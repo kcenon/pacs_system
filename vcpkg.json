@@ -1,9 +1,13 @@
 {
-  "name": "threadsystem",
-  "version": "1.0.0",
+  "name": "pacs-system",
+  "version": "0.1.0",
   "dependencies": [
     "fmt",
     "libiconv",
-    "gtest"
+    "gtest",
+    {
+      "name": "dcmtk",
+      "features": []
+    }
   ]
 }
