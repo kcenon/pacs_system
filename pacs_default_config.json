@@ -1,0 +1,28 @@
+{
+    "service": {
+        "aeTitle": "PACS",
+        "localPort": 11112,
+        "maxAssociations": 10,
+        "associationTimeout": 30,
+        "dimseTimeout": 30,
+        "acseTimeout": 30,
+        "connectionTimeout": 10,
+        "dataDirectory": "./data",
+        "logDirectory": "./logs",
+        "databaseDirectory": "./data/db",
+        "useTLS": false,
+        "serviceSpecificConfig": {
+            "STORAGE_MAX_PDU_SIZE": "16384",
+            "WORKLIST_FILE_PATH": "./data/worklist/modality.wl",
+            "QUERY_RETRIEVE_CACHE_SIZE": "100"
+        }
+    },
+    "config": {
+        "thread.pool.size": "4",
+        "thread.priority.levels": "3",
+        "log.level": "INFO",
+        "log.console": "true",
+        "log.file": "true",
+        "storage.compress": "false"
+    }
+}
