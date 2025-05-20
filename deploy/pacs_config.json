@@ -1,0 +1,31 @@
+{
+  "service": {
+    "aeTitle": "PACS",
+    "localPort": 11112,
+    "maxAssociations": 20,
+    "associationTimeout": 30,
+    "dimseTimeout": 30,
+    "acseTimeout": 30,
+    "connectionTimeout": 10,
+    "dataDirectory": "/app/data",
+    "logDirectory": "/app/logs",
+    "databaseDirectory": "/app/data/db",
+    "useTLS": false,
+    "serviceSpecificConfig": {
+      "STORAGE_MAX_PDU_SIZE": "16384",
+      "WORKLIST_FILE_PATH": "/app/data/worklist/modality.wl",
+      "QUERY_RETRIEVE_CACHE_SIZE": "100"
+    }
+  },
+  "config": {
+    "thread.pool.size": "4",
+    "thread.priority.levels": "3",
+    "log.level.console": "INFO",
+    "log.level.file": "DEBUG",
+    "log.max.files": "10",
+    "log.max.lines": "10000",
+    "security.auth.type": "basic",
+    "security.users.file": "/app/data/security/users.json",
+    "security.create.default.user": "true"
+  }
+}

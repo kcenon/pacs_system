@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  pacs-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: pacs-system:latest
+    container_name: pacs-server
+    ports:
+      - "11112:11112"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - PACS_AE_TITLE=PACS
+      - PACS_LOCAL_PORT=11112
+      - PACS_DATA_DIRECTORY=/app/data
+      - PACS_LOG_DIRECTORY=/app/logs
+      - PACS_DATABASE_DIRECTORY=/app/data/db
+      - PACS_CONFIG_FILE_PATH=/app/config/pacs_config.json
+    restart: unless-stopped
+
+volumes:
+  config:
+  data:
+  logs:
