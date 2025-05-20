@@ -12,7 +12,7 @@ set(COMMON_SOURCE_FILES
     pacs_common.h
     service_config.cpp
     service_config.h
-    performance.cpp
+    performance_standalone.cpp
     performance.h
 )
 

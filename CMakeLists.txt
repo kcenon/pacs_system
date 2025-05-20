@@ -20,6 +20,23 @@ endif()
 # Set CMake module path
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+# Find fmt package explicitly before adding thread_system
+find_package(fmt CONFIG REQUIRED)
+message(STATUS "Found fmt version ${fmt_VERSION}")
+
+# Force USE_STD_FORMAT to avoid fmt dependency issues
+add_definitions(-DUSE_STD_FORMAT)
+message(STATUS "Forcing USE_STD_FORMAT to avoid fmt dependency issues")
+
+# Add thread_system directories to include path
+include_directories(BEFORE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources/utilities
+    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources
+    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources/thread_base
+    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources/logger
+)
+message(STATUS "Added thread_system directories to include path")
+
 # Use thread_system from the project instead of internal thread_pool
 message(STATUS "Using thread_system from project")
 add_subdirectory(thread_system)
