@@ -117,8 +117,8 @@ private:
     std::mutex m_operationMutex;
     std::vector<OperationData> m_activeOperations;
     
-    std::mutex m_statsMutex;
-    std::unordered_map<std::string, OperationStats> m_statistics;
+    mutable std::mutex m_statsMutex;
+    mutable std::unordered_map<std::string, OperationStats> m_statistics;
 };
 
 /**

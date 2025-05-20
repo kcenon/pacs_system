@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "thread_system/sources/logger/logger.h"
 #include "thread_system/sources/logger/log_types.h"
+#include "thread_system/sources/thread_base/error_handling.h"
 
 namespace pacs {
 namespace common {
@@ -58,17 +59,13 @@ void PerformanceTracker::endOperation(int operationId, size_t dataSize) {
     
     {
         std::lock_guard<std::mutex> lock(m_operationMutex);
-        auto it = std::find_if(m_activeOperations.begin(), m_activeOperations.end(),
-            [operationId, this](const OperationData&) {
-                return &m_activeOperations[operationId] == &m_activeOperations[operationId];
-            });
-            
-        if (it != m_activeOperations.end()) {
-            operationName = it->name;
-            startTime = it->startTime;
-            m_activeOperations.erase(it);
+        // Find operation by index position
+        if (operationId >= 0 && operationId < static_cast<int>(m_activeOperations.size())) {
+            operationName = m_activeOperations[operationId].name;
+            startTime = m_activeOperations[operationId].startTime;
+            m_activeOperations.erase(m_activeOperations.begin() + operationId);
         } else {
-            return; // Operation not found
+            return; // Invalid operation ID
         }
     }
     
