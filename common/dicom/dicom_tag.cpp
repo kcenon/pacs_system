@@ -5,6 +5,13 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 #include "dcmtk/dcmdata/dcdicent.h"
+#else
+// Placeholder DcmTagKey implementation for when DCMTK is not available
+class DcmTagKey {
+public:
+    DcmTagKey() {}
+    DcmTagKey(uint16_t, uint16_t) {}
+};
 #endif
 
 #include <sstream>

@@ -2,6 +2,7 @@
 #include "dicom_tag.h"
 #include "dicom_error.h"
 
+// DEFINE DCMTK_NOT_AVAILABLE to build without DCMTK
 #ifndef DCMTK_NOT_AVAILABLE
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
@@ -330,10 +331,8 @@ std::string DicomObject::getStudyTime() const {
     return getString(DicomTag::StudyTime);
 }
 
+#ifndef DCMTK_NOT_AVAILABLE
 DcmElement* DicomObject::getElement(const DcmTagKey& tagKey) const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return nullptr;
-#else
     if (!dataset_) {
         return nullptr;
     }
@@ -344,8 +343,8 @@ DcmElement* DicomObject::getElement(const DcmTagKey& tagKey) const {
         return element;
     }
     return nullptr;
-#endif
 }
+#endif
 
 } // namespace dicom
 } // namespace common

@@ -149,7 +149,12 @@ public:
     DcmFileFormat* getFileFormat() const;
     
 private:
+#ifndef DCMTK_NOT_AVAILABLE
     std::unique_ptr<DcmFileFormat> fileFormat_;
+#else
+    // Placeholder for DCMTK implementation
+    void* placeholder = nullptr;
+#endif
     std::optional<std::string> filename_;
 };
 
