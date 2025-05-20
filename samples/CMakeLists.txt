@@ -21,3 +21,9 @@ add_subdirectory(integrated_sample)
 # Add simplified API samples
 add_subdirectory(simplified_storage)
 add_subdirectory(simplified_usage)
+
+# Add database, config, logger, and security samples
+add_subdirectory(database_sample)
+add_subdirectory(config_sample)
+add_subdirectory(logger_sample)
+add_subdirectory(security_sample)

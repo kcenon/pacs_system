@@ -8,6 +8,10 @@ add_executable(pacs_server
 target_link_libraries(pacs_server
     pacs_core
     pacs_common
+    pacs_config
+    pacs_logger
+    pacs_security
+    pacs_core_database
     pacs_mpps
     pacs_storage
     pacs_worklist

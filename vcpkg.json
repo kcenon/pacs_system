@@ -5,9 +5,9 @@
     "fmt",
     "libiconv",
     "gtest",
-    {
-      "name": "dcmtk",
-      "features": []
-    }
+    "nlohmann-json",
+    "cryptopp",
+    "sqlite3",
+    "dcmtk"
   ]
 }
