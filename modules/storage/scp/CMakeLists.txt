@@ -14,11 +14,11 @@ target_link_libraries(pacs_storage_scp PUBLIC
     pacs_core 
     pacs_common
     pacs_core_result
-    thread_system_priority_thread_pool
-    thread_system_thread_base
-    thread_system_thread_pool
-    thread_system_logger
-    thread_system_utilities
+    priority_thread_pool
+    thread_base
+    thread_pool
+    logger
+    utilities
 )
 
 # DCMTK dependency (only when available)
