@@ -8,10 +8,7 @@
 #include <condition_variable>
 #include <vector>
 
-// Forward declaration for priority_thread_pool
-namespace priority_thread_pool_module {
-    class priority_thread_pool;
-}
+#include "thread_system/sources/priority_thread_pool/priority_thread_pool.h"
 
 #ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes

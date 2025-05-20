@@ -11,8 +11,7 @@
 #include "dcmtk/dcmdata/dcuid.h"
 #endif
 
-#include "priority_thread_pool.h"
-#include "callback_priority_job.h"
+#include "thread_system/sources/priority_thread_pool/callback_priority_job.h"
 #include "thread_system/sources/logger/logger.h"
 #include "common/dicom_util.h"
 
@@ -32,7 +31,7 @@ StorageSCP::StorageSCP(const common::ServiceConfig& config, const std::string& s
 #endif
     
     // Initialize thread pool
-    threadPool_ = std::make_shared<priority_thread_pool>("PACS_StorageSCP");
+    threadPool_ = std::make_shared<priority_thread_pool_module::priority_thread_pool>("PACS_StorageSCP");
     auto result = threadPool_->start();
     if (result.has_error()) {
         write_error("Failed to start Storage SCP thread pool: {}", result.get_error().message());
