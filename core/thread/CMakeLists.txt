@@ -1,21 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 
-# Core thread module for PACS system
-# Since the implementation files are empty, use INTERFACE library instead
+# Use the INTERFACE library approach to provide direct access to thread_system
 add_library(pacs_core_thread INTERFACE)
 
+# Make thread_system headers available through this interface
 target_include_directories(pacs_core_thread INTERFACE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/thread_system/sources
 )
 
-# Using INTERFACE ensures libraries are only linked where they're used
+# Link directly to thread_system libraries
 target_link_libraries(pacs_core_thread INTERFACE 
-    pacs_common
-    pacs_core_result
-    priority_thread_pool
-    thread_base
     thread_pool
-    logger
-    utilities
+    priority_thread_pool
 )

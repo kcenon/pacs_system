@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <thread>
 
 #ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
@@ -12,7 +13,6 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #endif
 
-#include "core/thread/thread_manager.h"
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
 
@@ -300,11 +300,9 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::serverLoop() {
         }
         
         // Process the association in a separate thread
-        pacs::core::thread::ThreadManager::getInstance().scheduleTask(
-            [this, assoc]() {
-                this->processAssociation(assoc);
-            }
-        );
+        std::thread([this, assoc]() {
+            this->processAssociation(assoc);
+        }).detach();
     }
     
     // Cleanup

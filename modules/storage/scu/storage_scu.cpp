@@ -12,7 +12,6 @@
 #endif
 
 #include "thread_system/sources/logger/logger.h"
-#include "core/thread/thread_manager.h"
 #include "common/dicom_util.h"
 
 namespace pacs {

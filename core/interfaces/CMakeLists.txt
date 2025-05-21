@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(INTERFACES_SOURCE_FILES
+    service_interface.h
     mpps/mpps_interface.h
     storage/storage_interface.h
     worklist/worklist_interface.h

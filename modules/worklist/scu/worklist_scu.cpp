@@ -12,7 +12,6 @@
 #include "dcmtk/dcmdata/dcuid.h"
 #endif
 
-#include "core/thread/thread_manager.h"
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
 
