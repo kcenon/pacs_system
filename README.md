@@ -8,13 +8,15 @@ A comprehensive DICOM PACS (Picture Archiving and Communication System) implemen
 pacs_system/
 ├── common/                  # Common shared functionality
 ├── core/                    # Core implementation
-│   ├── thread/              # Thread management
-│   ├── result/              # Result handling
-│   └── interfaces/          # Interface definitions
-│       ├── mpps/
-│       ├── storage/
-│       ├── worklist/
-│       └── query_retrieve/
+│   ├── interfaces/          # Interface definitions
+│   │   ├── mpps/
+│   │   ├── storage/
+│   │   ├── worklist/
+│   │   ├── query_retrieve/
+│   │   └── service_interface.h
+│   ├── result/              # Result pattern for error handling
+│   ├── thread/              # Thread system interface adapters
+│   └── database/            # Database management
 ├── modules/                 # DICOM service modules
 │   ├── mpps/                # Modality Performed Procedure Step
 │   │   ├── scp/             # Service Class Provider
@@ -28,6 +30,7 @@ pacs_system/
 │   └── query_retrieve/      # Query/Retrieve
 │       ├── scp/
 │       └── scu/
+├── thread_system/           # Thread management submodule
 ├── apps/                    # Applications
 │   └── pacs_server.cpp      # Sample PACS server
 ├── CMakeLists.txt           # Main CMake configuration
@@ -41,8 +44,17 @@ pacs_system/
 - DICOM Storage SCP/SCU
 - Modality Worklist SCP/SCU
 - Query/Retrieve SCP/SCU
-- Internal thread pooling for concurrent operations
+- Thread pool system for concurrent operations
+- Standardized error handling with Result pattern
 - C++20 standards compliance
+
+## Recent Improvements
+
+- Removed unnecessary thread manager implementation in favor of direct thread_system usage
+- Implemented comprehensive service interfaces
+- Optimized build system to reduce duplicate library warnings
+- Updated thread_system integration
+- Removed empty and unnecessary files for cleaner codebase
 
 ## Dependencies
 
@@ -53,12 +65,15 @@ pacs_system/
 ## Building
 
 ```bash
+# Install dependencies
+./dependency.sh
+
 # Create build directory
 mkdir -p build
 cd build
 
 # Configure with CMake
-cmake .. -DCMAKE_TOOLCHAIN_FILE="../../vcpkg/scripts/buildsystems/vcpkg.cmake"
+cmake ..
 
 # Build
 cmake --build .
@@ -71,3 +86,17 @@ To start the PACS server:
 ```bash
 ./bin/pacs_server
 ```
+
+## Documentation
+
+See the `docs/` directory for detailed documentation on:
+
+- System architecture
+- Configuration options
+- Deployment strategies
+- Logging system
+- Security features
+
+## License
+
+This project is licensed under the BSD 3-Clause License. See the LICENSE file for details.

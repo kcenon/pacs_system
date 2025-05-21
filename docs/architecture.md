@@ -16,7 +16,7 @@ The PACS System is built with a modular architecture that separates concerns and
 
 ### Core Components
 
-- **Thread Management**: Provides concurrent operation handling
+- **Thread System**: Submodule providing thread pools for concurrent operations
 - **Result Handling**: Standardized approach to error and success conditions
 - **Service Interfaces**: Abstract definitions for all DICOM services
 - **Common Utilities**: Shared functionality for all components
@@ -45,7 +45,6 @@ Each DICOM service module is implemented with both SCP (Server) and SCU (Client)
 
 - **PACS Server**: Integrated server implementing all SCP components
 - **Sample Applications**: Individual applications demonstrating each service
-- **Integrated Client**: Comprehensive client application with all functions
 
 ## Data Flow
 
@@ -66,10 +65,35 @@ Each DICOM service module is implemented with both SCP (Server) and SCU (Client)
 - **Language**: C++20
 - **Build System**: CMake
 - **Dependency Management**: vcpkg
-- **Threading Model**: Thread pool with job queue
+- **Threading Model**: Thread pool system with job queues
+  - Using dedicated thread_system submodule
+  - Support for priority-based thread pools
 - **Network Communication**: DICOM protocol over TCP/IP
 - **File Storage**: File system-based with configurable paths
 - **Logging**: Thread-safe logging with multiple targets
+- **Error Handling**: Result pattern for consistent error management
+
+## Thread System Architecture
+
+The thread_system submodule provides:
+
+1. **Thread Pool**: Primary mechanism for concurrent task execution
+2. **Priority Thread Pool**: Task execution with priority levels
+3. **Job Queue**: Thread-safe queue for pending tasks
+4. **Worker Threads**: Execution contexts for tasks
+5. **Job Abstraction**: Common interface for all executable tasks
+
+This system is used via direct integration rather than through intermediate adapters, ensuring optimal performance and minimal overhead.
+
+## Service Interface Architecture
+
+The core/interfaces directory defines abstract interfaces for all DICOM services:
+
+1. **ServiceInterface**: Base interface for all services
+2. **DicomServiceInterface**: DICOM-specific service interface
+3. **Module-specific interfaces**: Specialized interfaces for each DICOM service
+
+These interfaces ensure consistent behavior across implementations and facilitate testing and future enhancements.
 
 ## Deployment Architecture
 
@@ -92,4 +116,4 @@ Future security enhancements will include:
 
 ## Conclusion
 
-The PACS System architecture provides a solid foundation for a complete medical imaging solution. Its modular design allows for flexible deployment options and future enhancements while maintaining compliance with DICOM standards.
+The PACS System architecture provides a solid foundation for a complete medical imaging solution. Its modular design allows for flexible deployment options and future enhancements while maintaining compliance with DICOM standards. The recent optimization to use the thread_system directly improves both code clarity and performance.
