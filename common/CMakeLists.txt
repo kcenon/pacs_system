@@ -22,6 +22,12 @@ target_include_directories(pacs_common PUBLIC
     ${CMAKE_SOURCE_DIR}
 )
 
+# Explicitly tell CMake to only include C++ standard library once
+set_target_properties(pacs_common PROPERTIES 
+    LINK_FLAGS_DEBUG ""
+    LINK_FLAGS_RELEASE ""
+)
+
 # DCMTK dependency (only when available)
 if(NOT USE_DCMTK_PLACEHOLDER)
     find_package(DCMTK REQUIRED)

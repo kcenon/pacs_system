@@ -13,18 +13,15 @@ target_include_directories(pacs_core INTERFACE
     ${CMAKE_SOURCE_DIR}
 )
 
+# Link only our core components - their dependencies will be transitively included
+# without duplicating them here
 target_link_libraries(pacs_core INTERFACE 
     pacs_common
     pacs_core_result
     pacs_core_interfaces
     pacs_core_database
     pacs_core_thread
-    # Direct thread_system dependencies
-    priority_thread_pool
-    thread_base
-    thread_pool
-    logger
-    utilities
+    # Remove direct thread_system dependencies - we get these through pacs_core_thread
 )
 
 # DCMTK dependency (only when available)

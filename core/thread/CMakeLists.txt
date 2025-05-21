@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Core thread module for PACS system
-add_library(pacs_core_thread
-    thread_manager.cpp
-    thread_pool.cpp
-)
+# Since the implementation files are empty, use INTERFACE library instead
+add_library(pacs_core_thread INTERFACE)
 
-target_include_directories(pacs_core_thread PUBLIC 
+target_include_directories(pacs_core_thread INTERFACE 
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}
 )
 
-target_link_libraries(pacs_core_thread PUBLIC 
+# Using INTERFACE ensures libraries are only linked where they're used
+target_link_libraries(pacs_core_thread INTERFACE 
     pacs_common
     pacs_core_result
     priority_thread_pool
