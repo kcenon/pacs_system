@@ -11,9 +11,10 @@ target_include_directories(pacs_query_retrieve INTERFACE
     ${CMAKE_SOURCE_DIR}
 )
 
+# Only link against direct dependencies
+# pacs_core already includes pacs_common, so we don't need to link it again
 target_link_libraries(pacs_query_retrieve INTERFACE 
     pacs_core
-    pacs_common
     pacs_query_retrieve_scp
     pacs_query_retrieve_scu
 )

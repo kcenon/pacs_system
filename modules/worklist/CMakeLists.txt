@@ -11,9 +11,10 @@ target_include_directories(pacs_worklist INTERFACE
     ${CMAKE_SOURCE_DIR}
 )
 
+# Only link against direct dependencies
+# pacs_core already includes pacs_common, so we don't need to link it again
 target_link_libraries(pacs_worklist INTERFACE 
     pacs_core
-    pacs_common
     pacs_worklist_scp
     pacs_worklist_scu
 )
