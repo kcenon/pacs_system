@@ -8,6 +8,7 @@ add_library(pacs_dicom
     dicom_error.cpp
     storage_client.cpp
     storage_server.cpp
+    codec_manager.cpp
 )
 
 # Set include directories
@@ -31,11 +32,7 @@ target_link_libraries(pacs_dicom
 target_compile_features(pacs_dicom PUBLIC cxx_std_20)
 
 # Add DCMTK preprocessor definitions
-if(USE_DCMTK_PLACEHOLDER)
-    target_compile_definitions(pacs_dicom PUBLIC DCMTK_NOT_AVAILABLE)
-else()
-    target_compile_definitions(pacs_dicom PRIVATE ${DCMTK_DEFINITIONS})
-endif()
+target_compile_definitions(pacs_dicom PRIVATE ${DCMTK_DEFINITIONS})
 
 # Install the library
 install(TARGETS pacs_dicom
@@ -51,5 +48,6 @@ install(FILES
     dicom_error.h
     storage_client.h
     storage_server.h
+    codec_manager.h
     DESTINATION include/pacs/common/dicom
 )

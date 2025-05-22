@@ -2,8 +2,6 @@
 #include "dicom_tag.h"
 #include "dicom_error.h"
 
-// DEFINE DCMTK_NOT_AVAILABLE to build without DCMTK
-#ifndef DCMTK_NOT_AVAILABLE
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcdeftag.h"
@@ -29,7 +27,6 @@
 #include "dcmtk/dcmdata/dcvrfl.h"
 #include "dcmtk/dcmdata/dcvrfd.h"
 #include "dcmtk/dcmdata/dcvrsq.h"
-#endif
 
 #include <iomanip>
 #include <sstream>
@@ -40,61 +37,46 @@ namespace common {
 namespace dicom {
 
 DicomObject::DicomObject() {
-#ifndef DCMTK_NOT_AVAILABLE
     dataset_ = std::make_unique<DcmDataset>();
-#endif
 }
 
 DicomObject::DicomObject(DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
     dataset_ = std::unique_ptr<DcmDataset>(dataset);
-#endif
 }
 
 DicomObject::DicomObject(const DicomObject& other) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (other.dataset_) {
         dataset_ = std::make_unique<DcmDataset>(*(other.dataset_));
     } else {
         dataset_ = std::make_unique<DcmDataset>();
     }
-#endif
 }
 
 DicomObject::DicomObject(DicomObject&& other) noexcept {
-#ifndef DCMTK_NOT_AVAILABLE
     dataset_ = std::move(other.dataset_);
-#endif
 }
 
 DicomObject::~DicomObject() = default;
 
 DicomObject& DicomObject::operator=(const DicomObject& other) {
     if (this != &other) {
-#ifndef DCMTK_NOT_AVAILABLE
         if (other.dataset_) {
             dataset_ = std::make_unique<DcmDataset>(*(other.dataset_));
         } else {
             dataset_ = std::make_unique<DcmDataset>();
         }
-#endif
     }
     return *this;
 }
 
 DicomObject& DicomObject::operator=(DicomObject&& other) noexcept {
     if (this != &other) {
-#ifndef DCMTK_NOT_AVAILABLE
         dataset_ = std::move(other.dataset_);
-#endif
     }
     return *this;
 }
 
 bool DicomObject::hasTag(const DicomTag& tag) const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return false;
-#else
     if (!dataset_) {
         return false;
     }
@@ -103,13 +85,9 @@ bool DicomObject::hasTag(const DicomTag& tag) const {
     DcmElement* element = nullptr;
     OFCondition result = dataset_->findAndGetElement(tagKey, element);
     return result.good() && element != nullptr;
-#endif
 }
 
 std::string DicomObject::getString(const DicomTag& tag) const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return "";
-#else
     if (!dataset_) {
         return "";
     }
@@ -121,13 +99,9 @@ std::string DicomObject::getString(const DicomTag& tag) const {
         return std::string(value.c_str());
     }
     return "";
-#endif
 }
 
 std::optional<int> DicomObject::getInt(const DicomTag& tag) const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return std::nullopt;
-#else
     if (!dataset_) {
         return std::nullopt;
     }
@@ -139,13 +113,9 @@ std::optional<int> DicomObject::getInt(const DicomTag& tag) const {
         return static_cast<int>(value);
     }
     return std::nullopt;
-#endif
 }
 
 std::optional<double> DicomObject::getFloat(const DicomTag& tag) const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return std::nullopt;
-#else
     if (!dataset_) {
         return std::nullopt;
     }
@@ -157,13 +127,11 @@ std::optional<double> DicomObject::getFloat(const DicomTag& tag) const {
         return value;
     }
     return std::nullopt;
-#endif
 }
 
 std::vector<DicomObject> DicomObject::getSequence(const DicomTag& tag) const {
     std::vector<DicomObject> result;
     
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset_) {
         return result;
     }
@@ -185,46 +153,38 @@ std::vector<DicomObject> DicomObject::getSequence(const DicomTag& tag) const {
             }
         }
     }
-#endif
     
     return result;
 }
 
 void DicomObject::setString(const DicomTag& tag, const std::string& value) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset_) {
         dataset_ = std::make_unique<DcmDataset>();
     }
     
     DcmTagKey tagKey = tag.toDcmtkTag();
     dataset_->putAndInsertString(tagKey, value.c_str());
-#endif
 }
 
 void DicomObject::setInt(const DicomTag& tag, int value) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset_) {
         dataset_ = std::make_unique<DcmDataset>();
     }
     
     DcmTagKey tagKey = tag.toDcmtkTag();
     dataset_->putAndInsertLongInt(tagKey, static_cast<long int>(value));
-#endif
 }
 
 void DicomObject::setFloat(const DicomTag& tag, double value) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset_) {
         dataset_ = std::make_unique<DcmDataset>();
     }
     
     DcmTagKey tagKey = tag.toDcmtkTag();
     dataset_->putAndInsertFloat64(tagKey, value);
-#endif
 }
 
 void DicomObject::setSequence(const DicomTag& tag, const std::vector<DicomObject>& sequence) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset_) {
         dataset_ = std::make_unique<DcmDataset>();
     }
@@ -242,13 +202,9 @@ void DicomObject::setSequence(const DicomTag& tag, const std::vector<DicomObject
     }
     
     dataset_->insert(dcmSequence, true);
-#endif
 }
 
 std::string DicomObject::toString() const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return "[DCMTK not available]";
-#else
     if (!dataset_) {
         return "[Empty DICOM object]";
     }
@@ -256,15 +212,10 @@ std::string DicomObject::toString() const {
     std::ostringstream ss;
     dataset_->print(ss);
     return ss.str();
-#endif
 }
 
 DcmDataset* DicomObject::getDataset() const {
-#ifdef DCMTK_NOT_AVAILABLE
-    return nullptr;
-#else
     return dataset_.get();
-#endif
 }
 
 DicomObject DicomObject::clone() const {
@@ -274,7 +225,6 @@ DicomObject DicomObject::clone() const {
 std::vector<DicomTag> DicomObject::getAllTags() const {
     std::vector<DicomTag> tags;
     
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset_) {
         return tags;
     }
@@ -286,7 +236,6 @@ std::vector<DicomTag> DicomObject::getAllTags() const {
             tags.emplace_back(DicomTag(tagKey));
         }
     }
-#endif
     
     return tags;
 }
@@ -331,7 +280,6 @@ std::string DicomObject::getStudyTime() const {
     return getString(DicomTag::StudyTime);
 }
 
-#ifndef DCMTK_NOT_AVAILABLE
 DcmElement* DicomObject::getElement(const DcmTagKey& tagKey) const {
     if (!dataset_) {
         return nullptr;
@@ -344,7 +292,6 @@ DcmElement* DicomObject::getElement(const DcmTagKey& tagKey) const {
     }
     return nullptr;
 }
-#endif
 
 } // namespace dicom
 } // namespace common

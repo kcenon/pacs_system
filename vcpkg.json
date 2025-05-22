@@ -8,6 +8,10 @@
     "nlohmann-json",
     "cryptopp",
     "sqlite3",
-    "dcmtk"
+    "dcmtk",
+    "libxml2",
+    "zlib",
+    "libiconv",
+    "openssl"
   ]
 }

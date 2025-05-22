@@ -215,15 +215,10 @@ public:
     std::string getStudyTime() const;
     
 private:
-#ifndef DCMTK_NOT_AVAILABLE
     std::unique_ptr<DcmDataset> dataset_;
     
     // Helper method to get a DCMTK element
     DcmElement* getElement(const DcmTagKey& tagKey) const;
-#else
-    // Placeholder for DCMTK implementation
-    void* placeholder = nullptr;
-#endif
 };
 
 } // namespace dicom

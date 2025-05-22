@@ -16,13 +16,9 @@ target_include_directories(pacs_security PUBLIC
 # Find required dependencies
 find_package(nlohmann_json CONFIG REQUIRED)
 
-# Try to find CryptoPP but make it optional
-find_package(CryptoPP CONFIG)
-if(CryptoPP_FOUND)
-    target_compile_definitions(pacs_security PUBLIC HAVE_CRYPTOPP)
-else()
-    message(WARNING "CryptoPP not found. Password hashing will use a fallback implementation.")
-endif()
+# Find CryptoPP (required)
+find_package(cryptopp CONFIG REQUIRED)
+target_compile_definitions(pacs_security PUBLIC HAVE_CRYPTOPP)
 
 # Basic dependencies
 target_link_libraries(pacs_security PUBLIC 
@@ -32,10 +28,8 @@ target_link_libraries(pacs_security PUBLIC
     nlohmann_json::nlohmann_json
 )
 
-# Add CryptoPP if available
-if(CryptoPP_FOUND)
-    target_link_libraries(pacs_security PUBLIC cryptopp::cryptopp)
-endif()
+# Link CryptoPP
+target_link_libraries(pacs_security PUBLIC cryptopp::cryptopp)
 
 # DCMTK dependency (only when available)
 if(NOT USE_DCMTK_PLACEHOLDER)

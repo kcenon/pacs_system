@@ -1,18 +1,9 @@
 #include "dicom_tag.h"
 
-#ifndef DCMTK_NOT_AVAILABLE
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 #include "dcmtk/dcmdata/dcdicent.h"
-#else
-// Placeholder DcmTagKey implementation for when DCMTK is not available
-class DcmTagKey {
-public:
-    DcmTagKey() {}
-    DcmTagKey(uint16_t, uint16_t) {}
-};
-#endif
 
 #include <sstream>
 #include <iomanip>
@@ -115,13 +106,8 @@ DicomTag::DicomTag(uint16_t group, uint16_t element)
 }
 
 DicomTag::DicomTag(const DcmTagKey& tagKey) {
-#ifndef DCMTK_NOT_AVAILABLE
     group_ = tagKey.getGroup();
     element_ = tagKey.getElement();
-#else
-    group_ = 0;
-    element_ = 0;
-#endif
 }
 
 bool DicomTag::operator==(const DicomTag& other) const {
@@ -157,7 +143,6 @@ std::string DicomTag::getName() const {
         return it->second;
     }
     
-#ifndef DCMTK_NOT_AVAILABLE
     // Try to look up in DCMTK dictionary if not found in our map
     DcmTagKey tagKey(group_, element_);
     const DcmDataDictionary& globalDict = dcmDataDict.rdlock();
@@ -168,19 +153,13 @@ std::string DicomTag::getName() const {
         return name;
     }
     dcmDataDict.unlock();
-#endif
     
     // Return a formatted string like (gggg,eeee) if no name found
     return toString();
 }
 
 DcmTagKey DicomTag::toDcmtkTag() const {
-#ifndef DCMTK_NOT_AVAILABLE
     return DcmTagKey(group_, element_);
-#else
-    // This will never be used in placeholder implementation
-    return DcmTagKey();
-#endif
 }
 
 DicomTag DicomTag::fromName(const std::string& name) {

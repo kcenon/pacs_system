@@ -47,17 +47,43 @@ message(STATUS "Added thread_system directories to include path")
 message(STATUS "Using thread_system from project")
 add_subdirectory(thread_system)
 
-# For this simplified build, we'll use the placeholder implementation
-message(STATUS "Using placeholder implementation for DCMTK")
-# Define a variable to indicate DCMTK is not available
-set(USE_DCMTK_PLACEHOLDER TRUE)
-# Define dummy variables to keep the build going
-set(DCMTK_INCLUDE_DIRS "")
-set(DCMTK_LIBRARIES "")
-add_definitions(-DDCMTK_NOT_AVAILABLE)
+# Find DCMTK package
+find_package(DCMTK CONFIG REQUIRED)
+message(STATUS "Found DCMTK version ${DCMTK_VERSION}")
+
+# Set DCMTK variables
+set(USE_DCMTK_PLACEHOLDER FALSE)
+set(DCMTK_INCLUDE_DIRS ${DCMTK_INCLUDE_DIRS})
+set(DCMTK_LIBRARIES 
+    DCMTK::DCMTK
+    DCMTK::dcmdata
+    DCMTK::dcmnet
+    DCMTK::dcmimgle
+    DCMTK::dcmimage
+    DCMTK::dcmjpeg
+    DCMTK::dcmjpls
+    DCMTK::dcmtls
+    DCMTK::ofstd
+    DCMTK::oflog
+)
+
+# Add DCMTK definitions
+add_definitions(-DHAVE_CONFIG_H)
+
+# Find additional required packages
+find_package(ZLIB REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(LibXml2 REQUIRED)
 
 # Add subdirectories for each module
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(modules)
 add_subdirectory(apps)
+
+# Add tests if enabled
+option(BUILD_TESTS "Build test programs" ON)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
