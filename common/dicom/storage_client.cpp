@@ -1,7 +1,6 @@
 #include "storage_client.h"
 #include "dicom_error.h"
 
-#ifndef DCMTK_NOT_AVAILABLE
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
@@ -10,7 +9,7 @@
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/scu.h"
 #include "dcmtk/dcmnet/assoc.h"
-#endif
+#include "dcmtk/dcmnet/cond.h"
 
 #include <filesystem>
 #include <thread>
@@ -29,9 +28,6 @@ public:
     explicit Impl(const StorageClient::Config& config) : config_(config) {}
     
     DicomVoidResult storeFile(const std::string& filename) {
-#ifdef DCMTK_NOT_AVAILABLE
-        return DicomVoidResult(DicomErrorCode::NotImplemented, "DCMTK not available");
-#else
         // Check if file exists
         if (!fs::exists(filename)) {
             return DicomVoidResult(DicomErrorCode::FileNotFound, 
@@ -47,13 +43,9 @@ public:
         
         // Store the object
         return store(file.getObject());
-#endif
     }
     
     DicomVoidResult store(const DicomObject& object) {
-#ifdef DCMTK_NOT_AVAILABLE
-        return DicomVoidResult(DicomErrorCode::NotImplemented, "DCMTK not available");
-#else
         // Get the dataset
         DcmDataset* dataset = object.getDataset();
         if (!dataset) {
@@ -256,14 +248,10 @@ public:
         }
         
         return DicomVoidResult(); // Success
-#endif
     }
     
     DicomVoidResult storeFiles(const std::vector<std::string>& filenames, 
                              ProgressCallback progressCallback) {
-#ifdef DCMTK_NOT_AVAILABLE
-        return DicomVoidResult(DicomErrorCode::NotImplemented, "DCMTK not available");
-#else
         if (filenames.empty()) {
             return DicomVoidResult();  // Nothing to do
         }
@@ -297,14 +285,10 @@ public:
         }
         
         return DicomVoidResult();  // Success
-#endif
     }
     
     DicomVoidResult storeDirectory(const std::string& directory, bool recursive,
                                  ProgressCallback progressCallback) {
-#ifdef DCMTK_NOT_AVAILABLE
-        return DicomVoidResult(DicomErrorCode::NotImplemented, "DCMTK not available");
-#else
         // Check if directory exists
         if (!fs::exists(directory) || !fs::is_directory(directory)) {
             return DicomVoidResult(DicomErrorCode::FileNotFound, 
@@ -336,7 +320,6 @@ public:
         
         // Store the collected files
         return storeFiles(dicomFiles, progressCallback);
-#endif
     }
     
 private:
