@@ -1,7 +1,6 @@
 #include "storage_server.h"
 #include "dicom_error.h"
 
-#ifndef DCMTK_NOT_AVAILABLE
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
@@ -10,7 +9,7 @@
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/scp.h"
 #include "dcmtk/dcmnet/assoc.h"
-#endif
+#include "dcmtk/dcmnet/cond.h"
 
 #include "thread_system/sources/logger/logger.h"
 #include "thread_system/sources/logger/log_types.h"
@@ -41,9 +40,6 @@ public:
     }
     
     DicomVoidResult start() {
-#ifdef DCMTK_NOT_AVAILABLE
-        return DicomVoidResult(DicomErrorCode::NotImplemented, "DCMTK not available");
-#else
         // Check if already running
         if (running_) {
             return DicomVoidResult();  // Already running
@@ -70,7 +66,6 @@ public:
                                  "Failed to start server thread: " + 
                                  std::string(ex.what()));
         }
-#endif
     }
     
     void stop() {
@@ -89,7 +84,6 @@ public:
     }
     
 private:
-#ifndef DCMTK_NOT_AVAILABLE
     // Main server loop
     void serverLoop() {
         // Initialize network
@@ -460,7 +454,6 @@ private:
         std::replace(filename.begin(), filename.end(), '.', '_');
         return config_.storageDirectory + "/" + filename + ".dcm";
     }
-#endif
     
 private:
     StorageServer::Config config_;

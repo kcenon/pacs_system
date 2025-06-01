@@ -4,12 +4,16 @@
 #include <filesystem>
 #include <fstream>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
-#endif
+#include "dcmtk/dcmdata/dcmetinf.h"
+#include "dcmtk/dcmdata/dcdeftag.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/dul.h"
 
 #include "thread_system/sources/priority_thread_pool/callback_priority_job.h"
 #include "thread_system/sources/logger/logger.h"
@@ -25,10 +29,8 @@ using namespace log_module;
 
 StorageSCP::StorageSCP(const common::ServiceConfig& config, const std::string& storageDirectory)
     : config_(config), storageDirectory_(storageDirectory), running_(false) {
-#ifndef DCMTK_NOT_AVAILABLE
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
     
     // Initialize thread pool
     threadPool_ = std::make_shared<priority_thread_pool_module::priority_thread_pool>("PACS_StorageSCP");
@@ -124,7 +126,6 @@ void StorageSCP::setStorageDirectory(const std::string& directory) {
 }
 
 void StorageSCP::serverLoop() {
-#ifndef DCMTK_NOT_AVAILABLE
     T_ASC_Network* net = nullptr;
     
     OFCondition cond;
@@ -173,19 +174,9 @@ void StorageSCP::serverLoop() {
     
     // Cleanup
     ASC_dropNetwork(&net);
-#else
-    // Placeholder implementation
-    write_information("Storage SCP started on port {} (placeholder)", config_.localPort);
-    while (running_) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    
-    write_information("Storage SCP stopped (placeholder)");
-#endif
 }
 
 void StorageSCP::processAssociation(T_ASC_Association* assoc) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!assoc) {
         return;
     }
@@ -273,12 +264,10 @@ void StorageSCP::processAssociation(T_ASC_Association* assoc) {
     ASC_releaseAssociation(assoc);
     ASC_dropAssociation(assoc);
     ASC_destroyAssociation(&assoc);
-#endif
 }
 
 void StorageSCP::handleCStoreRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                                    T_ASC_PresentationContextID presID, DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset) {
         // Error - no dataset
         T_DIMSE_Message response;
@@ -346,33 +335,11 @@ void StorageSCP::handleCStoreRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
     
     // Send the message
     DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
-#else
-    // Placeholder implementation when DCMTK is not available
-    write_information("Received C-STORE request (placeholder implementation)");
-    
-    // Invoke callback if set with nullptr dataset
-    {
-        std::lock_guard<std::mutex> lock(callbackMutex_);
-        if (storageCallback_) {
-            try {
-                // Extract a mock SOP Instance UID
-                std::string sopInstanceUID = "PLACEHOLDER_SOPINSTANCE_UID";
-                storageCallback_(sopInstanceUID, nullptr);
-            }
-            catch (const std::exception& ex) {
-                write_error("Error in Storage callback: {}", ex.what());
-            }
-        }
-    }
-    
-    write_information("Sent C-STORE response (placeholder implementation)");
-#endif
 }
 
 bool StorageSCP::storeDatasetToDisk(const std::string& sopClassUID, 
                                   const std::string& sopInstanceUID, 
                                   DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (storageDirectory_.empty() || !dataset) {
         return false;
     }
@@ -394,35 +361,6 @@ bool StorageSCP::storeDatasetToDisk(const std::string& sopClassUID,
         write_error("Error storing DICOM file: {}", ex.what());
         return false;
     }
-#else
-    // Placeholder implementation when DCMTK is not available
-    if (storageDirectory_.empty()) {
-        return false;
-    }
-    
-    try {
-        // Create a filename based on SOP Instance UID
-        std::string filename = storageDirectory_ + "/" + sopInstanceUID + ".dcm";
-        
-        // Just log what we would do
-        write_information("Would store DICOM file to: {} (placeholder)", filename);
-        
-        // Create an empty file to simulate storage
-        std::ofstream file(filename);
-        if (file.is_open()) {
-            file << "PLACEHOLDER DICOM DATA - DCMTK NOT AVAILABLE" << std::endl;
-            file << "SOP Class UID: " << sopClassUID << std::endl;
-            file << "SOP Instance UID: " << sopInstanceUID << std::endl;
-            file.close();
-            return true;
-        }
-        return false;
-    }
-    catch (const std::exception& ex) {
-        write_error("Error creating placeholder DICOM file: {}", ex.what());
-        return false;
-    }
-#endif
 }
 
 } // namespace scp

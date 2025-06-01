@@ -5,19 +5,14 @@
 #include <mutex>
 #include <vector>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"
-#else
-// Forward declarations for when DCMTK is not available
-struct T_ASC_Association;
-typedef unsigned char T_ASC_PresentationContextID;
-class DcmDataset;
-#endif
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 
 #include "core/interfaces/storage/storage_interface.h"
 #include "common/pacs_common.h"

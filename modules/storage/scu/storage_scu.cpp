@@ -3,13 +3,16 @@
 #include <string>
 #include <fstream>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmnet/scu.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
-#endif
+#include "dcmtk/dcmdata/dcdeftag.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/dul.h"
 
 #include "thread_system/sources/logger/logger.h"
 #include "common/dicom_util.h"
@@ -22,16 +25,13 @@ using namespace log_module;
 
 StorageSCU::StorageSCU(const common::ServiceConfig& config)
     : config_(config) {
-#ifndef DCMTK_NOT_AVAILABLE
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
 }
 
 StorageSCU::~StorageSCU() = default;
 
 core::Result<void> StorageSCU::storeDICOM(const DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset) {
         return core::Result<void>::error("DICOM dataset is null");
     }
@@ -141,15 +141,9 @@ core::Result<void> StorageSCU::storeDICOM(const DcmDataset* dataset) {
     catch (const std::exception& ex) {
         return core::Result<void>::error(std::string("Exception during DICOM storage: ") + ex.what());
     }
-#else
-    // Placeholder implementation when DCMTK is not available
-    write_information("Storage SCU: Attempting to store DICOM dataset (placeholder)");
-    return core::Result<void>::error("DCMTK library not available");
-#endif
 }
 
 core::Result<void> StorageSCU::storeDICOMFile(const std::string& filename) {
-#ifndef DCMTK_NOT_AVAILABLE
     // Load DICOM file
     DcmFileFormat fileFormat;
     OFCondition cond = fileFormat.loadFile(filename.c_str());
@@ -160,11 +154,6 @@ core::Result<void> StorageSCU::storeDICOMFile(const std::string& filename) {
     
     // Store the DICOM dataset
     return storeDICOM(fileFormat.getDataset());
-#else
-    // Placeholder implementation
-    write_information("Storage SCU: Attempting to store DICOM file: %s (placeholder)", filename.c_str());
-    return core::Result<void>::error("DCMTK library not available");
-#endif
 }
 
 core::Result<void> StorageSCU::storeDICOMFiles(const std::vector<std::string>& filenames) {
@@ -188,7 +177,6 @@ void StorageSCU::setStorageCallback(core::interfaces::storage::StorageCallback c
 }
 
 T_ASC_Association* StorageSCU::createAssociation() {
-#ifndef DCMTK_NOT_AVAILABLE
     T_ASC_Network* net = nullptr;
     T_ASC_Parameters* params = nullptr;
     T_ASC_Association* assoc = nullptr;
@@ -286,26 +274,18 @@ T_ASC_Association* StorageSCU::createAssociation() {
     }
     
     return assoc;
-#else
-    // Placeholder implementation 
-    write_information("StorageSCU::createAssociation - DCMTK not available");
-    return nullptr;
-#endif
 }
 
 void StorageSCU::releaseAssociation(T_ASC_Association* assoc) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
         ASC_dropNetwork(&assoc->net);
     }
-#endif
 }
 
 T_ASC_PresentationContextID StorageSCU::findPresentationContextID(T_ASC_Association* assoc, 
                                                                 const char* sopClassUID) {
-#ifndef DCMTK_NOT_AVAILABLE
     T_ASC_PresentationContextID presID = 0;
     
     if (assoc && sopClassUID) {
@@ -326,10 +306,6 @@ T_ASC_PresentationContextID StorageSCU::findPresentationContextID(T_ASC_Associat
     }
     
     return presID;
-#else
-    // Placeholder implementation
-    return 0;
-#endif
 }
 
 } // namespace scu
