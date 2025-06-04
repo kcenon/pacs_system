@@ -24,6 +24,7 @@ class ConfigManager;
 #include "common/logger/logging_service.h"
 #include "common/security/security_manager.h"
 #include "common/security/tls_config.h"
+#include "common/dicom/codec_manager.h"
 #include "core/database/database_manager.h"
 
 #include "modules/mpps/scp/mpps_scp.h"
@@ -119,6 +120,11 @@ int main(int argc, char* argv[]) {
         
         pacs::common::logger::logInfo("Security manager initialized successfully");
         
+        // Initialize DICOM codec manager
+        pacs::common::logger::logInfo("Initializing DICOM codec manager");
+        pacs::common::dicom::CodecManager::getInstance().initialize();
+        pacs::common::logger::logInfo("DICOM codec manager initialized successfully");
+        
         // Print server information
         printServerInfo(config, securityManager);
         
@@ -198,6 +204,10 @@ int main(int argc, char* argv[]) {
             // Shutdown database
             pacs::common::logger::logInfo("Shutting down database");
             pacs::core::database::DatabaseManager::getInstance().shutdown();
+            
+            // Cleanup DICOM codec manager
+            pacs::common::logger::logInfo("Cleaning up DICOM codec manager");
+            pacs::common::dicom::CodecManager::getInstance().cleanup();
             
             // Shutdown logging at the very end
             pacs::common::logger::logInfo("PACS Server shutdown complete");

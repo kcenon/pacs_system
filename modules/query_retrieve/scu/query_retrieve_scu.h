@@ -5,20 +5,13 @@
 #include <mutex>
 #include <vector>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"
-#else
-// Forward declarations for when DCMTK is not available
-class DcmDataset;
-// Forward declarations for DCMTK network types
-struct T_ASC_Association;
-typedef unsigned char T_ASC_PresentationContextID;
-struct T_DIMSE_Message;
-#endif
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 
 #include "core/interfaces/query_retrieve/query_retrieve_interface.h"
 #include "common/pacs_common.h"
@@ -93,7 +86,6 @@ public:
     void setRetrieveDirectory(const std::string& directory);
     
 private:
-#ifndef DCMTK_NOT_AVAILABLE
     /**
      * @brief Establish DICOM association with the Query/Retrieve SCP
      * @param queryRetrieveModel The Query/Retrieve Information Model to use
@@ -135,16 +127,6 @@ private:
      */
     core::interfaces::query_retrieve::QueryResultItem parseQueryResult(const DcmDataset* dataset, 
                                                                    core::interfaces::query_retrieve::QueryRetrieveLevel level);
-#else
-    /**
-     * @brief Parse a query result into a QueryResultItem structure (placeholder for when DCMTK is not available)
-     * @param dataset The DICOM dataset (not used without DCMTK)
-     * @param level The query level
-     * @return Parsed QueryResultItem with minimal information
-     */
-    core::interfaces::query_retrieve::QueryResultItem parseQueryResult(const DcmDataset* dataset, 
-                                                                   core::interfaces::query_retrieve::QueryRetrieveLevel level);
-#endif
 
     /**
      * @brief Get the string representation of a query level

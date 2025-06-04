@@ -3,13 +3,16 @@
 #include <string>
 #include <filesystem>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmnet/scu.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
-#endif
+#include "dcmtk/dcmdata/dcdeftag.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/dul.h"
 
 #include "thread_system/sources/logger/logger.h"
 #include "common/dicom_util.h"
@@ -23,10 +26,8 @@ using namespace log_module;
 
 QueryRetrieveSCU::QueryRetrieveSCU(const common::ServiceConfig& config, const std::string& retrieveDirectory)
     : config_(config), retrieveDirectory_(retrieveDirectory) {
-#ifndef DCMTK_NOT_AVAILABLE
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
     
     // Create retrieve directory if it doesn't exist
     if (!retrieveDirectory_.empty() && !fs::exists(retrieveDirectory_)) {
@@ -41,7 +42,6 @@ QueryRetrieveSCU::QueryRetrieveSCU(const common::ServiceConfig& config, const st
 
 QueryRetrieveSCU::~QueryRetrieveSCU() = default;
 
-#ifndef DCMTK_NOT_AVAILABLE
 core::Result<std::vector<DcmDataset*>> QueryRetrieveSCU::query(const DcmDataset* searchDataset, 
                                                       core::interfaces::query_retrieve::QueryRetrieveLevel level) {
     if (!searchDataset) {
@@ -203,15 +203,7 @@ core::Result<std::vector<DcmDataset*>> QueryRetrieveSCU::query(const DcmDataset*
         return core::Result<std::vector<DcmDataset*>>::error(std::string("Exception during query: ") + ex.what());
     }
 }
-#else
-core::Result<std::vector<DcmDataset*>> QueryRetrieveSCU::query(const DcmDataset* /*searchDataset*/, 
-                                                      core::interfaces::query_retrieve::QueryRetrieveLevel /*level*/) {
-    // Placeholder implementation when DCMTK is not available
-    return core::Result<std::vector<DcmDataset*>>::error("Query operation not available without DCMTK");
-}
-#endif
 
-#ifndef DCMTK_NOT_AVAILABLE
 core::Result<void> QueryRetrieveSCU::retrieve(const std::string& studyInstanceUID,
                                      const std::string& seriesInstanceUID,
                                      const std::string& sopInstanceUID) {
@@ -239,14 +231,6 @@ core::Result<void> QueryRetrieveSCU::retrieve(const std::string& studyInstanceUI
         return core::Result<void>::error(std::string("Exception during retrieve: ") + ex.what());
     }
 }
-#else
-core::Result<void> QueryRetrieveSCU::retrieve(const std::string& /*studyInstanceUID*/,
-                                     const std::string& /*seriesInstanceUID*/,
-                                     const std::string& /*sopInstanceUID*/) {
-    // Placeholder implementation when DCMTK is not available
-    return core::Result<void>::error("Retrieve operation not available without DCMTK");
-}
-#endif
 
 void QueryRetrieveSCU::setQueryCallback(core::interfaces::query_retrieve::QueryCallback callback) {
     queryCallback_ = callback;
@@ -274,7 +258,6 @@ void QueryRetrieveSCU::setRetrieveDirectory(const std::string& directory) {
     }
 }
 
-#ifndef DCMTK_NOT_AVAILABLE
 T_ASC_Association* QueryRetrieveSCU::createAssociation(const char* queryRetrieveModel) {
     T_ASC_Network* net = nullptr;
     T_ASC_Parameters* params = nullptr;
@@ -535,7 +518,6 @@ const char* QueryRetrieveSCU::getInformationModelForLevel(core::interfaces::quer
     // Using Study Root Information Model for all levels
     return UID_FINDStudyRootQueryRetrieveInformationModel;
 }
-#endif
 
 std::string QueryRetrieveSCU::getQueryLevelString(core::interfaces::query_retrieve::QueryRetrieveLevel level) {
     switch (level) {
@@ -552,7 +534,6 @@ std::string QueryRetrieveSCU::getQueryLevelString(core::interfaces::query_retrie
     }
 }
 
-#ifndef DCMTK_NOT_AVAILABLE
 core::interfaces::query_retrieve::QueryResultItem QueryRetrieveSCU::parseQueryResult(
     const DcmDataset* dataset, 
     core::interfaces::query_retrieve::QueryRetrieveLevel level) {
@@ -608,19 +589,6 @@ core::interfaces::query_retrieve::QueryResultItem QueryRetrieveSCU::parseQueryRe
     
     return item;
 }
-#else
-// Simplified implementation when DCMTK is not available
-core::interfaces::query_retrieve::QueryResultItem QueryRetrieveSCU::parseQueryResult(
-    const DcmDataset* /*dataset*/, 
-    core::interfaces::query_retrieve::QueryRetrieveLevel level) {
-    
-    core::interfaces::query_retrieve::QueryResultItem item;
-    item.level = level;
-    
-    // Cannot extract actual values without DCMTK
-    return item;
-}
-#endif
 
 } // namespace scu
 } // namespace query_retrieve

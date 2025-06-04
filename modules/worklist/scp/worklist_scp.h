@@ -8,20 +8,14 @@
 #include <vector>
 #include <map>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"
-#else
-// Forward declarations for when DCMTK is not available
-struct T_ASC_Association;
-typedef unsigned char T_ASC_PresentationContextID;
-struct T_DIMSE_Message;
-// Forward declaration of DcmDataset with a custom deleter
-class DcmDataset;
-#endif
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
+#include "dcmtk/dcmwlm/wldsfs.h"
 
 // Include for unique_ptr
 #include <memory>
@@ -152,8 +146,8 @@ private:
     std::thread serverThread_;
     std::atomic<bool> running_;
     
-    // Use unique_ptr with custom deleter to avoid incomplete type warnings
-    std::map<std::string, std::unique_ptr<DcmDataset, std::function<void(DcmDataset*)>>> worklistItems_; // Keyed by accession number
+    // Map of worklist items keyed by accession number
+    std::map<std::string, DcmDataset*> worklistItems_; // Keyed by accession number
     std::mutex worklistMutex_;
     
     core::interfaces::worklist::WorklistCallback worklistCallback_;

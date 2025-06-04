@@ -4,18 +4,13 @@
 #include <memory>
 #include <mutex>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"
-#else
-// Forward declarations for when DCMTK is not available
-class DcmDataset;
-// Forward declarations for DCMTK network types
-struct T_ASC_Association;
-#endif
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 
 #include "core/interfaces/mpps/mpps_interface.h"
 #include "common/pacs_common.h"
