@@ -5,13 +5,18 @@
 #include <filesystem>
 #include <thread>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
 #include "dcmtk/dcmdata/dcdeftag.h"
-#endif
+#include "dcmtk/dcmdata/dcdict.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/dul.h"
+#include "dcmtk/dcmqrdb/dcmqrdbs.h"
+#include "dcmtk/dcmqrdb/dcmqrsrv.h"
 
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
@@ -26,10 +31,8 @@ namespace fs = std::filesystem;
 
 QueryRetrieveSCP::QueryRetrieveSCP(const common::ServiceConfig& config, const std::string& storageDirectory)
     : config_(config), storageDirectory_(storageDirectory), running_(false) {
-#ifndef DCMTK_NOT_AVAILABLE
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
     
     // Create storage directory if it doesn't exist
     if (!storageDirectory_.empty() && !fs::exists(storageDirectory_)) {
@@ -79,7 +82,6 @@ core::Result<void> pacs::query_retrieve::scp::QueryRetrieveSCP::addFile(const st
         std::string destFilename;
         std::map<std::string, std::string> metadata;
         
-#ifndef DCMTK_NOT_AVAILABLE
         // Load DICOM file
         DcmFileFormat fileFormat;
         OFCondition cond = fileFormat.loadFile(filename.c_str());
@@ -100,15 +102,6 @@ core::Result<void> pacs::query_retrieve::scp::QueryRetrieveSCP::addFile(const st
         
         // Create destination filename
         destFilename = storageDirectory_ + "/" + sopInstanceUID + ".dcm";
-#else
-        // Simplified implementation when DCMTK is not available
-        // Just copy the file to the storage directory
-        std::string filename_only = fs::path(filename).filename().string();
-        destFilename = storageDirectory_ + "/" + filename_only;
-        
-        // Extract basic metadata
-        metadata = extractMetadata(filename);
-#endif
         
         // Copy file if source and destination are different
         if (filename != destFilename) {
@@ -128,7 +121,6 @@ core::Result<void> pacs::query_retrieve::scp::QueryRetrieveSCP::addFile(const st
     }
 }
 
-#ifndef DCMTK_NOT_AVAILABLE
 core::Result<std::vector<DcmDataset*>> pacs::query_retrieve::scp::QueryRetrieveSCP::query(const DcmDataset* searchDataset, 
                                                       core::interfaces::query_retrieve::QueryRetrieveLevel level) {
     if (!searchDataset) {
@@ -227,13 +219,6 @@ core::Result<std::vector<DcmDataset*>> pacs::query_retrieve::scp::QueryRetrieveS
         return core::Result<std::vector<DcmDataset*>>::error(std::string("Exception during query: ") + ex.what());
     }
 }
-#else
-core::Result<std::vector<DcmDataset*>> pacs::query_retrieve::scp::QueryRetrieveSCP::query(const DcmDataset* /*searchDataset*/, 
-                                                      core::interfaces::query_retrieve::QueryRetrieveLevel /*level*/) {
-    // Placeholder implementation when DCMTK is not available
-    return core::Result<std::vector<DcmDataset*>>::error("Query operation not available without DCMTK");
-}
-#endif
 
 core::Result<void> pacs::query_retrieve::scp::QueryRetrieveSCP::retrieve(const std::string& /*studyInstanceUID*/,
                                      const std::string& /*seriesInstanceUID*/,
@@ -274,7 +259,6 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::setStorageDirectory(const std:
 }
 
 void pacs::query_retrieve::scp::QueryRetrieveSCP::serverLoop() {
-#ifndef DCMTK_NOT_AVAILABLE
     T_ASC_Network* net = nullptr;
     
     OFCondition cond;
@@ -307,20 +291,8 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::serverLoop() {
     
     // Cleanup
     ASC_dropNetwork(&net);
-#else
-    // Placeholder for when DCMTK is not available
-    write_information("Query/Retrieve SCP started on port %d (placeholder)", config_.localPort);
-    
-    // Just keep the thread alive
-    while (running_) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    
-    write_information("Query/Retrieve SCP stopped (placeholder)");
-#endif
 }
 
-#ifndef DCMTK_NOT_AVAILABLE
 void QueryRetrieveSCP::processAssociation(T_ASC_Association* assoc) {
     if (!assoc) {
         return;
@@ -440,9 +412,7 @@ void QueryRetrieveSCP::processAssociation(T_ASC_Association* assoc) {
     ASC_dropAssociation(assoc);
     ASC_destroyAssociation(&assoc);
 }
-#endif
 
-#ifndef DCMTK_NOT_AVAILABLE
 void QueryRetrieveSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                                    T_ASC_PresentationContextID presID, DcmDataset* dataset) {
     if (!dataset) {
@@ -538,9 +508,7 @@ void QueryRetrieveSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Mess
     response.msg.CFindRSP.DataSetType = DIMSE_DATASET_NULL;
     DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
 }
-#endif
 
-#ifndef DCMTK_NOT_AVAILABLE
 void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                                    T_ASC_PresentationContextID presID, DcmDataset* dataset) {
     if (!dataset) {
@@ -1009,9 +977,7 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         }
     }
 }
-#endif
 
-#ifndef DCMTK_NOT_AVAILABLE
 void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                                   T_ASC_PresentationContextID presID, DcmDataset* dataset) {
     // Similar to handleCMoveRequest, but without creating a sub-association
@@ -1261,9 +1227,7 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
     finalResponse.msg.CGetRSP.NumberOfWarningSubOperations = warning;
     DIMSE_sendMessage(assoc, presID, &finalResponse, nullptr, nullptr);
 }
-#endif
 
-#ifndef DCMTK_NOT_AVAILABLE
 bool QueryRetrieveSCP::matchDataset(const DcmDataset* searchDataset, const DcmDataset* candidateDataset) {
     if (!searchDataset || !candidateDataset) {
         return false;
@@ -1324,7 +1288,6 @@ bool QueryRetrieveSCP::matchDataset(const DcmDataset* searchDataset, const DcmDa
     // All elements matched
     return true;
 }
-#endif
 
 void pacs::query_retrieve::scp::QueryRetrieveSCP::indexStorageDirectory() {
     if (storageDirectory_.empty()) return;
@@ -1340,16 +1303,11 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::indexStorageDirectory() {
             if (entry.is_regular_file() && entry.path().extension() == ".dcm") {
                 std::map<std::string, std::string> metadata;
                 
-#ifndef DCMTK_NOT_AVAILABLE
-                // Extract metadata using DCMTK when available
+                // Extract metadata using DCMTK
                 DcmFileFormat fileFormat;
                 if (fileFormat.loadFile(entry.path().string().c_str()).good()) {
                     metadata = extractMetadata(fileFormat.getDataset());
                 }
-#else
-                // Extract basic metadata when DCMTK is not available
-                metadata = extractMetadata(entry.path().string());
-#endif
                 
                 // Add to index
                 std::lock_guard<std::mutex> lock(indexMutex_);
@@ -1362,7 +1320,6 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::indexStorageDirectory() {
     }
 }
 
-#ifndef DCMTK_NOT_AVAILABLE
 std::map<std::string, std::string> pacs::query_retrieve::scp::QueryRetrieveSCP::extractMetadata(const DcmDataset* dataset) {
     std::map<std::string, std::string> metadata;
     
@@ -1414,15 +1371,6 @@ std::map<std::string, std::string> pacs::query_retrieve::scp::QueryRetrieveSCP::
     
     return metadata;
 }
-#else
-// When DCMTK is not available, we need a different implementation that doesn't depend on DcmDataset
-std::map<std::string, std::string> pacs::query_retrieve::scp::QueryRetrieveSCP::extractMetadata(const std::string& filename) {
-    // Just add the filename as metadata
-    std::map<std::string, std::string> metadata;
-    metadata["Filename"] = fs::path(filename).filename().string();
-    return metadata;
-}
-#endif
 
 } // namespace scp
 } // namespace query_retrieve

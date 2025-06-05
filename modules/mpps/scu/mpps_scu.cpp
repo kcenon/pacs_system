@@ -3,11 +3,18 @@
 #include <iostream>
 #include <string>
 
-#ifndef DCMTK_NOT_AVAILABLE
+
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmnet/scu.h"
-#endif
+#include "dcmtk/dcmdata/dcuid.h"
+#include "dcmtk/dcmdata/dcdeftag.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
+
 
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
@@ -20,16 +27,16 @@ namespace scu {
 
 MPPSSCU::MPPSSCU(const common::ServiceConfig& config)
     : config_(config) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
+
 }
 
 MPPSSCU::~MPPSSCU() = default;
 
 core::Result<void> MPPSSCU::createMPPS(const DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     if (!dataset) {
         return core::Result<void>::error("MPPS dataset is null");
     }
@@ -145,14 +152,11 @@ core::Result<void> MPPSSCU::createMPPS(const DcmDataset* dataset) {
     catch (const std::exception& ex) {
         return core::Result<void>::error(std::string("Exception during MPPS N-CREATE: ") + ex.what());
     }
-#else
-    // Placeholder implementation
-    return core::Result<void>::error("DCMTK not available for MPPS N-CREATE operation");
-#endif
+
 }
 
 core::Result<void> MPPSSCU::updateMPPS(const std::string& sopInstanceUID, const DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     if (!dataset) {
         return core::Result<void>::error("MPPS dataset is null");
     }
@@ -261,10 +265,7 @@ core::Result<void> MPPSSCU::updateMPPS(const std::string& sopInstanceUID, const 
     catch (const std::exception& ex) {
         return core::Result<void>::error(std::string("Exception during MPPS N-SET: ") + ex.what());
     }
-#else
-    // Placeholder implementation
-    return core::Result<void>::error("DCMTK not available for MPPS N-SET operation");
-#endif
+
 }
 
 void MPPSSCU::setCreateCallback(core::interfaces::mpps::MPPSCallback callback) {
@@ -276,7 +277,7 @@ void MPPSSCU::setUpdateCallback(core::interfaces::mpps::MPPSCallback callback) {
 }
 
 T_ASC_Association* MPPSSCU::createAssociation() {
-#ifndef DCMTK_NOT_AVAILABLE
+
     T_ASC_Network* net = nullptr;
     T_ASC_Parameters* params = nullptr;
     T_ASC_Association* assoc = nullptr;
@@ -290,8 +291,7 @@ T_ASC_Association* MPPSSCU::createAssociation() {
     }
     
     // Create association parameters
-    // Use the newer ASC_initializeAssociationParameters instead of deprecated ASC_createAssociationParameters
-    cond = ASC_initializeAssociationParameters(&params, ASC_MAXIMUMPDUSIZE);
+    cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE);
     if (cond.bad()) {
         ASC_dropNetwork(&net);
         return nullptr;
@@ -342,20 +342,17 @@ T_ASC_Association* MPPSSCU::createAssociation() {
     }
     
     return assoc;
-#else
-    return nullptr;
-#endif
+
 }
 
 void MPPSSCU::releaseAssociation(T_ASC_Association* assoc) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
-        // The network structure is no longer directly accessible 
-        // in the modern DCMTK API, so we don't try to drop it here
+        ASC_dropNetwork(&assoc->net);
     }
-#endif
+
 }
 
 } // namespace scu

@@ -3,11 +3,19 @@
 #include <string>
 #include <thread>
 
-#ifndef DCMTK_NOT_AVAILABLE
+
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmnet/scp.h"
-#endif
+#include "dcmtk/dcmdata/dcuid.h"
+#include "dcmtk/dcmdata/dcdeftag.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/dul.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
+
 
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
@@ -20,10 +28,10 @@ using namespace log_module;
 
 MPPSSCP::MPPSSCP(const common::ServiceConfig& config)
     : config_(config), running_(false) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
+
 }
 
 MPPSSCP::~MPPSSCP() {
@@ -71,7 +79,7 @@ void MPPSSCP::setUpdateCallback(core::interfaces::mpps::MPPSCallback callback) {
 }
 
 void MPPSSCP::serverLoop() {
-#ifndef DCMTK_NOT_AVAILABLE
+
     T_ASC_Network* net = nullptr;
     T_ASC_Association* assoc = nullptr;
     
@@ -107,21 +115,11 @@ void MPPSSCP::serverLoop() {
     
     // Cleanup
     ASC_dropNetwork(&net);
-#else
-    // Placeholder implementation
-    write_information("MPPS SCP started on port {} (placeholder)", config_.localPort);
-    
-    // Just keep the thread alive
-    while (running_) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    
-    write_information("MPPS SCP stopped (placeholder)");
-#endif
+
 }
 
 void MPPSSCP::processAssociation(T_ASC_Association* assoc) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     if (!assoc) {
         return;
     }
@@ -187,10 +185,11 @@ void MPPSSCP::processAssociation(T_ASC_Association* assoc) {
                     response.msg.CEchoRSP.DimseStatus = STATUS_Success;
                     response.msg.CEchoRSP.DataSetType = DIMSE_DATASET_NULL;
                     
-                    // We'll use the sendEchoResponse helper instead of DIMSE_sendMessage directly
-                    OFString echoResponse;
-                    DIMSE_dumpMessage(echoResponse, response, DIMSE_OUTGOING);
-                    write_information("Echo response: {}", echoResponse.c_str());
+                    // Send the echo response
+                    OFCondition echoSendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+                    if (echoSendCond.bad()) {
+                        write_error("Failed to send C-ECHO response: {}", echoSendCond.text());
+                    }
                 }
                 break;
                 
@@ -207,12 +206,12 @@ void MPPSSCP::processAssociation(T_ASC_Association* assoc) {
     ASC_releaseAssociation(assoc);
     ASC_dropAssociation(assoc);
     ASC_destroyAssociation(&assoc);
-#endif
+
 }
 
 void MPPSSCP::handleNCreateRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                                  T_ASC_PresentationContextID presID, DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     if (!dataset) {
         // Error - no dataset
         T_DIMSE_Message response;
@@ -228,10 +227,11 @@ void MPPSSCP::handleNCreateRequest(T_ASC_Association* assoc, T_DIMSE_Message& re
         response.msg.NCreateRSP.DimseStatus = STATUS_N_ProcessingFailure;
         response.msg.NCreateRSP.DataSetType = DIMSE_DATASET_NULL;
         
-        // Log the response instead of sending it directly
-        OFString dumpStr;
-        DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-        write_information("N-CREATE response: {}", dumpStr.c_str());
+        // Send the response
+        OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+        if (sendCond.bad()) {
+            write_error("Failed to send N-CREATE error response: {}", sendCond.text());
+        }
         return;
     }
     
@@ -276,16 +276,17 @@ void MPPSSCP::handleNCreateRequest(T_ASC_Association* assoc, T_DIMSE_Message& re
     response.msg.NCreateRSP.DimseStatus = STATUS_Success;
     response.msg.NCreateRSP.DataSetType = DIMSE_DATASET_NULL;
     
-    // Log the response instead of sending it directly
-    OFString dumpStr;
-    DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-    write_information("N-CREATE response: {}", dumpStr.c_str());
-#endif
+    // Send the response
+    OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+    if (sendCond.bad()) {
+        write_error("Failed to send N-CREATE response: {}", sendCond.text());
+    }
+
 }
 
 void MPPSSCP::handleNSetRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                               T_ASC_PresentationContextID presID, DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     if (!dataset) {
         // Error - no dataset
         T_DIMSE_Message response;
@@ -306,10 +307,11 @@ void MPPSSCP::handleNSetRequest(T_ASC_Association* assoc, T_DIMSE_Message& reque
         response.msg.NSetRSP.DimseStatus = STATUS_N_ProcessingFailure;
         response.msg.NSetRSP.DataSetType = DIMSE_DATASET_NULL;
         
-        // Log the response instead of sending it directly
-        OFString dumpStr;
-        DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-        write_information("N-SET response: {}", dumpStr.c_str());
+        // Send the response
+        OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+        if (sendCond.bad()) {
+            write_error("Failed to send N-SET error response: {}", sendCond.text());
+        }
         return;
     }
     
@@ -359,11 +361,12 @@ void MPPSSCP::handleNSetRequest(T_ASC_Association* assoc, T_DIMSE_Message& reque
     response.msg.NSetRSP.DimseStatus = STATUS_Success;
     response.msg.NSetRSP.DataSetType = DIMSE_DATASET_NULL;
     
-    // Log the response instead of sending it directly
-    OFString dumpStr;
-    DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-    write_information("N-SET response: {}", dumpStr.c_str());
-#endif
+    // Send the response
+    OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+    if (sendCond.bad()) {
+        write_error("Failed to send N-SET response: {}", sendCond.text());
+    }
+
 }
 
 } // namespace scp

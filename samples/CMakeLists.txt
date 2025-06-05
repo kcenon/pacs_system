@@ -27,3 +27,17 @@ add_subdirectory(database_sample)
 add_subdirectory(config_sample)
 add_subdirectory(logger_sample)
 add_subdirectory(security_sample)
+
+# Add DICOM test program
+add_executable(simple_dicom_test simple_dicom_test.cpp)
+target_link_libraries(simple_dicom_test
+    pacs_dicom
+    pacs_common
+)
+
+# Add storage test program
+add_executable(storage_test storage_test.cpp)
+target_link_libraries(storage_test
+    pacs_dicom
+    pacs_common
+)

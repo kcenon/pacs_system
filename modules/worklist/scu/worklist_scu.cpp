@@ -3,14 +3,14 @@
 #include <string>
 #include <fstream>
 
-#ifndef DCMTK_NOT_AVAILABLE
+
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmnet/scu.h"
 #include "dcmtk/dcmwlm/wlds.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
-#endif
+
 
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
@@ -23,10 +23,10 @@ namespace scu {
 
 WorklistSCU::WorklistSCU(const common::ServiceConfig& config)
     : config_(config) {
-#ifndef DCMTK_NOT_AVAILABLE
+
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
+
 }
 
 WorklistSCU::~WorklistSCU() = default;
@@ -39,7 +39,7 @@ core::Result<std::vector<DcmDataset*>> WorklistSCU::findWorklist(const DcmDatase
     std::lock_guard<std::mutex> lock(mutex_);
     std::vector<DcmDataset*> result;
     
-#ifndef DCMTK_NOT_AVAILABLE
+
     try {
         // Create association with remote Worklist SCP
         T_ASC_Association* assoc = createAssociation();
@@ -70,20 +70,14 @@ core::Result<std::vector<DcmDataset*>> WorklistSCU::findWorklist(const DcmDatase
         // Find the first presentation context for Modality Worklist
         T_ASC_PresentationContextID presID = 0;
         
-        // Use ASC_findAcceptedPresentationContext instead of ASC_getAcceptedPresentationContext
+        // Find presentation context for Modality Worklist
         for (int i = 0; i < ASC_countAcceptedPresentationContexts(assoc->params); i++) {
             T_ASC_PresentationContext pc;
-            // Find presentation context with ID i+1 (DCMTK uses non-zero IDs)
-            presID = ASC_findAcceptedPresentationContext(assoc->params, i+1);
-            if (presID > 0) {
-                // Get the abstract syntax of this presentation context
-                const char* abstractSyntax = NULL;
-                ASC_findAcceptedPresentationContext(assoc->params, presID, &abstractSyntax);
-                if (abstractSyntax && strcmp(abstractSyntax, UID_FINDModalityWorklistInformationModel) == 0) {
-                    break;
-                }
+            ASC_getAcceptedPresentationContext(assoc->params, i, &pc);
+            if (strcmp(pc.abstractSyntax, UID_FINDModalityWorklistInformationModel) == 0) {
+                presID = pc.presentationContextID;
+                break;
             }
-            presID = 0; // Reset if not found
         }
         
         if (presID == 0) {
@@ -176,11 +170,7 @@ core::Result<std::vector<DcmDataset*>> WorklistSCU::findWorklist(const DcmDatase
         
         return core::Result<std::vector<DcmDataset*>>::error(std::string("Exception during worklist find: ") + ex.what());
     }
-#else
-    // Placeholder implementation when DCMTK is not available
-    write_information("Finding worklist entries (placeholder implementation)");
-    return core::Result<std::vector<DcmDataset*>>::ok(result);
-#endif
+
 }
 
 core::Result<void> WorklistSCU::addWorklistItem(const DcmDataset* dataset) {
@@ -203,7 +193,7 @@ void WorklistSCU::setWorklistCallback(core::interfaces::worklist::WorklistCallba
 }
 
 T_ASC_Association* WorklistSCU::createAssociation() {
-#ifndef DCMTK_NOT_AVAILABLE
+
     T_ASC_Network* net = nullptr;
     T_ASC_Parameters* params = nullptr;
     T_ASC_Association* assoc = nullptr;
@@ -268,27 +258,15 @@ T_ASC_Association* WorklistSCU::createAssociation() {
     }
     
     return assoc;
-#else
-    // Placeholder implementation
-    return nullptr;
-#endif
+
 }
 
 void WorklistSCU::releaseAssociation(T_ASC_Association* assoc) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
-        // Modern DCMTK API doesn't store net in assoc struct, it's stored in the assoc params
-        T_ASC_Network *net = nullptr;
-        if (assoc->params) {
-            net = assoc->params->DULparams.network;
-        }
-        if (net) {
-            ASC_dropNetwork(&net);
-        }
+        ASC_dropNetwork(&assoc->net);
     }
-#endif
 }
 
 } // namespace scu

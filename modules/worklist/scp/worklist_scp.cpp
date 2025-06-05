@@ -6,7 +6,6 @@
 #include <fstream>
 #include <thread>
 
-#ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
@@ -19,7 +18,6 @@
 #include "dcmtk/dcmdata/dcvrsh.h"
 #include "dcmtk/dcmdata/dcvrcs.h"
 #include "dcmtk/dcmdata/dcvrui.h"
-#endif
 
 #include "common/dicom_util.h"
 #include "thread_system/sources/logger/logger.h"
@@ -34,10 +32,8 @@ namespace fs = std::filesystem;
 
 WorklistSCP::WorklistSCP(const common::ServiceConfig& config, const std::string& worklistDirectory)
     : config_(config), worklistDirectory_(worklistDirectory), running_(false) {
-#ifndef DCMTK_NOT_AVAILABLE
     // Configure DCMTK logging
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
-#endif
     
     // Create worklist directory if it doesn't exist
     if (!worklistDirectory_.empty() && !fs::exists(worklistDirectory_)) {
@@ -89,7 +85,6 @@ core::Result<std::vector<DcmDataset*>> WorklistSCP::findWorklist(const DcmDatase
     
     std::vector<DcmDataset*> result;
     
-#ifndef DCMTK_NOT_AVAILABLE
     // Lock worklist items
     std::lock_guard<std::mutex> lock(worklistMutex_);
     
@@ -100,15 +95,6 @@ core::Result<std::vector<DcmDataset*>> WorklistSCP::findWorklist(const DcmDatase
             result.push_back(new DcmDataset(*pair.second));
         }
     }
-#else
-    // Placeholder implementation
-    write_information("Searching worklist (placeholder implementation)");
-    
-    // Create a placeholder dataset for demonstration
-    // Note: In real implementation with DCMTK, this would be a proper DcmDataset
-    // Since we're in the placeholder implementation, this doesn't actually do anything useful
-    // but allows the rest of the code to continue functioning
-#endif
     
     return core::Result<std::vector<DcmDataset*>>::ok(result);
 }
@@ -118,7 +104,6 @@ core::Result<void> WorklistSCP::addWorklistItem(const DcmDataset* dataset) {
         return core::Result<void>::error("Worklist dataset is null");
     }
     
-#ifndef DCMTK_NOT_AVAILABLE
     // Extract accession number
     DcmElement* element = nullptr;
     OFString accessionNumberStr;
@@ -181,50 +166,6 @@ core::Result<void> WorklistSCP::addWorklistItem(const DcmDataset* dataset) {
     }
     
     return core::Result<void>::ok();
-#else
-    // Placeholder implementation when DCMTK is not available
-    write_information("Adding worklist item (placeholder implementation)");
-    
-    // Create a placeholder worklist item
-    core::interfaces::worklist::WorklistItem placeholderItem = extractWorklistItem(dataset);
-    
-    // Save to placeholder file if directory is specified
-    if (!worklistDirectory_.empty()) {
-        try {
-            std::string filename = worklistDirectory_ + "/" + placeholderItem.accessionNumber + ".wl";
-            
-            // Create a simple text file as a placeholder
-            std::ofstream outFile(filename);
-            if (outFile.is_open()) {
-                outFile << "PLACEHOLDER WORKLIST ITEM" << std::endl;
-                outFile << "PatientID: " << placeholderItem.patientID << std::endl;
-                outFile << "PatientName: " << placeholderItem.patientName << std::endl;
-                outFile << "AccessionNumber: " << placeholderItem.accessionNumber << std::endl;
-                outFile.close();
-            } else {
-                return core::Result<void>::error("Failed to create placeholder worklist file");
-            }
-        }
-        catch (const std::exception& ex) {
-            return core::Result<void>::error(std::string("Error creating placeholder worklist file: ") + ex.what());
-        }
-    }
-    
-    // Invoke callback if set
-    {
-        std::lock_guard<std::mutex> callbackLock(callbackMutex_);
-        if (worklistCallback_) {
-            try {
-                worklistCallback_(placeholderItem, dataset);
-            }
-            catch (const std::exception& ex) {
-                write_error("Error in worklist callback: %s", ex.what());
-            }
-        }
-    }
-    
-    return core::Result<void>::ok();
-#endif
 }
 
 core::Result<void> WorklistSCP::updateWorklistItem(const std::string& accessionNumber, const DcmDataset* dataset) {
@@ -236,7 +177,6 @@ core::Result<void> WorklistSCP::updateWorklistItem(const std::string& accessionN
         return core::Result<void>::error("Accession number is empty");
     }
     
-#ifndef DCMTK_NOT_AVAILABLE
     // Lock worklist items
     std::lock_guard<std::mutex> lock(worklistMutex_);
     
@@ -288,50 +228,6 @@ core::Result<void> WorklistSCP::updateWorklistItem(const std::string& accessionN
     }
     
     return core::Result<void>::ok();
-#else
-    // Placeholder implementation when DCMTK is not available
-    write_information("Updating worklist item with accession number %s (placeholder implementation)", accessionNumber.c_str());
-    
-    // Create a placeholder worklist item
-    core::interfaces::worklist::WorklistItem placeholderItem = extractWorklistItem(dataset);
-    
-    // Save to placeholder file if directory is specified
-    if (!worklistDirectory_.empty()) {
-        try {
-            std::string filename = worklistDirectory_ + "/" + accessionNumber + ".wl";
-            
-            // Create a simple text file as a placeholder
-            std::ofstream outFile(filename);
-            if (outFile.is_open()) {
-                outFile << "PLACEHOLDER WORKLIST ITEM (UPDATED)" << std::endl;
-                outFile << "PatientID: " << placeholderItem.patientID << std::endl;
-                outFile << "PatientName: " << placeholderItem.patientName << std::endl;
-                outFile << "AccessionNumber: " << accessionNumber << std::endl;
-                outFile.close();
-            } else {
-                return core::Result<void>::error("Failed to update placeholder worklist file");
-            }
-        }
-        catch (const std::exception& ex) {
-            return core::Result<void>::error(std::string("Error updating placeholder worklist file: ") + ex.what());
-        }
-    }
-    
-    // Invoke callback if set
-    {
-        std::lock_guard<std::mutex> callbackLock(callbackMutex_);
-        if (worklistCallback_) {
-            try {
-                worklistCallback_(placeholderItem, dataset);
-            }
-            catch (const std::exception& ex) {
-                write_error("Error in worklist callback: %s", ex.what());
-            }
-        }
-    }
-    
-    return core::Result<void>::ok();
-#endif
 }
 
 core::Result<void> WorklistSCP::removeWorklistItem(const std::string& accessionNumber) {
@@ -342,7 +238,6 @@ core::Result<void> WorklistSCP::removeWorklistItem(const std::string& accessionN
     // Lock worklist items
     std::lock_guard<std::mutex> lock(worklistMutex_);
     
-#ifndef DCMTK_NOT_AVAILABLE
     // Check if item with this accession number exists
     auto it = worklistItems_.find(accessionNumber);
     if (it == worklistItems_.end()) {
@@ -352,7 +247,6 @@ core::Result<void> WorklistSCP::removeWorklistItem(const std::string& accessionN
     // Remove worklist item
     delete it->second;
     worklistItems_.erase(it);
-#endif
     
     // Delete file if directory is specified
     if (!worklistDirectory_.empty()) {
@@ -361,21 +255,13 @@ core::Result<void> WorklistSCP::removeWorklistItem(const std::string& accessionN
             if (fs::exists(filename)) {
                 fs::remove(filename);
             } else {
-#ifndef DCMTK_NOT_AVAILABLE
                 return core::Result<void>::error("Worklist file not found: " + filename);
-#else
-                write_information("Worklist file not found: %s (placeholder implementation - ignoring)", filename.c_str());
-#endif
             }
         }
         catch (const std::exception& ex) {
             return core::Result<void>::error(std::string("Error deleting worklist item file: ") + ex.what());
         }
     }
-    
-#ifdef DCMTK_NOT_AVAILABLE
-    write_information("Removing worklist item with accession number %s (placeholder implementation)", accessionNumber.c_str());
-#endif
     
     return core::Result<void>::ok();
 }
@@ -402,7 +288,6 @@ void WorklistSCP::setWorklistDirectory(const std::string& directory) {
 }
 
 void WorklistSCP::serverLoop() {
-#ifndef DCMTK_NOT_AVAILABLE
     T_ASC_Network* net = nullptr;
     
     OFCondition cond;
@@ -435,21 +320,9 @@ void WorklistSCP::serverLoop() {
     
     // Cleanup
     ASC_dropNetwork(&net);
-#else
-    // Placeholder implementation
-    write_information("Worklist SCP started on port %d (placeholder)", config_.localPort);
-    
-    // Just keep the thread alive
-    while (running_) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    
-    write_information("Worklist SCP stopped (placeholder)");
-#endif
 }
 
 void WorklistSCP::processAssociation(T_ASC_Association* assoc) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!assoc) {
         return;
     }
@@ -539,12 +412,10 @@ void WorklistSCP::processAssociation(T_ASC_Association* assoc) {
     ASC_releaseAssociation(assoc);
     ASC_dropAssociation(assoc);
     ASC_destroyAssociation(&assoc);
-#endif
 }
 
 void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
                                    T_ASC_PresentationContextID presID, DcmDataset* dataset) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!dataset) {
         // Error - no dataset
         T_DIMSE_Message response;
@@ -654,21 +525,9 @@ void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
     if (sendCond.bad()) {
         write_error("Failed to send C-FIND success response: %s", sendCond.text());
     }
-#else
-    // Placeholder implementation when DCMTK is not available
-    write_information("Received C-FIND request (placeholder implementation)");
-    
-    // Find matching worklist items (placeholder)
-    if (dataset != nullptr) {
-        write_information("Found 0 matching worklist items (placeholder)");
-    }
-    
-    write_information("Sent C-FIND response (placeholder implementation)");
-#endif
 }
 
 bool WorklistSCP::matchWorklistItem(const DcmDataset* searchDataset, const DcmDataset* worklistDataset) {
-#ifndef DCMTK_NOT_AVAILABLE
     if (!searchDataset || !worklistDataset) {
         return false;
     }
@@ -729,10 +588,6 @@ bool WorklistSCP::matchWorklistItem(const DcmDataset* searchDataset, const DcmDa
     
     // All elements matched
     return true;
-#else
-    // Placeholder implementation when DCMTK is not available
-    return false;
-#endif
 }
 
 void WorklistSCP::loadWorklistItems() {
@@ -744,7 +599,6 @@ void WorklistSCP::loadWorklistItems() {
         worklistItems_.clear();
     }
     
-#ifndef DCMTK_NOT_AVAILABLE
     try {
         // Iterate over all files in the directory
         for (const auto& entry : fs::directory_iterator(worklistDirectory_)) {
@@ -773,24 +627,6 @@ void WorklistSCP::loadWorklistItems() {
     catch (const std::exception& ex) {
         write_error("Error loading worklist items: %s", ex.what());
     }
-#else
-    // Placeholder implementation
-    write_information("Loading worklist items from %s (placeholder implementation)", worklistDirectory_.c_str());
-    
-    try {
-        // Iterate over all files in the directory and just count them
-        int count = 0;
-        for (const auto& entry : fs::directory_iterator(worklistDirectory_)) {
-            if (entry.is_regular_file() && entry.path().extension() == ".wl") {
-                count++;
-            }
-        }
-        write_information("Found %d worklist files (placeholder - not actually loaded)", count);
-    }
-    catch (const std::exception& ex) {
-        write_error("Error counting worklist files: %s", ex.what());
-    }
-#endif
 }
 
 core::interfaces::worklist::WorklistItem WorklistSCP::extractWorklistItem(const DcmDataset* dataset) {
@@ -798,7 +634,6 @@ core::interfaces::worklist::WorklistItem WorklistSCP::extractWorklistItem(const 
     
     if (!dataset) return item;
     
-#ifndef DCMTK_NOT_AVAILABLE
     // Extract values from dataset
     DcmElement* element = nullptr;
     OFString valueStr;
@@ -849,17 +684,6 @@ core::interfaces::worklist::WorklistItem WorklistSCP::extractWorklistItem(const 
             item.scheduledProcedureStepDescription = valueStr.c_str();
         }
     }
-#else
-    // Placeholder implementation
-    item.patientID = "PLACEHOLDER_PATIENT_ID";
-    item.patientName = "PLACEHOLDER_PATIENT_NAME";
-    item.accessionNumber = "PLACEHOLDER_ACCESSION_NUMBER";
-    item.scheduledProcedureStepStartDate = "20250101";
-    item.scheduledProcedureStepStartTime = "120000";
-    item.modality = "CT";
-    item.scheduledStationAETitle = "PLACEHOLDER_AE";
-    item.scheduledProcedureStepDescription = "PLACEHOLDER_PROCEDURE";
-#endif
     
     return item;
 }
