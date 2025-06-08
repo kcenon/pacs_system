@@ -40,27 +40,60 @@ pacs_system/
 
 ## Features
 
-- MPPS (Modality Performed Procedure Step) Implementation
-- DICOM Storage SCP/SCU
-- Modality Worklist SCP/SCU
-- Query/Retrieve SCP/SCU
-- Thread pool system for concurrent operations
-- Standardized error handling with Result pattern
-- C++20 standards compliance
+- **Full DCMTK Integration** - Complete DICOM toolkit integration with all major services
+- **DICOM Storage Service** - Full C-STORE implementation for both SCP and SCU roles
+- **Query/Retrieve Service** - C-FIND, C-MOVE, and C-GET operations
+- **Modality Worklist** - Complete worklist management with C-FIND support
+- **MPPS Service** - N-CREATE and N-SET for procedure step tracking
+- **Compression Support** - JPEG, JPEG-LS, JPEG-2000, and RLE codecs
+- **Network Communication** - Robust DIMSE protocol implementation
+- **Thread Pool System** - Efficient concurrent operation handling
+- **Error Handling** - Standardized Result pattern for all operations
+- **C++20 Standards** - Modern C++ features and best practices
+
+## DCMTK Integration (3-Week Implementation)
+
+### Week 1: Foundation
+- Enabled DCMTK in the build system
+- Removed all placeholder implementations
+- Implemented basic DICOM file I/O operations
+- Added DICOM object and tag management
+
+### Week 2: Network and Storage
+- Implemented DICOM network communication (DIMSE)
+- Added compression codec support
+- Completed Storage SCP/SCU with C-STORE
+- Added transfer syntax negotiation
+
+### Week 3: Advanced Services
+- Implemented Query/Retrieve with C-FIND, C-MOVE, C-GET
+- Added Modality Worklist service
+- Implemented MPPS with N-CREATE/N-SET
+- Completed comprehensive testing framework
 
 ## Recent Improvements
 
-- Removed unnecessary thread manager implementation in favor of direct thread_system usage
-- Implemented comprehensive service interfaces
-- Optimized build system to reduce duplicate library warnings
-- Updated thread_system integration
-- Removed empty and unnecessary files for cleaner codebase
+- Complete DCMTK library integration replacing all placeholder code
+- Full DICOM network protocol implementation
+- Comprehensive codec management system
+- Robust error handling and logging
+- Removed all conditional compilation for cleaner codebase
 
 ## Dependencies
 
-- DCMTK (DICOM Toolkit) - Optional, automatically installed via vcpkg
-- fmt and other utilities - Automatically installed via vcpkg
+- **DCMTK** (DICOM Toolkit) - Core DICOM functionality
+- **libxml2** - XML parsing for DCMTK
+- **zlib** - Compression support
+- **openssl** - TLS/Security support
+- **libjpeg** - JPEG codec support
+- **fmt** - Modern formatting library
+- **gtest** - Unit testing framework
+- **nlohmann-json** - JSON support
+- **sqlite3** - Database support
+- **cryptopp** - Cryptographic functions
 - C++20 compatible compiler
+
+All dependencies are automatically managed via vcpkg.
 
 ## Building
 
