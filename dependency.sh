@@ -63,7 +63,7 @@ fi
 cd ..
 if [ -d "./vcpkg" ]; then
     cd vcpkg
-    if ! ./vcpkg install lz4 fmt cpprestsdk cryptopp asio python3 crossguid libpq gtest --recurse; then
+    if ! ./vcpkg install lz4 fmt cryptopp asio python3 crossguid libpq gtest dcmtk --recurse; then
         echo "Error: vcpkg install failed"
         exit 1
     fi

@@ -67,9 +67,10 @@ if exist "thread_system\dependency.bat" (
 cd ..
 if exist "vcpkg\" (
     cd vcpkg
-    vcpkg install lz4:x64-windows fmt:x64-windows cpprestsdk:x64-windows ^
+    vcpkg install lz4:x64-windows fmt:x64-windows ^
                  cryptopp:x64-windows asio:x64-windows python3:x64-windows ^
-                 crossguid:x64-windows libpq:x64-windows gtest:x64-windows --recurse || exit /b 1
+                 crossguid:x64-windows libpq:x64-windows gtest:x64-windows ^
+                 dcmtk:x64-windows --recurse || exit /b 1
 ) else (
     echo Error: vcpkg directory not found
     exit /b 1
