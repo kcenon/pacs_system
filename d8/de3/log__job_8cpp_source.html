@@ -136,12 +136,12 @@ $(document).ready(function() { init_codefold(1); });
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        std::optional&lt;log_types&gt; type,</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        std::optional&lt;std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt;&gt; start_time)</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        : <a class="code hl_class" href="../../d8/d42/classthread__module_1_1job.html">job</a>(<span class="stringliteral">&quot;log_job&quot;</span>)</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        , type_(type)</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        , message_type_(<a class="code hl_enumeration" href="../../df/df4/classlog__module_1_1log__job.html#a9659665b71a5b0beb2a851fe6fbabecb">message_types</a>::String)</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        , message_(message)</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        , timestamp_(std::chrono::system_clock::now())</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        , start_time_(start_time)</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        , log_message_(<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        , message_type_(<a class="code hl_enumeration" href="../../df/df4/classlog__module_1_1log__job.html#a9659665b71a5b0beb2a851fe6fbabecb">message_types</a>::String)</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        , message_(message)</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        , log_message_(<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        , type_(type)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        , timestamp_(std::chrono::system_clock::now())</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        , start_time_(start_time)</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    {</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    }</div>
 </div>
@@ -152,12 +152,12 @@ $(document).ready(function() { init_codefold(1); });
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        std::optional&lt;log_types&gt; type,</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        std::optional&lt;std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt;&gt; start_time)</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        : <a class="code hl_class" href="../../d8/d42/classthread__module_1_1job.html">job</a>(<span class="stringliteral">&quot;log_job&quot;</span>)</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        , type_(type)</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        , message_type_(<a class="code hl_enumeration" href="../../df/df4/classlog__module_1_1log__job.html#a9659665b71a5b0beb2a851fe6fbabecb">message_types</a>::WString)</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        , wmessage_(message)</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        , timestamp_(std::chrono::system_clock::now())</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        , start_time_(start_time)</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        , log_message_(<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        , message_type_(<a class="code hl_enumeration" href="../../df/df4/classlog__module_1_1log__job.html#a9659665b71a5b0beb2a851fe6fbabecb">message_types</a>::WString)</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        , wmessage_(message)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        , log_message_(<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        , type_(type)</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        , timestamp_(std::chrono::system_clock::now())</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        , start_time_(start_time)</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    {</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    }</div>
 </div>
@@ -263,20 +263,20 @@ $(document).ready(function() { init_codefold(1); });
 <div class="ttc" id="aclassutility__module_1_1datetime__tool_html_ac8282d0e6a42a1cdf0cbdc0a986d1761"><div class="ttname"><a href="../../db/d61/classutility__module_1_1datetime__tool.html#ac8282d0e6a42a1cdf0cbdc0a986d1761">utility_module::datetime_tool::time_difference</a></div><div class="ttdeci">static auto time_difference(const std::chrono::time_point&lt; ClockType &gt; &amp;start_time, const std::chrono::time_point&lt; ClockType &gt; &amp;end_time=ClockType::now()) -&gt; double</div><div class="ttdoc">Calculates the time difference between two time points in a specified duration type.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da9/datetime__tool_8cpp_source.html#l00127">datetime_tool.cpp:127</a></div></div>
 <div class="ttc" id="aclassutility__module_1_1datetime__tool_html_ae8bc79e53ad02c718cac3b93592c2d5e"><div class="ttname"><a href="../../db/d61/classutility__module_1_1datetime__tool.html#ae8bc79e53ad02c718cac3b93592c2d5e">utility_module::datetime_tool::milliseconds</a></div><div class="ttdeci">static auto milliseconds(const std::chrono::system_clock::time_point &amp;time, const int &amp;milli_portion=0) -&gt; std::string</div><div class="ttdoc">Extracts the milliseconds (0-999) component from a time point.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da9/datetime__tool_8cpp_source.html#l00090">datetime_tool.cpp:90</a></div></div>
 <div class="ttc" id="aclassutility__module_1_1datetime__tool_html_af24272c85e0cd14d223fb7b736253d77"><div class="ttname"><a href="../../db/d61/classutility__module_1_1datetime__tool.html#af24272c85e0cd14d223fb7b736253d77">utility_module::datetime_tool::microseconds</a></div><div class="ttdeci">static auto microseconds(const std::chrono::system_clock::time_point &amp;time, const int &amp;micro_portion=0) -&gt; std::string</div><div class="ttdoc">Extracts the microseconds (0-999) component from a time point.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da9/datetime__tool_8cpp_source.html#l00102">datetime_tool.cpp:102</a></div></div>
-<div class="ttc" id="aclassutility__module_1_1formatter_html_a1b5ec167f6e47412edd77a4ea658e339"><div class="ttname"><a href="../../d1/daf/classutility__module_1_1formatter.html#a1b5ec167f6e47412edd77a4ea658e339">utility_module::formatter::format</a></div><div class="ttdeci">static auto format(const char *formats, const FormatArgs &amp;... args) -&gt; std::string</div><div class="ttdoc">Formats a narrow-character string with the given arguments.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d52/formatter_8h_source.html#l00179">formatter.h:179</a></div></div>
+<div class="ttc" id="aclassutility__module_1_1formatter_html_a1b5ec167f6e47412edd77a4ea658e339"><div class="ttname"><a href="../../d1/daf/classutility__module_1_1formatter.html#a1b5ec167f6e47412edd77a4ea658e339">utility_module::formatter::format</a></div><div class="ttdeci">static auto format(const char *formats, const FormatArgs &amp;... args) -&gt; std::string</div><div class="ttdoc">Formats a narrow-character string with the given arguments.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d52/formatter_8h_source.html#l00176">formatter.h:176</a></div></div>
 <div class="ttc" id="aconvert__string_8h_html"><div class="ttname"><a href="../../d1/d46/convert__string_8h.html">convert_string.h</a></div></div>
 <div class="ttc" id="adatetime__tool_8h_html"><div class="ttname"><a href="../../d9/da1/datetime__tool_8h.html">datetime_tool.h</a></div></div>
 <div class="ttc" id="aformatter_8h_html"><div class="ttname"><a href="../../de/d52/formatter_8h.html">formatter.h</a></div></div>
 <div class="ttc" id="alog__job_8h_html"><div class="ttname"><a href="../../d1/dc2/log__job_8h.html">log_job.h</a></div></div>
-<div class="ttc" id="anamespacelog__module_html"><div class="ttname"><a href="../../d9/de0/namespacelog__module.html">log_module</a></div><div class="ttdef"><b>Definition</b> <a href="../../d5/d76/callback__writer_8cpp_source.html#l00047">callback_writer.cpp:48</a></div></div>
+<div class="ttc" id="anamespacelog__module_html"><div class="ttname"><a href="../../d9/de0/namespacelog__module.html">log_module</a></div><div class="ttdoc">Thread-safe logging system built on the thread system foundation.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d76/callback__writer_8cpp_source.html#l00047">callback_writer.cpp:48</a></div></div>
 <div class="ttc" id="anamespacelog__module_html_ac59af6ec9704b7fd0d73e7becbc54709"><div class="ttname"><a href="../../d9/de0/namespacelog__module.html#ac59af6ec9704b7fd0d73e7becbc54709">log_module::log_types</a></div><div class="ttdeci">log_types</div><div class="ttdoc">Enumerates different categories of log messages.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d18/log__types_8h_source.html#l00056">log_types.h:57</a></div></div>
 <div class="ttc" id="anamespacelog__module_html_ac59af6ec9704b7fd0d73e7becbc54709a6adf97f83acf6453d4a6a4b1070f3754"><div class="ttname"><a href="../../d9/de0/namespacelog__module.html#ac59af6ec9704b7fd0d73e7becbc54709a6adf97f83acf6453d4a6a4b1070f3754">log_module::log_types::None</a></div><div class="ttdeci">@ None</div><div class="ttdoc">No specific category for the log message.</div></div>
-<div class="ttc" id="anamespacethread__module_html"><div class="ttname"><a href="../../de/d48/namespacethread__module.html">thread_module</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/callback__job_8cpp_source.html#l00035">callback_job.cpp:36</a></div></div>
-<div class="ttc" id="anamespaceutility__module_html"><div class="ttname"><a href="../../dd/d2a/namespaceutility__module.html">utility_module</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d2f/argument__parser_8cpp_source.html#l00040">argument_parser.cpp:41</a></div></div>
+<div class="ttc" id="anamespacethread__module_html"><div class="ttname"><a href="../../de/d48/namespacethread__module.html">thread_module</a></div><div class="ttdoc">Core threading foundation of the thread system library.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/callback__job_8cpp_source.html#l00035">callback_job.cpp:36</a></div></div>
+<div class="ttc" id="anamespaceutility__module_html"><div class="ttname"><a href="../../dd/d2a/namespaceutility__module.html">utility_module</a></div><div class="ttdoc">Utility components supporting the thread system library.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2f/argument__parser_8cpp_source.html#l00040">argument_parser.cpp:41</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 21 2025 13:49:41 for Thread System by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Thu Jun 12 2025 11:57:55 for Thread System by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>
