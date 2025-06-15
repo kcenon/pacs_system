@@ -11,10 +11,11 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/dicom.h"
-#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 #include "dcmtk/dcmnet/dul.h"
 
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
 #include "common/dicom_util.h"
 
 namespace pacs {
@@ -46,12 +47,9 @@ core::Result<void> StorageSCU::storeDICOM(const DcmDataset* dataset) {
         }
         
         // Extract SOP Class UID from the dataset
-        DcmElement* element = nullptr;
         OFString sopClassUIDStr;
-        OFCondition cond = dataset->findAndGetElement(DCM_SOPClassUID, element);
-        if (cond.good() && element) {
-            element->getOFString(sopClassUIDStr, 0);
-        } else {
+        OFCondition cond = const_cast<DcmDataset*>(dataset)->findAndGetOFString(DCM_SOPClassUID, sopClassUIDStr);
+        if (cond.bad() || sopClassUIDStr.empty()) {
             releaseAssociation(assoc);
             return core::Result<void>::error("Missing SOP Class UID in DICOM dataset");
         }
@@ -82,11 +80,8 @@ core::Result<void> StorageSCU::storeDICOM(const DcmDataset* dataset) {
         
         // Extract SOP Instance UID from the dataset
         OFString sopInstanceUIDStr;
-        element = nullptr;
-        cond = dataset->findAndGetElement(DCM_SOPInstanceUID, element);
-        if (cond.good() && element) {
-            element->getOFString(sopInstanceUIDStr, 0);
-        } else {
+        cond = const_cast<DcmDataset*>(dataset)->findAndGetOFString(DCM_SOPInstanceUID, sopInstanceUIDStr);
+        if (cond.bad() || sopInstanceUIDStr.empty()) {
             releaseAssociation(assoc);
             return core::Result<void>::error("Missing SOP Instance UID in DICOM dataset");
         }
@@ -97,11 +92,11 @@ core::Result<void> StorageSCU::storeDICOM(const DcmDataset* dataset) {
                           sizeof(storeReq.AffectedSOPInstanceUID));
         
         storeReq.Priority = DIMSE_PRIORITY_MEDIUM;
-        storeReq.MoveOriginatorAETitle[0] = '\0';
         storeReq.MoveOriginatorID = 0;
         
         // Send C-STORE request
-        cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, dataset, 
+        cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, 
+                                              const_cast<DcmDataset*>(dataset), 
                                               nullptr, nullptr, nullptr);
         
         if (cond.bad()) {
@@ -190,7 +185,7 @@ T_ASC_Association* StorageSCU::createAssociation() {
     }
     
     // Create association parameters
-    cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE);
+    cond = ASC_createAssociationParameters(&params, ASC_DEFAULTMAXPDU);
     if (cond.bad()) {
         ASC_dropNetwork(&net);
         return nullptr;
@@ -280,7 +275,7 @@ void StorageSCU::releaseAssociation(T_ASC_Association* assoc) {
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
-        ASC_dropNetwork(&assoc->net);
+        ASC_destroyAssociation(&assoc);
     }
 }
 
@@ -289,20 +284,8 @@ T_ASC_PresentationContextID StorageSCU::findPresentationContextID(T_ASC_Associat
     T_ASC_PresentationContextID presID = 0;
     
     if (assoc && sopClassUID) {
-        // Look for a presentation context matching the SOP class UID
-        DUL_PRESENTATIONCONTEXT* pc;
-        LST_HEAD** pcList = &assoc->params->DULparams.acceptedPresentationContext;
-        
-        if (pcList) {
-            pc = (DUL_PRESENTATIONCONTEXT*) LST_Head(pcList);
-            while (pc) {
-                if (strcmp(pc->abstractSyntax, sopClassUID) == 0) {
-                    presID = pc->presentationContextID;
-                    break;
-                }
-                pc = (DUL_PRESENTATIONCONTEXT*) LST_Next(pcList);
-            }
-        }
+        // Find the first accepted presentation context for this SOP class
+        presID = ASC_findAcceptedPresentationContextID(assoc, sopClassUID);
     }
     
     return presID;

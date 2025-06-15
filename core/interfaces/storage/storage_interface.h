@@ -5,9 +5,11 @@
 #include <functional>
 #include <vector>
 
-#ifndef DCMTK_NOT_AVAILABLE
+#ifndef USE_DCMTK_PLACEHOLDER
 // DCMTK includes
+#ifdef HAVE_CONFIG_H
 #include "dcmtk/config/osconfig.h"
+#endif
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #else

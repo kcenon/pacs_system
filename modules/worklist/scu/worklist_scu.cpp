@@ -13,9 +13,9 @@
 
 
 #include "common/dicom_util.h"
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
 
-using namespace log_module;
+using namespace pacs::common::logger;
 
 namespace pacs {
 namespace worklist {
@@ -73,7 +73,7 @@ core::Result<std::vector<DcmDataset*>> WorklistSCU::findWorklist(const DcmDatase
         // Find presentation context for Modality Worklist
         for (int i = 0; i < ASC_countAcceptedPresentationContexts(assoc->params); i++) {
             T_ASC_PresentationContext pc;
-            ASC_getAcceptedPresentationContext(assoc->params, i, &pc);
+            ASC_findAcceptedPresentationContext(assoc->params, i, &pc);
             if (strcmp(pc.abstractSyntax, UID_FINDModalityWorklistInformationModel) == 0) {
                 presID = pc.presentationContextID;
                 break;
@@ -87,7 +87,7 @@ core::Result<std::vector<DcmDataset*>> WorklistSCU::findWorklist(const DcmDatase
         
         // Send C-FIND request - using DIMSE_sendMessage instead of DIMSE_sendMessageUsingMemoryData
         DcmDataset* nonConstDataset = const_cast<DcmDataset*>(searchDataset);
-        OFCondition cond = DIMSE_sendMessage(assoc, presID, &request, nonConstDataset);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, nonConstDataset, nullptr, nullptr, nullptr);
         
         if (cond.bad()) {
             releaseAssociation(assoc);
@@ -265,7 +265,7 @@ void WorklistSCU::releaseAssociation(T_ASC_Association* assoc) {
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
-        ASC_dropNetwork(&assoc->net);
+        // Network is handled by association cleanup
     }
 }
 

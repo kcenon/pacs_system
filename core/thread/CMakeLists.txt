@@ -1,15 +1,35 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Use the INTERFACE library approach to provide direct access to thread_system
-add_library(pacs_core_thread INTERFACE)
+# Create thread library (currently header-only, prepare for future implementation)
+add_library(pacs_thread INTERFACE)
 
-# Make thread_system headers available through this interface
-target_include_directories(pacs_core_thread INTERFACE 
-    ${CMAKE_SOURCE_DIR}/thread_system/sources
+# Add alias
+add_library(pacs::thread ALIAS pacs_thread)
+
+# Configure include directories
+target_include_directories(pacs_thread INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
+    $<INSTALL_INTERFACE:include>
 )
 
-# Link directly to thread_system libraries
-target_link_libraries(pacs_core_thread INTERFACE 
-    thread_pool
-    priority_thread_pool
+# Find Threads
+find_package(Threads QUIET)
+
+# Link dependencies
+target_link_libraries(pacs_thread INTERFACE
+    pacs::common
+)
+
+if(Threads_FOUND)
+    target_link_libraries(pacs_thread INTERFACE Threads::Threads)
+endif()
+
+# Set compile features
+target_compile_features(pacs_thread INTERFACE cxx_std_20)
+
+# Install targets
+install(TARGETS pacs_thread
+    EXPORT pacs_targets
 )

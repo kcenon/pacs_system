@@ -3,8 +3,8 @@
 #include <iostream>
 
 // Include the full thread_system logger
-#include "thread_system/sources/logger/logger.h"
-#include "thread_system/sources/logger/log_types.h"
+#include "logger/logger.h"
+#include "logger/types/log_types.h"
 
 namespace pacs {
 namespace common {

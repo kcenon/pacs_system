@@ -11,14 +11,15 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/dicom.h"
-#include "dcmtk/dcmnet/dimcmd.h"
 #include "dcmtk/dcmnet/dul.h"
 #include "dcmtk/dcmnet/assoc.h"
 #include "dcmtk/dcmnet/cond.h"
 
 
 #include "common/dicom_util.h"
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
+
+using namespace pacs::common::logger;
 
 namespace pacs {
 namespace mpps {
@@ -88,7 +89,7 @@ void MPPSSCP::serverLoop() {
     // Initialize network
     cond = ASC_initializeNetwork(NET_ACCEPTOR, config_.localPort, 30, &net);
     if (cond.bad()) {
-        write_error("Error initializing network: {}", cond.text());
+        logError("Error initializing network: {}", cond.text());
         return;
     }
     
@@ -102,7 +103,7 @@ void MPPSSCP::serverLoop() {
         
         if (cond.bad()) {
             if (cond != DUL_ASSOCIATIONREJECTED) {  // Changed to available constant
-                write_error("Error receiving association: {}", cond.text());
+                logError("Error receiving association: {}", cond.text());
             }
             continue;
         }
@@ -186,9 +187,9 @@ void MPPSSCP::processAssociation(T_ASC_Association* assoc) {
                     response.msg.CEchoRSP.DataSetType = DIMSE_DATASET_NULL;
                     
                     // Send the echo response
-                    OFCondition echoSendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+                    OFCondition echoSendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
                     if (echoSendCond.bad()) {
-                        write_error("Failed to send C-ECHO response: {}", echoSendCond.text());
+                        logError("Failed to send C-ECHO response: {}", echoSendCond.text());
                     }
                 }
                 break;
@@ -228,9 +229,9 @@ void MPPSSCP::handleNCreateRequest(T_ASC_Association* assoc, T_DIMSE_Message& re
         response.msg.NCreateRSP.DataSetType = DIMSE_DATASET_NULL;
         
         // Send the response
-        OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+        OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
         if (sendCond.bad()) {
-            write_error("Failed to send N-CREATE error response: {}", sendCond.text());
+            logError("Failed to send N-CREATE error response: {}", sendCond.text());
         }
         return;
     }
@@ -257,7 +258,7 @@ void MPPSSCP::handleNCreateRequest(T_ASC_Association* assoc, T_DIMSE_Message& re
                 createCallback_(accessionNumber, dataset);
             }
             catch (const std::exception& ex) {
-                write_error("Error in MPPS create callback: {}", ex.what());
+                logError("Error in MPPS create callback: {}", ex.what());
             }
         }
     }
@@ -277,9 +278,9 @@ void MPPSSCP::handleNCreateRequest(T_ASC_Association* assoc, T_DIMSE_Message& re
     response.msg.NCreateRSP.DataSetType = DIMSE_DATASET_NULL;
     
     // Send the response
-    OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+    OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
     if (sendCond.bad()) {
-        write_error("Failed to send N-CREATE response: {}", sendCond.text());
+        logError("Failed to send N-CREATE response: {}", sendCond.text());
     }
 
 }
@@ -308,9 +309,9 @@ void MPPSSCP::handleNSetRequest(T_ASC_Association* assoc, T_DIMSE_Message& reque
         response.msg.NSetRSP.DataSetType = DIMSE_DATASET_NULL;
         
         // Send the response
-        OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+        OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
         if (sendCond.bad()) {
-            write_error("Failed to send N-SET error response: {}", sendCond.text());
+            logError("Failed to send N-SET error response: {}", sendCond.text());
         }
         return;
     }
@@ -337,7 +338,7 @@ void MPPSSCP::handleNSetRequest(T_ASC_Association* assoc, T_DIMSE_Message& reque
                 updateCallback_(accessionNumber, dataset);
             }
             catch (const std::exception& ex) {
-                write_error("Error in MPPS update callback: {}", ex.what());
+                logError("Error in MPPS update callback: {}", ex.what());
             }
         }
     }
@@ -362,9 +363,9 @@ void MPPSSCP::handleNSetRequest(T_ASC_Association* assoc, T_DIMSE_Message& reque
     response.msg.NSetRSP.DataSetType = DIMSE_DATASET_NULL;
     
     // Send the response
-    OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+    OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
     if (sendCond.bad()) {
-        write_error("Failed to send N-SET response: {}", sendCond.text());
+        logError("Failed to send N-SET response: {}", sendCond.text());
     }
 
 }

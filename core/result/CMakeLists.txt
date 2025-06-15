@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(SOURCE_FILES
-    result.h
-)
-
+# Result library (header-only)
 add_library(pacs_core_result INTERFACE)
 target_include_directories(pacs_core_result INTERFACE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/sources  # For core/result includes
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(pacs_core_result INTERFACE pacs_common)
 
+# Only need to link against pacs_common without thread_base or utilities
+target_link_libraries(pacs_core_result INTERFACE 
+    pacs_common
+)

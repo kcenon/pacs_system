@@ -17,6 +17,24 @@
             "QUERY_RETRIEVE_CACHE_SIZE": "100"
         }
     },
+    "database": {
+        "type": "sqlite",
+        "sqlite": {
+            "path": "./data/db/pacs.db"
+        },
+        "postgresql": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "pacs",
+            "username": "pacs",
+            "password": "",
+            "ssl_mode": "prefer",
+            "connection_timeout": 10,
+            "command_timeout": 30,
+            "min_pool_size": 2,
+            "max_pool_size": 10
+        }
+    },
     "config": {
         "thread.pool.size": "4",
         "thread.priority.levels": "3",
@@ -24,5 +42,63 @@
         "log.console": "true",
         "log.file": "true",
         "storage.compress": "false"
+    },
+    "storage": {
+        "encryption": {
+            "enabled": true,
+            "algorithm": "AES_256_GCM"
+        }
+    },
+    "security": {
+        "auth": {
+            "type": "basic"
+        },
+        "users": {
+            "file": "./data/security/users.json"
+        },
+        "create": {
+            "default": {
+                "user": "false"
+            }
+        },
+        "admin": {
+            "email": "admin@hospital.local"
+        },
+        "encryption": {
+            "enabled": true,
+            "algorithm": "AES_256_GCM",
+            "key_file": "./data/security/master.key"
+        },
+        "tls": {
+            "enabled": false,
+            "min_version": "1.2",
+            "cert_verification": "require_peer",
+            "key_file": "./data/security/private_key.pem",
+            "cert_file": "./data/security/certificate.pem",
+            "ca_file": "./data/security/ca_certificate.pem",
+            "cert_dir": "./data/security/certs",
+            "dh_params_file": "./data/security/dh_params.pem",
+            "cipher_suites": [
+                "ECDHE-RSA-AES256-GCM-SHA384",
+                "ECDHE-RSA-AES128-GCM-SHA256",
+                "AES256-GCM-SHA384",
+                "AES128-GCM-SHA256"
+            ]
+        }
+    },
+    "audit": {
+        "enabled": true,
+        "backend": "file",
+        "directory": "./data/audit",
+        "rotation": {
+            "max_file_size_mb": 100,
+            "max_files": 30,
+            "compress_old_files": true
+        },
+        "retention": {
+            "days": 365,
+            "archive_old_files": true,
+            "archive_directory": "./data/audit/archive"
+        }
     }
 }

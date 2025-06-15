@@ -8,10 +8,14 @@
     "nlohmann-json",
     "cryptopp",
     "sqlite3",
+    {
+      "name": "libpq",
+      "features": []
+    },
     "dcmtk",
     "libxml2",
     "zlib",
-    "libiconv",
-    "openssl"
+    "openssl",
+    "spdlog"
   ]
 }

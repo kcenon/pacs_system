@@ -1,7 +1,7 @@
 #include "storage_server.h"
 #include "dicom_error.h"
 
-#include "dcmtk/config/osconfig.h"
+#ifndef USE_DCMTK_PLACEHOLDER
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
@@ -10,9 +10,10 @@
 #include "dcmtk/dcmnet/scp.h"
 #include "dcmtk/dcmnet/assoc.h"
 #include "dcmtk/dcmnet/cond.h"
+#endif
 
-#include "thread_system/sources/logger/logger.h"
-#include "thread_system/sources/logger/log_types.h"
+#include "../logger/logger.h"
+// #include "thread_system/sources/logger/log_types.h"
 
 #include <filesystem>
 #include <thread>
@@ -23,7 +24,88 @@
 #include <condition_variable>
 
 namespace fs = std::filesystem;
-using namespace log_module;
+
+#ifdef USE_DCMTK_PLACEHOLDER
+// Placeholder implementation when DCMTK is not available
+
+namespace pacs {
+namespace common {
+namespace dicom {
+
+class StorageServer::Impl {
+public:
+    explicit Impl(const StorageServer::Config& config)
+        : config_(config), running_(false) {}
+    
+    ~Impl() {
+        stop();
+    }
+    
+    DicomVoidResult start() {
+        if (running_) {
+            return DicomVoidResult();
+        }
+        
+        pacs::common::logger::logInfo("StorageServer::start called in placeholder mode - not implemented");
+        return DicomVoidResult(DicomErrorCode::NotImplemented, 
+                             "DCMTK not available - storage server not supported");
+    }
+    
+    void stop() {
+        running_ = false;
+    }
+    
+    bool isRunning() const {
+        return running_;
+    }
+    
+    void setCallback(StorageCallback callback) {
+        callback_ = callback;
+    }
+    
+private:
+    StorageServer::Config config_;
+    StorageCallback callback_;
+    std::atomic<bool> running_;
+};
+
+StorageServer::StorageServer(const Config& config)
+    : config_(config), impl_(std::make_unique<Impl>(config)), running_(false) {
+}
+
+StorageServer::~StorageServer() = default;
+
+DicomVoidResult StorageServer::start() {
+    return impl_->start();
+}
+
+void StorageServer::stop() {
+    impl_->stop();
+}
+
+bool StorageServer::isRunning() const {
+    return impl_->isRunning();
+}
+
+void StorageServer::setStorageCallback(StorageCallback callback) {
+    callback_ = callback;
+    impl_->setCallback(callback);
+}
+
+void StorageServer::setConfig(const Config& config) {
+    config_ = config;
+}
+
+const StorageServer::Config& StorageServer::getConfig() const {
+    return config_;
+}
+
+} // namespace dicom
+} // namespace common
+} // namespace pacs
+
+#else
+// Real implementation when DCMTK is available
 
 namespace pacs {
 namespace common {
@@ -91,29 +173,29 @@ private:
         OFCondition cond = ASC_initializeNetwork(NET_ACCEPTOR, config_.port, 
                                                30, &net);
         if (cond.bad()) {
-            write_error("Failed to initialize network: %s", cond.text());
+            pacs::common::logger::logError("Failed to initialize network: %s", cond.text());
             running_ = false;
             return;
         }
         
         // Clean up network on exit
-        auto netCleanup = [&net]() {
+        auto netCleanup = [&net](void*) {
             if (net) {
                 ASC_dropNetwork(&net);
             }
         };
-        std::unique_ptr<void, decltype(netCleanup)> netGuard(nullptr, netCleanup);
+        std::unique_ptr<void, decltype(netCleanup)> netGuard(reinterpret_cast<void*>(1), netCleanup);
         
         // Server loop
-        write_information("Storage SCP started on port %d with AE title: %s", 
+        pacs::common::logger::logInfo("Storage SCP started on port %d with AE title: %s", 
                          config_.port, config_.aeTitle.c_str());
         
         while (running_) {
             // Create association parameters
             T_ASC_Parameters* params = nullptr;
-            cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE);
+            cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE, 300);
             if (cond.bad()) {
-                write_error("Failed to create association parameters: %s", cond.text());
+                pacs::common::logger::logError("Failed to create association parameters: %s", cond.text());
                 std::this_thread::sleep_for(std::chrono::seconds(1));
                 continue;
             }
@@ -121,7 +203,7 @@ private:
             // Set transport layer
             cond = ASC_setTransportLayerType(params, config_.useTLS);
             if (cond.bad()) {
-                write_error("Failed to set transport layer: %s", cond.text());
+                pacs::common::logger::logError("Failed to set transport layer: %s", cond.text());
                 ASC_destroyAssociationParameters(&params);
                 std::this_thread::sleep_for(std::chrono::seconds(1));
                 continue;
@@ -163,20 +245,20 @@ private:
                                                 sopClasses[i],
                                                 transferSyntaxes, numTransferSyntaxes);
                 if (cond.bad()) {
-                    write_error("Failed to add presentation context: %s", cond.text());
+                    pacs::common::logger::logError("Failed to add presentation context: %s", cond.text());
                     continue;
                 }
                 contextID += 2;  // Add with odd IDs per DICOM standard
             }
             
             // Wait for and accept association
-            write_information("Waiting for association on port %d", config_.port);
+            pacs::common::logger::logInfo("Waiting for association on port %d", config_.port);
             T_ASC_Association* assoc = nullptr;
-            cond = ASC_waitForAssociation(net, &assoc, 5);
+            cond = ASC_receiveAssociation(net, &assoc, ASC_DEFAULTMAXPDU, NULL, NULL, OFFalse, DUL_BLOCK, 5);
             
             if (cond.bad()) {
                 if (cond != DUL_NOASSOCIATIONREQUEST) {
-                    write_error("Failed while waiting for association: %s", cond.text());
+                    pacs::common::logger::logError("Failed while waiting for association: %s", cond.text());
                 }
                 
                 ASC_destroyAssociationParameters(&params);
@@ -184,13 +266,13 @@ private:
             }
             
             // Clean up association on exit
-            auto assocCleanup = [&assoc]() {
+            auto assocCleanup = [&assoc](void*) {
                 if (assoc) {
                     ASC_dropAssociation(assoc);
                     ASC_destroyAssociation(&assoc);
                 }
             };
-            std::unique_ptr<void, decltype(assocCleanup)> assocGuard(nullptr, assocCleanup);
+            std::unique_ptr<void, decltype(assocCleanup)> assocGuard(reinterpret_cast<void*>(1), assocCleanup);
             
             // Handle association in a separate thread to continue waiting for new ones
             std::thread associationThread(&Impl::handleAssociation, this, assoc);
@@ -218,19 +300,21 @@ private:
             }
             
             if (!allowed) {
-                write_error("Association rejected, calling AE title not allowed: %s", callingAE);
-                ASC_rejectAssociation(assoc, ASC_RESULT_REJECTEDPERMANENT, 
-                                    ASC_SOURCE_SERVICEUSER, 
-                                    ASC_REASON_SU_CALLINGAETITLENOTRECOGNIZED);
+                pacs::common::logger::logError("Association rejected, calling AE title not allowed: %s", callingAE);
+                T_ASC_RejectParameters rejectParams;
+                rejectParams.result = ASC_RESULT_REJECTEDPERMANENT;
+                rejectParams.source = ASC_SOURCE_SERVICEUSER;
+                rejectParams.reason = ASC_REASON_SU_CALLINGAETITLENOTRECOGNIZED;
+                ASC_rejectAssociation(assoc, &rejectParams);
                 return;
             }
         }
         
         // Accept association
-        write_information("Association received from %s", callingAE);
+        pacs::common::logger::logInfo("Association received from %s", callingAE);
         OFCondition cond = ASC_acknowledgeAssociation(assoc);
         if (cond.bad()) {
-            write_error("Failed to acknowledge association: %s", cond.text());
+            pacs::common::logger::logError("Failed to acknowledge association: %s", cond.text());
             return;
         }
         
@@ -246,14 +330,14 @@ private:
             
             if (cond.bad()) {
                 if (cond == DUL_PEERREQUESTEDRELEASE) {
-                    write_information("Association released by peer");
+                    pacs::common::logger::logInfo("Association released by peer");
                     ASC_acknowledgeRelease(assoc);
                     finished = true;
                 } else if (cond == DUL_PEERABORTEDASSOCIATION) {
-                    write_information("Association aborted by peer");
+                    pacs::common::logger::logInfo("Association aborted by peer");
                     finished = true;
                 } else {
-                    write_error("Failed to receive command: %s", cond.text());
+                    pacs::common::logger::logError("Failed to receive command: %s", cond.text());
                     finished = true;
                 }
                 
@@ -272,8 +356,8 @@ private:
                     
                 default:
                     // Unsupported command, reject it
-                    write_error("Unsupported command received: 0x%X", msg.CommandField);
-                    DIMSE_rejectCommand(assoc, &msg, DIMSE_BADCOMMANDTYPE);
+                    pacs::common::logger::logError("Unsupported command received: %u", static_cast<unsigned int>(msg.CommandField));
+                    // For unsupported commands, just continue (drop the association)
                     break;
             }
         }
@@ -312,10 +396,10 @@ private:
         
         // Handle error in receiving dataset
         if (cond.bad() || dataset == nullptr) {
-            write_error("Failed to receive dataset: %s", 
+            pacs::common::logger::logError("Failed to receive dataset: %s", 
                        cond.bad() ? cond.text() : "dataset is null");
             rsp.DimseStatus = STATUS_STORE_Error_CannotUnderstand;
-            DIMSE_sendStoreResponse(assoc, presID, &rsp, nullptr);
+            DIMSE_sendStoreResponse(assoc, presID, &req, &rsp, nullptr);
             
             if (dataset) {
                 delete dataset;
@@ -330,19 +414,19 @@ private:
         
         // Handle error in storing dataset
         if (cond.bad()) {
-            write_error("Failed to store dataset: %s", cond.text());
+            pacs::common::logger::logError("Failed to store dataset: %s", cond.text());
             rsp.DimseStatus = STATUS_STORE_Refused_OutOfResources;
-            DIMSE_sendStoreResponse(assoc, presID, &rsp, nullptr);
+            DIMSE_sendStoreResponse(assoc, presID, &req, &rsp, nullptr);
             
             delete dataset;
             return;
         }
         
         // Send success response
-        cond = DIMSE_sendStoreResponse(assoc, presID, &rsp, nullptr);
+        cond = DIMSE_sendStoreResponse(assoc, presID, &req, &rsp, nullptr);
         
         if (cond.bad()) {
-            write_error("Failed to send C-STORE response: %s", cond.text());
+            pacs::common::logger::logError("Failed to send C-STORE response: %s", cond.text());
         }
         
         // Clean up
@@ -366,12 +450,12 @@ private:
                sizeof(rsp.AffectedSOPClassUID));
         
         // Send response
-        OFCondition cond = DIMSE_sendEchoResponse(assoc, presID, &rsp, nullptr);
+        OFCondition cond = DIMSE_sendEchoResponse(assoc, presID, &req, rsp.DimseStatus, nullptr);
         
         if (cond.bad()) {
-            write_error("Failed to send C-ECHO response: %s", cond.text());
+            pacs::common::logger::logError("Failed to send C-ECHO response: %s", cond.text());
         } else {
-            write_information("C-ECHO response sent successfully");
+            pacs::common::logger::logInfo("C-ECHO response sent successfully");
         }
     }
     
@@ -385,7 +469,7 @@ private:
         }
         
         // Create DicomObject from dataset
-        DicomObject obj(dataset->clone());
+        DicomObject obj(static_cast<DcmDataset*>(dataset->clone()));
         
         // Build path and create directories if needed
         std::string fullPath = filename;
@@ -403,7 +487,7 @@ private:
         bool success = file.save(fullPath);
         
         if (!success) {
-            return EC_CannotWriteFile;
+            return EC_IllegalCall;
         }
         
         // Extract additional information for the callback
@@ -434,7 +518,7 @@ private:
             callbackThread.detach();
         }
         
-        write_information("Stored DICOM object: %s", fullPath.c_str());
+        pacs::common::logger::logInfo("Stored DICOM object: %s", fullPath.c_str());
         return EC_Normal;
     }
     
@@ -499,3 +583,5 @@ const StorageServer::Config& StorageServer::getConfig() const {
 } // namespace dicom
 } // namespace common
 } // namespace pacs
+
+#endif // USE_DCMTK_PLACEHOLDER

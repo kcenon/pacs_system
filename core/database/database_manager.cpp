@@ -1,5 +1,6 @@
 #include "database_manager.h"
 #include "sqlite_database.h"
+#include "postgresql_database.h"
 #include <stdexcept>
 
 namespace pacs {
@@ -23,6 +24,9 @@ Result<void> DatabaseManager::initialize(DatabaseType type, const std::string& c
         switch (type) {
             case DatabaseType::SQLite:
                 database_ = std::make_shared<SQLiteDatabase>();
+                break;
+            case DatabaseType::PostgreSQL:
+                database_ = std::make_shared<PostgreSQLDatabase>();
                 break;
             default:
                 return Result<void>::error("Unsupported database type");

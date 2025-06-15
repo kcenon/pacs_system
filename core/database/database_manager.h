@@ -15,7 +15,9 @@ namespace database {
  */
 enum class DatabaseType {
     SQLite,
-    // Add more database types here as needed (PostgreSQL, MySQL, etc.)
+    PostgreSQL,
+    MySQL,
+    MongoDB
 };
 
 /**

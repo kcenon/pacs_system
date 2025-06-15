@@ -11,10 +11,11 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/dicom.h"
-#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 #include "dcmtk/dcmnet/dul.h"
 
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
 #include "common/dicom_util.h"
 
 namespace pacs {
@@ -22,7 +23,7 @@ namespace query_retrieve {
 namespace scu {
 
 namespace fs = std::filesystem;
-using namespace log_module;
+using namespace pacs::common::logger;
 
 QueryRetrieveSCU::QueryRetrieveSCU(const common::ServiceConfig& config, const std::string& retrieveDirectory)
     : config_(config), retrieveDirectory_(retrieveDirectory) {
@@ -33,9 +34,9 @@ QueryRetrieveSCU::QueryRetrieveSCU(const common::ServiceConfig& config, const st
     if (!retrieveDirectory_.empty() && !fs::exists(retrieveDirectory_)) {
         try {
             fs::create_directories(retrieveDirectory_);
-            write_information("Created retrieve directory: %s", retrieveDirectory_.c_str());
+            logInfo("Created retrieve directory: %s", retrieveDirectory_.c_str());
         } catch (const std::exception& e) {
-            write_error("Failed to create retrieve directory: %s", e.what());
+            logError("Failed to create retrieve directory: %s", e.what());
         }
     }
 }
@@ -84,7 +85,7 @@ core::Result<std::vector<DcmDataset*>> QueryRetrieveSCU::query(const DcmDataset*
         T_ASC_PresentationContextID presID = 0;
         for (int i = 0; i < ASC_countAcceptedPresentationContexts(assoc->params); i++) {
             T_ASC_PresentationContext pc;
-            ASC_getAcceptedPresentationContext(assoc->params, i, &pc);
+            ASC_findAcceptedPresentationContext(assoc->params, i, &pc);
             if (strcmp(pc.abstractSyntax, informationModel) == 0) {
                 presID = pc.presentationContextID;
                 break;
@@ -163,7 +164,7 @@ core::Result<std::vector<DcmDataset*>> QueryRetrieveSCU::query(const DcmDataset*
                             queryCallback_(item, responseDataset);
                         }
                         catch (const std::exception& ex) {
-                            write_error("Error in query callback: %s", ex.what());
+                            logError("Error in query callback: %s", ex.what());
                         }
                     }
                     
@@ -251,9 +252,9 @@ void QueryRetrieveSCU::setRetrieveDirectory(const std::string& directory) {
     if (!retrieveDirectory_.empty() && !fs::exists(retrieveDirectory_)) {
         try {
             fs::create_directories(retrieveDirectory_);
-            write_information("Created retrieve directory: %s", retrieveDirectory_.c_str());
+            logInfo("Created retrieve directory: %s", retrieveDirectory_.c_str());
         } catch (const std::exception& e) {
-            write_error("Failed to create retrieve directory: %s", e.what());
+            logError("Failed to create retrieve directory: %s", e.what());
         }
     }
 }
@@ -339,7 +340,7 @@ void QueryRetrieveSCU::releaseAssociation(T_ASC_Association* assoc) {
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
-        ASC_dropNetwork(&assoc->net);
+        // Network is handled by association cleanup
     }
 }
 
@@ -382,7 +383,7 @@ core::Result<void> QueryRetrieveSCU::executeCMove(const std::string& studyInstan
     T_ASC_PresentationContextID presID = 0;
     for (int i = 0; i < ASC_countAcceptedPresentationContexts(assoc->params); i++) {
         T_ASC_PresentationContext pc;
-        ASC_getAcceptedPresentationContext(assoc->params, i, &pc);
+        ASC_findAcceptedPresentationContext(assoc->params, i, &pc);
         if (strcmp(pc.abstractSyntax, informationModel) == 0) {
             presID = pc.presentationContextID;
             break;
@@ -466,7 +467,7 @@ core::Result<void> QueryRetrieveSCU::executeCMove(const std::string& studyInstan
                     moveCallback_(moveResult);
                 }
                 catch (const std::exception& ex) {
-                    write_error("Error in move callback: %s", ex.what());
+                    logError("Error in move callback: %s", ex.what());
                 }
             }
         } else {
@@ -485,7 +486,7 @@ core::Result<void> QueryRetrieveSCU::executeCMove(const std::string& studyInstan
                     moveCallback_(moveResult);
                 }
                 catch (const std::exception& ex) {
-                    write_error("Error in move callback: %s", ex.what());
+                    logError("Error in move callback: %s", ex.what());
                 }
             }
             
@@ -504,7 +505,7 @@ core::Result<void> QueryRetrieveSCU::executeCMove(const std::string& studyInstan
             moveCallback_(moveResult);
         }
         catch (const std::exception& ex) {
-            write_error("Error in move callback: %s", ex.what());
+            logError("Error in move callback: %s", ex.what());
         }
     }
     
@@ -547,42 +548,42 @@ core::interfaces::query_retrieve::QueryResultItem QueryRetrieveSCU::parseQueryRe
     DcmElement* element = nullptr;
     OFString valueStr;
     
-    if (dataset->findAndGetElement(DCM_PatientID, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_PatientID, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.patientID = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_PatientName, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_PatientName, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.patientName = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_StudyInstanceUID, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_StudyInstanceUID, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.studyInstanceUID = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_StudyDescription, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_StudyDescription, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.studyDescription = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_SeriesInstanceUID, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_SeriesInstanceUID, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.seriesInstanceUID = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_SeriesDescription, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_SeriesDescription, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.seriesDescription = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_SOPInstanceUID, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_SOPInstanceUID, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.sopInstanceUID = valueStr.c_str();
     }
     
-    if (dataset->findAndGetElement(DCM_SOPClassUID, element).good() && element) {
+    if (const_cast<DcmDataset*>(dataset)->findAndGetElement(DCM_SOPClassUID, element).good() && element) {
         element->getOFString(valueStr, 0);
         item.sopClassUID = valueStr.c_str();
     }

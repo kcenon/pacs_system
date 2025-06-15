@@ -6,7 +6,9 @@
 
 #ifndef DCMTK_NOT_AVAILABLE
 // DCMTK includes
+#ifdef HAVE_CONFIG_H
 #include "dcmtk/config/osconfig.h"
+#endif
 #include "dcmtk/dcmdata/dcdatset.h"
 #else
 // Forward declarations for when DCMTK is not available

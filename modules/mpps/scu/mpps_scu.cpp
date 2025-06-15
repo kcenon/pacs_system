@@ -11,15 +11,14 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/dicom.h"
-#include "dcmtk/dcmnet/dimcmd.h"
 #include "dcmtk/dcmnet/assoc.h"
 #include "dcmtk/dcmnet/cond.h"
 
 
 #include "common/dicom_util.h"
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
 
-using namespace log_module;
+using namespace pacs::common::logger;
 
 namespace pacs {
 namespace mpps {
@@ -111,7 +110,7 @@ core::Result<void> MPPSSCU::createMPPS(const DcmDataset* dataset) {
         }
         
         // Send N-CREATE request
-        cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, dataset, nullptr, nullptr, nullptr);
+        cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, const_cast<DcmDataset*>(dataset), nullptr, nullptr, nullptr);
         
         if (cond.bad()) {
             releaseAssociation(assoc);
@@ -224,7 +223,7 @@ core::Result<void> MPPSSCU::updateMPPS(const std::string& sopInstanceUID, const 
         }
         
         // Send N-SET request
-        cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, dataset, nullptr, nullptr, nullptr);
+        cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &request, nullptr, const_cast<DcmDataset*>(dataset), nullptr, nullptr, nullptr);
         
         if (cond.bad()) {
             releaseAssociation(assoc);
@@ -350,7 +349,7 @@ void MPPSSCU::releaseAssociation(T_ASC_Association* assoc) {
     if (assoc) {
         ASC_releaseAssociation(assoc);
         ASC_dropAssociation(assoc);
-        ASC_dropNetwork(&assoc->net);
+        // Network is handled by association cleanup
     }
 
 }

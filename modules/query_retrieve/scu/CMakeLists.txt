@@ -1,25 +1,29 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-set(SOURCE_FILES
+# Create query_retrieve SCU library
+add_library(pacs_query_retrieve_scu
     query_retrieve_scu.cpp
-    query_retrieve_scu.h
 )
 
-add_library(pacs_query_retrieve_scu STATIC ${SOURCE_FILES})
-target_include_directories(pacs_query_retrieve_scu PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}  # For core/result and other includes
+# Add alias
+add_library(pacs::query_retrieve::scu ALIAS pacs_query_retrieve_scu)
+
+# Configure include directories
+target_include_directories(pacs_query_retrieve_scu
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../..>
+        $<INSTALL_INTERFACE:include>
 )
 
-# Only link against pacs_core which already includes common libraries
-target_link_libraries(pacs_query_retrieve_scu PUBLIC 
-    pacs_core
-    pacs_core_thread
+# Link libraries
+target_link_libraries(pacs_query_retrieve_scu
+    PUBLIC
+        pacs::dicom
+        pacs::common
+        pacs::interfaces
 )
 
-# DCMTK dependency
-# Only link against DCMTK if it's available
-if(NOT USE_DCMTK_PLACEHOLDER)
-    target_link_libraries(pacs_query_retrieve_scu PUBLIC ${DCMTK_LIBRARIES})
-    target_include_directories(pacs_query_retrieve_scu PUBLIC ${DCMTK_INCLUDE_DIRS})
-endif()
+# Set compile features
+target_compile_features(pacs_query_retrieve_scu PUBLIC cxx_std_20)

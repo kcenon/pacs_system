@@ -1,7 +1,7 @@
 #include "storage_client.h"
 #include "dicom_error.h"
 
-#include "dcmtk/config/osconfig.h"
+#ifndef USE_DCMTK_PLACEHOLDER
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
@@ -10,6 +10,7 @@
 #include "dcmtk/dcmnet/scu.h"
 #include "dcmtk/dcmnet/assoc.h"
 #include "dcmtk/dcmnet/cond.h"
+#endif
 
 #include <filesystem>
 #include <thread>
@@ -18,6 +19,99 @@
 #include <mutex>
 
 namespace fs = std::filesystem;
+
+#ifdef USE_DCMTK_PLACEHOLDER
+// Placeholder implementation when DCMTK is not available
+#include "../logger/logger.h"
+// using namespace log_module;
+
+namespace pacs {
+namespace common {
+namespace dicom {
+
+class StorageClient::Impl {
+public:
+    explicit Impl(const StorageClient::Config& config) : config_(config) {}
+    
+    DicomVoidResult storeFile(const std::string& filename) {
+        pacs::common::logger::logInfo("StorageClient::storeFile called in placeholder mode - not implemented");
+        return DicomVoidResult(DicomErrorCode::NotImplemented, 
+                             "DCMTK not available - storage operations not supported");
+    }
+    
+    DicomVoidResult store(const DicomObject& object) {
+        pacs::common::logger::logInfo("StorageClient::store called in placeholder mode - not implemented");
+        return DicomVoidResult(DicomErrorCode::NotImplemented, 
+                             "DCMTK not available - storage operations not supported");
+    }
+    
+    DicomVoidResult store(const DicomFile& file) {
+        pacs::common::logger::logInfo("StorageClient::store(file) called in placeholder mode - not implemented");
+        return DicomVoidResult(DicomErrorCode::NotImplemented, 
+                             "DCMTK not available - storage operations not supported");
+    }
+    
+    DicomVoidResult storeFiles(const std::vector<std::string>& filenames, 
+                             StorageClient::ProgressCallback progressCallback) {
+        pacs::common::logger::logInfo("StorageClient::storeFiles called in placeholder mode - not implemented");
+        return DicomVoidResult(DicomErrorCode::NotImplemented, 
+                             "DCMTK not available - storage operations not supported");
+    }
+    
+    DicomVoidResult storeDirectory(const std::string& directory, bool recursive,
+                                 StorageClient::ProgressCallback progressCallback) {
+        pacs::common::logger::logInfo("StorageClient::storeDirectory called in placeholder mode - not implemented");
+        return DicomVoidResult(DicomErrorCode::NotImplemented, 
+                             "DCMTK not available - storage operations not supported");
+    }
+    
+private:
+    StorageClient::Config config_;
+};
+
+StorageClient::StorageClient(const Config& config) 
+    : impl_(std::make_unique<Impl>(config)) {
+}
+
+StorageClient::~StorageClient() = default;
+
+DicomVoidResult StorageClient::storeFile(const std::string& filename) {
+    return impl_->storeFile(filename);
+}
+
+DicomVoidResult StorageClient::store(const DicomObject& object) {
+    return impl_->store(object);
+}
+
+DicomVoidResult StorageClient::store(const DicomFile& file) {
+    return impl_->store(file);
+}
+
+DicomVoidResult StorageClient::storeFiles(const std::vector<std::string>& filenames, 
+                                        ProgressCallback progressCallback) {
+    return impl_->storeFiles(filenames, progressCallback);
+}
+
+DicomVoidResult StorageClient::storeDirectory(const std::string& directory, bool recursive,
+                                            ProgressCallback progressCallback) {
+    return impl_->storeDirectory(directory, recursive, progressCallback);
+}
+
+void StorageClient::setConfig(const Config& config) {
+    impl_ = std::make_unique<Impl>(config);
+}
+
+const StorageClient::Config& StorageClient::getConfig() const {
+    static Config empty_config;
+    return empty_config; // Placeholder implementation
+}
+
+} // namespace dicom
+} // namespace common
+} // namespace pacs
+
+#else
+// Real implementation when DCMTK is available
 
 namespace pacs {
 namespace common {
@@ -61,16 +155,16 @@ public:
         }
         
         // Clean up network on exit
-        auto netCleanup = [&net]() {
+        auto netCleanup = [&net](void*) {
             if (net) {
                 ASC_dropNetwork(&net);
             }
         };
-        std::unique_ptr<void, decltype(netCleanup)> netGuard(nullptr, netCleanup);
+        std::unique_ptr<void, decltype(netCleanup)> netGuard(reinterpret_cast<void*>(1), netCleanup);
         
         // Create association parameters
         T_ASC_Parameters* params = nullptr;
-        cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE);
+        cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE, 300);
         if (cond.bad()) {
             return makeDcmtkResult(cond.code(), "Association parameter creation");
         }
@@ -158,13 +252,13 @@ public:
         }
         
         // Clean up association on exit
-        auto assocCleanup = [&assoc]() {
+        auto assocCleanup = [&assoc](void*) {
             if (assoc) {
                 ASC_releaseAssociation(assoc);
                 ASC_destroyAssociation(&assoc);
             }
         };
-        std::unique_ptr<void, decltype(assocCleanup)> assocGuard(nullptr, assocCleanup);
+        std::unique_ptr<void, decltype(assocCleanup)> assocGuard(reinterpret_cast<void*>(1), assocCleanup);
         
         // Check if the association was accepted
         if (ASC_countAcceptedPresentationContexts(assoc->params) == 0) {
@@ -216,9 +310,9 @@ public:
         DcmDataset* statusDetail = nullptr;
         
         // Send the C-STORE request
-        cond = DIMSE_storeUser(assoc, pc, &req, dataset, nullptr, nullptr, 
-                              config_.dimseTimeout, 
-                              DIMSE_BLOCKING, 0, 
+        cond = DIMSE_storeUser(assoc, pc, &req, nullptr, dataset, 
+                              nullptr, nullptr,
+                              DIMSE_BLOCKING, config_.dimseTimeout, 
                               &rsp, &statusDetail);
         
         // Clean up status detail dataset
@@ -366,3 +460,5 @@ const StorageClient::Config& StorageClient::getConfig() const {
 } // namespace dicom
 } // namespace common
 } // namespace pacs
+
+#endif // USE_DCMTK_PLACEHOLDER

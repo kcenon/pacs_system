@@ -1,20 +1,7 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Add SCP and SCU components
+# Add subdirectories
 add_subdirectory(scp)
 add_subdirectory(scu)
-
-# Create an INTERFACE library for worklist
-add_library(pacs_worklist INTERFACE)
-target_include_directories(pacs_worklist INTERFACE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}
-)
-
-# Only link against direct dependencies
-# pacs_core already includes pacs_common, so we don't need to link it again
-target_link_libraries(pacs_worklist INTERFACE 
-    pacs_core
-    pacs_worklist_scp
-    pacs_worklist_scu
-)

@@ -4,7 +4,9 @@
 #include <vector>
 #include <memory>
 
+#ifndef USE_DCMTK_PLACEHOLDER
 #include "dcmtk/dcmdata/dctypes.h"
+#endif
 
 namespace pacs {
 namespace common {

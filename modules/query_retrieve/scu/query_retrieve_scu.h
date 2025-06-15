@@ -6,7 +6,9 @@
 #include <vector>
 
 // DCMTK includes
+#ifdef HAVE_CONFIG_H
 #include "dcmtk/config/osconfig.h"
+#endif
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"

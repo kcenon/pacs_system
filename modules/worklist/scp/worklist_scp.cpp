@@ -10,6 +10,7 @@
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcuid.h"
+#include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcitem.h"
 #include "dcmtk/dcmdata/dcvrda.h"
 #include "dcmtk/dcmdata/dcvrtm.h"
@@ -18,11 +19,16 @@
 #include "dcmtk/dcmdata/dcvrsh.h"
 #include "dcmtk/dcmdata/dcvrcs.h"
 #include "dcmtk/dcmdata/dcvrui.h"
+#include "dcmtk/dcmnet/dimse.h"
+#include "dcmtk/dcmnet/dicom.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
+#include "dcmtk/dcmnet/dul.h"
 
 #include "common/dicom_util.h"
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
 
-using namespace log_module;
+using namespace pacs::common::logger;
 
 namespace pacs {
 namespace worklist {
@@ -40,7 +46,7 @@ WorklistSCP::WorklistSCP(const common::ServiceConfig& config, const std::string&
         try {
             fs::create_directories(worklistDirectory_);
         } catch (const std::exception& e) {
-            write_error("Failed to create worklist directory: %s", e.what());
+            logError("Failed to create worklist directory: %s", e.what());
         }
     }
     
@@ -160,7 +166,7 @@ core::Result<void> WorklistSCP::addWorklistItem(const DcmDataset* dataset) {
                 worklistCallback_(extractWorklistItem(dataset), dataset);
             }
             catch (const std::exception& ex) {
-                write_error("Error in worklist callback: %s", ex.what());
+                logError("Error in worklist callback: %s", ex.what());
             }
         }
     }
@@ -222,7 +228,7 @@ core::Result<void> WorklistSCP::updateWorklistItem(const std::string& accessionN
                 worklistCallback_(extractWorklistItem(dataset), dataset);
             }
             catch (const std::exception& ex) {
-                write_error("Error in worklist callback: %s", ex.what());
+                logError("Error in worklist callback: %s", ex.what());
             }
         }
     }
@@ -279,7 +285,7 @@ void WorklistSCP::setWorklistDirectory(const std::string& directory) {
         try {
             fs::create_directories(worklistDirectory_);
         } catch (const std::exception& e) {
-            write_error("Failed to create worklist directory: %s", e.what());
+            logError("Failed to create worklist directory: %s", e.what());
         }
     }
     
@@ -295,7 +301,7 @@ void WorklistSCP::serverLoop() {
     // Initialize network
     cond = ASC_initializeNetwork(NET_ACCEPTOR, config_.localPort, 30, &net);
     if (cond.bad()) {
-        write_error("Error initializing network: %s", cond.text());
+        logError("Error initializing network: %s", cond.text());
         return;
     }
     
@@ -307,7 +313,7 @@ void WorklistSCP::serverLoop() {
         
         if (cond.bad()) {
             if (cond != DUL_ASSOCIATIONREJECTED) { // Changed from DUL_ASSOCIATIONABORTED
-                write_error("Error receiving association: %s", cond.text());
+                logError("Error receiving association: %s", cond.text());
             }
             continue;
         }
@@ -389,12 +395,12 @@ void WorklistSCP::processAssociation(T_ASC_Association* assoc) {
                     // Log the response instead of sending it directly
                     OFString dumpStr;
                     DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-                    write_information("C-ECHO response: %s", dumpStr.c_str());
+                    logInfo("C-ECHO response: %s", dumpStr.c_str());
                     
                     // Send the message
-                    OFCondition echoSendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+                    OFCondition echoSendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
                     if (echoSendCond.bad()) {
-                        write_error("Failed to send C-ECHO response: %s", echoSendCond.text());
+                        logError("Failed to send C-ECHO response: %s", echoSendCond.text());
                     }
                 }
                 break;
@@ -431,12 +437,12 @@ void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
         // Log message
         OFString dumpStr;
         DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-        write_information("C-FIND error response: %s", dumpStr.c_str());
+        logInfo("C-FIND error response: %s", dumpStr.c_str());
         
         // Send the message
-        OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+        OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
         if (sendCond.bad()) {
-            write_error("Failed to send C-FIND error response: %s", sendCond.text());
+            logError("Failed to send C-FIND error response: %s", sendCond.text());
         }
         return;
     }
@@ -459,12 +465,12 @@ void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
         // Log message
         OFString dumpStr;
         DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-        write_information("C-FIND error response: %s", dumpStr.c_str());
+        logInfo("C-FIND error response: %s", dumpStr.c_str());
         
         // Send the message
-        OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+        OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
         if (sendCond.bad()) {
-            write_error("Failed to send C-FIND error response: %s", sendCond.text());
+            logError("Failed to send C-FIND error response: %s", sendCond.text());
         }
         return;
     }
@@ -486,10 +492,10 @@ void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
         // Log message
         OFString dumpStr;
         DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-        write_information("C-FIND pending response: %s", dumpStr.c_str());
+        logInfo("C-FIND pending response: %s", dumpStr.c_str());
         
         // Send the message
-        OFCondition cond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, matchingDataset);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, matchingDataset, nullptr, nullptr, nullptr);
         
         // Clean up dataset
         delete matchingDataset;
@@ -500,7 +506,7 @@ void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
                 delete result.value()[i];
             }
             
-            write_error("Failed to send C-FIND pending response: %s", cond.text());
+            logError("Failed to send C-FIND pending response: %s", cond.text());
             return;
         }
     }
@@ -518,12 +524,12 @@ void WorklistSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
     // Log message
     OFString dumpStr;
     DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-    write_information("C-FIND success response: %s", dumpStr.c_str());
+    logInfo("C-FIND success response: %s", dumpStr.c_str());
     
     // Send the message
-    OFCondition sendCond = DIMSE_sendResponseMessage(assoc, presID, &request, &response, nullptr);
+    OFCondition sendCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr, nullptr);
     if (sendCond.bad()) {
-        write_error("Failed to send C-FIND success response: %s", sendCond.text());
+        logError("Failed to send C-FIND success response: %s", sendCond.text());
     }
 }
 
@@ -536,7 +542,7 @@ bool WorklistSCP::matchWorklistItem(const DcmDataset* searchDataset, const DcmDa
     for (unsigned long i = 0; i < searchDataset->card(); i++) {
         DcmElement* searchElement = nullptr;
         // Use const-safe method to get element
-        if (DcmObject* obj = searchDataset->getElement(i)) {
+        if (DcmObject* obj = const_cast<DcmDataset*>(searchDataset)->getElement(i)) {
             searchElement = dynamic_cast<DcmElement*>(obj);
         }
         
@@ -625,7 +631,7 @@ void WorklistSCP::loadWorklistItems() {
         }
     }
     catch (const std::exception& ex) {
-        write_error("Error loading worklist items: %s", ex.what());
+        logError("Error loading worklist items: %s", ex.what());
     }
 }
 

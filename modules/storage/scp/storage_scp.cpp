@@ -12,11 +12,13 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/dicom.h"
-#include "dcmtk/dcmnet/dimcmd.h"
 #include "dcmtk/dcmnet/dul.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 
-#include "thread_system/sources/priority_thread_pool/callback_priority_job.h"
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
+#include "thread_pool/core/thread_pool.h"
+#include "thread_base/jobs/callback_job.h"
 #include "common/dicom_util.h"
 
 namespace pacs {
@@ -24,8 +26,8 @@ namespace storage {
 namespace scp {
 
 namespace fs = std::filesystem;
-using namespace priority_thread_pool_module;
-using namespace log_module;
+using namespace thread_pool_module;
+using namespace thread_module;
 
 StorageSCP::StorageSCP(const common::ServiceConfig& config, const std::string& storageDirectory)
     : config_(config), storageDirectory_(storageDirectory), running_(false) {
@@ -33,21 +35,21 @@ StorageSCP::StorageSCP(const common::ServiceConfig& config, const std::string& s
     OFLog::configure(OFLogger::WARN_LOG_LEVEL);
     
     // Initialize thread pool
-    threadPool_ = std::make_shared<priority_thread_pool_module::priority_thread_pool>("PACS_StorageSCP");
+    threadPool_ = std::make_shared<thread_pool_module::thread_pool>("PACS_StorageSCP");
     auto result = threadPool_->start();
-    if (result.has_error()) {
-        write_error("Failed to start Storage SCP thread pool: {}", result.get_error().message());
+    if (!result) {
+        pacs::common::logger::logError("Failed to start Storage SCP thread pool: %s", result.value_or("Unknown error").c_str());
     } else {
-        write_information("Storage SCP thread pool started successfully");
+        pacs::common::logger::logInfo("Storage SCP thread pool started successfully");
     }
     
     // Create storage directory if it doesn't exist
     if (!storageDirectory_.empty() && !fs::exists(storageDirectory_)) {
         try {
             fs::create_directories(storageDirectory_);
-            write_information("Created storage directory: {}", storageDirectory_);
+            pacs::common::logger::logInfo("Created storage directory: %s", storageDirectory_.c_str());
         } catch (const std::exception& e) {
-            write_error("Failed to create storage directory: {}", e.what());
+            pacs::common::logger::logError("Failed to create storage directory: %s", e.what());
         }
     }
 }
@@ -57,38 +59,34 @@ StorageSCP::~StorageSCP() {
     
     // Stop thread pool
     if (threadPool_) {
-        auto result = threadPool_->stop();
-        if (result.has_error()) {
-            write_error("Error stopping Storage SCP thread pool: {}", result.get_error().message());
-        } else {
-            write_information("Storage SCP thread pool stopped successfully");
-        }
+        threadPool_->stop();
+        pacs::common::logger::logInfo("Storage SCP thread pool stopped successfully");
     }
 }
 
 core::Result<void> StorageSCP::start() {
     if (running_) {
-        write_information("Storage SCP is already running");
+        pacs::common::logger::logInfo("Storage SCP is already running");
         return core::Result<void>::error("Storage SCP is already running");
     }
     
-    write_information("Starting Storage SCP on port {}", config_.localPort);
+    pacs::common::logger::logInfo("Starting Storage SCP on port %d", config_.localPort);
     
     running_ = true;
     serverThread_ = std::thread(&StorageSCP::serverLoop, this);
     
-    write_information("Storage SCP started successfully");
+    pacs::common::logger::logInfo("Storage SCP started successfully");
     return core::Result<void>::ok();
 }
 
 void StorageSCP::stop() {
     if (running_) {
-        write_information("Stopping Storage SCP");
+        pacs::common::logger::logInfo("Stopping Storage SCP");
         running_ = false;
         if (serverThread_.joinable()) {
             serverThread_.join();
         }
-        write_information("Storage SCP stopped");
+        pacs::common::logger::logInfo("Storage SCP stopped");
     }
 }
 
@@ -130,43 +128,44 @@ void StorageSCP::serverLoop() {
     
     OFCondition cond;
     
-    // Initialize network
-    cond = ASC_initializeNetwork(NET_ACCEPTOR, config_.localPort, 30, &net);
+    // Initialize network with timeout
+    cond = ASC_initializeNetwork(NET_ACCEPTOR, config_.localPort, 1, &net);
     if (cond.bad()) {
-        write_error("Error initializing network: {}", cond.text());
+        pacs::common::logger::logError("Error initializing network: %s", cond.text());
         return;
     }
     
     // Main server loop
     while (running_) {
+        // Use ASC_associationWaiting to check if association is available with timeout
+        if (!ASC_associationWaiting(net, 1)) {
+            // No association within 1 second timeout, check running_ and continue
+            continue;
+        }
+        
         // Accept associations
         T_ASC_Association* assoc = nullptr;
         cond = ASC_receiveAssociation(net, &assoc, ASC_DEFAULTMAXPDU);
         
         if (cond.bad()) {
-            if (cond != DUL_ASSOCIATIONREJECTED) { // Changed from DUL_ASSOCIATIONABORTED
-                write_error("Error receiving association: {}", cond.text());
+            if (cond != DUL_ASSOCIATIONREJECTED) {
+                pacs::common::logger::logError("Error receiving association: %s", cond.text());
             }
             continue;
         }
         
-        // Process the association in a separate thread using priority thread pool
-        auto job = std::make_unique<callback_priority_job>(
-            [this, assoc]() -> result_void {
-                try {
-                    this->processAssociation(assoc);
-                    return {};
-                } catch (const std::exception& ex) {
-                    return result_void::error(fmt::format("Error processing association: {}", ex.what()));
-                }
+        // Process the association in a separate thread using thread pool
+        auto job = std::make_unique<thread_module::callback_job>(
+            [this, assoc]() -> std::optional<std::string> {
+                this->processAssociation(assoc);
+                return std::nullopt;
             },
-            job_priorities::High,
             "PACS_ProcessAssociation"
         );
-        
         auto result = threadPool_->enqueue(std::move(job));
-        if (result.has_error()) {
-            write_error("Failed to enqueue association processing job: {}", result.get_error().message());
+        
+        if (!result) {
+            pacs::common::logger::logError("Failed to enqueue association processing job: %s", result.value_or("Unknown error").c_str());
             ASC_dropAssociation(assoc);
             ASC_destroyAssociation(&assoc);
         }
@@ -219,11 +218,17 @@ void StorageSCP::processAssociation(T_ASC_Association* assoc) {
         T_DIMSE_Message request;
         T_ASC_PresentationContextID presID;
         
-        // Receive command
+        // Receive command with timeout
         DcmDataset* dataset = nullptr;
-        cond = DIMSE_receiveCommand(assoc, DIMSE_BLOCKING, 0, &presID, &request, &dataset);
+        cond = DIMSE_receiveCommand(assoc, DIMSE_NONBLOCKING, 1, &presID, &request, &dataset);
         
         if (cond.bad()) {
+            // Check if it's just a timeout (no data available)
+            if (cond == DIMSE_NODATAAVAILABLE) {
+                // No data available within timeout, check running_ and continue
+                continue;
+            }
+            // Other errors - finish the association
             finished = true;
             continue;
         }
@@ -247,7 +252,7 @@ void StorageSCP::processAssociation(T_ASC_Association* assoc) {
                     // Log the response instead of sending it directly
                     OFString dumpStr;
                     DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-                    write_information("C-ECHO response: {}", dumpStr.c_str());
+                    pacs::common::logger::logInfo("C-ECHO response: %s", dumpStr.c_str());
                 }
                 break;
                 
@@ -286,10 +291,10 @@ void StorageSCP::handleCStoreRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
         // Log message instead of sending directly with DIMSE_sendMessage
         OFString dumpStr;
         DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-        write_error("C-STORE error response: {}", dumpStr.c_str());
+        pacs::common::logger::logError("C-STORE error response: %s", dumpStr.c_str());
         
-        // Send the message
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        // Send the message using DCMTK 3.6.9 API
+        DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -308,7 +313,7 @@ void StorageSCP::handleCStoreRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
                 storageCallback_(sopInstanceUID, dataset);
             }
             catch (const std::exception& ex) {
-                write_error("Error in Storage callback: {}", ex.what());
+                pacs::common::logger::logError("Error in Storage callback: %s", ex.what());
             }
         }
     }
@@ -331,10 +336,10 @@ void StorageSCP::handleCStoreRequest(T_ASC_Association* assoc, T_DIMSE_Message& 
     // Log message
     OFString dumpStr;
     DIMSE_dumpMessage(dumpStr, response, DIMSE_OUTGOING);
-    write_information("C-STORE response: {}", dumpStr.c_str());
+    pacs::common::logger::logInfo("C-STORE response: %s", dumpStr.c_str());
     
-    // Send the message
-    DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+    // Send the message using DCMTK 3.6.9 API
+    DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, nullptr, nullptr, nullptr);
 }
 
 bool StorageSCP::storeDatasetToDisk(const std::string& sopClassUID, 
@@ -350,7 +355,8 @@ bool StorageSCP::storeDatasetToDisk(const std::string& sopClassUID,
         
         // Create DICOM file format
         DcmFileFormat fileFormat;
-        fileFormat.setDataset(new DcmDataset(*dataset));  // Create a copy of the dataset
+        // Copy dataset to file format
+        *fileFormat.getDataset() = *dataset;
         
         // Save to file
         OFCondition cond = fileFormat.saveFile(filename.c_str(), EXS_LittleEndianExplicit);
@@ -358,7 +364,7 @@ bool StorageSCP::storeDatasetToDisk(const std::string& sopClassUID,
         return cond.good();
     }
     catch (const std::exception& ex) {
-        write_error("Error storing DICOM file: {}", ex.what());
+        pacs::common::logger::logError("Error storing DICOM file: %s", ex.what());
         return false;
     }
 }

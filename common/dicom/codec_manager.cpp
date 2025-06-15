@@ -1,6 +1,6 @@
 #include "codec_manager.h"
 
-#include "dcmtk/config/osconfig.h"
+#ifndef USE_DCMTK_PLACEHOLDER
 #include "dcmtk/dcmdata/dcuid.h"
 #include "dcmtk/dcmdata/dcrledrg.h"     // RLE decoder
 #include "dcmtk/dcmdata/dcrleerg.h"     // RLE encoder
@@ -14,9 +14,50 @@
 #include "dcmtk/dcmjp2k/djp2kdec.h"     // JPEG-2000 decoder
 #include "dcmtk/dcmjp2k/djp2kenc.h"     // JPEG-2000 encoder
 #endif
+#endif // USE_DCMTK_PLACEHOLDER
 
-#include "thread_system/sources/logger/logger.h"
-using namespace log_module;
+#include "../logger/logger.h"
+
+#ifdef USE_DCMTK_PLACEHOLDER
+// Define placeholder UIDs when DCMTK is not available
+#define UID_LittleEndianImplicitTransferSyntax "1.2.840.10008.1.2"
+#define UID_LittleEndianExplicitTransferSyntax "1.2.840.10008.1.2.1"
+#define UID_BigEndianExplicitTransferSyntax "1.2.840.10008.1.2.2"
+#define UID_JPEGProcess1TransferSyntax "1.2.840.10008.1.2.4.50"
+#define UID_JPEGProcess2_4TransferSyntax "1.2.840.10008.1.2.4.51"
+#define UID_JPEGProcess14TransferSyntax "1.2.840.10008.1.2.4.57"
+#define UID_JPEGProcess14SV1TransferSyntax "1.2.840.10008.1.2.4.70"
+#define UID_JPEGLSLosslessTransferSyntax "1.2.840.10008.1.2.4.80"
+#define UID_JPEGLSNearLosslessTransferSyntax "1.2.840.10008.1.2.4.81"
+#define UID_JPEG2000LosslessOnlyTransferSyntax "1.2.840.10008.1.2.4.90"
+#define UID_JPEG2000TransferSyntax "1.2.840.10008.1.2.4.91"
+#define UID_RLELosslessTransferSyntax "1.2.840.10008.1.2.5"
+#endif
+
+// Create shorter aliases for UIDs
+#ifdef USE_DCMTK_PLACEHOLDER
+// When DCMTK is not available, use the literal UID values
+#define UID_JPEGProcess1 "1.2.840.10008.1.2.4.50"
+#define UID_JPEGProcess2_4 "1.2.840.10008.1.2.4.51"
+#define UID_JPEGProcess14 "1.2.840.10008.1.2.4.70"
+#define UID_JPEGProcess14SV1 "1.2.840.10008.1.2.4.80"
+#define UID_JPEGLSLossless "1.2.840.10008.1.2.4.80"
+#define UID_JPEGLSLossy "1.2.840.10008.1.2.4.81"
+#define UID_JPEG2000LosslessOnly "1.2.840.10008.1.2.4.90"
+#define UID_JPEG2000 "1.2.840.10008.1.2.4.91"
+#define UID_RLELossless "1.2.840.10008.1.2.5"
+#else
+// When DCMTK is available, use the DCMTK constants
+#define UID_JPEGProcess1 UID_JPEGProcess1TransferSyntax
+#define UID_JPEGProcess2_4 UID_JPEGProcess2_4TransferSyntax
+#define UID_JPEGProcess14 UID_JPEGProcess14TransferSyntax
+#define UID_JPEGProcess14SV1 UID_JPEGProcess14SV1TransferSyntax
+#define UID_JPEGLSLossless UID_JPEGLSLosslessTransferSyntax
+#define UID_JPEGLSLossy UID_JPEGLSLossyTransferSyntax
+#define UID_JPEG2000LosslessOnly UID_JPEG2000LosslessOnlyTransferSyntax
+#define UID_JPEG2000 UID_JPEG2000TransferSyntax
+#define UID_RLELossless UID_RLELosslessTransferSyntax
+#endif
 
 namespace pacs {
 namespace common {
@@ -44,7 +85,7 @@ void CodecManager::initialize() {
         return;
     }
     
-    write_information("Initializing DICOM codec manager");
+    pacs::common::logger::logInfo("Initializing DICOM codec manager");
     
     // Register all available codecs
     registerJPEGCodecs();
@@ -53,7 +94,7 @@ void CodecManager::initialize() {
     registerRLECodec();
     
     initialized_ = true;
-    write_information("DICOM codec manager initialized successfully");
+    pacs::common::logger::logInfo("DICOM codec manager initialized successfully");
 }
 
 void CodecManager::cleanup() {
@@ -61,8 +102,9 @@ void CodecManager::cleanup() {
         return;
     }
     
-    write_information("Cleaning up DICOM codec manager");
+    pacs::common::logger::logInfo("Cleaning up DICOM codec manager");
     
+#ifndef USE_DCMTK_PLACEHOLDER
     // Deregister codecs in reverse order
     if (rleCodecRegistered_) {
         DcmRLEDecoderRegistration::cleanup();
@@ -89,9 +131,16 @@ void CodecManager::cleanup() {
         DJEncoderRegistration::cleanup();
         jpegCodecsRegistered_ = false;
     }
+#else
+    // When DCMTK is not available, just reset the flags
+    rleCodecRegistered_ = false;
+    jpeg2000CodecsRegistered_ = false;
+    jpegLSCodecsRegistered_ = false;
+    jpegCodecsRegistered_ = false;
+#endif
     
     initialized_ = false;
-    write_information("DICOM codec manager cleaned up");
+    pacs::common::logger::logInfo("DICOM codec manager cleaned up");
 }
 
 void CodecManager::registerJPEGCodecs() {
@@ -99,6 +148,10 @@ void CodecManager::registerJPEGCodecs() {
         return;
     }
     
+#ifdef USE_DCMTK_PLACEHOLDER
+    pacs::common::logger::logInfo("JPEG codec registration skipped - DCMTK not available");
+    jpegCodecsRegistered_ = true;
+#else
     try {
         // Register JPEG decoders
         DJDecoderRegistration::registerCodecs();
@@ -107,11 +160,12 @@ void CodecManager::registerJPEGCodecs() {
         DJEncoderRegistration::registerCodecs();
         
         jpegCodecsRegistered_ = true;
-        write_information("JPEG codecs registered successfully");
+        pacs::common::logger::logInfo("JPEG codecs registered successfully");
     }
     catch (const std::exception& e) {
-        write_error("Failed to register JPEG codecs: {}", e.what());
+        pacs::common::logger::logError("Failed to register JPEG codecs: %s", e.what());
     }
+#endif
 }
 
 void CodecManager::registerJPEGLSCodecs() {
@@ -119,6 +173,10 @@ void CodecManager::registerJPEGLSCodecs() {
         return;
     }
     
+#ifdef USE_DCMTK_PLACEHOLDER
+    pacs::common::logger::logInfo("JPEG-LS codec registration skipped - DCMTK not available");
+    jpegLSCodecsRegistered_ = true;
+#else
     try {
         // Register JPEG-LS decoders
         DJLSDecoderRegistration::registerCodecs();
@@ -127,11 +185,12 @@ void CodecManager::registerJPEGLSCodecs() {
         DJLSEncoderRegistration::registerCodecs();
         
         jpegLSCodecsRegistered_ = true;
-        write_information("JPEG-LS codecs registered successfully");
+        pacs::common::logger::logInfo("JPEG-LS codecs registered successfully");
     }
     catch (const std::exception& e) {
-        write_error("Failed to register JPEG-LS codecs: {}", e.what());
+        pacs::common::logger::logError("Failed to register JPEG-LS codecs: %s", e.what());
     }
+#endif
 }
 
 void CodecManager::registerJPEG2000Codecs() {
@@ -154,7 +213,7 @@ void CodecManager::registerJPEG2000Codecs() {
         write_error("Failed to register JPEG-2000 codecs: {}", e.what());
     }
 #else
-    write_information("JPEG-2000 support not available (compile with WITH_JPEG2K)");
+    pacs::common::logger::logInfo("JPEG-2000 support not available (compile with WITH_JPEG2K)");
 #endif
 }
 
@@ -163,6 +222,10 @@ void CodecManager::registerRLECodec() {
         return;
     }
     
+#ifdef USE_DCMTK_PLACEHOLDER
+    write_information("RLE codec registration skipped - DCMTK not available");
+    rleCodecRegistered_ = true;
+#else
     try {
         // Register RLE decoder
         DcmRLEDecoderRegistration::registerCodecs();
@@ -171,11 +234,12 @@ void CodecManager::registerRLECodec() {
         DcmRLEEncoderRegistration::registerCodecs();
         
         rleCodecRegistered_ = true;
-        write_information("RLE codec registered successfully");
+        pacs::common::logger::logInfo("RLE codec registered successfully");
     }
     catch (const std::exception& e) {
-        write_error("Failed to register RLE codec: {}", e.what());
+        pacs::common::logger::logError("Failed to register RLE codec: %s", e.what());
     }
+#endif
 }
 
 bool CodecManager::isTransferSyntaxSupported(const std::string& transferSyntax) const {

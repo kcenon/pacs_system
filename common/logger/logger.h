@@ -8,7 +8,7 @@
 #include <memory>
 #include <iostream>
 
-#include "thread_system/sources/logger/log_types.h"
+#include "logger/types/log_types.h"
 
 namespace pacs {
 namespace common {

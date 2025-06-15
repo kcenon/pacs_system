@@ -13,13 +13,14 @@
 #include "dcmtk/dcmdata/dcdict.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/dicom.h"
-#include "dcmtk/dcmnet/dimcmd.h"
+#include "dcmtk/dcmnet/assoc.h"
+#include "dcmtk/dcmnet/cond.h"
 #include "dcmtk/dcmnet/dul.h"
 #include "dcmtk/dcmqrdb/dcmqrdbs.h"
 #include "dcmtk/dcmqrdb/dcmqrsrv.h"
 
 #include "common/dicom_util.h"
-#include "thread_system/sources/logger/logger.h"
+#include "common/logger/logger.h"
 
 namespace pacs {
 namespace query_retrieve {
@@ -39,7 +40,7 @@ QueryRetrieveSCP::QueryRetrieveSCP(const common::ServiceConfig& config, const st
         try {
             fs::create_directories(storageDirectory_);
         } catch (const std::exception& e) {
-            write_error("Failed to create storage directory: %s", e.what());
+            pacs::common::logger::logError("Failed to create storage directory: %s", e.what());
         }
     }
     
@@ -200,7 +201,7 @@ core::Result<std::vector<DcmDataset*>> pacs::query_retrieve::scp::QueryRetrieveS
                             queryCallback_(item, dataset);
                         }
                         catch (const std::exception& ex) {
-                            write_error("Error in query callback: %s", ex.what());
+                            pacs::common::logger::logError("Error in query callback: %s", ex.what());
                         }
                     }
                 }
@@ -250,7 +251,7 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::setStorageDirectory(const std:
         try {
             fs::create_directories(storageDirectory_);
         } catch (const std::exception& e) {
-            write_error("Failed to create storage directory: %s", e.what());
+            pacs::common::logger::logError("Failed to create storage directory: %s", e.what());
         }
     }
     
@@ -266,7 +267,7 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::serverLoop() {
     // Initialize network
     cond = ASC_initializeNetwork(NET_ACCEPTOR, config_.localPort, 30, &net);
     if (cond.bad()) {
-        write_error("Error initializing network: %s", cond.text());
+        pacs::common::logger::logError("Error initializing network: %s", cond.text());
         return;
     }
     
@@ -278,7 +279,7 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::serverLoop() {
         
         if (cond.bad()) {
             if (cond != DUL_ASSOCIATIONREJECTED) { // Updated from DUL_ASSOCIATIONABORTED
-                write_error("Error receiving association: %s", cond.text());
+                pacs::common::logger::logError("Error receiving association: %s", cond.text());
             }
             continue;
         }
@@ -314,14 +315,14 @@ void QueryRetrieveSCP::processAssociation(T_ASC_Association* assoc) {
             strcmp(pc.abstractSyntax, UID_MOVEStudyRootQueryRetrieveInformationModel) == 0 ||
             strcmp(pc.abstractSyntax, UID_GETStudyRootQueryRetrieveInformationModel) == 0) {
             ASC_acceptPresentationContext(assoc->params, pc.presentationContextID,
-                                        transferSyntaxes[0], numTransferSyntaxes);
+                                        transferSyntaxes[0]);
         }
         // Also accept storage SOP classes for C-STORE operations during C-GET
         else {
             for (int j = 0; j < numberOfDcmAllStorageSOPClassUIDs; j++) { // Updated from numberOfDcmStorageSOPClassUIDs
                 if (strcmp(pc.abstractSyntax, dcmAllStorageSOPClassUIDs[j]) == 0) { // Updated from dcmStorageSOPClassUIDs
                     ASC_acceptPresentationContext(assoc->params, pc.presentationContextID,
-                                                transferSyntaxes[0], numTransferSyntaxes);
+                                                transferSyntaxes[0]);
                     break;
                 }
             }
@@ -375,7 +376,8 @@ void QueryRetrieveSCP::processAssociation(T_ASC_Association* assoc) {
                     response.msg.CEchoRSP.MessageIDBeingRespondedTo = request.msg.CEchoRQ.MessageID;
                     response.msg.CEchoRSP.DimseStatus = STATUS_Success;
                     response.msg.CEchoRSP.DataSetType = DIMSE_DATASET_NULL;
-                    DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+                    OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                                       nullptr, nullptr, nullptr, nullptr);
                 }
                 break;
                 
@@ -394,7 +396,8 @@ void QueryRetrieveSCP::processAssociation(T_ASC_Association* assoc) {
                     OFStandard::strlcpy(response.msg.CStoreRSP.AffectedSOPInstanceUID,
                                        request.msg.CStoreRQ.AffectedSOPInstanceUID,
                                        sizeof(response.msg.CStoreRSP.AffectedSOPInstanceUID));
-                    DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+                    OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                                       nullptr, nullptr, nullptr, nullptr);
                 }
                 break;
                 
@@ -426,7 +429,8 @@ void QueryRetrieveSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                           sizeof(response.msg.CFindRSP.AffectedSOPClassUID));
         response.msg.CFindRSP.DimseStatus = STATUS_FIND_Failed_UnableToProcess;
         response.msg.CFindRSP.DataSetType = DIMSE_DATASET_NULL;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -463,7 +467,8 @@ void QueryRetrieveSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                           sizeof(response.msg.CFindRSP.AffectedSOPClassUID));
         response.msg.CFindRSP.DimseStatus = STATUS_FIND_Failed_UnableToProcess;
         response.msg.CFindRSP.DataSetType = DIMSE_DATASET_NULL;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -506,7 +511,8 @@ void QueryRetrieveSCP::handleCFindRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                       sizeof(response.msg.CFindRSP.AffectedSOPClassUID));
     response.msg.CFindRSP.DimseStatus = STATUS_Success;
     response.msg.CFindRSP.DataSetType = DIMSE_DATASET_NULL;
-    DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+    OFCondition cond2 = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                        nullptr, nullptr, nullptr, nullptr);
 }
 
 void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Message& request, 
@@ -526,7 +532,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         response.msg.CMoveRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfFailedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -615,12 +622,13 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         response.msg.CMoveRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfFailedSubOperations = matchingFiles.size();
         response.msg.CMoveRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
     // Create association parameters
-    cond = ASC_createAssociationParameters(&params, ASC_MAXIMUMPDUSIZE);
+    cond = ASC_createAssociationParameters(&params, ASC_DEFAULTMAXPDU);
     if (cond.bad()) {
         ASC_dropNetwork(&net);
         
@@ -638,7 +646,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         response.msg.CMoveRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfFailedSubOperations = matchingFiles.size();
         response.msg.CMoveRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -676,7 +685,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         response.msg.CMoveRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfFailedSubOperations = matchingFiles.size();
         response.msg.CMoveRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -686,8 +696,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                                      UID_LittleEndianImplicitTransferSyntax };
     int numTransferSyntaxes = 3;
     
-    for (int i = 0; i < numberOfDcmStorageSOPClassUIDs; i++) {
-        cond = ASC_addPresentationContext(params, (i*2)+1, dcmStorageSOPClassUIDs[i],
+    for (int i = 0; i < numberOfDcmAllStorageSOPClassUIDs; i++) {
+        cond = ASC_addPresentationContext(params, (i*2)+1, dcmAllStorageSOPClassUIDs[i],
                                         transferSyntaxes, numTransferSyntaxes);
         if (cond.bad()) {
             break;
@@ -712,7 +722,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         response.msg.CMoveRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfFailedSubOperations = matchingFiles.size();
         response.msg.CMoveRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -736,7 +747,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         response.msg.CMoveRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CMoveRSP.NumberOfFailedSubOperations = matchingFiles.size();
         response.msg.CMoveRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -760,7 +772,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
     progressResponse.msg.CMoveRSP.NumberOfCompletedSubOperations = completed;
     progressResponse.msg.CMoveRSP.NumberOfFailedSubOperations = failed;
     progressResponse.msg.CMoveRSP.NumberOfWarningSubOperations = warning;
-    DIMSE_sendMessage(assoc, presID, &progressResponse, nullptr, nullptr);
+    OFCondition progressCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &progressResponse, nullptr, 
+                                                              nullptr, nullptr, nullptr, nullptr);
     
     // Create the move result
     core::interfaces::query_retrieve::MoveResult moveResult;
@@ -779,7 +792,7 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                 moveCallback_(moveResult);
             }
             catch (const std::exception& ex) {
-                write_error("Error in move callback: %s", ex.what());
+                pacs::common::logger::logError("Error in move callback: %s", ex.what());
             }
         }
     }
@@ -811,7 +824,7 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
         T_ASC_PresentationContextID storePresID = 0;
         for (int i = 0; i < ASC_countAcceptedPresentationContexts(subAssoc->params); i++) {
             T_ASC_PresentationContext pc;
-            ASC_getAcceptedPresentationContext(subAssoc->params, i, &pc);
+            ASC_getPresentationContext(subAssoc->params, i, &pc);
             if (strcmp(pc.abstractSyntax, sopClassUIDStr.c_str()) == 0) {
                 storePresID = pc.presentationContextID;
                 break;
@@ -874,7 +887,7 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                         retrieveCallback_(sopInstanceUIDStr.c_str(), storeDataset);
                     }
                     catch (const std::exception& ex) {
-                        write_error("Error in retrieve callback: %s", ex.what());
+                        pacs::common::logger::logError("Error in retrieve callback: %s", ex.what());
                     }
                 }
             }
@@ -899,7 +912,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
             progressResponse.msg.CMoveRSP.NumberOfCompletedSubOperations = completed;
             progressResponse.msg.CMoveRSP.NumberOfFailedSubOperations = failed;
             progressResponse.msg.CMoveRSP.NumberOfWarningSubOperations = warning;
-            DIMSE_sendMessage(assoc, presID, &progressResponse, nullptr, nullptr);
+            OFCondition progressCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &progressResponse, nullptr, 
+                                                              nullptr, nullptr, nullptr, nullptr);
             
             // Update the move result
             moveResult.completed = completed;
@@ -915,7 +929,7 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                         moveCallback_(moveResult);
                     }
                     catch (const std::exception& ex) {
-                        write_error("Error in move callback: %s", ex.what());
+                        pacs::common::logger::logError("Error in move callback: %s", ex.what());
                     }
                 }
             }
@@ -956,7 +970,8 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
     finalResponse.msg.CMoveRSP.NumberOfCompletedSubOperations = completed;
     finalResponse.msg.CMoveRSP.NumberOfFailedSubOperations = failed;
     finalResponse.msg.CMoveRSP.NumberOfWarningSubOperations = warning;
-    DIMSE_sendMessage(assoc, presID, &finalResponse, nullptr, nullptr);
+    OFCondition finalCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &finalResponse, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
     
     // Update the move result
     moveResult.completed = completed;
@@ -972,7 +987,7 @@ void QueryRetrieveSCP::handleCMoveRequest(T_ASC_Association* assoc, T_DIMSE_Mess
                 moveCallback_(moveResult);
             }
             catch (const std::exception& ex) {
-                write_error("Error in move callback: %s", ex.what());
+                pacs::common::logger::logError("Error in move callback: %s", ex.what());
             }
         }
     }
@@ -998,7 +1013,8 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
         response.msg.CGetRSP.NumberOfCompletedSubOperations = 0;
         response.msg.CGetRSP.NumberOfFailedSubOperations = 0;
         response.msg.CGetRSP.NumberOfWarningSubOperations = 0;
-        DIMSE_sendMessage(assoc, presID, &response, nullptr, nullptr);
+        OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &response, nullptr, 
+                                                           nullptr, nullptr, nullptr, nullptr);
         return;
     }
     
@@ -1081,7 +1097,8 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
     progressResponse.msg.CGetRSP.NumberOfCompletedSubOperations = completed;
     progressResponse.msg.CGetRSP.NumberOfFailedSubOperations = failed;
     progressResponse.msg.CGetRSP.NumberOfWarningSubOperations = warning;
-    DIMSE_sendMessage(assoc, presID, &progressResponse, nullptr, nullptr);
+    OFCondition progressCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &progressResponse, nullptr, 
+                                                              nullptr, nullptr, nullptr, nullptr);
     
     // Send each file via C-STORE
     for (const auto& filename : matchingFiles) {
@@ -1110,7 +1127,7 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
         T_ASC_PresentationContextID storePresID = 0;
         for (int i = 0; i < ASC_countAcceptedPresentationContexts(assoc->params); i++) {
             T_ASC_PresentationContext pc;
-            ASC_getAcceptedPresentationContext(assoc->params, i, &pc);
+            ASC_getPresentationContext(assoc->params, i, &pc);
             if (strcmp(pc.abstractSyntax, sopClassUIDStr.c_str()) == 0) {
                 storePresID = pc.presentationContextID;
                 break;
@@ -1173,7 +1190,7 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
                         retrieveCallback_(sopInstanceUIDStr.c_str(), storeDataset);
                     }
                     catch (const std::exception& ex) {
-                        write_error("Error in retrieve callback: %s", ex.what());
+                        pacs::common::logger::logError("Error in retrieve callback: %s", ex.what());
                     }
                 }
             }
@@ -1198,7 +1215,8 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
             progressResponse.msg.CGetRSP.NumberOfCompletedSubOperations = completed;
             progressResponse.msg.CGetRSP.NumberOfFailedSubOperations = failed;
             progressResponse.msg.CGetRSP.NumberOfWarningSubOperations = warning;
-            DIMSE_sendMessage(assoc, presID, &progressResponse, nullptr, nullptr);
+            OFCondition progressCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &progressResponse, nullptr, 
+                                                              nullptr, nullptr, nullptr, nullptr);
         }
     }
     
@@ -1225,7 +1243,8 @@ void QueryRetrieveSCP::handleCGetRequest(T_ASC_Association* assoc, T_DIMSE_Messa
     finalResponse.msg.CGetRSP.NumberOfCompletedSubOperations = completed;
     finalResponse.msg.CGetRSP.NumberOfFailedSubOperations = failed;
     finalResponse.msg.CGetRSP.NumberOfWarningSubOperations = warning;
-    DIMSE_sendMessage(assoc, presID, &finalResponse, nullptr, nullptr);
+    OFCondition finalGetCond = DIMSE_sendMessageUsingMemoryData(assoc, presID, &finalResponse, nullptr, 
+                                                              nullptr, nullptr, nullptr, nullptr);
 }
 
 bool QueryRetrieveSCP::matchDataset(const DcmDataset* searchDataset, const DcmDataset* candidateDataset) {
@@ -1235,7 +1254,7 @@ bool QueryRetrieveSCP::matchDataset(const DcmDataset* searchDataset, const DcmDa
     
     // Iterate through all elements in the search dataset
     for (unsigned long i = 0; i < searchDataset->card(); i++) {
-        DcmElement* searchElement = searchDataset->getElement(i);
+        DcmElement* searchElement = const_cast<DcmDataset*>(searchDataset)->getElement(i);
         if (!searchElement) continue;
         
         // Skip group length elements
@@ -1249,7 +1268,7 @@ bool QueryRetrieveSCP::matchDataset(const DcmDataset* searchDataset, const DcmDa
         
         // Get the corresponding element from the candidate dataset
         DcmElement* candidateElement = nullptr;
-        if (candidateDataset->findAndGetElement(searchElement->getTag(), candidateElement).bad() || 
+        if (const_cast<DcmDataset*>(candidateDataset)->findAndGetElement(searchElement->getTag(), candidateElement).bad() || 
             !candidateElement) {
             // Element not found in candidate dataset
             return false;
@@ -1316,11 +1335,11 @@ void pacs::query_retrieve::scp::QueryRetrieveSCP::indexStorageDirectory() {
         }
     }
     catch (const std::exception& ex) {
-        write_error("Error indexing storage directory: %s", ex.what());
+        pacs::common::logger::logError("Error indexing storage directory: %s", ex.what());
     }
 }
 
-std::map<std::string, std::string> pacs::query_retrieve::scp::QueryRetrieveSCP::extractMetadata(const DcmDataset* dataset) {
+std::map<std::string, std::string> pacs::query_retrieve::scp::QueryRetrieveSCP::extractMetadata(DcmDataset* dataset) {
     std::map<std::string, std::string> metadata;
     
     if (!dataset) return metadata;

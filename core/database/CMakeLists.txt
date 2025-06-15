@@ -1,28 +1,64 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Database module for PACS system
-add_library(pacs_core_database
+# Create database library
+add_library(pacs_database
     database_interface.cpp
     database_manager.cpp
+    postgresql_database.cpp
     sqlite_database.cpp
 )
 
-target_include_directories(pacs_core_database PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}
+# Add alias
+add_library(pacs::database ALIAS pacs_database)
+
+# Configure include directories
+target_include_directories(pacs_database
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Find SQLite3 dependency
-find_package(SQLite3 REQUIRED)
+# Find packages
+find_package(PostgreSQL QUIET)
+find_package(SQLite3 QUIET)
 
-target_link_libraries(pacs_core_database PUBLIC 
-    pacs_common
-    pacs_core_result
-    utilities
-    logger
-    ${SQLite3_LIBRARIES}
+# Link libraries
+target_link_libraries(pacs_database
+    PUBLIC
+        pacs::common
+        pacs::interfaces
 )
 
-target_include_directories(pacs_core_database PUBLIC 
-    ${SQLite3_INCLUDE_DIRS}
+if(PostgreSQL_FOUND)
+    target_link_libraries(pacs_database PRIVATE PostgreSQL::PostgreSQL)
+    target_compile_definitions(pacs_database PRIVATE HAS_POSTGRESQL)
+endif()
+
+if(SQLite3_FOUND)
+    target_link_libraries(pacs_database PRIVATE SQLite::SQLite3)
+    target_compile_definitions(pacs_database PRIVATE HAS_SQLITE3)
+endif()
+
+# Set compile features
+target_compile_features(pacs_database PUBLIC cxx_std_20)
+
+# Install library
+install(TARGETS pacs_database
+    EXPORT pacs_targets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+# Install headers
+install(FILES
+    database_interface.h
+    database_manager.h
+    postgresql_database.h
+    sqlite_database.h
+    DESTINATION include/pacs/core/database
 )

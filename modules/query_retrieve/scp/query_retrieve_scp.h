@@ -9,7 +9,9 @@
 #include <map>
 
 // DCMTK includes
+#ifdef HAVE_CONFIG_H
 #include "dcmtk/config/osconfig.h"
+#endif
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"
@@ -162,7 +164,7 @@ private:
      * @param dataset DICOM dataset
      * @return Map of key attributes for indexing
      */
-    std::map<std::string, std::string> extractMetadata(const DcmDataset* dataset);
+    std::map<std::string, std::string> extractMetadata(DcmDataset* dataset);
 #else
     /**
      * @brief Extract basic metadata for indexing (simplified version when DCMTK is not available)

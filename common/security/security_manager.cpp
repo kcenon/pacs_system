@@ -12,7 +12,75 @@
 #include <iomanip>
 
 // JSON handling
+#ifdef HAS_NLOHMANN_JSON
 #include <nlohmann/json.hpp>
+using json = nlohmann::json;
+#else
+// Simple JSON placeholder
+#include <map>
+class json {
+public:
+    std::map<std::string, std::string> data;
+    std::string current_key;
+    
+    json() = default;
+    
+    json& operator[](const std::string& key) {
+        current_key = key;
+        return *this;
+    }
+    
+    json& operator=(const std::string& value) {
+        if (!current_key.empty()) {
+            data[current_key] = value;
+        }
+        return *this;
+    }
+    
+    json& operator=(int value) {
+        if (!current_key.empty()) {
+            data[current_key] = std::to_string(value);
+        }
+        return *this;
+    }
+    
+    json& operator=(const char* value) {
+        if (!current_key.empty()) {
+            data[current_key] = value;
+        }
+        return *this;
+    }
+    
+    std::string dump(int = -1) const {
+        std::stringstream ss;
+        ss << "{";
+        bool first = true;
+        for (const auto& [k, v] : data) {
+            if (!first) ss << ",";
+            ss << "\"" << k << "\":\"" << v << "\"";
+            first = false;
+        }
+        ss << "}";
+        return ss.str();
+    }
+    
+    // For parsing
+    static json parse(const std::string& str) {
+        json j;
+        // Simple implementation - just return empty json
+        return j;
+    }
+    
+    std::string get_value(const std::string& key) const {
+        auto it = data.find(key);
+        return it != data.end() ? it->second : "";
+    }
+    
+    bool contains(const std::string& key) const {
+        return data.find(key) != data.end();
+    }
+};
+#endif
 
 // Crypto++ for password hashing and token generation (if available)
 #ifdef HAVE_CRYPTOPP
@@ -28,7 +96,6 @@ using CryptoPP::PKCS5_PBKDF2_HMAC;
 using CryptoPP::byte;
 #endif
 
-using json = nlohmann::json;
 using Result = pacs::core::Result<void>;
 
 namespace pacs {
@@ -359,6 +426,7 @@ bool SecurityManager::userHasRole(const std::string& username, UserRole role) {
 }
 
 std::string SecurityManager::hashPassword(const std::string& password) {
+#ifdef HAVE_CRYPTOPP
     // Generate a random salt
     AutoSeededRandomPool rng;
     byte salt[16];
@@ -383,6 +451,11 @@ std::string SecurityManager::hashPassword(const std::string& password) {
     
     // Format: algorithm$iterations$salt$hash
     return "pbkdf2sha256$10000$" + saltB64 + "$" + hashB64;
+#else
+    // Simple SHA256 hash without salt (not secure!)
+    logger::logWarning("CryptoPP not available - using insecure password hashing");
+    return "simple$" + password; // NOT SECURE - only for testing
+#endif
 }
 
 bool SecurityManager::verifyPassword(const std::string& password, const std::string& hash) {
@@ -396,6 +469,7 @@ bool SecurityManager::verifyPassword(const std::string& password, const std::str
             parts.push_back(part);
         }
         
+#ifdef HAVE_CRYPTOPP
         if (parts.size() != 4) {
             logger::logError("Invalid hash format");
             return false;
@@ -433,6 +507,13 @@ bool SecurityManager::verifyPassword(const std::string& password, const std::str
         
         // Compare with stored hash
         return derivedB64 == parts[3];
+#else
+        // Simple comparison for testing
+        if (parts.size() >= 2 && parts[0] == "simple") {
+            return parts[1] == password;
+        }
+        return false;
+#endif
     }
     catch (const std::exception& ex) {
         logger::logError("Error verifying password: {}", ex.what());
@@ -442,6 +523,7 @@ bool SecurityManager::verifyPassword(const std::string& password, const std::str
 
 std::optional<std::string> SecurityManager::generateToken(const std::string& username) {
     try {
+#ifdef HAVE_CRYPTOPP
         // Generate a random token
         AutoSeededRandomPool rng;
         byte tokenBytes[32];
@@ -457,6 +539,13 @@ std::optional<std::string> SecurityManager::generateToken(const std::string& use
         tokens_[token] = username;
         
         return token;
+#else
+        // Simple token generation for testing
+        static int tokenCounter = 0;
+        std::string token = "token_" + username + "_" + std::to_string(++tokenCounter) + "_" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count());
+        tokens_[token] = username;
+        return token;
+#endif
     }
     catch (const std::exception& ex) {
         logger::logError("Error generating token: {}", ex.what());
@@ -481,6 +570,7 @@ pacs::core::Result<void> SecurityManager::loadUsersFromFile(const std::string& f
             return pacs::core::Result<void>::error("Failed to open user file");
         }
         
+#ifdef HAS_NLOHMANN_JSON
         // Parse JSON
         json usersJson;
         file >> usersJson;
@@ -515,6 +605,10 @@ pacs::core::Result<void> SecurityManager::loadUsersFromFile(const std::string& f
         logger::logInfo("Loaded {} users from file: {}", users_.size(), filePath);
         
         return pacs::core::Result<void>::ok();
+#else
+        logger::logError("JSON support not available - cannot load users");
+        return pacs::core::Result<void>::error("JSON support not available");
+#endif
     }
     catch (const std::exception& ex) {
         logger::logError("Failed to load users from file: {}", ex.what());
@@ -530,6 +624,7 @@ pacs::core::Result<void> SecurityManager::saveUsersToFile(const std::string& fil
         std::filesystem::path path(filePath);
         std::filesystem::create_directories(path.parent_path());
         
+#ifdef HAS_NLOHMANN_JSON
         // Create JSON array
         json usersJson = json::array();
         
@@ -573,6 +668,10 @@ pacs::core::Result<void> SecurityManager::saveUsersToFile(const std::string& fil
         logger::logInfo("Saved {} users to file: {}", users_.size(), filePath);
         
         return pacs::core::Result<void>::ok();
+#else
+        logger::logError("JSON support not available - cannot save users");
+        return pacs::core::Result<void>::error("JSON support not available");
+#endif
     }
     catch (const std::exception& ex) {
         logger::logError("Failed to save users to file: {}", ex.what());

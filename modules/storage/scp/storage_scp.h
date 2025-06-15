@@ -8,18 +8,23 @@
 #include <condition_variable>
 #include <vector>
 
-#include "thread_system/sources/priority_thread_pool/priority_thread_pool.h"
+// Thread pool functionality is integrated into the implementation
 
 // DCMTK includes
+#ifndef USE_DCMTK_PLACEHOLDER
+#ifdef HAVE_CONFIG_H
 #include "dcmtk/config/osconfig.h"
+#endif
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmnet/dimse.h"
 #include "dcmtk/dcmnet/diutil.h"
 #include "dcmtk/dcmnet/assoc.h"
 #include "dcmtk/dcmnet/cond.h"
+#endif
 
 #include "core/interfaces/storage/storage_interface.h"
 #include "common/pacs_common.h"
+#include "thread_pool/core/thread_pool.h"
 
 namespace pacs {
 namespace storage {
@@ -130,7 +135,8 @@ private:
     std::mutex callbackMutex_;
     
     // Thread pool for processing associations
-    std::shared_ptr<priority_thread_pool_module::priority_thread_pool> threadPool_;
+    std::shared_ptr<thread_pool_module::thread_pool> threadPool_;
+    std::mutex serverMutex_;
 };
 
 } // namespace scp

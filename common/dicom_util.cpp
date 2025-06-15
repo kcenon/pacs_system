@@ -7,7 +7,7 @@ namespace pacs {
 namespace common {
 
 std::string DicomUtil::datasetToString(const DcmDataset* dataset) {
-#ifdef DCMTK_NOT_AVAILABLE
+#ifdef USE_DCMTK_PLACEHOLDER
     return "[DCMTK not available]";
 #else
     if (!dataset) {
@@ -23,7 +23,7 @@ std::string DicomUtil::datasetToString(const DcmDataset* dataset) {
 }
 
 std::unique_ptr<DcmFileFormat> DicomUtil::loadDicomFile(const std::string& filename) {
-#ifdef DCMTK_NOT_AVAILABLE
+#ifdef USE_DCMTK_PLACEHOLDER
     return nullptr;
 #else
     auto fileFormat = std::make_unique<DcmFileFormat>();
@@ -38,7 +38,7 @@ std::unique_ptr<DcmFileFormat> DicomUtil::loadDicomFile(const std::string& filen
 }
 
 bool DicomUtil::saveDicomFile(DcmDataset* dataset, const std::string& filename) {
-#ifdef DCMTK_NOT_AVAILABLE
+#ifdef USE_DCMTK_PLACEHOLDER
     return false;
 #else
     if (!dataset) {
@@ -58,7 +58,7 @@ bool DicomUtil::saveDicomFile(DcmDataset* dataset, const std::string& filename) 
 }
 
 std::string DicomUtil::getElementValue(const DcmDataset* dataset, const DcmTagKey& tag) {
-#ifdef DCMTK_NOT_AVAILABLE
+#ifdef USE_DCMTK_PLACEHOLDER
     return "[DCMTK not available]";
 #else
     if (!dataset) {

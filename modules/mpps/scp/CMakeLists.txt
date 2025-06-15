@@ -1,24 +1,29 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-set(SOURCE_FILES
+# Create mpps SCP library
+add_library(pacs_mpps_scp
     mpps_scp.cpp
-    mpps_scp.h
 )
 
-add_library(pacs_mpps_scp STATIC ${SOURCE_FILES})
-target_include_directories(pacs_mpps_scp PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}  # For core/result and other includes
+# Add alias
+add_library(pacs::mpps::scp ALIAS pacs_mpps_scp)
+
+# Configure include directories
+target_include_directories(pacs_mpps_scp
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../..>
+        $<INSTALL_INTERFACE:include>
 )
 
-# Only link against pacs_core which already includes common libraries
-target_link_libraries(pacs_mpps_scp PUBLIC 
-    pacs_core
-    pacs_core_thread
+# Link libraries
+target_link_libraries(pacs_mpps_scp
+    PUBLIC
+        pacs::dicom
+        pacs::common
+        pacs::interfaces
 )
 
-# DCMTK dependency (only when available)
-if(NOT USE_DCMTK_PLACEHOLDER)
-    target_link_libraries(pacs_mpps_scp PUBLIC ${DCMTK_LIBRARIES})
-    target_include_directories(pacs_mpps_scp PUBLIC ${DCMTK_INCLUDE_DIRS})
-endif()
+# Set compile features
+target_compile_features(pacs_mpps_scp PUBLIC cxx_std_20)

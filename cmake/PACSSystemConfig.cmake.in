@@ -1,0 +1,48 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find required dependencies
+find_dependency(fmt REQUIRED)
+find_dependency(nlohmann_json REQUIRED)
+find_dependency(SQLite3 REQUIRED)
+find_dependency(cryptopp REQUIRED)
+
+# Optional dependencies
+find_dependency(DCMTK)
+find_dependency(PostgreSQL)
+find_dependency(OpenSSL)
+
+# Include target exports
+include("${CMAKE_CURRENT_LIST_DIR}/PACSSystemTargets.cmake")
+
+# Check required components
+check_required_components(PACSSystem)
+
+# Set variables for compatibility
+set(PACSSystem_FOUND TRUE)
+set(PACSSystem_VERSION @PROJECT_VERSION@)
+set(PACSSystem_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(PACSSystem_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(PACSSystem_VERSION_PATCH @PROJECT_VERSION_PATCH@)
+
+# Provide component information
+set(PACSSystem_COMPONENTS
+    pacs::core
+    pacs::common
+    pacs::storage
+    pacs::worklist
+    pacs::query_retrieve
+    pacs::mpps
+)
+
+# Macros for easier usage
+macro(pacs_use_component component)
+    target_link_libraries(${PROJECT_NAME} PRIVATE pacs::${component})
+endmacro()
+
+# Print configuration summary
+if(NOT PACSSystem_FIND_QUIETLY)
+    message(STATUS "Found PACSSystem: ${PACSSystem_VERSION}")
+    message(STATUS "  Components: ${PACSSystem_COMPONENTS}")
+endif()

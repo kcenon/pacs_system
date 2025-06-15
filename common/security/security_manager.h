@@ -156,6 +156,13 @@ public:
      * @return Result object indicating success or failure
      */
     core::Result<void> saveUsersToFile(const std::string& filePath);
+    
+    /**
+     * @brief Generate a secure random password
+     * @param length Password length (default: 16)
+     * @return Generated password
+     */
+    std::string generateSecurePassword(size_t length = 16);
 
 private:
     // Private constructor for singleton pattern

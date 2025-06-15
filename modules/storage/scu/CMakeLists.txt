@@ -1,24 +1,29 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-set(SOURCE_FILES
+# Create storage SCU library
+add_library(pacs_storage_scu
     storage_scu.cpp
-    storage_scu.h
 )
 
-add_library(pacs_storage_scu STATIC ${SOURCE_FILES})
-target_include_directories(pacs_storage_scu PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}  # For core/result and other includes
+# Add alias
+add_library(pacs::storage::scu ALIAS pacs_storage_scu)
+
+# Configure include directories
+target_include_directories(pacs_storage_scu
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../..>
+        $<INSTALL_INTERFACE:include>
 )
 
-# Only link against core libraries, removing redundant dependencies
-target_link_libraries(pacs_storage_scu PUBLIC 
-    pacs_core
-    pacs_core_thread
+# Link libraries
+target_link_libraries(pacs_storage_scu
+    PUBLIC
+        pacs::dicom
+        pacs::common
+        pacs::interfaces
 )
 
-# DCMTK dependency (only when available)
-if(NOT USE_DCMTK_PLACEHOLDER)
-    target_link_libraries(pacs_storage_scu PUBLIC ${DCMTK_LIBRARIES})
-    target_include_directories(pacs_storage_scu PUBLIC ${DCMTK_INCLUDE_DIRS})
-endif()
+# Set compile features
+target_compile_features(pacs_storage_scu PUBLIC cxx_std_20)

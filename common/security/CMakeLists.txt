@@ -1,52 +1,85 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Define source files
-set(SECURITY_SOURCE_FILES
-    tls_config.cpp
-    security_manager.cpp
+# Create security library
+add_library(pacs_security
+    crypto_manager.cpp
     dcmtk_tls_adapter.cpp
+    security_manager.cpp
+    tls_config.cpp
 )
 
-add_library(pacs_security ${SECURITY_SOURCE_FILES})
+# Add alias
+add_library(pacs::security ALIAS pacs_security)
 
-target_include_directories(pacs_security PUBLIC 
-    ${CMAKE_SOURCE_DIR}
+# Configure include directories
+target_include_directories(pacs_security
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Find required dependencies
-find_package(nlohmann_json CONFIG REQUIRED)
+# Find packages
+find_package(OpenSSL QUIET)
+find_package(DCMTK QUIET)
+find_package(cryptopp QUIET)
+find_package(nlohmann_json QUIET)
 
-# Find CryptoPP (required)
-find_package(cryptopp CONFIG REQUIRED)
-target_compile_definitions(pacs_security PUBLIC HAVE_CRYPTOPP)
-
-# Basic dependencies
-target_link_libraries(pacs_security PUBLIC 
-    pacs_common
-    pacs_config
-    pacs_logger
-    nlohmann_json::nlohmann_json
+# Link libraries
+target_link_libraries(pacs_security
+    PUBLIC
+        pacs::logger
+        pacs::common
+        pacs::config
 )
 
-# Link CryptoPP
-target_link_libraries(pacs_security PUBLIC cryptopp::cryptopp)
-
-# DCMTK dependency (only when available)
-if(NOT USE_DCMTK_PLACEHOLDER)
-    find_package(DCMTK REQUIRED)
-    target_link_libraries(pacs_security PUBLIC ${DCMTK_LIBRARIES})
-    target_include_directories(pacs_security PUBLIC ${DCMTK_INCLUDE_DIRS})
-    
-    # Check if DCMTK has OpenSSL support
-    include(CheckCXXSymbolExists)
-    set(CMAKE_REQUIRED_INCLUDES ${DCMTK_INCLUDE_DIRS})
-    set(CMAKE_REQUIRED_LIBRARIES ${DCMTK_LIBRARIES})
-    check_cxx_symbol_exists("DCMTK_WITH_OPENSSL" "dcmtk/config/osconfig.h" DCMTK_HAS_OPENSSL)
-    
-    if(DCMTK_HAS_OPENSSL)
-        target_compile_definitions(pacs_security PUBLIC DCMTK_WITH_OPENSSL)
-        message(STATUS "DCMTK has OpenSSL support: YES")
-    else()
-        message(STATUS "DCMTK has OpenSSL support: NO")
-    endif()
+if(OpenSSL_FOUND)
+    target_link_libraries(pacs_security PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+else()
+    target_compile_definitions(pacs_security PUBLIC NO_OPENSSL)
 endif()
+
+if(DCMTK_FOUND)
+    target_link_libraries(pacs_security PUBLIC DCMTK::DCMTK)
+else()
+    target_compile_definitions(pacs_security PUBLIC USE_DCMTK_PLACEHOLDER)
+endif()
+
+if(cryptopp_FOUND)
+    target_link_libraries(pacs_security PUBLIC cryptopp::cryptopp)
+    target_compile_definitions(pacs_security PUBLIC HAVE_CRYPTOPP)
+    message(STATUS "CryptoPP found - secure password hashing enabled")
+else()
+    target_compile_definitions(pacs_security PUBLIC NO_CRYPTOPP)
+    message(STATUS "CryptoPP not found - using insecure password hashing for testing only")
+endif()
+
+if(nlohmann_json_FOUND)
+    target_link_libraries(pacs_security PUBLIC nlohmann_json::nlohmann_json)
+    target_compile_definitions(pacs_security PUBLIC HAS_NLOHMANN_JSON)
+else()
+    target_compile_definitions(pacs_security PUBLIC NO_NLOHMANN_JSON)
+endif()
+
+# Set compile features
+target_compile_features(pacs_security PUBLIC cxx_std_20)
+
+# Install library
+install(TARGETS pacs_security
+    EXPORT pacs_targets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+# Install headers
+install(FILES
+    crypto_manager.h
+    dcmtk_tls_adapter.h
+    security_manager.h
+    tls_config.h
+    DESTINATION include/pacs/common/security
+)

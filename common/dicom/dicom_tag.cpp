@@ -1,13 +1,63 @@
 #include "dicom_tag.h"
 
-#include "dcmtk/config/osconfig.h"
+#ifndef USE_DCMTK_PLACEHOLDER
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 #include "dcmtk/dcmdata/dcdicent.h"
+#endif
 
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+
+#ifdef USE_DCMTK_PLACEHOLDER
+// Define placeholder DCMTK types
+typedef unsigned short Uint16;
+
+// Placeholder DcmTagKey class
+class DcmTagKey {
+public:
+    DcmTagKey(Uint16 g, Uint16 e) : group_(g), element_(e) {}
+    Uint16 getGroup() const { return group_; }
+    Uint16 getElement() const { return element_; }
+private:
+    Uint16 group_;
+    Uint16 element_;
+};
+
+// Placeholder dictionary entry
+class DcmDictEntry {
+public:
+    DcmDictEntry() {}
+    const char* getTagName() const { return "Unknown"; }
+    int getVR() const { return 0; }
+    const char* getStandardTagName() const { return "Unknown"; }
+};
+
+// Placeholder dictionary lookup
+inline const DcmDictEntry* dcmDataDict_findEntry(const DcmTagKey&, const char* = nullptr) {
+    static DcmDictEntry entry;
+    return &entry;
+}
+
+// Global dictionary 
+class DcmDataDictionary {
+public:
+    const DcmDataDictionary& rdlock() const { return *this; }
+    void rdunlock() const {}
+    const DcmDictEntry* findEntry(const DcmTagKey& key, const char* = nullptr) const {
+        return dcmDataDict_findEntry(key);
+    }
+};
+
+inline DcmDataDictionary& dcmDataDict_get() {
+    static DcmDataDictionary dict;
+    return dict;
+}
+
+#define dcmDataDict dcmDataDict_get()
+
+#endif
 
 namespace pacs {
 namespace common {
@@ -149,10 +199,10 @@ std::string DicomTag::getName() const {
     const DcmDictEntry* entry = globalDict.findEntry(tagKey, nullptr);
     if (entry) {
         std::string name = entry->getTagName();
-        dcmDataDict.unlock();
+        dcmDataDict.rdunlock();
         return name;
     }
-    dcmDataDict.unlock();
+    dcmDataDict.rdunlock();
     
     // Return a formatted string like (gggg,eeee) if no name found
     return toString();

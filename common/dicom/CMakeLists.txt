@@ -1,53 +1,65 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Create the DICOM abstraction library
+# Create dicom library
 add_library(pacs_dicom
+    codec_manager.cpp
+    dicom_error.cpp
+    dicom_file.cpp
     dicom_object.cpp
     dicom_tag.cpp
-    dicom_file.cpp
-    dicom_error.cpp
     storage_client.cpp
     storage_server.cpp
-    codec_manager.cpp
 )
 
-# Set include directories
+# Add alias
+add_library(pacs::dicom ALIAS pacs_dicom)
+
+# Configure include directories
 target_include_directories(pacs_dicom
     PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../..
-    ${DCMTK_INCLUDE_DIRS}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Link against DCMTK and other dependencies
+# Find packages
+find_package(DCMTK QUIET)
+
+# Link libraries
 target_link_libraries(pacs_dicom
     PUBLIC
-    pacs_common
-    ${DCMTK_LIBRARIES}
-    priority_thread_pool_module
-    logger_module
+        pacs::logger
+        pacs::security
 )
 
-# Set compilation options
+if(DCMTK_FOUND AND TARGET DCMTK::DCMTK)
+    target_link_libraries(pacs_dicom PUBLIC DCMTK::DCMTK)
+else()
+    target_compile_definitions(pacs_dicom PUBLIC USE_DCMTK_PLACEHOLDER)
+endif()
+
+# Set compile features
 target_compile_features(pacs_dicom PUBLIC cxx_std_20)
 
-# Add DCMTK preprocessor definitions
-target_compile_definitions(pacs_dicom PRIVATE ${DCMTK_DEFINITIONS})
-
-# Install the library
+# Install library
 install(TARGETS pacs_dicom
-    LIBRARY DESTINATION lib
+    EXPORT pacs_targets
     ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
 )
 
 # Install headers
 install(FILES
+    codec_manager.h
+    dicom_error.h
+    dicom_file.h
     dicom_object.h
     dicom_tag.h
-    dicom_file.h
-    dicom_error.h
     storage_client.h
     storage_server.h
-    codec_manager.h
     DESTINATION include/pacs/common/dicom
 )

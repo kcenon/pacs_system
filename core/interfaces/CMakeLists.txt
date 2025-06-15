@@ -1,19 +1,54 @@
-cmake_minimum_required(VERSION 3.16)
+# BSD 3-Clause License
+# Copyright (c) 2024, kcenon
+# SPDX-License-Identifier: BSD-3-Clause
 
-set(INTERFACES_SOURCE_FILES
+# Create interfaces library (header-only)
+add_library(pacs_interfaces INTERFACE)
+
+# Add alias
+add_library(pacs::interfaces ALIAS pacs_interfaces)
+
+# Configure include directories
+target_include_directories(pacs_interfaces INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+    $<INSTALL_INTERFACE:include>
+)
+
+# Link dependencies
+target_link_libraries(pacs_interfaces INTERFACE
+    pacs::common
+)
+
+# Set compile features
+target_compile_features(pacs_interfaces INTERFACE cxx_std_20)
+
+# Install headers
+install(FILES
     service_interface.h
-    mpps/mpps_interface.h
+    DESTINATION include/pacs/core/interfaces
+)
+
+install(FILES
     storage/storage_interface.h
+    DESTINATION include/pacs/core/interfaces/storage
+)
+
+install(FILES
     worklist/worklist_interface.h
+    DESTINATION include/pacs/core/interfaces/worklist
+)
+
+install(FILES
     query_retrieve/query_retrieve_interface.h
+    DESTINATION include/pacs/core/interfaces/query_retrieve
 )
 
-add_library(pacs_core_interfaces INTERFACE)
-target_include_directories(pacs_core_interfaces INTERFACE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}
+install(FILES
+    mpps/mpps_interface.h
+    DESTINATION include/pacs/core/interfaces/mpps
 )
 
-target_link_libraries(pacs_core_interfaces INTERFACE 
-    pacs_common
-    pacs_core_result)
+# Install targets
+install(TARGETS pacs_interfaces
+    EXPORT pacs_targets
+)
