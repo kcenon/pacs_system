@@ -17,3 +17,7 @@ add_subdirectory(worklist_sample)
 add_subdirectory(query_retrieve_sample)
 add_subdirectory(mpps_sample)
 add_subdirectory(integrated_sample)
+
+# Add simplified API samples
+add_subdirectory(simplified_storage)
+add_subdirectory(simplified_usage)
