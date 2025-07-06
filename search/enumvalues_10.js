@@ -1,10 +1,8 @@
 var searchData=
 [
-  ['u16string_0',['U16String',['../df/df4/classlog__module_1_1log__job.html#a9659665b71a5b0beb2a851fe6fbabecba6b352ec039f3c13da567703866271fb6',1,'log_module::log_job']]],
-  ['u32string_1',['U32String',['../df/df4/classlog__module_1_1log__job.html#a9659665b71a5b0beb2a851fe6fbabecba6260469c9293bbfde2398c6971915ce8',1,'log_module::log_job']]],
-  ['unknown_2',['unknown',['../d1/d53/classutility__module_1_1convert__string.html#afbde2f9b7be55d89662baedd43ba63cfaad921d60486366258809553a3db49a4a',1,'utility_module::convert_string']]],
-  ['unknown_5ferror_3',['unknown_error',['../de/d48/namespacethread__module.html#a215ffba45222b5527566469d33e4447ca4e44c97a51e5519cd277f335de285ead',1,'thread_module']]],
-  ['utf16_4',['utf16',['../d1/d53/classutility__module_1_1convert__string.html#a6ea78e52dff286b9309465a9b0f993a4a5ab39c2bd546655547f6101ed91e395e',1,'utility_module::convert_string']]],
-  ['utf32_5',['utf32',['../d1/d53/classutility__module_1_1convert__string.html#a6ea78e52dff286b9309465a9b0f993a4a1c067a9fa89e2bf1d6dd55a6ca6204ce',1,'utility_module::convert_string']]],
-  ['utf8_6',['utf8',['../d1/d53/classutility__module_1_1convert__string.html#a6ea78e52dff286b9309465a9b0f993a4a30df7f629fcf6b940bcaef5faf2490bb',1,'utility_module::convert_string']]]
+  ['realtime_0',['RealTime',['../d4/db9/namespacetyped__thread__pool__module.html#aeddf7d42d9fc60bebab25fba779ad0b6ad50ae798e3aa50c3a502118e759cc216',1,'typed_thread_pool_module']]],
+  ['relaxed_1',['relaxed',['../de/d41/namespacethread__module_1_1lockfree.html#a07cdd7466a09a6c46b1f7a1121ab9037a81f32be24a2a62fc472cc43edc97e65b',1,'thread_module::lockfree']]],
+  ['resource_5fallocation_5ffailed_2',['resource_allocation_failed',['../de/d48/namespacethread__module.html#a215ffba45222b5527566469d33e4447cacde679dc006944a4dcc197c13cf731e5',1,'thread_module']]],
+  ['resource_5flimit_5freached_3',['resource_limit_reached',['../de/d48/namespacethread__module.html#a215ffba45222b5527566469d33e4447ca03273d60e581aa34c9f233314fe7ab24',1,'thread_module']]],
+  ['running_4',['running',['../d2/dca/namespacethread__module_1_1jobs.html#ab7e88d20a4feef6010627676c6cc6a93a75101dcdfc88455bcafc9e53e0b06689',1,'thread_module::jobs']]]
 ];

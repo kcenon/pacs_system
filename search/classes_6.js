@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['job_0',['job',['../d8/d42/classthread__module_1_1job.html',1,'thread_module']]],
-  ['job_5fqueue_1',['job_queue',['../df/d6d/classthread__module_1_1job__queue.html',1,'thread_module']]]
+  ['global_5fmetrics_5fcollector_0',['global_metrics_collector',['../de/d95/classmonitoring__module_1_1global__metrics__collector.html',1,'monitoring_module']]]
 ];

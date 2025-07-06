@@ -72,6 +72,7 @@ $(function() {
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#nested-classes">Classes</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">thread_pool_module Namespace Reference</div></div>
 </div><!--header-->
@@ -82,11 +83,28 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
+<tr class="memitem:d3/d3a/namespacethread__pool__module_1_1config" id="r_d3/d3a/namespacethread__pool__module_1_1config"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d3a/namespacethread__pool__module_1_1config.html">config</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:da/d38/namespacethread__pool__module_1_1detail" id="r_da/d38/namespacethread__pool__module_1_1detail"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/d38/namespacethread__pool__module_1_1detail.html">detail</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d4/dcf/namespacethread__pool__module_1_1presets" id="r_d4/dcf/namespacethread__pool__module_1_1presets"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/dcf/namespacethread__pool__module_1_1presets.html">presets</a></td></tr>
+<tr class="memdesc:d4/dcf/namespacethread__pool__module_1_1presets"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for pool presets and common configurations. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/ddb/classthread__pool__module_1_1pool__factory.html">pool_factory</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory class for creating thread pools with predefined configurations.  <a href="../../d4/ddb/classthread__pool__module_1_1pool__factory.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A future that can be scheduled on a thread pool.  <a href="../../df/d38/classthread__pool__module_1_1pool__future.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html">pool_promise</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A promise that can schedule work on a thread pool.  <a href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d4a/classthread__pool__module_1_1pool__promise_3_01void_01_4.html">pool_promise&lt; void &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specialization for void type.  <a href="../../d8/d4a/classthread__pool__module_1_1pool__promise_3_01void_01_4.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d6e/classthread__pool__module_1_1task.html">task</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A class representing an asynchronous coroutine task.  <a href="../../de/d6e/classthread__pool__module_1_1task.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -108,9 +126,53 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d1b/classthread__pool__module_1_1thread__worker.html">thread_worker</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A specialized worker thread that processes jobs from a <code>job_queue</code>.  <a href="../../d7/d1b/classthread__pool__module_1_1thread__worker.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d53/structthread__pool__module_1_1worker__policy.html">worker_policy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Worker behavior policy configuration.  <a href="../../d4/d53/structthread__pool__module_1_1worker__policy.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a91dfb70040110beaa487b8abbdc8d9fd" id="r_a91dfb70040110beaa487b8abbdc8d9fd"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fd">worker_state</a> { <br />
+&#160;&#160;<a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdae2fa538867c3830a859a5b17ab24644b">created</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fda1ee85f6c60017a7f0646ba8dc5824de6">starting</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdac76a5e84e4bdee527e274ea30c680d79">active</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdaec2f993aec2c27fc750119ab17b16cdb">idle</a>
+, <br />
+&#160;&#160;<a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fda3b2a3c8ed19fc3647432e72885d633e7">stopping</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdaf0a0bfe6bc7d2c58d2989034f83183e0">stopped</a>
+<br />
+ }</td></tr>
+<tr class="memdesc:a91dfb70040110beaa487b8abbdc8d9fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of worker states.  <a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fd">More...</a><br /></td></tr>
+<tr class="separator:a91dfb70040110beaa487b8abbdc8d9fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add8b8e5f5fd0f12965fb6fdda6b22355" id="r_add8b8e5f5fd0f12965fb6fdda6b22355"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355">scheduling_policy</a> { <a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355acf54937a2330ac17aa523bf7130911a3">fifo</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355a5d2e5ea4d6d86a5de8b268a9f3e92375">lifo</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355ab988295c268025b49dfb3df26171ddc3">priority</a>
+, <a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355a58dcf5004c51af9570779f6fb22a8ad1">work_stealing</a>
+ }</td></tr>
+<tr class="memdesc:add8b8e5f5fd0f12965fb6fdda6b22355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of scheduling policies.  <a href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355">More...</a><br /></td></tr>
+<tr class="separator:add8b8e5f5fd0f12965fb6fdda6b22355"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a26cb3767ed00a8ce412b776aa7b7765e" id="r_a26cb3767ed00a8ce412b776aa7b7765e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a26cb3767ed00a8ce412b776aa7b7765e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a>&lt; std::decay_t&lt; T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a26cb3767ed00a8ce412b776aa7b7765e">make_ready_future</a> (T &amp;&amp;value)</td></tr>
+<tr class="memdesc:a26cb3767ed00a8ce412b776aa7b7765e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a future that is already ready with a value.  <br /></td></tr>
+<tr class="separator:a26cb3767ed00a8ce412b776aa7b7765e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ab7372dcd09abd745b3978af363b73f" id="r_a2ab7372dcd09abd745b3978af363b73f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a>&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a2ab7372dcd09abd745b3978af363b73f">make_ready_future</a> ()</td></tr>
+<tr class="memdesc:a2ab7372dcd09abd745b3978af363b73f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a future that is already ready with void.  <br /></td></tr>
+<tr class="separator:a2ab7372dcd09abd745b3978af363b73f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef6a0fdf9f3aba228c372989d4eba659" id="r_aef6a0fdf9f3aba228c372989d4eba659"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aef6a0fdf9f3aba228c372989d4eba659"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#aef6a0fdf9f3aba228c372989d4eba659">make_exceptional_future</a> (std::exception_ptr exception)</td></tr>
+<tr class="memdesc:aef6a0fdf9f3aba228c372989d4eba659"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a future that is already ready with an exception.  <br /></td></tr>
+<tr class="separator:aef6a0fdf9f3aba228c372989d4eba659"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dfc5e3068af68df35df3b9bd117d1be" id="r_a1dfc5e3068af68df35df3b9bd117d1be"><td class="memTemplParams" colspan="2">template&lt;typename... Futures&gt; </td></tr>
+<tr class="memitem:a1dfc5e3068af68df35df3b9bd117d1be"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a1dfc5e3068af68df35df3b9bd117d1be">wait_for_all</a> (Futures &amp;... futures)</td></tr>
+<tr class="memdesc:a1dfc5e3068af68df35df3b9bd117d1be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for all futures to complete.  <br /></td></tr>
+<tr class="separator:a1dfc5e3068af68df35df3b9bd117d1be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b7411875accbf7de1655ba3cd38784f" id="r_a3b7411875accbf7de1655ba3cd38784f"><td class="memTemplParams" colspan="2">template&lt;typename... Futures&gt; </td></tr>
+<tr class="memitem:a3b7411875accbf7de1655ba3cd38784f"><td class="memTemplItemLeft" align="right" valign="top">size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a3b7411875accbf7de1655ba3cd38784f">wait_for_any</a> (Futures &amp;... futures)</td></tr>
+<tr class="memdesc:a3b7411875accbf7de1655ba3cd38784f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for any future to complete.  <br /></td></tr>
+<tr class="separator:a3b7411875accbf7de1655ba3cd38784f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad350b842e5c8a2409fd4cef589d98f77" id="r_ad350b842e5c8a2409fd4cef589d98f77"><td class="memTemplParams" colspan="2">template&lt;typename Func &gt; </td></tr>
 <tr class="memitem:ad350b842e5c8a2409fd4cef589d98f77"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#ad350b842e5c8a2409fd4cef589d98f77">make_task</a> (Func &amp;&amp;func) -&gt; <a class="el" href="../../de/d6e/classthread__pool__module_1_1task.html">task</a>&lt; std::invoke_result_t&lt; Func &gt; &gt;</td></tr>
 <tr class="separator:ad350b842e5c8a2409fd4cef589d98f77"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -118,6 +180,12 @@ Functions</h2></td></tr>
 <tr class="separator:a7b07a23993168217a9ae8536c9ef9e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c486c1ebe4bcede7004627da8004478" id="r_a0c486c1ebe4bcede7004627da8004478"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/d6e/classthread__pool__module_1_1task.html">task</a>&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a0c486c1ebe4bcede7004627da8004478">delay</a> (std::chrono::milliseconds duration)</td></tr>
 <tr class="separator:a0c486c1ebe4bcede7004627da8004478"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01ba7496fee6a3d92c79f8becaa8850c" id="r_a01ba7496fee6a3d92c79f8becaa8850c"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a01ba7496fee6a3d92c79f8becaa8850c">to_string</a> (<a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fd">worker_state</a> state)</td></tr>
+<tr class="memdesc:a01ba7496fee6a3d92c79f8becaa8850c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert worker state to string representation.  <br /></td></tr>
+<tr class="separator:a01ba7496fee6a3d92c79f8becaa8850c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3ec2a14d6be8d26adfd25d681675f09" id="r_ad3ec2a14d6be8d26adfd25d681675f09"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#ad3ec2a14d6be8d26adfd25d681675f09">to_string</a> (<a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355">scheduling_policy</a> policy)</td></tr>
+<tr class="memdesc:ad3ec2a14d6be8d26adfd25d681675f09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert scheduling policy to string representation.  <br /></td></tr>
+<tr class="separator:ad3ec2a14d6be8d26adfd25d681675f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Thread pool implementation for managing worker threads. </p>
@@ -140,7 +208,108 @@ Functions</h2></td></tr>
 <li><a class="el" href="../../d7/d1b/classthread__pool__module_1_1thread__worker.html" title="A specialized worker thread that processes jobs from a job_queue.">thread_worker</a>: Individual worker thread implementation</li>
 <li>Factory functions for easy pool creation </li>
 </ul>
-</div><h2 class="groupheader">Function Documentation</h2>
+</div><h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="add8b8e5f5fd0f12965fb6fdda6b22355" name="add8b8e5f5fd0f12965fb6fdda6b22355"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add8b8e5f5fd0f12965fb6fdda6b22355">&#9670;&#160;</a></span>scheduling_policy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355">thread_pool_module::scheduling_policy</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enumeration of scheduling policies. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="add8b8e5f5fd0f12965fb6fdda6b22355acf54937a2330ac17aa523bf7130911a3" name="add8b8e5f5fd0f12965fb6fdda6b22355acf54937a2330ac17aa523bf7130911a3"></a>fifo&#160;</td><td class="fielddoc"><p>First-in, first-out scheduling. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="add8b8e5f5fd0f12965fb6fdda6b22355a5d2e5ea4d6d86a5de8b268a9f3e92375" name="add8b8e5f5fd0f12965fb6fdda6b22355a5d2e5ea4d6d86a5de8b268a9f3e92375"></a>lifo&#160;</td><td class="fielddoc"><p>Last-in, first-out scheduling. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="add8b8e5f5fd0f12965fb6fdda6b22355ab988295c268025b49dfb3df26171ddc3" name="add8b8e5f5fd0f12965fb6fdda6b22355ab988295c268025b49dfb3df26171ddc3"></a>priority&#160;</td><td class="fielddoc"><p>Priority-based scheduling. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="add8b8e5f5fd0f12965fb6fdda6b22355a58dcf5004c51af9570779f6fb22a8ad1" name="add8b8e5f5fd0f12965fb6fdda6b22355a58dcf5004c51af9570779f6fb22a8ad1"></a>work_stealing&#160;</td><td class="fielddoc"><p>Work-stealing scheduling. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="../../d3/d09/worker__policy_8h_source.html#l00064">64</a> of file <a class="el" href="../../d3/d09/worker__policy_8h_source.html">worker_policy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   64</span>                                 {</div>
+<div class="line"><span class="lineno">   65</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355acf54937a2330ac17aa523bf7130911a3">fifo</a>,        </div>
+<div class="line"><span class="lineno">   66</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355a5d2e5ea4d6d86a5de8b268a9f3e92375">lifo</a>,        </div>
+<div class="line"><span class="lineno">   67</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355ab988295c268025b49dfb3df26171ddc3">priority</a>,    </div>
+<div class="line"><span class="lineno">   68</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355a58dcf5004c51af9570779f6fb22a8ad1">work_stealing</a> </div>
+<div class="line"><span class="lineno">   69</span>    };</div>
+<div class="ttc" id="anamespacethread__pool__module_html_add8b8e5f5fd0f12965fb6fdda6b22355a58dcf5004c51af9570779f6fb22a8ad1"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355a58dcf5004c51af9570779f6fb22a8ad1">thread_pool_module::scheduling_policy::work_stealing</a></div><div class="ttdeci">@ work_stealing</div><div class="ttdoc">Work-stealing scheduling.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_add8b8e5f5fd0f12965fb6fdda6b22355a5d2e5ea4d6d86a5de8b268a9f3e92375"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355a5d2e5ea4d6d86a5de8b268a9f3e92375">thread_pool_module::scheduling_policy::lifo</a></div><div class="ttdeci">@ lifo</div><div class="ttdoc">Last-in, first-out scheduling.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_add8b8e5f5fd0f12965fb6fdda6b22355ab988295c268025b49dfb3df26171ddc3"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355ab988295c268025b49dfb3df26171ddc3">thread_pool_module::scheduling_policy::priority</a></div><div class="ttdeci">@ priority</div><div class="ttdoc">Priority-based scheduling.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_add8b8e5f5fd0f12965fb6fdda6b22355acf54937a2330ac17aa523bf7130911a3"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355acf54937a2330ac17aa523bf7130911a3">thread_pool_module::scheduling_policy::fifo</a></div><div class="ttdeci">@ fifo</div><div class="ttdoc">First-in, first-out scheduling.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a91dfb70040110beaa487b8abbdc8d9fd" name="a91dfb70040110beaa487b8abbdc8d9fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91dfb70040110beaa487b8abbdc8d9fd">&#9670;&#160;</a></span>worker_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fd">thread_pool_module::worker_state</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enumeration of worker states. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a91dfb70040110beaa487b8abbdc8d9fdae2fa538867c3830a859a5b17ab24644b" name="a91dfb70040110beaa487b8abbdc8d9fdae2fa538867c3830a859a5b17ab24644b"></a>created&#160;</td><td class="fielddoc"><p>Worker created but not started. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a91dfb70040110beaa487b8abbdc8d9fda1ee85f6c60017a7f0646ba8dc5824de6" name="a91dfb70040110beaa487b8abbdc8d9fda1ee85f6c60017a7f0646ba8dc5824de6"></a>starting&#160;</td><td class="fielddoc"><p>Worker is starting up. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a91dfb70040110beaa487b8abbdc8d9fdac76a5e84e4bdee527e274ea30c680d79" name="a91dfb70040110beaa487b8abbdc8d9fdac76a5e84e4bdee527e274ea30c680d79"></a>active&#160;</td><td class="fielddoc"><p>Worker is actively processing jobs. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a91dfb70040110beaa487b8abbdc8d9fdaec2f993aec2c27fc750119ab17b16cdb" name="a91dfb70040110beaa487b8abbdc8d9fdaec2f993aec2c27fc750119ab17b16cdb"></a>idle&#160;</td><td class="fielddoc"><p>Worker is idle, waiting for work. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a91dfb70040110beaa487b8abbdc8d9fda3b2a3c8ed19fc3647432e72885d633e7" name="a91dfb70040110beaa487b8abbdc8d9fda3b2a3c8ed19fc3647432e72885d633e7"></a>stopping&#160;</td><td class="fielddoc"><p>Worker is shutting down. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a91dfb70040110beaa487b8abbdc8d9fdaf0a0bfe6bc7d2c58d2989034f83183e0" name="a91dfb70040110beaa487b8abbdc8d9fdaf0a0bfe6bc7d2c58d2989034f83183e0"></a>stopped&#160;</td><td class="fielddoc"><p>Worker has stopped. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="../../d3/d09/worker__policy_8h_source.html#l00052">52</a> of file <a class="el" href="../../d3/d09/worker__policy_8h_source.html">worker_policy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   52</span>                            {</div>
+<div class="line"><span class="lineno">   53</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdae2fa538867c3830a859a5b17ab24644b">created</a>,     </div>
+<div class="line"><span class="lineno">   54</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fda1ee85f6c60017a7f0646ba8dc5824de6">starting</a>,    </div>
+<div class="line"><span class="lineno">   55</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdac76a5e84e4bdee527e274ea30c680d79">active</a>,      </div>
+<div class="line"><span class="lineno">   56</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdaec2f993aec2c27fc750119ab17b16cdb">idle</a>,        </div>
+<div class="line"><span class="lineno">   57</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fda3b2a3c8ed19fc3647432e72885d633e7">stopping</a>,    </div>
+<div class="line"><span class="lineno">   58</span>        <a class="code hl_enumvalue" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdaf0a0bfe6bc7d2c58d2989034f83183e0">stopped</a>      </div>
+<div class="line"><span class="lineno">   59</span>    };</div>
+<div class="ttc" id="anamespacethread__pool__module_html_a91dfb70040110beaa487b8abbdc8d9fda1ee85f6c60017a7f0646ba8dc5824de6"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fda1ee85f6c60017a7f0646ba8dc5824de6">thread_pool_module::worker_state::starting</a></div><div class="ttdeci">@ starting</div><div class="ttdoc">Worker is starting up.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_a91dfb70040110beaa487b8abbdc8d9fda3b2a3c8ed19fc3647432e72885d633e7"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fda3b2a3c8ed19fc3647432e72885d633e7">thread_pool_module::worker_state::stopping</a></div><div class="ttdeci">@ stopping</div><div class="ttdoc">Worker is shutting down.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_a91dfb70040110beaa487b8abbdc8d9fdac76a5e84e4bdee527e274ea30c680d79"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdac76a5e84e4bdee527e274ea30c680d79">thread_pool_module::worker_state::active</a></div><div class="ttdeci">@ active</div><div class="ttdoc">Worker is actively processing jobs.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_a91dfb70040110beaa487b8abbdc8d9fdae2fa538867c3830a859a5b17ab24644b"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdae2fa538867c3830a859a5b17ab24644b">thread_pool_module::worker_state::created</a></div><div class="ttdeci">@ created</div><div class="ttdoc">Worker created but not started.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_a91dfb70040110beaa487b8abbdc8d9fdaec2f993aec2c27fc750119ab17b16cdb"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdaec2f993aec2c27fc750119ab17b16cdb">thread_pool_module::worker_state::idle</a></div><div class="ttdeci">@ idle</div><div class="ttdoc">Worker is idle, waiting for work.</div></div>
+<div class="ttc" id="anamespacethread__pool__module_html_a91dfb70040110beaa487b8abbdc8d9fdaf0a0bfe6bc7d2c58d2989034f83183e0"><div class="ttname"><a href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fdaf0a0bfe6bc7d2c58d2989034f83183e0">thread_pool_module::worker_state::stopped</a></div><div class="ttdeci">@ stopped</div><div class="ttdoc">Worker has stopped.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
 <a id="a0c486c1ebe4bcede7004627da8004478" name="a0c486c1ebe4bcede7004627da8004478"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0c486c1ebe4bcede7004627da8004478">&#9670;&#160;</a></span>delay()</h2>
 
@@ -165,25 +334,26 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00817">817</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  817</span>                                                        {</div>
-<div class="line"><span class="lineno">  818</span>    <span class="keyword">struct </span>delay_awaiter {</div>
-<div class="line"><span class="lineno">  819</span>        std::chrono::milliseconds duration;</div>
-<div class="line"><span class="lineno">  820</span>        </div>
-<div class="line"><span class="lineno">  821</span>        <span class="keywordtype">bool</span> await_ready() const noexcept { </div>
-<div class="line"><span class="lineno">  822</span>            <span class="keywordflow">return</span> duration.count() &lt;= 0; </div>
-<div class="line"><span class="lineno">  823</span>        }</div>
-<div class="line"><span class="lineno">  824</span>        </div>
-<div class="line"><span class="lineno">  825</span>        <span class="keywordtype">void</span> await_suspend(std::coroutine_handle&lt;&gt; handle) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  826</span>            <span class="comment">// Use the helper function to sleep and resume</span></div>
-<div class="line"><span class="lineno">  827</span>            sleep_and_resume(duration, handle);</div>
-<div class="line"><span class="lineno">  828</span>        }</div>
-<div class="line"><span class="lineno">  829</span>        </div>
-<div class="line"><span class="lineno">  830</span>        <span class="keywordtype">void</span> await_resume() noexcept {}</div>
-<div class="line"><span class="lineno">  831</span>    };</div>
-<div class="line"><span class="lineno">  832</span>    </div>
-<div class="line"><span class="lineno">  833</span>    <span class="keyword">co_await</span> delay_awaiter{duration};</div>
-<div class="line"><span class="lineno">  834</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00848">848</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  848</span>                                                        {</div>
+<div class="line"><span class="lineno">  849</span>    <span class="keyword">struct </span>delay_awaiter {</div>
+<div class="line"><span class="lineno">  850</span>        std::chrono::milliseconds duration;</div>
+<div class="line"><span class="lineno">  851</span>        </div>
+<div class="line"><span class="lineno">  852</span>        <span class="keywordtype">bool</span> await_ready() const noexcept { </div>
+<div class="line"><span class="lineno">  853</span>            <span class="keywordflow">return</span> duration.count() &lt;= 0; </div>
+<div class="line"><span class="lineno">  854</span>        }</div>
+<div class="line"><span class="lineno">  855</span>        </div>
+<div class="line"><span class="lineno">  856</span>        <span class="keywordtype">void</span> await_suspend(std::coroutine_handle&lt;&gt; handle) <span class="keyword">noexcept</span> {</div>
+<div class="line"><span class="lineno">  857</span>            <span class="comment">// Use the helper function to sleep and resume</span></div>
+<div class="line"><span class="lineno">  858</span>            sleep_and_resume(duration, handle);</div>
+<div class="line"><span class="lineno">  859</span>        }</div>
+<div class="line"><span class="lineno">  860</span>        </div>
+<div class="line"><span class="lineno">  861</span>        <span class="keywordtype">void</span> await_resume() noexcept {}</div>
+<div class="line"><span class="lineno">  862</span>    };</div>
+<div class="line"><span class="lineno">  863</span>    </div>
+<div class="line"><span class="lineno">  864</span>    <span class="keyword">co_await</span> delay_awaiter{<a class="code hl_typedef" href="../../dc/da4/namespacemonitoring__module.html#a5288937db3fb31594060a3ae2c801b01">duration</a>};</div>
+<div class="line"><span class="lineno">  865</span>}</div>
+<div class="ttc" id="anamespacemonitoring__module_html_a5288937db3fb31594060a3ae2c801b01"><div class="ttname"><a href="../../dc/da4/namespacemonitoring__module.html#a5288937db3fb31594060a3ae2c801b01">monitoring_module::duration</a></div><div class="ttdeci">std::chrono::nanoseconds duration</div><div class="ttdoc">Duration type for time measurements.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d01/monitoring__types_8h_source.html#l00079">monitoring_types.h:79</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -192,6 +362,141 @@ Here is the call graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="5,5,160,45"/>
 <area shape="rect" href="../../d8/d98/namespacethread__pool__module.html#a7b07a23993168217a9ae8536c9ef9e38" title=" " alt="" coords="208,5,363,45"/>
 <area shape="poly" title=" " alt="" coords="160,23,194,23,194,28,160,28"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="aef6a0fdf9f3aba228c372989d4eba659" name="aef6a0fdf9f3aba228c372989d4eba659"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef6a0fdf9f3aba228c372989d4eba659">&#9670;&#160;</a></span>make_exceptional_future()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a>&lt; T &gt; thread_pool_module::make_exceptional_future </td>
+          <td>(</td>
+          <td class="paramtype">std::exception_ptr&#160;</td>
+          <td class="paramname"><em>exception</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a future that is already ready with an exception. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/dca/future__extensions_8h_source.html#l00230">230</a> of file <a class="el" href="../../df/dca/future__extensions_8h_source.html">future_extensions.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  230</span>                                                                       {</div>
+<div class="line"><span class="lineno">  231</span>        <a class="code hl_class" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html">pool_promise&lt;T&gt;</a> promise;</div>
+<div class="line"><span class="lineno">  232</span>        <span class="keyword">auto</span> future = promise.<a class="code hl_function" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895">get_future</a>();</div>
+<div class="line"><span class="lineno">  233</span>        promise.<a class="code hl_function" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a9a3a08160f4baa3802afbe80fa377261">set_exception</a>(exception);</div>
+<div class="line"><span class="lineno">  234</span>        <span class="keywordflow">return</span> future;</div>
+<div class="line"><span class="lineno">  235</span>    }</div>
+<div class="ttc" id="aclassthread__pool__module_1_1pool__promise_html"><div class="ttname"><a href="../../d4/d02/classthread__pool__module_1_1pool__promise.html">thread_pool_module::pool_promise</a></div><div class="ttdoc">A promise that can schedule work on a thread pool.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dca/future__extensions_8h_source.html#l00120">future_extensions.h:120</a></div></div>
+<div class="ttc" id="aclassthread__pool__module_1_1pool__promise_html_a1f753f7a0f08f78c616723e878017895"><div class="ttname"><a href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895">thread_pool_module::pool_promise::get_future</a></div><div class="ttdeci">pool_future&lt; T &gt; get_future()</div><div class="ttdoc">Get the associated future.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dca/future__extensions_8h_source.html#l00132">future_extensions.h:132</a></div></div>
+<div class="ttc" id="aclassthread__pool__module_1_1pool__promise_html_a9a3a08160f4baa3802afbe80fa377261"><div class="ttname"><a href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a9a3a08160f4baa3802afbe80fa377261">thread_pool_module::pool_promise::set_exception</a></div><div class="ttdeci">void set_exception(std::exception_ptr exception)</div><div class="ttdoc">Set an exception.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dca/future__extensions_8h_source.html#l00153">future_extensions.h:153</a></div></div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d98/namespacethread__pool__module_aef6a0fdf9f3aba228c372989d4eba659_cgraph.png" border="0" usemap="#ad8/d98/namespacethread__pool__module_aef6a0fdf9f3aba228c372989d4eba659_cgraph" alt=""/></div>
+<map name="ad8/d98/namespacethread__pool__module_aef6a0fdf9f3aba228c372989d4eba659_cgraph" id="ad8/d98/namespacethread__pool__module_aef6a0fdf9f3aba228c372989d4eba659_cgraph">
+<area shape="rect" title="Create a future that is already ready with an exception." alt="" coords="5,53,200,93"/>
+<area shape="rect" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895" title="Get the associated future." alt="" coords="248,5,403,60"/>
+<area shape="poly" title=" " alt="" coords="200,52,234,46,235,52,201,58"/>
+<area shape="rect" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a9a3a08160f4baa3802afbe80fa377261" title="Set an exception." alt="" coords="248,84,403,139"/>
+<area shape="poly" title=" " alt="" coords="201,87,235,93,234,98,200,92"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a2ab7372dcd09abd745b3978af363b73f" name="a2ab7372dcd09abd745b3978af363b73f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ab7372dcd09abd745b3978af363b73f">&#9670;&#160;</a></span>make_ready_future() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a>&lt; void &gt; thread_pool_module::make_ready_future </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a future that is already ready with void. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/dca/future__extensions_8h_source.html#l00219">219</a> of file <a class="el" href="../../df/dca/future__extensions_8h_source.html">future_extensions.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  219</span>                                                 {</div>
+<div class="line"><span class="lineno">  220</span>        <a class="code hl_class" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html">pool_promise&lt;void&gt;</a> promise;</div>
+<div class="line"><span class="lineno">  221</span>        <span class="keyword">auto</span> future = promise.<a class="code hl_function" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895">get_future</a>();</div>
+<div class="line"><span class="lineno">  222</span>        promise.<a class="code hl_function" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a02fb3af59a47f91c9d7900ef6b22dd0b">set_value</a>();</div>
+<div class="line"><span class="lineno">  223</span>        <span class="keywordflow">return</span> future;</div>
+<div class="line"><span class="lineno">  224</span>    }</div>
+<div class="ttc" id="aclassthread__pool__module_1_1pool__promise_html_a02fb3af59a47f91c9d7900ef6b22dd0b"><div class="ttname"><a href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a02fb3af59a47f91c9d7900ef6b22dd0b">thread_pool_module::pool_promise::set_value</a></div><div class="ttdeci">void set_value(const T &amp;value)</div><div class="ttdoc">Set the value.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dca/future__extensions_8h_source.html#l00139">future_extensions.h:139</a></div></div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d98/namespacethread__pool__module_a2ab7372dcd09abd745b3978af363b73f_cgraph.png" border="0" usemap="#ad8/d98/namespacethread__pool__module_a2ab7372dcd09abd745b3978af363b73f_cgraph" alt=""/></div>
+<map name="ad8/d98/namespacethread__pool__module_a2ab7372dcd09abd745b3978af363b73f_cgraph" id="ad8/d98/namespacethread__pool__module_a2ab7372dcd09abd745b3978af363b73f_cgraph">
+<area shape="rect" title="Create a future that is already ready with void." alt="" coords="5,49,161,89"/>
+<area shape="rect" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895" title="Get the associated future." alt="" coords="227,5,381,60"/>
+<area shape="poly" title=" " alt="" coords="161,53,213,45,213,50,162,59"/>
+<area shape="rect" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a02fb3af59a47f91c9d7900ef6b22dd0b" title="Set the value." alt="" coords="209,85,399,125"/>
+<area shape="poly" title=" " alt="" coords="162,79,196,84,195,90,161,84"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a26cb3767ed00a8ce412b776aa7b7765e" name="a26cb3767ed00a8ce412b776aa7b7765e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26cb3767ed00a8ce412b776aa7b7765e">&#9670;&#160;</a></span>make_ready_future() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../df/d38/classthread__pool__module_1_1pool__future.html">pool_future</a>&lt; std::decay_t&lt; T &gt; &gt; thread_pool_module::make_ready_future </td>
+          <td>(</td>
+          <td class="paramtype">T &amp;&amp;&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a future that is already ready with a value. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/dca/future__extensions_8h_source.html#l00209">209</a> of file <a class="el" href="../../df/dca/future__extensions_8h_source.html">future_extensions.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  209</span>                                                            {</div>
+<div class="line"><span class="lineno">  210</span>        <a class="code hl_class" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html">pool_promise&lt;std::decay_t&lt;T&gt;</a>&gt; promise;</div>
+<div class="line"><span class="lineno">  211</span>        <span class="keyword">auto</span> future = promise.<a class="code hl_function" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895">get_future</a>();</div>
+<div class="line"><span class="lineno">  212</span>        promise.<a class="code hl_function" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a02fb3af59a47f91c9d7900ef6b22dd0b">set_value</a>(std::forward&lt;T&gt;(value));</div>
+<div class="line"><span class="lineno">  213</span>        <span class="keywordflow">return</span> future;</div>
+<div class="line"><span class="lineno">  214</span>    }</div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d98/namespacethread__pool__module_a26cb3767ed00a8ce412b776aa7b7765e_cgraph.png" border="0" usemap="#ad8/d98/namespacethread__pool__module_a26cb3767ed00a8ce412b776aa7b7765e_cgraph" alt=""/></div>
+<map name="ad8/d98/namespacethread__pool__module_a26cb3767ed00a8ce412b776aa7b7765e_cgraph" id="ad8/d98/namespacethread__pool__module_a26cb3767ed00a8ce412b776aa7b7765e_cgraph">
+<area shape="rect" title="Create a future that is already ready with a value." alt="" coords="5,49,161,89"/>
+<area shape="rect" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a1f753f7a0f08f78c616723e878017895" title="Get the associated future." alt="" coords="227,5,381,60"/>
+<area shape="poly" title=" " alt="" coords="161,53,213,45,213,50,162,59"/>
+<area shape="rect" href="../../d4/d02/classthread__pool__module_1_1pool__promise.html#a02fb3af59a47f91c9d7900ef6b22dd0b" title="Set the value." alt="" coords="209,85,399,125"/>
+<area shape="poly" title=" " alt="" coords="162,79,196,84,195,90,161,84"/>
 </map>
 </div>
 
@@ -215,77 +520,46 @@ template&lt;typename Func &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00618">618</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  618</span>                                                              {</div>
-<div class="line"><span class="lineno">  619</span>    <span class="keyword">using </span>result_type = std::invoke_result_t&lt;Func&gt;;</div>
-<div class="line"><span class="lineno">  620</span>    </div>
-<div class="line"><span class="lineno">  621</span><span class="preprocessor">#if defined(_MSC_VER)</span></div>
-<div class="line"><span class="lineno">  622</span>    <span class="comment">// MSVC-specific implementation</span></div>
-<div class="line"><span class="lineno">  623</span>    <span class="comment">// MSVC requires different approach for handling errors from coroutines</span></div>
-<div class="line"><span class="lineno">  624</span>    <span class="comment">// We need to handle error conditions by wrapping the entire function</span></div>
-<div class="line"><span class="lineno">  625</span>    <span class="keywordflow">try</span> {</div>
-<div class="line"><span class="lineno">  626</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  627</span>            std::forward&lt;Func&gt;(func)();</div>
-<div class="line"><span class="lineno">  628</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  629</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  630</span>            <span class="keyword">co_return</span> std::forward&lt;Func&gt;(func)();</div>
-<div class="line"><span class="lineno">  631</span>        }</div>
-<div class="line"><span class="lineno">  632</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> error&amp; e) {</div>
-<div class="line"><span class="lineno">  633</span>        <span class="comment">// Special case for our error type - we already have the error information</span></div>
-<div class="line"><span class="lineno">  634</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  635</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  636</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  637</span>            <span class="keyword">co_return</span> result_type(e);</div>
-<div class="line"><span class="lineno">  638</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  639</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
-<div class="line"><span class="lineno">  640</span>        }</div>
-<div class="line"><span class="lineno">  641</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
-<div class="line"><span class="lineno">  642</span>        <span class="comment">// For standard exceptions, convert to our error type</span></div>
-<div class="line"><span class="lineno">  643</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  644</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  645</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_same_v&lt;result_type, result_t&lt;void&gt;&gt; ||</div>
-<div class="line"><span class="lineno">  646</span>                           std::is_same_v&lt;result_type, result_void&gt;) {</div>
-<div class="line"><span class="lineno">  647</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
-<div class="line"><span class="lineno">  648</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  649</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
-<div class="line"><span class="lineno">  650</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  651</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
-<div class="line"><span class="lineno">  652</span>        }</div>
-<div class="line"><span class="lineno">  653</span>    }</div>
-<div class="line"><span class="lineno">  654</span><span class="preprocessor">#elif defined(THREAD_SYSTEM_MINGW) || defined(THREAD_SYSTEM_MSYS)</span></div>
-<div class="line"><span class="lineno">  655</span>    <span class="comment">// MinGW/MSYS-specific implementation</span></div>
-<div class="line"><span class="lineno">  656</span>    <span class="comment">// These environments need special handling similar to MSVC</span></div>
-<div class="line"><span class="lineno">  657</span>    <span class="keywordflow">try</span> {</div>
-<div class="line"><span class="lineno">  658</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  659</span>            std::forward&lt;Func&gt;(func)();</div>
-<div class="line"><span class="lineno">  660</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  661</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  662</span>            <span class="keyword">co_return</span> std::forward&lt;Func&gt;(func)();</div>
-<div class="line"><span class="lineno">  663</span>        }</div>
-<div class="line"><span class="lineno">  664</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> error&amp; e) {</div>
-<div class="line"><span class="lineno">  665</span>        <span class="comment">// Special case for our error type</span></div>
-<div class="line"><span class="lineno">  666</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  667</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  668</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  669</span>            <span class="keyword">co_return</span> result_type(e);</div>
-<div class="line"><span class="lineno">  670</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  671</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
-<div class="line"><span class="lineno">  672</span>        }</div>
-<div class="line"><span class="lineno">  673</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
-<div class="line"><span class="lineno">  674</span>        <span class="comment">// For standard exceptions</span></div>
-<div class="line"><span class="lineno">  675</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  676</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  677</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_same_v&lt;result_type, result_t&lt;void&gt;&gt; ||</div>
-<div class="line"><span class="lineno">  678</span>                           std::is_same_v&lt;result_type, result_void&gt;) {</div>
-<div class="line"><span class="lineno">  679</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
-<div class="line"><span class="lineno">  680</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  681</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
-<div class="line"><span class="lineno">  682</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  683</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
-<div class="line"><span class="lineno">  684</span>        }</div>
-<div class="line"><span class="lineno">  685</span>    }</div>
-<div class="line"><span class="lineno">  686</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  687</span>    <span class="comment">// Implementation for Clang, GCC, etc.</span></div>
+<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00649">649</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  649</span>                                                              {</div>
+<div class="line"><span class="lineno">  650</span>    <span class="keyword">using </span>result_type = std::invoke_result_t&lt;Func&gt;;</div>
+<div class="line"><span class="lineno">  651</span>    </div>
+<div class="line"><span class="lineno">  652</span><span class="preprocessor">#if defined(_MSC_VER)</span></div>
+<div class="line"><span class="lineno">  653</span>    <span class="comment">// MSVC-specific implementation</span></div>
+<div class="line"><span class="lineno">  654</span>    <span class="comment">// MSVC requires different approach for handling errors from coroutines</span></div>
+<div class="line"><span class="lineno">  655</span>    <span class="comment">// We need to handle error conditions by wrapping the entire function</span></div>
+<div class="line"><span class="lineno">  656</span>    <span class="keywordflow">try</span> {</div>
+<div class="line"><span class="lineno">  657</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  658</span>            std::forward&lt;Func&gt;(func)();</div>
+<div class="line"><span class="lineno">  659</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  660</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  661</span>            <span class="keyword">co_return</span> std::forward&lt;Func&gt;(func)();</div>
+<div class="line"><span class="lineno">  662</span>        }</div>
+<div class="line"><span class="lineno">  663</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> error&amp; e) {</div>
+<div class="line"><span class="lineno">  664</span>        <span class="comment">// Special case for our error type - we already have the error information</span></div>
+<div class="line"><span class="lineno">  665</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  666</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  667</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  668</span>            <span class="keyword">co_return</span> result_type(e);</div>
+<div class="line"><span class="lineno">  669</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  670</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
+<div class="line"><span class="lineno">  671</span>        }</div>
+<div class="line"><span class="lineno">  672</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
+<div class="line"><span class="lineno">  673</span>        <span class="comment">// For standard exceptions, convert to our error type</span></div>
+<div class="line"><span class="lineno">  674</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  675</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  676</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_same_v&lt;result_type, result_t&lt;void&gt;&gt; ||</div>
+<div class="line"><span class="lineno">  677</span>                           std::is_same_v&lt;result_type, result_void&gt;) {</div>
+<div class="line"><span class="lineno">  678</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
+<div class="line"><span class="lineno">  679</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  680</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
+<div class="line"><span class="lineno">  681</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  682</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
+<div class="line"><span class="lineno">  683</span>        }</div>
+<div class="line"><span class="lineno">  684</span>    }</div>
+<div class="line"><span class="lineno">  685</span><span class="preprocessor">#elif defined(THREAD_SYSTEM_MINGW) || defined(THREAD_SYSTEM_MSYS)</span></div>
+<div class="line"><span class="lineno">  686</span>    <span class="comment">// MinGW/MSYS-specific implementation</span></div>
+<div class="line"><span class="lineno">  687</span>    <span class="comment">// These environments need special handling similar to MSVC</span></div>
 <div class="line"><span class="lineno">  688</span>    <span class="keywordflow">try</span> {</div>
 <div class="line"><span class="lineno">  689</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
 <div class="line"><span class="lineno">  690</span>            std::forward&lt;Func&gt;(func)();</div>
@@ -294,69 +568,100 @@ template&lt;typename Func &gt; </div>
 <div class="line"><span class="lineno">  693</span>            <span class="keyword">co_return</span> std::forward&lt;Func&gt;(func)();</div>
 <div class="line"><span class="lineno">  694</span>        }</div>
 <div class="line"><span class="lineno">  695</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> error&amp; e) {</div>
-<div class="line"><span class="lineno">  696</span>        <span class="comment">// Direct handling of our error type</span></div>
-<div class="line"><span class="lineno">  697</span><span class="preprocessor">        #if defined(__clang__) &amp;&amp; defined(__has_builtin) &amp;&amp; __has_builtin(__builtin_coro_frame)</span></div>
-<div class="line"><span class="lineno">  698</span>            <span class="comment">// Clang-specific implementation using __builtin_coro_frame if available</span></div>
-<div class="line"><span class="lineno">  699</span>            <span class="keyword">auto</span> handle = std::coroutine_handle&lt;task_promise&lt;result_type&gt;&gt;::from_promise(</div>
-<div class="line"><span class="lineno">  700</span>                *<span class="keyword">reinterpret_cast&lt;</span>task_promise&lt;result_type&gt;*<span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno">  701</span>                    std::coroutine_handle&lt;&gt;::from_address(</div>
-<div class="line"><span class="lineno">  702</span>                        __builtin_coro_frame()</div>
-<div class="line"><span class="lineno">  703</span>                    ).address()</div>
-<div class="line"><span class="lineno">  704</span>                )</div>
-<div class="line"><span class="lineno">  705</span>            );</div>
-<div class="line"><span class="lineno">  706</span>            handle.promise().set_error(e);</div>
-<div class="line"><span class="lineno">  707</span><span class="preprocessor">        #else</span></div>
-<div class="line"><span class="lineno">  708</span>            <span class="comment">// For other compilers, rethrow and handle in the catch block below</span></div>
-<div class="line"><span class="lineno">  709</span>            <span class="keywordflow">throw</span> e;</div>
-<div class="line"><span class="lineno">  710</span><span class="preprocessor">        #endif</span></div>
-<div class="line"><span class="lineno">  711</span>        </div>
-<div class="line"><span class="lineno">  712</span>        <span class="comment">// Fallback return values</span></div>
-<div class="line"><span class="lineno">  713</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  714</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  715</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  716</span>            <span class="keyword">co_return</span> result_type(e);</div>
-<div class="line"><span class="lineno">  717</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  718</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
-<div class="line"><span class="lineno">  719</span>        }</div>
-<div class="line"><span class="lineno">  720</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
-<div class="line"><span class="lineno">  721</span>        <span class="comment">// Can&#39;t use co_await in catch block, so manually handle the error</span></div>
-<div class="line"><span class="lineno">  722</span>        <span class="comment">// We need a safe, cross-compiler way to access the promise</span></div>
-<div class="line"><span class="lineno">  723</span><span class="preprocessor">        #if defined(__clang__) &amp;&amp; defined(__has_builtin) &amp;&amp; __has_builtin(__builtin_coro_frame)</span></div>
-<div class="line"><span class="lineno">  724</span>            <span class="comment">// Clang-specific implementation using __builtin_coro_frame</span></div>
-<div class="line"><span class="lineno">  725</span>            <span class="keyword">auto</span> handle = std::coroutine_handle&lt;task_promise&lt;result_type&gt;&gt;::from_promise(</div>
-<div class="line"><span class="lineno">  726</span>                *<span class="keyword">reinterpret_cast&lt;</span>task_promise&lt;result_type&gt;*<span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno">  727</span>                    std::coroutine_handle&lt;&gt;::from_address(</div>
-<div class="line"><span class="lineno">  728</span>                        __builtin_coro_frame()</div>
-<div class="line"><span class="lineno">  729</span>                    ).address()</div>
-<div class="line"><span class="lineno">  730</span>                )</div>
-<div class="line"><span class="lineno">  731</span>            );</div>
-<div class="line"><span class="lineno">  732</span>            handle.promise().set_error(error{error_code::job_execution_failed, e.what()});</div>
-<div class="line"><span class="lineno">  733</span><span class="preprocessor">        #elif defined(__GNUC__) || defined(__GNUG__)</span></div>
-<div class="line"><span class="lineno">  734</span>            <span class="comment">// GCC implementation</span></div>
-<div class="line"><span class="lineno">  735</span>            <span class="comment">// Convert to our error type then throw - the promise will catch it</span></div>
-<div class="line"><span class="lineno">  736</span>            <span class="keywordflow">throw</span> error{error_code::job_execution_failed, e.what()};</div>
-<div class="line"><span class="lineno">  737</span><span class="preprocessor">        #else</span></div>
-<div class="line"><span class="lineno">  738</span>            <span class="comment">// Generic fallback for other compilers</span></div>
-<div class="line"><span class="lineno">  739</span>            <span class="keywordflow">throw</span> error{error_code::job_execution_failed, e.what()};</div>
-<div class="line"><span class="lineno">  740</span><span class="preprocessor">        #endif</span></div>
-<div class="line"><span class="lineno">  741</span>        </div>
-<div class="line"><span class="lineno">  742</span>        <span class="comment">// We need to provide a return value for non-void tasks</span></div>
-<div class="line"><span class="lineno">  743</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  744</span>            <span class="keyword">co_return</span>;</div>
-<div class="line"><span class="lineno">  745</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_same_v&lt;result_type, result_t&lt;void&gt;&gt; ||</div>
-<div class="line"><span class="lineno">  746</span>                           std::is_same_v&lt;result_type, result_void&gt;) {</div>
-<div class="line"><span class="lineno">  747</span>            <span class="comment">// For result-based return types</span></div>
-<div class="line"><span class="lineno">  748</span>            <span class="keyword">co_return</span> result_type(error{error_code::operation_canceled, <span class="stringliteral">&quot;Task was cancelled&quot;</span>});</div>
-<div class="line"><span class="lineno">  749</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
-<div class="line"><span class="lineno">  750</span>            <span class="comment">// For any other result&lt;T&gt; types</span></div>
-<div class="line"><span class="lineno">  751</span>            <span class="keyword">co_return</span> result_type(error{error_code::operation_canceled, <span class="stringliteral">&quot;Task was cancelled&quot;</span>});</div>
-<div class="line"><span class="lineno">  752</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  753</span>            <span class="comment">// For regular return types - return default value of T</span></div>
-<div class="line"><span class="lineno">  754</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
-<div class="line"><span class="lineno">  755</span>        }</div>
-<div class="line"><span class="lineno">  756</span>    }</div>
-<div class="line"><span class="lineno">  757</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  758</span>}</div>
+<div class="line"><span class="lineno">  696</span>        <span class="comment">// Special case for our error type</span></div>
+<div class="line"><span class="lineno">  697</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  698</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  699</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  700</span>            <span class="keyword">co_return</span> result_type(e);</div>
+<div class="line"><span class="lineno">  701</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  702</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
+<div class="line"><span class="lineno">  703</span>        }</div>
+<div class="line"><span class="lineno">  704</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
+<div class="line"><span class="lineno">  705</span>        <span class="comment">// For standard exceptions</span></div>
+<div class="line"><span class="lineno">  706</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  707</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  708</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_same_v&lt;result_type, result_t&lt;void&gt;&gt; ||</div>
+<div class="line"><span class="lineno">  709</span>                           std::is_same_v&lt;result_type, result_void&gt;) {</div>
+<div class="line"><span class="lineno">  710</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
+<div class="line"><span class="lineno">  711</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  712</span>            <span class="keyword">co_return</span> result_type(error{error_code::job_execution_failed, e.what()});</div>
+<div class="line"><span class="lineno">  713</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  714</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
+<div class="line"><span class="lineno">  715</span>        }</div>
+<div class="line"><span class="lineno">  716</span>    }</div>
+<div class="line"><span class="lineno">  717</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  718</span>    <span class="comment">// Implementation for Clang, GCC, etc.</span></div>
+<div class="line"><span class="lineno">  719</span>    <span class="keywordflow">try</span> {</div>
+<div class="line"><span class="lineno">  720</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  721</span>            std::forward&lt;Func&gt;(func)();</div>
+<div class="line"><span class="lineno">  722</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  723</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  724</span>            <span class="keyword">co_return</span> std::forward&lt;Func&gt;(func)();</div>
+<div class="line"><span class="lineno">  725</span>        }</div>
+<div class="line"><span class="lineno">  726</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> error&amp; e) {</div>
+<div class="line"><span class="lineno">  727</span>        <span class="comment">// Direct handling of our error type</span></div>
+<div class="line"><span class="lineno">  728</span><span class="preprocessor">        #if defined(__clang__) &amp;&amp; defined(__has_builtin) &amp;&amp; __has_builtin(__builtin_coro_frame)</span></div>
+<div class="line"><span class="lineno">  729</span>            <span class="comment">// Clang-specific implementation using __builtin_coro_frame if available</span></div>
+<div class="line"><span class="lineno">  730</span>            <span class="keyword">auto</span> handle = std::coroutine_handle&lt;task_promise&lt;result_type&gt;&gt;::from_promise(</div>
+<div class="line"><span class="lineno">  731</span>                *<span class="keyword">reinterpret_cast&lt;</span>task_promise&lt;result_type&gt;*<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  732</span>                    std::coroutine_handle&lt;&gt;::from_address(</div>
+<div class="line"><span class="lineno">  733</span>                        __builtin_coro_frame()</div>
+<div class="line"><span class="lineno">  734</span>                    ).address()</div>
+<div class="line"><span class="lineno">  735</span>                )</div>
+<div class="line"><span class="lineno">  736</span>            );</div>
+<div class="line"><span class="lineno">  737</span>            handle.promise().set_error(e);</div>
+<div class="line"><span class="lineno">  738</span><span class="preprocessor">        #else</span></div>
+<div class="line"><span class="lineno">  739</span>            <span class="comment">// For other compilers, rethrow and handle in the catch block below</span></div>
+<div class="line"><span class="lineno">  740</span>            <span class="keywordflow">throw</span> e;</div>
+<div class="line"><span class="lineno">  741</span><span class="preprocessor">        #endif</span></div>
+<div class="line"><span class="lineno">  742</span>        </div>
+<div class="line"><span class="lineno">  743</span>        <span class="comment">// Fallback return values</span></div>
+<div class="line"><span class="lineno">  744</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  745</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  746</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  747</span>            <span class="keyword">co_return</span> result_type(e);</div>
+<div class="line"><span class="lineno">  748</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  749</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
+<div class="line"><span class="lineno">  750</span>        }</div>
+<div class="line"><span class="lineno">  751</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
+<div class="line"><span class="lineno">  752</span>        <span class="comment">// Can&#39;t use co_await in catch block, so manually handle the error</span></div>
+<div class="line"><span class="lineno">  753</span>        <span class="comment">// We need a safe, cross-compiler way to access the promise</span></div>
+<div class="line"><span class="lineno">  754</span><span class="preprocessor">        #if defined(__clang__) &amp;&amp; defined(__has_builtin) &amp;&amp; __has_builtin(__builtin_coro_frame)</span></div>
+<div class="line"><span class="lineno">  755</span>            <span class="comment">// Clang-specific implementation using __builtin_coro_frame</span></div>
+<div class="line"><span class="lineno">  756</span>            <span class="keyword">auto</span> handle = std::coroutine_handle&lt;task_promise&lt;result_type&gt;&gt;::from_promise(</div>
+<div class="line"><span class="lineno">  757</span>                *<span class="keyword">reinterpret_cast&lt;</span>task_promise&lt;result_type&gt;*<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  758</span>                    std::coroutine_handle&lt;&gt;::from_address(</div>
+<div class="line"><span class="lineno">  759</span>                        __builtin_coro_frame()</div>
+<div class="line"><span class="lineno">  760</span>                    ).address()</div>
+<div class="line"><span class="lineno">  761</span>                )</div>
+<div class="line"><span class="lineno">  762</span>            );</div>
+<div class="line"><span class="lineno">  763</span>            handle.promise().set_error(error{error_code::job_execution_failed, e.what()});</div>
+<div class="line"><span class="lineno">  764</span><span class="preprocessor">        #elif defined(__GNUC__) || defined(__GNUG__)</span></div>
+<div class="line"><span class="lineno">  765</span>            <span class="comment">// GCC implementation</span></div>
+<div class="line"><span class="lineno">  766</span>            <span class="comment">// Convert to our error type then throw - the promise will catch it</span></div>
+<div class="line"><span class="lineno">  767</span>            <span class="keywordflow">throw</span> error{error_code::job_execution_failed, e.what()};</div>
+<div class="line"><span class="lineno">  768</span><span class="preprocessor">        #else</span></div>
+<div class="line"><span class="lineno">  769</span>            <span class="comment">// Generic fallback for other compilers</span></div>
+<div class="line"><span class="lineno">  770</span>            <span class="keywordflow">throw</span> error{error_code::job_execution_failed, e.what()};</div>
+<div class="line"><span class="lineno">  771</span><span class="preprocessor">        #endif</span></div>
+<div class="line"><span class="lineno">  772</span>        </div>
+<div class="line"><span class="lineno">  773</span>        <span class="comment">// We need to provide a return value for non-void tasks</span></div>
+<div class="line"><span class="lineno">  774</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_void_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  775</span>            <span class="keyword">co_return</span>;</div>
+<div class="line"><span class="lineno">  776</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::is_same_v&lt;result_type, result_t&lt;void&gt;&gt; ||</div>
+<div class="line"><span class="lineno">  777</span>                           std::is_same_v&lt;result_type, result_void&gt;) {</div>
+<div class="line"><span class="lineno">  778</span>            <span class="comment">// For result-based return types</span></div>
+<div class="line"><span class="lineno">  779</span>            <span class="keyword">co_return</span> result_type(error{error_code::operation_canceled, <span class="stringliteral">&quot;Task was cancelled&quot;</span>});</div>
+<div class="line"><span class="lineno">  780</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (detail::is_result_v&lt;result_type&gt;) {</div>
+<div class="line"><span class="lineno">  781</span>            <span class="comment">// For any other result&lt;T&gt; types</span></div>
+<div class="line"><span class="lineno">  782</span>            <span class="keyword">co_return</span> result_type(error{error_code::operation_canceled, <span class="stringliteral">&quot;Task was cancelled&quot;</span>});</div>
+<div class="line"><span class="lineno">  783</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  784</span>            <span class="comment">// For regular return types - return default value of T</span></div>
+<div class="line"><span class="lineno">  785</span>            <span class="keyword">co_return</span> <span class="keyword">static_cast&lt;</span>result_type<span class="keyword">&gt;</span>(0);</div>
+<div class="line"><span class="lineno">  786</span>        }</div>
+<div class="line"><span class="lineno">  787</span>    }</div>
+<div class="line"><span class="lineno">  788</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  789</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -394,61 +699,61 @@ template&lt;typename Func &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00761">761</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  761</span>                                                                                           {</div>
-<div class="line"><span class="lineno">  762</span>    <span class="comment">// Create a shared state to ensure we properly manage thread lifetime</span></div>
-<div class="line"><span class="lineno">  763</span>    <span class="keyword">struct </span>shared_state {</div>
-<div class="line"><span class="lineno">  764</span>        std::thread timer_thread;</div>
-<div class="line"><span class="lineno">  765</span>        std::atomic&lt;bool&gt; completed{<span class="keyword">false</span>};</div>
-<div class="line"><span class="lineno">  766</span>        std::atomic&lt;bool&gt; destroyed{<span class="keyword">false</span>};</div>
-<div class="line"><span class="lineno">  767</span>        </div>
-<div class="line"><span class="lineno">  768</span>        ~shared_state() {</div>
-<div class="line"><span class="lineno">  769</span>            destroyed.store(<span class="keyword">true</span>);</div>
-<div class="line"><span class="lineno">  770</span>            <span class="keywordflow">if</span> (timer_thread.joinable()) {</div>
-<div class="line"><span class="lineno">  771</span>                timer_thread.join();</div>
-<div class="line"><span class="lineno">  772</span>            }</div>
-<div class="line"><span class="lineno">  773</span>        }</div>
-<div class="line"><span class="lineno">  774</span>    };</div>
-<div class="line"><span class="lineno">  775</span>    </div>
-<div class="line"><span class="lineno">  776</span>    <span class="comment">// Using shared_ptr for automatic cleanup when all references are gone</span></div>
-<div class="line"><span class="lineno">  777</span>    <span class="keyword">auto</span> state = std::make_shared&lt;shared_state&gt;();</div>
-<div class="line"><span class="lineno">  778</span>    </div>
-<div class="line"><span class="lineno">  779</span>    <span class="comment">// Create the timer thread that will sleep and then resume the coroutine</span></div>
-<div class="line"><span class="lineno">  780</span>    state-&gt;timer_thread = std::thread([state, duration, handle]() {</div>
-<div class="line"><span class="lineno">  781</span>        std::this_thread::sleep_for(duration);</div>
-<div class="line"><span class="lineno">  782</span>        </div>
-<div class="line"><span class="lineno">  783</span>        <span class="comment">// Only resume if we haven&#39;t been destroyed yet</span></div>
-<div class="line"><span class="lineno">  784</span>        <span class="keywordflow">if</span> (!state-&gt;destroyed.load()) {</div>
-<div class="line"><span class="lineno">  785</span>            handle.resume();</div>
-<div class="line"><span class="lineno">  786</span>        }</div>
-<div class="line"><span class="lineno">  787</span>        </div>
-<div class="line"><span class="lineno">  788</span>        state-&gt;completed.store(<span class="keyword">true</span>);</div>
-<div class="line"><span class="lineno">  789</span>    });</div>
-<div class="line"><span class="lineno">  790</span>    </div>
-<div class="line"><span class="lineno">  791</span><span class="preprocessor">#if defined(THREAD_SYSTEM_WINDOWS)</span></div>
-<div class="line"><span class="lineno">  792</span>    <span class="comment">// On Windows (including MSVC, MinGW, MSYS), we use a dedicated cleanup approach</span></div>
-<div class="line"><span class="lineno">  793</span>    std::thread cleanup_thread([state]() {</div>
-<div class="line"><span class="lineno">  794</span>        <span class="comment">// This thread&#39;s only job is to hold a reference to the state </span></div>
-<div class="line"><span class="lineno">  795</span>        <span class="comment">// until the timer thread completes to ensure proper cleanup</span></div>
-<div class="line"><span class="lineno">  796</span>        <span class="keywordflow">while</span> (!state-&gt;completed.load()) {</div>
-<div class="line"><span class="lineno">  797</span>            std::this_thread::sleep_for(std::chrono::milliseconds(10));</div>
-<div class="line"><span class="lineno">  798</span>        }</div>
-<div class="line"><span class="lineno">  799</span>    });</div>
-<div class="line"><span class="lineno">  800</span>    cleanup_thread.detach();</div>
-<div class="line"><span class="lineno">  801</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  802</span>    <span class="comment">// On non-Windows platforms, we can safely detach the thread</span></div>
-<div class="line"><span class="lineno">  803</span>    <span class="comment">// The shared_ptr will keep the state alive until all references are gone</span></div>
-<div class="line"><span class="lineno">  804</span>    state-&gt;timer_thread.detach();</div>
-<div class="line"><span class="lineno">  805</span>    </div>
-<div class="line"><span class="lineno">  806</span>    <span class="comment">// Create a second detached thread as a safety net that will</span></div>
-<div class="line"><span class="lineno">  807</span>    <span class="comment">// ensure the state lives long enough for the timer thread to finish</span></div>
-<div class="line"><span class="lineno">  808</span>    std::thread([state]() {</div>
-<div class="line"><span class="lineno">  809</span>        <span class="keywordflow">while</span> (!state-&gt;completed.load()) {</div>
-<div class="line"><span class="lineno">  810</span>            std::this_thread::sleep_for(std::chrono::milliseconds(50));</div>
-<div class="line"><span class="lineno">  811</span>        }</div>
-<div class="line"><span class="lineno">  812</span>    }).detach();</div>
-<div class="line"><span class="lineno">  813</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  814</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00792">792</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  792</span>                                                                                           {</div>
+<div class="line"><span class="lineno">  793</span>    <span class="comment">// Create a shared state to ensure we properly manage thread lifetime</span></div>
+<div class="line"><span class="lineno">  794</span>    <span class="keyword">struct </span>shared_state {</div>
+<div class="line"><span class="lineno">  795</span>        std::thread timer_thread;</div>
+<div class="line"><span class="lineno">  796</span>        std::atomic&lt;bool&gt; completed{<span class="keyword">false</span>};</div>
+<div class="line"><span class="lineno">  797</span>        std::atomic&lt;bool&gt; destroyed{<span class="keyword">false</span>};</div>
+<div class="line"><span class="lineno">  798</span>        </div>
+<div class="line"><span class="lineno">  799</span>        ~shared_state() {</div>
+<div class="line"><span class="lineno">  800</span>            destroyed.store(<span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">  801</span>            <span class="keywordflow">if</span> (timer_thread.joinable()) {</div>
+<div class="line"><span class="lineno">  802</span>                timer_thread.join();</div>
+<div class="line"><span class="lineno">  803</span>            }</div>
+<div class="line"><span class="lineno">  804</span>        }</div>
+<div class="line"><span class="lineno">  805</span>    };</div>
+<div class="line"><span class="lineno">  806</span>    </div>
+<div class="line"><span class="lineno">  807</span>    <span class="comment">// Using shared_ptr for automatic cleanup when all references are gone</span></div>
+<div class="line"><span class="lineno">  808</span>    <span class="keyword">auto</span> state = std::make_shared&lt;shared_state&gt;();</div>
+<div class="line"><span class="lineno">  809</span>    </div>
+<div class="line"><span class="lineno">  810</span>    <span class="comment">// Create the timer thread that will sleep and then resume the coroutine</span></div>
+<div class="line"><span class="lineno">  811</span>    state-&gt;timer_thread = std::thread([state, duration, handle]() {</div>
+<div class="line"><span class="lineno">  812</span>        std::this_thread::sleep_for(duration);</div>
+<div class="line"><span class="lineno">  813</span>        </div>
+<div class="line"><span class="lineno">  814</span>        <span class="comment">// Only resume if we haven&#39;t been destroyed yet</span></div>
+<div class="line"><span class="lineno">  815</span>        <span class="keywordflow">if</span> (!state-&gt;destroyed.load()) {</div>
+<div class="line"><span class="lineno">  816</span>            handle.resume();</div>
+<div class="line"><span class="lineno">  817</span>        }</div>
+<div class="line"><span class="lineno">  818</span>        </div>
+<div class="line"><span class="lineno">  819</span>        state-&gt;completed.store(<span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">  820</span>    });</div>
+<div class="line"><span class="lineno">  821</span>    </div>
+<div class="line"><span class="lineno">  822</span><span class="preprocessor">#if defined(THREAD_SYSTEM_WINDOWS)</span></div>
+<div class="line"><span class="lineno">  823</span>    <span class="comment">// On Windows (including MSVC, MinGW, MSYS), we use a dedicated cleanup approach</span></div>
+<div class="line"><span class="lineno">  824</span>    std::thread cleanup_thread([state]() {</div>
+<div class="line"><span class="lineno">  825</span>        <span class="comment">// This thread&#39;s only job is to hold a reference to the state </span></div>
+<div class="line"><span class="lineno">  826</span>        <span class="comment">// until the timer thread completes to ensure proper cleanup</span></div>
+<div class="line"><span class="lineno">  827</span>        <span class="keywordflow">while</span> (!state-&gt;completed.load()) {</div>
+<div class="line"><span class="lineno">  828</span>            std::this_thread::sleep_for(std::chrono::milliseconds(10));</div>
+<div class="line"><span class="lineno">  829</span>        }</div>
+<div class="line"><span class="lineno">  830</span>    });</div>
+<div class="line"><span class="lineno">  831</span>    cleanup_thread.detach();</div>
+<div class="line"><span class="lineno">  832</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  833</span>    <span class="comment">// On non-Windows platforms, we can safely detach the thread</span></div>
+<div class="line"><span class="lineno">  834</span>    <span class="comment">// The shared_ptr will keep the state alive until all references are gone</span></div>
+<div class="line"><span class="lineno">  835</span>    state-&gt;timer_thread.detach();</div>
+<div class="line"><span class="lineno">  836</span>    </div>
+<div class="line"><span class="lineno">  837</span>    <span class="comment">// Create a second detached thread as a safety net that will</span></div>
+<div class="line"><span class="lineno">  838</span>    <span class="comment">// ensure the state lives long enough for the timer thread to finish</span></div>
+<div class="line"><span class="lineno">  839</span>    std::thread([state]() {</div>
+<div class="line"><span class="lineno">  840</span>        <span class="keywordflow">while</span> (!state-&gt;completed.load()) {</div>
+<div class="line"><span class="lineno">  841</span>            std::this_thread::sleep_for(std::chrono::milliseconds(50));</div>
+<div class="line"><span class="lineno">  842</span>        }</div>
+<div class="line"><span class="lineno">  843</span>    }).detach();</div>
+<div class="line"><span class="lineno">  844</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  845</span>}</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -462,10 +767,161 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
+<a id="ad3ec2a14d6be8d26adfd25d681675f09" name="ad3ec2a14d6be8d26adfd25d681675f09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3ec2a14d6be8d26adfd25d681675f09">&#9670;&#160;</a></span>to_string() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr const char * thread_pool_module::to_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#add8b8e5f5fd0f12965fb6fdda6b22355">scheduling_policy</a>&#160;</td>
+          <td class="paramname"><em>policy</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convert scheduling policy to string representation. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d3/d09/worker__policy_8h_source.html#l00167">167</a> of file <a class="el" href="../../d3/d09/worker__policy_8h_source.html">worker_policy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  167</span>                                                              {</div>
+<div class="line"><span class="lineno">  168</span>        <span class="keywordflow">switch</span> (policy) {</div>
+<div class="line"><span class="lineno">  169</span>            <span class="keywordflow">case</span> scheduling_policy::fifo: <span class="keywordflow">return</span> <span class="stringliteral">&quot;fifo&quot;</span>;</div>
+<div class="line"><span class="lineno">  170</span>            <span class="keywordflow">case</span> scheduling_policy::lifo: <span class="keywordflow">return</span> <span class="stringliteral">&quot;lifo&quot;</span>;</div>
+<div class="line"><span class="lineno">  171</span>            <span class="keywordflow">case</span> scheduling_policy::priority: <span class="keywordflow">return</span> <span class="stringliteral">&quot;priority&quot;</span>;</div>
+<div class="line"><span class="lineno">  172</span>            <span class="keywordflow">case</span> scheduling_policy::work_stealing: <span class="keywordflow">return</span> <span class="stringliteral">&quot;work_stealing&quot;</span>;</div>
+<div class="line"><span class="lineno">  173</span>            <span class="keywordflow">default</span>: <span class="keywordflow">return</span> <span class="stringliteral">&quot;unknown&quot;</span>;</div>
+<div class="line"><span class="lineno">  174</span>        }</div>
+<div class="line"><span class="lineno">  175</span>    }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a01ba7496fee6a3d92c79f8becaa8850c" name="a01ba7496fee6a3d92c79f8becaa8850c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01ba7496fee6a3d92c79f8becaa8850c">&#9670;&#160;</a></span>to_string() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr const char * thread_pool_module::to_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d8/d98/namespacethread__pool__module.html#a91dfb70040110beaa487b8abbdc8d9fd">worker_state</a>&#160;</td>
+          <td class="paramname"><em>state</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convert worker state to string representation. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d3/d09/worker__policy_8h_source.html#l00152">152</a> of file <a class="el" href="../../d3/d09/worker__policy_8h_source.html">worker_policy.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  152</span>                                                        {</div>
+<div class="line"><span class="lineno">  153</span>        <span class="keywordflow">switch</span> (state) {</div>
+<div class="line"><span class="lineno">  154</span>            <span class="keywordflow">case</span> worker_state::created: <span class="keywordflow">return</span> <span class="stringliteral">&quot;created&quot;</span>;</div>
+<div class="line"><span class="lineno">  155</span>            <span class="keywordflow">case</span> worker_state::starting: <span class="keywordflow">return</span> <span class="stringliteral">&quot;starting&quot;</span>;</div>
+<div class="line"><span class="lineno">  156</span>            <span class="keywordflow">case</span> worker_state::active: <span class="keywordflow">return</span> <span class="stringliteral">&quot;active&quot;</span>;</div>
+<div class="line"><span class="lineno">  157</span>            <span class="keywordflow">case</span> worker_state::idle: <span class="keywordflow">return</span> <span class="stringliteral">&quot;idle&quot;</span>;</div>
+<div class="line"><span class="lineno">  158</span>            <span class="keywordflow">case</span> worker_state::stopping: <span class="keywordflow">return</span> <span class="stringliteral">&quot;stopping&quot;</span>;</div>
+<div class="line"><span class="lineno">  159</span>            <span class="keywordflow">case</span> worker_state::stopped: <span class="keywordflow">return</span> <span class="stringliteral">&quot;stopped&quot;</span>;</div>
+<div class="line"><span class="lineno">  160</span>            <span class="keywordflow">default</span>: <span class="keywordflow">return</span> <span class="stringliteral">&quot;unknown&quot;</span>;</div>
+<div class="line"><span class="lineno">  161</span>        }</div>
+<div class="line"><span class="lineno">  162</span>    }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a1dfc5e3068af68df35df3b9bd117d1be" name="a1dfc5e3068af68df35df3b9bd117d1be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dfc5e3068af68df35df3b9bd117d1be">&#9670;&#160;</a></span>wait_for_all()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Futures&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void thread_pool_module::wait_for_all </td>
+          <td>(</td>
+          <td class="paramtype">Futures &amp;...&#160;</td>
+          <td class="paramname"><em>futures</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Wait for all futures to complete. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/dca/future__extensions_8h_source.html#l00241">241</a> of file <a class="el" href="../../df/dca/future__extensions_8h_source.html">future_extensions.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  241</span>                                           {</div>
+<div class="line"><span class="lineno">  242</span>        (futures.wait(), ...);</div>
+<div class="line"><span class="lineno">  243</span>    }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a3b7411875accbf7de1655ba3cd38784f" name="a3b7411875accbf7de1655ba3cd38784f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b7411875accbf7de1655ba3cd38784f">&#9670;&#160;</a></span>wait_for_any()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Futures&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t thread_pool_module::wait_for_any </td>
+          <td>(</td>
+          <td class="paramtype">Futures &amp;...&#160;</td>
+          <td class="paramname"><em>futures</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Wait for any future to complete. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/dca/future__extensions_8h_source.html#l00249">249</a> of file <a class="el" href="../../df/dca/future__extensions_8h_source.html">future_extensions.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  249</span>                                             {</div>
+<div class="line"><span class="lineno">  250</span>        <span class="comment">// Implementation would require a more complex approach</span></div>
+<div class="line"><span class="lineno">  251</span>        <span class="comment">// This is a simplified version</span></div>
+<div class="line"><span class="lineno">  252</span>        <span class="keywordtype">size_t</span> index = 0;</div>
+<div class="line"><span class="lineno">  253</span>        <span class="keyword">auto</span> check_future = [&amp;](<span class="keyword">auto</span>&amp; future) {</div>
+<div class="line"><span class="lineno">  254</span>            <span class="keywordflow">if</span> (future.is_ready()) {</div>
+<div class="line"><span class="lineno">  255</span>                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  256</span>            }</div>
+<div class="line"><span class="lineno">  257</span>            ++index;</div>
+<div class="line"><span class="lineno">  258</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  259</span>        };</div>
+<div class="line"><span class="lineno">  260</span>        </div>
+<div class="line"><span class="lineno">  261</span>        <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
+<div class="line"><span class="lineno">  262</span>            index = 0;</div>
+<div class="line"><span class="lineno">  263</span>            <span class="keywordflow">if</span> ((check_future(futures) || ...)) {</div>
+<div class="line"><span class="lineno">  264</span>                <span class="keywordflow">return</span> index;</div>
+<div class="line"><span class="lineno">  265</span>            }</div>
+<div class="line"><span class="lineno">  266</span>            std::this_thread::yield();</div>
+<div class="line"><span class="lineno">  267</span>        }</div>
+<div class="line"><span class="lineno">  268</span>    }</div>
+</div><!-- fragment -->
+</div>
+</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jun 13 2025 00:26:17 for Thread System by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Sun Jul 6 2025 12:32:44 for Thread System by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>

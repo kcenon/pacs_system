@@ -199,18 +199,18 @@ Static Private Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Provides utilities for string encoding conversion, Base64 encoding/decoding, and substring operations like splitting or replacing. </p>
 <p>This class relies on platform-specific APIs or <code>iconv</code> (when available) to convert strings between different encodings such as UTF-8, UTF-16, UTF-32, and the local system encoding. It also provides methods to handle Base64 encoding/decoding and some basic string manipulation (split, replace).</p>
-<h3><a class="anchor" id="autotoc_md51"></a>
+<h3><a class="anchor" id="autotoc_md67"></a>
 Encoding Conversions</h3>
 <ul>
 <li>Typically returns a tuple containing either a successful result (<code>std::optional&lt;T&gt;</code>) and an empty error (<code>std::nullopt</code>), or <code>std::nullopt</code> with an error message describing the failure.</li>
 <li>BOM (Byte Order Mark) is handled in certain functions for UTF-8, UTF-16, and UTF-32.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md52"></a>
+<h3><a class="anchor" id="autotoc_md68"></a>
 Base64</h3>
 <ul>
 <li>Encodes and decodes raw byte arrays (<code>std::vector&lt;uint8_t&gt;</code>).</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md53"></a>
+<h3><a class="anchor" id="autotoc_md69"></a>
 Usage Example</h3>
 <div class="fragment"><div class="line"><span class="comment">// Converting a wstring to system-encoded string</span></div>
 <div class="line"><span class="keyword">auto</span> [strOpt, errMsg] = <a class="code hl_function" href="../../d1/d53/classutility__module_1_1convert__string.html#a253963501540b93269546be1be251f6e">convert_string::to_string</a>(L<span class="stringliteral">&quot;안녕하세요&quot;</span>);</div>
@@ -964,7 +964,7 @@ template&lt;typename FromType , typename ToType &gt; </div>
 <p class="definition">Definition at line <a class="el" href="../../d9/d86/convert__string_8cpp_source.html#l00272">272</a> of file <a class="el" href="../../d9/d86/convert__string_8cpp_source.html">convert_string.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  273</span>    {</div>
 <div class="line"><span class="lineno">  274</span><span class="preprocessor">#ifdef _WIN32</span></div>
-<div class="line"><span class="lineno">  275</span>        <span class="keywordflow">return</span> GetACP();</div>
+<div class="line"><span class="lineno">  275</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(GetACP());</div>
 <div class="line"><span class="lineno">  276</span><span class="preprocessor">#else</span></div>
 <div class="line"><span class="lineno">  277</span>        <span class="keywordflow">return</span> 65001;</div>
 <div class="line"><span class="lineno">  278</span><span class="preprocessor">#endif</span></div>
@@ -1007,11 +1007,11 @@ template&lt;typename FromType , typename ToType &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d86/convert__string_8cpp_source.html#l00181">181</a> of file <a class="el" href="../../d9/d86/convert__string_8cpp_source.html">convert_string.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  182</span>    {</div>
-<div class="line"><span class="lineno">  183</span>        <span class="keywordflow">if</span> (<span class="keyword">sizeof</span>(<span class="keywordtype">wchar_t</span>) == 2)</div>
+<div class="line"><span class="lineno">  183</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (<span class="keyword">sizeof</span>(wchar_t) == 2)</div>
 <div class="line"><span class="lineno">  184</span>        {</div>
 <div class="line"><span class="lineno">  185</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d53/classutility__module_1_1convert__string.html#a316651c671cec003dc927423e12d2466">get_encoding_name</a>(<a class="code hl_enumvalue" href="../../d1/d53/classutility__module_1_1convert__string.html#a6ea78e52dff286b9309465a9b0f993a4a5ab39c2bd546655547f6101ed91e395e">encoding_types::utf16</a>, endian);</div>
 <div class="line"><span class="lineno">  186</span>        }</div>
-<div class="line"><span class="lineno">  187</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">sizeof</span>(<span class="keywordtype">wchar_t</span>) == 4)</div>
+<div class="line"><span class="lineno">  187</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (<span class="keyword">sizeof</span>(wchar_t) == 4)</div>
 <div class="line"><span class="lineno">  188</span>        {</div>
 <div class="line"><span class="lineno">  189</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d53/classutility__module_1_1convert__string.html#a316651c671cec003dc927423e12d2466">get_encoding_name</a>(<a class="code hl_enumvalue" href="../../d1/d53/classutility__module_1_1convert__string.html#a6ea78e52dff286b9309465a9b0f993a4a1c067a9fa89e2bf1d6dd55a6ca6204ce">encoding_types::utf32</a>, endian);</div>
 <div class="line"><span class="lineno">  190</span>        }</div>
@@ -1896,13 +1896,13 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>sources/utilities/<a class="el" href="../../d1/d46/convert__string_8h_source.html">convert_string.h</a></li>
-<li>sources/utilities/<a class="el" href="../../d9/d86/convert__string_8cpp_source.html">convert_string.cpp</a></li>
+<li>sources/utilities/conversion/<a class="el" href="../../d1/d46/convert__string_8h_source.html">convert_string.h</a></li>
+<li>sources/utilities/conversion/<a class="el" href="../../d9/d86/convert__string_8cpp_source.html">convert_string.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jun 13 2025 00:26:17 for Thread System by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Sun Jul 6 2025 12:32:44 for Thread System by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>

@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['typed_5fjob_0',['typed_job',['../d4/db9/namespacetyped__thread__pool__module.html#a9276d2960ba979c47fa6764c50111689',1,'typed_thread_pool_module']]],
-  ['typed_5fjob_5fqueue_1',['typed_job_queue',['../d4/db9/namespacetyped__thread__pool__module.html#a3da39bb993d9f5053019dbe8bb2e1ffb',1,'typed_thread_pool_module']]],
-  ['typed_5fthread_5fpool_2',['typed_thread_pool',['../d4/db9/namespacetyped__thread__pool__module.html#a970a3d65b2de11fe9eecd9c588159c63',1,'typed_thread_pool_module']]],
-  ['typed_5fthread_5fworker_3',['typed_thread_worker',['../d4/db9/namespacetyped__thread__pool__module.html#ae29cbeff14562615cc9e00ad276fc61c',1,'typed_thread_pool_module']]]
+  ['lockfree_5fqueue_5fptr_0',['lockfree_queue_ptr',['../d3/d35/classtyped__thread__pool__module_1_1typed__lockfree__job__queue__t.html#a597e81723a388c497e0c182f187f971a',1,'typed_thread_pool_module::typed_lockfree_job_queue_t']]]
 ];
