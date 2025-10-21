@@ -52,18 +52,40 @@ endif()
 add_definitions(-DUSE_STD_FORMAT)
 message(STATUS "Forcing USE_STD_FORMAT to avoid fmt dependency issues")
 
+# Find thread_system from Sources/ directory
+# Priority: Local Sources/ directory first, then embedded subfolder (for backwards compatibility)
+set(_PACS_THREAD_SEARCH_PATHS
+    "/Users/dongcheolshin/Sources/thread_system"                # macOS development (HIGHEST PRIORITY)
+    "/home/${USER}/Sources/thread_system"                        # Linux development
+    "${CMAKE_CURRENT_SOURCE_DIR}/thread_system"                  # Embedded subfolder (legacy, fallback)
+)
+
+set(_PACS_THREAD_SYSTEM_PATH "")
+foreach(_path ${_PACS_THREAD_SEARCH_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt")
+        message(STATUS "Found thread_system at: ${_path}")
+        set(_PACS_THREAD_SYSTEM_PATH "${_path}")
+        break()
+    endif()
+endforeach()
+
+if(NOT _PACS_THREAD_SYSTEM_PATH)
+    message(FATAL_ERROR "thread_system not found in any search path")
+endif()
+
+message(STATUS "Using thread_system from: ${_PACS_THREAD_SYSTEM_PATH}")
+
 # Add thread_system directories to include path
-include_directories(BEFORE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources/utilities
-    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources/thread_base
-    ${CMAKE_CURRENT_SOURCE_DIR}/thread_system/sources/logger
+include_directories(BEFORE
+    ${_PACS_THREAD_SYSTEM_PATH}/sources/utilities
+    ${_PACS_THREAD_SYSTEM_PATH}/sources
+    ${_PACS_THREAD_SYSTEM_PATH}/sources/thread_base
+    ${_PACS_THREAD_SYSTEM_PATH}/sources/logger
 )
 message(STATUS "Added thread_system directories to include path")
 
 # Use thread_system from the project instead of internal thread_pool
-message(STATUS "Using thread_system from project")
-add_subdirectory(thread_system)
+add_subdirectory(${_PACS_THREAD_SYSTEM_PATH} ${CMAKE_BINARY_DIR}/thread_system_build)
 
 # Find DCMTK package
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
