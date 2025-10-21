@@ -349,3 +349,6 @@ documents/
 
 # Log files
 logs/
+
+# Embedded dependencies (now using Sources/ directory)
+thread_system/
