@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
-        path: ../thread_system
+        path: thread_system
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install dependencies
@@ -147,7 +147,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
-        path: ../thread_system
+        path: thread_system
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install cppcheck
