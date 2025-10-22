@@ -181,10 +181,8 @@ set(PACS_INSTALL_TARGETS
     pacs_api
     pacs_version
     pacs_monitoring
-    # thread_system targets
-    logger
-    thread_base
-    utilities
+    # Note: thread_system targets (logger, thread_base, utilities) are external dependencies
+    # and should not be installed as part of pacs_system
 )
 
 if(TARGET pacs_dicom)
