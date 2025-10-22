@@ -1,0 +1,159 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    name: Coverage Analysis
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: true
+        clean: true
+        fetch-depth: 1
+
+    - name: Checkout thread_system dependency
+      uses: actions/checkout@v4
+      with:
+        repository: kcenon/thread_system
+        path: thread_system
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Sources directory structure
+      run: |
+        mkdir -p /home/$USER/Sources
+        mv thread_system /home/$USER/Sources/thread_system
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build g++ lcov pkg-config curl zip unzip tar autoconf automake autoconf-archive
+        sudo apt-get install -y libgtest-dev libgmock-dev
+
+    - name: Cache vcpkg
+      uses: actions/cache@v4
+      id: vcpkg-cache
+      with:
+        path: |
+          ${{ github.workspace }}/vcpkg
+          !${{ github.workspace }}/vcpkg/buildtrees
+          !${{ github.workspace }}/vcpkg/packages
+          !${{ github.workspace }}/vcpkg/downloads
+        key: ${{ runner.os }}-coverage-vcpkg-${{ hashFiles('vcpkg.json') }}
+
+    - name: Set up vcpkg
+      run: |
+        if [ ! -d "vcpkg" ]; then
+          git clone https://github.com/Microsoft/vcpkg.git
+        fi
+        cd vcpkg
+        git pull
+        ./bootstrap-vcpkg.sh
+        cd ..
+
+    - name: Determine vcpkg commit
+      id: vcpkg-commit
+      run: echo "commit=$(git -C vcpkg rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Cache vcpkg installed
+      uses: actions/cache@v4
+      id: vcpkg-installed
+      with:
+        path: ${{ github.workspace }}/vcpkg_installed
+        key: ${{ runner.os }}-coverage-vcpkg-installed-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}-${{ steps.vcpkg-commit.outputs.commit }}
+        restore-keys: |
+          ${{ runner.os }}-coverage-vcpkg-installed-
+
+    - name: Install dependencies with vcpkg
+      if: steps.vcpkg-installed.outputs.cache-hit != 'true'
+      run: |
+        ./vcpkg/vcpkg install --x-manifest-root=. --x-install-root=${{ github.workspace }}/vcpkg_installed --triplet x64-linux
+
+    - name: Configure CMake with coverage
+      run: |
+        echo "=== Build Configuration ==="
+        echo "Build Mode: Debug with Coverage"
+        echo "Thread System: Required dependency"
+        echo "Directory structure:"
+        ls -la . | head -20
+        echo "==========================="
+
+        cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_TESTS=ON \
+          -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_EXE_LINKER_FLAGS="--coverage" \
+          -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ || {
+            echo "::error::CMake configuration failed for coverage build"
+            cat build/CMakeFiles/CMakeOutput.log 2>/dev/null || echo "No output log"
+            cat build/CMakeFiles/CMakeError.log 2>/dev/null || echo "No error log found"
+            exit 1
+          }
+
+    - name: Build with coverage
+      run: cmake --build build --config Debug
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest -C Debug --output-on-failure --verbose || true
+
+    - name: Generate coverage report
+      run: |
+        cd build
+        # Capture coverage data
+        lcov --directory . --capture --output-file coverage.info || true
+
+        # Filter out system headers, test files, and dependencies
+        lcov --remove coverage.info '/usr/*' '*/test/*' '*/tests/*' '*/vcpkg_installed/*' '*/thread_system/*' --output-file coverage_filtered.info || true
+
+        # Generate HTML report
+        genhtml coverage_filtered.info --output-directory coverage_html || true
+
+        # Print summary
+        lcov --list coverage_filtered.info || true
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./build/coverage_filtered.info
+        flags: unittests
+        name: pacs_system-coverage
+        fail_ci_if_error: false
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          build/coverage.info
+          build/coverage_filtered.info
+          build/coverage_html/
+        retention-days: 7
+
+    - name: Coverage summary
+      if: always()
+      run: |
+        echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f build/coverage_filtered.info ]; then
+          echo "Coverage data collected successfully." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Target: Establish baseline coverage for PACS system" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "No coverage data generated." >> $GITHUB_STEP_SUMMARY
+        fi
