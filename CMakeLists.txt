@@ -75,16 +75,9 @@ endif()
 
 message(STATUS "Using thread_system from: ${_PACS_THREAD_SYSTEM_PATH}")
 
-# Add thread_system directories to include path
-include_directories(BEFORE
-    ${_PACS_THREAD_SYSTEM_PATH}/sources/utilities
-    ${_PACS_THREAD_SYSTEM_PATH}/sources
-    ${_PACS_THREAD_SYSTEM_PATH}/sources/thread_base
-    ${_PACS_THREAD_SYSTEM_PATH}/sources/logger
-)
-message(STATUS "Added thread_system directories to include path")
-
 # Use thread_system from the project instead of internal thread_pool
+# Note: thread_system now uses target-based include directory propagation
+# via target_link_libraries, so no manual include_directories needed
 add_subdirectory(${_PACS_THREAD_SYSTEM_PATH} ${CMAKE_BINARY_DIR}/thread_system_build)
 
 # Find DCMTK package
