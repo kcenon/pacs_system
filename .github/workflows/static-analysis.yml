@@ -23,13 +23,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
-        path: thread_system
+        path: ../thread_system
         token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Create Sources directory structure
-      run: |
-        mkdir -p /home/$USER/Sources
-        mv thread_system /home/$USER/Sources/thread_system
 
     - name: Install dependencies
       run: |
@@ -152,13 +147,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
-        path: thread_system
+        path: ../thread_system
         token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Create Sources directory structure
-      run: |
-        mkdir -p /home/$USER/Sources
-        mv thread_system /home/$USER/Sources/thread_system
 
     - name: Install cppcheck
       run: |

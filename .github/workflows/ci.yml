@@ -45,23 +45,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
-        path: thread_system
+        path: ../thread_system
         token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Create Sources directory structure
-      if: runner.os != 'Windows'
-      run: |
-        mkdir -p /home/$USER/Sources
-        mv thread_system /home/$USER/Sources/thread_system || true
-
-    - name: Create Sources directory structure (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Force -Path C:\Sources | Out-Null
-        if (Test-Path thread_system) {
-          Move-Item -Path thread_system -Destination C:\Sources\thread_system -Force
-        }
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
