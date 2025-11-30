@@ -209,6 +209,41 @@ elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
         "  - Set LOGGER_SYSTEM_ROOT environment variable")
 endif()
 
+# thread_system (REQUIRED for thread_adapter - Tier 1)
+message(STATUS "")
+message(STATUS "=== Finding thread_system (REQUIRED for thread_adapter - Tier 1) ===")
+
+set(_PACS_THREAD_PATHS
+    "$ENV{THREAD_SYSTEM_ROOT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../thread_system"
+    "${CMAKE_CURRENT_SOURCE_DIR}/thread_system"
+)
+
+set(THREAD_SYSTEM_FOUND FALSE)
+foreach(_path ${_PACS_THREAD_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/thread/core/thread_pool.h")
+        message(STATUS "Found thread_system at: ${_path}")
+        set(PACS_THREAD_SYSTEM_DIR "${_path}")
+        set(PACS_THREAD_SYSTEM_INCLUDE_DIR "${_path}/include")
+        set(THREAD_SYSTEM_FOUND TRUE)
+        break()
+    endif()
+endforeach()
+
+if(THREAD_SYSTEM_FOUND AND NOT TARGET ThreadSystem)
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(THREAD_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+    add_subdirectory("${PACS_THREAD_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/thread_system_build")
+elseif(NOT THREAD_SYSTEM_FOUND AND NOT TARGET ThreadSystem)
+    message(WARNING
+        "thread_system is REQUIRED for thread_adapter (Tier 1).\n"
+        "thread_adapter will be disabled.\n"
+        "Please ensure thread_system is available at:\n"
+        "  - ../thread_system\n"
+        "  - Set THREAD_SYSTEM_ROOT environment variable")
+endif()
+
 # network_system (REQUIRED - Tier 4)
 if(PACS_WITH_NETWORK_SYSTEM)
     message(STATUS "")
@@ -430,11 +465,17 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     add_library(pacs_integration
         src/integration/container_adapter.cpp
         src/integration/logger_adapter.cpp
+        src/integration/thread_adapter.cpp
     )
     target_include_directories(pacs_integration
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
+    )
+    # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
+    target_compile_options(pacs_integration PRIVATE
+        $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
     )
     target_link_libraries(pacs_integration
         PUBLIC pacs_core pacs_encoding container_system
@@ -449,13 +490,32 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         message(WARNING "    - logger_adapter: OFF (LoggerSystem target not found)")
     endif()
 
+    # Link thread_system (REQUIRED for thread_adapter)
+    # thread_system creates 'thread_base' as main target (legacy build) or 'ThreadSystem' (new build)
+    if(TARGET ThreadSystem)
+        target_link_libraries(pacs_integration PUBLIC ThreadSystem)
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
+        message(STATUS "    - thread_adapter: ON (ThreadSystem)")
+    elseif(TARGET thread_base)
+        target_link_libraries(pacs_integration PUBLIC thread_base)
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
+        message(STATUS "    - thread_adapter: ON (thread_base)")
+    elseif(PACS_THREAD_SYSTEM_INCLUDE_DIR)
+        # Fallback: include headers only (will fail at link time)
+        target_include_directories(pacs_integration PUBLIC ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
+        message(WARNING "    - thread_adapter: ON (headers only - linking may fail)")
+    else()
+        message(WARNING "    - thread_adapter: OFF (ThreadSystem/thread_base target not found)")
+    endif()
+
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_COMMON_SYSTEM)
     endif()
 
-    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system)")
+    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system)")
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
@@ -555,6 +615,7 @@ if(PACS_BUILD_TESTS)
         add_executable(integration_tests
             tests/integration/container_adapter_test.cpp
             tests/integration/logger_adapter_test.cpp
+            tests/integration/thread_adapter_test.cpp
         )
         target_link_libraries(integration_tests
             PRIVATE
