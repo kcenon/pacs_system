@@ -349,6 +349,31 @@ else()
     message(STATUS "  [--] pacs_storage: OFF")
 endif()
 
+# Integration library (requires container_system)
+if(TARGET container_system AND COMMON_SYSTEM_FOUND)
+    add_library(pacs_integration
+        src/integration/container_adapter.cpp
+    )
+    target_include_directories(pacs_integration
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_integration
+        PUBLIC pacs_core pacs_encoding container_system
+    )
+
+    # Link common_system for Result<T>
+    if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+        target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_COMMON_SYSTEM)
+    endif()
+
+    message(STATUS "  [OK] pacs_integration: ON (container_system)")
+else()
+    message(STATUS "  [--] pacs_integration: OFF (requires container_system)")
+endif()
+
 # Testing
 if(PACS_BUILD_TESTS)
     enable_testing()
@@ -367,6 +392,7 @@ if(PACS_BUILD_TESTS)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/encoding)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/network)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/storage)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/integration)
 
     # Core tests
     add_executable(core_tests
@@ -423,6 +449,18 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
+    # Integration tests
+    if(TARGET pacs_integration)
+        add_executable(integration_tests
+            tests/integration/container_adapter_test.cpp
+        )
+        target_link_libraries(integration_tests
+            PRIVATE
+                pacs_integration
+                Catch2::Catch2WithMain
+        )
+    endif()
+
     include(CTest)
     include(Catch)
     catch_discover_tests(core_tests)
@@ -430,6 +468,9 @@ if(PACS_BUILD_TESTS)
     catch_discover_tests(network_tests)
     if(TARGET storage_tests)
         catch_discover_tests(storage_tests)
+    endif()
+    if(TARGET integration_tests)
+        catch_discover_tests(integration_tests)
     endif()
 endif()
 
@@ -471,5 +512,10 @@ if(TARGET pacs_storage)
     message(STATUS "  Storage: ON (SQLite3)")
 else()
     message(STATUS "  Storage: OFF")
+endif()
+if(TARGET pacs_integration)
+    message(STATUS "  Integration: ON (container_system)")
+else()
+    message(STATUS "  Integration: OFF")
 endif()
 message(STATUS "========================================")
