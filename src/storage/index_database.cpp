@@ -828,12 +828,17 @@ auto index_database::study_count(std::string_view patient_id) const -> size_t {
 auto index_database::update_modalities_in_study(int64_t study_pk)
     -> VoidResult {
     // Aggregate all unique modalities from series
+    // Note: DICOM uses backslash (\) as multi-value separator
+    // SQLite doesn't support GROUP_CONCAT(DISTINCT col, separator), so we use
+    // a subquery
     const char* sql = R"(
         UPDATE studies
         SET modalities_in_study = (
-            SELECT GROUP_CONCAT(DISTINCT modality, '\')
-            FROM series
-            WHERE study_pk = ?
+            SELECT GROUP_CONCAT(modality, '\')
+            FROM (
+                SELECT DISTINCT modality FROM series
+                WHERE study_pk = ? AND modality IS NOT NULL AND modality != ''
+            )
         ),
         updated_at = datetime('now')
         WHERE study_pk = ?;
@@ -886,6 +891,843 @@ auto index_database::parse_study_row(void* stmt_ptr) const -> study_record {
 
     auto updated_str = get_text(stmt, 13);
     record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+
+// ============================================================================
+// Series Operations
+// ============================================================================
+
+auto index_database::upsert_series(int64_t study_pk,
+                                   std::string_view series_uid,
+                                   std::string_view modality,
+                                   std::optional<int> series_number,
+                                   std::string_view series_description,
+                                   std::string_view body_part_examined,
+                                   std::string_view station_name)
+    -> Result<int64_t> {
+    series_record record;
+    record.study_pk = study_pk;
+    record.series_uid = std::string(series_uid);
+    record.modality = std::string(modality);
+    record.series_number = series_number;
+    record.series_description = std::string(series_description);
+    record.body_part_examined = std::string(body_part_examined);
+    record.station_name = std::string(station_name);
+    return upsert_series(record);
+}
+
+auto index_database::upsert_series(const series_record& record)
+    -> Result<int64_t> {
+    if (record.series_uid.empty()) {
+        return make_error<int64_t>(-1, "Series Instance UID is required",
+                                   "storage");
+    }
+
+    if (record.series_uid.length() > 64) {
+        return make_error<int64_t>(
+            -1, "Series Instance UID exceeds maximum length of 64 characters",
+            "storage");
+    }
+
+    if (record.study_pk <= 0) {
+        return make_error<int64_t>(-1, "Valid study_pk is required", "storage");
+    }
+
+    // Use INSERT OR REPLACE for upsert behavior
+    const char* sql = R"(
+        INSERT INTO series (
+            study_pk, series_uid, modality, series_number,
+            series_description, body_part_examined, station_name,
+            updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        ON CONFLICT(series_uid) DO UPDATE SET
+            study_pk = excluded.study_pk,
+            modality = excluded.modality,
+            series_number = excluded.series_number,
+            series_description = excluded.series_description,
+            body_part_examined = excluded.body_part_examined,
+            station_name = excluded.station_name,
+            updated_at = datetime('now')
+        RETURNING series_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_int64(stmt, 1, record.study_pk);
+    sqlite3_bind_text(stmt, 2, record.series_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, record.modality.c_str(), -1, SQLITE_TRANSIENT);
+
+    if (record.series_number.has_value()) {
+        sqlite3_bind_int(stmt, 4, *record.series_number);
+    } else {
+        sqlite3_bind_null(stmt, 4);
+    }
+
+    sqlite3_bind_text(stmt, 5, record.series_description.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, record.body_part_examined.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, record.station_name.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, std::format("Failed to upsert series: {}", error_msg),
+            "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    // Update modalities in study
+    (void)update_modalities_in_study(record.study_pk);
+
+    return pk;
+}
+
+auto index_database::find_series(std::string_view series_uid) const
+    -> std::optional<series_record> {
+    const char* sql = R"(
+        SELECT series_pk, study_pk, series_uid, modality, series_number,
+               series_description, body_part_examined, station_name,
+               num_instances, created_at, updated_at
+        FROM series
+        WHERE series_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, series_uid.data(),
+                      static_cast<int>(series_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_series_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::find_series_by_pk(int64_t pk) const
+    -> std::optional<series_record> {
+    const char* sql = R"(
+        SELECT series_pk, study_pk, series_uid, modality, series_number,
+               series_description, body_part_examined, station_name,
+               num_instances, created_at, updated_at
+        FROM series
+        WHERE series_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_series_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::list_series(std::string_view study_uid) const
+    -> std::vector<series_record> {
+    std::vector<series_record> results;
+
+    const char* sql = R"(
+        SELECT se.series_pk, se.study_pk, se.series_uid, se.modality,
+               se.series_number, se.series_description, se.body_part_examined,
+               se.station_name, se.num_instances, se.created_at, se.updated_at
+        FROM series se
+        JOIN studies st ON se.study_pk = st.study_pk
+        WHERE st.study_uid = ?
+        ORDER BY se.series_number ASC, se.series_uid ASC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, study_uid.data(),
+                      static_cast<int>(study_uid.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_series_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::search_series(const series_query& query) const
+    -> std::vector<series_record> {
+    std::vector<series_record> results;
+
+    std::string sql = R"(
+        SELECT se.series_pk, se.study_pk, se.series_uid, se.modality,
+               se.series_number, se.series_description, se.body_part_examined,
+               se.station_name, se.num_instances, se.created_at, se.updated_at
+        FROM series se
+        JOIN studies st ON se.study_pk = st.study_pk
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    if (query.study_uid.has_value()) {
+        sql += " AND st.study_uid = ?";
+        params.push_back(*query.study_uid);
+    }
+
+    if (query.series_uid.has_value()) {
+        sql += " AND se.series_uid = ?";
+        params.push_back(*query.series_uid);
+    }
+
+    if (query.modality.has_value()) {
+        sql += " AND se.modality = ?";
+        params.push_back(*query.modality);
+    }
+
+    if (query.series_description.has_value()) {
+        sql += " AND se.series_description LIKE ?";
+        params.push_back(to_like_pattern(*query.series_description));
+    }
+
+    if (query.body_part_examined.has_value()) {
+        sql += " AND se.body_part_examined = ?";
+        params.push_back(*query.body_part_examined);
+    }
+
+    sql += " ORDER BY se.series_number ASC, se.series_uid ASC";
+
+    if (query.limit > 0) {
+        sql += std::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += std::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    // Bind parameters
+    int bind_index = 1;
+    for (const auto& param : params) {
+        sqlite3_bind_text(stmt, bind_index++, param.c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    // Handle series_number separately since it's an int
+    if (query.series_number.has_value()) {
+        // Need to rebuild query with series_number filter
+        // For simplicity, we filter in code for now
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        auto record = parse_series_row(stmt);
+
+        // Filter by series_number if specified
+        if (query.series_number.has_value()) {
+            if (!record.series_number.has_value() ||
+                *record.series_number != *query.series_number) {
+                continue;
+            }
+        }
+
+        results.push_back(std::move(record));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
+    // Get study_pk before deleting
+    auto series = find_series(series_uid);
+    int64_t study_pk = series ? series->study_pk : 0;
+
+    const char* sql = "DELETE FROM series WHERE series_uid = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, series_uid.data(),
+                      static_cast<int>(series_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc, std::format("Failed to delete series: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Update modalities in study
+    if (study_pk > 0) {
+        (void)update_modalities_in_study(study_pk);
+    }
+
+    return ok();
+}
+
+auto index_database::series_count() const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM series;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::series_count(std::string_view study_uid) const -> size_t {
+    const char* sql = R"(
+        SELECT COUNT(*) FROM series se
+        JOIN studies st ON se.study_pk = st.study_pk
+        WHERE st.study_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, study_uid.data(),
+                      static_cast<int>(study_uid.size()), SQLITE_TRANSIENT);
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::parse_series_row(void* stmt_ptr) const -> series_record {
+    auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
+    series_record record;
+
+    record.pk = sqlite3_column_int64(stmt, 0);
+    record.study_pk = sqlite3_column_int64(stmt, 1);
+    record.series_uid = get_text(stmt, 2);
+    record.modality = get_text(stmt, 3);
+
+    // Handle nullable series_number
+    if (sqlite3_column_type(stmt, 4) != SQLITE_NULL) {
+        record.series_number = sqlite3_column_int(stmt, 4);
+    }
+
+    record.series_description = get_text(stmt, 5);
+    record.body_part_examined = get_text(stmt, 6);
+    record.station_name = get_text(stmt, 7);
+    record.num_instances = sqlite3_column_int(stmt, 8);
+
+    auto created_str = get_text(stmt, 9);
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_text(stmt, 10);
+    record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+
+// ============================================================================
+// Instance Operations
+// ============================================================================
+
+auto index_database::upsert_instance(int64_t series_pk,
+                                     std::string_view sop_uid,
+                                     std::string_view sop_class_uid,
+                                     std::string_view file_path,
+                                     int64_t file_size,
+                                     std::string_view transfer_syntax,
+                                     std::optional<int> instance_number)
+    -> Result<int64_t> {
+    instance_record record;
+    record.series_pk = series_pk;
+    record.sop_uid = std::string(sop_uid);
+    record.sop_class_uid = std::string(sop_class_uid);
+    record.file_path = std::string(file_path);
+    record.file_size = file_size;
+    record.transfer_syntax = std::string(transfer_syntax);
+    record.instance_number = instance_number;
+    return upsert_instance(record);
+}
+
+auto index_database::upsert_instance(const instance_record& record)
+    -> Result<int64_t> {
+    if (record.sop_uid.empty()) {
+        return make_error<int64_t>(-1, "SOP Instance UID is required",
+                                   "storage");
+    }
+
+    if (record.sop_uid.length() > 64) {
+        return make_error<int64_t>(
+            -1, "SOP Instance UID exceeds maximum length of 64 characters",
+            "storage");
+    }
+
+    if (record.series_pk <= 0) {
+        return make_error<int64_t>(-1, "Valid series_pk is required",
+                                   "storage");
+    }
+
+    if (record.file_path.empty()) {
+        return make_error<int64_t>(-1, "File path is required", "storage");
+    }
+
+    if (record.file_size < 0) {
+        return make_error<int64_t>(-1, "File size must be non-negative",
+                                   "storage");
+    }
+
+    // Use INSERT OR REPLACE for upsert behavior
+    const char* sql = R"(
+        INSERT INTO instances (
+            series_pk, sop_uid, sop_class_uid, instance_number,
+            transfer_syntax, content_date, content_time,
+            rows, columns, bits_allocated, number_of_frames,
+            file_path, file_size, file_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(sop_uid) DO UPDATE SET
+            series_pk = excluded.series_pk,
+            sop_class_uid = excluded.sop_class_uid,
+            instance_number = excluded.instance_number,
+            transfer_syntax = excluded.transfer_syntax,
+            content_date = excluded.content_date,
+            content_time = excluded.content_time,
+            rows = excluded.rows,
+            columns = excluded.columns,
+            bits_allocated = excluded.bits_allocated,
+            number_of_frames = excluded.number_of_frames,
+            file_path = excluded.file_path,
+            file_size = excluded.file_size,
+            file_hash = excluded.file_hash
+        RETURNING instance_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_int64(stmt, 1, record.series_pk);
+    sqlite3_bind_text(stmt, 2, record.sop_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, record.sop_class_uid.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    if (record.instance_number.has_value()) {
+        sqlite3_bind_int(stmt, 4, *record.instance_number);
+    } else {
+        sqlite3_bind_null(stmt, 4);
+    }
+
+    sqlite3_bind_text(stmt, 5, record.transfer_syntax.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, record.content_date.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, record.content_time.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    if (record.rows.has_value()) {
+        sqlite3_bind_int(stmt, 8, *record.rows);
+    } else {
+        sqlite3_bind_null(stmt, 8);
+    }
+
+    if (record.columns.has_value()) {
+        sqlite3_bind_int(stmt, 9, *record.columns);
+    } else {
+        sqlite3_bind_null(stmt, 9);
+    }
+
+    if (record.bits_allocated.has_value()) {
+        sqlite3_bind_int(stmt, 10, *record.bits_allocated);
+    } else {
+        sqlite3_bind_null(stmt, 10);
+    }
+
+    if (record.number_of_frames.has_value()) {
+        sqlite3_bind_int(stmt, 11, *record.number_of_frames);
+    } else {
+        sqlite3_bind_null(stmt, 11);
+    }
+
+    sqlite3_bind_text(stmt, 12, record.file_path.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int64(stmt, 13, record.file_size);
+    sqlite3_bind_text(stmt, 14, record.file_hash.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, std::format("Failed to upsert instance: {}", error_msg),
+            "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return pk;
+}
+
+auto index_database::find_instance(std::string_view sop_uid) const
+    -> std::optional<instance_record> {
+    const char* sql = R"(
+        SELECT instance_pk, series_pk, sop_uid, sop_class_uid, instance_number,
+               transfer_syntax, content_date, content_time,
+               rows, columns, bits_allocated, number_of_frames,
+               file_path, file_size, file_hash, created_at
+        FROM instances
+        WHERE sop_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, sop_uid.data(),
+                      static_cast<int>(sop_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_instance_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::find_instance_by_pk(int64_t pk) const
+    -> std::optional<instance_record> {
+    const char* sql = R"(
+        SELECT instance_pk, series_pk, sop_uid, sop_class_uid, instance_number,
+               transfer_syntax, content_date, content_time,
+               rows, columns, bits_allocated, number_of_frames,
+               file_path, file_size, file_hash, created_at
+        FROM instances
+        WHERE instance_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_instance_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::list_instances(std::string_view series_uid) const
+    -> std::vector<instance_record> {
+    std::vector<instance_record> results;
+
+    const char* sql = R"(
+        SELECT i.instance_pk, i.series_pk, i.sop_uid, i.sop_class_uid,
+               i.instance_number, i.transfer_syntax, i.content_date,
+               i.content_time, i.rows, i.columns, i.bits_allocated,
+               i.number_of_frames, i.file_path, i.file_size, i.file_hash,
+               i.created_at
+        FROM instances i
+        JOIN series s ON i.series_pk = s.series_pk
+        WHERE s.series_uid = ?
+        ORDER BY i.instance_number ASC, i.sop_uid ASC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, series_uid.data(),
+                      static_cast<int>(series_uid.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_instance_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::search_instances(const instance_query& query) const
+    -> std::vector<instance_record> {
+    std::vector<instance_record> results;
+
+    std::string sql = R"(
+        SELECT i.instance_pk, i.series_pk, i.sop_uid, i.sop_class_uid,
+               i.instance_number, i.transfer_syntax, i.content_date,
+               i.content_time, i.rows, i.columns, i.bits_allocated,
+               i.number_of_frames, i.file_path, i.file_size, i.file_hash,
+               i.created_at
+        FROM instances i
+        JOIN series s ON i.series_pk = s.series_pk
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    if (query.series_uid.has_value()) {
+        sql += " AND s.series_uid = ?";
+        params.push_back(*query.series_uid);
+    }
+
+    if (query.sop_uid.has_value()) {
+        sql += " AND i.sop_uid = ?";
+        params.push_back(*query.sop_uid);
+    }
+
+    if (query.sop_class_uid.has_value()) {
+        sql += " AND i.sop_class_uid = ?";
+        params.push_back(*query.sop_class_uid);
+    }
+
+    if (query.content_date.has_value()) {
+        sql += " AND i.content_date = ?";
+        params.push_back(*query.content_date);
+    }
+
+    if (query.content_date_from.has_value()) {
+        sql += " AND i.content_date >= ?";
+        params.push_back(*query.content_date_from);
+    }
+
+    if (query.content_date_to.has_value()) {
+        sql += " AND i.content_date <= ?";
+        params.push_back(*query.content_date_to);
+    }
+
+    sql += " ORDER BY i.instance_number ASC, i.sop_uid ASC";
+
+    if (query.limit > 0) {
+        sql += std::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += std::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    // Bind parameters
+    int bind_index = 1;
+    for (const auto& param : params) {
+        sqlite3_bind_text(stmt, bind_index++, param.c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        auto record = parse_instance_row(stmt);
+
+        // Filter by instance_number if specified
+        if (query.instance_number.has_value()) {
+            if (!record.instance_number.has_value() ||
+                *record.instance_number != *query.instance_number) {
+                continue;
+            }
+        }
+
+        results.push_back(std::move(record));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
+    const char* sql = "DELETE FROM instances WHERE sop_uid = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, sop_uid.data(),
+                      static_cast<int>(sop_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to delete instance: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::instance_count() const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM instances;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::instance_count(std::string_view series_uid) const
+    -> size_t {
+    const char* sql = R"(
+        SELECT COUNT(*) FROM instances i
+        JOIN series s ON i.series_pk = s.series_pk
+        WHERE s.series_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, series_uid.data(),
+                      static_cast<int>(series_uid.size()), SQLITE_TRANSIENT);
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::parse_instance_row(void* stmt_ptr) const
+    -> instance_record {
+    auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
+    instance_record record;
+
+    record.pk = sqlite3_column_int64(stmt, 0);
+    record.series_pk = sqlite3_column_int64(stmt, 1);
+    record.sop_uid = get_text(stmt, 2);
+    record.sop_class_uid = get_text(stmt, 3);
+
+    // Handle nullable instance_number
+    if (sqlite3_column_type(stmt, 4) != SQLITE_NULL) {
+        record.instance_number = sqlite3_column_int(stmt, 4);
+    }
+
+    record.transfer_syntax = get_text(stmt, 5);
+    record.content_date = get_text(stmt, 6);
+    record.content_time = get_text(stmt, 7);
+
+    // Handle nullable image properties
+    if (sqlite3_column_type(stmt, 8) != SQLITE_NULL) {
+        record.rows = sqlite3_column_int(stmt, 8);
+    }
+
+    if (sqlite3_column_type(stmt, 9) != SQLITE_NULL) {
+        record.columns = sqlite3_column_int(stmt, 9);
+    }
+
+    if (sqlite3_column_type(stmt, 10) != SQLITE_NULL) {
+        record.bits_allocated = sqlite3_column_int(stmt, 10);
+    }
+
+    if (sqlite3_column_type(stmt, 11) != SQLITE_NULL) {
+        record.number_of_frames = sqlite3_column_int(stmt, 11);
+    }
+
+    record.file_path = get_text(stmt, 12);
+    record.file_size = sqlite3_column_int64(stmt, 13);
+    record.file_hash = get_text(stmt, 14);
+
+    auto created_str = get_text(stmt, 15);
+    record.created_at = parse_datetime(created_str.c_str());
 
     return record;
 }
