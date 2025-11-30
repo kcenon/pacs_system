@@ -50,6 +50,7 @@ target_include_directories(pacs_core
 # Encoding library
 add_library(pacs_encoding
     src/encoding/transfer_syntax.cpp
+    src/encoding/vr_info.cpp
 )
 target_include_directories(pacs_encoding
     PUBLIC
@@ -97,6 +98,7 @@ if(PACS_BUILD_TESTS)
     add_executable(encoding_tests
         tests/encoding/transfer_syntax_test.cpp
         tests/encoding/vr_type_test.cpp
+        tests/encoding/vr_info_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
