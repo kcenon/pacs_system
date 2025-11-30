@@ -1,0 +1,351 @@
+/**
+ * @file dimse_message.cpp
+ * @brief DIMSE message implementation
+ */
+
+#include <pacs/network/dimse/dimse_message.hpp>
+
+#include <pacs/encoding/implicit_vr_codec.hpp>
+#include <pacs/encoding/explicit_vr_codec.hpp>
+#include <pacs/encoding/vr_type.hpp>
+
+#include <stdexcept>
+
+namespace pacs::network::dimse {
+
+// ============================================================================
+// Construction
+// ============================================================================
+
+dimse_message::dimse_message(command_field cmd, uint16_t message_id)
+    : command_(cmd), message_id_(message_id) {
+    // Initialize the command set with required fields
+    command_set_.set_numeric(tag_command_field, encoding::vr_type::US,
+                             static_cast<uint16_t>(cmd));
+    command_set_.set_numeric(tag_message_id, encoding::vr_type::US, message_id);
+    update_data_set_type();
+}
+
+// ============================================================================
+// Command Set Access
+// ============================================================================
+
+auto dimse_message::command() const noexcept -> command_field {
+    return command_;
+}
+
+auto dimse_message::message_id() const noexcept -> uint16_t {
+    return message_id_;
+}
+
+auto dimse_message::command_set() noexcept -> core::dicom_dataset& {
+    return command_set_;
+}
+
+auto dimse_message::command_set() const noexcept -> const core::dicom_dataset& {
+    return command_set_;
+}
+
+// ============================================================================
+// Dataset Access
+// ============================================================================
+
+auto dimse_message::has_dataset() const noexcept -> bool {
+    return dataset_.has_value();
+}
+
+auto dimse_message::dataset() -> core::dicom_dataset& {
+    if (!dataset_) {
+        throw std::runtime_error("DIMSE message has no dataset");
+    }
+    return *dataset_;
+}
+
+auto dimse_message::dataset() const -> const core::dicom_dataset& {
+    if (!dataset_) {
+        throw std::runtime_error("DIMSE message has no dataset");
+    }
+    return *dataset_;
+}
+
+void dimse_message::set_dataset(core::dicom_dataset ds) {
+    dataset_ = std::move(ds);
+    update_data_set_type();
+}
+
+void dimse_message::clear_dataset() noexcept {
+    dataset_.reset();
+    update_data_set_type();
+}
+
+// ============================================================================
+// Status (for responses)
+// ============================================================================
+
+auto dimse_message::status() const -> status_code {
+    return command_set_.get_numeric<uint16_t>(tag_status).value_or(0);
+}
+
+void dimse_message::set_status(status_code status) {
+    command_set_.set_numeric(tag_status, encoding::vr_type::US, status);
+}
+
+// ============================================================================
+// Common Attributes
+// ============================================================================
+
+auto dimse_message::affected_sop_class_uid() const -> std::string {
+    return command_set_.get_string(tag_affected_sop_class_uid);
+}
+
+void dimse_message::set_affected_sop_class_uid(std::string_view uid) {
+    command_set_.set_string(tag_affected_sop_class_uid, encoding::vr_type::UI,
+                            uid);
+}
+
+auto dimse_message::affected_sop_instance_uid() const -> std::string {
+    return command_set_.get_string(tag_affected_sop_instance_uid);
+}
+
+void dimse_message::set_affected_sop_instance_uid(std::string_view uid) {
+    command_set_.set_string(tag_affected_sop_instance_uid, encoding::vr_type::UI,
+                            uid);
+}
+
+auto dimse_message::priority() const -> uint16_t {
+    return command_set_.get_numeric<uint16_t>(tag_priority).value_or(priority_medium);
+}
+
+void dimse_message::set_priority(uint16_t priority) {
+    command_set_.set_numeric(tag_priority, encoding::vr_type::US, priority);
+}
+
+auto dimse_message::message_id_responded_to() const -> uint16_t {
+    return command_set_.get_numeric<uint16_t>(tag_message_id_responded_to).value_or(0);
+}
+
+void dimse_message::set_message_id_responded_to(uint16_t id) {
+    command_set_.set_numeric(tag_message_id_responded_to, encoding::vr_type::US, id);
+}
+
+// ============================================================================
+// Sub-operation Counts
+// ============================================================================
+
+auto dimse_message::remaining_subops() const -> std::optional<uint16_t> {
+    return command_set_.get_numeric<uint16_t>(tag_number_of_remaining_subops);
+}
+
+void dimse_message::set_remaining_subops(uint16_t count) {
+    command_set_.set_numeric(tag_number_of_remaining_subops, encoding::vr_type::US,
+                             count);
+}
+
+auto dimse_message::completed_subops() const -> std::optional<uint16_t> {
+    return command_set_.get_numeric<uint16_t>(tag_number_of_completed_subops);
+}
+
+void dimse_message::set_completed_subops(uint16_t count) {
+    command_set_.set_numeric(tag_number_of_completed_subops, encoding::vr_type::US,
+                             count);
+}
+
+auto dimse_message::failed_subops() const -> std::optional<uint16_t> {
+    return command_set_.get_numeric<uint16_t>(tag_number_of_failed_subops);
+}
+
+void dimse_message::set_failed_subops(uint16_t count) {
+    command_set_.set_numeric(tag_number_of_failed_subops, encoding::vr_type::US,
+                             count);
+}
+
+auto dimse_message::warning_subops() const -> std::optional<uint16_t> {
+    return command_set_.get_numeric<uint16_t>(tag_number_of_warning_subops);
+}
+
+void dimse_message::set_warning_subops(uint16_t count) {
+    command_set_.set_numeric(tag_number_of_warning_subops, encoding::vr_type::US,
+                             count);
+}
+
+// ============================================================================
+// Encoding/Decoding
+// ============================================================================
+
+auto dimse_message::encode(const dimse_message& msg,
+                           const encoding::transfer_syntax& dataset_ts)
+    -> dimse_result<encoded_message> {
+    // Create a mutable copy for encoding
+    dimse_message copy = msg;
+    copy.update_command_group_length();
+
+    // Command set is always Implicit VR Little Endian
+    auto command_bytes = encoding::implicit_vr_codec::encode(copy.command_set_);
+
+    // Encode dataset if present
+    std::vector<uint8_t> dataset_bytes;
+    if (copy.has_dataset()) {
+        if (dataset_ts.vr_type() == encoding::vr_encoding::implicit) {
+            dataset_bytes = encoding::implicit_vr_codec::encode(copy.dataset());
+        } else {
+            dataset_bytes = encoding::explicit_vr_codec::encode(copy.dataset());
+        }
+    }
+
+    return encoded_message{std::move(command_bytes), std::move(dataset_bytes)};
+}
+
+auto dimse_message::decode(std::span<const uint8_t> command_data,
+                           std::span<const uint8_t> dataset_data,
+                           const encoding::transfer_syntax& dataset_ts)
+    -> dimse_result<dimse_message> {
+    // Decode command set (always Implicit VR Little Endian)
+    auto cmd_result = encoding::implicit_vr_codec::decode(command_data);
+    if (!cmd_result) {
+        return dimse_error::decoding_error;
+    }
+
+    auto command_set = std::move(*cmd_result);
+
+    // Extract command field
+    auto cmd_value = command_set.get_numeric<uint16_t>(tag_command_field);
+    if (!cmd_value) {
+        return dimse_error::missing_required_field;
+    }
+    auto cmd = static_cast<command_field>(*cmd_value);
+
+    // Extract message ID
+    auto msg_id = command_set.get_numeric<uint16_t>(tag_message_id);
+    if (!msg_id && dimse::is_request(cmd)) {
+        return dimse_error::missing_required_field;
+    }
+    // For responses, use message_id_responded_to if message_id is not present
+    uint16_t message_id = msg_id.value_or(0);
+
+    dimse_message msg(cmd, message_id);
+    msg.command_set_ = std::move(command_set);
+
+    // Decode dataset if present
+    if (!dataset_data.empty()) {
+        encoding::codec_result<core::dicom_dataset> ds_result{
+            encoding::codec_error::success};
+
+        if (dataset_ts.vr_type() == encoding::vr_encoding::implicit) {
+            ds_result = encoding::implicit_vr_codec::decode(dataset_data);
+        } else {
+            ds_result = encoding::explicit_vr_codec::decode(dataset_data);
+        }
+
+        if (!ds_result) {
+            return dimse_error::decoding_error;
+        }
+        msg.dataset_ = std::move(*ds_result);
+    }
+
+    return msg;
+}
+
+// ============================================================================
+// Validation
+// ============================================================================
+
+auto dimse_message::is_valid() const noexcept -> bool {
+    return command_set_.contains(tag_command_field) &&
+           command_set_.contains(tag_message_id);
+}
+
+auto dimse_message::is_request() const noexcept -> bool {
+    return dimse::is_request(command_);
+}
+
+auto dimse_message::is_response() const noexcept -> bool {
+    return dimse::is_response(command_);
+}
+
+// ============================================================================
+// Private Methods
+// ============================================================================
+
+void dimse_message::update_data_set_type() {
+    if (dataset_) {
+        command_set_.set_numeric(tag_command_data_set_type, encoding::vr_type::US,
+                                 command_data_set_type_present);
+    } else {
+        command_set_.set_numeric(tag_command_data_set_type, encoding::vr_type::US,
+                                 command_data_set_type_null);
+    }
+}
+
+void dimse_message::update_command_group_length() {
+    // First, remove CommandGroupLength to calculate without it
+    command_set_.remove(tag_command_group_length);
+
+    // Encode command set to get the size
+    auto encoded = encoding::implicit_vr_codec::encode(command_set_);
+    auto length = static_cast<uint32_t>(encoded.size());
+
+    // Set CommandGroupLength
+    command_set_.set_numeric(tag_command_group_length, encoding::vr_type::UL, length);
+}
+
+// ============================================================================
+// Factory Functions
+// ============================================================================
+
+auto make_c_echo_rq(uint16_t message_id, std::string_view sop_class_uid)
+    -> dimse_message {
+    dimse_message msg(command_field::c_echo_rq, message_id);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    return msg;
+}
+
+auto make_c_echo_rsp(uint16_t message_id_responded_to, status_code status,
+                     std::string_view sop_class_uid) -> dimse_message {
+    dimse_message msg(command_field::c_echo_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_c_store_rq(uint16_t message_id, std::string_view sop_class_uid,
+                     std::string_view sop_instance_uid, uint16_t priority)
+    -> dimse_message {
+    dimse_message msg(command_field::c_store_rq, message_id);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_priority(priority);
+    return msg;
+}
+
+auto make_c_store_rsp(uint16_t message_id_responded_to,
+                      std::string_view sop_class_uid,
+                      std::string_view sop_instance_uid, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::c_store_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_c_find_rq(uint16_t message_id, std::string_view sop_class_uid,
+                    uint16_t priority) -> dimse_message {
+    dimse_message msg(command_field::c_find_rq, message_id);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_priority(priority);
+    return msg;
+}
+
+auto make_c_find_rsp(uint16_t message_id_responded_to,
+                     std::string_view sop_class_uid, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::c_find_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+}  // namespace pacs::network::dimse
