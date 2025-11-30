@@ -320,6 +320,27 @@ if(TARGET NetworkSystem)
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
 endif()
 
+# Services library
+add_library(pacs_services
+    src/services/verification_scp.cpp
+)
+target_include_directories(pacs_services
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(pacs_services
+    PUBLIC pacs_network
+)
+
+# Link common_system for Result<T>
+if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+    target_include_directories(pacs_services PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    target_compile_definitions(pacs_services PUBLIC PACS_WITH_COMMON_SYSTEM)
+endif()
+
+message(STATUS "  [OK] pacs_services: ON")
+
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
@@ -392,6 +413,7 @@ if(PACS_BUILD_TESTS)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/core)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/encoding)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/network)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/services)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/storage)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/integration)
 
@@ -438,6 +460,16 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    # Services tests
+    add_executable(services_tests
+        tests/services/verification_scp_test.cpp
+    )
+    target_link_libraries(services_tests
+        PRIVATE
+            pacs_services
+            Catch2::Catch2WithMain
+    )
+
     # Storage tests
     if(TARGET pacs_storage)
         add_executable(storage_tests
@@ -468,6 +500,7 @@ if(PACS_BUILD_TESTS)
     catch_discover_tests(core_tests)
     catch_discover_tests(encoding_tests)
     catch_discover_tests(network_tests)
+    catch_discover_tests(services_tests)
     if(TARGET storage_tests)
         catch_discover_tests(storage_tests)
     endif()
@@ -510,6 +543,7 @@ message(STATUS "Build Options:")
 message(STATUS "  Tests: ${PACS_BUILD_TESTS}")
 message(STATUS "  Examples: ${PACS_BUILD_EXAMPLES}")
 message(STATUS "  Benchmarks: ${PACS_BUILD_BENCHMARKS}")
+message(STATUS "  Services: ON")
 if(TARGET pacs_storage)
     message(STATUS "  Storage: ON (SQLite3)")
 else()
