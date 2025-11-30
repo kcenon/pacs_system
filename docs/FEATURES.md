@@ -1,7 +1,7 @@
 # PACS System Features
 
 > **Version:** 1.0.0
-> **Last Updated:** 2025-01-30
+> **Last Updated:** 2025-11-30
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
@@ -691,5 +691,5 @@ pacs_query_latency_seconds{quantile="0.95"}
 ---
 
 *Document Version: 1.0.0*
-*Created: 2025-01-30*
+*Created: 2025-11-30*
 *Author: kcenon@naver.com*

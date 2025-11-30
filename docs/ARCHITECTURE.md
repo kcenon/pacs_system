@@ -1,7 +1,7 @@
 # Architecture Documentation - PACS System
 
 > **Version:** 1.0.0
-> **Last Updated:** 2025-01-30
+> **Last Updated:** 2025-11-30
 > **Language:** **English** | [한국어](ARCHITECTURE_KO.md)
 
 ---
@@ -809,5 +809,5 @@ auto& file = result.value();
 ---
 
 *Document Version: 1.0.0*
-*Created: 2025-01-30*
+*Created: 2025-11-30*
 *Author: kcenon@naver.com*

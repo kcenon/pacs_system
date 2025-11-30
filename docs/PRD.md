@@ -1,7 +1,7 @@
 # Product Requirements Document - PACS System
 
 > **Version:** 1.0.0
-> **Last Updated:** 2025-01-30
+> **Last Updated:** 2025-11-30
 > **Language:** **English** | [한국어](PRD_KO.md)
 
 ---
@@ -707,5 +707,5 @@ Query Errors (-880 to -899):
 ---
 
 *Document Version: 1.0.0*
-*Created: 2025-01-30*
+*Created: 2025-11-30*
 *Author: kcenon@naver.com*
