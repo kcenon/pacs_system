@@ -17,16 +17,33 @@ A production-ready C++20 PACS (Picture Archiving and Communication System) imple
 
 ## Project Status
 
-**Current Phase**: 📋 Analysis & Planning
+**Current Phase**: 🔨 Phase 1 Complete - Core & Encoding
 
 | Milestone | Status | Target |
 |-----------|--------|--------|
 | Analysis & Documentation | ✅ Complete | Week 1 |
-| Core DICOM Structures | 🔜 Planned | Week 2-5 |
-| Network Protocol (PDU) | 🔜 Planned | Week 6-9 |
+| Core DICOM Structures | ✅ Complete | Week 2-5 |
+| Encoding Module | ✅ Complete | Week 2-5 |
+| Network Protocol (PDU) | 🔄 In Progress | Week 6-9 |
 | DIMSE Services | 🔜 Planned | Week 10-13 |
 | Storage SCP/SCU | 🔜 Planned | Week 14-17 |
 | Query/Retrieve | 🔜 Planned | Week 18-20 |
+
+### Phase 1 Achievements
+
+**Core Module** (113 tests passing):
+- `dicom_tag` - DICOM Tag representation (Group, Element pairs)
+- `dicom_element` - Data Element with tag, VR, and value
+- `dicom_dataset` - Ordered collection of Data Elements
+- `dicom_file` - DICOM Part 10 file read/write
+- `dicom_dictionary` - Standard tag metadata lookup
+
+**Encoding Module**:
+- `vr_type` - 30+ Value Representation types
+- `vr_info` - VR metadata and validation utilities
+- `transfer_syntax` - Transfer Syntax management
+- `implicit_vr_codec` - Implicit VR Little Endian codec
+- `explicit_vr_codec` - Explicit VR Little Endian codec
 
 ---
 
@@ -84,41 +101,40 @@ This project leverages the following kcenon ecosystem components:
 
 ```
 pacs_system/
-├── core/                    # Core DICOM implementation
-│   ├── dicom_element.h      # Data Element
-│   ├── dicom_dataset.h      # Data Set
-│   ├── dicom_file.h         # DICOM File (Part 10)
-│   └── dicom_dictionary.h   # Tag Dictionary
+├── include/pacs/
+│   ├── core/                    # Core DICOM implementation (✅ Complete)
+│   │   ├── dicom_tag.hpp        # Tag representation (Group, Element)
+│   │   ├── dicom_tag_constants.hpp # Standard tag constants
+│   │   ├── dicom_element.hpp    # Data Element
+│   │   ├── dicom_dataset.hpp    # Data Set
+│   │   ├── dicom_file.hpp       # DICOM File (Part 10)
+│   │   ├── dicom_dictionary.hpp # Tag Dictionary
+│   │   └── tag_info.hpp         # Tag metadata
+│   │
+│   ├── encoding/                # Encoding/Decoding (✅ Complete)
+│   │   ├── vr_type.hpp          # Value Representation enum
+│   │   ├── vr_info.hpp          # VR metadata and utilities
+│   │   ├── transfer_syntax.hpp  # Transfer Syntax
+│   │   ├── byte_order.hpp       # Byte order handling
+│   │   ├── implicit_vr_codec.hpp # Implicit VR codec
+│   │   └── explicit_vr_codec.hpp # Explicit VR codec
+│   │
+│   └── network/                 # Network Protocol (🔄 In Progress)
+│       ├── pdu_types.hpp        # PDU type definitions
+│       └── pdu_encoder.hpp      # PDU encoder
 │
-├── encoding/                # Encoding/Decoding
-│   ├── vr_types.h           # Value Representation
-│   ├── transfer_syntax.h    # Transfer Syntax
-│   └── codecs/              # Compression codecs
+├── src/                         # Source files
+│   ├── core/                    # Core implementations
+│   ├── encoding/                # Encoding implementations
+│   └── network/                 # Network implementations
 │
-├── network/                 # Network Protocol
-│   ├── pdu/                 # Protocol Data Units
-│   ├── dimse/               # DIMSE Messages
-│   └── association.h        # Association Manager
+├── tests/                       # Test suites (113 tests)
+│   ├── core/                    # Core module tests
+│   ├── encoding/                # Encoding module tests
+│   └── network/                 # Network module tests
 │
-├── services/                # DICOM Services
-│   ├── storage_scp.h        # Storage SCP
-│   ├── qr_scp.h             # Query/Retrieve SCP
-│   ├── worklist_scp.h       # Modality Worklist SCP
-│   └── mpps_scp.h           # MPPS SCP
-│
-├── storage/                 # Storage Backend
-│   ├── storage_interface.h  # Abstract interface
-│   └── file_storage.h       # Filesystem storage
-│
-├── integration/             # Ecosystem Integration
-│   ├── container_adapter.h  # container_system adapter
-│   ├── network_adapter.h    # network_system adapter
-│   └── thread_adapter.h     # thread_system adapter
-│
-├── tests/                   # Test suites
-├── examples/                # Usage examples
-├── scripts/                 # Build and utility scripts
-└── docs/                    # Documentation
+├── docs/                        # Documentation
+└── CMakeLists.txt               # Build configuration
 ```
 
 ---
@@ -169,22 +185,22 @@ pacs_system/
 - CMake 3.20+
 - kcenon ecosystem libraries
 
-### Build (Coming Soon)
+### Build
 
 ```bash
 # Clone repository
 git clone https://github.com/kcenon/pacs_system.git
 cd pacs_system
 
-# Install dependencies
-./scripts/dependency.sh
-
-# Build
-./scripts/build.sh
+# Configure and build
+cmake -S . -B build
+cmake --build build
 
 # Run tests
-./scripts/test.sh
+cd build && ctest --output-on-failure
 ```
+
+**Test Results**: 113 tests passing (Core: 57, Encoding: 41, Network: 15)
 
 ---
 
