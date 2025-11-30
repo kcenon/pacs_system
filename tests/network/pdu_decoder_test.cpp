@@ -119,7 +119,7 @@ TEST_CASE("pdu_decoder A-RELEASE-RQ", "[network][pdu_decoder]") {
     SECTION("fails on incomplete data") {
         std::vector<uint8_t> incomplete = {0x05, 0x00, 0x00};
         auto result = pdu_decoder::decode_release_rq(incomplete);
-        CHECK(result.is_error());
+        CHECK(result.is_err());
     }
 }
 
@@ -609,7 +609,7 @@ TEST_CASE("pdu_decoder error handling", "[network][pdu_decoder]") {
     SECTION("decode fails on empty buffer") {
         std::vector<uint8_t> empty;
         auto result = pdu_decoder::decode(empty);
-        CHECK(result.is_error());
+        CHECK(result.is_err());
     }
 
     SECTION("decode fails on invalid PDU type") {
@@ -619,7 +619,7 @@ TEST_CASE("pdu_decoder error handling", "[network][pdu_decoder]") {
             0x00, 0x00, 0x00, 0x00   // Data
         };
         auto result = pdu_decoder::decode(invalid);
-        CHECK(result.is_error());
+        CHECK(result.is_err());
     }
 
     SECTION("decode fails on truncated PDU") {
@@ -629,7 +629,7 @@ TEST_CASE("pdu_decoder error handling", "[network][pdu_decoder]") {
             0x00, 0x00, 0x00, 0x64   // Length = 100 (but no data follows)
         };
         auto result = pdu_decoder::decode(truncated);
-        CHECK(result.is_error());
+        CHECK(result.is_err());
     }
 
     SECTION("decode_p_data_tf fails on malformed PDV") {
@@ -642,7 +642,7 @@ TEST_CASE("pdu_decoder error handling", "[network][pdu_decoder]") {
             0x00, 0x00, 0x00          // Padding
         };
         auto result = pdu_decoder::decode_p_data_tf(malformed);
-        CHECK(result.is_error());
+        CHECK(result.is_err());
     }
 }
 
