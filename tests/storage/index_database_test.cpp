@@ -1389,3 +1389,557 @@ TEST_CASE("index_database: series ordering by series_number",
     CHECK(series_list[1].series_number.value_or(-1) == 2);
     CHECK(series_list[2].series_number.value_or(-1) == 3);
 }
+
+// ============================================================================
+// Instance Insert Tests
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Helper to create a test series and return pk
+ */
+auto create_test_series_helper(index_database& db, int64_t study_pk,
+                               const std::string& series_uid = "1.2.3.4.5.6.7.1")
+    -> int64_t {
+    auto result = db.upsert_series(study_pk, series_uid, "CT");
+    REQUIRE(result.is_ok());
+    return result.value();
+}
+
+}  // namespace
+
+TEST_CASE("index_database: insert instance with basic info",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    auto result = db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024000, "1.2.840.10008.1.2.1", 1);
+
+    REQUIRE(result.is_ok());
+    CHECK(result.value() > 0);
+
+    // Verify instance was inserted
+    auto instance = db->find_instance("1.2.3.4.5.6.7.1.1");
+    REQUIRE(instance.has_value());
+    CHECK(instance->sop_uid == "1.2.3.4.5.6.7.1.1");
+    CHECK(instance->sop_class_uid == "1.2.840.10008.5.1.4.1.1.2");
+    CHECK(instance->file_path == "/storage/file.dcm");
+    CHECK(instance->file_size == 1024000);
+    CHECK(instance->transfer_syntax == "1.2.840.10008.1.2.1");
+    CHECK(instance->instance_number.has_value());
+    CHECK(*instance->instance_number == 1);
+}
+
+TEST_CASE("index_database: insert instance with full record",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    instance_record record;
+    record.series_pk = series_pk;
+    record.sop_uid = "1.2.3.4.5.6.7.1.2";
+    record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";  // CT Image Storage
+    record.instance_number = 2;
+    record.transfer_syntax = "1.2.840.10008.1.2.1";
+    record.content_date = "20231115";
+    record.content_time = "120000";
+    record.rows = 512;
+    record.columns = 512;
+    record.bits_allocated = 16;
+    record.number_of_frames = 1;
+    record.file_path = "/storage/ct_image.dcm";
+    record.file_size = 2048000;
+    record.file_hash = "abc123def456";
+
+    auto result = db->upsert_instance(record);
+
+    REQUIRE(result.is_ok());
+
+    auto instance = db->find_instance("1.2.3.4.5.6.7.1.2");
+    REQUIRE(instance.has_value());
+    CHECK(instance->rows.value_or(0) == 512);
+    CHECK(instance->columns.value_or(0) == 512);
+    CHECK(instance->bits_allocated.value_or(0) == 16);
+    CHECK(instance->file_hash == "abc123def456");
+}
+
+TEST_CASE("index_database: insert instance requires sop_uid",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    auto result = db->upsert_instance(
+        series_pk, "", "1.2.840.10008.5.1.4.1.1.2", "/storage/file.dcm", 1024);
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("SOP Instance UID is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: insert instance requires valid series_pk",
+          "[storage][instance]") {
+    auto db = create_test_database();
+
+    auto result = db->upsert_instance(
+        0, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024);
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("series_pk is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: insert instance requires file_path",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    auto result = db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2", "", 1024);
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("File path is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: sop_uid max length validation",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    // 65 characters - should fail
+    std::string long_uid(65, '1');
+    auto result = db->upsert_instance(
+        series_pk, long_uid, "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024);
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("maximum length") != std::string::npos);
+
+    // 64 characters - should succeed
+    std::string max_uid(64, '1');
+    result = db->upsert_instance(
+        series_pk, max_uid, "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024);
+    REQUIRE(result.is_ok());
+}
+
+// ============================================================================
+// Instance Update Tests
+// ============================================================================
+
+TEST_CASE("index_database: update existing instance", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    // Insert initial instance
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024).is_ok());
+
+    // Update with new file path and size
+    auto result = db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/updated.dcm", 2048);
+    REQUIRE(result.is_ok());
+
+    // Verify only one instance exists
+    CHECK(db->instance_count() == 1);
+
+    // Verify update was applied
+    auto instance = db->find_instance("1.2.3.4.5.6.7.1.1");
+    REQUIRE(instance.has_value());
+    CHECK(instance->file_path == "/storage/updated.dcm");
+    CHECK(instance->file_size == 2048);
+}
+
+// ============================================================================
+// Instance Search Tests
+// ============================================================================
+
+TEST_CASE("index_database: find instance by sop_uid", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024).is_ok());
+
+    auto instance = db->find_instance("1.2.3.4.5.6.7.1.1");
+    REQUIRE(instance.has_value());
+    CHECK(instance->sop_uid == "1.2.3.4.5.6.7.1.1");
+
+    // Non-existent instance
+    auto not_found = db->find_instance("9.9.9.9.9.9.9.9.9");
+    CHECK_FALSE(not_found.has_value());
+}
+
+TEST_CASE("index_database: find instance by pk", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    auto result = db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024);
+    REQUIRE(result.is_ok());
+    auto pk = result.value();
+
+    auto instance = db->find_instance_by_pk(pk);
+    REQUIRE(instance.has_value());
+    CHECK(instance->sop_uid == "1.2.3.4.5.6.7.1.1");
+
+    // Non-existent PK
+    auto not_found = db->find_instance_by_pk(99999);
+    CHECK_FALSE(not_found.has_value());
+}
+
+TEST_CASE("index_database: list instances for series", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series1_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+    auto series2_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.2");
+
+    // Add instances to series 1
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024, "", 1).is_ok());
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.1.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024, "", 2).is_ok());
+
+    // Add instance to series 2
+    REQUIRE(db->upsert_instance(
+        series2_pk, "1.2.3.2.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/3.dcm", 1024, "", 1).is_ok());
+
+    // List instances for series 1
+    auto instance_list = db->list_instances("1.2.3.4.5.6.7.1");
+
+    CHECK(instance_list.size() == 2);
+    // Should be ordered by instance number
+    CHECK(instance_list[0].instance_number.value_or(-1) == 1);
+    CHECK(instance_list[1].instance_number.value_or(-1) == 2);
+}
+
+TEST_CASE("index_database: search instances by sop_class_uid",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    // CT Image Storage
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/ct1.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/ct2.dcm", 1024).is_ok());
+    // MR Image Storage
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.3", "1.2.840.10008.5.1.4.1.1.4",
+        "/storage/mr1.dcm", 1024).is_ok());
+
+    instance_query query;
+    query.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";  // CT Image Storage
+
+    auto results = db->search_instances(query);
+
+    CHECK(results.size() == 2);
+}
+
+TEST_CASE("index_database: search instances by series_uid",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series1_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+    auto series2_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.2");
+
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series2_pk, "1.2.3.3", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/3.dcm", 1024).is_ok());
+
+    instance_query query;
+    query.series_uid = "1.2.3.4.5.6.7.1";
+
+    auto results = db->search_instances(query);
+
+    CHECK(results.size() == 2);
+}
+
+TEST_CASE("index_database: search instances with pagination",
+          "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    // Insert 10 instances
+    for (int i = 1; i <= 10; ++i) {
+        auto uid = std::format("1.2.3.4.5.6.7.1.{}", i);
+        auto path = std::format("/storage/{}.dcm", i);
+        REQUIRE(db->upsert_instance(
+            series_pk, uid, "1.2.840.10008.5.1.4.1.1.2",
+            path, 1024, "", i).is_ok());
+    }
+
+    instance_query query;
+    query.limit = 3;
+    query.offset = 0;
+
+    auto page1 = db->search_instances(query);
+    CHECK(page1.size() == 3);
+
+    query.offset = 3;
+    auto page2 = db->search_instances(query);
+    CHECK(page2.size() == 3);
+
+    // Last page
+    query.offset = 9;
+    auto page4 = db->search_instances(query);
+    CHECK(page4.size() == 1);
+}
+
+// ============================================================================
+// Instance Delete Tests
+// ============================================================================
+
+TEST_CASE("index_database: delete instance", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024).is_ok());
+    CHECK(db->instance_count() == 1);
+
+    auto result = db->delete_instance("1.2.3.4.5.6.7.1.1");
+    REQUIRE(result.is_ok());
+
+    CHECK(db->instance_count() == 0);
+    CHECK_FALSE(db->find_instance("1.2.3.4.5.6.7.1.1").has_value());
+}
+
+TEST_CASE("index_database: delete non-existent instance",
+          "[storage][instance]") {
+    auto db = create_test_database();
+
+    // Should not error
+    auto result = db->delete_instance("nonexistent");
+    CHECK(result.is_ok());
+}
+
+// ============================================================================
+// Instance Count Tests
+// ============================================================================
+
+TEST_CASE("index_database: instance count", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    CHECK(db->instance_count() == 0);
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+    CHECK(db->instance_count() == 1);
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024).is_ok());
+    CHECK(db->instance_count() == 2);
+
+    REQUIRE(db->delete_instance("1.2.3.1").is_ok());
+    CHECK(db->instance_count() == 1);
+}
+
+TEST_CASE("index_database: instance count for series", "[storage][instance]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series1_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+    auto series2_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.2");
+
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series2_pk, "1.2.3.3", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/3.dcm", 1024).is_ok());
+
+    CHECK(db->instance_count("1.2.3.4.5.6.7.1") == 2);
+    CHECK(db->instance_count("1.2.3.4.5.6.7.2") == 1);
+    CHECK(db->instance_count("9.9.9.9.9.9.9") == 0);
+}
+
+// ============================================================================
+// Instance Record Tests
+// ============================================================================
+
+TEST_CASE("instance_record: is_valid", "[storage][instance]") {
+    instance_record record;
+
+    CHECK_FALSE(record.is_valid());
+
+    record.sop_uid = "1.2.3.4.5.6.7.1.1";
+    CHECK_FALSE(record.is_valid());  // file_path is also required
+
+    record.file_path = "/storage/file.dcm";
+    CHECK(record.is_valid());
+}
+
+TEST_CASE("instance_query: has_criteria", "[storage][instance]") {
+    instance_query query;
+
+    CHECK_FALSE(query.has_criteria());
+
+    query.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";
+    CHECK(query.has_criteria());
+}
+
+// ============================================================================
+// Series-Instance Cascade Tests
+// ============================================================================
+
+TEST_CASE("index_database: delete series cascades to instances",
+          "[storage][cascade]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024).is_ok());
+
+    CHECK(db->instance_count() == 2);
+
+    // Delete series should cascade to instances
+    REQUIRE(db->delete_series("1.2.3.4.5.6.7.1").is_ok());
+
+    CHECK(db->instance_count() == 0);
+    CHECK_FALSE(db->find_instance("1.2.3.1").has_value());
+    CHECK_FALSE(db->find_instance("1.2.3.2").has_value());
+}
+
+// ============================================================================
+// Instance Parent Count Update Tests (via trigger)
+// ============================================================================
+
+TEST_CASE("index_database: instance insert updates series num_instances",
+          "[storage][instance][trigger]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+
+    // Initially num_instances should be 0
+    auto series_before = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series_before.has_value());
+    CHECK(series_before->num_instances == 0);
+
+    // Insert instance
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+
+    // num_instances should be updated
+    auto series_after = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series_after.has_value());
+    CHECK(series_after->num_instances == 1);
+
+    // Insert another instance
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024).is_ok());
+
+    series_after = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series_after.has_value());
+    CHECK(series_after->num_instances == 2);
+}
+
+TEST_CASE("index_database: instance delete updates series num_instances",
+          "[storage][instance][trigger]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/2.dcm", 1024).is_ok());
+
+    auto series = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series.has_value());
+    CHECK(series->num_instances == 2);
+
+    // Delete one instance
+    REQUIRE(db->delete_instance("1.2.3.1").is_ok());
+
+    series = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series.has_value());
+    CHECK(series->num_instances == 1);
+}
+
+TEST_CASE("index_database: instance insert updates study num_instances",
+          "[storage][instance][trigger]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+    auto series_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+
+    // Initially num_instances should be 0
+    auto study_before = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study_before.has_value());
+    CHECK(study_before->num_instances == 0);
+
+    // Insert instance
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/1.dcm", 1024).is_ok());
+
+    // num_instances should be updated on study
+    auto study_after = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study_after.has_value());
+    CHECK(study_after->num_instances == 1);
+}

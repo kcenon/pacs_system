@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "instance_record.hpp"
 #include "migration_runner.hpp"
 #include "patient_record.hpp"
 #include "series_record.hpp"
@@ -393,6 +394,104 @@ public:
     [[nodiscard]] auto series_count(std::string_view study_uid) const -> size_t;
 
     // ========================================================================
+    // Instance Operations
+    // ========================================================================
+
+    /**
+     * @brief Insert or update an instance record
+     *
+     * If an instance with the same sop_uid exists, updates the record.
+     * Otherwise, inserts a new record.
+     *
+     * @param series_pk Foreign key to the series (required)
+     * @param sop_uid SOP Instance UID (required, max 64 chars)
+     * @param sop_class_uid SOP Class UID (required)
+     * @param file_path Path to the stored DICOM file (required)
+     * @param file_size Size of the file in bytes (required, >= 0)
+     * @param transfer_syntax Transfer Syntax UID
+     * @param instance_number Instance number
+     * @return Result containing the instance's primary key or error
+     */
+    [[nodiscard]] auto upsert_instance(int64_t series_pk,
+                                       std::string_view sop_uid,
+                                       std::string_view sop_class_uid,
+                                       std::string_view file_path,
+                                       int64_t file_size,
+                                       std::string_view transfer_syntax = "",
+                                       std::optional<int> instance_number = std::nullopt)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Insert or update an instance record with full details
+     *
+     * @param record Complete instance record (pk field is ignored for insert)
+     * @return Result containing the instance's primary key or error
+     */
+    [[nodiscard]] auto upsert_instance(const instance_record& record)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Find an instance by SOP Instance UID
+     *
+     * @param sop_uid The SOP Instance UID to search for
+     * @return Optional containing the instance record if found
+     */
+    [[nodiscard]] auto find_instance(std::string_view sop_uid) const
+        -> std::optional<instance_record>;
+
+    /**
+     * @brief Find an instance by primary key
+     *
+     * @param pk The instance's primary key
+     * @return Optional containing the instance record if found
+     */
+    [[nodiscard]] auto find_instance_by_pk(int64_t pk) const
+        -> std::optional<instance_record>;
+
+    /**
+     * @brief List all instances for a series
+     *
+     * @param series_uid The Series Instance UID to list instances for
+     * @return Vector of instance records for the series, ordered by instance number
+     */
+    [[nodiscard]] auto list_instances(std::string_view series_uid) const
+        -> std::vector<instance_record>;
+
+    /**
+     * @brief Search instances with query criteria
+     *
+     * Can filter by series UID, SOP class, and other attributes.
+     *
+     * @param query Query parameters with optional filters
+     * @return Vector of matching instance records
+     */
+    [[nodiscard]] auto search_instances(const instance_query& query) const
+        -> std::vector<instance_record>;
+
+    /**
+     * @brief Delete an instance by SOP Instance UID
+     *
+     * @param sop_uid The SOP Instance UID to delete
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto delete_instance(std::string_view sop_uid) -> VoidResult;
+
+    /**
+     * @brief Get total instance count
+     *
+     * @return Number of instances in the database
+     */
+    [[nodiscard]] auto instance_count() const -> size_t;
+
+    /**
+     * @brief Get instance count for a specific series
+     *
+     * @param series_uid The Series Instance UID
+     * @return Number of instances for the series
+     */
+    [[nodiscard]] auto instance_count(std::string_view series_uid) const -> size_t;
+
+    // ========================================================================
     // Database Information
     // ========================================================================
 
@@ -437,6 +536,11 @@ private:
      * @brief Parse a series record from a prepared statement
      */
     [[nodiscard]] auto parse_series_row(void* stmt) const -> series_record;
+
+    /**
+     * @brief Parse an instance record from a prepared statement
+     */
+    [[nodiscard]] auto parse_instance_row(void* stmt) const -> instance_record;
 
     /**
      * @brief Convert wildcard pattern to SQL LIKE pattern
