@@ -322,6 +322,7 @@ endif()
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
         src/storage/migration_runner.cpp
+        src/storage/index_database.cpp
     )
     target_include_directories(pacs_storage
         PUBLIC
@@ -411,6 +412,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_storage)
         add_executable(storage_tests
             tests/storage/migration_runner_test.cpp
+            tests/storage/index_database_test.cpp
         )
         target_link_libraries(storage_tests
             PRIVATE
