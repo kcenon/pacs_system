@@ -49,6 +49,7 @@ option(PACS_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
 option(PACS_WITH_CONTAINER_SYSTEM "Enable container_system integration (REQUIRED)" ON)
 option(PACS_WITH_NETWORK_SYSTEM "Enable network_system integration (REQUIRED)" ON)
+option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
 
 ##################################################
 # Compiler Warnings
@@ -66,6 +67,45 @@ endif()
 
 include(FetchContent)
 find_package(Threads REQUIRED)
+
+# SQLite3 (for storage module)
+if(PACS_BUILD_STORAGE)
+    message(STATUS "")
+    message(STATUS "=== Finding SQLite3 (for storage module) ===")
+
+    # Try system SQLite3 first
+    find_package(SQLite3 QUIET)
+
+    if(SQLite3_FOUND)
+        message(STATUS "Found system SQLite3: ${SQLite3_VERSION}")
+        set(SQLITE3_FOUND TRUE)
+    else()
+        # Fallback to FetchContent
+        message(STATUS "System SQLite3 not found, fetching from source...")
+
+        FetchContent_Declare(
+            sqlite3
+            URL https://www.sqlite.org/2024/sqlite-amalgamation-3450100.zip
+            URL_HASH SHA3_256=72887d57a1d5c9ff937e59efc8db186c5c871fae9e2e5a9b20a1f2c7b5f1e8f7
+            DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        )
+        FetchContent_MakeAvailable(sqlite3)
+
+        # Create SQLite3 library target
+        add_library(sqlite3_lib STATIC
+            ${sqlite3_SOURCE_DIR}/sqlite3.c
+        )
+        target_include_directories(sqlite3_lib PUBLIC ${sqlite3_SOURCE_DIR})
+        target_compile_definitions(sqlite3_lib PRIVATE
+            SQLITE_THREADSAFE=1
+            SQLITE_ENABLE_FTS5
+            SQLITE_ENABLE_JSON1
+        )
+        set(SQLITE3_FOUND TRUE)
+        set(SQLITE3_FROM_FETCH TRUE)
+        message(STATUS "SQLite3 fetched and configured")
+    endif()
+endif()
 
 # common_system (REQUIRED - Tier 0)
 if(PACS_WITH_COMMON_SYSTEM)
@@ -277,6 +317,35 @@ if(TARGET NetworkSystem)
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
 endif()
 
+# Storage library
+if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
+    add_library(pacs_storage
+        src/storage/migration_runner.cpp
+    )
+    target_include_directories(pacs_storage
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+
+    # Link common_system for Result<T>
+    if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+        target_include_directories(pacs_storage PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_storage PUBLIC PACS_WITH_COMMON_SYSTEM)
+    endif()
+
+    # Link SQLite3
+    if(SQLITE3_FROM_FETCH)
+        target_link_libraries(pacs_storage PUBLIC sqlite3_lib)
+    else()
+        target_link_libraries(pacs_storage PUBLIC SQLite::SQLite3)
+    endif()
+
+    message(STATUS "  [OK] pacs_storage: ON (SQLite3)")
+else()
+    message(STATUS "  [--] pacs_storage: OFF")
+endif()
+
 # Testing
 if(PACS_BUILD_TESTS)
     enable_testing()
@@ -294,6 +363,7 @@ if(PACS_BUILD_TESTS)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/core)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/encoding)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/network)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/storage)
 
     # Core tests
     add_executable(core_tests
@@ -335,11 +405,26 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    # Storage tests
+    if(TARGET pacs_storage)
+        add_executable(storage_tests
+            tests/storage/migration_runner_test.cpp
+        )
+        target_link_libraries(storage_tests
+            PRIVATE
+                pacs_storage
+                Catch2::Catch2WithMain
+        )
+    endif()
+
     include(CTest)
     include(Catch)
     catch_discover_tests(core_tests)
     catch_discover_tests(encoding_tests)
     catch_discover_tests(network_tests)
+    if(TARGET storage_tests)
+        catch_discover_tests(storage_tests)
+    endif()
 endif()
 
 ##################################################
@@ -376,4 +461,9 @@ message(STATUS "Build Options:")
 message(STATUS "  Tests: ${PACS_BUILD_TESTS}")
 message(STATUS "  Examples: ${PACS_BUILD_EXAMPLES}")
 message(STATUS "  Benchmarks: ${PACS_BUILD_BENCHMARKS}")
+if(TARGET pacs_storage)
+    message(STATUS "  Storage: ON (SQLite3)")
+else()
+    message(STATUS "  Storage: OFF")
+endif()
 message(STATUS "========================================")
