@@ -301,6 +301,7 @@ target_link_libraries(pacs_encoding
 # Network library
 add_library(pacs_network
     src/network/pdu_encoder.cpp
+    src/network/pdu_decoder.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
@@ -398,6 +399,7 @@ if(PACS_BUILD_TESTS)
     # Network tests
     add_executable(network_tests
         tests/network/pdu_encoder_test.cpp
+        tests/network/pdu_decoder_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
