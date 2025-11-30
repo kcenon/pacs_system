@@ -466,6 +466,8 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         src/integration/container_adapter.cpp
         src/integration/logger_adapter.cpp
         src/integration/thread_adapter.cpp
+        src/integration/network_adapter.cpp
+        src/integration/dicom_session.cpp
     )
     target_include_directories(pacs_integration
         PUBLIC
@@ -478,7 +480,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
     )
     target_link_libraries(pacs_integration
-        PUBLIC pacs_core pacs_encoding container_system
+        PUBLIC pacs_core pacs_encoding pacs_network container_system
     )
 
     # Link logger_system (REQUIRED for logger_adapter)
@@ -515,7 +517,16 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_COMMON_SYSTEM)
     endif()
 
-    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system)")
+    # Link network_system (REQUIRED for network_adapter)
+    if(TARGET NetworkSystem)
+        target_link_libraries(pacs_integration PUBLIC NetworkSystem)
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_NETWORK_SYSTEM)
+        message(STATUS "    - network_adapter: ON (NetworkSystem)")
+    else()
+        message(WARNING "    - network_adapter: OFF (NetworkSystem target not found)")
+    endif()
+
+    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system, network_system)")
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
@@ -616,10 +627,12 @@ if(PACS_BUILD_TESTS)
             tests/integration/container_adapter_test.cpp
             tests/integration/logger_adapter_test.cpp
             tests/integration/thread_adapter_test.cpp
+            tests/integration/network_adapter_test.cpp
         )
         target_link_libraries(integration_tests
             PRIVATE
                 pacs_integration
+                pacs_network
                 Catch2::Catch2WithMain
         )
     endif()
