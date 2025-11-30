@@ -453,4 +453,441 @@ auto index_database::to_like_pattern(std::string_view pattern) -> std::string {
     return result;
 }
 
+// ============================================================================
+// Study Operations
+// ============================================================================
+
+auto index_database::upsert_study(int64_t patient_pk,
+                                  std::string_view study_uid,
+                                  std::string_view study_id,
+                                  std::string_view study_date,
+                                  std::string_view study_time,
+                                  std::string_view accession_number,
+                                  std::string_view referring_physician,
+                                  std::string_view study_description)
+    -> Result<int64_t> {
+    study_record record;
+    record.patient_pk = patient_pk;
+    record.study_uid = std::string(study_uid);
+    record.study_id = std::string(study_id);
+    record.study_date = std::string(study_date);
+    record.study_time = std::string(study_time);
+    record.accession_number = std::string(accession_number);
+    record.referring_physician = std::string(referring_physician);
+    record.study_description = std::string(study_description);
+    return upsert_study(record);
+}
+
+auto index_database::upsert_study(const study_record& record)
+    -> Result<int64_t> {
+    if (record.study_uid.empty()) {
+        return make_error<int64_t>(-1, "Study Instance UID is required",
+                                   "storage");
+    }
+
+    if (record.study_uid.length() > 64) {
+        return make_error<int64_t>(
+            -1, "Study Instance UID exceeds maximum length of 64 characters",
+            "storage");
+    }
+
+    if (record.patient_pk <= 0) {
+        return make_error<int64_t>(-1, "Valid patient_pk is required",
+                                   "storage");
+    }
+
+    // Use INSERT OR REPLACE for upsert behavior
+    const char* sql = R"(
+        INSERT INTO studies (
+            patient_pk, study_uid, study_id, study_date, study_time,
+            accession_number, referring_physician, study_description,
+            updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        ON CONFLICT(study_uid) DO UPDATE SET
+            patient_pk = excluded.patient_pk,
+            study_id = excluded.study_id,
+            study_date = excluded.study_date,
+            study_time = excluded.study_time,
+            accession_number = excluded.accession_number,
+            referring_physician = excluded.referring_physician,
+            study_description = excluded.study_description,
+            updated_at = datetime('now')
+        RETURNING study_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_int64(stmt, 1, record.patient_pk);
+    sqlite3_bind_text(stmt, 2, record.study_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, record.study_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, record.study_date.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, record.study_time.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, record.accession_number.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, record.referring_physician.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, record.study_description.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, std::format("Failed to upsert study: {}", error_msg),
+            "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return pk;
+}
+
+auto index_database::find_study(std::string_view study_uid) const
+    -> std::optional<study_record> {
+    const char* sql = R"(
+        SELECT study_pk, patient_pk, study_uid, study_id, study_date,
+               study_time, accession_number, referring_physician,
+               study_description, modalities_in_study, num_series,
+               num_instances, created_at, updated_at
+        FROM studies
+        WHERE study_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, study_uid.data(),
+                      static_cast<int>(study_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_study_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::find_study_by_pk(int64_t pk) const
+    -> std::optional<study_record> {
+    const char* sql = R"(
+        SELECT study_pk, patient_pk, study_uid, study_id, study_date,
+               study_time, accession_number, referring_physician,
+               study_description, modalities_in_study, num_series,
+               num_instances, created_at, updated_at
+        FROM studies
+        WHERE study_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_study_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::list_studies(std::string_view patient_id) const
+    -> std::vector<study_record> {
+    std::vector<study_record> results;
+
+    const char* sql = R"(
+        SELECT s.study_pk, s.patient_pk, s.study_uid, s.study_id, s.study_date,
+               s.study_time, s.accession_number, s.referring_physician,
+               s.study_description, s.modalities_in_study, s.num_series,
+               s.num_instances, s.created_at, s.updated_at
+        FROM studies s
+        JOIN patients p ON s.patient_pk = p.patient_pk
+        WHERE p.patient_id = ?
+        ORDER BY s.study_date DESC, s.study_time DESC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, patient_id.data(),
+                      static_cast<int>(patient_id.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_study_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::search_studies(const study_query& query) const
+    -> std::vector<study_record> {
+    std::vector<study_record> results;
+
+    std::string sql = R"(
+        SELECT s.study_pk, s.patient_pk, s.study_uid, s.study_id, s.study_date,
+               s.study_time, s.accession_number, s.referring_physician,
+               s.study_description, s.modalities_in_study, s.num_series,
+               s.num_instances, s.created_at, s.updated_at
+        FROM studies s
+        JOIN patients p ON s.patient_pk = p.patient_pk
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    if (query.patient_id.has_value()) {
+        sql += " AND p.patient_id LIKE ?";
+        params.push_back(to_like_pattern(*query.patient_id));
+    }
+
+    if (query.patient_name.has_value()) {
+        sql += " AND p.patient_name LIKE ?";
+        params.push_back(to_like_pattern(*query.patient_name));
+    }
+
+    if (query.study_uid.has_value()) {
+        sql += " AND s.study_uid = ?";
+        params.push_back(*query.study_uid);
+    }
+
+    if (query.study_id.has_value()) {
+        sql += " AND s.study_id LIKE ?";
+        params.push_back(to_like_pattern(*query.study_id));
+    }
+
+    if (query.study_date.has_value()) {
+        sql += " AND s.study_date = ?";
+        params.push_back(*query.study_date);
+    }
+
+    if (query.study_date_from.has_value()) {
+        sql += " AND s.study_date >= ?";
+        params.push_back(*query.study_date_from);
+    }
+
+    if (query.study_date_to.has_value()) {
+        sql += " AND s.study_date <= ?";
+        params.push_back(*query.study_date_to);
+    }
+
+    if (query.accession_number.has_value()) {
+        sql += " AND s.accession_number LIKE ?";
+        params.push_back(to_like_pattern(*query.accession_number));
+    }
+
+    if (query.modality.has_value()) {
+        // modalities_in_study contains backslash-separated list
+        sql += " AND (s.modalities_in_study = ? OR "
+               "s.modalities_in_study LIKE ? OR "
+               "s.modalities_in_study LIKE ? OR "
+               "s.modalities_in_study LIKE ?)";
+        params.push_back(*query.modality);  // Exact match
+        params.push_back(*query.modality + "\\%");  // Start
+        params.push_back("%\\" + *query.modality);  // End
+        params.push_back("%\\" + *query.modality + "\\%");  // Middle
+    }
+
+    if (query.referring_physician.has_value()) {
+        sql += " AND s.referring_physician LIKE ?";
+        params.push_back(to_like_pattern(*query.referring_physician));
+    }
+
+    if (query.study_description.has_value()) {
+        sql += " AND s.study_description LIKE ?";
+        params.push_back(to_like_pattern(*query.study_description));
+    }
+
+    sql += " ORDER BY s.study_date DESC, s.study_time DESC";
+
+    if (query.limit > 0) {
+        sql += std::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += std::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    // Bind parameters
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_study_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
+    const char* sql = "DELETE FROM studies WHERE study_uid = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, study_uid.data(),
+                      static_cast<int>(study_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc, std::format("Failed to delete study: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::study_count() const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM studies;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::study_count(std::string_view patient_id) const -> size_t {
+    const char* sql = R"(
+        SELECT COUNT(*) FROM studies s
+        JOIN patients p ON s.patient_pk = p.patient_pk
+        WHERE p.patient_id = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, patient_id.data(),
+                      static_cast<int>(patient_id.size()), SQLITE_TRANSIENT);
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::update_modalities_in_study(int64_t study_pk)
+    -> VoidResult {
+    // Aggregate all unique modalities from series
+    const char* sql = R"(
+        UPDATE studies
+        SET modalities_in_study = (
+            SELECT GROUP_CONCAT(DISTINCT modality, '\')
+            FROM series
+            WHERE study_pk = ?
+        ),
+        updated_at = datetime('now')
+        WHERE study_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare update: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_int64(stmt, 1, study_pk);
+    sqlite3_bind_int64(stmt, 2, study_pk);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to update modalities: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::parse_study_row(void* stmt_ptr) const -> study_record {
+    auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
+    study_record record;
+
+    record.pk = sqlite3_column_int64(stmt, 0);
+    record.patient_pk = sqlite3_column_int64(stmt, 1);
+    record.study_uid = get_text(stmt, 2);
+    record.study_id = get_text(stmt, 3);
+    record.study_date = get_text(stmt, 4);
+    record.study_time = get_text(stmt, 5);
+    record.accession_number = get_text(stmt, 6);
+    record.referring_physician = get_text(stmt, 7);
+    record.study_description = get_text(stmt, 8);
+    record.modalities_in_study = get_text(stmt, 9);
+    record.num_series = sqlite3_column_int(stmt, 10);
+    record.num_instances = sqlite3_column_int(stmt, 11);
+
+    auto created_str = get_text(stmt, 12);
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_text(stmt, 13);
+    record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+
 }  // namespace pacs::storage
