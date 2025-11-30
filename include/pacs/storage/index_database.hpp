@@ -13,6 +13,7 @@
 
 #include "migration_runner.hpp"
 #include "patient_record.hpp"
+#include "study_record.hpp"
 
 #include <kcenon/common/patterns/result.h>
 
@@ -176,6 +177,120 @@ public:
     [[nodiscard]] auto patient_count() const -> size_t;
 
     // ========================================================================
+    // Study Operations
+    // ========================================================================
+
+    /**
+     * @brief Insert or update a study record
+     *
+     * If a study with the same study_uid exists, updates the record.
+     * Otherwise, inserts a new record.
+     *
+     * @param patient_pk Foreign key to the patient (required)
+     * @param study_uid Study Instance UID (required, max 64 chars)
+     * @param study_id Study ID
+     * @param study_date Study date in YYYYMMDD format
+     * @param study_time Study time in HHMMSS format
+     * @param accession_number Accession number
+     * @param referring_physician Referring physician's name
+     * @param study_description Study description
+     * @return Result containing the study's primary key or error
+     */
+    [[nodiscard]] auto upsert_study(int64_t patient_pk,
+                                    std::string_view study_uid,
+                                    std::string_view study_id = "",
+                                    std::string_view study_date = "",
+                                    std::string_view study_time = "",
+                                    std::string_view accession_number = "",
+                                    std::string_view referring_physician = "",
+                                    std::string_view study_description = "")
+        -> Result<int64_t>;
+
+    /**
+     * @brief Insert or update a study record with full details
+     *
+     * @param record Complete study record (pk field is ignored for insert)
+     * @return Result containing the study's primary key or error
+     */
+    [[nodiscard]] auto upsert_study(const study_record& record)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Find a study by Study Instance UID
+     *
+     * @param study_uid The Study Instance UID to search for
+     * @return Optional containing the study record if found
+     */
+    [[nodiscard]] auto find_study(std::string_view study_uid) const
+        -> std::optional<study_record>;
+
+    /**
+     * @brief Find a study by primary key
+     *
+     * @param pk The study's primary key
+     * @return Optional containing the study record if found
+     */
+    [[nodiscard]] auto find_study_by_pk(int64_t pk) const
+        -> std::optional<study_record>;
+
+    /**
+     * @brief List all studies for a patient
+     *
+     * @param patient_id The patient ID to list studies for
+     * @return Vector of study records for the patient
+     */
+    [[nodiscard]] auto list_studies(std::string_view patient_id) const
+        -> std::vector<study_record>;
+
+    /**
+     * @brief Search studies with query criteria
+     *
+     * Supports wildcard matching using '*' character.
+     * Can filter by patient attributes, study attributes, and date ranges.
+     *
+     * @param query Query parameters with optional filters
+     * @return Vector of matching study records
+     */
+    [[nodiscard]] auto search_studies(const study_query& query) const
+        -> std::vector<study_record>;
+
+    /**
+     * @brief Delete a study by Study Instance UID
+     *
+     * This operation cascades to delete all related series and instances.
+     *
+     * @param study_uid The Study Instance UID to delete
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto delete_study(std::string_view study_uid) -> VoidResult;
+
+    /**
+     * @brief Get total study count
+     *
+     * @return Number of studies in the database
+     */
+    [[nodiscard]] auto study_count() const -> size_t;
+
+    /**
+     * @brief Get study count for a specific patient
+     *
+     * @param patient_id The patient ID
+     * @return Number of studies for the patient
+     */
+    [[nodiscard]] auto study_count(std::string_view patient_id) const -> size_t;
+
+    /**
+     * @brief Update modalities in study (denormalized field)
+     *
+     * Called after series insert/delete to update the modalities_in_study field.
+     *
+     * @param study_pk The study's primary key
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto update_modalities_in_study(int64_t study_pk)
+        -> VoidResult;
+
+    // ========================================================================
     // Database Information
     // ========================================================================
 
@@ -210,6 +325,11 @@ private:
      * @brief Parse a patient record from a prepared statement
      */
     [[nodiscard]] auto parse_patient_row(void* stmt) const -> patient_record;
+
+    /**
+     * @brief Parse a study record from a prepared statement
+     */
+    [[nodiscard]] auto parse_study_row(void* stmt) const -> study_record;
 
     /**
      * @brief Convert wildcard pattern to SQL LIKE pattern
