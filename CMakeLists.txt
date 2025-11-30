@@ -36,6 +36,7 @@ add_library(pacs_core
     src/core/dicom_tag.cpp
     src/core/dicom_element.cpp
     src/core/dicom_dataset.cpp
+    src/core/dicom_file.cpp
 )
 target_include_directories(pacs_core
     PUBLIC
@@ -78,10 +79,12 @@ if(PACS_BUILD_TESTS)
         tests/core/dicom_tag_test.cpp
         tests/core/dicom_element_test.cpp
         tests/core/dicom_dataset_test.cpp
+        tests/core/dicom_file_test.cpp
     )
     target_link_libraries(core_tests
         PRIVATE
             pacs_core
+            pacs_encoding
             Catch2::Catch2WithMain
     )
 
