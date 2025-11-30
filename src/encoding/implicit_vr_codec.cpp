@@ -1,0 +1,396 @@
+/**
+ * @file implicit_vr_codec.cpp
+ * @brief Implementation of Implicit VR Little Endian encoder/decoder
+ */
+
+#include "pacs/encoding/implicit_vr_codec.hpp"
+
+#include <pacs/core/dicom_dictionary.hpp>
+#include <pacs/encoding/vr_info.hpp>
+
+#include <cstring>
+
+namespace pacs::encoding {
+
+namespace {
+
+// ============================================================================
+// Byte Order Utilities (Little Endian)
+// ============================================================================
+
+constexpr uint16_t read_le16(const uint8_t* data) {
+    return static_cast<uint16_t>(data[0]) |
+           (static_cast<uint16_t>(data[1]) << 8);
+}
+
+constexpr uint32_t read_le32(const uint8_t* data) {
+    return static_cast<uint32_t>(data[0]) |
+           (static_cast<uint32_t>(data[1]) << 8) |
+           (static_cast<uint32_t>(data[2]) << 16) |
+           (static_cast<uint32_t>(data[3]) << 24);
+}
+
+void write_le16(std::vector<uint8_t>& buffer, uint16_t value) {
+    buffer.push_back(static_cast<uint8_t>(value & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 8) & 0xFF));
+}
+
+void write_le32(std::vector<uint8_t>& buffer, uint32_t value) {
+    buffer.push_back(static_cast<uint8_t>(value & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 8) & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 16) & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 24) & 0xFF));
+}
+
+// ============================================================================
+// DICOM Special Tags
+// ============================================================================
+
+constexpr uint16_t ITEM_GROUP = 0xFFFE;
+constexpr uint16_t ITEM_TAG_ELEMENT = 0xE000;       // Item
+constexpr uint16_t ITEM_DELIM_ELEMENT = 0xE00D;     // Item Delimitation Item
+constexpr uint16_t SEQ_DELIM_ELEMENT = 0xE0DD;      // Sequence Delimitation Item
+
+constexpr uint32_t UNDEFINED_LENGTH = 0xFFFFFFFF;
+
+constexpr bool is_sequence_delimiter(core::dicom_tag tag) {
+    return tag.group() == ITEM_GROUP && tag.element() == SEQ_DELIM_ELEMENT;
+}
+
+constexpr bool is_item_delimiter(core::dicom_tag tag) {
+    return tag.group() == ITEM_GROUP && tag.element() == ITEM_DELIM_ELEMENT;
+}
+
+constexpr bool is_item_tag(core::dicom_tag tag) {
+    return tag.group() == ITEM_GROUP && tag.element() == ITEM_TAG_ELEMENT;
+}
+
+}  // namespace
+
+// ============================================================================
+// Error Handling
+// ============================================================================
+
+std::string to_string(codec_error error) {
+    switch (error) {
+        case codec_error::success:
+            return "Success";
+        case codec_error::invalid_tag:
+            return "Invalid or malformed tag";
+        case codec_error::invalid_length:
+            return "Invalid length field";
+        case codec_error::insufficient_data:
+            return "Insufficient data to decode";
+        case codec_error::invalid_sequence:
+            return "Malformed sequence structure";
+        case codec_error::unknown_vr:
+            return "VR could not be determined from dictionary";
+        case codec_error::encoding_failed:
+            return "Encoding failed";
+        case codec_error::decoding_failed:
+            return "Decoding failed";
+        default:
+            return "Unknown error";
+    }
+}
+
+// ============================================================================
+// Dataset Encoding
+// ============================================================================
+
+std::vector<uint8_t> implicit_vr_codec::encode(
+    const core::dicom_dataset& dataset) {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(4096);  // Initial capacity
+
+    for (const auto& [tag, element] : dataset) {
+        auto encoded = encode_element(element);
+        buffer.insert(buffer.end(), encoded.begin(), encoded.end());
+    }
+
+    return buffer;
+}
+
+std::vector<uint8_t> implicit_vr_codec::encode_element(
+    const core::dicom_element& element) {
+    std::vector<uint8_t> buffer;
+
+    // Write tag (4 bytes: group + element, little-endian)
+    write_le16(buffer, element.tag().group());
+    write_le16(buffer, element.tag().element());
+
+    // Handle sequences specially
+    if (element.is_sequence()) {
+        encode_sequence(buffer, element);
+        return buffer;
+    }
+
+    // Write length (4 bytes, little-endian)
+    // Ensure even length by padding if necessary
+    auto data = element.raw_data();
+    auto padded_data = pad_to_even(element.vr(), data);
+
+    write_le32(buffer, static_cast<uint32_t>(padded_data.size()));
+
+    // Write value
+    buffer.insert(buffer.end(), padded_data.begin(), padded_data.end());
+
+    return buffer;
+}
+
+void implicit_vr_codec::encode_sequence(std::vector<uint8_t>& buffer,
+                                         const core::dicom_element& element) {
+    // Write undefined length for sequence
+    write_le32(buffer, UNDEFINED_LENGTH);
+
+    // Encode each sequence item
+    const auto& items = element.sequence_items();
+    for (const auto& item : items) {
+        encode_sequence_item(buffer, item);
+    }
+
+    // Write sequence delimitation item
+    write_le16(buffer, ITEM_GROUP);
+    write_le16(buffer, SEQ_DELIM_ELEMENT);
+    write_le32(buffer, 0);  // Length is always 0 for delimiter
+}
+
+void implicit_vr_codec::encode_sequence_item(std::vector<uint8_t>& buffer,
+                                              const core::dicom_dataset& item) {
+    // Write Item tag
+    write_le16(buffer, ITEM_GROUP);
+    write_le16(buffer, ITEM_TAG_ELEMENT);
+
+    // Encode item content first to determine length
+    auto item_content = encode(item);
+
+    // Write item length
+    write_le32(buffer, static_cast<uint32_t>(item_content.size()));
+
+    // Write item content
+    buffer.insert(buffer.end(), item_content.begin(), item_content.end());
+}
+
+// ============================================================================
+// Dataset Decoding
+// ============================================================================
+
+implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode(
+    std::span<const uint8_t> data) {
+    core::dicom_dataset dataset;
+
+    while (!data.empty()) {
+        // Peek at tag to check for sequence delimiters
+        if (data.size() >= 4) {
+            uint16_t group = read_le16(data.data());
+            uint16_t elem = read_le16(data.data() + 2);
+            core::dicom_tag tag{group, elem};
+
+            // Stop at sequence delimiter
+            if (is_sequence_delimiter(tag)) {
+                break;
+            }
+            // Stop at item delimiter
+            if (is_item_delimiter(tag)) {
+                break;
+            }
+        }
+
+        auto result = decode_element(data);
+        if (!result) {
+            return result.error();
+        }
+
+        dataset.insert(std::move(*result));
+    }
+
+    return dataset;
+}
+
+implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_element(
+    std::span<const uint8_t>& data) {
+    // Need at least 8 bytes: tag (4) + length (4)
+    if (data.size() < 8) {
+        return codec_error::insufficient_data;
+    }
+
+    // Read tag
+    uint16_t group = read_le16(data.data());
+    uint16_t elem = read_le16(data.data() + 2);
+    core::dicom_tag tag{group, elem};
+
+    // Read length
+    uint32_t length = read_le32(data.data() + 4);
+    data = data.subspan(8);
+
+    // Look up VR from dictionary
+    auto& dict = core::dicom_dictionary::instance();
+    auto tag_info = dict.find(tag);
+
+    vr_type vr = vr_type::UN;  // Default to Unknown if not found
+    if (tag_info) {
+        vr = static_cast<vr_type>(tag_info->vr);
+    }
+
+    // Special handling for sequence delimiter tags
+    if (tag.group() == ITEM_GROUP) {
+        // These are structure tags, not data elements
+        // Return a placeholder element (caller handles these)
+        return core::dicom_element(tag, vr_type::UN);
+    }
+
+    // Handle undefined length (sequences and encapsulated data)
+    if (length == UNDEFINED_LENGTH) {
+        return decode_undefined_length(tag, vr, data);
+    }
+
+    // Check if we have enough data
+    if (data.size() < length) {
+        return codec_error::insufficient_data;
+    }
+
+    // Read value
+    auto value_data = data.subspan(0, length);
+    data = data.subspan(length);
+
+    return core::dicom_element(tag, vr, value_data);
+}
+
+implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_undefined_length(
+    core::dicom_tag tag, vr_type vr,
+    std::span<const uint8_t>& data) {
+    // If this is a sequence (SQ), decode sequence items
+    if (vr == vr_type::SQ) {
+        core::dicom_element seq_element(tag, vr_type::SQ);
+
+        while (!data.empty()) {
+            // Check for sequence delimitation
+            if (data.size() < 8) {
+                return codec_error::insufficient_data;
+            }
+
+            uint16_t item_group = read_le16(data.data());
+            uint16_t item_elem = read_le16(data.data() + 2);
+            core::dicom_tag item_tag{item_group, item_elem};
+
+            // Check for sequence delimitation item
+            if (is_sequence_delimiter(item_tag)) {
+                // Skip the delimiter (8 bytes: tag + length)
+                data = data.subspan(8);
+                break;
+            }
+
+            // Must be an Item tag
+            if (!is_item_tag(item_tag)) {
+                return codec_error::invalid_sequence;
+            }
+
+            // Decode the sequence item
+            auto item_result = decode_sequence_item(data);
+            if (!item_result) {
+                return item_result.error();
+            }
+
+            seq_element.sequence_items().push_back(std::move(*item_result));
+        }
+
+        return seq_element;
+    }
+
+    // For other undefined-length elements (like encapsulated pixel data),
+    // read until we find a sequence delimitation item
+    std::vector<uint8_t> accumulated_data;
+
+    while (!data.empty()) {
+        if (data.size() < 8) {
+            return codec_error::insufficient_data;
+        }
+
+        uint16_t item_group = read_le16(data.data());
+        uint16_t item_elem = read_le16(data.data() + 2);
+        core::dicom_tag item_tag{item_group, item_elem};
+
+        // Check for sequence delimitation item
+        if (is_sequence_delimiter(item_tag)) {
+            data = data.subspan(8);
+            break;
+        }
+
+        // For encapsulated data, read item tag + length + data
+        if (is_item_tag(item_tag)) {
+            uint32_t item_length = read_le32(data.data() + 4);
+            data = data.subspan(8);
+
+            if (item_length != UNDEFINED_LENGTH && data.size() >= item_length) {
+                accumulated_data.insert(accumulated_data.end(),
+                                        data.begin(), data.begin() + item_length);
+                data = data.subspan(item_length);
+            }
+        } else {
+            return codec_error::invalid_sequence;
+        }
+    }
+
+    return core::dicom_element(tag, vr, accumulated_data);
+}
+
+implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequence_item(
+    std::span<const uint8_t>& data) {
+    // Read Item tag and length
+    if (data.size() < 8) {
+        return codec_error::insufficient_data;
+    }
+
+    uint16_t group = read_le16(data.data());
+    uint16_t elem = read_le16(data.data() + 2);
+    core::dicom_tag tag{group, elem};
+
+    if (!is_item_tag(tag)) {
+        return codec_error::invalid_sequence;
+    }
+
+    uint32_t item_length = read_le32(data.data() + 4);
+    data = data.subspan(8);
+
+    if (item_length == UNDEFINED_LENGTH) {
+        // Decode until Item Delimitation Item
+        core::dicom_dataset item;
+
+        while (!data.empty()) {
+            if (data.size() < 4) {
+                return codec_error::insufficient_data;
+            }
+
+            uint16_t elem_group = read_le16(data.data());
+            uint16_t elem_elem = read_le16(data.data() + 2);
+            core::dicom_tag elem_tag{elem_group, elem_elem};
+
+            if (is_item_delimiter(elem_tag)) {
+                // Skip delimiter
+                data = data.subspan(8);
+                break;
+            }
+
+            auto elem_result = decode_element(data);
+            if (!elem_result) {
+                return elem_result.error();
+            }
+
+            item.insert(std::move(*elem_result));
+        }
+
+        return item;
+    }
+
+    // Explicit item length
+    if (data.size() < item_length) {
+        return codec_error::insufficient_data;
+    }
+
+    auto item_data = data.subspan(0, item_length);
+    data = data.subspan(item_length);
+
+    return decode(item_data);
+}
+
+}  // namespace pacs::encoding
