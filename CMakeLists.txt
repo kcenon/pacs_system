@@ -37,6 +37,9 @@ add_library(pacs_core
     src/core/dicom_element.cpp
     src/core/dicom_dataset.cpp
     src/core/dicom_file.cpp
+    src/core/tag_info.cpp
+    src/core/dicom_dictionary.cpp
+    src/core/standard_tags_data.cpp
 )
 target_include_directories(pacs_core
     PUBLIC
@@ -80,6 +83,8 @@ if(PACS_BUILD_TESTS)
         tests/core/dicom_element_test.cpp
         tests/core/dicom_dataset_test.cpp
         tests/core/dicom_file_test.cpp
+        tests/core/tag_info_test.cpp
+        tests/core/dicom_dictionary_test.cpp
     )
     target_link_libraries(core_tests
         PRIVATE
