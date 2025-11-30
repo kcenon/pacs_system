@@ -34,6 +34,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Core library
 add_library(pacs_core
     src/core/dicom_tag.cpp
+    src/core/dicom_element.cpp
 )
 target_include_directories(pacs_core
     PUBLIC
@@ -74,6 +75,7 @@ if(PACS_BUILD_TESTS)
     # Core tests
     add_executable(core_tests
         tests/core/dicom_tag_test.cpp
+        tests/core/dicom_element_test.cpp
     )
     target_link_libraries(core_tests
         PRIVATE
