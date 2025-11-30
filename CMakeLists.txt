@@ -63,6 +63,19 @@ target_link_libraries(pacs_encoding
     PUBLIC pacs_core
 )
 
+# Network library
+add_library(pacs_network
+    src/network/pdu_encoder.cpp
+)
+target_include_directories(pacs_network
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(pacs_network
+    PUBLIC pacs_core pacs_encoding
+)
+
 # Testing
 if(PACS_BUILD_TESTS)
     enable_testing()
@@ -79,6 +92,7 @@ if(PACS_BUILD_TESTS)
     # Create tests directory if it doesn't exist
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/core)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/encoding)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/network)
 
     # Core tests
     add_executable(core_tests
@@ -110,8 +124,19 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    # Network tests
+    add_executable(network_tests
+        tests/network/pdu_encoder_test.cpp
+    )
+    target_link_libraries(network_tests
+        PRIVATE
+            pacs_network
+            Catch2::Catch2WithMain
+    )
+
     include(CTest)
     include(Catch)
     catch_discover_tests(core_tests)
     catch_discover_tests(encoding_tests)
+    catch_discover_tests(network_tests)
 endif()
