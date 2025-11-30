@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 #include <format>
 #include <iomanip>
 #include <sstream>
@@ -62,6 +63,11 @@ auto get_text(sqlite3_stmt* stmt, int col) -> std::string {
 
 auto index_database::open(std::string_view db_path)
     -> Result<std::unique_ptr<index_database>> {
+    return open(db_path, index_config{});
+}
+
+auto index_database::open(std::string_view db_path, const index_config& config)
+    -> Result<std::unique_ptr<index_database>> {
     sqlite3* db = nullptr;
 
     auto rc = sqlite3_open(std::string(db_path).c_str(), &db);
@@ -83,6 +89,43 @@ auto index_database::open(std::string_view db_path)
         sqlite3_close(db);
         return make_error<std::unique_ptr<index_database>>(
             rc, "Failed to enable foreign keys", "storage");
+    }
+
+    // Configure WAL mode for better concurrency (except for in-memory DB)
+    if (config.wal_mode && db_path != ":memory:") {
+        rc = sqlite3_exec(db, "PRAGMA journal_mode = WAL;", nullptr, nullptr,
+                          nullptr);
+        if (rc != SQLITE_OK) {
+            sqlite3_close(db);
+            return make_error<std::unique_ptr<index_database>>(
+                rc, "Failed to enable WAL mode", "storage");
+        }
+    }
+
+    // Configure cache size (negative value means KB)
+    auto cache_sql =
+        std::format("PRAGMA cache_size = -{};", config.cache_size_mb * 1024);
+    rc = sqlite3_exec(db, cache_sql.c_str(), nullptr, nullptr, nullptr);
+    if (rc != SQLITE_OK) {
+        sqlite3_close(db);
+        return make_error<std::unique_ptr<index_database>>(
+            rc, "Failed to set cache size", "storage");
+    }
+
+    // Configure memory-mapped I/O
+    if (config.mmap_enabled && db_path != ":memory:") {
+        auto mmap_sql = std::format("PRAGMA mmap_size = {};", config.mmap_size);
+        rc = sqlite3_exec(db, mmap_sql.c_str(), nullptr, nullptr, nullptr);
+        if (rc != SQLITE_OK) {
+            // mmap failure is not critical, continue with regular I/O
+        }
+    }
+
+    // Set synchronous mode for durability with WAL
+    rc = sqlite3_exec(db, "PRAGMA synchronous = NORMAL;", nullptr, nullptr,
+                      nullptr);
+    if (rc != SQLITE_OK) {
+        // Not critical, continue
     }
 
     // Create database instance
@@ -1730,6 +1773,198 @@ auto index_database::parse_instance_row(void* stmt_ptr) const
     record.created_at = parse_datetime(created_str.c_str());
 
     return record;
+}
+
+// ============================================================================
+// File Path Lookup Operations
+// ============================================================================
+
+auto index_database::get_file_path(std::string_view sop_instance_uid) const
+    -> std::optional<std::string> {
+    const char* sql = "SELECT file_path FROM instances WHERE sop_uid = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, sop_instance_uid.data(),
+                      static_cast<int>(sop_instance_uid.size()),
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto path = get_text(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return path;
+}
+
+auto index_database::get_study_files(std::string_view study_instance_uid) const
+    -> std::vector<std::string> {
+    std::vector<std::string> results;
+
+    const char* sql = R"(
+        SELECT i.file_path
+        FROM instances i
+        JOIN series se ON i.series_pk = se.series_pk
+        JOIN studies st ON se.study_pk = st.study_pk
+        WHERE st.study_uid = ?
+        ORDER BY se.series_number, i.instance_number;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, study_instance_uid.data(),
+                      static_cast<int>(study_instance_uid.size()),
+                      SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(get_text(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::get_series_files(std::string_view series_instance_uid)
+    const -> std::vector<std::string> {
+    std::vector<std::string> results;
+
+    const char* sql = R"(
+        SELECT i.file_path
+        FROM instances i
+        JOIN series se ON i.series_pk = se.series_pk
+        WHERE se.series_uid = ?
+        ORDER BY i.instance_number;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, series_instance_uid.data(),
+                      static_cast<int>(series_instance_uid.size()),
+                      SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(get_text(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+// ============================================================================
+// Database Maintenance Operations
+// ============================================================================
+
+auto index_database::vacuum() -> VoidResult {
+    auto rc = sqlite3_exec(db_, "VACUUM;", nullptr, nullptr, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc, std::format("VACUUM failed: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+    return ok();
+}
+
+auto index_database::analyze() -> VoidResult {
+    auto rc = sqlite3_exec(db_, "ANALYZE;", nullptr, nullptr, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc, std::format("ANALYZE failed: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+    return ok();
+}
+
+auto index_database::verify_integrity() const -> VoidResult {
+    const char* sql = "PRAGMA integrity_check;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare integrity check: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    std::string result;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        result = get_text(stmt, 0);
+        if (result != "ok") {
+            sqlite3_finalize(stmt);
+            return make_error<std::monostate>(
+                -1, std::format("Integrity check failed: {}", result),
+                "storage");
+        }
+    }
+
+    sqlite3_finalize(stmt);
+    return ok();
+}
+
+auto index_database::checkpoint(bool truncate) -> VoidResult {
+    const char* sql =
+        truncate ? "PRAGMA wal_checkpoint(TRUNCATE);"
+                 : "PRAGMA wal_checkpoint(PASSIVE);";
+
+    auto rc = sqlite3_exec(db_, sql, nullptr, nullptr, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc, std::format("Checkpoint failed: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+    return ok();
+}
+
+// ============================================================================
+// Storage Statistics
+// ============================================================================
+
+auto index_database::get_storage_stats() const -> storage_stats {
+    storage_stats stats;
+
+    stats.total_patients = patient_count();
+    stats.total_studies = study_count();
+    stats.total_series = series_count();
+    stats.total_instances = instance_count();
+
+    // Get total file size
+    const char* file_size_sql = "SELECT COALESCE(SUM(file_size), 0) FROM instances;";
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, file_size_sql, -1, &stmt, nullptr);
+    if (rc == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            stats.total_file_size = sqlite3_column_int64(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    }
+
+    // Get database file size
+    if (path_ != ":memory:") {
+        std::error_code ec;
+        auto size = std::filesystem::file_size(path_, ec);
+        if (!ec) {
+            stats.database_size = static_cast<int64_t>(size);
+        }
+    }
+
+    return stats;
 }
 
 }  // namespace pacs::storage
