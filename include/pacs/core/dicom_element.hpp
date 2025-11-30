@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "dicom_dataset.hpp"
 #include "dicom_tag.hpp"
 
 #include <pacs/encoding/vr_type.hpp>
@@ -26,6 +25,9 @@
 #include <vector>
 
 namespace pacs::core {
+
+// Forward declaration to break circular dependency
+class dicom_dataset;
 
 /**
  * @brief Exception thrown when value conversion fails
@@ -82,29 +84,29 @@ public:
                   std::span<const uint8_t> data);
 
     /**
-     * @brief Default copy constructor
+     * @brief Copy constructor
      */
-    dicom_element(const dicom_element&) = default;
+    dicom_element(const dicom_element&);
 
     /**
-     * @brief Default move constructor
+     * @brief Move constructor
      */
-    dicom_element(dicom_element&&) noexcept = default;
+    dicom_element(dicom_element&&) noexcept;
 
     /**
-     * @brief Default copy assignment
+     * @brief Copy assignment
      */
-    auto operator=(const dicom_element&) -> dicom_element& = default;
+    auto operator=(const dicom_element&) -> dicom_element&;
 
     /**
-     * @brief Default move assignment
+     * @brief Move assignment
      */
-    auto operator=(dicom_element&&) noexcept -> dicom_element& = default;
+    auto operator=(dicom_element&&) noexcept -> dicom_element&;
 
     /**
-     * @brief Default destructor
+     * @brief Destructor
      */
-    ~dicom_element() = default;
+    ~dicom_element();
 
     // ========================================================================
     // Factory Methods

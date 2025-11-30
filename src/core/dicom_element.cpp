@@ -23,6 +23,12 @@ dicom_element::dicom_element(dicom_tag tag, encoding::vr_type vr,
                              std::span<const uint8_t> data)
     : tag_{tag}, vr_{vr}, data_(data.begin(), data.end()), sequence_items_{} {}
 
+dicom_element::dicom_element(const dicom_element&) = default;
+dicom_element::dicom_element(dicom_element&&) noexcept = default;
+auto dicom_element::operator=(const dicom_element&) -> dicom_element& = default;
+auto dicom_element::operator=(dicom_element&&) noexcept -> dicom_element& = default;
+dicom_element::~dicom_element() = default;
+
 // ============================================================================
 // Factory Methods
 // ============================================================================
