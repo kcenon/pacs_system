@@ -17,16 +17,33 @@ kcenon 에코시스템을 기반으로 외부 DICOM 라이브러리 없이 구�
 
 ## 프로젝트 현황
 
-**현재 단계**: 📋 분석 및 계획
+**현재 단계**: 🔨 Phase 1 완료 - Core & Encoding
 
 | 마일스톤 | 상태 | 목표 |
 |----------|------|------|
 | 분석 및 문서화 | ✅ 완료 | 1주차 |
-| 핵심 DICOM 구조 | 🔜 예정 | 2-5주차 |
-| 네트워크 프로토콜 (PDU) | 🔜 예정 | 6-9주차 |
+| 핵심 DICOM 구조 | ✅ 완료 | 2-5주차 |
+| Encoding 모듈 | ✅ 완료 | 2-5주차 |
+| 네트워크 프로토콜 (PDU) | 🔄 진행중 | 6-9주차 |
 | DIMSE 서비스 | 🔜 예정 | 10-13주차 |
 | Storage SCP/SCU | 🔜 예정 | 14-17주차 |
 | Query/Retrieve | 🔜 예정 | 18-20주차 |
+
+### Phase 1 성과
+
+**Core 모듈** (113개 테스트 통과):
+- `dicom_tag` - DICOM 태그 표현 (Group, Element 쌍)
+- `dicom_element` - 태그, VR, 값을 가진 데이터 요소
+- `dicom_dataset` - 데이터 요소의 정렬된 컬렉션
+- `dicom_file` - DICOM Part 10 파일 읽기/쓰기
+- `dicom_dictionary` - 표준 태그 메타데이터 조회
+
+**Encoding 모듈**:
+- `vr_type` - 30개 이상의 Value Representation 타입
+- `vr_info` - VR 메타데이터 및 검증 유틸리티
+- `transfer_syntax` - Transfer Syntax 관리
+- `implicit_vr_codec` - Implicit VR Little Endian 코덱
+- `explicit_vr_codec` - Explicit VR Little Endian 코덱
 
 ---
 
@@ -84,41 +101,40 @@ kcenon 에코시스템을 기반으로 외부 DICOM 라이브러리 없이 구�
 
 ```
 pacs_system/
-├── core/                    # 핵심 DICOM 구현
-│   ├── dicom_element.h      # Data Element
-│   ├── dicom_dataset.h      # Data Set
-│   ├── dicom_file.h         # DICOM File (Part 10)
-│   └── dicom_dictionary.h   # Tag Dictionary
+├── include/pacs/
+│   ├── core/                    # 핵심 DICOM 구현 (✅ 완료)
+│   │   ├── dicom_tag.hpp        # 태그 표현 (Group, Element)
+│   │   ├── dicom_tag_constants.hpp # 표준 태그 상수
+│   │   ├── dicom_element.hpp    # Data Element
+│   │   ├── dicom_dataset.hpp    # Data Set
+│   │   ├── dicom_file.hpp       # DICOM File (Part 10)
+│   │   ├── dicom_dictionary.hpp # Tag Dictionary
+│   │   └── tag_info.hpp         # 태그 메타데이터
+│   │
+│   ├── encoding/                # 인코딩/디코딩 (✅ 완료)
+│   │   ├── vr_type.hpp          # Value Representation 열거형
+│   │   ├── vr_info.hpp          # VR 메타데이터 및 유틸리티
+│   │   ├── transfer_syntax.hpp  # Transfer Syntax
+│   │   ├── byte_order.hpp       # 바이트 순서 처리
+│   │   ├── implicit_vr_codec.hpp # Implicit VR 코덱
+│   │   └── explicit_vr_codec.hpp # Explicit VR 코덱
+│   │
+│   └── network/                 # 네트워크 프로토콜 (🔄 진행중)
+│       ├── pdu_types.hpp        # PDU 타입 정의
+│       └── pdu_encoder.hpp      # PDU 인코더
 │
-├── encoding/                # 인코딩/디코딩
-│   ├── vr_types.h           # Value Representation
-│   ├── transfer_syntax.h    # Transfer Syntax
-│   └── codecs/              # 압축 코덱
+├── src/                         # 소스 파일
+│   ├── core/                    # Core 구현
+│   ├── encoding/                # Encoding 구현
+│   └── network/                 # Network 구현
 │
-├── network/                 # 네트워크 프로토콜
-│   ├── pdu/                 # Protocol Data Units
-│   ├── dimse/               # DIMSE Messages
-│   └── association.h        # Association Manager
+├── tests/                       # 테스트 스위트 (113개 테스트)
+│   ├── core/                    # Core 모듈 테스트
+│   ├── encoding/                # Encoding 모듈 테스트
+│   └── network/                 # Network 모듈 테스트
 │
-├── services/                # DICOM 서비스
-│   ├── storage_scp.h        # Storage SCP
-│   ├── qr_scp.h             # Query/Retrieve SCP
-│   ├── worklist_scp.h       # Modality Worklist SCP
-│   └── mpps_scp.h           # MPPS SCP
-│
-├── storage/                 # 저장소 백엔드
-│   ├── storage_interface.h  # 추상 인터페이스
-│   └── file_storage.h       # 파일시스템 저장소
-│
-├── integration/             # 에코시스템 통합
-│   ├── container_adapter.h  # container_system 어댑터
-│   ├── network_adapter.h    # network_system 어댑터
-│   └── thread_adapter.h     # thread_system 어댑터
-│
-├── tests/                   # 테스트 스위트
-├── examples/                # 사용 예제
-├── scripts/                 # 빌드 및 유틸리티 스크립트
-└── docs/                    # 문서
+├── docs/                        # 문서
+└── CMakeLists.txt               # 빌드 설정
 ```
 
 ---
@@ -169,22 +185,22 @@ pacs_system/
 - CMake 3.20+
 - kcenon 에코시스템 라이브러리
 
-### 빌드 (준비 중)
+### 빌드
 
 ```bash
 # 저장소 클론
 git clone https://github.com/kcenon/pacs_system.git
 cd pacs_system
 
-# 의존성 설치
-./scripts/dependency.sh
-
-# 빌드
-./scripts/build.sh
+# 설정 및 빌드
+cmake -S . -B build
+cmake --build build
 
 # 테스트 실행
-./scripts/test.sh
+cd build && ctest --output-on-failure
 ```
+
+**테스트 결과**: 113개 테스트 통과 (Core: 57, Encoding: 41, Network: 15)
 
 ---
 
