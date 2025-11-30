@@ -882,3 +882,510 @@ TEST_CASE("index_database: delete patient cascades to studies",
     CHECK_FALSE(db->find_study("1.2.3.1").has_value());
     CHECK_FALSE(db->find_study("1.2.3.2").has_value());
 }
+
+// ============================================================================
+// Series Insert Tests
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Helper to create a test study and return pk
+ */
+auto create_test_study(index_database& db, int64_t patient_pk,
+                       const std::string& study_uid = "1.2.3.4.5.6.7")
+    -> int64_t {
+    auto result = db.upsert_study(patient_pk, study_uid, "STUDY001");
+    REQUIRE(result.is_ok());
+    return result.value();
+}
+
+}  // namespace
+
+TEST_CASE("index_database: insert series with basic info", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    auto result = db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT", 1,
+                                    "CT Series 1", "HEAD", "SCANNER1");
+
+    REQUIRE(result.is_ok());
+    CHECK(result.value() > 0);
+
+    // Verify series was inserted
+    auto series = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series.has_value());
+    CHECK(series->series_uid == "1.2.3.4.5.6.7.1");
+    CHECK(series->modality == "CT");
+    CHECK(series->series_number.has_value());
+    CHECK(*series->series_number == 1);
+    CHECK(series->series_description == "CT Series 1");
+    CHECK(series->body_part_examined == "HEAD");
+    CHECK(series->station_name == "SCANNER1");
+}
+
+TEST_CASE("index_database: insert series with full record", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    series_record record;
+    record.study_pk = study_pk;
+    record.series_uid = "1.2.3.4.5.6.7.2";
+    record.modality = "MR";
+    record.series_number = 2;
+    record.series_description = "MR Brain";
+    record.body_part_examined = "BRAIN";
+    record.station_name = "MRI-001";
+
+    auto result = db->upsert_series(record);
+
+    REQUIRE(result.is_ok());
+
+    auto series = db->find_series("1.2.3.4.5.6.7.2");
+    REQUIRE(series.has_value());
+    CHECK(series->modality == "MR");
+    CHECK(series->series_description == "MR Brain");
+}
+
+TEST_CASE("index_database: insert series requires series_uid",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    auto result = db->upsert_series(study_pk, "", "CT");
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("Series Instance UID is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: insert series requires valid study_pk",
+          "[storage][series]") {
+    auto db = create_test_database();
+
+    auto result = db->upsert_series(0, "1.2.3.4.5.6.7.1", "CT");
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("study_pk is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: series_uid max length validation",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    // 65 characters - should fail
+    std::string long_uid(65, '1');
+    auto result = db->upsert_series(study_pk, long_uid, "CT");
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("maximum length") != std::string::npos);
+
+    // 64 characters - should succeed
+    std::string max_uid(64, '1');
+    result = db->upsert_series(study_pk, max_uid, "CT");
+    REQUIRE(result.is_ok());
+}
+
+// ============================================================================
+// Series Update Tests
+// ============================================================================
+
+TEST_CASE("index_database: update existing series", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    // Insert initial series
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT", 1,
+                               "CT Series 1").is_ok());
+
+    // Update with new description
+    auto result = db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT", 1,
+                                    "CT Series 1 Updated");
+    REQUIRE(result.is_ok());
+
+    // Verify only one series exists
+    CHECK(db->series_count() == 1);
+
+    // Verify update was applied
+    auto series = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series.has_value());
+    CHECK(series->series_description == "CT Series 1 Updated");
+}
+
+TEST_CASE("index_database: upsert series preserves primary key",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    // Insert series
+    auto pk1 = db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT");
+    REQUIRE(pk1.is_ok());
+
+    // Update same series
+    auto pk2 = db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "MR");
+    REQUIRE(pk2.is_ok());
+
+    // Primary key should be the same
+    CHECK(pk1.value() == pk2.value());
+}
+
+// ============================================================================
+// Series Search Tests
+// ============================================================================
+
+TEST_CASE("index_database: find series by uid", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT").is_ok());
+
+    auto series = db->find_series("1.2.3.4.5.6.7.1");
+    REQUIRE(series.has_value());
+    CHECK(series->series_uid == "1.2.3.4.5.6.7.1");
+
+    // Non-existent series
+    auto not_found = db->find_series("9.9.9.9.9.9.9.9");
+    CHECK_FALSE(not_found.has_value());
+}
+
+TEST_CASE("index_database: find series by pk", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    auto result = db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT");
+    REQUIRE(result.is_ok());
+    auto pk = result.value();
+
+    auto series = db->find_series_by_pk(pk);
+    REQUIRE(series.has_value());
+    CHECK(series->series_uid == "1.2.3.4.5.6.7.1");
+
+    // Non-existent PK
+    auto not_found = db->find_series_by_pk(99999);
+    CHECK_FALSE(not_found.has_value());
+}
+
+TEST_CASE("index_database: list series for study", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study1_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+    auto study2_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.8");
+
+    // Add series to study 1
+    REQUIRE(db->upsert_series(study1_pk, "1.2.3.1", "CT", 1).is_ok());
+    REQUIRE(db->upsert_series(study1_pk, "1.2.3.2", "CT", 2).is_ok());
+
+    // Add series to study 2
+    REQUIRE(db->upsert_series(study2_pk, "1.2.3.3", "MR", 1).is_ok());
+
+    // List series for study 1
+    auto series_list = db->list_series("1.2.3.4.5.6.7");
+
+    CHECK(series_list.size() == 2);
+    // Should be ordered by series number
+    CHECK(series_list[0].series_number.value_or(-1) == 1);
+    CHECK(series_list[1].series_number.value_or(-1) == 2);
+}
+
+TEST_CASE("index_database: search series by modality", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.3", "MR").is_ok());
+
+    series_query query;
+    query.modality = "CT";
+
+    auto results = db->search_series(query);
+
+    CHECK(results.size() == 2);
+}
+
+TEST_CASE("index_database: search series by study_uid", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study1_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+    auto study2_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.8");
+
+    REQUIRE(db->upsert_series(study1_pk, "1.2.3.1", "CT").is_ok());
+    REQUIRE(db->upsert_series(study1_pk, "1.2.3.2", "CT").is_ok());
+    REQUIRE(db->upsert_series(study2_pk, "1.2.3.3", "MR").is_ok());
+
+    series_query query;
+    query.study_uid = "1.2.3.4.5.6.7";
+
+    auto results = db->search_series(query);
+
+    CHECK(results.size() == 2);
+}
+
+TEST_CASE("index_database: search series with pagination", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    // Insert 10 series
+    for (int i = 1; i <= 10; ++i) {
+        auto uid = std::format("1.2.3.4.5.6.7.{}", i);
+        REQUIRE(db->upsert_series(study_pk, uid, "CT", i).is_ok());
+    }
+
+    series_query query;
+    query.limit = 3;
+    query.offset = 0;
+
+    auto page1 = db->search_series(query);
+    CHECK(page1.size() == 3);
+
+    query.offset = 3;
+    auto page2 = db->search_series(query);
+    CHECK(page2.size() == 3);
+
+    // Last page
+    query.offset = 9;
+    auto page4 = db->search_series(query);
+    CHECK(page4.size() == 1);
+}
+
+TEST_CASE("index_database: search series with multiple criteria",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT", 1, "", "HEAD").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT", 2, "", "CHEST").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.3", "MR", 3, "", "HEAD").is_ok());
+
+    series_query query;
+    query.modality = "CT";
+    query.body_part_examined = "HEAD";
+
+    auto results = db->search_series(query);
+
+    CHECK(results.size() == 1);
+    CHECK(results[0].series_uid == "1.2.3.1");
+}
+
+// ============================================================================
+// Series Delete Tests
+// ============================================================================
+
+TEST_CASE("index_database: delete series", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT").is_ok());
+    CHECK(db->series_count() == 1);
+
+    auto result = db->delete_series("1.2.3.4.5.6.7.1");
+    REQUIRE(result.is_ok());
+
+    CHECK(db->series_count() == 0);
+    CHECK_FALSE(db->find_series("1.2.3.4.5.6.7.1").has_value());
+}
+
+TEST_CASE("index_database: delete non-existent series", "[storage][series]") {
+    auto db = create_test_database();
+
+    // Should not error
+    auto result = db->delete_series("nonexistent");
+    CHECK(result.is_ok());
+}
+
+// ============================================================================
+// Series Count Tests
+// ============================================================================
+
+TEST_CASE("index_database: series count", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+
+    CHECK(db->series_count() == 0);
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+    CHECK(db->series_count() == 1);
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
+    CHECK(db->series_count() == 2);
+
+    REQUIRE(db->delete_series("1.2.3.1").is_ok());
+    CHECK(db->series_count() == 1);
+}
+
+TEST_CASE("index_database: series count for study", "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study1_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+    auto study2_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.8");
+
+    REQUIRE(db->upsert_series(study1_pk, "1.2.3.1", "CT").is_ok());
+    REQUIRE(db->upsert_series(study1_pk, "1.2.3.2", "CT").is_ok());
+    REQUIRE(db->upsert_series(study2_pk, "1.2.3.3", "MR").is_ok());
+
+    CHECK(db->series_count("1.2.3.4.5.6.7") == 2);
+    CHECK(db->series_count("1.2.3.4.5.6.8") == 1);
+    CHECK(db->series_count("9.9.9.9.9.9.9") == 0);
+}
+
+// ============================================================================
+// Series Record Tests
+// ============================================================================
+
+TEST_CASE("series_record: is_valid", "[storage][series]") {
+    series_record record;
+
+    CHECK_FALSE(record.is_valid());
+
+    record.series_uid = "1.2.3.4.5.6.7.1";
+    CHECK(record.is_valid());
+}
+
+TEST_CASE("series_query: has_criteria", "[storage][series]") {
+    series_query query;
+
+    CHECK_FALSE(query.has_criteria());
+
+    query.modality = "CT";
+    CHECK(query.has_criteria());
+}
+
+// ============================================================================
+// Study-Series Cascade Tests
+// ============================================================================
+
+TEST_CASE("index_database: delete study cascades to series",
+          "[storage][cascade]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
+
+    CHECK(db->series_count() == 2);
+
+    // Delete study should cascade to series
+    REQUIRE(db->delete_study("1.2.3.4.5.6.7").is_ok());
+
+    CHECK(db->series_count() == 0);
+    CHECK_FALSE(db->find_series("1.2.3.1").has_value());
+    CHECK_FALSE(db->find_series("1.2.3.2").has_value());
+}
+
+// ============================================================================
+// Series Parent Count Update Tests (via trigger)
+// ============================================================================
+
+TEST_CASE("index_database: series insert updates study num_series",
+          "[storage][series][trigger]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    // Initially num_series should be 0
+    auto study_before = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study_before.has_value());
+    CHECK(study_before->num_series == 0);
+
+    // Insert series
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+
+    // num_series should be updated
+    auto study_after = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study_after.has_value());
+    CHECK(study_after->num_series == 1);
+
+    // Insert another series
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
+
+    study_after = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study_after.has_value());
+    CHECK(study_after->num_series == 2);
+}
+
+TEST_CASE("index_database: series delete updates study num_series",
+          "[storage][series][trigger]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
+
+    auto study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->num_series == 2);
+
+    // Delete one series
+    REQUIRE(db->delete_series("1.2.3.1").is_ok());
+
+    study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->num_series == 1);
+}
+
+// ============================================================================
+// Modalities In Study Update Tests
+// ============================================================================
+
+TEST_CASE("index_database: series insert updates modalities_in_study",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    // Insert CT series
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+
+    auto study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->modalities_in_study == "CT");
+
+    // Insert MR series
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "MR").is_ok());
+
+    study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    // modalities_in_study should contain both CT and MR
+    CHECK(study->modalities_in_study.find("CT") != std::string::npos);
+    CHECK(study->modalities_in_study.find("MR") != std::string::npos);
+}
+
+// ============================================================================
+// Series Ordering Tests
+// ============================================================================
+
+TEST_CASE("index_database: series ordering by series_number",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    // Insert out of order
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.3", "CT", 3).is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT", 1).is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT", 2).is_ok());
+
+    auto series_list = db->list_series("1.2.3.4.5.6.7");
+
+    REQUIRE(series_list.size() == 3);
+    CHECK(series_list[0].series_number.value_or(-1) == 1);
+    CHECK(series_list[1].series_number.value_or(-1) == 2);
+    CHECK(series_list[2].series_number.value_or(-1) == 3);
+}

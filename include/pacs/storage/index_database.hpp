@@ -13,6 +13,7 @@
 
 #include "migration_runner.hpp"
 #include "patient_record.hpp"
+#include "series_record.hpp"
 #include "study_record.hpp"
 
 #include <kcenon/common/patterns/result.h>
@@ -291,6 +292,107 @@ public:
         -> VoidResult;
 
     // ========================================================================
+    // Series Operations
+    // ========================================================================
+
+    /**
+     * @brief Insert or update a series record
+     *
+     * If a series with the same series_uid exists, updates the record.
+     * Otherwise, inserts a new record.
+     *
+     * @param study_pk Foreign key to the study (required)
+     * @param series_uid Series Instance UID (required, max 64 chars)
+     * @param modality Modality (e.g., CT, MR)
+     * @param series_number Series number
+     * @param series_description Series description
+     * @param body_part_examined Body part examined
+     * @param station_name Station name
+     * @return Result containing the series's primary key or error
+     */
+    [[nodiscard]] auto upsert_series(int64_t study_pk,
+                                     std::string_view series_uid,
+                                     std::string_view modality = "",
+                                     std::optional<int> series_number = std::nullopt,
+                                     std::string_view series_description = "",
+                                     std::string_view body_part_examined = "",
+                                     std::string_view station_name = "")
+        -> Result<int64_t>;
+
+    /**
+     * @brief Insert or update a series record with full details
+     *
+     * @param record Complete series record (pk field is ignored for insert)
+     * @return Result containing the series's primary key or error
+     */
+    [[nodiscard]] auto upsert_series(const series_record& record)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Find a series by Series Instance UID
+     *
+     * @param series_uid The Series Instance UID to search for
+     * @return Optional containing the series record if found
+     */
+    [[nodiscard]] auto find_series(std::string_view series_uid) const
+        -> std::optional<series_record>;
+
+    /**
+     * @brief Find a series by primary key
+     *
+     * @param pk The series's primary key
+     * @return Optional containing the series record if found
+     */
+    [[nodiscard]] auto find_series_by_pk(int64_t pk) const
+        -> std::optional<series_record>;
+
+    /**
+     * @brief List all series for a study
+     *
+     * @param study_uid The Study Instance UID to list series for
+     * @return Vector of series records for the study, ordered by series number
+     */
+    [[nodiscard]] auto list_series(std::string_view study_uid) const
+        -> std::vector<series_record>;
+
+    /**
+     * @brief Search series with query criteria
+     *
+     * Supports wildcard matching using '*' character.
+     * Can filter by study UID, modality, and other attributes.
+     *
+     * @param query Query parameters with optional filters
+     * @return Vector of matching series records
+     */
+    [[nodiscard]] auto search_series(const series_query& query) const
+        -> std::vector<series_record>;
+
+    /**
+     * @brief Delete a series by Series Instance UID
+     *
+     * This operation cascades to delete all related instances.
+     *
+     * @param series_uid The Series Instance UID to delete
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto delete_series(std::string_view series_uid) -> VoidResult;
+
+    /**
+     * @brief Get total series count
+     *
+     * @return Number of series in the database
+     */
+    [[nodiscard]] auto series_count() const -> size_t;
+
+    /**
+     * @brief Get series count for a specific study
+     *
+     * @param study_uid The Study Instance UID
+     * @return Number of series for the study
+     */
+    [[nodiscard]] auto series_count(std::string_view study_uid) const -> size_t;
+
+    // ========================================================================
     // Database Information
     // ========================================================================
 
@@ -330,6 +432,11 @@ private:
      * @brief Parse a study record from a prepared statement
      */
     [[nodiscard]] auto parse_study_row(void* stmt) const -> study_record;
+
+    /**
+     * @brief Parse a series record from a prepared statement
+     */
+    [[nodiscard]] auto parse_series_row(void* stmt) const -> series_record;
 
     /**
      * @brief Convert wildcard pattern to SQL LIKE pattern
