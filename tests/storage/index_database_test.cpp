@@ -442,3 +442,443 @@ TEST_CASE("patient_query: has_criteria", "[storage][patient]") {
     query.patient_name = "Test";
     CHECK(query.has_criteria());
 }
+
+// ============================================================================
+// Study Insert Tests
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Helper to create a test patient and return pk
+ */
+auto create_test_patient(index_database& db, const std::string& patient_id = "P001")
+    -> int64_t {
+    auto result = db.upsert_patient(patient_id, "Test^Patient", "19800115", "M");
+    REQUIRE(result.is_ok());
+    return result.value();
+}
+
+}  // namespace
+
+TEST_CASE("index_database: insert study with basic info", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    auto result = db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001",
+                                   "20231115", "120000", "ACC001",
+                                   "Dr. Smith", "CT Head");
+
+    REQUIRE(result.is_ok());
+    CHECK(result.value() > 0);
+
+    // Verify study was inserted
+    auto study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->study_uid == "1.2.3.4.5.6.7");
+    CHECK(study->study_id == "STUDY001");
+    CHECK(study->study_date == "20231115");
+    CHECK(study->study_time == "120000");
+    CHECK(study->accession_number == "ACC001");
+    CHECK(study->referring_physician == "Dr. Smith");
+    CHECK(study->study_description == "CT Head");
+}
+
+TEST_CASE("index_database: insert study with full record", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    study_record record;
+    record.patient_pk = patient_pk;
+    record.study_uid = "1.2.3.4.5.6.8";
+    record.study_id = "STUDY002";
+    record.study_date = "20231120";
+    record.study_time = "143000";
+    record.accession_number = "ACC002";
+    record.referring_physician = "Dr. Jones";
+    record.study_description = "MRI Brain";
+
+    auto result = db->upsert_study(record);
+
+    REQUIRE(result.is_ok());
+
+    auto study = db->find_study("1.2.3.4.5.6.8");
+    REQUIRE(study.has_value());
+    CHECK(study->study_id == "STUDY002");
+    CHECK(study->study_description == "MRI Brain");
+}
+
+TEST_CASE("index_database: insert study requires study_uid",
+          "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    auto result = db->upsert_study(patient_pk, "", "STUDY001");
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("Study Instance UID is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: insert study requires valid patient_pk",
+          "[storage][study]") {
+    auto db = create_test_database();
+
+    auto result = db->upsert_study(0, "1.2.3.4.5.6.7", "STUDY001");
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("patient_pk is required") !=
+          std::string::npos);
+}
+
+TEST_CASE("index_database: study_uid max length validation",
+          "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    // 65 characters - should fail
+    std::string long_uid(65, '1');
+    auto result = db->upsert_study(patient_pk, long_uid, "TEST");
+
+    REQUIRE(result.is_err());
+    CHECK(result.error().message.find("maximum length") != std::string::npos);
+
+    // 64 characters - should succeed
+    std::string max_uid(64, '1');
+    result = db->upsert_study(patient_pk, max_uid, "TEST");
+    REQUIRE(result.is_ok());
+}
+
+// ============================================================================
+// Study Update Tests
+// ============================================================================
+
+TEST_CASE("index_database: update existing study", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    // Insert initial study
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001",
+                             "20231115", "120000", "ACC001", "Dr. Smith",
+                             "CT Head")
+                .is_ok());
+
+    // Update with new description
+    auto result = db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001",
+                                   "20231115", "120000", "ACC001", "Dr. Smith",
+                                   "CT Head with Contrast");
+    REQUIRE(result.is_ok());
+
+    // Verify only one study exists
+    CHECK(db->study_count() == 1);
+
+    // Verify update was applied
+    auto study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->study_description == "CT Head with Contrast");
+}
+
+TEST_CASE("index_database: upsert study preserves primary key",
+          "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    // Insert study
+    auto pk1 = db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001");
+    REQUIRE(pk1.is_ok());
+
+    // Update same study
+    auto pk2 = db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001_UPDATED");
+    REQUIRE(pk2.is_ok());
+
+    // Primary key should be the same
+    CHECK(pk1.value() == pk2.value());
+}
+
+// ============================================================================
+// Study Search Tests
+// ============================================================================
+
+TEST_CASE("index_database: find study by uid", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001").is_ok());
+
+    auto study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->study_uid == "1.2.3.4.5.6.7");
+
+    // Non-existent study
+    auto not_found = db->find_study("9.9.9.9.9.9.9");
+    CHECK_FALSE(not_found.has_value());
+}
+
+TEST_CASE("index_database: find study by pk", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    auto result = db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001");
+    REQUIRE(result.is_ok());
+    auto pk = result.value();
+
+    auto study = db->find_study_by_pk(pk);
+    REQUIRE(study.has_value());
+    CHECK(study->study_uid == "1.2.3.4.5.6.7");
+
+    // Non-existent PK
+    auto not_found = db->find_study_by_pk(99999);
+    CHECK_FALSE(not_found.has_value());
+}
+
+TEST_CASE("index_database: list studies for patient", "[storage][study]") {
+    auto db = create_test_database();
+
+    // Create two patients
+    auto patient1_pk = create_test_patient(*db, "P001");
+    auto patient2_pk = create_test_patient(*db, "P002");
+
+    // Add studies to patient 1
+    REQUIRE(
+        db->upsert_study(patient1_pk, "1.2.3.1", "STUDY01", "20231115").is_ok());
+    REQUIRE(
+        db->upsert_study(patient1_pk, "1.2.3.2", "STUDY02", "20231120").is_ok());
+
+    // Add study to patient 2
+    REQUIRE(
+        db->upsert_study(patient2_pk, "1.2.3.3", "STUDY03", "20231125").is_ok());
+
+    // List studies for patient 1
+    auto studies = db->list_studies("P001");
+
+    CHECK(studies.size() == 2);
+    // Should be ordered by date DESC
+    CHECK(studies[0].study_date == "20231120");
+    CHECK(studies[1].study_date == "20231115");
+}
+
+TEST_CASE("index_database: search studies by patient id", "[storage][study]") {
+    auto db = create_test_database();
+
+    auto patient_pk = create_test_patient(*db, "PAT001");
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "STUDY01").is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "STUDY02").is_ok());
+
+    auto patient2_pk = create_test_patient(*db, "PAT002");
+    REQUIRE(db->upsert_study(patient2_pk, "1.2.3.3", "STUDY03").is_ok());
+
+    study_query query;
+    query.patient_id = "PAT001";
+
+    auto results = db->search_studies(query);
+
+    CHECK(results.size() == 2);
+}
+
+TEST_CASE("index_database: search studies by date range", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1", "20231101").is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2", "20231115").is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.3", "S3", "20231130").is_ok());
+
+    SECTION("exact date") {
+        study_query query;
+        query.study_date = "20231115";
+
+        auto results = db->search_studies(query);
+        CHECK(results.size() == 1);
+        CHECK(results[0].study_id == "S2");
+    }
+
+    SECTION("date range") {
+        study_query query;
+        query.study_date_from = "20231110";
+        query.study_date_to = "20231125";
+
+        auto results = db->search_studies(query);
+        CHECK(results.size() == 1);
+        CHECK(results[0].study_id == "S2");
+    }
+}
+
+TEST_CASE("index_database: search studies by accession number",
+          "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1", "", "", "ACC001")
+                .is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2", "", "", "ACC002")
+                .is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.3", "S3", "", "", "ACC003")
+                .is_ok());
+
+    study_query query;
+    query.accession_number = "ACC00*";
+
+    auto results = db->search_studies(query);
+
+    CHECK(results.size() == 3);
+}
+
+TEST_CASE("index_database: search studies with pagination",
+          "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    // Insert 10 studies
+    for (int i = 1; i <= 10; ++i) {
+        auto uid = std::format("1.2.3.{}", i);
+        auto study_id = std::format("STUDY{:02d}", i);
+        auto date = std::format("202311{:02d}", i);
+        REQUIRE(db->upsert_study(patient_pk, uid, study_id, date).is_ok());
+    }
+
+    study_query query;
+    query.limit = 3;
+    query.offset = 0;
+
+    auto page1 = db->search_studies(query);
+    CHECK(page1.size() == 3);
+
+    query.offset = 3;
+    auto page2 = db->search_studies(query);
+    CHECK(page2.size() == 3);
+
+    // Last page
+    query.offset = 9;
+    auto page4 = db->search_studies(query);
+    CHECK(page4.size() == 1);
+}
+
+TEST_CASE("index_database: search studies with multiple criteria",
+          "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1", "20231115", "", "",
+                             "Dr. Smith", "CT Head")
+                .is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2", "20231115", "", "",
+                             "Dr. Jones", "CT Chest")
+                .is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.3", "S3", "20231120", "", "",
+                             "Dr. Smith", "MRI Brain")
+                .is_ok());
+
+    study_query query;
+    query.study_date = "20231115";
+    query.referring_physician = "Dr. Smith";
+
+    auto results = db->search_studies(query);
+
+    CHECK(results.size() == 1);
+    CHECK(results[0].study_id == "S1");
+}
+
+// ============================================================================
+// Study Delete Tests
+// ============================================================================
+
+TEST_CASE("index_database: delete study", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001").is_ok());
+    CHECK(db->study_count() == 1);
+
+    auto result = db->delete_study("1.2.3.4.5.6.7");
+    REQUIRE(result.is_ok());
+
+    CHECK(db->study_count() == 0);
+    CHECK_FALSE(db->find_study("1.2.3.4.5.6.7").has_value());
+}
+
+TEST_CASE("index_database: delete non-existent study", "[storage][study]") {
+    auto db = create_test_database();
+
+    // Should not error
+    auto result = db->delete_study("nonexistent");
+    CHECK(result.is_ok());
+}
+
+// ============================================================================
+// Study Count Tests
+// ============================================================================
+
+TEST_CASE("index_database: study count", "[storage][study]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+
+    CHECK(db->study_count() == 0);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1").is_ok());
+    CHECK(db->study_count() == 1);
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2").is_ok());
+    CHECK(db->study_count() == 2);
+
+    REQUIRE(db->delete_study("1.2.3.1").is_ok());
+    CHECK(db->study_count() == 1);
+}
+
+TEST_CASE("index_database: study count for patient", "[storage][study]") {
+    auto db = create_test_database();
+
+    auto patient1_pk = create_test_patient(*db, "P001");
+    auto patient2_pk = create_test_patient(*db, "P002");
+
+    REQUIRE(db->upsert_study(patient1_pk, "1.2.3.1", "S1").is_ok());
+    REQUIRE(db->upsert_study(patient1_pk, "1.2.3.2", "S2").is_ok());
+    REQUIRE(db->upsert_study(patient2_pk, "1.2.3.3", "S3").is_ok());
+
+    CHECK(db->study_count("P001") == 2);
+    CHECK(db->study_count("P002") == 1);
+    CHECK(db->study_count("P999") == 0);
+}
+
+// ============================================================================
+// Study Record Tests
+// ============================================================================
+
+TEST_CASE("study_record: is_valid", "[storage][study]") {
+    study_record record;
+
+    CHECK_FALSE(record.is_valid());
+
+    record.study_uid = "1.2.3.4.5.6.7";
+    CHECK(record.is_valid());
+}
+
+TEST_CASE("study_query: has_criteria", "[storage][study]") {
+    study_query query;
+
+    CHECK_FALSE(query.has_criteria());
+
+    query.patient_id = "P001";
+    CHECK(query.has_criteria());
+}
+
+// ============================================================================
+// Patient-Study Cascade Tests
+// ============================================================================
+
+TEST_CASE("index_database: delete patient cascades to studies",
+          "[storage][cascade]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db, "P001");
+
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1").is_ok());
+    REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2").is_ok());
+
+    CHECK(db->study_count() == 2);
+
+    // Delete patient should cascade to studies
+    REQUIRE(db->delete_patient("P001").is_ok());
+
+    CHECK(db->study_count() == 0);
+    CHECK_FALSE(db->find_study("1.2.3.1").has_value());
+    CHECK_FALSE(db->find_study("1.2.3.2").has_value());
+}
