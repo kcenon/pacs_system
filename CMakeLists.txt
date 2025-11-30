@@ -84,6 +84,7 @@ if(PACS_BUILD_TESTS)
     # Encoding tests
     add_executable(encoding_tests
         tests/encoding/transfer_syntax_test.cpp
+        tests/encoding/vr_type_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
