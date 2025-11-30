@@ -9,6 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <memory>
 
@@ -1942,4 +1943,243 @@ TEST_CASE("index_database: instance insert updates study num_instances",
     auto study_after = db->find_study("1.2.3.4.5.6.7");
     REQUIRE(study_after.has_value());
     CHECK(study_after->num_instances == 1);
+}
+
+// ============================================================================
+// File Path Lookup Tests
+// ============================================================================
+
+TEST_CASE("index_database: get_file_path returns path for existing instance",
+          "[storage][file_path]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/test/file.dcm", 1024).is_ok());
+
+    auto path = db->get_file_path("1.2.3.4.5.6.7.1.1");
+
+    REQUIRE(path.has_value());
+    CHECK(*path == "/storage/test/file.dcm");
+}
+
+TEST_CASE("index_database: get_file_path returns empty for non-existent instance",
+          "[storage][file_path]") {
+    auto db = create_test_database();
+
+    auto path = db->get_file_path("non.existent.uid");
+
+    CHECK_FALSE(path.has_value());
+}
+
+TEST_CASE("index_database: get_study_files returns all files in study",
+          "[storage][file_path]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    // Create two series
+    auto series1_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+    auto series2_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.2");
+
+    // Add instances to both series
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.1.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/s1_1.dcm", 1024, "", 1).is_ok());
+    REQUIRE(db->upsert_instance(
+        series1_pk, "1.2.3.1.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/s1_2.dcm", 1024, "", 2).is_ok());
+    REQUIRE(db->upsert_instance(
+        series2_pk, "1.2.3.2.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/s2_1.dcm", 1024, "", 1).is_ok());
+
+    auto files = db->get_study_files("1.2.3.4.5.6.7");
+
+    CHECK(files.size() == 3);
+    // Check all expected files are present
+    CHECK(std::find(files.begin(), files.end(), "/storage/s1_1.dcm") != files.end());
+    CHECK(std::find(files.begin(), files.end(), "/storage/s1_2.dcm") != files.end());
+    CHECK(std::find(files.begin(), files.end(), "/storage/s2_1.dcm") != files.end());
+}
+
+TEST_CASE("index_database: get_study_files returns empty for non-existent study",
+          "[storage][file_path]") {
+    auto db = create_test_database();
+
+    auto files = db->get_study_files("non.existent.study");
+
+    CHECK(files.empty());
+}
+
+TEST_CASE("index_database: get_series_files returns all files in series",
+          "[storage][file_path]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk, "1.2.3.4.5.6.7.1");
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file1.dcm", 1024, "", 1).is_ok());
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file2.dcm", 1024, "", 2).is_ok());
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.3", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file3.dcm", 1024, "", 3).is_ok());
+
+    auto files = db->get_series_files("1.2.3.4.5.6.7.1");
+
+    CHECK(files.size() == 3);
+    // Should be ordered by instance number
+    CHECK(files[0] == "/storage/file1.dcm");
+    CHECK(files[1] == "/storage/file2.dcm");
+    CHECK(files[2] == "/storage/file3.dcm");
+}
+
+// ============================================================================
+// Database Maintenance Tests
+// ============================================================================
+
+TEST_CASE("index_database: vacuum succeeds on in-memory database",
+          "[storage][maintenance]") {
+    auto db = create_test_database();
+
+    // Add some data and then delete it
+    (void)create_test_patient(*db);
+    REQUIRE(db->delete_patient("P001").is_ok());
+
+    // VACUUM should succeed
+    auto result = db->vacuum();
+    CHECK(result.is_ok());
+}
+
+TEST_CASE("index_database: analyze succeeds", "[storage][maintenance]") {
+    auto db = create_test_database();
+
+    // Add some data
+    auto patient_pk = create_test_patient(*db);
+    (void)create_test_study(*db, patient_pk);
+
+    // ANALYZE should succeed
+    auto result = db->analyze();
+    CHECK(result.is_ok());
+}
+
+TEST_CASE("index_database: verify_integrity succeeds on valid database",
+          "[storage][maintenance]") {
+    auto db = create_test_database();
+
+    // Add some data
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file.dcm", 1024).is_ok());
+
+    // Integrity check should pass
+    auto result = db->verify_integrity();
+    CHECK(result.is_ok());
+}
+
+TEST_CASE("index_database: checkpoint succeeds on in-memory database",
+          "[storage][maintenance]") {
+    auto db = create_test_database();
+
+    // Checkpoint should succeed (no-op for in-memory)
+    auto result = db->checkpoint();
+    CHECK(result.is_ok());
+
+    // With truncate flag
+    result = db->checkpoint(true);
+    CHECK(result.is_ok());
+}
+
+// ============================================================================
+// Storage Statistics Tests
+// ============================================================================
+
+TEST_CASE("index_database: get_storage_stats returns correct counts",
+          "[storage][stats]") {
+    auto db = create_test_database();
+
+    // Initially empty
+    auto stats = db->get_storage_stats();
+    CHECK(stats.total_patients == 0);
+    CHECK(stats.total_studies == 0);
+    CHECK(stats.total_series == 0);
+    CHECK(stats.total_instances == 0);
+    CHECK(stats.total_file_size == 0);
+
+    // Add data
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk);
+    auto series_pk = create_test_series_helper(*db, study_pk);
+
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file1.dcm", 1024000).is_ok());  // 1MB
+    REQUIRE(db->upsert_instance(
+        series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
+        "/storage/file2.dcm", 2048000).is_ok());  // 2MB
+
+    stats = db->get_storage_stats();
+    CHECK(stats.total_patients == 1);
+    CHECK(stats.total_studies == 1);
+    CHECK(stats.total_series == 1);
+    CHECK(stats.total_instances == 2);
+    CHECK(stats.total_file_size == 3072000);  // 3MB total
+}
+
+// ============================================================================
+// Configuration Tests
+// ============================================================================
+
+TEST_CASE("index_database: open with custom config", "[storage][config]") {
+    index_config config;
+    config.cache_size_mb = 32;
+    config.wal_mode = false;  // In-memory doesn't support WAL anyway
+    config.mmap_enabled = false;
+
+    auto result = index_database::open(":memory:", config);
+
+    REQUIRE(result.is_ok());
+    auto db = std::move(result.value());
+    CHECK(db->is_open());
+}
+
+TEST_CASE("index_database: file-based database with WAL mode",
+          "[storage][config]") {
+    const std::string test_path = "/tmp/pacs_test_wal_db.sqlite";
+
+    // Clean up any existing test file
+    std::filesystem::remove(test_path);
+    std::filesystem::remove(test_path + "-wal");
+    std::filesystem::remove(test_path + "-shm");
+
+    {
+        index_config config;
+        config.wal_mode = true;
+        config.cache_size_mb = 16;
+
+        auto result = index_database::open(test_path, config);
+        REQUIRE(result.is_ok());
+        auto db = std::move(result.value());
+
+        // Add some data
+        auto patient_pk_result = db->upsert_patient("12345", "Test^Patient");
+        REQUIRE(patient_pk_result.is_ok());
+
+        // Verify database file exists
+        CHECK(std::filesystem::exists(test_path));
+    }
+
+    // Clean up
+    std::filesystem::remove(test_path);
+    std::filesystem::remove(test_path + "-wal");
+    std::filesystem::remove(test_path + "-shm");
 }
