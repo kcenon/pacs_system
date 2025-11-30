@@ -345,6 +345,7 @@ message(STATUS "  [OK] pacs_services: ON")
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
+        src/storage/storage_interface.cpp
         src/storage/migration_runner.cpp
         src/storage/index_database.cpp
     )
@@ -366,6 +367,9 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     else()
         target_link_libraries(pacs_storage PUBLIC SQLite::SQLite3)
     endif()
+
+    # Link pacs_core for dicom_dataset
+    target_link_libraries(pacs_storage PUBLIC pacs_core)
 
     message(STATUS "  [OK] pacs_storage: ON (SQLite3)")
 else()
@@ -476,6 +480,7 @@ if(PACS_BUILD_TESTS)
     # Storage tests
     if(TARGET pacs_storage)
         add_executable(storage_tests
+            tests/storage/storage_interface_test.cpp
             tests/storage/migration_runner_test.cpp
             tests/storage/index_database_test.cpp
         )
