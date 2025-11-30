@@ -24,7 +24,7 @@ DecodeResult<T> make_error(pdu_decode_error err, const std::string& msg = "") {
     if (!msg.empty()) {
         full_msg += ": " + msg;
     }
-    return DecodeResult<T>::error(kcenon::common::error_info(
+    return DecodeResult<T>::err(kcenon::common::error_info(
         static_cast<int>(err), full_msg, "pacs::network::pdu_decoder"));
 }
 
@@ -257,7 +257,7 @@ DecodeResult<associate_rj> pdu_decoder::decode_associate_rj(
     std::span<const uint8_t> data) {
 
     auto header_result = validate_pdu_header(data, 0x03);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<associate_rj>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
@@ -288,7 +288,7 @@ DecodeResult<release_rq_pdu> pdu_decoder::decode_release_rq(
     std::span<const uint8_t> data) {
 
     auto header_result = validate_pdu_header(data, 0x05);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<release_rq_pdu>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
@@ -309,7 +309,7 @@ DecodeResult<release_rp_pdu> pdu_decoder::decode_release_rp(
     std::span<const uint8_t> data) {
 
     auto header_result = validate_pdu_header(data, 0x06);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<release_rp_pdu>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
@@ -328,7 +328,7 @@ DecodeResult<release_rp_pdu> pdu_decoder::decode_release_rp(
 
 DecodeResult<abort_pdu> pdu_decoder::decode_abort(std::span<const uint8_t> data) {
     auto header_result = validate_pdu_header(data, 0x07);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<abort_pdu>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
@@ -357,7 +357,7 @@ DecodeResult<p_data_tf_pdu> pdu_decoder::decode_p_data_tf(
     std::span<const uint8_t> data) {
 
     auto header_result = validate_pdu_header(data, 0x04);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<p_data_tf_pdu>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
@@ -618,7 +618,7 @@ DecodeResult<associate_rq> pdu_decoder::decode_associate_rq(
     std::span<const uint8_t> data) {
 
     auto header_result = validate_pdu_header(data, 0x01);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<associate_rq>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
@@ -680,7 +680,7 @@ DecodeResult<associate_ac> pdu_decoder::decode_associate_ac(
     std::span<const uint8_t> data) {
 
     auto header_result = validate_pdu_header(data, 0x02);
-    if (header_result.is_error()) {
+    if (header_result.is_err()) {
 #ifdef PACS_WITH_COMMON_SYSTEM
         return make_error<associate_ac>(pdu_decode_error::incomplete_pdu,
             header_result.error().message);
