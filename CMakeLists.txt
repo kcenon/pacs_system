@@ -174,6 +174,41 @@ if(PACS_WITH_CONTAINER_SYSTEM)
     endif()
 endif()
 
+# logger_system (REQUIRED for logger_adapter - Tier 2)
+message(STATUS "")
+message(STATUS "=== Finding logger_system (REQUIRED for logger_adapter - Tier 2) ===")
+
+set(_PACS_LOGGER_PATHS
+    "$ENV{LOGGER_SYSTEM_ROOT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../logger_system"
+    "${CMAKE_CURRENT_SOURCE_DIR}/logger_system"
+)
+
+set(LOGGER_SYSTEM_FOUND FALSE)
+foreach(_path ${_PACS_LOGGER_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/logger/core/logger.h")
+        message(STATUS "Found logger_system at: ${_path}")
+        set(PACS_LOGGER_SYSTEM_DIR "${_path}")
+        set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "${_path}/include")
+        set(LOGGER_SYSTEM_FOUND TRUE)
+        break()
+    endif()
+endforeach()
+
+if(LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(LOGGER_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+    add_subdirectory("${PACS_LOGGER_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/logger_system_build")
+elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    message(WARNING
+        "logger_system is REQUIRED for logger_adapter (Tier 2).\n"
+        "logger_adapter will be disabled.\n"
+        "Please ensure logger_system is available at:\n"
+        "  - ../logger_system\n"
+        "  - Set LOGGER_SYSTEM_ROOT environment variable")
+endif()
+
 # network_system (REQUIRED - Tier 4)
 if(PACS_WITH_NETWORK_SYSTEM)
     message(STATUS "")
@@ -200,6 +235,20 @@ if(PACS_WITH_NETWORK_SYSTEM)
         set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(NETWORK_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
         add_subdirectory("${PACS_NETWORK_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/network_system_build")
+
+        # Find logger_system include directory (included via network_system)
+        set(_PACS_LOGGER_PATHS
+            "$ENV{LOGGER_SYSTEM_ROOT}/include"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../logger_system/include"
+            "${CMAKE_CURRENT_SOURCE_DIR}/logger_system/include"
+        )
+        foreach(_path ${_PACS_LOGGER_PATHS})
+            if(EXISTS "${_path}/kcenon/logger/core/logger.h")
+                message(STATUS "Found logger_system at: ${_path}")
+                set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "${_path}")
+                break()
+            endif()
+        endforeach()
     elseif(NOT NETWORK_SYSTEM_FOUND AND NOT TARGET NetworkSystem)
         message(FATAL_ERROR
             "network_system is REQUIRED (Tier 4) for DICOM PDU.\n"
@@ -376,10 +425,11 @@ else()
     message(STATUS "  [--] pacs_storage: OFF")
 endif()
 
-# Integration library (requires container_system)
-if(TARGET container_system AND COMMON_SYSTEM_FOUND)
+# Integration library (requires container_system and logger_system via network_system)
+if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     add_library(pacs_integration
         src/integration/container_adapter.cpp
+        src/integration/logger_adapter.cpp
     )
     target_include_directories(pacs_integration
         PUBLIC
@@ -390,15 +440,24 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND)
         PUBLIC pacs_core pacs_encoding container_system
     )
 
+    # Link logger_system (REQUIRED for logger_adapter)
+    if(TARGET LoggerSystem)
+        target_link_libraries(pacs_integration PUBLIC LoggerSystem)
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_LOGGER_SYSTEM)
+        message(STATUS "    - logger_adapter: ON (LoggerSystem)")
+    else()
+        message(WARNING "    - logger_adapter: OFF (LoggerSystem target not found)")
+    endif()
+
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_COMMON_SYSTEM)
     endif()
 
-    message(STATUS "  [OK] pacs_integration: ON (container_system)")
+    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system)")
 else()
-    message(STATUS "  [--] pacs_integration: OFF (requires container_system)")
+    message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
 
 # Testing
@@ -495,6 +554,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_integration)
         add_executable(integration_tests
             tests/integration/container_adapter_test.cpp
+            tests/integration/logger_adapter_test.cpp
         )
         target_link_libraries(integration_tests
             PRIVATE
