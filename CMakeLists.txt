@@ -31,6 +31,16 @@ endif()
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+# Core library
+add_library(pacs_core
+    src/core/dicom_tag.cpp
+)
+target_include_directories(pacs_core
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
 # Encoding library
 add_library(pacs_encoding
     src/encoding/transfer_syntax.cpp
@@ -39,6 +49,9 @@ target_include_directories(pacs_encoding
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(pacs_encoding
+    PUBLIC pacs_core
 )
 
 # Testing
@@ -55,7 +68,18 @@ if(PACS_BUILD_TESTS)
     FetchContent_MakeAvailable(Catch2)
 
     # Create tests directory if it doesn't exist
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/core)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/encoding)
+
+    # Core tests
+    add_executable(core_tests
+        tests/core/dicom_tag_test.cpp
+    )
+    target_link_libraries(core_tests
+        PRIVATE
+            pacs_core
+            Catch2::Catch2WithMain
+    )
 
     # Encoding tests
     add_executable(encoding_tests
@@ -69,5 +93,6 @@ if(PACS_BUILD_TESTS)
 
     include(CTest)
     include(Catch)
+    catch_discover_tests(core_tests)
     catch_discover_tests(encoding_tests)
 endif()
