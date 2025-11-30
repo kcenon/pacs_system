@@ -303,6 +303,7 @@ add_library(pacs_network
     src/network/pdu_encoder.cpp
     src/network/pdu_decoder.cpp
     src/network/association.cpp
+    src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
 )
 target_include_directories(pacs_network
@@ -452,11 +453,13 @@ if(PACS_BUILD_TESTS)
         tests/network/pdu_encoder_test.cpp
         tests/network/pdu_decoder_test.cpp
         tests/network/association_test.cpp
+        tests/network/dicom_server_test.cpp
         tests/network/dimse/dimse_message_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
             pacs_network
+            pacs_services
             Catch2::Catch2WithMain
     )
 
