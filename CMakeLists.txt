@@ -716,6 +716,16 @@ if(PACS_BUILD_EXAMPLES)
     message(STATUS "")
     message(STATUS "=== Building Examples ===")
 
+    # Echo SCU/SCP samples - basic connectivity test
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/echo_scu)
+        add_subdirectory(examples/echo_scp)
+        message(STATUS "  [OK] echo_scu: DICOM connectivity test client")
+        message(STATUS "  [OK] echo_scp: DICOM connectivity test server")
+    else()
+        message(STATUS "  [--] echo_scu/scp: OFF (requires pacs_integration)")
+    endif()
+
     # PACS Server example requires all modules
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/pacs_server)
