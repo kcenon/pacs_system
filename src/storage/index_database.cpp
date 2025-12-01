@@ -1967,4 +1967,478 @@ auto index_database::get_storage_stats() const -> storage_stats {
     return stats;
 }
 
+// ============================================================================
+// MPPS Operations
+// ============================================================================
+
+auto index_database::create_mpps(std::string_view mpps_uid,
+                                 std::string_view station_ae,
+                                 std::string_view modality,
+                                 std::string_view study_uid,
+                                 std::string_view accession_no,
+                                 std::string_view start_datetime)
+    -> Result<int64_t> {
+    mpps_record record;
+    record.mpps_uid = std::string(mpps_uid);
+    record.station_ae = std::string(station_ae);
+    record.modality = std::string(modality);
+    record.study_uid = std::string(study_uid);
+    record.accession_no = std::string(accession_no);
+    record.start_datetime = std::string(start_datetime);
+    record.status = "IN PROGRESS";  // N-CREATE always starts with IN PROGRESS
+    return create_mpps(record);
+}
+
+auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
+    if (record.mpps_uid.empty()) {
+        return make_error<int64_t>(-1, "MPPS SOP Instance UID is required",
+                                   "storage");
+    }
+
+    // Validate status - N-CREATE must start with IN PROGRESS
+    if (!record.status.empty() && record.status != "IN PROGRESS") {
+        return make_error<int64_t>(
+            -1, "N-CREATE must create MPPS with status 'IN PROGRESS'",
+            "storage");
+    }
+
+    const char* sql = R"(
+        INSERT INTO mpps (
+            mpps_uid, status, start_datetime, station_ae, station_name,
+            modality, study_uid, accession_no, scheduled_step_id,
+            requested_proc_id, performed_series, updated_at
+        ) VALUES (?, 'IN PROGRESS', ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        RETURNING mpps_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_text(stmt, 1, record.mpps_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, record.start_datetime.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, record.station_ae.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, record.station_name.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, record.modality.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, record.study_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, record.accession_no.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, record.scheduled_step_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 9, record.requested_proc_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 10, record.performed_series.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, std::format("Failed to create MPPS: {}", error_msg), "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return pk;
+}
+
+auto index_database::update_mpps(std::string_view mpps_uid,
+                                 std::string_view new_status,
+                                 std::string_view end_datetime,
+                                 std::string_view performed_series)
+    -> VoidResult {
+    // Validate new status
+    if (new_status != "COMPLETED" && new_status != "DISCONTINUED" &&
+        new_status != "IN PROGRESS") {
+        return make_error<std::monostate>(
+            -1,
+            "Invalid status. Must be 'IN PROGRESS', 'COMPLETED', or "
+            "'DISCONTINUED'",
+            "storage");
+    }
+
+    // Check current status to validate transition
+    auto current = find_mpps(mpps_uid);
+    if (!current.has_value()) {
+        return make_error<std::monostate>(-1, "MPPS not found", "storage");
+    }
+
+    // Validate status transition
+    if (current->status == "COMPLETED" || current->status == "DISCONTINUED") {
+        return make_error<std::monostate>(
+            -1,
+            std::format("Cannot update MPPS in final state '{}'. COMPLETED and "
+                       "DISCONTINUED are final states.",
+                       current->status),
+            "storage");
+    }
+
+    const char* sql = R"(
+        UPDATE mpps
+        SET status = ?,
+            end_datetime = CASE WHEN ? != '' THEN ? ELSE end_datetime END,
+            performed_series = CASE WHEN ? != '' THEN ? ELSE performed_series END,
+            updated_at = datetime('now')
+        WHERE mpps_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, new_status.data(),
+                      static_cast<int>(new_status.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, end_datetime.data(),
+                      static_cast<int>(end_datetime.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, end_datetime.data(),
+                      static_cast<int>(end_datetime.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, performed_series.data(),
+                      static_cast<int>(performed_series.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, performed_series.data(),
+                      static_cast<int>(performed_series.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, mpps_uid.data(),
+                      static_cast<int>(mpps_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc, std::format("Failed to update MPPS: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::update_mpps(const mpps_record& record) -> VoidResult {
+    if (record.mpps_uid.empty()) {
+        return make_error<std::monostate>(-1, "MPPS UID is required for update",
+                                          "storage");
+    }
+
+    return update_mpps(record.mpps_uid, record.status, record.end_datetime,
+                       record.performed_series);
+}
+
+auto index_database::find_mpps(std::string_view mpps_uid) const
+    -> std::optional<mpps_record> {
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE mpps_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, mpps_uid.data(),
+                      static_cast<int>(mpps_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_mpps_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::find_mpps_by_pk(int64_t pk) const
+    -> std::optional<mpps_record> {
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE mpps_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_mpps_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::list_active_mpps(std::string_view station_ae) const
+    -> std::vector<mpps_record> {
+    std::vector<mpps_record> results;
+
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE status = 'IN PROGRESS' AND station_ae = ?
+        ORDER BY start_datetime DESC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, station_ae.data(),
+                      static_cast<int>(station_ae.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_mpps_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::find_mpps_by_study(std::string_view study_uid) const
+    -> std::vector<mpps_record> {
+    std::vector<mpps_record> results;
+
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE study_uid = ?
+        ORDER BY start_datetime DESC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    sqlite3_bind_text(stmt, 1, study_uid.data(),
+                      static_cast<int>(study_uid.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_mpps_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::search_mpps(const mpps_query& query) const
+    -> std::vector<mpps_record> {
+    std::vector<mpps_record> results;
+
+    std::string sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    if (query.mpps_uid.has_value()) {
+        sql += " AND mpps_uid = ?";
+        params.push_back(*query.mpps_uid);
+    }
+
+    if (query.status.has_value()) {
+        sql += " AND status = ?";
+        params.push_back(*query.status);
+    }
+
+    if (query.station_ae.has_value()) {
+        sql += " AND station_ae = ?";
+        params.push_back(*query.station_ae);
+    }
+
+    if (query.modality.has_value()) {
+        sql += " AND modality = ?";
+        params.push_back(*query.modality);
+    }
+
+    if (query.study_uid.has_value()) {
+        sql += " AND study_uid = ?";
+        params.push_back(*query.study_uid);
+    }
+
+    if (query.accession_no.has_value()) {
+        sql += " AND accession_no = ?";
+        params.push_back(*query.accession_no);
+    }
+
+    if (query.start_date_from.has_value()) {
+        sql += " AND substr(start_datetime, 1, 8) >= ?";
+        params.push_back(*query.start_date_from);
+    }
+
+    if (query.start_date_to.has_value()) {
+        sql += " AND substr(start_datetime, 1, 8) <= ?";
+        params.push_back(*query.start_date_to);
+    }
+
+    sql += " ORDER BY start_datetime DESC";
+
+    if (query.limit > 0) {
+        sql += std::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += std::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    // Bind parameters
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_mpps_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
+    const char* sql = "DELETE FROM mpps WHERE mpps_uid = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, mpps_uid.data(),
+                      static_cast<int>(mpps_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc, std::format("Failed to delete MPPS: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::mpps_count() const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM mpps;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::mpps_count(std::string_view status) const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM mpps WHERE status = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, status.data(), static_cast<int>(status.size()),
+                      SQLITE_TRANSIENT);
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::parse_mpps_row(void* stmt_ptr) const -> mpps_record {
+    auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
+    mpps_record record;
+
+    record.pk = sqlite3_column_int64(stmt, 0);
+    record.mpps_uid = get_text(stmt, 1);
+    record.status = get_text(stmt, 2);
+    record.start_datetime = get_text(stmt, 3);
+    record.end_datetime = get_text(stmt, 4);
+    record.station_ae = get_text(stmt, 5);
+    record.station_name = get_text(stmt, 6);
+    record.modality = get_text(stmt, 7);
+    record.study_uid = get_text(stmt, 8);
+    record.accession_no = get_text(stmt, 9);
+    record.scheduled_step_id = get_text(stmt, 10);
+    record.requested_proc_id = get_text(stmt, 11);
+    record.performed_series = get_text(stmt, 12);
+
+    auto created_str = get_text(stmt, 13);
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_text(stmt, 14);
+    record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+
 }  // namespace pacs::storage
