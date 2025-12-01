@@ -1,7 +1,7 @@
 # 프로젝트 구조 - PACS 시스템
 
 > **버전:** 1.0.0
-> **최종 수정일:** 2025-11-30
+> **최종 수정일:** 2025-12-01
 > **언어:** [English](PROJECT_STRUCTURE.md) | **한국어**
 
 ---
@@ -40,75 +40,66 @@ pacs_system/
 ├── include/                    # 공개 헤더 파일
 │   └── pacs/
 │       ├── core/               # 코어 DICOM 구조
-│       │   ├── dicom_element.h
-│       │   ├── dicom_dataset.h
-│       │   ├── dicom_file.h
-│       │   ├── dicom_dictionary.h
-│       │   └── dicom_tags.h
+│       │   ├── dicom_element.hpp
+│       │   ├── dicom_dataset.hpp
+│       │   ├── dicom_file.hpp
+│       │   ├── dicom_dictionary.hpp
+│       │   ├── dicom_tag.hpp
+│       │   ├── dicom_tag_constants.hpp
+│       │   └── tag_info.hpp
 │       │
 │       ├── encoding/           # VR 인코딩/디코딩
-│       │   ├── vr_types.h
-│       │   ├── transfer_syntax.h
-│       │   ├── implicit_vr_codec.h
-│       │   ├── explicit_vr_codec.h
-│       │   └── byte_order.h
+│       │   ├── vr_type.hpp
+│       │   ├── vr_info.hpp
+│       │   ├── transfer_syntax.hpp
+│       │   ├── implicit_vr_codec.hpp
+│       │   ├── explicit_vr_codec.hpp
+│       │   └── byte_order.hpp
 │       │
 │       ├── network/            # 네트워크 프로토콜
-│       │   ├── pdu/
-│       │   │   ├── pdu_types.h
-│       │   │   ├── pdu_encoder.h
-│       │   │   ├── pdu_decoder.h
-│       │   │   ├── associate_rq.h
-│       │   │   ├── associate_ac.h
-│       │   │   ├── associate_rj.h
-│       │   │   ├── p_data.h
-│       │   │   ├── a_release.h
-│       │   │   └── a_abort.h
+│       │   ├── pdu_types.hpp       # PDU 타입 정의
+│       │   ├── pdu_encoder.hpp     # PDU 직렬화
+│       │   ├── pdu_decoder.hpp     # PDU 역직렬화
+│       │   ├── association.hpp     # 연결 상태 머신
+│       │   ├── dicom_server.hpp    # 다중 연결 서버
+│       │   ├── server_config.hpp   # 서버 구성
 │       │   │
-│       │   ├── dimse/
-│       │   │   ├── dimse_message.h
-│       │   │   ├── dimse_command.h
-│       │   │   ├── c_echo.h
-│       │   │   ├── c_store.h
-│       │   │   ├── c_find.h
-│       │   │   ├── c_move.h
-│       │   │   ├── c_get.h
-│       │   │   ├── n_create.h
-│       │   │   └── n_set.h
-│       │   │
-│       │   ├── association.h
-│       │   ├── presentation_context.h
-│       │   └── dicom_server.h
+│       │   └── dimse/              # DIMSE 프로토콜
+│       │       ├── dimse_message.hpp
+│       │       ├── command_field.hpp
+│       │       └── status_codes.hpp
 │       │
 │       ├── services/           # DICOM 서비스
-│       │   ├── service_provider.h
-│       │   ├── verification_scp.h
-│       │   ├── verification_scu.h
-│       │   ├── storage_scp.h
-│       │   ├── storage_scu.h
-│       │   ├── query_scp.h
-│       │   ├── query_scu.h
-│       │   ├── retrieve_scp.h
-│       │   ├── worklist_scp.h
-│       │   └── mpps_scp.h
+│       │   ├── scp_service.hpp       # 기본 SCP 인터페이스
+│       │   ├── verification_scp.hpp  # C-ECHO SCP
+│       │   ├── storage_scp.hpp       # C-STORE SCP
+│       │   ├── storage_scu.hpp       # C-STORE SCU
+│       │   ├── storage_status.hpp    # 저장 상태 코드
+│       │   ├── query_scp.hpp         # C-FIND SCP
+│       │   ├── retrieve_scp.hpp      # C-MOVE/C-GET SCP
+│       │   ├── worklist_scp.hpp      # MWL SCP
+│       │   └── mpps_scp.hpp          # MPPS SCP
 │       │
 │       ├── storage/            # 저장 백엔드
-│       │   ├── storage_interface.h
-│       │   ├── file_storage.h
-│       │   ├── storage_config.h
-│       │   └── index_database.h
+│       │   ├── storage_interface.hpp # 추상 저장 인터페이스
+│       │   ├── file_storage.hpp      # 파일시스템 저장소
+│       │   ├── index_database.hpp    # SQLite 인덱스 (~2,900줄)
+│       │   ├── migration_runner.hpp  # 데이터베이스 스키마 마이그레이션
+│       │   ├── migration_record.hpp  # 마이그레이션 이력 레코드
+│       │   ├── patient_record.hpp    # 환자 데이터 모델
+│       │   ├── study_record.hpp      # 스터디 데이터 모델
+│       │   ├── series_record.hpp     # 시리즈 데이터 모델
+│       │   ├── instance_record.hpp   # 인스턴스 데이터 모델
+│       │   ├── worklist_record.hpp   # 워크리스트 데이터 모델
+│       │   └── mpps_record.hpp       # MPPS 데이터 모델
 │       │
-│       ├── integration/        # 에코시스템 어댑터
-│       │   ├── container_adapter.h
-│       │   ├── network_adapter.h
-│       │   ├── thread_adapter.h
-│       │   ├── logger_adapter.h
-│       │   └── monitoring_adapter.h
-│       │
-│       └── common/             # 공통 유틸리티
-│           ├── error_codes.h
-│           ├── uid_generator.h
-│           └── config.h
+│       └── integration/        # 에코시스템 어댑터
+│           ├── container_adapter.hpp # container_system 통합
+│           ├── network_adapter.hpp   # network_system 통합
+│           ├── thread_adapter.hpp    # thread_system 통합
+│           ├── logger_adapter.hpp    # logger_system 통합
+│           ├── monitoring_adapter.hpp # monitoring_system 통합
+│           └── dicom_session.hpp     # 고수준 세션 관리
 │
 ├── src/                        # 구현 파일
 │   ├── core/
@@ -285,11 +276,11 @@ pacs_system/
 
 | 파일 | 설명 |
 |------|------|
-| `dicom_element.h` | 데이터 요소 (태그, VR, 값) |
-| `dicom_dataset.h` | 데이터 요소의 정렬된 컬렉션 |
-| `dicom_file.h` | DICOM Part 10 파일 처리 |
-| `dicom_dictionary.h` | 태그 딕셔너리 및 메타데이터 |
-| `dicom_tags.h` | 표준 태그 상수 |
+| `dicom_element.hpp` | 데이터 요소 (태그, VR, 값) |
+| `dicom_dataset.hpp` | 데이터 요소의 정렬된 컬렉션 |
+| `dicom_file.hpp` | DICOM Part 10 파일 처리 |
+| `dicom_dictionary.hpp` | 태그 딕셔너리 및 메타데이터 |
+| `dicom_tag.hpp` | 표준 태그 상수 |
 
 ### 인코딩 모듈 (`include/pacs/encoding/`)
 
@@ -297,11 +288,11 @@ Value Representation 인코딩을 처리합니다:
 
 | 파일 | 설명 |
 |------|------|
-| `vr_types.h` | 27개 VR 타입 정의 |
-| `transfer_syntax.h` | Transfer Syntax 관리 |
-| `implicit_vr_codec.h` | Implicit VR 인코딩 |
-| `explicit_vr_codec.h` | Explicit VR 인코딩 |
-| `byte_order.h` | 엔디언 처리 |
+| `vr_type.hpp` | 27개 VR 타입 정의 |
+| `transfer_syntax.hpp` | Transfer Syntax 관리 |
+| `implicit_vr_codec.hpp` | Implicit VR 인코딩 |
+| `explicit_vr_codec.hpp` | Explicit VR 인코딩 |
+| `byte_order.hpp` | 엔디언 처리 |
 
 ### 네트워크 모듈 (`include/pacs/network/`)
 
@@ -319,12 +310,12 @@ DICOM 서비스 구현:
 
 | 파일 | 설명 |
 |------|------|
-| `verification_scp/scu.h` | C-ECHO 서비스 |
-| `storage_scp/scu.h` | C-STORE 서비스 |
-| `query_scp/scu.h` | C-FIND 서비스 |
-| `retrieve_scp.h` | C-MOVE/C-GET 서비스 |
-| `worklist_scp.h` | Modality Worklist |
-| `mpps_scp.h` | MPPS 서비스 |
+| `verification_scp/scu.hpp` | C-ECHO 서비스 |
+| `storage_scp/scu.hpp` | C-STORE 서비스 |
+| `query_scp/scu.hpp` | C-FIND 서비스 |
+| `retrieve_scp.hpp` | C-MOVE/C-GET 서비스 |
+| `worklist_scp.hpp` | Modality Worklist |
+| `mpps_scp.hpp` | MPPS 서비스 |
 
 ### 저장 모듈 (`include/pacs/storage/`)
 
@@ -332,10 +323,10 @@ DICOM 서비스 구현:
 
 | 파일 | 설명 |
 |------|------|
-| `storage_interface.h` | 추상 저장 인터페이스 |
-| `file_storage.h` | 파일시스템 구현 |
-| `index_database.h` | SQLite 인덱스 |
-| `storage_config.h` | 저장 구성 |
+| `storage_interface.hpp` | 추상 저장 인터페이스 |
+| `file_storage.hpp` | 파일시스템 구현 |
+| `index_database.hpp` | SQLite 인덱스 |
+| `storage_config.hpp` | 저장 구성 |
 
 ### 통합 모듈 (`include/pacs/integration/`)
 
@@ -343,11 +334,11 @@ DICOM 서비스 구현:
 
 | 파일 | 설명 |
 |------|------|
-| `container_adapter.h` | container_system 통합 |
-| `network_adapter.h` | network_system 통합 |
-| `thread_adapter.h` | thread_system 통합 |
-| `logger_adapter.h` | logger_system 통합 |
-| `monitoring_adapter.h` | monitoring_system 통합 |
+| `container_adapter.hpp` | container_system 통합 |
+| `network_adapter.hpp` | network_system 통합 |
+| `thread_adapter.hpp` | thread_system 통합 |
+| `logger_adapter.hpp` | logger_system 통합 |
+| `monitoring_adapter.hpp` | monitoring_system 통합 |
 
 ---
 
@@ -357,10 +348,10 @@ DICOM 서비스 구현:
 
 ```cpp
 // 표준 인클루드 패턴
-#include <pacs/core/dicom_element.h>
-#include <pacs/encoding/vr_types.h>
-#include <pacs/network/association.h>
-#include <pacs/services/storage_scp.h>
+#include <pacs/core/dicom_element.hpp>
+#include <pacs/encoding/vr_type.hpp>
+#include <pacs/network/association.hpp>
+#include <pacs/services/storage_scp.hpp>
 ```
 
 ### 헤더 가드
@@ -406,15 +397,15 @@ namespace pacs {
 ```cpp
 // dicom_element.cpp
 
-#include <pacs/core/dicom_element.h>  // 자체 헤더 먼저
+#include <pacs/core/dicom_element.hpp>  // 자체 헤더 먼저
 
-#include <pacs/encoding/vr_types.h>    // 내부 헤더
-#include <pacs/common/error_codes.h>
+#include <pacs/encoding/vr_type.hpp>    // 내부 헤더
+#include <pacs/core/dicom_tag.hpp>
 
-#include <common/result.h>             // 에코시스템 헤더
+#include <common/result.h>              // 에코시스템 헤더
 #include <container/value.h>
 
-#include <algorithm>                   // 표준 라이브러리
+#include <algorithm>                    // 표준 라이브러리
 #include <vector>
 
 namespace pacs::core {
@@ -546,4 +537,5 @@ TEST(DicomElement, SetValue) {
 
 *문서 버전: 1.0.0*
 *작성일: 2025-11-30*
+*수정일: 2025-12-01*
 *작성자: kcenon@naver.com*

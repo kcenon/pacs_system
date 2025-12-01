@@ -2,7 +2,7 @@
 
 > **버전:** 1.0.0
 > **상위 문서:** [SDS_KO.md](SDS_KO.md)
-> **최종 수정일:** 2025-11-30
+> **최종 수정일:** 2025-12-01
 
 ---
 
@@ -12,7 +12,9 @@
 - [2. PRD에서 SRS 추적성](#2-prd에서-srs-추적성)
 - [3. SRS에서 SDS 추적성](#3-srs에서-sds-추적성)
 - [4. 완전한 추적성 체인](#4-완전한-추적성-체인)
-- [5. 커버리지 분석](#5-커버리지-분석)
+- [5. SDS에서 구현 추적성](#5-sds에서-구현-추적성)
+- [6. SDS에서 테스트 추적성](#6-sds에서-테스트-추적성)
+- [7. 커버리지 분석](#7-커버리지-분석)
 
 ---
 
@@ -27,16 +29,48 @@
 - 테스트 계획이 설계 요소를 참조할 수 있음
 - 요구사항 변경에 대한 영향 분석 가능
 
-### 1.2 추적성 체인
+### 1.2 추적성 체인 (V-모델)
 
 ```
-┌─────────┐       ┌─────────┐       ┌─────────┐       ┌─────────┐
-│   PRD   │──────►│   SRS   │──────►│   SDS   │──────►│ 테스트  │
-│         │       │         │       │         │       │         │
-│  FR-x   │       │SRS-xxx  │       │DES-xxx  │       │ TC-xxx  │
-│  NFR-x  │       │         │       │SEQ-xxx  │       │         │
-│  IR-x   │       │         │       │DES-DB-x │       │         │
-└─────────┘       └─────────┘       └─────────┘       └─────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              V-모델 추적성                                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  요구사항 단계                                        검증/확인 단계              │
+│  ────────────                                        ──────────────              │
+│                                                                                  │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │   PRD   │◄────────────────────────────────────────────►│   인수 테스트    │   │
+│  │  FR-x   │                  Validation                  │   (Validation)  │   │
+│  │  NFR-x  │                                              └─────────────────┘   │
+│  │  IR-x   │                                                       ▲            │
+│  └────┬────┘                                                       │            │
+│       │                                                            │            │
+│       ▼                                                            │            │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │   SRS   │◄────────────────────────────────────────────►│  시스템 테스트   │   │
+│  │SRS-xxx  │                  Validation                  │   (Validation)  │   │
+│  └────┬────┘                                              └─────────────────┘   │
+│       │                                                            ▲            │
+│       ▼                                                            │            │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │   SDS   │◄────────────────────────────────────────────►│   통합 테스트    │   │
+│  │DES-xxx  │                 Verification                 │ (Verification)  │   │
+│  │SEQ-xxx  │                                              └─────────────────┘   │
+│  └────┬────┘                                                       ▲            │
+│       │                                                            │            │
+│       ▼                                                            │            │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │  코드   │◄────────────────────────────────────────────►│   단위 테스트    │   │
+│  │ .hpp    │                 Verification                 │ (Verification)  │   │
+│  │ .cpp    │                                              └─────────────────┘   │
+│  └─────────┘                                                                    │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+범례:
+  - Validation: "올바른 제품을 만들고 있는가?" (SRS 요구사항 충족 확인)
+  - Verification: "제품을 올바르게 만들고 있는가?" (SDS 설계대로 구현 확인)
 ```
 
 ### 1.3 요구사항 ID 규칙
@@ -334,9 +368,206 @@
 
 ---
 
-## 5. 커버리지 분석
+## 5. SDS에서 구현 추적성
 
-### 5.1 요구사항 커버리지 요약
+이 섹션은 설계 요소와 해당 소스 코드 파일 간의 매핑을 제공합니다.
+
+### 5.1 Core 모듈 구현
+
+| SDS ID | 설계 요소 | 헤더 파일 | 소스 파일 |
+|--------|---------|-----------|----------|
+| DES-CORE-001 | `dicom_tag` | `include/pacs/core/dicom_tag.hpp` | `src/core/dicom_tag.cpp` |
+| DES-CORE-002 | `dicom_element` | `include/pacs/core/dicom_element.hpp` | `src/core/dicom_element.cpp` |
+| DES-CORE-003 | `dicom_dataset` | `include/pacs/core/dicom_dataset.hpp` | `src/core/dicom_dataset.cpp` |
+| DES-CORE-004 | `dicom_file` | `include/pacs/core/dicom_file.hpp` | `src/core/dicom_file.cpp` |
+| DES-CORE-005 | `dicom_dictionary` | `include/pacs/core/dicom_dictionary.hpp` | `src/core/dicom_dictionary.cpp`, `src/core/standard_tags_data.cpp` |
+| - | `tag_info` | `include/pacs/core/tag_info.hpp` | `src/core/tag_info.cpp` |
+| - | `dicom_tag_constants` | `include/pacs/core/dicom_tag_constants.hpp` | (헤더 전용) |
+
+### 5.2 Encoding 모듈 구현
+
+| SDS ID | 설계 요소 | 헤더 파일 | 소스 파일 |
+|--------|---------|-----------|----------|
+| DES-ENC-001 | `vr_type` | `include/pacs/encoding/vr_type.hpp` | (헤더 전용, enum) |
+| DES-ENC-002 | `vr_info` | `include/pacs/encoding/vr_info.hpp` | `src/encoding/vr_info.cpp` |
+| DES-ENC-003 | `transfer_syntax` | `include/pacs/encoding/transfer_syntax.hpp` | `src/encoding/transfer_syntax.cpp` |
+| DES-ENC-004 | `implicit_vr_codec` | `include/pacs/encoding/implicit_vr_codec.hpp` | `src/encoding/implicit_vr_codec.cpp` |
+| DES-ENC-005 | `explicit_vr_codec` | `include/pacs/encoding/explicit_vr_codec.hpp` | `src/encoding/explicit_vr_codec.cpp` |
+| - | `byte_order` | `include/pacs/encoding/byte_order.hpp` | (헤더 전용) |
+
+### 5.3 Network 모듈 구현
+
+| SDS ID | 설계 요소 | 헤더 파일 | 소스 파일 |
+|--------|---------|-----------|----------|
+| DES-NET-001 | `pdu_encoder` | `include/pacs/network/pdu_encoder.hpp` | `src/network/pdu_encoder.cpp` |
+| DES-NET-002 | `pdu_decoder` | `include/pacs/network/pdu_decoder.hpp` | `src/network/pdu_decoder.cpp` |
+| DES-NET-003 | `dimse_message` | `include/pacs/network/dimse/dimse_message.hpp` | `src/network/dimse/dimse_message.cpp` |
+| DES-NET-004 | `association` | `include/pacs/network/association.hpp` | `src/network/association.cpp` |
+| DES-NET-005 | `dicom_server` | `include/pacs/network/dicom_server.hpp` | `src/network/dicom_server.cpp` |
+| - | `pdu_types` | `include/pacs/network/pdu_types.hpp` | (헤더 전용) |
+| - | `server_config` | `include/pacs/network/server_config.hpp` | (헤더 전용) |
+| - | `command_field` | `include/pacs/network/dimse/command_field.hpp` | (헤더 전용) |
+| - | `status_codes` | `include/pacs/network/dimse/status_codes.hpp` | (헤더 전용) |
+
+### 5.4 Services 모듈 구현
+
+| SDS ID | 설계 요소 | 헤더 파일 | 소스 파일 |
+|--------|---------|-----------|----------|
+| DES-SVC-001 | `verification_scp` | `include/pacs/services/verification_scp.hpp` | `src/services/verification_scp.cpp` |
+| DES-SVC-002 | `storage_scp` | `include/pacs/services/storage_scp.hpp` | `src/services/storage_scp.cpp` |
+| DES-SVC-003 | `storage_scu` | `include/pacs/services/storage_scu.hpp` | `src/services/storage_scu.cpp` |
+| DES-SVC-004 | `query_scp` | `include/pacs/services/query_scp.hpp` | `src/services/query_scp.cpp` |
+| DES-SVC-005 | `retrieve_scp` | `include/pacs/services/retrieve_scp.hpp` | `src/services/retrieve_scp.cpp` |
+| DES-SVC-006 | `worklist_scp` | `include/pacs/services/worklist_scp.hpp` | `src/services/worklist_scp.cpp` |
+| DES-SVC-007 | `mpps_scp` | `include/pacs/services/mpps_scp.hpp` | `src/services/mpps_scp.cpp` |
+| - | `scp_service` | `include/pacs/services/scp_service.hpp` | (헤더 전용, 인터페이스) |
+| - | `storage_status` | `include/pacs/services/storage_status.hpp` | (헤더 전용) |
+
+### 5.5 Storage 모듈 구현
+
+| SDS ID | 설계 요소 | 헤더 파일 | 소스 파일 |
+|--------|---------|-----------|----------|
+| DES-STOR-001 | `storage_interface` | `include/pacs/storage/storage_interface.hpp` | `src/storage/storage_interface.cpp` |
+| DES-STOR-002 | `file_storage` | `include/pacs/storage/file_storage.hpp` | `src/storage/file_storage.cpp` |
+| DES-STOR-003 | `index_database` | `include/pacs/storage/index_database.hpp` | `src/storage/index_database.cpp` |
+| - | `migration_runner` | `include/pacs/storage/migration_runner.hpp` | `src/storage/migration_runner.cpp` |
+| - | `patient_record` | `include/pacs/storage/patient_record.hpp` | (헤더 전용, struct) |
+| - | `study_record` | `include/pacs/storage/study_record.hpp` | (헤더 전용, struct) |
+| - | `series_record` | `include/pacs/storage/series_record.hpp` | (헤더 전용, struct) |
+| - | `instance_record` | `include/pacs/storage/instance_record.hpp` | (헤더 전용, struct) |
+| - | `worklist_record` | `include/pacs/storage/worklist_record.hpp` | (헤더 전용, struct) |
+| - | `mpps_record` | `include/pacs/storage/mpps_record.hpp` | (헤더 전용, struct) |
+| - | `migration_record` | `include/pacs/storage/migration_record.hpp` | (헤더 전용, struct) |
+
+### 5.6 Integration 모듈 구현
+
+| SDS ID | 설계 요소 | 헤더 파일 | 소스 파일 |
+|--------|---------|-----------|----------|
+| DES-INT-001 | `container_adapter` | `include/pacs/integration/container_adapter.hpp` | `src/integration/container_adapter.cpp` |
+| DES-INT-002 | `network_adapter` | `include/pacs/integration/network_adapter.hpp` | `src/integration/network_adapter.cpp` |
+| DES-INT-003 | `thread_adapter` | `include/pacs/integration/thread_adapter.hpp` | `src/integration/thread_adapter.cpp` |
+| DES-INT-004 | `logger_adapter` | `include/pacs/integration/logger_adapter.hpp` | `src/integration/logger_adapter.cpp` |
+| DES-INT-005 | `monitoring_adapter` | `include/pacs/integration/monitoring_adapter.hpp` | `src/integration/monitoring_adapter.cpp` |
+| - | `dicom_session` | `include/pacs/integration/dicom_session.hpp` | `src/integration/dicom_session.cpp` |
+
+### 5.7 구현 요약
+
+| 모듈 | 헤더 | 소스 | 헤더 전용 | 전체 파일 |
+|------|------|------|----------|----------|
+| Core | 7 | 7 | 1 | 14 |
+| Encoding | 6 | 4 | 2 | 10 |
+| Network | 9 | 5 | 4 | 14 |
+| Services | 9 | 7 | 2 | 16 |
+| Storage | 11 | 4 | 7 | 15 |
+| Integration | 6 | 6 | 0 | 12 |
+| **총계** | **48** | **33** | **16** | **81** |
+
+---
+
+## 6. SDS에서 테스트 추적성 (Verification)
+
+이 섹션은 **Verification** 목적으로 설계 요소와 해당 테스트 파일 간의 매핑을 제공합니다.
+
+> **Verification과 Validation 참고:**
+> - **Verification** (이 섹션): 코드가 SDS 설계 명세와 일치하는지 확인하는 테스트
+>   - 단위 테스트 → 개별 컴포넌트 설계 (DES-xxx)
+>   - 통합 테스트 → 모듈 상호작용 설계 (SEQ-xxx)
+> - **Validation** (별도): 구현이 SRS 요구사항을 충족하는지 확인하는 테스트
+>   - 시스템 테스트 → SRS 기능 요구사항
+>   - 인수 테스트 → PRD 사용자 요구사항
+
+### 6.1 Core 모듈 테스트
+
+| SDS ID | 설계 요소 | 테스트 파일 | 테스트 수 |
+|--------|---------|-----------|----------|
+| DES-CORE-001 | `dicom_tag` | `tests/core/dicom_tag_test.cpp` | 12 |
+| DES-CORE-002 | `dicom_element` | `tests/core/dicom_element_test.cpp` | 15 |
+| DES-CORE-003 | `dicom_dataset` | `tests/core/dicom_dataset_test.cpp` | 18 |
+| DES-CORE-004 | `dicom_file` | `tests/core/dicom_file_test.cpp` | 8 |
+| DES-CORE-005 | `dicom_dictionary` | `tests/core/dicom_dictionary_test.cpp` | 6 |
+| - | `tag_info` | `tests/core/tag_info_test.cpp` | 4 |
+
+### 6.2 Encoding 모듈 테스트
+
+| SDS ID | 설계 요소 | 테스트 파일 | 테스트 수 |
+|--------|---------|-----------|----------|
+| DES-ENC-001 | `vr_type` | `tests/encoding/vr_type_test.cpp` | 10 |
+| DES-ENC-002 | `vr_info` | `tests/encoding/vr_info_test.cpp` | 8 |
+| DES-ENC-003 | `transfer_syntax` | `tests/encoding/transfer_syntax_test.cpp` | 7 |
+| DES-ENC-004 | `implicit_vr_codec` | `tests/encoding/implicit_vr_codec_test.cpp` | 9 |
+| DES-ENC-005 | `explicit_vr_codec` | `tests/encoding/explicit_vr_codec_test.cpp` | 9 |
+
+### 6.3 Network 모듈 테스트
+
+| SDS ID | 설계 요소 | 테스트 파일 | 테스트 수 |
+|--------|---------|-----------|----------|
+| DES-NET-001 | `pdu_encoder` | `tests/network/pdu_encoder_test.cpp` | 7 |
+| DES-NET-002 | `pdu_decoder` | `tests/network/pdu_decoder_test.cpp` | 7 |
+| DES-NET-003 | `dimse_message` | `tests/network/dimse/dimse_message_test.cpp` | 5 |
+| DES-NET-004 | `association` | `tests/network/association_test.cpp` | 8 |
+| DES-NET-005 | `dicom_server` | `tests/network/dicom_server_test.cpp` | 4 |
+
+### 6.4 Services 모듈 테스트
+
+| SDS ID | 설계 요소 | 테스트 파일 | 테스트 수 |
+|--------|---------|-----------|----------|
+| DES-SVC-001 | `verification_scp` | `tests/services/verification_scp_test.cpp` | - |
+| DES-SVC-002 | `storage_scp` | `tests/services/storage_scp_test.cpp` | - |
+| DES-SVC-003 | `storage_scu` | `tests/services/storage_scu_test.cpp` | - |
+| DES-SVC-004 | `query_scp` | `tests/services/query_scp_test.cpp` | - |
+| DES-SVC-005 | `retrieve_scp` | `tests/services/retrieve_scp_test.cpp` | - |
+| DES-SVC-006 | `worklist_scp` | `tests/services/worklist_scp_test.cpp` | - |
+| DES-SVC-007 | `mpps_scp` | `tests/services/mpps_scp_test.cpp` | - |
+
+### 6.5 Storage 모듈 테스트
+
+| SDS ID | 설계 요소 | 테스트 파일 | 테스트 수 |
+|--------|---------|-----------|----------|
+| DES-STOR-001 | `storage_interface` | `tests/storage/storage_interface_test.cpp` | - |
+| DES-STOR-002 | `file_storage` | `tests/storage/file_storage_test.cpp` | - |
+| DES-STOR-003 | `index_database` | `tests/storage/index_database_test.cpp` | - |
+| - | `migration_runner` | `tests/storage/migration_runner_test.cpp` | - |
+| DES-DB-005 | `mpps` 레코드 | `tests/storage/mpps_test.cpp` | - |
+| DES-DB-006 | `worklist` 레코드 | `tests/storage/worklist_test.cpp` | - |
+
+### 6.6 Integration 모듈 테스트
+
+| SDS ID | 설계 요소 | 테스트 파일 | 테스트 수 |
+|--------|---------|-----------|----------|
+| DES-INT-001 | `container_adapter` | `tests/integration/container_adapter_test.cpp` | - |
+| DES-INT-002 | `network_adapter` | `tests/integration/network_adapter_test.cpp` | - |
+| DES-INT-003 | `thread_adapter` | `tests/integration/thread_adapter_test.cpp` | - |
+| DES-INT-004 | `logger_adapter` | `tests/integration/logger_adapter_test.cpp` | - |
+| DES-INT-005 | `monitoring_adapter` | `tests/integration/monitoring_adapter_test.cpp` | - |
+
+### 6.7 Verification 테스트 커버리지 요약
+
+| 모듈 | 테스트 파일 | 커버된 설계 요소 | Verification 커버리지 |
+|------|-----------|----------------|---------------------|
+| Core | 6 | 6/6 | 100% |
+| Encoding | 5 | 5/5 | 100% |
+| Network | 5 | 5/5 | 100% |
+| Services | 7 | 7/7 | 100% |
+| Storage | 6 | 6/6 | 100% |
+| Integration | 5 | 5/5 | 100% |
+| **총계** | **34** | **34/34** | **100%** |
+
+### 6.8 Validation 추적성 (별도 문서)
+
+**Validation** (SRS → 시스템 테스트)은 별도의 [VALIDATION_REPORT_KO.md](VALIDATION_REPORT_KO.md)에서 문서화됩니다.
+
+| 문서 | 목적 | 추적성 |
+|------|------|--------|
+| **VERIFICATION_REPORT_KO.md** | 코드가 SDS와 일치하는지 확인 | SDS ↔ 단위/통합 테스트 |
+| **VALIDATION_REPORT_KO.md** | 구현이 SRS를 충족하는지 확인 | SRS ↔ 시스템/인수 테스트 |
+
+> **참고:** 이 문서(SDS_TRACEABILITY_KO.md)는 **Verification** 추적성에만 집중합니다.
+
+---
+
+## 7. 커버리지 분석
+
+### 7.1 요구사항 커버리지 요약
 
 | 카테고리 | PRD 총계 | SRS 추적 | SDS 추적 | 커버리지 |
 |----------|---------|---------|---------|---------|
@@ -345,7 +576,7 @@
 | 통합 (IR) | 5 | 5 | 5 | 100% |
 | **총계** | **23** | **23** | **23** | **100%** |
 
-### 5.2 SRS에서 SDS 커버리지
+### 7.2 SRS에서 SDS 커버리지
 
 | 모듈 | SRS 개수 | SDS 개수 | 시퀀스 | DB 테이블 | 커버리지 |
 |------|---------|---------|--------|----------|---------|
@@ -359,19 +590,19 @@
 | Security | 3 | 해당 없음 | - | - | 반영됨 |
 | Maintainability | 3 | 해당 없음 | - | - | 반영됨 |
 
-### 5.3 고아 분석
+### 7.3 고아 분석
 
 **고아 요구사항 (설계 없음):** 없음
 
 **고아 설계 (요구사항 없음):** 없음
 
-### 5.4 추적성 격차
+### 7.4 추적성 격차
 
 | 격차 ID | 설명 | 상태 | 해결 방안 |
 |---------|-----|------|----------|
 | - | 식별된 항목 없음 | - | - |
 
-### 5.5 영향 분석 템플릿
+### 7.5 영향 분석 템플릿
 
 요구사항이 변경될 때 이 체크리스트를 사용하세요:
 
@@ -485,6 +716,17 @@
 
 ---
 
+## 부록 B: 개정 이력
+
+| 버전 | 일자 | 작성자 | 변경사항 |
+|------|------|--------|----------|
+| 1.0.0 | 2025-11-30 | kcenon@naver.com | 초기 추적성 매트릭스 |
+| 1.1.0 | 2025-12-01 | kcenon@naver.com | SDS에서 구현 및 테스트 추적성 추가 (섹션 5, 6) |
+| 1.2.0 | 2025-12-01 | kcenon@naver.com | V-모델 다이어그램에 Verification/Validation 구분 수정 |
+| 1.3.0 | 2025-12-01 | kcenon@naver.com | Verification에만 집중하도록 범위 조정; Validation은 별도 VALIDATION_REPORT_KO.md로 이동 |
+
+---
+
 *문서 버전: 1.0.0*
-*작성일: 2025-11-30*
+*최종 수정일: 2025-12-01*
 *작성자: kcenon@naver.com*
