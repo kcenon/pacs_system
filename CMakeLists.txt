@@ -734,6 +734,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] store_scu: OFF (requires pacs_integration)")
     endif()
 
+    # Store SCP sample - DICOM image receiver
+    if(TARGET pacs_storage AND TARGET pacs_integration)
+        add_subdirectory(examples/store_scp)
+        message(STATUS "  [OK] store_scp: DICOM image receiver")
+    else()
+        message(STATUS "  [--] store_scp: OFF (requires pacs_storage and pacs_integration)")
+    endif()
+
     # PACS Server example requires all modules
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/pacs_server)
