@@ -1,0 +1,72 @@
+# PACS Server Configuration Example
+# Copy this file to pacs_server.yaml and modify as needed
+
+# Server network configuration
+server:
+  # Application Entity Title (max 16 characters)
+  ae_title: MY_PACS
+
+  # Port to listen on (standard DICOM: 104, alternate: 11112)
+  port: 11112
+
+  # Maximum concurrent associations (0 = unlimited)
+  max_associations: 50
+
+  # Idle timeout for associations in seconds (0 = no timeout)
+  idle_timeout: 60
+
+# File storage configuration
+storage:
+  # Root directory for DICOM file storage
+  directory: ./archive
+
+  # File naming scheme:
+  #   - hierarchical: {StudyUID}/{SeriesUID}/{SOPUID}.dcm
+  #   - date_hierarchical: YYYY/MM/DD/{StudyUID}/{SOPUID}.dcm
+  #   - flat: {SOPUID}.dcm
+  naming: hierarchical
+
+  # Duplicate handling policy:
+  #   - reject: Return error if instance exists
+  #   - replace: Overwrite existing instance
+  #   - ignore: Accept silently (return success)
+  duplicate_policy: reject
+
+# SQLite database configuration
+database:
+  # Path to database file
+  path: ./pacs.db
+
+  # Enable WAL (Write-Ahead Logging) mode for better concurrency
+  wal_mode: true
+
+# Logging configuration
+logging:
+  # Log level: trace, debug, info, warning, error, critical
+  level: info
+
+  # Log file path (leave empty for console only)
+  file: ./logs/pacs.log
+
+  # Enable console output
+  console: true
+
+# Access control configuration
+access_control:
+  # Allowed AE titles (empty list = accept all)
+  # Uncomment and add entries to restrict access
+  allowed_ae_titles:
+    # - MODALITY1
+    # - MODALITY2
+    # - VIEWER1
+
+# TLS configuration (optional, not implemented in this sample)
+# tls:
+#   enabled: false
+#   cert_path: ./certs/server.crt
+#   key_path: ./certs/server.key
+
+# Monitoring configuration (optional)
+# monitoring:
+#   enabled: true
+#   metrics_port: 9090
