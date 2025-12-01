@@ -220,6 +220,7 @@ pacs_system/
 │   ├── store_scu/               # DICOM Storage SCU client
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
 │   ├── retrieve_scu/            # DICOM Retrieve SCU client (C-MOVE/C-GET)
+│   ├── worklist_scu/            # Modality Worklist Query client (MWL C-FIND)
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
 │
@@ -394,6 +395,28 @@ cmake --build build
 
 # Flat storage structure (all files in one directory)
 ./build/bin/retrieve_scu localhost 11112 PACS_SCP --study-uid "1.2.3.4.5" --structure flat
+```
+
+### Worklist SCU (Modality Worklist Query Client)
+
+```bash
+# Query worklist for CT modality
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT
+
+# Query worklist for today's scheduled procedures
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality MR --date today
+
+# Query by station AE title
+./build/bin/worklist_scu localhost 11112 RIS_SCP --station "CT_SCANNER_01" --date 20241215
+
+# Query with patient filter
+./build/bin/worklist_scu localhost 11112 RIS_SCP --patient-name "DOE^*" --modality CT
+
+# Output as JSON for integration
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT --format json > worklist.json
+
+# Export to CSV
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT --format csv > worklist.csv
 ```
 
 ### Full PACS Server

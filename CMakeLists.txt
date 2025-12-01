@@ -754,6 +754,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] retrieve_scu: OFF (requires pacs_integration)")
     endif()
 
+    # Worklist SCU sample - Modality Worklist Query client
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/worklist_scu)
+        message(STATUS "  [OK] worklist_scu: Modality Worklist query client")
+    else()
+        message(STATUS "  [--] worklist_scu: OFF (requires pacs_integration)")
+    endif()
+
     # Store SCP sample - DICOM image receiver
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/store_scp)
@@ -771,11 +779,11 @@ if(PACS_BUILD_EXAMPLES)
     endif()
 
     # Integration Test Suite - End-to-end workflow tests
-    if(TARGET pacs_storage AND TARGET pacs_integration)
+    if(TARGET pacs_storage AND TARGET pacs_integration AND TARGET Catch2::Catch2WithMain)
         add_subdirectory(examples/integration_tests)
         message(STATUS "  [OK] integration_tests: End-to-end workflow tests")
     else()
-        message(STATUS "  [--] integration_tests: OFF (requires pacs_storage and pacs_integration)")
+        message(STATUS "  [--] integration_tests: OFF (requires pacs_storage, pacs_integration, and Catch2)")
     endif()
 endif()
 
