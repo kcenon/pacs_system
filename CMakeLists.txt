@@ -716,6 +716,10 @@ if(PACS_BUILD_EXAMPLES)
     message(STATUS "")
     message(STATUS "=== Building Examples ===")
 
+    # DICOM Dump utility - file inspection tool (core only, no network)
+    add_subdirectory(examples/dcm_dump)
+    message(STATUS "  [OK] dcm_dump: DICOM file inspection utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
