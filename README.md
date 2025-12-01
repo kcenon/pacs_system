@@ -133,8 +133,67 @@ pacs_system/
 │   ├── encoding/                # Encoding module tests
 │   └── network/                 # Network module tests
 │
+├── examples/                    # Sample applications
+│   ├── dcm_dump/                # DICOM file inspection utility
+│   ├── echo_scu/                # DICOM connectivity test client
+│   ├── echo_scp/                # DICOM connectivity test server
+│   ├── store_scu/               # DICOM image sender
+│   ├── store_scp/               # DICOM image receiver
+│   └── pacs_server/             # Complete PACS server
+│
 ├── docs/                        # Documentation
 └── CMakeLists.txt               # Build configuration
+```
+
+---
+
+## Sample Applications
+
+The project includes several sample applications demonstrating DICOM functionality:
+
+### dcm_dump - DICOM File Inspector
+
+A command-line utility for inspecting DICOM file contents:
+
+```bash
+# Basic dump
+./build/bin/dcm_dump image.dcm
+
+# Show specific tags
+./build/bin/dcm_dump image.dcm --tags PatientName,PatientID,StudyDate
+
+# Show pixel data info
+./build/bin/dcm_dump image.dcm --pixel-info
+
+# JSON output
+./build/bin/dcm_dump image.dcm --format json
+
+# Process directory recursively
+./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
+### echo_scu / echo_scp - Connectivity Test
+
+Test DICOM network connectivity:
+
+```bash
+# Start echo server
+./build/bin/echo_scp 11112 MY_PACS
+
+# Test connectivity
+./build/bin/echo_scu localhost 11112 MY_PACS
+```
+
+### store_scu / store_scp - Image Transfer
+
+Transfer DICOM images:
+
+```bash
+# Start storage server
+./build/bin/store_scp 11113 STORAGE_SCP --storage ./dicom_storage
+
+# Send DICOM file
+./build/bin/store_scu localhost 11113 STORAGE_SCP image.dcm
 ```
 
 ---

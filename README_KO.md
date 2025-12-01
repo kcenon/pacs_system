@@ -133,8 +133,67 @@ pacs_system/
 │   ├── encoding/                # Encoding 모듈 테스트
 │   └── network/                 # Network 모듈 테스트
 │
+├── examples/                    # 샘플 애플리케이션
+│   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
+│   ├── echo_scu/                # DICOM 연결 테스트 클라이언트
+│   ├── echo_scp/                # DICOM 연결 테스트 서버
+│   ├── store_scu/               # DICOM 이미지 전송 클라이언트
+│   ├── store_scp/               # DICOM 이미지 수신 서버
+│   └── pacs_server/             # 완전한 PACS 서버
+│
 ├── docs/                        # 문서
 └── CMakeLists.txt               # 빌드 설정
+```
+
+---
+
+## 샘플 애플리케이션
+
+프로젝트에는 DICOM 기능을 보여주는 여러 샘플 애플리케이션이 포함되어 있습니다:
+
+### dcm_dump - DICOM 파일 검사기
+
+DICOM 파일 내용을 검사하는 명령줄 유틸리티:
+
+```bash
+# 기본 덤프
+./build/bin/dcm_dump image.dcm
+
+# 특정 태그만 표시
+./build/bin/dcm_dump image.dcm --tags PatientName,PatientID,StudyDate
+
+# 픽셀 데이터 정보 표시
+./build/bin/dcm_dump image.dcm --pixel-info
+
+# JSON 출력
+./build/bin/dcm_dump image.dcm --format json
+
+# 디렉토리 재귀 처리
+./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
+### echo_scu / echo_scp - 연결 테스트
+
+DICOM 네트워크 연결 테스트:
+
+```bash
+# 에코 서버 시작
+./build/bin/echo_scp 11112 MY_PACS
+
+# 연결 테스트
+./build/bin/echo_scu localhost 11112 MY_PACS
+```
+
+### store_scu / store_scp - 이미지 전송
+
+DICOM 이미지 전송:
+
+```bash
+# 스토리지 서버 시작
+./build/bin/store_scp 11113 STORAGE_SCP --storage ./dicom_storage
+
+# DICOM 파일 전송
+./build/bin/store_scu localhost 11113 STORAGE_SCP image.dcm
 ```
 
 ---
