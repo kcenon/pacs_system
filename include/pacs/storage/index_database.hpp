@@ -13,6 +13,7 @@
 
 #include "instance_record.hpp"
 #include "migration_runner.hpp"
+#include "mpps_record.hpp"
 #include "patient_record.hpp"
 #include "series_record.hpp"
 #include "study_record.hpp"
@@ -528,6 +529,138 @@ public:
     [[nodiscard]] auto instance_count(std::string_view series_uid) const -> size_t;
 
     // ========================================================================
+    // MPPS Operations
+    // ========================================================================
+
+    /**
+     * @brief Create a new MPPS record (N-CREATE)
+     *
+     * Creates a new MPPS with status "IN PROGRESS". This corresponds to the
+     * DICOM N-CREATE operation received from modalities.
+     *
+     * @param mpps_uid SOP Instance UID for the MPPS (required, must be unique)
+     * @param station_ae Performing station AE Title
+     * @param modality Modality type (CT, MR, etc.)
+     * @param study_uid Related Study Instance UID
+     * @param accession_no Accession number
+     * @param start_datetime Procedure step start date/time (YYYYMMDDHHMMSS)
+     * @return Result containing the MPPS primary key or error
+     */
+    [[nodiscard]] auto create_mpps(std::string_view mpps_uid,
+                                   std::string_view station_ae = "",
+                                   std::string_view modality = "",
+                                   std::string_view study_uid = "",
+                                   std::string_view accession_no = "",
+                                   std::string_view start_datetime = "")
+        -> Result<int64_t>;
+
+    /**
+     * @brief Create a new MPPS record with full details
+     *
+     * @param record Complete MPPS record (pk field is ignored)
+     * @return Result containing the MPPS primary key or error
+     */
+    [[nodiscard]] auto create_mpps(const mpps_record& record) -> Result<int64_t>;
+
+    /**
+     * @brief Update an existing MPPS record (N-SET)
+     *
+     * Updates the MPPS status and attributes. This corresponds to the
+     * DICOM N-SET operation. Status transitions are validated:
+     * - IN PROGRESS -> COMPLETED or DISCONTINUED (allowed)
+     * - COMPLETED or DISCONTINUED -> any (not allowed, final states)
+     *
+     * @param mpps_uid SOP Instance UID of the MPPS to update
+     * @param new_status New status (COMPLETED or DISCONTINUED)
+     * @param end_datetime Procedure step end date/time
+     * @param performed_series JSON string of performed series information
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto update_mpps(std::string_view mpps_uid,
+                                   std::string_view new_status,
+                                   std::string_view end_datetime = "",
+                                   std::string_view performed_series = "")
+        -> VoidResult;
+
+    /**
+     * @brief Update an existing MPPS record with partial data
+     *
+     * Only non-empty fields in the record will be updated.
+     *
+     * @param record MPPS record with fields to update (mpps_uid required)
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto update_mpps(const mpps_record& record) -> VoidResult;
+
+    /**
+     * @brief Find an MPPS by SOP Instance UID
+     *
+     * @param mpps_uid The MPPS SOP Instance UID to search for
+     * @return Optional containing the MPPS record if found
+     */
+    [[nodiscard]] auto find_mpps(std::string_view mpps_uid) const
+        -> std::optional<mpps_record>;
+
+    /**
+     * @brief Find an MPPS by primary key
+     *
+     * @param pk The MPPS primary key
+     * @return Optional containing the MPPS record if found
+     */
+    [[nodiscard]] auto find_mpps_by_pk(int64_t pk) const
+        -> std::optional<mpps_record>;
+
+    /**
+     * @brief List active (IN PROGRESS) MPPS records for a station
+     *
+     * @param station_ae The station AE Title to filter by
+     * @return Vector of active MPPS records
+     */
+    [[nodiscard]] auto list_active_mpps(std::string_view station_ae) const
+        -> std::vector<mpps_record>;
+
+    /**
+     * @brief Find MPPS records by Study Instance UID
+     *
+     * @param study_uid The Study Instance UID to search for
+     * @return Vector of MPPS records associated with the study
+     */
+    [[nodiscard]] auto find_mpps_by_study(std::string_view study_uid) const
+        -> std::vector<mpps_record>;
+
+    /**
+     * @brief Search MPPS records with query criteria
+     *
+     * @param query Query parameters with optional filters
+     * @return Vector of matching MPPS records
+     */
+    [[nodiscard]] auto search_mpps(const mpps_query& query) const
+        -> std::vector<mpps_record>;
+
+    /**
+     * @brief Delete an MPPS record
+     *
+     * @param mpps_uid The MPPS SOP Instance UID to delete
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto delete_mpps(std::string_view mpps_uid) -> VoidResult;
+
+    /**
+     * @brief Get total MPPS count
+     *
+     * @return Number of MPPS records in the database
+     */
+    [[nodiscard]] auto mpps_count() const -> size_t;
+
+    /**
+     * @brief Get MPPS count by status
+     *
+     * @param status The status to count (IN PROGRESS, COMPLETED, DISCONTINUED)
+     * @return Number of MPPS records with the given status
+     */
+    [[nodiscard]] auto mpps_count(std::string_view status) const -> size_t;
+
+    // ========================================================================
     // Database Information
     // ========================================================================
 
@@ -691,6 +824,11 @@ private:
      * @brief Parse an instance record from a prepared statement
      */
     [[nodiscard]] auto parse_instance_row(void* stmt) const -> instance_record;
+
+    /**
+     * @brief Parse an MPPS record from a prepared statement
+     */
+    [[nodiscard]] auto parse_mpps_row(void* stmt) const -> mpps_record;
 
     /**
      * @brief Convert wildcard pattern to SQL LIKE pattern
