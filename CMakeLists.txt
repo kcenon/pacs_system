@@ -474,6 +474,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         src/integration/logger_adapter.cpp
         src/integration/thread_adapter.cpp
         src/integration/network_adapter.cpp
+        src/integration/monitoring_adapter.cpp
         src/integration/dicom_session.cpp
     )
     target_include_directories(pacs_integration
@@ -533,7 +534,46 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         message(WARNING "    - network_adapter: OFF (NetworkSystem target not found)")
     endif()
 
-    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system, network_system)")
+    # Link monitoring_system (REQUIRED for monitoring_adapter)
+    set(_PACS_MONITORING_PATHS
+        "$ENV{MONITORING_SYSTEM_ROOT}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
+        "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
+    )
+    set(MONITORING_SYSTEM_FOUND FALSE)
+    foreach(_path ${_PACS_MONITORING_PATHS})
+        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
+            set(PACS_MONITORING_SYSTEM_DIR "${_path}")
+            set(PACS_MONITORING_SYSTEM_INCLUDE_DIR "${_path}/include")
+            set(MONITORING_SYSTEM_FOUND TRUE)
+            break()
+        endif()
+    endforeach()
+
+    if(MONITORING_SYSTEM_FOUND AND NOT TARGET monitoring_system)
+        set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+        set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(MONITORING_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(MONITORING_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+        set(MONITORING_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        add_subdirectory("${PACS_MONITORING_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/monitoring_system_build")
+    endif()
+
+    if(TARGET monitoring_system)
+        target_link_libraries(pacs_integration PUBLIC monitoring_system)
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_MONITORING_SYSTEM)
+        message(STATUS "    - monitoring_adapter: ON (monitoring_system)")
+    elseif(PACS_MONITORING_SYSTEM_INCLUDE_DIR)
+        # Fallback: include headers only
+        target_include_directories(pacs_integration PUBLIC ${PACS_MONITORING_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_MONITORING_SYSTEM)
+        message(STATUS "    - monitoring_adapter: ON (headers only)")
+    else()
+        message(WARNING "    - monitoring_adapter: OFF (monitoring_system target not found)")
+    endif()
+
+    message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system, network_system, monitoring_system)")
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
@@ -644,6 +684,7 @@ if(PACS_BUILD_TESTS)
             tests/integration/logger_adapter_test.cpp
             tests/integration/thread_adapter_test.cpp
             tests/integration/network_adapter_test.cpp
+            tests/integration/monitoring_adapter_test.cpp
         )
         target_link_libraries(integration_tests
             PRIVATE
