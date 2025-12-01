@@ -720,6 +720,10 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/dcm_dump)
     message(STATUS "  [OK] dcm_dump: DICOM file inspection utility")
 
+    # DCM Modify - DICOM tag modification utility (no network dependencies)
+    add_subdirectory(examples/dcm_modify)
+    message(STATUS "  [OK] dcm_modify: DICOM tag modification utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
