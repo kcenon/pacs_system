@@ -177,7 +177,7 @@ if (write_result.is_err()) {
 |-----------------|-----|--------|
 | Implicit VR Little Endian | 1.2.840.10008.1.2 | ✅ Implemented |
 | Explicit VR Little Endian | 1.2.840.10008.1.2.1 | ✅ Implemented |
-| Explicit VR Big Endian | 1.2.840.10008.1.2.2 | 🔜 Planned |
+| Explicit VR Big Endian | 1.2.840.10008.1.2.2 | ✅ Implemented |
 | JPEG Baseline | 1.2.840.10008.1.2.4.50 | 🔮 Future |
 | JPEG Lossless | 1.2.840.10008.1.2.4.70 | 🔮 Future |
 | JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | 🔮 Future |
