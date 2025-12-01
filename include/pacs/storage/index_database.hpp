@@ -19,6 +19,7 @@
 
 #include <kcenon/common/patterns/result.h>
 
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -29,6 +30,26 @@
 struct sqlite3;
 
 namespace pacs::storage {
+
+/**
+ * @brief Configuration for index database
+ *
+ * Allows customization of SQLite database behavior including
+ * caching, journaling mode, and other performance options.
+ */
+struct index_config {
+    /// Cache size in megabytes (default: 64 MB)
+    size_t cache_size_mb = 64;
+
+    /// Enable WAL (Write-Ahead Logging) mode for better concurrency
+    bool wal_mode = true;
+
+    /// Enable memory-mapped I/O for faster reads
+    bool mmap_enabled = true;
+
+    /// Maximum memory map size in bytes (default: 1 GB)
+    size_t mmap_size = 1024 * 1024 * 1024;
+};
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -74,15 +95,30 @@ using VoidResult = kcenon::common::VoidResult;
 class index_database {
 public:
     /**
-     * @brief Open or create a database
+     * @brief Open or create a database with default configuration
      *
      * Opens an existing database or creates a new one at the specified path.
-     * Automatically runs pending migrations.
+     * Automatically runs pending migrations. Uses default configuration
+     * with WAL mode enabled.
      *
      * @param db_path Path to the database file, or ":memory:" for in-memory DB
      * @return Result containing the database instance or error
      */
     [[nodiscard]] static auto open(std::string_view db_path)
+        -> Result<std::unique_ptr<index_database>>;
+
+    /**
+     * @brief Open or create a database with custom configuration
+     *
+     * Opens an existing database or creates a new one at the specified path.
+     * Automatically runs pending migrations.
+     *
+     * @param db_path Path to the database file, or ":memory:" for in-memory DB
+     * @param config Configuration options for database behavior
+     * @return Result containing the database instance or error
+     */
+    [[nodiscard]] static auto open(std::string_view db_path,
+                                   const index_config& config)
         -> Result<std::unique_ptr<index_database>>;
 
     /**
@@ -515,6 +551,120 @@ public:
      * @return true if the database connection is active
      */
     [[nodiscard]] auto is_open() const noexcept -> bool;
+
+    // ========================================================================
+    // File Path Lookup Operations
+    // ========================================================================
+
+    /**
+     * @brief Get file path for a SOP Instance UID
+     *
+     * Convenience method to quickly look up the file path for a specific
+     * DICOM instance without loading the full record.
+     *
+     * @param sop_instance_uid The SOP Instance UID to look up
+     * @return Optional containing the file path if found
+     */
+    [[nodiscard]] auto get_file_path(std::string_view sop_instance_uid) const
+        -> std::optional<std::string>;
+
+    /**
+     * @brief Get all file paths for a study
+     *
+     * Returns all DICOM file paths associated with a study.
+     * Useful for bulk operations like C-MOVE or study export.
+     *
+     * @param study_instance_uid The Study Instance UID
+     * @return Vector of file paths for all instances in the study
+     */
+    [[nodiscard]] auto get_study_files(std::string_view study_instance_uid) const
+        -> std::vector<std::string>;
+
+    /**
+     * @brief Get all file paths for a series
+     *
+     * Returns all DICOM file paths associated with a series.
+     *
+     * @param series_instance_uid The Series Instance UID
+     * @return Vector of file paths for all instances in the series
+     */
+    [[nodiscard]] auto get_series_files(std::string_view series_instance_uid) const
+        -> std::vector<std::string>;
+
+    // ========================================================================
+    // Database Maintenance Operations
+    // ========================================================================
+
+    /**
+     * @brief Reclaim unused space in the database
+     *
+     * VACUUM rebuilds the database file, repacking it into a minimal
+     * amount of disk space. This can reduce file size after large
+     * deletions but may take time for large databases.
+     *
+     * Note: This operation requires exclusive access and may take
+     * significant time for large databases.
+     *
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto vacuum() -> VoidResult;
+
+    /**
+     * @brief Update database statistics for query optimization
+     *
+     * ANALYZE collects statistics about tables and indexes, which
+     * helps the query planner choose better execution plans.
+     * Should be run periodically, especially after bulk insertions.
+     *
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto analyze() -> VoidResult;
+
+    /**
+     * @brief Verify database integrity
+     *
+     * Runs SQLite's integrity check to verify the database structure
+     * and detect any corruption issues.
+     *
+     * @return VoidResult indicating success or error with details
+     */
+    [[nodiscard]] auto verify_integrity() const -> VoidResult;
+
+    /**
+     * @brief Checkpoint WAL file
+     *
+     * Forces a WAL checkpoint, writing all WAL content to the main
+     * database file. Useful for ensuring durability before backup.
+     *
+     * @param truncate If true, truncate the WAL file after checkpoint
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto checkpoint(bool truncate = false) -> VoidResult;
+
+    // ========================================================================
+    // Storage Statistics
+    // ========================================================================
+
+    /**
+     * @brief Storage statistics structure
+     */
+    struct storage_stats {
+        size_t total_patients = 0;     ///< Total number of patients
+        size_t total_studies = 0;      ///< Total number of studies
+        size_t total_series = 0;       ///< Total number of series
+        size_t total_instances = 0;    ///< Total number of instances
+        int64_t total_file_size = 0;   ///< Total size of all files in bytes
+        int64_t database_size = 0;     ///< Size of the database file in bytes
+    };
+
+    /**
+     * @brief Get storage statistics
+     *
+     * Returns aggregate statistics about the database contents.
+     *
+     * @return Storage statistics structure
+     */
+    [[nodiscard]] auto get_storage_stats() const -> storage_stats;
 
 private:
     /**
