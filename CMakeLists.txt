@@ -623,6 +623,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/file_storage_test.cpp
             tests/storage/migration_runner_test.cpp
             tests/storage/index_database_test.cpp
+            tests/storage/mpps_test.cpp
         )
         target_link_libraries(storage_tests
             PRIVATE
