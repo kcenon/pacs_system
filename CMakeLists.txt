@@ -409,6 +409,7 @@ endif()
 add_library(pacs_services
     src/services/verification_scp.cpp
     src/services/storage_scp.cpp
+    src/services/query_scp.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
@@ -603,6 +604,7 @@ if(PACS_BUILD_TESTS)
     add_executable(services_tests
         tests/services/verification_scp_test.cpp
         tests/services/storage_scp_test.cpp
+        tests/services/query_scp_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE
