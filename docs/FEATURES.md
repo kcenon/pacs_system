@@ -295,12 +295,12 @@ if (result.is_ok()) {
 
 | Service | Status | Description |
 |---------|--------|-------------|
-| N-CREATE | ✅ Implemented | Create object (MPPS) |
-| N-SET | ✅ Implemented | Modify object (MPPS) |
-| N-GET | 🔮 Future | Get attributes |
-| N-EVENT-REPORT | 🔮 Future | Event notification |
-| N-ACTION | 🔮 Future | Action request |
-| N-DELETE | 🔮 Future | Delete object |
+| N-CREATE | ✅ Implemented | Create managed SOP instance (MPPS, Print) |
+| N-SET | ✅ Implemented | Modify object attributes (MPPS) |
+| N-GET | ✅ Implemented | Get attribute values with selective retrieval |
+| N-EVENT-REPORT | ✅ Implemented | Event notification (Storage Commitment) |
+| N-ACTION | ✅ Implemented | Action request (Storage Commitment) |
+| N-DELETE | ✅ Implemented | Delete managed SOP instance (Print) |
 
 ---
 
