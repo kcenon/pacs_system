@@ -212,9 +212,10 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (11 apps, ~7,500 lines)
+├── examples/                    # Example Applications (12 apps, ~8,200 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
+│   ├── db_browser/              # PACS index database browser
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
 │   ├── store_scp/               # DICOM Storage SCP server
@@ -354,6 +355,29 @@ cmake --build build
 
 # Batch anonymize directory
 ./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
+```
+
+### DB Browser (Database Viewer)
+
+```bash
+# List all patients
+./build/bin/db_browser pacs.db patients
+
+# List studies for a specific patient
+./build/bin/db_browser pacs.db studies --patient-id "12345"
+
+# Filter studies by date range
+./build/bin/db_browser pacs.db studies --from 20240101 --to 20241231
+
+# List series for a study
+./build/bin/db_browser pacs.db series --study-uid "1.2.3.4.5"
+
+# Show database statistics
+./build/bin/db_browser pacs.db stats
+
+# Database maintenance
+./build/bin/db_browser pacs.db vacuum
+./build/bin/db_browser pacs.db verify
 ```
 
 ### Echo SCP (Verification Server)

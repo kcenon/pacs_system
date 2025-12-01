@@ -782,6 +782,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] store_scp: OFF (requires pacs_storage and pacs_integration)")
     endif()
 
+    # Database Browser - PACS index database viewer
+    if(TARGET pacs_storage)
+        add_subdirectory(examples/db_browser)
+        message(STATUS "  [OK] db_browser: PACS index database viewer")
+    else()
+        message(STATUS "  [--] db_browser: OFF (requires pacs_storage)")
+    endif()
+
     # PACS Server example requires all modules
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/pacs_server)
