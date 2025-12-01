@@ -709,6 +709,23 @@ if(PACS_BUILD_TESTS)
 endif()
 
 ##################################################
+# Examples
+##################################################
+
+if(PACS_BUILD_EXAMPLES)
+    message(STATUS "")
+    message(STATUS "=== Building Examples ===")
+
+    # PACS Server example requires all modules
+    if(TARGET pacs_storage AND TARGET pacs_integration)
+        add_subdirectory(examples/pacs_server)
+        message(STATUS "  [OK] pacs_server: Complete DICOM archive")
+    else()
+        message(STATUS "  [--] pacs_server: OFF (requires pacs_storage and pacs_integration)")
+    endif()
+endif()
+
+##################################################
 # Build Summary
 ##################################################
 
@@ -740,7 +757,11 @@ endif()
 message(STATUS "")
 message(STATUS "Build Options:")
 message(STATUS "  Tests: ${PACS_BUILD_TESTS}")
-message(STATUS "  Examples: ${PACS_BUILD_EXAMPLES}")
+if(PACS_BUILD_EXAMPLES AND TARGET pacs_server)
+    message(STATUS "  Examples: ON (pacs_server)")
+else()
+    message(STATUS "  Examples: ${PACS_BUILD_EXAMPLES}")
+endif()
 message(STATUS "  Benchmarks: ${PACS_BUILD_BENCHMARKS}")
 message(STATUS "  Services: ON")
 if(TARGET pacs_storage)
