@@ -212,7 +212,7 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (8 apps, ~4,300 lines)
+├── examples/                    # Example Applications (9 apps, ~6,000 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
@@ -220,7 +220,8 @@ pacs_system/
 │   ├── store_scu/               # DICOM Storage SCU client
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
 │   ├── retrieve_scu/            # DICOM Retrieve SCU client (C-MOVE/C-GET)
-│   └── pacs_server/             # Full PACS server example
+│   ├── pacs_server/             # Full PACS server example
+│   └── integration_tests/       # End-to-end integration test suite
 │
 ├── docs/                        # Documentation (30+ files)
 └── CMakeLists.txt               # Build configuration (v0.2.0)
@@ -417,6 +418,36 @@ database:
   path: ./pacs.db
   wal_mode: true
 ```
+
+### Integration Tests (End-to-End Workflow Tests)
+
+```bash
+# Run all integration tests
+./build/bin/integration_tests
+
+# Run specific test category
+./build/bin/integration_tests [connectivity]    # Basic C-ECHO tests
+./build/bin/integration_tests [store_query]     # Store and query workflow
+./build/bin/integration_tests [worklist]        # Worklist and MPPS workflow
+./build/bin/integration_tests [stress]          # Multi-association stress tests
+./build/bin/integration_tests [error]           # Error recovery tests
+
+# List available tests
+./build/bin/integration_tests --list-tests
+
+# Run with verbose output
+./build/bin/integration_tests --success
+
+# Generate JUnit XML report for CI/CD
+./build/bin/integration_tests --reporter junit --out results.xml
+```
+
+**Test Scenarios**:
+- **Connectivity**: C-ECHO, multiple associations, timeout handling
+- **Store & Query**: Store files, query by patient/study/series, wildcard matching
+- **Worklist/MPPS**: Scheduled procedures, MPPS IN PROGRESS/COMPLETED workflow
+- **Stress**: Concurrent SCUs, rapid connections, large datasets
+- **Error Recovery**: Invalid SOP class, server restart, abort handling
 
 ---
 
