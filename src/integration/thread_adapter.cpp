@@ -6,8 +6,11 @@
 #include <pacs/integration/thread_adapter.hpp>
 
 #include <kcenon/thread/core/thread_pool.h>
+#include <kcenon/thread/core/thread_worker.h>
+#include <kcenon/thread/interfaces/thread_context.h>
 
 #include <stdexcept>
+#include <vector>
 
 namespace pacs::integration {
 
@@ -28,7 +31,8 @@ auto thread_adapter::get_pool() -> std::shared_ptr<kcenon::thread::thread_pool> 
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (!pool_) {
-        pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name);
+        kcenon::thread::thread_context context;
+        pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name, context);
     }
 
     return pool_;
@@ -58,24 +62,31 @@ auto thread_adapter::start() -> bool {
         return true;  // Already running
     }
 
-    // Create pool if not exists
+    // Create pool if not exists with proper context
+    kcenon::thread::thread_context context;
     if (!pool_) {
-        pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name);
+        pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name, context);
     }
 
-    // Add worker threads based on configuration
+    // Create worker threads and add them in batch
+    // Note: thread_pool::enqueue() automatically sets job_queue, context, and metrics
+    std::vector<std::unique_ptr<kcenon::thread::thread_worker>> workers;
+    workers.reserve(config_.min_threads);
+
     for (std::size_t i = 0; i < config_.min_threads; ++i) {
-        auto worker = std::make_unique<kcenon::thread::thread_worker>();
-        worker->set_job_queue(pool_->get_job_queue());
-        auto result = pool_->enqueue(std::move(worker));
-        if (!result) {
-            return false;
-        }
+        // Pass false for use_time_tag and context for consistency
+        workers.push_back(std::make_unique<kcenon::thread::thread_worker>(false, context));
+    }
+
+    // Use batch enqueue for efficiency
+    auto enqueue_result = pool_->enqueue_batch(std::move(workers));
+    if (enqueue_result.has_error()) {
+        return false;
     }
 
     // Start the pool
     auto start_result = pool_->start();
-    if (!start_result) {
+    if (start_result.has_error()) {
         return false;
     }
 
@@ -109,11 +120,8 @@ void thread_adapter::submit_job_internal(std::function<void()> task,
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!pool_) {
-            pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name);
-        }
-        if (!initialized_) {
-            // Start pool without lock (start() acquires lock internally)
-            // We need to release the lock first
+            kcenon::thread::thread_context context;
+            pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name, context);
         }
     }
 
