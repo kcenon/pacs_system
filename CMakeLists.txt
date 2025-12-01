@@ -734,6 +734,15 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] echo_scu/scp: OFF (requires pacs_integration)")
     endif()
 
+    # Secure Echo SCU/SCP samples - TLS-secured connectivity test
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/secure_dicom)
+        message(STATUS "  [OK] secure_echo_scu: TLS-secured DICOM client")
+        message(STATUS "  [OK] secure_echo_scp: TLS-secured DICOM server")
+    else()
+        message(STATUS "  [--] secure_dicom: OFF (requires pacs_integration)")
+    endif()
+
     # Store SCU sample - DICOM image sender
     if(TARGET pacs_integration)
         add_subdirectory(examples/store_scu)

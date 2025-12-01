@@ -212,12 +212,13 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (12 apps, ~8,200 lines)
+├── examples/                    # Example Applications (13 apps, ~8,700 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
 │   ├── db_browser/              # PACS index database browser
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
+│   ├── secure_dicom/            # TLS-secured DICOM Echo SCU/SCP
 │   ├── store_scp/               # DICOM Storage SCP server
 │   ├── store_scu/               # DICOM Storage SCU client
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
@@ -392,6 +393,37 @@ cmake --build build
 ```bash
 # Test connectivity
 ./build/examples/echo_scu/echo_scu --host localhost --port 11112 --ae-title TEST_SCU
+```
+
+### Secure Echo SCU/SCP (TLS-Secured DICOM)
+
+TLS-secured DICOM connectivity testing with support for TLS 1.2/1.3 and mutual TLS.
+
+```bash
+# Generate test certificates first
+cd examples/secure_dicom
+./generate_certs.sh
+
+# Start secure server (TLS)
+./build/bin/secure_echo_scp 2762 MY_PACS \
+    --cert certs/server.crt \
+    --key certs/server.key \
+    --ca certs/ca.crt
+
+# Test secure connectivity (server verification only)
+./build/bin/secure_echo_scu localhost 2762 MY_PACS \
+    --ca certs/ca.crt
+
+# Test with mutual TLS (client certificate)
+./build/bin/secure_echo_scu localhost 2762 MY_PACS \
+    --cert certs/client.crt \
+    --key certs/client.key \
+    --ca certs/ca.crt
+
+# Use TLS 1.3
+./build/bin/secure_echo_scu localhost 2762 MY_PACS \
+    --ca certs/ca.crt \
+    --tls-version 1.3
 ```
 
 ### Storage SCU (Image Sender)

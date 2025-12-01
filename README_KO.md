@@ -212,12 +212,13 @@ pacs_system/
 │   ├── storage/                 # Storage 테스트 (6개 파일)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (12개, ~8,200줄)
+├── examples/                    # 예제 애플리케이션 (13개, ~8,700줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
 │   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
 │   ├── db_browser/              # PACS 인덱스 데이터베이스 브라우저
 │   ├── echo_scp/                # DICOM Echo SCP 서버
 │   ├── echo_scu/                # DICOM Echo SCU 클라이언트
+│   ├── secure_dicom/            # TLS 보안 DICOM Echo SCU/SCP
 │   ├── store_scp/               # DICOM Storage SCP 서버
 │   ├── store_scu/               # DICOM Storage SCU 클라이언트
 │   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
@@ -393,6 +394,37 @@ cmake --build build
 ```bash
 # 연결 테스트
 ./build/examples/echo_scu/echo_scu --host localhost --port 11112 --ae-title TEST_SCU
+```
+
+### Secure Echo SCU/SCP (TLS 보안 DICOM)
+
+TLS 1.2/1.3 및 상호 TLS를 지원하는 보안 DICOM 연결 테스트입니다.
+
+```bash
+# 먼저 테스트 인증서 생성
+cd examples/secure_dicom
+./generate_certs.sh
+
+# 보안 서버 시작 (TLS)
+./build/bin/secure_echo_scp 2762 MY_PACS \
+    --cert certs/server.crt \
+    --key certs/server.key \
+    --ca certs/ca.crt
+
+# 보안 연결 테스트 (서버 인증서만 검증)
+./build/bin/secure_echo_scu localhost 2762 MY_PACS \
+    --ca certs/ca.crt
+
+# 상호 TLS 테스트 (클라이언트 인증서 사용)
+./build/bin/secure_echo_scu localhost 2762 MY_PACS \
+    --cert certs/client.crt \
+    --key certs/client.key \
+    --ca certs/ca.crt
+
+# TLS 1.3 사용
+./build/bin/secure_echo_scu localhost 2762 MY_PACS \
+    --ca certs/ca.crt \
+    --tls-version 1.3
 ```
 
 ### Storage SCU (이미지 전송)
