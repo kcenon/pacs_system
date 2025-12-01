@@ -212,10 +212,11 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (4 apps, ~1,200 lines)
+├── examples/                    # Example Applications (5 apps, ~2,400 lines)
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
-│   ├── store_scu/               # DICOM Storage SCU client (NEW)
+│   ├── store_scu/               # DICOM Storage SCU client
+│   ├── query_scu/               # DICOM Query SCU client (C-FIND)
 │   └── pacs_server/             # Full PACS server example
 │
 ├── docs/                        # Documentation (30+ files)
@@ -329,6 +330,25 @@ cmake --build build
 
 # Specify transfer syntax
 ./build/examples/store_scu/store_scu localhost 11112 PACS_SCP image.dcm --transfer-syntax explicit-le
+```
+
+### Query SCU (C-FIND Client)
+
+```bash
+# Query studies by patient name (wildcards supported)
+./build/bin/query_scu localhost 11112 PACS_SCP --level STUDY --patient-name "DOE^*"
+
+# Query by date range
+./build/bin/query_scu localhost 11112 PACS_SCP --level STUDY --study-date "20240101-20241231"
+
+# Query series for a specific study
+./build/bin/query_scu localhost 11112 PACS_SCP --level SERIES --study-uid "1.2.3.4.5"
+
+# Output as JSON for integration
+./build/bin/query_scu localhost 11112 PACS_SCP --patient-id "12345" --format json
+
+# Export to CSV
+./build/bin/query_scu localhost 11112 PACS_SCP --modality CT --format csv > results.csv
 ```
 
 ### Full PACS Server

@@ -734,6 +734,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] store_scu: OFF (requires pacs_integration)")
     endif()
 
+    # Query SCU sample - DICOM C-FIND client
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/query_scu)
+        message(STATUS "  [OK] query_scu: DICOM C-FIND client")
+    else()
+        message(STATUS "  [--] query_scu: OFF (requires pacs_integration)")
+    endif()
+
     # Store SCP sample - DICOM image receiver
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/store_scp)

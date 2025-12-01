@@ -212,10 +212,11 @@ pacs_system/
 │   ├── storage/                 # Storage 테스트 (6개 파일)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (4개, ~1,200줄)
+├── examples/                    # 예제 애플리케이션 (5개, ~2,400줄)
 │   ├── echo_scp/                # DICOM Echo SCP 서버
 │   ├── echo_scu/                # DICOM Echo SCU 클라이언트
-│   ├── store_scu/               # DICOM Storage SCU 클라이언트 (NEW)
+│   ├── store_scu/               # DICOM Storage SCU 클라이언트
+│   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
 │   └── pacs_server/             # 전체 PACS 서버 예제
 │
 ├── docs/                        # 문서 (26개 이상 파일)
@@ -329,6 +330,25 @@ cmake --build build
 
 # Transfer Syntax 지정
 ./build/examples/store_scu/store_scu localhost 11112 PACS_SCP image.dcm --transfer-syntax explicit-le
+```
+
+### Query SCU (C-FIND 클라이언트)
+
+```bash
+# 환자 이름으로 Study 검색 (와일드카드 지원)
+./build/bin/query_scu localhost 11112 PACS_SCP --level STUDY --patient-name "DOE^*"
+
+# 날짜 범위로 검색
+./build/bin/query_scu localhost 11112 PACS_SCP --level STUDY --study-date "20240101-20241231"
+
+# 특정 Study의 Series 검색
+./build/bin/query_scu localhost 11112 PACS_SCP --level SERIES --study-uid "1.2.3.4.5"
+
+# 연동을 위한 JSON 출력
+./build/bin/query_scu localhost 11112 PACS_SCP --patient-id "12345" --format json
+
+# CSV로 내보내기
+./build/bin/query_scu localhost 11112 PACS_SCP --modality CT --format csv > results.csv
 ```
 
 ### 전체 PACS 서버
