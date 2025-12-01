@@ -769,6 +769,14 @@ if(PACS_BUILD_EXAMPLES)
     else()
         message(STATUS "  [--] pacs_server: OFF (requires pacs_storage and pacs_integration)")
     endif()
+
+    # Integration Test Suite - End-to-end workflow tests
+    if(TARGET pacs_storage AND TARGET pacs_integration)
+        add_subdirectory(examples/integration_tests)
+        message(STATUS "  [OK] integration_tests: End-to-end workflow tests")
+    else()
+        message(STATUS "  [--] integration_tests: OFF (requires pacs_storage and pacs_integration)")
+    endif()
 endif()
 
 ##################################################
