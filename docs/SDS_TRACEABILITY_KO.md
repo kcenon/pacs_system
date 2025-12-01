@@ -420,8 +420,12 @@
 | DES-SVC-005 | `retrieve_scp` | `include/pacs/services/retrieve_scp.hpp` | `src/services/retrieve_scp.cpp` |
 | DES-SVC-006 | `worklist_scp` | `include/pacs/services/worklist_scp.hpp` | `src/services/worklist_scp.cpp` |
 | DES-SVC-007 | `mpps_scp` | `include/pacs/services/mpps_scp.hpp` | `src/services/mpps_scp.cpp` |
+| DES-SVC-008 | `sop_class_registry` | `include/pacs/services/sop_class_registry.hpp` | `src/services/sop_class_registry.cpp` |
+| DES-SVC-009 | XA Storage SOP Classes | `include/pacs/services/sop_classes/xa_storage.hpp` | `src/services/sop_classes/xa_storage.cpp` |
+| DES-SVC-010 | `xa_iod_validator` | `include/pacs/services/validation/xa_iod_validator.hpp` | `src/services/validation/xa_iod_validator.cpp` |
 | - | `scp_service` | `include/pacs/services/scp_service.hpp` | (헤더 전용, 인터페이스) |
 | - | `storage_status` | `include/pacs/services/storage_status.hpp` | (헤더 전용) |
+| - | US Storage SOP Classes | `include/pacs/services/sop_classes/us_storage.hpp` | (헤더 전용) |
 
 ### 5.5 Storage 모듈 구현
 
@@ -518,6 +522,7 @@
 | DES-SVC-005 | `retrieve_scp` | `tests/services/retrieve_scp_test.cpp` | - |
 | DES-SVC-006 | `worklist_scp` | `tests/services/worklist_scp_test.cpp` | - |
 | DES-SVC-007 | `mpps_scp` | `tests/services/mpps_scp_test.cpp` | - |
+| DES-SVC-009 | XA Storage | `tests/services/xa_storage_test.cpp` | 15 |
 
 ### 6.5 Storage 모듈 테스트
 
@@ -698,6 +703,9 @@
 | DES-SVC-005 | retrieve_scp |
 | DES-SVC-006 | worklist_scp |
 | DES-SVC-007 | mpps_scp |
+| DES-SVC-008 | sop_class_registry |
+| DES-SVC-009 | XA Storage SOP Classes |
+| DES-SVC-010 | xa_iod_validator |
 | DES-STOR-001 | storage_interface |
 | DES-STOR-002 | file_storage |
 | DES-STOR-003 | index_database |
@@ -724,6 +732,7 @@
 | 1.1.0 | 2025-12-01 | kcenon@naver.com | SDS에서 구현 및 테스트 추적성 추가 (섹션 5, 6) |
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | V-모델 다이어그램에 Verification/Validation 구분 수정 |
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | Verification에만 집중하도록 범위 조정; Validation은 별도 VALIDATION_REPORT_KO.md로 이동 |
+| 1.4.0 | 2025-12-01 | kcenon@naver.com | DES-SVC-008 ~ DES-SVC-010 추가 (SOP Class Registry, XA Storage, IOD Validator) |
 
 ---
 

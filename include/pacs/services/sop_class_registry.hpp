@@ -190,6 +190,7 @@ private:
 
     void register_standard_sop_classes();
     void register_us_sop_classes();
+    void register_xa_sop_classes();
     void register_ct_sop_classes();
     void register_mr_sop_classes();
     void register_other_sop_classes();

@@ -175,7 +175,14 @@ pacs_system/
 │   │   ├── query_scp.hpp        # C-FIND SCP
 │   │   ├── retrieve_scp.hpp     # C-MOVE/GET SCP
 │   │   ├── worklist_scp.hpp     # MWL SCP
-│   │   └── mpps_scp.hpp         # MPPS SCP
+│   │   ├── mpps_scp.hpp         # MPPS SCP
+│   │   ├── sop_class_registry.hpp # SOP Class registry
+│   │   ├── sop_classes/         # Modality-specific SOP classes
+│   │   │   ├── us_storage.hpp   # Ultrasound Storage
+│   │   │   └── xa_storage.hpp   # X-Ray Angiographic Storage
+│   │   └── validation/          # IOD Validators
+│   │       ├── us_iod_validator.hpp # US IOD validation
+│   │       └── xa_iod_validator.hpp # XA IOD validation
 │   │
 │   ├── storage/                 # Storage Backend (✅ Complete)
 │   │   ├── storage_interface.hpp # Abstract interface
@@ -253,6 +260,9 @@ pacs_system/
 | **Verification** | 1.2.840.10008.1.1 | ✅ Complete |
 | **CT Storage** | 1.2.840.10008.5.1.4.1.1.2 | ✅ Complete |
 | **MR Storage** | 1.2.840.10008.5.1.4.1.1.4 | ✅ Complete |
+| **US Storage** | 1.2.840.10008.5.1.4.1.1.6.x | ✅ Complete |
+| **XA Storage** | 1.2.840.10008.5.1.4.1.1.12.x | ✅ Complete |
+| **XRF Storage** | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ Complete |
 | **X-Ray Storage** | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ Complete |
 | **Patient Root Q/R** | 1.2.840.10008.5.1.4.1.2.1.x | ✅ Complete |
 | **Study Root Q/R** | 1.2.840.10008.5.1.4.1.2.2.x | ✅ Complete |

@@ -857,6 +857,234 @@ public:
 
 ---
 
+### `pacs::services::sop_classes` - XA/XRF Storage
+
+X-Ray Angiographic and Radiofluoroscopic Storage SOP Classes.
+
+```cpp
+#include <pacs/services/sop_classes/xa_storage.hpp>
+
+namespace pacs::services::sop_classes {
+
+// SOP Class UIDs
+inline constexpr std::string_view xa_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.12.1";
+inline constexpr std::string_view enhanced_xa_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.12.1.1";
+inline constexpr std::string_view xrf_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.12.2";
+inline constexpr std::string_view xray_3d_angiographic_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.13.1.1";
+inline constexpr std::string_view xray_3d_craniofacial_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.13.1.2";
+
+// Photometric Interpretation (grayscale only for XA)
+enum class xa_photometric_interpretation {
+    monochrome1,  // Minimum value = white
+    monochrome2   // Minimum value = black
+};
+
+// XA SOP Class information
+struct xa_sop_class_info {
+    std::string_view uid;
+    std::string_view name;
+    bool is_enhanced;
+    bool is_3d;
+    bool supports_multiframe;
+};
+
+// Positioner angles (LAO/RAO, Cranial/Caudal)
+struct xa_positioner_angles {
+    double primary_angle;    // LAO(+) / RAO(-) in degrees
+    double secondary_angle;  // Cranial(+) / Caudal(-) in degrees
+};
+
+// QCA calibration data
+struct xa_calibration_data {
+    double imager_pixel_spacing[2];       // mm/pixel
+    double distance_source_to_detector;   // SID in mm
+    double distance_source_to_patient;    // SOD in mm
+};
+
+// Utility functions
+[[nodiscard]] bool is_xa_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_enhanced_xa_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_xrf_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] const xa_sop_class_info* get_xa_sop_class_info(std::string_view uid);
+
+[[nodiscard]] std::vector<std::string_view> get_xa_transfer_syntaxes();
+[[nodiscard]] bool is_valid_xa_photometric(std::string_view photometric) noexcept;
+[[nodiscard]] xa_photometric_interpretation
+    parse_xa_photometric(std::string_view value) noexcept;
+
+// Calibration utilities
+[[nodiscard]] double calculate_magnification_factor(
+    double distance_source_to_detector,
+    double distance_source_to_patient
+) noexcept;
+
+[[nodiscard]] double calculate_real_world_size(
+    double pixel_size,
+    double imager_pixel_spacing,
+    double magnification_factor
+) noexcept;
+
+} // namespace pacs::services::sop_classes
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::sop_classes;
+
+// Check if dataset is XA
+if (is_xa_sop_class(sop_class_uid)) {
+    auto info = get_xa_sop_class_info(sop_class_uid);
+    std::cout << "SOP Class: " << info->name << std::endl;
+
+    if (info->is_enhanced) {
+        // Handle enhanced XA with functional groups
+    }
+}
+
+// Calculate real-world measurement from QCA
+xa_calibration_data cal{
+    {0.2, 0.2},  // 0.2mm pixel spacing
+    1000.0,      // SID = 1000mm
+    750.0        // SOD = 750mm
+};
+double mag_factor = calculate_magnification_factor(cal.distance_source_to_detector,
+                                                    cal.distance_source_to_patient);
+double real_size = calculate_real_world_size(100.0, cal.imager_pixel_spacing[0], mag_factor);
+```
+
+---
+
+### `pacs::services::validation::xa_iod_validator`
+
+IOD Validator for X-Ray Angiographic images.
+
+```cpp
+#include <pacs/services/validation/xa_iod_validator.hpp>
+
+namespace pacs::services::validation {
+
+// XA-specific DICOM tags
+namespace xa_tags {
+    inline constexpr core::dicom_tag positioner_primary_angle{0x0018, 0x1510};
+    inline constexpr core::dicom_tag positioner_secondary_angle{0x0018, 0x1511};
+    inline constexpr core::dicom_tag imager_pixel_spacing{0x0018, 0x1164};
+    inline constexpr core::dicom_tag distance_source_to_detector{0x0018, 0x1110};
+    inline constexpr core::dicom_tag distance_source_to_patient{0x0018, 0x1111};
+    inline constexpr core::dicom_tag frame_time{0x0018, 0x1063};
+    inline constexpr core::dicom_tag cine_rate{0x0018, 0x0040};
+    inline constexpr core::dicom_tag radiation_setting{0x0018, 0x1155};
+}
+
+// Validation severity levels
+enum class validation_severity {
+    error,    // Must be corrected
+    warning,  // Should be corrected
+    info      // Informational
+};
+
+// Validation result for a single finding
+struct validation_finding {
+    validation_severity severity;
+    std::string module;
+    std::string message;
+    std::optional<core::dicom_tag> tag;
+};
+
+// Complete validation result
+struct validation_result {
+    bool is_valid;
+    std::vector<validation_finding> findings;
+
+    [[nodiscard]] bool has_errors() const noexcept;
+    [[nodiscard]] bool has_warnings() const noexcept;
+    [[nodiscard]] std::vector<validation_finding> errors() const;
+    [[nodiscard]] std::vector<validation_finding> warnings() const;
+};
+
+// Validation options
+struct xa_validation_options {
+    bool validate_patient_module = true;
+    bool validate_study_module = true;
+    bool validate_series_module = true;
+    bool validate_equipment_module = true;
+    bool validate_acquisition_module = true;
+    bool validate_image_module = true;
+    bool validate_calibration = true;       // XA-specific
+    bool validate_multiframe = true;        // XA-specific
+    bool strict_mode = false;               // Treat warnings as errors
+};
+
+class xa_iod_validator {
+public:
+    // Validate complete XA IOD
+    [[nodiscard]] static validation_result validate(
+        const core::dicom_dataset& dataset,
+        const xa_validation_options& options = {}
+    );
+
+    // Validate specific modules
+    [[nodiscard]] static validation_result validate_patient_module(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_xa_acquisition_module(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_xa_image_module(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_calibration_data(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_multiframe_data(
+        const core::dicom_dataset& dataset
+    );
+
+    // Quick checks
+    [[nodiscard]] static bool has_required_xa_attributes(
+        const core::dicom_dataset& dataset
+    ) noexcept;
+    [[nodiscard]] static bool has_valid_photometric_interpretation(
+        const core::dicom_dataset& dataset
+    ) noexcept;
+    [[nodiscard]] static bool has_calibration_data(
+        const core::dicom_dataset& dataset
+    ) noexcept;
+};
+
+} // namespace pacs::services::validation
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::validation;
+
+// Full validation
+xa_validation_options opts;
+opts.strict_mode = true;  // Fail on warnings
+
+auto result = xa_iod_validator::validate(dataset, opts);
+
+if (!result.is_valid) {
+    for (const auto& finding : result.errors()) {
+        std::cerr << "[" << finding.module << "] "
+                  << finding.message << std::endl;
+    }
+}
+
+// Quick calibration check
+if (xa_iod_validator::has_calibration_data(dataset)) {
+    auto cal_result = xa_iod_validator::validate_calibration_data(dataset);
+    // Process calibration validation...
+}
+```
+
+---
+
 ## Storage Module
 
 ### `pacs::storage::storage_interface`
