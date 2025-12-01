@@ -409,6 +409,7 @@ endif()
 add_library(pacs_services
     src/services/verification_scp.cpp
     src/services/storage_scp.cpp
+    src/services/storage_scu.cpp
     src/services/query_scp.cpp
     src/services/retrieve_scp.cpp
 )
@@ -605,6 +606,7 @@ if(PACS_BUILD_TESTS)
     add_executable(services_tests
         tests/services/verification_scp_test.cpp
         tests/services/storage_scp_test.cpp
+        tests/services/storage_scu_test.cpp
         tests/services/query_scp_test.cpp
         tests/services/retrieve_scp_test.cpp
     )
