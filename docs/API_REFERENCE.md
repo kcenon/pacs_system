@@ -531,6 +531,148 @@ public:
 } // namespace pacs::network
 ```
 
+---
+
+### `pacs::network::dimse::dimse_message`
+
+DIMSE message handling for both DIMSE-C and DIMSE-N services.
+
+```cpp
+#include <pacs/network/dimse/dimse_message.hpp>
+
+namespace pacs::network::dimse {
+
+class dimse_message {
+public:
+    // DIMSE-C Factory Methods
+    static dimse_message make_c_echo_rq(uint16_t msg_id, std::string_view sop_class_uid);
+    static dimse_message make_c_store_rq(uint16_t msg_id, ...);
+    static dimse_message make_c_find_rq(uint16_t msg_id, ...);
+    static dimse_message make_c_move_rq(uint16_t msg_id, ...);
+    static dimse_message make_c_get_rq(uint16_t msg_id, ...);
+
+    // DIMSE-N Factory Methods
+    static dimse_message make_n_create_rq(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid = ""
+    );
+    static dimse_message make_n_create_rsp(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        status_code status
+    );
+
+    static dimse_message make_n_set_rq(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid
+    );
+    static dimse_message make_n_set_rsp(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        status_code status
+    );
+
+    static dimse_message make_n_get_rq(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        const std::vector<core::dicom_tag>& attribute_list = {}
+    );
+    static dimse_message make_n_get_rsp(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        status_code status
+    );
+
+    static dimse_message make_n_event_report_rq(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        uint16_t event_type_id
+    );
+    static dimse_message make_n_event_report_rsp(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        uint16_t event_type_id,
+        status_code status
+    );
+
+    static dimse_message make_n_action_rq(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        uint16_t action_type_id
+    );
+    static dimse_message make_n_action_rsp(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        uint16_t action_type_id,
+        status_code status
+    );
+
+    static dimse_message make_n_delete_rq(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid
+    );
+    static dimse_message make_n_delete_rsp(
+        uint16_t msg_id,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        status_code status
+    );
+
+    // DIMSE-N Specific Accessors
+    std::string requested_sop_class_uid() const;
+    void set_requested_sop_class_uid(std::string_view uid);
+    std::string requested_sop_instance_uid() const;
+    void set_requested_sop_instance_uid(std::string_view uid);
+    std::optional<uint16_t> event_type_id() const;
+    void set_event_type_id(uint16_t type_id);
+    std::optional<uint16_t> action_type_id() const;
+    void set_action_type_id(uint16_t type_id);
+    std::vector<core::dicom_tag> attribute_identifier_list() const;
+    void set_attribute_identifier_list(const std::vector<core::dicom_tag>& tags);
+};
+
+} // namespace pacs::network::dimse
+```
+
+**DIMSE-N Example:**
+```cpp
+using namespace pacs::network::dimse;
+
+// N-CREATE: Create MPPS instance
+auto create_rq = make_n_create_rq(1, mpps_sop_class_uid, generated_instance_uid);
+create_rq.set_data_set(mpps_dataset);
+
+// N-SET: Update MPPS status
+auto set_rq = make_n_set_rq(2, mpps_sop_class_uid, mpps_instance_uid);
+set_rq.set_data_set(status_update_dataset);
+
+// N-EVENT-REPORT: Storage commitment notification
+auto event_rq = make_n_event_report_rq(3, storage_commitment_sop_class, instance_uid, 1);
+event_rq.set_data_set(commitment_result);
+
+// N-ACTION: Request storage commitment
+auto action_rq = make_n_action_rq(4, storage_commitment_sop_class, instance_uid, 1);
+action_rq.set_data_set(commitment_request);
+
+// N-GET: Retrieve specific attributes
+std::vector<core::dicom_tag> attrs = {tags::PatientName, tags::PatientID};
+auto get_rq = make_n_get_rq(5, printer_sop_class, printer_instance_uid, attrs);
+
+// N-DELETE: Delete print job
+auto delete_rq = make_n_delete_rq(6, print_job_sop_class, job_instance_uid);
+```
+
 **Example:**
 ```cpp
 using namespace pacs::network;

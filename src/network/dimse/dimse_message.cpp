@@ -129,6 +129,82 @@ void dimse_message::set_message_id_responded_to(uint16_t id) {
 }
 
 // ============================================================================
+// DIMSE-N Specific Attributes
+// ============================================================================
+
+auto dimse_message::requested_sop_class_uid() const -> std::string {
+    return command_set_.get_string(tag_requested_sop_class_uid);
+}
+
+void dimse_message::set_requested_sop_class_uid(std::string_view uid) {
+    command_set_.set_string(tag_requested_sop_class_uid, encoding::vr_type::UI, uid);
+}
+
+auto dimse_message::requested_sop_instance_uid() const -> std::string {
+    return command_set_.get_string(tag_requested_sop_instance_uid);
+}
+
+void dimse_message::set_requested_sop_instance_uid(std::string_view uid) {
+    command_set_.set_string(tag_requested_sop_instance_uid, encoding::vr_type::UI, uid);
+}
+
+auto dimse_message::event_type_id() const -> std::optional<uint16_t> {
+    return command_set_.get_numeric<uint16_t>(tag_event_type_id);
+}
+
+void dimse_message::set_event_type_id(uint16_t type_id) {
+    command_set_.set_numeric(tag_event_type_id, encoding::vr_type::US, type_id);
+}
+
+auto dimse_message::action_type_id() const -> std::optional<uint16_t> {
+    return command_set_.get_numeric<uint16_t>(tag_action_type_id);
+}
+
+void dimse_message::set_action_type_id(uint16_t type_id) {
+    command_set_.set_numeric(tag_action_type_id, encoding::vr_type::US, type_id);
+}
+
+auto dimse_message::attribute_identifier_list() const -> std::vector<core::dicom_tag> {
+    std::vector<core::dicom_tag> tags;
+    const auto* elem = command_set_.get(tag_attribute_identifier_list);
+    if (elem == nullptr) {
+        return tags;
+    }
+
+    auto bytes = elem->raw_data();
+    if (bytes.empty()) {
+        return tags;
+    }
+
+    // Each tag is 4 bytes (group:2 + element:2), little-endian
+    for (size_t i = 0; i + 3 < bytes.size(); i += 4) {
+        uint16_t group = static_cast<uint16_t>(bytes[i]) |
+                         (static_cast<uint16_t>(bytes[i + 1]) << 8);
+        uint16_t element = static_cast<uint16_t>(bytes[i + 2]) |
+                           (static_cast<uint16_t>(bytes[i + 3]) << 8);
+        tags.emplace_back(group, element);
+    }
+    return tags;
+}
+
+void dimse_message::set_attribute_identifier_list(
+    const std::vector<core::dicom_tag>& tags) {
+    std::vector<uint8_t> bytes;
+    bytes.reserve(tags.size() * 4);
+
+    for (const auto& tag : tags) {
+        // Little-endian encoding
+        bytes.push_back(static_cast<uint8_t>(tag.group() & 0xFF));
+        bytes.push_back(static_cast<uint8_t>((tag.group() >> 8) & 0xFF));
+        bytes.push_back(static_cast<uint8_t>(tag.element() & 0xFF));
+        bytes.push_back(static_cast<uint8_t>((tag.element() >> 8) & 0xFF));
+    }
+
+    command_set_.insert(core::dicom_element(tag_attribute_identifier_list,
+                                            encoding::vr_type::AT, bytes));
+}
+
+// ============================================================================
 // Sub-operation Counts
 // ============================================================================
 
@@ -344,6 +420,144 @@ auto make_c_find_rsp(uint16_t message_id_responded_to,
     dimse_message msg(command_field::c_find_rsp, 0);
     msg.set_message_id_responded_to(message_id_responded_to);
     msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+// ============================================================================
+// DIMSE-N Factory Functions
+// ============================================================================
+
+auto make_n_create_rq(uint16_t message_id, std::string_view sop_class_uid,
+                      std::string_view sop_instance_uid) -> dimse_message {
+    dimse_message msg(command_field::n_create_rq, message_id);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    if (!sop_instance_uid.empty()) {
+        msg.set_affected_sop_instance_uid(sop_instance_uid);
+    }
+    return msg;
+}
+
+auto make_n_create_rsp(uint16_t message_id_responded_to,
+                       std::string_view sop_class_uid,
+                       std::string_view sop_instance_uid, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::n_create_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_n_set_rq(uint16_t message_id, std::string_view sop_class_uid,
+                   std::string_view sop_instance_uid) -> dimse_message {
+    dimse_message msg(command_field::n_set_rq, message_id);
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
+    return msg;
+}
+
+auto make_n_set_rsp(uint16_t message_id_responded_to,
+                    std::string_view sop_class_uid,
+                    std::string_view sop_instance_uid, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::n_set_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_n_get_rq(uint16_t message_id, std::string_view sop_class_uid,
+                   std::string_view sop_instance_uid,
+                   const std::vector<core::dicom_tag>& attribute_tags)
+    -> dimse_message {
+    dimse_message msg(command_field::n_get_rq, message_id);
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
+    if (!attribute_tags.empty()) {
+        msg.set_attribute_identifier_list(attribute_tags);
+    }
+    return msg;
+}
+
+auto make_n_get_rsp(uint16_t message_id_responded_to,
+                    std::string_view sop_class_uid,
+                    std::string_view sop_instance_uid, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::n_get_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_n_event_report_rq(uint16_t message_id, std::string_view sop_class_uid,
+                            std::string_view sop_instance_uid,
+                            uint16_t event_type_id) -> dimse_message {
+    dimse_message msg(command_field::n_event_report_rq, message_id);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_event_type_id(event_type_id);
+    return msg;
+}
+
+auto make_n_event_report_rsp(uint16_t message_id_responded_to,
+                             std::string_view sop_class_uid,
+                             std::string_view sop_instance_uid,
+                             uint16_t event_type_id, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::n_event_report_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_event_type_id(event_type_id);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_n_action_rq(uint16_t message_id, std::string_view sop_class_uid,
+                      std::string_view sop_instance_uid, uint16_t action_type_id)
+    -> dimse_message {
+    dimse_message msg(command_field::n_action_rq, message_id);
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
+    msg.set_action_type_id(action_type_id);
+    return msg;
+}
+
+auto make_n_action_rsp(uint16_t message_id_responded_to,
+                       std::string_view sop_class_uid,
+                       std::string_view sop_instance_uid, uint16_t action_type_id,
+                       status_code status) -> dimse_message {
+    dimse_message msg(command_field::n_action_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_action_type_id(action_type_id);
+    msg.set_status(status);
+    return msg;
+}
+
+auto make_n_delete_rq(uint16_t message_id, std::string_view sop_class_uid,
+                      std::string_view sop_instance_uid) -> dimse_message {
+    dimse_message msg(command_field::n_delete_rq, message_id);
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
+    return msg;
+}
+
+auto make_n_delete_rsp(uint16_t message_id_responded_to,
+                       std::string_view sop_class_uid,
+                       std::string_view sop_instance_uid, status_code status)
+    -> dimse_message {
+    dimse_message msg(command_field::n_delete_rsp, 0);
+    msg.set_message_id_responded_to(message_id_responded_to);
+    msg.set_affected_sop_class_uid(sop_class_uid);
+    msg.set_affected_sop_instance_uid(sop_instance_uid);
     msg.set_status(status);
     return msg;
 }

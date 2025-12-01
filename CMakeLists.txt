@@ -639,6 +639,7 @@ if(PACS_BUILD_TESTS)
         tests/network/association_test.cpp
         tests/network/dicom_server_test.cpp
         tests/network/dimse/dimse_message_test.cpp
+        tests/network/dimse/n_service_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
