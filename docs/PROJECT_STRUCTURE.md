@@ -1,7 +1,7 @@
 # Project Structure - PACS System
 
 > **Version:** 1.0.0
-> **Last Updated:** 2025-11-30
+> **Last Updated:** 2025-12-01
 > **Language:** **English** | [한국어](PROJECT_STRUCTURE_KO.md)
 
 ---
@@ -40,75 +40,66 @@ pacs_system/
 ├── include/                    # Public header files
 │   └── pacs/
 │       ├── core/               # Core DICOM structures
-│       │   ├── dicom_element.h
-│       │   ├── dicom_dataset.h
-│       │   ├── dicom_file.h
-│       │   ├── dicom_dictionary.h
-│       │   └── dicom_tags.h
+│       │   ├── dicom_element.hpp
+│       │   ├── dicom_dataset.hpp
+│       │   ├── dicom_file.hpp
+│       │   ├── dicom_dictionary.hpp
+│       │   ├── dicom_tag.hpp
+│       │   ├── dicom_tag_constants.hpp
+│       │   └── tag_info.hpp
 │       │
 │       ├── encoding/           # VR encoding/decoding
-│       │   ├── vr_types.h
-│       │   ├── transfer_syntax.h
-│       │   ├── implicit_vr_codec.h
-│       │   ├── explicit_vr_codec.h
-│       │   └── byte_order.h
+│       │   ├── vr_type.hpp
+│       │   ├── vr_info.hpp
+│       │   ├── transfer_syntax.hpp
+│       │   ├── implicit_vr_codec.hpp
+│       │   ├── explicit_vr_codec.hpp
+│       │   └── byte_order.hpp
 │       │
 │       ├── network/            # Network protocol
-│       │   ├── pdu/
-│       │   │   ├── pdu_types.h
-│       │   │   ├── pdu_encoder.h
-│       │   │   ├── pdu_decoder.h
-│       │   │   ├── associate_rq.h
-│       │   │   ├── associate_ac.h
-│       │   │   ├── associate_rj.h
-│       │   │   ├── p_data.h
-│       │   │   ├── a_release.h
-│       │   │   └── a_abort.h
+│       │   ├── pdu_types.hpp       # PDU type definitions
+│       │   ├── pdu_encoder.hpp     # PDU serialization
+│       │   ├── pdu_decoder.hpp     # PDU deserialization
+│       │   ├── association.hpp     # Association state machine
+│       │   ├── dicom_server.hpp    # Multi-association server
+│       │   ├── server_config.hpp   # Server configuration
 │       │   │
-│       │   ├── dimse/
-│       │   │   ├── dimse_message.h
-│       │   │   ├── dimse_command.h
-│       │   │   ├── c_echo.h
-│       │   │   ├── c_store.h
-│       │   │   ├── c_find.h
-│       │   │   ├── c_move.h
-│       │   │   ├── c_get.h
-│       │   │   ├── n_create.h
-│       │   │   └── n_set.h
-│       │   │
-│       │   ├── association.h
-│       │   ├── presentation_context.h
-│       │   └── dicom_server.h
+│       │   └── dimse/              # DIMSE protocol
+│       │       ├── dimse_message.hpp
+│       │       ├── command_field.hpp
+│       │       └── status_codes.hpp
 │       │
 │       ├── services/           # DICOM services
-│       │   ├── service_provider.h
-│       │   ├── verification_scp.h
-│       │   ├── verification_scu.h
-│       │   ├── storage_scp.h
-│       │   ├── storage_scu.h
-│       │   ├── query_scp.h
-│       │   ├── query_scu.h
-│       │   ├── retrieve_scp.h
-│       │   ├── worklist_scp.h
-│       │   └── mpps_scp.h
+│       │   ├── scp_service.hpp       # Base SCP interface
+│       │   ├── verification_scp.hpp  # C-ECHO SCP
+│       │   ├── storage_scp.hpp       # C-STORE SCP
+│       │   ├── storage_scu.hpp       # C-STORE SCU
+│       │   ├── storage_status.hpp    # Storage status codes
+│       │   ├── query_scp.hpp         # C-FIND SCP
+│       │   ├── retrieve_scp.hpp      # C-MOVE/C-GET SCP
+│       │   ├── worklist_scp.hpp      # MWL SCP
+│       │   └── mpps_scp.hpp          # MPPS SCP
 │       │
 │       ├── storage/            # Storage backend
-│       │   ├── storage_interface.h
-│       │   ├── file_storage.h
-│       │   ├── storage_config.h
-│       │   └── index_database.h
+│       │   ├── storage_interface.hpp # Abstract storage interface
+│       │   ├── file_storage.hpp      # Filesystem storage
+│       │   ├── index_database.hpp    # SQLite index (~2,900 lines)
+│       │   ├── migration_runner.hpp  # Database schema migrations
+│       │   ├── migration_record.hpp  # Migration history record
+│       │   ├── patient_record.hpp    # Patient data model
+│       │   ├── study_record.hpp      # Study data model
+│       │   ├── series_record.hpp     # Series data model
+│       │   ├── instance_record.hpp   # Instance data model
+│       │   ├── worklist_record.hpp   # Worklist data model
+│       │   └── mpps_record.hpp       # MPPS data model
 │       │
-│       ├── integration/        # Ecosystem adapters
-│       │   ├── container_adapter.h
-│       │   ├── network_adapter.h
-│       │   ├── thread_adapter.h
-│       │   ├── logger_adapter.h
-│       │   └── monitoring_adapter.h
-│       │
-│       └── common/             # Common utilities
-│           ├── error_codes.h
-│           ├── uid_generator.h
-│           └── config.h
+│       └── integration/        # Ecosystem adapters
+│           ├── container_adapter.hpp # container_system integration
+│           ├── network_adapter.hpp   # network_system integration
+│           ├── thread_adapter.hpp    # thread_system integration
+│           ├── logger_adapter.hpp    # logger_system integration
+│           ├── monitoring_adapter.hpp # monitoring_system integration
+│           └── dicom_session.hpp     # High-level session management
 │
 ├── src/                        # Implementation files
 │   ├── core/
@@ -357,10 +348,10 @@ Ecosystem integration adapters:
 
 ```cpp
 // Standard include pattern
-#include <pacs/core/dicom_element.h>
-#include <pacs/encoding/vr_types.h>
-#include <pacs/network/association.h>
-#include <pacs/services/storage_scp.h>
+#include <pacs/core/dicom_element.hpp>
+#include <pacs/encoding/vr_type.hpp>
+#include <pacs/network/association.hpp>
+#include <pacs/services/storage_scp.hpp>
 ```
 
 ### Header Guards
@@ -406,15 +397,15 @@ namespace pacs {
 ```cpp
 // dicom_element.cpp
 
-#include <pacs/core/dicom_element.h>  // Own header first
+#include <pacs/core/dicom_element.hpp>  // Own header first
 
-#include <pacs/encoding/vr_types.h>    // Internal headers
-#include <pacs/common/error_codes.h>
+#include <pacs/encoding/vr_type.hpp>    // Internal headers
+#include <pacs/core/dicom_tag.hpp>
 
-#include <common/result.h>             // Ecosystem headers
+#include <common/result.h>              // Ecosystem headers
 #include <container/value.h>
 
-#include <algorithm>                   // Standard library
+#include <algorithm>                    // Standard library
 #include <vector>
 
 namespace pacs::core {
@@ -546,4 +537,5 @@ Test DICOM files stored in `tests/fixtures/`:
 
 *Document Version: 1.0.0*
 *Created: 2025-11-30*
+*Updated: 2025-12-01*
 *Author: kcenon@naver.com*

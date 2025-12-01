@@ -2,7 +2,7 @@
 
 > **Version:** 1.0.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2025-11-30
+> **Last Updated:** 2025-12-01
 
 ---
 
@@ -12,7 +12,9 @@
 - [2. PRD to SRS Traceability](#2-prd-to-srs-traceability)
 - [3. SRS to SDS Traceability](#3-srs-to-sds-traceability)
 - [4. Complete Traceability Chain](#4-complete-traceability-chain)
-- [5. Coverage Analysis](#5-coverage-analysis)
+- [5. SDS to Implementation Traceability](#5-sds-to-implementation-traceability)
+- [6. SDS to Test Traceability](#6-sds-to-test-traceability)
+- [7. Coverage Analysis](#7-coverage-analysis)
 
 ---
 
@@ -27,16 +29,48 @@ This document provides complete traceability from Product Requirements (PRD) thr
 - Test planning can reference design elements
 - Impact analysis for requirement changes
 
-### 1.2 Traceability Chain
+### 1.2 Traceability Chain (V-Model)
 
 ```
-┌─────────┐       ┌─────────┐       ┌─────────┐       ┌─────────┐
-│   PRD   │──────►│   SRS   │──────►│   SDS   │──────►│  Tests  │
-│         │       │         │       │         │       │         │
-│  FR-x   │       │SRS-xxx  │       │DES-xxx  │       │ TC-xxx  │
-│  NFR-x  │       │         │       │SEQ-xxx  │       │         │
-│  IR-x   │       │         │       │DES-DB-x │       │         │
-└─────────┘       └─────────┘       └─────────┘       └─────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              V-Model Traceability                                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  Requirements Phase                              Validation/Verification Phase   │
+│  ─────────────────                              ─────────────────────────────    │
+│                                                                                  │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │   PRD   │◄────────────────────────────────────────────►│ Acceptance Test │   │
+│  │  FR-x   │                  Validation                  │   (Validation)  │   │
+│  │  NFR-x  │                                              └─────────────────┘   │
+│  │  IR-x   │                                                       ▲            │
+│  └────┬────┘                                                       │            │
+│       │                                                            │            │
+│       ▼                                                            │            │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │   SRS   │◄────────────────────────────────────────────►│   System Test   │   │
+│  │SRS-xxx  │                  Validation                  │   (Validation)  │   │
+│  └────┬────┘                                              └─────────────────┘   │
+│       │                                                            ▲            │
+│       ▼                                                            │            │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │   SDS   │◄────────────────────────────────────────────►│Integration Test │   │
+│  │DES-xxx  │                 Verification                 │  (Verification) │   │
+│  │SEQ-xxx  │                                              └─────────────────┘   │
+│  └────┬────┘                                                       ▲            │
+│       │                                                            │            │
+│       ▼                                                            │            │
+│  ┌─────────┐                                              ┌─────────────────┐   │
+│  │  Code   │◄────────────────────────────────────────────►│    Unit Test    │   │
+│  │ .hpp    │                 Verification                 │  (Verification) │   │
+│  │ .cpp    │                                              └─────────────────┘   │
+│  └─────────┘                                                                    │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Legend:
+  - Validation: "Are we building the RIGHT product?" (SRS 요구사항 충족 확인)
+  - Verification: "Are we building the product RIGHT?" (SDS 설계대로 구현 확인)
 ```
 
 ### 1.3 Requirement ID Conventions
@@ -334,9 +368,206 @@ This document provides complete traceability from Product Requirements (PRD) thr
 
 ---
 
-## 5. Coverage Analysis
+## 5. SDS to Implementation Traceability
 
-### 5.1 Requirements Coverage Summary
+This section maps design elements to their corresponding source code files.
+
+### 5.1 Core Module Implementation
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-CORE-001 | `dicom_tag` | `include/pacs/core/dicom_tag.hpp` | `src/core/dicom_tag.cpp` |
+| DES-CORE-002 | `dicom_element` | `include/pacs/core/dicom_element.hpp` | `src/core/dicom_element.cpp` |
+| DES-CORE-003 | `dicom_dataset` | `include/pacs/core/dicom_dataset.hpp` | `src/core/dicom_dataset.cpp` |
+| DES-CORE-004 | `dicom_file` | `include/pacs/core/dicom_file.hpp` | `src/core/dicom_file.cpp` |
+| DES-CORE-005 | `dicom_dictionary` | `include/pacs/core/dicom_dictionary.hpp` | `src/core/dicom_dictionary.cpp`, `src/core/standard_tags_data.cpp` |
+| - | `tag_info` | `include/pacs/core/tag_info.hpp` | `src/core/tag_info.cpp` |
+| - | `dicom_tag_constants` | `include/pacs/core/dicom_tag_constants.hpp` | (header-only) |
+
+### 5.2 Encoding Module Implementation
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-ENC-001 | `vr_type` | `include/pacs/encoding/vr_type.hpp` | (header-only, enum) |
+| DES-ENC-002 | `vr_info` | `include/pacs/encoding/vr_info.hpp` | `src/encoding/vr_info.cpp` |
+| DES-ENC-003 | `transfer_syntax` | `include/pacs/encoding/transfer_syntax.hpp` | `src/encoding/transfer_syntax.cpp` |
+| DES-ENC-004 | `implicit_vr_codec` | `include/pacs/encoding/implicit_vr_codec.hpp` | `src/encoding/implicit_vr_codec.cpp` |
+| DES-ENC-005 | `explicit_vr_codec` | `include/pacs/encoding/explicit_vr_codec.hpp` | `src/encoding/explicit_vr_codec.cpp` |
+| - | `byte_order` | `include/pacs/encoding/byte_order.hpp` | (header-only) |
+
+### 5.3 Network Module Implementation
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-NET-001 | `pdu_encoder` | `include/pacs/network/pdu_encoder.hpp` | `src/network/pdu_encoder.cpp` |
+| DES-NET-002 | `pdu_decoder` | `include/pacs/network/pdu_decoder.hpp` | `src/network/pdu_decoder.cpp` |
+| DES-NET-003 | `dimse_message` | `include/pacs/network/dimse/dimse_message.hpp` | `src/network/dimse/dimse_message.cpp` |
+| DES-NET-004 | `association` | `include/pacs/network/association.hpp` | `src/network/association.cpp` |
+| DES-NET-005 | `dicom_server` | `include/pacs/network/dicom_server.hpp` | `src/network/dicom_server.cpp` |
+| - | `pdu_types` | `include/pacs/network/pdu_types.hpp` | (header-only) |
+| - | `server_config` | `include/pacs/network/server_config.hpp` | (header-only) |
+| - | `command_field` | `include/pacs/network/dimse/command_field.hpp` | (header-only) |
+| - | `status_codes` | `include/pacs/network/dimse/status_codes.hpp` | (header-only) |
+
+### 5.4 Services Module Implementation
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-SVC-001 | `verification_scp` | `include/pacs/services/verification_scp.hpp` | `src/services/verification_scp.cpp` |
+| DES-SVC-002 | `storage_scp` | `include/pacs/services/storage_scp.hpp` | `src/services/storage_scp.cpp` |
+| DES-SVC-003 | `storage_scu` | `include/pacs/services/storage_scu.hpp` | `src/services/storage_scu.cpp` |
+| DES-SVC-004 | `query_scp` | `include/pacs/services/query_scp.hpp` | `src/services/query_scp.cpp` |
+| DES-SVC-005 | `retrieve_scp` | `include/pacs/services/retrieve_scp.hpp` | `src/services/retrieve_scp.cpp` |
+| DES-SVC-006 | `worklist_scp` | `include/pacs/services/worklist_scp.hpp` | `src/services/worklist_scp.cpp` |
+| DES-SVC-007 | `mpps_scp` | `include/pacs/services/mpps_scp.hpp` | `src/services/mpps_scp.cpp` |
+| - | `scp_service` | `include/pacs/services/scp_service.hpp` | (header-only, interface) |
+| - | `storage_status` | `include/pacs/services/storage_status.hpp` | (header-only) |
+
+### 5.5 Storage Module Implementation
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-STOR-001 | `storage_interface` | `include/pacs/storage/storage_interface.hpp` | `src/storage/storage_interface.cpp` |
+| DES-STOR-002 | `file_storage` | `include/pacs/storage/file_storage.hpp` | `src/storage/file_storage.cpp` |
+| DES-STOR-003 | `index_database` | `include/pacs/storage/index_database.hpp` | `src/storage/index_database.cpp` |
+| - | `migration_runner` | `include/pacs/storage/migration_runner.hpp` | `src/storage/migration_runner.cpp` |
+| - | `patient_record` | `include/pacs/storage/patient_record.hpp` | (header-only, struct) |
+| - | `study_record` | `include/pacs/storage/study_record.hpp` | (header-only, struct) |
+| - | `series_record` | `include/pacs/storage/series_record.hpp` | (header-only, struct) |
+| - | `instance_record` | `include/pacs/storage/instance_record.hpp` | (header-only, struct) |
+| - | `worklist_record` | `include/pacs/storage/worklist_record.hpp` | (header-only, struct) |
+| - | `mpps_record` | `include/pacs/storage/mpps_record.hpp` | (header-only, struct) |
+| - | `migration_record` | `include/pacs/storage/migration_record.hpp` | (header-only, struct) |
+
+### 5.6 Integration Module Implementation
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-INT-001 | `container_adapter` | `include/pacs/integration/container_adapter.hpp` | `src/integration/container_adapter.cpp` |
+| DES-INT-002 | `network_adapter` | `include/pacs/integration/network_adapter.hpp` | `src/integration/network_adapter.cpp` |
+| DES-INT-003 | `thread_adapter` | `include/pacs/integration/thread_adapter.hpp` | `src/integration/thread_adapter.cpp` |
+| DES-INT-004 | `logger_adapter` | `include/pacs/integration/logger_adapter.hpp` | `src/integration/logger_adapter.cpp` |
+| DES-INT-005 | `monitoring_adapter` | `include/pacs/integration/monitoring_adapter.hpp` | `src/integration/monitoring_adapter.cpp` |
+| - | `dicom_session` | `include/pacs/integration/dicom_session.hpp` | `src/integration/dicom_session.cpp` |
+
+### 5.7 Implementation Summary
+
+| Module | Headers | Sources | Header-Only | Total Files |
+|--------|---------|---------|-------------|-------------|
+| Core | 7 | 7 | 1 | 14 |
+| Encoding | 6 | 4 | 2 | 10 |
+| Network | 9 | 5 | 4 | 14 |
+| Services | 9 | 7 | 2 | 16 |
+| Storage | 11 | 4 | 7 | 15 |
+| Integration | 6 | 6 | 0 | 12 |
+| **Total** | **48** | **33** | **16** | **81** |
+
+---
+
+## 6. SDS to Test Traceability (Verification)
+
+This section maps design elements to their corresponding test files for **Verification** purposes.
+
+> **Note on Verification vs Validation:**
+> - **Verification** (This Section): Tests that confirm code matches SDS design specifications
+>   - Unit Tests → Individual component design (DES-xxx)
+>   - Integration Tests → Module interaction design (SEQ-xxx)
+> - **Validation** (Separate): Tests that confirm implementation meets SRS requirements
+>   - System Tests → SRS functional requirements
+>   - Acceptance Tests → PRD user requirements
+
+### 6.1 Core Module Tests
+
+| SDS ID | Design Element | Test File | Test Count |
+|--------|---------------|-----------|------------|
+| DES-CORE-001 | `dicom_tag` | `tests/core/dicom_tag_test.cpp` | 12 |
+| DES-CORE-002 | `dicom_element` | `tests/core/dicom_element_test.cpp` | 15 |
+| DES-CORE-003 | `dicom_dataset` | `tests/core/dicom_dataset_test.cpp` | 18 |
+| DES-CORE-004 | `dicom_file` | `tests/core/dicom_file_test.cpp` | 8 |
+| DES-CORE-005 | `dicom_dictionary` | `tests/core/dicom_dictionary_test.cpp` | 6 |
+| - | `tag_info` | `tests/core/tag_info_test.cpp` | 4 |
+
+### 6.2 Encoding Module Tests
+
+| SDS ID | Design Element | Test File | Test Count |
+|--------|---------------|-----------|------------|
+| DES-ENC-001 | `vr_type` | `tests/encoding/vr_type_test.cpp` | 10 |
+| DES-ENC-002 | `vr_info` | `tests/encoding/vr_info_test.cpp` | 8 |
+| DES-ENC-003 | `transfer_syntax` | `tests/encoding/transfer_syntax_test.cpp` | 7 |
+| DES-ENC-004 | `implicit_vr_codec` | `tests/encoding/implicit_vr_codec_test.cpp` | 9 |
+| DES-ENC-005 | `explicit_vr_codec` | `tests/encoding/explicit_vr_codec_test.cpp` | 9 |
+
+### 6.3 Network Module Tests
+
+| SDS ID | Design Element | Test File | Test Count |
+|--------|---------------|-----------|------------|
+| DES-NET-001 | `pdu_encoder` | `tests/network/pdu_encoder_test.cpp` | 7 |
+| DES-NET-002 | `pdu_decoder` | `tests/network/pdu_decoder_test.cpp` | 7 |
+| DES-NET-003 | `dimse_message` | `tests/network/dimse/dimse_message_test.cpp` | 5 |
+| DES-NET-004 | `association` | `tests/network/association_test.cpp` | 8 |
+| DES-NET-005 | `dicom_server` | `tests/network/dicom_server_test.cpp` | 4 |
+
+### 6.4 Services Module Tests
+
+| SDS ID | Design Element | Test File | Test Count |
+|--------|---------------|-----------|------------|
+| DES-SVC-001 | `verification_scp` | `tests/services/verification_scp_test.cpp` | - |
+| DES-SVC-002 | `storage_scp` | `tests/services/storage_scp_test.cpp` | - |
+| DES-SVC-003 | `storage_scu` | `tests/services/storage_scu_test.cpp` | - |
+| DES-SVC-004 | `query_scp` | `tests/services/query_scp_test.cpp` | - |
+| DES-SVC-005 | `retrieve_scp` | `tests/services/retrieve_scp_test.cpp` | - |
+| DES-SVC-006 | `worklist_scp` | `tests/services/worklist_scp_test.cpp` | - |
+| DES-SVC-007 | `mpps_scp` | `tests/services/mpps_scp_test.cpp` | - |
+
+### 6.5 Storage Module Tests
+
+| SDS ID | Design Element | Test File | Test Count |
+|--------|---------------|-----------|------------|
+| DES-STOR-001 | `storage_interface` | `tests/storage/storage_interface_test.cpp` | - |
+| DES-STOR-002 | `file_storage` | `tests/storage/file_storage_test.cpp` | - |
+| DES-STOR-003 | `index_database` | `tests/storage/index_database_test.cpp` | - |
+| - | `migration_runner` | `tests/storage/migration_runner_test.cpp` | - |
+| DES-DB-005 | `mpps` records | `tests/storage/mpps_test.cpp` | - |
+| DES-DB-006 | `worklist` records | `tests/storage/worklist_test.cpp` | - |
+
+### 6.6 Integration Module Tests
+
+| SDS ID | Design Element | Test File | Test Count |
+|--------|---------------|-----------|------------|
+| DES-INT-001 | `container_adapter` | `tests/integration/container_adapter_test.cpp` | - |
+| DES-INT-002 | `network_adapter` | `tests/integration/network_adapter_test.cpp` | - |
+| DES-INT-003 | `thread_adapter` | `tests/integration/thread_adapter_test.cpp` | - |
+| DES-INT-004 | `logger_adapter` | `tests/integration/logger_adapter_test.cpp` | - |
+| DES-INT-005 | `monitoring_adapter` | `tests/integration/monitoring_adapter_test.cpp` | - |
+
+### 6.7 Verification Test Coverage Summary
+
+| Module | Test Files | Design Elements Covered | Verification Coverage |
+|--------|------------|------------------------|----------------------|
+| Core | 6 | 6/6 | 100% |
+| Encoding | 5 | 5/5 | 100% |
+| Network | 5 | 5/5 | 100% |
+| Services | 7 | 7/7 | 100% |
+| Storage | 6 | 6/6 | 100% |
+| Integration | 5 | 5/5 | 100% |
+| **Total** | **34** | **34/34** | **100%** |
+
+### 6.8 Validation Traceability (Separate Document)
+
+**Validation** (SRS → System Test) is documented separately in [VALIDATION_REPORT.md](VALIDATION_REPORT.md).
+
+| Document | Purpose | Traceability |
+|----------|---------|--------------|
+| **VERIFICATION_REPORT.md** | Confirms code matches SDS | SDS ↔ Unit/Integration Tests |
+| **VALIDATION_REPORT.md** | Confirms implementation meets SRS | SRS ↔ System/Acceptance Tests |
+
+> **Note:** This document (SDS_TRACEABILITY.md) focuses on **Verification** traceability only.
+
+---
+
+## 7. Coverage Analysis
+
+### 7.1 Requirements Coverage Summary
 
 | Category | Total PRD | Traced to SRS | Traced to SDS | Coverage |
 |----------|-----------|---------------|---------------|----------|
@@ -345,7 +576,7 @@ This document provides complete traceability from Product Requirements (PRD) thr
 | Integration (IR) | 5 | 5 | 5 | 100% |
 | **Total** | **23** | **23** | **23** | **100%** |
 
-### 5.2 SRS to SDS Coverage
+### 7.2 SRS to SDS Coverage
 
 | Module | SRS Count | SDS Count | Sequences | DB Tables | Coverage |
 |--------|-----------|-----------|-----------|-----------|----------|
@@ -359,19 +590,19 @@ This document provides complete traceability from Product Requirements (PRD) thr
 | Security | 3 | N/A | - | - | Addressed |
 | Maintainability | 3 | N/A | - | - | Addressed |
 
-### 5.3 Orphan Analysis
+### 7.3 Orphan Analysis
 
 **Orphan Requirements (no design):** None
 
 **Orphan Designs (no requirement):** None
 
-### 5.4 Traceability Gaps
+### 7.4 Traceability Gaps
 
 | Gap ID | Description | Status | Resolution |
 |--------|-------------|--------|------------|
 | - | None identified | - | - |
 
-### 5.5 Impact Analysis Template
+### 7.5 Impact Analysis Template
 
 When a requirement changes, use this checklist:
 
@@ -485,6 +716,17 @@ When a requirement changes, use this checklist:
 
 ---
 
+## Appendix B: Revision History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon@naver.com | Initial traceability matrix |
+| 1.1.0 | 2025-12-01 | kcenon@naver.com | Added SDS to Implementation and Test traceability (Sections 5, 6) |
+| 1.2.0 | 2025-12-01 | kcenon@naver.com | Corrected V-Model diagram with proper Verification/Validation distinction |
+| 1.3.0 | 2025-12-01 | kcenon@naver.com | Scoped to Verification only; Validation moved to separate VALIDATION_REPORT.md |
+
+---
+
 *Document Version: 1.0.0*
-*Created: 2025-11-30*
+*Last Updated: 2025-12-01*
 *Author: kcenon@naver.com*

@@ -1,7 +1,7 @@
 # PACS System Features
 
 > **Version:** 1.0.0
-> **Last Updated:** 2025-11-30
+> **Last Updated:** 2025-12-01
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
@@ -287,16 +287,16 @@ if (result.is_ok()) {
 |---------|--------|-------------|
 | C-ECHO | ✅ Implemented | Verification |
 | C-STORE | ✅ Implemented | Storage |
-| C-FIND | 🔜 Planned | Query |
-| C-MOVE | 🔜 Planned | Retrieve (Move) |
-| C-GET | 🔜 Planned | Retrieve (Get) |
+| C-FIND | ✅ Implemented | Query |
+| C-MOVE | ✅ Implemented | Retrieve (Move) |
+| C-GET | ✅ Implemented | Retrieve (Get) |
 
 **DIMSE-N Services**:
 
 | Service | Status | Description |
 |---------|--------|-------------|
-| N-CREATE | 🔜 Planned | Create object |
-| N-SET | 🔜 Planned | Modify object |
+| N-CREATE | ✅ Implemented | Create object (MPPS) |
+| N-SET | ✅ Implemented | Modify object (MPPS) |
 | N-GET | 🔮 Future | Get attributes |
 | N-EVENT-REPORT | 🔮 Future | Event notification |
 | N-ACTION | 🔮 Future | Action request |
@@ -692,4 +692,5 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 *Document Version: 1.0.0*
 *Created: 2025-11-30*
+*Updated: 2025-12-01*
 *Author: kcenon@naver.com*
