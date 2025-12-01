@@ -212,13 +212,14 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (7 apps, ~3,200 lines)
+├── examples/                    # Example Applications (8 apps, ~4,300 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
 │   ├── store_scp/               # DICOM Storage SCP server
 │   ├── store_scu/               # DICOM Storage SCU client
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
+│   ├── retrieve_scu/            # DICOM Retrieve SCU client (C-MOVE/C-GET)
 │   └── pacs_server/             # Full PACS server example
 │
 ├── docs/                        # Documentation (30+ files)
@@ -373,6 +374,25 @@ cmake --build build
 
 # Export to CSV
 ./build/bin/query_scu localhost 11112 PACS_SCP --modality CT --format csv > results.csv
+```
+
+### Retrieve SCU (C-MOVE/C-GET Client)
+
+```bash
+# C-GET: Retrieve study directly to local machine
+./build/bin/retrieve_scu localhost 11112 PACS_SCP --mode get --study-uid "1.2.3.4.5" -o ./downloads
+
+# C-MOVE: Transfer study to another PACS/workstation
+./build/bin/retrieve_scu localhost 11112 PACS_SCP --mode move --dest-ae LOCAL_SCP --study-uid "1.2.3.4.5"
+
+# Retrieve specific series
+./build/bin/retrieve_scu localhost 11112 PACS_SCP --level SERIES --series-uid "1.2.3.4.5.6"
+
+# Retrieve all studies for a patient
+./build/bin/retrieve_scu localhost 11112 PACS_SCP --level PATIENT --patient-id "12345"
+
+# Flat storage structure (all files in one directory)
+./build/bin/retrieve_scu localhost 11112 PACS_SCP --study-uid "1.2.3.4.5" --structure flat
 ```
 
 ### Full PACS Server
