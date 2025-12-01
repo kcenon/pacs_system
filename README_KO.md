@@ -398,6 +398,34 @@ cmake --build build
 ./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT --format csv > worklist.csv
 ```
 
+### MPPS SCU (검사 수행 상태 클라이언트)
+
+```bash
+# 새 MPPS 인스턴스 생성 (검사 시작)
+./build/bin/mpps_scu localhost 11112 RIS_SCP create \
+  --patient-id "12345" \
+  --patient-name "Doe^John" \
+  --modality CT
+
+# 검사 완료
+./build/bin/mpps_scu localhost 11112 RIS_SCP set \
+  --mpps-uid "1.2.3.4.5.6.7.8" \
+  --status COMPLETED \
+  --series-uid "1.2.3.4.5.6.7.8.9"
+
+# 검사 중단 (취소)
+./build/bin/mpps_scu localhost 11112 RIS_SCP set \
+  --mpps-uid "1.2.3.4.5.6.7.8" \
+  --status DISCONTINUED \
+  --reason "Patient refused"
+
+# 디버깅을 위한 상세 출력
+./build/bin/mpps_scu localhost 11112 RIS_SCP create \
+  --patient-id "12345" \
+  --modality MR \
+  --verbose
+```
+
 ### 전체 PACS 서버
 
 ```bash
