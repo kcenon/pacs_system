@@ -212,9 +212,11 @@ pacs_system/
 │   ├── storage/                 # Storage 테스트 (6개 파일)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (5개, ~2,400줄)
+├── examples/                    # 예제 애플리케이션 (7개, ~3,200줄)
+│   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
 │   ├── echo_scp/                # DICOM Echo SCP 서버
 │   ├── echo_scu/                # DICOM Echo SCU 클라이언트
+│   ├── store_scp/               # DICOM Storage SCP 서버
 │   ├── store_scu/               # DICOM Storage SCU 클라이언트
 │   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
 │   └── pacs_server/             # 전체 PACS 서버 예제
@@ -301,15 +303,37 @@ PACS_BUILD_STORAGE (ON)            # Storage 모듈 빌드
 
 ## 예제
 
+### 예제 빌드
+
+```bash
+cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
+cmake --build build
+```
+
+### DCM Dump (파일 검사 유틸리티)
+
+```bash
+# DICOM 파일 메타데이터 출력
+./build/bin/dcm_dump image.dcm
+
+# 특정 태그만 필터링
+./build/bin/dcm_dump image.dcm --tags PatientName,PatientID,Modality
+
+# 픽셀 데이터 정보 표시
+./build/bin/dcm_dump image.dcm --pixel-info
+
+# JSON 형식 출력 (연동용)
+./build/bin/dcm_dump image.dcm --format json
+
+# 디렉토리 재귀 스캔 및 요약
+./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
 ### Echo SCP (검증 서버)
 
 ```bash
-# 예제 빌드
-cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
-cmake --build build
-
 # Echo SCP 실행
-./build/examples/echo_scp/echo_scp --port 11112 --ae-title MY_ECHO
+./build/bin/echo_scp --port 11112 --ae-title MY_ECHO
 ```
 
 ### Echo SCU (검증 클라이언트)
