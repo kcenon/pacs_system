@@ -762,6 +762,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] worklist_scu: OFF (requires pacs_integration)")
     endif()
 
+    # MPPS SCU sample - Modality Performed Procedure Step client
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/mpps_scu)
+        message(STATUS "  [OK] mpps_scu: MPPS N-CREATE/N-SET client")
+    else()
+        message(STATUS "  [--] mpps_scu: OFF (requires pacs_integration)")
+    endif()
+
     # Store SCP sample - DICOM image receiver
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/store_scp)

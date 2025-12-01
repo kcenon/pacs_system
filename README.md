@@ -212,7 +212,7 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (9 apps, ~6,000 lines)
+├── examples/                    # Example Applications (10 apps, ~6,500 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
@@ -417,6 +417,34 @@ cmake --build build
 
 # Export to CSV
 ./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT --format csv > worklist.csv
+```
+
+### MPPS SCU (Modality Performed Procedure Step Client)
+
+```bash
+# Create new MPPS instance (start procedure)
+./build/bin/mpps_scu localhost 11112 RIS_SCP create \
+  --patient-id "12345" \
+  --patient-name "Doe^John" \
+  --modality CT
+
+# Complete the procedure
+./build/bin/mpps_scu localhost 11112 RIS_SCP set \
+  --mpps-uid "1.2.3.4.5.6.7.8" \
+  --status COMPLETED \
+  --series-uid "1.2.3.4.5.6.7.8.9"
+
+# Discontinue (cancel) a procedure
+./build/bin/mpps_scu localhost 11112 RIS_SCP set \
+  --mpps-uid "1.2.3.4.5.6.7.8" \
+  --status DISCONTINUED \
+  --reason "Patient refused"
+
+# Verbose output for debugging
+./build/bin/mpps_scu localhost 11112 RIS_SCP create \
+  --patient-id "12345" \
+  --modality MR \
+  --verbose
 ```
 
 ### Full PACS Server
