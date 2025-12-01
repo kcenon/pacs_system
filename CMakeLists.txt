@@ -230,12 +230,15 @@ foreach(_path ${_PACS_THREAD_PATHS})
     endif()
 endforeach()
 
-if(THREAD_SYSTEM_FOUND AND NOT TARGET ThreadSystem)
+# Avoid re-adding thread_system when the unified build already provided the targets
+if(TARGET thread_base OR TARGET ThreadSystem OR TARGET interfaces)
+    message(STATUS "thread_system already available in parent build - skipping add_subdirectory")
+elseif(THREAD_SYSTEM_FOUND)
     set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
     set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(THREAD_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
     add_subdirectory("${PACS_THREAD_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/thread_system_build")
-elseif(NOT THREAD_SYSTEM_FOUND AND NOT TARGET ThreadSystem)
+else()
     message(WARNING
         "thread_system is REQUIRED for thread_adapter (Tier 1).\n"
         "thread_adapter will be disabled.\n"
@@ -332,7 +335,7 @@ message(STATUS "=== Dependency Chain: VALID ===")
 message(STATUS "")
 
 # Include directories
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 ##################################################
 # PACS Libraries
@@ -350,7 +353,7 @@ add_library(pacs_core
 )
 target_include_directories(pacs_core
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
@@ -376,7 +379,7 @@ add_library(pacs_encoding
 )
 target_include_directories(pacs_encoding
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(pacs_encoding
@@ -393,7 +396,7 @@ add_library(pacs_network
 )
 target_include_directories(pacs_network
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(pacs_network
@@ -421,7 +424,7 @@ add_library(pacs_services
 )
 target_include_directories(pacs_services
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(pacs_services
@@ -446,7 +449,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     )
     target_include_directories(pacs_storage
         PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
     )
 
@@ -483,7 +486,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     )
     target_include_directories(pacs_integration
         PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
     )
     # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
@@ -687,14 +690,14 @@ if(PACS_BUILD_TESTS)
 
     # Integration tests
     if(TARGET pacs_integration)
-        add_executable(integration_tests
+        add_executable(pacs_integration_tests
             tests/integration/container_adapter_test.cpp
             tests/integration/logger_adapter_test.cpp
             tests/integration/thread_adapter_test.cpp
             tests/integration/network_adapter_test.cpp
             tests/integration/monitoring_adapter_test.cpp
         )
-        target_link_libraries(integration_tests
+        target_link_libraries(pacs_integration_tests
             PRIVATE
                 pacs_integration
                 pacs_network
@@ -711,8 +714,8 @@ if(PACS_BUILD_TESTS)
     if(TARGET storage_tests)
         catch_discover_tests(storage_tests)
     endif()
-    if(TARGET integration_tests)
-        catch_discover_tests(integration_tests)
+    if(TARGET pacs_integration_tests)
+        catch_discover_tests(pacs_integration_tests)
     endif()
 endif()
 
@@ -818,9 +821,9 @@ if(PACS_BUILD_EXAMPLES)
     # Integration Test Suite - End-to-end workflow tests
     if(TARGET pacs_storage AND TARGET pacs_integration AND TARGET Catch2::Catch2WithMain)
         add_subdirectory(examples/integration_tests)
-        message(STATUS "  [OK] integration_tests: End-to-end workflow tests")
+        message(STATUS "  [OK] pacs_integration_e2e: End-to-end workflow tests")
     else()
-        message(STATUS "  [--] integration_tests: OFF (requires pacs_storage, pacs_integration, and Catch2)")
+        message(STATUS "  [--] pacs_integration_e2e: OFF (requires pacs_storage, pacs_integration, and Catch2)")
     endif()
 endif()
 
