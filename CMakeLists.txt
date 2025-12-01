@@ -412,6 +412,7 @@ add_library(pacs_services
     src/services/storage_scu.cpp
     src/services/query_scp.cpp
     src/services/retrieve_scp.cpp
+    src/services/worklist_scp.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
@@ -609,6 +610,7 @@ if(PACS_BUILD_TESTS)
         tests/services/storage_scu_test.cpp
         tests/services/query_scp_test.cpp
         tests/services/retrieve_scp_test.cpp
+        tests/services/worklist_scp_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE
