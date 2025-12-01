@@ -212,9 +212,11 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (5 apps, ~2,400 lines)
+├── examples/                    # Example Applications (7 apps, ~3,200 lines)
+│   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
+│   ├── store_scp/               # DICOM Storage SCP server
 │   ├── store_scu/               # DICOM Storage SCU client
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
 │   └── pacs_server/             # Full PACS server example
@@ -301,15 +303,37 @@ PACS_BUILD_STORAGE (ON)            # Build storage module
 
 ## Examples
 
+### Build Examples
+
+```bash
+cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
+cmake --build build
+```
+
+### DCM Dump (File Inspection Utility)
+
+```bash
+# Dump DICOM file metadata
+./build/bin/dcm_dump image.dcm
+
+# Filter specific tags
+./build/bin/dcm_dump image.dcm --tags PatientName,PatientID,Modality
+
+# Show pixel data information
+./build/bin/dcm_dump image.dcm --pixel-info
+
+# JSON output for integration
+./build/bin/dcm_dump image.dcm --format json
+
+# Scan directory recursively with summary
+./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
 ### Echo SCP (Verification Server)
 
 ```bash
-# Build examples
-cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
-cmake --build build
-
 # Run Echo SCP
-./build/examples/echo_scp/echo_scp --port 11112 --ae-title MY_ECHO
+./build/bin/echo_scp --port 11112 --ae-title MY_ECHO
 ```
 
 ### Echo SCU (Verification Client)
