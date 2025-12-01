@@ -358,7 +358,11 @@ if (result.is_ok()) {
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | ✅ |
 | US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ |
 | US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | ✅ |
-| XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | 🔜 |
+| XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | ✅ |
+| Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | ✅ |
+| XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |
+| X-Ray 3D Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.1 | ✅ |
+| X-Ray 3D Craniofacial Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.2 | ✅ |
 
 **Example**:
 ```cpp
@@ -670,7 +674,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 | Feature | Description | Target |
 |---------|-------------|--------|
 | C-GET | Alternative retrieve | Phase 3 |
-| Extended SOP Classes | US, XA, etc. | Phase 3 |
+| Additional SOP Classes | NM, PET, RT, etc. | Phase 3 |
 | Connection Pooling | Reuse associations | Phase 3 |
 
 ### Medium Term

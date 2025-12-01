@@ -70,15 +70,23 @@ pacs_system/
 │       │       └── status_codes.hpp
 │       │
 │       ├── services/           # DICOM 서비스
-│       │   ├── scp_service.hpp       # 기본 SCP 인터페이스
-│       │   ├── verification_scp.hpp  # C-ECHO SCP
-│       │   ├── storage_scp.hpp       # C-STORE SCP
-│       │   ├── storage_scu.hpp       # C-STORE SCU
-│       │   ├── storage_status.hpp    # 저장 상태 코드
-│       │   ├── query_scp.hpp         # C-FIND SCP
-│       │   ├── retrieve_scp.hpp      # C-MOVE/C-GET SCP
-│       │   ├── worklist_scp.hpp      # MWL SCP
-│       │   └── mpps_scp.hpp          # MPPS SCP
+│       │   ├── scp_service.hpp           # 기본 SCP 인터페이스
+│       │   ├── verification_scp.hpp      # C-ECHO SCP
+│       │   ├── storage_scp.hpp           # C-STORE SCP
+│       │   ├── storage_scu.hpp           # C-STORE SCU
+│       │   ├── storage_status.hpp        # 저장 상태 코드
+│       │   ├── query_scp.hpp             # C-FIND SCP
+│       │   ├── retrieve_scp.hpp          # C-MOVE/C-GET SCP
+│       │   ├── worklist_scp.hpp          # MWL SCP
+│       │   ├── mpps_scp.hpp              # MPPS SCP
+│       │   ├── sop_class_registry.hpp    # 중앙 SOP 클래스 레지스트리
+│       │   │
+│       │   ├── sop_classes/              # SOP 클래스 정의
+│       │   │   ├── us_storage.hpp        # US 저장 SOP 클래스
+│       │   │   └── xa_storage.hpp        # XA/XRF 저장 SOP 클래스
+│       │   │
+│       │   └── validation/               # IOD 검증기
+│       │       └── xa_iod_validator.hpp  # XA IOD 검증
 │       │
 │       ├── storage/            # 저장 백엔드
 │       │   ├── storage_interface.hpp # 추상 저장 인터페이스
@@ -137,6 +145,12 @@ pacs_system/
 │   │   ├── verification_scp.cpp
 │   │   ├── storage_scp.cpp
 │   │   ├── query_scp.cpp
+│   │   ├── sop_class_registry.cpp
+│   │   ├── sop_classes/
+│   │   │   ├── us_storage.cpp
+│   │   │   └── xa_storage.cpp
+│   │   ├── validation/
+│   │   │   └── xa_iod_validator.cpp
 │   │   └── CMakeLists.txt
 │   │
 │   ├── storage/
@@ -167,7 +181,8 @@ pacs_system/
 │   │
 │   ├── services/
 │   │   ├── test_verification.cpp
-│   │   └── test_storage.cpp
+│   │   ├── test_storage.cpp
+│   │   └── xa_storage_test.cpp
 │   │
 │   ├── integration/
 │   │   ├── test_interop.cpp
@@ -316,6 +331,10 @@ DICOM 서비스 구현:
 | `retrieve_scp.hpp` | C-MOVE/C-GET 서비스 |
 | `worklist_scp.hpp` | Modality Worklist |
 | `mpps_scp.hpp` | MPPS 서비스 |
+| `sop_class_registry.hpp` | 중앙 SOP 클래스 레지스트리 |
+| `sop_classes/us_storage.hpp` | US 저장 SOP 클래스 |
+| `sop_classes/xa_storage.hpp` | XA/XRF 저장 SOP 클래스 |
+| `validation/xa_iod_validator.hpp` | XA IOD 검증 |
 
 ### 저장 모듈 (`include/pacs/storage/`)
 
