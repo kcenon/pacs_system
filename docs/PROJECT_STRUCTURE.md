@@ -70,15 +70,23 @@ pacs_system/
 │       │       └── status_codes.hpp
 │       │
 │       ├── services/           # DICOM services
-│       │   ├── scp_service.hpp       # Base SCP interface
-│       │   ├── verification_scp.hpp  # C-ECHO SCP
-│       │   ├── storage_scp.hpp       # C-STORE SCP
-│       │   ├── storage_scu.hpp       # C-STORE SCU
-│       │   ├── storage_status.hpp    # Storage status codes
-│       │   ├── query_scp.hpp         # C-FIND SCP
-│       │   ├── retrieve_scp.hpp      # C-MOVE/C-GET SCP
-│       │   ├── worklist_scp.hpp      # MWL SCP
-│       │   └── mpps_scp.hpp          # MPPS SCP
+│       │   ├── scp_service.hpp           # Base SCP interface
+│       │   ├── verification_scp.hpp      # C-ECHO SCP
+│       │   ├── storage_scp.hpp           # C-STORE SCP
+│       │   ├── storage_scu.hpp           # C-STORE SCU
+│       │   ├── storage_status.hpp        # Storage status codes
+│       │   ├── query_scp.hpp             # C-FIND SCP
+│       │   ├── retrieve_scp.hpp          # C-MOVE/C-GET SCP
+│       │   ├── worklist_scp.hpp          # MWL SCP
+│       │   ├── mpps_scp.hpp              # MPPS SCP
+│       │   ├── sop_class_registry.hpp    # Central SOP Class registry
+│       │   │
+│       │   ├── sop_classes/              # SOP Class definitions
+│       │   │   ├── us_storage.hpp        # US Storage SOP Classes
+│       │   │   └── xa_storage.hpp        # XA/XRF Storage SOP Classes
+│       │   │
+│       │   └── validation/               # IOD Validators
+│       │       └── xa_iod_validator.hpp  # XA IOD validation
 │       │
 │       ├── storage/            # Storage backend
 │       │   ├── storage_interface.hpp # Abstract storage interface
@@ -137,6 +145,12 @@ pacs_system/
 │   │   ├── verification_scp.cpp
 │   │   ├── storage_scp.cpp
 │   │   ├── query_scp.cpp
+│   │   ├── sop_class_registry.cpp
+│   │   ├── sop_classes/
+│   │   │   ├── us_storage.cpp
+│   │   │   └── xa_storage.cpp
+│   │   ├── validation/
+│   │   │   └── xa_iod_validator.cpp
 │   │   └── CMakeLists.txt
 │   │
 │   ├── storage/
@@ -167,7 +181,8 @@ pacs_system/
 │   │
 │   ├── services/
 │   │   ├── test_verification.cpp
-│   │   └── test_storage.cpp
+│   │   ├── test_storage.cpp
+│   │   └── xa_storage_test.cpp
 │   │
 │   ├── integration/
 │   │   ├── test_interop.cpp
@@ -316,6 +331,10 @@ DICOM service implementations:
 | `retrieve_scp.h` | C-MOVE/C-GET service |
 | `worklist_scp.h` | Modality Worklist |
 | `mpps_scp.h` | MPPS service |
+| `sop_class_registry.hpp` | Central SOP Class registry |
+| `sop_classes/us_storage.hpp` | US Storage SOP Classes |
+| `sop_classes/xa_storage.hpp` | XA/XRF Storage SOP Classes |
+| `validation/xa_iod_validator.hpp` | XA IOD validation |
 
 ### Storage Module (`include/pacs/storage/`)
 

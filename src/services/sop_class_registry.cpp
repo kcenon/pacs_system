@@ -5,6 +5,7 @@
 
 #include "pacs/services/sop_class_registry.hpp"
 #include "pacs/services/sop_classes/us_storage.hpp"
+#include "pacs/services/sop_classes/xa_storage.hpp"
 
 #include <algorithm>
 
@@ -139,6 +140,7 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
 
 void sop_class_registry::register_standard_sop_classes() {
     register_us_sop_classes();
+    register_xa_sop_classes();
     register_ct_sop_classes();
     register_mr_sop_classes();
     register_other_sop_classes();
@@ -193,6 +195,73 @@ void sop_class_registry::register_us_sop_classes() {
             sop_class_category::storage,
             modality_type::us,
             true,
+            true
+        }
+    );
+}
+
+void sop_class_registry::register_xa_sop_classes() {
+    // XA Image Storage
+    registry_.emplace(
+        std::string(sop_classes::xa_image_storage_uid),
+        sop_class_info{
+            sop_classes::xa_image_storage_uid,
+            "X-Ray Angiographic Image Storage",
+            sop_class_category::storage,
+            modality_type::xa,
+            false,
+            true  // supports multiframe
+        }
+    );
+
+    // Enhanced XA Image Storage
+    registry_.emplace(
+        std::string(sop_classes::enhanced_xa_image_storage_uid),
+        sop_class_info{
+            sop_classes::enhanced_xa_image_storage_uid,
+            "Enhanced X-Ray Angiographic Image Storage",
+            sop_class_category::storage,
+            modality_type::xa,
+            false,
+            true
+        }
+    );
+
+    // XRF Image Storage
+    registry_.emplace(
+        std::string(sop_classes::xrf_image_storage_uid),
+        sop_class_info{
+            sop_classes::xrf_image_storage_uid,
+            "X-Ray Radiofluoroscopic Image Storage",
+            sop_class_category::storage,
+            modality_type::xrf,
+            false,
+            true
+        }
+    );
+
+    // X-Ray 3D Angiographic Image Storage
+    registry_.emplace(
+        std::string(sop_classes::xray_3d_angiographic_image_storage_uid),
+        sop_class_info{
+            sop_classes::xray_3d_angiographic_image_storage_uid,
+            "X-Ray 3D Angiographic Image Storage",
+            sop_class_category::storage,
+            modality_type::xa,
+            false,
+            true
+        }
+    );
+
+    // X-Ray 3D Craniofacial Image Storage
+    registry_.emplace(
+        std::string(sop_classes::xray_3d_craniofacial_image_storage_uid),
+        sop_class_info{
+            sop_classes::xray_3d_craniofacial_image_storage_uid,
+            "X-Ray 3D Craniofacial Image Storage",
+            sop_class_category::storage,
+            modality_type::xa,
+            false,
             true
         }
     );
@@ -289,19 +358,6 @@ void sop_class_registry::register_other_sop_classes() {
             "Secondary Capture Image Storage",
             sop_class_category::storage,
             modality_type::sc,
-            false,
-            false
-        }
-    );
-
-    // XA Image Storage
-    registry_.emplace(
-        "1.2.840.10008.5.1.4.1.1.12.1",
-        sop_class_info{
-            "1.2.840.10008.5.1.4.1.1.12.1",
-            "X-Ray Angiographic Image Storage",
-            sop_class_category::storage,
-            modality_type::xa,
             false,
             false
         }

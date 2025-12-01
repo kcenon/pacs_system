@@ -715,6 +715,234 @@ public:
 
 ---
 
+### `pacs::services::sop_classes` - XA/XRF 저장
+
+X-Ray 혈관조영술 및 방사선투시 저장 SOP 클래스.
+
+```cpp
+#include <pacs/services/sop_classes/xa_storage.hpp>
+
+namespace pacs::services::sop_classes {
+
+// SOP 클래스 UID
+inline constexpr std::string_view xa_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.12.1";
+inline constexpr std::string_view enhanced_xa_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.12.1.1";
+inline constexpr std::string_view xrf_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.12.2";
+inline constexpr std::string_view xray_3d_angiographic_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.13.1.1";
+inline constexpr std::string_view xray_3d_craniofacial_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.13.1.2";
+
+// Photometric Interpretation (XA는 그레이스케일만)
+enum class xa_photometric_interpretation {
+    monochrome1,  // 최소값 = 흰색
+    monochrome2   // 최소값 = 검은색
+};
+
+// XA SOP 클래스 정보
+struct xa_sop_class_info {
+    std::string_view uid;
+    std::string_view name;
+    bool is_enhanced;
+    bool is_3d;
+    bool supports_multiframe;
+};
+
+// 포지셔너 각도 (LAO/RAO, Cranial/Caudal)
+struct xa_positioner_angles {
+    double primary_angle;    // LAO(+) / RAO(-) 단위: 도
+    double secondary_angle;  // Cranial(+) / Caudal(-) 단위: 도
+};
+
+// QCA 캘리브레이션 데이터
+struct xa_calibration_data {
+    double imager_pixel_spacing[2];       // mm/픽셀
+    double distance_source_to_detector;   // SID (mm)
+    double distance_source_to_patient;    // SOD (mm)
+};
+
+// 유틸리티 함수
+[[nodiscard]] bool is_xa_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_enhanced_xa_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_xrf_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] const xa_sop_class_info* get_xa_sop_class_info(std::string_view uid);
+
+[[nodiscard]] std::vector<std::string_view> get_xa_transfer_syntaxes();
+[[nodiscard]] bool is_valid_xa_photometric(std::string_view photometric) noexcept;
+[[nodiscard]] xa_photometric_interpretation
+    parse_xa_photometric(std::string_view value) noexcept;
+
+// 캘리브레이션 유틸리티
+[[nodiscard]] double calculate_magnification_factor(
+    double distance_source_to_detector,
+    double distance_source_to_patient
+) noexcept;
+
+[[nodiscard]] double calculate_real_world_size(
+    double pixel_size,
+    double imager_pixel_spacing,
+    double magnification_factor
+) noexcept;
+
+} // namespace pacs::services::sop_classes
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::sop_classes;
+
+// 데이터셋이 XA인지 확인
+if (is_xa_sop_class(sop_class_uid)) {
+    auto info = get_xa_sop_class_info(sop_class_uid);
+    std::cout << "SOP 클래스: " << info->name << std::endl;
+
+    if (info->is_enhanced) {
+        // 향상된 XA의 기능 그룹 처리
+    }
+}
+
+// QCA에서 실제 크기 계산
+xa_calibration_data cal{
+    {0.2, 0.2},  // 0.2mm 픽셀 간격
+    1000.0,      // SID = 1000mm
+    750.0        // SOD = 750mm
+};
+double mag_factor = calculate_magnification_factor(cal.distance_source_to_detector,
+                                                    cal.distance_source_to_patient);
+double real_size = calculate_real_world_size(100.0, cal.imager_pixel_spacing[0], mag_factor);
+```
+
+---
+
+### `pacs::services::validation::xa_iod_validator`
+
+X-Ray 혈관조영술 이미지용 IOD 검증기.
+
+```cpp
+#include <pacs/services/validation/xa_iod_validator.hpp>
+
+namespace pacs::services::validation {
+
+// XA 전용 DICOM 태그
+namespace xa_tags {
+    inline constexpr core::dicom_tag positioner_primary_angle{0x0018, 0x1510};
+    inline constexpr core::dicom_tag positioner_secondary_angle{0x0018, 0x1511};
+    inline constexpr core::dicom_tag imager_pixel_spacing{0x0018, 0x1164};
+    inline constexpr core::dicom_tag distance_source_to_detector{0x0018, 0x1110};
+    inline constexpr core::dicom_tag distance_source_to_patient{0x0018, 0x1111};
+    inline constexpr core::dicom_tag frame_time{0x0018, 0x1063};
+    inline constexpr core::dicom_tag cine_rate{0x0018, 0x0040};
+    inline constexpr core::dicom_tag radiation_setting{0x0018, 0x1155};
+}
+
+// 검증 심각도 수준
+enum class validation_severity {
+    error,    // 반드시 수정해야 함
+    warning,  // 수정 권장
+    info      // 정보성
+};
+
+// 단일 발견 사항에 대한 검증 결과
+struct validation_finding {
+    validation_severity severity;
+    std::string module;
+    std::string message;
+    std::optional<core::dicom_tag> tag;
+};
+
+// 전체 검증 결과
+struct validation_result {
+    bool is_valid;
+    std::vector<validation_finding> findings;
+
+    [[nodiscard]] bool has_errors() const noexcept;
+    [[nodiscard]] bool has_warnings() const noexcept;
+    [[nodiscard]] std::vector<validation_finding> errors() const;
+    [[nodiscard]] std::vector<validation_finding> warnings() const;
+};
+
+// 검증 옵션
+struct xa_validation_options {
+    bool validate_patient_module = true;
+    bool validate_study_module = true;
+    bool validate_series_module = true;
+    bool validate_equipment_module = true;
+    bool validate_acquisition_module = true;
+    bool validate_image_module = true;
+    bool validate_calibration = true;       // XA 전용
+    bool validate_multiframe = true;        // XA 전용
+    bool strict_mode = false;               // 경고를 오류로 처리
+};
+
+class xa_iod_validator {
+public:
+    // 전체 XA IOD 검증
+    [[nodiscard]] static validation_result validate(
+        const core::dicom_dataset& dataset,
+        const xa_validation_options& options = {}
+    );
+
+    // 특정 모듈 검증
+    [[nodiscard]] static validation_result validate_patient_module(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_xa_acquisition_module(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_xa_image_module(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_calibration_data(
+        const core::dicom_dataset& dataset
+    );
+    [[nodiscard]] static validation_result validate_multiframe_data(
+        const core::dicom_dataset& dataset
+    );
+
+    // 빠른 확인
+    [[nodiscard]] static bool has_required_xa_attributes(
+        const core::dicom_dataset& dataset
+    ) noexcept;
+    [[nodiscard]] static bool has_valid_photometric_interpretation(
+        const core::dicom_dataset& dataset
+    ) noexcept;
+    [[nodiscard]] static bool has_calibration_data(
+        const core::dicom_dataset& dataset
+    ) noexcept;
+};
+
+} // namespace pacs::services::validation
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::validation;
+
+// 전체 검증
+xa_validation_options opts;
+opts.strict_mode = true;  // 경고 시 실패
+
+auto result = xa_iod_validator::validate(dataset, opts);
+
+if (!result.is_valid) {
+    for (const auto& finding : result.errors()) {
+        std::cerr << "[" << finding.module << "] "
+                  << finding.message << std::endl;
+    }
+}
+
+// 빠른 캘리브레이션 확인
+if (xa_iod_validator::has_calibration_data(dataset)) {
+    auto cal_result = xa_iod_validator::validate_calibration_data(dataset);
+    // 캘리브레이션 검증 처리...
+}
+```
+
+---
+
 ## 저장 모듈
 
 ### `pacs::storage::storage_interface`

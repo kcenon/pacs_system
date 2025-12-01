@@ -420,6 +420,10 @@ This section maps design elements to their corresponding source code files.
 | DES-SVC-005 | `retrieve_scp` | `include/pacs/services/retrieve_scp.hpp` | `src/services/retrieve_scp.cpp` |
 | DES-SVC-006 | `worklist_scp` | `include/pacs/services/worklist_scp.hpp` | `src/services/worklist_scp.cpp` |
 | DES-SVC-007 | `mpps_scp` | `include/pacs/services/mpps_scp.hpp` | `src/services/mpps_scp.cpp` |
+| DES-SVC-008 | `sop_class_registry` | `include/pacs/services/sop_class_registry.hpp` | `src/services/sop_class_registry.cpp` |
+| DES-SVC-009 | XA Storage SOP Classes | `include/pacs/services/sop_classes/xa_storage.hpp` | `src/services/sop_classes/xa_storage.cpp` |
+| DES-SVC-010 | `xa_iod_validator` | `include/pacs/services/validation/xa_iod_validator.hpp` | `src/services/validation/xa_iod_validator.cpp` |
+| - | US Storage SOP Classes | `include/pacs/services/sop_classes/us_storage.hpp` | `src/services/sop_classes/us_storage.cpp` |
 | - | `scp_service` | `include/pacs/services/scp_service.hpp` | (header-only, interface) |
 | - | `storage_status` | `include/pacs/services/storage_status.hpp` | (header-only) |
 
@@ -518,6 +522,7 @@ This section maps design elements to their corresponding test files for **Verifi
 | DES-SVC-005 | `retrieve_scp` | `tests/services/retrieve_scp_test.cpp` | - |
 | DES-SVC-006 | `worklist_scp` | `tests/services/worklist_scp_test.cpp` | - |
 | DES-SVC-007 | `mpps_scp` | `tests/services/mpps_scp_test.cpp` | - |
+| DES-SVC-009 | XA Storage | `tests/services/xa_storage_test.cpp` | 15 |
 
 ### 6.5 Storage Module Tests
 
@@ -698,6 +703,9 @@ When a requirement changes, use this checklist:
 | DES-SVC-005 | retrieve_scp |
 | DES-SVC-006 | worklist_scp |
 | DES-SVC-007 | mpps_scp |
+| DES-SVC-008 | sop_class_registry |
+| DES-SVC-009 | xa_storage (XA/XRF SOP Classes) |
+| DES-SVC-010 | xa_iod_validator |
 | DES-STOR-001 | storage_interface |
 | DES-STOR-002 | file_storage |
 | DES-STOR-003 | index_database |
@@ -724,6 +732,7 @@ When a requirement changes, use this checklist:
 | 1.1.0 | 2025-12-01 | kcenon@naver.com | Added SDS to Implementation and Test traceability (Sections 5, 6) |
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | Corrected V-Model diagram with proper Verification/Validation distinction |
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | Scoped to Verification only; Validation moved to separate VALIDATION_REPORT.md |
+| 1.4.0 | 2025-12-01 | kcenon@naver.com | Added DES-SVC-008 (sop_class_registry), DES-SVC-009 (XA Storage), DES-SVC-010 (xa_iod_validator) |
 
 ---
 
