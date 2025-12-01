@@ -212,8 +212,9 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (10 apps, ~6,500 lines)
+├── examples/                    # Example Applications (11 apps, ~7,500 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
+│   ├── dcm_modify/              # DICOM tag modification & anonymization utility
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
 │   ├── store_scp/               # DICOM Storage SCP server
@@ -330,6 +331,29 @@ cmake --build build
 
 # Scan directory recursively with summary
 ./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
+### DCM Modify (Tag Modification Utility)
+
+```bash
+# Modify single tag
+./build/bin/dcm_modify image.dcm --set PatientName="Anonymous" -o modified.dcm
+
+# Modify multiple tags
+./build/bin/dcm_modify image.dcm \
+  --set PatientName="Anonymous" \
+  --set PatientID="ANON001" \
+  --delete PatientBirthDate \
+  -o anonymized.dcm
+
+# Apply basic anonymization (DICOM PS3.15)
+./build/bin/dcm_modify image.dcm --anonymize -o anonymized.dcm
+
+# Convert transfer syntax
+./build/bin/dcm_modify image.dcm --transfer-syntax explicit-le -o converted.dcm
+
+# Batch anonymize directory
+./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
 ```
 
 ### Echo SCP (Verification Server)

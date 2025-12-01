@@ -212,15 +212,19 @@ pacs_system/
 │   ├── storage/                 # Storage 테스트 (6개 파일)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (7개, ~3,200줄)
+├── examples/                    # 예제 애플리케이션 (11개, ~7,500줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
+│   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
 │   ├── echo_scp/                # DICOM Echo SCP 서버
 │   ├── echo_scu/                # DICOM Echo SCU 클라이언트
 │   ├── store_scp/               # DICOM Storage SCP 서버
 │   ├── store_scu/               # DICOM Storage SCU 클라이언트
 │   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
+│   ├── retrieve_scu/            # DICOM Retrieve SCU 클라이언트 (C-MOVE/C-GET)
 │   ├── worklist_scu/            # Modality Worklist 조회 클라이언트 (MWL C-FIND)
-│   └── pacs_server/             # 전체 PACS 서버 예제
+│   ├── mpps_scu/                # MPPS N-CREATE/N-SET 클라이언트
+│   ├── pacs_server/             # 전체 PACS 서버 예제
+│   └── integration_tests/       # 통합 테스트 스위트
 │
 ├── docs/                        # 문서 (26개 이상 파일)
 └── CMakeLists.txt               # 빌드 설정 (v0.2.0)
@@ -328,6 +332,29 @@ cmake --build build
 
 # 디렉토리 재귀 스캔 및 요약
 ./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
+### DCM Modify (태그 수정 유틸리티)
+
+```bash
+# 단일 태그 수정
+./build/bin/dcm_modify image.dcm --set PatientName="Anonymous" -o modified.dcm
+
+# 여러 태그 수정
+./build/bin/dcm_modify image.dcm \
+  --set PatientName="Anonymous" \
+  --set PatientID="ANON001" \
+  --delete PatientBirthDate \
+  -o anonymized.dcm
+
+# 기본 익명화 적용 (DICOM PS3.15)
+./build/bin/dcm_modify image.dcm --anonymize -o anonymized.dcm
+
+# Transfer Syntax 변환
+./build/bin/dcm_modify image.dcm --transfer-syntax explicit-le -o converted.dcm
+
+# 디렉토리 일괄 익명화
+./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
 ```
 
 ### Echo SCP (검증 서버)
