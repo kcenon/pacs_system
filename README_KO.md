@@ -212,9 +212,10 @@ pacs_system/
 │   ├── storage/                 # Storage 테스트 (6개 파일)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (11개, ~7,500줄)
+├── examples/                    # 예제 애플리케이션 (12개, ~8,200줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
 │   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
+│   ├── db_browser/              # PACS 인덱스 데이터베이스 브라우저
 │   ├── echo_scp/                # DICOM Echo SCP 서버
 │   ├── echo_scu/                # DICOM Echo SCU 클라이언트
 │   ├── store_scp/               # DICOM Storage SCP 서버
@@ -355,6 +356,29 @@ cmake --build build
 
 # 디렉토리 일괄 익명화
 ./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
+```
+
+### DB Browser (데이터베이스 뷰어)
+
+```bash
+# 전체 환자 목록 조회
+./build/bin/db_browser pacs.db patients
+
+# 특정 환자의 스터디 목록 조회
+./build/bin/db_browser pacs.db studies --patient-id "12345"
+
+# 날짜 범위로 스터디 필터링
+./build/bin/db_browser pacs.db studies --from 20240101 --to 20241231
+
+# 특정 스터디의 시리즈 목록 조회
+./build/bin/db_browser pacs.db series --study-uid "1.2.3.4.5"
+
+# 데이터베이스 통계 표시
+./build/bin/db_browser pacs.db stats
+
+# 데이터베이스 유지보수
+./build/bin/db_browser pacs.db vacuum
+./build/bin/db_browser pacs.db verify
 ```
 
 ### Echo SCP (검증 서버)
