@@ -17,6 +17,7 @@
 #include "patient_record.hpp"
 #include "series_record.hpp"
 #include "study_record.hpp"
+#include "worklist_record.hpp"
 
 #include <kcenon/common/patterns/result.h>
 
@@ -661,6 +662,109 @@ public:
     [[nodiscard]] auto mpps_count(std::string_view status) const -> size_t;
 
     // ========================================================================
+    // Worklist Operations
+    // ========================================================================
+
+    /**
+     * @brief Add a new worklist item
+     *
+     * Creates a new scheduled procedure step entry for Modality Worklist.
+     * The step_status is set to 'SCHEDULED' by default.
+     *
+     * @param item Worklist item data (pk field is ignored)
+     * @return Result containing the worklist primary key or error
+     */
+    [[nodiscard]] auto add_worklist_item(const worklist_item& item)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Update worklist item status
+     *
+     * Called when MPPS is received to update the corresponding worklist
+     * item status from SCHEDULED to STARTED or COMPLETED.
+     *
+     * @param step_id Scheduled Procedure Step ID
+     * @param accession_no Accession Number
+     * @param new_status New status (STARTED or COMPLETED)
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto update_worklist_status(std::string_view step_id,
+                                              std::string_view accession_no,
+                                              std::string_view new_status)
+        -> VoidResult;
+
+    /**
+     * @brief Query worklist items
+     *
+     * Returns worklist items matching the query criteria.
+     * By default, only returns items with status 'SCHEDULED'.
+     * Used for MWL C-FIND operations.
+     *
+     * @param query Query parameters with optional filters
+     * @return Vector of matching worklist items
+     */
+    [[nodiscard]] auto query_worklist(const worklist_query& query) const
+        -> std::vector<worklist_item>;
+
+    /**
+     * @brief Find a worklist item by step ID and accession number
+     *
+     * @param step_id Scheduled Procedure Step ID
+     * @param accession_no Accession Number
+     * @return Optional containing the worklist item if found
+     */
+    [[nodiscard]] auto find_worklist_item(std::string_view step_id,
+                                          std::string_view accession_no) const
+        -> std::optional<worklist_item>;
+
+    /**
+     * @brief Find a worklist item by primary key
+     *
+     * @param pk The worklist primary key
+     * @return Optional containing the worklist item if found
+     */
+    [[nodiscard]] auto find_worklist_by_pk(int64_t pk) const
+        -> std::optional<worklist_item>;
+
+    /**
+     * @brief Delete a worklist item
+     *
+     * @param step_id Scheduled Procedure Step ID
+     * @param accession_no Accession Number
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto delete_worklist_item(std::string_view step_id,
+                                            std::string_view accession_no)
+        -> VoidResult;
+
+    /**
+     * @brief Cleanup old worklist items
+     *
+     * Removes worklist items older than the specified age.
+     * Only deletes items that are not in SCHEDULED status.
+     *
+     * @param age Maximum age of items to keep
+     * @return Result containing the number of deleted items or error
+     */
+    [[nodiscard]] auto cleanup_old_worklist_items(std::chrono::hours age)
+        -> Result<size_t>;
+
+    /**
+     * @brief Get total worklist count
+     *
+     * @return Number of worklist items in the database
+     */
+    [[nodiscard]] auto worklist_count() const -> size_t;
+
+    /**
+     * @brief Get worklist count by status
+     *
+     * @param status The status to count (SCHEDULED, STARTED, COMPLETED)
+     * @return Number of worklist items with the given status
+     */
+    [[nodiscard]] auto worklist_count(std::string_view status) const -> size_t;
+
+    // ========================================================================
     // Database Information
     // ========================================================================
 
@@ -829,6 +933,11 @@ private:
      * @brief Parse an MPPS record from a prepared statement
      */
     [[nodiscard]] auto parse_mpps_row(void* stmt) const -> mpps_record;
+
+    /**
+     * @brief Parse a worklist record from a prepared statement
+     */
+    [[nodiscard]] auto parse_worklist_row(void* stmt) const -> worklist_item;
 
     /**
      * @brief Convert wildcard pattern to SQL LIKE pattern

@@ -624,6 +624,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/migration_runner_test.cpp
             tests/storage/index_database_test.cpp
             tests/storage/mpps_test.cpp
+            tests/storage/worklist_test.cpp
         )
         target_link_libraries(storage_tests
             PRIVATE
