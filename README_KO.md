@@ -219,6 +219,7 @@ pacs_system/
 │   ├── store_scp/               # DICOM Storage SCP 서버
 │   ├── store_scu/               # DICOM Storage SCU 클라이언트
 │   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
+│   ├── worklist_scu/            # Modality Worklist 조회 클라이언트 (MWL C-FIND)
 │   └── pacs_server/             # 전체 PACS 서버 예제
 │
 ├── docs/                        # 문서 (26개 이상 파일)
@@ -373,6 +374,28 @@ cmake --build build
 
 # CSV로 내보내기
 ./build/bin/query_scu localhost 11112 PACS_SCP --modality CT --format csv > results.csv
+```
+
+### Worklist SCU (Modality Worklist 조회 클라이언트)
+
+```bash
+# CT 모달리티 Worklist 조회
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT
+
+# 오늘 예정된 검사 조회
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality MR --date today
+
+# 스테이션 AE 타이틀로 조회
+./build/bin/worklist_scu localhost 11112 RIS_SCP --station "CT_SCANNER_01" --date 20241215
+
+# 환자 필터로 조회
+./build/bin/worklist_scu localhost 11112 RIS_SCP --patient-name "DOE^*" --modality CT
+
+# 연동을 위한 JSON 출력
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT --format json > worklist.json
+
+# CSV로 내보내기
+./build/bin/worklist_scu localhost 11112 RIS_SCP --modality CT --format csv > worklist.csv
 ```
 
 ### 전체 PACS 서버
