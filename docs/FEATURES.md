@@ -356,7 +356,8 @@ if (result.is_ok()) {
 | CR Image Storage | 1.2.840.10008.5.1.4.1.1.1 | ✅ |
 | DX Image Storage | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | ✅ |
-| Ultrasound Storage | 1.2.840.10008.5.1.4.1.1.6.1 | 🔜 |
+| US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ |
+| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | ✅ |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | 🔜 |
 
 **Example**:

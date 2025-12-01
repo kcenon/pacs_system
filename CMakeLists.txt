@@ -415,6 +415,9 @@ add_library(pacs_services
     src/services/retrieve_scp.cpp
     src/services/worklist_scp.cpp
     src/services/mpps_scp.cpp
+    src/services/sop_class_registry.cpp
+    src/services/sop_classes/us_storage.cpp
+    src/services/validation/us_iod_validator.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
@@ -657,6 +660,7 @@ if(PACS_BUILD_TESTS)
         tests/services/retrieve_scp_test.cpp
         tests/services/worklist_scp_test.cpp
         tests/services/mpps_scp_test.cpp
+        tests/services/us_storage_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE
