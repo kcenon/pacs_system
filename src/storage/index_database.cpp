@@ -2441,4 +2441,444 @@ auto index_database::parse_mpps_row(void* stmt_ptr) const -> mpps_record {
     return record;
 }
 
+// ============================================================================
+// Worklist Operations
+// ============================================================================
+
+auto index_database::add_worklist_item(const worklist_item& item)
+    -> Result<int64_t> {
+    if (item.step_id.empty()) {
+        return make_error<int64_t>(-1, "Step ID is required", "storage");
+    }
+
+    if (item.patient_id.empty()) {
+        return make_error<int64_t>(-1, "Patient ID is required", "storage");
+    }
+
+    if (item.modality.empty()) {
+        return make_error<int64_t>(-1, "Modality is required", "storage");
+    }
+
+    if (item.scheduled_datetime.empty()) {
+        return make_error<int64_t>(-1, "Scheduled datetime is required",
+                                   "storage");
+    }
+
+    const char* sql = R"(
+        INSERT INTO worklist (
+            step_id, step_status, patient_id, patient_name, birth_date, sex,
+            accession_no, requested_proc_id, study_uid, scheduled_datetime,
+            station_ae, station_name, modality, procedure_desc, protocol_code,
+            referring_phys, referring_phys_id, updated_at
+        ) VALUES (?, 'SCHEDULED', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                  datetime('now'))
+        RETURNING worklist_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_text(stmt, 1, item.step_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, item.patient_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, item.patient_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, item.birth_date.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, item.sex.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, item.accession_no.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, item.requested_proc_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, item.study_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 9, item.scheduled_datetime.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 10, item.station_ae.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 11, item.station_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 12, item.modality.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 13, item.procedure_desc.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 14, item.protocol_code.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 15, item.referring_phys.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 16, item.referring_phys_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, std::format("Failed to add worklist item: {}", error_msg),
+            "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return pk;
+}
+
+auto index_database::update_worklist_status(std::string_view step_id,
+                                            std::string_view accession_no,
+                                            std::string_view new_status)
+    -> VoidResult {
+    // Validate status
+    if (new_status != "SCHEDULED" && new_status != "STARTED" &&
+        new_status != "COMPLETED") {
+        return make_error<std::monostate>(
+            -1, "Invalid status. Must be 'SCHEDULED', 'STARTED', or 'COMPLETED'",
+            "storage");
+    }
+
+    const char* sql = R"(
+        UPDATE worklist
+        SET step_status = ?,
+            updated_at = datetime('now')
+        WHERE step_id = ? AND accession_no = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, new_status.data(),
+                      static_cast<int>(new_status.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, step_id.data(), static_cast<int>(step_id.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, accession_no.data(),
+                      static_cast<int>(accession_no.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to update worklist status: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::query_worklist(const worklist_query& query) const
+    -> std::vector<worklist_item> {
+    std::vector<worklist_item> results;
+
+    std::string sql = R"(
+        SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
+               birth_date, sex, accession_no, requested_proc_id, study_uid,
+               scheduled_datetime, station_ae, station_name, modality,
+               procedure_desc, protocol_code, referring_phys, referring_phys_id,
+               created_at, updated_at
+        FROM worklist
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    // Default: only return SCHEDULED items unless include_all_status is set
+    if (!query.include_all_status) {
+        sql += " AND step_status = 'SCHEDULED'";
+    }
+
+    if (query.station_ae.has_value()) {
+        sql += " AND station_ae = ?";
+        params.push_back(*query.station_ae);
+    }
+
+    if (query.modality.has_value()) {
+        sql += " AND modality = ?";
+        params.push_back(*query.modality);
+    }
+
+    if (query.scheduled_date_from.has_value()) {
+        sql += " AND substr(scheduled_datetime, 1, 8) >= ?";
+        params.push_back(*query.scheduled_date_from);
+    }
+
+    if (query.scheduled_date_to.has_value()) {
+        sql += " AND substr(scheduled_datetime, 1, 8) <= ?";
+        params.push_back(*query.scheduled_date_to);
+    }
+
+    if (query.patient_id.has_value()) {
+        sql += " AND patient_id LIKE ?";
+        params.push_back(to_like_pattern(*query.patient_id));
+    }
+
+    if (query.patient_name.has_value()) {
+        sql += " AND patient_name LIKE ?";
+        params.push_back(to_like_pattern(*query.patient_name));
+    }
+
+    if (query.accession_no.has_value()) {
+        sql += " AND accession_no = ?";
+        params.push_back(*query.accession_no);
+    }
+
+    if (query.step_id.has_value()) {
+        sql += " AND step_id = ?";
+        params.push_back(*query.step_id);
+    }
+
+    sql += " ORDER BY scheduled_datetime ASC";
+
+    if (query.limit > 0) {
+        sql += std::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += std::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    // Bind parameters
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_worklist_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::find_worklist_item(std::string_view step_id,
+                                        std::string_view accession_no) const
+    -> std::optional<worklist_item> {
+    const char* sql = R"(
+        SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
+               birth_date, sex, accession_no, requested_proc_id, study_uid,
+               scheduled_datetime, station_ae, station_name, modality,
+               procedure_desc, protocol_code, referring_phys, referring_phys_id,
+               created_at, updated_at
+        FROM worklist
+        WHERE step_id = ? AND accession_no = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, step_id.data(), static_cast<int>(step_id.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, accession_no.data(),
+                      static_cast<int>(accession_no.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_worklist_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::find_worklist_by_pk(int64_t pk) const
+    -> std::optional<worklist_item> {
+    const char* sql = R"(
+        SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
+               birth_date, sex, accession_no, requested_proc_id, study_uid,
+               scheduled_datetime, station_ae, station_name, modality,
+               procedure_desc, protocol_code, referring_phys, referring_phys_id,
+               created_at, updated_at
+        FROM worklist
+        WHERE worklist_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_worklist_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
+}
+
+auto index_database::delete_worklist_item(std::string_view step_id,
+                                          std::string_view accession_no)
+    -> VoidResult {
+    const char* sql =
+        "DELETE FROM worklist WHERE step_id = ? AND accession_no = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, step_id.data(), static_cast<int>(step_id.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, accession_no.data(),
+                      static_cast<int>(accession_no.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            std::format("Failed to delete worklist item: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
+    -> Result<size_t> {
+    // Calculate the cutoff datetime
+    auto now = std::chrono::system_clock::now();
+    auto cutoff = now - age;
+    auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
+
+    std::tm tm{};
+    localtime_r(&cutoff_time, &tm);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    auto cutoff_str = oss.str();
+
+    // Delete old items that are not SCHEDULED
+    const char* sql = R"(
+        DELETE FROM worklist
+        WHERE step_status != 'SCHEDULED'
+          AND created_at < ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            std::format("Failed to prepare cleanup: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, cutoff_str.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<size_t>(
+            rc,
+            std::format("Failed to cleanup old worklist items: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return static_cast<size_t>(sqlite3_changes(db_));
+}
+
+auto index_database::worklist_count() const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM worklist;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::worklist_count(std::string_view status) const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM worklist WHERE step_status = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    sqlite3_bind_text(stmt, 1, status.data(), static_cast<int>(status.size()),
+                      SQLITE_TRANSIENT);
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::parse_worklist_row(void* stmt_ptr) const -> worklist_item {
+    auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
+    worklist_item item;
+
+    item.pk = sqlite3_column_int64(stmt, 0);
+    item.step_id = get_text(stmt, 1);
+    item.step_status = get_text(stmt, 2);
+    item.patient_id = get_text(stmt, 3);
+    item.patient_name = get_text(stmt, 4);
+    item.birth_date = get_text(stmt, 5);
+    item.sex = get_text(stmt, 6);
+    item.accession_no = get_text(stmt, 7);
+    item.requested_proc_id = get_text(stmt, 8);
+    item.study_uid = get_text(stmt, 9);
+    item.scheduled_datetime = get_text(stmt, 10);
+    item.station_ae = get_text(stmt, 11);
+    item.station_name = get_text(stmt, 12);
+    item.modality = get_text(stmt, 13);
+    item.procedure_desc = get_text(stmt, 14);
+    item.protocol_code = get_text(stmt, 15);
+    item.referring_phys = get_text(stmt, 16);
+    item.referring_phys_id = get_text(stmt, 17);
+
+    auto created_str = get_text(stmt, 18);
+    item.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_text(stmt, 19);
+    item.updated_at = parse_datetime(updated_str.c_str());
+
+    return item;
+}
+
 }  // namespace pacs::storage
