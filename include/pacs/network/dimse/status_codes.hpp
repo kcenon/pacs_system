@@ -80,6 +80,50 @@ constexpr status_code status_error_missing_attribute_value = 0x0121;
 
 /// @}
 
+/// @name DIMSE-N Specific Failure Status Codes
+/// @{
+
+/// Error: Attribute list error (N-CREATE)
+constexpr status_code status_error_attribute_list_error = 0x0107;
+
+/// Error: Attribute value out of range (N-SET)
+constexpr status_code status_error_attribute_value_out_of_range = 0x0116;
+
+/// Error: Invalid object instance (N-SET, N-GET, N-ACTION, N-DELETE)
+constexpr status_code status_error_invalid_object_instance = 0x0117;
+
+/// Error: No such SOP class (All DIMSE-N)
+constexpr status_code status_error_no_such_sop_class = 0x0118;
+
+/// Error: Class-instance conflict (All DIMSE-N)
+constexpr status_code status_error_class_instance_conflict = 0x0119;
+
+/// Error: Not authorized (All DIMSE-N)
+constexpr status_code status_error_not_authorized = 0x0124;
+
+/// Error: Duplicate invocation (All DIMSE-N)
+constexpr status_code status_error_duplicate_invocation = 0x0210;
+
+/// Error: Unrecognized operation (All DIMSE-N)
+constexpr status_code status_error_unrecognized_operation = 0x0211;
+
+/// Error: Mistyped argument (All DIMSE-N)
+constexpr status_code status_error_mistyped_argument = 0x0212;
+
+/// Error: Resource limitation (All DIMSE-N)
+constexpr status_code status_error_resource_limitation = 0x0213;
+
+/// Error: No such action type (N-ACTION)
+constexpr status_code status_error_no_such_action_type = 0x0123;
+
+/// Error: No such event type (N-EVENT-REPORT)
+constexpr status_code status_error_no_such_event_type = 0x0113;
+
+/// Error: Processing failure (All DIMSE-N)
+constexpr status_code status_error_processing_failure = 0x0110;
+
+/// @}
+
 /// @name Warning Status Codes (0xBxxx)
 /// @{
 
@@ -142,12 +186,12 @@ constexpr status_code status_warning_subops_complete_failures = 0xB000;
  * @return true if operation failed
  *
  * Failure status codes start with 0xA or 0xC in the high nibble,
- * or have specific values like 0x01xx.
+ * or have specific values like 0x01xx (DIMSE-N errors) or 0x02xx (protocol errors).
  */
 [[nodiscard]] constexpr bool is_failure(status_code status) noexcept {
     const auto high_nibble = (status & 0xF000) >> 12;
     return high_nibble == 0xA || high_nibble == 0xC ||
-           (status >= 0x0100 && status <= 0x01FF);
+           (status >= 0x0100 && status <= 0x02FF);
 }
 
 /**
@@ -194,6 +238,32 @@ constexpr status_code status_warning_subops_complete_failures = 0xB000;
         case status_error_missing_attribute: return "Error: Missing attribute";
         case status_error_missing_attribute_value:
             return "Error: Missing attribute value";
+        case status_error_attribute_list_error:
+            return "Error: Attribute list error";
+        case status_error_attribute_value_out_of_range:
+            return "Error: Attribute value out of range";
+        case status_error_invalid_object_instance:
+            return "Error: Invalid object instance";
+        case status_error_no_such_sop_class:
+            return "Error: No such SOP class";
+        case status_error_class_instance_conflict:
+            return "Error: Class-instance conflict";
+        case status_error_not_authorized:
+            return "Error: Not authorized";
+        case status_error_duplicate_invocation:
+            return "Error: Duplicate invocation";
+        case status_error_unrecognized_operation:
+            return "Error: Unrecognized operation";
+        case status_error_mistyped_argument:
+            return "Error: Mistyped argument";
+        case status_error_resource_limitation:
+            return "Error: Resource limitation";
+        case status_error_no_such_action_type:
+            return "Error: No such action type";
+        case status_error_no_such_event_type:
+            return "Error: No such event type";
+        case status_error_processing_failure:
+            return "Error: Processing failure";
         case status_warning_coercion: return "Warning: Coercion of data elements";
         case status_warning_dataset_mismatch:
             return "Warning: Data set does not match SOP class";
