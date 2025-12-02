@@ -1,0 +1,138 @@
+# Code Coverage Workflow for PACS System
+# Generates code coverage reports using lcov and uploads to Codecov
+#
+# Based on messaging_system coverage patterns
+
+name: Code Coverage
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Ensure only one workflow runs per branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Code Coverage Analysis
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+        fetch-depth: 0  # Need full history for coverage
+
+    - name: Checkout dependencies
+      run: |
+        git clone --depth 1 https://github.com/kcenon/common_system.git
+        git clone --depth 1 https://github.com/kcenon/thread_system.git
+        git clone --depth 1 https://github.com/kcenon/logger_system.git
+        git clone --depth 1 https://github.com/kcenon/container_system.git
+        git clone --depth 1 https://github.com/kcenon/network_system.git
+        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y cmake build-essential ninja-build gcc g++
+        sudo apt install -y libsqlite3-dev libssl-dev
+        sudo apt install -y libgtest-dev libgmock-dev
+        sudo apt install -y lcov
+
+    - name: Patch dependency CMake files to remove -Werror
+      run: |
+        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
+          if [ -d "$repo" ]; then
+            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
+              if grep -q '\-Werror' "$file" 2>/dev/null; then
+                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
+              fi
+            done
+          fi
+        done
+
+    - name: Configure CMake with coverage
+      working-directory: pacs_system
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=OFF \
+          -DPACS_BUILD_STORAGE=ON \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Run tests
+      working-directory: pacs_system
+      run: |
+        cd build
+        ctest --output-on-failure || true
+
+    - name: Generate coverage report
+      working-directory: pacs_system
+      run: |
+        cd build
+
+        # Capture coverage data
+        lcov --directory . --capture --output-file coverage.info || {
+          echo "No coverage data found"
+          touch coverage.info
+          exit 0
+        }
+
+        # Remove coverage for external/test/example code
+        lcov --remove coverage.info \
+          '/usr/*' \
+          '*/tests/*' \
+          '*/examples/*' \
+          '*/build/_deps/*' \
+          '*/common_system/*' \
+          '*/container_system/*' \
+          '*/thread_system/*' \
+          '*/logger_system/*' \
+          '*/monitoring_system/*' \
+          '*/network_system/*' \
+          --output-file coverage.info || true
+
+        # Display coverage summary
+        lcov --list coverage.info || echo "No coverage records to display"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./pacs_system/build/coverage.info
+        flags: unittests
+        name: pacs_system-coverage
+        fail_ci_if_error: false
+        verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          pacs_system/build/coverage.info
+          pacs_system/build/**/*.gcda
+          pacs_system/build/**/*.gcno
+        retention-days: 7
+        if-no-files-found: ignore
