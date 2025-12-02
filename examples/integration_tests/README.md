@@ -30,6 +30,7 @@ examples/integration_tests/
 ├── test_error_recovery.cpp          # Error handling tests
 ├── test_xa_storage.cpp              # XA-specific storage tests
 ├── test_tls_integration.cpp         # TLS integration tests
+├── test_stability.cpp               # Long-running stability tests
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
@@ -405,6 +406,63 @@ REQUIRE(verifier.instance_count(study_uid) >= 2);
 // Check for duplicate UIDs
 REQUIRE_FALSE(verifier.has_duplicate_uids());
 ```
+
+## Long-Running Stability Tests
+
+The `test_stability.cpp` provides comprehensive tests for system reliability under extended operation. These tests are designed for 24-hour continuous operation testing but include configurable durations.
+
+### Test Scenarios
+
+| Scenario | Tag | Description |
+|----------|-----|-------------|
+| Continuous Store/Query | `[stability][.slow]` | Extended store/query operations with configurable duration |
+| Memory Stability | `[stability][memory]` | Verify no memory leaks over 100 iterations |
+| Connection Pool Exhaustion | `[stability][network]` | Open/close many connections, verify recovery |
+| Database Integrity | `[stability][database]` | Concurrent writes, verify no data corruption |
+| Smoke Test | `[stability][smoke]` | Quick 10-second validation for CI |
+
+### Running Stability Tests
+
+```bash
+# Run quick smoke test (10 seconds) - suitable for CI
+./bin/pacs_integration_e2e "[stability][smoke]"
+
+# Run memory stability test
+./bin/pacs_integration_e2e "[stability][memory]"
+
+# Run all stability tests except long-running ones
+./bin/pacs_integration_e2e "[stability]" "~[.slow]"
+
+# Run 24-hour continuous operation test
+PACS_STABILITY_TEST_DURATION=1440 ./bin/pacs_integration_e2e "[stability][.slow]"
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PACS_STABILITY_TEST_DURATION` | 60 | Test duration in minutes |
+| `PACS_STABILITY_STORE_RATE` | 5.0 | Store operations per second |
+| `PACS_STABILITY_QUERY_RATE` | 1.0 | Query operations per second |
+| `PACS_STABILITY_STORE_WORKERS` | 4 | Number of concurrent store workers |
+| `PACS_STABILITY_QUERY_WORKERS` | 2 | Number of concurrent query workers |
+
+### Stability Metrics
+
+The tests collect and report metrics including:
+- Store/query success and failure counts
+- Connection statistics (opened, closed, errors)
+- Memory usage (initial, peak, growth)
+- Operation rates
+
+Reports are automatically saved to `/tmp/stability_test_report.txt`.
+
+### Memory Monitoring
+
+Cross-platform memory monitoring is implemented:
+- **Linux**: Reads `/proc/self/status` for VmRSS
+- **macOS**: Uses `mach_task_basic_info` for resident memory
+- **Windows**: Uses `GetProcessMemoryInfo` for working set
 
 ## Test Data Generation
 
