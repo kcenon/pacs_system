@@ -44,6 +44,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 option(PACS_BUILD_TESTS "Build unit tests" ON)
 option(PACS_BUILD_EXAMPLES "Build examples" OFF)
 option(PACS_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(PACS_WARNINGS_AS_ERRORS "Treat warnings as errors (disable for CI with external deps)" ON)
 
 # Dependency integration options
 option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
@@ -56,9 +57,15 @@ option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
 ##################################################
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    if(PACS_WARNINGS_AS_ERRORS)
+        add_compile_options(-Werror)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4)
+    if(PACS_WARNINGS_AS_ERRORS)
+        add_compile_options(/WX)
+    endif()
 endif()
 
 ##################################################
