@@ -24,6 +24,8 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <queue>
+#include <condition_variable>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -555,6 +557,21 @@ public:
      */
     void set_state(association_state new_state);
 
+    /**
+     * @brief Set peer association for in-memory testing.
+     */
+    void set_peer(association* peer);
+
+    /**
+     * @brief Enqueue message from peer (for in-memory testing).
+     */
+    void enqueue_message(uint8_t context_id, dimse::dimse_message msg);
+
+    /**
+     * @brief Update peer pointer (for in-memory testing).
+     */
+    void update_peer(association* old_peer, association* new_peer);
+
 private:
     // =========================================================================
     // Private Implementation
@@ -629,6 +646,14 @@ private:
 
     /// Is this an SCU (true) or SCP (false)?
     bool is_scu_{true};
+
+    /// Peer association for in-memory testing
+    association* peer_{nullptr};
+
+    /// Incoming message queue for in-memory testing
+    std::deque<std::pair<uint8_t, dimse::dimse_message>> incoming_queue_;
+    mutable std::mutex queue_mutex_;
+    std::condition_variable queue_cv_;
 };
 
 }  // namespace pacs::network
