@@ -118,46 +118,49 @@ inline core::dicom_dataset generate_ct_dataset(
     core::dicom_dataset ds;
 
     // Patient module
-    ds.set_string(core::tags::patient_name, "TEST^PATIENT");
-    ds.set_string(core::tags::patient_id, "TEST001");
-    ds.set_string(core::tags::patient_birth_date, "19800101");
-    ds.set_string(core::tags::patient_sex, "M");
+    ds.set_string(core::tags::patient_name, encoding::vr_type::PN, "TEST^PATIENT");
+    ds.set_string(core::tags::patient_id, encoding::vr_type::LO, "TEST001");
+    ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, "19800101");
+    ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, "M");
 
     // Study module
-    ds.set_string(core::tags::study_instance_uid,
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
                   study_uid.empty() ? generate_uid() : study_uid);
-    ds.set_string(core::tags::study_date, "20240101");
-    ds.set_string(core::tags::study_time, "120000");
-    ds.set_string(core::tags::accession_number, "ACC001");
-    ds.set_string(core::tags::study_id, "STUDY001");
-    ds.set_string(core::tags::study_description, "Integration Test Study");
+    ds.set_string(core::tags::study_date, encoding::vr_type::DA, "20240101");
+    ds.set_string(core::tags::study_time, encoding::vr_type::TM, "120000");
+    ds.set_string(core::tags::accession_number, encoding::vr_type::SH, "ACC001");
+    ds.set_string(core::tags::study_id, encoding::vr_type::SH, "STUDY001");
+    ds.set_string(core::tags::study_description, encoding::vr_type::LO, "Integration Test Study");
 
     // Series module
-    ds.set_string(core::tags::series_instance_uid,
+    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI,
                   series_uid.empty() ? generate_uid() : series_uid);
-    ds.set_string(core::tags::modality, "CT");
-    ds.set_string(core::tags::series_number, "1");
-    ds.set_string(core::tags::series_description, "Test Series");
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "CT");
+    ds.set_string(core::tags::series_number, encoding::vr_type::IS, "1");
+    ds.set_string(core::tags::series_description, encoding::vr_type::LO, "Test Series");
 
     // SOP Common module
-    ds.set_string(core::tags::sop_class_uid, "1.2.840.10008.5.1.4.1.1.2");  // CT Image Storage
-    ds.set_string(core::tags::sop_instance_uid,
+    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");  // CT Image Storage
+    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI,
                   instance_uid.empty() ? generate_uid() : instance_uid);
 
     // Image module (minimal)
-    ds.set_uint16(core::tags::rows, 64);
-    ds.set_uint16(core::tags::columns, 64);
-    ds.set_uint16(core::tags::bits_allocated, 16);
-    ds.set_uint16(core::tags::bits_stored, 12);
-    ds.set_uint16(core::tags::high_bit, 11);
-    ds.set_uint16(core::tags::pixel_representation, 0);
-    ds.set_uint16(core::tags::samples_per_pixel, 1);
-    ds.set_string(core::tags::photometric_interpretation, "MONOCHROME2");
+    ds.set_numeric<uint16_t>(core::tags::rows, encoding::vr_type::US, 64);
+    ds.set_numeric<uint16_t>(core::tags::columns, encoding::vr_type::US, 64);
+    ds.set_numeric<uint16_t>(core::tags::bits_allocated, encoding::vr_type::US, 16);
+    ds.set_numeric<uint16_t>(core::tags::bits_stored, encoding::vr_type::US, 12);
+    ds.set_numeric<uint16_t>(core::tags::high_bit, encoding::vr_type::US, 11);
+    ds.set_numeric<uint16_t>(core::tags::pixel_representation, encoding::vr_type::US, 0);
+    ds.set_numeric<uint16_t>(core::tags::samples_per_pixel, encoding::vr_type::US, 1);
+    ds.set_string(core::tags::photometric_interpretation, encoding::vr_type::CS, "MONOCHROME2");
 
     // Generate minimal pixel data (64x64 16-bit)
     std::vector<uint16_t> pixel_data(64 * 64, 512);
-    ds.set_pixel_data(reinterpret_cast<const uint8_t*>(pixel_data.data()),
-                      pixel_data.size() * sizeof(uint16_t));
+    core::dicom_element pixel_elem(core::tags::pixel_data, encoding::vr_type::OW);
+    pixel_elem.set_value(std::span<const uint8_t>(
+        reinterpret_cast<const uint8_t*>(pixel_data.data()),
+        pixel_data.size() * sizeof(uint16_t)));
+    ds.insert(std::move(pixel_elem));
 
     return ds;
 }
@@ -171,44 +174,114 @@ inline core::dicom_dataset generate_mr_dataset(const std::string& study_uid = ""
     core::dicom_dataset ds;
 
     // Patient module
-    ds.set_string(core::tags::patient_name, "TEST^MR^PATIENT");
-    ds.set_string(core::tags::patient_id, "TESTMR001");
-    ds.set_string(core::tags::patient_birth_date, "19900215");
-    ds.set_string(core::tags::patient_sex, "F");
+    ds.set_string(core::tags::patient_name, encoding::vr_type::PN, "TEST^MR^PATIENT");
+    ds.set_string(core::tags::patient_id, encoding::vr_type::LO, "TESTMR001");
+    ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, "19900215");
+    ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, "F");
 
     // Study module
-    ds.set_string(core::tags::study_instance_uid,
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
                   study_uid.empty() ? generate_uid() : study_uid);
-    ds.set_string(core::tags::study_date, "20240115");
-    ds.set_string(core::tags::study_time, "140000");
-    ds.set_string(core::tags::accession_number, "ACCMR001");
-    ds.set_string(core::tags::study_id, "STUDYMR001");
-    ds.set_string(core::tags::study_description, "MR Integration Test");
+    ds.set_string(core::tags::study_date, encoding::vr_type::DA, "20240115");
+    ds.set_string(core::tags::study_time, encoding::vr_type::TM, "140000");
+    ds.set_string(core::tags::accession_number, encoding::vr_type::SH, "ACCMR001");
+    ds.set_string(core::tags::study_id, encoding::vr_type::SH, "STUDYMR001");
+    ds.set_string(core::tags::study_description, encoding::vr_type::LO, "MR Integration Test");
 
     // Series module
-    ds.set_string(core::tags::series_instance_uid, generate_uid());
-    ds.set_string(core::tags::modality, "MR");
-    ds.set_string(core::tags::series_number, "1");
-    ds.set_string(core::tags::series_description, "T1 FLAIR");
+    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI, generate_uid());
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "MR");
+    ds.set_string(core::tags::series_number, encoding::vr_type::IS, "1");
+    ds.set_string(core::tags::series_description, encoding::vr_type::LO, "T1 FLAIR");
 
     // SOP Common module
-    ds.set_string(core::tags::sop_class_uid, "1.2.840.10008.5.1.4.1.1.4");  // MR Image Storage
-    ds.set_string(core::tags::sop_instance_uid, generate_uid());
+    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI, "1.2.840.10008.5.1.4.1.1.4");  // MR Image Storage
+    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI, generate_uid());
 
     // Image module (minimal)
-    ds.set_uint16(core::tags::rows, 64);
-    ds.set_uint16(core::tags::columns, 64);
-    ds.set_uint16(core::tags::bits_allocated, 16);
-    ds.set_uint16(core::tags::bits_stored, 12);
-    ds.set_uint16(core::tags::high_bit, 11);
-    ds.set_uint16(core::tags::pixel_representation, 0);
-    ds.set_uint16(core::tags::samples_per_pixel, 1);
-    ds.set_string(core::tags::photometric_interpretation, "MONOCHROME2");
+    ds.set_numeric<uint16_t>(core::tags::rows, encoding::vr_type::US, 64);
+    ds.set_numeric<uint16_t>(core::tags::columns, encoding::vr_type::US, 64);
+    ds.set_numeric<uint16_t>(core::tags::bits_allocated, encoding::vr_type::US, 16);
+    ds.set_numeric<uint16_t>(core::tags::bits_stored, encoding::vr_type::US, 12);
+    ds.set_numeric<uint16_t>(core::tags::high_bit, encoding::vr_type::US, 11);
+    ds.set_numeric<uint16_t>(core::tags::pixel_representation, encoding::vr_type::US, 0);
+    ds.set_numeric<uint16_t>(core::tags::samples_per_pixel, encoding::vr_type::US, 1);
+    ds.set_string(core::tags::photometric_interpretation, encoding::vr_type::CS, "MONOCHROME2");
 
     // Generate minimal pixel data
     std::vector<uint16_t> pixel_data(64 * 64, 256);
-    ds.set_pixel_data(reinterpret_cast<const uint8_t*>(pixel_data.data()),
-                      pixel_data.size() * sizeof(uint16_t));
+    core::dicom_element pixel_elem(core::tags::pixel_data, encoding::vr_type::OW);
+    pixel_elem.set_value(std::span<const uint8_t>(
+        reinterpret_cast<const uint8_t*>(pixel_data.data()),
+        pixel_data.size() * sizeof(uint16_t)));
+    ds.insert(std::move(pixel_elem));
+
+    return ds;
+}
+
+/**
+ * @brief Generate a XA (X-Ray Angiographic) image dataset for testing
+ * @param study_uid Study Instance UID (generated if empty)
+ * @return DICOM dataset
+ */
+inline core::dicom_dataset generate_xa_dataset(const std::string& study_uid = "") {
+    core::dicom_dataset ds;
+
+    // Patient module
+    ds.set_string(core::tags::patient_name, encoding::vr_type::PN, "TEST^XA^PATIENT");
+    ds.set_string(core::tags::patient_id, encoding::vr_type::LO, "TESTXA001");
+    ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, "19750610");
+    ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, "F");
+
+    // Study module
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
+                  study_uid.empty() ? generate_uid() : study_uid);
+    ds.set_string(core::tags::study_date, encoding::vr_type::DA, "20240220");
+    ds.set_string(core::tags::study_time, encoding::vr_type::TM, "103000");
+    ds.set_string(core::tags::accession_number, encoding::vr_type::SH, "ACCXA001");
+    ds.set_string(core::tags::study_id, encoding::vr_type::SH, "STUDYXA001");
+    ds.set_string(core::tags::study_description, encoding::vr_type::LO, "XA Integration Test");
+
+    // Series module
+    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI, generate_uid());
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "XA");
+    ds.set_string(core::tags::series_number, encoding::vr_type::IS, "1");
+    ds.set_string(core::tags::series_description, encoding::vr_type::LO, "Coronary Angio");
+
+    // SOP Common module
+    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI, "1.2.840.10008.5.1.4.1.1.12.1");  // XA Image Storage
+    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI, generate_uid());
+
+    // Image module
+    ds.set_numeric<uint16_t>(core::tags::rows, encoding::vr_type::US, 512);
+    ds.set_numeric<uint16_t>(core::tags::columns, encoding::vr_type::US, 512);
+    ds.set_numeric<uint16_t>(core::tags::bits_allocated, encoding::vr_type::US, 16);
+    ds.set_numeric<uint16_t>(core::tags::bits_stored, encoding::vr_type::US, 12);
+    ds.set_numeric<uint16_t>(core::tags::high_bit, encoding::vr_type::US, 11);
+    ds.set_numeric<uint16_t>(core::tags::pixel_representation, encoding::vr_type::US, 0);
+    ds.set_numeric<uint16_t>(core::tags::samples_per_pixel, encoding::vr_type::US, 1);
+    ds.set_string(core::tags::photometric_interpretation, encoding::vr_type::CS, "MONOCHROME2");
+
+    // XA Specific
+    // Note: Using raw tag numbers if constants are not defined yet
+    // Positioner Primary Angle
+    ds.set_string({0x0018, 0x1510}, encoding::vr_type::DS, "0");
+    // Positioner Secondary Angle
+    ds.set_string({0x0018, 0x1511}, encoding::vr_type::DS, "0");
+    // KVP
+    ds.set_string({0x0018, 0x0060}, encoding::vr_type::DS, "80");
+    // X-Ray Tube Current
+    ds.set_numeric<uint16_t>({0x0018, 0x1151}, encoding::vr_type::IS, 500);
+    // Exposure Time
+    ds.set_numeric<uint16_t>({0x0018, 0x1150}, encoding::vr_type::IS, 100);
+
+    // Generate minimal pixel data
+    std::vector<uint16_t> pixel_data(512 * 512, 128);
+    core::dicom_element pixel_elem(core::tags::pixel_data, encoding::vr_type::OW);
+    pixel_elem.set_value(std::span<const uint8_t>(
+        reinterpret_cast<const uint8_t*>(pixel_data.data()),
+        pixel_data.size() * sizeof(uint16_t)));
+    ds.insert(std::move(pixel_elem));
 
     return ds;
 }
@@ -221,22 +294,22 @@ inline core::dicom_dataset generate_worklist_item() {
     core::dicom_dataset ds;
 
     // Patient module
-    ds.set_string(core::tags::patient_name, "WORKLIST^PATIENT");
-    ds.set_string(core::tags::patient_id, "WL001");
-    ds.set_string(core::tags::patient_birth_date, "19850520");
-    ds.set_string(core::tags::patient_sex, "M");
+    ds.set_string(core::tags::patient_name, encoding::vr_type::PN, "WORKLIST^PATIENT");
+    ds.set_string(core::tags::patient_id, encoding::vr_type::LO, "WL001");
+    ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, "19850520");
+    ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, "M");
 
     // Scheduled Procedure Step
-    ds.set_string(core::tags::scheduled_procedure_step_start_date, "20240201");
-    ds.set_string(core::tags::scheduled_procedure_step_start_time, "090000");
-    ds.set_string(core::tags::modality, "CT");
-    ds.set_string(core::tags::scheduled_station_ae_title, "CT_SCANNER");
-    ds.set_string(core::tags::scheduled_procedure_step_description, "CT Chest");
+    ds.set_string(core::tags::scheduled_procedure_step_start_date, encoding::vr_type::DA, "20240201");
+    ds.set_string(core::tags::scheduled_procedure_step_start_time, encoding::vr_type::TM, "090000");
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "CT");
+    ds.set_string(core::tags::scheduled_station_ae_title, encoding::vr_type::AE, "CT_SCANNER");
+    ds.set_string(core::tags::scheduled_procedure_step_description, encoding::vr_type::LO, "CT Chest");
 
     // Requested Procedure
-    ds.set_string(core::tags::requested_procedure_id, "RP001");
-    ds.set_string(core::tags::accession_number, "WLACC001");
-    ds.set_string(core::tags::study_instance_uid, generate_uid());
+    ds.set_string(core::tags::requested_procedure_id, encoding::vr_type::SH, "RP001");
+    ds.set_string(core::tags::accession_number, encoding::vr_type::SH, "WLACC001");
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, generate_uid());
 
     return ds;
 }
