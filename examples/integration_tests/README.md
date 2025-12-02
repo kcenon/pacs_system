@@ -29,6 +29,7 @@ examples/integration_tests/
 ├── test_stress.cpp                  # Stress and performance tests
 ├── test_error_recovery.cpp          # Error handling tests
 ├── test_xa_storage.cpp              # XA-specific storage tests
+├── test_tls_integration.cpp         # TLS integration tests
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
@@ -40,7 +41,13 @@ examples/integration_tests/
 └── test_data/                       # Minimal DICOM test files
     ├── ct_minimal.dcm               # CT Image IOD
     ├── mr_minimal.dcm               # MR Image IOD
-    └── xa_minimal.dcm               # XA Image IOD
+    ├── xa_minimal.dcm               # XA Image IOD
+    └── certs/                       # TLS test certificates
+        ├── generate_test_certs.sh   # Certificate generation script
+        ├── ca.crt / ca.key          # Test CA certificate
+        ├── server.crt / server.key  # Server certificate
+        ├── client.crt / client.key  # Client certificate (for mTLS)
+        └── other_ca.crt             # Different CA for validation testing
 ```
 
 ## Prerequisites
@@ -148,6 +155,97 @@ Tests TLS-encrypted DICOM communication:
 - Secure Echo operations
 - Client certificate verification
 - Cipher suite negotiation
+
+## TLS Integration Tests (C++)
+
+The `test_tls_integration.cpp` provides comprehensive C++ tests for TLS-secured DICOM communication. These tests verify TLS functionality using the `network_adapter` TLS configuration.
+
+### Running TLS Tests
+
+```bash
+# Generate test certificates (run once)
+./examples/integration_tests/test_data/certs/generate_test_certs.sh
+
+# Run TLS integration tests
+PACS_TEST_CERT_DIR=./examples/integration_tests/test_data/certs \
+    ./build/bin/pacs_integration_e2e "[tls]"
+
+# Run specific TLS test scenarios
+./build/bin/pacs_integration_e2e "[tls][connectivity]"  # Basic TLS connection
+./build/bin/pacs_integration_e2e "[tls][security]"      # Certificate validation
+./build/bin/pacs_integration_e2e "[tls][mtls]"          # Mutual TLS
+./build/bin/pacs_integration_e2e "[tls][version]"       # TLS version tests
+./build/bin/pacs_integration_e2e "[tls][concurrent]"    # Concurrent TLS connections
+./build/bin/pacs_integration_e2e "[tls][config]"        # Configuration validation
+```
+
+### TLS Test Scenarios
+
+| Scenario | Tag | Description |
+|----------|-----|-------------|
+| Basic TLS Connection | `[tls][connectivity]` | TLS server accepts connection and responds to C-ECHO |
+| Certificate Validation | `[tls][security]` | Valid/invalid certificate handling |
+| Mutual TLS | `[tls][mtls]` | Client certificate authentication |
+| TLS Version | `[tls][version]` | TLS 1.2 and 1.3 negotiation |
+| Concurrent Connections | `[tls][concurrent]` | Multiple parallel TLS connections |
+| Config Validation | `[tls][config]` | TLS configuration structure validation |
+
+### Test Certificate Generation
+
+The `generate_test_certs.sh` script creates a complete PKI for testing:
+
+```bash
+# Generate certificates in custom directory
+./generate_test_certs.sh /path/to/output
+
+# Files generated:
+# - ca.crt / ca.key       - Root CA certificate
+# - server.crt / server.key - Server certificate (localhost)
+# - client.crt / client.key - Client certificate (for mTLS)
+# - other_ca.crt / other_ca.key - Different CA for validation tests
+```
+
+### TLS Test Fixtures
+
+The test file provides reusable TLS fixtures:
+
+```cpp
+#include "test_tls_integration.cpp"
+
+// Get test certificate paths
+auto certs = get_test_certificates();
+if (!certs.all_exist()) {
+    SKIP("Test certificates not available");
+}
+
+// Create TLS-enabled server
+tls_config server_tls;
+server_tls.enabled = true;
+server_tls.cert_path = certs.server_cert;
+server_tls.key_path = certs.server_key;
+server_tls.ca_path = certs.ca_cert;
+server_tls.verify_peer = true;  // Require client cert (mTLS)
+
+tls_test_server server(port, "TLS_SCP", server_tls);
+server.register_service(std::make_shared<verification_scp>());
+server.start();
+
+// Connect with TLS client
+tls_config client_tls;
+client_tls.enabled = true;
+client_tls.cert_path = certs.client_cert;
+client_tls.key_path = certs.client_key;
+client_tls.ca_path = certs.ca_cert;
+
+auto result = tls_test_client::connect(
+    "localhost", port, server.ae_title(), "TLS_SCU", client_tls);
+```
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PACS_TEST_CERT_DIR` | Directory containing test certificates |
 
 ## C++ Test Utilities
 
