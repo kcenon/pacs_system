@@ -39,13 +39,27 @@ target_link_libraries(pacs_integration_e2e
 target_compile_features(pacs_integration_e2e PRIVATE cxx_std_20)
 
 # Register tests with CTest
+# @see Issue #139 - CI/CD Integration
 include(Catch)
+
+# E2E integration tests
 catch_discover_tests(pacs_integration_e2e
-    TEST_PREFIX "integration::"
+    TEST_PREFIX "e2e::"
     REPORTER junit
     OUTPUT_DIR ${CMAKE_BINARY_DIR}/test-results
     OUTPUT_PREFIX integration_
     OUTPUT_SUFFIX .xml
+    PROPERTIES LABELS "integration;e2e"
+)
+
+# Stress tests (filtered by tag, run only on main branch)
+# Use: ctest -L stress
+add_test(NAME stress_tests
+    COMMAND pacs_integration_e2e "[stress]" --reporter junit --out ${CMAKE_BINARY_DIR}/test-results/stress-tests.xml
+)
+set_tests_properties(stress_tests PROPERTIES
+    LABELS "stress"
+    TIMEOUT 600
 )
 
 # Copy test data files
