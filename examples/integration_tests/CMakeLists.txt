@@ -11,6 +11,7 @@ add_executable(pacs_integration_e2e
     test_stress.cpp
     test_error_recovery.cpp
     test_xa_storage.cpp
+    test_multimodal_workflow.cpp
     test_data_generator.cpp
     test_data_generator_test.cpp
 )

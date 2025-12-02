@@ -17,10 +17,18 @@ Binary integration tests complement library-level tests by verifying:
 examples/integration_tests/
 ├── README.md                        # This file
 ├── CMakeLists.txt                   # Build configuration
+├── main.cpp                         # Test main entry point
 ├── test_fixtures.hpp                # C++ test utilities and process launcher
 ├── test_data_generator.hpp          # Comprehensive DICOM data generators
 ├── test_data_generator.cpp          # Generator implementations
 ├── test_data_generator_test.cpp     # Generator unit tests
+├── test_connectivity.cpp            # DICOM network connectivity tests
+├── test_store_query.cpp             # Storage and query tests
+├── test_worklist_mpps.cpp           # Worklist and MPPS tests
+├── test_multimodal_workflow.cpp     # Multi-modal clinical workflow tests
+├── test_stress.cpp                  # Stress and performance tests
+├── test_error_recovery.cpp          # Error handling tests
+├── test_xa_storage.cpp              # XA-specific storage tests
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
@@ -244,6 +252,60 @@ Use `background_process_guard` for automatic cleanup:
         // Run tests...
     }
 }  // Server automatically stopped
+```
+
+## Multi-Modal Workflow Tests
+
+The `test_multimodal_workflow.cpp` contains comprehensive tests for multi-modality clinical workflows. These tests verify that the PACS system correctly handles complex real-world scenarios involving multiple imaging modalities.
+
+### Test Scenarios
+
+| Scenario | Description | Modalities |
+|----------|-------------|------------|
+| Complete Patient Journey | Full diagnostic workup with multiple studies | CT, MR |
+| Interventional Workflow | XA cine acquisition with procedure tracking | XA (30-frame) |
+| Emergency Multi-Modality | Trauma case with rapid multi-modal imaging | CT, XA, follow-up CT |
+| Concurrent Operations | Thread safety with parallel storage | CT, MR, XA, US |
+
+### Running Workflow Tests
+
+```bash
+# Run all multi-modal workflow tests
+./bin/pacs_integration_e2e "[workflow][multimodal]"
+
+# Run with MPPS tracking tests
+./bin/pacs_integration_e2e "[workflow][mpps]"
+
+# Run stress tests (hidden by default)
+./bin/pacs_integration_e2e "[.stress]"
+```
+
+### Workflow Verification Helper
+
+The `workflow_verification` class provides utilities for validating workflow consistency:
+
+```cpp
+#include "test_multimodal_workflow.cpp"
+
+// After storing datasets, verify the workflow
+workflow_verification verifier(database);
+
+// Check patient exists
+REQUIRE(verifier.patient_exists("PATIENT001"));
+
+// Verify study count
+REQUIRE(verifier.study_count("PATIENT001") == 1);
+
+// Check modality is present in study
+REQUIRE(verifier.study_has_modality(study_uid, "CT"));
+REQUIRE(verifier.study_has_modality(study_uid, "MR"));
+
+// Verify series and instance counts
+REQUIRE(verifier.series_count(study_uid) == 2);
+REQUIRE(verifier.instance_count(study_uid) >= 2);
+
+// Check for duplicate UIDs
+REQUIRE_FALSE(verifier.has_duplicate_uids());
 ```
 
 ## Test Data Generation
