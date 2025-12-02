@@ -4,7 +4,9 @@
  */
 
 #include "pacs/network/association.hpp"
+#include "pacs/network/association.hpp"
 #include "pacs/network/pdu_encoder.hpp"
+#include "pacs/network/dicom_server.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -108,8 +110,15 @@ association::association(association&& other) noexcept {
     abort_source_ = other.abort_source_;
     abort_reason_ = other.abort_reason_;
     is_scu_ = other.is_scu_;
+    peer_ = other.peer_;
+    incoming_queue_ = std::move(other.incoming_queue_);
 
     other.state_ = association_state::idle;
+    other.peer_ = nullptr;
+
+    if (peer_) {
+        peer_->update_peer(&other, this);
+    }
 }
 
 association& association::operator=(association&& other) noexcept {
@@ -132,8 +141,15 @@ association& association::operator=(association&& other) noexcept {
         abort_source_ = other.abort_source_;
         abort_reason_ = other.abort_reason_;
         is_scu_ = other.is_scu_;
+        peer_ = other.peer_;
+        incoming_queue_ = std::move(other.incoming_queue_);
 
         other.state_ = association_state::idle;
+        other.peer_ = nullptr;
+
+        if (peer_) {
+            peer_->update_peer(&other, this);
+        }
     }
     return *this;
 }
@@ -172,6 +188,22 @@ Result<association> association::connect(
 
     // Transition to awaiting state
     assoc.transition(association_state::awaiting_associate_ac);
+
+    // Check for in-memory server (Test Hook)
+    auto* server = dicom_server::get_server_on_port(port);
+    if (server) {
+        auto rq = assoc.build_associate_rq();
+        auto result = server->simulate_association_request(rq, &assoc);
+        if (result.is_ok()) {
+            if (assoc.process_associate_ac(result.value())) {
+                return assoc;
+            } else {
+                return error_info("Association negotiation failed");
+            }
+        } else {
+            return error_info(result.error());
+        }
+    }
 
     // Note: Actual network connection should be handled by network_system
     // This implementation prepares the association for PDU exchange
@@ -347,20 +379,48 @@ Result<std::monostate> association::send_dimse(
     // Placeholder for actual send implementation
     (void)msg;
 
+    if (peer_) {
+        peer_->enqueue_message(context_id, msg);
+        return std::monostate{};
+    }
+
     return std::monostate{};
 }
 
 Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
-    duration /*timeout*/) {
+    duration timeout) {
 
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    if (state_ != association_state::established) {
-        return error_info("Cannot receive DIMSE: association not established");
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (state_ != association_state::established) {
+            return error_info("Cannot receive DIMSE: association not established");
+        }
     }
 
     // Placeholder - actual receive would be implemented with network_system
-    return error_info("Not implemented: requires network_system integration");
+    // return error_info("Not implemented: requires network_system integration");
+
+    std::unique_lock<std::mutex> queue_lock(queue_mutex_);
+    // Wait for message or timeout
+    bool received = queue_cv_.wait_for(queue_lock, timeout, [this]{ 
+        return !incoming_queue_.empty(); 
+    });
+
+    if (received) {
+        auto item = std::move(incoming_queue_.front());
+        incoming_queue_.pop_front();
+        return item;
+    }
+
+    // Check if we were aborted/released while waiting
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (state_ != association_state::established) {
+            return error_info("Association aborted or released");
+        }
+    }
+
+    return error_info("Receive timeout");
 }
 
 // =============================================================================
@@ -520,6 +580,9 @@ void association::abort(uint8_t source, uint8_t reason) {
     abort_source_ = source;
     abort_reason_ = reason;
     state_ = association_state::aborted;
+    
+    // Wake up any waiters
+    queue_cv_.notify_all();
 }
 
 void association::process_abort(const abort_source& source, const abort_reason& reason) {
@@ -528,11 +591,32 @@ void association::process_abort(const abort_source& source, const abort_reason& 
     abort_source_ = static_cast<uint8_t>(source);
     abort_reason_ = static_cast<uint8_t>(reason);
     state_ = association_state::aborted;
+
+    // Wake up any waiters
+    queue_cv_.notify_all();
 }
 
 void association::set_state(association_state new_state) {
     std::lock_guard<std::mutex> lock(mutex_);
     state_ = new_state;
+}
+
+void association::set_peer(association* peer) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    peer_ = peer;
+}
+
+void association::enqueue_message(uint8_t context_id, dimse::dimse_message msg) {
+    std::lock_guard<std::mutex> lock(queue_mutex_);
+    incoming_queue_.push_back({context_id, std::move(msg)});
+    queue_cv_.notify_one();
+}
+
+void association::update_peer(association* old_peer, association* new_peer) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (peer_ == old_peer) {
+        peer_ = new_peer;
+    }
 }
 
 // =============================================================================

@@ -31,12 +31,15 @@
 #include <random>
 #include <thread>
 #include <vector>
+#include <set>
 
 using namespace pacs::integration_test;
 using namespace pacs::network;
 using namespace pacs::services;
 using namespace pacs::storage;
 using namespace pacs::core;
+using namespace pacs::encoding;
+using namespace pacs::network::dimse;
 
 // =============================================================================
 // Helper: Stress Test Storage Server
@@ -69,25 +72,32 @@ public:
         config.implementation_version_name = "STRESS_SCP";
 
         server_ = std::make_unique<dicom_server>(config);
-        file_storage_ = std::make_unique<file_storage>(storage_dir_);
-        database_ = std::make_unique<index_database>(db_path_);
+        
+        file_storage_config fs_conf;
+        fs_conf.root_path = storage_dir_;
+        file_storage_ = std::make_unique<file_storage>(fs_conf);
+        
+        auto db_result = index_database::open(db_path_.string());
+        if (db_result.is_ok()) {
+            database_ = std::move(db_result.value());
+        } else {
+            throw std::runtime_error("Failed to open database: " + db_result.error().message);
+        }
     }
 
     bool initialize() {
         server_->register_service(std::make_shared<verification_scp>());
 
         auto storage_scp_ptr = std::make_shared<storage_scp>();
-        storage_scp_ptr->on_store([this](
+        storage_scp_ptr->set_handler([this](
             const dicom_dataset& dataset,
             const std::string& calling_ae,
             const std::string& sop_class_uid,
-            const std::string& sop_instance_uid) -> storage_status {
-
+            const std::string& sop_instance_uid) {
             return handle_store(dataset, calling_ae, sop_class_uid, sop_instance_uid);
         });
         server_->register_service(storage_scp_ptr);
-
-        return database_->initialize();
+        return true;
     }
 
     bool start() {
@@ -134,16 +144,81 @@ private:
 
         // Store to filesystem
         auto store_result = file_storage_->store(dataset);
-        if (!store_result) {
+        if (store_result.is_err()) {
             ++failed_count_;
-            return storage_status::processing_failure;
+            return storage_status::storage_error;
         }
 
-        // Index in database
-        auto index_result = database_->index(dataset, store_result.value());
-        if (!index_result) {
+        // 1. Upsert Patient
+        auto patient_res = database_->upsert_patient(
+            dataset.get_string(tags::patient_id),
+            dataset.get_string(tags::patient_name),
+            dataset.get_string(tags::patient_birth_date),
+            dataset.get_string(tags::patient_sex));
+        
+        if (patient_res.is_err()) {
             ++failed_count_;
-            return storage_status::processing_failure;
+            return storage_status::storage_error;
+        }
+        int64_t patient_pk = patient_res.value();
+
+        // 2. Upsert Study
+        auto study_res = database_->upsert_study(
+            patient_pk,
+            dataset.get_string(tags::study_instance_uid),
+            dataset.get_string(tags::study_id),
+            dataset.get_string(tags::study_date),
+            dataset.get_string(tags::study_time),
+            dataset.get_string(tags::accession_number));
+            
+        if (study_res.is_err()) {
+            ++failed_count_;
+            return storage_status::storage_error;
+        }
+        int64_t study_pk = study_res.value();
+
+        // 3. Upsert Series
+        // Parse series number safely
+        std::optional<int> series_number;
+        try {
+            std::string sn = dataset.get_string(tags::series_number);
+            if (!sn.empty()) series_number = std::stoi(sn);
+        } catch (...) {}
+
+        auto series_res = database_->upsert_series(
+            study_pk,
+            dataset.get_string(tags::series_instance_uid),
+            dataset.get_string(tags::modality),
+            series_number);
+            
+        if (series_res.is_err()) {
+            ++failed_count_;
+            return storage_status::storage_error;
+        }
+        int64_t series_pk = series_res.value();
+
+        // 4. Upsert Instance
+        auto file_path = file_storage_->get_file_path(sop_instance_uid);
+        
+        // Parse instance number safely
+        std::optional<int> instance_number;
+        try {
+            std::string in = dataset.get_string(tags::instance_number);
+            if (!in.empty()) instance_number = std::stoi(in);
+        } catch (...) {}
+
+        auto instance_res = database_->upsert_instance(
+            series_pk,
+            sop_instance_uid,
+            dataset.get_string(tags::sop_class_uid),
+            file_path.string(),
+            static_cast<int64_t>(std::filesystem::file_size(file_path)),
+            "", // transfer syntax
+            instance_number);
+            
+        if (instance_res.is_err()) {
+            ++failed_count_;
+            return storage_status::storage_error;
         }
 
         // Track stored instance
@@ -231,9 +306,9 @@ worker_result run_storage_worker(
         // Send files
         for (int i = 0; i < file_count; ++i) {
             auto dataset = generate_ct_dataset(study_uid);
-            dataset.set_string(tags::instance_number, std::to_string(i + 1));
+            dataset.set_string(tags::instance_number, vr_type::IS, std::to_string(i + 1));
 
-            auto store_result = scu.store_dataset(assoc, dataset);
+            auto store_result = scu.store(assoc, dataset);
             if (store_result.is_ok() && store_result.value().is_success()) {
                 ++result.success_count;
             } else {
@@ -338,7 +413,7 @@ TEST_CASE("Rapid sequential connections", "[stress][sequential]") {
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.9";
         config.proposed_contexts.push_back({
             1,
-            verification_sop_class_uid,
+            std::string(verification_sop_class_uid),
             {"1.2.840.10008.1.2.1"}
         });
 
@@ -368,25 +443,25 @@ TEST_CASE("Large dataset storage", "[stress][large]") {
     dicom_dataset large_ds;
 
     // Standard patient/study info
-    large_ds.set_string(tags::patient_name, "LARGE^DATASET");
-    large_ds.set_string(tags::patient_id, "LARGE001");
-    large_ds.set_string(tags::study_instance_uid, generate_uid());
-    large_ds.set_string(tags::series_instance_uid, generate_uid());
-    large_ds.set_string(tags::sop_class_uid, "1.2.840.10008.5.1.4.1.1.2");
-    large_ds.set_string(tags::sop_instance_uid, generate_uid());
-    large_ds.set_string(tags::modality, "CT");
+    large_ds.set_string(tags::patient_name, vr_type::PN, "LARGE^DATASET");
+    large_ds.set_string(tags::patient_id, vr_type::LO, "LARGE001");
+    large_ds.set_string(tags::study_instance_uid, vr_type::UI, generate_uid());
+    large_ds.set_string(tags::series_instance_uid, vr_type::UI, generate_uid());
+    large_ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+    large_ds.set_string(tags::sop_instance_uid, vr_type::UI, generate_uid());
+    large_ds.set_string(tags::modality, vr_type::CS, "CT");
 
     // Large image (512x512 16-bit = 512KB pixel data)
     constexpr int rows = 512;
     constexpr int cols = 512;
-    large_ds.set_uint16(tags::rows, rows);
-    large_ds.set_uint16(tags::columns, cols);
-    large_ds.set_uint16(tags::bits_allocated, 16);
-    large_ds.set_uint16(tags::bits_stored, 12);
-    large_ds.set_uint16(tags::high_bit, 11);
-    large_ds.set_uint16(tags::pixel_representation, 0);
-    large_ds.set_uint16(tags::samples_per_pixel, 1);
-    large_ds.set_string(tags::photometric_interpretation, "MONOCHROME2");
+    large_ds.set_numeric<uint16_t>(tags::rows, vr_type::US, rows);
+    large_ds.set_numeric<uint16_t>(tags::columns, vr_type::US, cols);
+    large_ds.set_numeric<uint16_t>(tags::bits_allocated, vr_type::US, 16);
+    large_ds.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 12);
+    large_ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US, 11);
+    large_ds.set_numeric<uint16_t>(tags::pixel_representation, vr_type::US, 0);
+    large_ds.set_numeric<uint16_t>(tags::samples_per_pixel, vr_type::US, 1);
+    large_ds.set_string(tags::photometric_interpretation, vr_type::CS, "MONOCHROME2");
 
     // Generate pixel data
     std::vector<uint16_t> pixel_data(rows * cols);
@@ -396,9 +471,12 @@ TEST_CASE("Large dataset storage", "[stress][large]") {
     for (auto& pixel : pixel_data) {
         pixel = dist(gen);
     }
-    large_ds.set_pixel_data(
-        reinterpret_cast<const uint8_t*>(pixel_data.data()),
-        pixel_data.size() * sizeof(uint16_t));
+    large_ds.insert(dicom_element(
+        tags::pixel_data,
+        vr_type::OW,
+        std::span<const uint8_t>(
+            reinterpret_cast<const uint8_t*>(pixel_data.data()),
+            pixel_data.size() * sizeof(uint16_t))));
 
     // Store the large dataset
     association_config config;
@@ -421,7 +499,7 @@ TEST_CASE("Large dataset storage", "[stress][large]") {
     storage_scu scu{scu_config};
 
     auto start = std::chrono::steady_clock::now();
-    auto result = scu.store_dataset(assoc, large_ds);
+    auto result = scu.store(assoc, large_ds);
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now() - start);
 
@@ -452,7 +530,7 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.11";
         config.proposed_contexts.push_back({
             1,
-            verification_sop_class_uid,
+            std::string(verification_sop_class_uid),
             {"1.2.840.10008.1.2.1"}
         });
 
@@ -476,7 +554,7 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.12";
         config.proposed_contexts.push_back({
             1,
-            verification_sop_class_uid,
+            std::string(verification_sop_class_uid),
             {"1.2.840.10008.1.2.1"}
         });
 
@@ -506,7 +584,7 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
     config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.13";
     config.proposed_contexts.push_back({
         1,
-        verification_sop_class_uid,
+        std::string(verification_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -541,7 +619,7 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
                 config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.14";
                 config.proposed_contexts.push_back({
                     1,
-                    verification_sop_class_uid,
+                    std::string(verification_sop_class_uid),
                     {"1.2.840.10008.1.2.1"}
                 });
 
@@ -585,7 +663,7 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
                     auto& assoc = connect.value();
                     storage_scu scu{{}};
                     auto ds = generate_ct_dataset();
-                    auto result = scu.store_dataset(assoc, ds);
+                    auto result = scu.store(assoc, ds);
                     if (result.is_ok() && result.value().is_success()) {
                         ++store_success;
                     }

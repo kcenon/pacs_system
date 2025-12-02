@@ -221,9 +221,19 @@ public:
      */
     void on_error(error_callback callback);
 
+    /**
+     * @brief Get server instance listening on port (for in-memory testing).
+     */
+    static dicom_server* get_server_on_port(uint16_t port);
+
+    /**
+     * @brief Simulate an incoming association request (for in-memory testing).
+     */
+    Result<associate_ac> simulate_association_request(const associate_rq& rq, association* client_peer);
+
 private:
     // =========================================================================
-    // Private Types
+    // Private Implementation
     // =========================================================================
 
     /// Internal association info for tracking
@@ -233,6 +243,7 @@ private:
         time_point connected_at;
         time_point last_activity;
         std::string remote_address;
+        std::thread worker_thread;
     };
 
     // =========================================================================
@@ -296,7 +307,7 @@ private:
     std::unordered_map<std::string, services::scp_service*> sop_class_to_service_;
 
     /// Active associations
-    std::unordered_map<uint64_t, association_info> associations_;
+    std::unordered_map<uint64_t, std::unique_ptr<association_info>> associations_;
 
     /// Server statistics
     mutable server_statistics stats_;

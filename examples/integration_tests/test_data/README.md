@@ -9,6 +9,7 @@ through the `test_fixtures.hpp` helper functions:
 
 - `generate_ct_dataset()` - Creates minimal CT Image datasets
 - `generate_mr_dataset()` - Creates minimal MR Image datasets
+- `generate_xa_dataset()` - Creates minimal XA (X-Ray Angiographic) Image datasets
 - `generate_worklist_item()` - Creates Worklist query items
 
 This approach ensures:
@@ -27,6 +28,8 @@ test_data/
 │   └── *.dcm         # CT Image files
 ├── mr/
 │   └── *.dcm         # MR Image files
+├── xa/
+│   └── *.dcm         # XA (X-Ray Angiographic) Image files
 ├── us/
 │   └── *.dcm         # US Image files
 └── multiframe/

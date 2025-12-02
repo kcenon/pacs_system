@@ -34,6 +34,7 @@ using namespace pacs::network::dimse;
 using namespace pacs::services;
 using namespace pacs::storage;
 using namespace pacs::core;
+using namespace pacs::encoding;
 
 // =============================================================================
 // Helper: Simple PACS Server for Testing
@@ -70,8 +71,14 @@ public:
         server_ = std::make_unique<dicom_server>(config);
 
         // Initialize storage and database
-        file_storage_ = std::make_unique<file_storage>(storage_dir_);
-        database_ = std::make_unique<index_database>(db_path_);
+        file_storage_config fs_config;
+        fs_config.root_path = storage_dir_;
+        file_storage_ = std::make_unique<file_storage>(fs_config);
+        auto db_result = index_database::open(db_path_.string());
+        if (db_result.is_err()) {
+            throw std::runtime_error("Failed to open database: " + db_result.error().message);
+        }
+        database_ = std::move(db_result.value());
     }
 
     bool initialize() {
@@ -80,7 +87,7 @@ public:
 
         // Storage SCP with callback to store files
         auto storage_scp_ptr = std::make_shared<storage_scp>();
-        storage_scp_ptr->on_store([this](
+        storage_scp_ptr->set_handler([this](
             const dicom_dataset& dataset,
             const std::string& calling_ae,
             const std::string& sop_class_uid,
@@ -92,7 +99,7 @@ public:
 
         // Query SCP with callback
         auto query_scp_ptr = std::make_shared<query_scp>();
-        query_scp_ptr->on_query([this](
+        query_scp_ptr->set_handler([this](
             query_level level,
             const dicom_dataset& query_keys,
             const std::string& calling_ae) -> std::vector<dicom_dataset> {
@@ -103,14 +110,14 @@ public:
 
         // Retrieve SCP with callback
         auto retrieve_scp_ptr = std::make_shared<retrieve_scp>();
-        retrieve_scp_ptr->on_retrieve([this](
+        retrieve_scp_ptr->set_retrieve_handler([this](
             const dicom_dataset& query_keys) -> std::vector<dicom_file> {
 
             return handle_retrieve(query_keys);
         });
         server_->register_service(retrieve_scp_ptr);
 
-        return database_->initialize();
+        return true;
     }
 
     bool start() {
@@ -135,19 +142,48 @@ private:
         const dicom_dataset& dataset,
         const std::string& /* calling_ae */,
         const std::string& /* sop_class_uid */,
-        const std::string& sop_instance_uid) {
+        const std::string& /* sop_instance_uid */) {
 
         // Store to filesystem
         auto store_result = file_storage_->store(dataset);
-        if (!store_result) {
-            return storage_status::processing_failure;
+        if (store_result.is_err()) {
+            return storage_status::storage_error;
         }
 
         // Index in database
-        auto index_result = database_->index(dataset, store_result.value());
-        if (!index_result) {
-            return storage_status::processing_failure;
-        }
+        // 1. Patient
+        auto pat_id = dataset.get_string(tags::patient_id);
+        auto pat_name = dataset.get_string(tags::patient_name);
+        auto pat_birth = dataset.get_string(tags::patient_birth_date);
+        auto pat_sex = dataset.get_string(tags::patient_sex);
+        
+        auto pat_res = database_->upsert_patient(pat_id, pat_name, pat_birth, pat_sex);
+        if (pat_res.is_err()) return storage_status::storage_error;
+        auto pat_pk = pat_res.value();
+
+        // 2. Study
+        auto study_uid = dataset.get_string(tags::study_instance_uid);
+        auto study_res = database_->upsert_study(pat_pk, study_uid);
+        if (study_res.is_err()) return storage_status::storage_error;
+        auto study_pk = study_res.value();
+
+        // 3. Series
+        auto series_uid = dataset.get_string(tags::series_instance_uid);
+        auto series_res = database_->upsert_series(study_pk, series_uid);
+        if (series_res.is_err()) return storage_status::storage_error;
+        auto series_pk = series_res.value();
+
+        // 4. Instance
+        auto sop_uid = dataset.get_string(tags::sop_instance_uid);
+        auto sop_class = dataset.get_string(tags::sop_class_uid);
+        auto file_path = file_storage_->get_file_path(sop_uid).string();
+        
+        std::error_code ec;
+        auto file_size = std::filesystem::file_size(file_path, ec);
+        if (ec) file_size = 0;
+
+        auto inst_res = database_->upsert_instance(series_pk, sop_uid, sop_class, file_path, static_cast<int64_t>(file_size));
+        if (inst_res.is_err()) return storage_status::storage_error;
 
         ++stored_count_;
         return storage_status::success;
@@ -158,21 +194,61 @@ private:
         const dicom_dataset& query_keys,
         const std::string& /* calling_ae */) {
 
-        return database_->query(level, query_keys);
+        std::vector<dicom_dataset> results;
+
+        if (level == query_level::study) {
+            study_query query;
+            auto study_uid_val = query_keys.get_string(tags::study_instance_uid);
+            if (!study_uid_val.empty()) query.study_uid = study_uid_val;
+            
+            auto pat_id_val = query_keys.get_string(tags::patient_id);
+            if (!pat_id_val.empty()) query.patient_id = pat_id_val;
+            
+            auto pat_name_val = query_keys.get_string(tags::patient_name);
+            if (!pat_name_val.empty()) query.patient_name = pat_name_val;
+
+            auto studies = database_->search_studies(query);
+            for (const auto& study : studies) {
+                dicom_dataset ds;
+                ds.set_string(tags::study_instance_uid, vr_type::UI, study.study_uid);
+                ds.set_string(tags::study_id, vr_type::SH, study.study_id);
+                ds.set_string(tags::study_date, vr_type::DA, study.study_date);
+                ds.set_string(tags::study_time, vr_type::TM, study.study_time);
+                ds.set_string(tags::accession_number, vr_type::SH, study.accession_number);
+                ds.set_string(tags::study_description, vr_type::LO, study.study_description);
+                ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+
+                auto patient = database_->find_patient_by_pk(study.patient_pk);
+                if (patient) {
+                    ds.set_string(tags::patient_name, vr_type::PN, patient->patient_name);
+                    ds.set_string(tags::patient_id, vr_type::LO, patient->patient_id);
+                    ds.set_string(tags::patient_birth_date, vr_type::DA, patient->birth_date);
+                    ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
+                }
+                
+                results.push_back(std::move(ds));
+            }
+        }
+        return results;
     }
 
     std::vector<dicom_file> handle_retrieve(const dicom_dataset& query_keys) {
         std::vector<dicom_file> results;
 
-        // Get file paths from database
-        auto paths = database_->get_file_paths(query_keys);
-        for (const auto& path : paths) {
-            auto file_result = dicom_file::open(path);
-            if (file_result.has_value()) {
-                results.push_back(std::move(file_result.value()));
+        auto study_uid = query_keys.get_string(tags::study_instance_uid);
+        if (!study_uid.empty()) {
+            auto series_list = database_->list_series(study_uid);
+            for (const auto& series : series_list) {
+                auto instance_list = database_->list_instances(series.series_uid);
+                for (const auto& inst : instance_list) {
+                    auto path = file_storage_->get_file_path(inst.sop_uid);
+                    auto file_result = dicom_file::open(path);
+                    if (file_result.has_value()) {
+                        results.push_back(std::move(file_result.value()));
+                    }
+                }
             }
         }
-
         return results;
     }
 
@@ -229,7 +305,7 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
         scu_config.response_timeout = default_timeout;
         storage_scu scu{scu_config};
 
-        auto store_result = scu.store_dataset(assoc, dataset);
+        auto store_result = scu.store(assoc, dataset);
         REQUIRE(store_result.is_ok());
         REQUIRE(store_result.value().is_success());
 
@@ -245,7 +321,7 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
         query_config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.3";
         query_config.proposed_contexts.push_back({
             1,
-            study_root_query_retrieve_information_model_find,
+            std::string(study_root_find_sop_class_uid),
             {"1.2.840.10008.1.2.1", "1.2.840.10008.1.2"}
         });
 
@@ -257,19 +333,19 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
 
         // Create query keys
         dicom_dataset query_keys;
-        query_keys.set_string(tags::query_retrieve_level, "STUDY");
-        query_keys.set_string(tags::study_instance_uid, study_uid);
-        query_keys.set_string(tags::patient_name, "");  // Return all
+        query_keys.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+        query_keys.set_string(tags::study_instance_uid, vr_type::UI, study_uid);
+        query_keys.set_string(tags::patient_name, vr_type::PN, "");  // Return all
 
         auto context_id = *query_assoc.accepted_context_id(
-            study_root_query_retrieve_information_model_find);
+            study_root_find_sop_class_uid);
 
         // Send C-FIND
         auto find_rq = make_c_find_rq(
             1,
-            study_root_query_retrieve_information_model_find,
-            query_keys
+            study_root_find_sop_class_uid
         );
+        find_rq.set_dataset(std::move(query_keys));
         auto send_result = query_assoc.send_dimse(context_id, find_rq);
         REQUIRE(send_result.is_ok());
 
@@ -315,7 +391,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     std::vector<dicom_dataset> datasets;
     for (int i = 0; i < num_images; ++i) {
         auto ds = generate_ct_dataset(study_uid, series_uid);
-        ds.set_string(tags::instance_number, std::to_string(i + 1));
+        ds.set_string(tags::instance_number, vr_type::IS, std::to_string(i + 1));
         datasets.push_back(std::move(ds));
     }
 
@@ -340,7 +416,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     storage_scu scu{scu_config};
 
     for (const auto& ds : datasets) {
-        auto result = scu.store_dataset(assoc, ds);
+        auto result = scu.store(assoc, ds);
         REQUIRE(result.is_ok());
         REQUIRE(result.value().is_success());
     }
@@ -356,7 +432,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     query_config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.3";
     query_config.proposed_contexts.push_back({
         1,
-        study_root_query_retrieve_information_model_find,
+        std::string(study_root_find_sop_class_uid),
         {"1.2.840.10008.1.2.1", "1.2.840.10008.1.2"}
     });
 
@@ -367,15 +443,16 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     auto& query_assoc = query_connect.value();
 
     dicom_dataset query_keys;
-    query_keys.set_string(tags::query_retrieve_level, "SERIES");
-    query_keys.set_string(tags::study_instance_uid, study_uid);
-    query_keys.set_string(tags::series_instance_uid, "");
-    query_keys.set_string(tags::number_of_series_related_instances, "");
+    query_keys.set_string(tags::query_retrieve_level, vr_type::CS, "SERIES");
+    query_keys.set_string(tags::study_instance_uid, vr_type::UI, study_uid);
+    query_keys.set_string(tags::series_instance_uid, vr_type::UI, "");
+    query_keys.set_string(tags::number_of_series_related_instances, vr_type::IS, "");
 
     auto context_id = *query_assoc.accepted_context_id(
-        study_root_query_retrieve_information_model_find);
+        study_root_find_sop_class_uid);
 
-    auto find_rq = make_c_find_rq(1, study_root_query_retrieve_information_model_find, query_keys);
+    auto find_rq = make_c_find_rq(1, study_root_find_sop_class_uid);
+    find_rq.set_dataset(std::move(query_keys));
     (void)query_assoc.send_dimse(context_id, find_rq);
 
     std::vector<dicom_dataset> results;
@@ -436,10 +513,10 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     auto& assoc = connect_result.value();
     storage_scu scu{{}};
 
-    auto ct_result = scu.store_dataset(assoc, ct_dataset);
+    auto ct_result = scu.store(assoc, ct_dataset);
     REQUIRE(ct_result.is_ok());
 
-    auto mr_result = scu.store_dataset(assoc, mr_dataset);
+    auto mr_result = scu.store(assoc, mr_dataset);
     REQUIRE(mr_result.is_ok());
 
     (void)assoc.release(default_timeout);
@@ -453,7 +530,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     query_config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.3";
     query_config.proposed_contexts.push_back({
         1,
-        study_root_query_retrieve_information_model_find,
+        std::string(study_root_find_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -465,14 +542,15 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
 
     // Query for CT studies only
     dicom_dataset ct_query;
-    ct_query.set_string(tags::query_retrieve_level, "STUDY");
-    ct_query.set_string(tags::modalities_in_study, "CT");
-    ct_query.set_string(tags::study_instance_uid, "");
+    ct_query.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+    ct_query.set_string(tags::modalities_in_study, vr_type::CS, "CT");
+    ct_query.set_string(tags::study_instance_uid, vr_type::UI, "");
 
     auto context_id = *query_assoc.accepted_context_id(
-        study_root_query_retrieve_information_model_find);
+        study_root_find_sop_class_uid);
 
-    auto find_rq = make_c_find_rq(1, study_root_query_retrieve_information_model_find, ct_query);
+    auto find_rq = make_c_find_rq(1, study_root_find_sop_class_uid);
+    find_rq.set_dataset(std::move(ct_query));
     (void)query_assoc.send_dimse(context_id, find_rq);
 
     std::vector<dicom_dataset> ct_results;
@@ -525,10 +603,10 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
 
     for (const auto& name : patient_names) {
         auto ds = generate_ct_dataset();
-        ds.set_string(tags::patient_name, name);
-        ds.set_string(tags::patient_id, "PID_" + name.substr(0, 5));
+        ds.set_string(tags::patient_name, vr_type::PN, name);
+        ds.set_string(tags::patient_id, vr_type::LO, "PID_" + name.substr(0, 5));
 
-        auto result = scu.store_dataset(assoc, ds);
+        auto result = scu.store(assoc, ds);
         REQUIRE(result.is_ok());
     }
 
@@ -541,7 +619,7 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
     query_config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.3";
     query_config.proposed_contexts.push_back({
         1,
-        study_root_query_retrieve_information_model_find,
+        std::string(study_root_find_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -553,14 +631,15 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
 
     // Query for all SMITH patients
     dicom_dataset query_keys;
-    query_keys.set_string(tags::query_retrieve_level, "STUDY");
-    query_keys.set_string(tags::patient_name, "SMITH*");
-    query_keys.set_string(tags::study_instance_uid, "");
+    query_keys.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+    query_keys.set_string(tags::patient_name, vr_type::PN, "SMITH*");
+    query_keys.set_string(tags::study_instance_uid, vr_type::UI, "");
 
     auto context_id = *query_assoc.accepted_context_id(
-        study_root_query_retrieve_information_model_find);
+        study_root_find_sop_class_uid);
 
-    auto find_rq = make_c_find_rq(1, study_root_query_retrieve_information_model_find, query_keys);
+    auto find_rq = make_c_find_rq(1, study_root_find_sop_class_uid);
+    find_rq.set_dataset(std::move(query_keys));
     (void)query_assoc.send_dimse(context_id, find_rq);
 
     std::vector<dicom_dataset> results;

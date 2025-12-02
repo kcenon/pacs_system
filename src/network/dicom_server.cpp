@@ -16,6 +16,10 @@ using kcenon::common::error_info;
 
 namespace pacs::network {
 
+// Registry for in-memory testing
+static std::mutex registry_mutex_;
+static std::map<uint16_t, dicom_server*> server_registry_;
+
 // =============================================================================
 // Construction / Destruction
 // =============================================================================
@@ -116,12 +120,24 @@ Result<std::monostate> dicom_server::start() {
         accept_loop();
     });
 
+    // Register in global registry
+    {
+        std::lock_guard<std::mutex> lock(registry_mutex_);
+        server_registry_[config_.port] = this;
+    }
+
     return std::monostate{};
 }
 
 void dicom_server::stop(duration timeout) {
     if (!running_.exchange(false)) {
         return;  // Already stopped
+    }
+
+    // Unregister from global registry
+    {
+        std::lock_guard<std::mutex> lock(registry_mutex_);
+        server_registry_.erase(config_.port);
     }
 
     // Wake up the accept loop
@@ -148,9 +164,17 @@ void dicom_server::stop(duration timeout) {
 
         // Force abort remaining associations
         for (auto& [id, info] : associations_) {
-            info.assoc.abort(
+            info->assoc.abort(
                 static_cast<uint8_t>(abort_source::service_provider),
                 static_cast<uint8_t>(abort_reason::not_specified));
+            
+            if (info->worker_thread.joinable()) {
+                if (info->worker_thread.get_id() == std::this_thread::get_id()) {
+                    info->worker_thread.detach();
+                } else {
+                    info->worker_thread.join();
+                }
+            }
         }
         associations_.clear();
     }
@@ -384,19 +408,29 @@ services::scp_service* dicom_server::find_service(
 void dicom_server::add_association(association_info info) {
     std::lock_guard<std::mutex> lock(associations_mutex_);
     auto id = info.id;
-    associations_.emplace(id, std::move(info));
+    associations_.emplace(id, std::make_unique<association_info>(std::move(info)));
 }
 
 void dicom_server::remove_association(uint64_t id) {
     std::lock_guard<std::mutex> lock(associations_mutex_);
-    associations_.erase(id);
+    auto it = associations_.find(id);
+    if (it != associations_.end()) {
+        if (it->second->worker_thread.joinable()) {
+            if (it->second->worker_thread.get_id() == std::this_thread::get_id()) {
+                it->second->worker_thread.detach();
+            } else {
+                it->second->worker_thread.join();
+            }
+        }
+        associations_.erase(it);
+    }
 }
 
 void dicom_server::touch_association(uint64_t id) {
     std::lock_guard<std::mutex> lock(associations_mutex_);
     auto it = associations_.find(id);
     if (it != associations_.end()) {
-        it->second.last_activity = clock::now();
+        it->second->last_activity = clock::now();
     }
 }
 
@@ -412,7 +446,7 @@ void dicom_server::check_idle_timeouts() {
         std::lock_guard<std::mutex> lock(associations_mutex_);
         for (auto& [id, info] : associations_) {
             auto idle_duration = std::chrono::duration_cast<std::chrono::seconds>(
-                now - info.last_activity);
+                now - info->last_activity);
 
             if (idle_duration >= config_.idle_timeout) {
                 timed_out.push_back(id);
@@ -423,7 +457,7 @@ void dicom_server::check_idle_timeouts() {
         for (auto id : timed_out) {
             auto it = associations_.find(id);
             if (it != associations_.end()) {
-                it->second.assoc.abort(
+                it->second->assoc.abort(
                     static_cast<uint8_t>(abort_source::service_provider),
                     static_cast<uint8_t>(abort_reason::not_specified));
             }
@@ -440,6 +474,72 @@ void dicom_server::report_error(const std::string& error) {
     if (on_error_cb_) {
         on_error_cb_(error);
     }
+}
+
+dicom_server* dicom_server::get_server_on_port(uint16_t port) {
+    std::lock_guard<std::mutex> lock(registry_mutex_);
+    auto it = server_registry_.find(port);
+    return it != server_registry_.end() ? it->second : nullptr;
+}
+
+Result<associate_ac> dicom_server::simulate_association_request(const associate_rq& rq, association* client_peer) {
+    // Validate called AE title
+    if (!validate_called_ae(rq.called_ae_title)) {
+        return error_info("Called AE Title not recognized");
+    }
+
+    // Validate calling AE title
+    if (!validate_calling_ae(rq.calling_ae_title)) {
+        return error_info("Calling AE Title not recognized");
+    }
+
+    // Create SCP configuration for negotiation
+    scp_config negotiation_config;
+    negotiation_config.ae_title = config_.ae_title;
+    negotiation_config.max_pdu_length = config_.max_pdu_size;
+    negotiation_config.implementation_class_uid = config_.implementation_class_uid;
+    negotiation_config.implementation_version_name = config_.implementation_version_name;
+    negotiation_config.supported_abstract_syntaxes = supported_sop_classes();
+    // For now, accept all transfer syntaxes or define default list
+    negotiation_config.supported_transfer_syntaxes = {
+        "1.2.840.10008.1.2.1", // Explicit VR LE
+        "1.2.840.10008.1.2"    // Implicit VR LE
+    };
+
+    // Accept association
+    auto assoc = association::accept(rq, negotiation_config);
+
+    if (!assoc.is_established()) {
+        return error_info("Association rejected: no acceptable presentation contexts");
+    }
+
+    // Build AC PDU before moving association
+    auto ac = assoc.build_associate_ac();
+
+    // Register association
+    uint64_t id = next_association_id();
+    handle_association(id, std::move(assoc));
+
+    // Link peers and start thread
+    {
+        std::lock_guard<std::mutex> lock(associations_mutex_);
+        auto it = associations_.find(id);
+        if (it != associations_.end()) {
+            // Link peers
+            it->second->assoc.set_peer(client_peer);
+            client_peer->set_peer(&it->second->assoc);
+
+            // Start message loop thread
+            // We need to capture the raw pointer to info because unique_ptr is in the map.
+            // The map might rehash but the unique_ptr value (the pointer to association_info) is stable.
+            auto* info_ptr = it->second.get();
+            it->second->worker_thread = std::thread([this, info_ptr]() {
+                message_loop(*info_ptr);
+            });
+        }
+    }
+
+    return ac;
 }
 
 }  // namespace pacs::network

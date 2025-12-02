@@ -31,12 +31,22 @@ using namespace pacs::network;
 using namespace pacs::network::dimse;
 using namespace pacs::services;
 using namespace pacs::core;
+using namespace pacs::encoding;
 
 // =============================================================================
 // Helper: RIS Mock Server
 // =============================================================================
 
 namespace {
+
+// Local tag definitions for missing constants
+namespace local_tags {
+    inline constexpr dicom_tag requested_procedure_description{0x0032, 0x1060};
+    inline constexpr dicom_tag performed_procedure_step_discontinuation_reason_code_sequence{0x0040, 0x0281};
+    inline constexpr dicom_tag performed_procedure_step_description{0x0040, 0x0254};
+}
+using namespace local_tags;
+using namespace pacs::services::mpps_tags;
 
 /**
  * @brief Mock RIS server for worklist and MPPS testing
@@ -68,23 +78,23 @@ public:
 
         // Register Worklist SCP
         auto worklist_scp_ptr = std::make_shared<worklist_scp>();
-        worklist_scp_ptr->on_query([this](
-            const dicom_dataset& query_keys,
+        worklist_scp_ptr->set_handler([this](
+            const dicom_dataset& query,
             const std::string& /* calling_ae */) -> std::vector<dicom_dataset> {
-            return handle_worklist_query(query_keys);
+            return this->query_worklist(query);
         });
         server_->register_service(worklist_scp_ptr);
 
         // Register MPPS SCP
         auto mpps_scp_ptr = std::make_shared<mpps_scp>();
-        mpps_scp_ptr->on_create([this](const mpps_instance& instance) -> Result<std::monostate> {
-            return handle_mpps_create(instance);
+        mpps_scp_ptr->set_create_handler([this](const mpps_instance& instance) -> Result<std::monostate> {
+            return this->create_mpps(instance);
         });
-        mpps_scp_ptr->on_set([this](
-            const std::string& sop_instance_uid,
+        mpps_scp_ptr->set_set_handler([this](
+            const std::string& uid,
             const dicom_dataset& modifications,
-            mpps_status new_status) -> Result<std::monostate> {
-            return handle_mpps_set(sop_instance_uid, modifications, new_status);
+            mpps_status status) -> Result<std::monostate> {
+            return this->update_mpps(uid, modifications, status);
         });
         server_->register_service(mpps_scp_ptr);
 
@@ -147,7 +157,7 @@ public:
     }
 
 private:
-    std::vector<dicom_dataset> handle_worklist_query(const dicom_dataset& query_keys) {
+    std::vector<dicom_dataset> query_worklist(const dicom_dataset& query_keys) {
         std::lock_guard<std::mutex> lock(mutex_);
 
         std::vector<dicom_dataset> results;
@@ -189,14 +199,14 @@ private:
         return results;
     }
 
-    Result<std::monostate> handle_mpps_create(const mpps_instance& instance) {
+    Result<std::monostate> create_mpps(const mpps_instance& instance) {
         std::lock_guard<std::mutex> lock(mutex_);
 
         // Check for duplicate
         for (const auto& existing : mpps_instances_) {
             if (existing.sop_instance_uid == instance.sop_instance_uid) {
                 return Result<std::monostate>::err({
-                    dimse_error_code::duplicate_sop_instance,
+                    pacs::network::dimse::dimse_error::invalid_data_format,
                     "MPPS instance already exists"
                 });
             }
@@ -206,7 +216,7 @@ private:
         return Result<std::monostate>::ok({});
     }
 
-    Result<std::monostate> handle_mpps_set(
+    Result<std::monostate> update_mpps(
         const std::string& sop_instance_uid,
         const dicom_dataset& modifications,
         mpps_status new_status) {
@@ -219,21 +229,21 @@ private:
                 if (mpps.status == mpps_status::completed ||
                     mpps.status == mpps_status::discontinued) {
                     return Result<std::monostate>::err({
-                        dimse_error_code::invalid_attribute_value,
+                        pacs::network::dimse::dimse_error::invalid_data_format,
                         "Cannot modify completed/discontinued MPPS"
                     });
                 }
 
                 // Update status and merge modifications
                 mpps.status = new_status;
-                mpps.dataset.merge(modifications);
+                mpps.data.merge(modifications);
 
                 return Result<std::monostate>::ok({});
             }
         }
 
         return Result<std::monostate>::err({
-            dimse_error_code::no_such_sop_instance,
+            pacs::network::dimse::dimse_error::invalid_data_format,
             "MPPS instance not found"
         });
     }
@@ -262,24 +272,24 @@ dicom_dataset create_scheduled_procedure(
     dicom_dataset ds;
 
     // Patient module
-    ds.set_string(tags::patient_name, patient_name);
-    ds.set_string(tags::patient_id, patient_id);
-    ds.set_string(tags::patient_birth_date, "19800101");
-    ds.set_string(tags::patient_sex, "M");
+    ds.set_string(tags::patient_name, vr_type::PN, patient_name);
+    ds.set_string(tags::patient_id, vr_type::LO, patient_id);
+    ds.set_string(tags::patient_birth_date, vr_type::DA, "19800101");
+    ds.set_string(tags::patient_sex, vr_type::CS, "M");
 
     // Scheduled Procedure Step
-    ds.set_string(tags::scheduled_procedure_step_start_date, scheduled_date);
-    ds.set_string(tags::scheduled_procedure_step_start_time, scheduled_time);
-    ds.set_string(tags::modality, modality);
-    ds.set_string(tags::scheduled_station_ae_title, station_ae);
-    ds.set_string(tags::scheduled_procedure_step_description, procedure_desc);
-    ds.set_string(tags::scheduled_procedure_step_id, generate_uid());
+    ds.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, scheduled_date);
+    ds.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, scheduled_time);
+    ds.set_string(tags::modality, vr_type::CS, modality);
+    ds.set_string(tags::scheduled_station_ae_title, vr_type::AE, station_ae);
+    ds.set_string(tags::scheduled_procedure_step_description, vr_type::LO, procedure_desc);
+    ds.set_string(tags::scheduled_procedure_step_id, vr_type::SH, generate_uid());
 
     // Requested Procedure
-    ds.set_string(tags::requested_procedure_id, "RP_" + patient_id);
-    ds.set_string(tags::accession_number, "ACC_" + patient_id);
-    ds.set_string(tags::study_instance_uid, generate_uid());
-    ds.set_string(tags::requested_procedure_description, procedure_desc);
+    ds.set_string(tags::requested_procedure_id, vr_type::SH, "RP_" + patient_id);
+    ds.set_string(tags::accession_number, vr_type::SH, "ACC_" + patient_id);
+    ds.set_string(tags::study_instance_uid, vr_type::UI, generate_uid());
+    ds.set_string(requested_procedure_description, vr_type::LO, procedure_desc);
 
     return ds;
 }
@@ -312,7 +322,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.6";
         config.proposed_contexts.push_back({
             1,
-            modality_worklist_information_model_find,
+            std::string(worklist_find_sop_class_uid),
             {"1.2.840.10008.1.2.1", "1.2.840.10008.1.2"}
         });
 
@@ -324,14 +334,15 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
 
         // Query all (empty criteria = return all)
         dicom_dataset query_keys;
-        query_keys.set_string(tags::patient_name, "");
-        query_keys.set_string(tags::patient_id, "");
-        query_keys.set_string(tags::modality, "");
-        query_keys.set_string(tags::scheduled_procedure_step_start_date, "");
-        query_keys.set_string(tags::scheduled_station_ae_title, "");
+        query_keys.set_string(tags::patient_name, vr_type::PN, "");
+        query_keys.set_string(tags::patient_id, vr_type::LO, "");
+        query_keys.set_string(tags::modality, vr_type::CS, "");
+        query_keys.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, "");
+        query_keys.set_string(tags::scheduled_station_ae_title, vr_type::AE, "");
 
-        auto context_id = *assoc.accepted_context_id(modality_worklist_information_model_find);
-        auto find_rq = make_c_find_rq(1, modality_worklist_information_model_find, query_keys);
+        auto context_id = *assoc.accepted_context_id(worklist_find_sop_class_uid);
+        auto find_rq = make_c_find_rq(1, worklist_find_sop_class_uid);
+        find_rq.set_dataset(std::move(query_keys));
         (void)assoc.send_dimse(context_id, find_rq);
 
         std::vector<dicom_dataset> results;
@@ -358,7 +369,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.6";
         config.proposed_contexts.push_back({
             1,
-            modality_worklist_information_model_find,
+            std::string(worklist_find_sop_class_uid),
             {"1.2.840.10008.1.2.1"}
         });
 
@@ -370,12 +381,13 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
 
         // Query CT only
         dicom_dataset query_keys;
-        query_keys.set_string(tags::patient_name, "");
-        query_keys.set_string(tags::modality, "CT");
-        query_keys.set_string(tags::scheduled_station_ae_title, "");
+        query_keys.set_string(tags::patient_name, vr_type::PN, "");
+        query_keys.set_string(tags::modality, vr_type::CS, "CT");
+        query_keys.set_string(tags::scheduled_station_ae_title, vr_type::AE, "");
 
-        auto context_id = *assoc.accepted_context_id(modality_worklist_information_model_find);
-        auto find_rq = make_c_find_rq(1, modality_worklist_information_model_find, query_keys);
+        auto context_id = *assoc.accepted_context_id(worklist_find_sop_class_uid);
+        auto find_rq = make_c_find_rq(1, worklist_find_sop_class_uid);
+        find_rq.set_dataset(std::move(query_keys));
         (void)assoc.send_dimse(context_id, find_rq);
 
         std::vector<dicom_dataset> results;
@@ -424,7 +436,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     wl_config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.6";
     wl_config.proposed_contexts.push_back({
         1,
-        modality_worklist_information_model_find,
+        std::string(worklist_find_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -434,11 +446,12 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     auto& wl_assoc = wl_connect.value();
 
     dicom_dataset wl_query;
-    wl_query.set_string(tags::patient_id, "MPPS001");
-    wl_query.set_string(tags::modality, "CT");
+    wl_query.set_string(tags::patient_id, vr_type::LO, "MPPS001");
+    wl_query.set_string(tags::modality, vr_type::CS, "CT");
 
-    auto wl_ctx = *wl_assoc.accepted_context_id(modality_worklist_information_model_find);
-    auto wl_rq = make_c_find_rq(1, modality_worklist_information_model_find, wl_query);
+    auto wl_ctx = *wl_assoc.accepted_context_id(worklist_find_sop_class_uid);
+    auto wl_rq = make_c_find_rq(1, worklist_find_sop_class_uid);
+    wl_rq.set_dataset(std::move(wl_query));
     (void)wl_assoc.send_dimse(wl_ctx, wl_rq);
 
     std::vector<dicom_dataset> wl_results;
@@ -462,7 +475,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     mpps_config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.6";
     mpps_config.proposed_contexts.push_back({
         1,
-        mpps_sop_class_uid,
+        std::string(mpps_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -473,17 +486,18 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
 
     // Create N-CREATE for MPPS IN PROGRESS
     dicom_dataset mpps_create_ds;
-    mpps_create_ds.set_string(tags::performed_procedure_step_status, "IN PROGRESS");
-    mpps_create_ds.set_string(tags::performed_procedure_step_start_date, "20240201");
-    mpps_create_ds.set_string(tags::performed_procedure_step_start_time, "091500");
-    mpps_create_ds.set_string(tags::performed_station_ae_title, "CT_SCANNER");
-    mpps_create_ds.set_string(tags::modality, "CT");
-    mpps_create_ds.set_string(tags::study_instance_uid, study_uid);
-    mpps_create_ds.set_string(tags::patient_name, "MPPS^TEST");
-    mpps_create_ds.set_string(tags::patient_id, "MPPS001");
+    mpps_create_ds.set_string(tags::performed_procedure_step_status, vr_type::CS, "IN PROGRESS");
+    mpps_create_ds.set_string(tags::performed_procedure_step_start_date, vr_type::DA, "20240201");
+    mpps_create_ds.set_string(tags::performed_procedure_step_start_time, vr_type::TM, "091500");
+    mpps_create_ds.set_string(performed_station_ae_title, vr_type::AE, "CT_SCANNER");
+    mpps_create_ds.set_string(tags::modality, vr_type::CS, "CT");
+    mpps_create_ds.set_string(tags::study_instance_uid, vr_type::UI, study_uid);
+    mpps_create_ds.set_string(tags::patient_name, vr_type::PN, "MPPS^TEST");
+    mpps_create_ds.set_string(tags::patient_id, vr_type::LO, "MPPS001");
 
     auto mpps_ctx = *mpps_assoc.accepted_context_id(mpps_sop_class_uid);
-    auto n_create_rq = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid, mpps_create_ds);
+    auto n_create_rq = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid);
+    n_create_rq.set_dataset(std::move(mpps_create_ds));
     (void)mpps_assoc.send_dimse(mpps_ctx, n_create_rq);
 
     auto create_recv = mpps_assoc.receive_dimse(default_timeout);
@@ -500,11 +514,12 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
 
     // Step 3: Update MPPS (COMPLETED)
     dicom_dataset mpps_set_ds;
-    mpps_set_ds.set_string(tags::performed_procedure_step_status, "COMPLETED");
-    mpps_set_ds.set_string(tags::performed_procedure_step_end_date, "20240201");
-    mpps_set_ds.set_string(tags::performed_procedure_step_end_time, "093000");
+    mpps_set_ds.set_string(tags::performed_procedure_step_status, vr_type::CS, "COMPLETED");
+    mpps_set_ds.set_string(performed_procedure_step_end_date, vr_type::DA, "20240201");
+    mpps_set_ds.set_string(performed_procedure_step_end_time, vr_type::TM, "093000");
 
-    auto n_set_rq = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid, mpps_set_ds);
+    auto n_set_rq = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid);
+    n_set_rq.set_dataset(std::move(mpps_set_ds));
     (void)mpps_assoc.send_dimse(mpps_ctx, n_set_rq);
 
     auto set_recv = mpps_assoc.receive_dimse(default_timeout);
@@ -537,7 +552,7 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
     config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.6";
     config.proposed_contexts.push_back({
         1,
-        mpps_sop_class_uid,
+        std::string(mpps_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -548,17 +563,18 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
 
     // Create MPPS IN PROGRESS
     dicom_dataset mpps_ds;
-    mpps_ds.set_string(tags::performed_procedure_step_status, "IN PROGRESS");
-    mpps_ds.set_string(tags::performed_procedure_step_start_date, "20240201");
-    mpps_ds.set_string(tags::performed_procedure_step_start_time, "100000");
-    mpps_ds.set_string(tags::performed_station_ae_title, "CT_SCANNER");
-    mpps_ds.set_string(tags::modality, "CT");
-    mpps_ds.set_string(tags::study_instance_uid, generate_uid());
-    mpps_ds.set_string(tags::patient_name, "DISCONTINUE^TEST");
-    mpps_ds.set_string(tags::patient_id, "DISC001");
+    mpps_ds.set_string(tags::performed_procedure_step_status, vr_type::CS, "IN PROGRESS");
+    mpps_ds.set_string(tags::performed_procedure_step_start_date, vr_type::DA, "20240201");
+    mpps_ds.set_string(tags::performed_procedure_step_start_time, vr_type::TM, "100000");
+    mpps_ds.set_string(performed_station_ae_title, vr_type::AE, "CT_SCANNER");
+    mpps_ds.set_string(tags::modality, vr_type::CS, "CT");
+    mpps_ds.set_string(tags::study_instance_uid, vr_type::UI, generate_uid());
+    mpps_ds.set_string(tags::patient_name, vr_type::PN, "DISCONTINUE^TEST");
+    mpps_ds.set_string(tags::patient_id, vr_type::LO, "DISC001");
 
     auto ctx = *assoc.accepted_context_id(mpps_sop_class_uid);
-    auto n_create = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid, mpps_ds);
+    auto n_create = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid);
+    n_create.set_dataset(std::move(mpps_ds));
     (void)assoc.send_dimse(ctx, n_create);
 
     auto create_recv = assoc.receive_dimse(default_timeout);
@@ -567,12 +583,13 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
 
     // Discontinue the procedure
     dicom_dataset disc_ds;
-    disc_ds.set_string(tags::performed_procedure_step_status, "DISCONTINUED");
-    disc_ds.set_string(tags::performed_procedure_step_end_date, "20240201");
-    disc_ds.set_string(tags::performed_procedure_step_end_time, "101500");
-    disc_ds.set_string(tags::performed_procedure_step_discontinuation_reason_code_sequence, "");
+    disc_ds.set_string(tags::performed_procedure_step_status, vr_type::CS, "DISCONTINUED");
+    disc_ds.set_string(performed_procedure_step_end_date, vr_type::DA, "20240201");
+    disc_ds.set_string(performed_procedure_step_end_time, vr_type::TM, "101500");
+    disc_ds.set_string(performed_procedure_step_discontinuation_reason_code_sequence, vr_type::SQ, "");
 
-    auto n_set = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid, disc_ds);
+    auto n_set = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid);
+    n_set.set_dataset(std::move(disc_ds));
     (void)assoc.send_dimse(ctx, n_set);
 
     auto set_recv = assoc.receive_dimse(default_timeout);
@@ -603,7 +620,7 @@ TEST_CASE("MPPS cannot modify completed procedure", "[worklist][mpps][error]") {
     config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.6";
     config.proposed_contexts.push_back({
         1,
-        mpps_sop_class_uid,
+        std::string(mpps_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -615,29 +632,32 @@ TEST_CASE("MPPS cannot modify completed procedure", "[worklist][mpps][error]") {
 
     // Create and complete MPPS
     dicom_dataset create_ds;
-    create_ds.set_string(tags::performed_procedure_step_status, "IN PROGRESS");
-    create_ds.set_string(tags::performed_procedure_step_start_date, "20240201");
-    create_ds.set_string(tags::performed_procedure_step_start_time, "110000");
-    create_ds.set_string(tags::performed_station_ae_title, "CT_SCANNER");
-    create_ds.set_string(tags::modality, "CT");
+    create_ds.set_string(tags::performed_procedure_step_status, vr_type::CS, "IN PROGRESS");
+    create_ds.set_string(tags::performed_procedure_step_start_date, vr_type::DA, "20240201");
+    create_ds.set_string(tags::performed_procedure_step_start_time, vr_type::TM, "110000");
+    create_ds.set_string(performed_station_ae_title, vr_type::AE, "CT_SCANNER");
+    create_ds.set_string(tags::modality, vr_type::CS, "CT");
 
-    auto n_create = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid, create_ds);
+    auto n_create = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid);
+    n_create.set_dataset(std::move(create_ds));
     (void)assoc.send_dimse(ctx, n_create);
     auto create_recv = assoc.receive_dimse(default_timeout);
     REQUIRE(create_recv.is_ok());
 
     // Complete the MPPS
     dicom_dataset complete_ds;
-    complete_ds.set_string(tags::performed_procedure_step_status, "COMPLETED");
-    auto n_set_complete = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid, complete_ds);
+    complete_ds.set_string(tags::performed_procedure_step_status, vr_type::CS, "COMPLETED");
+    auto n_set_complete = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid);
+    n_set_complete.set_dataset(std::move(complete_ds));
     (void)assoc.send_dimse(ctx, n_set_complete);
     auto complete_recv = assoc.receive_dimse(default_timeout);
     REQUIRE(complete_recv.is_ok());
 
     // Try to modify completed MPPS - should fail
     dicom_dataset modify_ds;
-    modify_ds.set_string(tags::performed_procedure_step_description, "Changed");
-    auto n_set_modify = make_n_set_rq(3, mpps_sop_class_uid, mpps_uid, modify_ds);
+    modify_ds.set_string(performed_procedure_step_description, vr_type::LO, "Changed");
+    auto n_set_modify = make_n_set_rq(3, mpps_sop_class_uid, mpps_uid);
+    n_set_modify.set_dataset(std::move(modify_ds));
     (void)assoc.send_dimse(ctx, n_set_modify);
 
     auto modify_recv = assoc.receive_dimse(default_timeout);

@@ -10,6 +10,7 @@ add_executable(pacs_integration_e2e
     test_worklist_mpps.cpp
     test_stress.cpp
     test_error_recovery.cpp
+    test_xa_storage.cpp
 )
 
 target_include_directories(pacs_integration_e2e
