@@ -707,15 +707,42 @@ if(PACS_BUILD_TESTS)
 
     include(CTest)
     include(Catch)
-    catch_discover_tests(core_tests)
-    catch_discover_tests(encoding_tests)
-    catch_discover_tests(network_tests)
-    catch_discover_tests(services_tests)
+
+    ##################################################
+    # CTest Labels for CI/CD Integration
+    # @see Issue #139 - CI/CD Integration
+    #
+    # Labels:
+    #   - unit: Fast unit tests (timeout: 60s)
+    #   - integration: Integration tests (timeout: 300s)
+    #   - stress: Stress/performance tests (timeout: 600s)
+    #   - slow: Long-running tests (manual trigger only)
+    ##################################################
+
+    # Unit tests - fast, isolated component tests
+    catch_discover_tests(core_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(encoding_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(network_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(services_tests
+        PROPERTIES LABELS "unit"
+    )
     if(TARGET storage_tests)
-        catch_discover_tests(storage_tests)
+        catch_discover_tests(storage_tests
+            PROPERTIES LABELS "unit"
+        )
     endif()
+
+    # Integration tests - cross-module adapter tests
     if(TARGET pacs_integration_tests)
-        catch_discover_tests(pacs_integration_tests)
+        catch_discover_tests(pacs_integration_tests
+            PROPERTIES LABELS "integration"
+        )
     endif()
 endif()
 

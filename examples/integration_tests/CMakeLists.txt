@@ -41,6 +41,7 @@ target_link_libraries(pacs_integration_e2e
 target_compile_features(pacs_integration_e2e PRIVATE cxx_std_20)
 
 # Register tests with CTest
+# @see Issue #139 - CI/CD Integration
 include(Catch)
 catch_discover_tests(pacs_integration_e2e
     TEST_PREFIX "integration::"
@@ -48,6 +49,9 @@ catch_discover_tests(pacs_integration_e2e
     OUTPUT_DIR ${CMAKE_BINARY_DIR}/test-results
     OUTPUT_PREFIX integration_
     OUTPUT_SUFFIX .xml
+    PROPERTIES
+        LABELS "integration"
+        TIMEOUT 300
 )
 
 # Copy test data files
