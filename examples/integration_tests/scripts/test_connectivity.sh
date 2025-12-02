@@ -95,6 +95,33 @@ check_binaries() {
     return 0
 }
 
+# Check if port is listening (cross-platform)
+is_port_listening() {
+    local port="$1"
+
+    # Try lsof first (works on macOS and Linux)
+    if command -v lsof &>/dev/null; then
+        lsof -i TCP:"${port}" -sTCP:LISTEN >/dev/null 2>&1 && return 0
+    fi
+
+    # Fallback to netcat
+    if command -v nc &>/dev/null; then
+        # macOS nc requires -G for timeout
+        if [[ "$(uname)" == "Darwin" ]]; then
+            nc -z -G 1 127.0.0.1 "${port}" 2>/dev/null && return 0
+        else
+            nc -z 127.0.0.1 "${port}" 2>/dev/null && return 0
+        fi
+    fi
+
+    # Fallback to bash /dev/tcp (if available)
+    if (echo >/dev/tcp/127.0.0.1/"${port}") 2>/dev/null; then
+        return 0
+    fi
+
+    return 1
+}
+
 # Wait for port to be listening
 wait_for_port() {
     local host="$1"
@@ -102,7 +129,7 @@ wait_for_port() {
     local timeout="${3:-10}"
     local elapsed=0
 
-    while ! nc -z "${host}" "${port}" 2>/dev/null; do
+    while ! is_port_listening "${port}"; do
         sleep 0.5
         elapsed=$((elapsed + 1))
         if [[ ${elapsed} -ge $((timeout * 2)) ]]; then
