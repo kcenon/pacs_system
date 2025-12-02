@@ -3,23 +3,24 @@
 #
 # @see Issue #111 - Integration Test Suite
 
-add_executable(integration_tests
+add_executable(pacs_integration_tests
     main.cpp
     test_connectivity.cpp
     test_store_query.cpp
     test_worklist_mpps.cpp
     test_stress.cpp
     test_error_recovery.cpp
+    test_xa_storage.cpp
 )
 
-target_include_directories(integration_tests
+target_include_directories(pacs_integration_tests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/include
 )
 
 # Link required PACS libraries
-target_link_libraries(integration_tests
+target_link_libraries(pacs_integration_tests
     PRIVATE
         pacs_core
         pacs_encoding
@@ -32,11 +33,11 @@ target_link_libraries(integration_tests
 )
 
 # Set C++20 standard
-target_compile_features(integration_tests PRIVATE cxx_std_20)
+target_compile_features(pacs_integration_tests PRIVATE cxx_std_20)
 
 # Register tests with CTest
 include(Catch)
-catch_discover_tests(integration_tests
+catch_discover_tests(pacs_integration_tests
     TEST_PREFIX "integration::"
     REPORTER junit
     OUTPUT_DIR ${CMAKE_BINARY_DIR}/test-results
@@ -52,6 +53,6 @@ if(TEST_DATA_FILES)
 endif()
 
 # Install target (optional)
-install(TARGETS integration_tests
+install(TARGETS pacs_integration_tests
     RUNTIME DESTINATION bin/tests
 )
