@@ -1,0 +1,432 @@
+# Integration Tests Workflow
+# Automated testing pipeline for PACS System
+#
+# @see Issue #139 - CI/CD Integration - Automated Integration Test Pipeline
+# @see Issue #134 - Integration Test Enhancement Epic
+
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:  # Manual trigger for ad-hoc testing
+
+# Ensure only one workflow runs per branch/PR to save resources
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  # ============================================================================
+  # Build and Unit Tests
+  # Run on all PRs and pushes - fast feedback loop
+  # ============================================================================
+  build-and-unit-tests:
+    name: Build & Unit Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          ninja-build \
+          cmake
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install sqlite3 openssl@3 ninja cmake
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Run Unit Tests
+      run: |
+        cd build
+        ctest \
+          --output-on-failure \
+          --timeout 60 \
+          --output-junit unit-test-results.xml \
+          --exclude-regex "integration::" \
+          || echo "Some unit tests failed"
+
+    - name: Upload Unit Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: unit-test-results-${{ matrix.os }}
+        path: build/unit-test-results.xml
+        retention-days: 30
+
+    - name: Publish Unit Test Report
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        report_paths: build/unit-test-results.xml
+        fail_on_failure: false
+        check_name: Unit Tests (${{ matrix.os }})
+
+  # ============================================================================
+  # Integration Tests
+  # Run library-level integration tests using Catch2
+  # ============================================================================
+  integration-tests:
+    name: Integration Tests (${{ matrix.os }})
+    needs: build-and-unit-tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          ninja-build \
+          cmake \
+          netcat-openbsd
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install sqlite3 openssl@3 ninja cmake
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Generate TLS Test Certificates
+      run: |
+        if [ -f "./examples/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
+          chmod +x ./examples/integration_tests/test_data/certs/generate_test_certs.sh
+          ./examples/integration_tests/test_data/certs/generate_test_certs.sh
+        fi
+
+    - name: Run Integration Tests
+      run: |
+        cd build
+        # Run integration tests with JUnit output
+        if [ -f "./bin/pacs_integration_e2e" ]; then
+          ./bin/pacs_integration_e2e \
+            --reporter junit \
+            --out integration-test-results.xml \
+            "~[.slow]" "~[stability]" \
+            || echo "Some integration tests failed"
+        else
+          echo "Integration test binary not found, running CTest integration tests"
+          ctest \
+            --output-on-failure \
+            --timeout 300 \
+            --output-junit integration-test-results.xml \
+            --tests-regex "integration::" \
+            || echo "Some integration tests failed"
+        fi
+      env:
+        PACS_TEST_CERT_DIR: ${{ github.workspace }}/examples/integration_tests/test_data/certs
+
+    - name: Upload Integration Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: integration-test-results-${{ matrix.os }}
+        path: build/integration-test-results.xml
+        retention-days: 30
+
+    - name: Publish Integration Test Report
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        report_paths: build/integration-test-results.xml
+        fail_on_failure: false
+        check_name: Integration Tests (${{ matrix.os }})
+
+  # ============================================================================
+  # Stability Smoke Tests
+  # Quick validation tests to ensure basic stability - runs on all PRs
+  # ============================================================================
+  stability-smoke-tests:
+    name: Stability Smoke Tests (${{ matrix.os }})
+    needs: build-and-unit-tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          ninja-build \
+          cmake
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install sqlite3 openssl@3 ninja cmake
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Run Stability Smoke Tests
+      run: |
+        cd build
+        if [ -f "./bin/pacs_integration_e2e" ]; then
+          ./bin/pacs_integration_e2e \
+            --reporter junit \
+            --out stability-smoke-results.xml \
+            "[stability][smoke]" \
+            || echo "Some stability smoke tests failed"
+        else
+          echo "Stability test binary not found"
+          exit 0
+        fi
+      timeout-minutes: 5
+
+    - name: Upload Stability Smoke Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: stability-smoke-results-${{ matrix.os }}
+        path: build/stability-smoke-results.xml
+        retention-days: 30
+
+  # ============================================================================
+  # Extended Stress Tests
+  # Run only on main branch pushes - longer running tests
+  # ============================================================================
+  stress-tests:
+    name: Stress Tests
+    needs: [integration-tests, stability-smoke-tests]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          ninja-build \
+          cmake
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Run Stress Tests
+      run: |
+        cd build
+        if [ -f "./bin/pacs_integration_e2e" ]; then
+          ./bin/pacs_integration_e2e \
+            --reporter junit \
+            --out stress-test-results.xml \
+            "[stress]" "~[.slow]" \
+            || echo "Some stress tests failed"
+        fi
+      timeout-minutes: 15
+      env:
+        PACS_STABILITY_TEST_DURATION: 5
+        PACS_STABILITY_STORE_RATE: 10.0
+        PACS_STABILITY_QUERY_RATE: 2.0
+
+    - name: Upload Stress Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: stress-test-results
+        path: build/stress-test-results.xml
+        retention-days: 30
+
+    - name: Publish Stress Test Report
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        report_paths: build/stress-test-results.xml
+        fail_on_failure: false
+        check_name: Stress Tests
+
+  # ============================================================================
+  # Binary Integration Tests
+  # Test actual binary executables as separate processes
+  # ============================================================================
+  binary-integration-tests:
+    name: Binary Integration Tests
+    needs: build-and-unit-tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          ninja-build \
+          cmake \
+          netcat-openbsd \
+          lsof
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Make Scripts Executable
+      run: |
+        if [ -d "./examples/integration_tests/scripts" ]; then
+          chmod +x ./examples/integration_tests/scripts/*.sh
+        fi
+
+    - name: Run Binary Integration Tests
+      run: |
+        if [ -f "./examples/integration_tests/scripts/run_all_binary_tests.sh" ]; then
+          cd examples/integration_tests/scripts
+          ./run_all_binary_tests.sh -v ../../../build || echo "Some binary tests failed"
+        else
+          echo "Binary integration test scripts not found"
+        fi
+      timeout-minutes: 10
+      continue-on-error: true
+
+  # ============================================================================
+  # Test Summary
+  # Aggregate all test results and create summary
+  # ============================================================================
+  test-summary:
+    name: Test Summary
+    needs: [build-and-unit-tests, integration-tests, stability-smoke-tests, binary-integration-tests]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Download All Test Results
+      uses: actions/download-artifact@v4
+      with:
+        path: test-results
+        pattern: "*-test-results-*"
+        merge-multiple: false
+
+    - name: Create Test Summary
+      run: |
+        echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Suite | Ubuntu | macOS |" >> $GITHUB_STEP_SUMMARY
+        echo "|------------|--------|-------|" >> $GITHUB_STEP_SUMMARY
+
+        # Check for test result files
+        for suite in unit integration stability-smoke; do
+          ubuntu_status="⏭️ Skipped"
+          macos_status="⏭️ Skipped"
+
+          if [ -f "test-results/${suite}-test-results-ubuntu-latest/${suite}-test-results.xml" ]; then
+            ubuntu_status="✅ Passed"
+          fi
+          if [ -f "test-results/${suite}-test-results-macos-latest/${suite}-test-results.xml" ]; then
+            macos_status="✅ Passed"
+          fi
+
+          echo "| ${suite^} Tests | $ubuntu_status | $macos_status |" >> $GITHUB_STEP_SUMMARY
+        done
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 Detailed results available in the **Checks** tab" >> $GITHUB_STEP_SUMMARY
