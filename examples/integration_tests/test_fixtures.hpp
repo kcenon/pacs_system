@@ -5,7 +5,16 @@
  * Provides reusable test fixtures, DICOM data generators, and utility
  * functions for integration testing of PACS system components.
  *
+ * For comprehensive DICOM data generation, see test_data_generator.hpp
+ * which provides the test_data_generator class with support for:
+ * - All modalities (CT, MR, XA, US)
+ * - Multi-frame datasets (XA cine, US cine, Enhanced CT/MR)
+ * - Clinical workflow generation (multi-modal studies)
+ * - Edge cases (large datasets, Unicode, private tags, invalid datasets)
+ *
  * @see Issue #111 - Integration Test Suite
+ * @see Issue #137 - Test Fixtures Extension
+ * @see test_data_generator.hpp
  */
 
 #ifndef PACS_INTEGRATION_TESTS_TEST_FIXTURES_HPP
@@ -20,6 +29,9 @@
 #include "pacs/services/storage_scp.hpp"
 #include "pacs/services/storage_scu.hpp"
 #include "pacs/services/verification_scp.hpp"
+
+// Include comprehensive test data generator
+#include "test_data_generator.hpp"
 
 #include <array>
 #include <atomic>
