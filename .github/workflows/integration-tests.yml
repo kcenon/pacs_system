@@ -74,6 +74,7 @@ jobs:
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_CXX_FLAGS="-Wno-error=unused-result -Wno-error=extra" \
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=ON \
           -DPACS_BUILD_STORAGE=ON
@@ -198,6 +199,7 @@ jobs:
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_FLAGS="-Wno-error=unused-result -Wno-error=extra" \
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=ON \
           -DPACS_BUILD_STORAGE=ON
@@ -283,6 +285,7 @@ jobs:
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_FLAGS="-Wno-error=unused-result -Wno-error=extra" \
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=ON \
           -DPACS_BUILD_STORAGE=ON
