@@ -408,6 +408,50 @@ When adding new binary tests:
 4. Add the test to `run_all_binary_tests.sh`
 5. Update this README
 
+## CI/CD Integration
+
+The integration tests are automatically run on GitHub Actions for every pull request and push to main/develop branches.
+
+### Test Categories
+
+Tests are organized into categories using CTest labels:
+
+| Label | Description | Trigger |
+|-------|-------------|---------|
+| `unit` | Unit tests (core, encoding, network, services, storage) | All PRs |
+| `integration` | Integration tests (adapters, E2E workflows) | All PRs |
+| `stress` | Long-running stress tests | Main branch only |
+
+### Running Tests Locally with Labels
+
+```bash
+# Run only unit tests
+cd build
+ctest -L unit --output-on-failure
+
+# Run only integration tests
+ctest -L integration --output-on-failure
+
+# Run stress tests (extended timeout)
+ctest -L stress --output-on-failure --timeout 600
+```
+
+### JUnit Reports
+
+Tests automatically generate JUnit XML reports for CI integration:
+
+```bash
+# Reports are generated in build/test-results/
+./bin/pacs_integration_e2e --reporter junit --out test-results/e2e-tests.xml
+```
+
+### GitHub Actions Workflow
+
+The CI workflow (`.github/workflows/integration-tests.yml`) runs:
+1. **build-and-test**: Unit and integration tests on Ubuntu and macOS
+2. **binary-integration-tests**: Shell script tests after build
+3. **stress-tests**: Long-running tests (main branch only)
+
 ## Related Documentation
 
 - [PACS System Architecture](../../docs/architecture.md)
