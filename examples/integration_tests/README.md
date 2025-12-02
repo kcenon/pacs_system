@@ -15,21 +15,24 @@ Binary integration tests complement library-level tests by verifying:
 
 ```
 examples/integration_tests/
-├── README.md                    # This file
-├── CMakeLists.txt              # Build configuration
-├── test_fixtures.hpp           # C++ test utilities and process launcher
-├── generate_test_data.cpp      # DICOM test file generator
-├── scripts/                    # Shell test scripts
-│   ├── common.sh               # Shared utility functions
-│   ├── test_connectivity.sh    # Echo SCP/SCU tests
-│   ├── test_store_retrieve.sh  # PACS storage workflow tests
-│   ├── test_worklist_mpps.sh   # RIS workflow tests
-│   ├── test_secure_dicom.sh    # TLS encrypted communication tests
-│   └── run_all_binary_tests.sh # Master test runner
-└── test_data/                  # Minimal DICOM test files
-    ├── ct_minimal.dcm          # CT Image IOD
-    ├── mr_minimal.dcm          # MR Image IOD
-    └── xa_minimal.dcm          # XA Image IOD
+├── README.md                        # This file
+├── CMakeLists.txt                   # Build configuration
+├── test_fixtures.hpp                # C++ test utilities and process launcher
+├── test_data_generator.hpp          # Comprehensive DICOM data generators
+├── test_data_generator.cpp          # Generator implementations
+├── test_data_generator_test.cpp     # Generator unit tests
+├── generate_test_data.cpp           # DICOM test file generator
+├── scripts/                         # Shell test scripts
+│   ├── common.sh                    # Shared utility functions
+│   ├── test_connectivity.sh         # Echo SCP/SCU tests
+│   ├── test_store_retrieve.sh       # PACS storage workflow tests
+│   ├── test_worklist_mpps.sh        # RIS workflow tests
+│   ├── test_secure_dicom.sh         # TLS encrypted communication tests
+│   └── run_all_binary_tests.sh      # Master test runner
+└── test_data/                       # Minimal DICOM test files
+    ├── ct_minimal.dcm               # CT Image IOD
+    ├── mr_minimal.dcm               # MR Image IOD
+    └── xa_minimal.dcm               # XA Image IOD
 ```
 
 ## Prerequisites
@@ -139,6 +142,57 @@ Tests TLS-encrypted DICOM communication:
 - Cipher suite negotiation
 
 ## C++ Test Utilities
+
+### test_data_generator Class
+
+The `test_data_generator` class provides comprehensive DICOM dataset generators for testing. This supports all modalities, multi-frame images, and edge cases.
+
+```cpp
+#include "test_data_generator.hpp"
+
+using namespace pacs::integration_test;
+
+// Single modality datasets
+auto ct_dataset = test_data_generator::ct();
+auto mr_dataset = test_data_generator::mr();
+auto xa_dataset = test_data_generator::xa();
+auto us_dataset = test_data_generator::us();
+
+// Multi-frame datasets
+auto xa_cine = test_data_generator::xa_cine(30);    // 30 frames
+auto us_cine = test_data_generator::us_cine(60);    // 60 frames
+auto enhanced_ct = test_data_generator::enhanced_ct(100);
+auto enhanced_mr = test_data_generator::enhanced_mr(50);
+
+// Clinical workflow - multi-modal patient study
+auto study = test_data_generator::patient_journey(
+    "PATIENT001",
+    {"CT", "MR", "XA"}
+);
+// All datasets share same Study Instance UID
+
+// Edge case datasets
+auto large = test_data_generator::large(10);  // ~10MB dataset
+auto unicode = test_data_generator::unicode(); // Korean patient name
+auto private_tags = test_data_generator::with_private_tags("MY_CREATOR");
+auto invalid = test_data_generator::invalid(
+    invalid_dataset_type::missing_sop_class_uid
+);
+```
+
+#### Supported Generators
+
+| Generator | Description | SOP Class |
+|-----------|-------------|-----------|
+| `ct()` | CT Image | 1.2.840.10008.5.1.4.1.1.2 |
+| `mr()` | MR Image | 1.2.840.10008.5.1.4.1.1.4 |
+| `xa()` | XA Image (single frame) | 1.2.840.10008.5.1.4.1.1.12.1 |
+| `us()` | US Image (single frame) | 1.2.840.10008.5.1.4.1.1.6.1 |
+| `xa_cine()` | XA Multi-frame | 1.2.840.10008.5.1.4.1.1.12.1 |
+| `us_cine()` | US Multi-frame | 1.2.840.10008.5.1.4.1.1.6.2 |
+| `enhanced_ct()` | Enhanced CT | 1.2.840.10008.5.1.4.1.1.2.1 |
+| `enhanced_mr()` | Enhanced MR | 1.2.840.10008.5.1.4.1.1.4.1 |
+| `worklist()` | Modality Worklist | N/A |
 
 ### process_launcher Class
 
