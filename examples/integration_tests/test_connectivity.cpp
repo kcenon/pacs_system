@@ -48,7 +48,7 @@ TEST_CASE("C-ECHO basic connectivity", "[connectivity][echo]") {
             port,
             server.ae_title(),
             "ECHO_SCU",
-            {verification_sop_class_uid}
+            {std::string(verification_sop_class_uid)}
         );
 
         REQUIRE(connect_result.is_ok());
@@ -94,7 +94,7 @@ TEST_CASE("Multiple sequential C-ECHO requests", "[connectivity][echo]") {
     // Connect once
     auto connect_result = test_association::connect(
         "localhost", port, server.ae_title(), "ECHO_SCU",
-        {verification_sop_class_uid}
+        {std::string(verification_sop_class_uid)}
     );
     REQUIRE(connect_result.is_ok());
     auto& assoc = connect_result.value();
@@ -136,7 +136,7 @@ TEST_CASE("Multiple concurrent associations", "[connectivity][echo]") {
             auto connect_result = test_association::connect(
                 "localhost", port, server.ae_title(),
                 "ECHO_SCU_" + std::to_string(i),
-                {verification_sop_class_uid}
+                {std::string(verification_sop_class_uid)}
             );
 
             if (connect_result.is_err()) {
@@ -185,7 +185,7 @@ TEST_CASE("Connection to non-existent server fails gracefully", "[connectivity][
         find_available_port() + 1000,  // Very unlikely to be in use
         "NONEXISTENT",
         "ECHO_SCU",
-        {verification_sop_class_uid}
+        {std::string(verification_sop_class_uid)}
     );
 
     REQUIRE(connect_result.is_err());
@@ -206,7 +206,7 @@ TEST_CASE("Wrong AE title handling", "[connectivity][ae_title]") {
         port,
         "WRONG_AE",  // Wrong AE title
         "ECHO_SCU",
-        {verification_sop_class_uid}
+        {std::string(verification_sop_class_uid)}
     );
 
     // The result depends on server configuration
@@ -229,7 +229,7 @@ TEST_CASE("Association timeout handling", "[connectivity][timeout]") {
 
     auto connect_result = test_association::connect(
         "localhost", port, server.ae_title(), "ECHO_SCU",
-        {verification_sop_class_uid}
+        {std::string(verification_sop_class_uid)}
     );
     REQUIRE(connect_result.is_ok());
     auto& assoc = connect_result.value();

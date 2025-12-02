@@ -31,6 +31,8 @@ using namespace pacs::network;
 using namespace pacs::services;
 using namespace pacs::storage;
 using namespace pacs::core;
+using namespace pacs::encoding;
+using namespace pacs::network::dimse;
 
 // =============================================================================
 // Helper: Configurable Error Server
@@ -61,25 +63,34 @@ public:
         config.implementation_version_name = "ERROR_SCP";
 
         server_ = std::make_unique<dicom_server>(config);
-        file_storage_ = std::make_unique<file_storage>(storage_dir_);
-        database_ = std::make_unique<index_database>(db_path_);
+    
+    file_storage_config fs_conf;
+    fs_conf.root_path = storage_dir_;
+    file_storage_ = std::make_unique<file_storage>(fs_conf);
+    
+    auto db_result = index_database::open(db_path_.string());
+    if (db_result.is_ok()) {
+        database_ = std::move(db_result.value());
+    } else {
+        throw std::runtime_error("Failed to open database");
     }
+}
 
     bool initialize() {
         server_->register_service(std::make_shared<verification_scp>());
 
         auto storage_scp_ptr = std::make_shared<storage_scp>();
-        storage_scp_ptr->on_store([this](
+        storage_scp_ptr->set_handler([this](
             const dicom_dataset& dataset,
             const std::string& calling_ae,
             const std::string& sop_class_uid,
-            const std::string& sop_instance_uid) -> storage_status {
+            const std::string& sop_instance_uid) {
 
             return handle_store(dataset, calling_ae, sop_class_uid, sop_instance_uid);
         });
         server_->register_service(storage_scp_ptr);
 
-        return database_->initialize();
+        return true;
     }
 
     bool start() {
@@ -114,7 +125,7 @@ private:
         const dicom_dataset& dataset,
         const std::string& /* calling_ae */,
         const std::string& sop_class_uid,
-        const std::string& /* sop_instance_uid */) {
+        const std::string& sop_instance_uid) {
 
         // Simulate processing delay
         if (simulate_delay_.count() > 0) {
@@ -124,13 +135,13 @@ private:
         // Reject all requests
         if (reject_all_) {
             ++rejected_count_;
-            return storage_status::refused_out_of_resources;
+            return storage_status::out_of_resources;
         }
 
         // Reject specific SOP class
         if (!reject_sop_class_.empty() && sop_class_uid == reject_sop_class_) {
             ++rejected_count_;
-            return storage_status::sop_class_not_supported;
+            return storage_status::data_set_does_not_match_sop_class;
         }
 
         // Check accepted SOP classes
@@ -144,26 +155,86 @@ private:
             }
             if (!found) {
                 ++rejected_count_;
-                return storage_status::sop_class_not_supported;
+                return storage_status::data_set_does_not_match_sop_class;
             }
         }
 
         // Normal processing
-        auto store_result = file_storage_->store(dataset);
-        if (!store_result) {
-            ++rejected_count_;
-            return storage_status::processing_failure;
-        }
-
-        auto index_result = database_->index(dataset, store_result.value());
-        if (!index_result) {
-            ++rejected_count_;
-            return storage_status::processing_failure;
-        }
-
-        ++stored_count_;
-        return storage_status::success;
+    auto store_result = file_storage_->store(dataset);
+    if (store_result.is_err()) {
+        ++rejected_count_;
+        return storage_status::storage_error;
     }
+
+    // 1. Upsert Patient
+    auto patient_res = database_->upsert_patient(
+        dataset.get_string(tags::patient_id),
+        dataset.get_string(tags::patient_name),
+        dataset.get_string(tags::patient_birth_date),
+        dataset.get_string(tags::patient_sex));
+    if (patient_res.is_err()) {
+        ++rejected_count_;
+        return storage_status::storage_error;
+    }
+    int64_t patient_pk = patient_res.value();
+
+    // 2. Upsert Study
+    auto study_res = database_->upsert_study(
+        patient_pk,
+        dataset.get_string(tags::study_instance_uid),
+        dataset.get_string(tags::study_id),
+        dataset.get_string(tags::study_date),
+        dataset.get_string(tags::study_time),
+        dataset.get_string(tags::accession_number));
+    if (study_res.is_err()) {
+        ++rejected_count_;
+        return storage_status::storage_error;
+    }
+    int64_t study_pk = study_res.value();
+
+    // 3. Upsert Series
+    std::optional<int> series_number;
+    try {
+        std::string sn = dataset.get_string(tags::series_number);
+        if (!sn.empty()) series_number = std::stoi(sn);
+    } catch (...) {}
+
+    auto series_res = database_->upsert_series(
+        study_pk,
+        dataset.get_string(tags::series_instance_uid),
+        dataset.get_string(tags::modality),
+        series_number);
+    if (series_res.is_err()) {
+        ++rejected_count_;
+        return storage_status::storage_error;
+    }
+    int64_t series_pk = series_res.value();
+
+    // 4. Upsert Instance
+    auto file_path = file_storage_->get_file_path(sop_instance_uid);
+    std::optional<int> instance_number;
+    try {
+        std::string in = dataset.get_string(tags::instance_number);
+        if (!in.empty()) instance_number = std::stoi(in);
+    } catch (...) {}
+
+    auto instance_res = database_->upsert_instance(
+        series_pk,
+        sop_instance_uid,
+        sop_class_uid,
+        file_path.string(),
+        static_cast<int64_t>(std::filesystem::file_size(file_path)),
+        "",
+        instance_number);
+
+    if (instance_res.is_err()) {
+        ++rejected_count_;
+        return storage_status::storage_error;
+    }
+
+    ++stored_count_;
+    return storage_status::success;
+}
 
     uint16_t port_;
     std::string ae_title_;
@@ -223,7 +294,7 @@ TEST_CASE("Invalid SOP Class rejection", "[error][sop_class]") {
         // If context was accepted, store should fail
         storage_scu scu{{}};
         auto mr_dataset = generate_mr_dataset();
-        auto result = scu.store_dataset(assoc, mr_dataset);
+        auto result = scu.store(assoc, mr_dataset);
 
         if (result.is_ok()) {
             // Server should reject with SOP class not supported
@@ -266,11 +337,11 @@ TEST_CASE("Server rejection of all stores", "[error][rejection]") {
     storage_scu scu{{}};
 
     auto dataset = generate_ct_dataset();
-    auto result = scu.store_dataset(assoc, dataset);
+    auto result = scu.store(assoc, dataset);
 
     REQUIRE(result.is_ok());
     REQUIRE_FALSE(result.value().is_success());
-    REQUIRE(result.value().status == static_cast<uint16_t>(storage_status::refused_out_of_resources));
+    REQUIRE(result.value().status == static_cast<uint16_t>(storage_status::out_of_resources));
 
     (void)assoc.release(default_timeout);
 
@@ -289,7 +360,7 @@ TEST_CASE("Connection to offline server and retry", "[error][retry]") {
         port,
         "OFFLINE_SCP",
         "RETRY_SCU",
-        {verification_sop_class_uid}
+        {std::string(verification_sop_class_uid)}
     );
 
     REQUIRE(connect_result.is_err());
@@ -305,7 +376,7 @@ TEST_CASE("Connection to offline server and retry", "[error][retry]") {
         port,
         server.ae_title(),
         "RETRY_SCU",
-        {verification_sop_class_uid}
+        {std::string(verification_sop_class_uid)}
     );
 
     REQUIRE(retry_result.is_ok());
@@ -338,7 +409,7 @@ TEST_CASE("Server restart during operations", "[error][restart]") {
 
         storage_scu scu{{}};
         auto ds = generate_ct_dataset();
-        auto result = scu.store_dataset(connect.value(), ds);
+        auto result = scu.store(connect.value(), ds);
         REQUIRE(result.is_ok());
         REQUIRE(result.value().is_success());
 
@@ -407,7 +478,7 @@ TEST_CASE("Timeout during slow processing", "[error][timeout]") {
     auto dataset = generate_ct_dataset();
 
     // This may timeout or succeed depending on timing
-    auto result = scu.store_dataset(assoc, dataset);
+    auto result = scu.store(assoc, dataset);
 
     // Either timeout error or slow success is acceptable
     // The key is that the system handles it gracefully without crashing
@@ -438,7 +509,7 @@ TEST_CASE("Association abort handling", "[error][abort]") {
     config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.25";
     config.proposed_contexts.push_back({
         1,
-        verification_sop_class_uid,
+        std::string(verification_sop_class_uid),
         {"1.2.840.10008.1.2.1"}
     });
 
@@ -455,7 +526,7 @@ TEST_CASE("Association abort handling", "[error][abort]") {
     // New connections should still work
     auto new_connect = test_association::connect(
         "localhost", port, server.ae_title(), "AFTER_ABORT",
-        {verification_sop_class_uid});
+        {std::string(verification_sop_class_uid)});
     REQUIRE(new_connect.is_ok());
     (void)new_connect.value().release(default_timeout);
 
@@ -478,7 +549,7 @@ TEST_CASE("Multiple rapid aborts", "[error][rapid_abort]") {
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.26";
         config.proposed_contexts.push_back({
             1,
-            verification_sop_class_uid,
+            std::string(verification_sop_class_uid),
             {"1.2.840.10008.1.2.1"}
         });
 
@@ -493,7 +564,7 @@ TEST_CASE("Multiple rapid aborts", "[error][rapid_abort]") {
     // Server should still be operational
     auto final_connect = test_association::connect(
         "localhost", port, server.ae_title(), "FINAL_CHECK",
-        {verification_sop_class_uid});
+        {std::string(verification_sop_class_uid)});
     REQUIRE(final_connect.is_ok());
 
     // Send an echo to verify server is responsive
@@ -539,10 +610,10 @@ TEST_CASE("Duplicate SOP Instance handling", "[error][duplicate]") {
     // Create dataset with fixed SOP Instance UID
     auto sop_instance_uid = generate_uid();
     auto dataset = generate_ct_dataset();
-    dataset.set_string(tags::sop_instance_uid, sop_instance_uid);
+    dataset.set_string(tags::sop_instance_uid, vr_type::UI, sop_instance_uid);
 
     // First store should succeed
-    auto result1 = scu.store_dataset(assoc, dataset);
+    auto result1 = scu.store(assoc, dataset);
     REQUIRE(result1.is_ok());
     REQUIRE(result1.value().is_success());
 
@@ -551,7 +622,7 @@ TEST_CASE("Duplicate SOP Instance handling", "[error][duplicate]") {
     // - Could overwrite (success)
     // - Could reject as duplicate (error)
     // - Could return warning
-    auto result2 = scu.store_dataset(assoc, dataset);
+    auto result2 = scu.store(assoc, dataset);
     REQUIRE(result2.is_ok());
     // Either success (overwrite) or warning (duplicate) is acceptable
 
