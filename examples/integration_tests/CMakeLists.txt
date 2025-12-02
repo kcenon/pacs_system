@@ -52,7 +52,35 @@ if(TEST_DATA_FILES)
          DESTINATION ${CMAKE_BINARY_DIR}/bin/test_data)
 endif()
 
+# Test data generator utility
+# @see Issue #136 - Binary Integration Test Scripts
+add_executable(generate_test_data
+    generate_test_data.cpp
+)
+
+target_include_directories(generate_test_data
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(generate_test_data
+    PRIVATE
+        pacs_core
+        pacs_encoding
+        Threads::Threads
+)
+
+target_compile_features(generate_test_data PRIVATE cxx_std_20)
+
+# Custom target to generate test data
+add_custom_target(generate_binary_test_data
+    COMMAND generate_test_data ${CMAKE_CURRENT_SOURCE_DIR}/test_data
+    DEPENDS generate_test_data
+    COMMENT "Generating DICOM test data files..."
+)
+
 # Install target (optional)
-install(TARGETS pacs_integration_e2e
+install(TARGETS pacs_integration_e2e generate_test_data
     RUNTIME DESTINATION bin/tests
 )
