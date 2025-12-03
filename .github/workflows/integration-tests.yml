@@ -44,6 +44,7 @@ jobs:
   build-and-unit-tests:
     name: Build & Unit Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -194,6 +195,7 @@ jobs:
     name: Integration Tests (${{ matrix.os }})
     needs: build-and-unit-tests
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -319,6 +321,7 @@ jobs:
 
     - name: Run Integration Tests
       working-directory: pacs_system
+      timeout-minutes: 15
       run: |
         cd build
         # Run integration tests with JUnit output
