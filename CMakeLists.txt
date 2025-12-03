@@ -129,6 +129,51 @@ if(PACS_BUILD_STORAGE)
     endif()
 endif()
 
+# fmt library (for std::format compatibility on older compilers)
+message(STATUS "")
+message(STATUS "=== Finding fmt library (for format compatibility) ===")
+
+# Check if std::format is available
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_FLAGS "-std=c++20")
+check_cxx_source_compiles("
+    #include <format>
+    int main() {
+        auto s = std::format(\"Hello {}\", \"World\");
+        return 0;
+    }
+" PACS_HAS_STD_FORMAT)
+
+if(PACS_HAS_STD_FORMAT)
+    message(STATUS "std::format is available - no fmt fallback needed")
+    set(PACS_FMT_NEEDED FALSE)
+else()
+    message(STATUS "std::format not available - using fmt library as fallback")
+    set(PACS_FMT_NEEDED TRUE)
+
+    # Try to find fmt library
+    find_package(fmt CONFIG QUIET)
+    if(NOT fmt_FOUND)
+        find_package(fmt QUIET)
+    endif()
+
+    if(fmt_FOUND)
+        message(STATUS "Found fmt library")
+        set(PACS_FMT_TARGET fmt::fmt)
+    else()
+        # Fetch fmt if not found
+        message(STATUS "fmt not found, fetching from source...")
+        FetchContent_Declare(
+            fmt
+            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+            GIT_TAG 10.2.1
+        )
+        FetchContent_MakeAvailable(fmt)
+        set(PACS_FMT_TARGET fmt::fmt)
+        message(STATUS "fmt fetched and configured")
+    endif()
+endif()
+
 # common_system (REQUIRED - Tier 0)
 if(PACS_WITH_COMMON_SYSTEM)
     message(STATUS "")
@@ -491,6 +536,11 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     # Link pacs_core for dicom_dataset and pacs_encoding for transfer_syntax
     target_link_libraries(pacs_storage PUBLIC pacs_core pacs_encoding)
 
+    # Link fmt library for format compatibility (if needed)
+    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
+        target_link_libraries(pacs_storage PUBLIC ${PACS_FMT_TARGET})
+    endif()
+
     message(STATUS "  [OK] pacs_storage: ON (SQLite3)")
 else()
     message(STATUS "  [--] pacs_storage: OFF")
@@ -541,6 +591,11 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     target_link_libraries(pacs_integration
         PUBLIC pacs_core pacs_encoding pacs_network container_system
     )
+
+    # Link fmt library for format compatibility (if needed)
+    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
+        target_link_libraries(pacs_integration PUBLIC ${PACS_FMT_TARGET})
+    endif()
 
     # Link logger_system (REQUIRED for logger_adapter)
     if(TARGET LoggerSystem)

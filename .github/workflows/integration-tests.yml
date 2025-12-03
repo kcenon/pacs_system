@@ -100,13 +100,14 @@ jobs:
         sudo apt-get install -y \
           libsqlite3-dev \
           libssl-dev \
+          libfmt-dev \
           ninja-build \
           cmake
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake
+        brew install sqlite3 openssl@3 ninja cmake fmt
 
     - name: Patch dependency CMake files to remove -Werror
       run: |
@@ -248,6 +249,7 @@ jobs:
         sudo apt-get install -y \
           libsqlite3-dev \
           libssl-dev \
+          libfmt-dev \
           ninja-build \
           cmake \
           netcat-openbsd
@@ -255,7 +257,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake
+        brew install sqlite3 openssl@3 ninja cmake fmt
 
     - name: Patch dependency CMake files to remove -Werror
       run: |
@@ -417,13 +419,14 @@ jobs:
         sudo apt-get install -y \
           libsqlite3-dev \
           libssl-dev \
+          libfmt-dev \
           ninja-build \
           cmake
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake
+        brew install sqlite3 openssl@3 ninja cmake fmt
 
     - name: Patch dependency CMake files to remove -Werror
       run: |
@@ -568,6 +571,7 @@ jobs:
         sudo apt-get install -y \
           libsqlite3-dev \
           libssl-dev \
+          libfmt-dev \
           ninja-build \
           cmake
 
@@ -724,6 +728,7 @@ jobs:
         sudo apt-get install -y \
           libsqlite3-dev \
           libssl-dev \
+          libfmt-dev \
           ninja-build \
           cmake \
           netcat-openbsd \
