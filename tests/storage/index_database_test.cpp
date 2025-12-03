@@ -8,6 +8,7 @@
 #include <pacs/storage/index_database.hpp>
 
 #include <catch2/catch_test_macros.hpp>
+#include <pacs/compat/format.hpp>
 
 #include <algorithm>
 #include <filesystem>
@@ -338,7 +339,7 @@ TEST_CASE("index_database: search patients with pagination",
 
     // Insert 10 patients
     for (int i = 1; i <= 10; ++i) {
-        auto id = std::format("{:03d}", i);
+        auto id = pacs::compat::format("{:03d}", i);
         REQUIRE(db->upsert_patient(id, "Test^Patient" + std::to_string(i), "", "").is_ok());
     }
 
@@ -731,9 +732,9 @@ TEST_CASE("index_database: search studies with pagination",
 
     // Insert 10 studies
     for (int i = 1; i <= 10; ++i) {
-        auto uid = std::format("1.2.3.{}", i);
-        auto study_id = std::format("STUDY{:02d}", i);
-        auto date = std::format("202311{:02d}", i);
+        auto uid = pacs::compat::format("1.2.3.{}", i);
+        auto study_id = pacs::compat::format("STUDY{:02d}", i);
+        auto date = pacs::compat::format("202311{:02d}", i);
         REQUIRE(db->upsert_study(patient_pk, uid, study_id, date).is_ok());
     }
 
@@ -1140,7 +1141,7 @@ TEST_CASE("index_database: search series with pagination", "[storage][series]") 
 
     // Insert 10 series
     for (int i = 1; i <= 10; ++i) {
-        auto uid = std::format("1.2.3.4.5.6.7.{}", i);
+        auto uid = pacs::compat::format("1.2.3.4.5.6.7.{}", i);
         REQUIRE(db->upsert_series(study_pk, uid, "CT", i).is_ok());
     }
 
@@ -1704,8 +1705,8 @@ TEST_CASE("index_database: search instances with pagination",
 
     // Insert 10 instances
     for (int i = 1; i <= 10; ++i) {
-        auto uid = std::format("1.2.3.4.5.6.7.1.{}", i);
-        auto path = std::format("/storage/{}.dcm", i);
+        auto uid = pacs::compat::format("1.2.3.4.5.6.7.1.{}", i);
+        auto path = pacs::compat::format("/storage/{}.dcm", i);
         REQUIRE(db->upsert_instance(
             series_pk, uid, "1.2.840.10008.5.1.4.1.1.2",
             path, 1024, "", i).is_ok());

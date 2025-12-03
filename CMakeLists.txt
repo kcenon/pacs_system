@@ -795,6 +795,7 @@ if(PACS_BUILD_TESTS)
             PRIVATE
                 pacs_storage
                 Catch2::Catch2WithMain
+                $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
         )
     endif()
 

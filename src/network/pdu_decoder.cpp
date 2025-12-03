@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <tuple>
 
 namespace pacs::network {
 
