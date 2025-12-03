@@ -5,8 +5,8 @@
  * This header provides a unified interface for string formatting that works
  * across different compilers and C++ standard library implementations.
  *
- * - GCC 13+, Clang 14+, MSVC 19.29+: Uses std::format
- * - Older compilers: Uses fmt::format as fallback
+ * Detection is primarily based on the __cpp_lib_format feature test macro,
+ * which is the most reliable way to detect std::format availability.
  *
  * Usage:
  *   #include <pacs/compat/format.hpp>
@@ -17,17 +17,16 @@
 
 #pragma once
 
-// Detect std::format availability
-// GCC 13+ has full std::format support
-// Clang 14+ has full std::format support
-// MSVC 19.29+ (VS 2019 16.10+) has full std::format support
+#include <version>  // For feature test macros
+
+// Detect std::format availability using feature test macros
+// This is the most reliable method as it checks the actual library support,
+// not just the compiler version. Clang may use libstdc++ which requires GCC 13+
+// for std::format support, even though Clang itself supports C++20.
 #if defined(__cpp_lib_format) && __cpp_lib_format >= 201907L
     #define PACS_HAS_STD_FORMAT 1
-#elif defined(_MSC_VER) && _MSC_VER >= 1929
-    #define PACS_HAS_STD_FORMAT 1
-#elif defined(__GNUC__) && __GNUC__ >= 13
-    #define PACS_HAS_STD_FORMAT 1
-#elif defined(__clang__) && __clang_major__ >= 14 && !defined(__apple_build_version__)
+#elif defined(_MSC_VER) && _MSC_VER >= 1929 && defined(_HAS_CXX20) && _HAS_CXX20
+    // MSVC with C++20 mode enabled
     #define PACS_HAS_STD_FORMAT 1
 #else
     #define PACS_HAS_STD_FORMAT 0
