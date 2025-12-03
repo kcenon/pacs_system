@@ -19,11 +19,20 @@
 
 #include <version>  // For feature test macros
 
-// Detect std::format availability using feature test macros
-// This is the most reliable method as it checks the actual library support,
-// not just the compiler version. Clang may use libstdc++ which requires GCC 13+
-// for std::format support, even though Clang itself supports C++20.
+// Detect std::format availability
+//
+// Detection strategy:
+// 1. __cpp_lib_format feature test macro (most reliable for libstdc++ and libc++)
+// 2. Apple Clang 15+ with libc++ (may not define __cpp_lib_format)
+// 3. MSVC 19.29+ with C++20 mode
+//
+// Note: Non-Apple Clang on Linux typically uses libstdc++ which requires GCC 13+
+// for std::format support, so we rely on __cpp_lib_format for that case.
 #if defined(__cpp_lib_format) && __cpp_lib_format >= 201907L
+    #define PACS_HAS_STD_FORMAT 1
+#elif defined(__APPLE__) && defined(__clang__) && __clang_major__ >= 15
+    // Apple Clang 15+ with libc++ supports std::format
+    // Note: __apple_build_version__ is always defined for Apple Clang
     #define PACS_HAS_STD_FORMAT 1
 #elif defined(_MSC_VER) && _MSC_VER >= 1929 && defined(_HAS_CXX20) && _HAS_CXX20
     // MSVC with C++20 mode enabled
