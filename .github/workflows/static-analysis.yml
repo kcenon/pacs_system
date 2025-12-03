@@ -20,7 +20,7 @@ concurrency:
 jobs:
   clang-tidy:
     name: Clang-Tidy Analysis
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     continue-on-error: true  # Allow baseline collection without failing CI
 
@@ -96,7 +96,7 @@ jobs:
 
   cppcheck:
     name: Cppcheck Analysis
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     continue-on-error: true  # Allow baseline collection without failing CI
 
@@ -139,7 +139,7 @@ jobs:
   analysis-summary:
     name: Static Analysis Summary
     needs: [clang-tidy, cppcheck]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: always()
 
     steps:

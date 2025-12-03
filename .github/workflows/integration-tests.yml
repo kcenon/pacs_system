@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-24.04, macos-14]
         build_type: [Release]
 
     steps:
@@ -197,7 +197,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-24.04, macos-14]
         build_type: [Release]
 
     steps:
@@ -367,7 +367,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-24.04, macos-14]
         build_type: [Release]
 
     steps:
@@ -520,7 +520,7 @@ jobs:
   stress-tests:
     name: Stress Tests
     needs: [integration-tests, stability-smoke-tests]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
@@ -678,7 +678,7 @@ jobs:
   binary-integration-tests:
     name: Binary Integration Tests
     needs: build-and-unit-tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout pacs_system
@@ -810,7 +810,7 @@ jobs:
   test-summary:
     name: Test Summary
     needs: [build-and-unit-tests, integration-tests, stability-smoke-tests, binary-integration-tests]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
 
     steps:
@@ -833,10 +833,10 @@ jobs:
           ubuntu_status="⏭️ Skipped"
           macos_status="⏭️ Skipped"
 
-          if [ -f "test-results/${suite}-test-results-ubuntu-latest/${suite}-test-results.xml" ]; then
+          if [ -f "test-results/${suite}-test-results-ubuntu-24.04/${suite}-test-results.xml" ]; then
             ubuntu_status="✅ Passed"
           fi
-          if [ -f "test-results/${suite}-test-results-macos-latest/${suite}-test-results.xml" ]; then
+          if [ -f "test-results/${suite}-test-results-macos-14/${suite}-test-results.xml" ]; then
             macos_status="✅ Passed"
           fi
 

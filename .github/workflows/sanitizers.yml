@@ -20,7 +20,7 @@ concurrency:
 jobs:
   sanitizer-tests:
     name: ${{ matrix.sanitizer }} Sanitizer
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
 
     strategy:
@@ -116,7 +116,7 @@ jobs:
   sanitizer-summary:
     name: Sanitizer Test Summary
     needs: sanitizer-tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: always()
 
     steps:

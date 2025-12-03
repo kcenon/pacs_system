@@ -2,6 +2,9 @@
 # Multi-platform, multi-compiler build and test
 #
 # Based on messaging_system CI patterns for kcenon ecosystem consistency
+#
+# Note: Uses Ubuntu 24.04 for GCC 13+ support which provides std::format
+# (required by logger_system dependency)
 
 name: CI
 
@@ -30,11 +33,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          # Ubuntu 24.04 provides GCC 13+ with std::format support
+          - os: ubuntu-24.04
             compiler: gcc
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             compiler: clang
-          - os: macos-13
+          - os: macos-14
             compiler: clang
           # Windows support planned for future release
           # - os: windows-2022
