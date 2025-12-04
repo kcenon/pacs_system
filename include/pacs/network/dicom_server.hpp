@@ -18,6 +18,8 @@
 #include "pacs/network/detail/accept_worker.hpp"
 #include "pacs/services/scp_service.hpp"
 
+#include <kcenon/thread/core/cancellation_token.h>
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -247,6 +249,9 @@ private:
         /// (replaces std::thread worker_thread - now using thread_adapter pool)
         /// Note: Protected by associations_mutex_ since std::atomic is not movable
         bool processing{false};
+        /// Cancellation token for cooperative shutdown
+        /// Allows graceful cancellation of message processing when stop() is called
+        kcenon::thread::cancellation_token cancel_token;
     };
 
     // =========================================================================
