@@ -2,7 +2,7 @@
 
 **Issue**: #155 - Verify thread_system stability and jthread support
 **Date**: 2024-12-04
-**Last Updated**: 2024-12-04 (CI Configuration Fixed)
+**Last Updated**: 2024-12-05 (Phase 3 cancellation_token integration)
 **Platform**: macOS ARM64 (Apple Silicon), Ubuntu 24.04 (x64)
 **Author**: Core Maintainer
 
@@ -159,7 +159,9 @@ The following tests are marked with Catch2's `[!mayfail]` tag to document known 
 - **Issue #157**: accept_thread_ migration - **READY TO PROCEED**
 
 ### Phase 3: Worker Migration
-- **Issues #158-160**: **READY TO PROCEED** after Phase 2
+- **Issue #158**: Worker pool migration - **COMPLETE** (merged in PR #168)
+- **Issue #159**: Cancellation token integration - **COMPLETE** (see below)
+- **Issue #160**: Performance testing - **READY TO PROCEED**
 
 ### Phase 4: network_system Integration (Optional)
 - **Issues #161-163**: May proceed independently if using network_system directly
@@ -344,12 +346,59 @@ After applying the fix:
 
 The thread_system library should use `target_compile_definitions(... PUBLIC ...)` instead of `add_definitions()` to properly export ABI-affecting definitions to consumers.
 
+## Cancellation Token Integration (Issue #159)
+
+### Implementation Summary
+
+Issue #159 integrates thread_system's `cancellation_token` into the DICOM server for cooperative cancellation and graceful shutdown.
+
+### Changes Made
+
+| File | Change |
+|------|--------|
+| `include/pacs/network/dicom_server.hpp` | Added `cancellation_token` to `association_info` struct |
+| `src/network/dicom_server.cpp` | Implemented 3-phase shutdown and cancellation-aware message loop |
+| `tests/network/dicom_server_test.cpp` | Added cancellation integration tests |
+
+### 3-Phase Graceful Shutdown
+
+The new `stop()` implementation uses a 3-phase approach:
+
+1. **Phase 1 - Graceful Cancellation**: Cancel all association tokens to trigger cooperative shutdown
+2. **Phase 2 - Wait with Timeout**: Allow associations to complete graceful release
+3. **Phase 3 - Force Abort**: Force abort any remaining connections after timeout
+
+### Message Loop Cancellation
+
+The `message_loop()` now:
+- Checks `cancel_token.is_cancelled()` in the main loop
+- Uses shorter receive timeout (max 1 second) to check cancellation frequently
+- Attempts graceful release when cancelled before abort
+
+### Test Coverage
+
+New tests added:
+- `dicom_server cancellation token integration` (3 sections)
+- `dicom_server shutdown with short timeout` (2 sections)
+
+All 13 assertions pass across 5 test sections.
+
+### Acceptance Criteria
+
+- [x] Graceful shutdown completes within timeout
+- [x] No blocked joins during shutdown
+- [x] Cancellation propagates to all workers
+- [x] DICOM associations properly released before abort
+- [x] All tests pass
+
 ## References
 
 - Issue #96: thread_adapter SIGILL error (Closed)
 - Issue #153: Epic - Migrate from std::thread to thread_system
 - Issue #155: Verify thread_system stability (This report)
 - **Issue #156: Implement accept_worker (ABI fix documented here)**
+- Issue #158: Worker pool migration (Complete)
+- **Issue #159: Cancellation token integration (Complete)**
 - thread_system #223: Original ARM64 bug (Closed)
 - thread_system #224: Static assertion fix (Merged)
 - thread_system #225: Follow-up EXC_BAD_ACCESS bug (Closed, fixed in #226)

@@ -163,29 +163,58 @@ void dicom_server::stop(duration timeout) {
         accept_worker_.reset();
     }
 
-    // Wait for active associations to complete (with timeout)
+    // =========================================================================
+    // Phase 1: Request graceful cancellation via cancellation tokens
+    // =========================================================================
+    // This triggers cooperative cancellation in all message loops.
+    // The message_loop will detect cancellation and attempt graceful release.
+    {
+        std::lock_guard<std::mutex> lock(associations_mutex_);
+        for (auto& [id, info] : associations_) {
+            info->cancel_token.cancel();
+        }
+    }
+
+    // =========================================================================
+    // Phase 2: Wait for graceful shutdown with timeout
+    // =========================================================================
+    // Give associations time to complete their graceful release.
+    // The message_loop will call release() and remove itself from the map.
     auto deadline = clock::now() + timeout;
     {
         std::unique_lock<std::mutex> lock(associations_mutex_);
         while (!associations_.empty() && clock::now() < deadline) {
-            // Release lock while waiting
+            // Release lock while waiting to allow message_loop to remove associations
             lock.unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds{100});
             lock.lock();
         }
+    }
 
-        // Force abort remaining associations
-        // Note: With thread_adapter pool, we don't need to join individual threads.
-        // The message_loop will exit when running_ is false or association is aborted.
+    // =========================================================================
+    // Phase 3: Force abort remaining associations
+    // =========================================================================
+    // If any associations are still active after timeout, force abort them.
+    // This ensures we don't hang indefinitely on unresponsive connections.
+    {
+        std::lock_guard<std::mutex> lock(associations_mutex_);
         for (auto& [id, info] : associations_) {
-            info->assoc.abort(
-                static_cast<uint8_t>(abort_source::service_provider),
-                static_cast<uint8_t>(abort_reason::not_specified));
-            // Mark as no longer processing (message_loop will check running_ and exit)
+            if (info->assoc.is_established()) {
+                info->assoc.abort(
+                    static_cast<uint8_t>(abort_source::service_provider),
+                    static_cast<uint8_t>(abort_reason::not_specified));
+            }
+            // Mark as no longer processing
             // Note: Already holding associations_mutex_ so no atomic needed
             info->processing = false;
         }
         associations_.clear();
+    }
+
+    // Notify shutdown waiters
+    {
+        std::lock_guard<std::mutex> lock(shutdown_mutex_);
+        shutdown_cv_.notify_all();
     }
 }
 
@@ -285,10 +314,21 @@ void dicom_server::handle_association(uint64_t session_id, association assoc) {
 }
 
 void dicom_server::message_loop(association_info& info) {
-    while (running_ && info.assoc.is_established()) {
+    // Check both running flag and cancellation token for cooperative shutdown
+    while (running_ && !info.cancel_token.is_cancelled() && info.assoc.is_established()) {
         // Receive DIMSE message with timeout
-        auto result = info.assoc.receive_dimse(
-            std::chrono::duration_cast<association::duration>(config_.idle_timeout));
+        // Use shorter timeout to check cancellation more frequently
+        auto receive_timeout = std::min(
+            std::chrono::duration_cast<association::duration>(config_.idle_timeout),
+            association::duration{1000}  // Check cancellation at least every second
+        );
+
+        auto result = info.assoc.receive_dimse(receive_timeout);
+
+        // Check for cancellation after potentially blocking receive
+        if (info.cancel_token.is_cancelled()) {
+            break;
+        }
 
         if (result.is_err()) {
             // Check if it was a timeout vs. actual error
@@ -327,6 +367,13 @@ void dicom_server::message_loop(association_info& info) {
             stats_.messages_processed++;
             stats_.last_activity = clock::now();
         }
+    }
+
+    // If cancelled, attempt graceful release before forced abort
+    if (info.cancel_token.is_cancelled() && info.assoc.is_established()) {
+        // Try graceful release first - ignore result as we'll abort anyway if it fails
+        // The Phase 3 shutdown will handle any remaining established associations
+        (void)info.assoc.release();
     }
 
     // Association ended - invoke released callback

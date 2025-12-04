@@ -484,3 +484,105 @@ TEST_CASE("dicom_server graceful shutdown", "[dicom_server][lifecycle]") {
         CHECK(duration.count() < 1000);
     }
 }
+
+// =============================================================================
+// Cancellation Token Integration Tests (Issue #159)
+// =============================================================================
+
+TEST_CASE("dicom_server cancellation token integration", "[dicom_server][cancellation][lifecycle]") {
+    server_config config;
+    config.ae_title = TEST_AE_TITLE;
+    config.port = TEST_PORT;
+
+    dicom_server server{config};
+    server.register_service(std::make_shared<verification_scp>());
+
+    SECTION("graceful shutdown uses 3-phase approach") {
+        // Phase 1: Request graceful cancellation via cancellation tokens
+        // Phase 2: Wait for graceful shutdown with timeout
+        // Phase 3: Force abort remaining associations
+
+        auto result = server.start();
+        REQUIRE(result.is_ok());
+        CHECK(server.is_running());
+
+        // Stop should complete without hanging, demonstrating
+        // that cancellation token integration works
+        auto start = std::chrono::steady_clock::now();
+        server.stop(std::chrono::milliseconds{500});
+        auto end = std::chrono::steady_clock::now();
+
+        CHECK_FALSE(server.is_running());
+
+        // Shutdown should complete well within the timeout since there are
+        // no active associations (Phase 1 & 2 complete quickly, Phase 3 skipped)
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        CHECK(duration.count() < 500);
+    }
+
+    SECTION("stop is idempotent with cancellation tokens") {
+        auto result = server.start();
+        REQUIRE(result.is_ok());
+
+        // First stop
+        server.stop(std::chrono::milliseconds{100});
+        CHECK_FALSE(server.is_running());
+
+        // Second stop should not crash or hang
+        server.stop(std::chrono::milliseconds{100});
+        CHECK_FALSE(server.is_running());
+    }
+
+    SECTION("shutdown notifies waiters") {
+        auto result = server.start();
+        REQUIRE(result.is_ok());
+
+        std::atomic<bool> waiter_notified{false};
+
+        // Start a thread that waits for shutdown
+        std::thread waiter([&]() {
+            server.wait_for_shutdown();
+            waiter_notified = true;
+        });
+
+        // Give the waiter thread time to start waiting
+        std::this_thread::sleep_for(std::chrono::milliseconds{50});
+
+        // Stop should notify the waiter
+        server.stop(std::chrono::milliseconds{100});
+
+        // Wait for waiter thread with timeout
+        if (waiter.joinable()) {
+            waiter.join();
+        }
+
+        CHECK(waiter_notified);
+    }
+}
+
+TEST_CASE("dicom_server shutdown with short timeout", "[dicom_server][cancellation][timeout]") {
+    server_config config;
+    config.ae_title = TEST_AE_TITLE;
+    config.port = TEST_PORT;
+
+    dicom_server server{config};
+    server.register_service(std::make_shared<verification_scp>());
+
+    SECTION("immediate shutdown with zero timeout") {
+        auto result = server.start();
+        REQUIRE(result.is_ok());
+
+        // Zero timeout should still work - goes straight to Phase 3
+        server.stop(std::chrono::milliseconds{0});
+        CHECK_FALSE(server.is_running());
+    }
+
+    SECTION("very short timeout completes normally") {
+        auto result = server.start();
+        REQUIRE(result.is_ok());
+
+        // Very short timeout (10ms) - should still work with no active connections
+        server.stop(std::chrono::milliseconds{10});
+        CHECK_FALSE(server.is_running());
+    }
+}

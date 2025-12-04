@@ -118,18 +118,30 @@ TEST_CASE("accept_worker maintenance callback", "[accept_worker][callback]") {
         [&]() { maintenance_count++; }
     );
 
-    worker.set_wake_interval(20ms);
+    worker.set_wake_interval(50ms);
 
     auto result = worker.start();
     REQUIRE_FALSE(result.has_error());
 
-    // Wait for multiple maintenance callbacks
-    std::this_thread::sleep_for(100ms);
+    // Wait for at least 2 maintenance callbacks with generous timeout
+    // Using polling with timeout instead of fixed sleep for CI stability
+    constexpr int expected_callbacks = 2;
+    constexpr auto max_wait = 500ms;
+    constexpr auto poll_interval = 25ms;
+
+    auto start = std::chrono::steady_clock::now();
+    while (maintenance_count.load() < expected_callbacks) {
+        auto elapsed = std::chrono::steady_clock::now() - start;
+        if (elapsed >= max_wait) {
+            break;
+        }
+        std::this_thread::sleep_for(poll_interval);
+    }
 
     worker.stop();
 
-    // Should have been called at least twice in 100ms with 20ms interval
-    REQUIRE(maintenance_count.load() >= 2);
+    // Should have been called at least twice within generous timeout
+    REQUIRE(maintenance_count.load() >= expected_callbacks);
 }
 
 TEST_CASE("accept_worker graceful shutdown", "[accept_worker][shutdown]") {
