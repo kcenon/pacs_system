@@ -460,6 +460,7 @@ add_library(pacs_network
     src/network/association.cpp
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
+    src/network/detail/accept_worker.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
@@ -474,6 +475,15 @@ target_link_libraries(pacs_network
 if(TARGET NetworkSystem)
     target_link_libraries(pacs_network PUBLIC NetworkSystem)
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
+endif()
+
+# Link thread_system (Tier 1) - for accept_worker
+if(TARGET ThreadSystem)
+    target_link_libraries(pacs_network PUBLIC ThreadSystem)
+    target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
+elseif(TARGET thread_base)
+    target_link_libraries(pacs_network PUBLIC thread_base)
+    target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
 endif()
 
 # Services library
