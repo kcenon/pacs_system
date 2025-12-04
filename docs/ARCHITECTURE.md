@@ -465,8 +465,8 @@ The network module implements DICOM Upper Layer Protocol:
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │                  TCP Acceptor (Port 11112)                 │  │
-│  │                  (network_system::messaging_server)        │  │
+│  │                  Accept Worker (Port 11112)                │  │
+│  │            (detail::accept_worker → thread_base)           │  │
 │  └────────────────────────────┬──────────────────────────────┘  │
 │                               │                                  │
 │                               │ New Connection                   │
@@ -487,11 +487,15 @@ The network module implements DICOM Upper Layer Protocol:
 │                               ▼                                  │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │                  Worker Thread Pool                        │  │
-│  │                  (thread_system::thread_pool)              │  │
+│  │            (integration::thread_adapter singleton)         │  │
 │  │                                                            │  │
 │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │  │
 │  │  │ Worker 1 │  │ Worker 2 │  │ Worker 3 │  │ Worker N │  │  │
 │  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │  │
+│  │                                                            │  │
+│  │  • Fire-and-forget task submission                        │  │
+│  │  • Priority-based scheduling (critical/high/normal/low)   │  │
+│  │  • Automatic thread lifecycle management                   │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -664,6 +668,14 @@ The network module implements DICOM Upper Layer Protocol:
 
 ### Threading Architecture
 
+The DICOM server uses a multi-tiered threading model that leverages the ecosystem's
+`thread_system` for efficient task scheduling and lifecycle management:
+
+- **Accept Worker**: Inherits from `thread_base` for connection acceptance with
+  proper lifecycle management (start/stop, cancellation token).
+- **Association Workers**: Use `thread_adapter::submit_fire_and_forget()` for
+  DIMSE message processing, eliminating per-association thread management overhead.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          Thread Model                                        │
@@ -679,23 +691,20 @@ The network module implements DICOM Upper Layer Protocol:
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                      I/O Thread Pool                                    │ │
-│  │                   (network_system ASIO)                                 │ │
+│  │                     Accept Worker Thread                                │ │
+│  │              (detail::accept_worker → thread_base)                      │ │
 │  │                                                                         │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                  │ │
-│  │  │  IO Thread 1 │  │  IO Thread 2 │  │  IO Thread N │                  │ │
-│  │  │              │  │              │  │              │                  │ │
-│  │  │ • Accept     │  │ • PDU Read   │  │ • PDU Write  │                  │ │
-│  │  │ • Read       │  │ • PDU Write  │  │ • Read       │                  │ │
-│  │  │ • Write      │  │              │  │              │                  │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘                  │ │
+│  │  • Listens on configured port (default 11112)                          │ │
+│  │  • Periodic maintenance callbacks (idle timeout checks)                │ │
+│  │  • Graceful shutdown via thread_base lifecycle                         │ │
+│  │  • Wake interval configurable (default 100ms)                          │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                       │
-│                                      │ Jobs                                  │
+│                                      │ New Associations                      │
 │                                      ▼                                       │
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                     Worker Thread Pool                                  │ │
-│  │                   (thread_system::thread_pool)                          │ │
+│  │                  Worker Thread Pool (Singleton)                         │ │
+│  │             (integration::thread_adapter → thread_pool)                 │ │
 │  │                                                                         │ │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                  │ │
 │  │  │  Worker 1    │  │  Worker 2    │  │  Worker N    │                  │ │
@@ -704,10 +713,11 @@ The network module implements DICOM Upper Layer Protocol:
 │  │  │   handling   │  │   handling   │  │   handling   │                  │ │
 │  │  └──────────────┘  └──────────────┘  └──────────────┘                  │ │
 │  │                                                                         │ │
-│  │  ┌──────────────────────────────────────────────────────────────────┐  │ │
-│  │  │                   Lock-Free Job Queue                             │  │ │
-│  │  │              (thread_system::job_queue)                           │  │ │
-│  │  └──────────────────────────────────────────────────────────────────┘  │ │
+│  │  Key Features:                                                          │ │
+│  │  • Fire-and-forget task submission (no thread join needed)             │ │
+│  │  • Priority scheduling: critical > high > normal > low                 │ │
+│  │  • Thread reuse across associations                                    │ │
+│  │  • Lock-free job queue (thread_system::job_queue)                      │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
