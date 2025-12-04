@@ -147,9 +147,13 @@ jobs:
     - name: Configure CMake
       working-directory: pacs_system
       run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
@@ -298,9 +302,13 @@ jobs:
     - name: Configure CMake
       working-directory: pacs_system
       run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
@@ -528,9 +536,13 @@ jobs:
     - name: Configure CMake
       working-directory: pacs_system
       run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
@@ -675,9 +687,13 @@ jobs:
     - name: Configure CMake
       working-directory: pacs_system
       run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
@@ -834,9 +850,13 @@ jobs:
     - name: Configure CMake
       working-directory: pacs_system
       run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
