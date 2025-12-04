@@ -2,17 +2,21 @@
 
 **Issue**: #155 - Verify thread_system stability and jthread support
 **Date**: 2024-12-04
-**Last Updated**: 2024-12-04 (Issue #225 Fix Merged)
-**Platform**: macOS ARM64 (Apple Silicon)
+**Last Updated**: 2024-12-04 (CI Configuration Fixed)
+**Platform**: macOS ARM64 (Apple Silicon), Ubuntu 24.04 (x64)
 **Author**: Core Maintainer
 
 ## Executive Summary
 
-This report documents the findings from verifying thread_system stability and jthread support on the macOS ARM64 platform as part of the Phase 1 preparation for migrating from `std::thread` to `thread_system`.
+This report documents the findings from verifying thread_system stability and jthread support on multiple platforms as part of the Phase 1 preparation for migrating from `std::thread` to `thread_system`.
 
 > **Update (2024-12-04)**: The EXC_BAD_ACCESS issue has been **RESOLVED** in thread_system PR #226.
 > The root cause was a data race between `on_stop_requested()` and job destruction in `do_work()`.
 > All tests should now pass with the updated thread_system.
+>
+> **Update (2024-12-04)**: CI workflow fix applied to `integration-tests.yml`.
+> Added explicit compiler specification (`-DCMAKE_CXX_COMPILER=g++`) to ensure consistent
+> behavior across all CI jobs, matching the successful `ci.yml` configuration.
 
 ### Key Findings
 
@@ -198,6 +202,59 @@ The EXC_BAD_ACCESS issue (#225) has been **RESOLVED** in thread_system PR #226:
 - **Detection Method**: ThreadSanitizer identified "data race on vptr (ctor/dtor vs virtual call)"
 - **Solution**: Added mutex synchronization (`queue_mutex_`) to protect job access during destruction
 - **Verification**: All 28 unit tests pass with ThreadSanitizer and AddressSanitizer
+
+## CI Configuration Fix
+
+### Problem Description
+
+After the thread_system #226 fix was merged, CI tests were still failing on Ubuntu 24.04 with "Subprocess aborted" errors affecting 15 thread-related tests:
+
+- `thread_adapter pool management`
+- `thread_adapter job submission`
+- `thread_adapter fire and forget`
+- `thread_base lifecycle stability`
+- `jthread automatic cleanup`
+- `cancellation_token propagation`
+- And others...
+
+### Root Cause Analysis
+
+Investigation revealed a configuration discrepancy between CI workflows:
+
+| Workflow | Compiler Specification | Test Result |
+|----------|------------------------|-------------|
+| `ci.yml` | Explicit `-DCMAKE_CXX_COMPILER=g++` | **PASS** |
+| `integration-tests.yml` | CMake auto-detection | **FAIL** |
+
+The `ci.yml` workflow explicitly specifies the compiler, while `integration-tests.yml` relied on CMake's default compiler detection on Ubuntu 24.04, which may result in different compiler behavior.
+
+### Solution Applied
+
+Added explicit compiler specification to all 5 CMake configuration steps in `integration-tests.yml`:
+
+```yaml
+cmake -B build \
+  -G Ninja \
+  -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+  -DCMAKE_C_COMPILER=gcc \
+  -DCMAKE_CXX_COMPILER=g++ \
+  ...
+```
+
+This ensures consistent compiler behavior across all CI workflows.
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `.github/workflows/integration-tests.yml` | Added `-DCMAKE_C_COMPILER=gcc` and `-DCMAKE_CXX_COMPILER=g++` to all 5 CMake steps |
+
+### Verification
+
+After the fix was applied:
+- All CI jobs passed successfully
+- No "Subprocess aborted" errors
+- All thread-related tests executing correctly
 
 ## References
 
