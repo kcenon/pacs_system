@@ -241,42 +241,18 @@ if(PACS_WITH_CONTAINER_SYSTEM)
     endif()
 endif()
 
-# logger_system (REQUIRED for logger_adapter - Tier 2)
-message(STATUS "")
-message(STATUS "=== Finding logger_system (REQUIRED for logger_adapter - Tier 2) ===")
-
-set(_PACS_LOGGER_PATHS
-    "$ENV{LOGGER_SYSTEM_ROOT}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../logger_system"
-    "${CMAKE_CURRENT_SOURCE_DIR}/logger_system"
-)
-
-set(LOGGER_SYSTEM_FOUND FALSE)
-foreach(_path ${_PACS_LOGGER_PATHS})
-    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/logger/core/logger.h")
-        message(STATUS "Found logger_system at: ${_path}")
-        set(PACS_LOGGER_SYSTEM_DIR "${_path}")
-        set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "${_path}/include")
-        set(LOGGER_SYSTEM_FOUND TRUE)
-        break()
-    endif()
-endforeach()
-
-if(LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
-    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(LOGGER_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
-    add_subdirectory("${PACS_LOGGER_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/logger_system_build")
-elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
-    message(WARNING
-        "logger_system is REQUIRED for logger_adapter (Tier 2).\n"
-        "logger_adapter will be disabled.\n"
-        "Please ensure logger_system is available at:\n"
-        "  - ../logger_system\n"
-        "  - Set LOGGER_SYSTEM_ROOT environment variable")
-endif()
+# Disable examples/samples for all dependencies fetched via FetchContent
+# This prevents build errors from missing example source files in upstream repos
+# (e.g., common_system's thread_integration_example.cpp doesn't exist but CMake
+# tries to build it when thread_system target exists)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(COMMON_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # thread_system (REQUIRED for thread_adapter - Tier 1)
+# NOTE: Must be added BEFORE logger_system to prevent FetchContent conflicts.
+# logger_system depends on thread_system and will fetch it via UnifiedDependencies
+# if targets don't exist. By adding thread_system first, we ensure the sibling
+# directory version is used with correct include paths.
 message(STATUS "")
 message(STATUS "=== Finding thread_system (REQUIRED for thread_adapter - Tier 1) ===")
 
@@ -312,6 +288,41 @@ else()
         "Please ensure thread_system is available at:\n"
         "  - ../thread_system\n"
         "  - Set THREAD_SYSTEM_ROOT environment variable")
+endif()
+
+# logger_system (REQUIRED for logger_adapter - Tier 2)
+message(STATUS "")
+message(STATUS "=== Finding logger_system (REQUIRED for logger_adapter - Tier 2) ===")
+
+set(_PACS_LOGGER_PATHS
+    "$ENV{LOGGER_SYSTEM_ROOT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../logger_system"
+    "${CMAKE_CURRENT_SOURCE_DIR}/logger_system"
+)
+
+set(LOGGER_SYSTEM_FOUND FALSE)
+foreach(_path ${_PACS_LOGGER_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/logger/core/logger.h")
+        message(STATUS "Found logger_system at: ${_path}")
+        set(PACS_LOGGER_SYSTEM_DIR "${_path}")
+        set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "${_path}/include")
+        set(LOGGER_SYSTEM_FOUND TRUE)
+        break()
+    endif()
+endforeach()
+
+if(LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(LOGGER_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+    add_subdirectory("${PACS_LOGGER_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/logger_system_build")
+elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    message(WARNING
+        "logger_system is REQUIRED for logger_adapter (Tier 2).\n"
+        "logger_adapter will be disabled.\n"
+        "Please ensure logger_system is available at:\n"
+        "  - ../logger_system\n"
+        "  - Set LOGGER_SYSTEM_ROOT environment variable")
 endif()
 
 # network_system (REQUIRED - Tier 4)
@@ -460,6 +471,7 @@ add_library(pacs_network
     src/network/association.cpp
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
+    src/network/detail/accept_worker.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
@@ -474,6 +486,48 @@ target_link_libraries(pacs_network
 if(TARGET NetworkSystem)
     target_link_libraries(pacs_network PUBLIC NetworkSystem)
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
+endif()
+
+# Link thread_system (Tier 1) - for accept_worker
+if(TARGET ThreadSystem)
+    target_link_libraries(pacs_network PUBLIC ThreadSystem)
+    target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
+elseif(TARGET thread_base)
+    target_link_libraries(pacs_network PUBLIC thread_base)
+    target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
+    # CRITICAL: Explicitly add thread_system include directories
+    # When thread_base is fetched via FetchContent (by logger_system), its INTERFACE
+    # include directories may not be set up correctly. Ensure we can find thread_base.h
+    # by explicitly adding the include directory from the sibling checkout.
+    if(PACS_THREAD_SYSTEM_INCLUDE_DIR)
+        target_include_directories(pacs_network PUBLIC ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
+    endif()
+endif()
+
+# CRITICAL: Inherit thread_system compile definitions for ABI compatibility
+# thread_system uses add_definitions(-DUSE_STD_JTHREAD) which doesn't propagate
+# as interface compile definitions. We must manually sync these flags to ensure
+# thread_base class layout matches between library and consumer code.
+# Without this, derived classes have incorrect member offsets causing crashes.
+#
+# NOTE: We must detect jthread support ourselves because SET_STD_JTHREAD from
+# thread_system doesn't propagate when using FetchContent. AppleClang doesn't
+# support std::jthread even in C++20 mode, so we need proper detection.
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("
+    #include <stop_token>
+    #include <thread>
+    int main() {
+        std::jthread t([](){});
+        return 0;
+    }
+" PACS_HAS_STD_JTHREAD)
+
+if(PACS_HAS_STD_JTHREAD)
+    message(STATUS "std::jthread detected - enabling USE_STD_JTHREAD for ABI compatibility")
+    target_compile_definitions(pacs_network PUBLIC USE_STD_JTHREAD)
+else()
+    message(STATUS "std::jthread not available - using std::thread fallback")
 endif()
 
 # Services library
@@ -625,6 +679,12 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         message(WARNING "    - thread_adapter: OFF (ThreadSystem/thread_base target not found)")
     endif()
 
+    # CRITICAL: Inherit thread_system compile definitions for ABI compatibility
+    # Use the same PACS_HAS_STD_JTHREAD detection result from pacs_network
+    if(PACS_HAS_STD_JTHREAD)
+        target_compile_definitions(pacs_integration PUBLIC USE_STD_JTHREAD)
+    endif()
+
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
@@ -756,6 +816,7 @@ if(PACS_BUILD_TESTS)
         tests/network/dicom_server_test.cpp
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
+        tests/network/detail/accept_worker_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
