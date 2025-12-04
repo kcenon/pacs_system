@@ -851,8 +851,11 @@ if(PACS_BUILD_TESTS)
     endif()
 
     # Integration tests - cross-module adapter tests
+    # TEST_PREFIX ensures these tests are excluded from unit test runs
+    # (CI uses --exclude-regex "integration::" for unit tests)
     if(TARGET pacs_integration_tests)
         catch_discover_tests(pacs_integration_tests
+            TEST_PREFIX "integration::"
             PROPERTIES LABELS "integration"
         )
     endif()
