@@ -1,6 +1,9 @@
 # PACS System
 
+[![CI](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml)
 [![Integration Tests](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml)
+[![Code Coverage](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml)
+[![Static Analysis](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml)
 [![SBOM Generation](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml)
 
 > **언어:** [English](README.md) | **한국어**
@@ -20,7 +23,7 @@ kcenon 에코시스템을 기반으로 외부 DICOM 라이브러리 없이 구�
 
 ## 프로젝트 현황
 
-**현재 단계**: 🎯 Phase 2 거의 완료 - Network & Services (80%+)
+**현재 단계**: ✅ Phase 2 완료 - Network & Services (100%)
 
 | 마일스톤 | 상태 | 목표 |
 |----------|------|------|
@@ -35,7 +38,7 @@ kcenon 에코시스템을 기반으로 외부 DICOM 라이브러리 없이 구�
 | Worklist/MPPS | ✅ 완료 | 18-20주차 |
 | 고급 압축 | 🔜 예정 | Phase 3 |
 
-**테스트 커버리지**: 34개 테스트 파일, 113개 이상 테스트 통과
+**테스트 커버리지**: 39개 테스트 파일, 120개 이상 테스트 통과
 
 ### Phase 1 성과 (완료)
 
@@ -207,7 +210,7 @@ pacs_system/
 │   ├── storage/                 # Storage 구현 (4개 파일)
 │   └── integration/             # Adapter 구현 (6개 파일)
 │
-├── tests/                       # 테스트 스위트 (34개 파일, 113개 이상 테스트)
+├── tests/                       # 테스트 스위트 (39개 파일, 120개 이상 테스트)
 │   ├── core/                    # Core 모듈 테스트 (6개 파일)
 │   ├── encoding/                # Encoding 모듈 테스트 (5개 파일)
 │   ├── network/                 # Network 모듈 테스트 (5개 파일)
@@ -215,7 +218,7 @@ pacs_system/
 │   ├── storage/                 # Storage 테스트 (6개 파일)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (13개, ~8,700줄)
+├── examples/                    # 예제 애플리케이션 (15개, ~10,500줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
 │   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
 │   ├── db_browser/              # PACS 인덱스 데이터베이스 브라우저
@@ -231,7 +234,7 @@ pacs_system/
 │   ├── pacs_server/             # 전체 PACS 서버 예제
 │   └── integration_tests/       # 통합 테스트 스위트
 │
-├── docs/                        # 문서 (26개 이상 파일)
+├── docs/                        # 문서 (30개 이상 파일)
 └── CMakeLists.txt               # 빌드 설정 (v0.2.0)
 ```
 
@@ -257,6 +260,9 @@ pacs_system/
 | **Verification** | 1.2.840.10008.1.1 | ✅ 완료 |
 | **CT Storage** | 1.2.840.10008.5.1.4.1.1.2 | ✅ 완료 |
 | **MR Storage** | 1.2.840.10008.5.1.4.1.1.4 | ✅ 완료 |
+| **US Storage** | 1.2.840.10008.5.1.4.1.1.6.x | ✅ 완료 |
+| **XA Storage** | 1.2.840.10008.5.1.4.1.1.12.x | ✅ 완료 |
+| **XRF Storage** | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ 완료 |
 | **X-Ray Storage** | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ 완료 |
 | **Patient Root Q/R** | 1.2.840.10008.5.1.4.1.2.1.x | ✅ 완료 |
 | **Study Root Q/R** | 1.2.840.10008.5.1.4.1.2.2.x | ✅ 완료 |
@@ -298,7 +304,7 @@ cmake --build build
 cd build && ctest --output-on-failure
 ```
 
-**테스트 결과**: 113개 이상 테스트 통과 (Core: 57, Encoding: 41, Network: 15, Storage/Integration: 15+)
+**테스트 결과**: 120개 이상 테스트 통과 (Core: 57, Encoding: 41, Network: 15, Services: 7+, Storage/Integration: 20+)
 
 ### 빌드 옵션
 
@@ -541,15 +547,16 @@ database:
 
 | 항목 | 값 |
 |------|-----|
-| **헤더 파일** | 48개 |
-| **소스 파일** | 33개 |
-| **헤더 LOC** | ~13,500줄 |
-| **소스 LOC** | ~13,800줄 |
-| **예제 LOC** | ~1,200줄 |
-| **총 LOC** | ~27,300줄 |
-| **테스트 파일** | 34개 |
-| **테스트 케이스** | 113개 이상 |
-| **문서** | 26개 이상 마크다운 |
+| **헤더 파일** | 50개 이상 |
+| **소스 파일** | 35개 이상 |
+| **헤더 LOC** | ~14,500줄 |
+| **소스 LOC** | ~15,000줄 |
+| **예제 LOC** | ~10,500줄 |
+| **총 LOC** | ~40,000줄 |
+| **테스트 파일** | 39개 |
+| **테스트 케이스** | 120개 이상 |
+| **문서** | 30개 이상 마크다운 |
+| **CI/CD 워크플로우** | 7개 |
 | **버전** | 0.2.0 |
 
 ---
