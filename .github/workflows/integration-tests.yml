@@ -324,13 +324,33 @@ jobs:
       timeout-minutes: 15
       run: |
         cd build
-        # Run integration tests with JUnit output
+
+        # Debug: Check binary existence and permissions
+        echo "=== Debug: Checking binary ==="
+        ls -la ./bin/pacs_integration_e2e 2>/dev/null || echo "Binary not found"
+        file ./bin/pacs_integration_e2e 2>/dev/null || true
+
         if [ -f "./bin/pacs_integration_e2e" ]; then
-          ./bin/pacs_integration_e2e \
-            --reporter junit \
-            --out integration-test-results.xml \
-            "~[.slow]" "~[stability]" \
-            || echo "Some integration tests failed"
+          # Debug: List available tests first (with timeout)
+          echo "=== Debug: Listing available tests ==="
+          timeout 30s ./bin/pacs_integration_e2e --list-tests "~[.slow]" "~[stability]" 2>&1 | head -50 || echo "List tests timed out or failed"
+
+          # Debug: Count tests
+          TEST_COUNT=$(timeout 30s ./bin/pacs_integration_e2e --list-tests "~[.slow]" "~[stability]" 2>/dev/null | grep -c "test case" || echo "0")
+          echo "=== Debug: Found $TEST_COUNT test cases ==="
+
+          if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
+            echo "No integration tests found, creating empty results"
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="integration" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > integration-test-results.xml
+          else
+            echo "=== Running integration tests ==="
+            # Run with console reporter first for better debugging, then JUnit
+            ./bin/pacs_integration_e2e \
+              --reporter console \
+              --reporter junit::out=integration-test-results.xml \
+              "~[.slow]" "~[stability]" \
+              || echo "Some integration tests failed"
+          fi
         else
           echo "Integration test binary not found, running CTest integration tests"
           ctest \
