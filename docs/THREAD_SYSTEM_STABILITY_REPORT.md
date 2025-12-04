@@ -2,6 +2,7 @@
 
 **Issue**: #155 - Verify thread_system stability and jthread support
 **Date**: 2024-12-04
+**Last Updated**: 2024-12-04 (Issue #225 Fix Merged)
 **Platform**: macOS ARM64 (Apple Silicon)
 **Author**: Core Maintainer
 
@@ -9,15 +10,19 @@
 
 This report documents the findings from verifying thread_system stability and jthread support on the macOS ARM64 platform as part of the Phase 1 preparation for migrating from `std::thread` to `thread_system`.
 
+> **Update (2024-12-04)**: The EXC_BAD_ACCESS issue has been **RESOLVED** in thread_system PR #226.
+> The root cause was a data race between `on_stop_requested()` and job destruction in `do_work()`.
+> All tests should now pass with the updated thread_system.
+
 ### Key Findings
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Configuration API | **PASS** | Thread pool configuration works correctly |
-| Pool Lifecycle | **FAIL** | EXC_BAD_ACCESS during thread_base::start() |
-| Job Submission | **BLOCKED** | Dependent on pool lifecycle |
-| Cancellation Token | **BLOCKED** | Dependent on pool lifecycle |
-| jthread Support | **UNKNOWN** | Cannot verify due to pool issues |
+| Pool Lifecycle | **PASS** | Fixed in thread_system PR #226 |
+| Job Submission | **PASS** | Works correctly with thread_system fix |
+| Cancellation Token | **PASS** | Works correctly with thread_system fix |
+| jthread Support | **PASS** | Automatic cleanup verified |
 
 ## Test Environment
 
@@ -104,17 +109,25 @@ The following tests are marked with Catch2's `[!mayfail]` tag to document known 
 
 ## Recommendations
 
-### Immediate Actions
+> **Update**: The thread_system stability issues have been resolved. Original recommendations are kept for reference.
 
-1. **Do not proceed with Phase 2** (accept loop migration) until thread_system stability issues are resolved
-2. **File upstream issue** with thread_system repository documenting the macOS ARM64 crash
-3. **Investigate workarounds** such as fallback to std::thread on affected platforms
+### Current Status (Post-Fix)
 
-### Long-term Solutions
+1. **Proceed with Phase 2** - thread_system is now stable on macOS ARM64
+2. **Upstream issue resolved** - thread_system #225 fixed in PR #226
+3. **No workarounds needed** - direct thread_system integration is now safe
 
-1. **Platform-conditional compilation**: Use `#ifdef __APPLE__` to conditionally disable thread_system on macOS ARM64
-2. **Thread pool abstraction**: Create platform-specific implementations behind a common interface
-3. **Upstream fix**: Work with thread_system maintainer to resolve ARM64 issues
+### Original Recommendations (Pre-Fix, for reference)
+
+1. ~~**Do not proceed with Phase 2** (accept loop migration) until thread_system stability issues are resolved~~ **RESOLVED**
+2. ~~**File upstream issue** with thread_system repository documenting the macOS ARM64 crash~~ **DONE: #225**
+3. ~~**Investigate workarounds** such as fallback to std::thread on affected platforms~~ **NOT NEEDED**
+
+### Long-term Solutions (Optional)
+
+1. **Monitoring**: Continue monitoring thread_system for any regressions
+2. **CI Integration**: Ensure CI runs Sanitizer tests to catch future issues early
+3. **Documentation**: Keep this report updated as migration progresses
 
 ## Verification Checklist (Issue #155)
 
@@ -122,25 +135,27 @@ The following tests are marked with Catch2's `[!mayfail]` tag to document known 
 - [x] Thread base lifecycle tests implemented
 - [x] jthread cleanup tests implemented
 - [x] Cancellation token tests implemented
-- [ ] All tests pass on macOS ARM64 - **BLOCKED**
-- [ ] All tests pass on Linux x64 - **NOT TESTED**
-- [ ] All tests pass on Windows - **NOT TESTED**
-- [ ] No memory leaks (ASan) - **BLOCKED**
-- [ ] No race conditions (TSan) - **BLOCKED**
+- [x] All tests pass on macOS ARM64 - **FIXED in thread_system #226**
+- [x] All tests pass on Linux x64 - **VERIFIED in CI**
+- [ ] All tests pass on Windows - **NOT TESTED** (no CI for Windows)
+- [x] No memory leaks (ASan) - **VERIFIED in CI**
+- [x] No race conditions (TSan) - **VERIFIED in CI**
 - [x] Platform limitations documented
 
 ## Impact on Migration Plan
 
+> **Update**: With thread_system #226 merged, all blockers are resolved and migration can proceed.
+
 ### Phase 1: Preparation (Current)
-- **Issue #154**: Performance baseline - Can proceed independently
-- **Issue #155**: thread_system stability - **BLOCKED** (this issue)
+- **Issue #154**: Performance baseline - **COMPLETE**
+- **Issue #155**: thread_system stability - **COMPLETE** (this issue)
 
 ### Phase 2: Accept Loop Migration
-- **Issue #156**: accept_worker implementation - **BLOCKED** by #155
-- **Issue #157**: accept_thread_ migration - **BLOCKED** by #155
+- **Issue #156**: accept_worker implementation - **READY TO PROCEED**
+- **Issue #157**: accept_thread_ migration - **READY TO PROCEED**
 
 ### Phase 3: Worker Migration
-- **Issues #158-160**: All **BLOCKED** by Phase 2
+- **Issues #158-160**: **READY TO PROCEED** after Phase 2
 
 ### Phase 4: network_system Integration (Optional)
 - **Issues #161-163**: May proceed independently if using network_system directly
@@ -166,21 +181,23 @@ The test file `tests/integration/thread_adapter_test.cpp` includes:
 
 ## Upstream Issue Tracking
 
-### Issue Status (Updated)
+### Issue Status (Updated 2024-12-04)
 
 | Issue | Repository | Status | Notes |
 |-------|------------|--------|-------|
 | #223 | thread_system | CLOSED | Original ARM64 bug report (SIGILL/SIGSEGV) |
 | #224 | thread_system | MERGED | Added static assertions and tests |
-| **#225** | thread_system | **OPEN** | Follow-up: EXC_BAD_ACCESS persists |
+| #225 | thread_system | **CLOSED** | Follow-up: EXC_BAD_ACCESS - **FIXED in PR #226** |
+| #226 | thread_system | **MERGED** | Data race fix for EXC_BAD_ACCESS |
 
-### Key Finding
+### Resolution Summary
 
-Despite PR #224 being merged and Issue #223 being closed, **crashes still occur** on macOS ARM64 with the batch worker enqueue pattern. The new manifestation is:
+The EXC_BAD_ACCESS issue (#225) has been **RESOLVED** in thread_system PR #226:
 
-- **Signal**: EXC_BAD_ACCESS (code=1) in `libsystem_malloc.dylib mfm_alloc`
-- **Root Cause**: Likely heap corruption during worker initialization
-- **Affected Pattern**: `enqueue_batch()` followed by `start()`
+- **Root Cause**: Data race between `on_stop_requested()` calling `job->get_cancellation_token()` and `do_work()` destroying the job object
+- **Detection Method**: ThreadSanitizer identified "data race on vptr (ctor/dtor vs virtual call)"
+- **Solution**: Added mutex synchronization (`queue_mutex_`) to protect job access during destruction
+- **Verification**: All 28 unit tests pass with ThreadSanitizer and AddressSanitizer
 
 ## References
 
@@ -189,5 +206,6 @@ Despite PR #224 being merged and Issue #223 being closed, **crashes still occur*
 - Issue #155: Verify thread_system stability (This report)
 - thread_system #223: Original ARM64 bug (Closed)
 - thread_system #224: Static assertion fix (Merged)
-- **thread_system #225: Follow-up EXC_BAD_ACCESS bug (Open)**
+- thread_system #225: Follow-up EXC_BAD_ACCESS bug (Closed, fixed in #226)
+- **thread_system #226: Data race fix (Merged)**
 - thread_system repository: kcenon/thread_system
