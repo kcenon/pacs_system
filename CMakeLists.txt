@@ -486,6 +486,15 @@ elseif(TARGET thread_base)
     target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
 endif()
 
+# CRITICAL: Inherit thread_system compile definitions for ABI compatibility
+# thread_system uses add_definitions(-DUSE_STD_JTHREAD) which doesn't propagate
+# as interface compile definitions. We must manually sync these flags to ensure
+# thread_base class layout matches between library and consumer code.
+# Without this, derived classes have incorrect member offsets causing crashes.
+if(SET_STD_JTHREAD)
+    target_compile_definitions(pacs_network PUBLIC USE_STD_JTHREAD)
+endif()
+
 # Services library
 add_library(pacs_services
     src/services/verification_scp.cpp
@@ -635,6 +644,11 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         message(WARNING "    - thread_adapter: OFF (ThreadSystem/thread_base target not found)")
     endif()
 
+    # CRITICAL: Inherit thread_system compile definitions for ABI compatibility
+    if(SET_STD_JTHREAD)
+        target_compile_definitions(pacs_integration PUBLIC USE_STD_JTHREAD)
+    endif()
+
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
@@ -705,6 +719,17 @@ else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
 
+# Simple standalone tests for debugging (without Catch2)
+add_executable(accept_worker_simple_test
+    test_accept_worker_simple.cpp
+)
+target_link_libraries(accept_worker_simple_test PRIVATE pacs_network)
+
+add_executable(thread_base_minimal_test
+    test_thread_base_minimal.cpp
+)
+target_link_libraries(thread_base_minimal_test PRIVATE thread_base)
+
 # Testing
 if(PACS_BUILD_TESTS)
     enable_testing()
@@ -766,6 +791,7 @@ if(PACS_BUILD_TESTS)
         tests/network/dicom_server_test.cpp
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
+        tests/network/detail/accept_worker_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE

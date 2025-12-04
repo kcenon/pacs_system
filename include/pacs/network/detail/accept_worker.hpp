@@ -17,10 +17,8 @@
 
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 
 namespace pacs::network::detail {
@@ -190,20 +188,22 @@ protected:
     result_void after_stop() override;
 
     /**
-     * @brief Determines whether the thread should continue doing work
+     * @brief Determines whether there is pending work that must complete
      *
-     * For the accept worker, this always returns true as long as we're
-     * accepting connections (the worker should keep running until stopped).
+     * Returns false because the accept worker has no pending work items
+     * that must complete before shutdown. This allows graceful shutdown
+     * when stop() is called.
      *
-     * @return true if there is work to do
+     * @return false (no pending work requiring completion)
      */
     [[nodiscard]] bool should_continue_work() const override;
 
     /**
      * @brief Called when stop() is requested
      *
-     * This hook allows the accept worker to signal any blocking operations
-     * to cancel. Currently triggers the shutdown condition variable.
+     * This hook is called from the thread calling stop() before the worker
+     * thread actually stops. Currently a no-op as the base class handles
+     * waking up the worker thread.
      *
      * Future implementation will:
      * - Cancel any pending async accept operations
@@ -243,12 +243,6 @@ private:
 
     /// Flag indicating if actively accepting connections
     std::atomic<bool> accepting_{false};
-
-    /// Mutex for shutdown synchronization
-    mutable std::mutex shutdown_mutex_;
-
-    /// Condition variable for shutdown notification
-    std::condition_variable shutdown_cv_;
 };
 
 }  // namespace pacs::network::detail

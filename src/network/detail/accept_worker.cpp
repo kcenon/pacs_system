@@ -88,8 +88,10 @@ accept_worker::result_void accept_worker::before_start() {
 accept_worker::result_void accept_worker::do_work() {
     // Main work routine for the accept loop
     //
+    // Note: The base class thread_base handles sleeping/waiting via wake_interval.
+    // We only need to do our actual work here.
+    //
     // Current placeholder implementation:
-    // - Waits for wake interval or shutdown signal
     // - Invokes maintenance callback for periodic tasks
     //
     // Future network_system integration will:
@@ -97,18 +99,6 @@ accept_worker::result_void accept_worker::do_work() {
     // - Accept new connections
     // - Generate session ID and invoke connection callback
     // - Handle accept errors gracefully
-
-    // Wait for wake interval or shutdown notification
-    {
-        std::unique_lock<std::mutex> lock(shutdown_mutex_);
-        auto wake_interval = get_wake_interval();
-        if (wake_interval.has_value()) {
-            shutdown_cv_.wait_for(lock, wake_interval.value());
-        } else {
-            // Default wait of 100ms if no wake interval set
-            shutdown_cv_.wait_for(lock, std::chrono::milliseconds{100});
-        }
-    }
 
     // Invoke maintenance callback for periodic tasks (e.g., idle timeout checks)
     if (on_maintenance_) {
@@ -133,23 +123,21 @@ accept_worker::result_void accept_worker::after_stop() {
 }
 
 bool accept_worker::should_continue_work() const {
-    // Accept worker should always continue until explicitly stopped
-    // The wake interval determines how often do_work() is called
-    return is_accepting();
+    // Return false to indicate no pending work that must complete before shutdown.
+    // The accept loop will exit promptly when stop() is called.
+    // Note: returning true here would prevent graceful shutdown.
+    return false;
 }
 
 void accept_worker::on_stop_requested() {
-    // Signal the accept loop to wake up and check for shutdown
+    // Called when stop() is requested, before thread actually stops.
     //
     // Current implementation:
-    // - Notifies shutdown condition variable
+    // - Nothing needed; base class handles waking up the worker thread
     //
     // Future network_system integration will:
     // - Cancel any pending async accept operations
     // - Close acceptor to unblock synchronous operations
-
-    std::lock_guard<std::mutex> lock(shutdown_mutex_);
-    shutdown_cv_.notify_all();
 }
 
 // =============================================================================
