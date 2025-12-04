@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-14, windows-2022]
         build_type: [Release]
 
     steps:
@@ -110,7 +110,24 @@ jobs:
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt
 
-    - name: Patch dependency CMake files to remove -Werror
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+
+    - name: Patch dependency CMake files to remove -Werror (Unix)
+      if: runner.os != 'Windows'
       run: |
         # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
         # This is necessary because dependencies use -Werror which causes
@@ -144,7 +161,29 @@ jobs:
           fi
         done
 
-    - name: Configure CMake
+    - name: Patch dependency CMake files to remove -Werror (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
+        foreach ($repo in $repos) {
+          if (Test-Path $repo) {
+            Write-Host "=== Patching $repo ==="
+            Get-ChildItem -Path $repo -Recurse -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+              $content = Get-Content $_.FullName -Raw
+              if ($content -match '-Werror|/WX') {
+                Write-Host "  Patching: $($_.FullName)"
+                $content = $content -replace '"-Werror[^"]*"', ''
+                $content = $content -replace '-Werror[^ )"]*', ''
+                $content = $content -replace '/WX', ''
+                Set-Content $_.FullName -Value $content
+              }
+            }
+          }
+        }
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
       working-directory: pacs_system
       run: |
         # Explicit compiler specification required for consistent thread_system behavior
@@ -159,6 +198,21 @@ jobs:
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=ON \
           -DPACS_BUILD_STORAGE=ON
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=ON `
+          -DPACS_BUILD_STORAGE=ON `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
       working-directory: pacs_system
@@ -203,7 +257,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-14, windows-2022]
         build_type: [Release]
 
     steps:
@@ -265,7 +319,24 @@ jobs:
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt
 
-    - name: Patch dependency CMake files to remove -Werror
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+
+    - name: Patch dependency CMake files to remove -Werror (Unix)
+      if: runner.os != 'Windows'
       run: |
         # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
         # This is necessary because dependencies use -Werror which causes
@@ -299,7 +370,29 @@ jobs:
           fi
         done
 
-    - name: Configure CMake
+    - name: Patch dependency CMake files to remove -Werror (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
+        foreach ($repo in $repos) {
+          if (Test-Path $repo) {
+            Write-Host "=== Patching $repo ==="
+            Get-ChildItem -Path $repo -Recurse -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+              $content = Get-Content $_.FullName -Raw
+              if ($content -match '-Werror|/WX') {
+                Write-Host "  Patching: $($_.FullName)"
+                $content = $content -replace '"-Werror[^"]*"', ''
+                $content = $content -replace '-Werror[^ )"]*', ''
+                $content = $content -replace '/WX', ''
+                Set-Content $_.FullName -Value $content
+              }
+            }
+          }
+        }
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
       working-directory: pacs_system
       run: |
         # Explicit compiler specification required for consistent thread_system behavior
@@ -315,11 +408,27 @@ jobs:
           -DPACS_BUILD_EXAMPLES=ON \
           -DPACS_BUILD_STORAGE=ON
 
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=ON `
+          -DPACS_BUILD_STORAGE=ON `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
     - name: Build
       working-directory: pacs_system
       run: cmake --build build --parallel
 
-    - name: Generate TLS Test Certificates
+    - name: Generate TLS Test Certificates (Unix)
+      if: runner.os != 'Windows'
       working-directory: pacs_system
       run: |
         if [ -f "./examples/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
@@ -327,7 +436,16 @@ jobs:
           ./examples/integration_tests/test_data/certs/generate_test_certs.sh
         fi
 
-    - name: Run Integration Tests
+    - name: Generate TLS Test Certificates (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        # Skip TLS cert generation on Windows for now - requires OpenSSL CLI
+        Write-Host "TLS certificate generation skipped on Windows"
+
+    - name: Run Integration Tests (Unix)
+      if: runner.os != 'Windows'
       working-directory: pacs_system
       timeout-minutes: 10
       run: |
@@ -411,6 +529,57 @@ jobs:
       env:
         PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/examples/integration_tests/test_data/certs
 
+    - name: Run Integration Tests (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      timeout-minutes: 10
+      shell: pwsh
+      run: |
+        Set-Location build
+
+        # Debug: Check binary existence
+        Write-Host "=== Debug: Checking binary ==="
+        if (Test-Path ".\bin\pacs_integration_e2e.exe") {
+          Write-Host "Binary found: .\bin\pacs_integration_e2e.exe"
+
+          # Run data_generator tests
+          Write-Host "=== Running data_generator tests (no network) ==="
+          & .\bin\pacs_integration_e2e.exe "[data_generator]" --reporter console --reporter junit::out=integration-test-datagen.xml 2>&1
+          Write-Host "Data generator tests completed"
+
+          # Run config tests
+          Write-Host "=== Running config tests ==="
+          & .\bin\pacs_integration_e2e.exe "[config]" --reporter console --reporter junit::out=integration-test-config.xml 2>&1
+          Write-Host "Config tests completed"
+
+          Write-Host "=== Skipping network-dependent tests in CI ==="
+
+          # Create merged results file
+          $header = '<?xml version="1.0" encoding="UTF-8"?><testsuites>'
+          $footer = '</testsuites>'
+          $content = $header
+
+          Get-ChildItem -Filter "integration-test-*.xml" | Where-Object { $_.Name -ne "integration-test-results.xml" } | ForEach-Object {
+            $fileContent = Get-Content $_.FullName -Raw
+            $fileContent = $fileContent -replace '<\?xml[^>]*\?>', ''
+            $fileContent = $fileContent -replace '<testsuites>', ''
+            $fileContent = $fileContent -replace '</testsuites>', ''
+            $content += $fileContent
+          }
+
+          $content += $footer
+          Set-Content -Path "integration-test-results.xml" -Value $content
+
+          Write-Host "=== Test Summary ==="
+          Get-ChildItem -Filter "integration-test-*.xml" | ForEach-Object { Write-Host $_.Name }
+        }
+        else {
+          Write-Host "Integration test binary not found, running CTest integration tests"
+          ctest --output-on-failure --timeout 120 --output-junit integration-test-results.xml --tests-regex "integration::"
+        }
+      env:
+        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/examples/integration_tests/test_data/certs
+
     - name: Upload Integration Test Results
       uses: actions/upload-artifact@v4
       if: always()
@@ -438,7 +607,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-14, windows-2022]
         build_type: [Release]
 
     steps:
@@ -499,7 +668,24 @@ jobs:
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt
 
-    - name: Patch dependency CMake files to remove -Werror
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+
+    - name: Patch dependency CMake files to remove -Werror (Unix)
+      if: runner.os != 'Windows'
       run: |
         # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
         # This is necessary because dependencies use -Werror which causes
@@ -533,7 +719,29 @@ jobs:
           fi
         done
 
-    - name: Configure CMake
+    - name: Patch dependency CMake files to remove -Werror (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
+        foreach ($repo in $repos) {
+          if (Test-Path $repo) {
+            Write-Host "=== Patching $repo ==="
+            Get-ChildItem -Path $repo -Recurse -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+              $content = Get-Content $_.FullName -Raw
+              if ($content -match '-Werror|/WX') {
+                Write-Host "  Patching: $($_.FullName)"
+                $content = $content -replace '"-Werror[^"]*"', ''
+                $content = $content -replace '-Werror[^ )"]*', ''
+                $content = $content -replace '/WX', ''
+                Set-Content $_.FullName -Value $content
+              }
+            }
+          }
+        }
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
       working-directory: pacs_system
       run: |
         # Explicit compiler specification required for consistent thread_system behavior
@@ -549,11 +757,27 @@ jobs:
           -DPACS_BUILD_EXAMPLES=ON \
           -DPACS_BUILD_STORAGE=ON
 
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=ON `
+          -DPACS_BUILD_STORAGE=ON `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
     - name: Build
       working-directory: pacs_system
       run: cmake --build build --parallel
 
-    - name: Run Stability Smoke Tests
+    - name: Run Stability Smoke Tests (Unix)
+      if: runner.os != 'Windows'
       working-directory: pacs_system
       run: |
         cd build
@@ -578,6 +802,34 @@ jobs:
           echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stability-smoke-results.xml
           exit 0
         fi
+
+    - name: Run Stability Smoke Tests (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        Set-Location build
+        if (Test-Path ".\bin\pacs_integration_e2e.exe") {
+          # Check for stability smoke tests
+          $testList = & .\bin\pacs_integration_e2e.exe --list-tests "[stability][smoke]" 2>&1
+          $testCount = ($testList | Select-String -Pattern "test case").Count
+
+          if ($testCount -eq 0) {
+            Write-Host "No stability smoke tests found with [stability][smoke] tags"
+            Write-Host "Skipping stability smoke tests"
+            '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' | Out-File -FilePath "stability-smoke-results.xml" -Encoding UTF8
+            exit 0
+          }
+
+          Write-Host "Found stability smoke tests, running..."
+          & .\bin\pacs_integration_e2e.exe --reporter junit --out stability-smoke-results.xml "[stability][smoke]"
+          Write-Host "Stability smoke tests completed"
+        }
+        else {
+          Write-Host "Stability test binary not found"
+          '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' | Out-File -FilePath "stability-smoke-results.xml" -Encoding UTF8
+          exit 0
+        }
       timeout-minutes: 5
 
     - name: Upload Stability Smoke Test Results
@@ -908,13 +1160,14 @@ jobs:
       run: |
         echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "| Test Suite | Ubuntu | macOS |" >> $GITHUB_STEP_SUMMARY
-        echo "|------------|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Suite | Ubuntu | macOS | Windows |" >> $GITHUB_STEP_SUMMARY
+        echo "|------------|--------|-------|---------|" >> $GITHUB_STEP_SUMMARY
 
         # Check for test result files
         for suite in unit integration stability-smoke; do
           ubuntu_status="⏭️ Skipped"
           macos_status="⏭️ Skipped"
+          windows_status="⏭️ Skipped"
 
           if [ -f "test-results/${suite}-test-results-ubuntu-24.04/${suite}-test-results.xml" ]; then
             ubuntu_status="✅ Passed"
@@ -922,8 +1175,11 @@ jobs:
           if [ -f "test-results/${suite}-test-results-macos-14/${suite}-test-results.xml" ]; then
             macos_status="✅ Passed"
           fi
+          if [ -f "test-results/${suite}-test-results-windows-2022/${suite}-test-results.xml" ]; then
+            windows_status="✅ Passed"
+          fi
 
-          echo "| ${suite^} Tests | $ubuntu_status | $macos_status |" >> $GITHUB_STEP_SUMMARY
+          echo "| ${suite^} Tests | $ubuntu_status | $macos_status | $windows_status |" >> $GITHUB_STEP_SUMMARY
         done
 
         echo "" >> $GITHUB_STEP_SUMMARY
