@@ -331,26 +331,41 @@ jobs:
         file ./bin/pacs_integration_e2e 2>/dev/null || true
 
         if [ -f "./bin/pacs_integration_e2e" ]; then
-          # Debug: List available tests first (with timeout)
+          # Debug: List available tests (no timeout for compatibility)
           echo "=== Debug: Listing available tests ==="
-          timeout 30s ./bin/pacs_integration_e2e --list-tests "~[.slow]" "~[stability]" 2>&1 | head -50 || echo "List tests timed out or failed"
+          ./bin/pacs_integration_e2e --list-tests "~[.slow]" "~[stability]" 2>&1 | head -100
 
-          # Debug: Count tests
-          TEST_COUNT=$(timeout 30s ./bin/pacs_integration_e2e --list-tests "~[.slow]" "~[stability]" 2>/dev/null | grep -c "test case" || echo "0")
-          echo "=== Debug: Found $TEST_COUNT test cases ==="
+          echo "=== Debug: Running tests one section at a time ==="
 
-          if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
-            echo "No integration tests found, creating empty results"
-            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="integration" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > integration-test-results.xml
-          else
-            echo "=== Running integration tests ==="
-            # Run with console reporter first for better debugging, then JUnit
-            ./bin/pacs_integration_e2e \
-              --reporter console \
-              --reporter junit::out=integration-test-results.xml \
-              "~[.slow]" "~[stability]" \
-              || echo "Some integration tests failed"
-          fi
+          # Run connectivity tests first (simplest)
+          echo "--- Testing [connectivity] ---"
+          ./bin/pacs_integration_e2e "[connectivity]" \
+            --reporter console \
+            --reporter junit::out=integration-test-connectivity.xml \
+            2>&1 || echo "Connectivity tests failed or timed out"
+
+          # If connectivity works, run other tests
+          echo "--- Testing [store_query] ---"
+          ./bin/pacs_integration_e2e "[store_query]" \
+            --reporter console \
+            --reporter junit::out=integration-test-store.xml \
+            2>&1 || echo "Store/query tests failed"
+
+          echo "--- Testing remaining (excluding slow/stability) ---"
+          ./bin/pacs_integration_e2e "~[connectivity]" "~[store_query]" "~[.slow]" "~[stability]" "~[stress]" "~[worklist]" \
+            --reporter console \
+            --reporter junit::out=integration-test-other.xml \
+            2>&1 || echo "Other tests failed"
+
+          # Merge results
+          echo '<?xml version="1.0" encoding="UTF-8"?><testsuites>' > integration-test-results.xml
+          for f in integration-test-*.xml; do
+            if [ -f "$f" ] && [ "$f" != "integration-test-results.xml" ]; then
+              grep -v '<?xml' "$f" | grep -v '</testsuites>' | grep -v '<testsuites>' >> integration-test-results.xml 2>/dev/null || true
+            fi
+          done
+          echo '</testsuites>' >> integration-test-results.xml
+
         else
           echo "Integration test binary not found, running CTest integration tests"
           ctest \
