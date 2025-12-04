@@ -15,6 +15,7 @@
 
 #include "pacs/network/association.hpp"
 #include "pacs/network/server_config.hpp"
+#include "pacs/network/detail/accept_worker.hpp"
 #include "pacs/services/scp_service.hpp"
 
 #include <atomic>
@@ -24,7 +25,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -250,9 +250,6 @@ private:
     // Private Methods
     // =========================================================================
 
-    /// Main accept loop (runs in dedicated thread)
-    void accept_loop();
-
     /// Handle a single association (runs in worker thread)
     void handle_association(uint64_t session_id, association assoc);
 
@@ -318,8 +315,8 @@ private:
     /// Running flag
     std::atomic<bool> running_{false};
 
-    /// Accept thread
-    std::thread accept_thread_;
+    /// Accept worker (replaces std::thread accept_thread_)
+    std::unique_ptr<detail::accept_worker> accept_worker_;
 
     /// Association mutex
     mutable std::mutex associations_mutex_;

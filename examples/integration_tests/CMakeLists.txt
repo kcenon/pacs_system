@@ -77,6 +77,10 @@ target_link_libraries(generate_test_data
     PRIVATE
         pacs_core
         pacs_encoding
+        pacs_network
+        pacs_services
+        pacs_storage
+        pacs_integration
         Threads::Threads
 )
 

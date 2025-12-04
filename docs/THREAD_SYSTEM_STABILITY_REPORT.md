@@ -294,11 +294,62 @@ The underlying heap corruption in thread_system on Linux (specifically with glib
 - Manifests as `malloc(): invalid size (unsorted)` and SIGABRT
 - Suggests timing-sensitive heap corruption during thread pool operations
 
+## ABI Compatibility Issue (Discovered 2024-12-04)
+
+### Problem Description
+
+While implementing `accept_worker` (Issue #156), SIGBUS crashes occurred during object destruction when using `thread_base` as a base class. Investigation revealed an **ABI mismatch** between the thread_system library and consumer code.
+
+### Root Cause
+
+The `thread_base` class has **different member layouts** depending on the `USE_STD_JTHREAD` preprocessor macro:
+
+```cpp
+// With USE_STD_JTHREAD defined (library):
+std::unique_ptr<std::jthread> worker_thread_;
+std::optional<std::stop_source> stop_source_;  // ~24-32 bytes
+
+// Without USE_STD_JTHREAD (consumer code):
+std::unique_ptr<std::thread> worker_thread_;
+std::atomic<bool> stop_requested_;  // ~1-8 bytes
+```
+
+The thread_system library uses `add_definitions(-DUSE_STD_JTHREAD)` in CMake, which does **not propagate** as interface compile definitions to consumers. This causes:
+
+1. Library compiled WITH `USE_STD_JTHREAD`
+2. Consumer code compiled WITHOUT `USE_STD_JTHREAD`
+3. Derived class members placed at incorrect offsets
+4. Memory corruption during destruction → SIGBUS
+
+### Solution
+
+Explicitly add `USE_STD_JTHREAD` to pacs_system targets when linking to thread_system:
+
+```cmake
+# CMakeLists.txt
+if(SET_STD_JTHREAD)
+    target_compile_definitions(pacs_network PUBLIC USE_STD_JTHREAD)
+    target_compile_definitions(pacs_integration PUBLIC USE_STD_JTHREAD)
+endif()
+```
+
+### Verification
+
+After applying the fix:
+- All 7 accept_worker tests pass (25 assertions)
+- All 102 network tests pass (740 assertions)
+- No SIGBUS or memory corruption issues
+
+### Recommendation
+
+The thread_system library should use `target_compile_definitions(... PUBLIC ...)` instead of `add_definitions()` to properly export ABI-affecting definitions to consumers.
+
 ## References
 
 - Issue #96: thread_adapter SIGILL error (Closed)
 - Issue #153: Epic - Migrate from std::thread to thread_system
 - Issue #155: Verify thread_system stability (This report)
+- **Issue #156: Implement accept_worker (ABI fix documented here)**
 - thread_system #223: Original ARM64 bug (Closed)
 - thread_system #224: Static assertion fix (Merged)
 - thread_system #225: Follow-up EXC_BAD_ACCESS bug (Closed, fixed in #226)

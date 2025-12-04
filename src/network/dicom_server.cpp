@@ -115,10 +115,26 @@ Result<std::monostate> dicom_server::start() {
         stats_.bytes_sent = 0;
     }
 
-    // Start accept thread
-    accept_thread_ = std::thread([this]() {
-        accept_loop();
-    });
+    // Create and start accept worker
+    accept_worker_ = std::make_unique<detail::accept_worker>(
+        config_.port,
+        // Connection callback (currently unused - placeholder for future TCP integration)
+        [](uint64_t /*session_id*/) {
+            // Future: handle new TCP connection
+        },
+        // Maintenance callback for periodic idle timeout checks
+        [this]() {
+            check_idle_timeouts();
+        }
+    );
+    accept_worker_->set_wake_interval(std::chrono::milliseconds(100));
+
+    auto start_result = accept_worker_->start();
+    if (start_result.has_error()) {
+        running_ = false;
+        return error_info("Failed to start accept worker: " +
+                         start_result.get_error().to_string());
+    }
 
     // Register in global registry
     {
@@ -140,15 +156,10 @@ void dicom_server::stop(duration timeout) {
         server_registry_.erase(config_.port);
     }
 
-    // Wake up the accept loop
-    {
-        std::lock_guard<std::mutex> lock(shutdown_mutex_);
-        shutdown_cv_.notify_all();
-    }
-
-    // Wait for accept thread to finish
-    if (accept_thread_.joinable()) {
-        accept_thread_.join();
+    // Stop accept worker (handles graceful shutdown via on_stop_requested hook)
+    if (accept_worker_) {
+        accept_worker_->stop();
+        accept_worker_.reset();
     }
 
     // Wait for active associations to complete (with timeout)
@@ -229,30 +240,8 @@ void dicom_server::on_error(error_callback callback) {
 }
 
 // =============================================================================
-// Private Methods - Accept Loop
+// Private Methods - Association Handling
 // =============================================================================
-
-void dicom_server::accept_loop() {
-    // Note: This is a placeholder implementation.
-    // Full network_system integration will provide:
-    // 1. TCP socket listening via network_system
-    // 2. Connection acceptance
-    // 3. Thread pool task submission
-
-    while (running_) {
-        // Placeholder: Wait for shutdown signal
-        // Real implementation would poll for incoming connections
-        std::unique_lock<std::mutex> lock(shutdown_mutex_);
-        shutdown_cv_.wait_for(lock, std::chrono::milliseconds{100});
-
-        if (!running_) {
-            break;
-        }
-
-        // Check for idle timeouts periodically
-        check_idle_timeouts();
-    }
-}
 
 void dicom_server::handle_association(uint64_t session_id, association assoc) {
     // Check max associations limit
