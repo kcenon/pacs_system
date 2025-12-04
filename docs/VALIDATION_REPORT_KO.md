@@ -1,7 +1,7 @@
 # PACS 시스템 검증 보고서 (Validation Report)
 
-> **보고서 버전:** 1.0.0
-> **보고서 일자:** 2025-12-01
+> **보고서 버전:** 1.1.0
+> **보고서 일자:** 2025-12-04
 > **언어:** [English](VALIDATION_REPORT.md) | **한국어**
 > **상태:** 완료
 > **관련 문서:** [VERIFICATION_REPORT_KO.md](VERIFICATION_REPORT_KO.md) (SDS 설계대로 구현 확인)

@@ -1,7 +1,7 @@
 # Architecture Documentation - PACS System
 
-> **Version:** 1.0.0
-> **Last Updated:** 2025-11-30
+> **Version:** 1.1.0
+> **Last Updated:** 2025-12-04
 > **Language:** **English** | [한국어](ARCHITECTURE_KO.md)
 
 ---

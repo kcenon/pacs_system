@@ -1,6 +1,9 @@
 # PACS System
 
+[![CI](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml)
 [![Integration Tests](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml)
+[![Code Coverage](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml)
+[![Static Analysis](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml)
 [![SBOM Generation](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml)
 
 > **Language:** **English** | [한국어](README_KO.md)
@@ -20,7 +23,7 @@ A production-ready C++20 PACS (Picture Archiving and Communication System) imple
 
 ## Project Status
 
-**Current Phase**: 🎯 Phase 2 Near Complete - Network & Services (80%+)
+**Current Phase**: ✅ Phase 2 Complete - Network & Services (100%)
 
 | Milestone | Status | Target |
 |-----------|--------|--------|
@@ -35,7 +38,7 @@ A production-ready C++20 PACS (Picture Archiving and Communication System) imple
 | Worklist/MPPS | ✅ Complete | Week 18-20 |
 | Advanced Compression | 🔜 Planned | Phase 3 |
 
-**Test Coverage**: 113+ tests passing across 34 test files
+**Test Coverage**: 120+ tests passing across 39 test files
 
 ### Phase 1 Achievements (Complete)
 
@@ -214,7 +217,7 @@ pacs_system/
 │   ├── storage/                 # Storage implementations (4 files)
 │   └── integration/             # Adapter implementations (6 files)
 │
-├── tests/                       # Test suites (34 files, 113+ tests)
+├── tests/                       # Test suites (39 files, 120+ tests)
 │   ├── core/                    # Core module tests (6 files)
 │   ├── encoding/                # Encoding module tests (5 files)
 │   ├── network/                 # Network module tests (5 files)
@@ -222,7 +225,7 @@ pacs_system/
 │   ├── storage/                 # Storage tests (6 files)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (13 apps, ~8,700 lines)
+├── examples/                    # Example Applications (15 apps, ~10,500 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
 │   ├── db_browser/              # PACS index database browser
@@ -234,6 +237,7 @@ pacs_system/
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
 │   ├── retrieve_scu/            # DICOM Retrieve SCU client (C-MOVE/C-GET)
 │   ├── worklist_scu/            # Modality Worklist Query client (MWL C-FIND)
+│   ├── mpps_scu/                # MPPS client (N-CREATE/N-SET)
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
 │
@@ -307,7 +311,7 @@ cmake --build build
 cd build && ctest --output-on-failure
 ```
 
-**Test Results**: 113+ tests passing (Core: 57, Encoding: 41, Network: 15, Storage/Integration: 15+)
+**Test Results**: 120+ tests passing (Core: 57, Encoding: 41, Network: 15, Services: 7+, Storage/Integration: 20+)
 
 ### Build Options
 
@@ -567,29 +571,36 @@ database:
 
 ```bash
 # Run all integration tests
-./build/bin/integration_tests
+./build/bin/pacs_integration_e2e
 
 # Run specific test category
-./build/bin/integration_tests [connectivity]    # Basic C-ECHO tests
-./build/bin/integration_tests [store_query]     # Store and query workflow
-./build/bin/integration_tests [worklist]        # Worklist and MPPS workflow
-./build/bin/integration_tests [stress]          # Multi-association stress tests
-./build/bin/integration_tests [error]           # Error recovery tests
+./build/bin/pacs_integration_e2e "[connectivity]"    # Basic C-ECHO tests
+./build/bin/pacs_integration_e2e "[store_query]"     # Store and query workflow
+./build/bin/pacs_integration_e2e "[worklist]"        # Worklist and MPPS workflow
+./build/bin/pacs_integration_e2e "[workflow][multimodal]"  # Multi-modal clinical workflows
+./build/bin/pacs_integration_e2e "[xa]"              # XA Storage tests
+./build/bin/pacs_integration_e2e "[tls]"             # TLS integration tests
+./build/bin/pacs_integration_e2e "[stability][smoke]"  # Quick stability smoke test
+./build/bin/pacs_integration_e2e "[stress]"          # Multi-association stress tests
 
 # List available tests
-./build/bin/integration_tests --list-tests
+./build/bin/pacs_integration_e2e --list-tests
 
 # Run with verbose output
-./build/bin/integration_tests --success
+./build/bin/pacs_integration_e2e --success
 
 # Generate JUnit XML report for CI/CD
-./build/bin/integration_tests --reporter junit --out results.xml
+./build/bin/pacs_integration_e2e --reporter junit --out results.xml
 ```
 
 **Test Scenarios**:
 - **Connectivity**: C-ECHO, multiple associations, timeout handling
 - **Store & Query**: Store files, query by patient/study/series, wildcard matching
+- **XA Storage**: X-Ray Angiographic image storage and retrieval
+- **Multi-Modal Workflow**: Complete patient journey with CT, MR, XA modalities
 - **Worklist/MPPS**: Scheduled procedures, MPPS IN PROGRESS/COMPLETED workflow
+- **TLS Security**: Certificate validation, mutual TLS, secure communication
+- **Stability**: Memory leak detection, connection pool exhaustion, long-running operations
 - **Stress**: Concurrent SCUs, rapid connections, large datasets
 - **Error Recovery**: Invalid SOP class, server restart, abort handling
 
@@ -599,15 +610,16 @@ database:
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 48 files |
-| **Source Files** | 33 files |
-| **Header LOC** | ~13,500 lines |
-| **Source LOC** | ~13,800 lines |
-| **Example LOC** | ~1,200 lines |
-| **Total LOC** | ~27,300 lines |
-| **Test Files** | 34 files |
-| **Test Cases** | 113+ tests |
-| **Documentation** | 26+ markdown files |
+| **Header Files** | 50+ files |
+| **Source Files** | 35+ files |
+| **Header LOC** | ~14,500 lines |
+| **Source LOC** | ~15,000 lines |
+| **Example LOC** | ~10,500 lines |
+| **Total LOC** | ~40,000 lines |
+| **Test Files** | 39 files |
+| **Test Cases** | 120+ tests |
+| **Documentation** | 30+ markdown files |
+| **CI/CD Workflows** | 7 workflows |
 | **Version** | 0.2.0 |
 
 ---
