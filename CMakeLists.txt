@@ -241,6 +241,13 @@ if(PACS_WITH_CONTAINER_SYSTEM)
     endif()
 endif()
 
+# Disable examples/samples for all dependencies fetched via FetchContent
+# This prevents build errors from missing example source files in upstream repos
+# (e.g., common_system's thread_integration_example.cpp doesn't exist but CMake
+# tries to build it when thread_system target exists)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(COMMON_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 # thread_system (REQUIRED for thread_adapter - Tier 1)
 # NOTE: Must be added BEFORE logger_system to prevent FetchContent conflicts.
 # logger_system depends on thread_system and will fetch it via UnifiedDependencies
