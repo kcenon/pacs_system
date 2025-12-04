@@ -50,16 +50,38 @@ option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
 option(PACS_WITH_CONTAINER_SYSTEM "Enable container_system integration (REQUIRED)" ON)
 option(PACS_WITH_NETWORK_SYSTEM "Enable network_system integration (REQUIRED)" ON)
 option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
+option(PACS_WARNINGS_AS_ERRORS "Treat warnings as errors (disable in CI if dependency warnings occur)" ON)
 
 ##################################################
-# Compiler Warnings
+# Compiler Warnings (Target-Scoped)
+#
+# IMPORTANT: Use target_compile_options() instead of add_compile_options()
+# to prevent warning flags from propagating to dependencies (container_system,
+# network_system, etc.) via add_subdirectory().
+#
+# The pacs_apply_warnings() function is called after all pacs_* targets
+# are defined to apply warnings ONLY to pacs_system's own targets.
 ##################################################
 
+# Define warning flags for later application to pacs targets only
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    set(PACS_WARNING_FLAGS -Wall -Wextra -Wpedantic)
+    if(PACS_WARNINGS_AS_ERRORS)
+        list(APPEND PACS_WARNING_FLAGS -Werror)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/W4 /WX)
+    set(PACS_WARNING_FLAGS /W4)
+    if(PACS_WARNINGS_AS_ERRORS)
+        list(APPEND PACS_WARNING_FLAGS /WX)
+    endif()
 endif()
+
+# Function to apply warnings to pacs targets only
+function(pacs_apply_warnings target_name)
+    if(TARGET ${target_name} AND PACS_WARNING_FLAGS)
+        target_compile_options(${target_name} PRIVATE ${PACS_WARNING_FLAGS})
+    endif()
+endfunction()
 
 ##################################################
 # Required Dependencies (Tier 0-4)
@@ -104,6 +126,51 @@ if(PACS_BUILD_STORAGE)
         set(SQLITE3_FOUND TRUE)
         set(SQLITE3_FROM_FETCH TRUE)
         message(STATUS "SQLite3 fetched and configured")
+    endif()
+endif()
+
+# fmt library (for std::format compatibility on older compilers)
+message(STATUS "")
+message(STATUS "=== Finding fmt library (for format compatibility) ===")
+
+# Check if std::format is available
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_FLAGS "-std=c++20")
+check_cxx_source_compiles("
+    #include <format>
+    int main() {
+        auto s = std::format(\"Hello {}\", \"World\");
+        return 0;
+    }
+" PACS_HAS_STD_FORMAT)
+
+if(PACS_HAS_STD_FORMAT)
+    message(STATUS "std::format is available - no fmt fallback needed")
+    set(PACS_FMT_NEEDED FALSE)
+else()
+    message(STATUS "std::format not available - using fmt library as fallback")
+    set(PACS_FMT_NEEDED TRUE)
+
+    # Try to find fmt library
+    find_package(fmt CONFIG QUIET)
+    if(NOT fmt_FOUND)
+        find_package(fmt QUIET)
+    endif()
+
+    if(fmt_FOUND)
+        message(STATUS "Found fmt library")
+        set(PACS_FMT_TARGET fmt::fmt)
+    else()
+        # Fetch fmt if not found
+        message(STATUS "fmt not found, fetching from source...")
+        FetchContent_Declare(
+            fmt
+            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+            GIT_TAG 10.2.1
+        )
+        FetchContent_MakeAvailable(fmt)
+        set(PACS_FMT_TARGET fmt::fmt)
+        message(STATUS "fmt fetched and configured")
     endif()
 endif()
 
@@ -469,6 +536,11 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     # Link pacs_core for dicom_dataset and pacs_encoding for transfer_syntax
     target_link_libraries(pacs_storage PUBLIC pacs_core pacs_encoding)
 
+    # Link fmt library for format compatibility (if needed)
+    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
+        target_link_libraries(pacs_storage PUBLIC ${PACS_FMT_TARGET})
+    endif()
+
     message(STATUS "  [OK] pacs_storage: ON (SQLite3)")
 else()
     message(STATUS "  [--] pacs_storage: OFF")
@@ -476,14 +548,36 @@ endif()
 
 # Integration library (requires container_system and logger_system via network_system)
 if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
-    add_library(pacs_integration
+    # Check for monitoring_system availability BEFORE defining pacs_integration
+    # This allows conditional inclusion of monitoring_adapter.cpp
+    set(_PACS_MONITORING_PATHS_EARLY
+        "$ENV{MONITORING_SYSTEM_ROOT}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
+        "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
+    )
+    set(MONITORING_SYSTEM_AVAILABLE FALSE)
+    foreach(_path ${_PACS_MONITORING_PATHS_EARLY})
+        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
+            set(MONITORING_SYSTEM_AVAILABLE TRUE)
+            break()
+        endif()
+    endforeach()
+
+    # Define integration library sources
+    set(PACS_INTEGRATION_SOURCES
         src/integration/container_adapter.cpp
         src/integration/logger_adapter.cpp
         src/integration/thread_adapter.cpp
         src/integration/network_adapter.cpp
-        src/integration/monitoring_adapter.cpp
         src/integration/dicom_session.cpp
     )
+
+    # Only include monitoring_adapter.cpp if monitoring_system is available
+    if(MONITORING_SYSTEM_AVAILABLE)
+        list(APPEND PACS_INTEGRATION_SOURCES src/integration/monitoring_adapter.cpp)
+    endif()
+
+    add_library(pacs_integration ${PACS_INTEGRATION_SOURCES})
     target_include_directories(pacs_integration
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -497,6 +591,11 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     target_link_libraries(pacs_integration
         PUBLIC pacs_core pacs_encoding pacs_network container_system
     )
+
+    # Link fmt library for format compatibility (if needed)
+    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
+        target_link_libraries(pacs_integration PUBLIC ${PACS_FMT_TARGET})
+    endif()
 
     # Link logger_system (REQUIRED for logger_adapter)
     if(TARGET LoggerSystem)
@@ -564,6 +663,17 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         set(MONITORING_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(MONITORING_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
         set(MONITORING_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+        # Workaround for monitoring_system alias mismatch:
+        # monitoring_system expects kcenon::common_system but common_system provides kcenon::common
+        # Create the missing alias if common_system target exists
+        if(NOT TARGET kcenon::common_system)
+            if(TARGET common_system)
+                add_library(kcenon::common_system ALIAS common_system)
+                message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
+            endif()
+        endif()
+
         add_subdirectory("${PACS_MONITORING_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/monitoring_system_build")
     endif()
 
@@ -685,6 +795,7 @@ if(PACS_BUILD_TESTS)
             PRIVATE
                 pacs_storage
                 Catch2::Catch2WithMain
+                $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
         )
     endif()
 
@@ -707,15 +818,42 @@ if(PACS_BUILD_TESTS)
 
     include(CTest)
     include(Catch)
-    catch_discover_tests(core_tests)
-    catch_discover_tests(encoding_tests)
-    catch_discover_tests(network_tests)
-    catch_discover_tests(services_tests)
+
+    ##################################################
+    # CTest Labels for CI/CD Integration
+    # @see Issue #139 - CI/CD Integration
+    #
+    # Labels:
+    #   - unit: Fast unit tests (timeout: 60s)
+    #   - integration: Integration tests (timeout: 300s)
+    #   - stress: Stress/performance tests (timeout: 600s)
+    #   - slow: Long-running tests (manual trigger only)
+    ##################################################
+
+    # Unit tests - fast, isolated component tests
+    catch_discover_tests(core_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(encoding_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(network_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(services_tests
+        PROPERTIES LABELS "unit"
+    )
     if(TARGET storage_tests)
-        catch_discover_tests(storage_tests)
+        catch_discover_tests(storage_tests
+            PROPERTIES LABELS "unit"
+        )
     endif()
+
+    # Integration tests - cross-module adapter tests
     if(TARGET pacs_integration_tests)
-        catch_discover_tests(pacs_integration_tests)
+        catch_discover_tests(pacs_integration_tests
+            PROPERTIES LABELS "integration"
+        )
     endif()
 endif()
 
@@ -826,6 +964,53 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] pacs_integration_e2e: OFF (requires pacs_storage, pacs_integration, and Catch2)")
     endif()
 endif()
+
+##################################################
+# Apply Compiler Warnings to PACS Targets Only
+#
+# This must be done AFTER all pacs_* targets are defined
+# and AFTER dependencies are added via add_subdirectory().
+# This ensures warning flags are NOT inherited by dependencies.
+##################################################
+
+message(STATUS "")
+message(STATUS "=== Applying Compiler Warnings to PACS Targets ===")
+
+# Core PACS libraries
+pacs_apply_warnings(pacs_core)
+pacs_apply_warnings(pacs_encoding)
+pacs_apply_warnings(pacs_network)
+pacs_apply_warnings(pacs_services)
+
+# Optional PACS libraries
+if(TARGET pacs_storage)
+    pacs_apply_warnings(pacs_storage)
+endif()
+
+if(TARGET pacs_integration)
+    pacs_apply_warnings(pacs_integration)
+endif()
+
+# Test executables
+if(PACS_BUILD_TESTS)
+    pacs_apply_warnings(core_tests)
+    pacs_apply_warnings(encoding_tests)
+    pacs_apply_warnings(network_tests)
+    pacs_apply_warnings(services_tests)
+    if(TARGET storage_tests)
+        pacs_apply_warnings(storage_tests)
+    endif()
+    if(TARGET pacs_integration_tests)
+        pacs_apply_warnings(pacs_integration_tests)
+    endif()
+endif()
+
+if(PACS_WARNINGS_AS_ERRORS)
+    message(STATUS "  Warning flags: ${PACS_WARNING_FLAGS} (APPLIED TO PACS TARGETS ONLY)")
+else()
+    message(STATUS "  Warning flags: ${PACS_WARNING_FLAGS} (warnings-as-errors disabled)")
+endif()
+message(STATUS "")
 
 ##################################################
 # Build Summary

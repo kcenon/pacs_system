@@ -98,7 +98,7 @@ TEST_CASE("storage_scp default construction", "[services][storage]") {
 TEST_CASE("storage_scp construction with config", "[services][storage]") {
     storage_scp_config config;
     config.accepted_sop_classes = {"1.2.840.10008.5.1.4.1.1.2"};  // CT only
-    config.duplicate_policy = duplicate_policy::reject;
+    config.dup_policy = duplicate_policy::reject;
 
     storage_scp scp{config};
 
@@ -359,12 +359,12 @@ TEST_CASE("duplicate_policy enum", "[services][storage]") {
     // Just verify enum values exist and can be used
     storage_scp_config config;
 
-    config.duplicate_policy = duplicate_policy::reject;
-    CHECK(config.duplicate_policy == duplicate_policy::reject);
+    config.dup_policy = duplicate_policy::reject;
+    CHECK(config.dup_policy == duplicate_policy::reject);
 
-    config.duplicate_policy = duplicate_policy::replace;
-    CHECK(config.duplicate_policy == duplicate_policy::replace);
+    config.dup_policy = duplicate_policy::replace;
+    CHECK(config.dup_policy == duplicate_policy::replace);
 
-    config.duplicate_policy = duplicate_policy::ignore;
-    CHECK(config.duplicate_policy == duplicate_policy::ignore);
+    config.dup_policy = duplicate_policy::ignore;
+    CHECK(config.dup_policy == duplicate_policy::ignore);
 }

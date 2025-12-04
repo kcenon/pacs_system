@@ -399,7 +399,7 @@ bool run_server(const store_scp_args& args) {
     if (!args.accepted_modalities.empty()) {
         scp_config.accepted_sop_classes = args.accepted_modalities;
     }
-    scp_config.duplicate_policy =
+    scp_config.dup_policy =
         args.duplicate == pacs::storage::duplicate_policy::reject ? pacs::services::duplicate_policy::reject :
         args.duplicate == pacs::storage::duplicate_policy::replace ? pacs::services::duplicate_policy::replace :
         pacs::services::duplicate_policy::ignore;

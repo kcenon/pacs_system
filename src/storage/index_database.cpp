@@ -10,7 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <filesystem>
-#include <format>
+#include <pacs/compat/format.hpp>
 #include <iomanip>
 #include <sstream>
 
@@ -78,7 +78,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
             sqlite3_close(db);
         }
         return make_error<std::unique_ptr<index_database>>(
-            rc, std::format("Failed to open database: {}", error_msg),
+            rc, pacs::compat::format("Failed to open database: {}", error_msg),
             "storage");
     }
 
@@ -104,7 +104,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
 
     // Configure cache size (negative value means KB)
     auto cache_sql =
-        std::format("PRAGMA cache_size = -{};", config.cache_size_mb * 1024);
+        pacs::compat::format("PRAGMA cache_size = -{};", config.cache_size_mb * 1024);
     rc = sqlite3_exec(db, cache_sql.c_str(), nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         sqlite3_close(db);
@@ -114,7 +114,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
 
     // Configure memory-mapped I/O
     if (config.mmap_enabled && db_path != ":memory:") {
-        auto mmap_sql = std::format("PRAGMA mmap_size = {};", config.mmap_size);
+        auto mmap_sql = pacs::compat::format("PRAGMA mmap_size = {};", config.mmap_size);
         rc = sqlite3_exec(db, mmap_sql.c_str(), nullptr, nullptr, nullptr);
         if (rc != SQLITE_OK) {
             // mmap failure is not critical, continue with regular I/O
@@ -137,7 +137,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     if (migration_result.is_err()) {
         return make_error<std::unique_ptr<index_database>>(
             migration_result.error().code,
-            std::format("Migration failed: {}",
+            pacs::compat::format("Migration failed: {}",
                        migration_result.error().message),
             "storage");
     }
@@ -230,7 +230,7 @@ auto index_database::upsert_patient(const patient_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -250,7 +250,7 @@ auto index_database::upsert_patient(const patient_record& record)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, std::format("Failed to upsert patient: {}", error_msg),
+            rc, pacs::compat::format("Failed to upsert patient: {}", error_msg),
             "storage");
     }
 
@@ -365,11 +365,11 @@ auto index_database::search_patients(const patient_query& query) const
     sql += " ORDER BY patient_name, patient_id";
 
     if (query.limit > 0) {
-        sql += std::format(" LIMIT {}", query.limit);
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += std::format(" OFFSET {}", query.offset);
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -400,7 +400,7 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -412,7 +412,7 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, std::format("Failed to delete patient: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("Failed to delete patient: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -563,7 +563,7 @@ auto index_database::upsert_study(const study_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -585,7 +585,7 @@ auto index_database::upsert_study(const study_record& record)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, std::format("Failed to upsert study: {}", error_msg),
+            rc, pacs::compat::format("Failed to upsert study: {}", error_msg),
             "storage");
     }
 
@@ -771,11 +771,11 @@ auto index_database::search_studies(const study_query& query) const
     sql += " ORDER BY s.study_date DESC, s.study_time DESC";
 
     if (query.limit > 0) {
-        sql += std::format(" LIMIT {}", query.limit);
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += std::format(" OFFSET {}", query.offset);
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -806,7 +806,7 @@ auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -818,7 +818,7 @@ auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, std::format("Failed to delete study: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("Failed to delete study: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -892,7 +892,7 @@ auto index_database::update_modalities_in_study(int64_t study_pk)
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare update: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare update: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -905,7 +905,7 @@ auto index_database::update_modalities_in_study(int64_t study_pk)
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to update modalities: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to update modalities: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1001,7 +1001,7 @@ auto index_database::upsert_series(const series_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1028,7 +1028,7 @@ auto index_database::upsert_series(const series_record& record)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, std::format("Failed to upsert series: {}", error_msg),
+            rc, pacs::compat::format("Failed to upsert series: {}", error_msg),
             "storage");
     }
 
@@ -1176,11 +1176,11 @@ auto index_database::search_series(const series_query& query) const
     sql += " ORDER BY se.series_number ASC, se.series_uid ASC";
 
     if (query.limit > 0) {
-        sql += std::format(" LIMIT {}", query.limit);
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += std::format(" OFFSET {}", query.offset);
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -1232,7 +1232,7 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1244,7 +1244,7 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, std::format("Failed to delete series: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("Failed to delete series: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1407,7 +1407,7 @@ auto index_database::upsert_instance(const instance_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1463,7 +1463,7 @@ auto index_database::upsert_instance(const instance_record& record)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, std::format("Failed to upsert instance: {}", error_msg),
+            rc, pacs::compat::format("Failed to upsert instance: {}", error_msg),
             "storage");
     }
 
@@ -1619,11 +1619,11 @@ auto index_database::search_instances(const instance_query& query) const
     sql += " ORDER BY i.instance_number ASC, i.sop_uid ASC";
 
     if (query.limit > 0) {
-        sql += std::format(" LIMIT {}", query.limit);
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += std::format(" OFFSET {}", query.offset);
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -1665,7 +1665,7 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1678,7 +1678,7 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to delete instance: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to delete instance: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1874,7 +1874,7 @@ auto index_database::vacuum() -> VoidResult {
     auto rc = sqlite3_exec(db_, "VACUUM;", nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
-            rc, std::format("VACUUM failed: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("VACUUM failed: {}", sqlite3_errmsg(db_)),
             "storage");
     }
     return ok();
@@ -1884,7 +1884,7 @@ auto index_database::analyze() -> VoidResult {
     auto rc = sqlite3_exec(db_, "ANALYZE;", nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
-            rc, std::format("ANALYZE failed: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("ANALYZE failed: {}", sqlite3_errmsg(db_)),
             "storage");
     }
     return ok();
@@ -1898,7 +1898,7 @@ auto index_database::verify_integrity() const -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare integrity check: {}",
+            pacs::compat::format("Failed to prepare integrity check: {}",
                        sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1909,7 +1909,7 @@ auto index_database::verify_integrity() const -> VoidResult {
         if (result != "ok") {
             sqlite3_finalize(stmt);
             return make_error<std::monostate>(
-                -1, std::format("Integrity check failed: {}", result),
+                -1, pacs::compat::format("Integrity check failed: {}", result),
                 "storage");
         }
     }
@@ -1926,7 +1926,7 @@ auto index_database::checkpoint(bool truncate) -> VoidResult {
     auto rc = sqlite3_exec(db_, sql, nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
-            rc, std::format("Checkpoint failed: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("Checkpoint failed: {}", sqlite3_errmsg(db_)),
             "storage");
     }
     return ok();
@@ -2016,7 +2016,7 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2043,7 +2043,7 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, std::format("Failed to create MPPS: {}", error_msg), "storage");
+            rc, pacs::compat::format("Failed to create MPPS: {}", error_msg), "storage");
     }
 
     auto pk = sqlite3_column_int64(stmt, 0);
@@ -2077,7 +2077,7 @@ auto index_database::update_mpps(std::string_view mpps_uid,
     if (current->status == "COMPLETED" || current->status == "DISCONTINUED") {
         return make_error<std::monostate>(
             -1,
-            std::format("Cannot update MPPS in final state '{}'. COMPLETED and "
+            pacs::compat::format("Cannot update MPPS in final state '{}'. COMPLETED and "
                        "DISCONTINUED are final states.",
                        current->status),
             "storage");
@@ -2097,7 +2097,7 @@ auto index_database::update_mpps(std::string_view mpps_uid,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2121,7 +2121,7 @@ auto index_database::update_mpps(std::string_view mpps_uid,
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, std::format("Failed to update MPPS: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("Failed to update MPPS: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2321,11 +2321,11 @@ auto index_database::search_mpps(const mpps_query& query) const
     sql += " ORDER BY start_datetime DESC";
 
     if (query.limit > 0) {
-        sql += std::format(" LIMIT {}", query.limit);
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += std::format(" OFFSET {}", query.offset);
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -2356,7 +2356,7 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2368,7 +2368,7 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, std::format("Failed to delete MPPS: {}", sqlite3_errmsg(db_)),
+            rc, pacs::compat::format("Failed to delete MPPS: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2480,7 +2480,7 @@ auto index_database::add_worklist_item(const worklist_item& item)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2513,7 +2513,7 @@ auto index_database::add_worklist_item(const worklist_item& item)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, std::format("Failed to add worklist item: {}", error_msg),
+            rc, pacs::compat::format("Failed to add worklist item: {}", error_msg),
             "storage");
     }
 
@@ -2547,7 +2547,7 @@ auto index_database::update_worklist_status(std::string_view step_id,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2564,7 +2564,7 @@ auto index_database::update_worklist_status(std::string_view step_id,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to update worklist status: {}",
+            pacs::compat::format("Failed to update worklist status: {}",
                        sqlite3_errmsg(db_)),
             "storage");
     }
@@ -2636,11 +2636,11 @@ auto index_database::query_worklist(const worklist_query& query) const
     sql += " ORDER BY scheduled_datetime ASC";
 
     if (query.limit > 0) {
-        sql += std::format(" LIMIT {}", query.limit);
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += std::format(" OFFSET {}", query.offset);
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -2742,7 +2742,7 @@ auto index_database::delete_worklist_item(std::string_view step_id,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2757,7 +2757,7 @@ auto index_database::delete_worklist_item(std::string_view step_id,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to delete worklist item: {}",
+            pacs::compat::format("Failed to delete worklist item: {}",
                        sqlite3_errmsg(db_)),
             "storage");
     }
@@ -2790,7 +2790,7 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            std::format("Failed to prepare cleanup: {}", sqlite3_errmsg(db_)),
+            pacs::compat::format("Failed to prepare cleanup: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -2802,7 +2802,7 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     if (rc != SQLITE_DONE) {
         return make_error<size_t>(
             rc,
-            std::format("Failed to cleanup old worklist items: {}",
+            pacs::compat::format("Failed to cleanup old worklist items: {}",
                        sqlite3_errmsg(db_)),
             "storage");
     }

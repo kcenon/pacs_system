@@ -7,7 +7,7 @@
 
 #include <sqlite3.h>
 
-#include <format>
+#include <pacs/compat/format.hpp>
 
 namespace pacs::storage {
 
@@ -37,7 +37,7 @@ auto migration_runner::run_migrations_to(sqlite3* db, int target_version)
     if (target_version > LATEST_VERSION) {
         return make_error<std::monostate>(
             -1,
-            std::format("Target version {} exceeds latest version {}",
+            pacs::compat::format("Target version {} exceeds latest version {}",
                        target_version, LATEST_VERSION),
             "storage");
     }
@@ -194,7 +194,7 @@ auto migration_runner::apply_migration(sqlite3* db, int version) -> VoidResult {
 
     return make_error<std::monostate>(
         -1,
-        std::format("Migration for version {} not found", version),
+        pacs::compat::format("Migration for version {} not found", version),
         "storage");
 }
 
@@ -209,7 +209,7 @@ auto migration_runner::record_migration(sqlite3* db, int version,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to prepare statement: {}",
+            pacs::compat::format("Failed to prepare statement: {}",
                        sqlite3_errmsg(db)),
             "storage");
     }
@@ -224,7 +224,7 @@ auto migration_runner::record_migration(sqlite3* db, int version,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            std::format("Failed to record migration: {}",
+            pacs::compat::format("Failed to record migration: {}",
                        sqlite3_errmsg(db)),
             "storage");
     }
@@ -242,7 +242,7 @@ auto migration_runner::execute_sql(sqlite3* db, std::string_view sql)
         sqlite3_free(errmsg);
 
         return make_error<std::monostate>(
-            rc, std::format("SQL execution failed: {}", error_str),
+            rc, pacs::compat::format("SQL execution failed: {}", error_str),
             "storage");
     }
 

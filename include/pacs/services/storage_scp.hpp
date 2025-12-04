@@ -42,7 +42,7 @@ struct storage_scp_config {
     std::vector<std::string> accepted_sop_classes;
 
     /// Policy for handling duplicate SOP instances
-    duplicate_policy duplicate_policy = duplicate_policy::reject;
+    duplicate_policy dup_policy = duplicate_policy::reject;
 };
 
 /**
@@ -112,7 +112,7 @@ using pre_store_handler = std::function<bool(const core::dicom_dataset& dataset)
  * @code
  * storage_scp_config config;
  * config.accepted_sop_classes = {"1.2.840.10008.5.1.4.1.1.2"};  // CT
- * config.duplicate_policy = duplicate_policy::reject;
+ * config.dup_policy = duplicate_policy::reject;
  *
  * storage_scp scp{config};
  *
