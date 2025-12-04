@@ -1,7 +1,7 @@
 # PACS System Features
 
-> **Version:** 1.0.0
-> **Last Updated:** 2025-12-01
+> **Version:** 1.1.0
+> **Last Updated:** 2025-12-04
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
@@ -673,9 +673,9 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 | Feature | Description | Target |
 |---------|-------------|--------|
-| C-GET | Alternative retrieve | Phase 3 |
 | Additional SOP Classes | NM, PET, RT, etc. | Phase 3 |
 | Connection Pooling | Reuse associations | Phase 3 |
+| Performance Optimization | Enhanced throughput | Phase 3 |
 
 ### Medium Term
 
@@ -695,7 +695,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 1.1.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-01*
+*Updated: 2025-12-04*
 *Author: kcenon@naver.com*

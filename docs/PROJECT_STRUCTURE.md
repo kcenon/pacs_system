@@ -1,7 +1,7 @@
 # Project Structure - PACS System
 
-> **Version:** 1.0.0
-> **Last Updated:** 2025-12-01
+> **Version:** 1.1.0
+> **Last Updated:** 2025-12-04
 > **Language:** **English** | [한국어](PROJECT_STRUCTURE_KO.md)
 
 ---
@@ -272,7 +272,10 @@ pacs_system/
     │   ├── ci.yml              # CI pipeline
     │   ├── coverage.yml        # Code coverage
     │   ├── static-analysis.yml # Static analysis
-    │   └── build-Doxygen.yaml  # API docs
+    │   ├── integration-tests.yml # Integration test pipeline
+    │   ├── sanitizers.yml      # Memory/UB sanitizers
+    │   ├── sbom.yml            # Software Bill of Materials
+    │   └── dependency-security-scan.yml # Security scanning
     │
     ├── ISSUE_TEMPLATE/
     │   ├── bug_report.md
@@ -554,7 +557,7 @@ Test DICOM files stored in `tests/fixtures/`:
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 1.1.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-01*
+*Updated: 2025-12-04*
 *Author: kcenon@naver.com*

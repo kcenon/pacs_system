@@ -1,7 +1,7 @@
 # PACS System Verification Report
 
-> **Report Version:** 1.0.0
-> **Report Date:** 2025-12-01
+> **Report Version:** 1.1.0
+> **Report Date:** 2025-12-04
 > **Language:** **English** | [한국어](VERIFICATION_REPORT_KO.md)
 > **Status:** Complete
 > **Related Document:** [VALIDATION_REPORT.md](VALIDATION_REPORT.md) (SRS 요구사항 충족 확인)
@@ -28,7 +28,7 @@ The verification was conducted through static code analysis, documentation revie
 | **Requirements Coverage** | ✅ Complete | 95% |
 | **Code Implementation** | ✅ Complete | 100% |
 | **Documentation Accuracy** | ✅ Updated | 95% |
-| **Test Coverage** | ✅ Passing | 113+ tests |
+| **Test Coverage** | ✅ Passing | 120+ tests |
 | **DICOM Compliance** | ✅ Conformant | PS3.5, PS3.7, PS3.8 |
 
 ---
@@ -42,9 +42,9 @@ The verification was conducted through static code analysis, documentation revie
 | **Total Commits** | 56 | Stable development history |
 | **Source Files (.cpp)** | 33 | Well-organized implementation |
 | **Header Files (.hpp)** | 48 | Clean interface definitions |
-| **Test Files** | 34 | Comprehensive coverage |
+| **Test Files** | 39 | Comprehensive coverage |
 | **Documentation Files** | 26 | Bilingual (EN/KO) |
-| **Example Applications** | 11 | Production-ready samples |
+| **Example Applications** | 15 | Production-ready samples |
 | **Source LOC** | ~13,808 | |
 | **Header LOC** | ~13,497 | |
 | **Test LOC** | ~15,149 | |

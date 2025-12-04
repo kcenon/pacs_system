@@ -1,8 +1,8 @@
 # SDS - Sequence Diagrams
 
-> **Version:** 1.0.0
+> **Version:** 1.1.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2025-11-30
+> **Last Updated:** 2025-12-04
 
 ---
 
