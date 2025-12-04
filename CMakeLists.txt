@@ -751,6 +751,15 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 
     message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system, network_system, monitoring_system)")
+
+    # CRITICAL: Link pacs_integration to pacs_network for thread_adapter usage in dicom_server.
+    # dicom_server.cpp uses thread_adapter::submit_fire_and_forget() for association worker threads.
+    # This creates a circular dependency (pacs_integration -> pacs_network -> pacs_integration)
+    # but CMake handles this correctly for static libraries by passing libraries multiple times
+    # to the linker. Using PUBLIC so that targets linking pacs_network also get pacs_integration
+    # (required because static libraries don't actually link - symbols are resolved at final link).
+    target_link_libraries(pacs_network PUBLIC pacs_integration)
+    message(STATUS "    - pacs_network: linked pacs_integration for thread_adapter")
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
@@ -824,6 +833,10 @@ if(PACS_BUILD_TESTS)
             pacs_services
             Catch2::Catch2WithMain
     )
+    # Link pacs_integration for thread_adapter (used by dicom_server)
+    if(TARGET pacs_integration)
+        target_link_libraries(network_tests PRIVATE pacs_integration)
+    endif()
 
     # Services tests
     add_executable(services_tests
