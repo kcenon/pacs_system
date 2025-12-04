@@ -164,9 +164,30 @@ The test file `tests/integration/thread_adapter_test.cpp` includes:
 - **Cancellation tests**: 2 sections testing cancel propagation
 - **Platform stability tests**: 2 sections with stress tests
 
+## Upstream Issue Tracking
+
+### Issue Status (Updated)
+
+| Issue | Repository | Status | Notes |
+|-------|------------|--------|-------|
+| #223 | thread_system | CLOSED | Original ARM64 bug report (SIGILL/SIGSEGV) |
+| #224 | thread_system | MERGED | Added static assertions and tests |
+| **#225** | thread_system | **OPEN** | Follow-up: EXC_BAD_ACCESS persists |
+
+### Key Finding
+
+Despite PR #224 being merged and Issue #223 being closed, **crashes still occur** on macOS ARM64 with the batch worker enqueue pattern. The new manifestation is:
+
+- **Signal**: EXC_BAD_ACCESS (code=1) in `libsystem_malloc.dylib mfm_alloc`
+- **Root Cause**: Likely heap corruption during worker initialization
+- **Affected Pattern**: `enqueue_batch()` followed by `start()`
+
 ## References
 
 - Issue #96: thread_adapter SIGILL error (Closed)
 - Issue #153: Epic - Migrate from std::thread to thread_system
 - Issue #155: Verify thread_system stability (This report)
+- thread_system #223: Original ARM64 bug (Closed)
+- thread_system #224: Static assertion fix (Merged)
+- **thread_system #225: Follow-up EXC_BAD_ACCESS bug (Open)**
 - thread_system repository: kcenon/thread_system

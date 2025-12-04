@@ -805,6 +805,7 @@ if(PACS_BUILD_TESTS)
             tests/integration/container_adapter_test.cpp
             tests/integration/logger_adapter_test.cpp
             tests/integration/thread_adapter_test.cpp
+            tests/integration/thread_system_direct_test.cpp
             tests/integration/network_adapter_test.cpp
             tests/integration/monitoring_adapter_test.cpp
         )
