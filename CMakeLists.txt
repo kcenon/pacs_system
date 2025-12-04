@@ -966,6 +966,24 @@ if(PACS_BUILD_EXAMPLES)
 endif()
 
 ##################################################
+# Benchmarks
+##################################################
+
+if(PACS_BUILD_BENCHMARKS)
+    message(STATUS "")
+    message(STATUS "=== Building Benchmarks ===")
+
+    # Thread Performance Benchmarks
+    # @see Issue #154 - Establish performance baseline benchmarks for thread migration
+    if(TARGET pacs_integration AND TARGET Catch2::Catch2WithMain)
+        add_subdirectory(benchmarks/thread_performance)
+        message(STATUS "  [OK] thread_performance_benchmarks: Thread migration baseline")
+    else()
+        message(STATUS "  [--] thread_performance_benchmarks: OFF (requires pacs_integration and Catch2)")
+    endif()
+endif()
+
+##################################################
 # Apply Compiler Warnings to PACS Targets Only
 #
 # This must be done AFTER all pacs_* targets are defined
@@ -1002,6 +1020,13 @@ if(PACS_BUILD_TESTS)
     endif()
     if(TARGET pacs_integration_tests)
         pacs_apply_warnings(pacs_integration_tests)
+    endif()
+endif()
+
+# Benchmark executables
+if(PACS_BUILD_BENCHMARKS)
+    if(TARGET thread_performance_benchmarks)
+        pacs_apply_warnings(thread_performance_benchmarks)
     endif()
 endif()
 
