@@ -241,42 +241,11 @@ if(PACS_WITH_CONTAINER_SYSTEM)
     endif()
 endif()
 
-# logger_system (REQUIRED for logger_adapter - Tier 2)
-message(STATUS "")
-message(STATUS "=== Finding logger_system (REQUIRED for logger_adapter - Tier 2) ===")
-
-set(_PACS_LOGGER_PATHS
-    "$ENV{LOGGER_SYSTEM_ROOT}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../logger_system"
-    "${CMAKE_CURRENT_SOURCE_DIR}/logger_system"
-)
-
-set(LOGGER_SYSTEM_FOUND FALSE)
-foreach(_path ${_PACS_LOGGER_PATHS})
-    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/logger/core/logger.h")
-        message(STATUS "Found logger_system at: ${_path}")
-        set(PACS_LOGGER_SYSTEM_DIR "${_path}")
-        set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "${_path}/include")
-        set(LOGGER_SYSTEM_FOUND TRUE)
-        break()
-    endif()
-endforeach()
-
-if(LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
-    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(LOGGER_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
-    add_subdirectory("${PACS_LOGGER_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/logger_system_build")
-elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
-    message(WARNING
-        "logger_system is REQUIRED for logger_adapter (Tier 2).\n"
-        "logger_adapter will be disabled.\n"
-        "Please ensure logger_system is available at:\n"
-        "  - ../logger_system\n"
-        "  - Set LOGGER_SYSTEM_ROOT environment variable")
-endif()
-
 # thread_system (REQUIRED for thread_adapter - Tier 1)
+# NOTE: Must be added BEFORE logger_system to prevent FetchContent conflicts.
+# logger_system depends on thread_system and will fetch it via UnifiedDependencies
+# if targets don't exist. By adding thread_system first, we ensure the sibling
+# directory version is used with correct include paths.
 message(STATUS "")
 message(STATUS "=== Finding thread_system (REQUIRED for thread_adapter - Tier 1) ===")
 
@@ -312,6 +281,41 @@ else()
         "Please ensure thread_system is available at:\n"
         "  - ../thread_system\n"
         "  - Set THREAD_SYSTEM_ROOT environment variable")
+endif()
+
+# logger_system (REQUIRED for logger_adapter - Tier 2)
+message(STATUS "")
+message(STATUS "=== Finding logger_system (REQUIRED for logger_adapter - Tier 2) ===")
+
+set(_PACS_LOGGER_PATHS
+    "$ENV{LOGGER_SYSTEM_ROOT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../logger_system"
+    "${CMAKE_CURRENT_SOURCE_DIR}/logger_system"
+)
+
+set(LOGGER_SYSTEM_FOUND FALSE)
+foreach(_path ${_PACS_LOGGER_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/logger/core/logger.h")
+        message(STATUS "Found logger_system at: ${_path}")
+        set(PACS_LOGGER_SYSTEM_DIR "${_path}")
+        set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "${_path}/include")
+        set(LOGGER_SYSTEM_FOUND TRUE)
+        break()
+    endif()
+endforeach()
+
+if(LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(LOGGER_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+    add_subdirectory("${PACS_LOGGER_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/logger_system_build")
+elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    message(WARNING
+        "logger_system is REQUIRED for logger_adapter (Tier 2).\n"
+        "logger_adapter will be disabled.\n"
+        "Please ensure logger_system is available at:\n"
+        "  - ../logger_system\n"
+        "  - Set LOGGER_SYSTEM_ROOT environment variable")
 endif()
 
 # network_system (REQUIRED - Tier 4)
