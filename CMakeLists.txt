@@ -495,6 +495,13 @@ if(TARGET ThreadSystem)
 elseif(TARGET thread_base)
     target_link_libraries(pacs_network PUBLIC thread_base)
     target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
+    # CRITICAL: Explicitly add thread_system include directories
+    # When thread_base is fetched via FetchContent (by logger_system), its INTERFACE
+    # include directories may not be set up correctly. Ensure we can find thread_base.h
+    # by explicitly adding the include directory from the sibling checkout.
+    if(PACS_THREAD_SYSTEM_INCLUDE_DIR)
+        target_include_directories(pacs_network PUBLIC ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
+    endif()
 endif()
 
 # CRITICAL: Inherit thread_system compile definitions for ABI compatibility
