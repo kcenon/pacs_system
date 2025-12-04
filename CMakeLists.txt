@@ -719,17 +719,6 @@ else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
 
-# Simple standalone tests for debugging (without Catch2)
-add_executable(accept_worker_simple_test
-    test_accept_worker_simple.cpp
-)
-target_link_libraries(accept_worker_simple_test PRIVATE pacs_network)
-
-add_executable(thread_base_minimal_test
-    test_thread_base_minimal.cpp
-)
-target_link_libraries(thread_base_minimal_test PRIVATE thread_base)
-
 # Testing
 if(PACS_BUILD_TESTS)
     enable_testing()
