@@ -554,6 +554,55 @@ All operations have configurable timeouts to prevent hanging tests:
    openssl version
    ```
 
+## CI/CD Pipeline
+
+Integration tests are automatically executed via GitHub Actions. The pipeline is defined in `.github/workflows/integration-tests.yml`.
+
+### Workflow Jobs
+
+| Job | Trigger | Description |
+|-----|---------|-------------|
+| `build-and-unit-tests` | All PRs | Build and run unit tests on Ubuntu and macOS |
+| `integration-tests` | All PRs | Run library-level integration tests |
+| `stability-smoke-tests` | All PRs | Quick 10-second stability validation |
+| `binary-integration-tests` | All PRs | Run shell-based binary integration tests |
+| `stress-tests` | Main only | Extended stress tests (5 min) |
+| `test-summary` | Always | Aggregate and report results |
+
+### Running Tests Locally with CTest Labels
+
+```bash
+# Run only unit tests
+ctest -L unit --output-on-failure
+
+# Run only integration tests
+ctest -L integration --output-on-failure
+
+# Exclude slow tests
+ctest -LE slow --output-on-failure
+
+# Run with verbose output
+ctest -L integration -V
+```
+
+### Test Categories (Catch2 Tags)
+
+| Tag | Description | CI Behavior |
+|-----|-------------|-------------|
+| `[connectivity]` | Basic DICOM network tests | All PRs |
+| `[workflow]` | Clinical workflow tests | All PRs |
+| `[multimodal]` | Multi-modality tests | All PRs |
+| `[tls]` | TLS/SSL security tests | All PRs |
+| `[stability]` | Stability tests | All PRs (smoke only) |
+| `[stress]` | Stress/load tests | Main only |
+| `[.slow]` | Long-running tests (hidden) | Manual only |
+
+### Viewing Test Results
+
+- **PR Checks**: JUnit reports appear directly in PR check results
+- **Workflow Runs**: Detailed logs in Actions tab
+- **Artifacts**: XML test reports downloadable for 30 days
+
 ## Contributing
 
 When adding new binary tests:

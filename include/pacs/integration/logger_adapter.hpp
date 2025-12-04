@@ -14,7 +14,7 @@
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
-#include <format>
+#include <pacs/compat/format.hpp>
 #include <functional>
 #include <map>
 #include <memory>
@@ -213,8 +213,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void trace(std::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::trace, std::format(fmt, std::forward<Args>(args)...));
+    static void trace(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::trace, pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -224,8 +224,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void debug(std::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::debug, std::format(fmt, std::forward<Args>(args)...));
+    static void debug(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::debug, pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -235,8 +235,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void info(std::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::info, std::format(fmt, std::forward<Args>(args)...));
+    static void info(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::info, pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -246,8 +246,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void warn(std::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::warn, std::format(fmt, std::forward<Args>(args)...));
+    static void warn(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::warn, pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -257,8 +257,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void error(std::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::error, std::format(fmt, std::forward<Args>(args)...));
+    static void error(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::error, pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -268,8 +268,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void fatal(std::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::fatal, std::format(fmt, std::forward<Args>(args)...));
+    static void fatal(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::fatal, pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**

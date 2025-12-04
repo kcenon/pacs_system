@@ -15,6 +15,7 @@
 #define PACS_SERVICES_SOP_CLASSES_US_STORAGE_HPP
 
 #include <array>
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>

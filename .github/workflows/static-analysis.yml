@@ -1,0 +1,157 @@
+# Static Analysis Workflow for PACS System
+# Runs clang-tidy and cppcheck for code quality analysis
+#
+# Based on messaging_system static analysis patterns
+
+name: Static Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Ensure only one workflow runs per branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clang-tidy:
+    name: Clang-Tidy Analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    continue-on-error: true  # Allow baseline collection without failing CI
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout dependencies
+      run: |
+        git clone --depth 1 https://github.com/kcenon/common_system.git
+        git clone --depth 1 https://github.com/kcenon/thread_system.git
+        git clone --depth 1 https://github.com/kcenon/logger_system.git
+        git clone --depth 1 https://github.com/kcenon/container_system.git
+        git clone --depth 1 https://github.com/kcenon/network_system.git
+        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y cmake build-essential ninja-build clang clang-tidy lld
+        sudo apt install -y libsqlite3-dev libssl-dev libfmt-dev
+        sudo apt install -y libgtest-dev libgmock-dev
+
+    - name: Patch dependency CMake files to remove -Werror
+      run: |
+        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
+          if [ -d "$repo" ]; then
+            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
+              if grep -q '\-Werror' "$file" 2>/dev/null; then
+                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
+              fi
+            done
+          fi
+        done
+
+    - name: Configure CMake
+      working-directory: pacs_system
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=OFF \
+          -DPACS_BUILD_STORAGE=ON \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+    - name: Run clang-tidy
+      working-directory: pacs_system
+      run: |
+        cd build
+        # Run clang-tidy on pacs_system sources only
+        run-clang-tidy -p . \
+          -header-filter='.*pacs.*' \
+          ../src/ ../include/ \
+          || echo "clang-tidy found issues (baseline collection)"
+
+    - name: Upload clang-tidy results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: clang-tidy-results
+        path: |
+          pacs_system/build/compile_commands.json
+          pacs_system/build/**/*.log
+        retention-days: 7
+        if-no-files-found: ignore
+
+  cppcheck:
+    name: Cppcheck Analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    continue-on-error: true  # Allow baseline collection without failing CI
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y cppcheck
+
+    - name: Run Cppcheck
+      working-directory: pacs_system
+      run: |
+        cppcheck \
+          --enable=all \
+          --inconclusive \
+          --std=c++20 \
+          --suppress=missingInclude \
+          --suppress=unmatchedSuppression \
+          --inline-suppr \
+          --xml \
+          --xml-version=2 \
+          -I include \
+          src/ \
+          2> cppcheck-results.xml || echo "Cppcheck found issues (baseline collection)"
+
+    - name: Upload Cppcheck results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cppcheck-results
+        path: pacs_system/cppcheck-results.xml
+        retention-days: 7
+        if-no-files-found: ignore
+
+  analysis-summary:
+    name: Static Analysis Summary
+    needs: [clang-tidy, cppcheck]
+    runs-on: ubuntu-24.04
+    if: always()
+
+    steps:
+    - name: Generate summary
+      run: |
+        echo "# Static Analysis Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Analysis Tools" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Tool | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Clang-Tidy | ${{ needs.clang-tidy.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Cppcheck | ${{ needs.cppcheck.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 Detailed results available in the **Artifacts** section" >> $GITHUB_STEP_SUMMARY

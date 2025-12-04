@@ -35,8 +35,10 @@ constexpr value_multiplicity vm_3{3, 3};
 constexpr value_multiplicity vm_6{6, 6};
 
 // Standard DICOM tags organized by group
+// Note: Array size explicitly specified to avoid Clang's fold expression
+//       nesting limit of 256 when using CTAD with large initializer lists
 // clang-format off
-static constexpr std::array standard_tags = {
+static constexpr std::array<tag_info, 298> standard_tags = {{
     // ========================================================================
     // Command Group (0x0000) - DIMSE messages
     // ========================================================================
@@ -374,7 +376,7 @@ static constexpr std::array standard_tags = {
     tag_info{dicom_tag{0xFFFE, 0xE000}, vr(VR::UN), vm_1, "Item", "Item", false},
     tag_info{dicom_tag{0xFFFE, 0xE00D}, vr(VR::UN), vm_1, "ItemDelimitationItem", "Item Delimitation Item", false},
     tag_info{dicom_tag{0xFFFE, 0xE0DD}, vr(VR::UN), vm_1, "SequenceDelimitationItem", "Sequence Delimitation Item", false},
-};
+}};
 // clang-format on
 
 auto get_standard_tags() -> std::span<const tag_info> {
