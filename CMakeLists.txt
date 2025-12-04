@@ -491,8 +491,25 @@ endif()
 # as interface compile definitions. We must manually sync these flags to ensure
 # thread_base class layout matches between library and consumer code.
 # Without this, derived classes have incorrect member offsets causing crashes.
-if(SET_STD_JTHREAD)
+#
+# NOTE: We must detect jthread support ourselves because SET_STD_JTHREAD from
+# thread_system doesn't propagate when using FetchContent. AppleClang doesn't
+# support std::jthread even in C++20 mode, so we need proper detection.
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("
+    #include <stop_token>
+    #include <thread>
+    int main() {
+        std::jthread t([](){});
+        return 0;
+    }
+" PACS_HAS_STD_JTHREAD)
+
+if(PACS_HAS_STD_JTHREAD)
+    message(STATUS "std::jthread detected - enabling USE_STD_JTHREAD for ABI compatibility")
     target_compile_definitions(pacs_network PUBLIC USE_STD_JTHREAD)
+else()
+    message(STATUS "std::jthread not available - using std::thread fallback")
 endif()
 
 # Services library
@@ -645,7 +662,8 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 
     # CRITICAL: Inherit thread_system compile definitions for ABI compatibility
-    if(SET_STD_JTHREAD)
+    # Use the same PACS_HAS_STD_JTHREAD detection result from pacs_network
+    if(PACS_HAS_STD_JTHREAD)
         target_compile_definitions(pacs_integration PUBLIC USE_STD_JTHREAD)
     endif()
 
