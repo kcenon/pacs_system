@@ -6,6 +6,7 @@
 #include "pacs/network/dicom_server.hpp"
 #include "pacs/network/pdu_encoder.hpp"
 #include "pacs/network/pdu_decoder.hpp"
+#include "pacs/integration/thread_adapter.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -174,18 +175,15 @@ void dicom_server::stop(duration timeout) {
         }
 
         // Force abort remaining associations
+        // Note: With thread_adapter pool, we don't need to join individual threads.
+        // The message_loop will exit when running_ is false or association is aborted.
         for (auto& [id, info] : associations_) {
             info->assoc.abort(
                 static_cast<uint8_t>(abort_source::service_provider),
                 static_cast<uint8_t>(abort_reason::not_specified));
-            
-            if (info->worker_thread.joinable()) {
-                if (info->worker_thread.get_id() == std::this_thread::get_id()) {
-                    info->worker_thread.detach();
-                } else {
-                    info->worker_thread.join();
-                }
-            }
+            // Mark as no longer processing (message_loop will check running_ and exit)
+            // Note: Already holding associations_mutex_ so no atomic needed
+            info->processing = false;
         }
         associations_.clear();
     }
@@ -404,13 +402,10 @@ void dicom_server::remove_association(uint64_t id) {
     std::lock_guard<std::mutex> lock(associations_mutex_);
     auto it = associations_.find(id);
     if (it != associations_.end()) {
-        if (it->second->worker_thread.joinable()) {
-            if (it->second->worker_thread.get_id() == std::this_thread::get_id()) {
-                it->second->worker_thread.detach();
-            } else {
-                it->second->worker_thread.join();
-            }
-        }
+        // With thread_adapter pool, no thread join is needed.
+        // Just mark as not processing and remove from map.
+        // Note: Already holding associations_mutex_ so no atomic needed
+        it->second->processing = false;
         associations_.erase(it);
     }
 }
@@ -509,7 +504,7 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
     uint64_t id = next_association_id();
     handle_association(id, std::move(assoc));
 
-    // Link peers and start thread
+    // Link peers and start message processing via thread pool
     {
         std::lock_guard<std::mutex> lock(associations_mutex_);
         auto it = associations_.find(id);
@@ -518,13 +513,21 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
             it->second->assoc.set_peer(client_peer);
             client_peer->set_peer(&it->second->assoc);
 
-            // Start message loop thread
+            // Submit message loop to thread_adapter pool instead of creating dedicated thread.
             // We need to capture the raw pointer to info because unique_ptr is in the map.
             // The map might rehash but the unique_ptr value (the pointer to association_info) is stable.
             auto* info_ptr = it->second.get();
-            it->second->worker_thread = std::thread([this, info_ptr]() {
-                message_loop(*info_ptr);
-            });
+
+            // Mark as processing before submitting to pool
+            // Note: Already holding associations_mutex_ so no atomic needed
+            info_ptr->processing = true;
+
+            // Submit with high priority - association message handling is important
+            integration::thread_adapter::submit_fire_and_forget(
+                [this, info_ptr]() {
+                    message_loop(*info_ptr);
+                }
+            );
         }
     }
 

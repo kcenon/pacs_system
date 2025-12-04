@@ -824,6 +824,10 @@ if(PACS_BUILD_TESTS)
             pacs_services
             Catch2::Catch2WithMain
     )
+    # Link pacs_integration for thread_adapter (used by dicom_server)
+    if(TARGET pacs_integration)
+        target_link_libraries(network_tests PRIVATE pacs_integration)
+    endif()
 
     # Services tests
     add_executable(services_tests
