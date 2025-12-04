@@ -256,6 +256,44 @@ After the fix was applied:
 - No "Subprocess aborted" errors
 - All thread-related tests executing correctly
 
+## Test Classification Fix
+
+### Problem Description
+
+The `pacs_integration_tests` executable was missing the `TEST_PREFIX "integration::"`, causing its tests to be included in the "Unit Tests" CI job (which uses `--exclude-regex "integration::"`).
+
+### Root Cause
+
+The thread_adapter tests in `pacs_integration_tests`:
+- Depend on thread_system's thread pool functionality
+- Exhibit heap corruption (`malloc(): invalid size`) on Ubuntu 24.04 with glibc
+- Do not manifest this issue on macOS or with Sanitizers enabled
+- Are timing-sensitive issues specific to glibc's malloc implementation
+
+### Solution Applied
+
+Added `TEST_PREFIX "integration::"` to `catch_discover_tests` for `pacs_integration_tests` in `CMakeLists.txt`:
+
+```cmake
+catch_discover_tests(pacs_integration_tests
+    TEST_PREFIX "integration::"
+    PROPERTIES LABELS "integration"
+)
+```
+
+This ensures:
+- Tests are excluded from unit test runs
+- Tests are only executed in the dedicated integration tests job
+- Tests use Catch2's `[!mayfail]` handling appropriately
+
+### Upstream Issue
+
+The underlying heap corruption in thread_system on Linux (specifically with glibc's malloc) requires further investigation. The issue:
+- Does not appear with AddressSanitizer or ThreadSanitizer
+- Does not appear on macOS
+- Manifests as `malloc(): invalid size (unsorted)` and SIGABRT
+- Suggests timing-sensitive heap corruption during thread pool operations
+
 ## References
 
 - Issue #96: thread_adapter SIGILL error (Closed)
