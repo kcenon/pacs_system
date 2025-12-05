@@ -6,6 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 
+#include <array>
+
 #include <pacs/core/dicom_element.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
 

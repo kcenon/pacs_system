@@ -9,6 +9,7 @@
 #include "pacs/network/dimse/status_codes.hpp"
 
 #include <algorithm>
+#include <array>
 
 namespace pacs::services {
 

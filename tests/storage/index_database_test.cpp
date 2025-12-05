@@ -46,7 +46,8 @@ TEST_CASE("index_database: create in-memory database", "[storage][database]") {
 
 TEST_CASE("index_database: create file-based database",
           "[storage][database]") {
-    const std::string test_path = "/tmp/pacs_test_db.sqlite";
+    auto test_path = (std::filesystem::temp_directory_path() /
+                      "pacs_test_db.sqlite").string();
 
     // Clean up any existing test file
     std::filesystem::remove(test_path);
@@ -2155,7 +2156,8 @@ TEST_CASE("index_database: open with custom config", "[storage][config]") {
 
 TEST_CASE("index_database: file-based database with WAL mode",
           "[storage][config]") {
-    const std::string test_path = "/tmp/pacs_test_wal_db.sqlite";
+    auto test_path = (std::filesystem::temp_directory_path() /
+                      "pacs_test_wal_db.sqlite").string();
 
     // Clean up any existing test file
     std::filesystem::remove(test_path);

@@ -529,7 +529,7 @@ size_t parallel_store(
     // Process in batches to avoid resource exhaustion
     for (size_t i = 0; i < datasets.size(); i += batch_size) {
         std::vector<std::future<bool>> futures;
-        size_t end = std::min(i + batch_size, datasets.size());
+        size_t end = (std::min)(i + batch_size, datasets.size());
 
         for (size_t j = i; j < end; ++j) {
             const auto& dataset = datasets[j];
