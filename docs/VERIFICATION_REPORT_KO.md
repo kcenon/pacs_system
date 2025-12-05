@@ -1,7 +1,7 @@
 # PACS 시스템 검증 보고서
 
-> **보고서 버전:** 1.1.0
-> **보고서 일자:** 2025-12-04
+> **보고서 버전:** 1.4.0
+> **보고서 일자:** 2025-12-05
 > **언어:** [English](VERIFICATION_REPORT.md) | **한국어**
 > **상태:** 완료
 > **관련 문서:** [VALIDATION_REPORT_KO.md](VALIDATION_REPORT_KO.md) (SRS 요구사항 충족 확인)
@@ -272,10 +272,11 @@
 | Core 모듈 | 6 | 57 | ✅ 통과 |
 | Encoding 모듈 | 5 | 41 | ✅ 통과 |
 | Network 모듈 | 5 | 15 | ✅ 통과 |
+| Network V2 모듈 | 7 | 85+ | ✅ 통과 |
 | Services 모듈 | 7 | - | ✅ 통과 |
 | Storage 모듈 | 6 | - | ✅ 통과 |
 | Integration 모듈 | 5 | - | ✅ 통과 |
-| **합계** | **34** | **113+** | **✅ 통과** |
+| **합계** | **41** | **198+** | **✅ 통과** |
 
 ### 5.2 테스트 구조
 
@@ -299,7 +300,15 @@ tests/
 │   ├── pdu_decoder_test.cpp
 │   ├── association_test.cpp
 │   ├── dicom_server_test.cpp
-│   └── dimse/dimse_message_test.cpp
+│   ├── dimse/dimse_message_test.cpp
+│   └── v2/                  # network_system 마이그레이션 테스트
+│       ├── pdu_framing_test.cpp
+│       ├── state_machine_test.cpp
+│       ├── service_dispatching_test.cpp
+│       ├── network_system_integration_test.cpp
+│       ├── stress_test.cpp
+│       ├── dicom_server_v2_test.cpp
+│       └── dicom_association_handler_test.cpp
 ├── services/                # 서비스 테스트
 │   ├── verification_scp_test.cpp
 │   ├── storage_scp_test.cpp
@@ -517,9 +526,10 @@ src/
 | 1.1.0 | 2025-12-01 | kcenon@naver.com | 추적성 문서 상태 업데이트, SDS_TRACEABILITY.md 업데이트 추가 |
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | V-Model에 따른 V&V 구분 명확화 |
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | 검증(SDS 준수)만으로 범위 한정; 확인은 별도 VALIDATION_REPORT_KO.md로 이동 |
+| 1.4.0 | 2025-12-05 | kcenon@naver.com | network_system 마이그레이션용 Network V2 테스트 추가 (Issue #163) |
 
 ---
 
-*보고서 버전: 1.0.0*
-*생성일: 2025-12-01*
+*보고서 버전: 1.4.0*
+*생성일: 2025-12-05*
 *검증자: kcenon@naver.com*
