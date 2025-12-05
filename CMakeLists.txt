@@ -830,6 +830,11 @@ if(PACS_BUILD_TESTS)
         tests/network/detail/accept_worker_test.cpp
         tests/network/v2/dicom_association_handler_test.cpp
         tests/network/v2/dicom_server_v2_test.cpp
+        tests/network/v2/pdu_framing_test.cpp
+        tests/network/v2/state_machine_test.cpp
+        tests/network/v2/service_dispatching_test.cpp
+        tests/network/v2/network_system_integration_test.cpp
+        tests/network/v2/stress_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
