@@ -621,6 +621,9 @@ public:
     using pid_type = pid_t;
 #endif
 
+    /// Invalid PID constant (0 is reserved on both platforms)
+    static constexpr pid_type invalid_pid = 0;
+
     static pid_type start_background(
         const std::string& executable,
         const std::vector<std::string>& args = {}) {
@@ -1144,7 +1147,9 @@ private:
  */
 class background_process_guard {
 public:
-    explicit background_process_guard(process_launcher::pid_type pid = -1) : pid_(pid) {}
+    explicit background_process_guard(
+        process_launcher::pid_type pid = process_launcher::invalid_pid)
+        : pid_(pid) {}
 
     ~background_process_guard() {
         stop();
@@ -1157,14 +1162,14 @@ public:
     // Movable
     background_process_guard(background_process_guard&& other) noexcept
         : pid_(other.pid_) {
-        other.pid_ = -1;
+        other.pid_ = process_launcher::invalid_pid;
     }
 
     background_process_guard& operator=(background_process_guard&& other) noexcept {
         if (this != &other) {
             stop();
             pid_ = other.pid_;
-            other.pid_ = -1;
+            other.pid_ = process_launcher::invalid_pid;
         }
         return *this;
     }
@@ -1184,19 +1189,19 @@ public:
     void stop() {
         if (pid_ > 0) {
             process_launcher::stop_background(pid_);
-            pid_ = -1;
+            pid_ = process_launcher::invalid_pid;
         }
     }
 
     /// @brief Release ownership without stopping
     process_launcher::pid_type release() {
         auto p = pid_;
-        pid_ = -1;
+        pid_ = process_launcher::invalid_pid;
         return p;
     }
 
 private:
-    process_launcher::pid_type pid_{-1};
+    process_launcher::pid_type pid_{process_launcher::invalid_pid};
 };
 
 }  // namespace pacs::integration_test

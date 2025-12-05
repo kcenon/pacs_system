@@ -375,7 +375,7 @@ TEST_CASE("Concurrent storage from multiple SCUs", "[stress][concurrent]") {
         auto result = future.get();
         total_success += result.success_count;
         total_failure += result.failure_count;
-        max_duration = std::max(max_duration, result.duration);
+        max_duration = (std::max)(max_duration, result.duration);
 
         if (!result.error_message.empty()) {
             INFO("Worker error: " << result.error_message);

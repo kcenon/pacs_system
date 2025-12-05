@@ -292,11 +292,30 @@ pacs_system/
 
 ### Prerequisites
 
+**All Platforms:**
 - C++20 compatible compiler (GCC 11+, Clang 14+, MSVC 2022+)
 - CMake 3.20+
-- kcenon ecosystem libraries
+- Ninja (recommended build system)
+- kcenon ecosystem libraries (auto-downloaded by CMake)
+
+**Linux (Ubuntu 24.04+):**
+```bash
+sudo apt install cmake ninja-build libsqlite3-dev libssl-dev libfmt-dev
+```
+
+**macOS:**
+```bash
+brew install cmake ninja sqlite3 openssl@3 fmt
+```
+
+**Windows:**
+- Visual Studio 2022 with C++ workload
+- [vcpkg](https://vcpkg.io/) for package management
+- Dependencies: `sqlite3`, `openssl`, `fmt`, `gtest`
 
 ### Build
+
+#### Linux/macOS
 
 ```bash
 # Clone repository
@@ -309,6 +328,30 @@ cmake --build build
 
 # Run tests
 cd build && ctest --output-on-failure
+```
+
+#### Windows
+
+```powershell
+# Prerequisites: Visual Studio 2022, vcpkg, CMake 3.20+
+
+# Install dependencies via vcpkg
+vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+
+# Clone repository
+git clone https://github.com/kcenon/pacs_system.git
+cd pacs_system
+
+# Configure with vcpkg toolchain
+cmake -S . -B build -G Ninja `
+  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+# Build
+cmake --build build
+
+# Run tests
+cd build
+ctest --output-on-failure
 ```
 
 **Test Results**: 120+ tests passing (Core: 57, Encoding: 41, Network: 15, Services: 7+, Storage/Integration: 20+)

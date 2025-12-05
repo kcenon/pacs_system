@@ -531,7 +531,7 @@ core::dicom_dataset test_data_generator::large(size_t target_size_mb) {
 
     // Use square dimensions
     uint16_t dimension = static_cast<uint16_t>(std::sqrt(static_cast<double>(total_pixels)));
-    dimension = std::min(dimension, static_cast<uint16_t>(4096));  // Cap at 4096x4096
+    dimension = (std::min)(dimension, static_cast<uint16_t>(4096));  // Cap at 4096x4096
 
     add_image_pixel_module(ds, dimension, dimension, 16, 12);
     add_pixel_data(ds, dimension, dimension, 16, 1, 1024);

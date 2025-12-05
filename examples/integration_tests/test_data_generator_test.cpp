@@ -12,6 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>  // for std::all_of
+
 namespace pacs::integration_test {
 
 // =============================================================================

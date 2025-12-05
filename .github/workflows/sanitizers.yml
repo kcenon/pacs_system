@@ -2,6 +2,14 @@
 # Runs AddressSanitizer, ThreadSanitizer, and UndefinedBehaviorSanitizer
 #
 # Based on database_system sanitizer patterns
+#
+# Note on Windows Support:
+# Windows sanitizer support is limited compared to Linux/macOS:
+# - MSVC supports AddressSanitizer (/fsanitize=address) since VS 2019 16.9
+# - ThreadSanitizer is NOT supported on Windows with MSVC
+# - UndefinedBehaviorSanitizer is partially supported
+# For comprehensive sanitizer coverage, we run on Ubuntu with Clang.
+# See: https://learn.microsoft.com/en-us/cpp/sanitizers/asan
 
 name: Sanitizer Tests
 
