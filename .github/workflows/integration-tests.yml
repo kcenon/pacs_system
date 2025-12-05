@@ -169,7 +169,7 @@ jobs:
         foreach ($repo in $repos) {
           if (Test-Path $repo) {
             Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -FollowSymlink:$false -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
               $content = Get-Content $_.FullName -Raw
               if ($content -match '-Werror|/WX') {
                 Write-Host "  Patching: $($_.FullName)"
@@ -378,7 +378,7 @@ jobs:
         foreach ($repo in $repos) {
           if (Test-Path $repo) {
             Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -FollowSymlink:$false -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
               $content = Get-Content $_.FullName -Raw
               if ($content -match '-Werror|/WX') {
                 Write-Host "  Patching: $($_.FullName)"
@@ -727,7 +727,7 @@ jobs:
         foreach ($repo in $repos) {
           if (Test-Path $repo) {
             Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -FollowSymlink:$false -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
               $content = Get-Content $_.FullName -Raw
               if ($content -match '-Werror|/WX') {
                 Write-Host "  Patching: $($_.FullName)"
