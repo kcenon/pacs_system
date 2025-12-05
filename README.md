@@ -649,6 +649,41 @@ database:
 
 ---
 
+## Performance
+
+The PACS system leverages the `thread_system` library for high-performance concurrent operations.
+See [PERFORMANCE_RESULTS.md](docs/PERFORMANCE_RESULTS.md) for detailed benchmark results.
+
+### Key Performance Metrics
+
+| Metric | Result |
+|--------|--------|
+| **Association Latency** | < 1 ms |
+| **C-ECHO Throughput** | 89,964 msg/s |
+| **C-STORE Throughput** | 31,759 store/s |
+| **Concurrent Operations** | 124 ops/s (10 workers) |
+| **Graceful Shutdown** | 110 ms (with active connections) |
+| **Data Rate (512x512)** | 9,247 MB/s |
+
+### Running Benchmarks
+
+```bash
+# Build with benchmarks
+cmake -B build -DPACS_BUILD_BENCHMARKS=ON
+cmake --build build
+
+# Run all benchmarks
+cmake --build build --target run_full_benchmarks
+
+# Run specific benchmark category
+./build/bin/thread_performance_benchmarks "[benchmark][association]"
+./build/bin/thread_performance_benchmarks "[benchmark][throughput]"
+./build/bin/thread_performance_benchmarks "[benchmark][concurrent]"
+./build/bin/thread_performance_benchmarks "[benchmark][shutdown]"
+```
+
+---
+
 ## Code Statistics
 
 | Metric | Value |
