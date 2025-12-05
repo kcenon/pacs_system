@@ -827,6 +827,7 @@ if(PACS_BUILD_TESTS)
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
         tests/network/detail/accept_worker_test.cpp
+        tests/network/v2/dicom_association_handler_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
