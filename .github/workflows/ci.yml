@@ -167,9 +167,11 @@ jobs:
       working-directory: pacs_system
       shell: pwsh
       run: |
+        # Use literal "Release" instead of $env:BUILD_TYPE to avoid Ninja rule generation issues
+        # where PowerShell variable syntax ends up as literal string in generated .ninja files
         cmake -B build `
           -G Ninja `
-          -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
+          -DCMAKE_BUILD_TYPE=Release `
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
           -DPACS_WARNINGS_AS_ERRORS=OFF `
           -DPACS_BUILD_TESTS=ON `
