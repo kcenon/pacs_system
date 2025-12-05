@@ -11,6 +11,7 @@
 #include <ctime>
 #include <filesystem>
 #include <pacs/compat/format.hpp>
+#include <pacs/compat/time.hpp>
 #include <iomanip>
 #include <sstream>
 
@@ -2773,7 +2774,7 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
 
     std::tm tm{};
-    localtime_r(&cutoff_time, &tm);
+    pacs::compat::localtime_safe(&cutoff_time, &tm);
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     auto cutoff_str = oss.str();
