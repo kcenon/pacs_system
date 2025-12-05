@@ -829,6 +829,134 @@ handler->start();
 
 ---
 
+### `pacs::network::v2::dicom_server_v2`
+
+DICOM server using network_system's messaging_server for connection management.
+This is the recommended server implementation for new applications.
+
+```cpp
+#include <pacs/network/v2/dicom_server_v2.hpp>
+
+namespace pacs::network::v2 {
+
+class dicom_server_v2 {
+public:
+    // Type aliases
+    using clock = std::chrono::steady_clock;
+    using duration = std::chrono::milliseconds;
+    using time_point = clock::time_point;
+    using association_established_callback =
+        std::function<void(const std::string& session_id,
+                           const std::string& calling_ae,
+                           const std::string& called_ae)>;
+    using association_closed_callback =
+        std::function<void(const std::string& session_id, bool graceful)>;
+    using error_callback = std::function<void(const std::string& error)>;
+
+    // Construction
+    explicit dicom_server_v2(const server_config& config);
+    ~dicom_server_v2();
+
+    // Non-copyable, non-movable
+    dicom_server_v2(const dicom_server_v2&) = delete;
+    dicom_server_v2& operator=(const dicom_server_v2&) = delete;
+
+    // Service registration (call before start)
+    void register_service(services::scp_service_ptr service);
+    std::vector<std::string> supported_sop_classes() const;
+
+    // Lifecycle
+    Result<std::monostate> start();
+    void stop(duration timeout = std::chrono::seconds{30});
+    void wait_for_shutdown();
+
+    // Status
+    bool is_running() const noexcept;
+    size_t active_associations() const noexcept;
+    server_statistics get_statistics() const;
+    const server_config& config() const noexcept;
+
+    // Callbacks
+    void on_association_established(association_established_callback callback);
+    void on_association_closed(association_closed_callback callback);
+    void on_error(error_callback callback);
+};
+
+} // namespace pacs::network::v2
+```
+
+**Usage Example:**
+
+```cpp
+#include <pacs/network/v2/dicom_server_v2.hpp>
+#include <pacs/services/verification_scp.hpp>
+#include <pacs/services/storage_scp.hpp>
+
+using namespace pacs::network;
+using namespace pacs::network::v2;
+using namespace pacs::services;
+
+// Configure server
+server_config config;
+config.ae_title = "MY_PACS";
+config.port = 11112;
+config.max_associations = 20;
+config.idle_timeout = std::chrono::minutes{5};
+
+// Create server
+dicom_server_v2 server{config};
+
+// Register services
+server.register_service(std::make_unique<verification_scp>());
+server.register_service(std::make_unique<storage_scp>("/path/to/storage"));
+
+// Set callbacks
+server.on_association_established(
+    [](const std::string& session_id,
+       const std::string& calling_ae,
+       const std::string& called_ae) {
+        std::cout << "Association: " << calling_ae << " -> " << called_ae << '\n';
+    });
+
+server.on_association_closed(
+    [](const std::string& session_id, bool graceful) {
+        std::cout << "Session " << session_id << " closed "
+                  << (graceful ? "gracefully" : "abruptly") << '\n';
+    });
+
+server.on_error([](const std::string& error) {
+    std::cerr << "Server error: " << error << '\n';
+});
+
+// Start server
+auto result = server.start();
+if (result.is_err()) {
+    std::cerr << "Failed to start: " << result.error().message << '\n';
+    return 1;
+}
+
+std::cout << "Server running on port " << config.port << '\n';
+
+// Wait for shutdown signal
+server.wait_for_shutdown();
+```
+
+**Key Features:**
+
+- **API-compatible** with existing `dicom_server` for easy migration
+- **Automatic session management** via network_system callbacks
+- **Thread-safe** handler map with proper synchronization
+- **Configurable limits** for max associations with automatic rejection
+- **Idle timeout support** for cleaning up inactive connections
+
+**Migration from dicom_server:**
+
+1. Replace `dicom_server` with `dicom_server_v2`
+2. No changes needed to service registration or callbacks
+3. Requires `PACS_WITH_NETWORK_SYSTEM` compile definition
+
+---
+
 ## Services Module
 
 ### `pacs::services::verification_scu`

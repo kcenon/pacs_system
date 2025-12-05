@@ -562,6 +562,134 @@ assoc.release();
 
 ---
 
+### `pacs::network::v2::dicom_server_v2`
+
+network_system의 messaging_server를 사용하는 DICOM 서버 구현.
+새로운 애플리케이션에 권장되는 서버 구현입니다.
+
+```cpp
+#include <pacs/network/v2/dicom_server_v2.hpp>
+
+namespace pacs::network::v2 {
+
+class dicom_server_v2 {
+public:
+    // 타입 별칭
+    using clock = std::chrono::steady_clock;
+    using duration = std::chrono::milliseconds;
+    using time_point = clock::time_point;
+    using association_established_callback =
+        std::function<void(const std::string& session_id,
+                           const std::string& calling_ae,
+                           const std::string& called_ae)>;
+    using association_closed_callback =
+        std::function<void(const std::string& session_id, bool graceful)>;
+    using error_callback = std::function<void(const std::string& error)>;
+
+    // 생성
+    explicit dicom_server_v2(const server_config& config);
+    ~dicom_server_v2();
+
+    // 복사/이동 불가
+    dicom_server_v2(const dicom_server_v2&) = delete;
+    dicom_server_v2& operator=(const dicom_server_v2&) = delete;
+
+    // 서비스 등록 (start 전에 호출)
+    void register_service(services::scp_service_ptr service);
+    std::vector<std::string> supported_sop_classes() const;
+
+    // 생명주기
+    Result<std::monostate> start();
+    void stop(duration timeout = std::chrono::seconds{30});
+    void wait_for_shutdown();
+
+    // 상태
+    bool is_running() const noexcept;
+    size_t active_associations() const noexcept;
+    server_statistics get_statistics() const;
+    const server_config& config() const noexcept;
+
+    // 콜백
+    void on_association_established(association_established_callback callback);
+    void on_association_closed(association_closed_callback callback);
+    void on_error(error_callback callback);
+};
+
+} // namespace pacs::network::v2
+```
+
+**사용 예제:**
+
+```cpp
+#include <pacs/network/v2/dicom_server_v2.hpp>
+#include <pacs/services/verification_scp.hpp>
+#include <pacs/services/storage_scp.hpp>
+
+using namespace pacs::network;
+using namespace pacs::network::v2;
+using namespace pacs::services;
+
+// 서버 설정
+server_config config;
+config.ae_title = "MY_PACS";
+config.port = 11112;
+config.max_associations = 20;
+config.idle_timeout = std::chrono::minutes{5};
+
+// 서버 생성
+dicom_server_v2 server{config};
+
+// 서비스 등록
+server.register_service(std::make_unique<verification_scp>());
+server.register_service(std::make_unique<storage_scp>("/path/to/storage"));
+
+// 콜백 설정
+server.on_association_established(
+    [](const std::string& session_id,
+       const std::string& calling_ae,
+       const std::string& called_ae) {
+        std::cout << "연결: " << calling_ae << " -> " << called_ae << '\n';
+    });
+
+server.on_association_closed(
+    [](const std::string& session_id, bool graceful) {
+        std::cout << "세션 " << session_id << " 종료 "
+                  << (graceful ? "(정상)" : "(비정상)") << '\n';
+    });
+
+server.on_error([](const std::string& error) {
+    std::cerr << "서버 오류: " << error << '\n';
+});
+
+// 서버 시작
+auto result = server.start();
+if (result.is_err()) {
+    std::cerr << "시작 실패: " << result.error().message << '\n';
+    return 1;
+}
+
+std::cout << "서버가 포트 " << config.port << "에서 실행 중\n";
+
+// 종료 신호 대기
+server.wait_for_shutdown();
+```
+
+**주요 기능:**
+
+- 기존 `dicom_server`와 **API 호환** - 쉬운 마이그레이션
+- network_system 콜백을 통한 **자동 세션 관리**
+- 적절한 동기화로 **스레드 안전** 핸들러 맵
+- 자동 거부로 **최대 연결 제한** 설정 가능
+- 비활성 연결 정리를 위한 **유휴 타임아웃 지원**
+
+**dicom_server에서 마이그레이션:**
+
+1. `dicom_server`를 `dicom_server_v2`로 교체
+2. 서비스 등록이나 콜백 변경 불필요
+3. `PACS_WITH_NETWORK_SYSTEM` 컴파일 정의 필요
+
+---
+
 ## 서비스 모듈
 
 ### `pacs::services::verification_scu`
