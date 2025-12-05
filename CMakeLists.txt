@@ -472,6 +472,7 @@ add_library(pacs_network
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
     src/network/detail/accept_worker.cpp
+    src/network/v2/dicom_association_handler.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
@@ -826,6 +827,7 @@ if(PACS_BUILD_TESTS)
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
         tests/network/detail/accept_worker_test.cpp
+        tests/network/v2/dicom_association_handler_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
