@@ -704,6 +704,131 @@ assoc.release();
 
 ---
 
+### `pacs::network::v2::dicom_association_handler`
+
+Bridge between network_system's messaging_session and DICOM protocol handling.
+This class is part of the Phase 4 network_system integration effort.
+
+```cpp
+#include <pacs/network/v2/dicom_association_handler.hpp>
+
+namespace pacs::network::v2 {
+
+// Handler state machine
+enum class handler_state {
+    idle,              // Initial state, waiting for A-ASSOCIATE-RQ
+    awaiting_response, // Sent response, awaiting next PDU
+    established,       // Association established, processing DIMSE
+    releasing,         // Graceful release in progress
+    closed             // Association closed (released or aborted)
+};
+
+// Callback types
+using association_established_callback = std::function<void(
+    const std::string& session_id,
+    const std::string& calling_ae,
+    const std::string& called_ae)>;
+
+using association_closed_callback = std::function<void(
+    const std::string& session_id,
+    bool graceful)>;
+
+using handler_error_callback = std::function<void(
+    const std::string& session_id,
+    const std::string& error)>;
+
+class dicom_association_handler
+    : public std::enable_shared_from_this<dicom_association_handler> {
+public:
+    using session_ptr = std::shared_ptr<network_system::session::messaging_session>;
+    using service_map = std::map<std::string, services::scp_service*>;
+
+    // Constants
+    static constexpr size_t pdu_header_size = 6;
+    static constexpr size_t max_pdu_size = 64 * 1024 * 1024;
+
+    // Construction
+    dicom_association_handler(
+        session_ptr session,
+        const server_config& config,
+        const service_map& services);
+    ~dicom_association_handler();
+
+    // Non-copyable, non-movable
+    dicom_association_handler(const dicom_association_handler&) = delete;
+    dicom_association_handler& operator=(const dicom_association_handler&) = delete;
+
+    // Lifecycle
+    void start();                      // Begin processing session
+    void stop(bool graceful = false);  // Stop handler
+
+    // State queries
+    handler_state state() const noexcept;
+    bool is_established() const noexcept;
+    bool is_closed() const noexcept;
+    std::string session_id() const;
+    std::string calling_ae() const;
+    std::string called_ae() const;
+    association& get_association();
+
+    // Callbacks
+    void set_established_callback(association_established_callback callback);
+    void set_closed_callback(association_closed_callback callback);
+    void set_error_callback(handler_error_callback callback);
+
+    // Statistics
+    uint64_t pdus_received() const noexcept;
+    uint64_t pdus_sent() const noexcept;
+    uint64_t messages_processed() const noexcept;
+};
+
+} // namespace pacs::network::v2
+```
+
+**Example Usage:**
+
+```cpp
+#include <pacs/network/v2/dicom_association_handler.hpp>
+
+using namespace pacs::network;
+using namespace pacs::network::v2;
+
+// Create handler for an incoming session
+auto handler = std::make_shared<dicom_association_handler>(
+    session,           // messaging_session from network_system
+    server_config,     // Server configuration
+    service_map        // SOP Class -> Service mapping
+);
+
+// Set up callbacks
+handler->set_established_callback(
+    [](const auto& session_id, const auto& calling, const auto& called) {
+        std::cout << "Association: " << calling << " -> " << called << '\n';
+    });
+
+handler->set_closed_callback(
+    [](const auto& session_id, bool graceful) {
+        std::cout << "Closed: " << (graceful ? "graceful" : "aborted") << '\n';
+    });
+
+handler->set_error_callback(
+    [](const auto& session_id, const auto& error) {
+        std::cerr << "Error: " << error << '\n';
+    });
+
+// Start processing
+handler->start();
+
+// Handler will automatically:
+// 1. Receive and validate A-ASSOCIATE-RQ
+// 2. Send A-ASSOCIATE-AC or A-ASSOCIATE-RJ
+// 3. Dispatch DIMSE messages to registered services
+// 4. Handle A-RELEASE-RQ with A-RELEASE-RP
+// 5. Handle A-ABORT
+```
+
+---
+
 ## Services Module
 
 ### `pacs::services::verification_scu`
