@@ -472,6 +472,7 @@ add_library(pacs_network
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
     src/network/detail/accept_worker.cpp
+    src/network/v2/dicom_association_handler.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
