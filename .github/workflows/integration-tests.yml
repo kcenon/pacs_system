@@ -220,6 +220,7 @@ jobs:
 
     - name: Run Unit Tests
       working-directory: pacs_system
+      shell: bash
       run: |
         cd build
         ctest \
