@@ -31,6 +31,7 @@ examples/integration_tests/
 ├── test_xa_storage.cpp              # XA-specific storage tests
 ├── test_tls_integration.cpp         # TLS integration tests
 ├── test_stability.cpp               # Long-running stability tests
+├── test_dicom_server_v2_integration.cpp  # V2 server integration tests (Issue #163)
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
@@ -156,6 +157,76 @@ Tests TLS-encrypted DICOM communication:
 - Secure Echo operations
 - Client certificate verification
 - Cipher suite negotiation
+
+## dicom_server_v2 Integration Tests (C++)
+
+The `test_dicom_server_v2_integration.cpp` provides comprehensive integration testing for `dicom_server_v2`, which is the network_system-based implementation introduced in Issue #162.
+
+### Running V2 Tests
+
+```bash
+# Run all V2 integration tests
+./build/bin/pacs_integration_e2e "[v2]"
+
+# Run specific V2 test categories
+./build/bin/pacs_integration_e2e "[v2][integration]"  # Basic operations
+./build/bin/pacs_integration_e2e "[v2][stress]"       # Stress tests
+./build/bin/pacs_integration_e2e "[v2][migration]"    # V1 to V2 validation
+./build/bin/pacs_integration_e2e "[v2][callbacks]"    # Callback testing
+
+# Run TLS tests with V2 server
+./build/bin/pacs_integration_e2e "[tls][v2]"
+```
+
+### V2 Test Scenarios
+
+| Scenario | Tag | Description |
+|----------|-----|-------------|
+| C-ECHO Integration | `[v2][integration][echo]` | Single and multiple C-ECHO operations |
+| C-STORE Integration | `[v2][integration][store]` | Single and batch image storage |
+| Concurrent Storage | `[v2][stress][concurrent]` | 10 workers x 5 files concurrently |
+| Rapid Connections | `[v2][stress][sequential]` | 30 sequential connections |
+| Max Associations | `[v2][stress][limits]` | Connection limit enforcement |
+| API Compatibility | `[v2][migration][api]` | V1 and V2 behavior comparison |
+| Graceful Shutdown | `[v2][migration][shutdown]` | Shutdown with active connections |
+| Callback Invocation | `[v2][callbacks]` | Association established/closed callbacks |
+| Mixed Operations | `[v2][stress][mixed]` | Concurrent echo and store workers |
+| TLS with V2 | `[tls][v2]` | TLS connections with V2 server |
+
+### V2 Test Fixtures
+
+The test file provides reusable V2 server fixtures:
+
+```cpp
+#include "test_dicom_server_v2_integration.cpp"
+
+// Basic V2 test server
+test_server_v2 server(port, "TEST_SCP_V2");
+server.register_service(std::make_shared<verification_scp>());
+server.start();
+
+// Stress test server with storage tracking
+stress_test_server_v2 stress_server(port, "STRESS_V2");
+stress_server.initialize();
+stress_server.start();
+// ... run stress tests
+INFO("Stored count: " << stress_server.stored_count());
+
+// Migration validation - compare V1 and V2
+dicom_server server_v1(config_v1);
+dicom_server_v2 server_v2(config_v2);
+// Both should behave identically for same configuration
+```
+
+### Prerequisites
+
+The V2 integration tests require `PACS_WITH_NETWORK_SYSTEM` to be defined during build:
+
+```bash
+cmake -DPACS_WITH_NETWORK_SYSTEM=ON ...
+```
+
+If `PACS_WITH_NETWORK_SYSTEM` is not defined, the tests will be skipped with a warning message.
 
 ## TLS Integration Tests (C++)
 
