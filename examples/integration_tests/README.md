@@ -31,6 +31,7 @@ examples/integration_tests/
 ├── test_xa_storage.cpp              # XA-specific storage tests
 ├── test_tls_integration.cpp         # TLS integration tests
 ├── test_stability.cpp               # Long-running stability tests
+├── test_dicom_server_v2_integration.cpp  # V2 server E2E tests (Issue #163)
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
@@ -156,6 +157,59 @@ Tests TLS-encrypted DICOM communication:
 - Secure Echo operations
 - Client certificate verification
 - Cipher suite negotiation
+
+## dicom_server_v2 E2E Integration Tests (C++)
+
+The `test_dicom_server_v2_integration.cpp` provides end-to-end integration testing for `dicom_server_v2`, verifying real DICOM operations with the network_system-based implementation.
+
+### Running V2 E2E Tests
+
+```bash
+# Run all V2 E2E tests
+./build/bin/pacs_integration_e2e "[v2]"
+
+# Run specific test categories
+./build/bin/pacs_integration_e2e "[v2][integration][echo]"   # C-ECHO tests
+./build/bin/pacs_integration_e2e "[v2][integration][store]"  # C-STORE tests
+./build/bin/pacs_integration_e2e "[v2][stress]"              # Stress tests
+./build/bin/pacs_integration_e2e "[v2][migration]"           # V1/V2 comparison
+./build/bin/pacs_integration_e2e "[v2][callbacks]"           # Callback tests
+./build/bin/pacs_integration_e2e "[tls][v2]"                 # TLS with V2
+```
+
+### V2 E2E Test Scenarios
+
+| Scenario | Tag | Description |
+|----------|-----|-------------|
+| C-ECHO Integration | `[v2][integration][echo]` | Single and multiple C-ECHO operations |
+| C-STORE Integration | `[v2][integration][store]` | Single and batch image storage |
+| Concurrent Storage | `[v2][stress][concurrent]` | 10 workers × 5 files concurrently |
+| Rapid Connections | `[v2][stress][sequential]` | 30 rapid sequential connections |
+| Max Associations | `[v2][stress][limits]` | Connection limit enforcement |
+| API Compatibility | `[v2][migration][api]` | V1 and V2 behavior comparison |
+| Graceful Shutdown | `[v2][migration][shutdown]` | Shutdown with active connections |
+| Callback Invocation | `[v2][callbacks]` | Association established/closed callbacks |
+| Mixed Operations | `[v2][stress][mixed]` | Concurrent echo and store workers |
+| TLS with V2 | `[tls][v2]` | TLS connections with V2 server |
+
+### V2 E2E Test Fixtures
+
+```cpp
+// Basic V2 test server
+test_server_v2 server(port, "TEST_SCP_V2");
+server.register_service(std::make_shared<verification_scp>());
+server.start();
+
+// Stress test server with storage tracking
+stress_test_server_v2 stress_server(port, "STRESS_V2");
+stress_server.initialize();
+stress_server.start();
+INFO("Stored: " << stress_server.stored_count());
+```
+
+### Prerequisites
+
+V2 E2E tests require `PACS_WITH_NETWORK_SYSTEM=ON` during build.
 
 ## TLS Integration Tests (C++)
 
