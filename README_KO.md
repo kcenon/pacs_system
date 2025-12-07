@@ -248,6 +248,7 @@ pacs_system/
 - ⚡ [기능 명세](docs/FEATURES_KO.md) - 기능 상세 설명
 - 📁 [프로젝트 구조](docs/PROJECT_STRUCTURE_KO.md) - 디렉토리 구조
 - 🔧 [API 레퍼런스](docs/API_REFERENCE_KO.md) - API 문서
+- 🚀 [마이그레이션 완료](docs/MIGRATION_COMPLETE_KO.md) - 스레드 시스템 마이그레이션 요약
 
 ---
 

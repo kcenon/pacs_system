@@ -255,6 +255,7 @@ pacs_system/
 - ⚡ [Features](docs/FEATURES.md) - Feature specifications
 - 📁 [Project Structure](docs/PROJECT_STRUCTURE.md) - Directory structure
 - 🔧 [API Reference](docs/API_REFERENCE.md) - API documentation
+- 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - Thread system migration summary
 
 ---
 
@@ -652,7 +653,8 @@ database:
 ## Performance
 
 The PACS system leverages the `thread_system` library for high-performance concurrent operations.
-See [PERFORMANCE_RESULTS.md](docs/PERFORMANCE_RESULTS.md) for detailed benchmark results.
+The thread system migration (Epic #153) has been successfully completed, replacing all direct `std::thread` usage with modern C++20 abstractions including jthread support and cancellation tokens.
+See [PERFORMANCE_RESULTS.md](docs/PERFORMANCE_RESULTS.md) for detailed benchmark results and [MIGRATION_COMPLETE.md](docs/MIGRATION_COMPLETE.md) for the migration summary.
 
 ### Key Performance Metrics
 
