@@ -58,6 +58,7 @@ jobs:
         sudo apt-get install -y cmake ninja-build clang lld
         sudo apt-get install -y libsqlite3-dev libssl-dev libfmt-dev
         sudo apt-get install -y libgtest-dev libgmock-dev
+        sudo apt-get install -y libjpeg-turbo8-dev
 
     - name: Patch dependency CMake files to remove -Werror
       run: |

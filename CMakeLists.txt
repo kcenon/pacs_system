@@ -133,7 +133,13 @@ endif()
 message(STATUS "")
 message(STATUS "=== Finding libjpeg-turbo (for JPEG compression) ===")
 
-# Try system libjpeg-turbo first
+# Try to find system libjpeg/libjpeg-turbo
+# NOTE: libjpeg-turbo cannot be built via FetchContent (their CMakeLists.txt
+# explicitly prohibits integration into other build systems).
+# System packages must be installed:
+#   - Ubuntu: sudo apt install libjpeg-turbo8-dev
+#   - macOS: brew install jpeg-turbo
+#   - Windows: vcpkg install libjpeg-turbo:x64-windows
 find_package(JPEG QUIET)
 
 if(JPEG_FOUND)
@@ -141,27 +147,15 @@ if(JPEG_FOUND)
     set(PACS_JPEG_FOUND TRUE)
     set(PACS_JPEG_TARGET JPEG::JPEG)
 else()
-    # Fallback to FetchContent with libjpeg-turbo
-    message(STATUS "System libjpeg not found, fetching libjpeg-turbo from source...")
-
-    # Disable libjpeg-turbo tests and examples
-    set(ENABLE_SHARED OFF CACHE BOOL "" FORCE)
-    set(ENABLE_STATIC ON CACHE BOOL "" FORCE)
-    set(WITH_TURBOJPEG OFF CACHE BOOL "" FORCE)
-    set(WITH_JAVA OFF CACHE BOOL "" FORCE)
-
-    FetchContent_Declare(
-        libjpeg_turbo
-        GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
-        GIT_TAG 3.0.4
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(libjpeg_turbo)
-
-    set(PACS_JPEG_FOUND TRUE)
-    set(PACS_JPEG_TARGET jpeg-static)
-    set(PACS_JPEG_INCLUDE_DIR "${libjpeg_turbo_SOURCE_DIR};${libjpeg_turbo_BINARY_DIR}")
-    message(STATUS "libjpeg-turbo fetched and configured")
+    message(WARNING
+        "libjpeg/libjpeg-turbo not found!\n"
+        "JPEG codec will be disabled.\n"
+        "\n"
+        "To enable JPEG support, install libjpeg-turbo:\n"
+        "  - Ubuntu: sudo apt install libjpeg-turbo8-dev\n"
+        "  - macOS: brew install jpeg-turbo\n"
+        "  - Windows: vcpkg install libjpeg-turbo:x64-windows")
+    set(PACS_JPEG_FOUND FALSE)
 endif()
 
 # fmt library (for std::format compatibility on older compilers)

@@ -248,8 +248,11 @@ public:
         }
 
         // Setup memory source
+        // Note: Some libjpeg versions (e.g., Mono.framework on macOS) declare
+        // jpeg_mem_src with non-const buffer parameter. Use const_cast for compatibility.
+        // The buffer is only read, not modified, so this is safe.
         jpeg_mem_src(&decompressor.get(),
-                     compressed_data.data(),
+                     const_cast<unsigned char*>(compressed_data.data()),
                      static_cast<unsigned long>(compressed_data.size()));
 
         // Read JPEG header
