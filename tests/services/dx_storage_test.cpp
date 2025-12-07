@@ -7,6 +7,7 @@
 #include <pacs/services/validation/dx_iod_validator.hpp>
 #include <pacs/services/sop_class_registry.hpp>
 #include <pacs/core/dicom_dataset.hpp>
+#include <pacs/core/dicom_element.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
 #include <pacs/encoding/vr_type.hpp>
 
@@ -344,57 +345,57 @@ dicom_dataset create_minimal_dx_dataset() {
     dicom_dataset ds;
 
     // Patient Module (Type 2)
-    ds.set_string(tags::patient_name, "Test^Patient", vr_type::PN);
-    ds.set_string(tags::patient_id, "12345", vr_type::LO);
-    ds.set_string(tags::patient_birth_date, "19800101", vr_type::DA);
-    ds.set_string(tags::patient_sex, "M", vr_type::CS);
+    ds.set_string(tags::patient_name, vr_type::PN, "Test^Patient");
+    ds.set_string(tags::patient_id, vr_type::LO, "12345");
+    ds.set_string(tags::patient_birth_date, vr_type::DA, "19800101");
+    ds.set_string(tags::patient_sex, vr_type::CS, "M");
 
     // General Study Module
-    ds.set_string(tags::study_instance_uid, "1.2.3.4.5.6.7.8.9", vr_type::UI);
-    ds.set_string(tags::study_date, "20240101", vr_type::DA);
-    ds.set_string(tags::study_time, "120000", vr_type::TM);
-    ds.set_string(tags::referring_physician_name, "Dr^Referring", vr_type::PN);
-    ds.set_string(tags::study_id, "STUDY001", vr_type::SH);
-    ds.set_string(tags::accession_number, "ACC001", vr_type::SH);
+    ds.set_string(tags::study_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+    ds.set_string(tags::study_date, vr_type::DA, "20240101");
+    ds.set_string(tags::study_time, vr_type::TM, "120000");
+    ds.set_string(tags::referring_physician_name, vr_type::PN, "Dr^Referring");
+    ds.set_string(tags::study_id, vr_type::SH, "STUDY001");
+    ds.set_string(tags::accession_number, vr_type::SH, "ACC001");
 
     // General Series Module
-    ds.set_string(tags::modality, "DX", vr_type::CS);
-    ds.set_string(tags::series_instance_uid, "1.2.3.4.5.6.7.8.9.1", vr_type::UI);
-    ds.set_numeric(tags::series_number, uint32_t{1}, vr_type::IS);
+    ds.set_string(tags::modality, vr_type::CS, "DX");
+    ds.set_string(tags::series_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9.1");
+    ds.set_string(tags::series_number, vr_type::IS, "1");
 
     // Image Pixel Module
-    ds.set_numeric(tags::samples_per_pixel, uint16_t{1}, vr_type::US);
-    ds.set_string(tags::photometric_interpretation, "MONOCHROME2", vr_type::CS);
-    ds.set_numeric(tags::rows, uint16_t{2048}, vr_type::US);
-    ds.set_numeric(tags::columns, uint16_t{2048}, vr_type::US);
-    ds.set_numeric(tags::bits_allocated, uint16_t{16}, vr_type::US);
-    ds.set_numeric(tags::bits_stored, uint16_t{12}, vr_type::US);
-    ds.set_numeric(tags::high_bit, uint16_t{11}, vr_type::US);
-    ds.set_numeric(tags::pixel_representation, uint16_t{0}, vr_type::US);
+    ds.set_numeric<uint16_t>(tags::samples_per_pixel, vr_type::US, 1);
+    ds.set_string(tags::photometric_interpretation, vr_type::CS, "MONOCHROME2");
+    ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 2048);
+    ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 2048);
+    ds.set_numeric<uint16_t>(tags::bits_allocated, vr_type::US, 16);
+    ds.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 12);
+    ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US, 11);
+    ds.set_numeric<uint16_t>(tags::pixel_representation, vr_type::US, 0);
 
-    // Pixel Data (minimal placeholder)
-    std::vector<uint8_t> pixel_data(2048 * 2048 * 2, 0);
-    ds.set_bytes(tags::pixel_data, pixel_data, vr_type::OW);
+    // Pixel Data (minimal placeholder - use dicom_element directly)
+    std::vector<uint8_t> pixel_data(100, 0);  // Minimal placeholder
+    ds.insert(dicom_element(tags::pixel_data, vr_type::OW, pixel_data));
 
     // DX Image Module
-    ds.set_string(dicom_tag{0x0008, 0x0008}, "ORIGINAL\\PRIMARY", vr_type::CS);  // Image Type
-    ds.set_string(dicom_tag{0x0028, 0x1040}, "LIN", vr_type::CS);  // Pixel Intensity Relationship
-    ds.set_numeric(dicom_tag{0x0028, 0x1041}, int16_t{1}, vr_type::SS);  // Pixel Intensity Relationship Sign
+    ds.set_string(dicom_tag{0x0008, 0x0008}, vr_type::CS, "ORIGINAL\\PRIMARY");  // Image Type
+    ds.set_string(dicom_tag{0x0028, 0x1040}, vr_type::CS, "LIN");  // Pixel Intensity Relationship
+    ds.set_numeric<int16_t>(dicom_tag{0x0028, 0x1041}, vr_type::SS, 1);  // Pixel Intensity Relationship Sign
 
     // DX Detector Module
-    ds.set_string(dicom_tag{0x0018, 0x7004}, "DIRECT", vr_type::CS);  // Detector Type
-    ds.set_string(dicom_tag{0x0018, 0x1164}, "0.15\\0.15", vr_type::DS);  // Imager Pixel Spacing
+    ds.set_string(dicom_tag{0x0018, 0x7004}, vr_type::CS, "DIRECT");  // Detector Type
+    ds.set_string(dicom_tag{0x0018, 0x1164}, vr_type::DS, "0.15\\0.15");  // Imager Pixel Spacing
 
     // DX Anatomy Imaged Module
-    ds.set_string(dicom_tag{0x0018, 0x0015}, "CHEST", vr_type::CS);  // Body Part Examined
+    ds.set_string(dicom_tag{0x0018, 0x0015}, vr_type::CS, "CHEST");  // Body Part Examined
 
     // DX Positioning Module
-    ds.set_string(dicom_tag{0x0018, 0x5101}, "PA", vr_type::CS);  // View Position
+    ds.set_string(dicom_tag{0x0018, 0x5101}, vr_type::CS, "PA");  // View Position
 
     // SOP Common Module
-    ds.set_string(tags::sop_class_uid,
-                  std::string(dx_image_storage_for_presentation_uid), vr_type::UI);
-    ds.set_string(tags::sop_instance_uid, "1.2.3.4.5.6.7.8.9.2", vr_type::UI);
+    ds.set_string(tags::sop_class_uid, vr_type::UI,
+                  std::string(dx_image_storage_for_presentation_uid));
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9.2");
 
     return ds;
 }
@@ -452,7 +453,7 @@ TEST_CASE("dx_iod_validator checks modality value", "[services][dx][validator]")
     auto dataset = create_minimal_dx_dataset();
 
     SECTION("wrong modality") {
-        dataset.set_string(tags::modality, "CT", vr_type::CS);
+        dataset.set_string(tags::modality, vr_type::CS, "CT");
         auto result = validator.validate(dataset);
         CHECK_FALSE(result.is_valid);
 
@@ -473,7 +474,7 @@ TEST_CASE("dx_iod_validator checks photometric interpretation", "[services][dx][
     auto dataset = create_minimal_dx_dataset();
 
     SECTION("invalid photometric for DX") {
-        dataset.set_string(tags::photometric_interpretation, "RGB", vr_type::CS);
+        dataset.set_string(tags::photometric_interpretation, vr_type::CS, "RGB");
         auto result = validator.validate(dataset);
         CHECK_FALSE(result.is_valid);
 
@@ -488,7 +489,7 @@ TEST_CASE("dx_iod_validator checks photometric interpretation", "[services][dx][
     }
 
     SECTION("MONOCHROME1 is valid") {
-        dataset.set_string(tags::photometric_interpretation, "MONOCHROME1", vr_type::CS);
+        dataset.set_string(tags::photometric_interpretation, vr_type::CS, "MONOCHROME1");
         auto result = validator.validate(dataset);
         CHECK(result.is_valid);
     }
@@ -499,14 +500,14 @@ TEST_CASE("dx_iod_validator checks SOP Class UID", "[services][dx][validator]") 
     auto dataset = create_minimal_dx_dataset();
 
     SECTION("non-DX SOP Class") {
-        dataset.set_string(tags::sop_class_uid, "1.2.840.10008.5.1.4.1.1.2", vr_type::UI);  // CT
+        dataset.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");  // CT
         auto result = validator.validate(dataset);
         CHECK_FALSE(result.is_valid);
     }
 
     SECTION("For Processing SOP Class") {
-        dataset.set_string(tags::sop_class_uid,
-                          std::string(dx_image_storage_for_processing_uid), vr_type::UI);
+        dataset.set_string(tags::sop_class_uid, vr_type::UI,
+                          std::string(dx_image_storage_for_processing_uid));
         auto result = validator.validate(dataset);
         CHECK(result.is_valid);
     }
@@ -517,19 +518,19 @@ TEST_CASE("dx_iod_validator checks pixel data consistency", "[services][dx][vali
     auto dataset = create_minimal_dx_dataset();
 
     SECTION("BitsStored exceeds BitsAllocated") {
-        dataset.set_numeric(tags::bits_stored, uint16_t{20}, vr_type::US);
+        dataset.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 20);
         auto result = validator.validate(dataset);
         CHECK_FALSE(result.is_valid);
     }
 
     SECTION("wrong HighBit") {
-        dataset.set_numeric(tags::high_bit, uint16_t{15}, vr_type::US);  // Should be 11
+        dataset.set_numeric<uint16_t>(tags::high_bit, vr_type::US, 15);  // Should be 11
         auto result = validator.validate(dataset);
         CHECK(result.has_warnings());
     }
 
     SECTION("non-grayscale SamplesPerPixel") {
-        dataset.set_numeric(tags::samples_per_pixel, uint16_t{3}, vr_type::US);
+        dataset.set_numeric<uint16_t>(tags::samples_per_pixel, vr_type::US, 3);
         auto result = validator.validate(dataset);
         CHECK_FALSE(result.is_valid);
     }
@@ -545,7 +546,7 @@ TEST_CASE("dx_iod_validator quick_check works correctly", "[services][dx][valida
 
     SECTION("invalid modality fails quick check") {
         auto dataset = create_minimal_dx_dataset();
-        dataset.set_string(tags::modality, "CT", vr_type::CS);
+        dataset.set_string(tags::modality, vr_type::CS, "CT");
         CHECK_FALSE(validator.quick_check(dataset));
     }
 
@@ -561,8 +562,8 @@ TEST_CASE("dx_iod_validator validates For Presentation images", "[services][dx][
     auto dataset = create_minimal_dx_dataset();
 
     // Add Window Center/Width for presentation
-    dataset.set_string(tags::window_center, "2048", vr_type::DS);
-    dataset.set_string(tags::window_width, "4096", vr_type::DS);
+    dataset.set_string(tags::window_center, vr_type::DS, "2048");
+    dataset.set_string(tags::window_width, vr_type::DS, "4096");
 
     auto result = validator.validate_for_presentation(dataset);
     CHECK(result.is_valid);
@@ -573,8 +574,8 @@ TEST_CASE("dx_iod_validator validates For Processing images", "[services][dx][va
     auto dataset = create_minimal_dx_dataset();
 
     // Change to For Processing SOP Class
-    dataset.set_string(tags::sop_class_uid,
-                      std::string(dx_image_storage_for_processing_uid), vr_type::UI);
+    dataset.set_string(tags::sop_class_uid, vr_type::UI,
+                      std::string(dx_image_storage_for_processing_uid));
 
     auto result = validator.validate_for_processing(dataset);
     CHECK(result.is_valid);
@@ -601,7 +602,7 @@ TEST_CASE("dx_iod_validator with custom options", "[services][dx][validator]") {
 
         dx_iod_validator validator(options);
         auto dataset = create_minimal_dx_dataset();
-        dataset.set_numeric(tags::bits_stored, uint16_t{20}, vr_type::US);  // Invalid normally
+        dataset.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 20);  // Invalid normally
 
         auto result = validator.validate(dataset);
         // Should not have pixel data errors when validation is disabled
@@ -634,7 +635,7 @@ TEST_CASE("is_valid_dx_dataset convenience function", "[services][dx][validator]
 
     SECTION("invalid dataset") {
         auto dataset = create_minimal_dx_dataset();
-        dataset.set_string(tags::modality, "CT", vr_type::CS);
+        dataset.set_string(tags::modality, vr_type::CS, "CT");
         CHECK_FALSE(is_valid_dx_dataset(dataset));
     }
 }
@@ -643,8 +644,8 @@ TEST_CASE("is_for_presentation_dx detects presentation images", "[services][dx][
     auto dataset = create_minimal_dx_dataset();
     CHECK(is_for_presentation_dx(dataset));
 
-    dataset.set_string(tags::sop_class_uid,
-                      std::string(dx_image_storage_for_processing_uid), vr_type::UI);
+    dataset.set_string(tags::sop_class_uid, vr_type::UI,
+                      std::string(dx_image_storage_for_processing_uid));
     CHECK_FALSE(is_for_presentation_dx(dataset));
 }
 
@@ -652,7 +653,7 @@ TEST_CASE("is_for_processing_dx detects processing images", "[services][dx][vali
     auto dataset = create_minimal_dx_dataset();
     CHECK_FALSE(is_for_processing_dx(dataset));
 
-    dataset.set_string(tags::sop_class_uid,
-                      std::string(dx_image_storage_for_processing_uid), vr_type::UI);
+    dataset.set_string(tags::sop_class_uid, vr_type::UI,
+                      std::string(dx_image_storage_for_processing_uid));
     CHECK(is_for_processing_dx(dataset));
 }
