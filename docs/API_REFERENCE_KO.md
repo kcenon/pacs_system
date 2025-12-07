@@ -1727,6 +1727,169 @@ if (is_for_presentation_dx(dataset)) {
 
 ---
 
+## MG 모달리티 모듈
+
+### `pacs::services::sop_classes::mg_storage`
+
+유방 영상을 위한 디지털 맘모그래피 X-Ray SOP 클래스 정의 및 유틸리티.
+
+```cpp
+#include <pacs/services/sop_classes/mg_storage.hpp>
+
+namespace pacs::services::sop_classes {
+
+// SOP 클래스 UID
+inline constexpr std::string_view mg_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2";
+inline constexpr std::string_view mg_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2.1";
+inline constexpr std::string_view breast_tomosynthesis_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.13.1.3";
+
+// 유방 측면 열거형
+enum class breast_laterality { left, right, bilateral, unknown };
+
+// 맘모그래피 뷰 위치
+enum class mg_view_position {
+    cc,      ///< 두개미측 (Craniocaudal)
+    mlo,     ///< 내외사위 (Mediolateral Oblique)
+    ml,      ///< 내외측 (Mediolateral)
+    lm,      ///< 외내측 (Lateromedial)
+    xccl,    ///< 확대 CC 외측
+    spot,    ///< 스팟 압박
+    mag,     ///< 확대 촬영
+    implant, ///< 임플란트 변위 (Eklund)
+    other
+};
+
+// 유틸리티 함수
+[[nodiscard]] std::string_view to_string(breast_laterality laterality) noexcept;
+[[nodiscard]] breast_laterality parse_breast_laterality(std::string_view value) noexcept;
+[[nodiscard]] bool is_valid_breast_laterality(std::string_view value) noexcept;
+
+[[nodiscard]] bool is_valid_compression_force(double force_n) noexcept;
+[[nodiscard]] std::pair<double, double> get_typical_compression_force_range() noexcept;
+
+[[nodiscard]] std::vector<std::string> get_mg_storage_sop_classes(bool include_tomosynthesis = true);
+[[nodiscard]] bool is_mg_storage_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_breast_tomosynthesis_sop_class(std::string_view uid) noexcept;
+
+} // namespace pacs::services::sop_classes
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::sop_classes;
+
+// SOP 클래스 UID가 맘모그래피인지 확인
+if (is_mg_storage_sop_class(sop_class_uid)) {
+    const auto* info = get_mg_sop_class_info(sop_class_uid);
+
+    if (info->is_tomosynthesis) {
+        // 3D 유방 토모신테시스 처리
+    }
+}
+
+// 맘모그래피 전용 속성 파싱
+auto laterality = parse_breast_laterality("L");  // 좌측 유방
+auto view = parse_mg_view_position("MLO");       // 내외사위
+
+// 표준 검진 뷰인지 확인
+if (is_screening_view(view)) {
+    // CC 또는 MLO - 표준 검진 검사
+}
+
+// 압박력 검증 (일반: 50-200 N)
+if (is_valid_compression_force(compression_force)) {
+    // 허용 범위 내
+}
+```
+
+---
+
+### `pacs::services::validation::mg_iod_validator`
+
+DICOM PS3.3 섹션 A.26.2에 따른 디지털 맘모그래피 이미지용 IOD 검증기.
+
+```cpp
+#include <pacs/services/validation/mg_iod_validator.hpp>
+
+namespace pacs::services::validation {
+
+// 맘모그래피 전용 검증 옵션
+struct mg_validation_options {
+    bool check_type1 = true;
+    bool check_type2 = true;
+    bool validate_laterality = true;        // 유방 측면 (0020,0060)
+    bool validate_view_position = true;     // 뷰 위치 (0018,5101)
+    bool validate_compression = true;       // 압박력 (0018,11A2)
+    bool validate_implant_attributes = true;
+    bool strict_mode = false;
+};
+
+class mg_iod_validator {
+public:
+    // 전체 IOD 검증
+    [[nodiscard]] validation_result validate(const core::dicom_dataset& dataset) const;
+
+    // 특화 검증
+    [[nodiscard]] validation_result validate_laterality(const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_view_position(const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_compression_force(const core::dicom_dataset& dataset) const;
+
+    // 빠른 검증
+    [[nodiscard]] bool quick_check(const core::dicom_dataset& dataset) const;
+};
+
+// 편의 함수
+[[nodiscard]] validation_result validate_mg_iod(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_valid_mg_dataset(const core::dicom_dataset& dataset);
+[[nodiscard]] bool has_breast_implant(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_screening_mammogram(const core::dicom_dataset& dataset);
+
+} // namespace pacs::services::validation
+```
+
+**오류 코드 (MG 전용):**
+| 코드 | 심각도 | 설명 |
+|------|--------|------|
+| MG-ERR-001 | 오류 | SOPClassUID가 맘모그래피 저장 클래스가 아님 |
+| MG-ERR-002 | 오류 | Modality는 'MG'여야 함 |
+| MG-ERR-003 | 오류 | 측면 미지정 (맘모그래피에 필수) |
+| MG-ERR-004 | 오류 | 잘못된 측면 값 |
+| MG-WARN-001 | 경고 | 시리즈와 이미지 레벨 간 측면 불일치 |
+| MG-WARN-005 | 경고 | 뷰 위치 미지정 |
+| MG-WARN-013 | 경고 | 압박력이 일반 범위 초과 |
+| MG-INFO-007 | 정보 | 유방 임플란트 있으나 ID 뷰 미사용 |
+| MG-INFO-008 | 정보 | 압박력 미기록 |
+
+**예제:**
+```cpp
+using namespace pacs::services::validation;
+
+// 맘모그래피 데이터셋 검증
+auto result = validate_mg_iod(dataset);
+if (!result.is_valid) {
+    for (const auto& finding : result.findings) {
+        if (finding.code.starts_with("MG-ERR-")) {
+            std::cerr << "[오류] " << finding.message << "\n";
+        }
+    }
+}
+
+// 검진 검사 확인
+if (is_screening_mammogram(dataset)) {
+    // 표준 4뷰 검진 (RCC, LCC, RMLO, LMLO)
+}
+
+// 임플란트 확인
+if (has_breast_implant(dataset)) {
+    // 임플란트 변위 뷰가 필요할 수 있음
+}
+```
+
+---
+
 ## 모니터링 모듈
 
 ### `pacs::monitoring::pacs_metrics`
@@ -1948,10 +2111,11 @@ public:
 | 1.2.0 | 2025-12-07 | Network V2 모듈 추가 (dicom_server_v2, dicom_association_handler) |
 | 1.3.0 | 2025-12-07 | 모니터링 모듈 추가 (DIMSE 작업 추적용 pacs_metrics) |
 | 1.4.0 | 2025-12-07 | DX 모달리티 모듈 추가 (dx_storage, dx_iod_validator) |
+| 1.5.0 | 2025-12-08 | MG 모달리티 모듈 추가 (mg_storage, mg_iod_validator) |
 
 ---
 
-*문서 버전: 1.4.0*
+*문서 버전: 1.5.0*
 *작성일: 2025-11-30*
 *최종 수정일: 2025-12-07*
 *작성자: kcenon@naver.com*
