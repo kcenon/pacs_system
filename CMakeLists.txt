@@ -129,6 +129,41 @@ if(PACS_BUILD_STORAGE)
     endif()
 endif()
 
+# libjpeg-turbo (for JPEG compression codecs)
+message(STATUS "")
+message(STATUS "=== Finding libjpeg-turbo (for JPEG compression) ===")
+
+# Try system libjpeg-turbo first
+find_package(JPEG QUIET)
+
+if(JPEG_FOUND)
+    message(STATUS "Found system libjpeg: ${JPEG_VERSION}")
+    set(PACS_JPEG_FOUND TRUE)
+    set(PACS_JPEG_TARGET JPEG::JPEG)
+else()
+    # Fallback to FetchContent with libjpeg-turbo
+    message(STATUS "System libjpeg not found, fetching libjpeg-turbo from source...")
+
+    # Disable libjpeg-turbo tests and examples
+    set(ENABLE_SHARED OFF CACHE BOOL "" FORCE)
+    set(ENABLE_STATIC ON CACHE BOOL "" FORCE)
+    set(WITH_TURBOJPEG OFF CACHE BOOL "" FORCE)
+    set(WITH_JAVA OFF CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(
+        libjpeg_turbo
+        GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
+        GIT_TAG 3.0.4
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(libjpeg_turbo)
+
+    set(PACS_JPEG_FOUND TRUE)
+    set(PACS_JPEG_TARGET jpeg-static)
+    set(PACS_JPEG_INCLUDE_DIR "${libjpeg_turbo_SOURCE_DIR};${libjpeg_turbo_BINARY_DIR}")
+    message(STATUS "libjpeg-turbo fetched and configured")
+endif()
+
 # fmt library (for std::format compatibility on older compilers)
 message(STATUS "")
 message(STATUS "=== Finding fmt library (for format compatibility) ===")
@@ -454,6 +489,8 @@ add_library(pacs_encoding
     src/encoding/implicit_vr_codec.cpp
     src/encoding/explicit_vr_codec.cpp
     src/encoding/explicit_vr_big_endian_codec.cpp
+    src/encoding/compression/jpeg_baseline_codec.cpp
+    src/encoding/compression/codec_factory.cpp
 )
 target_include_directories(pacs_encoding
     PUBLIC
@@ -463,6 +500,16 @@ target_include_directories(pacs_encoding
 target_link_libraries(pacs_encoding
     PUBLIC pacs_core
 )
+
+# Link libjpeg-turbo for JPEG compression codecs
+if(PACS_JPEG_FOUND)
+    target_link_libraries(pacs_encoding PUBLIC ${PACS_JPEG_TARGET})
+    if(PACS_JPEG_INCLUDE_DIR)
+        target_include_directories(pacs_encoding PUBLIC ${PACS_JPEG_INCLUDE_DIR})
+    endif()
+    target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG_CODEC)
+    message(STATUS "  [OK] pacs_encoding: JPEG codec enabled")
+endif()
 
 # Network library
 add_library(pacs_network
@@ -836,6 +883,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/explicit_vr_codec_test.cpp
         tests/encoding/byte_swap_test.cpp
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
+        tests/encoding/compression/jpeg_baseline_codec_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
