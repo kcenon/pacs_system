@@ -194,6 +194,11 @@ pacs_system/
 │   │   ├── worklist_record.hpp  # Worklist 데이터 모델
 │   │   └── mpps_record.hpp      # MPPS 데이터 모델
 │   │
+│   ├── monitoring/              # 헬스 모니터링 (✅ 완료)
+│   │   ├── health_status.hpp    # 헬스 상태 구조체
+│   │   ├── health_checker.hpp   # 헬스 체크 서비스
+│   │   └── health_json.hpp      # JSON 직렬화
+│   │
 │   └── integration/             # 에코시스템 어댑터 (✅ 완료)
 │       ├── container_adapter.hpp # container_system 연동
 │       ├── network_adapter.hpp  # network_system 연동
@@ -208,14 +213,16 @@ pacs_system/
 │   ├── network/                 # Network 구현 (8개 파일)
 │   ├── services/                # Services 구현 (7개 파일)
 │   ├── storage/                 # Storage 구현 (4개 파일)
+│   ├── monitoring/              # Health check 구현 (1개 파일)
 │   └── integration/             # Adapter 구현 (6개 파일)
 │
-├── tests/                       # 테스트 스위트 (39개 파일, 120개 이상 테스트)
+├── tests/                       # 테스트 스위트 (42개 파일, 170개 이상 테스트)
 │   ├── core/                    # Core 모듈 테스트 (6개 파일)
 │   ├── encoding/                # Encoding 모듈 테스트 (5개 파일)
 │   ├── network/                 # Network 모듈 테스트 (5개 파일)
 │   ├── services/                # Services 테스트 (7개 파일)
 │   ├── storage/                 # Storage 테스트 (6개 파일)
+│   ├── monitoring/              # Health check 테스트 (3개 파일, 50 테스트)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
 ├── examples/                    # 예제 애플리케이션 (15개, ~10,500줄)

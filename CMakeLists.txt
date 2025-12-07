@@ -602,6 +602,26 @@ else()
     message(STATUS "  [--] pacs_storage: OFF")
 endif()
 
+# Monitoring library (health check endpoint - Issue #211)
+# Requires pacs_storage for file_storage and index_database checks
+if(TARGET pacs_storage)
+    add_library(pacs_monitoring
+        src/monitoring/health_checker.cpp
+    )
+    target_include_directories(pacs_monitoring
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_monitoring
+        PUBLIC pacs_storage
+    )
+
+    message(STATUS "  [OK] pacs_monitoring: ON (health check)")
+else()
+    message(STATUS "  [--] pacs_monitoring: OFF (requires pacs_storage)")
+endif()
+
 # Integration library (requires container_system and logger_system via network_system)
 if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     # Check for monitoring_system availability BEFORE defining pacs_integration
@@ -882,6 +902,20 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
+    # Monitoring tests (Issue #211 - health check endpoint)
+    if(TARGET pacs_monitoring)
+        add_executable(monitoring_tests
+            tests/monitoring/health_status_test.cpp
+            tests/monitoring/health_checker_test.cpp
+            tests/monitoring/health_json_test.cpp
+        )
+        target_link_libraries(monitoring_tests
+            PRIVATE
+                pacs_monitoring
+                Catch2::Catch2WithMain
+        )
+    endif()
+
     # Integration tests
     if(TARGET pacs_integration)
         add_executable(pacs_integration_tests
@@ -929,6 +963,11 @@ if(PACS_BUILD_TESTS)
     )
     if(TARGET storage_tests)
         catch_discover_tests(storage_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+    if(TARGET monitoring_tests)
+        catch_discover_tests(monitoring_tests
             PROPERTIES LABELS "unit"
         )
     endif()
@@ -1092,6 +1131,10 @@ if(TARGET pacs_storage)
     pacs_apply_warnings(pacs_storage)
 endif()
 
+if(TARGET pacs_monitoring)
+    pacs_apply_warnings(pacs_monitoring)
+endif()
+
 if(TARGET pacs_integration)
     pacs_apply_warnings(pacs_integration)
 endif()
@@ -1104,6 +1147,9 @@ if(PACS_BUILD_TESTS)
     pacs_apply_warnings(services_tests)
     if(TARGET storage_tests)
         pacs_apply_warnings(storage_tests)
+    endif()
+    if(TARGET monitoring_tests)
+        pacs_apply_warnings(monitoring_tests)
     endif()
     if(TARGET pacs_integration_tests)
         pacs_apply_warnings(pacs_integration_tests)
