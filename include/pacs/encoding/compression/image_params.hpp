@@ -152,6 +152,22 @@ struct image_params {
         if (samples_per_pixel != 1 && samples_per_pixel != 3) return false;
         return true;
     }
+
+    /**
+     * @brief Validates image parameters for JPEG Lossless compression.
+     * @return true if parameters are valid for JPEG Lossless
+     *
+     * JPEG Lossless requirements:
+     * - 2-16 bit precision
+     * - bits_allocated must be 8 or 16
+     * - Grayscale only (samples_per_pixel = 1)
+     */
+    [[nodiscard]] bool valid_for_jpeg_lossless() const noexcept {
+        if (bits_stored < 2 || bits_stored > 16) return false;
+        if (bits_allocated != 8 && bits_allocated != 16) return false;
+        if (samples_per_pixel != 1) return false;
+        return true;
+    }
 };
 
 }  // namespace pacs::encoding::compression

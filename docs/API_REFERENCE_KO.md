@@ -569,6 +569,88 @@ void compress_image() {
 
 ---
 
+### `pacs::encoding::compression::jpeg_lossless_codec`
+
+진단 품질 이미지를 위한 JPEG 무손실 (Process 14, Selection Value 1) 코덱.
+
+```cpp
+#include <pacs/encoding/compression/jpeg_lossless_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class jpeg_lossless_codec final : public compression_codec {
+public:
+    static constexpr std::string_view kTransferSyntaxUID = "1.2.840.10008.1.2.4.70";
+    static constexpr int kDefaultPredictor = 1;       // Ra (왼쪽 이웃)
+    static constexpr int kDefaultPointTransform = 0;  // 스케일링 없음
+
+    // 선택적 predictor (1-7)와 point transform (0-15) 지정
+    explicit jpeg_lossless_codec(int predictor = kDefaultPredictor,
+                                  int point_transform = kDefaultPointTransform);
+    ~jpeg_lossless_codec() override;
+
+    // 이동 전용 (PIMPL)
+    jpeg_lossless_codec(jpeg_lossless_codec&&) noexcept;
+    jpeg_lossless_codec& operator=(jpeg_lossless_codec&&) noexcept;
+
+    // 설정
+    [[nodiscard]] int predictor() const noexcept;
+    [[nodiscard]] int point_transform() const noexcept;
+
+    // 코덱 인터페이스 구현
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "JPEG Lossless (Process 14, SV1)"
+    [[nodiscard]] bool is_lossy() const noexcept override;  // false (무손실!)
+
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// 지원 Predictor:
+// 1: Ra (왼쪽 이웃)
+// 2: Rb (위쪽 이웃)
+// 3: Rc (대각선 왼쪽 위 이웃)
+// 4: Ra + Rb - Rc
+// 5: Ra + (Rb - Rc) / 2
+// 6: Rb + (Ra - Rc) / 2
+// 7: (Ra + Rb) / 2
+
+// 지원 비트 깊이: 8, 12, 16비트 흑백
+
+// 사용 예시
+void compress_ct_image_lossless() {
+    jpeg_lossless_codec codec;  // 기본 predictor 1
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;    // 12비트 CT 이미지
+    params.samples_per_pixel = 1;  // 흑백 전용
+
+    std::vector<uint8_t> pixel_data(512 * 512 * 2);  // 16비트 저장
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data에 무손실 압축된 JPEG 포함
+        // 원본 데이터를 완벽하게 복원 가능
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
 ### `pacs::encoding::compression::codec_factory`
 
 Transfer Syntax UID로 압축 코덱을 생성하는 팩토리.
@@ -595,7 +677,8 @@ public:
 };
 
 // 현재 지원되는 Transfer Syntax:
-// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1)
+// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - 손실
+// - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - 무손실
 
 } // namespace pacs::encoding::compression
 ```
@@ -638,7 +721,8 @@ struct image_params {
     [[nodiscard]] bool is_grayscale() const noexcept;
     [[nodiscard]] bool is_color() const noexcept;
     [[nodiscard]] bool is_signed() const noexcept;
-    [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;
+    [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;  // 8비트 전용
+    [[nodiscard]] bool valid_for_jpeg_lossless() const noexcept;  // 2-16비트 흑백
 };
 
 // 문자열 변환
