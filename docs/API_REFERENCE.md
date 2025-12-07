@@ -1340,6 +1340,193 @@ if (xa_iod_validator::has_calibration_data(dataset)) {
 
 ---
 
+### `pacs::services::cache::simple_lru_cache<Key, Value>`
+
+Thread-safe LRU (Least Recently Used) cache with TTL support.
+
+```cpp
+#include <pacs/services/cache/simple_lru_cache.hpp>
+
+namespace pacs::services::cache {
+
+// Cache configuration
+struct cache_config {
+    std::size_t max_size{1000};           // Maximum entries
+    std::chrono::seconds ttl{300};        // Time-to-live (5 min default)
+    bool enable_metrics{true};            // Hit/miss tracking
+    std::string cache_name{"lru_cache"};  // For logging/metrics
+};
+
+// Cache statistics
+struct cache_stats {
+    std::atomic<uint64_t> hits{0};
+    std::atomic<uint64_t> misses{0};
+    std::atomic<uint64_t> evictions{0};
+    std::atomic<uint64_t> expirations{0};
+
+    double hit_rate() const noexcept;     // Returns 0.0-100.0
+    void reset() noexcept;
+};
+
+template <typename Key, typename Value,
+          typename Hash = std::hash<Key>,
+          typename KeyEqual = std::equal_to<Key>>
+class simple_lru_cache {
+public:
+    // Construction
+    explicit simple_lru_cache(const cache_config& config = {});
+    simple_lru_cache(size_type max_size, std::chrono::seconds ttl);
+
+    // Cache operations
+    [[nodiscard]] std::optional<Value> get(const Key& key);
+    void put(const Key& key, const Value& value);
+    void put(const Key& key, Value&& value);
+    bool invalidate(const Key& key);
+    void clear();
+    size_type purge_expired();
+
+    // Information
+    [[nodiscard]] size_type size() const;
+    [[nodiscard]] bool empty() const;
+    [[nodiscard]] size_type max_size() const noexcept;
+    [[nodiscard]] std::chrono::seconds ttl() const noexcept;
+
+    // Statistics
+    [[nodiscard]] const cache_stats& stats() const noexcept;
+    [[nodiscard]] double hit_rate() const noexcept;
+    void reset_stats() noexcept;
+};
+
+// Type alias for string-keyed cache
+template <typename Value>
+using string_lru_cache = simple_lru_cache<std::string, Value>;
+
+} // namespace pacs::services::cache
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::cache;
+
+// Create cache with 1000 entry limit and 5-minute TTL
+cache_config config;
+config.max_size = 1000;
+config.ttl = std::chrono::seconds{300};
+config.cache_name = "query_cache";
+
+simple_lru_cache<std::string, QueryResult> cache(config);
+
+// Store and retrieve
+cache.put("patient_123", result);
+
+auto cached = cache.get("patient_123");
+if (cached) {
+    // Use cached result
+    process(*cached);
+}
+
+// Check performance
+auto rate = cache.hit_rate();
+logger_adapter::info("Cache hit rate: {:.1f}%", rate);
+```
+
+---
+
+### `pacs::services::cache::query_cache`
+
+Specialized cache for DICOM C-FIND query results.
+
+```cpp
+#include <pacs/services/cache/query_cache.hpp>
+
+namespace pacs::services::cache {
+
+// Configuration
+struct query_cache_config {
+    std::size_t max_entries{1000};
+    std::chrono::seconds ttl{300};
+    bool enable_logging{false};
+    bool enable_metrics{true};
+    std::string cache_name{"cfind_query_cache"};
+};
+
+// Cached query result
+struct cached_query_result {
+    std::vector<uint8_t> data;                        // Serialized result
+    uint32_t match_count{0};                          // Number of matches
+    std::chrono::steady_clock::time_point cached_at;  // Cache timestamp
+    std::string query_level;                          // PATIENT/STUDY/SERIES/IMAGE
+};
+
+class query_cache {
+public:
+    explicit query_cache(const query_cache_config& config = {});
+
+    // Cache operations
+    [[nodiscard]] std::optional<cached_query_result> get(const std::string& key);
+    void put(const std::string& key, const cached_query_result& result);
+    void put(const std::string& key, cached_query_result&& result);
+    bool invalidate(const std::string& key);
+    void clear();
+    size_type purge_expired();
+
+    // Information
+    [[nodiscard]] size_type size() const;
+    [[nodiscard]] bool empty() const;
+    [[nodiscard]] const cache_stats& stats() const noexcept;
+    [[nodiscard]] double hit_rate() const noexcept;
+
+    // Key generation helpers
+    [[nodiscard]] static std::string build_key(
+        const std::string& query_level,
+        const std::vector<std::pair<std::string, std::string>>& params);
+
+    [[nodiscard]] static std::string build_key_with_ae(
+        const std::string& calling_ae,
+        const std::string& query_level,
+        const std::vector<std::pair<std::string, std::string>>& params);
+};
+
+// Global cache access
+[[nodiscard]] query_cache& global_query_cache();
+bool configure_global_cache(const query_cache_config& config);
+
+} // namespace pacs::services::cache
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::cache;
+
+// Build cache key from query parameters
+std::string key = query_cache::build_key("STUDY", {
+    {"PatientID", "12345"},
+    {"StudyDate", "20240101-20241231"}
+});
+
+// Check cache first
+auto& cache = global_query_cache();
+auto result = cache.get(key);
+
+if (result) {
+    // Return cached result
+    return result->data;
+}
+
+// Execute query and cache result
+auto query_result = execute_cfind(...);
+
+cached_query_result cached;
+cached.data = serialize(query_result);
+cached.match_count = query_result.size();
+cached.query_level = "STUDY";
+cached.cached_at = std::chrono::steady_clock::now();
+
+cache.put(key, std::move(cached));
+```
+
+---
+
 ## Storage Module
 
 ### `pacs::storage::storage_interface`
