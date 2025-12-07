@@ -1,7 +1,7 @@
 # Architecture Documentation - PACS System
 
-> **Version:** 1.1.0
-> **Last Updated:** 2025-12-04
+> **Version:** 1.2.0
+> **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](ARCHITECTURE_KO.md)
 
 ---
@@ -818,6 +818,17 @@ auto& file = result.value();
 
 ---
 
-*Document Version: 1.0.0*
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 1.1.0 | 2025-12-04 | kcenon | Updated Thread Model with thread_system migration details |
+| 1.2.0 | 2025-12-07 | kcenon | Updated version, confirmed Thread Model reflects migration (Epic #153) |
+
+---
+
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
+*Updated: 2025-12-07*
 *Author: kcenon@naver.com*

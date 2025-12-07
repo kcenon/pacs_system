@@ -1,7 +1,7 @@
 # PACS System Features
 
-> **Version:** 1.1.0
-> **Last Updated:** 2025-12-04
+> **Version:** 1.2.0
+> **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
@@ -572,10 +572,57 @@ auto restored_dataset = container_adapter::from_container(container);
 
 **Purpose**: Concurrent processing of DICOM operations.
 
+**Status:** ✅ **Fully Migrated (v1.1.0)** - See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md)
+
 **Integration Points**:
-- Thread pool for DIMSE message handling
-- Lock-free queues for image storage pipeline
-- Cancellation tokens for long operations
+- `accept_worker` (inherits from `thread_base`) for accept loop with jthread support
+- `thread_adapter` pool for association worker management with load balancing
+- `cancellation_token` for cooperative graceful shutdown
+- Unified thread statistics and monitoring
+
+**Migration Benefits (Epic #153):**
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Graceful shutdown | ~5,000 ms | 110 ms | 45x faster |
+| Thread management | Manual lifecycle | Automatic jthread | Zero leaks |
+| Monitoring | None | Unified statistics | Full visibility |
+| Cancellation | Not supported | cancellation_token | Cooperative |
+
+**Example (v1.1.0+):**
+```cpp
+#include <pacs/network/dicom_server.hpp>
+
+// Server now uses thread_system internally
+dicom_server server{config};
+server.register_service(std::make_unique<verification_scp>());
+server.start();
+
+// Graceful shutdown with timeout (uses cancellation_token)
+server.stop(std::chrono::seconds{5});  // Typically completes in ~110ms
+```
+
+### network_system V2 Integration (Optional)
+
+**Purpose**: Alternative DICOM server using `messaging_server` for TCP management.
+
+**Status:** ✅ **Available (Optional)**
+
+**Compile Flag:** `PACS_WITH_NETWORK_SYSTEM`
+
+**Components:**
+- `dicom_server_v2` - Uses `messaging_server` for connection management
+- `dicom_association_handler` - Per-session PDU framing and dispatching
+
+**Example:**
+```cpp
+#include <pacs/network/v2/dicom_server_v2.hpp>
+
+// Same API, different implementation
+dicom_server_v2 server{config};
+server.register_service(std::make_unique<verification_scp>());
+server.start();
+```
 
 ### logger_system Integration
 
@@ -667,6 +714,19 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
+## Recently Completed Features (v1.1.0 - 2025-12-07)
+
+| Feature | Description | Issue | Status |
+|---------|-------------|-------|--------|
+| Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
+| Network System V2 | Optional messaging_server integration | #163 | ✅ Complete |
+| DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | ✅ Complete |
+| Ultrasound Storage | US, US-MF SOP classes | #128 | ✅ Complete |
+| XA Image Storage | XA, Enhanced XA, XRF SOP classes | #129 | ✅ Complete |
+| Explicit VR Big Endian | Transfer syntax support | #126 | ✅ Complete |
+
+---
+
 ## Planned Features
 
 ### Short Term (Next Release)
@@ -675,7 +735,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 |---------|-------------|--------|
 | Additional SOP Classes | NM, PET, RT, etc. | Phase 3 |
 | Connection Pooling | Reuse associations | Phase 3 |
-| Performance Optimization | Enhanced throughput | Phase 3 |
+| Enhanced Metrics | Per-association timing | Phase 3 |
 
 ### Medium Term
 
@@ -695,7 +755,17 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
-*Document Version: 1.1.0*
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 1.1.0 | 2025-12-04 | kcenon | Updated DIMSE status |
+| 1.2.0 | 2025-12-07 | kcenon | Added: Thread migration, Network V2, DIMSE-N, Ultrasound, XA; Updated ecosystem integration |
+
+---
+
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-04*
+*Updated: 2025-12-07*
 *Author: kcenon@naver.com*

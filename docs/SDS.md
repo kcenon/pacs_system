@@ -1,9 +1,9 @@
 # Software Design Specification (SDS) - PACS System
 
-> **Version:** 1.1.0
-> **Last Updated:** 2025-12-04
+> **Version:** 1.2.0
+> **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](SDS_KO.md)
-> **Status:** Draft
+> **Status:** Complete
 
 ---
 
@@ -381,15 +381,18 @@ The PACS System follows a layered architecture:
 
 **Key Components:**
 
-| Component | Design ID | Description | Traces to |
-|-----------|-----------|-------------|-----------|
-| `verification_scp` | DES-SVC-001 | C-ECHO handler | SRS-SVC-001 |
-| `storage_scp` | DES-SVC-002 | C-STORE receiver | SRS-SVC-002 |
-| `storage_scu` | DES-SVC-003 | C-STORE sender | SRS-SVC-003 |
-| `query_scp` | DES-SVC-004 | C-FIND handler | SRS-SVC-004 |
-| `retrieve_scp` | DES-SVC-005 | C-MOVE/C-GET handler | SRS-SVC-005 |
-| `worklist_scp` | DES-SVC-006 | MWL C-FIND handler | SRS-SVC-006 |
-| `mpps_scp` | DES-SVC-007 | N-CREATE/N-SET handler | SRS-SVC-007 |
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `verification_scp` | DES-SVC-001 | C-ECHO handler | SRS-SVC-001 | ✅ |
+| `storage_scp` | DES-SVC-002 | C-STORE receiver | SRS-SVC-002 | ✅ |
+| `storage_scu` | DES-SVC-003 | C-STORE sender | SRS-SVC-003 | ✅ |
+| `query_scp` | DES-SVC-004 | C-FIND handler | SRS-SVC-004 | ✅ |
+| `retrieve_scp` | DES-SVC-005 | C-MOVE/C-GET handler | SRS-SVC-005 | ✅ |
+| `worklist_scp` | DES-SVC-006 | MWL C-FIND handler | SRS-SVC-006 | ✅ |
+| `mpps_scp` | DES-SVC-007 | N-CREATE/N-SET handler | SRS-SVC-007 | ✅ |
+| `dimse_n_encoder` | DES-SVC-008 | N-GET/N-ACTION/N-EVENT/N-DELETE | SRS-SVC-008 | ✅ |
+| `ultrasound_storage` | DES-SVC-009 | US/US-MF SOP classes | SRS-SVC-009 | ✅ |
+| `xa_storage` | DES-SVC-010 | XA/XRF SOP classes | SRS-SVC-010 | ✅ |
 
 ### 4.5 Storage Module (pacs_storage)
 
@@ -409,13 +412,27 @@ The PACS System follows a layered architecture:
 
 **Key Components:**
 
-| Component | Design ID | Description | Traces to |
-|-----------|-----------|-------------|-----------|
-| `container_adapter` | DES-INT-001 | VR to container mapping | IR-1 |
-| `network_adapter` | DES-INT-002 | TCP/TLS via network_system | IR-2 |
-| `thread_adapter` | DES-INT-003 | Job processing | IR-3 |
-| `logger_adapter` | DES-INT-004 | Audit logging | IR-4 |
-| `monitoring_adapter` | DES-INT-005 | Performance metrics | IR-5 |
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `container_adapter` | DES-INT-001 | VR to container mapping | IR-1 | ✅ |
+| `network_adapter` | DES-INT-002 | TCP/TLS via network_system | IR-2 | ✅ |
+| `thread_adapter` | DES-INT-003 | Job processing, thread pool | IR-3 | ✅ |
+| `accept_worker` | DES-INT-003a | Accept loop (thread_base) | IR-3 | ✅ (v1.1.0) |
+| `logger_adapter` | DES-INT-004 | Audit logging | IR-4 | ✅ |
+| `monitoring_adapter` | DES-INT-005 | Performance metrics | IR-5 | ✅ |
+
+### 4.7 Network V2 Module (pacs_network_v2) - Optional
+
+**Purpose:** network_system-based DICOM server implementation
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `dicom_server_v2` | DES-NET-006 | messaging_server-based DICOM server | SRS-INT-003 | ✅ |
+| `dicom_association_handler` | DES-NET-007 | Per-session PDU framing and dispatching | SRS-INT-003 | ✅ |
+
+**Compile Flag:** `PACS_WITH_NETWORK_SYSTEM`
 
 ---
 
@@ -529,9 +546,12 @@ The PACS System follows a layered architecture:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 1.1.0 | 2025-12-04 | kcenon | Updated component status, added transfer syntax details |
+| 1.2.0 | 2025-12-07 | kcenon | Added: DES-SVC-008~010 (DIMSE-N, Ultrasound, XA), DES-INT-003a (accept_worker), DES-NET-006~007 (Network V2); Updated thread_adapter design for thread_system migration |
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
+*Updated: 2025-12-07*
 *Author: kcenon@naver.com*
