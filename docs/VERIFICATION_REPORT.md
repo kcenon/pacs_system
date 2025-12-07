@@ -1,7 +1,7 @@
 # PACS System Verification Report
 
-> **Report Version:** 1.1.0
-> **Report Date:** 2025-12-04
+> **Report Version:** 1.4.0
+> **Report Date:** 2025-12-05
 > **Language:** **English** | [한국어](VERIFICATION_REPORT_KO.md)
 > **Status:** Complete
 > **Related Document:** [VALIDATION_REPORT.md](VALIDATION_REPORT.md) (SRS 요구사항 충족 확인)
@@ -272,10 +272,11 @@ The verification was conducted through static code analysis, documentation revie
 | Core Module | 6 | 57 | ✅ Passing |
 | Encoding Module | 5 | 41 | ✅ Passing |
 | Network Module | 5 | 15 | ✅ Passing |
+| Network V2 Module | 7 | 85+ | ✅ Passing |
 | Services Module | 7 | - | ✅ Passing |
 | Storage Module | 6 | - | ✅ Passing |
 | Integration Module | 5 | - | ✅ Passing |
-| **Total** | **34** | **113+** | **✅ Passing** |
+| **Total** | **41** | **198+** | **✅ Passing** |
 
 ### 5.2 Test Organization
 
@@ -299,7 +300,16 @@ tests/
 │   ├── pdu_decoder_test.cpp
 │   ├── association_test.cpp
 │   ├── dicom_server_test.cpp
-│   └── dimse/dimse_message_test.cpp
+│   ├── dimse/dimse_message_test.cpp
+│   ├── detail/accept_worker_test.cpp
+│   └── v2/                  # network_system V2 integration tests
+│       ├── dicom_association_handler_test.cpp
+│       ├── dicom_server_v2_test.cpp
+│       ├── pdu_framing_test.cpp
+│       ├── state_machine_test.cpp
+│       ├── service_dispatching_test.cpp
+│       ├── network_system_integration_test.cpp
+│       └── stress_test.cpp
 ├── services/                # Service tests
 │   ├── verification_scp_test.cpp
 │   ├── storage_scp_test.cpp
@@ -517,9 +527,10 @@ src/
 | 1.1.0 | 2025-12-01 | kcenon@naver.com | Updated traceability documentation status, added SDS_TRACEABILITY.md updates |
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | Clarified V&V distinction per V-Model |
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | Scoped to Verification only (SDS compliance); Validation moved to separate VALIDATION_REPORT.md |
+| 1.4.0 | 2025-12-05 | kcenon@naver.com | Added Network V2 tests for network_system migration (Issue #163) |
 
 ---
 
-*Report Version: 1.0.0*
-*Generated: 2025-12-01*
+*Report Version: 1.4.0*
+*Generated: 2025-12-05*
 *Verified by: kcenon@naver.com*

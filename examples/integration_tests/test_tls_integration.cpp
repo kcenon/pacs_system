@@ -716,3 +716,249 @@ TEST_CASE("TLS configuration validation", "[tls][config]") {
         REQUIRE(cfg.is_valid() == true);
     }
 }
+
+// =============================================================================
+// Scenario 6: TLS Integration with dicom_server_v2
+// =============================================================================
+
+#ifdef PACS_WITH_NETWORK_SYSTEM
+
+#include "pacs/network/v2/dicom_server_v2.hpp"
+
+namespace {
+
+/**
+ * @brief TLS-enabled test server wrapper for V2 server
+ *
+ * Extends test functionality with TLS configuration support for V2 server.
+ * This enables testing TLS connections with the new network_system-based
+ * dicom_server_v2 implementation.
+ *
+ * @see Issue #163 - Full integration testing for network_system migration
+ */
+class tls_test_server_v2 {
+public:
+    explicit tls_test_server_v2(
+        uint16_t port,
+        const std::string& ae_title,
+        const tls_config& tls_cfg)
+        : port_(port == 0 ? find_available_port() : port)
+        , ae_title_(ae_title)
+        , tls_cfg_(tls_cfg) {
+
+        pacs::network::server_config config;
+        config.ae_title = ae_title_;
+        config.port = port_;
+        config.max_associations = 10;
+        config.idle_timeout = std::chrono::seconds{30};
+        config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.200";
+        config.implementation_version_name = "TLS_V2_SCP";
+
+        // Validate TLS config first
+        auto tls_result = network_adapter::configure_tls(tls_cfg_);
+        if (tls_result.is_err()) {
+            tls_valid_ = false;
+            return;
+        }
+        tls_valid_ = true;
+
+        // Create V2 server
+        // Note: TLS integration for V2 server uses network_system's TLS support
+        server_ = std::make_unique<pacs::network::v2::dicom_server_v2>(config);
+    }
+
+    ~tls_test_server_v2() {
+        stop();
+    }
+
+    tls_test_server_v2(const tls_test_server_v2&) = delete;
+    tls_test_server_v2& operator=(const tls_test_server_v2&) = delete;
+    tls_test_server_v2(tls_test_server_v2&&) = delete;
+    tls_test_server_v2& operator=(tls_test_server_v2&&) = delete;
+
+    template <typename Service>
+    void register_service(std::shared_ptr<Service> service) {
+        if (server_) {
+            server_->register_service(std::move(service));
+        }
+    }
+
+    [[nodiscard]] bool start() {
+        if (!server_ || !tls_valid_) {
+            return false;
+        }
+        auto result = server_->start();
+        if (result.is_ok()) {
+            running_ = true;
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+        }
+        return result.is_ok();
+    }
+
+    void stop() {
+        if (running_ && server_) {
+            server_->stop();
+            running_ = false;
+        }
+    }
+
+    [[nodiscard]] uint16_t port() const noexcept { return port_; }
+    [[nodiscard]] const std::string& ae_title() const noexcept { return ae_title_; }
+    [[nodiscard]] bool is_running() const noexcept { return running_; }
+    [[nodiscard]] bool is_tls_valid() const noexcept { return tls_valid_; }
+    [[nodiscard]] pacs::network::v2::dicom_server_v2* server() { return server_.get(); }
+
+private:
+    uint16_t port_;
+    std::string ae_title_;
+    tls_config tls_cfg_;
+    std::unique_ptr<pacs::network::v2::dicom_server_v2> server_;
+    bool running_{false};
+    bool tls_valid_{false};
+};
+
+}  // namespace
+
+TEST_CASE("TLS C-ECHO with dicom_server_v2", "[tls][v2][connectivity]") {
+    auto certs = get_test_certificates();
+
+    if (!certs.all_exist()) {
+        WARN("Skipping TLS V2 tests: certificates not found");
+        SKIP("Test certificates not available");
+    }
+
+    SECTION("V2 TLS server accepts connection and responds to C-ECHO") {
+        tls_config server_tls;
+        server_tls.enabled = true;
+        server_tls.cert_path = certs.server_cert;
+        server_tls.key_path = certs.server_key;
+        server_tls.ca_path = certs.ca_cert;
+        server_tls.verify_peer = false;
+        server_tls.min_version = tls_config::tls_version::v1_2;
+
+        auto port = find_available_port();
+        tls_test_server_v2 server(port, "TLS_V2_SCP", server_tls);
+
+        if (!server.is_tls_valid()) {
+            WARN("TLS configuration not valid for V2, skipping test");
+            SKIP("TLS not properly configured");
+        }
+
+        server.register_service(std::make_shared<verification_scp>());
+        REQUIRE(server.start());
+        REQUIRE(server.is_running());
+
+        tls_config client_tls;
+        client_tls.enabled = true;
+        client_tls.ca_path = certs.ca_cert;
+        client_tls.verify_peer = true;
+        client_tls.min_version = tls_config::tls_version::v1_2;
+
+        auto connect_result = tls_test_client::connect(
+            "localhost", port, server.ae_title(), "TLS_V2_SCU", client_tls);
+
+        REQUIRE(connect_result.is_ok());
+        auto& assoc = connect_result.value();
+
+        REQUIRE(assoc.has_accepted_context(verification_sop_class_uid));
+
+        auto context_id_opt = assoc.accepted_context_id(verification_sop_class_uid);
+        REQUIRE(context_id_opt.has_value());
+
+        using namespace pacs::network::dimse;
+        auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
+        auto send_result = assoc.send_dimse(*context_id_opt, echo_rq);
+        REQUIRE(send_result.is_ok());
+
+        auto recv_result = assoc.receive_dimse(default_timeout);
+        REQUIRE(recv_result.is_ok());
+
+        auto& [recv_ctx, echo_rsp] = recv_result.value();
+        REQUIRE(echo_rsp.command() == command_field::c_echo_rsp);
+        REQUIRE(echo_rsp.status() == status_success);
+
+        (void)assoc.release(default_timeout);
+        server.stop();
+    }
+}
+
+TEST_CASE("TLS concurrent connections with dicom_server_v2", "[tls][v2][concurrent]") {
+    auto certs = get_test_certificates();
+
+    if (!certs.all_exist()) {
+        SKIP("Test certificates not available");
+    }
+
+    tls_config server_tls;
+    server_tls.enabled = true;
+    server_tls.cert_path = certs.server_cert;
+    server_tls.key_path = certs.server_key;
+    server_tls.ca_path = certs.ca_cert;
+    server_tls.verify_peer = false;
+    server_tls.min_version = tls_config::tls_version::v1_2;
+
+    auto port = find_available_port();
+    tls_test_server_v2 server(port, "TLS_V2_CONCURRENT", server_tls);
+
+    if (!server.is_tls_valid()) {
+        SKIP("TLS not properly configured for V2");
+    }
+
+    server.register_service(std::make_shared<verification_scp>());
+    REQUIRE(server.start());
+
+    constexpr int num_connections = 5;
+    std::vector<std::thread> threads;
+    std::atomic<int> success_count{0};
+
+    for (int i = 0; i < num_connections; ++i) {
+        threads.emplace_back([&, i]() {
+            tls_config client_tls;
+            client_tls.enabled = true;
+            client_tls.ca_path = certs.ca_cert;
+            client_tls.verify_peer = true;
+            client_tls.min_version = tls_config::tls_version::v1_2;
+
+            auto result = tls_test_client::connect(
+                "localhost", port, server.ae_title(),
+                "TLS_V2_SCU_" + std::to_string(i), client_tls);
+
+            if (result.is_err()) {
+                return;
+            }
+
+            auto& assoc = result.value();
+            auto ctx_opt = assoc.accepted_context_id(verification_sop_class_uid);
+            if (!ctx_opt) {
+                return;
+            }
+
+            using namespace pacs::network::dimse;
+            auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
+            auto send_result = assoc.send_dimse(*ctx_opt, echo_rq);
+            if (send_result.is_err()) {
+                return;
+            }
+
+            auto recv_result = assoc.receive_dimse(default_timeout);
+            if (recv_result.is_ok()) {
+                auto& [ctx, rsp] = recv_result.value();
+                if (rsp.status() == status_success) {
+                    ++success_count;
+                }
+            }
+
+            (void)assoc.release(default_timeout);
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    server.stop();
+
+    REQUIRE(success_count == num_connections);
+}
+
+#endif  // PACS_WITH_NETWORK_SYSTEM
