@@ -1995,6 +1995,219 @@ if (is_for_presentation_dx(dataset)) {
 
 ---
 
+## MG Modality Module
+
+### `pacs::services::sop_classes::mg_storage`
+
+Digital Mammography X-Ray SOP Class definitions and utilities for breast imaging.
+
+```cpp
+#include <pacs/services/sop_classes/mg_storage.hpp>
+
+namespace pacs::services::sop_classes {
+
+// SOP Class UIDs
+inline constexpr std::string_view mg_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2";
+inline constexpr std::string_view mg_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2.1";
+inline constexpr std::string_view breast_tomosynthesis_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.13.1.3";
+
+// Breast laterality enumeration
+enum class breast_laterality { left, right, bilateral, unknown };
+
+// Mammography view positions
+enum class mg_view_position {
+    cc,      ///< Craniocaudal
+    mlo,     ///< Mediolateral Oblique
+    ml,      ///< Mediolateral
+    lm,      ///< Lateromedial
+    xccl,    ///< Exaggerated CC Laterally
+    xccm,    ///< Exaggerated CC Medially
+    fb,      ///< From Below
+    spot,    ///< Spot compression
+    mag,     ///< Magnification
+    spot_mag,///< Spot with magnification
+    implant, ///< Implant displaced (Eklund)
+    // ... additional views
+    other
+};
+
+// Mammography SOP class information
+struct mg_sop_class_info {
+    std::string_view uid;
+    std::string_view name;
+    std::string_view description;
+    mg_image_type image_type;
+    bool is_tomosynthesis;
+    bool supports_multiframe;
+};
+
+// Utility functions
+[[nodiscard]] std::string_view to_string(breast_laterality laterality) noexcept;
+[[nodiscard]] breast_laterality parse_breast_laterality(std::string_view value) noexcept;
+[[nodiscard]] bool is_valid_breast_laterality(std::string_view value) noexcept;
+
+[[nodiscard]] std::string_view to_string(mg_view_position position) noexcept;
+[[nodiscard]] mg_view_position parse_mg_view_position(std::string_view value) noexcept;
+[[nodiscard]] bool is_screening_view(mg_view_position position) noexcept;
+[[nodiscard]] bool is_magnification_view(mg_view_position position) noexcept;
+
+[[nodiscard]] bool is_valid_compression_force(double force_n) noexcept;
+[[nodiscard]] std::pair<double, double> get_typical_compression_force_range() noexcept;
+
+[[nodiscard]] std::vector<std::string> get_mg_storage_sop_classes(bool include_tomosynthesis = true);
+[[nodiscard]] const mg_sop_class_info* get_mg_sop_class_info(std::string_view uid) noexcept;
+[[nodiscard]] bool is_mg_storage_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_breast_tomosynthesis_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_mg_for_processing_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_mg_for_presentation_sop_class(std::string_view uid) noexcept;
+
+} // namespace pacs::services::sop_classes
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::sop_classes;
+
+// Check if a SOP Class UID is Mammography
+if (is_mg_storage_sop_class(sop_class_uid)) {
+    const auto* info = get_mg_sop_class_info(sop_class_uid);
+
+    if (info->is_tomosynthesis) {
+        // Handle 3D breast tomosynthesis
+    }
+}
+
+// Parse mammography-specific attributes
+auto laterality = parse_breast_laterality("L");  // Left breast
+auto view = parse_mg_view_position("MLO");       // Mediolateral oblique
+
+// Check if this is a standard screening view
+if (is_screening_view(view)) {
+    // CC or MLO - standard screening exam
+}
+
+// Validate compression force (typical: 50-200 N)
+if (is_valid_compression_force(compression_force)) {
+    // Within acceptable range
+}
+```
+
+---
+
+### `pacs::services::validation::mg_iod_validator`
+
+IOD Validator for Digital Mammography images per DICOM PS3.3 Section A.26.2.
+
+```cpp
+#include <pacs/services/validation/mg_iod_validator.hpp>
+
+namespace pacs::services::validation {
+
+// Validation options specific to mammography
+struct mg_validation_options {
+    bool check_type1 = true;
+    bool check_type2 = true;
+    bool check_conditional = true;
+    bool validate_pixel_data = true;
+    bool validate_mg_specific = true;
+    bool validate_laterality = true;        // Breast laterality (0020,0060)
+    bool validate_view_position = true;     // View position (0018,5101)
+    bool validate_compression = true;       // Compression force (0018,11A2)
+    bool validate_implant_attributes = true;
+    bool validate_dose_parameters = true;
+    bool strict_mode = false;
+};
+
+class mg_iod_validator {
+public:
+    mg_iod_validator() = default;
+    explicit mg_iod_validator(const mg_validation_options& options);
+
+    // Full IOD validation
+    [[nodiscard]] validation_result validate(const core::dicom_dataset& dataset) const;
+
+    // Specialized validations
+    [[nodiscard]] validation_result validate_for_presentation(const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_for_processing(const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_laterality(const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_view_position(const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_compression_force(const core::dicom_dataset& dataset) const;
+
+    // Quick validation
+    [[nodiscard]] bool quick_check(const core::dicom_dataset& dataset) const;
+
+    // Configuration
+    [[nodiscard]] const mg_validation_options& options() const noexcept;
+    void set_options(const mg_validation_options& options);
+};
+
+// Convenience functions
+[[nodiscard]] validation_result validate_mg_iod(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_valid_mg_dataset(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_for_presentation_mg(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_for_processing_mg(const core::dicom_dataset& dataset);
+[[nodiscard]] bool has_breast_implant(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_screening_mammogram(const core::dicom_dataset& dataset);
+
+} // namespace pacs::services::validation
+```
+
+**Error Codes (MG-specific):**
+| Code | Severity | Description |
+|------|----------|-------------|
+| MG-ERR-001 | Error | SOPClassUID is not a mammography storage class |
+| MG-ERR-002 | Error | Modality must be 'MG' |
+| MG-ERR-003 | Error | Laterality not specified (required for mammography) |
+| MG-ERR-004 | Error | Invalid laterality value |
+| MG-ERR-005 | Error | Invalid image laterality value |
+| MG-ERR-006 | Error | BitsStored exceeds BitsAllocated |
+| MG-ERR-007 | Error | Mammography must be grayscale |
+| MG-ERR-008 | Error | Invalid photometric interpretation |
+| MG-WARN-001 | Warning | Laterality mismatch between series and image level |
+| MG-WARN-003 | Warning | Body Part Examined should be 'BREAST' |
+| MG-WARN-005 | Warning | View Position not present |
+| MG-WARN-010 | Warning | Unrecognized view position |
+| MG-WARN-013 | Warning | Compression force outside typical range |
+| MG-INFO-007 | Info | Breast implant present but not using ID view |
+| MG-INFO-008 | Info | Compression force not documented |
+
+**Example:**
+```cpp
+using namespace pacs::services::validation;
+
+// Validate a mammography dataset
+auto result = validate_mg_iod(dataset);
+if (!result.is_valid) {
+    for (const auto& finding : result.findings) {
+        if (finding.code.starts_with("MG-ERR-")) {
+            std::cerr << "Error: " << finding.message << "\n";
+        }
+    }
+}
+
+// Validate specific aspects
+mg_iod_validator validator;
+
+auto laterality_result = validator.validate_laterality(dataset);
+auto view_result = validator.validate_view_position(dataset);
+auto compression_result = validator.validate_compression_force(dataset);
+
+// Check for screening exam
+if (is_screening_mammogram(dataset)) {
+    // Standard 4-view screening (RCC, LCC, RMLO, LMLO)
+}
+
+// Check for implant
+if (has_breast_implant(dataset)) {
+    // May need implant-displaced views
+}
+```
+
+---
+
 ## Monitoring Module
 
 ### `pacs::monitoring::pacs_metrics`
@@ -2216,10 +2429,11 @@ public:
 | 1.2.0   | 2025-12-07 | Added Network V2 Module (dicom_server_v2, dicom_association_handler) |
 | 1.3.0   | 2025-12-07 | Added Monitoring Module (pacs_metrics for DIMSE operation tracking) |
 | 1.4.0   | 2025-12-07 | Added DX Modality Module (dx_storage, dx_iod_validator) |
+| 1.5.0   | 2025-12-08 | Added MG Modality Module (mg_storage, mg_iod_validator) |
 
 ---
 
-*Document Version: 1.4.0*
+*Document Version: 1.5.0*
 *Created: 2025-11-30*
 *Last Updated: 2025-12-07*
 *Author: kcenon@naver.com*
