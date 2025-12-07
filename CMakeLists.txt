@@ -158,6 +158,40 @@ else()
     set(PACS_JPEG_FOUND FALSE)
 endif()
 
+# OpenJPEG (for JPEG 2000 compression codec)
+message(STATUS "")
+message(STATUS "=== Finding OpenJPEG (for JPEG 2000 compression) ===")
+
+# Try to find system OpenJPEG
+find_package(OpenJPEG QUIET)
+
+if(OpenJPEG_FOUND)
+    message(STATUS "Found system OpenJPEG: ${OPENJPEG_VERSION}")
+    set(PACS_JPEG2000_FOUND TRUE)
+else()
+    # Try pkg-config as fallback
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(OPENJPEG QUIET libopenjp2)
+        if(OPENJPEG_FOUND)
+            message(STATUS "Found OpenJPEG via pkg-config: ${OPENJPEG_VERSION}")
+            set(PACS_JPEG2000_FOUND TRUE)
+        endif()
+    endif()
+endif()
+
+if(NOT PACS_JPEG2000_FOUND)
+    message(WARNING
+        "OpenJPEG not found!\n"
+        "JPEG 2000 codec will be disabled.\n"
+        "\n"
+        "To enable JPEG 2000 support, install OpenJPEG:\n"
+        "  - Ubuntu: sudo apt install libopenjp2-7-dev\n"
+        "  - macOS: brew install openjpeg\n"
+        "  - Windows: vcpkg install openjpeg:x64-windows")
+    set(PACS_JPEG2000_FOUND FALSE)
+endif()
+
 # fmt library (for std::format compatibility on older compilers)
 message(STATUS "")
 message(STATUS "=== Finding fmt library (for format compatibility) ===")
@@ -485,6 +519,7 @@ add_library(pacs_encoding
     src/encoding/explicit_vr_big_endian_codec.cpp
     src/encoding/compression/jpeg_baseline_codec.cpp
     src/encoding/compression/jpeg_lossless_codec.cpp
+    src/encoding/compression/jpeg2000_codec.cpp
     src/encoding/compression/codec_factory.cpp
 )
 target_include_directories(pacs_encoding
@@ -504,6 +539,20 @@ if(PACS_JPEG_FOUND)
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG_CODEC)
     message(STATUS "  [OK] pacs_encoding: JPEG codec enabled")
+endif()
+
+# Link OpenJPEG for JPEG 2000 compression codec
+if(PACS_JPEG2000_FOUND)
+    if(TARGET openjp2)
+        target_link_libraries(pacs_encoding PUBLIC openjp2)
+    elseif(OPENJPEG_LIBRARIES)
+        target_link_libraries(pacs_encoding PUBLIC ${OPENJPEG_LIBRARIES})
+        if(OPENJPEG_INCLUDE_DIRS)
+            target_include_directories(pacs_encoding PUBLIC ${OPENJPEG_INCLUDE_DIRS})
+        endif()
+    endif()
+    target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG2000_CODEC)
+    message(STATUS "  [OK] pacs_encoding: JPEG 2000 codec enabled")
 endif()
 
 # Network library
