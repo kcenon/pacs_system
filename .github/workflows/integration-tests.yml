@@ -102,13 +102,14 @@ jobs:
           libsqlite3-dev \
           libssl-dev \
           libfmt-dev \
+          libjpeg-turbo8-dev \
           ninja-build \
           cmake
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -124,7 +125,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -311,6 +312,7 @@ jobs:
           libsqlite3-dev \
           libssl-dev \
           libfmt-dev \
+          libjpeg-turbo8-dev \
           ninja-build \
           cmake \
           netcat-openbsd
@@ -318,7 +320,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -334,7 +336,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -661,13 +663,14 @@ jobs:
           libsqlite3-dev \
           libssl-dev \
           libfmt-dev \
+          libjpeg-turbo8-dev \
           ninja-build \
           cmake
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -683,7 +686,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -900,6 +903,7 @@ jobs:
           libsqlite3-dev \
           libssl-dev \
           libfmt-dev \
+          libjpeg-turbo8-dev \
           ninja-build \
           cmake
 
@@ -1061,6 +1065,7 @@ jobs:
           libsqlite3-dev \
           libssl-dev \
           libfmt-dev \
+          libjpeg-turbo8-dev \
           ninja-build \
           cmake \
           netcat-openbsd \

@@ -1,7 +1,7 @@
 # API Reference - PACS System
 
-> **Version:** 1.3.0
-> **Last Updated:** 2025-12-07
+> **Version:** 1.4.0
+> **Last Updated:** 2025-12-08
 > **Language:** **English** | [한국어](API_REFERENCE_KO.md)
 
 ---
@@ -446,6 +446,207 @@ public:
 };
 
 } // namespace pacs::encoding
+```
+
+---
+
+### `pacs::encoding::compression::compression_codec`
+
+Abstract base class for image compression codecs.
+
+```cpp
+#include <pacs/encoding/compression/compression_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+// Compression options
+struct compression_options {
+    int quality = 75;           // 1-100 for JPEG
+    bool lossless = false;       // Enable lossless mode if supported
+    bool progressive = false;    // Progressive encoding (JPEG)
+    int chroma_subsampling = 2;  // 0=4:4:4, 1=4:2:2, 2=4:2:0
+};
+
+// Codec operation result
+struct codec_result {
+    std::vector<uint8_t> data;
+    bool success = false;
+    std::string error_message;
+    image_params output_params;
+
+    static codec_result ok(std::vector<uint8_t> d, const image_params& params);
+    static codec_result error(std::string msg);
+};
+
+// Abstract codec interface
+class compression_codec {
+public:
+    virtual ~compression_codec() = default;
+
+    // Codec information
+    [[nodiscard]] virtual std::string_view transfer_syntax_uid() const noexcept = 0;
+    [[nodiscard]] virtual std::string_view name() const noexcept = 0;
+    [[nodiscard]] virtual bool is_lossy() const noexcept = 0;
+    [[nodiscard]] virtual bool can_encode(const image_params& params) const noexcept = 0;
+    [[nodiscard]] virtual bool can_decode(const image_params& params) const noexcept = 0;
+
+    // Compression operations
+    [[nodiscard]] virtual codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const = 0;
+
+    [[nodiscard]] virtual codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const = 0;
+};
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
+### `pacs::encoding::compression::jpeg_baseline_codec`
+
+JPEG Baseline (Process 1) codec using libjpeg-turbo.
+
+```cpp
+#include <pacs/encoding/compression/jpeg_baseline_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class jpeg_baseline_codec final : public compression_codec {
+public:
+    static constexpr std::string_view kTransferSyntaxUID = "1.2.840.10008.1.2.4.50";
+
+    jpeg_baseline_codec();
+    ~jpeg_baseline_codec() override;
+
+    // Move-only (PIMPL)
+    jpeg_baseline_codec(jpeg_baseline_codec&&) noexcept;
+    jpeg_baseline_codec& operator=(jpeg_baseline_codec&&) noexcept;
+
+    // Codec interface implementation
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "JPEG Baseline (Process 1)"
+    [[nodiscard]] bool is_lossy() const noexcept override;  // true
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// Usage example
+void compress_image() {
+    jpeg_baseline_codec codec;
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 8;
+    params.bits_stored = 8;
+    params.samples_per_pixel = 1;  // Grayscale
+
+    std::vector<uint8_t> pixel_data(512 * 512);  // Your image data
+
+    compression_options options;
+    options.quality = 90;
+
+    auto result = codec.encode(pixel_data, params, options);
+    if (result.success) {
+        // result.data contains compressed JPEG
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
+### `pacs::encoding::compression::codec_factory`
+
+Factory for creating compression codecs by Transfer Syntax UID.
+
+```cpp
+#include <pacs/encoding/compression/codec_factory.hpp>
+
+namespace pacs::encoding::compression {
+
+class codec_factory {
+public:
+    // Create codec by Transfer Syntax UID
+    [[nodiscard]] static std::unique_ptr<compression_codec> create(
+        std::string_view transfer_syntax_uid);
+
+    // Create codec by transfer_syntax object
+    [[nodiscard]] static std::unique_ptr<compression_codec> create(
+        const transfer_syntax& ts);
+
+    // Query supported codecs
+    [[nodiscard]] static std::vector<std::string_view> supported_transfer_syntaxes();
+    [[nodiscard]] static bool is_supported(std::string_view transfer_syntax_uid);
+    [[nodiscard]] static bool is_supported(const transfer_syntax& ts);
+};
+
+// Currently supported Transfer Syntaxes:
+// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1)
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
+### `pacs::encoding::compression::image_params`
+
+Parameters describing image pixel data for compression.
+
+```cpp
+#include <pacs/encoding/compression/image_params.hpp>
+
+namespace pacs::encoding::compression {
+
+enum class photometric_interpretation {
+    monochrome1,      // Min = white
+    monochrome2,      // Min = black
+    rgb,              // RGB color
+    ycbcr_full,       // YCbCr full range
+    ycbcr_full_422,   // YCbCr 4:2:2
+    palette_color,    // Palette lookup
+    unknown
+};
+
+struct image_params {
+    uint16_t width = 0;               // Columns (0028,0011)
+    uint16_t height = 0;              // Rows (0028,0010)
+    uint16_t bits_allocated = 0;      // (0028,0100)
+    uint16_t bits_stored = 0;         // (0028,0101)
+    uint16_t high_bit = 0;            // (0028,0102)
+    uint16_t samples_per_pixel = 1;   // (0028,0002)
+    uint16_t planar_configuration = 0; // (0028,0006)
+    uint16_t pixel_representation = 0; // (0028,0103)
+    photometric_interpretation photometric = photometric_interpretation::monochrome2;
+    uint32_t number_of_frames = 1;
+
+    // Utility methods
+    [[nodiscard]] size_t frame_size_bytes() const noexcept;
+    [[nodiscard]] bool is_grayscale() const noexcept;
+    [[nodiscard]] bool is_color() const noexcept;
+    [[nodiscard]] bool is_signed() const noexcept;
+    [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;
+};
+
+// String conversion
+[[nodiscard]] std::string to_string(photometric_interpretation pi);
+[[nodiscard]] photometric_interpretation parse_photometric_interpretation(const std::string& str);
+
+} // namespace pacs::encoding::compression
 ```
 
 ---

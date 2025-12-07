@@ -55,12 +55,12 @@ static constexpr std::array<ts_entry, 8> TS_REGISTRY = {{
      vr_encoding::explicit_vr,
      false, true, false},
 
-    // JPEG Transfer Syntaxes (not supported in Phase 1)
+    // JPEG Transfer Syntaxes
     {"1.2.840.10008.1.2.4.50",
      "JPEG Baseline (Process 1)",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},  // Supported in Phase 3
 
     {"1.2.840.10008.1.2.4.70",
      "JPEG Lossless, Non-Hierarchical, First-Order Prediction",
@@ -131,7 +131,7 @@ const transfer_syntax transfer_syntax::jpeg_baseline{
     "JPEG Baseline (Process 1)",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
-    true, false, false};
+    true, false, true};  // Supported in Phase 3
 
 const transfer_syntax transfer_syntax::jpeg_lossless{
     "1.2.840.10008.1.2.4.70",

@@ -65,7 +65,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());  // Not supported in Phase 1
+        CHECK(ts.is_supported());  // Supported since Phase 3
     }
 
     SECTION("JPEG Lossless") {
@@ -145,12 +145,11 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Phase 1: only uncompressed syntaxes
-        CHECK(supported.size() == 3);
+        // Phase 3: uncompressed syntaxes (3) + JPEG Baseline (1)
+        CHECK(supported.size() == 4);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());
-            CHECK_FALSE(ts.is_encapsulated());
             CHECK_FALSE(ts.is_deflated());
         }
     }

@@ -129,6 +129,35 @@ if(PACS_BUILD_STORAGE)
     endif()
 endif()
 
+# libjpeg-turbo (for JPEG compression codecs)
+message(STATUS "")
+message(STATUS "=== Finding libjpeg-turbo (for JPEG compression) ===")
+
+# Try to find system libjpeg/libjpeg-turbo
+# NOTE: libjpeg-turbo cannot be built via FetchContent (their CMakeLists.txt
+# explicitly prohibits integration into other build systems).
+# System packages must be installed:
+#   - Ubuntu: sudo apt install libjpeg-turbo8-dev
+#   - macOS: brew install jpeg-turbo
+#   - Windows: vcpkg install libjpeg-turbo:x64-windows
+find_package(JPEG QUIET)
+
+if(JPEG_FOUND)
+    message(STATUS "Found system libjpeg: ${JPEG_VERSION}")
+    set(PACS_JPEG_FOUND TRUE)
+    set(PACS_JPEG_TARGET JPEG::JPEG)
+else()
+    message(WARNING
+        "libjpeg/libjpeg-turbo not found!\n"
+        "JPEG codec will be disabled.\n"
+        "\n"
+        "To enable JPEG support, install libjpeg-turbo:\n"
+        "  - Ubuntu: sudo apt install libjpeg-turbo8-dev\n"
+        "  - macOS: brew install jpeg-turbo\n"
+        "  - Windows: vcpkg install libjpeg-turbo:x64-windows")
+    set(PACS_JPEG_FOUND FALSE)
+endif()
+
 # fmt library (for std::format compatibility on older compilers)
 message(STATUS "")
 message(STATUS "=== Finding fmt library (for format compatibility) ===")
@@ -454,6 +483,8 @@ add_library(pacs_encoding
     src/encoding/implicit_vr_codec.cpp
     src/encoding/explicit_vr_codec.cpp
     src/encoding/explicit_vr_big_endian_codec.cpp
+    src/encoding/compression/jpeg_baseline_codec.cpp
+    src/encoding/compression/codec_factory.cpp
 )
 target_include_directories(pacs_encoding
     PUBLIC
@@ -463,6 +494,16 @@ target_include_directories(pacs_encoding
 target_link_libraries(pacs_encoding
     PUBLIC pacs_core
 )
+
+# Link libjpeg-turbo for JPEG compression codecs
+if(PACS_JPEG_FOUND)
+    target_link_libraries(pacs_encoding PUBLIC ${PACS_JPEG_TARGET})
+    if(PACS_JPEG_INCLUDE_DIR)
+        target_include_directories(pacs_encoding PUBLIC ${PACS_JPEG_INCLUDE_DIR})
+    endif()
+    target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG_CODEC)
+    message(STATUS "  [OK] pacs_encoding: JPEG codec enabled")
+endif()
 
 # Network library
 add_library(pacs_network
@@ -836,6 +877,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/explicit_vr_codec_test.cpp
         tests/encoding/byte_swap_test.cpp
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
+        tests/encoding/compression/jpeg_baseline_codec_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
