@@ -458,7 +458,8 @@ TEST_CASE("codec_factory creates jpeg_lossless_codec", "[encoding][compression][
     SECTION("is_supported returns correct values") {
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.70") == true);
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.50") == true);  // Baseline
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.80") == false); // JPEG-LS (not yet)
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.80") == true);  // JPEG-LS Lossless
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.81") == true);  // JPEG-LS Near-Lossless
     }
 
     SECTION("supported_transfer_syntaxes includes JPEG Lossless") {

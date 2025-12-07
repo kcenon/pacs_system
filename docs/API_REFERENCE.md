@@ -761,6 +761,112 @@ void compress_xray_lossy() {
 
 ---
 
+### `pacs::encoding::compression::jpeg_ls_codec`
+
+JPEG-LS codec supporting both lossless and near-lossless compression modes.
+
+```cpp
+#include <pacs/encoding/compression/jpeg_ls_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class jpeg_ls_codec final : public compression_codec {
+public:
+    // Transfer Syntax UIDs
+    static constexpr std::string_view kTransferSyntaxUIDLossless =
+        "1.2.840.10008.1.2.4.80";  // JPEG-LS Lossless
+    static constexpr std::string_view kTransferSyntaxUIDNearLossless =
+        "1.2.840.10008.1.2.4.81";  // JPEG-LS Near-Lossless (Lossy)
+
+    static constexpr int kAutoNearValue = -1;  // Auto-determine NEAR
+    static constexpr int kLosslessNearValue = 0;
+    static constexpr int kDefaultNearLosslessValue = 2;
+    static constexpr int kMaxNearValue = 255;
+
+    // Construct with mode selection
+    // lossless: true for 4.80 (lossless), false for 4.81 (near-lossless)
+    // near_value: -1 = auto, 0 = lossless, 1-255 = bounded error
+    explicit jpeg_ls_codec(bool lossless = true, int near_value = kAutoNearValue);
+    ~jpeg_ls_codec() override;
+
+    // Move-only (PIMPL)
+    jpeg_ls_codec(jpeg_ls_codec&&) noexcept;
+    jpeg_ls_codec& operator=(jpeg_ls_codec&&) noexcept;
+
+    // Configuration
+    [[nodiscard]] bool is_lossless_mode() const noexcept;
+    [[nodiscard]] int near_value() const noexcept;
+
+    // Codec interface implementation
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "JPEG-LS Lossless" or "JPEG-LS Near-Lossless"
+    [[nodiscard]] bool is_lossy() const noexcept override;
+
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// Supported features:
+// - Bit depths: 2-16 bit (8, 12, 16-bit typical for medical imaging)
+// - Grayscale (samples_per_pixel = 1) and Color (samples_per_pixel = 3)
+// - Lossless: NEAR=0, exact reconstruction
+// - Near-Lossless: NEAR>0, bounded error (max |original - decoded| <= NEAR)
+// - Uses CharLS library (BSD-3 license) for high-performance encoding/decoding
+
+// Usage example - Lossless compression for CT images
+void compress_ct_lossless() {
+    jpeg_ls_codec codec(true);  // Lossless mode
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;    // 12-bit CT
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(512 * 512 * 2);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data contains losslessly compressed JPEG-LS data
+        // Typical compression: 2:1 to 4:1 for medical images
+    }
+}
+
+// Usage example - Near-lossless compression for archival
+void compress_xray_near_lossless() {
+    jpeg_ls_codec codec(false, 2);  // Near-lossless, NEAR=2
+
+    image_params params;
+    params.width = 2048;
+    params.height = 2048;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(2048 * 2048 * 2);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data contains near-losslessly compressed data
+        // Max pixel error: 2 (visually lossless quality)
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
 ### `pacs::encoding::compression::codec_factory`
 
 Factory for creating compression codecs by Transfer Syntax UID.
@@ -789,6 +895,8 @@ public:
 // Currently supported Transfer Syntaxes:
 // - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - Lossy
 // - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - Lossless
+// - 1.2.840.10008.1.2.4.80 - JPEG-LS Lossless Image Compression
+// - 1.2.840.10008.1.2.4.81 - JPEG-LS Lossy (Near-Lossless) Image Compression
 // - 1.2.840.10008.1.2.4.90 - JPEG 2000 Lossless Only
 // - 1.2.840.10008.1.2.4.91 - JPEG 2000 (Lossy or Lossless)
 
@@ -835,6 +943,7 @@ struct image_params {
     [[nodiscard]] bool is_signed() const noexcept;
     [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;  // 8-bit only
     [[nodiscard]] bool valid_for_jpeg_lossless() const noexcept;  // 2-16 bit grayscale
+    [[nodiscard]] bool valid_for_jpeg_ls() const noexcept;        // 2-16 bit grayscale/color
     [[nodiscard]] bool valid_for_jpeg2000() const noexcept;       // 1-16 bit grayscale/color
 };
 

@@ -760,6 +760,112 @@ void compress_xray_lossy() {
 
 ---
 
+### `pacs::encoding::compression::jpeg_ls_codec`
+
+무손실 및 근무손실 압축 모드를 지원하는 JPEG-LS 코덱.
+
+```cpp
+#include <pacs/encoding/compression/jpeg_ls_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class jpeg_ls_codec final : public compression_codec {
+public:
+    // Transfer Syntax UID
+    static constexpr std::string_view kTransferSyntaxUIDLossless =
+        "1.2.840.10008.1.2.4.80";  // JPEG-LS 무손실
+    static constexpr std::string_view kTransferSyntaxUIDNearLossless =
+        "1.2.840.10008.1.2.4.81";  // JPEG-LS 근무손실 (손실)
+
+    static constexpr int kAutoNearValue = -1;  // NEAR 자동 결정
+    static constexpr int kLosslessNearValue = 0;
+    static constexpr int kDefaultNearLosslessValue = 2;
+    static constexpr int kMaxNearValue = 255;
+
+    // 모드 선택으로 생성
+    // lossless: true면 4.80 (무손실), false면 4.81 (근무손실)
+    // near_value: -1 = 자동, 0 = 무손실, 1-255 = 제한된 오류
+    explicit jpeg_ls_codec(bool lossless = true, int near_value = kAutoNearValue);
+    ~jpeg_ls_codec() override;
+
+    // 이동 전용 (PIMPL)
+    jpeg_ls_codec(jpeg_ls_codec&&) noexcept;
+    jpeg_ls_codec& operator=(jpeg_ls_codec&&) noexcept;
+
+    // 구성
+    [[nodiscard]] bool is_lossless_mode() const noexcept;
+    [[nodiscard]] int near_value() const noexcept;
+
+    // 코덱 인터페이스 구현
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "JPEG-LS Lossless" 또는 "JPEG-LS Near-Lossless"
+    [[nodiscard]] bool is_lossy() const noexcept override;
+
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// 지원 기능:
+// - 비트 깊이: 2-16비트 (의료 영상에서 일반적으로 8, 12, 16비트)
+// - 그레이스케일 (samples_per_pixel = 1) 및 컬러 (samples_per_pixel = 3)
+// - 무손실: NEAR=0, 정확한 재구성
+// - 근무손실: NEAR>0, 제한된 오류 (최대 |원본 - 디코딩| <= NEAR)
+// - 고성능 인코딩/디코딩을 위해 CharLS 라이브러리 사용 (BSD-3 라이선스)
+
+// 사용 예시 - CT 영상 무손실 압축
+void compress_ct_lossless() {
+    jpeg_ls_codec codec(true);  // 무손실 모드
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;    // 12비트 CT
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(512 * 512 * 2);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data에 무손실 압축된 JPEG-LS 데이터 포함
+        // 일반적인 압축률: 의료 영상의 경우 2:1 ~ 4:1
+    }
+}
+
+// 사용 예시 - 아카이빙용 근무손실 압축
+void compress_xray_near_lossless() {
+    jpeg_ls_codec codec(false, 2);  // 근무손실, NEAR=2
+
+    image_params params;
+    params.width = 2048;
+    params.height = 2048;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(2048 * 2048 * 2);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data에 근무손실 압축된 데이터 포함
+        // 최대 픽셀 오류: 2 (시각적으로 무손실 품질)
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
 ### `pacs::encoding::compression::codec_factory`
 
 Transfer Syntax UID로 압축 코덱을 생성하는 팩토리.
@@ -788,6 +894,8 @@ public:
 // 현재 지원되는 Transfer Syntax:
 // - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - 손실
 // - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - 무손실
+// - 1.2.840.10008.1.2.4.80 - JPEG-LS 무손실 이미지 압축
+// - 1.2.840.10008.1.2.4.81 - JPEG-LS 손실 (근무손실) 이미지 압축
 // - 1.2.840.10008.1.2.4.90 - JPEG 2000 무손실 전용
 // - 1.2.840.10008.1.2.4.91 - JPEG 2000 (손실 또는 무손실)
 
@@ -834,6 +942,7 @@ struct image_params {
     [[nodiscard]] bool is_signed() const noexcept;
     [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;  // 8비트 전용
     [[nodiscard]] bool valid_for_jpeg_lossless() const noexcept;  // 2-16비트 흑백
+    [[nodiscard]] bool valid_for_jpeg_ls() const noexcept;        // 2-16비트 흑백/컬러
     [[nodiscard]] bool valid_for_jpeg2000() const noexcept;       // 1-16비트 흑백/컬러
 };
 
