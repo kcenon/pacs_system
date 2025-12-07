@@ -16,6 +16,7 @@ add_executable(pacs_integration_e2e
     test_stability.cpp
     test_data_generator.cpp
     test_data_generator_test.cpp
+    test_dicom_server_v2_integration.cpp
 )
 
 target_include_directories(pacs_integration_e2e

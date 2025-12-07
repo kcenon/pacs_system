@@ -193,6 +193,8 @@ void dicom_server_v2::stop(duration timeout) {
 
     // Clean up server
     server_.reset();
+#else
+    (void)timeout;  // Unused without network_system
 #endif
 
     // Notify shutdown waiters
