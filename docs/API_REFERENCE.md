@@ -1613,6 +1613,187 @@ public:
 
 ---
 
+## DX Modality Module
+
+### `pacs::services::sop_classes::dx_storage`
+
+Digital X-Ray (DX) SOP Class definitions and utilities for general radiography imaging.
+
+```cpp
+#include <pacs/services/sop_classes/dx_storage.hpp>
+
+namespace pacs::services::sop_classes {
+
+// SOP Class UIDs
+inline constexpr std::string_view dx_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.1";
+inline constexpr std::string_view dx_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.1.1";
+inline constexpr std::string_view mammography_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2";
+inline constexpr std::string_view mammography_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2.1";
+inline constexpr std::string_view intraoral_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.3";
+inline constexpr std::string_view intraoral_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.3.1";
+
+// Enumerations
+enum class dx_photometric_interpretation { monochrome1, monochrome2 };
+enum class dx_image_type { for_presentation, for_processing };
+enum class dx_view_position { ap, pa, lateral, oblique, other };
+enum class dx_detector_type { direct, indirect, storage, film };
+enum class dx_body_part { chest, abdomen, pelvis, spine, skull, hand, foot,
+                          knee, elbow, shoulder, hip, wrist, ankle, extremity,
+                          breast, other };
+
+// SOP Class information structure
+struct dx_sop_class_info {
+    std::string_view uid;
+    std::string_view name;
+    std::string_view description;
+    dx_image_type image_type;
+    bool is_mammography;
+    bool is_intraoral;
+};
+
+// Utility functions
+[[nodiscard]] std::vector<std::string> get_dx_transfer_syntaxes();
+[[nodiscard]] std::vector<std::string> get_dx_storage_sop_classes(
+    bool include_mammography = true, bool include_intraoral = true);
+[[nodiscard]] const dx_sop_class_info* get_dx_sop_class_info(std::string_view uid) noexcept;
+[[nodiscard]] bool is_dx_storage_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_dx_for_processing_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_dx_for_presentation_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_mammography_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_valid_dx_photometric(std::string_view value) noexcept;
+
+// Enum conversion utilities
+[[nodiscard]] std::string_view to_string(dx_photometric_interpretation interp) noexcept;
+[[nodiscard]] std::string_view to_string(dx_view_position position) noexcept;
+[[nodiscard]] std::string_view to_string(dx_detector_type type) noexcept;
+[[nodiscard]] std::string_view to_string(dx_body_part part) noexcept;
+[[nodiscard]] dx_view_position parse_view_position(std::string_view value) noexcept;
+[[nodiscard]] dx_body_part parse_body_part(std::string_view value) noexcept;
+
+} // namespace pacs::services::sop_classes
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::sop_classes;
+
+// Check if a SOP Class UID is DX
+if (is_dx_storage_sop_class(sop_class_uid)) {
+    const auto* info = get_dx_sop_class_info(sop_class_uid);
+
+    if (info->image_type == dx_image_type::for_presentation) {
+        // Display-ready image, apply VOI LUT
+    } else {
+        // Raw data, requires processing
+    }
+
+    if (info->is_mammography) {
+        // Apply mammography-specific display settings
+    }
+}
+
+// Get all general DX SOP Classes (exclude mammography/intraoral)
+auto dx_classes = get_dx_storage_sop_classes(false, false);
+
+// Parse body part from DICOM dataset
+auto body_part = parse_body_part("CHEST");  // Returns dx_body_part::chest
+auto view = parse_view_position("PA");       // Returns dx_view_position::pa
+```
+
+---
+
+### `pacs::services::validation::dx_iod_validator`
+
+IOD Validator for Digital X-Ray images per DICOM PS3.3 Section A.26.
+
+```cpp
+#include <pacs/services/validation/dx_iod_validator.hpp>
+
+namespace pacs::services::validation {
+
+// Validation options
+struct dx_validation_options {
+    bool check_type1 = true;               // Required attributes
+    bool check_type2 = true;               // Required, can be empty
+    bool check_conditional = true;         // Conditionally required
+    bool validate_pixel_data = true;       // Pixel consistency checks
+    bool validate_dx_specific = true;      // DX module validation
+    bool validate_anatomy = true;          // Body part/view validation
+    bool validate_presentation_requirements = true;
+    bool validate_processing_requirements = true;
+    bool allow_both_photometric = true;    // MONOCHROME1 and 2
+    bool strict_mode = false;              // Warnings as errors
+};
+
+class dx_iod_validator {
+public:
+    dx_iod_validator() = default;
+    explicit dx_iod_validator(const dx_validation_options& options);
+
+    // Full validation
+    [[nodiscard]] validation_result validate(const core::dicom_dataset& dataset) const;
+
+    // Specialized validation
+    [[nodiscard]] validation_result validate_for_presentation(
+        const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_for_processing(
+        const core::dicom_dataset& dataset) const;
+
+    // Quick Type 1 check only
+    [[nodiscard]] bool quick_check(const core::dicom_dataset& dataset) const;
+
+    // Options access
+    [[nodiscard]] const dx_validation_options& options() const noexcept;
+    void set_options(const dx_validation_options& options);
+};
+
+// Convenience functions
+[[nodiscard]] validation_result validate_dx_iod(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_valid_dx_dataset(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_for_presentation_dx(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_for_processing_dx(const core::dicom_dataset& dataset);
+
+} // namespace pacs::services::validation
+```
+
+**Example:**
+```cpp
+using namespace pacs::services::validation;
+
+// Basic validation
+auto result = validate_dx_iod(dataset);
+
+if (!result.is_valid) {
+    for (const auto& finding : result.findings) {
+        if (finding.severity == validation_severity::error) {
+            std::cerr << "[ERROR] " << finding.code << ": " << finding.message << "\n";
+        }
+    }
+    return;
+}
+
+// Strict validation with custom options
+dx_validation_options options;
+options.strict_mode = true;  // Treat warnings as errors
+
+dx_iod_validator validator(options);
+auto strict_result = validator.validate(dataset);
+
+// Validate For Presentation image with VOI LUT checks
+if (is_for_presentation_dx(dataset)) {
+    auto result = validator.validate_for_presentation(dataset);
+    // Includes Window Center/Width or VOI LUT Sequence validation
+}
+```
+
+---
+
 ## Monitoring Module
 
 ### `pacs::monitoring::pacs_metrics`
@@ -1833,10 +2014,11 @@ public:
 | 1.1.0   | 2025-12-05 | Added thread_system integration APIs         |
 | 1.2.0   | 2025-12-07 | Added Network V2 Module (dicom_server_v2, dicom_association_handler) |
 | 1.3.0   | 2025-12-07 | Added Monitoring Module (pacs_metrics for DIMSE operation tracking) |
+| 1.4.0   | 2025-12-07 | Added DX Modality Module (dx_storage, dx_iod_validator) |
 
 ---
 
-*Document Version: 1.3.0*
+*Document Version: 1.4.0*
 *Created: 2025-11-30*
 *Last Updated: 2025-12-07*
 *Author: kcenon@naver.com*

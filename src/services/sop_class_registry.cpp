@@ -4,6 +4,7 @@
  */
 
 #include "pacs/services/sop_class_registry.hpp"
+#include "pacs/services/sop_classes/dx_storage.hpp"
 #include "pacs/services/sop_classes/us_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
 
@@ -141,6 +142,7 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
 void sop_class_registry::register_standard_sop_classes() {
     register_us_sop_classes();
     register_xa_sop_classes();
+    register_dx_sop_classes();
     register_ct_sop_classes();
     register_mr_sop_classes();
     register_other_sop_classes();
@@ -267,6 +269,86 @@ void sop_class_registry::register_xa_sop_classes() {
     );
 }
 
+void sop_class_registry::register_dx_sop_classes() {
+    // Digital X-Ray Image Storage - For Presentation
+    registry_.emplace(
+        std::string(sop_classes::dx_image_storage_for_presentation_uid),
+        sop_class_info{
+            sop_classes::dx_image_storage_for_presentation_uid,
+            "Digital X-Ray Image Storage - For Presentation",
+            sop_class_category::storage,
+            modality_type::dx,
+            false,
+            false
+        }
+    );
+
+    // Digital X-Ray Image Storage - For Processing
+    registry_.emplace(
+        std::string(sop_classes::dx_image_storage_for_processing_uid),
+        sop_class_info{
+            sop_classes::dx_image_storage_for_processing_uid,
+            "Digital X-Ray Image Storage - For Processing",
+            sop_class_category::storage,
+            modality_type::dx,
+            false,
+            false
+        }
+    );
+
+    // Digital Mammography X-Ray Image Storage - For Presentation
+    registry_.emplace(
+        std::string(sop_classes::mammography_image_storage_for_presentation_uid),
+        sop_class_info{
+            sop_classes::mammography_image_storage_for_presentation_uid,
+            "Digital Mammography X-Ray Image Storage - For Presentation",
+            sop_class_category::storage,
+            modality_type::mg,
+            false,
+            false
+        }
+    );
+
+    // Digital Mammography X-Ray Image Storage - For Processing
+    registry_.emplace(
+        std::string(sop_classes::mammography_image_storage_for_processing_uid),
+        sop_class_info{
+            sop_classes::mammography_image_storage_for_processing_uid,
+            "Digital Mammography X-Ray Image Storage - For Processing",
+            sop_class_category::storage,
+            modality_type::mg,
+            false,
+            false
+        }
+    );
+
+    // Digital Intra-Oral X-Ray Image Storage - For Presentation
+    registry_.emplace(
+        std::string(sop_classes::intraoral_image_storage_for_presentation_uid),
+        sop_class_info{
+            sop_classes::intraoral_image_storage_for_presentation_uid,
+            "Digital Intra-Oral X-Ray Image Storage - For Presentation",
+            sop_class_category::storage,
+            modality_type::dx,  // Intra-oral uses DX modality
+            false,
+            false
+        }
+    );
+
+    // Digital Intra-Oral X-Ray Image Storage - For Processing
+    registry_.emplace(
+        std::string(sop_classes::intraoral_image_storage_for_processing_uid),
+        sop_class_info{
+            sop_classes::intraoral_image_storage_for_processing_uid,
+            "Digital Intra-Oral X-Ray Image Storage - For Processing",
+            sop_class_category::storage,
+            modality_type::dx,  // Intra-oral uses DX modality
+            false,
+            false
+        }
+    );
+}
+
 void sop_class_registry::register_ct_sop_classes() {
     // CT Image Storage
     registry_.emplace(
@@ -337,18 +419,7 @@ void sop_class_registry::register_other_sop_classes() {
         }
     );
 
-    // DX Image Storage - For Presentation
-    registry_.emplace(
-        "1.2.840.10008.5.1.4.1.1.1.1",
-        sop_class_info{
-            "1.2.840.10008.5.1.4.1.1.1.1",
-            "Digital X-Ray Image Storage - For Presentation",
-            sop_class_category::storage,
-            modality_type::dx,
-            false,
-            false
-        }
-    );
+    // Note: DX SOP classes are now registered in register_dx_sop_classes()
 
     // Secondary Capture Image Storage
     registry_.emplace(
