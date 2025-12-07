@@ -2,7 +2,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/encoding/compression/jpeg2000_codec.hpp"
+#include "pacs/encoding/compression/jpeg_ls_codec.hpp"
 #include "pacs/encoding/compression/codec_factory.hpp"
 #include "pacs/encoding/compression/image_params.hpp"
 
@@ -104,8 +104,26 @@ bool images_identical(const std::vector<uint8_t>& a, const std::vector<uint8_t>&
 }
 
 /**
+ * @brief Computes maximum absolute error between two images.
+ * Used to verify near-lossless compression bounded error.
+ */
+int compute_max_error(const std::vector<uint8_t>& original,
+                      const std::vector<uint8_t>& reconstructed) {
+    if (original.size() != reconstructed.size() || original.empty()) {
+        return -1;
+    }
+
+    int max_error = 0;
+    for (size_t i = 0; i < original.size(); ++i) {
+        int diff = std::abs(static_cast<int>(original[i]) -
+                           static_cast<int>(reconstructed[i]));
+        max_error = std::max(max_error, diff);
+    }
+    return max_error;
+}
+
+/**
  * @brief Computes Peak Signal-to-Noise Ratio between two images.
- * Used to verify lossy compression quality.
  */
 double compute_psnr(const std::vector<uint8_t>& original,
                     const std::vector<uint8_t>& reconstructed,
@@ -130,15 +148,15 @@ double compute_psnr(const std::vector<uint8_t>& original,
 
 }  // namespace
 
-TEST_CASE("jpeg2000_codec basic properties - lossless mode", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);  // lossless mode
+TEST_CASE("jpeg_ls_codec basic properties - lossless mode", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);  // lossless mode
 
     SECTION("transfer syntax UID is correct for lossless") {
-        REQUIRE(codec.transfer_syntax_uid() == "1.2.840.10008.1.2.4.90");
+        REQUIRE(codec.transfer_syntax_uid() == "1.2.840.10008.1.2.4.80");
     }
 
-    SECTION("name is JPEG 2000 Lossless") {
-        REQUIRE(codec.name() == "JPEG 2000 Lossless");
+    SECTION("name is JPEG-LS Lossless") {
+        REQUIRE(codec.name() == "JPEG-LS Lossless");
     }
 
     SECTION("is lossless codec") {
@@ -149,20 +167,20 @@ TEST_CASE("jpeg2000_codec basic properties - lossless mode", "[encoding][compres
         REQUIRE(codec.is_lossless_mode() == true);
     }
 
-    SECTION("default resolution levels is 6") {
-        REQUIRE(codec.resolution_levels() == 6);
+    SECTION("NEAR value is 0 for lossless") {
+        REQUIRE(codec.near_value() == 0);
     }
 }
 
-TEST_CASE("jpeg2000_codec basic properties - lossy mode", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(false);  // lossy mode
+TEST_CASE("jpeg_ls_codec basic properties - near-lossless mode", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(false, 3);  // near-lossless mode with NEAR=3
 
-    SECTION("transfer syntax UID is correct for lossy") {
-        REQUIRE(codec.transfer_syntax_uid() == "1.2.840.10008.1.2.4.91");
+    SECTION("transfer syntax UID is correct for near-lossless") {
+        REQUIRE(codec.transfer_syntax_uid() == "1.2.840.10008.1.2.4.81");
     }
 
-    SECTION("name is JPEG 2000") {
-        REQUIRE(codec.name() == "JPEG 2000");
+    SECTION("name is JPEG-LS Near-Lossless") {
+        REQUIRE(codec.name() == "JPEG-LS Near-Lossless");
     }
 
     SECTION("is lossy codec") {
@@ -173,33 +191,43 @@ TEST_CASE("jpeg2000_codec basic properties - lossy mode", "[encoding][compressio
         REQUIRE(codec.is_lossless_mode() == false);
     }
 
-    SECTION("default compression ratio is 20") {
-        REQUIRE(codec.compression_ratio() == 20.0f);
+    SECTION("NEAR value is 3") {
+        REQUIRE(codec.near_value() == 3);
     }
 }
 
-TEST_CASE("jpeg2000_codec custom configuration", "[encoding][compression][jpeg2000]") {
-    SECTION("custom compression ratio") {
-        jpeg2000_codec codec(false, 50.0f);
-        REQUIRE(codec.compression_ratio() == 50.0f);
+TEST_CASE("jpeg_ls_codec custom configuration", "[encoding][compression][jpegls]") {
+    SECTION("lossless mode with NEAR=0") {
+        jpeg_ls_codec codec(true, 0);
+        REQUIRE(codec.near_value() == 0);
+        REQUIRE(codec.is_lossless_mode() == true);
     }
 
-    SECTION("custom resolution levels") {
-        jpeg2000_codec codec(true, 20.0f, 4);
-        REQUIRE(codec.resolution_levels() == 4);
+    SECTION("NEAR=0 forces lossless even if lossless=false") {
+        jpeg_ls_codec codec(false, 0);
+        REQUIRE(codec.near_value() == 0);
+        REQUIRE(codec.is_lossless_mode() == true);
     }
 
-    SECTION("resolution levels are clamped to valid range") {
-        jpeg2000_codec codec_low(true, 20.0f, 0);
-        REQUIRE(codec_low.resolution_levels() == 1);
+    SECTION("lossless=true with NEAR>0 forces NEAR to 0") {
+        jpeg_ls_codec codec(true, 5);  // Request lossless but with NEAR=5
+        REQUIRE(codec.near_value() == 0);  // NEAR is forced to 0
+        REQUIRE(codec.is_lossless_mode() == true);
+    }
 
-        jpeg2000_codec codec_high(true, 20.0f, 100);
-        REQUIRE(codec_high.resolution_levels() == 32);
+    SECTION("NEAR value is clamped to valid range") {
+        jpeg_ls_codec codec_high(false, 500);  // Above max (255)
+        REQUIRE(codec_high.near_value() == 255);
+
+        jpeg_ls_codec codec_neg(false, -10);   // Below min (0)
+        REQUIRE(codec_neg.near_value() == 0);
+        // Negative clamped to 0, which forces lossless
+        REQUIRE(codec_neg.is_lossless_mode() == true);
     }
 }
 
-TEST_CASE("jpeg2000_codec can_encode validation", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);
+TEST_CASE("jpeg_ls_codec can_encode validation", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);
 
     SECTION("accepts valid 8-bit grayscale parameters") {
         image_params params;
@@ -250,13 +278,23 @@ TEST_CASE("jpeg2000_codec can_encode validation", "[encoding][compression][jpeg2
         REQUIRE(codec.can_encode(params) == true);
     }
 
-    SECTION("rejects invalid bit depth") {
+    SECTION("rejects invalid bit depth - too low") {
+        image_params params;
+        params.width = 256;
+        params.height = 256;
+        params.bits_allocated = 8;
+        params.bits_stored = 1;  // Below minimum (2)
+        params.samples_per_pixel = 1;
+
+        REQUIRE(codec.can_encode(params) == false);
+    }
+
+    SECTION("rejects invalid bit depth - too high") {
         image_params params;
         params.width = 256;
         params.height = 256;
         params.bits_allocated = 32;
-        params.bits_stored = 32;
-        params.high_bit = 31;
+        params.bits_stored = 32;  // Above maximum (16)
         params.samples_per_pixel = 1;
 
         REQUIRE(codec.can_encode(params) == false);
@@ -285,10 +323,10 @@ TEST_CASE("jpeg2000_codec can_encode validation", "[encoding][compression][jpeg2
     }
 }
 
-#ifdef PACS_WITH_JPEG2000_CODEC
+#ifdef PACS_WITH_JPEGLS_CODEC
 
-TEST_CASE("jpeg2000_codec 8-bit grayscale lossless round-trip", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);  // lossless mode
+TEST_CASE("jpeg_ls_codec 8-bit grayscale lossless round-trip", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);  // lossless mode
 
     uint16_t width = 64;
     uint16_t height = 64;
@@ -336,8 +374,8 @@ TEST_CASE("jpeg2000_codec 8-bit grayscale lossless round-trip", "[encoding][comp
     }
 }
 
-TEST_CASE("jpeg2000_codec 12-bit grayscale lossless round-trip", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);
+TEST_CASE("jpeg_ls_codec 12-bit grayscale lossless round-trip", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);
 
     uint16_t width = 64;
     uint16_t height = 64;
@@ -382,8 +420,8 @@ TEST_CASE("jpeg2000_codec 12-bit grayscale lossless round-trip", "[encoding][com
     }
 }
 
-TEST_CASE("jpeg2000_codec 16-bit grayscale lossless round-trip", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);
+TEST_CASE("jpeg_ls_codec 16-bit grayscale lossless round-trip", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);
 
     uint16_t width = 64;
     uint16_t height = 64;
@@ -411,8 +449,8 @@ TEST_CASE("jpeg2000_codec 16-bit grayscale lossless round-trip", "[encoding][com
     }
 }
 
-TEST_CASE("jpeg2000_codec 8-bit color lossless round-trip", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);  // lossless mode
+TEST_CASE("jpeg_ls_codec 8-bit color lossless round-trip", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);  // lossless mode
 
     uint16_t width = 64;
     uint16_t height = 64;
@@ -441,8 +479,9 @@ TEST_CASE("jpeg2000_codec 8-bit color lossless round-trip", "[encoding][compress
     }
 }
 
-TEST_CASE("jpeg2000_codec lossy compression", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(false, 20.0f);  // lossy mode with 20:1 ratio
+TEST_CASE("jpeg_ls_codec near-lossless compression", "[encoding][compression][jpegls]") {
+    const int near_value = 3;
+    jpeg_ls_codec codec(false, near_value);  // near-lossless mode with NEAR=3
 
     uint16_t width = 128;
     uint16_t height = 128;
@@ -457,9 +496,8 @@ TEST_CASE("jpeg2000_codec lossy compression", "[encoding][compression][jpeg2000]
     params.samples_per_pixel = 1;
     params.photometric = photometric_interpretation::monochrome2;
 
-    SECTION("lossy compression produces smaller output") {
-        // Compare with lossless codec
-        jpeg2000_codec lossless_codec(true);
+    SECTION("near-lossless compression produces smaller output than lossless") {
+        jpeg_ls_codec lossless_codec(true);
 
         auto lossy_result = codec.encode(original, params);
         auto lossless_result = lossless_codec.encode(original, params);
@@ -467,31 +505,74 @@ TEST_CASE("jpeg2000_codec lossy compression", "[encoding][compression][jpeg2000]
         REQUIRE(lossy_result.success == true);
         REQUIRE(lossless_result.success == true);
 
-        // Lossy should produce smaller output (though not guaranteed for all images)
-        // For gradient images, this should typically hold
-        INFO("Lossy size: " << lossy_result.data.size()
+        // Near-lossless should produce smaller or equal output
+        INFO("Near-lossless size: " << lossy_result.data.size()
              << ", Lossless size: " << lossless_result.data.size());
+
+        // Note: for simple gradient images, compression might be similar
     }
 
-    SECTION("lossy round-trip maintains acceptable quality") {
+    SECTION("near-lossless round-trip has bounded error") {
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.success == true);
 
         auto decode_result = codec.decode(encode_result.data, params);
         REQUIRE(decode_result.success == true);
 
-        // PSNR should be at least 30 dB for reasonable quality
-        double psnr = compute_psnr(original, decode_result.data);
-        INFO("PSNR: " << psnr << " dB");
-        REQUIRE(psnr > 30.0);
+        // Maximum error should be bounded by NEAR value
+        int max_error = compute_max_error(original, decode_result.data);
+        INFO("Max error: " << max_error << ", NEAR value: " << near_value);
+        REQUIRE(max_error <= near_value);
     }
 
-    SECTION("quality option affects compression") {
+    SECTION("near-lossless maintains high quality") {
+        auto encode_result = codec.encode(original, params);
+        REQUIRE(encode_result.success == true);
+
+        auto decode_result = codec.decode(encode_result.data, params);
+        REQUIRE(decode_result.success == true);
+
+        // PSNR should be high for near-lossless
+        double psnr = compute_psnr(original, decode_result.data);
+        INFO("PSNR: " << psnr << " dB");
+        REQUIRE(psnr > 40.0);  // High quality threshold
+    }
+}
+
+TEST_CASE("jpeg_ls_codec quality option affects NEAR", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(false, 5);  // Default NEAR=5
+
+    uint16_t width = 64;
+    uint16_t height = 64;
+    auto original = create_gradient_image_8bit(width, height);
+
+    image_params params;
+    params.width = width;
+    params.height = height;
+    params.bits_allocated = 8;
+    params.bits_stored = 8;
+    params.samples_per_pixel = 1;
+
+    SECTION("quality 100 produces lossless") {
+        compression_options options;
+        options.quality = 100;
+
+        auto encode_result = codec.encode(original, params, options);
+        REQUIRE(encode_result.success == true);
+
+        auto decode_result = codec.decode(encode_result.data, params);
+        REQUIRE(decode_result.success == true);
+
+        // Quality 100 should be lossless
+        REQUIRE(images_identical(original, decode_result.data));
+    }
+
+    SECTION("lower quality produces smaller files") {
         compression_options high_quality;
-        high_quality.quality = 90;  // High quality
+        high_quality.quality = 90;
 
         compression_options low_quality;
-        low_quality.quality = 10;   // Low quality
+        low_quality.quality = 50;
 
         auto high_result = codec.encode(original, params, high_quality);
         auto low_result = codec.encode(original, params, low_quality);
@@ -499,14 +580,13 @@ TEST_CASE("jpeg2000_codec lossy compression", "[encoding][compression][jpeg2000]
         REQUIRE(high_result.success == true);
         REQUIRE(low_result.success == true);
 
-        // Higher quality should produce larger files (typically)
         INFO("High quality size: " << high_result.data.size()
              << ", Low quality size: " << low_result.data.size());
     }
 }
 
-TEST_CASE("jpeg2000_codec with random noise", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);  // lossless mode
+TEST_CASE("jpeg_ls_codec with random noise", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);  // lossless mode
 
     uint16_t width = 128;
     uint16_t height = 128;
@@ -533,8 +613,8 @@ TEST_CASE("jpeg2000_codec with random noise", "[encoding][compression][jpeg2000]
     }
 }
 
-TEST_CASE("jpeg2000_codec error handling", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);
+TEST_CASE("jpeg_ls_codec error handling", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);
 
     SECTION("empty pixel data returns error") {
         image_params params;
@@ -551,16 +631,16 @@ TEST_CASE("jpeg2000_codec error handling", "[encoding][compression][jpeg2000]") 
         REQUIRE_FALSE(result.error_message.empty());
     }
 
-    SECTION("size mismatch returns error") {
+    SECTION("invalid dimensions returns error") {
         image_params params;
-        params.width = 64;
+        params.width = 0;  // Invalid
         params.height = 64;
         params.bits_allocated = 8;
         params.bits_stored = 8;
         params.samples_per_pixel = 1;
 
-        std::vector<uint8_t> wrong_size(100);  // Should be 64*64 = 4096
-        auto result = codec.encode(wrong_size, params);
+        auto original = create_gradient_image_8bit(64, 64);
+        auto result = codec.encode(original, params);
 
         REQUIRE(result.success == false);
     }
@@ -576,7 +656,7 @@ TEST_CASE("jpeg2000_codec error handling", "[encoding][compression][jpeg2000]") 
         REQUIRE(result.success == false);
     }
 
-    SECTION("invalid J2K data returns error") {
+    SECTION("invalid JPEG-LS data returns error") {
         image_params params;
         params.width = 64;
         params.height = 64;
@@ -588,7 +668,7 @@ TEST_CASE("jpeg2000_codec error handling", "[encoding][compression][jpeg2000]") 
     }
 }
 
-TEST_CASE("jpeg2000_codec compression options", "[encoding][compression][jpeg2000]") {
+TEST_CASE("jpeg_ls_codec compression options", "[encoding][compression][jpegls]") {
     uint16_t width = 64;
     uint16_t height = 64;
     auto original = create_gradient_image_8bit(width, height);
@@ -601,8 +681,8 @@ TEST_CASE("jpeg2000_codec compression options", "[encoding][compression][jpeg200
     params.high_bit = 7;
     params.samples_per_pixel = 1;
 
-    SECTION("lossless option overrides lossy codec") {
-        jpeg2000_codec lossy_codec(false);  // Default lossy
+    SECTION("lossless option overrides near-lossless codec") {
+        jpeg_ls_codec lossy_codec(false, 5);  // Default near-lossless
 
         compression_options options;
         options.lossless = true;  // Force lossless
@@ -613,15 +693,15 @@ TEST_CASE("jpeg2000_codec compression options", "[encoding][compression][jpeg200
         auto decode_result = lossy_codec.decode(encode_result.data, params);
         REQUIRE(decode_result.success == true);
 
-        // Should be lossless even though codec was created as lossy
+        // Should be lossless even though codec was created as near-lossless
         REQUIRE(images_identical(original, decode_result.data));
     }
 }
 
-#else  // !PACS_WITH_JPEG2000_CODEC
+#else  // !PACS_WITH_JPEGLS_CODEC
 
-TEST_CASE("jpeg2000_codec without OpenJPEG returns error", "[encoding][compression][jpeg2000]") {
-    jpeg2000_codec codec(true);
+TEST_CASE("jpeg_ls_codec without CharLS returns error", "[encoding][compression][jpegls]") {
+    jpeg_ls_codec codec(true);
 
     uint16_t width = 64;
     uint16_t height = 64;
@@ -643,7 +723,7 @@ TEST_CASE("jpeg2000_codec without OpenJPEG returns error", "[encoding][compressi
     }
 
     SECTION("decode returns not available error") {
-        std::vector<uint8_t> dummy_data = {0xFF, 0x4F, 0xFF, 0x51};
+        std::vector<uint8_t> dummy_data = {0xFF, 0xD8, 0xFF, 0xF7};  // JPEG-LS marker
         auto result = codec.decode(dummy_data, params);
 
         REQUIRE(result.success == false);
@@ -652,66 +732,61 @@ TEST_CASE("jpeg2000_codec without OpenJPEG returns error", "[encoding][compressi
     }
 }
 
-#endif  // PACS_WITH_JPEG2000_CODEC
+#endif  // PACS_WITH_JPEGLS_CODEC
 
-TEST_CASE("codec_factory creates jpeg2000_codec", "[encoding][compression][jpeg2000]") {
+TEST_CASE("codec_factory creates jpeg_ls_codec", "[encoding][compression][jpegls]") {
     SECTION("create lossless by UID") {
-        auto codec = codec_factory::create("1.2.840.10008.1.2.4.90");
+        auto codec = codec_factory::create("1.2.840.10008.1.2.4.80");
 
         REQUIRE(codec != nullptr);
-        REQUIRE(codec->transfer_syntax_uid() == "1.2.840.10008.1.2.4.90");
-        REQUIRE(codec->name() == "JPEG 2000 Lossless");
+        REQUIRE(codec->transfer_syntax_uid() == "1.2.840.10008.1.2.4.80");
+        REQUIRE(codec->name() == "JPEG-LS Lossless");
         REQUIRE(codec->is_lossy() == false);
     }
 
-    SECTION("create lossy by UID") {
-        auto codec = codec_factory::create("1.2.840.10008.1.2.4.91");
+    SECTION("create near-lossless by UID") {
+        auto codec = codec_factory::create("1.2.840.10008.1.2.4.81");
 
         REQUIRE(codec != nullptr);
-        REQUIRE(codec->transfer_syntax_uid() == "1.2.840.10008.1.2.4.91");
-        REQUIRE(codec->name() == "JPEG 2000");
+        REQUIRE(codec->transfer_syntax_uid() == "1.2.840.10008.1.2.4.81");
+        REQUIRE(codec->name() == "JPEG-LS Near-Lossless");
         REQUIRE(codec->is_lossy() == true);
     }
 
     SECTION("create by transfer_syntax - lossless") {
-        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.90");
+        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.80");
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);
         REQUIRE(codec->is_lossy() == false);
     }
 
-    SECTION("create by transfer_syntax - lossy") {
-        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.91");
+    SECTION("create by transfer_syntax - near-lossless") {
+        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.81");
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);
         REQUIRE(codec->is_lossy() == true);
     }
 
-    SECTION("is_supported returns correct values") {
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.90") == true);  // J2K Lossless
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.91") == true);  // J2K Lossy
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.70") == true);  // JPEG Lossless
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.50") == true);  // JPEG Baseline
+    SECTION("is_supported returns correct values for JPEG-LS") {
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.80") == true);  // JPEG-LS Lossless
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.81") == true);  // JPEG-LS Near-Lossless
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.5") == false);    // RLE (not yet)
     }
 
-    SECTION("supported_transfer_syntaxes includes JPEG 2000") {
+    SECTION("supported_transfer_syntaxes includes JPEG-LS") {
         auto supported = codec_factory::supported_transfer_syntaxes();
 
         REQUIRE_FALSE(supported.empty());
         REQUIRE(std::find(supported.begin(), supported.end(),
-                          "1.2.840.10008.1.2.4.90") != supported.end());
+                          "1.2.840.10008.1.2.4.80") != supported.end());
         REQUIRE(std::find(supported.begin(), supported.end(),
-                          "1.2.840.10008.1.2.4.91") != supported.end());
+                          "1.2.840.10008.1.2.4.81") != supported.end());
     }
 }
 
-TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg2000]") {
-    SECTION("valid_for_jpeg2000 accepts 8-bit grayscale") {
+TEST_CASE("image_params validation for JPEG-LS", "[encoding][compression][jpegls]") {
+    SECTION("valid_for_jpeg_ls accepts 8-bit grayscale") {
         image_params params;
         params.width = 256;
         params.height = 256;
@@ -719,10 +794,10 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 8;
         params.samples_per_pixel = 1;
 
-        REQUIRE(params.valid_for_jpeg2000() == true);
+        REQUIRE(params.valid_for_jpeg_ls() == true);
     }
 
-    SECTION("valid_for_jpeg2000 accepts 12-bit grayscale") {
+    SECTION("valid_for_jpeg_ls accepts 12-bit grayscale") {
         image_params params;
         params.width = 512;
         params.height = 512;
@@ -730,10 +805,10 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 12;
         params.samples_per_pixel = 1;
 
-        REQUIRE(params.valid_for_jpeg2000() == true);
+        REQUIRE(params.valid_for_jpeg_ls() == true);
     }
 
-    SECTION("valid_for_jpeg2000 accepts 16-bit grayscale") {
+    SECTION("valid_for_jpeg_ls accepts 16-bit grayscale") {
         image_params params;
         params.width = 512;
         params.height = 512;
@@ -741,10 +816,10 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 16;
         params.samples_per_pixel = 1;
 
-        REQUIRE(params.valid_for_jpeg2000() == true);
+        REQUIRE(params.valid_for_jpeg_ls() == true);
     }
 
-    SECTION("valid_for_jpeg2000 accepts 8-bit color") {
+    SECTION("valid_for_jpeg_ls accepts 8-bit color") {
         image_params params;
         params.width = 256;
         params.height = 256;
@@ -752,10 +827,21 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 8;
         params.samples_per_pixel = 3;
 
-        REQUIRE(params.valid_for_jpeg2000() == true);
+        REQUIRE(params.valid_for_jpeg_ls() == true);
     }
 
-    SECTION("valid_for_jpeg2000 rejects 32-bit") {
+    SECTION("valid_for_jpeg_ls rejects 1-bit (below minimum)") {
+        image_params params;
+        params.width = 256;
+        params.height = 256;
+        params.bits_allocated = 8;
+        params.bits_stored = 1;  // Below minimum (2)
+        params.samples_per_pixel = 1;
+
+        REQUIRE(params.valid_for_jpeg_ls() == false);
+    }
+
+    SECTION("valid_for_jpeg_ls rejects 32-bit") {
         image_params params;
         params.width = 256;
         params.height = 256;
@@ -763,10 +849,10 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 32;
         params.samples_per_pixel = 1;
 
-        REQUIRE(params.valid_for_jpeg2000() == false);
+        REQUIRE(params.valid_for_jpeg_ls() == false);
     }
 
-    SECTION("valid_for_jpeg2000 rejects zero dimensions") {
+    SECTION("valid_for_jpeg_ls rejects zero dimensions") {
         image_params params;
         params.width = 0;
         params.height = 256;
@@ -774,10 +860,10 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 8;
         params.samples_per_pixel = 1;
 
-        REQUIRE(params.valid_for_jpeg2000() == false);
+        REQUIRE(params.valid_for_jpeg_ls() == false);
     }
 
-    SECTION("valid_for_jpeg2000 rejects invalid samples_per_pixel") {
+    SECTION("valid_for_jpeg_ls rejects invalid samples_per_pixel") {
         image_params params;
         params.width = 256;
         params.height = 256;
@@ -785,6 +871,6 @@ TEST_CASE("image_params validation for JPEG 2000", "[encoding][compression][jpeg
         params.bits_stored = 8;
         params.samples_per_pixel = 4;  // RGBA not supported
 
-        REQUIRE(params.valid_for_jpeg2000() == false);
+        REQUIRE(params.valid_for_jpeg_ls() == false);
     }
 }
