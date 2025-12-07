@@ -12,6 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+
 using namespace pacs::services::validation;
 using namespace pacs::services::sop_classes;
 using namespace pacs::core;
@@ -37,6 +39,14 @@ constexpr dicom_tag tag_imager_pixel_spacing{0x0018, 0x1164};
 constexpr dicom_tag tag_body_part_examined{0x0018, 0x0015};
 constexpr dicom_tag tag_pixel_intensity_relationship{0x0028, 0x1040};
 constexpr dicom_tag tag_pixel_intensity_relationship_sign{0x0028, 0x1041};
+
+// Helper to check if validation result has info-level findings
+[[nodiscard]] bool has_info_findings(const validation_result& result) noexcept {
+    return std::any_of(result.findings.begin(), result.findings.end(),
+                       [](const validation_finding& f) {
+                           return f.severity == validation_severity::info;
+                       });
+}
 
 // Helper to create a minimal valid mammography dataset
 dicom_dataset create_minimal_mg_dataset() {
@@ -371,13 +381,13 @@ TEST_CASE("mg_iod_validator validates compression force", "[services][mg][valida
         dataset.set_numeric<double>(tag_compression_force, vr_type::DS, 30.0);
         auto result = validator.validate_compression_force(dataset);
         CHECK(result.is_valid);  // Still valid, just informational
-        CHECK(result.has_info());
+        CHECK(has_info_findings(result));
 
         // Above typical (info warning)
         dataset.set_numeric<double>(tag_compression_force, vr_type::DS, 250.0);
         result = validator.validate_compression_force(dataset);
         CHECK(result.is_valid);
-        CHECK(result.has_info());
+        CHECK(has_info_findings(result));
     }
 
     SECTION("force outside valid range") {
@@ -401,7 +411,7 @@ TEST_CASE("mg_iod_validator validates compression force", "[services][mg][valida
         auto result = validator.validate_compression_force(dataset);
         // Missing compression force is informational
         CHECK(result.is_valid);
-        CHECK(result.has_info());
+        CHECK(has_info_findings(result));
     }
 }
 
@@ -504,7 +514,7 @@ TEST_CASE("mg_iod_validator checks pixel data consistency", "[services][mg][vali
         dataset.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 8);
         auto result = validator.validate(dataset);
         // Low bit depth is informational only
-        CHECK(result.has_info());
+        CHECK(has_info_findings(result));
     }
 }
 
@@ -550,7 +560,7 @@ TEST_CASE("mg_iod_validator validates breast implant attributes", "[services][mg
         dataset.set_string(tag_breast_implant_present, vr_type::CS, "YES");
         auto result = validator.validate(dataset);
         // Implant present with non-ID view generates info
-        CHECK(result.has_info());
+        CHECK(has_info_findings(result));
     }
 
     SECTION("breast implant NO") {
