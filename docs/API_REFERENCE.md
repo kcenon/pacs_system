@@ -570,6 +570,88 @@ void compress_image() {
 
 ---
 
+### `pacs::encoding::compression::jpeg_lossless_codec`
+
+JPEG Lossless (Process 14, Selection Value 1) codec for diagnostic quality images.
+
+```cpp
+#include <pacs/encoding/compression/jpeg_lossless_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class jpeg_lossless_codec final : public compression_codec {
+public:
+    static constexpr std::string_view kTransferSyntaxUID = "1.2.840.10008.1.2.4.70";
+    static constexpr int kDefaultPredictor = 1;       // Ra (left neighbor)
+    static constexpr int kDefaultPointTransform = 0;  // No scaling
+
+    // Construct with optional predictor (1-7) and point transform (0-15)
+    explicit jpeg_lossless_codec(int predictor = kDefaultPredictor,
+                                  int point_transform = kDefaultPointTransform);
+    ~jpeg_lossless_codec() override;
+
+    // Move-only (PIMPL)
+    jpeg_lossless_codec(jpeg_lossless_codec&&) noexcept;
+    jpeg_lossless_codec& operator=(jpeg_lossless_codec&&) noexcept;
+
+    // Configuration
+    [[nodiscard]] int predictor() const noexcept;
+    [[nodiscard]] int point_transform() const noexcept;
+
+    // Codec interface implementation
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "JPEG Lossless (Process 14, SV1)"
+    [[nodiscard]] bool is_lossy() const noexcept override;  // false (lossless!)
+
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// Supported Predictors:
+// 1: Ra (left neighbor)
+// 2: Rb (above neighbor)
+// 3: Rc (diagonal upper-left neighbor)
+// 4: Ra + Rb - Rc
+// 5: Ra + (Rb - Rc) / 2
+// 6: Rb + (Ra - Rc) / 2
+// 7: (Ra + Rb) / 2
+
+// Supported bit depths: 8, 12, 16-bit grayscale
+
+// Usage example
+void compress_ct_image_lossless() {
+    jpeg_lossless_codec codec;  // Default predictor 1
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;    // 12-bit CT image
+    params.samples_per_pixel = 1;  // Grayscale only
+
+    std::vector<uint8_t> pixel_data(512 * 512 * 2);  // 16-bit storage
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data contains losslessly compressed JPEG
+        // Original data can be perfectly reconstructed
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
 ### `pacs::encoding::compression::codec_factory`
 
 Factory for creating compression codecs by Transfer Syntax UID.
@@ -596,7 +678,8 @@ public:
 };
 
 // Currently supported Transfer Syntaxes:
-// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1)
+// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - Lossy
+// - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - Lossless
 
 } // namespace pacs::encoding::compression
 ```
@@ -639,7 +722,8 @@ struct image_params {
     [[nodiscard]] bool is_grayscale() const noexcept;
     [[nodiscard]] bool is_color() const noexcept;
     [[nodiscard]] bool is_signed() const noexcept;
-    [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;
+    [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;  // 8-bit only
+    [[nodiscard]] bool valid_for_jpeg_lossless() const noexcept;  // 2-16 bit grayscale
 };
 
 // String conversion
