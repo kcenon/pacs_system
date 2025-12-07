@@ -1,5 +1,6 @@
 #include "pacs/encoding/compression/codec_factory.hpp"
 #include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
+#include "pacs/encoding/compression/jpeg_lossless_codec.hpp"
 
 #include <array>
 
@@ -10,11 +11,12 @@ namespace {
 /**
  * @brief List of supported Transfer Syntax UIDs for compression codecs.
  *
- * As more codecs are implemented (JPEG Lossless, JPEG 2000, etc.),
+ * As more codecs are implemented (JPEG 2000, JPEG-LS, RLE, etc.),
  * they should be added to this list.
  */
-static constexpr std::array<std::string_view, 1> kSupportedTransferSyntaxes = {{
-    jpeg_baseline_codec::kTransferSyntaxUID,  // 1.2.840.10008.1.2.4.50
+static constexpr std::array<std::string_view, 2> kSupportedTransferSyntaxes = {{
+    jpeg_baseline_codec::kTransferSyntaxUID,   // 1.2.840.10008.1.2.4.50
+    jpeg_lossless_codec::kTransferSyntaxUID,   // 1.2.840.10008.1.2.4.70
 }};
 
 }  // namespace
@@ -27,8 +29,12 @@ std::unique_ptr<compression_codec> codec_factory::create(
         return std::make_unique<jpeg_baseline_codec>();
     }
 
+    // JPEG Lossless (Process 14, Selection Value 1)
+    if (transfer_syntax_uid == jpeg_lossless_codec::kTransferSyntaxUID) {
+        return std::make_unique<jpeg_lossless_codec>();
+    }
+
     // Future codecs will be added here:
-    // - JPEG Lossless (1.2.840.10008.1.2.4.70)
     // - JPEG 2000 Lossless (1.2.840.10008.1.2.4.90)
     // - JPEG 2000 Lossy (1.2.840.10008.1.2.4.91)
     // - JPEG-LS Lossless (1.2.840.10008.1.2.4.80)
