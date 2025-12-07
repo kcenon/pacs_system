@@ -931,6 +931,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
         tests/encoding/compression/jpeg_baseline_codec_test.cpp
         tests/encoding/compression/jpeg_lossless_codec_test.cpp
+        tests/encoding/compression/jpeg2000_codec_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
