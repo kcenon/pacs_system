@@ -1072,6 +1072,193 @@ if (xa_iod_validator::has_calibration_data(dataset)) {
 
 ---
 
+### `pacs::services::cache::simple_lru_cache<Key, Value>`
+
+TTL 지원이 포함된 스레드 안전 LRU (Least Recently Used) 캐시.
+
+```cpp
+#include <pacs/services/cache/simple_lru_cache.hpp>
+
+namespace pacs::services::cache {
+
+// 캐시 설정
+struct cache_config {
+    std::size_t max_size{1000};           // 최대 항목 수
+    std::chrono::seconds ttl{300};        // 유효 시간 (기본 5분)
+    bool enable_metrics{true};            // 히트/미스 추적
+    std::string cache_name{"lru_cache"};  // 로깅/메트릭용 이름
+};
+
+// 캐시 통계
+struct cache_stats {
+    std::atomic<uint64_t> hits{0};        // 캐시 히트 수
+    std::atomic<uint64_t> misses{0};      // 캐시 미스 수
+    std::atomic<uint64_t> evictions{0};   // 제거된 항목 수
+    std::atomic<uint64_t> expirations{0}; // 만료된 항목 수
+
+    double hit_rate() const noexcept;     // 0.0-100.0 반환
+    void reset() noexcept;
+};
+
+template <typename Key, typename Value,
+          typename Hash = std::hash<Key>,
+          typename KeyEqual = std::equal_to<Key>>
+class simple_lru_cache {
+public:
+    // 생성
+    explicit simple_lru_cache(const cache_config& config = {});
+    simple_lru_cache(size_type max_size, std::chrono::seconds ttl);
+
+    // 캐시 연산
+    [[nodiscard]] std::optional<Value> get(const Key& key);
+    void put(const Key& key, const Value& value);
+    void put(const Key& key, Value&& value);
+    bool invalidate(const Key& key);
+    void clear();
+    size_type purge_expired();
+
+    // 정보
+    [[nodiscard]] size_type size() const;
+    [[nodiscard]] bool empty() const;
+    [[nodiscard]] size_type max_size() const noexcept;
+    [[nodiscard]] std::chrono::seconds ttl() const noexcept;
+
+    // 통계
+    [[nodiscard]] const cache_stats& stats() const noexcept;
+    [[nodiscard]] double hit_rate() const noexcept;
+    void reset_stats() noexcept;
+};
+
+// 문자열 키 캐시를 위한 타입 별칭
+template <typename Value>
+using string_lru_cache = simple_lru_cache<std::string, Value>;
+
+} // namespace pacs::services::cache
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::cache;
+
+// 1000개 항목 제한과 5분 TTL로 캐시 생성
+cache_config config;
+config.max_size = 1000;
+config.ttl = std::chrono::seconds{300};
+config.cache_name = "query_cache";
+
+simple_lru_cache<std::string, QueryResult> cache(config);
+
+// 저장 및 조회
+cache.put("patient_123", result);
+
+auto cached = cache.get("patient_123");
+if (cached) {
+    // 캐시된 결과 사용
+    process(*cached);
+}
+
+// 성능 확인
+auto rate = cache.hit_rate();
+logger_adapter::info("캐시 히트율: {:.1f}%", rate);
+```
+
+---
+
+### `pacs::services::cache::query_cache`
+
+DICOM C-FIND 쿼리 결과를 위한 특화된 캐시.
+
+```cpp
+#include <pacs/services/cache/query_cache.hpp>
+
+namespace pacs::services::cache {
+
+// 설정
+struct query_cache_config {
+    std::size_t max_entries{1000};
+    std::chrono::seconds ttl{300};
+    bool enable_logging{false};
+    bool enable_metrics{true};
+    std::string cache_name{"cfind_query_cache"};
+};
+
+// 캐시된 쿼리 결과
+struct cached_query_result {
+    std::vector<uint8_t> data;                        // 직렬화된 결과
+    uint32_t match_count{0};                          // 일치 항목 수
+    std::chrono::steady_clock::time_point cached_at;  // 캐시 타임스탬프
+    std::string query_level;                          // PATIENT/STUDY/SERIES/IMAGE
+};
+
+class query_cache {
+public:
+    explicit query_cache(const query_cache_config& config = {});
+
+    // 캐시 연산
+    [[nodiscard]] std::optional<cached_query_result> get(const std::string& key);
+    void put(const std::string& key, const cached_query_result& result);
+    void put(const std::string& key, cached_query_result&& result);
+    bool invalidate(const std::string& key);
+    void clear();
+    size_type purge_expired();
+
+    // 정보
+    [[nodiscard]] size_type size() const;
+    [[nodiscard]] bool empty() const;
+    [[nodiscard]] const cache_stats& stats() const noexcept;
+    [[nodiscard]] double hit_rate() const noexcept;
+
+    // 키 생성 헬퍼
+    [[nodiscard]] static std::string build_key(
+        const std::string& query_level,
+        const std::vector<std::pair<std::string, std::string>>& params);
+
+    [[nodiscard]] static std::string build_key_with_ae(
+        const std::string& calling_ae,
+        const std::string& query_level,
+        const std::vector<std::pair<std::string, std::string>>& params);
+};
+
+// 전역 캐시 접근
+[[nodiscard]] query_cache& global_query_cache();
+bool configure_global_cache(const query_cache_config& config);
+
+} // namespace pacs::services::cache
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::cache;
+
+// 쿼리 파라미터로 캐시 키 생성
+std::string key = query_cache::build_key("STUDY", {
+    {"PatientID", "12345"},
+    {"StudyDate", "20240101-20241231"}
+});
+
+// 먼저 캐시 확인
+auto& cache = global_query_cache();
+auto result = cache.get(key);
+
+if (result) {
+    // 캐시된 결과 반환
+    return result->data;
+}
+
+// 쿼리 실행 후 결과 캐싱
+auto query_result = execute_cfind(...);
+
+cached_query_result cached;
+cached.data = serialize(query_result);
+cached.match_count = query_result.size();
+cached.query_level = "STUDY";
+cached.cached_at = std::chrono::steady_clock::now();
+
+cache.put(key, std::move(cached));
+```
+
+---
+
 ## 저장 모듈
 
 ### `pacs::storage::storage_interface`
