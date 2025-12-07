@@ -484,6 +484,7 @@ add_library(pacs_encoding
     src/encoding/explicit_vr_codec.cpp
     src/encoding/explicit_vr_big_endian_codec.cpp
     src/encoding/compression/jpeg_baseline_codec.cpp
+    src/encoding/compression/jpeg_lossless_codec.cpp
     src/encoding/compression/codec_factory.cpp
 )
 target_include_directories(pacs_encoding
@@ -880,6 +881,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/byte_swap_test.cpp
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
         tests/encoding/compression/jpeg_baseline_codec_test.cpp
+        tests/encoding/compression/jpeg_lossless_codec_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
