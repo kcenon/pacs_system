@@ -201,6 +201,11 @@ pacs_system/
 │   │   ├── worklist_record.hpp  # Worklist data model
 │   │   └── mpps_record.hpp      # MPPS data model
 │   │
+│   ├── monitoring/              # Health Monitoring (✅ Complete)
+│   │   ├── health_status.hpp    # Health status structures
+│   │   ├── health_checker.hpp   # Health check service
+│   │   └── health_json.hpp      # JSON serialization
+│   │
 │   └── integration/             # Ecosystem Adapters (✅ Complete)
 │       ├── container_adapter.hpp # container_system integration
 │       ├── network_adapter.hpp  # network_system integration
@@ -215,14 +220,16 @@ pacs_system/
 │   ├── network/                 # Network implementations (8 files)
 │   ├── services/                # Service implementations (7 files)
 │   ├── storage/                 # Storage implementations (4 files)
+│   ├── monitoring/              # Health check implementations (1 file)
 │   └── integration/             # Adapter implementations (6 files)
 │
-├── tests/                       # Test suites (39 files, 120+ tests)
+├── tests/                       # Test suites (42 files, 170+ tests)
 │   ├── core/                    # Core module tests (6 files)
 │   ├── encoding/                # Encoding module tests (5 files)
 │   ├── network/                 # Network module tests (5 files)
 │   ├── services/                # Service tests (7 files)
 │   ├── storage/                 # Storage tests (6 files)
+│   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
 ├── examples/                    # Example Applications (15 apps, ~10,500 lines)
@@ -355,7 +362,7 @@ cd build
 ctest --output-on-failure
 ```
 
-**Test Results**: 120+ tests passing (Core: 57, Encoding: 41, Network: 15, Services: 7+, Storage/Integration: 20+)
+**Test Results**: 170+ tests passing (Core: 57, Encoding: 41, Network: 15, Services: 7+, Storage/Integration: 20+, Monitoring: 50)
 
 ### Build Options
 
@@ -696,8 +703,8 @@ cmake --build build --target run_full_benchmarks
 | **Source LOC** | ~15,000 lines |
 | **Example LOC** | ~10,500 lines |
 | **Total LOC** | ~40,000 lines |
-| **Test Files** | 39 files |
-| **Test Cases** | 120+ tests |
+| **Test Files** | 42 files |
+| **Test Cases** | 170+ tests |
 | **Documentation** | 30+ markdown files |
 | **CI/CD Workflows** | 7 workflows |
 | **Version** | 0.2.0 |
