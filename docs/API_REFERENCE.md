@@ -1,6 +1,6 @@
 # API Reference - PACS System
 
-> **Version:** 1.2.0
+> **Version:** 1.3.0
 > **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](API_REFERENCE_KO.md)
 
@@ -14,6 +14,7 @@
 - [Network V2 Module (Optional)](#network-v2-module-optional)
 - [Services Module](#services-module)
 - [Storage Module](#storage-module)
+- [Monitoring Module](#monitoring-module)
 - [Integration Module](#integration-module)
 - [Common Module](#common-module)
 
@@ -1425,6 +1426,143 @@ public:
 
 ---
 
+## Monitoring Module
+
+### `pacs::monitoring::pacs_metrics`
+
+Thread-safe metrics collection for DICOM operations with atomic counters and timing data.
+
+```cpp
+#include <pacs/monitoring/pacs_metrics.hpp>
+
+namespace pacs::monitoring {
+
+// DIMSE operation types
+enum class dimse_operation {
+    c_echo,    // C-ECHO (Verification)
+    c_store,   // C-STORE (Storage)
+    c_find,    // C-FIND (Query)
+    c_move,    // C-MOVE (Retrieve)
+    c_get,     // C-GET (Retrieve)
+    n_create,  // N-CREATE (MPPS)
+    n_set,     // N-SET (MPPS)
+    n_get,     // N-GET
+    n_action,  // N-ACTION
+    n_event,   // N-EVENT-REPORT
+    n_delete   // N-DELETE
+};
+
+// Atomic counter for operation statistics
+struct operation_counter {
+    std::atomic<uint64_t> success_count{0};
+    std::atomic<uint64_t> failure_count{0};
+    std::atomic<uint64_t> total_duration_us{0};
+    std::atomic<uint64_t> min_duration_us{UINT64_MAX};
+    std::atomic<uint64_t> max_duration_us{0};
+
+    uint64_t total_count() const noexcept;
+    uint64_t average_duration_us() const noexcept;
+    void record_success(std::chrono::microseconds duration) noexcept;
+    void record_failure(std::chrono::microseconds duration) noexcept;
+    void reset() noexcept;
+};
+
+// Data transfer tracking
+struct data_transfer_metrics {
+    std::atomic<uint64_t> bytes_sent{0};
+    std::atomic<uint64_t> bytes_received{0};
+    std::atomic<uint64_t> images_stored{0};
+    std::atomic<uint64_t> images_retrieved{0};
+
+    void add_bytes_sent(uint64_t bytes) noexcept;
+    void add_bytes_received(uint64_t bytes) noexcept;
+    void increment_images_stored() noexcept;
+    void increment_images_retrieved() noexcept;
+    void reset() noexcept;
+};
+
+// Association lifecycle tracking
+struct association_counters {
+    std::atomic<uint64_t> total_established{0};
+    std::atomic<uint64_t> total_rejected{0};
+    std::atomic<uint64_t> total_aborted{0};
+    std::atomic<uint32_t> current_active{0};
+    std::atomic<uint32_t> peak_active{0};
+
+    void record_established() noexcept;
+    void record_released() noexcept;
+    void record_rejected() noexcept;
+    void record_aborted() noexcept;
+    void reset() noexcept;
+};
+
+class pacs_metrics {
+public:
+    // Singleton access
+    static pacs_metrics& global_metrics() noexcept;
+
+    // DIMSE operation recording
+    void record_store(bool success, std::chrono::microseconds duration,
+                      uint64_t bytes_stored = 0) noexcept;
+    void record_query(bool success, std::chrono::microseconds duration,
+                      uint32_t matches = 0) noexcept;
+    void record_echo(bool success, std::chrono::microseconds duration) noexcept;
+    void record_move(bool success, std::chrono::microseconds duration,
+                     uint32_t images_moved = 0) noexcept;
+    void record_get(bool success, std::chrono::microseconds duration,
+                    uint32_t images_retrieved = 0, uint64_t bytes = 0) noexcept;
+    void record_operation(dimse_operation op, bool success,
+                          std::chrono::microseconds duration) noexcept;
+
+    // Data transfer recording
+    void record_bytes_sent(uint64_t bytes) noexcept;
+    void record_bytes_received(uint64_t bytes) noexcept;
+
+    // Association recording
+    void record_association_established() noexcept;
+    void record_association_released() noexcept;
+    void record_association_rejected() noexcept;
+    void record_association_aborted() noexcept;
+
+    // Metric access
+    const operation_counter& get_counter(dimse_operation op) const noexcept;
+    const data_transfer_metrics& transfer() const noexcept;
+    const association_counters& associations() const noexcept;
+
+    // Export
+    std::string to_json() const;
+    std::string to_prometheus(std::string_view prefix = "pacs") const;
+
+    // Reset all metrics
+    void reset() noexcept;
+};
+
+} // namespace pacs::monitoring
+```
+
+**Usage Example:**
+
+```cpp
+#include <pacs/monitoring/pacs_metrics.hpp>
+using namespace pacs::monitoring;
+
+// Get global metrics instance
+auto& metrics = pacs_metrics::global_metrics();
+
+// Record a C-STORE operation
+auto start = std::chrono::steady_clock::now();
+// ... perform C-STORE ...
+auto end = std::chrono::steady_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+metrics.record_store(true, duration, 1024 * 1024);  // 1MB image
+
+// Export for monitoring systems
+std::string json = metrics.to_json();           // For REST API
+std::string prom = metrics.to_prometheus();      // For Prometheus
+```
+
+---
+
 ## Common Module
 
 ### Error Codes
@@ -1507,10 +1645,11 @@ public:
 | 1.0.0   | 2025-11-30 | Initial API Reference document               |
 | 1.1.0   | 2025-12-05 | Added thread_system integration APIs         |
 | 1.2.0   | 2025-12-07 | Added Network V2 Module (dicom_server_v2, dicom_association_handler) |
+| 1.3.0   | 2025-12-07 | Added Monitoring Module (pacs_metrics for DIMSE operation tracking) |
 
 ---
 
-*Document Version: 1.2.0*
+*Document Version: 1.3.0*
 *Created: 2025-11-30*
 *Last Updated: 2025-12-07*
 *Author: kcenon@naver.com*

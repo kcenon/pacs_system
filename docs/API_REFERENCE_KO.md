@@ -1,6 +1,6 @@
 # API 참조 - PACS 시스템
 
-> **버전:** 1.2.0
+> **버전:** 1.3.0
 > **최종 수정일:** 2025-12-07
 > **언어:** [English](API_REFERENCE.md) | **한국어**
 
@@ -13,6 +13,7 @@
 - [네트워크 모듈](#네트워크-모듈)
 - [서비스 모듈](#서비스-모듈)
 - [저장 모듈](#저장-모듈)
+- [모니터링 모듈](#모니터링-모듈)
 - [통합 모듈](#통합-모듈)
 - [공통 모듈](#공통-모듈)
 
@@ -1157,6 +1158,143 @@ public:
 
 ---
 
+## 모니터링 모듈
+
+### `pacs::monitoring::pacs_metrics`
+
+DICOM 작업에 대한 원자적 카운터와 타이밍 데이터를 사용한 스레드 안전 메트릭 수집.
+
+```cpp
+#include <pacs/monitoring/pacs_metrics.hpp>
+
+namespace pacs::monitoring {
+
+// DIMSE 작업 유형
+enum class dimse_operation {
+    c_echo,    // C-ECHO (검증)
+    c_store,   // C-STORE (저장)
+    c_find,    // C-FIND (조회)
+    c_move,    // C-MOVE (검색)
+    c_get,     // C-GET (검색)
+    n_create,  // N-CREATE (MPPS)
+    n_set,     // N-SET (MPPS)
+    n_get,     // N-GET
+    n_action,  // N-ACTION
+    n_event,   // N-EVENT-REPORT
+    n_delete   // N-DELETE
+};
+
+// 작업 통계를 위한 원자적 카운터
+struct operation_counter {
+    std::atomic<uint64_t> success_count{0};
+    std::atomic<uint64_t> failure_count{0};
+    std::atomic<uint64_t> total_duration_us{0};
+    std::atomic<uint64_t> min_duration_us{UINT64_MAX};
+    std::atomic<uint64_t> max_duration_us{0};
+
+    uint64_t total_count() const noexcept;
+    uint64_t average_duration_us() const noexcept;
+    void record_success(std::chrono::microseconds duration) noexcept;
+    void record_failure(std::chrono::microseconds duration) noexcept;
+    void reset() noexcept;
+};
+
+// 데이터 전송 추적
+struct data_transfer_metrics {
+    std::atomic<uint64_t> bytes_sent{0};
+    std::atomic<uint64_t> bytes_received{0};
+    std::atomic<uint64_t> images_stored{0};
+    std::atomic<uint64_t> images_retrieved{0};
+
+    void add_bytes_sent(uint64_t bytes) noexcept;
+    void add_bytes_received(uint64_t bytes) noexcept;
+    void increment_images_stored() noexcept;
+    void increment_images_retrieved() noexcept;
+    void reset() noexcept;
+};
+
+// 연결 수명 주기 추적
+struct association_counters {
+    std::atomic<uint64_t> total_established{0};
+    std::atomic<uint64_t> total_rejected{0};
+    std::atomic<uint64_t> total_aborted{0};
+    std::atomic<uint32_t> current_active{0};
+    std::atomic<uint32_t> peak_active{0};
+
+    void record_established() noexcept;
+    void record_released() noexcept;
+    void record_rejected() noexcept;
+    void record_aborted() noexcept;
+    void reset() noexcept;
+};
+
+class pacs_metrics {
+public:
+    // 싱글톤 접근
+    static pacs_metrics& global_metrics() noexcept;
+
+    // DIMSE 작업 기록
+    void record_store(bool success, std::chrono::microseconds duration,
+                      uint64_t bytes_stored = 0) noexcept;
+    void record_query(bool success, std::chrono::microseconds duration,
+                      uint32_t matches = 0) noexcept;
+    void record_echo(bool success, std::chrono::microseconds duration) noexcept;
+    void record_move(bool success, std::chrono::microseconds duration,
+                     uint32_t images_moved = 0) noexcept;
+    void record_get(bool success, std::chrono::microseconds duration,
+                    uint32_t images_retrieved = 0, uint64_t bytes = 0) noexcept;
+    void record_operation(dimse_operation op, bool success,
+                          std::chrono::microseconds duration) noexcept;
+
+    // 데이터 전송 기록
+    void record_bytes_sent(uint64_t bytes) noexcept;
+    void record_bytes_received(uint64_t bytes) noexcept;
+
+    // 연결 기록
+    void record_association_established() noexcept;
+    void record_association_released() noexcept;
+    void record_association_rejected() noexcept;
+    void record_association_aborted() noexcept;
+
+    // 메트릭 접근
+    const operation_counter& get_counter(dimse_operation op) const noexcept;
+    const data_transfer_metrics& transfer() const noexcept;
+    const association_counters& associations() const noexcept;
+
+    // 내보내기
+    std::string to_json() const;
+    std::string to_prometheus(std::string_view prefix = "pacs") const;
+
+    // 모든 메트릭 초기화
+    void reset() noexcept;
+};
+
+} // namespace pacs::monitoring
+```
+
+**사용 예제:**
+
+```cpp
+#include <pacs/monitoring/pacs_metrics.hpp>
+using namespace pacs::monitoring;
+
+// 전역 메트릭 인스턴스 가져오기
+auto& metrics = pacs_metrics::global_metrics();
+
+// C-STORE 작업 기록
+auto start = std::chrono::steady_clock::now();
+// ... C-STORE 수행 ...
+auto end = std::chrono::steady_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+metrics.record_store(true, duration, 1024 * 1024);  // 1MB 이미지
+
+// 모니터링 시스템용 내보내기
+std::string json = metrics.to_json();           // REST API용
+std::string prom = metrics.to_prometheus();      // Prometheus용
+```
+
+---
+
 ## 공통 모듈
 
 ### 오류 코드
@@ -1232,6 +1370,18 @@ public:
 
 ---
 
-*문서 버전: 1.0.0*
+## 문서 이력
+
+| 버전 | 날짜       | 변경 사항                                     |
+|------|------------|-----------------------------------------------|
+| 1.0.0 | 2025-11-30 | 초기 API 참조 문서                             |
+| 1.1.0 | 2025-12-05 | thread_system 통합 API 추가                    |
+| 1.2.0 | 2025-12-07 | Network V2 모듈 추가 (dicom_server_v2, dicom_association_handler) |
+| 1.3.0 | 2025-12-07 | 모니터링 모듈 추가 (DIMSE 작업 추적용 pacs_metrics) |
+
+---
+
+*문서 버전: 1.3.0*
 *작성일: 2025-11-30*
+*최종 수정일: 2025-12-07*
 *작성자: kcenon@naver.com*

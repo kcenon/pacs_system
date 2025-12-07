@@ -602,11 +602,12 @@ else()
     message(STATUS "  [--] pacs_storage: OFF")
 endif()
 
-# Monitoring library (health check endpoint - Issue #211)
+# Monitoring library (health check endpoint - Issue #211, metrics - Issue #210)
 # Requires pacs_storage for file_storage and index_database checks
 if(TARGET pacs_storage)
     add_library(pacs_monitoring
         src/monitoring/health_checker.cpp
+        src/monitoring/pacs_metrics.cpp
     )
     target_include_directories(pacs_monitoring
         PUBLIC
@@ -902,12 +903,13 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
-    # Monitoring tests (Issue #211 - health check endpoint)
+    # Monitoring tests (Issue #211 - health check endpoint, Issue #210 - metrics)
     if(TARGET pacs_monitoring)
         add_executable(monitoring_tests
             tests/monitoring/health_status_test.cpp
             tests/monitoring/health_checker_test.cpp
             tests/monitoring/health_json_test.cpp
+            tests/monitoring/pacs_metrics_test.cpp
         )
         target_link_libraries(monitoring_tests
             PRIVATE
