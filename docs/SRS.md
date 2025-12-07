@@ -1,7 +1,7 @@
 # Software Requirements Specification - PACS System
 
-> **Version:** 1.1.0
-> **Last Updated:** 2025-12-04
+> **Version:** 1.2.0
+> **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](SRS_KO.md)
 > **Standard:** IEEE 830-1998 based
 
@@ -415,21 +415,22 @@ Sequence (SQ)
 | **Priority** | Must Have |
 | **Phase** | 1 |
 | **Traces To** | FR-1.3.3, FR-1.3.4, FR-1.3.5, FR-1.3.6 |
+| **Status** | ✅ All Transfer Syntaxes Implemented |
 
 **Acceptance Criteria:**
-1. Detect transfer syntax from File Meta Information
-2. Encode/decode Implicit VR Little Endian (1.2.840.10008.1.2)
-3. Encode/decode Explicit VR Little Endian (1.2.840.10008.1.2.1)
-4. Encode/decode Explicit VR Big Endian (1.2.840.10008.1.2.2)
-5. Validate VR length field sizes
+1. Detect transfer syntax from File Meta Information ✅
+2. Encode/decode Implicit VR Little Endian (1.2.840.10008.1.2) ✅
+3. Encode/decode Explicit VR Little Endian (1.2.840.10008.1.2.1) ✅
+4. Encode/decode Explicit VR Big Endian (1.2.840.10008.1.2.2) ✅ (Issue #126)
+5. Validate VR length field sizes ✅
 
 **Encoding Differences:**
 
-| Transfer Syntax | VR Field | Length Field |
-|-----------------|----------|--------------|
-| Implicit VR LE | None (from dictionary) | 4 bytes |
-| Explicit VR LE | 2 bytes | 2 or 4 bytes |
-| Explicit VR BE | 2 bytes | 2 or 4 bytes |
+| Transfer Syntax | VR Field | Length Field | Status |
+|-----------------|----------|--------------|--------|
+| Implicit VR LE | None (from dictionary) | 4 bytes | ✅ Implemented |
+| Explicit VR LE | 2 bytes | 2 or 4 bytes | ✅ Implemented |
+| Explicit VR BE | 2 bytes | 2 or 4 bytes | ✅ Implemented |
 
 ---
 
@@ -890,12 +891,13 @@ SCU                    SCP                    Destination
 | **Priority** | Should Have |
 | **Phase** | 4 |
 | **Traces To** | FR-3.5.1 - FR-3.5.4 |
+| **Status** | ✅ Implemented |
 
 **Acceptance Criteria:**
-1. Accept N-CREATE with MPPS initial state (IN PROGRESS)
-2. Accept N-SET to update MPPS state
-3. Validate state transitions (IN PROGRESS → COMPLETED/DISCONTINUED)
-4. Store MPPS information persistently
+1. Accept N-CREATE with MPPS initial state (IN PROGRESS) ✅
+2. Accept N-SET to update MPPS state ✅
+3. Validate state transitions (IN PROGRESS → COMPLETED/DISCONTINUED) ✅
+4. Store MPPS information persistently ✅
 
 **MPPS State Machine:**
 ```
@@ -913,6 +915,76 @@ SCU                    SCP                    Destination
 │   COMPLETED   │            │  DISCONTINUED  │
 └───────────────┘            └────────────────┘
 ```
+
+---
+
+#### SRS-SVC-008: DIMSE-N Services (N-GET/N-ACTION/N-EVENT-REPORT/N-DELETE)
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SVC-008 |
+| **Title** | Complete DIMSE-N Service Support |
+| **Description** | The system shall support all DIMSE-N message services for normalized operations. |
+| **Priority** | Could Have |
+| **Phase** | 4 |
+| **Traces To** | FR-2.3.8 - FR-2.3.11 |
+| **Status** | ✅ Implemented |
+
+**Acceptance Criteria:**
+1. N-GET request/response encoding/decoding ✅
+2. N-ACTION request/response encoding/decoding ✅
+3. N-EVENT-REPORT request/response encoding/decoding ✅
+4. N-DELETE request/response encoding/decoding ✅
+5. Status code handling for all N-xxx operations ✅
+
+**Related Issue:** #127
+
+---
+
+#### SRS-SVC-009: Ultrasound Image Storage
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SVC-009 |
+| **Title** | Ultrasound Image Storage SOP Classes |
+| **Description** | The system shall support storage of Ultrasound images including single-frame and multi-frame variants. |
+| **Priority** | Should Have |
+| **Phase** | 2 |
+| **Traces To** | FR-3.2.x |
+| **Status** | ✅ Implemented |
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Status |
+|-----------|-----|--------|
+| Ultrasound Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ |
+| Ultrasound Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | ✅ |
+| Ultrasound Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.6 | ✅ |
+| Ultrasound Multi-frame Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.3 | ✅ |
+
+**Related Issue:** #128
+
+---
+
+#### SRS-SVC-010: XA Image Storage (X-Ray Angiographic)
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SVC-010 |
+| **Title** | X-Ray Angiographic Image Storage SOP Classes |
+| **Description** | The system shall support storage of X-Ray Angiographic (XA) images including enhanced variants. |
+| **Priority** | Should Have |
+| **Phase** | 2 |
+| **Traces To** | FR-3.2.x |
+| **Status** | ✅ Implemented |
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Status |
+|-----------|-----|--------|
+| X-Ray Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | ✅ |
+| Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | ✅ |
+| X-Ray Radiofluoroscopic Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |
+| Enhanced XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2.1 | ✅ |
+
+**Related Issue:** #129
 
 ---
 
@@ -1071,12 +1143,25 @@ storage_root/
 | **Priority** | Must Have |
 | **Phase** | 2 |
 | **Traces To** | IR-1 |
+| **Status** | ✅ V2 Implementation Available (Optional) |
 
 **Acceptance Criteria:**
-1. messaging_server as SCP base
-2. messaging_client as SCU base
-3. messaging_session as Association wrapper
-4. TLS 1.2+ for DICOM TLS
+1. messaging_server as SCP base ✅
+2. messaging_client as SCU base ✅
+3. messaging_session as Association wrapper ✅
+4. TLS 1.2+ for DICOM TLS ✅
+
+**V2 Implementation (Optional - Completed 2025-12-07):**
+
+An optional V2 implementation using `network_system::messaging_server` is available for TCP connection management:
+
+| Component | Class | Description |
+|-----------|-------|-------------|
+| Server V2 | `dicom_server_v2` | Uses `messaging_server` for async TCP connection management |
+| Handler | `dicom_association_handler` | PDU framing, state machine, service dispatching per session |
+| Compile Flag | `PACS_WITH_NETWORK_SYSTEM` | Enable V2 implementation |
+
+**Related Issues:** #161, #162, #163
 
 ---
 
@@ -1089,11 +1174,26 @@ storage_root/
 | **Priority** | Must Have |
 | **Phase** | 2 |
 | **Traces To** | IR-1 |
+| **Status** | ✅ Fully Implemented (v1.1.0) |
 
 **Acceptance Criteria:**
-1. Worker pool for DIMSE processing
-2. Lock-free queue for job distribution
-3. Cancellation token support
+1. Worker pool for DIMSE processing ✅
+2. Lock-free queue for job distribution ✅
+3. Cancellation token support ✅
+4. Accept loop using `accept_worker` (inherits `thread_base`) ✅
+5. C++20 `jthread` integration via `thread_base` ✅
+6. Unified thread statistics and monitoring ✅
+7. Graceful shutdown with cooperative cancellation ✅
+
+**Implementation Details (Completed 2025-12-07):**
+
+| Component | Class | Description |
+|-----------|-------|-------------|
+| Accept Worker | `accept_worker` | Inherits from `thread_base`, manages accept loop with jthread and cancellation_token |
+| Thread Pool | `thread_adapter` | Manages association worker threads with load balancing |
+| Shutdown | Cooperative | Uses `cancellation_token` for clean shutdown (~110ms with active connections) |
+
+**Related Issues:** #153, #156, #157, #158, #159, #160
 
 ---
 
@@ -1444,6 +1544,8 @@ The PACS System provides no direct user interface. All interaction is through:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2025-11-30 | kcenon | Initial version |
+| 1.1.0 | 2025-12-04 | kcenon | Updated integration requirements |
+| 1.2.0 | 2025-12-07 | kcenon | Added: SRS-SVC-008 (DIMSE-N), SRS-SVC-009 (Ultrasound), SRS-SVC-010 (XA); Updated: SRS-CORE-007 (Explicit VR BE), SRS-INT-003 (network_system V2), SRS-INT-004 (thread_system migration) |
 
 ### Appendix C: Glossary
 
@@ -1454,9 +1556,12 @@ The PACS System provides no direct user interface. All interaction is through:
 | Data Set | Collection of DICOM data elements |
 | Presentation Context | Agreement on Abstract Syntax and Transfer Syntax |
 | Transfer Syntax | Rules for encoding DICOM data |
+| jthread | C++20 joining thread with built-in stop token support |
+| cancellation_token | Token for cooperative cancellation in thread_system |
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
+*Updated: 2025-12-07*
 *Author: kcenon@naver.com*

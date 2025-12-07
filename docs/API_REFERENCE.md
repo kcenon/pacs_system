@@ -1,7 +1,7 @@
 # API Reference - PACS System
 
-> **Version:** 1.0.0
-> **Last Updated:** 2025-11-30
+> **Version:** 1.2.0
+> **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](API_REFERENCE_KO.md)
 
 ---
@@ -11,6 +11,7 @@
 - [Core Module](#core-module)
 - [Encoding Module](#encoding-module)
 - [Network Module](#network-module)
+- [Network V2 Module (Optional)](#network-v2-module-optional)
 - [Services Module](#services-module)
 - [Storage Module](#storage-module)
 - [Integration Module](#integration-module)
@@ -1499,6 +1500,17 @@ public:
 
 ---
 
-*Document Version: 1.0.0*
+## Document History
+
+| Version | Date       | Changes                                      |
+|---------|------------|----------------------------------------------|
+| 1.0.0   | 2025-11-30 | Initial API Reference document               |
+| 1.1.0   | 2025-12-05 | Added thread_system integration APIs         |
+| 1.2.0   | 2025-12-07 | Added Network V2 Module (dicom_server_v2, dicom_association_handler) |
+
+---
+
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
+*Last Updated: 2025-12-07*
 *Author: kcenon@naver.com*

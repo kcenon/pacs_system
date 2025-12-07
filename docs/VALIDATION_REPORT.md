@@ -1,7 +1,7 @@
 # PACS System Validation Report
 
-> **Report Version:** 1.1.0
-> **Report Date:** 2025-12-04
+> **Report Version:** 1.2.0
+> **Report Date:** 2025-12-07
 > **Language:** **English** | [한국어](VALIDATION_REPORT_KO.md)
 > **Status:** Complete
 > **Related Document:** [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) (SDS 설계대로 구현 확인)
@@ -25,14 +25,26 @@ This **Validation Report** confirms that the PACS (Picture Archiving and Communi
 |----------|--------------|-----------|--------|
 | **Core Module** | 8 | 8 | ✅ 100% |
 | **Network Protocol** | 5 | 5 | ✅ 100% |
-| **DICOM Services** | 7 | 7 | ✅ 100% |
+| **DICOM Services** | 10 | 10 | ✅ 100% |
 | **Storage Backend** | 2 | 2 | ✅ 100% |
 | **Integration** | 6 | 6 | ✅ 100% |
 | **Performance** | 6 | 6 | ✅ 100% |
 | **Reliability** | 5 | 5 | ✅ 100% |
 | **Security** | 5 | 5 | ✅ 100% |
 | **Maintainability** | 5 | 5 | ✅ 100% |
-| **Total** | **49** | **49** | **✅ 100%** |
+| **Thread Migration** | 7 | 7 | ✅ 100% |
+| **Total** | **59** | **59** | **✅ 100%** |
+
+### Recent Validation Updates (2025-12-07)
+
+| Feature | Issue | Validation Status |
+|---------|-------|-------------------|
+| Thread System Migration | #153 (Epic) | ✅ All 11 sub-issues validated |
+| DIMSE-N Services | #127 | ✅ N-GET/N-ACTION/N-EVENT/N-DELETE validated |
+| Ultrasound Storage | #128 | ✅ US/US-MF SOP classes validated |
+| XA Image Storage | #129 | ✅ XA/Enhanced XA validated |
+| Explicit VR Big Endian | #126 | ✅ Transfer syntax validated |
+| Network System V2 | #163 | ✅ Integration tests passed |
 
 ---
 
@@ -927,18 +939,30 @@ storage_root/
 
 | Req ID | Requirement | Target | Measured | Status |
 |--------|-------------|--------|----------|--------|
-| SRS-PERF-001 | Image storage throughput | ≥100 MB/s | 120 MB/s | ✅ PASS |
+| SRS-PERF-001 | Image storage throughput | ≥100 MB/s | 9,247 MB/s | ✅ PASS |
 | SRS-PERF-002 | Concurrent associations | ≥100 | 200+ | ✅ PASS |
 | SRS-PERF-003 | Query response time (P95) | <100 ms | 78 ms | ✅ PASS |
-| SRS-PERF-004 | Association establishment | <50 ms | 30 ms | ✅ PASS |
+| SRS-PERF-004 | Association establishment | <50 ms | ~1 ms | ✅ PASS |
 | SRS-PERF-005 | Memory baseline | <500 MB | ~300 MB | ✅ PASS |
 | SRS-PERF-006 | Memory per association | <10 MB | ~5 MB | ✅ PASS |
+| SRS-PERF-007 | Graceful shutdown | <5,000 ms | 110 ms | ✅ PASS |
+
+**Thread System Migration Performance (2025-12-07):**
+
+| Metric | Baseline Target | Measured | Improvement |
+|--------|-----------------|----------|-------------|
+| C-ECHO throughput | >100 msg/s | 89,964 msg/s | 900x |
+| C-STORE throughput | >20 store/s | 31,759 store/s | 1,500x |
+| Concurrent operations | >50 ops/s | 124 ops/s | 2.5x |
+| Graceful shutdown | <5,000 ms | 110 ms | 45x faster |
+
+*See [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) for detailed benchmark data.*
 
 **Validation Method:** Load Testing with simulated DICOM traffic
 
 **Test Environment:**
-- CPU: 8-core x86_64
-- Memory: 16 GB
+- CPU: Apple M4 Max (ARM64) / 8-core x86_64
+- Memory: 16-36 GB
 - Storage: SSD
 - Network: 1 Gbps
 
@@ -1106,25 +1130,27 @@ storage_root/
 
 ### 6.1 Validation Summary
 
-The PACS System has successfully passed validation against all 49 SRS requirements:
+The PACS System has successfully passed validation against all 59 SRS requirements:
 
 | Aspect | Result |
 |--------|--------|
-| **Functional Requirements** | 100% validated (30/30) |
+| **Functional Requirements** | 100% validated (33/33) |
 | **Non-Functional Requirements** | 100% validated (19/19) |
+| **Thread Migration Requirements** | 100% validated (7/7) |
 | **User Scenarios** | 7/7 acceptance tests passed |
-| **Example Applications** | 14 applications validated |
+| **Example Applications** | 15 applications validated |
 | **DICOM Conformance** | PS3.5, PS3.7, PS3.8 compliant |
 
 ### 6.2 Certification
 
 This validation confirms that the PACS System:
 
-1. ✅ **Meets all SRS functional requirements** - Core, Network, Services, Storage, Integration
+1. ✅ **Meets all SRS functional requirements** - Core, Network, Services (including DIMSE-N), Storage, Integration
 2. ✅ **Meets all SRS non-functional requirements** - Performance, Reliability, Security, Maintainability
 3. ✅ **Passes all user acceptance scenarios** - Real-world DICOM workflows validated
 4. ✅ **Complies with DICOM standards** - Interoperability ensured
 5. ✅ **Ready for production deployment** - Quality gates passed
+6. ✅ **Thread system migration complete** - 45x faster graceful shutdown, unified monitoring
 
 **Validation Status: PASSED**
 
@@ -1135,6 +1161,8 @@ This validation confirms that the PACS System:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2025-12-01 | kcenon@naver.com | Initial validation report |
+| 1.1.0 | 2025-12-04 | kcenon@naver.com | Updated integration validation status |
+| 1.2.0 | 2025-12-07 | kcenon@naver.com | Added: Thread migration validation (#153), DIMSE-N (#127), Ultrasound (#128), XA (#129) validations; Updated performance metrics from PERFORMANCE_RESULTS.md |
 
 ---
 
@@ -1159,9 +1187,11 @@ This validation confirms that the PACS System:
 | SDS_TRACEABILITY.md | Design Traceability | [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) |
 | VERIFICATION_REPORT.md | Design Verification | [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) |
 | PRD.md | Product Requirements Document | [PRD.md](PRD.md) |
+| PERFORMANCE_RESULTS.md | Thread Migration Performance | [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) |
+| MIGRATION_COMPLETE.md | Thread System Migration Summary | [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) |
 
 ---
 
-*Report Version: 1.0.0*
-*Generated: 2025-12-01*
+*Report Version: 1.2.0*
+*Generated: 2025-12-07*
 *Validated by: kcenon@naver.com*

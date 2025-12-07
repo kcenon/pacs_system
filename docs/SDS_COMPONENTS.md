@@ -1,8 +1,8 @@
 # SDS - Component Design Specifications
 
-> **Version:** 1.1.0
+> **Version:** 1.2.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2025-12-04
+> **Last Updated:** 2025-12-07
 
 ---
 
@@ -14,6 +14,7 @@
 - [4. Services Module Components](#4-services-module-components)
 - [5. Storage Module Components](#5-storage-module-components)
 - [6. Integration Module Components](#6-integration-module-components)
+- [7. Network V2 Module Components](#7-network-v2-module-components)
 
 ---
 
@@ -1556,6 +1557,204 @@ public:
 
 ---
 
-*Document Version: 1.0.0*
+## 7. Network V2 Module Components
+
+> **NEW in v1.2.0** - Optional network_system-based DICOM server implementation
+
+### DES-NET-006: dicom_server_v2
+
+**Traces to:** SRS-INT-003
+
+**Purpose:** Alternative DICOM server using `network_system::messaging_server` for TCP connection management.
+
+**Class Design:**
+
+```cpp
+namespace pacs::network::v2 {
+
+class dicom_server_v2 {
+public:
+    // ─────────────────────────────────────────────────────
+    // Construction
+    // ─────────────────────────────────────────────────────
+    explicit dicom_server_v2(const server_config& config);
+    ~dicom_server_v2();
+
+    // ─────────────────────────────────────────────────────
+    // Server Lifecycle
+    // ─────────────────────────────────────────────────────
+    [[nodiscard]] common::Result<void> start();
+    void stop(std::chrono::milliseconds timeout = std::chrono::seconds{5});
+    [[nodiscard]] bool is_running() const noexcept;
+
+    // ─────────────────────────────────────────────────────
+    // Service Registration
+    // ─────────────────────────────────────────────────────
+    void register_service(std::unique_ptr<scp_service> service);
+
+    // ─────────────────────────────────────────────────────
+    // Statistics
+    // ─────────────────────────────────────────────────────
+    [[nodiscard]] size_t active_associations() const noexcept;
+    [[nodiscard]] size_t total_associations() const noexcept;
+
+private:
+    // Uses network_system::messaging_server internally
+    std::unique_ptr<network_system::messaging_server> server_;
+    std::unordered_map<uint64_t, std::unique_ptr<dicom_association_handler>> handlers_;
+    std::mutex handlers_mutex_;
+};
+
+} // namespace pacs::network::v2
+```
+
+**Compile Flag:** `PACS_WITH_NETWORK_SYSTEM`
+
+---
+
+### DES-NET-007: dicom_association_handler
+
+**Traces to:** SRS-INT-003
+
+**Purpose:** Per-session PDU framing, state machine management, and service dispatching.
+
+**Class Design:**
+
+```cpp
+namespace pacs::network::v2 {
+
+class dicom_association_handler
+    : public network_system::session_handler {
+public:
+    // ─────────────────────────────────────────────────────
+    // Construction
+    // ─────────────────────────────────────────────────────
+    explicit dicom_association_handler(
+        const server_config& config,
+        const service_registry& services);
+
+    // ─────────────────────────────────────────────────────
+    // Session Handler Interface (from network_system)
+    // ─────────────────────────────────────────────────────
+    void on_connect(session_ptr session) override;
+    void on_receive(session_ptr session,
+                    const std::vector<uint8_t>& data) override;
+    void on_disconnect(session_ptr session) override;
+
+    // ─────────────────────────────────────────────────────
+    // PDU Processing
+    // ─────────────────────────────────────────────────────
+    [[nodiscard]] common::Result<void> process_pdu(
+        const std::vector<uint8_t>& pdu_data);
+
+private:
+    // PDU framing buffer
+    std::vector<uint8_t> frame_buffer_;
+
+    // Association state machine
+    association_state_machine state_machine_;
+
+    // Service dispatcher
+    service_dispatcher dispatcher_;
+};
+
+} // namespace pacs::network::v2
+```
+
+**PDU Framing Strategy:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   PDU Framing in Handler                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Incoming TCP Stream          PDU Frame Extraction              │
+│  ─────────────────────       ────────────────────────           │
+│                                                                  │
+│  ┌─────────────────────┐     1. Read PDU Type (1 byte)          │
+│  │ Raw TCP Data        │──────► 2. Read Reserved (1 byte)        │
+│  │ (fragmented)        │     3. Read PDU Length (4 bytes)       │
+│  └─────────────────────┘     4. Read PDU Data (length bytes)    │
+│           │                            │                         │
+│           ▼                            ▼                         │
+│  ┌─────────────────────┐     ┌─────────────────────────┐        │
+│  │ Frame Buffer        │     │ Complete PDU            │        │
+│  │ (accumulates data)  │     │ → pdu_decoder::decode() │        │
+│  └─────────────────────┘     └─────────────────────────┘        │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### DES-INT-003a: accept_worker
+
+**Traces to:** SRS-INT-004
+
+**Purpose:** Accept loop implementation inheriting from `thread_base` for jthread and cancellation token support.
+
+**Class Design:**
+
+```cpp
+namespace pacs::network::detail {
+
+class accept_worker : public thread_system::thread_base {
+public:
+    // ─────────────────────────────────────────────────────
+    // Construction
+    // ─────────────────────────────────────────────────────
+    accept_worker(
+        int listen_socket,
+        std::function<void(int)> on_accept,
+        const cancellation_token& token);
+
+protected:
+    // ─────────────────────────────────────────────────────
+    // Thread Entry Point (from thread_base)
+    // ─────────────────────────────────────────────────────
+    void run(std::stop_token stop_token) override;
+
+private:
+    int listen_socket_;
+    std::function<void(int)> on_accept_;
+    cancellation_token token_;
+};
+
+} // namespace pacs::network::detail
+```
+
+**Threading Model:**
+
+```
+Before Migration                    After Migration (v1.1.0)
+────────────────                    ─────────────────────────
+
+std::thread accept_thread_          accept_worker (thread_base)
+    │                                   │
+    ├── Manual join/detach              ├── jthread auto-join
+    ├── No cancellation                 ├── cancellation_token
+    └── No statistics                   └── Unified monitoring
+
+std::thread worker_thread           thread_adapter pool
+    │                                   │
+    ├── Per-association                 ├── Load balancing
+    ├── Manual lifecycle                ├── Work stealing
+    └── No monitoring                   └── Statistics tracking
+```
+
+---
+
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 1.1.0 | 2025-12-04 | kcenon | Updated component designs |
+| 1.2.0 | 2025-12-07 | kcenon | Added: DES-NET-006/007 (Network V2), DES-INT-003a (accept_worker); Thread migration architecture |
+
+---
+
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
+*Updated: 2025-12-07*
 *Author: kcenon@naver.com*

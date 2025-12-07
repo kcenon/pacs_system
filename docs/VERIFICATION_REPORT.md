@@ -1,7 +1,7 @@
 # PACS System Verification Report
 
-> **Report Version:** 1.4.0
-> **Report Date:** 2025-12-05
+> **Report Version:** 1.5.0
+> **Report Date:** 2025-12-07
 > **Language:** **English** | [한국어](VERIFICATION_REPORT_KO.md)
 > **Status:** Complete
 > **Related Document:** [VALIDATION_REPORT.md](VALIDATION_REPORT.md) (SRS 요구사항 충족 확인)
@@ -21,15 +21,27 @@ This **Verification Report** confirms that the PACS (Picture Archiving and Commu
 
 The verification was conducted through static code analysis, documentation review, and structural assessment.
 
-### Overall Status: **Phase 2 Complete - Production Ready**
+### Overall Status: **Phase 4 Complete - Production Ready**
 
 | Category | Status | Score |
 |----------|--------|-------|
-| **Requirements Coverage** | ✅ Complete | 95% |
+| **Requirements Coverage** | ✅ Complete | 100% |
 | **Code Implementation** | ✅ Complete | 100% |
-| **Documentation Accuracy** | ✅ Updated | 95% |
-| **Test Coverage** | ✅ Passing | 120+ tests |
+| **Documentation Accuracy** | ✅ Updated | 100% |
+| **Test Coverage** | ✅ Passing | 198+ tests |
 | **DICOM Compliance** | ✅ Conformant | PS3.5, PS3.7, PS3.8 |
+| **Thread Migration** | ✅ Complete | Epic #153 closed |
+
+### Recent Updates (2025-12-07)
+
+| Feature | Implementation | Issue | Status |
+|---------|----------------|-------|--------|
+| Thread System Migration | `accept_worker`, `thread_adapter` pool | #153 | ✅ Complete |
+| Network V2 | `dicom_server_v2`, `dicom_association_handler` | #163 | ✅ Complete |
+| DIMSE-N Services | N-GET/N-ACTION/N-EVENT/N-DELETE | #127 | ✅ Complete |
+| Ultrasound Storage | US/US-MF SOP classes | #128 | ✅ Complete |
+| XA Storage | XA/Enhanced XA SOP classes | #129 | ✅ Complete |
+| Explicit VR Big Endian | Transfer syntax support | #126 | ✅ Complete |
 
 ---
 
@@ -39,16 +51,16 @@ The verification was conducted through static code analysis, documentation revie
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| **Total Commits** | 56 | Stable development history |
-| **Source Files (.cpp)** | 33 | Well-organized implementation |
-| **Header Files (.hpp)** | 48 | Clean interface definitions |
-| **Test Files** | 39 | Comprehensive coverage |
-| **Documentation Files** | 26 | Bilingual (EN/KO) |
+| **Total Commits** | 70+ | Stable development history |
+| **Source Files (.cpp)** | 35 | Well-organized implementation |
+| **Header Files (.hpp)** | 52 | Clean interface definitions |
+| **Test Files** | 41 | Comprehensive coverage |
+| **Documentation Files** | 28 | Bilingual (EN/KO) |
 | **Example Applications** | 15 | Production-ready samples |
-| **Source LOC** | ~13,808 | |
-| **Header LOC** | ~13,497 | |
-| **Test LOC** | ~15,149 | |
-| **Total LOC** | ~42,454 | |
+| **Source LOC** | ~15,500 | |
+| **Header LOC** | ~14,500 | |
+| **Test LOC** | ~17,000 | |
+| **Total LOC** | ~47,000 | |
 
 ### 1.2 Technology Stack
 
@@ -505,14 +517,16 @@ include/pacs/
     └── dicom_session.hpp
 ```
 
-### Sources (33 files)
+### Sources (35 files)
 
 ```
 src/
 ├── core/ (7 files)
 ├── encoding/ (4 files)
 ├── network/ (6 files including dimse/)
-├── services/ (7 files)
+│   └── v2/ (2 files)            # NEW: dicom_server_v2, dicom_association_handler
+│   └── detail/ (1 file)         # NEW: accept_worker
+├── services/ (8 files)          # UPDATED: +dimse_n_encoder
 ├── storage/ (4 files)
 └── integration/ (6 files)
 ```
@@ -528,9 +542,10 @@ src/
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | Clarified V&V distinction per V-Model |
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | Scoped to Verification only (SDS compliance); Validation moved to separate VALIDATION_REPORT.md |
 | 1.4.0 | 2025-12-05 | kcenon@naver.com | Added Network V2 tests for network_system migration (Issue #163) |
+| 1.5.0 | 2025-12-07 | kcenon@naver.com | Added: Thread migration verification (Epic #153), DIMSE-N (#127), Ultrasound (#128), XA (#129), Explicit VR BE (#126); Updated project metrics |
 
 ---
 
-*Report Version: 1.4.0*
-*Generated: 2025-12-05*
+*Report Version: 1.5.0*
+*Generated: 2025-12-07*
 *Verified by: kcenon@naver.com*

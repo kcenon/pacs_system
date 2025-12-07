@@ -1,7 +1,7 @@
 # PACS 시스템 검증 보고서
 
-> **보고서 버전:** 1.4.0
-> **보고서 일자:** 2025-12-05
+> **보고서 버전:** 1.5.0
+> **보고서 일자:** 2025-12-07
 > **언어:** [English](VERIFICATION_REPORT.md) | **한국어**
 > **상태:** 완료
 > **관련 문서:** [VALIDATION_REPORT_KO.md](VALIDATION_REPORT_KO.md) (SRS 요구사항 충족 확인)

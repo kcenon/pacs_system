@@ -1,8 +1,8 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 1.1.0
+> **Version:** 1.2.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2025-12-04
+> **Last Updated:** 2025-12-07
 
 ---
 

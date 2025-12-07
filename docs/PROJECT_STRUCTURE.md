@@ -1,7 +1,7 @@
 # Project Structure - PACS System
 
-> **Version:** 1.1.0
-> **Last Updated:** 2025-12-04
+> **Version:** 1.2.0
+> **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](PROJECT_STRUCTURE_KO.md)
 
 ---
@@ -63,6 +63,13 @@ pacs_system/
 │       │   ├── association.hpp     # Association state machine
 │       │   ├── dicom_server.hpp    # Multi-association server
 │       │   ├── server_config.hpp   # Server configuration
+│       │   │
+│       │   ├── detail/             # Internal implementation
+│       │   │   └── accept_worker.hpp   # Accept loop (thread_base) [NEW v1.1.0]
+│       │   │
+│       │   ├── v2/                 # network_system V2 [NEW v1.1.0]
+│       │   │   ├── dicom_server_v2.hpp           # messaging_server-based
+│       │   │   └── dicom_association_handler.hpp # Per-session handler
 │       │   │
 │       │   └── dimse/              # DIMSE protocol
 │       │       ├── dimse_message.hpp
@@ -557,7 +564,17 @@ Test DICOM files stored in `tests/fixtures/`:
 
 ---
 
-*Document Version: 1.1.0*
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 1.1.0 | 2025-12-04 | kcenon | Added SOP class and validation directories |
+| 1.2.0 | 2025-12-07 | kcenon | Added: network/detail/ (accept_worker), network/v2/ (dicom_server_v2, dicom_association_handler) |
+
+---
+
+*Document Version: 1.2.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-04*
+*Updated: 2025-12-07*
 *Author: kcenon@naver.com*
