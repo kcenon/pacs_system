@@ -83,6 +83,7 @@ jobs:
         sudo apt install -y cmake build-essential ninja-build pkg-config
         sudo apt install -y libsqlite3-dev libssl-dev libfmt-dev
         sudo apt install -y libgtest-dev libgmock-dev
+        sudo apt install -y libjpeg-turbo8-dev
         if [ "${{ matrix.compiler }}" = "clang" ]; then
           sudo apt install -y clang lld
         fi
@@ -90,7 +91,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install ninja pkg-config sqlite3 openssl@3 googletest fmt
+        brew install ninja pkg-config sqlite3 openssl@3 googletest fmt jpeg-turbo
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -107,7 +108,7 @@ jobs:
       shell: pwsh
       run: |
         # Install dependencies via vcpkg
-        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
