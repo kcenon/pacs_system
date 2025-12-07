@@ -168,6 +168,24 @@ struct image_params {
         if (samples_per_pixel != 1) return false;
         return true;
     }
+
+    /**
+     * @brief Validates image parameters for JPEG 2000 compression.
+     * @return true if parameters are valid for JPEG 2000
+     *
+     * JPEG 2000 requirements:
+     * - 1-16 bit precision (per component)
+     * - bits_allocated must be 8 or 16
+     * - 1 (grayscale) or 3 (color) samples per pixel
+     * - Valid dimensions (non-zero)
+     */
+    [[nodiscard]] bool valid_for_jpeg2000() const noexcept {
+        if (bits_stored < 1 || bits_stored > 16) return false;
+        if (bits_allocated != 8 && bits_allocated != 16) return false;
+        if (samples_per_pixel != 1 && samples_per_pixel != 3) return false;
+        if (width == 0 || height == 0) return false;
+        return true;
+    }
 };
 
 }  // namespace pacs::encoding::compression
