@@ -192,6 +192,40 @@ if(NOT PACS_JPEG2000_FOUND)
     set(PACS_JPEG2000_FOUND FALSE)
 endif()
 
+# CharLS (for JPEG-LS compression codec)
+message(STATUS "")
+message(STATUS "=== Finding CharLS (for JPEG-LS compression) ===")
+
+# Try to find system CharLS
+find_package(charls CONFIG QUIET)
+
+if(charls_FOUND)
+    message(STATUS "Found system CharLS")
+    set(PACS_JPEGLS_FOUND TRUE)
+else()
+    # Try pkg-config as fallback
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(CHARLS QUIET charls)
+        if(CHARLS_FOUND)
+            message(STATUS "Found CharLS via pkg-config: ${CHARLS_VERSION}")
+            set(PACS_JPEGLS_FOUND TRUE)
+        endif()
+    endif()
+endif()
+
+if(NOT PACS_JPEGLS_FOUND)
+    message(WARNING
+        "CharLS not found!\n"
+        "JPEG-LS codec will be disabled.\n"
+        "\n"
+        "To enable JPEG-LS support, install CharLS:\n"
+        "  - Ubuntu: sudo apt install libcharls-dev\n"
+        "  - macOS: brew install charls\n"
+        "  - Windows: vcpkg install charls:x64-windows")
+    set(PACS_JPEGLS_FOUND FALSE)
+endif()
+
 # fmt library (for std::format compatibility on older compilers)
 message(STATUS "")
 message(STATUS "=== Finding fmt library (for format compatibility) ===")
@@ -520,6 +554,7 @@ add_library(pacs_encoding
     src/encoding/compression/jpeg_baseline_codec.cpp
     src/encoding/compression/jpeg_lossless_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp
+    src/encoding/compression/jpeg_ls_codec.cpp
     src/encoding/compression/codec_factory.cpp
 )
 target_include_directories(pacs_encoding
@@ -553,6 +588,22 @@ if(PACS_JPEG2000_FOUND)
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG2000_CODEC)
     message(STATUS "  [OK] pacs_encoding: JPEG 2000 codec enabled")
+endif()
+
+# Link CharLS for JPEG-LS compression codec
+if(PACS_JPEGLS_FOUND)
+    if(TARGET charls)
+        target_link_libraries(pacs_encoding PUBLIC charls)
+    elseif(TARGET charls::charls)
+        target_link_libraries(pacs_encoding PUBLIC charls::charls)
+    elseif(CHARLS_LIBRARIES)
+        target_link_libraries(pacs_encoding PUBLIC ${CHARLS_LIBRARIES})
+        if(CHARLS_INCLUDE_DIRS)
+            target_include_directories(pacs_encoding PUBLIC ${CHARLS_INCLUDE_DIRS})
+        endif()
+    endif()
+    target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEGLS_CODEC)
+    message(STATUS "  [OK] pacs_encoding: JPEG-LS codec enabled")
 endif()
 
 # Network library
@@ -932,6 +983,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/compression/jpeg_baseline_codec_test.cpp
         tests/encoding/compression/jpeg_lossless_codec_test.cpp
         tests/encoding/compression/jpeg2000_codec_test.cpp
+        tests/encoding/compression/jpeg_ls_codec_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE

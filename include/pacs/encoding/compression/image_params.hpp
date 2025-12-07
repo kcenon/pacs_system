@@ -186,6 +186,25 @@ struct image_params {
         if (width == 0 || height == 0) return false;
         return true;
     }
+
+    /**
+     * @brief Validates image parameters for JPEG-LS compression.
+     * @return true if parameters are valid for JPEG-LS
+     *
+     * JPEG-LS requirements:
+     * - 2-16 bit precision (per component)
+     * - bits_allocated must be 8 or 16
+     * - 1 (grayscale) or 3 (color) samples per pixel
+     * - Valid dimensions (non-zero, max 65535x65535)
+     */
+    [[nodiscard]] bool valid_for_jpeg_ls() const noexcept {
+        if (bits_stored < 2 || bits_stored > 16) return false;
+        if (bits_allocated != 8 && bits_allocated != 16) return false;
+        if (samples_per_pixel != 1 && samples_per_pixel != 3) return false;
+        if (width == 0 || height == 0) return false;
+        if (width > 65535 || height > 65535) return false;
+        return true;
+    }
 };
 
 }  // namespace pacs::encoding::compression
