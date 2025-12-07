@@ -652,6 +652,115 @@ void compress_ct_image_lossless() {
 
 ---
 
+### `pacs::encoding::compression::jpeg2000_codec`
+
+JPEG 2000 codec supporting both lossless and lossy compression modes.
+
+```cpp
+#include <pacs/encoding/compression/jpeg2000_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class jpeg2000_codec final : public compression_codec {
+public:
+    // Transfer Syntax UIDs
+    static constexpr std::string_view kTransferSyntaxUIDLossless =
+        "1.2.840.10008.1.2.4.90";  // JPEG 2000 Lossless Only
+    static constexpr std::string_view kTransferSyntaxUIDLossy =
+        "1.2.840.10008.1.2.4.91";  // JPEG 2000 (Lossy or Lossless)
+
+    static constexpr float kDefaultCompressionRatio = 20.0f;
+    static constexpr int kDefaultResolutionLevels = 6;
+
+    // Construct with mode selection
+    // lossless: true for 4.90 (lossless only), false for 4.91 (default lossy)
+    // compression_ratio: Target ratio for lossy mode (ignored in lossless)
+    // resolution_levels: Number of DWT resolution levels (1-32)
+    explicit jpeg2000_codec(bool lossless = true,
+                            float compression_ratio = kDefaultCompressionRatio,
+                            int resolution_levels = kDefaultResolutionLevels);
+    ~jpeg2000_codec() override;
+
+    // Move-only (PIMPL)
+    jpeg2000_codec(jpeg2000_codec&&) noexcept;
+    jpeg2000_codec& operator=(jpeg2000_codec&&) noexcept;
+
+    // Configuration
+    [[nodiscard]] bool is_lossless_mode() const noexcept;
+    [[nodiscard]] float compression_ratio() const noexcept;
+    [[nodiscard]] int resolution_levels() const noexcept;
+
+    // Codec interface implementation
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "JPEG 2000 Lossless" or "JPEG 2000"
+    [[nodiscard]] bool is_lossy() const noexcept override;
+
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// Supported features:
+// - Bit depths: 1-16 bit (8, 12, 16-bit typical for medical)
+// - Grayscale (samples_per_pixel = 1) and Color (samples_per_pixel = 3)
+// - Lossless: Reversible 5/3 integer wavelet transform
+// - Lossy: Irreversible 9/7 floating-point wavelet transform
+// - Automatic J2K/JP2 format detection on decode
+
+// Usage example - Lossless compression for diagnostic images
+void compress_mri_lossless() {
+    jpeg2000_codec codec(true);  // Lossless mode
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 16;
+    params.bits_stored = 16;    // 16-bit MRI
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(512 * 512 * 2);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data contains losslessly compressed J2K codestream
+    }
+}
+
+// Usage example - Lossy compression for archival
+void compress_xray_lossy() {
+    jpeg2000_codec codec(false, 20.0f);  // Lossy, 20:1 ratio
+
+    image_params params;
+    params.width = 2048;
+    params.height = 2048;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(2048 * 2048 * 2);
+
+    compression_options options;
+    options.quality = 80;  // Maps to compression ratio
+
+    auto result = codec.encode(pixel_data, params, options);
+    if (result.success) {
+        // result.data contains lossy compressed J2K codestream
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
 ### `pacs::encoding::compression::codec_factory`
 
 Factory for creating compression codecs by Transfer Syntax UID.
@@ -680,6 +789,8 @@ public:
 // Currently supported Transfer Syntaxes:
 // - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - Lossy
 // - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - Lossless
+// - 1.2.840.10008.1.2.4.90 - JPEG 2000 Lossless Only
+// - 1.2.840.10008.1.2.4.91 - JPEG 2000 (Lossy or Lossless)
 
 } // namespace pacs::encoding::compression
 ```
@@ -724,6 +835,7 @@ struct image_params {
     [[nodiscard]] bool is_signed() const noexcept;
     [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept;  // 8-bit only
     [[nodiscard]] bool valid_for_jpeg_lossless() const noexcept;  // 2-16 bit grayscale
+    [[nodiscard]] bool valid_for_jpeg2000() const noexcept;       // 1-16 bit grayscale/color
 };
 
 // String conversion
