@@ -363,13 +363,15 @@ TEST_CASE("codec_factory creates jpeg_baseline_codec", "[encoding][compression]"
     }
 
     SECTION("unsupported UID returns nullptr") {
-        auto codec = codec_factory::create("1.2.840.10008.1.2.4.70");  // JPEG Lossless
+        // Use JPEG 2000 UID which is not yet implemented
+        auto codec = codec_factory::create("1.2.840.10008.1.2.4.90");  // JPEG 2000
         REQUIRE(codec == nullptr);
     }
 
     SECTION("is_supported returns correct values") {
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.50") == true);
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.70") == false);
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.50") == true);   // JPEG Baseline
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.70") == true);   // JPEG Lossless
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.90") == false);  // JPEG 2000 (not implemented)
         REQUIRE(codec_factory::is_supported("invalid.uid") == false);
     }
 
