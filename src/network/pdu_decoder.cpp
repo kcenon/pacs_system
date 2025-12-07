@@ -128,8 +128,10 @@ std::optional<size_t> pdu_decoder::pdu_length(std::span<const uint8_t> data) {
     const uint32_t length = read_uint32_be(data, 2);
     const size_t total = PDU_HEADER_SIZE + length;
 
-    // Return the total length even if we don't have all the data yet.
-    // This allows callers to know how much data is needed for a complete PDU.
+    if (data.size() < total) {
+        return std::nullopt;
+    }
+
     return total;
 }
 

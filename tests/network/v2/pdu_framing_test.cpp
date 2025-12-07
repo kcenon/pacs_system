@@ -169,13 +169,13 @@ TEST_CASE("PDU fragmented accumulation", "[pdu_framing][unit]") {
         // Simulate accumulation
         std::vector<uint8_t> buffer;
 
-        // First fragment (partial header)
+        // First fragment (just header)
         buffer.insert(buffer.end(), fragments[0].begin(), fragments[0].end());
         CHECK(buffer.size() == 6);  // Just the header
 
+        // With only header, pdu_length returns nullopt (incomplete PDU)
         auto length_opt = pdu_decoder::pdu_length(buffer);
-        REQUIRE(length_opt.has_value());
-        CHECK(*length_opt > buffer.size());  // Need more data
+        CHECK_FALSE(length_opt.has_value());
 
         // Add more fragments until complete
         for (size_t i = 1; i < fragments.size(); ++i) {
@@ -306,9 +306,14 @@ TEST_CASE("PDU length validation", "[pdu_framing][unit]") {
             static_cast<uint8_t>(max_size & 0xFF)
         };
 
+        // pdu_length requires complete PDU data, so with only header it returns nullopt
         auto length_opt = pdu_decoder::pdu_length(large_header);
-        REQUIRE(length_opt.has_value());
-        CHECK(*length_opt == max_size + 6);
+        CHECK_FALSE(length_opt.has_value());
+
+        // Verify peek_pdu_type works with just the header
+        auto type_opt = pdu_decoder::peek_pdu_type(large_header);
+        REQUIRE(type_opt.has_value());
+        CHECK(*type_opt == pdu_type::p_data_tf);
     }
 }
 
@@ -345,16 +350,20 @@ TEST_CASE("PDU framing edge cases", "[pdu_framing][unit]") {
         CHECK_FALSE(length_opt.has_value());
     }
 
-    SECTION("exactly header size buffer") {
+    SECTION("exactly header size buffer with incomplete payload") {
         std::vector<uint8_t> exact_header = {
             0x05,  // A-RELEASE-RQ
             0x00,  // Reserved
-            0x00, 0x00, 0x00, 0x04  // Length = 4
+            0x00, 0x00, 0x00, 0x04  // Length = 4 (needs 4 more bytes)
         };
 
+        // pdu_length requires complete PDU, so returns nullopt for header-only
         auto length_opt = pdu_decoder::pdu_length(exact_header);
-        REQUIRE(length_opt.has_value());
-        CHECK(*length_opt == 10);  // Need 4 more bytes for payload
-        CHECK(*length_opt > exact_header.size());  // Incomplete
+        CHECK_FALSE(length_opt.has_value());
+
+        // peek_pdu_type should still work
+        auto type_opt = pdu_decoder::peek_pdu_type(exact_header);
+        REQUIRE(type_opt.has_value());
+        CHECK(*type_opt == pdu_type::release_rq);
     }
 }
