@@ -191,7 +191,8 @@ TEST_CASE("dicom_server_v2 statistics integration", "[integration][server_v2]") 
         auto stats1 = server.get_statistics();
         auto uptime1 = stats1.uptime();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds{100});
+        // Sleep for >1 second since uptime() returns seconds
+        std::this_thread::sleep_for(std::chrono::milliseconds{1100});
 
         auto stats2 = server.get_statistics();
         auto uptime2 = stats2.uptime();
