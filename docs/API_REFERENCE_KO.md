@@ -1345,6 +1345,187 @@ public:
 
 ---
 
+## DX 모달리티 모듈
+
+### `pacs::services::sop_classes::dx_storage`
+
+일반 방사선 촬영을 위한 Digital X-Ray (DX) SOP 클래스 정의 및 유틸리티.
+
+```cpp
+#include <pacs/services/sop_classes/dx_storage.hpp>
+
+namespace pacs::services::sop_classes {
+
+// SOP 클래스 UID
+inline constexpr std::string_view dx_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.1";
+inline constexpr std::string_view dx_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.1.1";
+inline constexpr std::string_view mammography_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2";
+inline constexpr std::string_view mammography_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.2.1";
+inline constexpr std::string_view intraoral_image_storage_for_presentation_uid =
+    "1.2.840.10008.5.1.4.1.1.1.3";
+inline constexpr std::string_view intraoral_image_storage_for_processing_uid =
+    "1.2.840.10008.5.1.4.1.1.1.3.1";
+
+// 열거형
+enum class dx_photometric_interpretation { monochrome1, monochrome2 };
+enum class dx_image_type { for_presentation, for_processing };
+enum class dx_view_position { ap, pa, lateral, oblique, other };
+enum class dx_detector_type { direct, indirect, storage, film };
+enum class dx_body_part { chest, abdomen, pelvis, spine, skull, hand, foot,
+                          knee, elbow, shoulder, hip, wrist, ankle, extremity,
+                          breast, other };
+
+// SOP 클래스 정보 구조체
+struct dx_sop_class_info {
+    std::string_view uid;
+    std::string_view name;
+    std::string_view description;
+    dx_image_type image_type;
+    bool is_mammography;
+    bool is_intraoral;
+};
+
+// 유틸리티 함수
+[[nodiscard]] std::vector<std::string> get_dx_transfer_syntaxes();
+[[nodiscard]] std::vector<std::string> get_dx_storage_sop_classes(
+    bool include_mammography = true, bool include_intraoral = true);
+[[nodiscard]] const dx_sop_class_info* get_dx_sop_class_info(std::string_view uid) noexcept;
+[[nodiscard]] bool is_dx_storage_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_dx_for_processing_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_dx_for_presentation_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_mammography_sop_class(std::string_view uid) noexcept;
+[[nodiscard]] bool is_valid_dx_photometric(std::string_view value) noexcept;
+
+// 열거형 변환 유틸리티
+[[nodiscard]] std::string_view to_string(dx_photometric_interpretation interp) noexcept;
+[[nodiscard]] std::string_view to_string(dx_view_position position) noexcept;
+[[nodiscard]] std::string_view to_string(dx_detector_type type) noexcept;
+[[nodiscard]] std::string_view to_string(dx_body_part part) noexcept;
+[[nodiscard]] dx_view_position parse_view_position(std::string_view value) noexcept;
+[[nodiscard]] dx_body_part parse_body_part(std::string_view value) noexcept;
+
+} // namespace pacs::services::sop_classes
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::sop_classes;
+
+// SOP 클래스 UID가 DX인지 확인
+if (is_dx_storage_sop_class(sop_class_uid)) {
+    const auto* info = get_dx_sop_class_info(sop_class_uid);
+
+    if (info->image_type == dx_image_type::for_presentation) {
+        // 표시 준비된 이미지, VOI LUT 적용
+    } else {
+        // 원시 데이터, 처리 필요
+    }
+
+    if (info->is_mammography) {
+        // 유방촬영 전용 디스플레이 설정 적용
+    }
+}
+
+// 일반 DX SOP 클래스만 가져오기 (유방촬영/구강내 제외)
+auto dx_classes = get_dx_storage_sop_classes(false, false);
+
+// DICOM 데이터셋에서 신체 부위 파싱
+auto body_part = parse_body_part("CHEST");  // dx_body_part::chest 반환
+auto view = parse_view_position("PA");       // dx_view_position::pa 반환
+```
+
+---
+
+### `pacs::services::validation::dx_iod_validator`
+
+DICOM PS3.3 Section A.26에 따른 Digital X-Ray 이미지용 IOD 검증기.
+
+```cpp
+#include <pacs/services/validation/dx_iod_validator.hpp>
+
+namespace pacs::services::validation {
+
+// 검증 옵션
+struct dx_validation_options {
+    bool check_type1 = true;               // 필수 속성
+    bool check_type2 = true;               // 필수, 비어있을 수 있음
+    bool check_conditional = true;         // 조건부 필수
+    bool validate_pixel_data = true;       // 픽셀 일관성 검사
+    bool validate_dx_specific = true;      // DX 모듈 검증
+    bool validate_anatomy = true;          // 신체 부위/촬영 각도 검증
+    bool validate_presentation_requirements = true;
+    bool validate_processing_requirements = true;
+    bool allow_both_photometric = true;    // MONOCHROME1과 2 허용
+    bool strict_mode = false;              // 경고를 오류로 처리
+};
+
+class dx_iod_validator {
+public:
+    dx_iod_validator() = default;
+    explicit dx_iod_validator(const dx_validation_options& options);
+
+    // 전체 검증
+    [[nodiscard]] validation_result validate(const core::dicom_dataset& dataset) const;
+
+    // 특수 검증
+    [[nodiscard]] validation_result validate_for_presentation(
+        const core::dicom_dataset& dataset) const;
+    [[nodiscard]] validation_result validate_for_processing(
+        const core::dicom_dataset& dataset) const;
+
+    // 빠른 Type 1 검사만
+    [[nodiscard]] bool quick_check(const core::dicom_dataset& dataset) const;
+
+    // 옵션 접근
+    [[nodiscard]] const dx_validation_options& options() const noexcept;
+    void set_options(const dx_validation_options& options);
+};
+
+// 편의 함수
+[[nodiscard]] validation_result validate_dx_iod(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_valid_dx_dataset(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_for_presentation_dx(const core::dicom_dataset& dataset);
+[[nodiscard]] bool is_for_processing_dx(const core::dicom_dataset& dataset);
+
+} // namespace pacs::services::validation
+```
+
+**예제:**
+```cpp
+using namespace pacs::services::validation;
+
+// 기본 검증
+auto result = validate_dx_iod(dataset);
+
+if (!result.is_valid) {
+    for (const auto& finding : result.findings) {
+        if (finding.severity == validation_severity::error) {
+            std::cerr << "[오류] " << finding.code << ": " << finding.message << "\n";
+        }
+    }
+    return;
+}
+
+// 커스텀 옵션으로 엄격한 검증
+dx_validation_options options;
+options.strict_mode = true;  // 경고를 오류로 처리
+
+dx_iod_validator validator(options);
+auto strict_result = validator.validate(dataset);
+
+// VOI LUT 검사가 포함된 For Presentation 이미지 검증
+if (is_for_presentation_dx(dataset)) {
+    auto result = validator.validate_for_presentation(dataset);
+    // Window Center/Width 또는 VOI LUT Sequence 검증 포함
+}
+```
+
+---
+
 ## 모니터링 모듈
 
 ### `pacs::monitoring::pacs_metrics`
@@ -1565,10 +1746,11 @@ public:
 | 1.1.0 | 2025-12-05 | thread_system 통합 API 추가                    |
 | 1.2.0 | 2025-12-07 | Network V2 모듈 추가 (dicom_server_v2, dicom_association_handler) |
 | 1.3.0 | 2025-12-07 | 모니터링 모듈 추가 (DIMSE 작업 추적용 pacs_metrics) |
+| 1.4.0 | 2025-12-07 | DX 모달리티 모듈 추가 (dx_storage, dx_iod_validator) |
 
 ---
 
-*문서 버전: 1.3.0*
+*문서 버전: 1.4.0*
 *작성일: 2025-11-30*
 *최종 수정일: 2025-12-07*
 *작성자: kcenon@naver.com*
