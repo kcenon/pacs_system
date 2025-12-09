@@ -16,6 +16,7 @@
 - [Storage Module](#storage-module)
 - [Monitoring Module](#monitoring-module)
 - [Integration Module](#integration-module)
+- [Web Module](#web-module)
 - [Common Module](#common-module)
 
 ---
@@ -2725,6 +2726,65 @@ public:
 
 ---
 
+## Web Module
+
+### `pacs::web::rest_server`
+
+REST API server implementation using Crow framework.
+
+```cpp
+#include <pacs/web/rest_server.hpp>
+
+namespace pacs::web {
+
+class rest_server {
+public:
+    // Construction
+    explicit rest_server(const rest_server_config& config);
+    ~rest_server();
+
+    // Lifecycle
+    void start();        // Blocking
+    void start_async();  // Non-blocking
+    void stop();         // Graceful shutdown
+
+    // Configuration
+    void set_health_checker(std::shared_ptr<monitoring::health_checker> checker);
+
+    // Status
+    bool is_running() const;
+    uint16_t port() const;
+};
+
+} // namespace pacs::web
+```
+
+### `pacs::web::rest_server_config`
+
+Configuration for the REST server.
+
+```cpp
+#include <pacs/web/rest_server_config.hpp>
+
+namespace pacs::web {
+
+struct rest_server_config {
+    uint16_t port = 8080;
+    size_t concurrency = 2;
+    bool enable_cors = true;
+    std::string bind_address = "0.0.0.0";
+    
+    // TLS options (future)
+    bool use_tls = false;
+    std::string cert_file;
+    std::string key_file;
+};
+
+} // namespace pacs::web
+```
+
+---
+
 ## Document History
 
 | Version | Date       | Changes                                      |
@@ -2735,10 +2795,11 @@ public:
 | 1.3.0   | 2025-12-07 | Added Monitoring Module (pacs_metrics for DIMSE operation tracking) |
 | 1.4.0   | 2025-12-07 | Added DX Modality Module (dx_storage, dx_iod_validator) |
 | 1.5.0   | 2025-12-08 | Added MG Modality Module (mg_storage, mg_iod_validator) |
+| 1.6.0   | 2025-12-09 | Added Web Module (rest_server foundation)    |
 
 ---
 
-*Document Version: 1.5.0*
+*Document Version: 1.6.0*
 *Created: 2025-11-30*
-*Last Updated: 2025-12-07*
+*Last Updated: 2025-12-09*
 *Author: kcenon@naver.com*

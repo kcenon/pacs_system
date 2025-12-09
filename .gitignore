@@ -1,7 +1,7 @@
 # Build directories
-build/
+build*/
 cmake-build-*/
-out/
+out*/
 
 # IDE files
 .idea/
@@ -50,3 +50,6 @@ vcpkg_installed/
 # Dependencies
 dependencies/
 third_party/
+
+# npm-cache
+.npm-cache/
