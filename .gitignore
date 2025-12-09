@@ -51,5 +51,6 @@ vcpkg_installed/
 dependencies/
 third_party/
 
-# npm-cache
+# cache
+.cache/
 .npm-cache/

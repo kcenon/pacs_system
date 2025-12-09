@@ -10,6 +10,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "pacs/security/access_control_manager.hpp"
+#include "pacs/security/user.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_types.hpp"
@@ -54,6 +56,46 @@ std::string config_to_json(const rest_server_config &config) {
   return oss.str();
 }
 
+// Helper to check authentication and permission
+// Returns true if allowed, false if denied (and sets response)
+bool check_permission(const std::shared_ptr<rest_server_context> &ctx,
+                      const crow::request &req, crow::response &res,
+                      security::ResourceType resource, uint32_t action) {
+  if (!ctx->security_manager) {
+    // Fail open or closed? Closed is safer, but for dev maybe open if not
+    // configured? Let's fail closed.
+    res.code = 503;
+    res.body = make_error_json("SECURITY_UNAVAILABLE",
+                               "Security manager not configured");
+    return false;
+  }
+
+  // Simple Auth via Header for now (Integration step)
+  auto user_id_header = req.get_header_value("X-User-ID");
+  if (user_id_header.empty()) {
+    res.code = 401;
+    res.body = make_error_json("UNAUTHORIZED", "Missing X-User-ID header");
+    return false;
+  }
+
+  std::string user_id = user_id_header;
+  auto user_res = ctx->security_manager->get_user(user_id);
+  if (user_res.is_err()) {
+    res.code = 401;
+    res.body = make_error_json("UNAUTHORIZED", "Invalid user");
+    return false;
+  }
+
+  auto user = user_res.unwrap();
+  if (!ctx->security_manager->check_permission(user, resource, action)) {
+    res.code = 403;
+    res.body = make_error_json("FORBIDDEN", "Insufficient permissions");
+    return false;
+  }
+
+  return true;
+}
+
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
@@ -61,26 +103,35 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
                                     std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/system/status - System health status
   CROW_ROUTE(app, "/api/v1/system/status")
-      .methods(crow::HTTPMethod::GET)([ctx]() {
+      .methods(crow::HTTPMethod::GET)([ctx](const crow::request &req) {
         crow::response res;
         res.add_header("Content-Type", "application/json");
         add_cors_headers(res, *ctx);
+
+        // Permission Check: System Read
+        if (!check_permission(ctx, req, res, security::ResourceType::System,
+                              security::Action::Read)) {
+          return res;
+        }
+
+        crow::json::wvalue status_json;
+        status_json["status"] = "unknown";                        // Default
+        status_json["message"] = "Health checker not configured"; // Default
+        status_json["version"] = "1.0.0";                         // Default
 
 #ifdef PACS_WITH_MONITORING
         if (ctx->health_checker) {
           auto status = ctx->health_checker->get_status();
           // to_json is a free function in pacs::monitoring namespace
-          res.body = monitoring::to_json(status);
-          res.code = 200;
+          status_json = crow::json::load(
+              monitoring::to_json(status)); // Parse existing JSON into wvalue
+          status_json["version"] = "1.0.0"; // Add version
         } else {
-          res.body =
-              R"({"status":"unknown","message":"Health checker not configured"})";
-          res.code = 503;
+          status_json["status"] = "unknown";
+          status_json["message"] = "Health checker not configured";
         }
 #else
         // Basic status without monitoring module
-        res.body =
-            R"({"status":"healthy","message":"REST API server running","version":"1.0.0"})";
         res.code = 200;
 #endif
         return res;

@@ -746,12 +746,31 @@ endif()
 
 message(STATUS "  [OK] pacs_services: ON")
 
+# Security library
+add_library(pacs_security
+    src/security/access_control_manager.cpp
+)
+target_include_directories(pacs_security
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+# Link common_system (Tier 0)
+if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+    target_include_directories(pacs_security PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    target_compile_definitions(pacs_security PUBLIC PACS_WITH_COMMON_SYSTEM)
+endif()
+
+message(STATUS "  [OK] pacs_security: ON")
+
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
         src/storage/storage_interface.cpp
         src/storage/file_storage.cpp
         src/storage/s3_storage.cpp
+        src/storage/sqlite_security_storage.cpp
         src/storage/migration_runner.cpp
         src/storage/index_database.cpp
     )
@@ -775,7 +794,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     endif()
 
     # Link pacs_core for dicom_dataset and pacs_encoding for transfer_syntax
-    target_link_libraries(pacs_storage PUBLIC pacs_core pacs_encoding)
+    target_link_libraries(pacs_storage PUBLIC pacs_core pacs_encoding pacs_security)
 
     # Link fmt library for format compatibility (if needed)
     if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
@@ -814,6 +833,7 @@ if(TARGET Crow::Crow)
     add_library(pacs_web
         src/web/rest_server.cpp
         src/web/endpoints/system_endpoints.cpp
+        src/web/endpoints/security_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -971,6 +991,11 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
             if(TARGET common_system)
                 add_library(kcenon::common_system ALIAS common_system)
                 message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
+            elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+                add_library(kcenon_common_system_shim INTERFACE)
+                target_include_directories(kcenon_common_system_shim INTERFACE ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+                add_library(kcenon::common_system ALIAS kcenon_common_system_shim)
+                message(STATUS "Created kcenon::common_system shim for monitoring_system compatibility")
             endif()
         endif()
 
@@ -1111,6 +1136,18 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    # Security tests (Issue #193 - RBAC)
+    add_executable(security_tests
+        tests/security/access_control_manager_test.cpp
+        tests/security/sqlite_security_storage_test.cpp
+    )
+    target_link_libraries(security_tests
+        PRIVATE
+            pacs_security
+            pacs_storage
+            Catch2::Catch2WithMain
+    )
+
     # Storage tests
     if(TARGET pacs_storage)
         add_executable(storage_tests
@@ -1215,6 +1252,12 @@ if(PACS_BUILD_TESTS)
     endif()
     if(TARGET web_tests)
         catch_discover_tests(web_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+    
+    if(TARGET security_tests)
+        catch_discover_tests(security_tests
             PROPERTIES LABELS "unit"
         )
     endif()
