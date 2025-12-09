@@ -145,8 +145,8 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Phase 3: uncompressed syntaxes (3) + JPEG Baseline (1)
-        CHECK(supported.size() == 4);
+        // Phase 3: uncompressed syntaxes (3) + JPEG Baseline (1) + RLE Lossless (1)
+        CHECK(supported.size() == 5);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());

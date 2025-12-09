@@ -21,10 +21,12 @@ namespace {
  */
 std::vector<uint8_t> create_gradient_image_8bit(uint16_t width, uint16_t height) {
     std::vector<uint8_t> data(width * height);
+    // Handle edge case where width + height - 2 would be 0 (1x1 image)
+    uint32_t divisor = (width + height > 2) ? (width + height - 2) : 1;
     for (uint16_t y = 0; y < height; ++y) {
         for (uint16_t x = 0; x < width; ++x) {
             data[y * width + x] = static_cast<uint8_t>(
-                (x + y) * 255 / (width + height - 2));
+                (x + y) * 255 / divisor);
         }
     }
     return data;
