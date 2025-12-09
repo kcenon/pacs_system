@@ -365,6 +365,11 @@ if (result.is_ok()) {
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |
 | X-Ray 3D Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.1 | ✅ |
 | X-Ray 3D Craniofacial Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.2 | ✅ |
+| NM Image Storage | 1.2.840.10008.5.1.4.1.1.20 | ✅ |
+| NM Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.5 | ✅ |
+| PET Image Storage | 1.2.840.10008.5.1.4.1.1.128 | ✅ |
+| Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.130 | ✅ |
+| Legacy Converted Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.128.1 | ✅ |
 
 **Example**:
 ```cpp
@@ -857,7 +862,8 @@ server.stop();
 
 | Feature | Description | Target |
 |---------|-------------|--------|
-| Additional SOP Classes | NM, PET, RT, etc. | Phase 3 |
+| ~~Additional SOP Classes (PET/NM)~~ | ~~NM, PET support~~ | ✅ Complete |
+| Additional SOP Classes (RT) | RT Plan, RT Structure Set, etc. | Phase 3 |
 | Connection Pooling | Reuse associations | Phase 3 |
 | Enhanced Metrics | Per-association timing | Phase 3 |
 

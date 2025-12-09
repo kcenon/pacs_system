@@ -363,6 +363,11 @@ if (result.is_ok()) {
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |
 | X-Ray 3D Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.1 | ✅ |
 | X-Ray 3D Craniofacial Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.2 | ✅ |
+| NM Image Storage | 1.2.840.10008.5.1.4.1.1.20 | ✅ |
+| NM Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.5 | ✅ |
+| PET Image Storage | 1.2.840.10008.5.1.4.1.1.128 | ✅ |
+| Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.130 | ✅ |
+| Legacy Converted Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.128.1 | ✅ |
 
 **예제**:
 ```cpp
@@ -674,7 +679,8 @@ pacs_query_latency_seconds{quantile="0.95"}
 | 기능 | 설명 | 목표 |
 |------|------|------|
 | C-GET | 대체 검색 방법 | 3단계 |
-| 추가 SOP 클래스 | NM, PET, RT 등 | 3단계 |
+| ~~추가 SOP 클래스 (PET/NM)~~ | ~~NM, PET 지원~~ | ✅ 완료 |
+| 추가 SOP 클래스 (RT) | RT 계획, RT 구조 세트 등 | 3단계 |
 | 연결 풀링 | 연결 재사용 | 3단계 |
 
 ### 중기
