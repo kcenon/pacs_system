@@ -10,6 +10,7 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "pacs/web/endpoints/security_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_server.hpp"
@@ -86,6 +87,12 @@ void rest_server::set_metrics_provider(
   impl_->context->metrics = std::move(metrics);
 }
 
+void rest_server::set_access_control_manager(
+    std::shared_ptr<security::access_control_manager> manager) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->security_manager = std::move(manager);
+}
+
 void rest_server::start() {
   if (impl_->running.exchange(true)) {
     return; // Already running
@@ -134,7 +141,9 @@ void rest_server::start_async() {
     auto &app = *impl_->app;
 
     // Register system endpoints
+    // Register system endpoints
     endpoints::register_system_endpoints_impl(app, impl_->context);
+    endpoints::register_security_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {

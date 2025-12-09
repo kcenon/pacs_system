@@ -18,6 +18,10 @@ class health_checker;
 class pacs_metrics;
 } // namespace pacs::monitoring
 
+namespace pacs::security {
+class access_control_manager;
+} // namespace pacs::security
+
 namespace pacs::web {
 
 struct rest_server_config;
@@ -35,6 +39,9 @@ struct rest_server_context {
 
   /// Metrics provider for metrics endpoint
   std::shared_ptr<monitoring::pacs_metrics> metrics;
+
+  /// Access control manager for security
+  std::shared_ptr<security::access_control_manager> security_manager;
 };
 
 namespace endpoints {
