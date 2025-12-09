@@ -23,6 +23,10 @@ class health_checker;
 class pacs_metrics;
 } // namespace pacs::monitoring
 
+namespace pacs::security {
+class access_control_manager;
+} // namespace pacs::security
+
 namespace pacs::web {
 
 /**
@@ -107,7 +111,18 @@ public:
    * @brief Set metrics provider for /api/v1/system/metrics endpoint
    * @param metrics Metrics instance
    */
+  /**
+   * @brief Set metrics provider for /api/v1/system/metrics endpoint
+   * @param metrics Metrics instance
+   */
   void set_metrics_provider(std::shared_ptr<monitoring::pacs_metrics> metrics);
+
+  /**
+   * @brief Set access control manager for security
+   * @param manager Access control manager instance
+   */
+  void set_access_control_manager(
+      std::shared_ptr<security::access_control_manager> manager);
 
   // =========================================================================
   // Lifecycle

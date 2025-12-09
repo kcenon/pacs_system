@@ -730,12 +730,16 @@ server.start();
 - Certificate validation
 - Mutual authentication (optional)
 
-### Access Control
+### Access Control (RBAC)
+
+**Documentation**: [SECURITY.md](SECURITY.md)
 
 **Features**:
-- AE Title whitelisting
-- IP-based restrictions
-- User authentication (planned)
+- **Role-Based Access Control**: Pre-defined roles (Viewer, Technologist, Radiologist, Administrator).
+- **Granular Permissions**: Resource-level control (Study, Metadata, System, Audit).
+- **User Management**: Creating users and assigning roles via API.
+- **API Enforcement**: Secure REST API endpoints with permission checks.
+- **AE Title Security**: Association whitelisting (existing).
 
 ### Audit Logging
 

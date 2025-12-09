@@ -2797,6 +2797,73 @@ struct rest_server_config {
 | 1.5.0   | 2025-12-08 | Added MG Modality Module (mg_storage, mg_iod_validator) |
 | 1.6.0   | 2025-12-09 | Added Web Module (rest_server foundation)    |
 
+
+---
+
+## Security Module
+
+### `pacs::security::access_control_manager`
+
+Manages Users, Roles, and Permission enforcement.
+
+```cpp
+#include <pacs/security/access_control_manager.hpp>
+
+namespace pacs::security {
+
+class access_control_manager {
+public:
+    // Setup
+    void set_storage(std::shared_ptr<security_storage_interface> storage);
+
+    // User Management
+    VoidResult create_user(const User& user);
+    Result<User> get_user(std::string_view id);
+    VoidResult assign_role(std::string_view user_id, Role role);
+
+    // Permission Check
+    bool check_permission(const User& user, ResourceType resource, uint32_t action_mask) const;
+    bool has_role(const User& user, Role role) const;
+};
+
+} // namespace pacs::security
+```
+
+### REST API Endpoints
+
+**Base Path**: `/api/v1/security`
+
+#### Create User
+*   **Method**: `POST`
+*   **Path**: `/users`
+*   **Body**:
+    ```json
+    {
+      "id": "u123",
+      "username": "jdoe"
+    }
+    ```
+*   **Responses**:
+    *   `201 Created`: User created.
+    *   `400 Bad Request`: Invalid input or user exists.
+    *   `401 Unauthorized`: Missing or invalid authentication.
+
+#### Assign Role
+*   **Method**: `POST`
+*   **Path**: `/users/<id>/roles`
+*   **Body**:
+    ```json
+    {
+      "role": "Radiologist"
+    }
+    ```
+*   **Role Values**: `Viewer`, `Technologist`, `Radiologist`, `Administrator`.
+*   **Responses**:
+    *   `200 OK`: Role assigned.
+    *   `400 Bad Request`: Invalid role.
+    *   `404 Not Found`: User not found.
+    *   `401 Unauthorized`: Missing or invalid authentication.
+
 ---
 
 *Document Version: 1.6.0*
