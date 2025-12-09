@@ -370,6 +370,15 @@ if (result.is_ok()) {
 | PET Image Storage | 1.2.840.10008.5.1.4.1.1.128 | ✅ |
 | Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.130 | ✅ |
 | Legacy Converted Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.128.1 | ✅ |
+| RT Plan Storage | 1.2.840.10008.5.1.4.1.1.481.5 | ✅ |
+| RT Dose Storage | 1.2.840.10008.5.1.4.1.1.481.2 | ✅ |
+| RT Structure Set Storage | 1.2.840.10008.5.1.4.1.1.481.3 | ✅ |
+| RT Image Storage | 1.2.840.10008.5.1.4.1.1.481.1 | ✅ |
+| RT Beams Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.4 | ✅ |
+| RT Brachy Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.6 | ✅ |
+| RT Treatment Summary Record Storage | 1.2.840.10008.5.1.4.1.1.481.7 | ✅ |
+| RT Ion Plan Storage | 1.2.840.10008.5.1.4.1.1.481.8 | ✅ |
+| RT Ion Beams Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.9 | ✅ |
 
 **Example**:
 ```cpp
@@ -840,10 +849,11 @@ server.stop();
 
 ---
 
-## Recently Completed Features (v1.2.0 - 2025-12-09)
+## Recently Completed Features (v1.2.0 - 2025-12-10)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
 | RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
 | REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
 | S3 Cloud Storage | S3-compatible storage backend (mock implementation) | #198 | ✅ Complete |
@@ -863,7 +873,7 @@ server.stop();
 | Feature | Description | Target |
 |---------|-------------|--------|
 | ~~Additional SOP Classes (PET/NM)~~ | ~~NM, PET support~~ | ✅ Complete |
-| Additional SOP Classes (RT) | RT Plan, RT Structure Set, etc. | Phase 3 |
+| ~~Additional SOP Classes (RT)~~ | ~~RT Plan, RT Structure Set, etc.~~ | ✅ Complete |
 | Connection Pooling | Reuse associations | Phase 3 |
 | Enhanced Metrics | Per-association timing | Phase 3 |
 
@@ -895,11 +905,12 @@ server.stop();
 | 1.3.0 | 2025-12-09 | raphaelshin | Added: S3 Cloud Storage (mock implementation) for Issue #198 |
 | 1.4.0 | 2025-12-09 | raphaelshin | Added: REST API Server foundation with Crow framework for Issue #194 |
 | 1.5.0 | 2025-12-09 | raphaelshin | Added: RLE Lossless codec for Issue #182; Updated compression codec status |
+| 1.6.0 | 2025-12-10 | raphaelshin | Added: RT modality support (RT Plan, RT Dose, RT Structure Set) with IOD validation for Issue #186 |
 
 ---
 
-*Document Version: 1.5.0*
+*Document Version: 1.6.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-09*
+*Updated: 2025-12-10*
 *Author: kcenon@naver.com*
 
