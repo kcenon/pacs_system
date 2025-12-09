@@ -479,6 +479,43 @@ if(PACS_WITH_NETWORK_SYSTEM)
     endif()
 endif()
 
+# Crow Web Framework (for REST API - Issue #194)
+message(STATUS "")
+message(STATUS "=== Fetching Crow Web Framework (for REST API) ===")
+
+# Crow requires Asio. The network_system already fetched standalone ASIO.
+# Point Crow to use the same ASIO headers.
+if(DEFINED CACHE{network_system_asio_SOURCE_DIR})
+    set(ASIO_INCLUDE_DIR "${network_system_asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+    message(STATUS "  Using ASIO from network_system: ${ASIO_INCLUDE_DIR}")
+elseif(EXISTS "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include")
+    set(ASIO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include" CACHE PATH "" FORCE)
+    message(STATUS "  Using ASIO from build deps: ${ASIO_INCLUDE_DIR}")
+else()
+    # Fallback: fetch standalone ASIO for Crow
+    message(STATUS "  Fetching standalone ASIO for Crow...")
+    FetchContent_Declare(
+        asio
+        GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+        GIT_TAG asio-1-30-2
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(asio)
+    set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+endif()
+
+FetchContent_Declare(
+    Crow
+    GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
+    GIT_TAG master  # Use master for ASIO 1.30+ compatibility (io_context vs io_service)
+)
+set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CROW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
+set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(Crow)
+message(STATUS "  [OK] Crow (master) fetched")
+
 ##################################################
 # Dependency Chain Validation
 ##################################################
@@ -769,6 +806,38 @@ if(TARGET pacs_storage)
     message(STATUS "  [OK] pacs_monitoring: ON (health check)")
 else()
     message(STATUS "  [--] pacs_monitoring: OFF (requires pacs_storage)")
+endif()
+
+# Web library (REST API server - Issue #194)
+# Requires Crow framework (fetched above)
+if(TARGET Crow::Crow)
+    add_library(pacs_web
+        src/web/rest_server.cpp
+        src/web/endpoints/system_endpoints.cpp
+    )
+    target_include_directories(pacs_web
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_web
+        PUBLIC pacs_core Crow::Crow
+    )
+
+    # Link pacs_monitoring if available
+    if(TARGET pacs_monitoring)
+        target_link_libraries(pacs_web PUBLIC pacs_monitoring)
+        target_compile_definitions(pacs_web PUBLIC PACS_WITH_MONITORING)
+    endif()
+
+    # Link fmt library for format compatibility (if needed)
+    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
+        target_link_libraries(pacs_web PUBLIC ${PACS_FMT_TARGET})
+    endif()
+
+    message(STATUS "  [OK] pacs_web: ON (REST API server)")
+else()
+    message(STATUS "  [--] pacs_web: OFF (requires Crow)")
 endif()
 
 # Integration library (requires container_system and logger_system via network_system)
@@ -1076,6 +1145,19 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
+    # Web tests (Issue #194 - REST API server)
+    if(TARGET pacs_web)
+        add_executable(web_tests
+            tests/web/rest_server_test.cpp
+            tests/web/system_endpoints_test.cpp
+        )
+        target_link_libraries(web_tests
+            PRIVATE
+                pacs_web
+                Catch2::Catch2WithMain
+        )
+    endif()
+
     # Integration tests
     if(TARGET pacs_integration)
         add_executable(pacs_integration_tests
@@ -1128,6 +1210,11 @@ if(PACS_BUILD_TESTS)
     endif()
     if(TARGET monitoring_tests)
         catch_discover_tests(monitoring_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+    if(TARGET web_tests)
+        catch_discover_tests(web_tests
             PROPERTIES LABELS "unit"
         )
     endif()

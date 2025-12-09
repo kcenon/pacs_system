@@ -782,12 +782,58 @@ pacs_query_latency_seconds{quantile="0.95"}
 - Storage operation
 - Database query
 
+### REST API Server
+
+**Implementation**: REST API server using Crow web framework for PACS administration and monitoring.
+
+**Features**:
+- System health status and metrics endpoints
+- Configuration management
+- CORS support for web browser access
+- Integration with `pacs_monitoring` module
+
+**Classes**:
+- `rest_server` - Main server class with async/sync modes
+- `rest_server_config` - Configuration (port, CORS, TLS options)
+- `rest_server_context` - Shared context for endpoints
+
+**Endpoints**:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/system/status` | GET | System health status (via health_checker) |
+| `/api/v1/system/metrics` | GET | Performance metrics |
+| `/api/v1/system/config` | GET | Current server configuration |
+| `/api/v1/system/config` | PUT | Update configuration |
+| `/api/v1/system/version` | GET | API version info |
+
+**Example**:
+```cpp
+#include <pacs/web/rest_server.hpp>
+
+using namespace pacs::web;
+
+// Configure and start REST server
+rest_server_config config;
+config.port = 8080;
+config.concurrency = 4;
+config.enable_cors = true;
+
+rest_server server(config);
+server.set_health_checker(health_checker_instance);
+server.start_async();  // Non-blocking
+
+// Later: graceful shutdown
+server.stop();
+```
+
 ---
 
 ## Recently Completed Features (v1.2.0 - 2025-12-09)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
 | S3 Cloud Storage | S3-compatible storage backend (mock implementation) | #198 | ✅ Complete |
 | Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
 | Network System V2 | Optional messaging_server integration | #163 | ✅ Complete |
@@ -835,10 +881,12 @@ pacs_query_latency_seconds{quantile="0.95"}
 | 1.1.0 | 2025-12-04 | kcenon | Updated DIMSE status |
 | 1.2.0 | 2025-12-07 | kcenon | Added: Thread migration, Network V2, DIMSE-N, Ultrasound, XA; Updated ecosystem integration |
 | 1.3.0 | 2025-12-09 | raphaelshin | Added: S3 Cloud Storage (mock implementation) for Issue #198 |
+| 1.4.0 | 2025-12-09 | raphaelshin | Added: REST API Server foundation with Crow framework for Issue #194 |
 
 ---
 
-*Document Version: 1.3.0*
+*Document Version: 1.4.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-09*
 *Author: kcenon@naver.com*
+
