@@ -868,6 +868,99 @@ void compress_xray_near_lossless() {
 
 ---
 
+### `pacs::encoding::compression::rle_codec`
+
+DICOM RLE Lossless codec implementation (pure C++, no external dependencies).
+
+```cpp
+#include <pacs/encoding/compression/rle_codec.hpp>
+
+namespace pacs::encoding::compression {
+
+class rle_codec final : public compression_codec {
+public:
+    // Transfer Syntax UID
+    static constexpr std::string_view kTransferSyntaxUID = "1.2.840.10008.1.2.5";
+    static constexpr int kMaxSegments = 15;
+    static constexpr size_t kRLEHeaderSize = 64;
+
+    rle_codec();
+    ~rle_codec() override;
+
+    // Move-only (PIMPL)
+    rle_codec(rle_codec&&) noexcept;
+    rle_codec& operator=(rle_codec&&) noexcept;
+
+    // Codec interface implementation
+    [[nodiscard]] std::string_view transfer_syntax_uid() const noexcept override;
+    [[nodiscard]] std::string_view name() const noexcept override;  // "RLE Lossless"
+    [[nodiscard]] bool is_lossy() const noexcept override;  // Always false
+
+    [[nodiscard]] bool can_encode(const image_params& params) const noexcept override;
+    [[nodiscard]] bool can_decode(const image_params& params) const noexcept override;
+
+    [[nodiscard]] codec_result encode(
+        std::span<const uint8_t> pixel_data,
+        const image_params& params,
+        const compression_options& options = {}) const override;
+
+    [[nodiscard]] codec_result decode(
+        std::span<const uint8_t> compressed_data,
+        const image_params& params) const override;
+};
+
+// Supported features:
+// - Bit depths: 8-bit and 16-bit
+// - Grayscale (samples_per_pixel = 1) and RGB Color (samples_per_pixel = 3)
+// - Always lossless (exact reconstruction)
+// - Pure C++ implementation using PackBits algorithm
+// - No external library dependencies
+// - Good compression for images with large uniform areas
+
+// Usage example - Compress 8-bit grayscale image
+void compress_grayscale() {
+    rle_codec codec;
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 8;
+    params.bits_stored = 8;
+    params.samples_per_pixel = 1;
+    params.photometric = photometric_interpretation::monochrome2;
+
+    std::vector<uint8_t> pixel_data(512 * 512);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // result.data contains RLE compressed data with 64-byte header
+    }
+}
+
+// Usage example - Compress 16-bit CT image
+void compress_ct_16bit() {
+    rle_codec codec;
+
+    image_params params;
+    params.width = 512;
+    params.height = 512;
+    params.bits_allocated = 16;
+    params.bits_stored = 12;  // 12-bit CT
+    params.samples_per_pixel = 1;
+
+    std::vector<uint8_t> pixel_data(512 * 512 * 2);
+
+    auto result = codec.encode(pixel_data, params);
+    if (result.success) {
+        // 16-bit images are stored as 2 segments (high byte, low byte)
+    }
+}
+
+} // namespace pacs::encoding::compression
+```
+
+---
+
 ### `pacs::encoding::compression::codec_factory`
 
 Factory for creating compression codecs by Transfer Syntax UID.
@@ -894,6 +987,7 @@ public:
 };
 
 // Currently supported Transfer Syntaxes:
+// - 1.2.840.10008.1.2.5   - RLE Lossless (pure C++ implementation)
 // - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - Lossy
 // - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - Lossless
 // - 1.2.840.10008.1.2.4.80 - JPEG-LS Lossless Image Compression

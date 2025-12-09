@@ -205,6 +205,28 @@ struct image_params {
         if (width > 65535 || height > 65535) return false;
         return true;
     }
+
+    /**
+     * @brief Validates image parameters for RLE Lossless compression.
+     * @return true if parameters are valid for RLE
+     *
+     * RLE Lossless requirements:
+     * - bits_allocated must be 8 or 16
+     * - 1-3 samples per pixel (grayscale or RGB)
+     * - Valid dimensions (non-zero, max 65535x65535)
+     * - Maximum 15 segments (samples_per_pixel * bytes_per_sample)
+     */
+    [[nodiscard]] bool valid_for_rle() const noexcept {
+        if (bits_allocated != 8 && bits_allocated != 16) return false;
+        if (samples_per_pixel < 1 || samples_per_pixel > 3) return false;
+        if (width == 0 || height == 0) return false;
+        if (width > 65535 || height > 65535) return false;
+        // Check segment count limit (max 15 segments)
+        int bytes_per_sample = (bits_allocated + 7) / 8;
+        int num_segments = samples_per_pixel * bytes_per_sample;
+        if (num_segments > 15) return false;
+        return true;
+    }
 };
 
 }  // namespace pacs::encoding::compression

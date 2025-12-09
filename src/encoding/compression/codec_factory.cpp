@@ -3,6 +3,7 @@
 #include "pacs/encoding/compression/jpeg_lossless_codec.hpp"
 #include "pacs/encoding/compression/jpeg2000_codec.hpp"
 #include "pacs/encoding/compression/jpeg_ls_codec.hpp"
+#include "pacs/encoding/compression/rle_codec.hpp"
 
 #include <array>
 
@@ -16,7 +17,8 @@ namespace {
  * As more codecs are implemented (RLE, etc.),
  * they should be added to this list.
  */
-static constexpr std::array<std::string_view, 6> kSupportedTransferSyntaxes = {{
+static constexpr std::array<std::string_view, 7> kSupportedTransferSyntaxes = {{
+    rle_codec::kTransferSyntaxUID,                   // 1.2.840.10008.1.2.5
     jpeg_baseline_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.50
     jpeg_lossless_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.70
     jpeg_ls_codec::kTransferSyntaxUIDLossless,       // 1.2.840.10008.1.2.4.80
@@ -29,6 +31,11 @@ static constexpr std::array<std::string_view, 6> kSupportedTransferSyntaxes = {{
 
 std::unique_ptr<compression_codec> codec_factory::create(
     std::string_view transfer_syntax_uid) {
+
+    // RLE Lossless (1.2.840.10008.1.2.5)
+    if (transfer_syntax_uid == rle_codec::kTransferSyntaxUID) {
+        return std::make_unique<rle_codec>();
+    }
 
     // JPEG Baseline (Process 1)
     if (transfer_syntax_uid == jpeg_baseline_codec::kTransferSyntaxUID) {
@@ -59,9 +66,6 @@ std::unique_ptr<compression_codec> codec_factory::create(
     if (transfer_syntax_uid == jpeg2000_codec::kTransferSyntaxUIDLossy) {
         return std::make_unique<jpeg2000_codec>(false);  // lossless = false (default lossy)
     }
-
-    // Future codecs will be added here:
-    // - RLE Lossless (1.2.840.10008.1.2.5)
 
     return nullptr;
 }
