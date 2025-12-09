@@ -714,6 +714,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
         src/storage/storage_interface.cpp
         src/storage/file_storage.cpp
+        src/storage/s3_storage.cpp
         src/storage/migration_runner.cpp
         src/storage/index_database.cpp
     )
@@ -1046,6 +1047,7 @@ if(PACS_BUILD_TESTS)
         add_executable(storage_tests
             tests/storage/storage_interface_test.cpp
             tests/storage/file_storage_test.cpp
+            tests/storage/s3_storage_test.cpp
             tests/storage/migration_runner_test.cpp
             tests/storage/index_database_test.cpp
             tests/storage/mpps_test.cpp

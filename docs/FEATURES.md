@@ -530,6 +530,76 @@ CREATE TABLE instance (
 );
 ```
 
+### S3 Cloud Storage (Mock Implementation)
+
+**Implementation**: S3-compatible cloud storage backend with mock client for testing.
+
+**Features**:
+- AWS S3 and S3-compatible storage (MinIO, etc.)
+- Hierarchical object key structure (Study/Series/SOP)
+- Multipart upload support for large files (placeholder)
+- Progress callbacks for upload/download monitoring
+- Thread-safe operations with shared_mutex
+- Configurable connection and timeout settings
+
+**Configuration**:
+```cpp
+#include <pacs/storage/s3_storage.hpp>
+
+using namespace pacs::storage;
+
+cloud_storage_config config;
+config.bucket_name = "my-dicom-bucket";
+config.region = "us-east-1";
+config.access_key_id = "AKIAIOSFODNN7EXAMPLE";
+config.secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+
+// For MinIO local testing
+config.endpoint_url = "http://localhost:9000";
+
+// Multipart upload settings
+config.multipart_threshold = 100 * 1024 * 1024;  // 100MB
+config.part_size = 10 * 1024 * 1024;  // 10MB
+```
+
+**Usage Example**:
+```cpp
+s3_storage storage{config};
+
+// Store DICOM dataset
+core::dicom_dataset ds;
+// ... populate dataset with UIDs ...
+
+auto store_result = storage.store(ds);
+if (store_result.is_ok()) {
+    std::cout << "Stored successfully\n";
+}
+
+// Retrieve by SOP Instance UID
+auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
+if (retrieve_result.is_ok()) {
+    auto& dataset = retrieve_result.value();
+    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+}
+
+// Store with progress tracking
+auto progress = [](std::size_t transferred, std::size_t total) -> bool {
+    std::cout << "Progress: " << (100 * transferred / total) << "%\n";
+    return true;  // Continue upload
+};
+storage.store_with_progress(ds, progress);
+```
+
+**Object Key Structure**:
+```
+{bucket}/
+  └── {StudyInstanceUID}/
+      └── {SeriesInstanceUID}/
+          └── {SOPInstanceUID}.dcm
+```
+
+**Note**: This is currently a mock implementation for API validation and testing. Full AWS SDK C++ integration will be added in a future release.
+
 ---
 
 ## Ecosystem Integration
@@ -714,10 +784,11 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
-## Recently Completed Features (v1.1.0 - 2025-12-07)
+## Recently Completed Features (v1.2.0 - 2025-12-09)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| S3 Cloud Storage | S3-compatible storage backend (mock implementation) | #198 | ✅ Complete |
 | Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
 | Network System V2 | Optional messaging_server integration | #163 | ✅ Complete |
 | DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | ✅ Complete |
@@ -750,7 +821,8 @@ pacs_query_latency_seconds{quantile="0.95"}
 | Feature | Description | Target |
 |---------|-------------|--------|
 | AI Integration | Inference pipeline | Future |
-| Cloud Storage | S3/Azure Blob | Future |
+| Cloud Storage (Full AWS SDK) | Production AWS S3 integration | Future |
+| Azure Blob Storage | Azure cloud storage backend | Future |
 | FHIR Integration | Healthcare interop | Future |
 
 ---
@@ -762,10 +834,11 @@ pacs_query_latency_seconds{quantile="0.95"}
 | 1.0.0 | 2025-11-30 | kcenon | Initial release |
 | 1.1.0 | 2025-12-04 | kcenon | Updated DIMSE status |
 | 1.2.0 | 2025-12-07 | kcenon | Added: Thread migration, Network V2, DIMSE-N, Ultrasound, XA; Updated ecosystem integration |
+| 1.3.0 | 2025-12-09 | raphaelshin | Added: S3 Cloud Storage (mock implementation) for Issue #198 |
 
 ---
 
-*Document Version: 1.2.0*
+*Document Version: 1.3.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2025-12-09*
 *Author: kcenon@naver.com*
