@@ -5,6 +5,8 @@
 
 #include "pacs/services/sop_class_registry.hpp"
 #include "pacs/services/sop_classes/dx_storage.hpp"
+#include "pacs/services/sop_classes/nm_storage.hpp"
+#include "pacs/services/sop_classes/pet_storage.hpp"
 #include "pacs/services/sop_classes/us_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
 
@@ -145,6 +147,8 @@ void sop_class_registry::register_standard_sop_classes() {
     register_dx_sop_classes();
     register_ct_sop_classes();
     register_mr_sop_classes();
+    register_pet_sop_classes();
+    register_nm_sop_classes();
     register_other_sop_classes();
 }
 
@@ -401,6 +405,75 @@ void sop_class_registry::register_mr_sop_classes() {
             modality_type::mr,
             false,
             true
+        }
+    );
+}
+
+void sop_class_registry::register_pet_sop_classes() {
+    // PET Image Storage
+    registry_.emplace(
+        std::string(sop_classes::pet_image_storage_uid),
+        sop_class_info{
+            sop_classes::pet_image_storage_uid,
+            "PET Image Storage",
+            sop_class_category::storage,
+            modality_type::pet,
+            false,
+            false
+        }
+    );
+
+    // Enhanced PET Image Storage
+    registry_.emplace(
+        std::string(sop_classes::enhanced_pet_image_storage_uid),
+        sop_class_info{
+            sop_classes::enhanced_pet_image_storage_uid,
+            "Enhanced PET Image Storage",
+            sop_class_category::storage,
+            modality_type::pet,
+            false,
+            true  // supports multiframe
+        }
+    );
+
+    // Legacy Converted Enhanced PET Image Storage
+    registry_.emplace(
+        std::string(sop_classes::legacy_converted_enhanced_pet_image_storage_uid),
+        sop_class_info{
+            sop_classes::legacy_converted_enhanced_pet_image_storage_uid,
+            "Legacy Converted Enhanced PET Image Storage",
+            sop_class_category::storage,
+            modality_type::pet,
+            false,
+            true  // supports multiframe
+        }
+    );
+}
+
+void sop_class_registry::register_nm_sop_classes() {
+    // NM Image Storage
+    registry_.emplace(
+        std::string(sop_classes::nm_image_storage_uid),
+        sop_class_info{
+            sop_classes::nm_image_storage_uid,
+            "NM Image Storage",
+            sop_class_category::storage,
+            modality_type::nm,
+            false,
+            true  // supports multiframe (SPECT, dynamic, gated)
+        }
+    );
+
+    // NM Image Storage (Retired)
+    registry_.emplace(
+        std::string(sop_classes::nm_image_storage_retired_uid),
+        sop_class_info{
+            sop_classes::nm_image_storage_retired_uid,
+            "NM Image Storage (Retired)",
+            sop_class_category::storage,
+            modality_type::nm,
+            true,  // retired
+            true   // supports multiframe
         }
     );
 }
