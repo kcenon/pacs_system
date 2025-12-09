@@ -28,7 +28,7 @@ struct ts_entry {
  * This table contains the standard Transfer Syntaxes defined in DICOM PS3.5.
  * Compression support will be added in later phases.
  */
-static constexpr std::array<ts_entry, 8> TS_REGISTRY = {{
+static constexpr std::array<ts_entry, 9> TS_REGISTRY = {{
     // Uncompressed Transfer Syntaxes (supported in Phase 1)
     {"1.2.840.10008.1.2",
      "Implicit VR Little Endian",
@@ -80,6 +80,13 @@ static constexpr std::array<ts_entry, 8> TS_REGISTRY = {{
      byte_order::little_endian,
      vr_encoding::explicit_vr,
      true, false, false},
+
+    // RLE Lossless Transfer Syntax
+    {"1.2.840.10008.1.2.5",
+     "RLE Lossless",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, true},
 }};
 
 /**
@@ -153,6 +160,13 @@ const transfer_syntax transfer_syntax::jpeg2000_lossy{
     byte_order::little_endian,
     vr_encoding::explicit_vr,
     true, false, false};
+
+const transfer_syntax transfer_syntax::rle_lossless{
+    "1.2.840.10008.1.2.5",
+    "RLE Lossless",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, true};
 
 // Public constructor - looks up UID in registry
 transfer_syntax::transfer_syntax(std::string_view uid)

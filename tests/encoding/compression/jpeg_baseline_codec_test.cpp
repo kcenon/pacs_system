@@ -362,9 +362,8 @@ TEST_CASE("codec_factory creates jpeg_baseline_codec", "[encoding][compression]"
         REQUIRE(codec->is_lossy() == true);
     }
 
-    SECTION("unsupported UID returns nullptr") {
-        // Use RLE UID which is not yet implemented
-        auto codec = codec_factory::create("1.2.840.10008.1.2.5");  // RLE Lossless
+    SECTION("invalid UID returns nullptr") {
+        auto codec = codec_factory::create("1.2.3.4.5.invalid.uid");
         REQUIRE(codec == nullptr);
     }
 
@@ -375,7 +374,7 @@ TEST_CASE("codec_factory creates jpeg_baseline_codec", "[encoding][compression]"
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.81") == true);   // JPEG-LS Near-Lossless
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.90") == true);   // JPEG 2000 Lossless
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.91") == true);   // JPEG 2000
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.5") == false);     // RLE (not implemented)
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.5") == true);      // RLE Lossless
         REQUIRE(codec_factory::is_supported("invalid.uid") == false);
     }
 

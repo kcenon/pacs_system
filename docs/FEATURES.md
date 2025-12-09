@@ -178,11 +178,13 @@ if (write_result.is_err()) {
 | Implicit VR Little Endian | 1.2.840.10008.1.2 | ✅ Implemented |
 | Explicit VR Little Endian | 1.2.840.10008.1.2.1 | ✅ Implemented |
 | Explicit VR Big Endian | 1.2.840.10008.1.2.2 | ✅ Implemented |
-| JPEG Baseline | 1.2.840.10008.1.2.4.50 | 🔮 Future |
-| JPEG Lossless | 1.2.840.10008.1.2.4.70 | 🔮 Future |
-| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | 🔮 Future |
-| JPEG 2000 | 1.2.840.10008.1.2.4.91 | 🔮 Future |
-| RLE Lossless | 1.2.840.10008.1.2.5 | 🔮 Future |
+| JPEG Baseline | 1.2.840.10008.1.2.4.50 | ✅ Implemented |
+| JPEG Lossless | 1.2.840.10008.1.2.4.70 | ✅ Implemented |
+| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | ✅ Implemented |
+| JPEG 2000 | 1.2.840.10008.1.2.4.91 | ✅ Implemented |
+| RLE Lossless | 1.2.840.10008.1.2.5 | ✅ Implemented |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | ✅ Implemented |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | ✅ Implemented |
 
 ---
 
@@ -837,6 +839,7 @@ server.stop();
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
 | REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
 | S3 Cloud Storage | S3-compatible storage backend (mock implementation) | #198 | ✅ Complete |
 | Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
@@ -862,7 +865,6 @@ server.stop();
 
 | Feature | Description | Target |
 |---------|-------------|--------|
-| JPEG Compression | Lossy/Lossless | Future |
 | WADO-RS | DICOMweb support | Future |
 | Clustering | Multi-node PACS | Future |
 
@@ -886,10 +888,11 @@ server.stop();
 | 1.2.0 | 2025-12-07 | kcenon | Added: Thread migration, Network V2, DIMSE-N, Ultrasound, XA; Updated ecosystem integration |
 | 1.3.0 | 2025-12-09 | raphaelshin | Added: S3 Cloud Storage (mock implementation) for Issue #198 |
 | 1.4.0 | 2025-12-09 | raphaelshin | Added: REST API Server foundation with Crow framework for Issue #194 |
+| 1.5.0 | 2025-12-09 | raphaelshin | Added: RLE Lossless codec for Issue #182; Updated compression codec status |
 
 ---
 
-*Document Version: 1.4.0*
+*Document Version: 1.5.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-09*
 *Author: kcenon@naver.com*

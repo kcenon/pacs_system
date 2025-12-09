@@ -592,6 +592,7 @@ add_library(pacs_encoding
     src/encoding/compression/jpeg_lossless_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp
     src/encoding/compression/jpeg_ls_codec.cpp
+    src/encoding/compression/rle_codec.cpp
     src/encoding/compression/codec_factory.cpp
 )
 target_include_directories(pacs_encoding
@@ -1079,6 +1080,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/compression/jpeg_lossless_codec_test.cpp
         tests/encoding/compression/jpeg2000_codec_test.cpp
         tests/encoding/compression/jpeg_ls_codec_test.cpp
+        tests/encoding/compression/rle_codec_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE

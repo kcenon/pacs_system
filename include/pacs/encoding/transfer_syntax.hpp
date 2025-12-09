@@ -120,6 +120,9 @@ public:
     /// JPEG 2000 Image Compression (1.2.840.10008.1.2.4.91)
     static const transfer_syntax jpeg2000_lossy;
 
+    /// RLE Lossless (1.2.840.10008.1.2.5)
+    static const transfer_syntax rle_lossless;
+
     /// @}
 
     /// @name Comparison Operators

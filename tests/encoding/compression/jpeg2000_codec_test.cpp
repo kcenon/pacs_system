@@ -696,7 +696,7 @@ TEST_CASE("codec_factory creates jpeg2000_codec", "[encoding][compression][jpeg2
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.50") == true);  // JPEG Baseline
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.80") == true);  // JPEG-LS Lossless
         REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.4.81") == true);  // JPEG-LS Near-Lossless
-        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.5") == false);    // RLE (not yet)
+        REQUIRE(codec_factory::is_supported("1.2.840.10008.1.2.5") == true);     // RLE Lossless
     }
 
     SECTION("supported_transfer_syntaxes includes JPEG 2000") {
