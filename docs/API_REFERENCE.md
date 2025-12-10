@@ -1983,6 +1983,8 @@ public:
     void put(const Key& key, const Value& value);
     void put(const Key& key, Value&& value);
     bool invalidate(const Key& key);
+    template<typename Predicate>
+    size_type invalidate_if(Predicate pred);  // Conditional invalidation
     void clear();
     size_type purge_expired();
 
@@ -2068,6 +2070,10 @@ public:
     void put(const std::string& key, const cached_query_result& result);
     void put(const std::string& key, cached_query_result&& result);
     bool invalidate(const std::string& key);
+    size_type invalidate_by_prefix(const std::string& prefix);
+    size_type invalidate_by_query_level(const std::string& level);
+    template<typename Predicate>
+    size_type invalidate_if(Predicate pred);
     void clear();
     size_type purge_expired();
 
@@ -2124,6 +2130,29 @@ cached.query_level = "STUDY";
 cached.cached_at = std::chrono::steady_clock::now();
 
 cache.put(key, std::move(cached));
+
+// Cache invalidation on C-STORE (when new data is stored)
+// Use post_store_handler to invalidate affected cache entries
+storage_scp scp{config};
+scp.set_post_store_handler([&cache](const auto& dataset,
+                                     const auto& patient_id,
+                                     const auto& study_uid,
+                                     const auto& series_uid,
+                                     const auto& sop_uid) {
+    // Invalidate all cached queries that might be affected
+    cache.invalidate_by_query_level("IMAGE");
+    cache.invalidate_by_query_level("SERIES");
+    cache.invalidate_by_query_level("STUDY");
+    cache.invalidate_by_query_level("PATIENT");
+});
+
+// Targeted invalidation using prefix
+cache.invalidate_by_prefix("WORKSTATION1/");  // Invalidate specific AE
+
+// Custom predicate invalidation
+cache.invalidate_if([](const auto& key, const cached_query_result& r) {
+    return r.match_count > 1000;  // Remove large result sets
+});
 ```
 
 ---
