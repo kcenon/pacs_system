@@ -30,6 +30,34 @@ class private_key_impl;
 
 namespace {
 
+/**
+ * @brief Cross-platform gmtime_r implementation
+ *
+ * gmtime_r is a POSIX function not available on Windows.
+ * Windows uses gmtime_s with reversed parameter order.
+ */
+inline auto portable_gmtime_r(const time_t* timer, struct tm* result) -> struct tm* {
+#ifdef _WIN32
+    return (gmtime_s(result, timer) == 0) ? result : nullptr;
+#else
+    return gmtime_r(timer, result);
+#endif
+}
+
+/**
+ * @brief Cross-platform timegm implementation
+ *
+ * timegm is a POSIX extension not available on Windows.
+ * Windows uses _mkgmtime instead.
+ */
+inline auto portable_timegm(struct tm* tm_time) -> time_t {
+#ifdef _WIN32
+    return _mkgmtime(tm_time);
+#else
+    return timegm(tm_time);
+#endif
+}
+
 // DICOM Digital Signature tags
 constexpr core::dicom_tag digital_signature_sequence_tag{0x0400, 0x0561};
 constexpr core::dicom_tag signature_uid_tag{0x0400, 0x0100};
@@ -154,7 +182,7 @@ auto format_dicom_datetime() -> std::string {
         now.time_since_epoch()) % 1000;
 
     std::tm tm_now{};
-    gmtime_r(&time_t_now, &tm_now);
+    portable_gmtime_r(&time_t_now, &tm_now);
 
     std::ostringstream oss;
     oss << std::put_time(&tm_now, "%Y%m%d%H%M%S")
@@ -181,7 +209,7 @@ auto parse_dicom_datetime(std::string_view dt_str)
         return std::chrono::system_clock::time_point{};
     }
 
-    time_t time = timegm(&tm);
+    time_t time = portable_timegm(&tm);
     return std::chrono::system_clock::from_time_t(time);
 }
 

@@ -22,6 +22,20 @@ namespace pacs::security {
 namespace {
 
 /**
+ * @brief Cross-platform timegm implementation
+ *
+ * timegm is a POSIX extension not available on Windows.
+ * Windows uses _mkgmtime instead.
+ */
+inline auto portable_timegm(struct tm* tm_time) -> time_t {
+#ifdef _WIN32
+    return _mkgmtime(tm_time);
+#else
+    return timegm(tm_time);
+#endif
+}
+
+/**
  * @brief Get OpenSSL error string
  */
 auto get_openssl_error() -> std::string {
@@ -76,8 +90,8 @@ auto asn1_time_to_time_point(const ASN1_TIME* asn1_time)
         return std::chrono::system_clock::time_point{};
     }
 
-    // Convert to time_t
-    time_t time = timegm(&tm_time);
+    // Convert to time_t (using portable function for cross-platform support)
+    time_t time = portable_timegm(&tm_time);
 
     return std::chrono::system_clock::from_time_t(time);
 }
