@@ -421,6 +421,102 @@ TEST_CASE("simple_lru_cache edge cases", "[cache][lru][edge]") {
 }
 
 // ─────────────────────────────────────────────────────
+// Conditional Invalidation
+// ─────────────────────────────────────────────────────
+
+TEST_CASE("simple_lru_cache invalidate_if", "[cache][lru][invalidate]") {
+    simple_lru_cache<std::string, int> cache(100, 60s);
+
+    SECTION("removes matching entries") {
+        cache.put("patient:001", 1);
+        cache.put("patient:002", 2);
+        cache.put("study:001", 10);
+        cache.put("study:002", 20);
+        cache.put("series:001", 100);
+
+        // Remove all patient entries
+        auto removed = cache.invalidate_if(
+            [](const std::string& key, int) {
+                return key.starts_with("patient:");
+            });
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.size() == 3);
+        REQUIRE_FALSE(cache.contains("patient:001"));
+        REQUIRE_FALSE(cache.contains("patient:002"));
+        REQUIRE(cache.contains("study:001"));
+        REQUIRE(cache.contains("study:002"));
+        REQUIRE(cache.contains("series:001"));
+    }
+
+    SECTION("removes entries based on value") {
+        cache.put("a", 1);
+        cache.put("b", 5);
+        cache.put("c", 10);
+        cache.put("d", 15);
+        cache.put("e", 20);
+
+        // Remove entries with value > 10
+        auto removed = cache.invalidate_if(
+            [](const std::string&, int value) {
+                return value > 10;
+            });
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.size() == 3);
+        REQUIRE(cache.contains("a"));
+        REQUIRE(cache.contains("b"));
+        REQUIRE(cache.contains("c"));
+        REQUIRE_FALSE(cache.contains("d"));
+        REQUIRE_FALSE(cache.contains("e"));
+    }
+
+    SECTION("returns zero when no matches") {
+        cache.put("key1", 1);
+        cache.put("key2", 2);
+
+        auto removed = cache.invalidate_if(
+            [](const std::string& key, int) {
+                return key.starts_with("nonexistent");
+            });
+
+        REQUIRE(removed == 0);
+        REQUIRE(cache.size() == 2);
+    }
+
+    SECTION("handles empty cache") {
+        auto removed = cache.invalidate_if(
+            [](const std::string&, int) { return true; });
+
+        REQUIRE(removed == 0);
+    }
+
+    SECTION("removes all entries when predicate always true") {
+        cache.put("a", 1);
+        cache.put("b", 2);
+        cache.put("c", 3);
+
+        auto removed = cache.invalidate_if(
+            [](const std::string&, int) { return true; });
+
+        REQUIRE(removed == 3);
+        REQUIRE(cache.empty());
+    }
+
+    SECTION("updates current_size stat") {
+        cache.put("a", 1);
+        cache.put("b", 2);
+        cache.put("c", 3);
+
+        REQUIRE(cache.stats().current_size.load() == 3);
+
+        cache.invalidate_if([](const std::string&, int v) { return v > 1; });
+
+        REQUIRE(cache.stats().current_size.load() == 1);
+    }
+}
+
+// ─────────────────────────────────────────────────────
 // Configuration
 // ─────────────────────────────────────────────────────
 
