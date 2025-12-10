@@ -18,10 +18,7 @@ using namespace pacs::core;
 // =============================================================================
 namespace rt_tags {
     // RT Series Module
-    constexpr dicom_tag modality{0x0008, 0x0060};
-    constexpr dicom_tag series_instance_uid{0x0020, 0x000E};
     constexpr dicom_tag series_number{0x0020, 0x0011};
-    constexpr dicom_tag series_description{0x0008, 0x103E};
 
     // Frame of Reference
     constexpr dicom_tag frame_of_reference_uid{0x0020, 0x0052};
@@ -29,105 +26,55 @@ namespace rt_tags {
 
     // RT General Plan Module
     constexpr dicom_tag rt_plan_label{0x300A, 0x0002};
-    constexpr dicom_tag rt_plan_name{0x300A, 0x0003};
-    constexpr dicom_tag rt_plan_description{0x300A, 0x0004};
     constexpr dicom_tag rt_plan_date{0x300A, 0x0006};
     constexpr dicom_tag rt_plan_time{0x300A, 0x0007};
     constexpr dicom_tag rt_plan_geometry{0x300A, 0x000C};
-    constexpr dicom_tag treatment_protocols{0x300A, 0x0009};
     constexpr dicom_tag plan_intent{0x300A, 0x000A};
-    constexpr dicom_tag treatment_sites{0x300A, 0x000B};
     constexpr dicom_tag referenced_structure_set_sequence{0x300C, 0x0060};
-    constexpr dicom_tag referenced_dose_sequence{0x300C, 0x0080};
 
     // RT Fraction Scheme Module
     constexpr dicom_tag fraction_group_sequence{0x300A, 0x0070};
-    constexpr dicom_tag fraction_group_number{0x300A, 0x0071};
-    constexpr dicom_tag fraction_group_description{0x300A, 0x0072};
     constexpr dicom_tag number_of_fractions_planned{0x300A, 0x0078};
     constexpr dicom_tag number_of_beams{0x300A, 0x0080};
-    constexpr dicom_tag number_of_brachy_application_setups{0x300A, 0x00A0};
-    constexpr dicom_tag referenced_beam_sequence{0x300C, 0x0004};
 
     // RT Beams Module
     constexpr dicom_tag beam_sequence{0x300A, 0x00B0};
-    constexpr dicom_tag beam_number{0x300A, 0x00C0};
-    constexpr dicom_tag beam_name{0x300A, 0x00C2};
-    constexpr dicom_tag beam_description{0x300A, 0x00C3};
     constexpr dicom_tag beam_type{0x300A, 0x00C4};
     constexpr dicom_tag radiation_type{0x300A, 0x00C6};
     constexpr dicom_tag treatment_machine_name{0x300A, 0x00B2};
-    constexpr dicom_tag primary_dosimeter_unit{0x300A, 0x00B3};
-    constexpr dicom_tag source_axis_distance{0x300A, 0x00B4};
-    constexpr dicom_tag beam_limiting_device_sequence{0x300A, 0x00B6};
-    constexpr dicom_tag number_of_wedges{0x300A, 0x00D0};
-    constexpr dicom_tag number_of_compensators{0x300A, 0x00E0};
-    constexpr dicom_tag number_of_boli{0x300A, 0x00ED};
-    constexpr dicom_tag number_of_blocks{0x300A, 0x00F0};
-    constexpr dicom_tag final_cumulative_meterset_weight{0x300A, 0x010E};
-    constexpr dicom_tag number_of_control_points{0x300A, 0x0110};
-    constexpr dicom_tag control_point_sequence{0x300A, 0x0111};
 
     // RT Dose Module
     constexpr dicom_tag dose_units{0x3004, 0x0002};
     constexpr dicom_tag dose_type{0x3004, 0x0004};
-    constexpr dicom_tag spatial_transform_of_dose{0x3004, 0x0005};
-    constexpr dicom_tag dose_comment{0x3004, 0x0006};
-    constexpr dicom_tag normalization_point{0x3004, 0x0008};
     constexpr dicom_tag dose_summation_type{0x3004, 0x000A};
     constexpr dicom_tag grid_frame_offset_vector{0x3004, 0x000C};
     constexpr dicom_tag dose_grid_scaling{0x3004, 0x000E};
-    constexpr dicom_tag tissue_heterogeneity_correction{0x3004, 0x0014};
     constexpr dicom_tag referenced_rt_plan_sequence{0x300C, 0x0002};
 
     // Structure Set Module
     constexpr dicom_tag structure_set_label{0x3006, 0x0002};
-    constexpr dicom_tag structure_set_name{0x3006, 0x0004};
-    constexpr dicom_tag structure_set_description{0x3006, 0x0006};
     constexpr dicom_tag structure_set_date{0x3006, 0x0008};
     constexpr dicom_tag structure_set_time{0x3006, 0x0009};
     constexpr dicom_tag referenced_frame_of_reference_sequence{0x3006, 0x0010};
     constexpr dicom_tag structure_set_roi_sequence{0x3006, 0x0020};
-    constexpr dicom_tag roi_number{0x3006, 0x0022};
-    constexpr dicom_tag referenced_frame_of_reference_uid{0x3006, 0x0024};
-    constexpr dicom_tag roi_name{0x3006, 0x0026};
-    constexpr dicom_tag roi_description{0x3006, 0x0028};
-    constexpr dicom_tag roi_volume{0x3006, 0x002C};
-    constexpr dicom_tag roi_generation_algorithm{0x3006, 0x0036};
-    constexpr dicom_tag roi_generation_description{0x3006, 0x0038};
 
     // ROI Contour Module
     constexpr dicom_tag roi_contour_sequence{0x3006, 0x0039};
-    constexpr dicom_tag referenced_roi_number{0x3006, 0x0084};
     constexpr dicom_tag roi_display_color{0x3006, 0x002A};
-    constexpr dicom_tag contour_sequence{0x3006, 0x0040};
-    constexpr dicom_tag contour_geometric_type{0x3006, 0x0042};
-    constexpr dicom_tag number_of_contour_points{0x3006, 0x0046};
-    constexpr dicom_tag contour_data{0x3006, 0x0050};
 
     // RT ROI Observations Module
     constexpr dicom_tag rt_roi_observations_sequence{0x3006, 0x0080};
-    constexpr dicom_tag observation_number{0x3006, 0x0082};
     constexpr dicom_tag rt_roi_interpreted_type{0x3006, 0x00A4};
-    constexpr dicom_tag roi_interpreter{0x3006, 0x00A6};
 
     // Image Pixel Module (for RT Dose)
     constexpr dicom_tag rows{0x0028, 0x0010};
     constexpr dicom_tag columns{0x0028, 0x0011};
-    constexpr dicom_tag pixel_spacing{0x0028, 0x0030};
     constexpr dicom_tag bits_allocated{0x0028, 0x0100};
     constexpr dicom_tag bits_stored{0x0028, 0x0101};
     constexpr dicom_tag high_bit{0x0028, 0x0102};
     constexpr dicom_tag pixel_representation{0x0028, 0x0103};
     constexpr dicom_tag pixel_data{0x7FE0, 0x0010};
-    constexpr dicom_tag samples_per_pixel{0x0028, 0x0002};
-    constexpr dicom_tag photometric_interpretation{0x0028, 0x0004};
     constexpr dicom_tag number_of_frames{0x0028, 0x0008};
-
-    // Image Plane Module
-    constexpr dicom_tag image_position_patient{0x0020, 0x0032};
-    constexpr dicom_tag image_orientation_patient{0x0020, 0x0037};
-    constexpr dicom_tag slice_thickness{0x0018, 0x0050};
 }
 
 // =============================================================================
