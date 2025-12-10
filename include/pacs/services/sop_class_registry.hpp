@@ -196,6 +196,7 @@ private:
     void register_mr_sop_classes();
     void register_pet_sop_classes();
     void register_nm_sop_classes();
+    void register_rt_sop_classes();
     void register_other_sop_classes();
 
     std::unordered_map<std::string, sop_class_info> registry_;

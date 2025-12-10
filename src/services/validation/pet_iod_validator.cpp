@@ -19,26 +19,18 @@ namespace pet_tags {
     constexpr dicom_tag series_type{0x0054, 0x1000};
     constexpr dicom_tag units{0x0054, 0x1001};
     constexpr dicom_tag counts_source{0x0054, 0x1002};
-    constexpr dicom_tag series_date{0x0008, 0x0021};
-    constexpr dicom_tag series_time{0x0008, 0x0031};
 
     // PET Image Module
     constexpr dicom_tag image_type{0x0008, 0x0008};
     constexpr dicom_tag frame_reference_time{0x0054, 0x1300};
     constexpr dicom_tag decay_correction{0x0054, 0x1102};
     constexpr dicom_tag decay_factor{0x0054, 0x1321};
-    constexpr dicom_tag dose_calibration_factor{0x0054, 0x1322};
-    constexpr dicom_tag scatter_fraction_factor{0x0054, 0x1323};
-    constexpr dicom_tag rescale_intercept{0x0028, 0x1052};
     constexpr dicom_tag rescale_slope{0x0028, 0x1053};
 
     // Radiopharmaceutical Information
     constexpr dicom_tag radiopharmaceutical_info_sequence{0x0054, 0x0016};
-    constexpr dicom_tag radiopharmaceutical{0x0018, 0x0031};
-    constexpr dicom_tag radionuclide_code_sequence{0x0054, 0x0300};
     constexpr dicom_tag radionuclide_total_dose{0x0018, 0x1074};
     constexpr dicom_tag radionuclide_half_life{0x0018, 0x1075};
-    constexpr dicom_tag radiopharmaceutical_start_time{0x0018, 0x1072};
 
     // Frame of Reference
     constexpr dicom_tag frame_of_reference_uid{0x0020, 0x0052};
@@ -52,12 +44,9 @@ namespace pet_tags {
 
     // Reconstruction
     constexpr dicom_tag reconstruction_method{0x0054, 0x1103};
-    constexpr dicom_tag number_of_iterations{0x0054, 0x1104};
-    constexpr dicom_tag number_of_subsets{0x0054, 0x1105};
 
     // Corrections
     constexpr dicom_tag attenuation_correction_method{0x0054, 0x1101};
-    constexpr dicom_tag scatter_correction_method{0x0054, 0x1105};
     constexpr dicom_tag randoms_correction_method{0x0054, 0x1100};
 }
 

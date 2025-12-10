@@ -42,7 +42,7 @@ std::string_view to_string(pet_photometric_interpretation interp) noexcept {
 }
 
 pet_photometric_interpretation
-parse_pet_photometric_interpretation(std::string_view value) noexcept {
+parse_pet_photometric_interpretation([[maybe_unused]] std::string_view value) noexcept {
     // PET images are always MONOCHROME2
     return pet_photometric_interpretation::monochrome2;
 }

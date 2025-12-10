@@ -727,11 +727,13 @@ add_library(pacs_services
     src/services/sop_classes/mg_storage.cpp
     src/services/sop_classes/pet_storage.cpp
     src/services/sop_classes/nm_storage.cpp
+    src/services/sop_classes/rt_storage.cpp
     src/services/validation/us_iod_validator.cpp
     src/services/validation/dx_iod_validator.cpp
     src/services/validation/mg_iod_validator.cpp
     src/services/validation/pet_iod_validator.cpp
     src/services/validation/nm_iod_validator.cpp
+    src/services/validation/rt_iod_validator.cpp
     src/services/cache/query_cache.cpp
 )
 target_include_directories(pacs_services
@@ -1137,6 +1139,8 @@ if(PACS_BUILD_TESTS)
         tests/services/mg_iod_validator_test.cpp
         tests/services/pet_iod_validator_test.cpp
         tests/services/nm_iod_validator_test.cpp
+        tests/services/rt_storage_test.cpp
+        tests/services/rt_iod_validator_test.cpp
         tests/services/cache/simple_lru_cache_test.cpp
         tests/services/cache/query_cache_test.cpp
     )

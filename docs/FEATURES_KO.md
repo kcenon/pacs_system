@@ -368,6 +368,15 @@ if (result.is_ok()) {
 | PET Image Storage | 1.2.840.10008.5.1.4.1.1.128 | ✅ |
 | Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.130 | ✅ |
 | Legacy Converted Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.128.1 | ✅ |
+| RT Plan Storage | 1.2.840.10008.5.1.4.1.1.481.5 | ✅ |
+| RT Dose Storage | 1.2.840.10008.5.1.4.1.1.481.2 | ✅ |
+| RT Structure Set Storage | 1.2.840.10008.5.1.4.1.1.481.3 | ✅ |
+| RT Image Storage | 1.2.840.10008.5.1.4.1.1.481.1 | ✅ |
+| RT Beams Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.4 | ✅ |
+| RT Brachy Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.6 | ✅ |
+| RT Treatment Summary Record Storage | 1.2.840.10008.5.1.4.1.1.481.7 | ✅ |
+| RT Ion Plan Storage | 1.2.840.10008.5.1.4.1.1.481.8 | ✅ |
+| RT Ion Beams Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.9 | ✅ |
 
 **예제**:
 ```cpp
@@ -680,7 +689,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 |------|------|------|
 | C-GET | 대체 검색 방법 | 3단계 |
 | ~~추가 SOP 클래스 (PET/NM)~~ | ~~NM, PET 지원~~ | ✅ 완료 |
-| 추가 SOP 클래스 (RT) | RT 계획, RT 구조 세트 등 | 3단계 |
+| ~~추가 SOP 클래스 (RT)~~ | ~~RT 계획, RT 구조 세트 등~~ | ✅ 완료 |
 | 연결 풀링 | 연결 재사용 | 3단계 |
 
 ### 중기
@@ -701,7 +710,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
-*문서 버전: 1.0.0*
+*문서 버전: 1.6.0*
 *작성일: 2025-11-30*
-*수정일: 2025-12-01*
+*수정일: 2025-12-10*
 *작성자: kcenon@naver.com*

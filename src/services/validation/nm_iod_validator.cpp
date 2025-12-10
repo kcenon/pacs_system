@@ -15,62 +15,34 @@ using namespace pacs::core;
 
 // NM-specific DICOM tags
 namespace nm_tags {
-    // NM/PET Patient Orientation Module
-    constexpr dicom_tag patient_orientation_code_sequence{0x0054, 0x0410};
-    constexpr dicom_tag patient_gantry_relationship_code_sequence{0x0054, 0x0414};
-
     // NM Image Module
     constexpr dicom_tag image_type{0x0008, 0x0008};
-    constexpr dicom_tag type_of_detector_motion{0x0054, 0x0202};
     constexpr dicom_tag number_of_frames{0x0028, 0x0008};
     constexpr dicom_tag frame_increment_pointer{0x0028, 0x0009};
-    constexpr dicom_tag lossy_image_compression{0x0028, 0x2110};
-    constexpr dicom_tag image_index{0x0054, 0x1330};
 
     // NM Isotope Module
     constexpr dicom_tag energy_window_info_sequence{0x0054, 0x0012};
     constexpr dicom_tag energy_window_range_sequence{0x0054, 0x0013};
-    constexpr dicom_tag energy_window_lower_limit{0x0054, 0x0014};
-    constexpr dicom_tag energy_window_upper_limit{0x0054, 0x0015};
     constexpr dicom_tag radiopharmaceutical_info_sequence{0x0054, 0x0016};
-    constexpr dicom_tag radionuclide_code_sequence{0x0054, 0x0300};
     constexpr dicom_tag radionuclide_total_dose{0x0018, 0x1074};
     constexpr dicom_tag radionuclide_half_life{0x0018, 0x1075};
     constexpr dicom_tag radiopharmaceutical_start_time{0x0018, 0x1072};
-    constexpr dicom_tag radiopharmaceutical_volume{0x0018, 0x1071};
 
     // NM Detector Module
     constexpr dicom_tag detector_info_sequence{0x0054, 0x0022};
     constexpr dicom_tag collimator_type{0x0018, 0x1181};
-    constexpr dicom_tag field_of_view_shape{0x0018, 0x1147};
-    constexpr dicom_tag field_of_view_dimension{0x0018, 0x1149};
-    constexpr dicom_tag zoom_center{0x0028, 0x0032};
-    constexpr dicom_tag zoom_factor{0x0028, 0x0031};
-    constexpr dicom_tag center_of_rotation_offset{0x0018, 0x1145};
 
     // NM TOMO Acquisition Module (SPECT)
     constexpr dicom_tag rotation_info_sequence{0x0054, 0x0052};
     constexpr dicom_tag type_of_data{0x0054, 0x0400};
     constexpr dicom_tag start_angle{0x0054, 0x0200};
     constexpr dicom_tag scan_arc{0x0018, 0x1144};
-    constexpr dicom_tag angular_step{0x0018, 0x1143};
     constexpr dicom_tag rotation_direction{0x0018, 0x1140};
-    constexpr dicom_tag number_of_frames_in_rotation{0x0054, 0x0053};
-    constexpr dicom_tag actual_frame_duration{0x0018, 0x1242};
 
     // NM Multi-gated Acquisition Module
     constexpr dicom_tag gated_info_sequence{0x0054, 0x0062};
     constexpr dicom_tag trigger_source_or_type{0x0018, 0x1061};
-    constexpr dicom_tag rr_interval_time_nominal{0x0018, 0x1062};
-    constexpr dicom_tag beat_rejection_flag{0x0018, 0x1080};
     constexpr dicom_tag number_of_time_slots{0x0054, 0x0071};
-
-    // NM Phase Module
-    constexpr dicom_tag phase_info_sequence{0x0054, 0x0032};
-    constexpr dicom_tag number_of_phases{0x0054, 0x0031};
-
-    // Frame of Reference
-    constexpr dicom_tag frame_of_reference_uid{0x0020, 0x0052};
 }
 
 // =============================================================================
