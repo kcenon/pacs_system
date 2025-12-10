@@ -13,6 +13,7 @@
 
 #include <kcenon/common/patterns/result.h>
 
+#include <atomic>
 #include <chrono>
 #include <map>
 #include <mutex>
