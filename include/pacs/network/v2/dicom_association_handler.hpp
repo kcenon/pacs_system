@@ -409,10 +409,10 @@ private:
     std::vector<uint8_t> receive_buffer_;
 
     /// Expected PDU length (0 if waiting for header)
-    uint32_t expected_pdu_length_{0};
+    [[maybe_unused]] uint32_t expected_pdu_length_{0};
 
     /// Current PDU type being received
-    pdu_type current_pdu_type_{pdu_type::abort};
+    [[maybe_unused]] pdu_type current_pdu_type_{pdu_type::abort};
 
     /// Last activity timestamp
     time_point last_activity_;
