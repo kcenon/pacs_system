@@ -26,19 +26,19 @@ using namespace pacs::encoding;
 namespace {
 
 // Mammography-specific DICOM tags
-constexpr dicom_tag tag_laterality{0x0020, 0x0060};
-constexpr dicom_tag tag_image_laterality{0x0020, 0x0062};
-constexpr dicom_tag tag_view_position{0x0018, 0x5101};
-constexpr dicom_tag tag_compression_force{0x0018, 0x11A2};
-constexpr dicom_tag tag_body_part_thickness{0x0018, 0x11A0};
-constexpr dicom_tag tag_breast_implant_present{0x0028, 0x1300};
-constexpr dicom_tag tag_image_type{0x0008, 0x0008};
-constexpr dicom_tag tag_presentation_intent_type{0x0008, 0x0068};
-constexpr dicom_tag tag_detector_type{0x0018, 0x7004};
-constexpr dicom_tag tag_imager_pixel_spacing{0x0018, 0x1164};
-constexpr dicom_tag tag_body_part_examined{0x0018, 0x0015};
-constexpr dicom_tag tag_pixel_intensity_relationship{0x0028, 0x1040};
-constexpr dicom_tag tag_pixel_intensity_relationship_sign{0x0028, 0x1041};
+[[maybe_unused]] constexpr dicom_tag tag_laterality{0x0020, 0x0060};
+[[maybe_unused]] constexpr dicom_tag tag_image_laterality{0x0020, 0x0062};
+[[maybe_unused]] constexpr dicom_tag tag_view_position{0x0018, 0x5101};
+[[maybe_unused]] constexpr dicom_tag tag_compression_force{0x0018, 0x11A2};
+[[maybe_unused]] constexpr dicom_tag tag_body_part_thickness{0x0018, 0x11A0};
+[[maybe_unused]] constexpr dicom_tag tag_breast_implant_present{0x0028, 0x1300};
+[[maybe_unused]] constexpr dicom_tag tag_image_type{0x0008, 0x0008};
+[[maybe_unused]] constexpr dicom_tag tag_presentation_intent_type{0x0008, 0x0068};
+[[maybe_unused]] constexpr dicom_tag tag_detector_type{0x0018, 0x7004};
+[[maybe_unused]] constexpr dicom_tag tag_imager_pixel_spacing{0x0018, 0x1164};
+[[maybe_unused]] constexpr dicom_tag tag_body_part_examined{0x0018, 0x0015};
+[[maybe_unused]] constexpr dicom_tag tag_pixel_intensity_relationship{0x0028, 0x1040};
+[[maybe_unused]] constexpr dicom_tag tag_pixel_intensity_relationship_sign{0x0028, 0x1041};
 
 // Helper to check if validation result has info-level findings
 [[nodiscard]] bool has_info_findings(const validation_result& result) noexcept {

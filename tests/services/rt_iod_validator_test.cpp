@@ -28,9 +28,9 @@ namespace {
 // RT-specific tags for testing
 constexpr dicom_tag tag_rt_plan_label{0x300A, 0x0002};
 constexpr dicom_tag tag_rt_plan_geometry{0x300A, 0x000C};
-constexpr dicom_tag tag_plan_intent{0x300A, 0x000A};
+[[maybe_unused]] constexpr dicom_tag tag_plan_intent{0x300A, 0x000A};
 constexpr dicom_tag tag_fraction_group_sequence{0x300A, 0x0070};
-constexpr dicom_tag tag_beam_sequence{0x300A, 0x00B0};
+[[maybe_unused]] constexpr dicom_tag tag_beam_sequence{0x300A, 0x00B0};
 constexpr dicom_tag tag_dose_units{0x3004, 0x0002};
 constexpr dicom_tag tag_dose_type{0x3004, 0x0004};
 constexpr dicom_tag tag_dose_summation_type{0x3004, 0x000A};
@@ -50,7 +50,7 @@ bool has_errors(const validation_result& result) {
 }
 
 // Helper: Check if validation result has warnings
-bool has_warnings(const validation_result& result) {
+[[maybe_unused]] bool has_warnings(const validation_result& result) {
     return std::any_of(result.findings.begin(), result.findings.end(),
                        [](const validation_finding& f) {
                            return f.severity == validation_severity::warning;
@@ -58,7 +58,7 @@ bool has_warnings(const validation_result& result) {
 }
 
 // Helper: Count findings of a specific severity
-size_t count_findings(const validation_result& result, validation_severity severity) {
+[[maybe_unused]] size_t count_findings(const validation_result& result, validation_severity severity) {
     return std::count_if(result.findings.begin(), result.findings.end(),
                          [severity](const validation_finding& f) {
                              return f.severity == severity;
