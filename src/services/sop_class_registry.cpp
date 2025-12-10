@@ -8,6 +8,8 @@
 #include "pacs/services/sop_classes/nm_storage.hpp"
 #include "pacs/services/sop_classes/pet_storage.hpp"
 #include "pacs/services/sop_classes/rt_storage.hpp"
+#include "pacs/services/sop_classes/seg_storage.hpp"
+#include "pacs/services/sop_classes/sr_storage.hpp"
 #include "pacs/services/sop_classes/us_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
 
@@ -116,6 +118,7 @@ std::string_view sop_class_registry::modality_to_string(modality_type modality) 
         case modality_type::rt: return "RT";
         case modality_type::sc: return "SC";
         case modality_type::sr: return "SR";
+        case modality_type::seg: return "SEG";
         case modality_type::other: return "OT";
     }
     return "OT";
@@ -139,6 +142,7 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
     }
     if (modality == "SC") return modality_type::sc;
     if (modality == "SR") return modality_type::sr;
+    if (modality == "SEG") return modality_type::seg;
     return modality_type::other;
 }
 
@@ -155,6 +159,8 @@ void sop_class_registry::register_standard_sop_classes() {
     register_pet_sop_classes();
     register_nm_sop_classes();
     register_rt_sop_classes();
+    register_seg_sop_classes();
+    register_sr_sop_classes();
     register_other_sop_classes();
 }
 
@@ -597,6 +603,166 @@ void sop_class_registry::register_rt_sop_classes() {
             "RT Ion Beams Treatment Record Storage",
             sop_class_category::storage,
             modality_type::rt,
+            false,
+            false
+        }
+    );
+}
+
+void sop_class_registry::register_seg_sop_classes() {
+    // Segmentation Storage
+    registry_.emplace(
+        std::string(sop_classes::segmentation_storage_uid),
+        sop_class_info{
+            sop_classes::segmentation_storage_uid,
+            "Segmentation Storage",
+            sop_class_category::storage,
+            modality_type::seg,
+            false,
+            true  // supports multiframe
+        }
+    );
+
+    // Surface Segmentation Storage
+    registry_.emplace(
+        std::string(sop_classes::surface_segmentation_storage_uid),
+        sop_class_info{
+            sop_classes::surface_segmentation_storage_uid,
+            "Surface Segmentation Storage",
+            sop_class_category::storage,
+            modality_type::seg,
+            false,
+            false
+        }
+    );
+}
+
+void sop_class_registry::register_sr_sop_classes() {
+    // Basic Text SR Storage
+    registry_.emplace(
+        std::string(sop_classes::basic_text_sr_storage_uid),
+        sop_class_info{
+            sop_classes::basic_text_sr_storage_uid,
+            "Basic Text SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Enhanced SR Storage
+    registry_.emplace(
+        std::string(sop_classes::enhanced_sr_storage_uid),
+        sop_class_info{
+            sop_classes::enhanced_sr_storage_uid,
+            "Enhanced SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Comprehensive SR Storage
+    registry_.emplace(
+        std::string(sop_classes::comprehensive_sr_storage_uid),
+        sop_class_info{
+            sop_classes::comprehensive_sr_storage_uid,
+            "Comprehensive SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Comprehensive 3D SR Storage
+    registry_.emplace(
+        std::string(sop_classes::comprehensive_3d_sr_storage_uid),
+        sop_class_info{
+            sop_classes::comprehensive_3d_sr_storage_uid,
+            "Comprehensive 3D SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Extensible SR Storage
+    registry_.emplace(
+        std::string(sop_classes::extensible_sr_storage_uid),
+        sop_class_info{
+            sop_classes::extensible_sr_storage_uid,
+            "Extensible SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Key Object Selection Document Storage
+    registry_.emplace(
+        std::string(sop_classes::key_object_selection_document_storage_uid),
+        sop_class_info{
+            sop_classes::key_object_selection_document_storage_uid,
+            "Key Object Selection Document Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Mammography CAD SR Storage
+    registry_.emplace(
+        std::string(sop_classes::mammography_cad_sr_storage_uid),
+        sop_class_info{
+            sop_classes::mammography_cad_sr_storage_uid,
+            "Mammography CAD SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Chest CAD SR Storage
+    registry_.emplace(
+        std::string(sop_classes::chest_cad_sr_storage_uid),
+        sop_class_info{
+            sop_classes::chest_cad_sr_storage_uid,
+            "Chest CAD SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // Colon CAD SR Storage
+    registry_.emplace(
+        std::string(sop_classes::colon_cad_sr_storage_uid),
+        sop_class_info{
+            sop_classes::colon_cad_sr_storage_uid,
+            "Colon CAD SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
+            false,
+            false
+        }
+    );
+
+    // X-Ray Radiation Dose SR Storage
+    registry_.emplace(
+        std::string(sop_classes::xray_radiation_dose_sr_storage_uid),
+        sop_class_info{
+            sop_classes::xray_radiation_dose_sr_storage_uid,
+            "X-Ray Radiation Dose SR Storage",
+            sop_class_category::storage,
+            modality_type::sr,
             false,
             false
         }
