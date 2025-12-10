@@ -744,6 +744,9 @@ add_library(pacs_services
     src/services/validation/seg_iod_validator.cpp
     src/services/validation/sr_iod_validator.cpp
     src/services/cache/query_cache.cpp
+    src/services/cache/database_cursor.cpp
+    src/services/cache/query_result_stream.cpp
+    src/services/cache/streaming_query_handler.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
@@ -1154,10 +1157,12 @@ if(PACS_BUILD_TESTS)
         tests/services/sr_storage_test.cpp
         tests/services/cache/simple_lru_cache_test.cpp
         tests/services/cache/query_cache_test.cpp
+        tests/services/cache/streaming_query_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE
             pacs_services
+            pacs_storage
             Catch2::Catch2WithMain
     )
 

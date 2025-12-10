@@ -1765,6 +1765,226 @@ cache.put(key, std::move(cached));
 
 ---
 
+### `pacs::services::cache::streaming_query_handler`
+
+페이지네이션을 지원하는 메모리 효율적인 C-FIND 응답용 스트리밍 쿼리 핸들러.
+
+```cpp
+#include <pacs/services/cache/streaming_query_handler.hpp>
+
+namespace pacs::services {
+
+class streaming_query_handler {
+public:
+    using StreamResult = Result<std::unique_ptr<query_result_stream>>;
+
+    // 생성
+    explicit streaming_query_handler(storage::index_database* db);
+
+    // 설정
+    void set_page_size(size_t size) noexcept;        // 기본값: 100
+    [[nodiscard]] auto page_size() const noexcept -> size_t;
+
+    void set_max_results(size_t max) noexcept;       // 기본값: 0 (무제한)
+    [[nodiscard]] auto max_results() const noexcept -> size_t;
+
+    // 스트림 작업
+    [[nodiscard]] auto create_stream(
+        query_level level,
+        const core::dicom_dataset& query_keys,
+        const std::string& calling_ae
+    ) -> StreamResult;
+
+    [[nodiscard]] auto resume_stream(
+        const std::string& cursor_state,
+        query_level level,
+        const core::dicom_dataset& query_keys
+    ) -> StreamResult;
+
+    // query_scp 호환성
+    [[nodiscard]] auto as_query_handler() -> query_handler;
+};
+
+} // namespace pacs::services
+```
+
+**예제 - 스트리밍 인터페이스:**
+```cpp
+using namespace pacs::services;
+
+streaming_query_handler handler(db);
+handler.set_page_size(100);
+
+dicom_dataset query_keys;
+query_keys.set_string(tags::modality, vr_type::CS, "CT");
+
+auto stream_result = handler.create_stream(
+    query_level::study, query_keys, "CALLING_AE");
+
+if (stream_result.is_ok()) {
+    auto& stream = stream_result.value();
+
+    while (stream->has_more()) {
+        auto batch = stream->next_batch();
+        if (batch.has_value()) {
+            for (const auto& dataset : batch.value()) {
+                // 각 DICOM 데이터셋 처리
+            }
+        }
+    }
+}
+```
+
+**예제 - Query SCP 통합:**
+```cpp
+using namespace pacs::services;
+
+query_scp scp;
+streaming_query_handler handler(db);
+handler.set_max_results(500);
+
+// 하위 호환성을 위한 어댑터 사용
+scp.set_handler(handler.as_query_handler());
+scp.start();
+```
+
+---
+
+### `pacs::services::cache::query_result_stream`
+
+데이터베이스 커서 결과를 DICOM 데이터셋으로 변환하며 배치 지원.
+
+```cpp
+#include <pacs/services/cache/query_result_stream.hpp>
+
+namespace pacs::services {
+
+// 스트림 설정
+struct stream_config {
+    size_t page_size{100};  // 페치 배치 크기
+};
+
+class query_result_stream {
+public:
+    // 팩토리 메서드
+    static auto create(
+        storage::index_database* db,
+        query_level level,
+        const core::dicom_dataset& query_keys,
+        const stream_config& config = {}
+    ) -> Result<std::unique_ptr<query_result_stream>>;
+
+    static auto from_cursor(
+        storage::index_database* db,
+        const std::string& cursor_state,
+        query_level level,
+        const core::dicom_dataset& query_keys,
+        const stream_config& config = {}
+    ) -> Result<std::unique_ptr<query_result_stream>>;
+
+    // 스트림 상태
+    [[nodiscard]] auto has_more() const noexcept -> bool;
+    [[nodiscard]] auto position() const noexcept -> size_t;
+    [[nodiscard]] auto level() const noexcept -> query_level;
+    [[nodiscard]] auto total_count() const -> std::optional<size_t>;
+
+    // 데이터 조회
+    [[nodiscard]] auto next_batch()
+        -> std::optional<std::vector<core::dicom_dataset>>;
+
+    // 재개를 위한 커서
+    [[nodiscard]] auto cursor() const -> std::string;
+};
+
+} // namespace pacs::services
+```
+
+---
+
+### `pacs::services::cache::database_cursor`
+
+지연 평가를 지원하는 스트리밍 쿼리 결과용 저수준 SQLite 커서.
+
+```cpp
+#include <pacs/services/cache/database_cursor.hpp>
+
+namespace pacs::services {
+
+// 쿼리 레코드 타입 (모든 DICOM 레벨의 variant)
+using query_record = std::variant<
+    storage::patient_record,
+    storage::study_record,
+    storage::series_record,
+    storage::instance_record
+>;
+
+class database_cursor {
+public:
+    enum class record_type { patient, study, series, instance };
+
+    // 각 쿼리 레벨별 팩토리 메서드
+    static auto create_patient_cursor(
+        sqlite3* db,
+        const storage::patient_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    static auto create_study_cursor(
+        sqlite3* db,
+        const storage::study_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    static auto create_series_cursor(
+        sqlite3* db,
+        const storage::series_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    static auto create_instance_cursor(
+        sqlite3* db,
+        const storage::instance_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    // 커서 상태
+    [[nodiscard]] auto has_more() const noexcept -> bool;
+    [[nodiscard]] auto position() const noexcept -> size_t;
+    [[nodiscard]] auto type() const noexcept -> record_type;
+
+    // 데이터 조회
+    [[nodiscard]] auto fetch_next() -> std::optional<query_record>;
+    [[nodiscard]] auto fetch_batch(size_t batch_size)
+        -> std::vector<query_record>;
+
+    // 커서 제어
+    [[nodiscard]] auto reset() -> VoidResult;
+    [[nodiscard]] auto serialize() const -> std::string;
+};
+
+} // namespace pacs::services
+```
+
+**예제 - 재개 가능한 페이지네이션:**
+```cpp
+using namespace pacs::services;
+
+// 첫 번째 페이지 요청
+auto cursor_result = database_cursor::create_study_cursor(
+    db->native_handle(), study_query{});
+
+if (cursor_result.is_ok()) {
+    auto& cursor = cursor_result.value();
+
+    // 첫 100개 레코드 페치
+    auto batch = cursor->fetch_batch(100);
+
+    // 재개를 위한 커서 상태 저장
+    std::string saved_state = cursor->serialize();
+
+    // ... 나중에 저장된 상태에서 재개
+    // query_result_stream::from_cursor(..., saved_state, ...)
+}
+```
+
+---
+
 ## 저장 모듈
 
 ### `pacs::storage::storage_interface`
