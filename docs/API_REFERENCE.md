@@ -2128,6 +2128,226 @@ cache.put(key, std::move(cached));
 
 ---
 
+### `pacs::services::cache::streaming_query_handler`
+
+Streaming query handler for memory-efficient C-FIND responses with pagination.
+
+```cpp
+#include <pacs/services/cache/streaming_query_handler.hpp>
+
+namespace pacs::services {
+
+class streaming_query_handler {
+public:
+    using StreamResult = Result<std::unique_ptr<query_result_stream>>;
+
+    // Construction
+    explicit streaming_query_handler(storage::index_database* db);
+
+    // Configuration
+    void set_page_size(size_t size) noexcept;        // Default: 100
+    [[nodiscard]] auto page_size() const noexcept -> size_t;
+
+    void set_max_results(size_t max) noexcept;       // Default: 0 (unlimited)
+    [[nodiscard]] auto max_results() const noexcept -> size_t;
+
+    // Stream Operations
+    [[nodiscard]] auto create_stream(
+        query_level level,
+        const core::dicom_dataset& query_keys,
+        const std::string& calling_ae
+    ) -> StreamResult;
+
+    [[nodiscard]] auto resume_stream(
+        const std::string& cursor_state,
+        query_level level,
+        const core::dicom_dataset& query_keys
+    ) -> StreamResult;
+
+    // Compatibility with query_scp
+    [[nodiscard]] auto as_query_handler() -> query_handler;
+};
+
+} // namespace pacs::services
+```
+
+**Example - Streaming interface:**
+```cpp
+using namespace pacs::services;
+
+streaming_query_handler handler(db);
+handler.set_page_size(100);
+
+dicom_dataset query_keys;
+query_keys.set_string(tags::modality, vr_type::CS, "CT");
+
+auto stream_result = handler.create_stream(
+    query_level::study, query_keys, "CALLING_AE");
+
+if (stream_result.is_ok()) {
+    auto& stream = stream_result.value();
+
+    while (stream->has_more()) {
+        auto batch = stream->next_batch();
+        if (batch.has_value()) {
+            for (const auto& dataset : batch.value()) {
+                // Process each DICOM dataset
+            }
+        }
+    }
+}
+```
+
+**Example - Query SCP integration:**
+```cpp
+using namespace pacs::services;
+
+query_scp scp;
+streaming_query_handler handler(db);
+handler.set_max_results(500);
+
+// Use adapter for backward compatibility
+scp.set_handler(handler.as_query_handler());
+scp.start();
+```
+
+---
+
+### `pacs::services::cache::query_result_stream`
+
+Converts database cursor results to DICOM datasets with batch support.
+
+```cpp
+#include <pacs/services/cache/query_result_stream.hpp>
+
+namespace pacs::services {
+
+// Stream configuration
+struct stream_config {
+    size_t page_size{100};  // Batch size for fetching
+};
+
+class query_result_stream {
+public:
+    // Factory methods
+    static auto create(
+        storage::index_database* db,
+        query_level level,
+        const core::dicom_dataset& query_keys,
+        const stream_config& config = {}
+    ) -> Result<std::unique_ptr<query_result_stream>>;
+
+    static auto from_cursor(
+        storage::index_database* db,
+        const std::string& cursor_state,
+        query_level level,
+        const core::dicom_dataset& query_keys,
+        const stream_config& config = {}
+    ) -> Result<std::unique_ptr<query_result_stream>>;
+
+    // Stream state
+    [[nodiscard]] auto has_more() const noexcept -> bool;
+    [[nodiscard]] auto position() const noexcept -> size_t;
+    [[nodiscard]] auto level() const noexcept -> query_level;
+    [[nodiscard]] auto total_count() const -> std::optional<size_t>;
+
+    // Data retrieval
+    [[nodiscard]] auto next_batch()
+        -> std::optional<std::vector<core::dicom_dataset>>;
+
+    // Cursor for resumption
+    [[nodiscard]] auto cursor() const -> std::string;
+};
+
+} // namespace pacs::services
+```
+
+---
+
+### `pacs::services::cache::database_cursor`
+
+Low-level SQLite cursor for streaming query results with lazy evaluation.
+
+```cpp
+#include <pacs/services/cache/database_cursor.hpp>
+
+namespace pacs::services {
+
+// Query record types (variant of all DICOM levels)
+using query_record = std::variant<
+    storage::patient_record,
+    storage::study_record,
+    storage::series_record,
+    storage::instance_record
+>;
+
+class database_cursor {
+public:
+    enum class record_type { patient, study, series, instance };
+
+    // Factory methods for each query level
+    static auto create_patient_cursor(
+        sqlite3* db,
+        const storage::patient_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    static auto create_study_cursor(
+        sqlite3* db,
+        const storage::study_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    static auto create_series_cursor(
+        sqlite3* db,
+        const storage::series_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    static auto create_instance_cursor(
+        sqlite3* db,
+        const storage::instance_query& query
+    ) -> Result<std::unique_ptr<database_cursor>>;
+
+    // Cursor state
+    [[nodiscard]] auto has_more() const noexcept -> bool;
+    [[nodiscard]] auto position() const noexcept -> size_t;
+    [[nodiscard]] auto type() const noexcept -> record_type;
+
+    // Data retrieval
+    [[nodiscard]] auto fetch_next() -> std::optional<query_record>;
+    [[nodiscard]] auto fetch_batch(size_t batch_size)
+        -> std::vector<query_record>;
+
+    // Cursor control
+    [[nodiscard]] auto reset() -> VoidResult;
+    [[nodiscard]] auto serialize() const -> std::string;
+};
+
+} // namespace pacs::services
+```
+
+**Example - Resumable pagination:**
+```cpp
+using namespace pacs::services;
+
+// First page request
+auto cursor_result = database_cursor::create_study_cursor(
+    db->native_handle(), study_query{});
+
+if (cursor_result.is_ok()) {
+    auto& cursor = cursor_result.value();
+
+    // Fetch first 100 records
+    auto batch = cursor->fetch_batch(100);
+
+    // Save cursor state for resumption
+    std::string saved_state = cursor->serialize();
+
+    // ... Later, resume from saved state
+    // query_result_stream::from_cursor(..., saved_state, ...)
+}
+```
+
+---
+
 ## Storage Module
 
 ### `pacs::storage::storage_interface`
