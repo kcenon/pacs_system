@@ -217,7 +217,11 @@ pacs_system/
 │   │   ├── permission.hpp       # Resource permissions
 │   │   ├── signature_types.hpp  # Digital signature types
 │   │   ├── certificate.hpp      # X.509 certificate handling
-│   │   └── digital_signature.hpp # DICOM digital signatures
+│   │   ├── digital_signature.hpp # DICOM digital signatures
+│   │   ├── anonymization_profile.hpp # De-identification profiles (PS3.15)
+│   │   ├── tag_action.hpp       # Tag action definitions
+│   │   ├── uid_mapping.hpp      # UID mapping for de-identification
+│   │   └── anonymizer.hpp       # DICOM anonymization engine
 │   │
 │   └── integration/             # Ecosystem Adapters (✅ Complete)
 │       ├── container_adapter.hpp # container_system integration
@@ -233,7 +237,7 @@ pacs_system/
 │   ├── network/                 # Network implementations (8 files)
 │   ├── services/                # Service implementations (7 files)
 │   ├── storage/                 # Storage implementations (4 files)
-│   ├── security/                # Security implementations (3 files)
+│   ├── security/                # Security implementations (6 files)
 │   ├── monitoring/              # Health check implementations (1 file)
 │   └── integration/             # Adapter implementations (6 files)
 │
@@ -243,7 +247,7 @@ pacs_system/
 │   ├── network/                 # Network module tests (5 files)
 │   ├── services/                # Service tests (7 files)
 │   ├── storage/                 # Storage tests (6 files)
-│   ├── security/                # Security tests (3 files, 18 tests)
+│   ├── security/                # Security tests (5 files, 44 tests)
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │

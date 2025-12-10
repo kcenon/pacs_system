@@ -791,6 +791,9 @@ message(STATUS "  [OK] pacs_services: ON")
 # Base security sources (always included)
 set(PACS_SECURITY_SOURCES
     src/security/access_control_manager.cpp
+    src/security/tag_action.cpp
+    src/security/uid_mapping.cpp
+    src/security/anonymizer.cpp
 )
 
 # Digital signature sources (requires OpenSSL - Issue #191)
@@ -1214,10 +1217,12 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
 
-    # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures)
+    # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures, Issue #192 - Anonymization)
     set(SECURITY_TEST_SOURCES
         tests/security/access_control_manager_test.cpp
         tests/security/sqlite_security_storage_test.cpp
+        tests/security/uid_mapping_test.cpp
+        tests/security/anonymizer_test.cpp
     )
 
     # Add digital signature tests if OpenSSL is available (Issue #191)
