@@ -746,6 +746,7 @@ add_library(pacs_services
     src/services/cache/query_cache.cpp
     src/services/cache/database_cursor.cpp
     src/services/cache/query_result_stream.cpp
+    src/services/cache/streaming_query_handler.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
