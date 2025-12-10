@@ -34,6 +34,7 @@ std::vector<uint8_t> create_gradient_image_8bit(uint16_t width, uint16_t height)
 /**
  * @brief Creates a 12-bit grayscale gradient test image (stored in 16-bit).
  */
+[[maybe_unused]]
 std::vector<uint8_t> create_gradient_image_12bit(uint16_t width, uint16_t height) {
     std::vector<uint8_t> data(width * height * 2);
     for (uint16_t y = 0; y < height; ++y) {
@@ -52,6 +53,7 @@ std::vector<uint8_t> create_gradient_image_12bit(uint16_t width, uint16_t height
 /**
  * @brief Creates a 16-bit grayscale gradient test image.
  */
+[[maybe_unused]]
 std::vector<uint8_t> create_gradient_image_16bit(uint16_t width, uint16_t height) {
     std::vector<uint8_t> data(width * height * 2);
     for (uint16_t y = 0; y < height; ++y) {
@@ -70,6 +72,7 @@ std::vector<uint8_t> create_gradient_image_16bit(uint16_t width, uint16_t height
 /**
  * @brief Creates a simple 8-bit RGB color test image.
  */
+[[maybe_unused]]
 std::vector<uint8_t> create_color_image_8bit(uint16_t width, uint16_t height) {
     std::vector<uint8_t> data(width * height * 3);
     for (uint16_t y = 0; y < height; ++y) {
@@ -86,6 +89,7 @@ std::vector<uint8_t> create_color_image_8bit(uint16_t width, uint16_t height) {
 /**
  * @brief Creates a random noise image for stress testing.
  */
+[[maybe_unused]]
 std::vector<uint8_t> create_noise_image_8bit(uint16_t width, uint16_t height, uint32_t seed) {
     std::vector<uint8_t> data(width * height);
     std::mt19937 gen(seed);
@@ -99,6 +103,7 @@ std::vector<uint8_t> create_noise_image_8bit(uint16_t width, uint16_t height, ui
 /**
  * @brief Compares two images for exact equality (lossless verification).
  */
+[[maybe_unused]]
 bool images_identical(const std::vector<uint8_t>& a, const std::vector<uint8_t>& b) {
     return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin());
 }
@@ -107,6 +112,7 @@ bool images_identical(const std::vector<uint8_t>& a, const std::vector<uint8_t>&
  * @brief Computes maximum absolute error between two images.
  * Used to verify near-lossless compression bounded error.
  */
+[[maybe_unused]]
 int compute_max_error(const std::vector<uint8_t>& original,
                       const std::vector<uint8_t>& reconstructed) {
     if (original.size() != reconstructed.size() || original.empty()) {
@@ -125,6 +131,7 @@ int compute_max_error(const std::vector<uint8_t>& original,
 /**
  * @brief Computes Peak Signal-to-Noise Ratio between two images.
  */
+[[maybe_unused]]
 double compute_psnr(const std::vector<uint8_t>& original,
                     const std::vector<uint8_t>& reconstructed,
                     uint16_t max_value = 255) {

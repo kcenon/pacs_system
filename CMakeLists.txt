@@ -687,7 +687,7 @@ target_compile_options(pacs_network PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
 )
 target_link_libraries(pacs_network
-    PUBLIC pacs_core pacs_encoding
+    PUBLIC pacs_core pacs_encoding pacs_security
 )
 
 # Link network_system (Tier 4) - DICOM PDU/Association

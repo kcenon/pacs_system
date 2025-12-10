@@ -5,13 +5,45 @@
  * @copyright Copyright (c) 2025
  */
 
-#include <iostream>
 #include <pacs/security/access_control_manager.hpp>
 
 namespace pacs::security {
 
 access_control_manager::access_control_manager() {
   initialize_default_permissions();
+}
+
+// =============================================================================
+// DICOM Operation Mapping
+// =============================================================================
+
+std::pair<ResourceType, std::uint32_t>
+access_control_manager::map_dicom_operation(DicomOperation op) {
+  switch (op) {
+  case DicomOperation::CStore:
+    return {ResourceType::Study, Action::Write};
+  case DicomOperation::CFind:
+    return {ResourceType::Metadata, Action::Read};
+  case DicomOperation::CMove:
+    return {ResourceType::Study, Action::Export};
+  case DicomOperation::CGet:
+    return {ResourceType::Study, Action::Read | Action::Export};
+  case DicomOperation::CEcho:
+    return {ResourceType::System, Action::Execute};
+  case DicomOperation::NCreate:
+    return {ResourceType::Study, Action::Write};
+  case DicomOperation::NSet:
+    return {ResourceType::Study, Action::Write};
+  case DicomOperation::NGet:
+    return {ResourceType::Study, Action::Read};
+  case DicomOperation::NDelete:
+    return {ResourceType::Study, Action::Delete};
+  case DicomOperation::NAction:
+    return {ResourceType::Study, Action::Execute};
+  case DicomOperation::NEventReport:
+    return {ResourceType::Study, Action::Read};
+  }
+  return {ResourceType::System, Action::None};
 }
 
 void access_control_manager::initialize_default_permissions() {
@@ -125,6 +157,129 @@ access_control_manager::get_role_permissions(Role role) const {
     return it->second;
   }
   return empty;
+}
+
+// =============================================================================
+// DICOM Access Control
+// =============================================================================
+
+auto access_control_manager::validate_access(const user_context &ctx,
+                                             ResourceType resource,
+                                             std::uint32_t action_mask)
+    -> kcenon::common::VoidResult {
+  if (!ctx.is_valid()) {
+    return kcenon::common::make_error<std::monostate>(
+        1, "User context is not valid (inactive user)", "access_control");
+  }
+
+  if (!check_permission(ctx.user(), resource, action_mask)) {
+    return kcenon::common::make_error<std::monostate>(
+        2, "Access denied: insufficient permissions", "access_control");
+  }
+
+  return kcenon::common::ok();
+}
+
+AccessCheckResult
+access_control_manager::check_dicom_operation(const user_context &ctx,
+                                              DicomOperation op) const {
+  if (!ctx.is_valid()) {
+    auto result = AccessCheckResult::deny("User context is not valid");
+    if (audit_callback_) {
+      audit_callback_(ctx, op, result);
+    }
+    return result;
+  }
+
+  auto [resource, action] = map_dicom_operation(op);
+  bool allowed = check_permission(ctx.user(), resource, action);
+
+  AccessCheckResult result =
+      allowed ? AccessCheckResult::allow()
+              : AccessCheckResult::deny("Insufficient permissions for operation");
+
+  if (audit_callback_) {
+    audit_callback_(ctx, op, result);
+  }
+
+  return result;
+}
+
+user_context access_control_manager::get_context_for_ae(
+    std::string_view ae_title, const std::string &session_id) const {
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  // Look up AE Title to user mapping
+  auto it = ae_to_user_id_.find(std::string(ae_title));
+  if (it == ae_to_user_id_.end()) {
+    // No mapping found, return anonymous context
+    auto ctx = user_context::anonymous_context(session_id);
+    ctx.set_source_ae_title(std::string(ae_title));
+    return ctx;
+  }
+
+  // Get user from storage
+  if (!storage_) {
+    auto ctx = user_context::anonymous_context(session_id);
+    ctx.set_source_ae_title(std::string(ae_title));
+    return ctx;
+  }
+
+  auto user_result = storage_->get_user(it->second);
+  if (user_result.is_err()) {
+    auto ctx = user_context::anonymous_context(session_id);
+    ctx.set_source_ae_title(std::string(ae_title));
+    return ctx;
+  }
+
+  auto ctx = user_context(user_result.unwrap(), session_id);
+  ctx.set_source_ae_title(std::string(ae_title));
+  return ctx;
+}
+
+// =============================================================================
+// AE Title Mapping
+// =============================================================================
+
+void access_control_manager::register_ae_title(std::string_view ae_title,
+                                               std::string_view user_id) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  ae_to_user_id_[std::string(ae_title)] = std::string(user_id);
+}
+
+void access_control_manager::unregister_ae_title(std::string_view ae_title) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  ae_to_user_id_.erase(std::string(ae_title));
+}
+
+auto access_control_manager::get_user_by_ae_title(std::string_view ae_title)
+    -> std::optional<User> {
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  auto it = ae_to_user_id_.find(std::string(ae_title));
+  if (it == ae_to_user_id_.end()) {
+    return std::nullopt;
+  }
+
+  if (!storage_) {
+    return std::nullopt;
+  }
+
+  auto user_result = storage_->get_user(it->second);
+  if (user_result.is_err()) {
+    return std::nullopt;
+  }
+
+  return user_result.unwrap();
+}
+
+// =============================================================================
+// Audit Callback
+// =============================================================================
+
+void access_control_manager::set_audit_callback(AccessAuditCallback callback) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  audit_callback_ = std::move(callback);
 }
 
 } // namespace pacs::security
