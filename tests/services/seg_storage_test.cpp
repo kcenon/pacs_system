@@ -265,9 +265,9 @@ dicom_dataset create_minimal_seg_dataset() {
     ds.set_string(tags::content_date, vr_type::DA, "20231201");
     ds.set_string(tags::content_time, vr_type::TM, "120000");
     ds.set_string(dicom_tag{0x0062, 0x0001}, vr_type::CS, "BINARY");  // Segmentation Type
-    ds.set_string(tags::content_label, vr_type::CS, "AI_SEG");
-    ds.set_string(tags::content_description, vr_type::LO, "AI Segmentation Result");
-    ds.set_string(tags::content_creator_name, vr_type::PN, "AI^ALGORITHM");
+    ds.set_string(dicom_tag{0x0020, 0x4000}, vr_type::CS, "AI_SEG");  // Content Label
+    ds.set_string(dicom_tag{0x0070, 0x0081}, vr_type::LO, "AI Segmentation Result");  // Content Description
+    ds.set_string(dicom_tag{0x0070, 0x0084}, vr_type::PN, "AI^ALGORITHM");  // Content Creator Name
 
     // Image Pixel Module (for SEG)
     ds.set_numeric<uint16_t>(tags::samples_per_pixel, vr_type::US, 1);
@@ -279,7 +279,7 @@ dicom_dataset create_minimal_seg_dataset() {
     ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US, 0);
     ds.set_numeric<uint16_t>(tags::pixel_representation, vr_type::US, 0);
     ds.set_string(tags::pixel_data, vr_type::OB, "dummy_pixel_data");
-    ds.set_numeric<int32_t>(tags::number_of_frames, vr_type::IS, 1);
+    ds.set_string(dicom_tag{0x0028, 0x0008}, vr_type::IS, "1");  // Number of Frames
 
     // SOP Common Module
     ds.set_string(tags::sop_class_uid, vr_type::UI, std::string(segmentation_storage_uid));

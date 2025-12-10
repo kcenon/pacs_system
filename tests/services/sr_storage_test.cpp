@@ -385,8 +385,7 @@ dicom_dataset create_minimal_sr_dataset() {
                  "1.2.840.113619.2.55.3.604688119.969.1234567890.124");
     ds.set_string(tags::series_number, vr_type::IS, "1");
 
-    // SR Document Series Module
-    ds.set_string(tags::referenced_performed_procedure_step_sequence, vr_type::SQ, "");
+    // SR Document Series Module (Referenced Performed Procedure Step Sequence is optional)
 
     // SR Document General Module
     ds.set_string(tags::instance_number, vr_type::IS, "1");

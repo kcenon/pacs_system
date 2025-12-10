@@ -660,6 +660,11 @@ target_include_directories(pacs_network
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
+# Suppress deprecated warnings from common_system/logger_system headers (logger_interface is deprecated)
+target_compile_options(pacs_network PRIVATE
+    $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
+    $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
+)
 target_link_libraries(pacs_network
     PUBLIC pacs_core pacs_encoding
 )

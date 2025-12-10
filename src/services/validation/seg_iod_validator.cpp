@@ -20,27 +20,27 @@ using namespace pacs::core;
 namespace seg_tags {
 
 // Segmentation Series Module
-constexpr dicom_tag modality{0x0008, 0x0060};
+[[maybe_unused]] constexpr dicom_tag modality{0x0008, 0x0060};
 
 // Segmentation Image Module
 constexpr dicom_tag segmentation_type{0x0062, 0x0001};
 constexpr dicom_tag segmentation_fractional_type{0x0062, 0x0010};
 constexpr dicom_tag max_fractional_value{0x0062, 0x000E};
 constexpr dicom_tag segment_sequence{0x0062, 0x0002};
-constexpr dicom_tag segments_overlap{0x0062, 0x0013};
+[[maybe_unused]] constexpr dicom_tag segments_overlap{0x0062, 0x0013};
 
 // Segment Sequence Item attributes
 constexpr dicom_tag segment_number{0x0062, 0x0004};
 constexpr dicom_tag segment_label{0x0062, 0x0005};
-constexpr dicom_tag segment_description{0x0062, 0x0006};
+[[maybe_unused]] constexpr dicom_tag segment_description{0x0062, 0x0006};
 constexpr dicom_tag segment_algorithm_type{0x0062, 0x0008};
-constexpr dicom_tag segment_algorithm_name{0x0062, 0x0009};
+[[maybe_unused]] constexpr dicom_tag segment_algorithm_name{0x0062, 0x0009};
 constexpr dicom_tag segmented_property_category_code_sequence{0x0062, 0x0003};
 constexpr dicom_tag segmented_property_type_code_sequence{0x0062, 0x000F};
-constexpr dicom_tag anatomic_region_sequence{0x0008, 0x2218};
-constexpr dicom_tag recommended_display_cieLab_value{0x0062, 0x000D};
-constexpr dicom_tag tracking_id{0x0062, 0x0020};
-constexpr dicom_tag tracking_uid{0x0062, 0x0021};
+[[maybe_unused]] constexpr dicom_tag anatomic_region_sequence{0x0008, 0x2218};
+[[maybe_unused]] constexpr dicom_tag recommended_display_cieLab_value{0x0062, 0x000D};
+[[maybe_unused]] constexpr dicom_tag tracking_id{0x0062, 0x0020};
+[[maybe_unused]] constexpr dicom_tag tracking_uid{0x0062, 0x0021};
 
 // Multi-frame related
 constexpr dicom_tag number_of_frames{0x0028, 0x0008};
@@ -50,12 +50,12 @@ constexpr dicom_tag dimension_organization_sequence{0x0020, 0x9221};
 constexpr dicom_tag dimension_index_sequence{0x0020, 0x9222};
 
 // Referenced Series Sequence
-constexpr dicom_tag referenced_series_sequence{0x0008, 0x1115};
-constexpr dicom_tag referenced_instance_sequence{0x0008, 0x114A};
+[[maybe_unused]] constexpr dicom_tag referenced_series_sequence{0x0008, 0x1115};
+[[maybe_unused]] constexpr dicom_tag referenced_instance_sequence{0x0008, 0x114A};
 
 // Common Instance Reference Module
 constexpr dicom_tag referenced_series_sequence_cir{0x0008, 0x1115};
-constexpr dicom_tag studies_containing_other_referenced_instances_sequence{0x0008, 0x1200};
+[[maybe_unused]] constexpr dicom_tag studies_containing_other_referenced_instances_sequence{0x0008, 0x1200};
 
 // Enhanced General Equipment Module
 constexpr dicom_tag manufacturer{0x0008, 0x0070};
@@ -64,9 +64,9 @@ constexpr dicom_tag device_serial_number{0x0018, 0x1000};
 constexpr dicom_tag software_versions{0x0018, 0x1020};
 
 // Code Sequence attributes
-constexpr dicom_tag code_value{0x0008, 0x0100};
-constexpr dicom_tag coding_scheme_designator{0x0008, 0x0102};
-constexpr dicom_tag code_meaning{0x0008, 0x0104};
+[[maybe_unused]] constexpr dicom_tag code_value{0x0008, 0x0100};
+[[maybe_unused]] constexpr dicom_tag coding_scheme_designator{0x0008, 0x0102};
+[[maybe_unused]] constexpr dicom_tag code_meaning{0x0008, 0x0104};
 
 }  // namespace seg_tags
 
@@ -245,8 +245,8 @@ void seg_iod_validator::validate_general_series_module(
 }
 
 void seg_iod_validator::validate_segmentation_series_module(
-    const dicom_dataset& dataset,
-    std::vector<validation_finding>& findings) const {
+    [[maybe_unused]] const dicom_dataset& dataset,
+    [[maybe_unused]] std::vector<validation_finding>& findings) const {
 
     // Modality must be "SEG" - already checked in general series validation
     // This module primarily constrains Modality to SEG
@@ -352,8 +352,8 @@ void seg_iod_validator::validate_segment_sequence(
     }
 
     // Get sequence items
-    auto sequence = dataset.get_sequence(seg_tags::segment_sequence);
-    if (!sequence || sequence->empty()) {
+    const auto* element = dataset.get(seg_tags::segment_sequence);
+    if (!element || !element->is_sequence() || element->sequence_items().empty()) {
         findings.push_back({
             validation_severity::error,
             seg_tags::segment_sequence,
@@ -364,8 +364,9 @@ void seg_iod_validator::validate_segment_sequence(
     }
 
     // Validate each segment
-    for (size_t i = 0; i < sequence->size(); ++i) {
-        const auto& segment_item = (*sequence)[i];
+    const auto& sequence = element->sequence_items();
+    for (size_t i = 0; i < sequence.size(); ++i) {
+        const auto& segment_item = sequence[i];
         validate_single_segment(segment_item, i, findings);
     }
 }
@@ -688,9 +689,9 @@ bool is_fractional_segmentation(const dicom_dataset& dataset) {
 
 size_t get_segment_count(const dicom_dataset& dataset) {
     constexpr dicom_tag segment_sequence{0x0062, 0x0002};
-    auto sequence = dataset.get_sequence(segment_sequence);
-    if (sequence) {
-        return sequence->size();
+    const auto* element = dataset.get(segment_sequence);
+    if (element && element->is_sequence()) {
+        return element->sequence_items().size();
     }
     return 0;
 }

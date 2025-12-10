@@ -26,66 +26,66 @@ using namespace pacs::encoding;
 namespace {
 
 // General DICOM tags
-constexpr dicom_tag tag_image_type{0x0008, 0x0008};
-constexpr dicom_tag tag_frame_of_reference_uid{0x0020, 0x0052};
-constexpr dicom_tag tag_position_reference_indicator{0x0020, 0x1040};
+[[maybe_unused]] constexpr dicom_tag tag_image_type{0x0008, 0x0008};
+[[maybe_unused]] constexpr dicom_tag tag_frame_of_reference_uid{0x0020, 0x0052};
+[[maybe_unused]] constexpr dicom_tag tag_position_reference_indicator{0x0020, 0x1040};
 
 // NM Image Module tags
-constexpr dicom_tag tag_number_of_frames{0x0028, 0x0008};
-constexpr dicom_tag tag_type_of_data{0x0054, 0x0400};
-constexpr dicom_tag tag_image_index{0x0054, 0x1330};
+[[maybe_unused]] constexpr dicom_tag tag_number_of_frames{0x0028, 0x0008};
+[[maybe_unused]] constexpr dicom_tag tag_type_of_data{0x0054, 0x0400};
+[[maybe_unused]] constexpr dicom_tag tag_image_index{0x0054, 0x1330};
 
 // NM Series Module tags
-constexpr dicom_tag tag_patient_orientation_code_seq{0x0054, 0x0410};
+[[maybe_unused]] constexpr dicom_tag tag_patient_orientation_code_seq{0x0054, 0x0410};
 
 // Energy Window tags
-constexpr dicom_tag tag_energy_window_info_seq{0x0054, 0x0012};
-constexpr dicom_tag tag_energy_window_range_seq{0x0054, 0x0013};
-constexpr dicom_tag tag_energy_window_lower{0x0054, 0x0014};
-constexpr dicom_tag tag_energy_window_upper{0x0054, 0x0015};
-constexpr dicom_tag tag_energy_window_name{0x0054, 0x0018};
+[[maybe_unused]] constexpr dicom_tag tag_energy_window_info_seq{0x0054, 0x0012};
+[[maybe_unused]] constexpr dicom_tag tag_energy_window_range_seq{0x0054, 0x0013};
+[[maybe_unused]] constexpr dicom_tag tag_energy_window_lower{0x0054, 0x0014};
+[[maybe_unused]] constexpr dicom_tag tag_energy_window_upper{0x0054, 0x0015};
+[[maybe_unused]] constexpr dicom_tag tag_energy_window_name{0x0054, 0x0018};
 
 // Radiopharmaceutical tags
-constexpr dicom_tag tag_radiopharmaceutical_info_seq{0x0054, 0x0016};
-constexpr dicom_tag tag_radionuclide_code_seq{0x0054, 0x0300};
-constexpr dicom_tag tag_radiopharmaceutical_start_time{0x0018, 0x1072};
-constexpr dicom_tag tag_radionuclide_total_dose{0x0018, 0x1074};
-constexpr dicom_tag tag_radionuclide_half_life{0x0018, 0x1075};
+[[maybe_unused]] constexpr dicom_tag tag_radiopharmaceutical_info_seq{0x0054, 0x0016};
+[[maybe_unused]] constexpr dicom_tag tag_radionuclide_code_seq{0x0054, 0x0300};
+[[maybe_unused]] constexpr dicom_tag tag_radiopharmaceutical_start_time{0x0018, 0x1072};
+[[maybe_unused]] constexpr dicom_tag tag_radionuclide_total_dose{0x0018, 0x1074};
+[[maybe_unused]] constexpr dicom_tag tag_radionuclide_half_life{0x0018, 0x1075};
 
 // Detector Module tags
-constexpr dicom_tag tag_detector_info_seq{0x0054, 0x0022};
-constexpr dicom_tag tag_collimator_type{0x0018, 0x1181};
-constexpr dicom_tag tag_collimator_grid_name{0x0018, 0x1180};
-constexpr dicom_tag tag_field_of_view_shape{0x0018, 0x1147};
-constexpr dicom_tag tag_field_of_view_dimension{0x0018, 0x1149};
-constexpr dicom_tag tag_focal_distance{0x0018, 0x1182};
-constexpr dicom_tag tag_zoom_factor{0x0018, 0x1114};
+[[maybe_unused]] constexpr dicom_tag tag_detector_info_seq{0x0054, 0x0022};
+[[maybe_unused]] constexpr dicom_tag tag_collimator_type{0x0018, 0x1181};
+[[maybe_unused]] constexpr dicom_tag tag_collimator_grid_name{0x0018, 0x1180};
+[[maybe_unused]] constexpr dicom_tag tag_field_of_view_shape{0x0018, 0x1147};
+[[maybe_unused]] constexpr dicom_tag tag_field_of_view_dimension{0x0018, 0x1149};
+[[maybe_unused]] constexpr dicom_tag tag_focal_distance{0x0018, 0x1182};
+[[maybe_unused]] constexpr dicom_tag tag_zoom_factor{0x0018, 0x1114};
 
 // TOMO Acquisition tags
-constexpr dicom_tag tag_rotation_info_seq{0x0054, 0x0052};
-constexpr dicom_tag tag_rotation_direction{0x0018, 0x1140};
-constexpr dicom_tag tag_start_angle{0x0054, 0x0200};
-constexpr dicom_tag tag_angular_step{0x0018, 0x1144};
-constexpr dicom_tag tag_number_of_frames_in_rotation{0x0054, 0x0053};
+[[maybe_unused]] constexpr dicom_tag tag_rotation_info_seq{0x0054, 0x0052};
+[[maybe_unused]] constexpr dicom_tag tag_rotation_direction{0x0018, 0x1140};
+[[maybe_unused]] constexpr dicom_tag tag_start_angle{0x0054, 0x0200};
+[[maybe_unused]] constexpr dicom_tag tag_angular_step{0x0018, 0x1144};
+[[maybe_unused]] constexpr dicom_tag tag_number_of_frames_in_rotation{0x0054, 0x0053};
 
 // Gated Acquisition tags
-constexpr dicom_tag tag_gated_info_seq{0x0054, 0x0062};
-constexpr dicom_tag tag_trigger_time{0x0018, 0x1060};
-constexpr dicom_tag tag_cardiac_framing_type{0x0018, 0x1064};
-constexpr dicom_tag tag_rr_interval{0x0018, 0x1062};
+[[maybe_unused]] constexpr dicom_tag tag_gated_info_seq{0x0054, 0x0062};
+[[maybe_unused]] constexpr dicom_tag tag_trigger_time{0x0018, 0x1060};
+[[maybe_unused]] constexpr dicom_tag tag_cardiac_framing_type{0x0018, 0x1064};
+[[maybe_unused]] constexpr dicom_tag tag_rr_interval{0x0018, 0x1062};
 
 // NM Image tags (tag_image_index defined above)
-constexpr dicom_tag tag_counts_accumulated{0x0018, 0x0070};
-constexpr dicom_tag tag_acquisition_start_condition{0x0018, 0x0073};
-constexpr dicom_tag tag_acquisition_termination_condition{0x0018, 0x0071};
-constexpr dicom_tag tag_actual_frame_duration{0x0018, 0x1242};
+[[maybe_unused]] constexpr dicom_tag tag_counts_accumulated{0x0018, 0x0070};
+[[maybe_unused]] constexpr dicom_tag tag_acquisition_start_condition{0x0018, 0x0073};
+[[maybe_unused]] constexpr dicom_tag tag_acquisition_termination_condition{0x0018, 0x0071};
+[[maybe_unused]] constexpr dicom_tag tag_actual_frame_duration{0x0018, 0x1242};
 
 // Pixel representation tags
-constexpr dicom_tag tag_pixel_spacing{0x0028, 0x0030};
-constexpr dicom_tag tag_slice_thickness{0x0018, 0x0050};
+[[maybe_unused]] constexpr dicom_tag tag_pixel_spacing{0x0028, 0x0030};
+[[maybe_unused]] constexpr dicom_tag tag_slice_thickness{0x0018, 0x0050};
 
 // Helper to check if validation result has info-level findings
-[[nodiscard]] bool has_info_findings(const validation_result& result) noexcept {
+[[maybe_unused]] [[nodiscard]] bool has_info_findings(const validation_result& result) noexcept {
     return std::any_of(result.findings.begin(), result.findings.end(),
                        [](const validation_finding& f) {
                            return f.severity == validation_severity::info;

@@ -20,8 +20,8 @@ using namespace pacs::core;
 namespace sr_tags {
 
 // SR Document Series Module
-constexpr dicom_tag modality{0x0008, 0x0060};
-constexpr dicom_tag series_instance_uid{0x0020, 0x000E};
+[[maybe_unused]] constexpr dicom_tag modality{0x0008, 0x0060};
+[[maybe_unused]] constexpr dicom_tag series_instance_uid{0x0020, 0x000E};
 
 // SR Document General Module
 constexpr dicom_tag instance_number{0x0020, 0x0013};
@@ -30,14 +30,14 @@ constexpr dicom_tag verification_flag{0x0040, 0xA493};
 constexpr dicom_tag content_date{0x0008, 0x0023};
 constexpr dicom_tag content_time{0x0008, 0x0033};
 constexpr dicom_tag verifying_observer_sequence{0x0040, 0xA073};
-constexpr dicom_tag predecessor_documents_sequence{0x0040, 0xA360};
-constexpr dicom_tag identical_documents_sequence{0x0040, 0xA525};
+[[maybe_unused]] constexpr dicom_tag predecessor_documents_sequence{0x0040, 0xA360};
+[[maybe_unused]] constexpr dicom_tag identical_documents_sequence{0x0040, 0xA525};
 
 // SR Document Content Module
 constexpr dicom_tag value_type{0x0040, 0xA040};
 constexpr dicom_tag concept_name_code_sequence{0x0040, 0xA043};
 constexpr dicom_tag content_sequence{0x0040, 0xA730};
-constexpr dicom_tag continuity_of_content{0x0040, 0xA050};
+[[maybe_unused]] constexpr dicom_tag continuity_of_content{0x0040, 0xA050};
 
 // Content Item attributes
 constexpr dicom_tag relationship_type{0x0040, 0xA010};
@@ -66,15 +66,15 @@ constexpr dicom_tag graphic_type{0x0070, 0x0023};
 constexpr dicom_tag referenced_frame_of_reference_uid{0x3006, 0x0024};
 
 // Temporal coordinates
-constexpr dicom_tag temporal_range_type{0x0040, 0xA130};
-constexpr dicom_tag referenced_sample_positions{0x0040, 0xA132};
+[[maybe_unused]] constexpr dicom_tag temporal_range_type{0x0040, 0xA130};
+[[maybe_unused]] constexpr dicom_tag referenced_sample_positions{0x0040, 0xA132};
 
 // Template identification
-constexpr dicom_tag template_identifier{0x0040, 0xDB00};
-constexpr dicom_tag mapping_resource{0x0008, 0x0105};
+[[maybe_unused]] constexpr dicom_tag template_identifier{0x0040, 0xDB00};
+[[maybe_unused]] constexpr dicom_tag mapping_resource{0x0008, 0x0105};
 
 // Key Object Selection specific
-constexpr dicom_tag referenced_series_sequence{0x0008, 0x1115};
+[[maybe_unused]] constexpr dicom_tag referenced_series_sequence{0x0008, 0x1115};
 
 }  // namespace sr_tags
 
@@ -457,9 +457,9 @@ void sr_iod_validator::validate_sr_document_content_module(
 
     // Validate Concept Name Code Sequence
     if (options_.validate_coded_entries && dataset.contains(sr_tags::concept_name_code_sequence)) {
-        auto concept_seq = dataset.get_sequence(sr_tags::concept_name_code_sequence);
-        if (concept_seq && !concept_seq->empty()) {
-            validate_coded_entry((*concept_seq)[0], "Root Concept Name", findings);
+        const auto* concept_elem = dataset.get(sr_tags::concept_name_code_sequence);
+        if (concept_elem && concept_elem->is_sequence() && !concept_elem->sequence_items().empty()) {
+            validate_coded_entry(concept_elem->sequence_items()[0], "Root Concept Name", findings);
         }
     }
 
@@ -524,8 +524,8 @@ void sr_iod_validator::validate_content_sequence(
         return;
     }
 
-    auto content_seq = dataset.get_sequence(sr_tags::content_sequence);
-    if (!content_seq || content_seq->empty()) {
+    const auto* content_elem = dataset.get(sr_tags::content_sequence);
+    if (!content_elem || !content_elem->is_sequence() || content_elem->sequence_items().empty()) {
         findings.push_back({
             validation_severity::info,
             sr_tags::content_sequence,
@@ -539,15 +539,16 @@ void sr_iod_validator::validate_content_sequence(
     auto root_value_type = dataset.get_string(sr_tags::value_type);
 
     // Validate each content item
-    for (size_t i = 0; i < content_seq->size(); ++i) {
-        validate_content_item((*content_seq)[i], 1, root_value_type, findings);
+    const auto& content_seq = content_elem->sequence_items();
+    for (size_t i = 0; i < content_seq.size(); ++i) {
+        validate_content_item(content_seq[i], 1, root_value_type, findings);
     }
 }
 
 void sr_iod_validator::validate_content_item(
     const dicom_dataset& item,
     size_t depth,
-    std::string_view parent_value_type,
+    [[maybe_unused]] std::string_view parent_value_type,
     std::vector<validation_finding>& findings) const {
 
     // Prevent infinite recursion
@@ -620,10 +621,11 @@ void sr_iod_validator::validate_content_item(
 
     // Validate nested content items
     if (item.contains(sr_tags::content_sequence)) {
-        auto nested_seq = item.get_sequence(sr_tags::content_sequence);
-        if (nested_seq) {
-            for (size_t i = 0; i < nested_seq->size(); ++i) {
-                validate_content_item((*nested_seq)[i], depth + 1, value_type, findings);
+        const auto* nested_elem = item.get(sr_tags::content_sequence);
+        if (nested_elem && nested_elem->is_sequence()) {
+            const auto& nested_seq = nested_elem->sequence_items();
+            for (size_t i = 0; i < nested_seq.size(); ++i) {
+                validate_content_item(nested_seq[i], depth + 1, value_type, findings);
             }
         }
     }
@@ -707,9 +709,9 @@ void sr_iod_validator::validate_num_content_item(
         return;
     }
 
-    auto measured_seq = item.get_sequence(sr_tags::measured_value_sequence);
-    if (measured_seq && !measured_seq->empty()) {
-        const auto& mv_item = (*measured_seq)[0];
+    const auto* measured_elem = item.get(sr_tags::measured_value_sequence);
+    if (measured_elem && measured_elem->is_sequence() && !measured_elem->sequence_items().empty()) {
+        const auto& mv_item = measured_elem->sequence_items()[0];
 
         if (!mv_item.contains(sr_tags::numeric_value)) {
             findings.push_back({
@@ -745,9 +747,9 @@ void sr_iod_validator::validate_image_content_item(
         return;
     }
 
-    auto ref_seq = item.get_sequence(sr_tags::referenced_sop_sequence);
-    if (ref_seq && !ref_seq->empty()) {
-        const auto& ref_item = (*ref_seq)[0];
+    const auto* ref_elem = item.get(sr_tags::referenced_sop_sequence);
+    if (ref_elem && ref_elem->is_sequence() && !ref_elem->sequence_items().empty()) {
+        const auto& ref_item = ref_elem->sequence_items()[0];
 
         if (!ref_item.contains(sr_tags::referenced_sop_class_uid)) {
             findings.push_back({
@@ -962,9 +964,9 @@ bool is_sr_verified(const dicom_dataset& dataset) {
 
 size_t get_content_item_count(const dicom_dataset& dataset) {
     constexpr dicom_tag content_sequence{0x0040, 0xA730};
-    auto sequence = dataset.get_sequence(content_sequence);
-    if (sequence) {
-        return sequence->size();
+    const auto* element = dataset.get(content_sequence);
+    if (element && element->is_sequence()) {
+        return element->sequence_items().size();
     }
     return 0;
 }
@@ -973,9 +975,9 @@ std::string get_sr_document_title(const dicom_dataset& dataset) {
     constexpr dicom_tag concept_name_code_sequence{0x0040, 0xA043};
     constexpr dicom_tag code_meaning{0x0008, 0x0104};
 
-    auto seq = dataset.get_sequence(concept_name_code_sequence);
-    if (seq && !seq->empty()) {
-        const auto& item = (*seq)[0];
+    const auto* element = dataset.get(concept_name_code_sequence);
+    if (element && element->is_sequence() && !element->sequence_items().empty()) {
+        const auto& item = element->sequence_items()[0];
         if (item.contains(code_meaning)) {
             return item.get_string(code_meaning);
         }
