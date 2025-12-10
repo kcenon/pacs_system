@@ -12,6 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+
 using namespace pacs::services::validation;
 using namespace pacs::services::sop_classes;
 using namespace pacs::core;
