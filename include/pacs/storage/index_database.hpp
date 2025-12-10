@@ -868,6 +868,18 @@ public:
     [[nodiscard]] auto verify_integrity() const -> VoidResult;
 
     /**
+     * @brief Get the raw SQLite database handle
+     *
+     * Returns the underlying SQLite database handle for advanced operations
+     * such as creating cursors for streaming queries. The returned handle
+     * should not be closed or modified directly.
+     *
+     * @warning The returned handle is managed by this class. Do not close it.
+     * @return Raw SQLite database handle
+     */
+    [[nodiscard]] auto native_handle() const noexcept -> sqlite3*;
+
+    /**
      * @brief Checkpoint WAL file
      *
      * Forces a WAL checkpoint, writing all WAL content to the main
