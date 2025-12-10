@@ -27,6 +27,10 @@ namespace pacs::security {
 class access_control_manager;
 } // namespace pacs::security
 
+namespace pacs::storage {
+class index_database;
+} // namespace pacs::storage
+
 namespace pacs::web {
 
 /**
@@ -123,6 +127,12 @@ public:
    */
   void set_access_control_manager(
       std::shared_ptr<security::access_control_manager> manager);
+
+  /**
+   * @brief Set index database for patient/study/series endpoints
+   * @param database Index database instance
+   */
+  void set_database(std::shared_ptr<storage::index_database> database);
 
   // =========================================================================
   // Lifecycle
