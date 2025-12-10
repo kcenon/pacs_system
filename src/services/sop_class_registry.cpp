@@ -7,6 +7,7 @@
 #include "pacs/services/sop_classes/dx_storage.hpp"
 #include "pacs/services/sop_classes/nm_storage.hpp"
 #include "pacs/services/sop_classes/pet_storage.hpp"
+#include "pacs/services/sop_classes/rt_storage.hpp"
 #include "pacs/services/sop_classes/us_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
 
@@ -131,7 +132,11 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
     if (modality == "MG") return modality_type::mg;
     if (modality == "NM") return modality_type::nm;
     if (modality == "PT" || modality == "PET") return modality_type::pet;
-    if (modality == "RT") return modality_type::rt;
+    // RT modalities: RTPLAN, RTDOSE, RTSTRUCT, RTIMAGE, RTRECORD
+    if (modality == "RT" || modality == "RTPLAN" || modality == "RTDOSE" ||
+        modality == "RTSTRUCT" || modality == "RTIMAGE" || modality == "RTRECORD") {
+        return modality_type::rt;
+    }
     if (modality == "SC") return modality_type::sc;
     if (modality == "SR") return modality_type::sr;
     return modality_type::other;
@@ -149,6 +154,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_mr_sop_classes();
     register_pet_sop_classes();
     register_nm_sop_classes();
+    register_rt_sop_classes();
     register_other_sop_classes();
 }
 
@@ -474,6 +480,125 @@ void sop_class_registry::register_nm_sop_classes() {
             modality_type::nm,
             true,  // retired
             true   // supports multiframe
+        }
+    );
+}
+
+void sop_class_registry::register_rt_sop_classes() {
+    // RT Plan Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_plan_storage_uid),
+        sop_class_info{
+            sop_classes::rt_plan_storage_uid,
+            "RT Plan Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false  // no multiframe
+        }
+    );
+
+    // RT Dose Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_dose_storage_uid),
+        sop_class_info{
+            sop_classes::rt_dose_storage_uid,
+            "RT Dose Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            true  // supports multiframe (dose grids)
+        }
+    );
+
+    // RT Structure Set Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_structure_set_storage_uid),
+        sop_class_info{
+            sop_classes::rt_structure_set_storage_uid,
+            "RT Structure Set Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false  // no multiframe
+        }
+    );
+
+    // RT Image Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_image_storage_uid),
+        sop_class_info{
+            sop_classes::rt_image_storage_uid,
+            "RT Image Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false  // typically single frame
+        }
+    );
+
+    // RT Beams Treatment Record Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_beams_treatment_record_storage_uid),
+        sop_class_info{
+            sop_classes::rt_beams_treatment_record_storage_uid,
+            "RT Beams Treatment Record Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false
+        }
+    );
+
+    // RT Brachy Treatment Record Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_brachy_treatment_record_storage_uid),
+        sop_class_info{
+            sop_classes::rt_brachy_treatment_record_storage_uid,
+            "RT Brachy Treatment Record Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false
+        }
+    );
+
+    // RT Treatment Summary Record Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_treatment_summary_record_storage_uid),
+        sop_class_info{
+            sop_classes::rt_treatment_summary_record_storage_uid,
+            "RT Treatment Summary Record Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false
+        }
+    );
+
+    // RT Ion Plan Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_ion_plan_storage_uid),
+        sop_class_info{
+            sop_classes::rt_ion_plan_storage_uid,
+            "RT Ion Plan Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false
+        }
+    );
+
+    // RT Ion Beams Treatment Record Storage
+    registry_.emplace(
+        std::string(sop_classes::rt_ion_beams_treatment_record_storage_uid),
+        sop_class_info{
+            sop_classes::rt_ion_beams_treatment_record_storage_uid,
+            "RT Ion Beams Treatment Record Storage",
+            sop_class_category::storage,
+            modality_type::rt,
+            false,
+            false
         }
     );
 }
