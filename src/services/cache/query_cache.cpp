@@ -40,6 +40,37 @@ bool query_cache::invalidate(const key_type& key) {
     return cache_.invalidate(key);
 }
 
+query_cache::size_type query_cache::invalidate_by_prefix(const std::string& prefix) {
+    return cache_.invalidate_if(
+        [&prefix](const std::string& key, const cached_query_result&) {
+            return key.size() >= prefix.size() &&
+                   key.compare(0, prefix.size(), prefix) == 0;
+        });
+}
+
+query_cache::size_type query_cache::invalidate_by_query_level(const std::string& query_level) {
+    // Keys are formatted as "LEVEL:params" or "AE/LEVEL:params"
+    // Match both formats
+    return cache_.invalidate_if(
+        [&query_level](const std::string& key, const cached_query_result&) {
+            // Direct match: "LEVEL:..."
+            if (key.starts_with(query_level + ":")) {
+                return true;
+            }
+            // AE prefix match: "AE/LEVEL:..."
+            auto slash_pos = key.find('/');
+            if (slash_pos != std::string::npos) {
+                auto level_start = slash_pos + 1;
+                auto colon_pos = key.find(':', level_start);
+                if (colon_pos != std::string::npos) {
+                    auto key_level = key.substr(level_start, colon_pos - level_start);
+                    return key_level == query_level;
+                }
+            }
+            return false;
+        });
+}
+
 void query_cache::clear() {
     cache_.clear();
 }
