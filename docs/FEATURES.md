@@ -379,6 +379,18 @@ if (result.is_ok()) {
 | RT Treatment Summary Record Storage | 1.2.840.10008.5.1.4.1.1.481.7 | ✅ |
 | RT Ion Plan Storage | 1.2.840.10008.5.1.4.1.1.481.8 | ✅ |
 | RT Ion Beams Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.9 | ✅ |
+| Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.4 | ✅ |
+| Surface Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.5 | ✅ |
+| Basic Text SR Storage | 1.2.840.10008.5.1.4.1.1.88.11 | ✅ |
+| Enhanced SR Storage | 1.2.840.10008.5.1.4.1.1.88.22 | ✅ |
+| Comprehensive SR Storage | 1.2.840.10008.5.1.4.1.1.88.33 | ✅ |
+| Comprehensive 3D SR Storage | 1.2.840.10008.5.1.4.1.1.88.34 | ✅ |
+| Extensible SR Storage | 1.2.840.10008.5.1.4.1.1.88.35 | ✅ |
+| Key Object Selection Document Storage | 1.2.840.10008.5.1.4.1.1.88.59 | ✅ |
+| Mammography CAD SR Storage | 1.2.840.10008.5.1.4.1.1.88.50 | ✅ |
+| Chest CAD SR Storage | 1.2.840.10008.5.1.4.1.1.88.65 | ✅ |
+| Colon CAD SR Storage | 1.2.840.10008.5.1.4.1.1.88.69 | ✅ |
+| X-Ray Radiation Dose SR Storage | 1.2.840.10008.5.1.4.1.1.88.67 | ✅ |
 
 **Example**:
 ```cpp
@@ -853,6 +865,7 @@ server.stop();
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
 | Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
 | RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
 | REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
@@ -906,10 +919,11 @@ server.stop();
 | 1.4.0 | 2025-12-09 | raphaelshin | Added: REST API Server foundation with Crow framework for Issue #194 |
 | 1.5.0 | 2025-12-09 | raphaelshin | Added: RLE Lossless codec for Issue #182; Updated compression codec status |
 | 1.6.0 | 2025-12-10 | raphaelshin | Added: RT modality support (RT Plan, RT Dose, RT Structure Set) with IOD validation for Issue #186 |
+| 1.7.0 | 2025-12-10 | raphaelshin | Added: SEG/SR support (Segmentation, Structured Reports) for AI/CAD integration for Issue #187 |
 
 ---
 
-*Document Version: 1.6.0*
+*Document Version: 1.7.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-10*
 *Author: kcenon@naver.com*

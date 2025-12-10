@@ -26,49 +26,49 @@ using namespace pacs::encoding;
 namespace {
 
 // PET-specific DICOM tags
-constexpr dicom_tag tag_image_type{0x0008, 0x0008};
-constexpr dicom_tag tag_frame_of_reference_uid{0x0020, 0x0052};
-constexpr dicom_tag tag_position_reference_indicator{0x0020, 0x1040};
-constexpr dicom_tag tag_slice_thickness{0x0018, 0x0050};
-constexpr dicom_tag tag_image_position_patient{0x0020, 0x0032};
-constexpr dicom_tag tag_image_orientation_patient{0x0020, 0x0037};
-constexpr dicom_tag tag_pixel_spacing{0x0028, 0x0030};
+[[maybe_unused]] constexpr dicom_tag tag_image_type{0x0008, 0x0008};
+[[maybe_unused]] constexpr dicom_tag tag_frame_of_reference_uid{0x0020, 0x0052};
+[[maybe_unused]] constexpr dicom_tag tag_position_reference_indicator{0x0020, 0x1040};
+[[maybe_unused]] constexpr dicom_tag tag_slice_thickness{0x0018, 0x0050};
+[[maybe_unused]] constexpr dicom_tag tag_image_position_patient{0x0020, 0x0032};
+[[maybe_unused]] constexpr dicom_tag tag_image_orientation_patient{0x0020, 0x0037};
+[[maybe_unused]] constexpr dicom_tag tag_pixel_spacing{0x0028, 0x0030};
 
 // PET Series Module tags
-constexpr dicom_tag tag_series_type{0x0054, 0x1000};
-constexpr dicom_tag tag_units{0x0054, 0x1001};
-constexpr dicom_tag tag_counts_source{0x0054, 0x1002};
-constexpr dicom_tag tag_series_date{0x0008, 0x0021};
-constexpr dicom_tag tag_series_time{0x0008, 0x0031};
+[[maybe_unused]] constexpr dicom_tag tag_series_type{0x0054, 0x1000};
+[[maybe_unused]] constexpr dicom_tag tag_units{0x0054, 0x1001};
+[[maybe_unused]] constexpr dicom_tag tag_counts_source{0x0054, 0x1002};
+[[maybe_unused]] constexpr dicom_tag tag_series_date{0x0008, 0x0021};
+[[maybe_unused]] constexpr dicom_tag tag_series_time{0x0008, 0x0031};
 
 // PET Image Module tags
-constexpr dicom_tag tag_image_index{0x0054, 0x1330};
-constexpr dicom_tag tag_frame_reference_time{0x0054, 0x1300};  // Required Type 1
-constexpr dicom_tag tag_acquisition_date{0x0008, 0x0022};
-constexpr dicom_tag tag_acquisition_time{0x0008, 0x0032};
-constexpr dicom_tag tag_actual_frame_duration{0x0018, 0x1242};
-constexpr dicom_tag tag_decay_correction{0x0054, 0x1102};
-constexpr dicom_tag tag_reconstruction_diameter{0x0018, 0x1100};
-constexpr dicom_tag tag_rescale_intercept{0x0028, 0x1052};
-constexpr dicom_tag tag_rescale_slope{0x0028, 0x1053};
-constexpr dicom_tag tag_rescale_type{0x0028, 0x1054};
+[[maybe_unused]] constexpr dicom_tag tag_image_index{0x0054, 0x1330};
+[[maybe_unused]] constexpr dicom_tag tag_frame_reference_time{0x0054, 0x1300};  // Required Type 1
+[[maybe_unused]] constexpr dicom_tag tag_acquisition_date{0x0008, 0x0022};
+[[maybe_unused]] constexpr dicom_tag tag_acquisition_time{0x0008, 0x0032};
+[[maybe_unused]] constexpr dicom_tag tag_actual_frame_duration{0x0018, 0x1242};
+[[maybe_unused]] constexpr dicom_tag tag_decay_correction{0x0054, 0x1102};
+[[maybe_unused]] constexpr dicom_tag tag_reconstruction_diameter{0x0018, 0x1100};
+[[maybe_unused]] constexpr dicom_tag tag_rescale_intercept{0x0028, 0x1052};
+[[maybe_unused]] constexpr dicom_tag tag_rescale_slope{0x0028, 0x1053};
+[[maybe_unused]] constexpr dicom_tag tag_rescale_type{0x0028, 0x1054};
 
 // Radiopharmaceutical tags
-constexpr dicom_tag tag_radiopharmaceutical_info_seq{0x0054, 0x0016};
-constexpr dicom_tag tag_radionuclide_code_seq{0x0054, 0x0300};
-constexpr dicom_tag tag_radiopharmaceutical_start_time{0x0018, 0x1072};
-constexpr dicom_tag tag_radionuclide_total_dose{0x0018, 0x1074};
-constexpr dicom_tag tag_radionuclide_half_life{0x0018, 0x1075};
+[[maybe_unused]] constexpr dicom_tag tag_radiopharmaceutical_info_seq{0x0054, 0x0016};
+[[maybe_unused]] constexpr dicom_tag tag_radionuclide_code_seq{0x0054, 0x0300};
+[[maybe_unused]] constexpr dicom_tag tag_radiopharmaceutical_start_time{0x0018, 0x1072};
+[[maybe_unused]] constexpr dicom_tag tag_radionuclide_total_dose{0x0018, 0x1074};
+[[maybe_unused]] constexpr dicom_tag tag_radionuclide_half_life{0x0018, 0x1075};
 
 // SUV-related tags
-constexpr dicom_tag tag_patient_weight{0x0010, 0x1030};
-constexpr dicom_tag tag_patient_size{0x0010, 0x1020};
+[[maybe_unused]] constexpr dicom_tag tag_patient_weight{0x0010, 0x1030};
+[[maybe_unused]] constexpr dicom_tag tag_patient_size{0x0010, 0x1020};
 
 // Attenuation/Scatter correction tags
-constexpr dicom_tag tag_attenuation_correction_method{0x0054, 0x1101};
-constexpr dicom_tag tag_scatter_correction_method{0x0054, 0x1105};
-constexpr dicom_tag tag_reconstruction_method{0x0054, 0x1103};
-constexpr dicom_tag tag_convolution_kernel{0x0018, 0x1210};
+[[maybe_unused]] constexpr dicom_tag tag_attenuation_correction_method{0x0054, 0x1101};
+[[maybe_unused]] constexpr dicom_tag tag_scatter_correction_method{0x0054, 0x1105};
+[[maybe_unused]] constexpr dicom_tag tag_reconstruction_method{0x0054, 0x1103};
+[[maybe_unused]] constexpr dicom_tag tag_convolution_kernel{0x0018, 0x1210};
 
 // Helper to check if validation result has info-level findings
 [[nodiscard]] bool has_info_findings(const validation_result& result) noexcept {

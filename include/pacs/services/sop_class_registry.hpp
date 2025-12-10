@@ -56,6 +56,7 @@ enum class modality_type {
     rt,         ///< Radiation Therapy
     sc,         ///< Secondary Capture
     sr,         ///< Structured Report
+    seg,        ///< Segmentation
     other       ///< Other modalities
 };
 
@@ -197,6 +198,8 @@ private:
     void register_pet_sop_classes();
     void register_nm_sop_classes();
     void register_rt_sop_classes();
+    void register_seg_sop_classes();
+    void register_sr_sop_classes();
     void register_other_sop_classes();
 
     std::unordered_map<std::string, sop_class_info> registry_;
