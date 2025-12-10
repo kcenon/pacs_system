@@ -12,6 +12,7 @@
 #pragma once
 
 #include <chrono>
+#include <concepts>
 #include <cstddef>
 #include <functional>
 #include <future>
@@ -190,7 +191,7 @@ public:
      * This is the primary method for submitting tasks that return a value.
      * The task will be executed asynchronously by a worker thread.
      *
-     * @tparam F Callable type
+     * @tparam F Callable type satisfying std::invocable (C++20 Concepts)
      * @param task The task to execute
      * @return Future for the task result
      *
@@ -203,6 +204,7 @@ public:
      * @endcode
      */
     template <typename F>
+        requires std::invocable<F>
     [[nodiscard]] static auto submit(F&& task)
         -> std::future<std::invoke_result_t<std::decay_t<F>>>;
 
@@ -212,7 +214,7 @@ public:
      * Use this for tasks where you don't need the result or
      * don't want to block. Errors are logged but not propagated.
      *
-     * @tparam F Callable type
+     * @tparam F Callable type satisfying std::invocable returning void (C++20 Concepts)
      * @param task The task to execute
      *
      * @example
@@ -223,6 +225,7 @@ public:
      * @endcode
      */
     template <typename F>
+        requires std::invocable<F> && std::is_void_v<std::invoke_result_t<F>>
     static void submit_fire_and_forget(F&& task);
 
     // ─────────────────────────────────────────────────────
@@ -235,7 +238,7 @@ public:
      * Jobs with higher priority (lower numeric value) are processed first.
      * This is useful for ensuring critical operations are handled promptly.
      *
-     * @tparam F Callable type
+     * @tparam F Callable type satisfying std::invocable (C++20 Concepts)
      * @param priority The priority level for this task
      * @param task The task to execute
      * @return Future for the task result
@@ -250,6 +253,7 @@ public:
      * @endcode
      */
     template <typename F>
+        requires std::invocable<F>
     [[nodiscard]] static auto submit_with_priority(job_priority priority, F&& task)
         -> std::future<std::invoke_result_t<std::decay_t<F>>>;
 
@@ -300,6 +304,7 @@ private:
 // ─────────────────────────────────────────────────────
 
 template <typename F>
+    requires std::invocable<F>
 auto thread_adapter::submit(F&& task)
     -> std::future<std::invoke_result_t<std::decay_t<F>>> {
     using return_type = std::invoke_result_t<std::decay_t<F>>;
@@ -314,11 +319,13 @@ auto thread_adapter::submit(F&& task)
 }
 
 template <typename F>
+    requires std::invocable<F> && std::is_void_v<std::invoke_result_t<F>>
 void thread_adapter::submit_fire_and_forget(F&& task) {
     submit_job_internal(std::forward<F>(task), job_priority::low);
 }
 
 template <typename F>
+    requires std::invocable<F>
 auto thread_adapter::submit_with_priority(job_priority priority, F&& task)
     -> std::future<std::invoke_result_t<std::decay_t<F>>> {
     using return_type = std::invoke_result_t<std::decay_t<F>>;

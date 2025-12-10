@@ -306,7 +306,10 @@ pacs_system/
 ### Prerequisites
 
 **All Platforms:**
-- C++20 compatible compiler (GCC 11+, Clang 14+, MSVC 2022+)
+- C++20 compatible compiler with Concepts support:
+  - GCC 10+ (GCC 13+ recommended for full std::format support)
+  - Clang 10+ (Clang 14+ recommended)
+  - MSVC 2022 (19.30+)
 - CMake 3.20+
 - Ninja (recommended build system)
 - kcenon ecosystem libraries (auto-downloaded by CMake)
