@@ -1157,10 +1157,12 @@ if(PACS_BUILD_TESTS)
         tests/services/sr_storage_test.cpp
         tests/services/cache/simple_lru_cache_test.cpp
         tests/services/cache/query_cache_test.cpp
+        tests/services/cache/streaming_query_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE
             pacs_services
+            pacs_storage
             Catch2::Catch2WithMain
     )
 
