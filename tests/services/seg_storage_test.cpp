@@ -231,6 +231,37 @@ TEST_CASE("segment_category meanings are correct", "[services][seg][category]") 
 
 namespace {
 
+// Helper function to insert a sequence element into a dataset
+void insert_sequence(dicom_dataset& ds, dicom_tag tag, std::vector<dicom_dataset> items) {
+    dicom_element seq_elem(tag, vr_type::SQ);
+    seq_elem.sequence_items() = std::move(items);
+    ds.insert(std::move(seq_elem));
+}
+
+// Helper function to create a minimal segment item for Segment Sequence
+dicom_dataset create_segment_item() {
+    dicom_dataset segment;
+    segment.set_numeric<uint16_t>(dicom_tag{0x0062, 0x0004}, vr_type::US, 1);  // Segment Number
+    segment.set_string(dicom_tag{0x0062, 0x0005}, vr_type::LO, "Tumor");  // Segment Label
+    segment.set_string(dicom_tag{0x0062, 0x0008}, vr_type::CS, "AUTOMATIC");  // Segment Algorithm Type
+
+    // Segmented Property Category Code Sequence (Type 1)
+    dicom_dataset category_code;
+    category_code.set_string(dicom_tag{0x0008, 0x0100}, vr_type::SH, "T-D0050");  // Code Value
+    category_code.set_string(dicom_tag{0x0008, 0x0102}, vr_type::SH, "SRT");  // Coding Scheme Designator
+    category_code.set_string(dicom_tag{0x0008, 0x0104}, vr_type::LO, "Tissue");  // Code Meaning
+    insert_sequence(segment, dicom_tag{0x0062, 0x0003}, {category_code});
+
+    // Segmented Property Type Code Sequence (Type 1)
+    dicom_dataset property_code;
+    property_code.set_string(dicom_tag{0x0008, 0x0100}, vr_type::SH, "M-80003");  // Code Value
+    property_code.set_string(dicom_tag{0x0008, 0x0102}, vr_type::SH, "SRT");  // Coding Scheme Designator
+    property_code.set_string(dicom_tag{0x0008, 0x0104}, vr_type::LO, "Neoplasm");  // Code Meaning
+    insert_sequence(segment, dicom_tag{0x0062, 0x000F}, {property_code});
+
+    return segment;
+}
+
 dicom_dataset create_minimal_seg_dataset() {
     dicom_dataset ds;
 
@@ -259,15 +290,23 @@ dicom_dataset create_minimal_seg_dataset() {
     ds.set_string(tags::frame_of_reference_uid, vr_type::UI,
                  "1.2.840.113619.2.55.3.604688119.969.1234567890.126");
 
+    // General Equipment Module (Type 2)
+    ds.set_string(dicom_tag{0x0008, 0x0070}, vr_type::LO, "ACME Medical");  // Manufacturer
+
+    // Enhanced General Equipment Module (Type 1)
+    ds.set_string(dicom_tag{0x0008, 0x1090}, vr_type::LO, "AI Segmentation System");  // Manufacturer Model Name
+    ds.set_string(dicom_tag{0x0018, 0x1000}, vr_type::LO, "SN123456");  // Device Serial Number
+    ds.set_string(dicom_tag{0x0018, 0x1020}, vr_type::LO, "1.0.0");  // Software Versions
+
     // Segmentation Image Module
     ds.set_string(tags::image_type, vr_type::CS, "DERIVED\\PRIMARY");
     ds.set_string(tags::instance_number, vr_type::IS, "1");
     ds.set_string(tags::content_date, vr_type::DA, "20231201");
     ds.set_string(tags::content_time, vr_type::TM, "120000");
     ds.set_string(dicom_tag{0x0062, 0x0001}, vr_type::CS, "BINARY");  // Segmentation Type
-    ds.set_string(dicom_tag{0x0020, 0x4000}, vr_type::CS, "AI_SEG");  // Content Label
-    ds.set_string(dicom_tag{0x0070, 0x0081}, vr_type::LO, "AI Segmentation Result");  // Content Description
-    ds.set_string(dicom_tag{0x0070, 0x0084}, vr_type::PN, "AI^ALGORITHM");  // Content Creator Name
+
+    // Segment Sequence (Type 1)
+    insert_sequence(ds, dicom_tag{0x0062, 0x0002}, {create_segment_item()});
 
     // Image Pixel Module (for SEG)
     ds.set_numeric<uint16_t>(tags::samples_per_pixel, vr_type::US, 1);
@@ -280,6 +319,30 @@ dicom_dataset create_minimal_seg_dataset() {
     ds.set_numeric<uint16_t>(tags::pixel_representation, vr_type::US, 0);
     ds.set_string(tags::pixel_data, vr_type::OB, "dummy_pixel_data");
     ds.set_string(dicom_tag{0x0028, 0x0008}, vr_type::IS, "1");  // Number of Frames
+
+    // Multi-frame Functional Groups Module (Type 1)
+    dicom_dataset shared_fg_item;
+    insert_sequence(ds, dicom_tag{0x5200, 0x9229}, {shared_fg_item});  // Shared Functional Groups Sequence
+
+    dicom_dataset per_frame_fg_item;
+    insert_sequence(ds, dicom_tag{0x5200, 0x9230}, {per_frame_fg_item});  // Per-frame Functional Groups Sequence
+
+    // Multi-frame Dimension Module (Type 1)
+    dicom_dataset dim_org_item;
+    dim_org_item.set_string(dicom_tag{0x0020, 0x9164}, vr_type::UI,
+                           "1.2.840.113619.2.55.3.604688119.969.1234567890.200");  // Dimension Organization UID
+    insert_sequence(ds, dicom_tag{0x0020, 0x9221}, {dim_org_item});  // Dimension Organization Sequence
+
+    dicom_dataset dim_idx_item;
+    dim_idx_item.set_string(dicom_tag{0x0020, 0x9164}, vr_type::UI,
+                           "1.2.840.113619.2.55.3.604688119.969.1234567890.200");  // Dimension Organization UID
+    insert_sequence(ds, dicom_tag{0x0020, 0x9222}, {dim_idx_item});  // Dimension Index Sequence
+
+    // Common Instance Reference Module
+    dicom_dataset ref_series_item;
+    ref_series_item.set_string(tags::series_instance_uid, vr_type::UI,
+                              "1.2.840.113619.2.55.3.604688119.969.1234567890.100");
+    insert_sequence(ds, dicom_tag{0x0008, 0x1115}, {ref_series_item});  // Referenced Series Sequence
 
     // SOP Common Module
     ds.set_string(tags::sop_class_uid, vr_type::UI, std::string(segmentation_storage_uid));

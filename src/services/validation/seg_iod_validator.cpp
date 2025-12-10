@@ -237,6 +237,9 @@ void seg_iod_validator::validate_general_series_module(
         check_type1_attribute(dataset, tags::modality, "Modality", findings);
         check_type1_attribute(dataset, tags::series_instance_uid, "SeriesInstanceUID", findings);
         check_modality(dataset, findings);
+
+        // Frame of Reference Module - Type 1 for SEG
+        check_type1_attribute(dataset, tags::frame_of_reference_uid, "FrameOfReferenceUID", findings);
     }
 
     if (options_.check_type2) {
@@ -534,15 +537,32 @@ void seg_iod_validator::check_type1_attribute(
             "SEG-TYPE1-MISSING"
         });
     } else {
-        auto value = dataset.get_string(tag);
-        if (value.empty()) {
-            findings.push_back({
-                validation_severity::error,
-                tag,
-                std::string("Type 1 attribute has empty value: ") +
-                std::string(name) + " (" + tag.to_string() + ")",
-                "SEG-TYPE1-EMPTY"
-            });
+        const auto* element = dataset.get(tag);
+        if (element != nullptr) {
+            // For sequences, check if the sequence has items
+            if (element->is_sequence()) {
+                if (element->sequence_items().empty()) {
+                    findings.push_back({
+                        validation_severity::error,
+                        tag,
+                        std::string("Type 1 sequence has no items: ") +
+                        std::string(name) + " (" + tag.to_string() + ")",
+                        "SEG-TYPE1-EMPTY"
+                    });
+                }
+            } else {
+                // For non-sequence elements, check if the value is empty
+                auto value = dataset.get_string(tag);
+                if (value.empty()) {
+                    findings.push_back({
+                        validation_severity::error,
+                        tag,
+                        std::string("Type 1 attribute has empty value: ") +
+                        std::string(name) + " (" + tag.to_string() + ")",
+                        "SEG-TYPE1-EMPTY"
+                    });
+                }
+            }
         }
     }
 }

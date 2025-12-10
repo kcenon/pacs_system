@@ -361,6 +361,31 @@ TEST_CASE("get_recommended_sr_template returns correct templates", "[services][s
 
 namespace {
 
+// Helper function to insert a sequence element into a dataset
+void insert_sequence(dicom_dataset& ds, dicom_tag tag, std::vector<dicom_dataset> items) {
+    dicom_element seq_elem(tag, vr_type::SQ);
+    seq_elem.sequence_items() = std::move(items);
+    ds.insert(std::move(seq_elem));
+}
+
+// Helper function to create Concept Name Code Sequence item
+dicom_dataset create_concept_name_code() {
+    dicom_dataset code;
+    code.set_string(dicom_tag{0x0008, 0x0100}, vr_type::SH, "11528-7");  // Code Value (LOINC for Radiology Report)
+    code.set_string(dicom_tag{0x0008, 0x0102}, vr_type::SH, "LN");  // Coding Scheme Designator
+    code.set_string(dicom_tag{0x0008, 0x0104}, vr_type::LO, "Radiology Report");  // Code Meaning
+    return code;
+}
+
+// Helper function to create Verifying Observer Sequence item
+dicom_dataset create_verifying_observer() {
+    dicom_dataset observer;
+    observer.set_string(dicom_tag{0x0040, 0xA075}, vr_type::PN, "SMITH^JOHN^DR");  // Verifying Observer Name
+    observer.set_string(dicom_tag{0x0040, 0xA030}, vr_type::DT, "20231201120000");  // Verification DateTime
+    observer.set_string(dicom_tag{0x0040, 0xA027}, vr_type::LO, "ACME Hospital");  // Verifying Organization
+    return observer;
+}
+
 dicom_dataset create_minimal_sr_dataset() {
     dicom_dataset ds;
 
@@ -385,7 +410,8 @@ dicom_dataset create_minimal_sr_dataset() {
                  "1.2.840.113619.2.55.3.604688119.969.1234567890.124");
     ds.set_string(tags::series_number, vr_type::IS, "1");
 
-    // SR Document Series Module (Referenced Performed Procedure Step Sequence is optional)
+    // General Equipment Module (Type 2)
+    ds.set_string(dicom_tag{0x0008, 0x0070}, vr_type::LO, "ACME Medical");  // Manufacturer
 
     // SR Document General Module
     ds.set_string(tags::instance_number, vr_type::IS, "1");
@@ -394,12 +420,17 @@ dicom_dataset create_minimal_sr_dataset() {
     ds.set_string(tags::content_date, vr_type::DA, "20231201");
     ds.set_string(tags::content_time, vr_type::TM, "120000");
 
-    // Concept Name Code Sequence (Document Title)
-    // In real implementation, this would be a sequence item
-    ds.set_string(dicom_tag{0x0040, 0xA043}, vr_type::SQ, "");  // Concept Name Code Sequence
+    // Verifying Observer Sequence (Type 1C - required when Verification Flag is VERIFIED)
+    insert_sequence(ds, dicom_tag{0x0040, 0xA073}, {create_verifying_observer()});
 
-    // Content Sequence (Root container)
-    ds.set_string(dicom_tag{0x0040, 0xA730}, vr_type::SQ, "");  // Content Sequence
+    // SR Document Content Module - Root content item
+    ds.set_string(dicom_tag{0x0040, 0xA040}, vr_type::CS, "CONTAINER");  // Value Type (Type 1)
+
+    // Concept Name Code Sequence (Document Title) - must be actual sequence with items
+    insert_sequence(ds, dicom_tag{0x0040, 0xA043}, {create_concept_name_code()});
+
+    // Content Sequence (children of root container) - can be empty for minimal test
+    insert_sequence(ds, dicom_tag{0x0040, 0xA730}, {});
 
     // SOP Common Module
     ds.set_string(tags::sop_class_uid, vr_type::UI, std::string(basic_text_sr_storage_uid));
