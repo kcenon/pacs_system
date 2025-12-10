@@ -224,6 +224,170 @@ TEST_CASE("query_cache TTL expiration", "[cache][query][ttl]") {
 }
 
 // ─────────────────────────────────────────────────────
+// Conditional Invalidation
+// ─────────────────────────────────────────────────────
+
+TEST_CASE("query_cache invalidate_by_prefix", "[cache][query][invalidate]") {
+    query_cache_config config;
+    config.max_entries = 100;
+    config.ttl = 60s;
+
+    query_cache cache(config);
+
+    // Helper to create result
+    auto make_result = [](const std::string& level, std::uint32_t count) {
+        cached_query_result r;
+        r.data = {0x01};
+        r.match_count = count;
+        r.query_level = level;
+        r.cached_at = std::chrono::steady_clock::now();
+        return r;
+    };
+
+    SECTION("removes entries with matching prefix") {
+        cache.put("PATIENT:ID=001", make_result("PATIENT", 1));
+        cache.put("PATIENT:ID=002", make_result("PATIENT", 2));
+        cache.put("STUDY:ID=001", make_result("STUDY", 10));
+        cache.put("SERIES:ID=001", make_result("SERIES", 100));
+
+        auto removed = cache.invalidate_by_prefix("PATIENT:");
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.size() == 2);
+        REQUIRE_FALSE(cache.get("PATIENT:ID=001").has_value());
+        REQUIRE_FALSE(cache.get("PATIENT:ID=002").has_value());
+        REQUIRE(cache.get("STUDY:ID=001").has_value());
+        REQUIRE(cache.get("SERIES:ID=001").has_value());
+    }
+
+    SECTION("removes entries with AE prefix") {
+        cache.put("MODALITY1/STUDY:ID=001", make_result("STUDY", 1));
+        cache.put("MODALITY1/STUDY:ID=002", make_result("STUDY", 2));
+        cache.put("MODALITY2/STUDY:ID=001", make_result("STUDY", 3));
+
+        auto removed = cache.invalidate_by_prefix("MODALITY1/");
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.size() == 1);
+        REQUIRE(cache.get("MODALITY2/STUDY:ID=001").has_value());
+    }
+
+    SECTION("returns zero when no matches") {
+        cache.put("STUDY:ID=001", make_result("STUDY", 1));
+
+        auto removed = cache.invalidate_by_prefix("NONEXISTENT:");
+
+        REQUIRE(removed == 0);
+        REQUIRE(cache.size() == 1);
+    }
+}
+
+TEST_CASE("query_cache invalidate_by_query_level", "[cache][query][invalidate]") {
+    query_cache_config config;
+    config.max_entries = 100;
+    config.ttl = 60s;
+
+    query_cache cache(config);
+
+    auto make_result = [](const std::string& level, std::uint32_t count) {
+        cached_query_result r;
+        r.data = {0x01};
+        r.match_count = count;
+        r.query_level = level;
+        r.cached_at = std::chrono::steady_clock::now();
+        return r;
+    };
+
+    SECTION("removes direct query level entries") {
+        cache.put("PATIENT:ID=001", make_result("PATIENT", 1));
+        cache.put("STUDY:ID=001", make_result("STUDY", 10));
+        cache.put("STUDY:ID=002", make_result("STUDY", 20));
+        cache.put("SERIES:ID=001", make_result("SERIES", 100));
+
+        auto removed = cache.invalidate_by_query_level("STUDY");
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.size() == 2);
+        REQUIRE(cache.get("PATIENT:ID=001").has_value());
+        REQUIRE_FALSE(cache.get("STUDY:ID=001").has_value());
+        REQUIRE_FALSE(cache.get("STUDY:ID=002").has_value());
+        REQUIRE(cache.get("SERIES:ID=001").has_value());
+    }
+
+    SECTION("removes AE-prefixed query level entries") {
+        cache.put("AE1/STUDY:ID=001", make_result("STUDY", 1));
+        cache.put("AE2/STUDY:ID=002", make_result("STUDY", 2));
+        cache.put("AE1/PATIENT:ID=001", make_result("PATIENT", 3));
+        cache.put("STUDY:ID=003", make_result("STUDY", 4));
+
+        auto removed = cache.invalidate_by_query_level("STUDY");
+
+        REQUIRE(removed == 3);
+        REQUIRE(cache.size() == 1);
+        REQUIRE(cache.get("AE1/PATIENT:ID=001").has_value());
+    }
+
+    SECTION("handles IMAGE level") {
+        cache.put("IMAGE:UID=1.2.3", make_result("IMAGE", 1));
+        cache.put("SERIES:UID=1.2", make_result("SERIES", 2));
+
+        auto removed = cache.invalidate_by_query_level("IMAGE");
+
+        REQUIRE(removed == 1);
+        REQUIRE(cache.get("SERIES:UID=1.2").has_value());
+    }
+}
+
+TEST_CASE("query_cache invalidate_if", "[cache][query][invalidate]") {
+    query_cache_config config;
+    config.max_entries = 100;
+    config.ttl = 60s;
+
+    query_cache cache(config);
+
+    auto make_result = [](const std::string& level, std::uint32_t count) {
+        cached_query_result r;
+        r.data = {0x01};
+        r.match_count = count;
+        r.query_level = level;
+        r.cached_at = std::chrono::steady_clock::now();
+        return r;
+    };
+
+    SECTION("removes entries based on match count") {
+        cache.put("key1", make_result("STUDY", 10));
+        cache.put("key2", make_result("STUDY", 100));
+        cache.put("key3", make_result("STUDY", 1000));
+        cache.put("key4", make_result("STUDY", 5000));
+
+        // Remove large result sets
+        auto removed = cache.invalidate_if(
+            [](const std::string&, const cached_query_result& r) {
+                return r.match_count > 500;
+            });
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.size() == 2);
+        REQUIRE(cache.get("key1").has_value());
+        REQUIRE(cache.get("key2").has_value());
+    }
+
+    SECTION("removes entries based on query level") {
+        cache.put("key1", make_result("PATIENT", 1));
+        cache.put("key2", make_result("STUDY", 2));
+        cache.put("key3", make_result("SERIES", 3));
+
+        auto removed = cache.invalidate_if(
+            [](const std::string&, const cached_query_result& r) {
+                return r.query_level == "PATIENT" || r.query_level == "STUDY";
+            });
+
+        REQUIRE(removed == 2);
+        REQUIRE(cache.get("key3").has_value());
+    }
+}
+
+// ─────────────────────────────────────────────────────
 // Move Semantics
 // ─────────────────────────────────────────────────────
 

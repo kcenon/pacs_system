@@ -4,6 +4,7 @@
  */
 
 #include "pacs/services/storage_scp.hpp"
+#include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -27,6 +28,10 @@ void storage_scp::set_handler(storage_handler handler) {
 
 void storage_scp::set_pre_store_handler(pre_store_handler handler) {
     pre_store_handler_ = std::move(handler);
+}
+
+void storage_scp::set_post_store_handler(post_store_handler handler) {
+    post_store_handler_ = std::move(handler);
 }
 
 // =============================================================================
@@ -98,7 +103,7 @@ network::Result<std::monostate> storage_scp::handle_message(
         );
     }
 
-    // Update statistics on success or warning
+    // Update statistics and notify on success or warning
     if (!is_failure(status)) {
         images_received_.fetch_add(1, std::memory_order_relaxed);
         // Estimate dataset size - use element count as approximation
@@ -107,6 +112,22 @@ network::Result<std::monostate> storage_scp::handle_message(
             request.dataset().size() * sizeof(uint32_t),
             std::memory_order_relaxed
         );
+
+        // Call post-store handler for cache invalidation and notifications
+        if (post_store_handler_) {
+            const auto& dataset = request.dataset();
+            auto patient_id = dataset.get_string(core::tags::patient_id);
+            auto study_uid = dataset.get_string(core::tags::study_instance_uid);
+            auto series_uid = dataset.get_string(core::tags::series_instance_uid);
+
+            post_store_handler_(
+                dataset,
+                patient_id,
+                study_uid,
+                series_uid,
+                sop_instance_uid
+            );
+        }
     }
 
     // Build and send the response

@@ -72,6 +72,25 @@ using storage_handler = std::function<storage_status(
 using pre_store_handler = std::function<bool(const core::dicom_dataset& dataset)>;
 
 /**
+ * @brief Callback type for post-store notification
+ *
+ * Called after successful storage. Useful for cache invalidation,
+ * notifications, or other post-processing tasks.
+ *
+ * @param dataset The stored DICOM dataset
+ * @param patient_id The patient ID from the dataset
+ * @param study_uid The Study Instance UID
+ * @param series_uid The Series Instance UID
+ * @param sop_instance_uid The SOP Instance UID
+ */
+using post_store_handler = std::function<void(
+    const core::dicom_dataset& dataset,
+    const std::string& patient_id,
+    const std::string& study_uid,
+    const std::string& series_uid,
+    const std::string& sop_instance_uid)>;
+
+/**
  * @brief Storage SCP service for handling C-STORE requests
  *
  * The Storage SCP (Service Class Provider) receives DICOM images via C-STORE
@@ -173,6 +192,35 @@ public:
      */
     void set_pre_store_handler(pre_store_handler handler);
 
+    /**
+     * @brief Set the post-store notification handler
+     *
+     * This handler is called after successful storage operations.
+     * Use this for cache invalidation, notifications, or other post-processing.
+     *
+     * @param handler The post-store callback function
+     *
+     * @example Cache invalidation on storage
+     * @code
+     * storage_scp scp{config};
+     * scp.set_post_store_handler([](const auto& dataset,
+     *                               const auto& patient_id,
+     *                               const auto& study_uid,
+     *                               const auto& series_uid,
+     *                               const auto& sop_uid) {
+     *     // Invalidate all cached queries for affected patient/study
+     *     auto& cache = global_query_cache();
+     *     cache.invalidate_if([&](const auto& key, const auto& result) {
+     *         return result.query_level == "PATIENT" ||
+     *                result.query_level == "STUDY" ||
+     *                result.query_level == "SERIES" ||
+     *                result.query_level == "IMAGE";
+     *     });
+     * });
+     * @endcode
+     */
+    void set_post_store_handler(post_store_handler handler);
+
     // =========================================================================
     // scp_service Interface Implementation
     // =========================================================================
@@ -247,6 +295,9 @@ private:
 
     /// Pre-store validation handler
     pre_store_handler pre_store_handler_;
+
+    /// Post-store notification handler
+    post_store_handler post_store_handler_;
 
     /// Statistics: number of images received
     std::atomic<size_t> images_received_{0};
