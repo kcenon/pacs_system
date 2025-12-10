@@ -747,6 +747,7 @@ add_library(pacs_services
     src/services/cache/database_cursor.cpp
     src/services/cache/query_result_stream.cpp
     src/services/cache/streaming_query_handler.cpp
+    src/services/cache/parallel_query_executor.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
@@ -1158,6 +1159,7 @@ if(PACS_BUILD_TESTS)
         tests/services/cache/simple_lru_cache_test.cpp
         tests/services/cache/query_cache_test.cpp
         tests/services/cache/streaming_query_test.cpp
+        tests/services/cache/parallel_query_executor_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE
@@ -1165,6 +1167,10 @@ if(PACS_BUILD_TESTS)
             pacs_storage
             Catch2::Catch2WithMain
     )
+    # Link pacs_integration for thread_adapter (used by parallel_query_executor tests)
+    if(TARGET pacs_integration)
+        target_link_libraries(services_tests PRIVATE pacs_integration)
+    endif()
 
     # Security tests (Issue #193 - RBAC)
     add_executable(security_tests
