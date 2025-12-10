@@ -16,6 +16,7 @@
 #include "pacs/network/association.hpp"
 #include "pacs/network/pdu_types.hpp"
 #include "pacs/network/server_config.hpp"
+#include "pacs/security/access_control_manager.hpp"
 #include "pacs/services/scp_service.hpp"
 #include "pacs/integration/dicom_session.hpp"
 
@@ -25,6 +26,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -300,6 +302,22 @@ public:
      */
     [[nodiscard]] uint64_t messages_processed() const noexcept;
 
+    // =========================================================================
+    // Security / Access Control
+    // =========================================================================
+
+    /**
+     * @brief Set the access control manager for RBAC
+     * @param acm Shared pointer to access control manager
+     */
+    void set_access_control(std::shared_ptr<security::access_control_manager> acm);
+
+    /**
+     * @brief Enable or disable access control enforcement
+     * @param enabled If true, access control is enforced
+     */
+    void set_access_control_enabled(bool enabled);
+
 private:
     // =========================================================================
     // Network Callbacks
@@ -430,6 +448,15 @@ private:
     /// Thread safety
     mutable std::mutex mutex_;
     mutable std::mutex callback_mutex_;
+
+    /// Access control manager for RBAC
+    std::shared_ptr<security::access_control_manager> access_control_;
+
+    /// User context for this association (set after A-ASSOCIATE negotiation)
+    std::optional<security::user_context> user_context_;
+
+    /// Whether access control is enabled
+    bool access_control_enabled_{false};
 };
 
 }  // namespace pacs::network::v2

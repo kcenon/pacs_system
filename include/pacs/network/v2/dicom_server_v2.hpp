@@ -17,6 +17,7 @@
 
 #include "pacs/network/v2/dicom_association_handler.hpp"
 #include "pacs/network/server_config.hpp"
+#include "pacs/security/access_control_manager.hpp"
 #include "pacs/services/scp_service.hpp"
 
 #include <atomic>
@@ -255,6 +256,40 @@ public:
      */
     void on_error(error_callback callback);
 
+    // =========================================================================
+    // Security / Access Control
+    // =========================================================================
+
+    /**
+     * @brief Set the access control manager for RBAC
+     *
+     * When set, the server will validate permissions before allowing
+     * DICOM operations. If not set, all operations are allowed.
+     *
+     * @param acm Shared pointer to access control manager
+     * @note Should be set before calling start()
+     */
+    void set_access_control(std::shared_ptr<security::access_control_manager> acm);
+
+    /**
+     * @brief Get the access control manager
+     * @return Shared pointer to access control manager, or nullptr if not set
+     */
+    [[nodiscard]] std::shared_ptr<security::access_control_manager>
+    get_access_control() const noexcept;
+
+    /**
+     * @brief Enable or disable access control enforcement
+     * @param enabled If true, access control is enforced; if false, all operations allowed
+     */
+    void set_access_control_enabled(bool enabled);
+
+    /**
+     * @brief Check if access control is enabled
+     * @return true if access control is enforced
+     */
+    [[nodiscard]] bool is_access_control_enabled() const noexcept;
+
 private:
     // =========================================================================
     // Network System Callbacks
@@ -352,6 +387,15 @@ private:
 
     /// Callback mutex
     mutable std::mutex callback_mutex_;
+
+    /// Access control manager for RBAC
+    std::shared_ptr<security::access_control_manager> access_control_;
+
+    /// Whether access control is enabled
+    std::atomic<bool> access_control_enabled_{false};
+
+    /// Access control mutex
+    mutable std::mutex acl_mutex_;
 };
 
 }  // namespace pacs::network::v2
