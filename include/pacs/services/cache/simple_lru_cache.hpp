@@ -372,6 +372,52 @@ public:
     }
 
     /**
+     * @brief Remove all entries matching a predicate
+     *
+     * Iterates through all cache entries and removes those for which
+     * the predicate returns true. This is useful for invalidating
+     * related entries when data changes (e.g., invalidating all
+     * cached queries for a specific patient when new studies arrive).
+     *
+     * @tparam Predicate A callable that takes (const Key&, const Value&) and returns bool
+     * @param pred The predicate function; entries where pred(key, value) returns true are removed
+     * @return Number of entries removed
+     *
+     * @example
+     * @code
+     * // Invalidate all entries with keys starting with "PATIENT:"
+     * cache.invalidate_if([](const std::string& key, const auto&) {
+     *     return key.starts_with("PATIENT:");
+     * });
+     *
+     * // Invalidate entries older than a certain age
+     * cache.invalidate_if([&](const auto&, const QueryResult& result) {
+     *     return result.match_count > 1000;  // Remove large result sets
+     * });
+     * @endcode
+     */
+    template <typename Predicate>
+    size_type invalidate_if(Predicate pred) {
+        std::unique_lock lock(mutex_);
+
+        size_type removed = 0;
+        auto it = lru_list_.begin();
+
+        while (it != lru_list_.end()) {
+            if (pred(it->key, it->value)) {
+                cache_map_.erase(it->key);
+                it = lru_list_.erase(it);
+                ++removed;
+            } else {
+                ++it;
+            }
+        }
+
+        stats_.current_size.store(cache_map_.size(), std::memory_order_relaxed);
+        return removed;
+    }
+
+    /**
      * @brief Remove all entries from the cache
      */
     void clear() {

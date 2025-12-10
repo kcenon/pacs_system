@@ -1620,6 +1620,8 @@ public:
     void put(const Key& key, const Value& value);
     void put(const Key& key, Value&& value);
     bool invalidate(const Key& key);
+    template<typename Predicate>
+    size_type invalidate_if(Predicate pred);  // 조건부 무효화
     void clear();
     size_type purge_expired();
 
@@ -1705,6 +1707,10 @@ public:
     void put(const std::string& key, const cached_query_result& result);
     void put(const std::string& key, cached_query_result&& result);
     bool invalidate(const std::string& key);
+    size_type invalidate_by_prefix(const std::string& prefix);
+    size_type invalidate_by_query_level(const std::string& level);
+    template<typename Predicate>
+    size_type invalidate_if(Predicate pred);
     void clear();
     size_type purge_expired();
 
@@ -1761,6 +1767,29 @@ cached.query_level = "STUDY";
 cached.cached_at = std::chrono::steady_clock::now();
 
 cache.put(key, std::move(cached));
+
+// C-STORE 시 캐시 무효화 (새 데이터 저장 시)
+// post_store_handler를 사용하여 영향받는 캐시 항목 무효화
+storage_scp scp{config};
+scp.set_post_store_handler([&cache](const auto& dataset,
+                                     const auto& patient_id,
+                                     const auto& study_uid,
+                                     const auto& series_uid,
+                                     const auto& sop_uid) {
+    // 영향받을 수 있는 모든 캐시된 쿼리 무효화
+    cache.invalidate_by_query_level("IMAGE");
+    cache.invalidate_by_query_level("SERIES");
+    cache.invalidate_by_query_level("STUDY");
+    cache.invalidate_by_query_level("PATIENT");
+});
+
+// 접두사를 사용한 타겟 무효화
+cache.invalidate_by_prefix("WORKSTATION1/");  // 특정 AE 무효화
+
+// 커스텀 조건부 무효화
+cache.invalidate_if([](const auto& key, const cached_query_result& r) {
+    return r.match_count > 1000;  // 큰 결과 집합 제거
+});
 ```
 
 ---

@@ -189,6 +189,54 @@ public:
     bool invalidate(const key_type& key);
 
     /**
+     * @brief Remove all entries with keys starting with the given prefix
+     *
+     * Useful for invalidating related cache entries, such as all queries
+     * for a specific calling AE or query level.
+     *
+     * @param prefix The key prefix to match
+     * @return Number of entries removed
+     *
+     * @example
+     * @code
+     * // Invalidate all PATIENT level queries
+     * cache.invalidate_by_prefix("PATIENT:");
+     *
+     * // Invalidate all queries from a specific AE
+     * cache.invalidate_by_prefix("WORKSTATION1/");
+     * @endcode
+     */
+    size_type invalidate_by_prefix(const std::string& prefix);
+
+    /**
+     * @brief Remove all entries for a specific query level
+     *
+     * @param query_level The query level (PATIENT, STUDY, SERIES, IMAGE)
+     * @return Number of entries removed
+     */
+    size_type invalidate_by_query_level(const std::string& query_level);
+
+    /**
+     * @brief Remove all entries matching a predicate
+     *
+     * @tparam Predicate Callable taking (const key_type&, const cached_query_result&) -> bool
+     * @param pred Predicate function; entries where pred returns true are removed
+     * @return Number of entries removed
+     *
+     * @example
+     * @code
+     * // Invalidate entries with too many results
+     * cache.invalidate_if([](const auto&, const cached_query_result& r) {
+     *     return r.match_count > 1000;
+     * });
+     * @endcode
+     */
+    template <typename Predicate>
+    size_type invalidate_if(Predicate pred) {
+        return cache_.invalidate_if(std::move(pred));
+    }
+
+    /**
      * @brief Remove all entries from the cache
      */
     void clear();
