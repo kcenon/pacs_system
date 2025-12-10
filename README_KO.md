@@ -293,7 +293,10 @@ pacs_system/
 
 ### 사전 요구사항
 
-- C++20 호환 컴파일러 (GCC 11+, Clang 14+, MSVC 2022+)
+- C++20 Concepts를 지원하는 호환 컴파일러:
+  - GCC 10+ (std::format 전체 지원을 위해 GCC 13+ 권장)
+  - Clang 10+ (Clang 14+ 권장)
+  - MSVC 2022 (19.30+)
 - CMake 3.20+
 - kcenon 에코시스템 라이브러리
 
