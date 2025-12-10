@@ -211,6 +211,14 @@ pacs_system/
 │   │   ├── health_checker.hpp   # Health check service
 │   │   └── health_json.hpp      # JSON serialization
 │   │
+│   ├── security/                # Security Features (✅ Complete)
+│   │   ├── access_control_manager.hpp # RBAC access control
+│   │   ├── role.hpp             # User roles (Viewer, Admin, etc.)
+│   │   ├── permission.hpp       # Resource permissions
+│   │   ├── signature_types.hpp  # Digital signature types
+│   │   ├── certificate.hpp      # X.509 certificate handling
+│   │   └── digital_signature.hpp # DICOM digital signatures
+│   │
 │   └── integration/             # Ecosystem Adapters (✅ Complete)
 │       ├── container_adapter.hpp # container_system integration
 │       ├── network_adapter.hpp  # network_system integration
@@ -219,21 +227,23 @@ pacs_system/
 │       ├── monitoring_adapter.hpp # monitoring_system integration
 │       └── dicom_session.hpp    # High-level session
 │
-├── src/                         # Source files (~13,500 lines)
+├── src/                         # Source files (~15,500 lines)
 │   ├── core/                    # Core implementations (7 files)
 │   ├── encoding/                # Encoding implementations (4 files)
 │   ├── network/                 # Network implementations (8 files)
 │   ├── services/                # Service implementations (7 files)
 │   ├── storage/                 # Storage implementations (4 files)
+│   ├── security/                # Security implementations (3 files)
 │   ├── monitoring/              # Health check implementations (1 file)
 │   └── integration/             # Adapter implementations (6 files)
 │
-├── tests/                       # Test suites (42 files, 170+ tests)
+├── tests/                       # Test suites (43 files, 180+ tests)
 │   ├── core/                    # Core module tests (6 files)
 │   ├── encoding/                # Encoding module tests (5 files)
 │   ├── network/                 # Network module tests (5 files)
 │   ├── services/                # Service tests (7 files)
 │   ├── storage/                 # Storage tests (6 files)
+│   ├── security/                # Security tests (3 files, 18 tests)
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
