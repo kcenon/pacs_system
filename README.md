@@ -87,6 +87,7 @@ A production-ready C++20 PACS (Picture Archiving and Communication System) imple
 - `retrieve_scp` - C-MOVE/C-GET service (retrieve)
 - `worklist_scp` - Modality Worklist service (MWL)
 - `mpps_scp` - Modality Performed Procedure Step
+- `parallel_query_executor` - Parallel batch query execution with timeout
 
 ---
 
@@ -183,6 +184,10 @@ pacs_system/
 │   │   ├── worklist_scp.hpp     # MWL SCP
 │   │   ├── mpps_scp.hpp         # MPPS SCP
 │   │   ├── sop_class_registry.hpp # SOP Class registry
+│   │   ├── cache/               # Query caching and parallel execution
+│   │   │   ├── query_cache.hpp  # LRU query result cache
+│   │   │   ├── query_result_stream.hpp # Paginated query streaming
+│   │   │   └── parallel_query_executor.hpp # Parallel batch queries
 │   │   ├── sop_classes/         # Modality-specific SOP classes
 │   │   │   ├── us_storage.hpp   # Ultrasound Storage
 │   │   │   └── xa_storage.hpp   # X-Ray Angiographic Storage
