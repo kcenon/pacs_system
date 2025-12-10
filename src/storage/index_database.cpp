@@ -1933,6 +1933,10 @@ auto index_database::checkpoint(bool truncate) -> VoidResult {
     return ok();
 }
 
+auto index_database::native_handle() const noexcept -> sqlite3* {
+    return db_;
+}
+
 // ============================================================================
 // Storage Statistics
 // ============================================================================

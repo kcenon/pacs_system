@@ -744,6 +744,8 @@ add_library(pacs_services
     src/services/validation/seg_iod_validator.cpp
     src/services/validation/sr_iod_validator.cpp
     src/services/cache/query_cache.cpp
+    src/services/cache/database_cursor.cpp
+    src/services/cache/query_result_stream.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
