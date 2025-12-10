@@ -226,6 +226,27 @@ if(NOT PACS_JPEGLS_FOUND)
     set(PACS_JPEGLS_FOUND FALSE)
 endif()
 
+# OpenSSL (for digital signatures - Issue #191)
+message(STATUS "")
+message(STATUS "=== Finding OpenSSL (for digital signatures) ===")
+
+find_package(OpenSSL QUIET)
+
+if(OpenSSL_FOUND)
+    message(STATUS "Found system OpenSSL: ${OPENSSL_VERSION}")
+    set(PACS_OPENSSL_FOUND TRUE)
+else()
+    message(WARNING
+        "OpenSSL not found!\n"
+        "Digital signature features will be disabled.\n"
+        "\n"
+        "To enable digital signatures, install OpenSSL:\n"
+        "  - Ubuntu: sudo apt install libssl-dev\n"
+        "  - macOS: brew install openssl@3\n"
+        "  - Windows: vcpkg install openssl:x64-windows")
+    set(PACS_OPENSSL_FOUND FALSE)
+endif()
+
 # fmt library (for std::format compatibility on older compilers)
 message(STATUS "")
 message(STATUS "=== Finding fmt library (for format compatibility) ===")
@@ -767,14 +788,28 @@ endif()
 message(STATUS "  [OK] pacs_services: ON")
 
 # Security library
-add_library(pacs_security
+# Base security sources (always included)
+set(PACS_SECURITY_SOURCES
     src/security/access_control_manager.cpp
 )
+
+# Digital signature sources (requires OpenSSL - Issue #191)
+if(PACS_OPENSSL_FOUND)
+    list(APPEND PACS_SECURITY_SOURCES
+        src/security/certificate.cpp
+        src/security/digital_signature.cpp
+    )
+endif()
+
+add_library(pacs_security ${PACS_SECURITY_SOURCES})
 target_include_directories(pacs_security
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
+
+# Link pacs_core for dicom_dataset
+target_link_libraries(pacs_security PUBLIC pacs_core pacs_encoding)
 
 # Link common_system (Tier 0)
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
@@ -782,7 +817,14 @@ if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
     target_compile_definitions(pacs_security PUBLIC PACS_WITH_COMMON_SYSTEM)
 endif()
 
-message(STATUS "  [OK] pacs_security: ON")
+# Link OpenSSL for digital signatures (Issue #191)
+if(PACS_OPENSSL_FOUND)
+    target_link_libraries(pacs_security PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+    target_compile_definitions(pacs_security PUBLIC PACS_WITH_DIGITAL_SIGNATURES)
+    message(STATUS "  [OK] pacs_security: ON (with digital signatures)")
+else()
+    message(STATUS "  [OK] pacs_security: ON (without digital signatures)")
+endif()
 
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
@@ -1172,11 +1214,20 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
 
-    # Security tests (Issue #193 - RBAC)
-    add_executable(security_tests
+    # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures)
+    set(SECURITY_TEST_SOURCES
         tests/security/access_control_manager_test.cpp
         tests/security/sqlite_security_storage_test.cpp
     )
+
+    # Add digital signature tests if OpenSSL is available (Issue #191)
+    if(PACS_OPENSSL_FOUND)
+        list(APPEND SECURITY_TEST_SOURCES
+            tests/security/digital_signature_test.cpp
+        )
+    endif()
+
+    add_executable(security_tests ${SECURITY_TEST_SOURCES})
     target_link_libraries(security_tests
         PRIVATE
             pacs_security
