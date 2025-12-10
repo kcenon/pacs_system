@@ -207,6 +207,21 @@ uint64_t dicom_association_handler::messages_processed() const noexcept {
 }
 
 // =============================================================================
+// Security / Access Control
+// =============================================================================
+
+void dicom_association_handler::set_access_control(
+    std::shared_ptr<security::access_control_manager> acm) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    access_control_ = std::move(acm);
+}
+
+void dicom_association_handler::set_access_control_enabled(bool enabled) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    access_control_enabled_ = enabled;
+}
+
+// =============================================================================
 // Network Callbacks
 // =============================================================================
 
@@ -445,6 +460,12 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     association_.set_state(association_state::established);
     transition_to(handler_state::established);
 
+    // Set up user context for access control
+    if (access_control_enabled_ && access_control_) {
+        user_context_ = access_control_->get_context_for_ae(
+            rq.calling_ae_title, session_id());
+    }
+
     // Notify callback
     {
         std::lock_guard<std::mutex> cb_lock(callback_mutex_);
@@ -632,6 +653,56 @@ Result<std::monostate> dicom_association_handler::dispatch_to_service(
     auto* service = find_service(abstract_syntax);
     if (!service) {
         return error_info("No service registered for SOP Class: " + abstract_syntax);
+    }
+
+    // Perform access control check if enabled
+    if (access_control_enabled_ && access_control_ && user_context_) {
+        // Map DIMSE command to DICOM operation
+        security::DicomOperation op = security::DicomOperation::CEcho;
+        switch (msg.command()) {
+            case dimse::command_field::c_store_rq:
+                op = security::DicomOperation::CStore;
+                break;
+            case dimse::command_field::c_find_rq:
+                op = security::DicomOperation::CFind;
+                break;
+            case dimse::command_field::c_move_rq:
+                op = security::DicomOperation::CMove;
+                break;
+            case dimse::command_field::c_get_rq:
+                op = security::DicomOperation::CGet;
+                break;
+            case dimse::command_field::c_echo_rq:
+                op = security::DicomOperation::CEcho;
+                break;
+            case dimse::command_field::n_create_rq:
+                op = security::DicomOperation::NCreate;
+                break;
+            case dimse::command_field::n_set_rq:
+                op = security::DicomOperation::NSet;
+                break;
+            case dimse::command_field::n_get_rq:
+                op = security::DicomOperation::NGet;
+                break;
+            case dimse::command_field::n_delete_rq:
+                op = security::DicomOperation::NDelete;
+                break;
+            case dimse::command_field::n_action_rq:
+                op = security::DicomOperation::NAction;
+                break;
+            case dimse::command_field::n_event_report_rq:
+                op = security::DicomOperation::NEventReport;
+                break;
+            default:
+                // Response messages don't need access control
+                break;
+        }
+
+        // Check permission
+        auto check_result = access_control_->check_dicom_operation(*user_context_, op);
+        if (!check_result) {
+            return error_info("Access denied: " + check_result.reason);
+        }
     }
 
     // Dispatch to service

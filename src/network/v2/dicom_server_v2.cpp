@@ -365,6 +365,15 @@ void dicom_server_v2::create_handler(
     auto handler = std::make_shared<dicom_association_handler>(
         std::move(session), config_, service_map);
 
+    // Set up access control if configured
+    {
+        std::lock_guard<std::mutex> acl_lock(acl_mutex_);
+        if (access_control_) {
+            handler->set_access_control(access_control_);
+            handler->set_access_control_enabled(access_control_enabled_);
+        }
+    }
+
     // Set up handler callbacks
     auto weak_this = std::weak_ptr<dicom_server_v2*>(
         std::shared_ptr<dicom_server_v2*>(nullptr, [](dicom_server_v2**) {}));
@@ -482,6 +491,33 @@ void dicom_server_v2::report_error(const std::string& error) {
     if (on_error_cb_) {
         on_error_cb_(error);
     }
+}
+
+// =============================================================================
+// Security / Access Control
+// =============================================================================
+
+void dicom_server_v2::set_access_control(
+    std::shared_ptr<security::access_control_manager> acm) {
+    std::lock_guard<std::mutex> lock(acl_mutex_);
+    access_control_ = std::move(acm);
+    if (access_control_) {
+        access_control_enabled_ = true;
+    }
+}
+
+std::shared_ptr<security::access_control_manager>
+dicom_server_v2::get_access_control() const noexcept {
+    std::lock_guard<std::mutex> lock(acl_mutex_);
+    return access_control_;
+}
+
+void dicom_server_v2::set_access_control_enabled(bool enabled) {
+    access_control_enabled_ = enabled;
+}
+
+bool dicom_server_v2::is_access_control_enabled() const noexcept {
+    return access_control_enabled_;
 }
 
 }  // namespace pacs::network::v2
