@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# PACS Web Administration Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React-based web administration interface for the PACS system.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dashboard**: System status overview, metrics, and health indicators
+- **Patient Browser**: Search and browse patient records with study details
+- **Worklist Management**: View and manage scheduled procedures
+- **Audit Logs**: Searchable audit trail with CSV/JSON export
+- **Configuration**: System settings management
+- **Associations**: Monitor active DICOM network connections
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS v4
+- **State Management**: React Query (TanStack Query)
+- **Routing**: React Router v6
+- **Icons**: Lucide React
+- **Charts**: Recharts
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 18+
+- npm 9+
+- PACS REST API server running on port 8080
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The development server runs on port 3000 and proxies API requests to `http://localhost:8080`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Project Structure
+
 ```
+web/
+├── src/
+│   ├── api/          # API client and types
+│   ├── components/   # Reusable UI components
+│   │   ├── layout/   # Layout components (Header, Sidebar)
+│   │   └── ui/       # Base UI components (Button, Card, Table)
+│   ├── hooks/        # Custom React hooks
+│   ├── lib/          # Utility functions
+│   ├── pages/        # Page components
+│   └── types/        # TypeScript type definitions
+├── public/           # Static assets
+└── index.html        # Entry HTML file
+```
+
+### API Endpoints
+
+The frontend connects to the following REST API endpoints:
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/v1/system/status` | System health status |
+| `GET /api/v1/system/metrics` | Performance metrics |
+| `GET /api/v1/system/config` | Configuration |
+| `GET /api/v1/patients` | Patient list |
+| `GET /api/v1/patients/:id` | Patient details |
+| `GET /api/v1/worklist` | Worklist items |
+| `GET /api/v1/audit/logs` | Audit log entries |
+| `GET /api/v1/associations` | DICOM associations |
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist/` directory. These can be served by any static file server or integrated with the C++ REST server.
+
+## Configuration
+
+### Vite Configuration
+
+Edit `vite.config.ts` to customize:
+- API proxy settings
+- Build output directory
+- Development server port
+
+### TailwindCSS Theme
+
+Edit `src/index.css` to customize the color theme and design tokens.
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.

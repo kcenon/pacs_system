@@ -37,6 +37,18 @@ pacs_system/
 ├── .clang-format               # Code formatting rules
 ├── .clang-tidy                 # Static analysis rules
 │
+├── web/                        # Web administration frontend
+│   ├── src/                    # React TypeScript source
+│   │   ├── api/                # API client
+│   │   ├── components/         # React components
+│   │   ├── hooks/              # Custom hooks
+│   │   ├── lib/                # Utilities
+│   │   ├── pages/              # Page components
+│   │   └── types/              # TypeScript definitions
+│   ├── package.json            # Node.js dependencies
+│   ├── vite.config.ts          # Vite configuration
+│   └── tailwind.config.js      # TailwindCSS configuration
+│
 ├── include/                    # Public header files
 │   └── pacs/
 │       ├── core/               # Core DICOM structures
