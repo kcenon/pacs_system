@@ -22,6 +22,7 @@ using kcenon::common::make_error;
 migration_runner::migration_runner() {
     // Register all migrations
     migrations_.push_back({1, [this](sqlite3* db) { return migrate_v1(db); }});
+    migrations_.push_back({2, [this](sqlite3* db) { return migrate_v2(db); }});
 }
 
 // ============================================================================
@@ -473,6 +474,45 @@ auto migration_runner::migrate_v1(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 1, "Initial schema creation");
+}
+
+auto migration_runner::migrate_v2(sqlite3* db) -> VoidResult {
+    // V2: Add audit_log table for REST API audit endpoints
+    const char* sql = R"(
+        -- =====================================================================
+        -- AUDIT_LOG TABLE (for REST API and HIPAA compliance)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS audit_log (
+            audit_pk        INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type      TEXT NOT NULL,
+            outcome         TEXT DEFAULT 'SUCCESS',
+            timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+            user_id         TEXT,
+            source_ae       TEXT,
+            target_ae       TEXT,
+            source_ip       TEXT,
+            patient_id      TEXT,
+            study_uid       TEXT,
+            message         TEXT,
+            details         TEXT,
+            CHECK (outcome IN ('SUCCESS', 'FAILURE', 'WARNING'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_audit_event_type ON audit_log(event_type);
+        CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp);
+        CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_source_ae ON audit_log(source_ae);
+        CREATE INDEX IF NOT EXISTS idx_audit_patient ON audit_log(patient_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_study ON audit_log(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_audit_outcome ON audit_log(outcome);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 2, "Add audit_log table");
 }
 
 }  // namespace pacs::storage

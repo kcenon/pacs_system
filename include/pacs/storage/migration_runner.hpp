@@ -204,9 +204,10 @@ private:
 
     // Migration implementations
     [[nodiscard]] auto migrate_v1(sqlite3* db) -> VoidResult;
+    [[nodiscard]] auto migrate_v2(sqlite3* db) -> VoidResult;
 
     /// Latest schema version (increment when adding migrations)
-    static constexpr int LATEST_VERSION = 1;
+    static constexpr int LATEST_VERSION = 2;
 
     /// Migration function registry
     std::vector<std::pair<int, migration_function>> migrations_;

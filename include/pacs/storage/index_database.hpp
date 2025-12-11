@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "audit_record.hpp"
 #include "instance_record.hpp"
 #include "migration_runner.hpp"
 #include "mpps_record.hpp"
@@ -765,6 +766,59 @@ public:
     [[nodiscard]] auto worklist_count(std::string_view status) const -> size_t;
 
     // ========================================================================
+    // Audit Log Operations
+    // ========================================================================
+
+    /**
+     * @brief Add a new audit log entry
+     *
+     * Creates a new audit log record for HIPAA compliance and system monitoring.
+     *
+     * @param record Audit record data (pk field is ignored)
+     * @return Result containing the audit log primary key or error
+     */
+    [[nodiscard]] auto add_audit_log(const audit_record& record)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Query audit log entries
+     *
+     * Returns audit log entries matching the query criteria.
+     *
+     * @param query Query parameters with optional filters
+     * @return Vector of matching audit records
+     */
+    [[nodiscard]] auto query_audit_log(const audit_query& query) const
+        -> std::vector<audit_record>;
+
+    /**
+     * @brief Find an audit log entry by primary key
+     *
+     * @param pk The audit log primary key
+     * @return Optional containing the audit record if found
+     */
+    [[nodiscard]] auto find_audit_by_pk(int64_t pk) const
+        -> std::optional<audit_record>;
+
+    /**
+     * @brief Get total audit log count
+     *
+     * @return Number of audit log entries in the database
+     */
+    [[nodiscard]] auto audit_count() const -> size_t;
+
+    /**
+     * @brief Cleanup old audit log entries
+     *
+     * Removes audit log entries older than the specified age.
+     *
+     * @param age Maximum age of entries to keep
+     * @return Result containing the number of deleted entries or error
+     */
+    [[nodiscard]] auto cleanup_old_audit_logs(std::chrono::hours age)
+        -> Result<size_t>;
+
+    // ========================================================================
     // Database Information
     // ========================================================================
 
@@ -950,6 +1004,11 @@ private:
      * @brief Parse a worklist record from a prepared statement
      */
     [[nodiscard]] auto parse_worklist_row(void* stmt) const -> worklist_item;
+
+    /**
+     * @brief Parse an audit record from a prepared statement
+     */
+    [[nodiscard]] auto parse_audit_row(void* stmt) const -> audit_record;
 
     /**
      * @brief Convert wildcard pattern to SQL LIKE pattern
