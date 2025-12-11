@@ -1,0 +1,105 @@
+# PACS Web Administration Frontend
+
+React-based web administration interface for the PACS system.
+
+## Features
+
+- **Dashboard**: System status overview, metrics, and health indicators
+- **Patient Browser**: Search and browse patient records with study details
+- **Worklist Management**: View and manage scheduled procedures
+- **Audit Logs**: Searchable audit trail with CSV/JSON export
+- **Configuration**: System settings management
+- **Associations**: Monitor active DICOM network connections
+
+## Tech Stack
+
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS v4
+- **State Management**: React Query (TanStack Query)
+- **Routing**: React Router v6
+- **Icons**: Lucide React
+- **Charts**: Recharts
+
+## Prerequisites
+
+- Node.js 18+
+- npm 9+
+- PACS REST API server running on port 8080
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Development
+
+The development server runs on port 3000 and proxies API requests to `http://localhost:8080`.
+
+### Project Structure
+
+```
+web/
+├── src/
+│   ├── api/          # API client and types
+│   ├── components/   # Reusable UI components
+│   │   ├── layout/   # Layout components (Header, Sidebar)
+│   │   └── ui/       # Base UI components (Button, Card, Table)
+│   ├── hooks/        # Custom React hooks
+│   ├── lib/          # Utility functions
+│   ├── pages/        # Page components
+│   └── types/        # TypeScript type definitions
+├── public/           # Static assets
+└── index.html        # Entry HTML file
+```
+
+### API Endpoints
+
+The frontend connects to the following REST API endpoints:
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/v1/system/status` | System health status |
+| `GET /api/v1/system/metrics` | Performance metrics |
+| `GET /api/v1/system/config` | Configuration |
+| `GET /api/v1/patients` | Patient list |
+| `GET /api/v1/patients/:id` | Patient details |
+| `GET /api/v1/worklist` | Worklist items |
+| `GET /api/v1/audit/logs` | Audit log entries |
+| `GET /api/v1/associations` | DICOM associations |
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist/` directory. These can be served by any static file server or integrated with the C++ REST server.
+
+## Configuration
+
+### Vite Configuration
+
+Edit `vite.config.ts` to customize:
+- API proxy settings
+- Build output directory
+- Development server port
+
+### TailwindCSS Theme
+
+Edit `src/index.css` to customize the color theme and design tokens.
+
+## License
+
+MIT License - see [LICENSE](../LICENSE) for details.
