@@ -1,6 +1,6 @@
 # Thread System Migration Complete
 
-**Version:** 1.0.0
+**Version:** 0.1.0.0
 **Date:** 2025-12-07
 **Related Issue:** #153 - Epic: Migrate from std::thread to thread_system/network_system
 

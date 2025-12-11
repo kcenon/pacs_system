@@ -1,6 +1,6 @@
 # PACS System Features
 
-> **Version:** 1.2.0
+> **Version:** 0.1.2.0
 > **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
@@ -923,7 +923,7 @@ server.stop();
 
 ---
 
-*Document Version: 1.7.0*
+*Document Version: 0.1.7.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-10*
 *Author: kcenon@naver.com*

@@ -1,6 +1,6 @@
 # SDS - Interface Specifications
 
-> **Version:** 1.2.0
+> **Version:** 0.1.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2025-12-07
 
@@ -906,6 +906,6 @@ constexpr int INVALID_QUERY_KEY = -885;
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 0.1.0.0*
 *Created: 2025-11-30*
 *Author: kcenon@naver.com*

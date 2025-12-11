@@ -1,6 +1,6 @@
 # Performance Baseline for Thread Migration
 
-**Version:** 1.0.0
+**Version:** 0.1.0.0
 **Date:** 2024-12-04
 **Related Issue:** #154 - Establish performance baseline benchmarks for thread migration
 
