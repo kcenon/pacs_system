@@ -106,8 +106,8 @@ TEST_CASE("migration_runner initial state", "[migration][version]") {
         CHECK(runner.needs_migration(db.get()));
     }
 
-    SECTION("latest version is 1") {
-        CHECK(runner.get_latest_version() == 1);
+    SECTION("latest version is 2") {
+        CHECK(runner.get_latest_version() == 2);
     }
 
     SECTION("empty database has no history") {
@@ -128,7 +128,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result = runner.run_migrations(db.get());
         REQUIRE(result.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 1);
+        CHECK(runner.get_current_version(db.get()) == 2);
         CHECK_FALSE(runner.needs_migration(db.get()));
     }
 
@@ -139,7 +139,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result2 = runner.run_migrations(db.get());
         REQUIRE(result2.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 1);
+        CHECK(runner.get_current_version(db.get()) == 2);
     }
 
     SECTION("migration creates schema_version table") {
@@ -154,10 +154,13 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         REQUIRE(result.is_ok());
 
         auto history = runner.get_history(db.get());
-        REQUIRE(history.size() == 1);
+        REQUIRE(history.size() == 2);
         CHECK(history[0].version == 1);
         CHECK(history[0].description == "Initial schema creation");
         CHECK_FALSE(history[0].applied_at.empty());
+        CHECK(history[1].version == 2);
+        CHECK(history[1].description == "Add audit_log table");
+        CHECK_FALSE(history[1].applied_at.empty());
     }
 }
 

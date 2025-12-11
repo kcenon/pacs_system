@@ -3322,9 +3322,140 @@ public:
     *   `404 Not Found`: Series not found
     *   `503 Service Unavailable`: Database not configured
 
+### Worklist REST API Endpoints
+
+**Base Path**: `/api/v1/worklist`
+
+#### List Worklist Items
+*   **Method**: `GET`
+*   **Path**: `/`
+*   **Query Parameters**:
+    *   `limit` (optional): Maximum number of results (default: 20, max: 100)
+    *   `offset` (optional): Offset for pagination
+    *   `station_ae` (optional): Filter by station AE title
+    *   `modality` (optional): Filter by modality
+    *   `scheduled_date_from` (optional): Start of date range
+    *   `scheduled_date_to` (optional): End of date range
+    *   `patient_id` (optional): Filter by patient ID
+    *   `patient_name` (optional): Filter by patient name (supports wildcards)
+    *   `accession_no` (optional): Filter by accession number
+    *   `step_id` (optional): Filter by step ID
+    *   `include_all_status` (optional): Include all statuses if "true"
+*   **Responses**:
+    *   `200 OK`: Returns paginated list of worklist items
+    *   `503 Service Unavailable`: Database not configured
+
+#### Create Worklist Item
+*   **Method**: `POST`
+*   **Path**: `/`
+*   **Request Body**: JSON object with worklist item fields
+*   **Required Fields**: `step_id`, `patient_id`, `modality`, `scheduled_datetime`
+*   **Responses**:
+    *   `201 Created`: Returns created worklist item
+    *   `400 Bad Request`: Missing required fields
+    *   `500 Internal Server Error`: Create operation failed
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Worklist Item
+*   **Method**: `GET`
+*   **Path**: `/<id>`
+*   **Responses**:
+    *   `200 OK`: Returns worklist item details
+    *   `404 Not Found`: Worklist item not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Update Worklist Item
+*   **Method**: `PUT`
+*   **Path**: `/<id>`
+*   **Request Body**: JSON object with `step_status` field
+*   **Valid Statuses**: `SCHEDULED`, `STARTED`, `COMPLETED`
+*   **Responses**:
+    *   `200 OK`: Returns updated worklist item
+    *   `400 Bad Request`: Invalid status value
+    *   `404 Not Found`: Worklist item not found
+    *   `500 Internal Server Error`: Update operation failed
+    *   `503 Service Unavailable`: Database not configured
+
+#### Delete Worklist Item
+*   **Method**: `DELETE`
+*   **Path**: `/<id>`
+*   **Responses**:
+    *   `200 OK`: Worklist item deleted successfully
+    *   `404 Not Found`: Worklist item not found
+    *   `500 Internal Server Error`: Delete operation failed
+    *   `503 Service Unavailable`: Database not configured
+
+### Audit Log REST API Endpoints
+
+**Base Path**: `/api/v1/audit`
+
+#### List Audit Logs
+*   **Method**: `GET`
+*   **Path**: `/logs`
+*   **Query Parameters**:
+    *   `limit` (optional): Maximum number of results (default: 20, max: 100)
+    *   `offset` (optional): Offset for pagination
+    *   `event_type` (optional): Filter by event type (e.g., C_STORE, C_FIND)
+    *   `outcome` (optional): Filter by outcome (SUCCESS, FAILURE, WARNING)
+    *   `user_id` (optional): Filter by user/AE title
+    *   `source_ae` (optional): Filter by source AE title
+    *   `patient_id` (optional): Filter by patient ID
+    *   `study_uid` (optional): Filter by study UID
+    *   `date_from` (optional): Start of date range
+    *   `date_to` (optional): End of date range
+    *   `format` (optional): Export format ("csv" for CSV, default JSON)
+*   **Responses**:
+    *   `200 OK`: Returns paginated list of audit log entries
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Audit Log Entry
+*   **Method**: `GET`
+*   **Path**: `/logs/<id>`
+*   **Responses**:
+    *   `200 OK`: Returns audit log entry details
+    *   `404 Not Found`: Audit log entry not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Export Audit Logs
+*   **Method**: `GET`
+*   **Path**: `/export`
+*   **Query Parameters**: Same as List Audit Logs (without pagination)
+    *   `format` (optional): Export format ("csv" or "json", default: "json")
+*   **Responses**:
+    *   `200 OK`: Returns audit logs as downloadable file
+    *   `503 Service Unavailable`: Database not configured
+
+### Association REST API Endpoints
+
+**Base Path**: `/api/v1/associations`
+
+#### List Active Associations
+*   **Method**: `GET`
+*   **Path**: `/active`
+*   **Responses**:
+    *   `200 OK`: Returns list of active DICOM associations
+*   **Note**: Requires integration with DICOM server for real-time data
+
+#### Get Association Details
+*   **Method**: `GET`
+*   **Path**: `/<id>`
+*   **Responses**:
+    *   `200 OK`: Returns association details
+    *   `404 Not Found`: Association not found
+*   **Note**: Requires integration with DICOM server for real-time data
+
+#### Terminate Association
+*   **Method**: `DELETE`
+*   **Path**: `/<id>`
+*   **Responses**:
+    *   `200 OK`: Association terminated successfully
+    *   `400 Bad Request`: Invalid association ID
+    *   `501 Not Implemented`: Requires DICOM server integration
+*   **Note**: Requires integration with DICOM server
+
 ---
 
-*Document Version: 1.7.0*
+*Document Version: 1.8.0*
 *Created: 2025-11-30*
 *Last Updated: 2025-12-11*
 *Author: kcenon@naver.com*

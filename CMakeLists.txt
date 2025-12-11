@@ -902,6 +902,9 @@ if(TARGET Crow::Crow)
         src/web/endpoints/patient_endpoints.cpp
         src/web/endpoints/study_endpoints.cpp
         src/web/endpoints/series_endpoints.cpp
+        src/web/endpoints/worklist_endpoints.cpp
+        src/web/endpoints/audit_endpoints.cpp
+        src/web/endpoints/association_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1283,6 +1286,7 @@ if(PACS_BUILD_TESTS)
             tests/web/rest_server_test.cpp
             tests/web/system_endpoints_test.cpp
             tests/web/patient_study_endpoints_test.cpp
+            tests/web/worklist_audit_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
