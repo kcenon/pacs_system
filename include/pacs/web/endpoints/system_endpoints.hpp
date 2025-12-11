@@ -22,6 +22,10 @@ namespace pacs::security {
 class access_control_manager;
 } // namespace pacs::security
 
+namespace pacs::storage {
+class index_database;
+} // namespace pacs::storage
+
 namespace pacs::web {
 
 struct rest_server_config;
@@ -42,6 +46,9 @@ struct rest_server_context {
 
   /// Access control manager for security
   std::shared_ptr<security::access_control_manager> security_manager;
+
+  /// Index database for patient/study/series data access
+  std::shared_ptr<storage::index_database> database;
 };
 
 namespace endpoints {

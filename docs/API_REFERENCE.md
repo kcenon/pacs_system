@@ -3139,6 +3139,7 @@ struct rest_server_config {
 | 1.4.0   | 2025-12-07 | Added DX Modality Module (dx_storage, dx_iod_validator) |
 | 1.5.0   | 2025-12-08 | Added MG Modality Module (mg_storage, mg_iod_validator) |
 | 1.6.0   | 2025-12-09 | Added Web Module (rest_server foundation)    |
+| 1.7.0   | 2025-12-11 | Added Patient, Study, Series REST API endpoints |
 
 
 ---
@@ -3207,9 +3208,123 @@ public:
     *   `404 Not Found`: User not found.
     *   `401 Unauthorized`: Missing or invalid authentication.
 
+### Patient REST API Endpoints
+
+**Base Path**: `/api/v1/patients`
+
+#### List Patients
+*   **Method**: `GET`
+*   **Path**: `/`
+*   **Query Parameters**:
+    *   `patient_id`: Filter by patient ID (supports `*` wildcard)
+    *   `patient_name`: Filter by patient name (supports `*` wildcard)
+    *   `birth_date`: Filter by birth date (YYYYMMDD)
+    *   `birth_date_from`: Birth date range start
+    *   `birth_date_to`: Birth date range end
+    *   `sex`: Filter by sex (M, F, O)
+    *   `limit`: Maximum results (default: 20, max: 100)
+    *   `offset`: Pagination offset
+*   **Responses**:
+    *   `200 OK`: Returns paginated patient list with total count
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Patient Details
+*   **Method**: `GET`
+*   **Path**: `/<patient_id>`
+*   **Responses**:
+    *   `200 OK`: Returns patient details
+    *   `404 Not Found`: Patient not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Patient's Studies
+*   **Method**: `GET`
+*   **Path**: `/<patient_id>/studies`
+*   **Responses**:
+    *   `200 OK`: Returns list of studies for the patient
+    *   `404 Not Found`: Patient not found
+    *   `503 Service Unavailable`: Database not configured
+
+### Study REST API Endpoints
+
+**Base Path**: `/api/v1/studies`
+
+#### List Studies
+*   **Method**: `GET`
+*   **Path**: `/`
+*   **Query Parameters**:
+    *   `patient_id`: Filter by patient ID
+    *   `patient_name`: Filter by patient name (supports `*` wildcard)
+    *   `study_uid`: Filter by Study Instance UID
+    *   `study_id`: Filter by Study ID
+    *   `study_date`: Filter by study date (YYYYMMDD)
+    *   `study_date_from`: Study date range start
+    *   `study_date_to`: Study date range end
+    *   `accession_number`: Filter by accession number
+    *   `modality`: Filter by modality (CT, MR, etc.)
+    *   `referring_physician`: Filter by referring physician
+    *   `study_description`: Filter by study description
+    *   `limit`: Maximum results (default: 20, max: 100)
+    *   `offset`: Pagination offset
+*   **Responses**:
+    *   `200 OK`: Returns paginated study list with total count
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Study Details
+*   **Method**: `GET`
+*   **Path**: `/<study_uid>`
+*   **Responses**:
+    *   `200 OK`: Returns study details
+    *   `404 Not Found`: Study not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Study's Series
+*   **Method**: `GET`
+*   **Path**: `/<study_uid>/series`
+*   **Responses**:
+    *   `200 OK`: Returns list of series for the study
+    *   `404 Not Found`: Study not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Study's Instances
+*   **Method**: `GET`
+*   **Path**: `/<study_uid>/instances`
+*   **Responses**:
+    *   `200 OK`: Returns list of all instances in the study
+    *   `404 Not Found`: Study not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Delete Study
+*   **Method**: `DELETE`
+*   **Path**: `/<study_uid>`
+*   **Responses**:
+    *   `200 OK`: Study deleted successfully
+    *   `404 Not Found`: Study not found
+    *   `500 Internal Server Error`: Delete operation failed
+    *   `503 Service Unavailable`: Database not configured
+
+### Series REST API Endpoints
+
+**Base Path**: `/api/v1/series`
+
+#### Get Series Details
+*   **Method**: `GET`
+*   **Path**: `/<series_uid>`
+*   **Responses**:
+    *   `200 OK`: Returns series details
+    *   `404 Not Found`: Series not found
+    *   `503 Service Unavailable`: Database not configured
+
+#### Get Series Instances
+*   **Method**: `GET`
+*   **Path**: `/<series_uid>/instances`
+*   **Responses**:
+    *   `200 OK`: Returns list of instances in the series
+    *   `404 Not Found`: Series not found
+    *   `503 Service Unavailable`: Database not configured
+
 ---
 
-*Document Version: 1.6.0*
+*Document Version: 1.7.0*
 *Created: 2025-11-30*
-*Last Updated: 2025-12-09*
+*Last Updated: 2025-12-11*
 *Author: kcenon@naver.com*

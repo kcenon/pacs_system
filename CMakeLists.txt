@@ -899,6 +899,9 @@ if(TARGET Crow::Crow)
         src/web/rest_server.cpp
         src/web/endpoints/system_endpoints.cpp
         src/web/endpoints/security_endpoints.cpp
+        src/web/endpoints/patient_endpoints.cpp
+        src/web/endpoints/study_endpoints.cpp
+        src/web/endpoints/series_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -906,7 +909,7 @@ if(TARGET Crow::Crow)
             $<INSTALL_INTERFACE:include>
     )
     target_link_libraries(pacs_web
-        PUBLIC pacs_core Crow::Crow
+        PUBLIC pacs_core pacs_storage Crow::Crow
     )
 
     # Link pacs_monitoring if available
@@ -1279,6 +1282,7 @@ if(PACS_BUILD_TESTS)
         add_executable(web_tests
             tests/web/rest_server_test.cpp
             tests/web/system_endpoints_test.cpp
+            tests/web/patient_study_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
