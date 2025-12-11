@@ -10,7 +10,10 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "pacs/web/endpoints/patient_endpoints.hpp"
 #include "pacs/web/endpoints/security_endpoints.hpp"
+#include "pacs/web/endpoints/series_endpoints.hpp"
+#include "pacs/web/endpoints/study_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_server.hpp"
@@ -29,9 +32,15 @@
 
 namespace pacs::web {
 
-// Forward declare internal registration function
+// Forward declare internal registration functions
 namespace endpoints {
 void register_system_endpoints_impl(crow::SimpleApp &app,
+                                    std::shared_ptr<rest_server_context> ctx);
+void register_patient_endpoints_impl(crow::SimpleApp &app,
+                                     std::shared_ptr<rest_server_context> ctx);
+void register_study_endpoints_impl(crow::SimpleApp &app,
+                                   std::shared_ptr<rest_server_context> ctx);
+void register_series_endpoints_impl(crow::SimpleApp &app,
                                     std::shared_ptr<rest_server_context> ctx);
 } // namespace endpoints
 
@@ -93,6 +102,12 @@ void rest_server::set_access_control_manager(
   impl_->context->security_manager = std::move(manager);
 }
 
+void rest_server::set_database(
+    std::shared_ptr<storage::index_database> database) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->database = std::move(database);
+}
+
 void rest_server::start() {
   if (impl_->running.exchange(true)) {
     return; // Already running
@@ -140,10 +155,12 @@ void rest_server::start_async() {
     impl_->app = std::make_unique<crow::SimpleApp>();
     auto &app = *impl_->app;
 
-    // Register system endpoints
-    // Register system endpoints
+    // Register endpoints
     endpoints::register_system_endpoints_impl(app, impl_->context);
     endpoints::register_security_endpoints_impl(app, impl_->context);
+    endpoints::register_patient_endpoints_impl(app, impl_->context);
+    endpoints::register_study_endpoints_impl(app, impl_->context);
+    endpoints::register_series_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {
