@@ -37,6 +37,18 @@ pacs_system/
 ├── .clang-format               # 코드 포매팅 규칙
 ├── .clang-tidy                 # 정적 분석 규칙
 │
+├── web/                        # 웹 관리 프론트엔드
+│   ├── src/                    # React TypeScript 소스
+│   │   ├── api/                # API 클라이언트
+│   │   ├── components/         # React 컴포넌트
+│   │   ├── hooks/              # 커스텀 훅
+│   │   ├── lib/                # 유틸리티
+│   │   ├── pages/              # 페이지 컴포넌트
+│   │   └── types/              # TypeScript 타입 정의
+│   ├── package.json            # Node.js 의존성
+│   ├── vite.config.ts          # Vite 설정
+│   └── tailwind.config.js      # TailwindCSS 설정
+│
 ├── include/                    # 공개 헤더 파일
 │   └── pacs/
 │       ├── core/               # 코어 DICOM 구조
