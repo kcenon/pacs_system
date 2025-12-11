@@ -1,6 +1,6 @@
 # Project Structure - PACS System
 
-> **Version:** 1.2.0
+> **Version:** 0.1.2.0
 > **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](PROJECT_STRUCTURE_KO.md)
 
@@ -586,7 +586,7 @@ Test DICOM files stored in `tests/fixtures/`:
 
 ---
 
-*Document Version: 1.2.0*
+*Document Version: 0.1.2.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-07*
 *Author: kcenon@naver.com*

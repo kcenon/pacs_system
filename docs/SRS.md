@@ -1,6 +1,6 @@
 # Software Requirements Specification - PACS System
 
-> **Version:** 1.2.0
+> **Version:** 0.1.2.0
 > **Last Updated:** 2025-12-07
 > **Language:** **English** | [한국어](SRS_KO.md)
 > **Standard:** IEEE 830-1998 based
@@ -1561,7 +1561,7 @@ The PACS System provides no direct user interface. All interaction is through:
 
 ---
 
-*Document Version: 1.2.0*
+*Document Version: 0.1.2.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-07*
 *Author: kcenon@naver.com*

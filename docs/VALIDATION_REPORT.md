@@ -1,6 +1,6 @@
 # PACS System Validation Report
 
-> **Report Version:** 1.2.0
+> **Report Version:** 0.1.2.0
 > **Report Date:** 2025-12-07
 > **Language:** **English** | [한국어](VALIDATION_REPORT_KO.md)
 > **Status:** Complete
@@ -1192,6 +1192,6 @@ This validation confirms that the PACS System:
 
 ---
 
-*Report Version: 1.2.0*
+*Report Version: 0.1.2.0*
 *Generated: 2025-12-07*
 *Validated by: kcenon@naver.com*

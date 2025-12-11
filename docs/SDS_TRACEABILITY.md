@@ -1,6 +1,6 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 1.2.0
+> **Version:** 0.1.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2025-12-07
 
@@ -736,6 +736,6 @@ When a requirement changes, use this checklist:
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 0.1.0.0*
 *Last Updated: 2025-12-01*
 *Author: kcenon@naver.com*

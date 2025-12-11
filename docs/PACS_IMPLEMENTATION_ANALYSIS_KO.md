@@ -498,6 +498,6 @@ namespace pacs::error_codes {
 
 ---
 
-*문서 버전: 1.0.0*
+*문서 버전: 0.1.0.0*
 *작성일: 2025-11-30*
 *작성자: kcenon@naver.com*

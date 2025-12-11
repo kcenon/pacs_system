@@ -1,6 +1,6 @@
 # Security Module Documentation
 
-> **Version:** 1.1.0
+> **Version:** 0.1.1.0
 > **Last Updated:** 2025-12-11
 > **Language:** **English**
 

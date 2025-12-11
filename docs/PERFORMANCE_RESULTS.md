@@ -1,6 +1,6 @@
 # Performance Results After Thread Migration
 
-**Version:** 1.0.0
+**Version:** 0.1.0.0
 **Date:** 2024-12-05
 **Related Issue:** #160 - Performance testing and optimization after thread migration
 
