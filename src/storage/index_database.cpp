@@ -2886,4 +2886,235 @@ auto index_database::parse_worklist_row(void* stmt_ptr) const -> worklist_item {
     return item;
 }
 
+// ============================================================================
+// Audit Log Operations
+// ============================================================================
+
+auto index_database::add_audit_log(const audit_record& record)
+    -> Result<int64_t> {
+    const char* sql = R"(
+        INSERT INTO audit_log (
+            event_type, outcome, user_id, source_ae, target_ae,
+            source_ip, patient_id, study_uid, message, details
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            pacs::compat::format("Failed to prepare audit insert: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, record.event_type.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, record.outcome.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, record.user_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, record.source_ae.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, record.target_ae.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, record.source_ip.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, record.patient_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, record.study_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 9, record.message.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 10, record.details.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<int64_t>(
+            rc,
+            pacs::compat::format("Failed to insert audit log: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return sqlite3_last_insert_rowid(db_);
+}
+
+auto index_database::query_audit_log(const audit_query& query) const
+    -> std::vector<audit_record> {
+    std::vector<audit_record> results;
+
+    std::ostringstream sql;
+    sql << "SELECT audit_pk, event_type, outcome, timestamp, user_id, "
+        << "source_ae, target_ae, source_ip, patient_id, study_uid, "
+        << "message, details FROM audit_log WHERE 1=1";
+
+    std::vector<std::string> params;
+
+    if (query.event_type) {
+        sql << " AND event_type = ?";
+        params.push_back(*query.event_type);
+    }
+
+    if (query.outcome) {
+        sql << " AND outcome = ?";
+        params.push_back(*query.outcome);
+    }
+
+    if (query.user_id) {
+        sql << " AND user_id LIKE ?";
+        params.push_back(to_like_pattern(*query.user_id));
+    }
+
+    if (query.source_ae) {
+        sql << " AND source_ae = ?";
+        params.push_back(*query.source_ae);
+    }
+
+    if (query.patient_id) {
+        sql << " AND patient_id = ?";
+        params.push_back(*query.patient_id);
+    }
+
+    if (query.study_uid) {
+        sql << " AND study_uid = ?";
+        params.push_back(*query.study_uid);
+    }
+
+    if (query.date_from) {
+        sql << " AND date(timestamp) >= date(?)";
+        params.push_back(*query.date_from);
+    }
+
+    if (query.date_to) {
+        sql << " AND date(timestamp) <= date(?)";
+        params.push_back(*query.date_to);
+    }
+
+    sql << " ORDER BY timestamp DESC";
+
+    if (query.limit > 0) {
+        sql << " LIMIT " << query.limit;
+    }
+
+    if (query.offset > 0) {
+        sql << " OFFSET " << query.offset;
+    }
+
+    sql << ";";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.str().c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return results;
+    }
+
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_audit_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return results;
+}
+
+auto index_database::find_audit_by_pk(int64_t pk) const
+    -> std::optional<audit_record> {
+    const char* sql =
+        "SELECT audit_pk, event_type, outcome, timestamp, user_id, "
+        "source_ae, target_ae, source_ip, patient_id, study_uid, "
+        "message, details FROM audit_log WHERE audit_pk = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    std::optional<audit_record> result;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        result = parse_audit_row(stmt);
+    }
+
+    sqlite3_finalize(stmt);
+    return result;
+}
+
+auto index_database::audit_count() const -> size_t {
+    const char* sql = "SELECT COUNT(*) FROM audit_log;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return 0;
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+auto index_database::cleanup_old_audit_logs(std::chrono::hours age)
+    -> Result<size_t> {
+    auto cutoff = std::chrono::system_clock::now() - age;
+    auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
+    std::ostringstream oss;
+    oss << std::put_time(std::gmtime(&cutoff_time), "%Y-%m-%d %H:%M:%S");
+    auto cutoff_str = oss.str();
+
+    const char* sql = "DELETE FROM audit_log WHERE timestamp < ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare audit cleanup: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, cutoff_str.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to cleanup old audit logs: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return static_cast<size_t>(sqlite3_changes(db_));
+}
+
+auto index_database::parse_audit_row(void* stmt_ptr) const -> audit_record {
+    auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
+    audit_record record;
+
+    record.pk = sqlite3_column_int64(stmt, 0);
+    record.event_type = get_text(stmt, 1);
+    record.outcome = get_text(stmt, 2);
+
+    auto timestamp_str = get_text(stmt, 3);
+    record.timestamp = parse_datetime(timestamp_str.c_str());
+
+    record.user_id = get_text(stmt, 4);
+    record.source_ae = get_text(stmt, 5);
+    record.target_ae = get_text(stmt, 6);
+    record.source_ip = get_text(stmt, 7);
+    record.patient_id = get_text(stmt, 8);
+    record.study_uid = get_text(stmt, 9);
+    record.message = get_text(stmt, 10);
+    record.details = get_text(stmt, 11);
+
+    return record;
+}
+
 }  // namespace pacs::storage
