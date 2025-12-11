@@ -1286,6 +1286,7 @@ if(PACS_BUILD_TESTS)
             tests/web/rest_server_test.cpp
             tests/web/system_endpoints_test.cpp
             tests/web/patient_study_endpoints_test.cpp
+            tests/web/worklist_audit_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
