@@ -19,7 +19,13 @@ React-based web administration interface for the PACS system.
   - Detailed metadata viewer panel for Study, Series, and Instance
   - Table and tree view options for study navigation
 - **Worklist Management**: View and manage scheduled procedures
-- **Audit Logs**: Searchable audit trail with CSV/JSON export
+- **Audit Logs**: Comprehensive audit trail viewer with:
+  - Searchable log table with server-side pagination
+  - Filter by event type (Store/Query/Retrieve/Association/Login)
+  - Filter by outcome (Success/Failure)
+  - Date range picker for time-based filtering
+  - Detail view modal with full event information
+  - Export to CSV/JSON with applied filters
 - **Configuration Management**: Comprehensive settings management with:
   - **REST API Settings**: Bind address, port, concurrency, timeout, body size limits
   - **DICOM Server Settings**: AE Title, port, max associations, PDU size, timeouts
@@ -107,7 +113,8 @@ The frontend connects to the following REST API endpoints:
 | `GET /api/v1/studies/:uid/series` | Study's series |
 | `GET /api/v1/series/:uid/instances` | Series' instances |
 | `GET /api/v1/worklist` | Worklist items |
-| `GET /api/v1/audit/logs` | Audit log entries |
+| `GET /api/v1/audit/logs` | Audit log entries with filtering |
+| `GET /api/v1/audit/export` | Export audit logs (CSV/JSON) |
 | `GET /api/v1/associations` | DICOM associations |
 
 ## Building for Production
