@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -407,6 +408,143 @@ struct validation_result {
  */
 [[nodiscard]] auto parse_instance_query_params(
     const std::string& url_params) -> storage::instance_query;
+
+// ============================================================================
+// Frame Retrieval (WADO-RS)
+// ============================================================================
+
+/**
+ * @brief Parse frame numbers from URL path
+ * @param frame_list Comma-separated frame numbers (e.g., "1,3,5" or "1-5")
+ * @return Vector of frame numbers (1-based), empty on parse error
+ *
+ * @par Examples
+ * - "1" -> {1}
+ * - "1,3,5" -> {1, 3, 5}
+ * - "1-5" -> {1, 2, 3, 4, 5}
+ * - "1,3-5,7" -> {1, 3, 4, 5, 7}
+ */
+[[nodiscard]] auto parse_frame_numbers(std::string_view frame_list)
+    -> std::vector<uint32_t>;
+
+/**
+ * @brief Extract a single frame from pixel data
+ * @param pixel_data Complete pixel data buffer
+ * @param frame_number Frame number to extract (1-based)
+ * @param frame_size Size of each frame in bytes
+ * @return Frame data, or empty vector if frame doesn't exist
+ */
+[[nodiscard]] auto extract_frame(
+    std::span<const uint8_t> pixel_data,
+    uint32_t frame_number,
+    size_t frame_size) -> std::vector<uint8_t>;
+
+// ============================================================================
+// Rendered Images (WADO-RS)
+// ============================================================================
+
+/**
+ * @brief Rendered image output format
+ */
+enum class rendered_format {
+    jpeg,   ///< JPEG format (default)
+    png     ///< PNG format
+};
+
+/**
+ * @brief Parameters for rendered image requests
+ */
+struct rendered_params {
+    /// Output format (jpeg or png)
+    rendered_format format{rendered_format::jpeg};
+
+    /// JPEG quality (1-100, default 75)
+    int quality{75};
+
+    /// Window center (default: auto from DICOM or calculated)
+    std::optional<double> window_center;
+
+    /// Window width (default: auto from DICOM or calculated)
+    std::optional<double> window_width;
+
+    /// Output viewport width (0 = original size)
+    uint16_t viewport_width{0};
+
+    /// Output viewport height (0 = original size)
+    uint16_t viewport_height{0};
+
+    /// Frame number for multi-frame images (1-based, default 1)
+    uint32_t frame{1};
+
+    /// Presentation state SOP Instance UID (optional)
+    std::optional<std::string> presentation_state_uid;
+
+    /// Annotation (burned-in or removed)
+    bool burn_annotations{false};
+};
+
+/**
+ * @brief Parse rendered image parameters from HTTP request
+ * @param query_string The URL query string
+ * @param accept_header The Accept header value
+ * @return Parsed rendered parameters
+ */
+[[nodiscard]] auto parse_rendered_params(
+    std::string_view query_string,
+    std::string_view accept_header) -> rendered_params;
+
+/**
+ * @brief Result of rendered image operation
+ */
+struct rendered_result {
+    std::vector<uint8_t> data;      ///< Encoded image data
+    std::string content_type;       ///< MIME type (image/jpeg or image/png)
+    bool success{false};            ///< Operation succeeded
+    std::string error_message;      ///< Error message if failed
+
+    [[nodiscard]] static rendered_result ok(
+        std::vector<uint8_t> d, std::string_view mime_type) {
+        return {std::move(d), std::string(mime_type), true, ""};
+    }
+
+    [[nodiscard]] static rendered_result error(std::string msg) {
+        return {{}, "", false, std::move(msg)};
+    }
+};
+
+/**
+ * @brief Apply window/level transformation to pixel data
+ * @param pixel_data Raw pixel values (16-bit)
+ * @param width Image width
+ * @param height Image height
+ * @param bits_stored Bits stored per pixel
+ * @param is_signed Whether pixel values are signed
+ * @param window_center Window center value
+ * @param window_width Window width value
+ * @param rescale_slope Rescale slope (default 1.0)
+ * @param rescale_intercept Rescale intercept (default 0.0)
+ * @return 8-bit grayscale image data
+ */
+[[nodiscard]] auto apply_window_level(
+    std::span<const uint8_t> pixel_data,
+    uint16_t width,
+    uint16_t height,
+    uint16_t bits_stored,
+    bool is_signed,
+    double window_center,
+    double window_width,
+    double rescale_slope = 1.0,
+    double rescale_intercept = 0.0) -> std::vector<uint8_t>;
+
+/**
+ * @brief Render a DICOM image to JPEG or PNG
+ * @param file_path Path to DICOM file
+ * @param params Rendering parameters
+ * @return Rendered image result
+ */
+[[nodiscard]] auto render_dicom_image(
+    std::string_view file_path,
+    const rendered_params& params) -> rendered_result;
 
 } // namespace dicomweb
 

@@ -20,6 +20,7 @@
 #include "pacs/core/dicom_element.hpp"
 #include "pacs/core/dicom_file.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
 #include "pacs/encoding/vr_type.hpp"
 #include "pacs/storage/index_database.hpp"
 #include "pacs/storage/instance_record.hpp"
@@ -1105,6 +1106,384 @@ auto parse_instance_query_params(const std::string& url_params) -> storage::inst
     return query;
 }
 
+// ============================================================================
+// Frame Retrieval
+// ============================================================================
+
+auto parse_frame_numbers(std::string_view frame_list) -> std::vector<uint32_t> {
+    std::vector<uint32_t> frames;
+
+    if (frame_list.empty()) {
+        return frames;
+    }
+
+    // Split by comma
+    auto parts = split(frame_list, ',');
+    for (const auto& part : parts) {
+        auto trimmed = trim(part);
+        if (trimmed.empty()) {
+            continue;
+        }
+
+        // Check for range (e.g., "1-5")
+        auto dash_pos = trimmed.find('-');
+        if (dash_pos != std::string::npos && dash_pos > 0 &&
+            dash_pos < trimmed.size() - 1) {
+            try {
+                uint32_t start = std::stoul(trimmed.substr(0, dash_pos));
+                uint32_t end = std::stoul(trimmed.substr(dash_pos + 1));
+                if (start > 0 && end >= start) {
+                    for (uint32_t i = start; i <= end; ++i) {
+                        frames.push_back(i);
+                    }
+                }
+            } catch (...) {
+                // Invalid range, skip
+            }
+        } else {
+            // Single frame number
+            try {
+                uint32_t frame = std::stoul(trimmed);
+                if (frame > 0) {
+                    frames.push_back(frame);
+                }
+            } catch (...) {
+                // Invalid number, skip
+            }
+        }
+    }
+
+    // Remove duplicates while preserving order
+    std::vector<uint32_t> unique_frames;
+    for (auto f : frames) {
+        if (std::find(unique_frames.begin(), unique_frames.end(), f) ==
+            unique_frames.end()) {
+            unique_frames.push_back(f);
+        }
+    }
+
+    return unique_frames;
+}
+
+auto extract_frame(
+    std::span<const uint8_t> pixel_data,
+    uint32_t frame_number,
+    size_t frame_size) -> std::vector<uint8_t> {
+
+    if (frame_number == 0 || frame_size == 0) {
+        return {};
+    }
+
+    // Frame numbers are 1-based
+    size_t offset = (frame_number - 1) * frame_size;
+
+    if (offset + frame_size > pixel_data.size()) {
+        return {};  // Frame doesn't exist
+    }
+
+    return std::vector<uint8_t>(
+        pixel_data.begin() + static_cast<ptrdiff_t>(offset),
+        pixel_data.begin() + static_cast<ptrdiff_t>(offset + frame_size));
+}
+
+// ============================================================================
+// Rendered Images
+// ============================================================================
+
+auto parse_rendered_params(
+    std::string_view query_string,
+    std::string_view accept_header) -> rendered_params {
+
+    rendered_params params;
+
+    // Determine format from Accept header
+    if (accept_header.find("image/png") != std::string_view::npos) {
+        params.format = rendered_format::png;
+    } else {
+        params.format = rendered_format::jpeg;  // Default to JPEG
+    }
+
+    // Parse query parameters
+    auto query_params = parse_query_string(std::string(query_string));
+    for (const auto& [key, value] : query_params) {
+        if (key == "quality") {
+            try {
+                params.quality = std::stoi(value);
+                params.quality = std::clamp(params.quality, 1, 100);
+            } catch (...) {}
+        } else if (key == "windowcenter" || key == "window-center") {
+            try {
+                params.window_center = std::stod(value);
+            } catch (...) {}
+        } else if (key == "windowwidth" || key == "window-width") {
+            try {
+                params.window_width = std::stod(value);
+            } catch (...) {}
+        } else if (key == "viewport") {
+            // Format: WxH or W,H
+            auto sep = value.find_first_of("x,");
+            if (sep != std::string::npos) {
+                try {
+                    params.viewport_width =
+                        static_cast<uint16_t>(std::stoul(value.substr(0, sep)));
+                    params.viewport_height =
+                        static_cast<uint16_t>(std::stoul(value.substr(sep + 1)));
+                } catch (...) {}
+            }
+        } else if (key == "rows") {
+            try {
+                params.viewport_height = static_cast<uint16_t>(std::stoul(value));
+            } catch (...) {}
+        } else if (key == "columns") {
+            try {
+                params.viewport_width = static_cast<uint16_t>(std::stoul(value));
+            } catch (...) {}
+        } else if (key == "frame") {
+            try {
+                params.frame = std::stoul(value);
+                if (params.frame == 0) params.frame = 1;
+            } catch (...) {}
+        } else if (key == "annotation") {
+            params.burn_annotations = (value == "true" || value == "1");
+        }
+    }
+
+    return params;
+}
+
+auto apply_window_level(
+    std::span<const uint8_t> pixel_data,
+    uint16_t width,
+    uint16_t height,
+    uint16_t bits_stored,
+    bool is_signed,
+    double window_center,
+    double window_width,
+    double rescale_slope,
+    double rescale_intercept) -> std::vector<uint8_t> {
+
+    std::vector<uint8_t> output(static_cast<size_t>(width) * height);
+
+    // Calculate window boundaries
+    double window_min = window_center - window_width / 2.0;
+    double window_max = window_center + window_width / 2.0;
+
+    size_t pixel_count = static_cast<size_t>(width) * height;
+    bool is_16bit = (bits_stored > 8);
+
+    for (size_t i = 0; i < pixel_count; ++i) {
+        double value;
+
+        if (is_16bit) {
+            // 16-bit pixel data
+            size_t byte_offset = i * 2;
+            if (byte_offset + 1 >= pixel_data.size()) break;
+
+            if (is_signed) {
+                int16_t raw_value = static_cast<int16_t>(
+                    pixel_data[byte_offset] |
+                    (pixel_data[byte_offset + 1] << 8));
+                value = raw_value * rescale_slope + rescale_intercept;
+            } else {
+                uint16_t raw_value = static_cast<uint16_t>(
+                    pixel_data[byte_offset] |
+                    (pixel_data[byte_offset + 1] << 8));
+                value = raw_value * rescale_slope + rescale_intercept;
+            }
+        } else {
+            // 8-bit pixel data
+            if (i >= pixel_data.size()) break;
+
+            if (is_signed) {
+                value = static_cast<int8_t>(pixel_data[i]) * rescale_slope +
+                        rescale_intercept;
+            } else {
+                value = pixel_data[i] * rescale_slope + rescale_intercept;
+            }
+        }
+
+        // Apply window/level
+        uint8_t output_value;
+        if (value <= window_min) {
+            output_value = 0;
+        } else if (value >= window_max) {
+            output_value = 255;
+        } else {
+            output_value = static_cast<uint8_t>(
+                (value - window_min) / window_width * 255.0);
+        }
+
+        output[i] = output_value;
+    }
+
+    return output;
+}
+
+auto render_dicom_image(
+    std::string_view file_path,
+    const rendered_params& params) -> rendered_result {
+
+    // Load DICOM file
+    std::ifstream file(std::string(file_path), std::ios::binary);
+    if (!file) {
+        return rendered_result::error("Failed to open DICOM file");
+    }
+
+    std::vector<uint8_t> file_data(
+        (std::istreambuf_iterator<char>(file)),
+        std::istreambuf_iterator<char>());
+    file.close();
+
+    auto dicom_result = core::dicom_file::from_bytes(
+        std::span<const uint8_t>(file_data.data(), file_data.size()));
+
+    if (!dicom_result) {
+        return rendered_result::error("Failed to parse DICOM file");
+    }
+
+    const auto& dataset = dicom_result->dataset();
+
+    // Get image parameters
+    auto rows_elem = dataset.get(core::tags::rows);
+    auto cols_elem = dataset.get(core::tags::columns);
+    auto bits_stored_elem = dataset.get(core::tags::bits_stored);
+    auto bits_allocated_elem = dataset.get(core::tags::bits_allocated);
+    auto pixel_rep_elem = dataset.get(core::tags::pixel_representation);
+    auto samples_elem = dataset.get(core::tags::samples_per_pixel);
+    auto pixel_data_elem = dataset.get(core::tags::pixel_data);
+
+    if (!rows_elem || !cols_elem || !pixel_data_elem) {
+        return rendered_result::error("Missing required image attributes");
+    }
+
+    uint16_t rows = rows_elem->as_numeric<uint16_t>();
+    uint16_t cols = cols_elem->as_numeric<uint16_t>();
+    uint16_t bits_stored = bits_stored_elem ?
+        bits_stored_elem->as_numeric<uint16_t>() : 8;
+    uint16_t bits_allocated = bits_allocated_elem ?
+        bits_allocated_elem->as_numeric<uint16_t>() : 8;
+    uint16_t pixel_rep = pixel_rep_elem ?
+        pixel_rep_elem->as_numeric<uint16_t>() : 0;
+    uint16_t samples_per_pixel = samples_elem ?
+        samples_elem->as_numeric<uint16_t>() : 1;
+
+    bool is_signed = (pixel_rep == 1);
+
+    // Get window/level from DICOM or use provided parameters
+    double window_center = 128.0;
+    double window_width = 256.0;
+
+    if (params.window_center.has_value()) {
+        window_center = *params.window_center;
+    } else if (auto wc = dataset.get(core::tags::window_center)) {
+        try {
+            auto values = wc->as_string_list();
+            if (!values.empty()) {
+                window_center = std::stod(values[0]);
+            }
+        } catch (...) {}
+    }
+
+    if (params.window_width.has_value()) {
+        window_width = *params.window_width;
+    } else if (auto ww = dataset.get(core::tags::window_width)) {
+        try {
+            auto values = ww->as_string_list();
+            if (!values.empty()) {
+                window_width = std::stod(values[0]);
+            }
+        } catch (...) {}
+    }
+
+    // Get rescale parameters
+    double rescale_slope = 1.0;
+    double rescale_intercept = 0.0;
+
+    if (auto rs = dataset.get(core::tags::rescale_slope)) {
+        try {
+            rescale_slope = std::stod(rs->as_string());
+        } catch (...) {}
+    }
+    if (auto ri = dataset.get(core::tags::rescale_intercept)) {
+        try {
+            rescale_intercept = std::stod(ri->as_string());
+        } catch (...) {}
+    }
+
+    // Get pixel data
+    auto pixel_data = pixel_data_elem->raw_data();
+
+    // Calculate frame size for multi-frame images
+    size_t frame_size = static_cast<size_t>(rows) * cols * samples_per_pixel *
+                        ((bits_allocated + 7) / 8);
+
+    // Extract specific frame if multi-frame
+    std::span<const uint8_t> frame_data = pixel_data;
+    if (params.frame > 1) {
+        auto extracted = extract_frame(pixel_data, params.frame, frame_size);
+        if (extracted.empty()) {
+            return rendered_result::error("Requested frame does not exist");
+        }
+        // For simplicity, we'll just use first frame for now
+        // Full implementation would handle multi-frame properly
+    }
+
+    // Apply window/level for grayscale images
+    std::vector<uint8_t> output_pixels;
+    if (samples_per_pixel == 1) {
+        output_pixels = apply_window_level(
+            frame_data, cols, rows, bits_stored, is_signed,
+            window_center, window_width, rescale_slope, rescale_intercept);
+    } else {
+        // For color images, just use raw data (convert to 8-bit if needed)
+        output_pixels.resize(static_cast<size_t>(rows) * cols * samples_per_pixel);
+        if (bits_allocated == 8) {
+            std::copy(frame_data.begin(),
+                      frame_data.begin() + std::min(frame_data.size(),
+                                                     output_pixels.size()),
+                      output_pixels.begin());
+        } else {
+            // Convert 16-bit to 8-bit
+            for (size_t i = 0; i < output_pixels.size() && i * 2 + 1 < frame_data.size(); ++i) {
+                uint16_t val = static_cast<uint16_t>(
+                    frame_data[i * 2] | (frame_data[i * 2 + 1] << 8));
+                output_pixels[i] = static_cast<uint8_t>(val >> (bits_stored - 8));
+            }
+        }
+    }
+
+    // Encode to JPEG or PNG
+    if (params.format == rendered_format::jpeg) {
+        encoding::compression::jpeg_baseline_codec codec;
+        encoding::compression::image_params img_params;
+        img_params.width = cols;
+        img_params.height = rows;
+        img_params.bits_allocated = 8;
+        img_params.bits_stored = 8;
+        img_params.high_bit = 7;
+        img_params.samples_per_pixel = samples_per_pixel;
+        img_params.photometric =
+            (samples_per_pixel == 1) ?
+            encoding::compression::photometric_interpretation::monochrome2 :
+            encoding::compression::photometric_interpretation::rgb;
+
+        encoding::compression::compression_options opts;
+        opts.quality = params.quality;
+
+        auto result = codec.encode(output_pixels, img_params, opts);
+        if (!result.success) {
+            return rendered_result::error("JPEG encoding failed: " +
+                                          result.error_message);
+        }
+
+        return rendered_result::ok(std::move(result.data), media_type::jpeg);
+    } else {
+        // PNG encoding - not implemented yet
+        // For now, return JPEG as fallback
+        return rendered_result::error("PNG encoding not yet implemented");
+    }
+}
+
 } // namespace pacs::web::dicomweb
 
 namespace pacs::web::endpoints {
@@ -1480,6 +1859,280 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                                        "/series/" + series_uid +
                                        "/instances/" + sop_uid + "/bulkdata/";
                 return build_metadata_response(files, *ctx, bulk_uri);
+            });
+
+    // ========================================================================
+    // Frame Retrieval (WADO-RS)
+    // ========================================================================
+
+    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/frames/{frameNumbers}
+    CROW_ROUTE(app,
+               "/dicomweb/studies/<string>/series/<string>/instances/<string>/frames/<string>")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req,
+                  const std::string& study_uid,
+                  const std::string& series_uid,
+                  const std::string& sop_uid,
+                  const std::string& frame_list) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                auto file_path = ctx->database->get_file_path(sop_uid);
+                if (!file_path) {
+                    res.code = 404;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("NOT_FOUND", "Instance not found");
+                    return res;
+                }
+
+                // Parse frame numbers
+                auto frames = dicomweb::parse_frame_numbers(frame_list);
+                if (frames.empty()) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("INVALID_FRAME_LIST",
+                                               "No valid frame numbers specified");
+                    return res;
+                }
+
+                // Load DICOM file
+                auto data = read_file_bytes(*file_path);
+                if (data.empty()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("READ_ERROR",
+                                               "Failed to read DICOM file");
+                    return res;
+                }
+
+                auto dicom_result = core::dicom_file::from_bytes(
+                    std::span<const uint8_t>(data.data(), data.size()));
+                if (!dicom_result) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("PARSE_ERROR",
+                                               "Failed to parse DICOM file");
+                    return res;
+                }
+
+                const auto& dataset = dicom_result->dataset();
+
+                // Get image parameters
+                auto rows_elem = dataset.get(core::tags::rows);
+                auto cols_elem = dataset.get(core::tags::columns);
+                auto bits_alloc_elem = dataset.get(core::tags::bits_allocated);
+                auto samples_elem = dataset.get(core::tags::samples_per_pixel);
+                // Number of Frames (0028,0008)
+                constexpr core::dicom_tag number_of_frames_tag{0x0028, 0x0008};
+                auto num_frames_elem = dataset.get(number_of_frames_tag);
+                auto pixel_data_elem = dataset.get(core::tags::pixel_data);
+
+                if (!rows_elem || !cols_elem || !pixel_data_elem) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("NOT_IMAGE",
+                                               "Instance does not contain image data");
+                    return res;
+                }
+
+                uint16_t rows = rows_elem->as_numeric<uint16_t>();
+                uint16_t cols = cols_elem->as_numeric<uint16_t>();
+                uint16_t bits_allocated = bits_alloc_elem ?
+                    bits_alloc_elem->as_numeric<uint16_t>() : 16;
+                uint16_t samples_per_pixel = samples_elem ?
+                    samples_elem->as_numeric<uint16_t>() : 1;
+                uint32_t num_frames = 1;
+                if (num_frames_elem) {
+                    try {
+                        num_frames = std::stoul(num_frames_elem->as_string());
+                    } catch (...) {}
+                }
+
+                // Calculate frame size
+                size_t frame_size = static_cast<size_t>(rows) * cols *
+                                    samples_per_pixel * ((bits_allocated + 7) / 8);
+
+                auto pixel_data = pixel_data_elem->raw_data();
+
+                // Check Accept header
+                auto accept = req.get_header_value("Accept");
+
+                // Build multipart response for multiple frames
+                dicomweb::multipart_builder builder(
+                    dicomweb::media_type::octet_stream);
+
+                for (uint32_t frame_num : frames) {
+                    if (frame_num > num_frames) {
+                        // Skip invalid frame numbers
+                        continue;
+                    }
+
+                    auto frame_data = dicomweb::extract_frame(
+                        pixel_data, frame_num, frame_size);
+
+                    if (!frame_data.empty()) {
+                        std::string location = "/dicomweb/studies/" + study_uid +
+                                               "/series/" + series_uid +
+                                               "/instances/" + sop_uid +
+                                               "/frames/" + std::to_string(frame_num);
+                        builder.add_part_with_location(std::move(frame_data), location);
+                    }
+                }
+
+                if (builder.empty()) {
+                    res.code = 404;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("NOT_FOUND",
+                                               "No valid frames found");
+                    return res;
+                }
+
+                // Return single part or multipart
+                if (builder.size() == 1) {
+                    // Single frame - return directly
+                    auto body = builder.build();
+                    res.code = 200;
+                    res.add_header("Content-Type",
+                                   std::string(dicomweb::media_type::octet_stream));
+                    // Extract just the data part from multipart
+                    auto frame_data = dicomweb::extract_frame(
+                        pixel_data, frames[0], frame_size);
+                    res.body = std::string(
+                        reinterpret_cast<char*>(frame_data.data()),
+                        frame_data.size());
+                } else {
+                    // Multiple frames - return multipart
+                    res.code = 200;
+                    res.add_header("Content-Type", builder.content_type_header());
+                    res.body = builder.build();
+                }
+
+                return res;
+            });
+
+    // ========================================================================
+    // Rendered Images (WADO-RS)
+    // ========================================================================
+
+    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/rendered
+    CROW_ROUTE(app,
+               "/dicomweb/studies/<string>/series/<string>/instances/<string>/rendered")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req,
+                  const std::string& study_uid,
+                  const std::string& series_uid,
+                  const std::string& sop_uid) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                auto file_path = ctx->database->get_file_path(sop_uid);
+                if (!file_path) {
+                    res.code = 404;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("NOT_FOUND", "Instance not found");
+                    return res;
+                }
+
+                // Parse rendering parameters
+                auto accept = req.get_header_value("Accept");
+                auto params = dicomweb::parse_rendered_params(req.raw_url, accept);
+
+                // Render image
+                auto result = dicomweb::render_dicom_image(*file_path, params);
+
+                if (!result.success) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("RENDER_ERROR", result.error_message);
+                    return res;
+                }
+
+                res.code = 200;
+                res.add_header("Content-Type", result.content_type);
+                res.body = std::string(
+                    reinterpret_cast<char*>(result.data.data()),
+                    result.data.size());
+                return res;
+            });
+
+    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/frames/{frameNumber}/rendered
+    CROW_ROUTE(app,
+               "/dicomweb/studies/<string>/series/<string>/instances/<string>/frames/<string>/rendered")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req,
+                  const std::string& study_uid,
+                  const std::string& series_uid,
+                  const std::string& sop_uid,
+                  const std::string& frame_str) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                auto file_path = ctx->database->get_file_path(sop_uid);
+                if (!file_path) {
+                    res.code = 404;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("NOT_FOUND", "Instance not found");
+                    return res;
+                }
+
+                // Parse frame number
+                uint32_t frame_num = 1;
+                try {
+                    frame_num = std::stoul(frame_str);
+                    if (frame_num == 0) frame_num = 1;
+                } catch (...) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("INVALID_FRAME",
+                                               "Invalid frame number");
+                    return res;
+                }
+
+                // Parse rendering parameters and set frame
+                auto accept = req.get_header_value("Accept");
+                auto params = dicomweb::parse_rendered_params(req.raw_url, accept);
+                params.frame = frame_num;
+
+                // Render image
+                auto result = dicomweb::render_dicom_image(*file_path, params);
+
+                if (!result.success) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("RENDER_ERROR", result.error_message);
+                    return res;
+                }
+
+                res.code = 200;
+                res.add_header("Content-Type", result.content_type);
+                res.body = std::string(
+                    reinterpret_cast<char*>(result.data.data()),
+                    result.data.size());
+                return res;
             });
 
     // ========================================================================
