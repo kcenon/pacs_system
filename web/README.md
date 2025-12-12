@@ -18,7 +18,14 @@ React-based web administration interface for the PACS system.
   - Expandable Series/Instance navigation tree
   - Detailed metadata viewer panel for Study, Series, and Instance
   - Table and tree view options for study navigation
-- **Worklist Management**: View and manage scheduled procedures
+- **Worklist Management**: Full CRUD operations for scheduled procedures with:
+  - Scheduled procedure list view with pagination and search
+  - Create new worklist item form with auto-generated IDs
+  - Edit existing worklist items
+  - Status tracking with quick update dialog (Scheduled/In Progress/Completed/Discontinued)
+  - Delete confirmation dialog with item details
+  - Expandable row details showing all procedure information
+  - Form validation for required fields (Step ID, Patient ID, Modality, Scheduled DateTime)
 - **Audit Logs**: Comprehensive audit trail viewer with:
   - Searchable log table with server-side pagination
   - Filter by event type (Store/Query/Retrieve/Association/Login)
@@ -82,7 +89,8 @@ web/
 │   ├── api/          # API client and types
 │   ├── components/   # Reusable UI components
 │   │   ├── layout/   # Layout components (Header, Sidebar)
-│   │   └── ui/       # Base UI components (Button, Card, Table)
+│   │   ├── ui/       # Base UI components (Button, Card, Table)
+│   │   └── worklist/ # Worklist-specific components (Form, Dialogs)
 │   ├── hooks/        # Custom React hooks
 │   ├── lib/          # Utility functions
 │   ├── pages/        # Page components
@@ -112,7 +120,11 @@ The frontend connects to the following REST API endpoints:
 | `GET /api/v1/patients/:id/studies` | Patient's studies |
 | `GET /api/v1/studies/:uid/series` | Study's series |
 | `GET /api/v1/series/:uid/instances` | Series' instances |
-| `GET /api/v1/worklist` | Worklist items |
+| `GET /api/v1/worklist` | Worklist items (paginated) |
+| `POST /api/v1/worklist` | Create worklist item |
+| `GET /api/v1/worklist/:id` | Get worklist item by ID |
+| `PUT /api/v1/worklist/:id` | Update worklist item status |
+| `DELETE /api/v1/worklist/:id` | Delete worklist item |
 | `GET /api/v1/audit/logs` | Audit log entries with filtering |
 | `GET /api/v1/audit/export` | Export audit logs (CSV/JSON) |
 | `GET /api/v1/associations` | DICOM associations |

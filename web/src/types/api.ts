@@ -180,34 +180,61 @@ export interface Instance {
   file_size: number;
 }
 
-// Worklist types
+// Worklist types - aligned with backend API response
 export interface WorklistItem {
   pk: number;
-  scheduled_station_ae: string;
-  scheduled_procedure_step_start_date: string;
-  scheduled_procedure_step_start_time: string;
-  modality: string;
-  scheduled_performing_physician: string;
-  scheduled_procedure_step_description: string;
-  scheduled_procedure_step_id: string;
-  requested_procedure_id: string;
+  step_id: string;
+  step_status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISCONTINUED';
   patient_id: string;
   patient_name: string;
-  patient_birth_date: string;
-  patient_sex: string;
-  accession_number: string;
-  referring_physician: string;
-  study_instance_uid: string;
-  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISCONTINUED';
+  birth_date: string;
+  sex: string;
+  accession_no: string;
+  requested_proc_id: string;
+  study_uid: string;
+  scheduled_datetime: string;
+  station_ae: string;
+  station_name: string;
+  modality: string;
+  procedure_desc: string;
+  protocol_code: string;
+  referring_phys: string;
+  referring_phys_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Input type for creating/updating worklist items
+export interface WorklistItemInput {
+  step_id: string;
+  step_status?: string;
+  patient_id: string;
+  patient_name?: string;
+  birth_date?: string;
+  sex?: string;
+  accession_no?: string;
+  requested_proc_id?: string;
+  study_uid?: string;
+  scheduled_datetime: string;
+  station_ae?: string;
+  station_name?: string;
+  modality: string;
+  procedure_desc?: string;
+  protocol_code?: string;
+  referring_phys?: string;
+  referring_phys_id?: string;
 }
 
 export interface WorklistQuery {
-  scheduled_station_ae?: string;
+  station_ae?: string;
   modality?: string;
-  date_from?: string;
-  date_to?: string;
-  status?: string;
+  scheduled_date_from?: string;
+  scheduled_date_to?: string;
   patient_id?: string;
+  patient_name?: string;
+  accession_no?: string;
+  step_id?: string;
+  include_all_status?: boolean;
   limit?: number;
   offset?: number;
 }
