@@ -3296,6 +3296,157 @@ struct media_type {
     *   `200 OK`: DicomJSON array with single instance metadata.
     *   `404 Not Found`: Instance not found.
 
+##### Retrieve Frame
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/frames/<frameList>`
+*   **Description**: Retrieve specific frame(s) from a multi-frame DICOM instance.
+*   **Path Parameters**:
+    *   `frameList`: Comma-separated frame numbers or ranges (1-based). Examples:
+        *   `1` - Single frame
+        *   `1,3,5` - Multiple frames
+        *   `1-5` - Frame range (1, 2, 3, 4, 5)
+        *   `1,3-5,7` - Mixed notation
+*   **Accept Headers**:
+    *   `application/octet-stream` (default) - Raw pixel data
+    *   `multipart/related; type="application/octet-stream"` - Multiple frames
+*   **Responses**:
+    *   `200 OK`: Multipart response with frame pixel data.
+    *   `400 Bad Request`: Invalid frame list syntax.
+    *   `404 Not Found`: Instance not found or frame number out of range.
+    *   `406 Not Acceptable`: Requested media type not supported.
+
+##### Retrieve Rendered Image
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/rendered`
+*   **Description**: Retrieve a rendered (consumer-ready) image from a DICOM instance.
+*   **Query Parameters**:
+    *   `window-center` (optional): VOI LUT window center value
+    *   `window-width` (optional): VOI LUT window width value
+    *   `quality` (optional): JPEG quality (1-100, default 75)
+    *   `viewport` (optional): Output size as `width,height`
+    *   `frame` (optional): Frame number for multi-frame images (1-based, default 1)
+*   **Accept Headers**:
+    *   `image/jpeg` (default) - JPEG output
+    *   `image/png` - PNG output
+    *   `*/*` - JPEG (default)
+*   **Responses**:
+    *   `200 OK`: Rendered image in requested format.
+    *   `404 Not Found`: Instance not found.
+    *   `406 Not Acceptable`: Requested media type not supported.
+
+##### Retrieve Frame Rendered Image
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/frames/<frameNumber>/rendered`
+*   **Description**: Retrieve a rendered image of a specific frame from a multi-frame DICOM instance.
+*   **Query Parameters**: Same as Retrieve Rendered Image (except `frame`).
+*   **Accept Headers**: Same as Retrieve Rendered Image.
+*   **Responses**:
+    *   `200 OK`: Rendered image in requested format.
+    *   `400 Bad Request`: Invalid frame number.
+    *   `404 Not Found`: Instance not found or frame out of range.
+    *   `406 Not Acceptable`: Requested media type not supported.
+
+#### Frame Retrieval Utilities
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+/**
+ * @brief Parse frame numbers from URL path
+ * @param frame_list Comma-separated frame numbers (e.g., "1,3,5" or "1-5")
+ * @return Vector of frame numbers (1-based), empty on parse error
+ */
+[[nodiscard]] auto parse_frame_numbers(std::string_view frame_list)
+    -> std::vector<uint32_t>;
+
+/**
+ * @brief Extract a single frame from pixel data
+ * @param pixel_data Complete pixel data buffer
+ * @param frame_number Frame number to extract (1-based)
+ * @param frame_size Size of each frame in bytes
+ * @return Frame data, or empty vector if frame doesn't exist
+ */
+[[nodiscard]] auto extract_frame(
+    std::span<const uint8_t> pixel_data,
+    uint32_t frame_number,
+    size_t frame_size) -> std::vector<uint8_t>;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### Rendered Image Utilities
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+/**
+ * @brief Rendered image output format
+ */
+enum class rendered_format {
+    jpeg,   ///< JPEG format (default)
+    png     ///< PNG format
+};
+
+/**
+ * @brief Parameters for rendered image requests
+ */
+struct rendered_params {
+    rendered_format format{rendered_format::jpeg};  ///< Output format
+    int quality{75};                                 ///< JPEG quality (1-100)
+    std::optional<double> window_center;             ///< VOI LUT window center
+    std::optional<double> window_width;              ///< VOI LUT window width
+    uint16_t viewport_width{0};                      ///< Output width (0 = original)
+    uint16_t viewport_height{0};                     ///< Output height (0 = original)
+    uint32_t frame{1};                               ///< Frame number (1-based)
+    std::optional<std::string> presentation_state_uid;  ///< Optional GSPS UID
+    bool burn_annotations{false};                    ///< Burn-in annotations
+};
+
+/**
+ * @brief Result of a rendering operation
+ */
+struct rendered_result {
+    std::vector<uint8_t> data;      ///< Rendered image data
+    std::string content_type;        ///< MIME type of result
+    bool success{false};             ///< Whether rendering succeeded
+    std::string error_message;       ///< Error message if failed
+
+    [[nodiscard]] static rendered_result ok(std::vector<uint8_t> data,
+                                            std::string content_type);
+    [[nodiscard]] static rendered_result error(std::string msg);
+};
+
+/**
+ * @brief Parse rendered image parameters from HTTP request
+ */
+[[nodiscard]] auto parse_rendered_params(
+    std::string_view query_string,
+    std::string_view accept_header) -> rendered_params;
+
+/**
+ * @brief Apply window/level transformation to pixel data
+ */
+[[nodiscard]] auto apply_window_level(
+    std::span<const uint8_t> pixel_data,
+    uint16_t width, uint16_t height,
+    uint16_t bits_stored, bool is_signed,
+    double window_center, double window_width,
+    double rescale_slope, double rescale_intercept) -> std::vector<uint8_t>;
+
+/**
+ * @brief Render a DICOM image to consumer format
+ */
+[[nodiscard]] auto render_dicom_image(
+    std::string_view file_path,
+    const rendered_params& params) -> rendered_result;
+
+} // namespace pacs::web::dicomweb
+```
+
 ### STOW-RS (Store Over the Web) API
 
 The STOW-RS module implements the Store Over the Web - RESTful specification
@@ -3611,6 +3762,7 @@ namespace pacs::web::dicomweb {
 | 1.8.0   | 2025-12-12 | Added DICOMweb (WADO-RS) API endpoints and utilities |
 | 1.9.0   | 2025-12-13 | Added STOW-RS (Store Over the Web) API endpoints and multipart parser |
 | 1.10.0  | 2025-12-13 | Added QIDO-RS (Query based on ID for DICOM Objects) API endpoints |
+| 1.11.0  | 2025-12-13 | Added WADO-RS Frame retrieval and Rendered image endpoints |
 
 
 ---

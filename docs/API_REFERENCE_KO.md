@@ -2883,6 +2883,157 @@ struct media_type {
     *   `200 OK`: 단일 인스턴스 메타데이터의 DicomJSON 배열.
     *   `404 Not Found`: 인스턴스를 찾을 수 없음.
 
+##### 프레임 조회
+*   **메소드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/frames/<frameList>`
+*   **설명**: 다중 프레임 DICOM 인스턴스에서 특정 프레임을 조회합니다.
+*   **경로 매개변수**:
+    *   `frameList`: 쉼표로 구분된 프레임 번호 또는 범위 (1부터 시작). 예시:
+        *   `1` - 단일 프레임
+        *   `1,3,5` - 여러 프레임
+        *   `1-5` - 프레임 범위 (1, 2, 3, 4, 5)
+        *   `1,3-5,7` - 혼합 표기
+*   **Accept 헤더**:
+    *   `application/octet-stream` (기본값) - 원시 픽셀 데이터
+    *   `multipart/related; type="application/octet-stream"` - 여러 프레임
+*   **응답**:
+    *   `200 OK`: 프레임 픽셀 데이터의 멀티파트 응답.
+    *   `400 Bad Request`: 잘못된 프레임 목록 구문.
+    *   `404 Not Found`: 인스턴스를 찾을 수 없거나 프레임 번호가 범위를 벗어남.
+    *   `406 Not Acceptable`: 요청된 미디어 타입이 지원되지 않음.
+
+##### 렌더링된 이미지 조회
+*   **메소드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/rendered`
+*   **설명**: DICOM 인스턴스에서 렌더링된 (소비자용) 이미지를 조회합니다.
+*   **쿼리 매개변수**:
+    *   `window-center` (선택): VOI LUT 윈도우 센터 값
+    *   `window-width` (선택): VOI LUT 윈도우 너비 값
+    *   `quality` (선택): JPEG 품질 (1-100, 기본값 75)
+    *   `viewport` (선택): `너비,높이` 형식의 출력 크기
+    *   `frame` (선택): 다중 프레임 이미지의 프레임 번호 (1부터 시작, 기본값 1)
+*   **Accept 헤더**:
+    *   `image/jpeg` (기본값) - JPEG 출력
+    *   `image/png` - PNG 출력
+    *   `*/*` - JPEG (기본값)
+*   **응답**:
+    *   `200 OK`: 요청된 형식의 렌더링된 이미지.
+    *   `404 Not Found`: 인스턴스를 찾을 수 없음.
+    *   `406 Not Acceptable`: 요청된 미디어 타입이 지원되지 않음.
+
+##### 프레임 렌더링 이미지 조회
+*   **메소드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/frames/<frameNumber>/rendered`
+*   **설명**: 다중 프레임 DICOM 인스턴스에서 특정 프레임의 렌더링된 이미지를 조회합니다.
+*   **쿼리 매개변수**: 렌더링된 이미지 조회와 동일 (`frame` 제외).
+*   **Accept 헤더**: 렌더링된 이미지 조회와 동일.
+*   **응답**:
+    *   `200 OK`: 요청된 형식의 렌더링된 이미지.
+    *   `400 Bad Request`: 잘못된 프레임 번호.
+    *   `404 Not Found`: 인스턴스를 찾을 수 없거나 프레임이 범위를 벗어남.
+    *   `406 Not Acceptable`: 요청된 미디어 타입이 지원되지 않음.
+
+#### 프레임 조회 유틸리티
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+/**
+ * @brief URL 경로에서 프레임 번호 파싱
+ * @param frame_list 쉼표로 구분된 프레임 번호 (예: "1,3,5" 또는 "1-5")
+ * @return 프레임 번호 벡터 (1부터 시작), 파싱 오류 시 빈 벡터
+ */
+[[nodiscard]] auto parse_frame_numbers(std::string_view frame_list)
+    -> std::vector<uint32_t>;
+
+/**
+ * @brief 픽셀 데이터에서 단일 프레임 추출
+ * @param pixel_data 전체 픽셀 데이터 버퍼
+ * @param frame_number 추출할 프레임 번호 (1부터 시작)
+ * @param frame_size 각 프레임의 바이트 크기
+ * @return 프레임 데이터, 존재하지 않으면 빈 벡터
+ */
+[[nodiscard]] auto extract_frame(
+    std::span<const uint8_t> pixel_data,
+    uint32_t frame_number,
+    size_t frame_size) -> std::vector<uint8_t>;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### 렌더링 이미지 유틸리티
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+/**
+ * @brief 렌더링된 이미지 출력 형식
+ */
+enum class rendered_format {
+    jpeg,   ///< JPEG 형식 (기본값)
+    png     ///< PNG 형식
+};
+
+/**
+ * @brief 렌더링된 이미지 요청 매개변수
+ */
+struct rendered_params {
+    rendered_format format{rendered_format::jpeg};  ///< 출력 형식
+    int quality{75};                                 ///< JPEG 품질 (1-100)
+    std::optional<double> window_center;             ///< VOI LUT 윈도우 센터
+    std::optional<double> window_width;              ///< VOI LUT 윈도우 너비
+    uint16_t viewport_width{0};                      ///< 출력 너비 (0 = 원본)
+    uint16_t viewport_height{0};                     ///< 출력 높이 (0 = 원본)
+    uint32_t frame{1};                               ///< 프레임 번호 (1부터 시작)
+    std::optional<std::string> presentation_state_uid;  ///< 선택적 GSPS UID
+    bool burn_annotations{false};                    ///< 주석 번인
+};
+
+/**
+ * @brief 렌더링 작업 결과
+ */
+struct rendered_result {
+    std::vector<uint8_t> data;      ///< 렌더링된 이미지 데이터
+    std::string content_type;        ///< 결과의 MIME 타입
+    bool success{false};             ///< 렌더링 성공 여부
+    std::string error_message;       ///< 실패 시 오류 메시지
+
+    [[nodiscard]] static rendered_result ok(std::vector<uint8_t> data,
+                                            std::string content_type);
+    [[nodiscard]] static rendered_result error(std::string msg);
+};
+
+/**
+ * @brief HTTP 요청에서 렌더링된 이미지 매개변수 파싱
+ */
+[[nodiscard]] auto parse_rendered_params(
+    std::string_view query_string,
+    std::string_view accept_header) -> rendered_params;
+
+/**
+ * @brief 픽셀 데이터에 윈도우/레벨 변환 적용
+ */
+[[nodiscard]] auto apply_window_level(
+    std::span<const uint8_t> pixel_data,
+    uint16_t width, uint16_t height,
+    uint16_t bits_stored, bool is_signed,
+    double window_center, double window_width,
+    double rescale_slope, double rescale_intercept) -> std::vector<uint8_t>;
+
+/**
+ * @brief DICOM 이미지를 소비자 형식으로 렌더링
+ */
+[[nodiscard]] auto render_dicom_image(
+    std::string_view file_path,
+    const rendered_params& params) -> rendered_result;
+
+} // namespace pacs::web::dicomweb
+```
+
 ### STOW-RS (Store Over the Web) API
 
 STOW-RS 모듈은 HTTP를 통한 DICOM 객체 저장을 위해 DICOM PS3.18에 정의된
@@ -3060,10 +3211,12 @@ namespace pacs::web::dicomweb {
 | 1.7.0 | 2025-12-11 | Patient, Study, Series REST API 엔드포인트 추가 |
 | 1.8.0 | 2025-12-12 | DICOMweb (WADO-RS) API 엔드포인트 및 유틸리티 추가 |
 | 1.9.0 | 2025-12-13 | STOW-RS (Store Over the Web) API 엔드포인트 및 멀티파트 파서 추가 |
+| 1.10.0 | 2025-12-13 | QIDO-RS (Query based on ID for DICOM Objects) API 엔드포인트 추가 |
+| 1.11.0 | 2025-12-13 | WADO-RS 프레임 조회 및 렌더링 이미지 엔드포인트 추가 |
 
 ---
 
-*문서 버전: 0.1.9.0*
+*문서 버전: 0.1.11.0*
 *작성일: 2025-11-30*
 *최종 수정일: 2025-12-13*
 *작성자: kcenon@naver.com*
