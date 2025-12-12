@@ -183,6 +183,163 @@ private:
  */
 [[nodiscard]] auto is_bulk_data_tag(uint32_t tag) -> bool;
 
+// ============================================================================
+// STOW-RS Support (Store Over the Web)
+// ============================================================================
+
+/**
+ * @brief Parsed part from multipart request
+ *
+ * Represents a single part extracted from a multipart/related request body.
+ */
+struct multipart_part {
+    std::string content_type;       ///< Content-Type of this part
+    std::string content_location;   ///< Content-Location header (optional)
+    std::string content_id;         ///< Content-ID header (optional)
+    std::vector<uint8_t> data;      ///< Binary data of this part
+};
+
+/**
+ * @brief Parser for multipart/related request bodies
+ *
+ * Parses incoming multipart/related requests as used by STOW-RS
+ * for uploading DICOM instances.
+ *
+ * @par Example
+ * @code
+ * auto parts = multipart_parser::parse(content_type_header, request_body);
+ * for (const auto& part : parts) {
+ *     if (part.content_type == "application/dicom") {
+ *         // Process DICOM data
+ *     }
+ * }
+ * @endcode
+ */
+class multipart_parser {
+public:
+    /**
+     * @brief Parse error information
+     */
+    struct parse_error {
+        std::string code;       ///< Error code (e.g., "INVALID_BOUNDARY")
+        std::string message;    ///< Human-readable error message
+    };
+
+    /**
+     * @brief Parse result - either parts or error
+     */
+    struct parse_result {
+        std::vector<multipart_part> parts;  ///< Parsed parts (empty on error)
+        std::optional<parse_error> error;   ///< Error if parsing failed
+
+        [[nodiscard]] bool success() const noexcept { return !error.has_value(); }
+        [[nodiscard]] explicit operator bool() const noexcept { return success(); }
+    };
+
+    /**
+     * @brief Parse a multipart/related request body
+     * @param content_type The Content-Type header value (must include boundary)
+     * @param body The raw request body
+     * @return Parse result containing parts or error
+     */
+    [[nodiscard]] static auto parse(std::string_view content_type,
+                                    std::string_view body) -> parse_result;
+
+    /**
+     * @brief Extract boundary from Content-Type header
+     * @param content_type The Content-Type header value
+     * @return Boundary string or nullopt if not found
+     */
+    [[nodiscard]] static auto extract_boundary(std::string_view content_type)
+        -> std::optional<std::string>;
+
+    /**
+     * @brief Extract type parameter from Content-Type header
+     * @param content_type The Content-Type header value
+     * @return Type value or nullopt if not found
+     */
+    [[nodiscard]] static auto extract_type(std::string_view content_type)
+        -> std::optional<std::string>;
+
+private:
+    /**
+     * @brief Parse headers from a part's header section
+     * @param header_section The raw header section
+     * @return Map of header name to value
+     */
+    [[nodiscard]] static auto parse_part_headers(std::string_view header_section)
+        -> std::vector<std::pair<std::string, std::string>>;
+};
+
+/**
+ * @brief STOW-RS store result for a single instance
+ */
+struct store_instance_result {
+    bool success = false;                   ///< Whether storage succeeded
+    std::string sop_class_uid;              ///< SOP Class UID of the instance
+    std::string sop_instance_uid;           ///< SOP Instance UID of the instance
+    std::string retrieve_url;               ///< URL to retrieve the stored instance
+    std::optional<std::string> error_code;  ///< Error code if failed
+    std::optional<std::string> error_message; ///< Error message if failed
+};
+
+/**
+ * @brief STOW-RS overall store response
+ */
+struct store_response {
+    std::vector<store_instance_result> referenced_instances;  ///< Successfully stored
+    std::vector<store_instance_result> failed_instances;      ///< Failed to store
+
+    [[nodiscard]] bool all_success() const noexcept {
+        return failed_instances.empty() && !referenced_instances.empty();
+    }
+
+    [[nodiscard]] bool all_failed() const noexcept {
+        return referenced_instances.empty() && !failed_instances.empty();
+    }
+
+    [[nodiscard]] bool partial_success() const noexcept {
+        return !referenced_instances.empty() && !failed_instances.empty();
+    }
+};
+
+/**
+ * @brief Validation result for DICOM instance
+ */
+struct validation_result {
+    bool valid = true;                      ///< Whether validation passed
+    std::string error_code;                 ///< Error code if invalid
+    std::string error_message;              ///< Error message if invalid
+
+    [[nodiscard]] explicit operator bool() const noexcept { return valid; }
+
+    static validation_result ok() { return {true, "", ""}; }
+    static validation_result error(std::string code, std::string message) {
+        return {false, std::move(code), std::move(message)};
+    }
+};
+
+/**
+ * @brief Validate a DICOM instance for STOW-RS storage
+ * @param dataset The DICOM dataset to validate
+ * @param target_study_uid Optional target study UID (for existing study)
+ * @return Validation result
+ */
+[[nodiscard]] auto validate_instance(
+    const core::dicom_dataset& dataset,
+    std::optional<std::string_view> target_study_uid = std::nullopt)
+    -> validation_result;
+
+/**
+ * @brief Build STOW-RS response in DicomJSON format
+ * @param response The store response
+ * @param base_url Base URL for retrieve URLs
+ * @return DicomJSON response body
+ */
+[[nodiscard]] auto build_store_response_json(
+    const store_response& response,
+    std::string_view base_url) -> std::string;
+
 } // namespace dicomweb
 
 namespace endpoints {
