@@ -97,15 +97,40 @@ export interface Study {
   num_instances: number;
 }
 
+export interface StudyQuery {
+  patient_id?: string;
+  study_date?: string;
+  study_date_from?: string;
+  study_date_to?: string;
+  modality?: string;
+  accession_number?: string;
+  study_description?: string;
+  limit?: number;
+  offset?: number;
+}
+
 // Series types
 export interface Series {
   pk: number;
+  study_pk?: number;
   series_instance_uid: string;
-  series_number: string;
+  series_number: number | null;
   modality: string;
   series_description: string;
-  body_part: string;
+  body_part_examined?: string;
+  station_name?: string;
   num_instances: number;
+}
+
+// Instance types
+export interface Instance {
+  pk: number;
+  series_pk: number;
+  sop_instance_uid: string;
+  sop_class_uid: string;
+  transfer_syntax: string;
+  instance_number: number | null;
+  file_size: number;
 }
 
 // Worklist types
