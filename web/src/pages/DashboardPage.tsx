@@ -207,7 +207,7 @@ function StorageChart({ used, total }: { used: number; total: number }) {
               cy="50%"
               outerRadius={70}
               dataKey="value"
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
               labelLine={false}
             >
               {modalityData.map((entry, index) => (
