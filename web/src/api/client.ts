@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
-import type { ApiError } from '../types/api';
+import type { ApiError, WorklistItemInput } from '../types/api';
 
 const API_BASE_URL = '/api/v1';
 
@@ -134,7 +134,7 @@ class ApiClient {
   }
 
   // Worklist endpoints
-  async getWorklist(params?: Record<string, string | number | undefined>) {
+  async getWorklist(params?: Record<string, string | number | boolean | undefined>) {
     const response = await this.client.get('/worklist', { params });
     return response.data;
   }
@@ -144,12 +144,12 @@ class ApiClient {
     return response.data;
   }
 
-  async createWorklistItem(item: Record<string, unknown>) {
+  async createWorklistItem(item: WorklistItemInput) {
     const response = await this.client.post('/worklist', item);
     return response.data;
   }
 
-  async updateWorklistItem(itemId: number, item: Record<string, unknown>) {
+  async updateWorklistItem(itemId: number, item: { step_status: string }) {
     const response = await this.client.put(`/worklist/${itemId}`, item);
     return response.data;
   }
