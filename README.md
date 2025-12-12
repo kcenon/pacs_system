@@ -10,7 +10,7 @@
 
 ## Overview
 
-A production-ready C++20 PACS (Picture Archiving and Communication System) implementation built entirely on the kcenon ecosystem without external DICOM libraries. This project implements the DICOM standard from scratch, leveraging the existing high-performance infrastructure.
+A modern C++20 PACS (Picture Archiving and Communication System) implementation built entirely on the kcenon ecosystem without external DICOM libraries. This project implements the DICOM standard from scratch, leveraging the existing high-performance infrastructure.
 
 **Key Characteristics**:
 - **Zero External DICOM Libraries**: Pure implementation using kcenon ecosystem
