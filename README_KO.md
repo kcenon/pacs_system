@@ -10,7 +10,7 @@
 
 ## 개요
 
-kcenon 에코시스템을 기반으로 외부 DICOM 라이브러리 없이 구축된 프로덕션급 C++20 PACS (Picture Archiving and Communication System) 구현체입니다. 이 프로젝트는 기존 고성능 인프라를 활용하여 DICOM 표준을 처음부터 구현합니다.
+kcenon 에코시스템을 기반으로 외부 DICOM 라이브러리 없이 구축된 고성능 C++20 PACS (Picture Archiving and Communication System) 구현체입니다. 이 프로젝트는 기존 고성능 인프라를 활용하여 DICOM 표준을 처음부터 구현합니다.
 
 **주요 특징**:
 - **외부 DICOM 라이브러리 제로**: kcenon 에코시스템을 활용한 순수 구현
