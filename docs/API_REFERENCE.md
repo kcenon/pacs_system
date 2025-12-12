@@ -3457,6 +3457,143 @@ namespace pacs::web::dicomweb {
     *   `409 Conflict`: All instances failed or Study UID mismatch.
     *   `415 Unsupported Media Type`: Invalid Content-Type.
 
+### QIDO-RS (Query based on ID for DICOM Objects) API
+
+The QIDO-RS module implements the Query based on ID for DICOM Objects - RESTful specification
+as defined in DICOM PS3.18 for searching DICOM objects via HTTP.
+
+#### QIDO-RS Utility Functions
+
+```cpp
+namespace pacs::web::dicomweb {
+
+// Convert database records to DicomJSON format for QIDO-RS responses
+[[nodiscard]] auto study_record_to_dicom_json(
+    const storage::study_record& record,
+    std::string_view patient_id,
+    std::string_view patient_name) -> std::string;
+
+[[nodiscard]] auto series_record_to_dicom_json(
+    const storage::series_record& record,
+    std::string_view study_uid) -> std::string;
+
+[[nodiscard]] auto instance_record_to_dicom_json(
+    const storage::instance_record& record,
+    std::string_view series_uid,
+    std::string_view study_uid) -> std::string;
+
+// Parse QIDO-RS query parameters from HTTP request URL
+[[nodiscard]] auto parse_study_query_params(
+    const std::string& url_params) -> storage::study_query;
+
+[[nodiscard]] auto parse_series_query_params(
+    const std::string& url_params) -> storage::series_query;
+
+[[nodiscard]] auto parse_instance_query_params(
+    const std::string& url_params) -> storage::instance_query;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### REST API Endpoints (QIDO-RS)
+
+**Base Path**: `/dicomweb`
+
+##### Search Studies
+*   **Method**: `GET`
+*   **Path**: `/studies`
+*   **Description**: Search for studies matching query parameters.
+*   **Query Parameters**:
+    *   `PatientID` or `00100020`: Patient ID (supports `*` wildcard)
+    *   `PatientName` or `00100010`: Patient name (supports `*` wildcard)
+    *   `StudyInstanceUID` or `0020000D`: Study Instance UID
+    *   `StudyID` or `00200010`: Study ID
+    *   `StudyDate` or `00080020`: Study date (YYYYMMDD or YYYYMMDD-YYYYMMDD for range)
+    *   `AccessionNumber` or `00080050`: Accession number
+    *   `ModalitiesInStudy` or `00080061`: Modalities in study
+    *   `ReferringPhysicianName` or `00080090`: Referring physician
+    *   `StudyDescription` or `00081030`: Study description
+    *   `limit`: Maximum number of results (default: 100)
+    *   `offset`: Pagination offset
+*   **Accept**: `application/dicom+json`
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of matching studies.
+    *   `503 Service Unavailable`: Database not configured.
+
+##### Search Series
+*   **Method**: `GET`
+*   **Path**: `/series`
+*   **Description**: Search for all series matching query parameters.
+*   **Query Parameters**:
+    *   `StudyInstanceUID` or `0020000D`: Study Instance UID
+    *   `SeriesInstanceUID` or `0020000E`: Series Instance UID
+    *   `Modality` or `00080060`: Modality (e.g., CT, MR, US)
+    *   `SeriesNumber` or `00200011`: Series number
+    *   `SeriesDescription` or `0008103E`: Series description
+    *   `BodyPartExamined` or `00180015`: Body part examined
+    *   `limit`: Maximum number of results (default: 100)
+    *   `offset`: Pagination offset
+*   **Accept**: `application/dicom+json`
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of matching series.
+    *   `503 Service Unavailable`: Database not configured.
+
+##### Search Instances
+*   **Method**: `GET`
+*   **Path**: `/instances`
+*   **Description**: Search for all instances matching query parameters.
+*   **Query Parameters**:
+    *   `SeriesInstanceUID` or `0020000E`: Series Instance UID
+    *   `SOPInstanceUID` or `00080018`: SOP Instance UID
+    *   `SOPClassUID` or `00080016`: SOP Class UID
+    *   `InstanceNumber` or `00200013`: Instance number
+    *   `limit`: Maximum number of results (default: 100)
+    *   `offset`: Pagination offset
+*   **Accept**: `application/dicom+json`
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of matching instances.
+    *   `503 Service Unavailable`: Database not configured.
+
+##### Search Series in Study
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series`
+*   **Description**: Search for series within a specific study.
+*   **Path Parameters**:
+    *   `studyUID`: Study Instance UID
+*   **Query Parameters**: Same as Search Series (except StudyInstanceUID is from path)
+*   **Accept**: `application/dicom+json`
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of matching series.
+    *   `404 Not Found`: Study not found.
+    *   `503 Service Unavailable`: Database not configured.
+
+##### Search Instances in Study
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/instances`
+*   **Description**: Search for instances within a specific study.
+*   **Path Parameters**:
+    *   `studyUID`: Study Instance UID
+*   **Query Parameters**: Same as Search Instances
+*   **Accept**: `application/dicom+json`
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of matching instances.
+    *   `404 Not Found`: Study not found.
+    *   `503 Service Unavailable`: Database not configured.
+
+##### Search Instances in Series
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances`
+*   **Description**: Search for instances within a specific series.
+*   **Path Parameters**:
+    *   `studyUID`: Study Instance UID
+    *   `seriesUID`: Series Instance UID
+*   **Query Parameters**: Same as Search Instances (except SeriesInstanceUID is from path)
+*   **Accept**: `application/dicom+json`
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of matching instances.
+    *   `404 Not Found`: Study or series not found.
+    *   `503 Service Unavailable`: Database not configured.
+
 ---
 
 ## Document History
@@ -3473,6 +3610,7 @@ namespace pacs::web::dicomweb {
 | 1.7.0   | 2025-12-11 | Added Patient, Study, Series REST API endpoints |
 | 1.8.0   | 2025-12-12 | Added DICOMweb (WADO-RS) API endpoints and utilities |
 | 1.9.0   | 2025-12-13 | Added STOW-RS (Store Over the Web) API endpoints and multipart parser |
+| 1.10.0  | 2025-12-13 | Added QIDO-RS (Query based on ID for DICOM Objects) API endpoints |
 
 
 ---

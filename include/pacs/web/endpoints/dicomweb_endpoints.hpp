@@ -28,6 +28,12 @@ class dicom_dataset;
 
 namespace pacs::storage {
 class index_database;
+struct study_record;
+struct series_record;
+struct instance_record;
+struct study_query;
+struct series_query;
+struct instance_query;
 } // namespace pacs::storage
 
 namespace pacs::web {
@@ -339,6 +345,68 @@ struct validation_result {
 [[nodiscard]] auto build_store_response_json(
     const store_response& response,
     std::string_view base_url) -> std::string;
+
+// ============================================================================
+// QIDO-RS Support (Query based on ID for DICOM Objects)
+// ============================================================================
+
+/**
+ * @brief Convert a study record to DicomJSON format for QIDO-RS response
+ * @param record The study record to convert
+ * @param patient_id The patient ID for this study
+ * @param patient_name The patient name for this study
+ * @return DicomJSON string for the study
+ */
+[[nodiscard]] auto study_record_to_dicom_json(
+    const storage::study_record& record,
+    std::string_view patient_id,
+    std::string_view patient_name) -> std::string;
+
+/**
+ * @brief Convert a series record to DicomJSON format for QIDO-RS response
+ * @param record The series record to convert
+ * @param study_uid The Study Instance UID for this series
+ * @return DicomJSON string for the series
+ */
+[[nodiscard]] auto series_record_to_dicom_json(
+    const storage::series_record& record,
+    std::string_view study_uid) -> std::string;
+
+/**
+ * @brief Convert an instance record to DicomJSON format for QIDO-RS response
+ * @param record The instance record to convert
+ * @param series_uid The Series Instance UID for this instance
+ * @param study_uid The Study Instance UID for this instance
+ * @return DicomJSON string for the instance
+ */
+[[nodiscard]] auto instance_record_to_dicom_json(
+    const storage::instance_record& record,
+    std::string_view series_uid,
+    std::string_view study_uid) -> std::string;
+
+/**
+ * @brief Parse QIDO-RS query parameters from HTTP request
+ * @param url_params The URL query parameters
+ * @return Study query parameters
+ */
+[[nodiscard]] auto parse_study_query_params(
+    const std::string& url_params) -> storage::study_query;
+
+/**
+ * @brief Parse QIDO-RS series query parameters from HTTP request
+ * @param url_params The URL query parameters
+ * @return Series query parameters
+ */
+[[nodiscard]] auto parse_series_query_params(
+    const std::string& url_params) -> storage::series_query;
+
+/**
+ * @brief Parse QIDO-RS instance query parameters from HTTP request
+ * @param url_params The URL query parameters
+ * @return Instance query parameters
+ */
+[[nodiscard]] auto parse_instance_query_params(
+    const std::string& url_params) -> storage::instance_query;
 
 } // namespace dicomweb
 
