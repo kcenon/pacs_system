@@ -3296,6 +3296,167 @@ struct media_type {
     *   `200 OK`: DicomJSON array with single instance metadata.
     *   `404 Not Found`: Instance not found.
 
+### STOW-RS (Store Over the Web) API
+
+The STOW-RS module implements the Store Over the Web - RESTful specification
+as defined in DICOM PS3.18 for storing DICOM objects via HTTP.
+
+#### `pacs::web::dicomweb::multipart_parser`
+
+Parses multipart/related request bodies for STOW-RS uploads.
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+struct multipart_part {
+    std::string content_type;       // Content-Type of this part
+    std::string content_location;   // Content-Location header (optional)
+    std::string content_id;         // Content-ID header (optional)
+    std::vector<uint8_t> data;      // Binary data of this part
+};
+
+class multipart_parser {
+public:
+    struct parse_error {
+        std::string code;       // Error code (e.g., "INVALID_BOUNDARY")
+        std::string message;    // Human-readable error message
+    };
+
+    struct parse_result {
+        std::vector<multipart_part> parts;  // Parsed parts (empty on error)
+        std::optional<parse_error> error;   // Error if parsing failed
+
+        [[nodiscard]] bool success() const noexcept;
+        [[nodiscard]] explicit operator bool() const noexcept;
+    };
+
+    // Parse a multipart/related request body
+    [[nodiscard]] static auto parse(std::string_view content_type,
+                                    std::string_view body) -> parse_result;
+
+    // Extract boundary from Content-Type header
+    [[nodiscard]] static auto extract_boundary(std::string_view content_type)
+        -> std::optional<std::string>;
+
+    // Extract type parameter from Content-Type header
+    [[nodiscard]] static auto extract_type(std::string_view content_type)
+        -> std::optional<std::string>;
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### Store Response Types
+
+```cpp
+namespace pacs::web::dicomweb {
+
+struct store_instance_result {
+    bool success = false;                   // Whether storage succeeded
+    std::string sop_class_uid;              // SOP Class UID of the instance
+    std::string sop_instance_uid;           // SOP Instance UID of the instance
+    std::string retrieve_url;               // URL to retrieve the stored instance
+    std::optional<std::string> error_code;  // Error code if failed
+    std::optional<std::string> error_message; // Error message if failed
+};
+
+struct store_response {
+    std::vector<store_instance_result> referenced_instances;  // Successfully stored
+    std::vector<store_instance_result> failed_instances;      // Failed to store
+
+    [[nodiscard]] bool all_success() const noexcept;
+    [[nodiscard]] bool all_failed() const noexcept;
+    [[nodiscard]] bool partial_success() const noexcept;
+};
+
+struct validation_result {
+    bool valid = true;                      // Whether validation passed
+    std::string error_code;                 // Error code if invalid
+    std::string error_message;              // Error message if invalid
+
+    [[nodiscard]] explicit operator bool() const noexcept;
+
+    static validation_result ok();
+    static validation_result error(std::string code, std::string message);
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### STOW-RS Utility Functions
+
+```cpp
+namespace pacs::web::dicomweb {
+
+// Validate a DICOM instance for STOW-RS storage
+[[nodiscard]] auto validate_instance(
+    const core::dicom_dataset& dataset,
+    std::optional<std::string_view> target_study_uid = std::nullopt)
+    -> validation_result;
+
+// Build STOW-RS response in DicomJSON format
+[[nodiscard]] auto build_store_response_json(
+    const store_response& response,
+    std::string_view base_url) -> std::string;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### REST API Endpoints (STOW-RS)
+
+**Base Path**: `/dicomweb`
+
+##### Store Instances (Study-Independent)
+*   **Method**: `POST`
+*   **Path**: `/studies`
+*   **Description**: Store DICOM instances without specifying a target study.
+*   **Content-Type**: `multipart/related; type="application/dicom"; boundary=...`
+*   **Request Body**: Multipart/related with DICOM Part 10 files.
+    ```
+    --boundary
+    Content-Type: application/dicom
+
+    <DICOM Part 10 binary data>
+    --boundary
+    Content-Type: application/dicom
+
+    <DICOM Part 10 binary data>
+    --boundary--
+    ```
+*   **Responses**:
+    *   `200 OK`: All instances stored successfully.
+        ```json
+        {
+          "00081190": { "vr": "UR", "Value": ["/dicomweb/studies/1.2.3"] },
+          "00081199": {
+            "vr": "SQ",
+            "Value": [{
+              "00081150": { "vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.2"] },
+              "00081155": { "vr": "UI", "Value": ["1.2.3.4.5.6.7.8.9"] },
+              "00081190": { "vr": "UR", "Value": ["/dicomweb/studies/1.2.3/series/.../instances/..."] }
+            }]
+          }
+        }
+        ```
+    *   `202 Accepted`: Some instances failed (partial success).
+    *   `409 Conflict`: All instances failed.
+    *   `415 Unsupported Media Type`: Invalid Content-Type.
+
+##### Store Instances (Study-Targeted)
+*   **Method**: `POST`
+*   **Path**: `/studies/<studyUID>`
+*   **Description**: Store DICOM instances to a specific study.
+*   **Content-Type**: `multipart/related; type="application/dicom"; boundary=...`
+*   **Request Body**: Same as Study-Independent store.
+*   **Validation**: All instances must have Study Instance UID matching `<studyUID>`.
+*   **Responses**:
+    *   `200 OK`: All instances stored successfully.
+    *   `202 Accepted`: Some instances failed (partial success).
+    *   `409 Conflict`: All instances failed or Study UID mismatch.
+    *   `415 Unsupported Media Type`: Invalid Content-Type.
+
 ---
 
 ## Document History
@@ -3311,6 +3472,7 @@ struct media_type {
 | 1.6.0   | 2025-12-09 | Added Web Module (rest_server foundation)    |
 | 1.7.0   | 2025-12-11 | Added Patient, Study, Series REST API endpoints |
 | 1.8.0   | 2025-12-12 | Added DICOMweb (WADO-RS) API endpoints and utilities |
+| 1.9.0   | 2025-12-13 | Added STOW-RS (Store Over the Web) API endpoints and multipart parser |
 
 
 ---
