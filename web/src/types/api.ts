@@ -19,8 +19,55 @@ export interface SystemConfig {
   enable_cors: boolean;
   cors_allowed_origins: string;
   enable_tls: boolean;
+  tls_cert_path?: string;
+  tls_key_path?: string;
   request_timeout_seconds: number;
   max_body_size: number;
+}
+
+// DICOM Server Configuration
+export interface DicomServerConfig {
+  ae_title: string;
+  port: number;
+  max_associations: number;
+  max_pdu_size: number;
+  idle_timeout_seconds: number;
+  association_timeout_seconds: number;
+  ae_whitelist: string[];
+  accept_unknown_calling_ae: boolean;
+  implementation_class_uid?: string;
+  implementation_version_name?: string;
+}
+
+// Storage Configuration
+export interface StorageConfig {
+  storage_path: string;
+  storage_type: 'file' | 's3' | 'azure' | 'hsm';
+  max_storage_size_gb?: number;
+  archive_path?: string;
+  enable_compression?: boolean;
+  compression_level?: number;
+}
+
+// Logging Configuration
+export interface LoggingConfig {
+  log_directory: string;
+  log_level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'off';
+  enable_console: boolean;
+  enable_file: boolean;
+  enable_audit_log: boolean;
+  max_file_size_mb: number;
+  max_files: number;
+  audit_log_format: 'json' | 'syslog';
+  async_mode: boolean;
+}
+
+// Combined configuration for all settings
+export interface FullSystemConfig {
+  rest_server: SystemConfig;
+  dicom_server: DicomServerConfig;
+  storage: StorageConfig;
+  logging: LoggingConfig;
 }
 
 export interface SystemMetrics {

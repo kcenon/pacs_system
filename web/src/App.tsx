@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/Layout';
+import { ToastProvider } from '@/components/ui/toast';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { PatientsPage } from '@/pages/PatientsPage';
 import { WorklistPage } from '@/pages/WorklistPage';
@@ -21,18 +22,20 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="patients" element={<PatientsPage />} />
-            <Route path="worklist" element={<WorklistPage />} />
-            <Route path="audit" element={<AuditPage />} />
-            <Route path="config" element={<ConfigPage />} />
-            <Route path="associations" element={<AssociationsPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="patients" element={<PatientsPage />} />
+              <Route path="worklist" element={<WorklistPage />} />
+              <Route path="audit" element={<AuditPage />} />
+              <Route path="config" element={<ConfigPage />} />
+              <Route path="associations" element={<AssociationsPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }
