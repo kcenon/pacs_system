@@ -31,7 +31,7 @@
 PACS System (Picture Archiving and Communication System)
 
 ### Product Description
-A production-ready C++20 PACS implementation built entirely on the kcenon ecosystem without external DICOM libraries. This system implements the DICOM standard from scratch, providing complete control over the codebase while leveraging high-performance infrastructure from existing ecosystem components.
+A modern C++20 PACS implementation built entirely on the kcenon ecosystem without external DICOM libraries. This system implements the DICOM standard from scratch, providing complete control over the codebase while leveraging high-performance infrastructure from existing ecosystem components.
 
 ### Key Differentiators
 - **Zero External DICOM Dependencies**: Pure implementation using kcenon ecosystem
