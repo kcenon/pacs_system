@@ -4,7 +4,14 @@ React-based web administration interface for the PACS system.
 
 ## Features
 
-- **Dashboard**: System status overview, metrics, and health indicators
+- **Dashboard**: Real-time system status with:
+  - Active associations counter with live updates
+  - Patient and study statistics
+  - Storage usage pie charts (used/free and by modality)
+  - System health component indicators
+  - Recent activity feed from audit logs
+  - Auto-refresh (10s for real-time data, 30s for status)
+  - Manual refresh button
 - **Patient Browser**: Search and browse patient records with study details
 - **Worklist Management**: View and manage scheduled procedures
 - **Audit Logs**: Searchable audit trail with CSV/JSON export

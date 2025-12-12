@@ -158,6 +158,36 @@ class ApiClient {
     const response = await this.client.get(`/associations/${id}`);
     return response.data;
   }
+
+  // Dashboard aggregated stats
+  async getDashboardStats() {
+    // Fetch multiple endpoints in parallel and aggregate
+    const [associations, patients, studies] = await Promise.all([
+      this.getAssociations().catch(() => ({ data: [], count: 0 })),
+      this.getPatients({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
+      this.getStudies({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
+    ]);
+
+    const activeAssociations = (associations.data || []).filter(
+      (a: { state: string }) => a.state === 'ESTABLISHED'
+    ).length;
+
+    return {
+      active_associations: activeAssociations,
+      total_patients: patients.pagination?.total ?? 0,
+      total_studies: studies.pagination?.total ?? 0,
+      storage_used_bytes: 0,
+      storage_total_bytes: 0,
+    };
+  }
+
+  // Recent activity (latest audit logs)
+  async getRecentActivity(limit: number = 10) {
+    const response = await this.client.get('/audit/logs', {
+      params: { limit, offset: 0 },
+    });
+    return response.data;
+  }
 }
 
 export const apiClient = new ApiClient();
