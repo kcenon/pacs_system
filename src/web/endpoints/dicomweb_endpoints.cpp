@@ -23,6 +23,7 @@
 #include "pacs/encoding/vr_type.hpp"
 #include "pacs/storage/index_database.hpp"
 #include "pacs/storage/instance_record.hpp"
+#include "pacs/storage/patient_record.hpp"
 #include "pacs/storage/series_record.hpp"
 #include "pacs/storage/study_record.hpp"
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
@@ -736,6 +737,374 @@ auto dataset_to_dicom_json(
     return oss.str();
 }
 
+// ============================================================================
+// QIDO-RS Response Building
+// ============================================================================
+
+auto study_record_to_dicom_json(
+    const storage::study_record& record,
+    std::string_view patient_id,
+    std::string_view patient_name) -> std::string {
+    std::ostringstream oss;
+    oss << "{";
+
+    // Study Instance UID (0020,000D)
+    oss << "\"0020000D\":{\"vr\":\"UI\",\"Value\":[\""
+        << json_escape(record.study_uid) << "\"]}";
+
+    // Study Date (0008,0020)
+    if (!record.study_date.empty()) {
+        oss << ",\"00080020\":{\"vr\":\"DA\",\"Value\":[\""
+            << json_escape(record.study_date) << "\"]}";
+    }
+
+    // Study Time (0008,0030)
+    if (!record.study_time.empty()) {
+        oss << ",\"00080030\":{\"vr\":\"TM\",\"Value\":[\""
+            << json_escape(record.study_time) << "\"]}";
+    }
+
+    // Accession Number (0008,0050)
+    if (!record.accession_number.empty()) {
+        oss << ",\"00080050\":{\"vr\":\"SH\",\"Value\":[\""
+            << json_escape(record.accession_number) << "\"]}";
+    }
+
+    // Modalities in Study (0008,0061)
+    if (!record.modalities_in_study.empty()) {
+        oss << ",\"00080061\":{\"vr\":\"CS\",\"Value\":[";
+        auto modalities = split(record.modalities_in_study, '\\');
+        bool first = true;
+        for (const auto& mod : modalities) {
+            if (!first) oss << ",";
+            first = false;
+            oss << "\"" << json_escape(mod) << "\"";
+        }
+        oss << "]}";
+    }
+
+    // Referring Physician's Name (0008,0090)
+    if (!record.referring_physician.empty()) {
+        oss << ",\"00080090\":{\"vr\":\"PN\",\"Value\":[{\"Alphabetic\":\""
+            << json_escape(record.referring_physician) << "\"}]}";
+    }
+
+    // Patient's Name (0010,0010)
+    if (!patient_name.empty()) {
+        oss << ",\"00100010\":{\"vr\":\"PN\",\"Value\":[{\"Alphabetic\":\""
+            << json_escape(std::string(patient_name)) << "\"}]}";
+    }
+
+    // Patient ID (0010,0020)
+    if (!patient_id.empty()) {
+        oss << ",\"00100020\":{\"vr\":\"LO\",\"Value\":[\""
+            << json_escape(std::string(patient_id)) << "\"]}";
+    }
+
+    // Study ID (0020,0010)
+    if (!record.study_id.empty()) {
+        oss << ",\"00200010\":{\"vr\":\"SH\",\"Value\":[\""
+            << json_escape(record.study_id) << "\"]}";
+    }
+
+    // Study Description (0008,1030)
+    if (!record.study_description.empty()) {
+        oss << ",\"00081030\":{\"vr\":\"LO\",\"Value\":[\""
+            << json_escape(record.study_description) << "\"]}";
+    }
+
+    // Number of Study Related Series (0020,1206)
+    oss << ",\"00201206\":{\"vr\":\"IS\",\"Value\":[" << record.num_series << "]}";
+
+    // Number of Study Related Instances (0020,1208)
+    oss << ",\"00201208\":{\"vr\":\"IS\",\"Value\":[" << record.num_instances << "]}";
+
+    oss << "}";
+    return oss.str();
+}
+
+auto series_record_to_dicom_json(
+    const storage::series_record& record,
+    std::string_view study_uid) -> std::string {
+    std::ostringstream oss;
+    oss << "{";
+
+    // Series Instance UID (0020,000E)
+    oss << "\"0020000E\":{\"vr\":\"UI\",\"Value\":[\""
+        << json_escape(record.series_uid) << "\"]}";
+
+    // Study Instance UID (0020,000D)
+    if (!study_uid.empty()) {
+        oss << ",\"0020000D\":{\"vr\":\"UI\",\"Value\":[\""
+            << json_escape(std::string(study_uid)) << "\"]}";
+    }
+
+    // Modality (0008,0060)
+    if (!record.modality.empty()) {
+        oss << ",\"00080060\":{\"vr\":\"CS\",\"Value\":[\""
+            << json_escape(record.modality) << "\"]}";
+    }
+
+    // Series Number (0020,0011)
+    if (record.series_number.has_value()) {
+        oss << ",\"00200011\":{\"vr\":\"IS\",\"Value\":["
+            << *record.series_number << "]}";
+    }
+
+    // Series Description (0008,103E)
+    if (!record.series_description.empty()) {
+        oss << ",\"0008103E\":{\"vr\":\"LO\",\"Value\":[\""
+            << json_escape(record.series_description) << "\"]}";
+    }
+
+    // Body Part Examined (0018,0015)
+    if (!record.body_part_examined.empty()) {
+        oss << ",\"00180015\":{\"vr\":\"CS\",\"Value\":[\""
+            << json_escape(record.body_part_examined) << "\"]}";
+    }
+
+    // Number of Series Related Instances (0020,1209)
+    oss << ",\"00201209\":{\"vr\":\"IS\",\"Value\":[" << record.num_instances << "]}";
+
+    oss << "}";
+    return oss.str();
+}
+
+auto instance_record_to_dicom_json(
+    const storage::instance_record& record,
+    std::string_view series_uid,
+    std::string_view study_uid) -> std::string {
+    std::ostringstream oss;
+    oss << "{";
+
+    // SOP Class UID (0008,0016)
+    if (!record.sop_class_uid.empty()) {
+        oss << "\"00080016\":{\"vr\":\"UI\",\"Value\":[\""
+            << json_escape(record.sop_class_uid) << "\"]}";
+    }
+
+    // SOP Instance UID (0008,0018)
+    oss << ",\"00080018\":{\"vr\":\"UI\",\"Value\":[\""
+        << json_escape(record.sop_uid) << "\"]}";
+
+    // Study Instance UID (0020,000D)
+    if (!study_uid.empty()) {
+        oss << ",\"0020000D\":{\"vr\":\"UI\",\"Value\":[\""
+            << json_escape(std::string(study_uid)) << "\"]}";
+    }
+
+    // Series Instance UID (0020,000E)
+    if (!series_uid.empty()) {
+        oss << ",\"0020000E\":{\"vr\":\"UI\",\"Value\":[\""
+            << json_escape(std::string(series_uid)) << "\"]}";
+    }
+
+    // Instance Number (0020,0013)
+    if (record.instance_number.has_value()) {
+        oss << ",\"00200013\":{\"vr\":\"IS\",\"Value\":["
+            << *record.instance_number << "]}";
+    }
+
+    // Rows (0028,0010)
+    if (record.rows.has_value()) {
+        oss << ",\"00280010\":{\"vr\":\"US\",\"Value\":["
+            << *record.rows << "]}";
+    }
+
+    // Columns (0028,0011)
+    if (record.columns.has_value()) {
+        oss << ",\"00280011\":{\"vr\":\"US\",\"Value\":["
+            << *record.columns << "]}";
+    }
+
+    // Number of Frames (0028,0008)
+    if (record.number_of_frames.has_value()) {
+        oss << ",\"00280008\":{\"vr\":\"IS\",\"Value\":["
+            << *record.number_of_frames << "]}";
+    }
+
+    oss << "}";
+    return oss.str();
+}
+
+// ============================================================================
+// QIDO-RS Query Parameter Parsing
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief URL decode a string
+ */
+std::string url_decode(std::string_view str) {
+    std::string result;
+    result.reserve(str.size());
+
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (str[i] == '%' && i + 2 < str.size()) {
+            int value = 0;
+            std::string hex_str(str.substr(i + 1, 2));
+            try {
+                value = std::stoi(hex_str, nullptr, 16);
+                result += static_cast<char>(value);
+                i += 2;
+            } catch (...) {
+                result += str[i];
+            }
+        } else if (str[i] == '+') {
+            result += ' ';
+        } else {
+            result += str[i];
+        }
+    }
+    return result;
+}
+
+/**
+ * @brief Parse query string into key-value pairs
+ */
+std::vector<std::pair<std::string, std::string>> parse_query_string(
+    const std::string& query_string) {
+    std::vector<std::pair<std::string, std::string>> result;
+
+    if (query_string.empty()) {
+        return result;
+    }
+
+    // Remove leading '?' if present
+    std::string_view qs = query_string;
+    if (!qs.empty() && qs[0] == '?') {
+        qs = qs.substr(1);
+    }
+
+    auto params = split(qs, '&');
+    for (const auto& param : params) {
+        auto eq_pos = param.find('=');
+        if (eq_pos != std::string::npos) {
+            auto key = url_decode(param.substr(0, eq_pos));
+            auto value = url_decode(param.substr(eq_pos + 1));
+            result.emplace_back(std::move(key), std::move(value));
+        }
+    }
+
+    return result;
+}
+
+} // anonymous namespace
+
+auto parse_study_query_params(const std::string& url_params) -> storage::study_query {
+    storage::study_query query;
+
+    auto params = parse_query_string(url_params);
+    for (const auto& [key, value] : params) {
+        if (key == "PatientID" || key == "00100020") {
+            query.patient_id = value;
+        } else if (key == "PatientName" || key == "00100010") {
+            query.patient_name = value;
+        } else if (key == "StudyInstanceUID" || key == "0020000D") {
+            query.study_uid = value;
+        } else if (key == "StudyID" || key == "00200010") {
+            query.study_id = value;
+        } else if (key == "StudyDate" || key == "00080020") {
+            // Handle date range (YYYYMMDD-YYYYMMDD)
+            auto dash_pos = value.find('-');
+            if (dash_pos != std::string::npos && dash_pos > 0 &&
+                dash_pos < value.size() - 1) {
+                query.study_date_from = value.substr(0, dash_pos);
+                query.study_date_to = value.substr(dash_pos + 1);
+            } else if (dash_pos == 0) {
+                // -YYYYMMDD (up to date)
+                query.study_date_to = value.substr(1);
+            } else if (dash_pos == value.size() - 1) {
+                // YYYYMMDD- (from date)
+                query.study_date_from = value.substr(0, dash_pos);
+            } else {
+                query.study_date = value;
+            }
+        } else if (key == "AccessionNumber" || key == "00080050") {
+            query.accession_number = value;
+        } else if (key == "ModalitiesInStudy" || key == "00080061") {
+            query.modality = value;
+        } else if (key == "ReferringPhysicianName" || key == "00080090") {
+            query.referring_physician = value;
+        } else if (key == "StudyDescription" || key == "00081030") {
+            query.study_description = value;
+        } else if (key == "limit") {
+            try {
+                query.limit = std::stoull(value);
+            } catch (...) {}
+        } else if (key == "offset") {
+            try {
+                query.offset = std::stoull(value);
+            } catch (...) {}
+        }
+    }
+
+    return query;
+}
+
+auto parse_series_query_params(const std::string& url_params) -> storage::series_query {
+    storage::series_query query;
+
+    auto params = parse_query_string(url_params);
+    for (const auto& [key, value] : params) {
+        if (key == "StudyInstanceUID" || key == "0020000D") {
+            query.study_uid = value;
+        } else if (key == "SeriesInstanceUID" || key == "0020000E") {
+            query.series_uid = value;
+        } else if (key == "Modality" || key == "00080060") {
+            query.modality = value;
+        } else if (key == "SeriesNumber" || key == "00200011") {
+            try {
+                query.series_number = std::stoi(value);
+            } catch (...) {}
+        } else if (key == "SeriesDescription" || key == "0008103E") {
+            query.series_description = value;
+        } else if (key == "BodyPartExamined" || key == "00180015") {
+            query.body_part_examined = value;
+        } else if (key == "limit") {
+            try {
+                query.limit = std::stoull(value);
+            } catch (...) {}
+        } else if (key == "offset") {
+            try {
+                query.offset = std::stoull(value);
+            } catch (...) {}
+        }
+    }
+
+    return query;
+}
+
+auto parse_instance_query_params(const std::string& url_params) -> storage::instance_query {
+    storage::instance_query query;
+
+    auto params = parse_query_string(url_params);
+    for (const auto& [key, value] : params) {
+        if (key == "SeriesInstanceUID" || key == "0020000E") {
+            query.series_uid = value;
+        } else if (key == "SOPInstanceUID" || key == "00080018") {
+            query.sop_uid = value;
+        } else if (key == "SOPClassUID" || key == "00080016") {
+            query.sop_class_uid = value;
+        } else if (key == "InstanceNumber" || key == "00200013") {
+            try {
+                query.instance_number = std::stoi(value);
+            } catch (...) {}
+        } else if (key == "limit") {
+            try {
+                query.limit = std::stoull(value);
+            } catch (...) {}
+        } else if (key == "offset") {
+            try {
+                query.offset = std::stoull(value);
+            } catch (...) {}
+        }
+    }
+
+    return query;
+}
+
 } // namespace pacs::web::dicomweb
 
 namespace pacs::web::endpoints {
@@ -1421,6 +1790,381 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
 
                 res.body = dicomweb::build_store_response_json(
                     store_response, base_url);
+                return res;
+            });
+
+    // ========================================================================
+    // QIDO-RS (Query based on ID for DICOM Objects)
+    // ========================================================================
+
+    // GET /dicomweb/studies - Search for studies
+    CROW_ROUTE(app, "/dicomweb/studies")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Parse query parameters
+                auto query = dicomweb::parse_study_query_params(req.raw_url);
+
+                // Set default limit if not specified (prevent unlimited queries)
+                if (query.limit == 0) {
+                    query.limit = 100;
+                }
+
+                // Execute search
+                auto studies = ctx->database->search_studies(query);
+
+                // Build response
+                std::ostringstream oss;
+                oss << "[";
+
+                bool first = true;
+                for (const auto& study : studies) {
+                    if (!first) oss << ",";
+                    first = false;
+
+                    // Get patient info for this study
+                    std::string patient_id;
+                    std::string patient_name;
+                    if (auto patient = ctx->database->find_patient_by_pk(study.patient_pk)) {
+                        patient_id = patient->patient_id;
+                        patient_name = patient->patient_name;
+                    }
+
+                    oss << dicomweb::study_record_to_dicom_json(
+                        study, patient_id, patient_name);
+                }
+
+                oss << "]";
+
+                res.code = 200;
+                res.body = oss.str();
+                return res;
+            });
+
+    // GET /dicomweb/series - Search for all series
+    CROW_ROUTE(app, "/dicomweb/series")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Parse query parameters
+                auto query = dicomweb::parse_series_query_params(req.raw_url);
+
+                // Set default limit if not specified
+                if (query.limit == 0) {
+                    query.limit = 100;
+                }
+
+                // Execute search
+                auto series_list = ctx->database->search_series(query);
+
+                // Build response
+                std::ostringstream oss;
+                oss << "[";
+
+                bool first = true;
+                for (const auto& series : series_list) {
+                    if (!first) oss << ",";
+                    first = false;
+
+                    // Get study UID for this series
+                    std::string study_uid;
+                    if (auto study = ctx->database->find_study_by_pk(series.study_pk)) {
+                        study_uid = study->study_uid;
+                    }
+
+                    oss << dicomweb::series_record_to_dicom_json(series, study_uid);
+                }
+
+                oss << "]";
+
+                res.code = 200;
+                res.body = oss.str();
+                return res;
+            });
+
+    // GET /dicomweb/instances - Search for all instances
+    CROW_ROUTE(app, "/dicomweb/instances")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Parse query parameters
+                auto query = dicomweb::parse_instance_query_params(req.raw_url);
+
+                // Set default limit if not specified
+                if (query.limit == 0) {
+                    query.limit = 100;
+                }
+
+                // Execute search
+                auto instances = ctx->database->search_instances(query);
+
+                // Build response
+                std::ostringstream oss;
+                oss << "[";
+
+                bool first = true;
+                for (const auto& instance : instances) {
+                    if (!first) oss << ",";
+                    first = false;
+
+                    // Get series and study UIDs
+                    std::string series_uid;
+                    std::string study_uid;
+                    if (auto series = ctx->database->find_series_by_pk(instance.series_pk)) {
+                        series_uid = series->series_uid;
+                        if (auto study = ctx->database->find_study_by_pk(series->study_pk)) {
+                            study_uid = study->study_uid;
+                        }
+                    }
+
+                    oss << dicomweb::instance_record_to_dicom_json(
+                        instance, series_uid, study_uid);
+                }
+
+                oss << "]";
+
+                res.code = 200;
+                res.body = oss.str();
+                return res;
+            });
+
+    // GET /dicomweb/studies/{studyUID}/series - Search series in a study (QIDO-RS)
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req, const std::string& study_uid) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Verify study exists
+                auto study = ctx->database->find_study(study_uid);
+                if (!study) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Study not found");
+                    return res;
+                }
+
+                // Parse query parameters and add study filter
+                auto query = dicomweb::parse_series_query_params(req.raw_url);
+                query.study_uid = study_uid;
+
+                // Set default limit if not specified
+                if (query.limit == 0) {
+                    query.limit = 100;
+                }
+
+                // Execute search
+                auto series_list = ctx->database->search_series(query);
+
+                // Build response
+                std::ostringstream oss;
+                oss << "[";
+
+                bool first = true;
+                for (const auto& series : series_list) {
+                    if (!first) oss << ",";
+                    first = false;
+
+                    oss << dicomweb::series_record_to_dicom_json(series, study_uid);
+                }
+
+                oss << "]";
+
+                res.code = 200;
+                res.body = oss.str();
+                return res;
+            });
+
+    // GET /dicomweb/studies/{studyUID}/instances - Search instances in a study (QIDO-RS)
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/instances")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req, const std::string& study_uid) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Verify study exists
+                auto study = ctx->database->find_study(study_uid);
+                if (!study) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Study not found");
+                    return res;
+                }
+
+                // Get all series in this study and then instances
+                storage::series_query series_query;
+                series_query.study_uid = study_uid;
+                auto series_list = ctx->database->search_series(series_query);
+
+                // Parse query parameters for additional filters
+                auto inst_query = dicomweb::parse_instance_query_params(req.raw_url);
+                if (inst_query.limit == 0) {
+                    inst_query.limit = 100;
+                }
+
+                // Collect instances from all series
+                std::ostringstream oss;
+                oss << "[";
+
+                bool first = true;
+                size_t count = 0;
+                size_t skipped = 0;
+
+                for (const auto& series : series_list) {
+                    if (count >= inst_query.limit) break;
+
+                    // Search instances in this series
+                    storage::instance_query query;
+                    query.series_uid = series.series_uid;
+                    if (inst_query.sop_uid.has_value()) {
+                        query.sop_uid = inst_query.sop_uid;
+                    }
+                    if (inst_query.sop_class_uid.has_value()) {
+                        query.sop_class_uid = inst_query.sop_class_uid;
+                    }
+                    if (inst_query.instance_number.has_value()) {
+                        query.instance_number = inst_query.instance_number;
+                    }
+                    query.limit = inst_query.limit - count;
+
+                    auto instances = ctx->database->search_instances(query);
+                    for (const auto& instance : instances) {
+                        // Handle offset
+                        if (skipped < inst_query.offset) {
+                            ++skipped;
+                            continue;
+                        }
+
+                        if (count >= inst_query.limit) break;
+
+                        if (!first) oss << ",";
+                        first = false;
+
+                        oss << dicomweb::instance_record_to_dicom_json(
+                            instance, series.series_uid, study_uid);
+                        ++count;
+                    }
+                }
+
+                oss << "]";
+
+                res.code = 200;
+                res.body = oss.str();
+                return res;
+            });
+
+    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances - Search instances in a series (QIDO-RS)
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req,
+                  const std::string& study_uid,
+                  const std::string& series_uid) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Verify study exists
+                auto study = ctx->database->find_study(study_uid);
+                if (!study) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Study not found");
+                    return res;
+                }
+
+                // Verify series exists
+                auto series = ctx->database->find_series(series_uid);
+                if (!series) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Series not found");
+                    return res;
+                }
+
+                // Parse query parameters and add series filter
+                auto query = dicomweb::parse_instance_query_params(req.raw_url);
+                query.series_uid = series_uid;
+
+                // Set default limit if not specified
+                if (query.limit == 0) {
+                    query.limit = 100;
+                }
+
+                // Execute search
+                auto instances = ctx->database->search_instances(query);
+
+                // Build response
+                std::ostringstream oss;
+                oss << "[";
+
+                bool first = true;
+                for (const auto& instance : instances) {
+                    if (!first) oss << ",";
+                    first = false;
+
+                    oss << dicomweb::instance_record_to_dicom_json(
+                        instance, series_uid, study_uid);
+                }
+
+                oss << "]";
+
+                res.code = 200;
+                res.body = oss.str();
                 return res;
             });
 
