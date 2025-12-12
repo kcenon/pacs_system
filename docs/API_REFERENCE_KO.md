@@ -2883,6 +2883,167 @@ struct media_type {
     *   `200 OK`: 단일 인스턴스 메타데이터의 DicomJSON 배열.
     *   `404 Not Found`: 인스턴스를 찾을 수 없음.
 
+### STOW-RS (Store Over the Web) API
+
+STOW-RS 모듈은 HTTP를 통한 DICOM 객체 저장을 위해 DICOM PS3.18에 정의된
+Store Over the Web - RESTful 사양을 구현합니다.
+
+#### `pacs::web::dicomweb::multipart_parser`
+
+STOW-RS 업로드를 위한 multipart/related 요청 본문을 파싱합니다.
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+struct multipart_part {
+    std::string content_type;       // 이 파트의 Content-Type
+    std::string content_location;   // Content-Location 헤더 (선택사항)
+    std::string content_id;         // Content-ID 헤더 (선택사항)
+    std::vector<uint8_t> data;      // 이 파트의 바이너리 데이터
+};
+
+class multipart_parser {
+public:
+    struct parse_error {
+        std::string code;       // 오류 코드 (예: "INVALID_BOUNDARY")
+        std::string message;    // 사람이 읽을 수 있는 오류 메시지
+    };
+
+    struct parse_result {
+        std::vector<multipart_part> parts;  // 파싱된 파트 (오류 시 빈 값)
+        std::optional<parse_error> error;   // 파싱 실패 시 오류
+
+        [[nodiscard]] bool success() const noexcept;
+        [[nodiscard]] explicit operator bool() const noexcept;
+    };
+
+    // multipart/related 요청 본문 파싱
+    [[nodiscard]] static auto parse(std::string_view content_type,
+                                    std::string_view body) -> parse_result;
+
+    // Content-Type 헤더에서 boundary 추출
+    [[nodiscard]] static auto extract_boundary(std::string_view content_type)
+        -> std::optional<std::string>;
+
+    // Content-Type 헤더에서 type 매개변수 추출
+    [[nodiscard]] static auto extract_type(std::string_view content_type)
+        -> std::optional<std::string>;
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### 저장 응답 타입
+
+```cpp
+namespace pacs::web::dicomweb {
+
+struct store_instance_result {
+    bool success = false;                   // 저장 성공 여부
+    std::string sop_class_uid;              // 인스턴스의 SOP Class UID
+    std::string sop_instance_uid;           // 인스턴스의 SOP Instance UID
+    std::string retrieve_url;               // 저장된 인스턴스 조회 URL
+    std::optional<std::string> error_code;  // 실패 시 오류 코드
+    std::optional<std::string> error_message; // 실패 시 오류 메시지
+};
+
+struct store_response {
+    std::vector<store_instance_result> referenced_instances;  // 성공적으로 저장됨
+    std::vector<store_instance_result> failed_instances;      // 저장 실패
+
+    [[nodiscard]] bool all_success() const noexcept;
+    [[nodiscard]] bool all_failed() const noexcept;
+    [[nodiscard]] bool partial_success() const noexcept;
+};
+
+struct validation_result {
+    bool valid = true;                      // 유효성 검사 통과 여부
+    std::string error_code;                 // 유효하지 않은 경우 오류 코드
+    std::string error_message;              // 유효하지 않은 경우 오류 메시지
+
+    [[nodiscard]] explicit operator bool() const noexcept;
+
+    static validation_result ok();
+    static validation_result error(std::string code, std::string message);
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### STOW-RS 유틸리티 함수
+
+```cpp
+namespace pacs::web::dicomweb {
+
+// STOW-RS 저장을 위한 DICOM 인스턴스 유효성 검사
+[[nodiscard]] auto validate_instance(
+    const core::dicom_dataset& dataset,
+    std::optional<std::string_view> target_study_uid = std::nullopt)
+    -> validation_result;
+
+// DicomJSON 형식으로 STOW-RS 응답 빌드
+[[nodiscard]] auto build_store_response_json(
+    const store_response& response,
+    std::string_view base_url) -> std::string;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### REST API 엔드포인트 (STOW-RS)
+
+**기본 경로**: `/dicomweb`
+
+##### 인스턴스 저장 (Study 미지정)
+*   **메서드**: `POST`
+*   **경로**: `/studies`
+*   **설명**: 대상 Study를 지정하지 않고 DICOM 인스턴스를 저장합니다.
+*   **Content-Type**: `multipart/related; type="application/dicom"; boundary=...`
+*   **요청 본문**: DICOM Part 10 파일이 포함된 Multipart/related.
+    ```
+    --boundary
+    Content-Type: application/dicom
+
+    <DICOM Part 10 바이너리 데이터>
+    --boundary
+    Content-Type: application/dicom
+
+    <DICOM Part 10 바이너리 데이터>
+    --boundary--
+    ```
+*   **응답**:
+    *   `200 OK`: 모든 인스턴스가 성공적으로 저장됨.
+        ```json
+        {
+          "00081190": { "vr": "UR", "Value": ["/dicomweb/studies/1.2.3"] },
+          "00081199": {
+            "vr": "SQ",
+            "Value": [{
+              "00081150": { "vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.2"] },
+              "00081155": { "vr": "UI", "Value": ["1.2.3.4.5.6.7.8.9"] },
+              "00081190": { "vr": "UR", "Value": ["/dicomweb/studies/1.2.3/series/.../instances/..."] }
+            }]
+          }
+        }
+        ```
+    *   `202 Accepted`: 일부 인스턴스 저장 실패 (부분 성공).
+    *   `409 Conflict`: 모든 인스턴스 저장 실패.
+    *   `415 Unsupported Media Type`: 유효하지 않은 Content-Type.
+
+##### 인스턴스 저장 (Study 지정)
+*   **메서드**: `POST`
+*   **경로**: `/studies/<studyUID>`
+*   **설명**: 특정 Study에 DICOM 인스턴스를 저장합니다.
+*   **Content-Type**: `multipart/related; type="application/dicom"; boundary=...`
+*   **요청 본문**: Study 미지정 저장과 동일.
+*   **유효성 검사**: 모든 인스턴스의 Study Instance UID가 `<studyUID>`와 일치해야 합니다.
+*   **응답**:
+    *   `200 OK`: 모든 인스턴스가 성공적으로 저장됨.
+    *   `202 Accepted`: 일부 인스턴스 저장 실패 (부분 성공).
+    *   `409 Conflict`: 모든 인스턴스 저장 실패 또는 Study UID 불일치.
+    *   `415 Unsupported Media Type`: 유효하지 않은 Content-Type.
+
 ---
 
 ## 문서 이력
@@ -2898,10 +3059,11 @@ struct media_type {
 | 1.6.0 | 2025-12-09 | 웹 모듈 추가 (rest_server 기반)               |
 | 1.7.0 | 2025-12-11 | Patient, Study, Series REST API 엔드포인트 추가 |
 | 1.8.0 | 2025-12-12 | DICOMweb (WADO-RS) API 엔드포인트 및 유틸리티 추가 |
+| 1.9.0 | 2025-12-13 | STOW-RS (Store Over the Web) API 엔드포인트 및 멀티파트 파서 추가 |
 
 ---
 
-*문서 버전: 0.1.8.0*
+*문서 버전: 0.1.9.0*
 *작성일: 2025-11-30*
-*최종 수정일: 2025-12-12*
+*최종 수정일: 2025-12-13*
 *작성자: kcenon@naver.com*

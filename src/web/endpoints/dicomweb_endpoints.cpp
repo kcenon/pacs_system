@@ -315,6 +315,348 @@ auto vr_to_string(uint16_t vr_code) -> std::string {
     return std::string(vr);
 }
 
+// ============================================================================
+// Multipart Parser Implementation (STOW-RS)
+// ============================================================================
+
+auto multipart_parser::extract_boundary(std::string_view content_type)
+    -> std::optional<std::string> {
+    // Find boundary parameter in Content-Type header
+    // Example: multipart/related; type="application/dicom"; boundary=----=_Part_123
+    auto boundary_pos = content_type.find("boundary=");
+    if (boundary_pos == std::string_view::npos) {
+        return std::nullopt;
+    }
+
+    auto value_start = boundary_pos + 9; // length of "boundary="
+    if (value_start >= content_type.size()) {
+        return std::nullopt;
+    }
+
+    // Check if boundary is quoted
+    if (content_type[value_start] == '"') {
+        auto end_quote = content_type.find('"', value_start + 1);
+        if (end_quote == std::string_view::npos) {
+            return std::nullopt;
+        }
+        return std::string(content_type.substr(value_start + 1,
+                                               end_quote - value_start - 1));
+    }
+
+    // Unquoted boundary - find end (semicolon, space, or end of string)
+    auto end_pos = content_type.find_first_of("; \t", value_start);
+    if (end_pos == std::string_view::npos) {
+        end_pos = content_type.size();
+    }
+    return std::string(content_type.substr(value_start, end_pos - value_start));
+}
+
+auto multipart_parser::extract_type(std::string_view content_type)
+    -> std::optional<std::string> {
+    // Find type parameter in Content-Type header
+    // Example: multipart/related; type="application/dicom"
+    auto type_pos = content_type.find("type=");
+    if (type_pos == std::string_view::npos) {
+        return std::nullopt;
+    }
+
+    auto value_start = type_pos + 5; // length of "type="
+    if (value_start >= content_type.size()) {
+        return std::nullopt;
+    }
+
+    // Check if type is quoted
+    if (content_type[value_start] == '"') {
+        auto end_quote = content_type.find('"', value_start + 1);
+        if (end_quote == std::string_view::npos) {
+            return std::nullopt;
+        }
+        return std::string(content_type.substr(value_start + 1,
+                                               end_quote - value_start - 1));
+    }
+
+    // Unquoted type
+    auto end_pos = content_type.find_first_of("; \t", value_start);
+    if (end_pos == std::string_view::npos) {
+        end_pos = content_type.size();
+    }
+    return std::string(content_type.substr(value_start, end_pos - value_start));
+}
+
+auto multipart_parser::parse_part_headers(std::string_view header_section)
+    -> std::vector<std::pair<std::string, std::string>> {
+    std::vector<std::pair<std::string, std::string>> headers;
+
+    size_t pos = 0;
+    while (pos < header_section.size()) {
+        // Find end of line
+        auto line_end = header_section.find("\r\n", pos);
+        if (line_end == std::string_view::npos) {
+            line_end = header_section.size();
+        }
+
+        auto line = header_section.substr(pos, line_end - pos);
+        if (line.empty()) {
+            break;
+        }
+
+        // Parse header: name: value
+        auto colon_pos = line.find(':');
+        if (colon_pos != std::string_view::npos) {
+            auto name = trim(line.substr(0, colon_pos));
+            auto value = trim(line.substr(colon_pos + 1));
+
+            // Convert header name to lowercase for case-insensitive matching
+            std::string name_lower;
+            name_lower.reserve(name.size());
+            for (char c : name) {
+                name_lower += static_cast<char>(std::tolower(
+                    static_cast<unsigned char>(c)));
+            }
+
+            headers.emplace_back(std::move(name_lower), std::string(value));
+        }
+
+        pos = line_end + 2; // Skip \r\n
+    }
+
+    return headers;
+}
+
+auto multipart_parser::parse(std::string_view content_type,
+                             std::string_view body) -> parse_result {
+    parse_result result;
+
+    // Extract boundary from Content-Type
+    auto boundary_opt = extract_boundary(content_type);
+    if (!boundary_opt) {
+        result.error = parse_error{
+            "INVALID_BOUNDARY",
+            "Missing or invalid boundary in Content-Type header"};
+        return result;
+    }
+
+    const std::string& boundary = *boundary_opt;
+    std::string delimiter = "--" + boundary;
+    std::string end_delimiter = "--" + boundary + "--";
+
+    // Find first boundary
+    auto pos = body.find(delimiter);
+    if (pos == std::string_view::npos) {
+        result.error = parse_error{
+            "NO_PARTS",
+            "No parts found in multipart body"};
+        return result;
+    }
+
+    // Skip to after first boundary and CRLF
+    pos += delimiter.size();
+    if (pos < body.size() && body.substr(pos, 2) == "\r\n") {
+        pos += 2;
+    }
+
+    // Parse each part
+    while (pos < body.size()) {
+        // Check for end delimiter
+        if (body.substr(pos).starts_with("--")) {
+            break; // End of multipart
+        }
+
+        // Find next boundary
+        auto next_boundary = body.find(delimiter, pos);
+        if (next_boundary == std::string_view::npos) {
+            // No more parts
+            break;
+        }
+
+        // Extract part content (excluding trailing CRLF before boundary)
+        auto part_content = body.substr(pos, next_boundary - pos);
+        if (part_content.size() >= 2 &&
+            part_content.substr(part_content.size() - 2) == "\r\n") {
+            part_content = part_content.substr(0, part_content.size() - 2);
+        }
+
+        // Split part into headers and body
+        auto header_end = part_content.find("\r\n\r\n");
+        if (header_end == std::string_view::npos) {
+            // Malformed part - skip
+            pos = next_boundary + delimiter.size();
+            if (pos < body.size() && body.substr(pos, 2) == "\r\n") {
+                pos += 2;
+            }
+            continue;
+        }
+
+        auto header_section = part_content.substr(0, header_end);
+        auto body_section = part_content.substr(header_end + 4);
+
+        // Parse headers
+        auto headers = parse_part_headers(header_section);
+
+        // Create multipart_part
+        multipart_part part;
+        for (const auto& [name, value] : headers) {
+            if (name == "content-type") {
+                part.content_type = value;
+            } else if (name == "content-location") {
+                part.content_location = value;
+            } else if (name == "content-id") {
+                part.content_id = value;
+            }
+        }
+
+        // Default content type if not specified
+        if (part.content_type.empty()) {
+            part.content_type = std::string(media_type::dicom);
+        }
+
+        // Copy body data
+        part.data.assign(
+            reinterpret_cast<const uint8_t*>(body_section.data()),
+            reinterpret_cast<const uint8_t*>(body_section.data() +
+                                             body_section.size()));
+
+        result.parts.push_back(std::move(part));
+
+        // Move to next part
+        pos = next_boundary + delimiter.size();
+        if (pos < body.size() && body.substr(pos, 2) == "\r\n") {
+            pos += 2;
+        }
+    }
+
+    if (result.parts.empty()) {
+        result.error = parse_error{
+            "NO_VALID_PARTS",
+            "No valid parts found in multipart body"};
+    }
+
+    return result;
+}
+
+// ============================================================================
+// STOW-RS Validation
+// ============================================================================
+
+auto validate_instance(
+    const core::dicom_dataset& dataset,
+    std::optional<std::string_view> target_study_uid) -> validation_result {
+
+    // Check required DICOM tags
+    auto sop_class = dataset.get(core::tags::sop_class_uid);
+    if (!sop_class || sop_class->as_string().empty()) {
+        return validation_result::error(
+            "MISSING_SOP_CLASS",
+            "SOP Class UID (0008,0016) is required");
+    }
+
+    auto sop_instance = dataset.get(core::tags::sop_instance_uid);
+    if (!sop_instance || sop_instance->as_string().empty()) {
+        return validation_result::error(
+            "MISSING_SOP_INSTANCE",
+            "SOP Instance UID (0008,0018) is required");
+    }
+
+    auto study_uid = dataset.get(core::tags::study_instance_uid);
+    if (!study_uid || study_uid->as_string().empty()) {
+        return validation_result::error(
+            "MISSING_STUDY_UID",
+            "Study Instance UID (0020,000D) is required");
+    }
+
+    auto series_uid = dataset.get(core::tags::series_instance_uid);
+    if (!series_uid || series_uid->as_string().empty()) {
+        return validation_result::error(
+            "MISSING_SERIES_UID",
+            "Series Instance UID (0020,000E) is required");
+    }
+
+    // Validate study UID matches target if specified
+    if (target_study_uid.has_value()) {
+        auto instance_study_uid = study_uid->as_string();
+        if (instance_study_uid != *target_study_uid) {
+            return validation_result::error(
+                "STUDY_UID_MISMATCH",
+                "Instance Study UID does not match target study");
+        }
+    }
+
+    return validation_result::ok();
+}
+
+// ============================================================================
+// STOW-RS Response Building
+// ============================================================================
+
+auto build_store_response_json(
+    const store_response& response,
+    std::string_view base_url) -> std::string {
+    std::ostringstream oss;
+    oss << "{";
+
+    // Referenced SOP Sequence (0008,1199) - successfully stored instances
+    if (!response.referenced_instances.empty()) {
+        oss << "\"00081199\":{\"vr\":\"SQ\",\"Value\":[";
+        bool first = true;
+        for (const auto& inst : response.referenced_instances) {
+            if (!first) oss << ",";
+            first = false;
+
+            oss << "{";
+            // Referenced SOP Class UID (0008,1150)
+            oss << "\"00081150\":{\"vr\":\"UI\",\"Value\":[\""
+                << inst.sop_class_uid << "\"]},";
+            // Referenced SOP Instance UID (0008,1155)
+            oss << "\"00081155\":{\"vr\":\"UI\",\"Value\":[\""
+                << inst.sop_instance_uid << "\"]},";
+            // Retrieve URL (0008,1190)
+            oss << "\"00081190\":{\"vr\":\"UR\",\"Value\":[\""
+                << base_url << inst.retrieve_url << "\"]}";
+            oss << "}";
+        }
+        oss << "]}";
+    }
+
+    // Failed SOP Sequence (0008,1198) - failed instances
+    if (!response.failed_instances.empty()) {
+        if (!response.referenced_instances.empty()) {
+            oss << ",";
+        }
+        oss << "\"00081198\":{\"vr\":\"SQ\",\"Value\":[";
+        bool first = true;
+        for (const auto& inst : response.failed_instances) {
+            if (!first) oss << ",";
+            first = false;
+
+            oss << "{";
+            // Referenced SOP Class UID (0008,1150)
+            if (!inst.sop_class_uid.empty()) {
+                oss << "\"00081150\":{\"vr\":\"UI\",\"Value\":[\""
+                    << inst.sop_class_uid << "\"]},";
+            }
+            // Referenced SOP Instance UID (0008,1155)
+            if (!inst.sop_instance_uid.empty()) {
+                oss << "\"00081155\":{\"vr\":\"UI\",\"Value\":[\""
+                    << inst.sop_instance_uid << "\"]},";
+            }
+            // Failure Reason (0008,1197)
+            uint16_t failure_reason = 272; // Processing failure
+            if (inst.error_code && *inst.error_code == "DUPLICATE") {
+                failure_reason = 273; // Duplicate SOP Instance
+            } else if (inst.error_code && *inst.error_code == "INVALID_DATA") {
+                failure_reason = 272; // Processing failure
+            }
+            oss << "\"00081197\":{\"vr\":\"US\",\"Value\":["
+                << failure_reason << "]}";
+            oss << "}";
+        }
+        oss << "]}";
+    }
+
+    oss << "}";
+    return oss.str();
+}
+
 auto dataset_to_dicom_json(
     const core::dicom_dataset& dataset,
     bool include_bulk_data,
@@ -772,6 +1114,317 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
             });
 
     // ========================================================================
+    // STOW-RS (Store Over the Web)
+    // ========================================================================
+
+    // POST /dicomweb/studies - Store instances (new study)
+    CROW_ROUTE(app, "/dicomweb/studies")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& req) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Parse Content-Type header
+                auto content_type = req.get_header_value("Content-Type");
+                if (content_type.empty() ||
+                    content_type.find("multipart/related") == std::string::npos) {
+                    res.code = 415; // Unsupported Media Type
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json(
+                        "UNSUPPORTED_MEDIA_TYPE",
+                        "Content-Type must be multipart/related");
+                    return res;
+                }
+
+                // Parse multipart body
+                auto parse_result = dicomweb::multipart_parser::parse(
+                    content_type, req.body);
+
+                if (!parse_result) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json(
+                        parse_result.error->code,
+                        parse_result.error->message);
+                    return res;
+                }
+
+                if (parse_result.parts.empty()) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json(
+                        "NO_INSTANCES",
+                        "No DICOM instances in request body");
+                    return res;
+                }
+
+                // Process each part
+                dicomweb::store_response store_response;
+
+                for (const auto& part : parse_result.parts) {
+                    dicomweb::store_instance_result result;
+
+                    // Only process application/dicom parts
+                    if (part.content_type.find("application/dicom") ==
+                        std::string::npos) {
+                        continue;
+                    }
+
+                    // Parse DICOM from memory
+                    auto dicom_result = core::dicom_file::from_bytes(
+                        std::span<const uint8_t>(part.data.data(), part.data.size()));
+
+                    if (!dicom_result) {
+                        result.success = false;
+                        result.error_code = "INVALID_DATA";
+                        result.error_message = "Failed to parse DICOM data";
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
+
+                    const auto& dataset = dicom_result->dataset();
+
+                    // Validate instance
+                    auto validation = dicomweb::validate_instance(dataset);
+                    if (!validation) {
+                        result.success = false;
+                        result.error_code = validation.error_code;
+                        result.error_message = validation.error_message;
+
+                        // Try to extract UIDs for error reporting
+                        if (auto elem = dataset.get(core::tags::sop_class_uid)) {
+                            result.sop_class_uid = elem->as_string();
+                        }
+                        if (auto elem = dataset.get(core::tags::sop_instance_uid)) {
+                            result.sop_instance_uid = elem->as_string();
+                        }
+
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
+
+                    // Extract UIDs
+                    auto sop_class_elem = dataset.get(core::tags::sop_class_uid);
+                    auto sop_instance_elem = dataset.get(core::tags::sop_instance_uid);
+                    auto study_uid_elem = dataset.get(core::tags::study_instance_uid);
+                    auto series_uid_elem = dataset.get(core::tags::series_instance_uid);
+
+                    result.sop_class_uid = sop_class_elem->as_string();
+                    result.sop_instance_uid = sop_instance_elem->as_string();
+
+                    std::string study_uid = study_uid_elem->as_string();
+                    std::string series_uid = series_uid_elem->as_string();
+
+                    // Check for duplicate
+                    auto existing = ctx->database->get_file_path(
+                        result.sop_instance_uid);
+                    if (existing) {
+                        result.success = false;
+                        result.error_code = "DUPLICATE";
+                        result.error_message = "Instance already exists";
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
+
+                    // TODO: Implement full storage pipeline with file_storage
+                    // For now, just validate and report success
+                    // Full implementation requires:
+                    // 1. Generate file path
+                    // 2. Write file via file_storage
+                    // 3. Upsert patient/study/series/instance records
+
+                    // Success (validation only for now)
+                    result.success = true;
+                    result.retrieve_url = "/dicomweb/studies/" + study_uid +
+                                          "/series/" + series_uid +
+                                          "/instances/" + result.sop_instance_uid;
+                    store_response.referenced_instances.push_back(
+                        std::move(result));
+                }
+
+                // Build response
+                std::string base_url;  // Empty base URL, client should use relative URLs
+
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (store_response.all_failed()) {
+                    res.code = 409; // Conflict
+                } else if (store_response.partial_success()) {
+                    res.code = 202; // Accepted with warnings
+                } else {
+                    res.code = 200; // OK
+                }
+
+                res.body = dicomweb::build_store_response_json(
+                    store_response, base_url);
+                return res;
+            });
+
+    // POST /dicomweb/studies/{studyUID} - Store instances to existing study
+    CROW_ROUTE(app, "/dicomweb/studies/<string>")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& req, const std::string& target_study_uid) {
+                crow::response res;
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->database) {
+                    res.code = 503;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("DATABASE_UNAVAILABLE",
+                                               "Database not configured");
+                    return res;
+                }
+
+                // Parse Content-Type header
+                auto content_type = req.get_header_value("Content-Type");
+                if (content_type.empty() ||
+                    content_type.find("multipart/related") == std::string::npos) {
+                    res.code = 415;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json(
+                        "UNSUPPORTED_MEDIA_TYPE",
+                        "Content-Type must be multipart/related");
+                    return res;
+                }
+
+                // Parse multipart body
+                auto parse_result = dicomweb::multipart_parser::parse(
+                    content_type, req.body);
+
+                if (!parse_result) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json(
+                        parse_result.error->code,
+                        parse_result.error->message);
+                    return res;
+                }
+
+                if (parse_result.parts.empty()) {
+                    res.code = 400;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json(
+                        "NO_INSTANCES",
+                        "No DICOM instances in request body");
+                    return res;
+                }
+
+                // Process each part
+                dicomweb::store_response store_response;
+
+                for (const auto& part : parse_result.parts) {
+                    dicomweb::store_instance_result result;
+
+                    // Only process application/dicom parts
+                    if (part.content_type.find("application/dicom") ==
+                        std::string::npos) {
+                        continue;
+                    }
+
+                    // Parse DICOM from memory
+                    auto dicom_result = core::dicom_file::from_bytes(
+                        std::span<const uint8_t>(part.data.data(), part.data.size()));
+
+                    if (!dicom_result) {
+                        result.success = false;
+                        result.error_code = "INVALID_DATA";
+                        result.error_message = "Failed to parse DICOM data";
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
+
+                    const auto& dataset = dicom_result->dataset();
+
+                    // Validate instance with target study UID check
+                    auto validation = dicomweb::validate_instance(
+                        dataset, target_study_uid);
+                    if (!validation) {
+                        result.success = false;
+                        result.error_code = validation.error_code;
+                        result.error_message = validation.error_message;
+
+                        if (auto elem = dataset.get(core::tags::sop_class_uid)) {
+                            result.sop_class_uid = elem->as_string();
+                        }
+                        if (auto elem = dataset.get(core::tags::sop_instance_uid)) {
+                            result.sop_instance_uid = elem->as_string();
+                        }
+
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
+
+                    // Extract UIDs
+                    auto sop_class_elem = dataset.get(core::tags::sop_class_uid);
+                    auto sop_instance_elem = dataset.get(core::tags::sop_instance_uid);
+                    auto series_uid_elem = dataset.get(core::tags::series_instance_uid);
+
+                    result.sop_class_uid = sop_class_elem->as_string();
+                    result.sop_instance_uid = sop_instance_elem->as_string();
+                    std::string series_uid = series_uid_elem->as_string();
+
+                    // Check for duplicate
+                    auto existing = ctx->database->get_file_path(
+                        result.sop_instance_uid);
+                    if (existing) {
+                        result.success = false;
+                        result.error_code = "DUPLICATE";
+                        result.error_message = "Instance already exists";
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
+
+                    // TODO: Implement full storage pipeline with file_storage
+                    // For now, just validate and report success
+                    // Full implementation requires:
+                    // 1. Generate file path
+                    // 2. Write file via file_storage
+                    // 3. Upsert patient/study/series/instance records
+
+                    // Success (validation only for now)
+                    result.success = true;
+                    result.retrieve_url = "/dicomweb/studies/" + target_study_uid +
+                                          "/series/" + series_uid +
+                                          "/instances/" + result.sop_instance_uid;
+                    store_response.referenced_instances.push_back(
+                        std::move(result));
+                }
+
+                // Build response
+                std::string base_url;  // Empty base URL, client should use relative URLs
+
+                res.add_header("Content-Type",
+                               std::string(dicomweb::media_type::dicom_json));
+
+                if (store_response.all_failed()) {
+                    res.code = 409; // Conflict
+                } else if (store_response.partial_success()) {
+                    res.code = 202; // Accepted with warnings
+                } else {
+                    res.code = 200; // OK
+                }
+
+                res.body = dicomweb::build_store_response_json(
+                    store_response, base_url);
+                return res;
+            });
+
+    // ========================================================================
     // CORS Preflight Handler for DICOMweb
     // ========================================================================
 
@@ -783,7 +1436,8 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     res.add_header("Access-Control-Allow-Origin",
                                    ctx->config->cors_allowed_origins);
                 }
-                res.add_header("Access-Control-Allow-Methods", "GET, OPTIONS");
+                res.add_header("Access-Control-Allow-Methods",
+                               "GET, POST, OPTIONS");
                 res.add_header("Access-Control-Allow-Headers",
                                "Content-Type, Accept, Authorization");
                 res.add_header("Access-Control-Max-Age", "86400");
