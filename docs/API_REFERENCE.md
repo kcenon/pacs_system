@@ -3126,6 +3126,176 @@ struct rest_server_config {
 } // namespace pacs::web
 ```
 
+### DICOMweb (WADO-RS) API
+
+The DICOMweb module implements the WADO-RS (Web Access to DICOM Objects - RESTful) specification
+as defined in DICOM PS3.18 for retrieving DICOM objects over HTTP.
+
+#### `pacs::web::dicomweb::multipart_builder`
+
+Builds multipart/related MIME responses for returning multiple DICOM objects.
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+class multipart_builder {
+public:
+    // Construction (default content type: application/dicom)
+    explicit multipart_builder(std::string_view content_type = media_type::dicom);
+
+    // Add parts
+    void add_part(std::vector<uint8_t> data,
+                  std::optional<std::string_view> content_type = std::nullopt);
+    void add_part_with_location(std::vector<uint8_t> data,
+                                std::string_view location,
+                                std::optional<std::string_view> content_type = std::nullopt);
+
+    // Build response
+    [[nodiscard]] auto build() const -> std::string;
+    [[nodiscard]] auto content_type_header() const -> std::string;
+    [[nodiscard]] auto boundary() const -> std::string_view;
+
+    // Status
+    [[nodiscard]] auto empty() const noexcept -> bool;
+    [[nodiscard]] auto size() const noexcept -> size_t;
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### Utility Functions
+
+```cpp
+namespace pacs::web::dicomweb {
+
+// Parse Accept header into structured format, sorted by quality
+[[nodiscard]] auto parse_accept_header(std::string_view accept_header)
+    -> std::vector<accept_info>;
+
+// Check if a media type is acceptable based on parsed Accept header
+[[nodiscard]] auto is_acceptable(const std::vector<accept_info>& accept_infos,
+                                  std::string_view media_type) -> bool;
+
+// Convert DICOM dataset to DicomJSON format
+[[nodiscard]] auto dataset_to_dicom_json(
+    const core::dicom_dataset& dataset,
+    bool include_bulk_data = false,
+    std::string_view bulk_data_uri_prefix = "") -> std::string;
+
+// Check if a DICOM tag contains bulk data (Pixel Data, etc.)
+[[nodiscard]] auto is_bulk_data_tag(uint32_t tag) -> bool;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### Media Type Constants
+
+```cpp
+namespace pacs::web::dicomweb {
+
+struct media_type {
+    static constexpr std::string_view dicom = "application/dicom";
+    static constexpr std::string_view dicom_json = "application/dicom+json";
+    static constexpr std::string_view dicom_xml = "application/dicom+xml";
+    static constexpr std::string_view octet_stream = "application/octet-stream";
+    static constexpr std::string_view jpeg = "image/jpeg";
+    static constexpr std::string_view png = "image/png";
+    static constexpr std::string_view multipart_related = "multipart/related";
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### REST API Endpoints (WADO-RS)
+
+**Base Path**: `/dicomweb`
+
+##### Retrieve Study
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>`
+*   **Description**: Retrieve all DICOM instances of a study.
+*   **Accept Headers**:
+    *   `application/dicom` (default)
+    *   `multipart/related; type="application/dicom"`
+    *   `*/*`
+*   **Responses**:
+    *   `200 OK`: Multipart response with DICOM instances.
+    *   `404 Not Found`: Study not found.
+    *   `406 Not Acceptable`: Requested media type not supported.
+
+##### Retrieve Study Metadata
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/metadata`
+*   **Description**: Retrieve metadata for all instances in a study.
+*   **Accept Headers**:
+    *   `application/dicom+json` (default)
+*   **Response Body**:
+    ```json
+    [
+      {
+        "00080018": { "vr": "UI", "Value": ["1.2.840..."] },
+        "00100010": { "vr": "PN", "Value": [{ "Alphabetic": "DOE^JOHN" }] }
+      }
+    ]
+    ```
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of instance metadata.
+    *   `404 Not Found`: Study not found.
+
+##### Retrieve Series
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>`
+*   **Description**: Retrieve all DICOM instances of a series.
+*   **Accept Headers**: Same as Retrieve Study.
+*   **Responses**:
+    *   `200 OK`: Multipart response with DICOM instances.
+    *   `404 Not Found`: Series not found.
+    *   `406 Not Acceptable`: Requested media type not supported.
+
+##### Retrieve Series Metadata
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/metadata`
+*   **Description**: Retrieve metadata for all instances in a series.
+*   **Accept Headers**: `application/dicom+json` (default)
+*   **Responses**:
+    *   `200 OK`: DicomJSON array of instance metadata.
+    *   `404 Not Found`: Series not found.
+
+##### Retrieve Instance
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>`
+*   **Description**: Retrieve a single DICOM instance.
+*   **Accept Headers**:
+    *   `application/dicom` (default)
+    *   `multipart/related; type="application/dicom"`
+    *   `*/*`
+*   **Responses**:
+    *   `200 OK`: Multipart response with single DICOM instance.
+    *   `404 Not Found`: Instance not found.
+    *   `406 Not Acceptable`: Requested media type not supported.
+
+##### Retrieve Instance Metadata
+*   **Method**: `GET`
+*   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/metadata`
+*   **Description**: Retrieve metadata for a single instance.
+*   **Accept Headers**: `application/dicom+json` (default)
+*   **Response Body**:
+    ```json
+    [
+      {
+        "00080016": { "vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.2"] },
+        "00080018": { "vr": "UI", "Value": ["1.2.840...instance"] },
+        "00100010": { "vr": "PN", "Value": [{ "Alphabetic": "DOE^JOHN" }] },
+        "7FE00010": { "vr": "OW", "BulkDataURI": "/dicomweb/studies/.../bulkdata/..." }
+      }
+    ]
+    ```
+*   **Responses**:
+    *   `200 OK`: DicomJSON array with single instance metadata.
+    *   `404 Not Found`: Instance not found.
+
 ---
 
 ## Document History
@@ -3140,6 +3310,7 @@ struct rest_server_config {
 | 1.5.0   | 2025-12-08 | Added MG Modality Module (mg_storage, mg_iod_validator) |
 | 1.6.0   | 2025-12-09 | Added Web Module (rest_server foundation)    |
 | 1.7.0   | 2025-12-11 | Added Patient, Study, Series REST API endpoints |
+| 1.8.0   | 2025-12-12 | Added DICOMweb (WADO-RS) API endpoints and utilities |
 
 
 ---

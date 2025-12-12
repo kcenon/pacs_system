@@ -2656,6 +2656,235 @@ public:
 
 ---
 
+## 웹 모듈
+
+### `pacs::web::rest_server`
+
+Crow 프레임워크를 사용한 REST API 서버 구현체입니다.
+
+```cpp
+#include <pacs/web/rest_server.hpp>
+
+namespace pacs::web {
+
+class rest_server {
+public:
+    // 생성
+    explicit rest_server(const rest_server_config& config);
+    ~rest_server();
+
+    // 수명 주기
+    void start();        // 블로킹
+    void start_async();  // 논블로킹
+    void stop();         // 정상 종료
+
+    // 설정
+    void set_health_checker(std::shared_ptr<monitoring::health_checker> checker);
+
+    // 상태
+    bool is_running() const;
+    uint16_t port() const;
+};
+
+} // namespace pacs::web
+```
+
+### `pacs::web::rest_server_config`
+
+REST 서버 설정입니다.
+
+```cpp
+#include <pacs/web/rest_server_config.hpp>
+
+namespace pacs::web {
+
+struct rest_server_config {
+    uint16_t port = 8080;
+    size_t concurrency = 2;
+    bool enable_cors = true;
+    std::string bind_address = "0.0.0.0";
+
+    // TLS 옵션 (향후)
+    bool use_tls = false;
+    std::string cert_file;
+    std::string key_file;
+};
+
+} // namespace pacs::web
+```
+
+### DICOMweb (WADO-RS) API
+
+DICOMweb 모듈은 HTTP를 통한 DICOM 객체 검색을 위해 DICOM PS3.18에 정의된
+WADO-RS (Web Access to DICOM Objects - RESTful) 사양을 구현합니다.
+
+#### `pacs::web::dicomweb::multipart_builder`
+
+여러 DICOM 객체를 반환하기 위한 multipart/related MIME 응답을 생성합니다.
+
+```cpp
+#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+
+namespace pacs::web::dicomweb {
+
+class multipart_builder {
+public:
+    // 생성 (기본 콘텐츠 타입: application/dicom)
+    explicit multipart_builder(std::string_view content_type = media_type::dicom);
+
+    // 파트 추가
+    void add_part(std::vector<uint8_t> data,
+                  std::optional<std::string_view> content_type = std::nullopt);
+    void add_part_with_location(std::vector<uint8_t> data,
+                                std::string_view location,
+                                std::optional<std::string_view> content_type = std::nullopt);
+
+    // 응답 빌드
+    [[nodiscard]] auto build() const -> std::string;
+    [[nodiscard]] auto content_type_header() const -> std::string;
+    [[nodiscard]] auto boundary() const -> std::string_view;
+
+    // 상태
+    [[nodiscard]] auto empty() const noexcept -> bool;
+    [[nodiscard]] auto size() const noexcept -> size_t;
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### 유틸리티 함수
+
+```cpp
+namespace pacs::web::dicomweb {
+
+// Accept 헤더를 품질값 기준으로 정렬된 구조화 형식으로 파싱
+[[nodiscard]] auto parse_accept_header(std::string_view accept_header)
+    -> std::vector<accept_info>;
+
+// 파싱된 Accept 헤더를 기반으로 미디어 타입의 허용 여부 확인
+[[nodiscard]] auto is_acceptable(const std::vector<accept_info>& accept_infos,
+                                  std::string_view media_type) -> bool;
+
+// DICOM 데이터셋을 DicomJSON 형식으로 변환
+[[nodiscard]] auto dataset_to_dicom_json(
+    const core::dicom_dataset& dataset,
+    bool include_bulk_data = false,
+    std::string_view bulk_data_uri_prefix = "") -> std::string;
+
+// DICOM 태그가 벌크 데이터(Pixel Data 등)를 포함하는지 확인
+[[nodiscard]] auto is_bulk_data_tag(uint32_t tag) -> bool;
+
+} // namespace pacs::web::dicomweb
+```
+
+#### 미디어 타입 상수
+
+```cpp
+namespace pacs::web::dicomweb {
+
+struct media_type {
+    static constexpr std::string_view dicom = "application/dicom";
+    static constexpr std::string_view dicom_json = "application/dicom+json";
+    static constexpr std::string_view dicom_xml = "application/dicom+xml";
+    static constexpr std::string_view octet_stream = "application/octet-stream";
+    static constexpr std::string_view jpeg = "image/jpeg";
+    static constexpr std::string_view png = "image/png";
+    static constexpr std::string_view multipart_related = "multipart/related";
+};
+
+} // namespace pacs::web::dicomweb
+```
+
+#### REST API 엔드포인트 (WADO-RS)
+
+**기본 경로**: `/dicomweb`
+
+##### 스터디 조회
+*   **메서드**: `GET`
+*   **경로**: `/studies/<studyUID>`
+*   **설명**: 스터디의 모든 DICOM 인스턴스를 조회합니다.
+*   **Accept 헤더**:
+    *   `application/dicom` (기본값)
+    *   `multipart/related; type="application/dicom"`
+    *   `*/*`
+*   **응답**:
+    *   `200 OK`: DICOM 인스턴스가 포함된 멀티파트 응답.
+    *   `404 Not Found`: 스터디를 찾을 수 없음.
+    *   `406 Not Acceptable`: 요청한 미디어 타입이 지원되지 않음.
+
+##### 스터디 메타데이터 조회
+*   **메서드**: `GET`
+*   **경로**: `/studies/<studyUID>/metadata`
+*   **설명**: 스터디의 모든 인스턴스에 대한 메타데이터를 조회합니다.
+*   **Accept 헤더**:
+    *   `application/dicom+json` (기본값)
+*   **응답 본문**:
+    ```json
+    [
+      {
+        "00080018": { "vr": "UI", "Value": ["1.2.840..."] },
+        "00100010": { "vr": "PN", "Value": [{ "Alphabetic": "홍^길동" }] }
+      }
+    ]
+    ```
+*   **응답**:
+    *   `200 OK`: 인스턴스 메타데이터의 DicomJSON 배열.
+    *   `404 Not Found`: 스터디를 찾을 수 없음.
+
+##### 시리즈 조회
+*   **메서드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>`
+*   **설명**: 시리즈의 모든 DICOM 인스턴스를 조회합니다.
+*   **Accept 헤더**: 스터디 조회와 동일.
+*   **응답**:
+    *   `200 OK`: DICOM 인스턴스가 포함된 멀티파트 응답.
+    *   `404 Not Found`: 시리즈를 찾을 수 없음.
+    *   `406 Not Acceptable`: 요청한 미디어 타입이 지원되지 않음.
+
+##### 시리즈 메타데이터 조회
+*   **메서드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>/metadata`
+*   **설명**: 시리즈의 모든 인스턴스에 대한 메타데이터를 조회합니다.
+*   **Accept 헤더**: `application/dicom+json` (기본값)
+*   **응답**:
+    *   `200 OK`: 인스턴스 메타데이터의 DicomJSON 배열.
+    *   `404 Not Found`: 시리즈를 찾을 수 없음.
+
+##### 인스턴스 조회
+*   **메서드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>`
+*   **설명**: 단일 DICOM 인스턴스를 조회합니다.
+*   **Accept 헤더**:
+    *   `application/dicom` (기본값)
+    *   `multipart/related; type="application/dicom"`
+    *   `*/*`
+*   **응답**:
+    *   `200 OK`: 단일 DICOM 인스턴스가 포함된 멀티파트 응답.
+    *   `404 Not Found`: 인스턴스를 찾을 수 없음.
+    *   `406 Not Acceptable`: 요청한 미디어 타입이 지원되지 않음.
+
+##### 인스턴스 메타데이터 조회
+*   **메서드**: `GET`
+*   **경로**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/metadata`
+*   **설명**: 단일 인스턴스의 메타데이터를 조회합니다.
+*   **Accept 헤더**: `application/dicom+json` (기본값)
+*   **응답 본문**:
+    ```json
+    [
+      {
+        "00080016": { "vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.2"] },
+        "00080018": { "vr": "UI", "Value": ["1.2.840...instance"] },
+        "00100010": { "vr": "PN", "Value": [{ "Alphabetic": "홍^길동" }] },
+        "7FE00010": { "vr": "OW", "BulkDataURI": "/dicomweb/studies/.../bulkdata/..." }
+      }
+    ]
+    ```
+*   **응답**:
+    *   `200 OK`: 단일 인스턴스 메타데이터의 DicomJSON 배열.
+    *   `404 Not Found`: 인스턴스를 찾을 수 없음.
+
+---
+
 ## 문서 이력
 
 | 버전 | 날짜       | 변경 사항                                     |
@@ -2666,10 +2895,13 @@ public:
 | 1.3.0 | 2025-12-07 | 모니터링 모듈 추가 (DIMSE 작업 추적용 pacs_metrics) |
 | 1.4.0 | 2025-12-07 | DX 모달리티 모듈 추가 (dx_storage, dx_iod_validator) |
 | 1.5.0 | 2025-12-08 | MG 모달리티 모듈 추가 (mg_storage, mg_iod_validator) |
+| 1.6.0 | 2025-12-09 | 웹 모듈 추가 (rest_server 기반)               |
+| 1.7.0 | 2025-12-11 | Patient, Study, Series REST API 엔드포인트 추가 |
+| 1.8.0 | 2025-12-12 | DICOMweb (WADO-RS) API 엔드포인트 및 유틸리티 추가 |
 
 ---
 
-*문서 버전: 0.1.5.0*
+*문서 버전: 0.1.8.0*
 *작성일: 2025-11-30*
-*최종 수정일: 2025-12-07*
+*최종 수정일: 2025-12-12*
 *작성자: kcenon@naver.com*
