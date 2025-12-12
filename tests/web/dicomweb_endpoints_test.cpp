@@ -10,6 +10,9 @@
 #include <catch2/catch_approx.hpp>
 
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
+#include "pacs/storage/study_record.hpp"
+#include "pacs/storage/series_record.hpp"
+#include "pacs/storage/instance_record.hpp"
 
 using namespace pacs::web;
 using namespace pacs::web::dicomweb;
@@ -484,4 +487,291 @@ TEST_CASE("validation_result - error result", "[dicomweb][stowrs][validation]") 
     REQUIRE(static_cast<bool>(result) == false);
     REQUIRE(result.error_code == "MISSING_TAG");
     REQUIRE(result.error_message == "Required tag missing");
+}
+
+// ============================================================================
+// QIDO-RS Query Parameter Parsing Tests
+// ============================================================================
+
+TEST_CASE("parse_study_query_params - empty params", "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("");
+
+    REQUIRE(!query.patient_id.has_value());
+    REQUIRE(!query.study_uid.has_value());
+    REQUIRE(query.limit == 0);
+    REQUIRE(query.offset == 0);
+}
+
+TEST_CASE("parse_study_query_params - PatientID", "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?PatientID=12345");
+
+    REQUIRE(query.patient_id.has_value());
+    REQUIRE(*query.patient_id == "12345");
+}
+
+TEST_CASE("parse_study_query_params - PatientName with wildcard",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?PatientName=DOE*");
+
+    REQUIRE(query.patient_name.has_value());
+    REQUIRE(*query.patient_name == "DOE*");
+}
+
+TEST_CASE("parse_study_query_params - StudyDate exact", "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?StudyDate=20231215");
+
+    REQUIRE(query.study_date.has_value());
+    REQUIRE(*query.study_date == "20231215");
+    REQUIRE(!query.study_date_from.has_value());
+    REQUIRE(!query.study_date_to.has_value());
+}
+
+TEST_CASE("parse_study_query_params - StudyDate range", "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?StudyDate=20230101-20231231");
+
+    REQUIRE(!query.study_date.has_value());
+    REQUIRE(query.study_date_from.has_value());
+    REQUIRE(*query.study_date_from == "20230101");
+    REQUIRE(query.study_date_to.has_value());
+    REQUIRE(*query.study_date_to == "20231231");
+}
+
+TEST_CASE("parse_study_query_params - StudyDate from only",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?StudyDate=20230101-");
+
+    REQUIRE(query.study_date_from.has_value());
+    REQUIRE(*query.study_date_from == "20230101");
+    REQUIRE(!query.study_date_to.has_value());
+}
+
+TEST_CASE("parse_study_query_params - StudyDate to only",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?StudyDate=-20231231");
+
+    REQUIRE(!query.study_date_from.has_value());
+    REQUIRE(query.study_date_to.has_value());
+    REQUIRE(*query.study_date_to == "20231231");
+}
+
+TEST_CASE("parse_study_query_params - multiple params",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params(
+        "?PatientID=12345&ModalitiesInStudy=CT&limit=50&offset=10");
+
+    REQUIRE(query.patient_id.has_value());
+    REQUIRE(*query.patient_id == "12345");
+    REQUIRE(query.modality.has_value());
+    REQUIRE(*query.modality == "CT");
+    REQUIRE(query.limit == 50);
+    REQUIRE(query.offset == 10);
+}
+
+TEST_CASE("parse_study_query_params - DICOM tag format",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?00100020=PATIENT123&0020000D=1.2.3.4");
+
+    REQUIRE(query.patient_id.has_value());
+    REQUIRE(*query.patient_id == "PATIENT123");
+    REQUIRE(query.study_uid.has_value());
+    REQUIRE(*query.study_uid == "1.2.3.4");
+}
+
+TEST_CASE("parse_study_query_params - URL encoded values",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_study_query_params("?PatientName=DOE%5EJOHN");
+
+    REQUIRE(query.patient_name.has_value());
+    REQUIRE(*query.patient_name == "DOE^JOHN");
+}
+
+TEST_CASE("parse_series_query_params - basic params", "[dicomweb][qidors][query]") {
+    auto query = parse_series_query_params(
+        "?Modality=CT&SeriesNumber=1&limit=25");
+
+    REQUIRE(query.modality.has_value());
+    REQUIRE(*query.modality == "CT");
+    REQUIRE(query.series_number.has_value());
+    REQUIRE(*query.series_number == 1);
+    REQUIRE(query.limit == 25);
+}
+
+TEST_CASE("parse_series_query_params - DICOM tag format",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_series_query_params("?00080060=MR&0020000E=1.2.3.4.5");
+
+    REQUIRE(query.modality.has_value());
+    REQUIRE(*query.modality == "MR");
+    REQUIRE(query.series_uid.has_value());
+    REQUIRE(*query.series_uid == "1.2.3.4.5");
+}
+
+TEST_CASE("parse_instance_query_params - basic params",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_instance_query_params(
+        "?SOPClassUID=1.2.840.10008.5.1.4.1.1.2&InstanceNumber=5");
+
+    REQUIRE(query.sop_class_uid.has_value());
+    REQUIRE(*query.sop_class_uid == "1.2.840.10008.5.1.4.1.1.2");
+    REQUIRE(query.instance_number.has_value());
+    REQUIRE(*query.instance_number == 5);
+}
+
+TEST_CASE("parse_instance_query_params - DICOM tag format",
+          "[dicomweb][qidors][query]") {
+    auto query = parse_instance_query_params("?00080018=1.2.3.4.5.6.7.8.9");
+
+    REQUIRE(query.sop_uid.has_value());
+    REQUIRE(*query.sop_uid == "1.2.3.4.5.6.7.8.9");
+}
+
+// ============================================================================
+// QIDO-RS DicomJSON Response Building Tests
+// ============================================================================
+
+TEST_CASE("study_record_to_dicom_json - basic record",
+          "[dicomweb][qidors][json]") {
+    pacs::storage::study_record record;
+    record.study_uid = "1.2.3.4.5.6.7";
+    record.study_date = "20231215";
+    record.study_time = "143025";
+    record.accession_number = "ACC123";
+    record.study_description = "CT Chest";
+    record.num_series = 3;
+    record.num_instances = 150;
+
+    auto json = study_record_to_dicom_json(record, "PAT001", "DOE^JOHN");
+
+    // Check Study Instance UID
+    REQUIRE(json.find("0020000D") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7") != std::string::npos);
+
+    // Check Study Date
+    REQUIRE(json.find("00080020") != std::string::npos);
+    REQUIRE(json.find("20231215") != std::string::npos);
+
+    // Check Patient ID
+    REQUIRE(json.find("00100020") != std::string::npos);
+    REQUIRE(json.find("PAT001") != std::string::npos);
+
+    // Check Patient Name (PN VR format)
+    REQUIRE(json.find("00100010") != std::string::npos);
+    REQUIRE(json.find("Alphabetic") != std::string::npos);
+    REQUIRE(json.find("DOE^JOHN") != std::string::npos);
+
+    // Check Number of Series
+    REQUIRE(json.find("00201206") != std::string::npos);
+    REQUIRE(json.find("3") != std::string::npos);
+
+    // Check Number of Instances
+    REQUIRE(json.find("00201208") != std::string::npos);
+    REQUIRE(json.find("150") != std::string::npos);
+}
+
+TEST_CASE("study_record_to_dicom_json - with modalities",
+          "[dicomweb][qidors][json]") {
+    pacs::storage::study_record record;
+    record.study_uid = "1.2.3";
+    record.modalities_in_study = "CT\\MR\\US";
+    record.num_series = 0;
+    record.num_instances = 0;
+
+    auto json = study_record_to_dicom_json(record, "", "");
+
+    // Check Modalities in Study
+    REQUIRE(json.find("00080061") != std::string::npos);
+    REQUIRE(json.find("CT") != std::string::npos);
+    REQUIRE(json.find("MR") != std::string::npos);
+    REQUIRE(json.find("US") != std::string::npos);
+}
+
+TEST_CASE("series_record_to_dicom_json - basic record",
+          "[dicomweb][qidors][json]") {
+    pacs::storage::series_record record;
+    record.series_uid = "1.2.3.4.5.6.7.8";
+    record.modality = "CT";
+    record.series_number = 1;
+    record.series_description = "Axial";
+    record.body_part_examined = "CHEST";
+    record.num_instances = 50;
+
+    auto json = series_record_to_dicom_json(record, "1.2.3.4.5.6.7");
+
+    // Check Series Instance UID
+    REQUIRE(json.find("0020000E") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7.8") != std::string::npos);
+
+    // Check Study Instance UID
+    REQUIRE(json.find("0020000D") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7") != std::string::npos);
+
+    // Check Modality
+    REQUIRE(json.find("00080060") != std::string::npos);
+    REQUIRE(json.find("\"CT\"") != std::string::npos);
+
+    // Check Series Number
+    REQUIRE(json.find("00200011") != std::string::npos);
+
+    // Check Body Part Examined
+    REQUIRE(json.find("00180015") != std::string::npos);
+    REQUIRE(json.find("CHEST") != std::string::npos);
+
+    // Check Number of Instances
+    REQUIRE(json.find("00201209") != std::string::npos);
+    REQUIRE(json.find("50") != std::string::npos);
+}
+
+TEST_CASE("instance_record_to_dicom_json - basic record",
+          "[dicomweb][qidors][json]") {
+    pacs::storage::instance_record record;
+    record.sop_uid = "1.2.3.4.5.6.7.8.9";
+    record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";
+    record.instance_number = 10;
+    record.rows = 512;
+    record.columns = 512;
+    record.number_of_frames = 1;
+
+    auto json = instance_record_to_dicom_json(record, "1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7");
+
+    // Check SOP Instance UID
+    REQUIRE(json.find("00080018") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7.8.9") != std::string::npos);
+
+    // Check SOP Class UID
+    REQUIRE(json.find("00080016") != std::string::npos);
+    REQUIRE(json.find("1.2.840.10008.5.1.4.1.1.2") != std::string::npos);
+
+    // Check Study Instance UID
+    REQUIRE(json.find("0020000D") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7") != std::string::npos);
+
+    // Check Series Instance UID
+    REQUIRE(json.find("0020000E") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7.8") != std::string::npos);
+
+    // Check Instance Number
+    REQUIRE(json.find("00200013") != std::string::npos);
+
+    // Check Rows and Columns
+    REQUIRE(json.find("00280010") != std::string::npos);
+    REQUIRE(json.find("00280011") != std::string::npos);
+    REQUIRE(json.find("512") != std::string::npos);
+}
+
+TEST_CASE("instance_record_to_dicom_json - optional fields not present",
+          "[dicomweb][qidors][json]") {
+    pacs::storage::instance_record record;
+    record.sop_uid = "1.2.3";
+    record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";
+    // No rows, columns, instance_number, number_of_frames
+
+    auto json = instance_record_to_dicom_json(record, "", "");
+
+    // SOP UIDs should be present
+    REQUIRE(json.find("00080018") != std::string::npos);
+    REQUIRE(json.find("00080016") != std::string::npos);
+
+    // Rows/Columns should NOT be present
+    REQUIRE(json.find("00280010") == std::string::npos);
+    REQUIRE(json.find("00280011") == std::string::npos);
 }
