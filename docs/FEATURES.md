@@ -1,7 +1,7 @@
 # PACS System Features
 
-> **Version:** 0.1.2.0
-> **Last Updated:** 2025-12-07
+> **Version:** 0.1.8.0
+> **Last Updated:** 2025-12-12
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
@@ -628,6 +628,81 @@ storage.store_with_progress(ds, progress);
 
 **Note**: This is currently a mock implementation for API validation and testing. Full AWS SDK C++ integration will be added in a future release.
 
+### Azure Blob Storage (Mock Implementation)
+
+**Implementation**: Azure Blob storage backend with mock client for testing.
+
+**Features**:
+- Azure Blob Storage container support
+- Block blob upload for large files (parallel block staging)
+- Access tier management (Hot, Cool, Archive)
+- Progress callbacks for upload/download monitoring
+- Thread-safe operations with shared_mutex
+- Azurite emulator support for local testing
+- Configurable connection and timeout settings
+
+**Configuration**:
+```cpp
+#include <pacs/storage/azure_blob_storage.hpp>
+
+using namespace pacs::storage;
+
+azure_storage_config config;
+config.container_name = "dicom-container";
+config.connection_string = "DefaultEndpointsProtocol=https;AccountName=...";
+
+// For Azurite local testing
+config.endpoint_url = "http://127.0.0.1:10000/devstoreaccount1";
+
+// Block blob upload settings
+config.block_upload_threshold = 100 * 1024 * 1024;  // 100MB
+config.block_size = 4 * 1024 * 1024;  // 4MB
+
+// Access tier
+config.access_tier = "Hot";  // Hot, Cool, or Archive
+```
+
+**Usage Example**:
+```cpp
+azure_blob_storage storage{config};
+
+// Store DICOM dataset
+core::dicom_dataset ds;
+// ... populate dataset with UIDs ...
+
+auto store_result = storage.store(ds);
+if (store_result.is_ok()) {
+    std::cout << "Stored successfully\n";
+}
+
+// Retrieve by SOP Instance UID
+auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
+if (retrieve_result.is_ok()) {
+    auto& dataset = retrieve_result.value();
+    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+}
+
+// Change access tier for archival
+storage.set_access_tier("1.2.3.4.5.6.7.8.9", "Archive");
+
+// Store with progress tracking
+auto progress = [](std::size_t transferred, std::size_t total) -> bool {
+    std::cout << "Progress: " << (100 * transferred / total) << "%\n";
+    return true;  // Continue upload
+};
+storage.store_with_progress(ds, progress);
+```
+
+**Blob Naming Structure**:
+```
+{container}/
+  └── {StudyInstanceUID}/
+      └── {SeriesInstanceUID}/
+          └── {SOPInstanceUID}.dcm
+```
+
+**Note**: This is currently a mock implementation for API validation and testing. Full Azure SDK C++ integration will be added in a future release.
+
 ---
 
 ## Ecosystem Integration
@@ -861,10 +936,11 @@ server.stop();
 
 ---
 
-## Recently Completed Features (v1.2.0 - 2025-12-10)
+## Recently Completed Features (v1.2.0 - 2025-12-12)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Azure Blob Storage | Azure Blob storage backend (mock implementation) with block blob upload | #199 | ✅ Complete |
 | Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
 | Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
 | RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
@@ -903,7 +979,7 @@ server.stop();
 |---------|-------------|--------|
 | AI Integration | Inference pipeline | Future |
 | Cloud Storage (Full AWS SDK) | Production AWS S3 integration | Future |
-| Azure Blob Storage | Azure cloud storage backend | Future |
+| Cloud Storage (Full Azure SDK) | Production Azure Blob Storage integration | Future |
 | FHIR Integration | Healthcare interop | Future |
 
 ---
@@ -920,11 +996,12 @@ server.stop();
 | 1.5.0 | 2025-12-09 | raphaelshin | Added: RLE Lossless codec for Issue #182; Updated compression codec status |
 | 1.6.0 | 2025-12-10 | raphaelshin | Added: RT modality support (RT Plan, RT Dose, RT Structure Set) with IOD validation for Issue #186 |
 | 1.7.0 | 2025-12-10 | raphaelshin | Added: SEG/SR support (Segmentation, Structured Reports) for AI/CAD integration for Issue #187 |
+| 1.8.0 | 2025-12-12 | raphaelshin | Added: Azure Blob Storage (mock implementation) with block blob upload for Issue #199 |
 
 ---
 
-*Document Version: 0.1.7.0*
+*Document Version: 0.1.8.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-10*
+*Updated: 2025-12-12*
 *Author: kcenon@naver.com*
 
