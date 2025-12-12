@@ -29,6 +29,30 @@ export interface SystemMetrics {
   message?: string;
 }
 
+// Dashboard statistics types
+export interface DashboardStats {
+  active_associations: number;
+  total_patients: number;
+  total_studies: number;
+  storage_used_bytes: number;
+  storage_total_bytes: number;
+}
+
+export interface StorageStats {
+  used_bytes: number;
+  total_bytes: number;
+  free_bytes: number;
+  used_percentage: number;
+  breakdown?: StorageBreakdown[];
+}
+
+export interface StorageBreakdown {
+  name: string;
+  size_bytes: number;
+  percentage: number;
+  color?: string;
+}
+
 export interface SystemVersion {
   api_version: string;
   pacs_version: string;
