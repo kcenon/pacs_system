@@ -60,6 +60,36 @@ class ApiClient {
     return response.data;
   }
 
+  async getDicomConfig() {
+    const response = await this.client.get('/system/dicom-config');
+    return response.data;
+  }
+
+  async updateDicomConfig(config: Record<string, unknown>) {
+    const response = await this.client.put('/system/dicom-config', config);
+    return response.data;
+  }
+
+  async getStorageConfig() {
+    const response = await this.client.get('/system/storage-config');
+    return response.data;
+  }
+
+  async updateStorageConfig(config: Record<string, unknown>) {
+    const response = await this.client.put('/system/storage-config', config);
+    return response.data;
+  }
+
+  async getLoggingConfig() {
+    const response = await this.client.get('/system/logging-config');
+    return response.data;
+  }
+
+  async updateLoggingConfig(config: Record<string, unknown>) {
+    const response = await this.client.put('/system/logging-config', config);
+    return response.data;
+  }
+
   // Patient endpoints
   async getPatients(params?: Record<string, string | number | undefined>) {
     const response = await this.client.get('/patients', { params });
