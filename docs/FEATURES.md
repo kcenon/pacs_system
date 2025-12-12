@@ -703,6 +703,138 @@ storage.store_with_progress(ds, progress);
 
 **Note**: This is currently a mock implementation for API validation and testing. Full Azure SDK C++ integration will be added in a future release.
 
+### Hierarchical Storage Management (HSM)
+
+**Implementation**: Three-tier storage system with automatic age-based data migration between tiers.
+
+**Features**:
+- Three storage tiers: Hot (fast access), Warm (medium), Cold (archival)
+- Automatic background migration based on configurable age policies
+- Transparent data retrieval across all tiers
+- Statistics tracking and monitoring
+- Thread-safe operations with shared_mutex
+- Progress and error callbacks for migration operations
+- Integration with thread_system for parallel migrations
+
+**Tier Characteristics**:
+
+| Tier | Use Case | Typical Backend | Access Pattern |
+|------|----------|-----------------|----------------|
+| Hot | Active studies | Local SSD, File System | Frequent read/write |
+| Warm | Recent archives | Network storage, S3 | Occasional access |
+| Cold | Long-term archive | Azure Archive, Glacier | Rare access |
+
+**Configuration**:
+```cpp
+#include <pacs/storage/hsm_storage.hpp>
+#include <pacs/storage/hsm_types.hpp>
+
+using namespace pacs::storage;
+
+// Configure tier policies
+tier_policy hot_policy;
+hot_policy.tier = storage_tier::hot;
+hot_policy.migration_age = std::chrono::days{30};   // Migrate after 30 days
+
+tier_policy warm_policy;
+warm_policy.tier = storage_tier::warm;
+warm_policy.migration_age = std::chrono::days{180}; // Migrate after 180 days
+
+tier_policy cold_policy;
+cold_policy.tier = storage_tier::cold;
+// No migration from cold tier (final destination)
+
+// Create HSM storage with backends
+auto hot_backend = std::make_shared<file_storage>(hot_path);
+auto warm_backend = std::make_shared<s3_storage>(warm_config);
+auto cold_backend = std::make_shared<azure_blob_storage>(cold_config);
+
+hsm_storage storage{
+    hot_backend, hot_policy,
+    warm_backend, warm_policy,
+    cold_backend, cold_policy
+};
+```
+
+**Usage Example**:
+```cpp
+// Store always goes to hot tier
+core::dicom_dataset ds;
+// ... populate dataset ...
+auto store_result = storage.store(ds);
+
+// Retrieve transparently searches all tiers
+auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
+if (retrieve_result.is_ok()) {
+    auto& dataset = retrieve_result.value();
+    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+}
+
+// Check which tier contains the instance
+auto tier_result = storage.get_tier("1.2.3.4.5.6.7.8.9");
+if (tier_result.is_ok()) {
+    std::cout << "Stored in: " << to_string(tier_result.value()) << "\n";
+}
+
+// Manual migration to specific tier
+storage.migrate("1.2.3.4.5.6.7.8.9", storage_tier::cold);
+
+// Get storage statistics
+auto stats = storage.get_statistics();
+std::cout << "Hot tier: " << stats.hot_count << " instances\n";
+std::cout << "Warm tier: " << stats.warm_count << " instances\n";
+std::cout << "Cold tier: " << stats.cold_count << " instances\n";
+```
+
+**Background Migration Service**:
+```cpp
+#include <pacs/storage/hsm_migration_service.hpp>
+
+// Configure migration service
+migration_service_config config;
+config.migration_interval = std::chrono::hours{1};  // Run every hour
+config.max_concurrent_migrations = 4;
+config.auto_start = true;
+
+config.on_cycle_complete = [](const migration_result& r) {
+    std::cout << "Migrated " << r.instances_migrated << " instances\n";
+    std::cout << "Bytes transferred: " << r.bytes_migrated << "\n";
+};
+
+config.on_migration_error = [](const std::string& uid, const std::string& err) {
+    std::cerr << "Migration failed for " << uid << ": " << err << "\n";
+};
+
+// Create and start migration service
+hsm_migration_service service{storage, config};
+service.start();
+
+// Monitor progress
+auto time_left = service.time_until_next_cycle();
+std::cout << "Next cycle in: " << time_left->count() << " seconds\n";
+
+// Trigger immediate migration
+service.trigger_cycle();
+
+// Get statistics
+auto stats = service.get_cumulative_stats();
+std::cout << "Total migrated: " << stats.instances_migrated << "\n";
+
+// Graceful shutdown
+service.stop();
+```
+
+**Migration Result Structure**:
+```cpp
+struct migration_result {
+    std::size_t instances_migrated{0};   // Successfully migrated
+    std::size_t bytes_migrated{0};       // Total bytes transferred
+    std::chrono::milliseconds duration;  // Time taken
+    std::size_t instances_skipped{0};    // Not yet eligible
+    std::vector<std::string> failed_uids; // Failed migrations
+};
+```
+
 ---
 
 ## Ecosystem Integration
@@ -940,6 +1072,7 @@ server.stop();
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
 | Azure Blob Storage | Azure Blob storage backend (mock implementation) with block blob upload | #199 | ✅ Complete |
 | Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
 | Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
@@ -997,6 +1130,7 @@ server.stop();
 | 1.6.0 | 2025-12-10 | raphaelshin | Added: RT modality support (RT Plan, RT Dose, RT Structure Set) with IOD validation for Issue #186 |
 | 1.7.0 | 2025-12-10 | raphaelshin | Added: SEG/SR support (Segmentation, Structured Reports) for AI/CAD integration for Issue #187 |
 | 1.8.0 | 2025-12-12 | raphaelshin | Added: Azure Blob Storage (mock implementation) with block blob upload for Issue #199 |
+| 1.9.0 | 2025-12-12 | raphaelshin | Added: Hierarchical Storage Management (HSM) with three-tier storage and automatic migration for Issue #200 |
 
 ---
 
