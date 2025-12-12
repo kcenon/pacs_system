@@ -20,16 +20,25 @@ React-based web administration interface for the PACS system.
   - Table and tree view options for study navigation
 - **Worklist Management**: View and manage scheduled procedures
 - **Audit Logs**: Searchable audit trail with CSV/JSON export
-- **Configuration**: System settings management
+- **Configuration Management**: Comprehensive settings management with:
+  - **REST API Settings**: Bind address, port, concurrency, timeout, body size limits
+  - **DICOM Server Settings**: AE Title, port, max associations, PDU size, timeouts
+  - **Storage Configuration**: Storage path, type (file/S3/Azure/HSM), compression
+  - **Security Settings**: TLS/SSL toggle with certificate path configuration
+  - **Logging Settings**: Log level, directory, rotation, audit trail options
+  - Form validation with clear error messages
+  - Toast notifications for save status feedback
+  - Confirmation dialogs for critical changes
 - **Associations**: Monitor active DICOM network connections
 
 ## Tech Stack
 
-- **Framework**: React 18 with TypeScript
+- **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite
 - **Styling**: TailwindCSS v4
 - **State Management**: React Query (TanStack Query)
-- **Routing**: React Router v6
+- **Form Handling**: React Hook Form with Zod validation
+- **Routing**: React Router v7
 - **Icons**: Lucide React
 - **Charts**: Recharts
 
@@ -84,7 +93,14 @@ The frontend connects to the following REST API endpoints:
 |----------|-------------|
 | `GET /api/v1/system/status` | System health status |
 | `GET /api/v1/system/metrics` | Performance metrics |
-| `GET /api/v1/system/config` | Configuration |
+| `GET /api/v1/system/config` | REST server configuration |
+| `PUT /api/v1/system/config` | Update REST server configuration |
+| `GET /api/v1/system/dicom-config` | DICOM server configuration |
+| `PUT /api/v1/system/dicom-config` | Update DICOM server configuration |
+| `GET /api/v1/system/storage-config` | Storage configuration |
+| `PUT /api/v1/system/storage-config` | Update storage configuration |
+| `GET /api/v1/system/logging-config` | Logging configuration |
+| `PUT /api/v1/system/logging-config` | Update logging configuration |
 | `GET /api/v1/patients` | Patient list |
 | `GET /api/v1/patients/:id` | Patient details |
 | `GET /api/v1/patients/:id/studies` | Patient's studies |
