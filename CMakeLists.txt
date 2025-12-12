@@ -908,6 +908,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/worklist_endpoints.cpp
         src/web/endpoints/audit_endpoints.cpp
         src/web/endpoints/association_endpoints.cpp
+        src/web/endpoints/dicomweb_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
