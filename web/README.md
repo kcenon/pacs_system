@@ -12,7 +12,12 @@ React-based web administration interface for the PACS system.
   - Recent activity feed from audit logs
   - Auto-refresh (10s for real-time data, 30s for status)
   - Manual refresh button
-- **Patient Browser**: Search and browse patient records with study details
+- **Patient/Study Browser**: Full DICOM hierarchy navigation with:
+  - Patient search with debounced input (300ms)
+  - Study list with date range and modality filters
+  - Expandable Series/Instance navigation tree
+  - Detailed metadata viewer panel for Study, Series, and Instance
+  - Table and tree view options for study navigation
 - **Worklist Management**: View and manage scheduled procedures
 - **Audit Logs**: Searchable audit trail with CSV/JSON export
 - **Configuration**: System settings management
@@ -82,6 +87,9 @@ The frontend connects to the following REST API endpoints:
 | `GET /api/v1/system/config` | Configuration |
 | `GET /api/v1/patients` | Patient list |
 | `GET /api/v1/patients/:id` | Patient details |
+| `GET /api/v1/patients/:id/studies` | Patient's studies |
+| `GET /api/v1/studies/:uid/series` | Study's series |
+| `GET /api/v1/series/:uid/instances` | Series' instances |
 | `GET /api/v1/worklist` | Worklist items |
 | `GET /api/v1/audit/logs` | Audit log entries |
 | `GET /api/v1/associations` | DICOM associations |
