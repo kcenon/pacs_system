@@ -836,6 +836,8 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/file_storage.cpp
         src/storage/s3_storage.cpp
         src/storage/azure_blob_storage.cpp
+        src/storage/hsm_storage.cpp
+        src/storage/hsm_migration_service.cpp
         src/storage/sqlite_security_storage.cpp
         src/storage/migration_runner.cpp
         src/storage/index_database.cpp
@@ -1254,6 +1256,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/file_storage_test.cpp
             tests/storage/s3_storage_test.cpp
             tests/storage/azure_blob_storage_test.cpp
+            tests/storage/hsm_storage_test.cpp
             tests/storage/migration_runner_test.cpp
             tests/storage/index_database_test.cpp
             tests/storage/mpps_test.cpp

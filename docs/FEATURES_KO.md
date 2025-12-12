@@ -544,6 +544,155 @@ CREATE TABLE instance (
 );
 ```
 
+### S3 클라우드 저장소 (목 구현)
+
+**구현**: 테스트용 목 클라이언트를 갖춘 S3 호환 클라우드 저장소 백엔드.
+
+**기능**:
+- AWS S3 및 S3 호환 저장소 (MinIO 등)
+- 계층적 객체 키 구조 (Study/Series/SOP)
+- 대용량 파일을 위한 멀티파트 업로드 지원 (플레이스홀더)
+- 업로드/다운로드 모니터링을 위한 진행 콜백
+- shared_mutex를 통한 스레드 안전 연산
+- 설정 가능한 연결 및 타임아웃 설정
+
+**참고**: API 검증 및 테스트를 위한 목 구현입니다. 전체 AWS SDK C++ 통합은 향후 릴리스에서 추가될 예정입니다.
+
+### Azure Blob 저장소 (목 구현)
+
+**구현**: 테스트용 목 클라이언트를 갖춘 Azure Blob 저장소 백엔드.
+
+**기능**:
+- Azure Blob Storage 컨테이너 지원
+- 대용량 파일을 위한 블록 블롭 업로드 (병렬 블록 스테이징)
+- 액세스 티어 관리 (Hot, Cool, Archive)
+- 업로드/다운로드 모니터링을 위한 진행 콜백
+- shared_mutex를 통한 스레드 안전 연산
+- 로컬 테스트를 위한 Azurite 에뮬레이터 지원
+
+**참고**: API 검증 및 테스트를 위한 목 구현입니다. 전체 Azure SDK C++ 통합은 향후 릴리스에서 추가될 예정입니다.
+
+### 계층적 저장소 관리 (HSM)
+
+**구현**: 티어 간 자동 연령 기반 데이터 마이그레이션이 있는 3계층 저장소 시스템.
+
+**기능**:
+- 세 가지 저장소 티어: Hot (빠른 접근), Warm (중간), Cold (보관)
+- 설정 가능한 연령 정책에 기반한 자동 백그라운드 마이그레이션
+- 모든 티어에서 투명한 데이터 검색
+- 통계 추적 및 모니터링
+- shared_mutex를 통한 스레드 안전 연산
+- 마이그레이션 연산을 위한 진행 및 오류 콜백
+- 병렬 마이그레이션을 위한 thread_system 통합
+
+**티어 특성**:
+
+| 티어 | 사용 사례 | 일반적인 백엔드 | 접근 패턴 |
+|------|----------|-----------------|-----------|
+| Hot | 활성 스터디 | 로컬 SSD, 파일 시스템 | 빈번한 읽기/쓰기 |
+| Warm | 최근 아카이브 | 네트워크 저장소, S3 | 가끔 접근 |
+| Cold | 장기 아카이브 | Azure Archive, Glacier | 드문 접근 |
+
+**구성**:
+```cpp
+#include <pacs/storage/hsm_storage.hpp>
+#include <pacs/storage/hsm_types.hpp>
+
+using namespace pacs::storage;
+
+// 티어 정책 구성
+tier_policy hot_policy;
+hot_policy.tier = storage_tier::hot;
+hot_policy.migration_age = std::chrono::days{30};   // 30일 후 마이그레이션
+
+tier_policy warm_policy;
+warm_policy.tier = storage_tier::warm;
+warm_policy.migration_age = std::chrono::days{180}; // 180일 후 마이그레이션
+
+tier_policy cold_policy;
+cold_policy.tier = storage_tier::cold;
+// cold 티어에서는 마이그레이션 없음 (최종 목적지)
+
+// 백엔드로 HSM 저장소 생성
+auto hot_backend = std::make_shared<file_storage>(hot_path);
+auto warm_backend = std::make_shared<s3_storage>(warm_config);
+auto cold_backend = std::make_shared<azure_blob_storage>(cold_config);
+
+hsm_storage storage{
+    hot_backend, hot_policy,
+    warm_backend, warm_policy,
+    cold_backend, cold_policy
+};
+```
+
+**사용 예제**:
+```cpp
+// 저장은 항상 hot 티어로
+core::dicom_dataset ds;
+// ... 데이터세트 채우기 ...
+auto store_result = storage.store(ds);
+
+// 검색은 투명하게 모든 티어 검색
+auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
+if (retrieve_result.is_ok()) {
+    auto& dataset = retrieve_result.value();
+    std::cout << "환자: " << dataset.get_string(tags::patient_name) << "\n";
+}
+
+// 인스턴스가 어느 티어에 있는지 확인
+auto tier_result = storage.get_tier("1.2.3.4.5.6.7.8.9");
+if (tier_result.is_ok()) {
+    std::cout << "저장 위치: " << to_string(tier_result.value()) << "\n";
+}
+
+// 특정 티어로 수동 마이그레이션
+storage.migrate("1.2.3.4.5.6.7.8.9", storage_tier::cold);
+
+// 저장소 통계 가져오기
+auto stats = storage.get_statistics();
+std::cout << "Hot 티어: " << stats.hot_count << " 인스턴스\n";
+std::cout << "Warm 티어: " << stats.warm_count << " 인스턴스\n";
+std::cout << "Cold 티어: " << stats.cold_count << " 인스턴스\n";
+```
+
+**백그라운드 마이그레이션 서비스**:
+```cpp
+#include <pacs/storage/hsm_migration_service.hpp>
+
+// 마이그레이션 서비스 구성
+migration_service_config config;
+config.migration_interval = std::chrono::hours{1};  // 매시간 실행
+config.max_concurrent_migrations = 4;
+config.auto_start = true;
+
+config.on_cycle_complete = [](const migration_result& r) {
+    std::cout << r.instances_migrated << " 인스턴스 마이그레이션됨\n";
+    std::cout << "전송된 바이트: " << r.bytes_migrated << "\n";
+};
+
+config.on_migration_error = [](const std::string& uid, const std::string& err) {
+    std::cerr << uid << " 마이그레이션 실패: " << err << "\n";
+};
+
+// 마이그레이션 서비스 생성 및 시작
+hsm_migration_service service{storage, config};
+service.start();
+
+// 진행 상황 모니터링
+auto time_left = service.time_until_next_cycle();
+std::cout << "다음 사이클까지: " << time_left->count() << " 초\n";
+
+// 즉시 마이그레이션 트리거
+service.trigger_cycle();
+
+// 통계 가져오기
+auto stats = service.get_cumulative_stats();
+std::cout << "총 마이그레이션: " << stats.instances_migrated << "\n";
+
+// 정상 종료
+service.stop();
+```
+
 ---
 
 ## 에코시스템 통합
@@ -714,6 +863,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 | 기능 | 설명 | 이슈 | 상태 |
 |------|------|------|------|
+| 계층적 저장소 관리 (HSM) | 자동 연령 기반 마이그레이션을 갖춘 3계층 HSM | #200 | ✅ 완료 |
 | Azure Blob 저장소 | Azure Blob 저장소 백엔드 (목 구현) with 블록 블롭 업로드 | #199 | ✅ 완료 |
 | S3 클라우드 저장소 | S3 호환 저장소 백엔드 (목 구현) | #198 | ✅ 완료 |
 | SEG/SR 지원 | AI/CAD를 위한 세그먼테이션 및 구조화된 보고서 | #187 | ✅ 완료 |
