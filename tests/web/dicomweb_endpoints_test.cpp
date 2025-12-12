@@ -775,3 +775,285 @@ TEST_CASE("instance_record_to_dicom_json - optional fields not present",
     REQUIRE(json.find("00280010") == std::string::npos);
     REQUIRE(json.find("00280011") == std::string::npos);
 }
+
+// ============================================================================
+// Frame Retrieval Tests
+// ============================================================================
+
+TEST_CASE("parse_frame_numbers - single frame", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("1");
+
+    REQUIRE(frames.size() == 1);
+    REQUIRE(frames[0] == 1);
+}
+
+TEST_CASE("parse_frame_numbers - multiple frames", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("1,3,5");
+
+    REQUIRE(frames.size() == 3);
+    REQUIRE(frames[0] == 1);
+    REQUIRE(frames[1] == 3);
+    REQUIRE(frames[2] == 5);
+}
+
+TEST_CASE("parse_frame_numbers - range", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("1-5");
+
+    REQUIRE(frames.size() == 5);
+    REQUIRE(frames[0] == 1);
+    REQUIRE(frames[1] == 2);
+    REQUIRE(frames[2] == 3);
+    REQUIRE(frames[3] == 4);
+    REQUIRE(frames[4] == 5);
+}
+
+TEST_CASE("parse_frame_numbers - mixed format", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("1,3-5,7");
+
+    REQUIRE(frames.size() == 5);
+    REQUIRE(frames[0] == 1);
+    REQUIRE(frames[1] == 3);
+    REQUIRE(frames[2] == 4);
+    REQUIRE(frames[3] == 5);
+    REQUIRE(frames[4] == 7);
+}
+
+TEST_CASE("parse_frame_numbers - empty string", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("");
+
+    REQUIRE(frames.empty());
+}
+
+TEST_CASE("parse_frame_numbers - invalid input", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("abc");
+
+    REQUIRE(frames.empty());
+}
+
+TEST_CASE("parse_frame_numbers - zero frame is ignored", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("0,1,2");
+
+    REQUIRE(frames.size() == 2);
+    REQUIRE(frames[0] == 1);
+    REQUIRE(frames[1] == 2);
+}
+
+TEST_CASE("parse_frame_numbers - removes duplicates", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers("1,1,2,2,3");
+
+    REQUIRE(frames.size() == 3);
+    REQUIRE(frames[0] == 1);
+    REQUIRE(frames[1] == 2);
+    REQUIRE(frames[2] == 3);
+}
+
+TEST_CASE("parse_frame_numbers - whitespace handling", "[dicomweb][frames]") {
+    auto frames = parse_frame_numbers(" 1 , 2 , 3 ");
+
+    REQUIRE(frames.size() == 3);
+    REQUIRE(frames[0] == 1);
+    REQUIRE(frames[1] == 2);
+    REQUIRE(frames[2] == 3);
+}
+
+TEST_CASE("extract_frame - first frame", "[dicomweb][frames]") {
+    // Create test pixel data: 4 frames of 4 bytes each
+    std::vector<uint8_t> pixel_data = {
+        0x01, 0x02, 0x03, 0x04,  // Frame 1
+        0x11, 0x12, 0x13, 0x14,  // Frame 2
+        0x21, 0x22, 0x23, 0x24,  // Frame 3
+        0x31, 0x32, 0x33, 0x34   // Frame 4
+    };
+
+    auto frame = extract_frame(pixel_data, 1, 4);
+
+    REQUIRE(frame.size() == 4);
+    REQUIRE(frame[0] == 0x01);
+    REQUIRE(frame[1] == 0x02);
+    REQUIRE(frame[2] == 0x03);
+    REQUIRE(frame[3] == 0x04);
+}
+
+TEST_CASE("extract_frame - middle frame", "[dicomweb][frames]") {
+    std::vector<uint8_t> pixel_data = {
+        0x01, 0x02, 0x03, 0x04,  // Frame 1
+        0x11, 0x12, 0x13, 0x14,  // Frame 2
+        0x21, 0x22, 0x23, 0x24,  // Frame 3
+        0x31, 0x32, 0x33, 0x34   // Frame 4
+    };
+
+    auto frame = extract_frame(pixel_data, 3, 4);
+
+    REQUIRE(frame.size() == 4);
+    REQUIRE(frame[0] == 0x21);
+    REQUIRE(frame[1] == 0x22);
+}
+
+TEST_CASE("extract_frame - out of bounds frame", "[dicomweb][frames]") {
+    std::vector<uint8_t> pixel_data = {
+        0x01, 0x02, 0x03, 0x04  // Only 1 frame
+    };
+
+    auto frame = extract_frame(pixel_data, 5, 4);
+
+    REQUIRE(frame.empty());
+}
+
+TEST_CASE("extract_frame - zero frame number", "[dicomweb][frames]") {
+    std::vector<uint8_t> pixel_data = {0x01, 0x02, 0x03, 0x04};
+
+    auto frame = extract_frame(pixel_data, 0, 4);
+
+    REQUIRE(frame.empty());
+}
+
+// ============================================================================
+// Rendered Image Parameter Parsing Tests
+// ============================================================================
+
+TEST_CASE("parse_rendered_params - default values", "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("", "");
+
+    REQUIRE(params.format == rendered_format::jpeg);
+    REQUIRE(params.quality == 75);
+    REQUIRE(!params.window_center.has_value());
+    REQUIRE(!params.window_width.has_value());
+    REQUIRE(params.viewport_width == 0);
+    REQUIRE(params.viewport_height == 0);
+    REQUIRE(params.frame == 1);
+}
+
+TEST_CASE("parse_rendered_params - png format from accept header",
+          "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("", "image/png");
+
+    REQUIRE(params.format == rendered_format::png);
+}
+
+TEST_CASE("parse_rendered_params - jpeg format from accept header",
+          "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("", "image/jpeg");
+
+    REQUIRE(params.format == rendered_format::jpeg);
+}
+
+TEST_CASE("parse_rendered_params - quality parameter", "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("?quality=90", "");
+
+    REQUIRE(params.quality == 90);
+}
+
+TEST_CASE("parse_rendered_params - quality clamped to 1-100",
+          "[dicomweb][rendered]") {
+    auto params1 = parse_rendered_params("?quality=0", "");
+    REQUIRE(params1.quality == 1);
+
+    auto params2 = parse_rendered_params("?quality=150", "");
+    REQUIRE(params2.quality == 100);
+}
+
+TEST_CASE("parse_rendered_params - window center and width",
+          "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("?windowcenter=400&windowwidth=1500", "");
+
+    REQUIRE(params.window_center.has_value());
+    REQUIRE(*params.window_center == Catch::Approx(400.0));
+    REQUIRE(params.window_width.has_value());
+    REQUIRE(*params.window_width == Catch::Approx(1500.0));
+}
+
+TEST_CASE("parse_rendered_params - viewport parameter", "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("?viewport=512x512", "");
+
+    REQUIRE(params.viewport_width == 512);
+    REQUIRE(params.viewport_height == 512);
+}
+
+TEST_CASE("parse_rendered_params - rows and columns parameters",
+          "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("?rows=256&columns=512", "");
+
+    REQUIRE(params.viewport_height == 256);
+    REQUIRE(params.viewport_width == 512);
+}
+
+TEST_CASE("parse_rendered_params - frame parameter", "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("?frame=5", "");
+
+    REQUIRE(params.frame == 5);
+}
+
+TEST_CASE("parse_rendered_params - frame 0 defaults to 1",
+          "[dicomweb][rendered]") {
+    auto params = parse_rendered_params("?frame=0", "");
+
+    REQUIRE(params.frame == 1);
+}
+
+// ============================================================================
+// Window/Level Application Tests
+// ============================================================================
+
+TEST_CASE("apply_window_level - 8-bit unsigned", "[dicomweb][rendered]") {
+    // Create simple 2x2 image with values 0, 64, 128, 255
+    std::vector<uint8_t> pixel_data = {0, 64, 128, 255};
+
+    auto output = apply_window_level(
+        pixel_data,
+        2, 2,       // width, height
+        8,          // bits_stored
+        false,      // is_signed
+        127.5,      // window_center (for proper 8-bit identity mapping)
+        255.0,      // window_width (255 for [0,255] range)
+        1.0, 0.0    // rescale slope/intercept
+    );
+
+    REQUIRE(output.size() == 4);
+    // Values should map linearly with center=127.5, width=255: 0->0, 255->255
+    REQUIRE(output[0] == 0);
+    REQUIRE(output[3] == 255);
+}
+
+TEST_CASE("apply_window_level - window clipping", "[dicomweb][rendered]") {
+    std::vector<uint8_t> pixel_data = {0, 100, 200, 255};
+
+    // Window from 100 to 200 (center=150, width=100)
+    auto output = apply_window_level(
+        pixel_data,
+        2, 2,
+        8,
+        false,
+        150.0,      // window_center
+        100.0,      // window_width
+        1.0, 0.0
+    );
+
+    REQUIRE(output.size() == 4);
+    REQUIRE(output[0] == 0);     // Below window min
+    REQUIRE(output[1] == 0);     // At window min
+    REQUIRE(output[2] == 255);   // At window max
+    REQUIRE(output[3] == 255);   // Above window max
+}
+
+TEST_CASE("apply_window_level - rescale slope and intercept",
+          "[dicomweb][rendered]") {
+    std::vector<uint8_t> pixel_data = {0, 50, 100, 150};
+
+    // With slope=2, intercept=-100:
+    // 0 -> -100 (below window)
+    // 50 -> 0 (at window min with center=128, width=256 -> min=0)
+    // 100 -> 100 (in window)
+    // 150 -> 200 (in window)
+    auto output = apply_window_level(
+        pixel_data,
+        2, 2,
+        8,
+        false,
+        128.0,
+        256.0,
+        2.0, -100.0
+    );
+
+    REQUIRE(output.size() == 4);
+    REQUIRE(output[0] == 0);     // -100 clipped to 0
+}
