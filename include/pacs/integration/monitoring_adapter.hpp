@@ -26,11 +26,16 @@ namespace pacs::integration {
 // Forward Declarations
 // ─────────────────────────────────────────────────────
 
+// Note: query_level is defined in logger_adapter.hpp
+// If logger_adapter.hpp is not included, we define it here
+#ifndef PACS_INTEGRATION_QUERY_LEVEL_DEFINED
+#define PACS_INTEGRATION_QUERY_LEVEL_DEFINED
 /**
  * @enum query_level
  * @brief DICOM query retrieve level for metrics
  */
 enum class query_level { patient, study, series, image };
+#endif
 
 // ─────────────────────────────────────────────────────
 // Configuration
