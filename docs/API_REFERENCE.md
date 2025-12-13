@@ -1,7 +1,7 @@
 # API Reference - PACS System
 
-> **Version:** 0.1.4.0
-> **Last Updated:** 2025-12-08
+> **Version:** 0.1.5.0
+> **Last Updated:** 2025-12-13
 > **Language:** **English** | [한국어](API_REFERENCE_KO.md)
 
 ---
@@ -14,6 +14,7 @@
 - [Network V2 Module (Optional)](#network-v2-module-optional)
 - [Services Module](#services-module)
 - [Storage Module](#storage-module)
+- [AI Module](#ai-module)
 - [Monitoring Module](#monitoring-module)
 - [Integration Module](#integration-module)
 - [Web Module](#web-module)
@@ -2852,6 +2853,229 @@ if (is_screening_mammogram(dataset)) {
 // Check for implant
 if (has_breast_implant(dataset)) {
     // May need implant-displaced views
+}
+```
+
+---
+
+## AI Module
+
+### `pacs::ai::ai_result_handler`
+
+Handler for AI-generated DICOM objects including Structured Reports (SR), Segmentation objects (SEG), and Presentation States (PR).
+
+```cpp
+#include <pacs/ai/ai_result_handler.hpp>
+
+namespace pacs::ai {
+
+// Result types
+template <typename T>
+using Result = kcenon::common::Result<T>;
+using VoidResult = kcenon::common::VoidResult;
+
+// AI result type enumeration
+enum class ai_result_type {
+    structured_report,    // DICOM SR (Structured Report)
+    segmentation,         // DICOM SEG (Segmentation)
+    presentation_state    // DICOM PR (Presentation State)
+};
+
+// Validation status enumeration
+enum class validation_status {
+    valid,                    // All validations passed
+    missing_required_tags,    // Required DICOM tags are missing
+    invalid_reference,        // Referenced source images not found
+    invalid_template,         // SR template conformance failed
+    invalid_segment_data,     // Segmentation data is malformed
+    unknown_error             // Unexpected validation error
+};
+
+// AI result information structure
+struct ai_result_info {
+    std::string sop_instance_uid;           // SOP Instance UID of the AI result
+    ai_result_type type;                    // Type of AI result
+    std::string sop_class_uid;              // SOP Class UID
+    std::string series_instance_uid;        // Series Instance UID
+    std::string source_study_uid;           // Study Instance UID of source study
+    std::string algorithm_name;             // AI model/algorithm identifier
+    std::string algorithm_version;          // Algorithm version
+    std::chrono::system_clock::time_point received_at;  // Reception timestamp
+    std::optional<std::string> description; // Optional description
+};
+
+// Source reference structure
+struct source_reference {
+    std::string study_instance_uid;
+    std::optional<std::string> series_instance_uid;
+    std::vector<std::string> sop_instance_uids;
+};
+
+// CAD finding from Structured Report
+struct cad_finding {
+    std::string finding_type;               // Finding type/category
+    std::string location;                   // Location/site description
+    std::optional<double> confidence;       // Confidence score (0.0 to 1.0)
+    std::optional<std::string> measurement; // Additional measurement data
+    std::optional<std::string> referenced_sop_instance_uid;
+};
+
+// Segment information from Segmentation
+struct segment_info {
+    uint16_t segment_number;                // Segment number (1-based)
+    std::string segment_label;              // Segment label
+    std::optional<std::string> description; // Segment description
+    std::string algorithm_type;             // Algorithm type
+    std::optional<std::tuple<uint8_t, uint8_t, uint8_t>> recommended_display_color;
+};
+
+// Validation result
+struct validation_result {
+    validation_status status;
+    std::optional<std::string> error_message;
+    std::vector<std::string> missing_tags;
+    std::vector<std::string> invalid_references;
+};
+
+// Handler configuration
+struct ai_handler_config {
+    bool validate_source_references = true;
+    bool validate_sr_templates = true;
+    bool auto_link_to_source = true;
+    std::vector<std::string> accepted_sr_templates;
+    uint16_t max_segments = 256;
+};
+
+// Callback types
+using ai_result_received_callback = std::function<void(const ai_result_info& info)>;
+using pre_store_validator = std::function<bool(
+    const core::dicom_dataset& dataset,
+    ai_result_type type)>;
+
+// Main handler class
+class ai_result_handler {
+public:
+    // Factory method
+    [[nodiscard]] static auto create(
+        std::shared_ptr<storage::storage_interface> storage,
+        std::shared_ptr<storage::index_database> database)
+        -> std::unique_ptr<ai_result_handler>;
+
+    virtual ~ai_result_handler();
+
+    // Configuration
+    void configure(const ai_handler_config& config);
+    [[nodiscard]] auto get_config() const -> ai_handler_config;
+    void set_received_callback(ai_result_received_callback callback);
+    void set_pre_store_validator(pre_store_validator validator);
+
+    // Structured Report operations
+    [[nodiscard]] auto receive_structured_report(const core::dicom_dataset& sr)
+        -> VoidResult;
+    [[nodiscard]] auto validate_sr_template(const core::dicom_dataset& sr)
+        -> validation_result;
+    [[nodiscard]] auto get_cad_findings(std::string_view sr_sop_instance_uid)
+        -> Result<std::vector<cad_finding>>;
+
+    // Segmentation operations
+    [[nodiscard]] auto receive_segmentation(const core::dicom_dataset& seg)
+        -> VoidResult;
+    [[nodiscard]] auto validate_segmentation(const core::dicom_dataset& seg)
+        -> validation_result;
+    [[nodiscard]] auto get_segment_info(std::string_view seg_sop_instance_uid)
+        -> Result<std::vector<segment_info>>;
+
+    // Presentation State operations
+    [[nodiscard]] auto receive_presentation_state(const core::dicom_dataset& pr)
+        -> VoidResult;
+    [[nodiscard]] auto validate_presentation_state(const core::dicom_dataset& pr)
+        -> validation_result;
+
+    // Source linking operations
+    [[nodiscard]] auto link_to_source(
+        std::string_view result_uid,
+        std::string_view source_study_uid) -> VoidResult;
+    [[nodiscard]] auto link_to_source(
+        std::string_view result_uid,
+        const source_reference& references) -> VoidResult;
+    [[nodiscard]] auto get_source_reference(std::string_view result_uid)
+        -> Result<source_reference>;
+
+    // Query operations
+    [[nodiscard]] auto find_ai_results_for_study(std::string_view study_instance_uid)
+        -> Result<std::vector<ai_result_info>>;
+    [[nodiscard]] auto find_ai_results_by_type(
+        std::string_view study_instance_uid,
+        ai_result_type type) -> Result<std::vector<ai_result_info>>;
+    [[nodiscard]] auto get_ai_result_info(std::string_view sop_instance_uid)
+        -> std::optional<ai_result_info>;
+    [[nodiscard]] auto exists(std::string_view sop_instance_uid) const -> bool;
+
+    // Removal operations
+    [[nodiscard]] auto remove(std::string_view sop_instance_uid) -> VoidResult;
+    [[nodiscard]] auto remove_ai_results_for_study(std::string_view study_instance_uid)
+        -> Result<std::size_t>;
+
+protected:
+    ai_result_handler(
+        std::shared_ptr<storage::storage_interface> storage,
+        std::shared_ptr<storage::index_database> database);
+
+private:
+    class impl;
+    std::unique_ptr<impl> pimpl_;
+};
+
+} // namespace pacs::ai
+```
+
+#### Usage Example
+
+```cpp
+#include <pacs/ai/ai_result_handler.hpp>
+#include <pacs/storage/file_storage.hpp>
+#include <pacs/storage/index_database.hpp>
+
+// Create handler with storage and database
+auto storage = std::make_shared<pacs::storage::file_storage>("/data/pacs");
+auto database = std::make_shared<pacs::storage::index_database>("/data/pacs/index.db");
+auto handler = pacs::ai::ai_result_handler::create(storage, database);
+
+// Configure validation options
+pacs::ai::ai_handler_config config;
+config.validate_source_references = true;
+config.auto_link_to_source = true;
+handler->configure(config);
+
+// Set notification callback
+handler->set_received_callback([](const pacs::ai::ai_result_info& info) {
+    std::cout << "Received AI result: " << info.sop_instance_uid
+              << " (" << info.algorithm_name << ")\n";
+});
+
+// Receive AI-generated structured report
+pacs::core::dicom_dataset sr_dataset;
+// ... populate SR dataset with CAD findings ...
+auto result = handler->receive_structured_report(sr_dataset);
+if (result.is_ok()) {
+    // Successfully stored
+    auto findings = handler->get_cad_findings(sr_dataset.get_string(
+        pacs::core::tags::sop_instance_uid));
+    if (findings.is_ok()) {
+        for (const auto& f : findings.value()) {
+            std::cout << "Finding: " << f.finding_type
+                      << " at " << f.location << "\n";
+        }
+    }
+}
+
+// Query AI results for a study
+auto ai_results = handler->find_ai_results_for_study("1.2.3.4.5.6.7.8.9");
+if (ai_results.is_ok()) {
+    for (const auto& info : ai_results.value()) {
+        std::cout << "AI Result: " << info.sop_instance_uid
+                  << " Type: " << static_cast<int>(info.type) << "\n";
+    }
 }
 ```
 
