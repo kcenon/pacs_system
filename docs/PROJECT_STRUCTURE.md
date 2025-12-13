@@ -221,17 +221,31 @@ pacs_system/
 │       ├── sample_mr.dcm
 │       └── sample_cr.dcm
 │
-├── examples/                   # Example applications
+├── examples/                   # Example applications & CLI utilities
 │   ├── CMakeLists.txt
-│   ├── echo_scu/
+│   ├── echo_scu/               # C-ECHO SCU (Verification)
 │   │   └── main.cpp
-│   ├── store_scu/
+│   ├── store_scu/              # C-STORE SCU (Storage)
 │   │   └── main.cpp
-│   ├── store_scp/
+│   ├── find_scu/               # C-FIND SCU (Query)
 │   │   └── main.cpp
-│   ├── query_scu/
+│   ├── move_scu/               # C-MOVE SCU (Retrieve)
 │   │   └── main.cpp
-│   └── pacs_server/
+│   ├── get_scu/                # C-GET SCU (Retrieve)
+│   │   └── main.cpp
+│   ├── worklist_scu/           # Modality Worklist SCU
+│   │   ├── main.cpp
+│   │   ├── worklist_query_builder.hpp
+│   │   └── worklist_result_formatter.hpp
+│   ├── mpps_scu/               # MPPS SCU
+│   │   └── main.cpp
+│   ├── echo_scp/               # C-ECHO SCP
+│   │   └── main.cpp
+│   ├── store_scp/              # C-STORE SCP
+│   │   └── main.cpp
+│   ├── query_scu/              # Query SCU (legacy)
+│   │   └── main.cpp
+│   └── pacs_server/            # Full PACS Server
 │       └── main.cpp
 │
 ├── benchmarks/                 # Performance benchmarks

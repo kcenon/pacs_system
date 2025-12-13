@@ -26,19 +26,22 @@ namespace worklist_scu {
  * @brief Output format enumeration
  */
 enum class output_format {
-    table,  ///< Human-readable table format
+    table,  ///< Human-readable table format (alias: text)
     json,   ///< JSON format for integration
-    csv     ///< CSV format for export
+    csv,    ///< CSV format for export
+    xml     ///< XML format for integration
 };
 
 /**
  * @brief Parse output format from string
- * @param format_str Format string ("table", "json", "csv")
+ * @param format_str Format string ("table", "text", "json", "csv", "xml")
  * @return Parsed output format, or table if invalid
  */
 [[nodiscard]] inline output_format parse_output_format(std::string_view format_str) {
     if (format_str == "json") return output_format::json;
     if (format_str == "csv") return output_format::csv;
+    if (format_str == "xml") return output_format::xml;
+    if (format_str == "text") return output_format::table;
     return output_format::table;
 }
 
@@ -70,6 +73,8 @@ public:
                 return format_json(results);
             case output_format::csv:
                 return format_csv(results);
+            case output_format::xml:
+                return format_xml(results);
             case output_format::table:
             default:
                 return format_table(results);
@@ -292,6 +297,55 @@ private:
     }
 
     /**
+     * @brief Format results as XML
+     */
+    [[nodiscard]] std::string format_xml(
+        const std::vector<pacs::core::dicom_dataset>& results) const {
+        std::ostringstream oss;
+
+        oss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        oss << "<WorklistQueryResult>\n";
+        oss << "  <ResultCount>" << results.size() << "</ResultCount>\n";
+        oss << "  <WorklistItems>\n";
+
+        for (size_t i = 0; i < results.size(); ++i) {
+            auto item = extract_item(results[i]);
+
+            oss << "    <WorklistItem index=\"" << (i + 1) << "\">\n";
+
+            // Patient information
+            oss << "      <Patient>\n";
+            oss << "        <Name>" << escape_xml(item.patient_name) << "</Name>\n";
+            oss << "        <ID>" << escape_xml(item.patient_id) << "</ID>\n";
+            oss << "        <BirthDate>" << item.patient_birth_date << "</BirthDate>\n";
+            oss << "        <Sex>" << item.patient_sex << "</Sex>\n";
+            oss << "      </Patient>\n";
+
+            // Scheduled Procedure Step
+            oss << "      <ScheduledProcedureStep>\n";
+            oss << "        <StartDate>" << item.scheduled_date << "</StartDate>\n";
+            oss << "        <StartTime>" << item.scheduled_time << "</StartTime>\n";
+            oss << "        <Modality>" << item.modality << "</Modality>\n";
+            oss << "        <StationAETitle>" << escape_xml(item.station_ae) << "</StationAETitle>\n";
+            oss << "        <StepID>" << escape_xml(item.step_id) << "</StepID>\n";
+            oss << "        <Description>" << escape_xml(item.step_description) << "</Description>\n";
+            oss << "      </ScheduledProcedureStep>\n";
+
+            // Study information
+            oss << "      <AccessionNumber>" << escape_xml(item.accession_number) << "</AccessionNumber>\n";
+            oss << "      <StudyInstanceUID>" << item.study_uid << "</StudyInstanceUID>\n";
+            oss << "      <RequestedProcedureID>" << escape_xml(item.requested_procedure_id) << "</RequestedProcedureID>\n";
+
+            oss << "    </WorklistItem>\n";
+        }
+
+        oss << "  </WorklistItems>\n";
+        oss << "</WorklistQueryResult>\n";
+
+        return oss.str();
+    }
+
+    /**
      * @brief Truncate string to max length
      */
     [[nodiscard]] static std::string truncate(const std::string& s, size_t max_len) {
@@ -368,6 +422,25 @@ private:
             }
         }
         result += "\"";
+        return result;
+    }
+
+    /**
+     * @brief Escape string for XML output
+     */
+    [[nodiscard]] static std::string escape_xml(const std::string& s) {
+        std::string result;
+        result.reserve(s.length());
+        for (char c : s) {
+            switch (c) {
+                case '&': result += "&amp;"; break;
+                case '<': result += "&lt;"; break;
+                case '>': result += "&gt;"; break;
+                case '"': result += "&quot;"; break;
+                case '\'': result += "&apos;"; break;
+                default: result += c;
+            }
+        }
         return result;
     }
 
