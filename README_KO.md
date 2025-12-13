@@ -468,13 +468,28 @@ cd examples/secure_dicom
 
 ```bash
 # 단일 DICOM 파일 전송
-./build/examples/store_scu/store_scu localhost 11112 PACS_SCP image.dcm
+./build/bin/store_scu localhost 11112 image.dcm
 
-# 디렉토리의 모든 파일 전송 (재귀)
-./build/examples/store_scu/store_scu localhost 11112 PACS_SCP ./dicom_folder/ --recursive
+# 사용자 지정 AE 타이틀로 전송
+./build/bin/store_scu -aet MYSCU -aec PACS localhost 11112 image.dcm
 
-# Transfer Syntax 지정
-./build/examples/store_scu/store_scu localhost 11112 PACS_SCP image.dcm --transfer-syntax explicit-le
+# 디렉토리의 모든 파일 전송 (재귀) + 진행률 표시
+./build/bin/store_scu -r --progress localhost 11112 ./dicom_folder/
+
+# Transfer Syntax 선호 설정
+./build/bin/store_scu --prefer-lossless localhost 11112 *.dcm
+
+# 상세 출력 + 타임아웃 설정
+./build/bin/store_scu -v -to 60 localhost 11112 image.dcm
+
+# 전송 리포트 생성
+./build/bin/store_scu --report-file transfer.log localhost 11112 ./data/
+
+# 조용한 모드 (최소 출력)
+./build/bin/store_scu -q localhost 11112 image.dcm
+
+# 도움말 표시
+./build/bin/store_scu --help
 ```
 
 ### Query SCU (C-FIND 클라이언트)
