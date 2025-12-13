@@ -874,11 +874,14 @@ else()
     message(STATUS "  [--] pacs_storage: OFF")
 endif()
 
-# AI library (AI result handler for SR/SEG/PR objects - Issue #204)
+# AI library (AI result handler for SR/SEG/PR objects - Issue #204,
+#             AI service connector for inference requests - Issue #205)
 # Requires pacs_storage for storing AI-generated DICOM objects
+# Requires pacs_integration for logger/monitoring adapters
 if(TARGET pacs_storage)
     add_library(pacs_ai
         src/ai/ai_result_handler.cpp
+        src/ai/ai_service_connector.cpp
     )
     target_include_directories(pacs_ai
         PUBLIC
@@ -895,7 +898,10 @@ if(TARGET pacs_storage)
         target_compile_definitions(pacs_ai PUBLIC PACS_WITH_COMMON_SYSTEM)
     endif()
 
-    message(STATUS "  [OK] pacs_ai: ON (AI result handler)")
+    # Note: pacs_integration is linked later after it's defined (for ai_service_connector)
+    # This is handled in the pacs_integration section below
+
+    message(STATUS "  [OK] pacs_ai: ON (AI result handler, AI service connector)")
 else()
     message(STATUS "  [--] pacs_ai: OFF (requires pacs_storage)")
 endif()
@@ -1126,6 +1132,13 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     # (required because static libraries don't actually link - symbols are resolved at final link).
     target_link_libraries(pacs_network PUBLIC pacs_integration)
     message(STATUS "    - pacs_network: linked pacs_integration for thread_adapter")
+
+    # Link pacs_integration to pacs_ai for ai_service_connector (Issue #205)
+    # ai_service_connector uses logger_adapter and monitoring_adapter
+    if(TARGET pacs_ai)
+        target_link_libraries(pacs_ai PUBLIC pacs_integration)
+        message(STATUS "    - pacs_ai: linked pacs_integration for ai_service_connector")
+    endif()
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
@@ -1297,16 +1310,22 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
-    # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects)
+    # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects,
+    #           Issue #205 - AI service connector for inference requests)
     if(TARGET pacs_ai)
         add_executable(ai_tests
             tests/ai/ai_result_handler_test.cpp
+            tests/ai/ai_service_connector_test.cpp
         )
         target_link_libraries(ai_tests
             PRIVATE
                 pacs_ai
                 Catch2::Catch2WithMain
         )
+        # Link pacs_integration for logger/monitoring adapters (required by ai_service_connector)
+        if(TARGET pacs_integration)
+            target_link_libraries(ai_tests PRIVATE pacs_integration)
+        endif()
     endif()
 
     # Monitoring tests (Issue #211 - health check endpoint, Issue #210 - metrics)

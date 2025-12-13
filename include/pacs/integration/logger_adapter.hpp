@@ -72,11 +72,15 @@ enum class move_status {
     unknown_error
 };
 
+// Note: query_level may also be defined in monitoring_adapter.hpp
+#ifndef PACS_INTEGRATION_QUERY_LEVEL_DEFINED
+#define PACS_INTEGRATION_QUERY_LEVEL_DEFINED
 /**
  * @enum query_level
  * @brief DICOM query retrieve level
  */
 enum class query_level { patient, study, series, image };
+#endif
 
 /**
  * @enum security_event_type
