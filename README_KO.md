@@ -411,9 +411,26 @@ cmake --build build
 
 ### Echo SCU (검증 클라이언트)
 
+dcmtk 호환 DICOM 연결 검증 도구입니다.
+
 ```bash
-# 연결 테스트
-./build/examples/echo_scu/echo_scu --host localhost --port 11112 --ae-title TEST_SCU
+# 기본 연결 테스트
+./build/bin/echo_scu localhost 11112
+
+# 커스텀 AE Title 지정
+./build/bin/echo_scu -aet MY_SCU -aec PACS_SCP localhost 11112
+
+# 상세 출력 및 타임아웃 설정
+./build/bin/echo_scu -v -to 60 localhost 11112
+
+# 연결 모니터링을 위한 반복 테스트
+./build/bin/echo_scu -r 10 --repeat-delay 1000 localhost 11112
+
+# 조용한 모드 (종료 코드만 반환)
+./build/bin/echo_scu -q localhost 11112
+
+# 모든 옵션 확인
+./build/bin/echo_scu --help
 ```
 
 ### Secure Echo SCU/SCP (TLS 보안 DICOM)
