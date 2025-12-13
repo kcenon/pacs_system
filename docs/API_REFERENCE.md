@@ -3081,6 +3081,227 @@ if (ai_results.is_ok()) {
 
 ---
 
+### `pacs::ai::ai_service_connector`
+
+Connector for external AI inference services with support for async job submission, status tracking, and result retrieval.
+
+```cpp
+#include <pacs/ai/ai_service_connector.hpp>
+
+namespace pacs::ai {
+
+// Result type alias
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+// Authentication types for AI service connection
+enum class authentication_type {
+    none,           // No authentication
+    api_key,        // API key in header
+    bearer_token,   // Bearer token (JWT)
+    basic           // HTTP Basic authentication
+};
+
+// Inference job status codes
+enum class inference_status_code {
+    pending,    // Job is queued
+    running,    // Job is being processed
+    completed,  // Job completed successfully
+    failed,     // Job failed
+    cancelled,  // Job was cancelled
+    timeout     // Job timed out
+};
+
+// AI service configuration
+struct ai_service_config {
+    std::string base_url;                           // AI service endpoint
+    std::string service_name{"ai_service"};         // Service identifier for logging
+    authentication_type auth_type{authentication_type::none};
+    std::string api_key;                            // For api_key auth
+    std::string bearer_token;                       // For bearer_token auth
+    std::string username;                           // For basic auth
+    std::string password;                           // For basic auth
+    std::chrono::seconds connection_timeout{30};    // Connection timeout
+    std::chrono::seconds request_timeout{300};      // Request timeout
+    std::size_t max_retries{3};                     // Max retry attempts
+    std::chrono::seconds retry_delay{5};            // Delay between retries
+    bool enable_metrics{true};                      // Enable performance metrics
+    bool enable_tracing{true};                      // Enable distributed tracing
+};
+
+// Inference request structure
+struct inference_request {
+    std::string study_instance_uid;                 // Required: Study UID
+    std::optional<std::string> series_instance_uid; // Optional: Series UID
+    std::string model_id;                           // Required: AI model identifier
+    std::map<std::string, std::string> parameters;  // Model-specific parameters
+    int priority{0};                                // Job priority (higher = more urgent)
+    std::optional<std::string> callback_url;        // Webhook for completion
+    std::map<std::string, std::string> metadata;    // Custom metadata
+};
+
+// Inference status structure
+struct inference_status {
+    std::string job_id;                             // Unique job identifier
+    inference_status_code status;                   // Current status
+    int progress{0};                                // Progress 0-100
+    std::optional<std::string> message;             // Status message
+    std::optional<std::string> result_study_uid;    // Result study UID if completed
+    std::optional<std::string> error_code;          // Error code if failed
+    std::chrono::system_clock::time_point submitted_at;
+    std::optional<std::chrono::system_clock::time_point> started_at;
+    std::optional<std::chrono::system_clock::time_point> completed_at;
+};
+
+// AI model information
+struct model_info {
+    std::string model_id;                           // Model identifier
+    std::string name;                               // Display name
+    std::string version;                            // Model version
+    std::string description;                        // Model description
+    std::vector<std::string> supported_modalities;  // e.g., ["CT", "MR"]
+    std::vector<std::string> output_types;          // e.g., ["SR", "SEG"]
+    bool available{true};                           // Model availability
+};
+
+// Main connector class (Singleton pattern with static methods)
+class ai_service_connector {
+public:
+    // Initialization and lifecycle
+    [[nodiscard]] static auto initialize(const ai_service_config& config)
+        -> Result<std::monostate>;
+    static void shutdown();
+    [[nodiscard]] static auto is_initialized() noexcept -> bool;
+
+    // Inference operations
+    [[nodiscard]] static auto request_inference(const inference_request& request)
+        -> Result<std::string>;  // Returns job_id
+    [[nodiscard]] static auto check_status(const std::string& job_id)
+        -> Result<inference_status>;
+    [[nodiscard]] static auto cancel(const std::string& job_id)
+        -> Result<std::monostate>;
+    [[nodiscard]] static auto list_active_jobs()
+        -> Result<std::vector<inference_status>>;
+
+    // Model discovery
+    [[nodiscard]] static auto list_models()
+        -> Result<std::vector<model_info>>;
+    [[nodiscard]] static auto get_model_info(const std::string& model_id)
+        -> Result<model_info>;
+
+    // Health and diagnostics
+    [[nodiscard]] static auto check_health() -> bool;
+    [[nodiscard]] static auto get_latency()
+        -> std::optional<std::chrono::milliseconds>;
+
+    // Configuration
+    [[nodiscard]] static auto update_credentials(
+        authentication_type auth_type,
+        const std::string& credential) -> Result<std::monostate>;
+    [[nodiscard]] static auto get_config() -> const ai_service_config&;
+
+private:
+    class impl;
+    static std::unique_ptr<impl> pimpl_;
+};
+
+// Helper functions
+[[nodiscard]] auto to_string(inference_status_code status) -> std::string;
+[[nodiscard]] auto to_string(authentication_type auth) -> std::string;
+
+} // namespace pacs::ai
+```
+
+**Design Decisions:**
+
+| Decision | Rationale |
+|----------|-----------|
+| Static singleton pattern | Global access, consistent with other adapters |
+| PIMPL pattern | ABI stability, hidden implementation details |
+| Result<T> return type | Consistent error handling with common_system |
+| Async job model | Long-running inference tasks with status tracking |
+| Metrics integration | Performance monitoring via monitoring_adapter |
+
+**Thread Safety:**
+
+All public methods are thread-safe. Internal synchronization uses:
+- `std::mutex` for job tracking state
+- `std::shared_mutex` for read-heavy operations
+- `std::atomic<bool>` for initialization flag
+
+**Usage Example:**
+
+```cpp
+#include <pacs/ai/ai_service_connector.hpp>
+#include <pacs/integration/logger_adapter.hpp>
+#include <pacs/integration/monitoring_adapter.hpp>
+
+using namespace pacs::ai;
+
+// Initialize dependencies first
+pacs::integration::logger_adapter::initialize({});
+pacs::integration::monitoring_adapter::initialize({});
+
+// Configure AI service
+ai_service_config config;
+config.base_url = "https://ai-service.example.com/api/v1";
+config.service_name = "radiology_ai";
+config.auth_type = authentication_type::api_key;
+config.api_key = "your-api-key-here";
+config.request_timeout = std::chrono::minutes(5);
+
+// Initialize connector
+auto init_result = ai_service_connector::initialize(config);
+if (init_result.is_err()) {
+    std::cerr << "Failed to initialize: " << init_result.error().message << "\n";
+    return 1;
+}
+
+// Submit inference request
+inference_request request;
+request.study_instance_uid = "1.2.840.10008.5.1.4.1.1.2.1";
+request.model_id = "chest-xray-nodule-detector-v2";
+request.parameters["threshold"] = "0.7";
+request.parameters["output_format"] = "SR";
+request.priority = 5;
+
+auto submit_result = ai_service_connector::request_inference(request);
+if (submit_result.is_err()) {
+    std::cerr << "Submission failed: " << submit_result.error().message << "\n";
+    return 1;
+}
+
+std::string job_id = submit_result.value();
+std::cout << "Job submitted: " << job_id << "\n";
+
+// Poll for completion
+while (true) {
+    auto status_result = ai_service_connector::check_status(job_id);
+    if (status_result.is_err()) {
+        std::cerr << "Status check failed\n";
+        break;
+    }
+
+    auto& status = status_result.value();
+    std::cout << "Progress: " << status.progress << "%\n";
+
+    if (status.status == inference_status_code::completed) {
+        std::cout << "Result available: " << *status.result_study_uid << "\n";
+        break;
+    } else if (status.status == inference_status_code::failed) {
+        std::cerr << "Job failed: " << *status.error_code << "\n";
+        break;
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+}
+
+// Cleanup
+ai_service_connector::shutdown();
+```
+
+---
+
 ## Monitoring Module
 
 ### `pacs::monitoring::pacs_metrics`

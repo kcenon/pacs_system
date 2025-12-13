@@ -13,6 +13,7 @@
 - [네트워크 모듈](#네트워크-모듈)
 - [서비스 모듈](#서비스-모듈)
 - [저장 모듈](#저장-모듈)
+- [AI 모듈](#ai-모듈)
 - [모니터링 모듈](#모니터링-모듈)
 - [통합 모듈](#통합-모듈)
 - [공통 모듈](#공통-모듈)
@@ -2440,6 +2441,229 @@ if (is_screening_mammogram(dataset)) {
 if (has_breast_implant(dataset)) {
     // 임플란트 변위 뷰가 필요할 수 있음
 }
+```
+
+---
+
+## AI 모듈
+
+### `pacs::ai::ai_service_connector`
+
+비동기 작업 제출, 상태 추적 및 결과 검색을 지원하는 외부 AI 추론 서비스 커넥터.
+
+```cpp
+#include <pacs/ai/ai_service_connector.hpp>
+
+namespace pacs::ai {
+
+// Result 타입 별칭
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+// AI 서비스 연결을 위한 인증 유형
+enum class authentication_type {
+    none,           // 인증 없음
+    api_key,        // 헤더의 API 키
+    bearer_token,   // Bearer 토큰 (JWT)
+    basic           // HTTP Basic 인증
+};
+
+// 추론 작업 상태 코드
+enum class inference_status_code {
+    pending,    // 작업 대기 중
+    running,    // 작업 처리 중
+    completed,  // 작업 완료
+    failed,     // 작업 실패
+    cancelled,  // 작업 취소됨
+    timeout     // 작업 시간 초과
+};
+
+// AI 서비스 구성
+struct ai_service_config {
+    std::string base_url;                           // AI 서비스 엔드포인트
+    std::string service_name{"ai_service"};         // 로깅용 서비스 식별자
+    authentication_type auth_type{authentication_type::none};
+    std::string api_key;                            // api_key 인증용
+    std::string bearer_token;                       // bearer_token 인증용
+    std::string username;                           // basic 인증용
+    std::string password;                           // basic 인증용
+    std::chrono::seconds connection_timeout{30};    // 연결 타임아웃
+    std::chrono::seconds request_timeout{300};      // 요청 타임아웃
+    std::size_t max_retries{3};                     // 최대 재시도 횟수
+    std::chrono::seconds retry_delay{5};            // 재시도 간격
+    bool enable_metrics{true};                      // 성능 메트릭 활성화
+    bool enable_tracing{true};                      // 분산 추적 활성화
+};
+
+// 추론 요청 구조체
+struct inference_request {
+    std::string study_instance_uid;                 // 필수: Study UID
+    std::optional<std::string> series_instance_uid; // 선택: Series UID
+    std::string model_id;                           // 필수: AI 모델 식별자
+    std::map<std::string, std::string> parameters;  // 모델별 파라미터
+    int priority{0};                                // 작업 우선순위 (높을수록 긴급)
+    std::optional<std::string> callback_url;        // 완료 웹훅
+    std::map<std::string, std::string> metadata;    // 사용자 정의 메타데이터
+};
+
+// 추론 상태 구조체
+struct inference_status {
+    std::string job_id;                             // 고유 작업 식별자
+    inference_status_code status;                   // 현재 상태
+    int progress{0};                                // 진행률 0-100
+    std::optional<std::string> message;             // 상태 메시지
+    std::optional<std::string> result_study_uid;    // 완료 시 결과 Study UID
+    std::optional<std::string> error_code;          // 실패 시 오류 코드
+    std::chrono::system_clock::time_point submitted_at;
+    std::optional<std::chrono::system_clock::time_point> started_at;
+    std::optional<std::chrono::system_clock::time_point> completed_at;
+};
+
+// AI 모델 정보
+struct model_info {
+    std::string model_id;                           // 모델 식별자
+    std::string name;                               // 표시 이름
+    std::string version;                            // 모델 버전
+    std::string description;                        // 모델 설명
+    std::vector<std::string> supported_modalities;  // 예: ["CT", "MR"]
+    std::vector<std::string> output_types;          // 예: ["SR", "SEG"]
+    bool available{true};                           // 모델 가용성
+};
+
+// 메인 커넥터 클래스 (정적 메서드를 가진 싱글톤 패턴)
+class ai_service_connector {
+public:
+    // 초기화 및 라이프사이클
+    [[nodiscard]] static auto initialize(const ai_service_config& config)
+        -> Result<std::monostate>;
+    static void shutdown();
+    [[nodiscard]] static auto is_initialized() noexcept -> bool;
+
+    // 추론 작업
+    [[nodiscard]] static auto request_inference(const inference_request& request)
+        -> Result<std::string>;  // job_id 반환
+    [[nodiscard]] static auto check_status(const std::string& job_id)
+        -> Result<inference_status>;
+    [[nodiscard]] static auto cancel(const std::string& job_id)
+        -> Result<std::monostate>;
+    [[nodiscard]] static auto list_active_jobs()
+        -> Result<std::vector<inference_status>>;
+
+    // 모델 검색
+    [[nodiscard]] static auto list_models()
+        -> Result<std::vector<model_info>>;
+    [[nodiscard]] static auto get_model_info(const std::string& model_id)
+        -> Result<model_info>;
+
+    // 상태 확인 및 진단
+    [[nodiscard]] static auto check_health() -> bool;
+    [[nodiscard]] static auto get_latency()
+        -> std::optional<std::chrono::milliseconds>;
+
+    // 구성
+    [[nodiscard]] static auto update_credentials(
+        authentication_type auth_type,
+        const std::string& credential) -> Result<std::monostate>;
+    [[nodiscard]] static auto get_config() -> const ai_service_config&;
+
+private:
+    class impl;
+    static std::unique_ptr<impl> pimpl_;
+};
+
+// 헬퍼 함수
+[[nodiscard]] auto to_string(inference_status_code status) -> std::string;
+[[nodiscard]] auto to_string(authentication_type auth) -> std::string;
+
+} // namespace pacs::ai
+```
+
+**설계 결정:**
+
+| 결정 | 근거 |
+|------|------|
+| 정적 싱글톤 패턴 | 전역 접근, 다른 어댑터와 일관성 유지 |
+| PIMPL 패턴 | ABI 안정성, 구현 세부사항 숨김 |
+| Result<T> 반환 타입 | common_system과 일관된 오류 처리 |
+| 비동기 작업 모델 | 상태 추적이 가능한 장시간 실행 추론 작업 |
+| 메트릭 통합 | monitoring_adapter를 통한 성능 모니터링 |
+
+**스레드 안전성:**
+
+모든 공개 메서드는 스레드 안전합니다. 내부 동기화는 다음을 사용합니다:
+- 작업 추적 상태용 `std::mutex`
+- 읽기 집약적 작업용 `std::shared_mutex`
+- 초기화 플래그용 `std::atomic<bool>`
+
+**사용 예제:**
+
+```cpp
+#include <pacs/ai/ai_service_connector.hpp>
+#include <pacs/integration/logger_adapter.hpp>
+#include <pacs/integration/monitoring_adapter.hpp>
+
+using namespace pacs::ai;
+
+// 먼저 의존성 초기화
+pacs::integration::logger_adapter::initialize({});
+pacs::integration::monitoring_adapter::initialize({});
+
+// AI 서비스 구성
+ai_service_config config;
+config.base_url = "https://ai-service.example.com/api/v1";
+config.service_name = "radiology_ai";
+config.auth_type = authentication_type::api_key;
+config.api_key = "your-api-key-here";
+config.request_timeout = std::chrono::minutes(5);
+
+// 커넥터 초기화
+auto init_result = ai_service_connector::initialize(config);
+if (init_result.is_err()) {
+    std::cerr << "초기화 실패: " << init_result.error().message << "\n";
+    return 1;
+}
+
+// 추론 요청 제출
+inference_request request;
+request.study_instance_uid = "1.2.840.10008.5.1.4.1.1.2.1";
+request.model_id = "chest-xray-nodule-detector-v2";
+request.parameters["threshold"] = "0.7";
+request.parameters["output_format"] = "SR";
+request.priority = 5;
+
+auto submit_result = ai_service_connector::request_inference(request);
+if (submit_result.is_err()) {
+    std::cerr << "제출 실패: " << submit_result.error().message << "\n";
+    return 1;
+}
+
+std::string job_id = submit_result.value();
+std::cout << "작업 제출됨: " << job_id << "\n";
+
+// 완료 대기
+while (true) {
+    auto status_result = ai_service_connector::check_status(job_id);
+    if (status_result.is_err()) {
+        std::cerr << "상태 확인 실패\n";
+        break;
+    }
+
+    auto& status = status_result.value();
+    std::cout << "진행률: " << status.progress << "%\n";
+
+    if (status.status == inference_status_code::completed) {
+        std::cout << "결과 사용 가능: " << *status.result_study_uid << "\n";
+        break;
+    } else if (status.status == inference_status_code::failed) {
+        std::cerr << "작업 실패: " << *status.error_code << "\n";
+        break;
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+}
+
+// 정리
+ai_service_connector::shutdown();
 ```
 
 ---
