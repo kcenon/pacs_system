@@ -1,7 +1,7 @@
 # Project Structure - PACS System
 
-> **Version:** 0.1.2.0
-> **Last Updated:** 2025-12-07
+> **Version:** 0.1.3.0
+> **Last Updated:** 2025-12-13
 > **Language:** **English** | [한국어](PROJECT_STRUCTURE_KO.md)
 
 ---
@@ -120,6 +120,9 @@ pacs_system/
 │       │   ├── worklist_record.hpp   # Worklist data model
 │       │   └── mpps_record.hpp       # MPPS data model
 │       │
+│       ├── ai/                 # AI result handling [NEW v1.3.0]
+│       │   └── ai_result_handler.hpp # Handler for AI-generated DICOM objects (SR, SEG, PR)
+│       │
 │       └── integration/        # Ecosystem adapters
 │           ├── container_adapter.hpp # container_system integration
 │           ├── network_adapter.hpp   # network_system integration
@@ -177,6 +180,9 @@ pacs_system/
 │   │   ├── index_database.cpp
 │   │   └── CMakeLists.txt
 │   │
+│   ├── ai/                     # AI result handling [NEW v1.3.0]
+│   │   └── ai_result_handler.cpp
+│   │
 │   └── integration/
 │       ├── container_adapter.cpp
 │       ├── network_adapter.cpp
@@ -206,6 +212,9 @@ pacs_system/
 │   ├── integration/
 │   │   ├── test_interop.cpp
 │   │   └── test_conformance.cpp
+│   │
+│   ├── ai/                     # AI module tests [NEW v1.3.0]
+│   │   └── ai_result_handler_test.cpp
 │   │
 │   └── fixtures/
 │       ├── sample_ct.dcm
@@ -369,6 +378,19 @@ Storage backend abstraction:
 | `index_database.h` | SQLite index |
 | `storage_config.h` | Storage configuration |
 
+### AI Module (`include/pacs/ai/`) [NEW v1.3.0]
+
+Handler for AI-generated DICOM objects:
+
+| File | Description |
+|------|-------------|
+| `ai_result_handler.hpp` | Handler for AI-generated DICOM objects (SR, SEG, PR) |
+
+Supports:
+- Structured Reports (SR) with CAD findings
+- Segmentation objects (SEG) with binary/fractional segments
+- Presentation States (PR) with annotations and measurements
+
 ### Integration Module (`include/pacs/integration/`)
 
 Ecosystem integration adapters:
@@ -419,6 +441,7 @@ namespace pacs {
     }
     namespace services { /* DICOM services */ }
     namespace storage { /* Storage backend */ }
+    namespace ai { /* AI result handling [NEW v1.3.0] */ }
     namespace integration { /* Ecosystem adapters */ }
 }
 ```
@@ -510,6 +533,7 @@ endif()
 | `pacs_network` | STATIC | Network protocol |
 | `pacs_services` | STATIC | DICOM services |
 | `pacs_storage` | STATIC | Storage backend |
+| `pacs_ai` | STATIC | AI result handling [NEW v1.3.0] |
 | `pacs_system` | INTERFACE | All-in-one target |
 
 ---
@@ -583,10 +607,11 @@ Test DICOM files stored in `tests/fixtures/`:
 | 1.0.0 | 2025-11-30 | kcenon | Initial release |
 | 1.1.0 | 2025-12-04 | kcenon | Added SOP class and validation directories |
 | 1.2.0 | 2025-12-07 | kcenon | Added: network/detail/ (accept_worker), network/v2/ (dicom_server_v2, dicom_association_handler) |
+| 1.3.0 | 2025-12-13 | kcenon | Added: ai/ module for AI-generated DICOM objects (SR, SEG, PR) handler |
 
 ---
 
-*Document Version: 0.1.2.0*
+*Document Version: 0.1.3.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2025-12-13*
 *Author: kcenon@naver.com*
