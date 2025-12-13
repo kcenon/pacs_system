@@ -205,17 +205,31 @@ pacs_system/
 │       ├── sample_mr.dcm
 │       └── sample_cr.dcm
 │
-├── examples/                   # 예제 애플리케이션
+├── examples/                   # 예제 애플리케이션 및 CLI 유틸리티
 │   ├── CMakeLists.txt
-│   ├── echo_scu/
+│   ├── echo_scu/               # C-ECHO SCU (검증)
 │   │   └── main.cpp
-│   ├── store_scu/
+│   ├── store_scu/              # C-STORE SCU (저장)
 │   │   └── main.cpp
-│   ├── store_scp/
+│   ├── find_scu/               # C-FIND SCU (조회)
 │   │   └── main.cpp
-│   ├── query_scu/
+│   ├── move_scu/               # C-MOVE SCU (검색)
 │   │   └── main.cpp
-│   └── pacs_server/
+│   ├── get_scu/                # C-GET SCU (검색)
+│   │   └── main.cpp
+│   ├── worklist_scu/           # Modality Worklist SCU
+│   │   ├── main.cpp
+│   │   ├── worklist_query_builder.hpp
+│   │   └── worklist_result_formatter.hpp
+│   ├── mpps_scu/               # MPPS SCU
+│   │   └── main.cpp
+│   ├── echo_scp/               # C-ECHO SCP
+│   │   └── main.cpp
+│   ├── store_scp/              # C-STORE SCP
+│   │   └── main.cpp
+│   ├── query_scu/              # Query SCU (레거시)
+│   │   └── main.cpp
+│   └── pacs_server/            # 전체 PACS 서버
 │       └── main.cpp
 │
 ├── benchmarks/                 # 성능 벤치마크
