@@ -17,6 +17,7 @@ This document provides comprehensive details on all features available in the PA
 - [Ecosystem Integration](#ecosystem-integration)
 - [Security Features](#security-features)
 - [Monitoring and Observability](#monitoring-and-observability)
+- [Workflow Services](#workflow-services)
 - [Planned Features](#planned-features)
 
 ---
@@ -1068,10 +1069,101 @@ server.stop();
 
 ---
 
-## Recently Completed Features (v1.2.0 - 2025-12-12)
+## Workflow Services
+
+### Auto Prefetch Service
+
+**Implementation**: Background service for automatically prefetching prior patient studies from remote PACS when patients appear in the modality worklist.
+
+**Features**:
+- Worklist-triggered prefetch: Automatically queues prefetch requests when patients appear in MWL
+- Configurable selection criteria: Filter priors by modality, body part, lookback period
+- Multi-source support: Can prefetch from multiple remote PACS servers
+- Parallel processing: Uses thread_pool for concurrent prefetch operations
+- Rate limiting: Prevents overloading remote PACS with requests
+- Retry logic: Automatically retries failed prefetches with configurable delay
+- Deduplication: Prevents duplicate prefetch requests for the same patient
+
+**Classes**:
+- `auto_prefetch_service` - Main service class for background prefetching
+- `prefetch_service_config` - Service configuration options
+- `prefetch_criteria` - Selection criteria for prior studies
+- `prefetch_result` - Statistics for prefetch operations
+- `prior_study_info` - Information about a prior study candidate
+- `prefetch_request` - Request for prefetching patient priors
+
+**Configuration Options**:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | bool | true | Enable/disable prefetch service |
+| `prefetch_interval` | seconds | 300 | Interval between prefetch cycles |
+| `max_concurrent_prefetches` | size_t | 4 | Maximum parallel prefetch operations |
+| `lookback_period` | days | 365 | How far back to look for prior studies |
+| `max_studies_per_patient` | size_t | 10 | Maximum priors per patient |
+| `prefer_same_modality` | bool | true | Prefer priors with same modality |
+| `rate_limit_per_minute` | size_t | 0 | Max prefetches per minute (0=unlimited) |
+
+**Example**:
+```cpp
+#include <pacs/workflow/auto_prefetch_service.hpp>
+#include <pacs/workflow/prefetch_config.hpp>
+
+using namespace pacs::workflow;
+
+// Configure prefetch service
+prefetch_service_config config;
+config.prefetch_interval = std::chrono::minutes{5};
+config.max_concurrent_prefetches = 4;
+config.criteria.lookback_period = std::chrono::days{365};
+config.criteria.max_studies_per_patient = 10;
+config.criteria.prefer_same_modality = true;
+
+// Add remote PACS sources
+remote_pacs_config remote;
+remote.ae_title = "ARCHIVE_PACS";
+remote.host = "192.168.1.100";
+remote.port = 11112;
+config.remote_pacs.push_back(remote);
+
+// Set callbacks
+config.on_cycle_complete = [](const prefetch_result& result) {
+    std::cout << "Prefetched " << result.studies_prefetched
+              << " studies for " << result.patients_processed << " patients\n";
+};
+
+// Create and start service
+auto_prefetch_service service{database, config};
+service.start();
+
+// Trigger prefetch for worklist items
+service.trigger_for_worklist(worklist_items);
+
+// Manual prefetch for a specific patient
+auto result = service.prefetch_priors("PATIENT123", std::chrono::days{180});
+
+// Monitor statistics
+auto stats = service.get_cumulative_stats();
+std::cout << "Total prefetched: " << stats.studies_prefetched << "\n";
+
+// Stop service
+service.stop();
+```
+
+**Integration Points**:
+- **MWL SCP**: Automatically notified when worklist queries complete
+- **index_database**: Checks local storage before initiating prefetch
+- **thread_pool**: Parallel C-MOVE operations
+- **logger_adapter**: Audit logging for prefetch operations
+- **monitoring_adapter**: Metrics for prefetch success/failure rates
+
+---
+
+## Recently Completed Features (v1.2.0 - 2025-12-13)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | ✅ Complete |
 | Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
 | Azure Blob Storage | Azure Blob storage backend (mock implementation) with block blob upload | #199 | ✅ Complete |
 | Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
@@ -1131,11 +1223,12 @@ server.stop();
 | 1.7.0 | 2025-12-10 | raphaelshin | Added: SEG/SR support (Segmentation, Structured Reports) for AI/CAD integration for Issue #187 |
 | 1.8.0 | 2025-12-12 | raphaelshin | Added: Azure Blob Storage (mock implementation) with block blob upload for Issue #199 |
 | 1.9.0 | 2025-12-12 | raphaelshin | Added: Hierarchical Storage Management (HSM) with three-tier storage and automatic migration for Issue #200 |
+| 2.0.0 | 2025-12-13 | raphaelshin | Added: Auto Prefetch Service for worklist-triggered prior study prefetch for Issue #206 |
 
 ---
 
-*Document Version: 0.1.8.0*
+*Document Version: 0.1.9.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-12*
+*Updated: 2025-12-13*
 *Author: kcenon@naver.com*
 

@@ -17,6 +17,7 @@
 - [에코시스템 통합](#에코시스템-통합)
 - [보안 기능](#보안-기능)
 - [모니터링 및 관찰성](#모니터링-및-관찰성)
+- [워크플로우 서비스](#워크플로우-서비스)
 - [계획된 기능](#계획된-기능)
 
 ---
@@ -830,6 +831,96 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
+## 워크플로우 서비스
+
+### 자동 사전 검색 서비스
+
+**구현**: 환자가 모달리티 워크리스트에 나타날 때 원격 PACS에서 이전 환자 검사를 자동으로 사전 검색하는 백그라운드 서비스.
+
+**기능**:
+- 워크리스트 트리거 사전 검색: MWL에 환자가 나타나면 자동으로 사전 검색 요청 큐에 추가
+- 구성 가능한 선택 기준: 모달리티, 신체 부위, 검색 기간으로 이전 검사 필터링
+- 다중 소스 지원: 여러 원격 PACS 서버에서 사전 검색 가능
+- 병렬 처리: thread_pool을 사용한 동시 사전 검색 작업
+- 속도 제한: 원격 PACS 과부하 방지
+- 재시도 로직: 구성 가능한 지연으로 실패한 사전 검색 자동 재시도
+- 중복 제거: 동일 환자에 대한 중복 사전 검색 요청 방지
+
+**클래스**:
+- `auto_prefetch_service` - 백그라운드 사전 검색을 위한 메인 서비스 클래스
+- `prefetch_service_config` - 서비스 구성 옵션
+- `prefetch_criteria` - 이전 검사 선택 기준
+- `prefetch_result` - 사전 검색 작업 통계
+- `prior_study_info` - 이전 검사 후보 정보
+- `prefetch_request` - 환자 이전 검사 사전 검색 요청
+
+**구성 옵션**:
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `enabled` | bool | true | 사전 검색 서비스 활성화/비활성화 |
+| `prefetch_interval` | seconds | 300 | 사전 검색 주기 간격 |
+| `max_concurrent_prefetches` | size_t | 4 | 최대 병렬 사전 검색 작업 수 |
+| `lookback_period` | days | 365 | 이전 검사 검색 기간 |
+| `max_studies_per_patient` | size_t | 10 | 환자당 최대 이전 검사 수 |
+| `prefer_same_modality` | bool | true | 동일 모달리티 이전 검사 우선 |
+| `rate_limit_per_minute` | size_t | 0 | 분당 최대 사전 검색 수 (0=무제한) |
+
+**예제**:
+```cpp
+#include <pacs/workflow/auto_prefetch_service.hpp>
+#include <pacs/workflow/prefetch_config.hpp>
+
+using namespace pacs::workflow;
+
+// 사전 검색 서비스 구성
+prefetch_service_config config;
+config.prefetch_interval = std::chrono::minutes{5};
+config.max_concurrent_prefetches = 4;
+config.criteria.lookback_period = std::chrono::days{365};
+config.criteria.max_studies_per_patient = 10;
+config.criteria.prefer_same_modality = true;
+
+// 원격 PACS 소스 추가
+remote_pacs_config remote;
+remote.ae_title = "ARCHIVE_PACS";
+remote.host = "192.168.1.100";
+remote.port = 11112;
+config.remote_pacs.push_back(remote);
+
+// 콜백 설정
+config.on_cycle_complete = [](const prefetch_result& result) {
+    std::cout << result.patients_processed << "명 환자에 대해 "
+              << result.studies_prefetched << "개 검사 사전 검색 완료\n";
+};
+
+// 서비스 생성 및 시작
+auto_prefetch_service service{database, config};
+service.start();
+
+// 워크리스트 항목에 대한 사전 검색 트리거
+service.trigger_for_worklist(worklist_items);
+
+// 특정 환자에 대한 수동 사전 검색
+auto result = service.prefetch_priors("PATIENT123", std::chrono::days{180});
+
+// 통계 모니터링
+auto stats = service.get_cumulative_stats();
+std::cout << "총 사전 검색: " << stats.studies_prefetched << "\n";
+
+// 서비스 중지
+service.stop();
+```
+
+**통합 포인트**:
+- **MWL SCP**: 워크리스트 쿼리 완료 시 자동 알림
+- **index_database**: 사전 검색 시작 전 로컬 저장소 확인
+- **thread_pool**: 병렬 C-MOVE 작업
+- **logger_adapter**: 사전 검색 작업 감사 로깅
+- **monitoring_adapter**: 사전 검색 성공/실패율 메트릭
+
+---
+
 ## 계획된 기능
 
 ### 단기 (다음 릴리스)
@@ -859,10 +950,11 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
-## 최근 완료된 기능 (v1.2.0 - 2025-12-12)
+## 최근 완료된 기능 (v1.2.0 - 2025-12-13)
 
 | 기능 | 설명 | 이슈 | 상태 |
 |------|------|------|------|
+| 자동 사전 검색 서비스 | 워크리스트 쿼리 기반 이전 검사 자동 사전 검색 | #206 | ✅ 완료 |
 | 계층적 저장소 관리 (HSM) | 자동 연령 기반 마이그레이션을 갖춘 3계층 HSM | #200 | ✅ 완료 |
 | Azure Blob 저장소 | Azure Blob 저장소 백엔드 (목 구현) with 블록 블롭 업로드 | #199 | ✅ 완료 |
 | S3 클라우드 저장소 | S3 호환 저장소 백엔드 (목 구현) | #198 | ✅ 완료 |
@@ -872,7 +964,7 @@ pacs_query_latency_seconds{quantile="0.95"}
 
 ---
 
-*문서 버전: 0.1.8.0*
+*문서 버전: 0.1.9.0*
 *작성일: 2025-11-30*
-*수정일: 2025-12-12*
+*수정일: 2025-12-13*
 *작성자: kcenon@naver.com*
