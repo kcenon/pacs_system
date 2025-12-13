@@ -537,13 +537,28 @@ cd examples/secure_dicom
 
 ```bash
 # Send single DICOM file
-./build/examples/store_scu/store_scu localhost 11112 PACS_SCP image.dcm
+./build/bin/store_scu localhost 11112 image.dcm
 
-# Send all files in directory (recursive)
-./build/examples/store_scu/store_scu localhost 11112 PACS_SCP ./dicom_folder/ --recursive
+# Send with custom AE Titles
+./build/bin/store_scu -aet MYSCU -aec PACS localhost 11112 image.dcm
 
-# Specify transfer syntax
-./build/examples/store_scu/store_scu localhost 11112 PACS_SCP image.dcm --transfer-syntax explicit-le
+# Send all files in directory (recursive) with progress
+./build/bin/store_scu -r --progress localhost 11112 ./dicom_folder/
+
+# Specify transfer syntax preference
+./build/bin/store_scu --prefer-lossless localhost 11112 *.dcm
+
+# Verbose output with timeout
+./build/bin/store_scu -v -to 60 localhost 11112 image.dcm
+
+# Generate transfer report
+./build/bin/store_scu --report-file transfer.log localhost 11112 ./data/
+
+# Quiet mode (minimal output)
+./build/bin/store_scu -q localhost 11112 image.dcm
+
+# Show help
+./build/bin/store_scu --help
 ```
 
 ### Query SCU (C-FIND Client)
