@@ -874,6 +874,32 @@ else()
     message(STATUS "  [--] pacs_storage: OFF")
 endif()
 
+# AI library (AI result handler for SR/SEG/PR objects - Issue #204)
+# Requires pacs_storage for storing AI-generated DICOM objects
+if(TARGET pacs_storage)
+    add_library(pacs_ai
+        src/ai/ai_result_handler.cpp
+    )
+    target_include_directories(pacs_ai
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_ai
+        PUBLIC pacs_core pacs_storage
+    )
+
+    # Link common_system for Result<T>
+    if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+        target_include_directories(pacs_ai PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_ai PUBLIC PACS_WITH_COMMON_SYSTEM)
+    endif()
+
+    message(STATUS "  [OK] pacs_ai: ON (AI result handler)")
+else()
+    message(STATUS "  [--] pacs_ai: OFF (requires pacs_storage)")
+endif()
+
 # Monitoring library (health check endpoint - Issue #211, metrics - Issue #210)
 # Requires pacs_storage for file_storage and index_database checks
 if(TARGET pacs_storage)
@@ -1271,6 +1297,18 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
+    # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects)
+    if(TARGET pacs_ai)
+        add_executable(ai_tests
+            tests/ai/ai_result_handler_test.cpp
+        )
+        target_link_libraries(ai_tests
+            PRIVATE
+                pacs_ai
+                Catch2::Catch2WithMain
+        )
+    endif()
+
     # Monitoring tests (Issue #211 - health check endpoint, Issue #210 - metrics)
     if(TARGET pacs_monitoring)
         add_executable(monitoring_tests
@@ -1349,6 +1387,11 @@ if(PACS_BUILD_TESTS)
     )
     if(TARGET storage_tests)
         catch_discover_tests(storage_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+    if(TARGET ai_tests)
+        catch_discover_tests(ai_tests
             PROPERTIES LABELS "unit"
         )
     endif()
@@ -1528,6 +1571,10 @@ if(TARGET pacs_storage)
     pacs_apply_warnings(pacs_storage)
 endif()
 
+if(TARGET pacs_ai)
+    pacs_apply_warnings(pacs_ai)
+endif()
+
 if(TARGET pacs_monitoring)
     pacs_apply_warnings(pacs_monitoring)
 endif()
@@ -1544,6 +1591,9 @@ if(PACS_BUILD_TESTS)
     pacs_apply_warnings(services_tests)
     if(TARGET storage_tests)
         pacs_apply_warnings(storage_tests)
+    endif()
+    if(TARGET ai_tests)
+        pacs_apply_warnings(ai_tests)
     endif()
     if(TARGET monitoring_tests)
         pacs_apply_warnings(monitoring_tests)
