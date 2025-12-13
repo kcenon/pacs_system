@@ -1474,12 +1474,36 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] query_scu: OFF (requires pacs_integration)")
     endif()
 
+    # find_scu - dcmtk-compatible C-FIND SCU utility
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/find_scu)
+        message(STATUS "  [OK] find_scu: dcmtk-compatible C-FIND SCU utility")
+    else()
+        message(STATUS "  [--] find_scu: OFF (requires pacs_integration)")
+    endif()
+
     # Retrieve SCU sample - DICOM C-MOVE/C-GET client
     if(TARGET pacs_integration)
         add_subdirectory(examples/retrieve_scu)
         message(STATUS "  [OK] retrieve_scu: DICOM C-MOVE/C-GET client")
     else()
         message(STATUS "  [--] retrieve_scu: OFF (requires pacs_integration)")
+    endif()
+
+    # move_scu - dcmtk-compatible C-MOVE SCU utility
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/move_scu)
+        message(STATUS "  [OK] move_scu: dcmtk-compatible C-MOVE SCU utility")
+    else()
+        message(STATUS "  [--] move_scu: OFF (requires pacs_integration)")
+    endif()
+
+    # get_scu - dcmtk-compatible C-GET SCU utility
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/get_scu)
+        message(STATUS "  [OK] get_scu: dcmtk-compatible C-GET SCU utility")
+    else()
+        message(STATUS "  [--] get_scu: OFF (requires pacs_integration)")
     endif()
 
     # Worklist SCU sample - Modality Worklist Query client
