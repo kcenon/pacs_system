@@ -927,6 +927,32 @@ else()
     message(STATUS "  [--] pacs_monitoring: OFF (requires pacs_storage)")
 endif()
 
+# Workflow library (auto prefetch service - Issue #206)
+# Requires pacs_storage for index_database and pacs_integration for adapters
+if(TARGET pacs_storage)
+    add_library(pacs_workflow
+        src/workflow/auto_prefetch_service.cpp
+    )
+    target_include_directories(pacs_workflow
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_workflow
+        PUBLIC pacs_storage pacs_services
+    )
+
+    # Link common_system for Result<T>
+    if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+        target_include_directories(pacs_workflow PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_workflow PUBLIC PACS_WITH_COMMON_SYSTEM)
+    endif()
+
+    message(STATUS "  [OK] pacs_workflow: ON (auto prefetch service)")
+else()
+    message(STATUS "  [--] pacs_workflow: OFF (requires pacs_storage)")
+endif()
+
 # Web library (REST API server - Issue #194)
 # Requires Crow framework (fetched above)
 if(TARGET Crow::Crow)
@@ -1139,6 +1165,13 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         target_link_libraries(pacs_ai PUBLIC pacs_integration)
         message(STATUS "    - pacs_ai: linked pacs_integration for ai_service_connector")
     endif()
+
+    # Link pacs_integration to pacs_workflow for auto_prefetch_service (Issue #206)
+    # auto_prefetch_service uses logger_adapter, monitoring_adapter, and thread_adapter
+    if(TARGET pacs_workflow)
+        target_link_libraries(pacs_workflow PUBLIC pacs_integration)
+        message(STATUS "    - pacs_workflow: linked pacs_integration for auto_prefetch_service")
+    endif()
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
 endif()
@@ -1328,6 +1361,22 @@ if(PACS_BUILD_TESTS)
         endif()
     endif()
 
+    # Workflow tests (Issue #206 - auto prefetch service)
+    if(TARGET pacs_workflow)
+        add_executable(workflow_tests
+            tests/workflow/auto_prefetch_service_test.cpp
+        )
+        target_link_libraries(workflow_tests
+            PRIVATE
+                pacs_workflow
+                Catch2::Catch2WithMain
+        )
+        # Link pacs_integration for logger/monitoring/thread adapters
+        if(TARGET pacs_integration)
+            target_link_libraries(workflow_tests PRIVATE pacs_integration)
+        endif()
+    endif()
+
     # Monitoring tests (Issue #211 - health check endpoint, Issue #210 - metrics)
     if(TARGET pacs_monitoring)
         add_executable(monitoring_tests
@@ -1411,6 +1460,11 @@ if(PACS_BUILD_TESTS)
     endif()
     if(TARGET ai_tests)
         catch_discover_tests(ai_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+    if(TARGET workflow_tests)
+        catch_discover_tests(workflow_tests
             PROPERTIES LABELS "unit"
         )
     endif()
@@ -1622,6 +1676,10 @@ if(TARGET pacs_monitoring)
     pacs_apply_warnings(pacs_monitoring)
 endif()
 
+if(TARGET pacs_workflow)
+    pacs_apply_warnings(pacs_workflow)
+endif()
+
 if(TARGET pacs_integration)
     pacs_apply_warnings(pacs_integration)
 endif()
@@ -1637,6 +1695,9 @@ if(PACS_BUILD_TESTS)
     endif()
     if(TARGET ai_tests)
         pacs_apply_warnings(ai_tests)
+    endif()
+    if(TARGET workflow_tests)
+        pacs_apply_warnings(workflow_tests)
     endif()
     if(TARGET monitoring_tests)
         pacs_apply_warnings(monitoring_tests)
