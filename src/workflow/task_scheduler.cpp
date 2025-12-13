@@ -1009,25 +1009,104 @@ auto task_scheduler::generate_execution_id() const -> std::string {
 
 auto task_scheduler::create_cleanup_callback(const cleanup_config& config)
     -> task_callback_with_result {
-    return [config]() -> std::optional<std::string> {
+    return [this, config]() -> std::optional<std::string> {
         integration::logger_adapter::info(
             "Running cleanup task retention_days={}",
             config.default_retention.count());
 
-        if (config.dry_run) {
-            integration::logger_adapter::info(
-                "Cleanup task in dry-run mode - no deletions performed");
-            return std::nullopt;
-        }
-
         try {
-            // TODO: Query database for studies older than cutoff
-            // auto cutoff_date = std::chrono::system_clock::now() -
-            //                    config.default_retention;
-            // TODO: Delete studies (respecting modality-specific retention)
+            // Calculate cutoff date
+            auto now = std::chrono::system_clock::now();
+            auto cutoff = now - config.default_retention;
+
+            // Convert to YYYYMMDD format for database query
+            auto cutoff_time_t = std::chrono::system_clock::to_time_t(cutoff);
+            std::tm tm = *std::localtime(&cutoff_time_t);
+            std::ostringstream date_oss;
+            date_oss << std::put_time(&tm, "%Y%m%d");
+            std::string cutoff_date = date_oss.str();
+
+            // Query for studies older than cutoff
+            storage::study_query query;
+            query.study_date_to = cutoff_date;
+            query.limit = config.max_deletions_per_cycle;
+
+            auto studies = database_.search_studies(query);
+
+            std::size_t deleted_count = 0;
+            std::size_t skipped_count = 0;
+
+            for (const auto& study : studies) {
+                // Check modality-specific retention
+                auto modality_retention = config.retention_for(study.modalities_in_study);
+                auto modality_cutoff = now - modality_retention;
+                auto modality_cutoff_t = std::chrono::system_clock::to_time_t(modality_cutoff);
+                std::tm mod_tm = *std::localtime(&modality_cutoff_t);
+                std::ostringstream mod_oss;
+                mod_oss << std::put_time(&mod_tm, "%Y%m%d");
+                std::string modality_cutoff_date = mod_oss.str();
+
+                // Skip if study is newer than modality-specific retention
+                if (study.study_date > modality_cutoff_date) {
+                    ++skipped_count;
+                    continue;
+                }
+
+                // Check exclusion patterns
+                bool excluded = false;
+                for (const auto& pattern : config.exclude_patterns) {
+                    if (study.study_description.find(pattern) != std::string::npos) {
+                        excluded = true;
+                        break;
+                    }
+                }
+                if (excluded) {
+                    ++skipped_count;
+                    continue;
+                }
+
+                if (config.dry_run) {
+                    integration::logger_adapter::info(
+                        "Dry-run: would delete study study_uid={} study_date={} modality={}",
+                        study.study_uid, study.study_date, study.modalities_in_study);
+                    ++deleted_count;
+                    continue;
+                }
+
+                // Delete files from storage if not database_only
+                if (!config.database_only && file_storage_ != nullptr) {
+                    auto file_paths = database_.get_study_files(study.study_uid);
+                    for (const auto& file_path : file_paths) {
+                        // Extract SOP UID from file path for removal
+                        std::filesystem::path p(file_path);
+                        std::string sop_uid = p.stem().string();
+                        auto remove_result = file_storage_->remove(sop_uid);
+                        if (remove_result.is_err()) {
+                            integration::logger_adapter::warn(
+                                "Failed to remove file file_path={} error={}",
+                                file_path, remove_result.error().message);
+                        }
+                    }
+                }
+
+                // Delete from database
+                auto delete_result = database_.delete_study(study.study_uid);
+                if (delete_result.is_err()) {
+                    integration::logger_adapter::error(
+                        "Failed to delete study study_uid={} error={}",
+                        study.study_uid, delete_result.error().message);
+                    continue;
+                }
+
+                ++deleted_count;
+                integration::logger_adapter::debug(
+                    "Deleted study study_uid={} study_date={}",
+                    study.study_uid, study.study_date);
+            }
 
             integration::logger_adapter::info(
-                "Cleanup task completed");
+                "Cleanup task completed deleted={} skipped={} dry_run={}",
+                deleted_count, skipped_count, config.dry_run);
 
             return std::nullopt;  // Success
         } catch (const std::exception& e) {
@@ -1038,21 +1117,121 @@ auto task_scheduler::create_cleanup_callback(const cleanup_config& config)
 
 auto task_scheduler::create_archive_callback(const archive_config& config)
     -> task_callback_with_result {
-    return [config]() -> std::optional<std::string> {
+    return [this, config]() -> std::optional<std::string> {
         integration::logger_adapter::info(
             "Running archive task archive_after_days={} destination={}",
             config.archive_after.count(),
             config.destination);
 
         try {
-            // TODO: Query database for studies older than cutoff
-            // auto cutoff_date = std::chrono::system_clock::now() -
-            //                    config.archive_after;
-            // TODO: Archive studies to destination
-            // TODO: Optionally verify and delete originals
+            // Calculate cutoff date
+            auto now = std::chrono::system_clock::now();
+            auto cutoff = now - config.archive_after;
+
+            // Convert to YYYYMMDD format
+            auto cutoff_time_t = std::chrono::system_clock::to_time_t(cutoff);
+            std::tm tm = *std::localtime(&cutoff_time_t);
+            std::ostringstream date_oss;
+            date_oss << std::put_time(&tm, "%Y%m%d");
+            std::string cutoff_date = date_oss.str();
+
+            // Query for studies older than cutoff
+            storage::study_query query;
+            query.study_date_to = cutoff_date;
+            query.limit = config.max_archives_per_cycle;
+
+            auto studies = database_.search_studies(query);
+
+            std::size_t archived_count = 0;
+            std::size_t failed_count = 0;
+
+            // Create destination directory if needed
+            std::filesystem::path dest_path(config.destination);
+            if (!std::filesystem::exists(dest_path)) {
+                std::filesystem::create_directories(dest_path);
+            }
+
+            for (const auto& study : studies) {
+                // Get all files for this study
+                auto file_paths = database_.get_study_files(study.study_uid);
+                if (file_paths.empty()) {
+                    continue;
+                }
+
+                // Create study archive directory
+                std::filesystem::path study_dest = dest_path / study.study_uid;
+                if (!std::filesystem::exists(study_dest)) {
+                    std::filesystem::create_directories(study_dest);
+                }
+
+                bool archive_success = true;
+
+                for (const auto& src_file : file_paths) {
+                    std::filesystem::path src_path(src_file);
+                    if (!std::filesystem::exists(src_path)) {
+                        integration::logger_adapter::warn(
+                            "Source file not found file_path={}", src_file);
+                        continue;
+                    }
+
+                    // Determine destination filename
+                    std::filesystem::path dest_file = study_dest / src_path.filename();
+
+                    try {
+                        // Copy file to archive location
+                        std::filesystem::copy_file(
+                            src_path, dest_file,
+                            std::filesystem::copy_options::overwrite_existing);
+
+                        // Verify copy if configured
+                        if (config.verify_after_archive) {
+                            auto src_size = std::filesystem::file_size(src_path);
+                            auto dest_size = std::filesystem::file_size(dest_file);
+                            if (src_size != dest_size) {
+                                integration::logger_adapter::error(
+                                    "Archive verification failed: size mismatch "
+                                    "src={} dest={}", src_file, dest_file.string());
+                                archive_success = false;
+                                break;
+                            }
+                        }
+                    } catch (const std::filesystem::filesystem_error& e) {
+                        integration::logger_adapter::error(
+                            "Failed to archive file src={} dest={} error={}",
+                            src_file, dest_file.string(), e.what());
+                        archive_success = false;
+                        break;
+                    }
+                }
+
+                if (archive_success) {
+                    ++archived_count;
+
+                    // Delete originals if configured
+                    if (config.delete_after_archive && file_storage_ != nullptr) {
+                        for (const auto& file_path : file_paths) {
+                            std::filesystem::path p(file_path);
+                            std::string sop_uid = p.stem().string();
+                            (void)file_storage_->remove(sop_uid);
+                        }
+                        (void)database_.delete_study(study.study_uid);
+                    }
+
+                    integration::logger_adapter::debug(
+                        "Archived study study_uid={} files={}",
+                        study.study_uid, file_paths.size());
+                } else {
+                    ++failed_count;
+                }
+            }
 
             integration::logger_adapter::info(
-                "Archive task completed");
+                "Archive task completed archived={} failed={}",
+                archived_count, failed_count);
+
+            if (failed_count > 0) {
+                return "Archive completed with " + std::to_string(failed_count) + " failures";
+            }
 
             return std::nullopt;  // Success
         } catch (const std::exception& e) {
@@ -1063,7 +1242,7 @@ auto task_scheduler::create_archive_callback(const archive_config& config)
 
 auto task_scheduler::create_verification_callback(const verification_config& config)
     -> task_callback_with_result {
-    return [config]() -> std::optional<std::string> {
+    return [this, config]() -> std::optional<std::string> {
         integration::logger_adapter::info(
             "Running verification task check_checksums={} check_db={}",
             config.check_checksums,
@@ -1072,18 +1251,92 @@ auto task_scheduler::create_verification_callback(const verification_config& con
         try {
             std::size_t verified = 0;
             std::size_t errors = 0;
+            std::size_t missing_files = 0;
 
-            // TODO: Query database for studies to verify
-            // TODO: Verify checksums if enabled
-            // TODO: Check database-storage consistency if enabled
-            (void)verified;  // Suppress unused warning until implementation
+            // Database integrity check
+            if (config.check_db_consistency) {
+                auto db_result = database_.verify_integrity();
+                if (db_result.is_err()) {
+                    integration::logger_adapter::error(
+                        "Database integrity check failed error={}",
+                        db_result.error().message);
+                    ++errors;
+                } else {
+                    integration::logger_adapter::debug("Database integrity check passed");
+                }
+            }
+
+            // Get studies for verification
+            storage::study_query query;
+            query.limit = config.max_verifications_per_cycle;
+            auto studies = database_.search_studies(query);
+
+            for (const auto& study : studies) {
+                // Get all files for this study
+                auto file_paths = database_.get_study_files(study.study_uid);
+
+                for (const auto& file_path : file_paths) {
+                    std::filesystem::path path(file_path);
+
+                    // Check file existence
+                    if (!std::filesystem::exists(path)) {
+                        ++missing_files;
+                        integration::logger_adapter::warn(
+                            "Missing file detected file_path={} study_uid={}",
+                            file_path, study.study_uid);
+
+                        if (config.repair_on_failure) {
+                            // Extract SOP UID and remove orphaned database record
+                            std::string sop_uid = path.stem().string();
+                            (void)database_.delete_instance(sop_uid);
+                            integration::logger_adapter::info(
+                                "Removed orphaned database record sop_uid={}", sop_uid);
+                        }
+                        continue;
+                    }
+
+                    // Checksum verification
+                    if (config.check_checksums) {
+                        // Get file size as basic verification
+                        // Full checksum verification would require storing checksums in DB
+                        try {
+                            auto file_size = std::filesystem::file_size(path);
+                            if (file_size == 0) {
+                                ++errors;
+                                integration::logger_adapter::warn(
+                                    "Empty file detected file_path={}", file_path);
+                            }
+                        } catch (const std::filesystem::filesystem_error& e) {
+                            ++errors;
+                            integration::logger_adapter::error(
+                                "Cannot read file file_path={} error={}",
+                                file_path, e.what());
+                        }
+                    }
+
+                    ++verified;
+                }
+            }
+
+            // File storage integrity check
+            if (file_storage_ != nullptr) {
+                auto storage_result = file_storage_->verify_integrity();
+                if (storage_result.is_err()) {
+                    integration::logger_adapter::warn(
+                        "Storage integrity check reported issues error={}",
+                        storage_result.error().message);
+                }
+            }
 
             integration::logger_adapter::info(
-                "Verification task completed verified={} errors={}",
-                verified, errors);
+                "Verification task completed verified={} errors={} missing_files={}",
+                verified, errors, missing_files);
 
-            if (errors > 0) {
-                return "Verification found " + std::to_string(errors) + " errors";
+            if (errors > 0 || missing_files > 0) {
+                std::ostringstream oss;
+                oss << "Verification found " << errors << " errors and "
+                    << missing_files << " missing files";
+                return oss.str();
             }
 
             return std::nullopt;  // Success
