@@ -251,7 +251,7 @@ pacs_system/
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (15 apps, ~10,500 lines)
+├── examples/                    # Example Applications (18 apps, ~13,000 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
 │   ├── db_browser/              # PACS index database browser
@@ -261,7 +261,10 @@ pacs_system/
 │   ├── store_scp/               # DICOM Storage SCP server
 │   ├── store_scu/               # DICOM Storage SCU client
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
+│   ├── find_scu/                # dcmtk-compatible C-FIND SCU utility
 │   ├── retrieve_scu/            # DICOM Retrieve SCU client (C-MOVE/C-GET)
+│   ├── move_scu/                # dcmtk-compatible C-MOVE SCU utility
+│   ├── get_scu/                 # dcmtk-compatible C-GET SCU utility
 │   ├── worklist_scu/            # Modality Worklist Query client (MWL C-FIND)
 │   ├── mpps_scu/                # MPPS client (N-CREATE/N-SET)
 │   ├── pacs_server/             # Full PACS server example
@@ -597,6 +600,65 @@ cd examples/secure_dicom
 
 # Flat storage structure (all files in one directory)
 ./build/bin/retrieve_scu localhost 11112 PACS_SCP --study-uid "1.2.3.4.5" --structure flat
+```
+
+### DCMTK-Compatible SCU Utilities
+
+The following utilities provide dcmtk-compatible command-line interfaces for interoperability with existing DICOM toolchains:
+
+#### find_scu (dcmtk-compatible C-FIND)
+
+```bash
+# Patient Root Query - find all studies for a patient
+./build/bin/find_scu -P -L STUDY -k "0010,0010=Smith*" localhost 11112
+
+# Study Root Query - find CT studies in date range
+./build/bin/find_scu -S -L STUDY \
+  -aec PACS_SCP \
+  -k "0008,0060=CT" \
+  -k "0008,0020=20240101-20241231" \
+  localhost 11112
+
+# Output as JSON
+./build/bin/find_scu -S -L SERIES -k "0020,000D=1.2.840..." -o json localhost 11112
+
+# Read query keys from file
+./build/bin/find_scu -f query_keys.txt localhost 11112
+```
+
+#### move_scu (dcmtk-compatible C-MOVE)
+
+```bash
+# Move study to third-party workstation
+./build/bin/move_scu -aem WORKSTATION \
+  -L STUDY \
+  -k "0020,000D=1.2.840..." \
+  pacs.example.com 104
+
+# Move series with progress display
+./build/bin/move_scu -aem ARCHIVE \
+  --progress \
+  -L SERIES \
+  -k "0020,000E=1.2.840..." \
+  localhost 11112
+```
+
+#### get_scu (dcmtk-compatible C-GET)
+
+```bash
+# Get entire study directly (no separate storage SCP needed)
+./build/bin/get_scu -L STUDY \
+  -k "0020,000D=1.2.840..." \
+  --progress \
+  -od ./study_data/ \
+  pacs.example.com 104
+
+# Get single instance with lossless preference
+./build/bin/get_scu --prefer-lossless \
+  -L IMAGE \
+  -k "0008,0018=1.2.840..." \
+  -od ./retrieved/ \
+  localhost 11112
 ```
 
 ### Worklist SCU (Modality Worklist Query Client)
