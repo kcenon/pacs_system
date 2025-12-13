@@ -6,6 +6,7 @@
 #include <pacs/ai/ai_result_handler.hpp>
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
+#include <pacs/encoding/vr_type.hpp>
 #include <pacs/storage/storage_interface.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -13,67 +14,77 @@
 #include <memory>
 #include <vector>
 
-using namespace pacs::ai;
-using namespace pacs::core;
-using namespace pacs::storage;
+// Use explicit namespace aliases to avoid ambiguity
+namespace ai = pacs::ai;
+namespace core = pacs::core;
+namespace encoding = pacs::encoding;
+namespace storage = pacs::storage;
+
+// Use common_system's ok() function
+using kcenon::common::ok;
 
 // ============================================================================
 // Mock Storage Implementation
 // ============================================================================
 
-class mock_storage : public storage_interface {
+class mock_storage : public storage::storage_interface {
 public:
     mock_storage() = default;
 
-    [[nodiscard]] auto store(const dicom_dataset& dataset) -> VoidResult override {
-        auto uid = dataset.get_string(tags::sop_instance_uid);
+    [[nodiscard]] auto store(const core::dicom_dataset& dataset)
+        -> storage::VoidResult override {
+        auto uid = dataset.get_string(core::tags::sop_instance_uid);
         if (uid.empty()) {
-            return VoidResult::err(kcenon::common::error_info("Missing SOP Instance UID"));
+            return storage::VoidResult::err(
+                kcenon::common::error_info("Missing SOP Instance UID"));
         }
         datasets_[uid] = dataset;
-        return VoidResult::ok();
+        return ok();
     }
 
     [[nodiscard]] auto retrieve(std::string_view sop_instance_uid)
-        -> Result<dicom_dataset> override {
+        -> storage::Result<core::dicom_dataset> override {
         auto it = datasets_.find(std::string(sop_instance_uid));
         if (it == datasets_.end()) {
-            return Result<dicom_dataset>::err(
+            return storage::Result<core::dicom_dataset>::err(
                 kcenon::common::error_info("Dataset not found"));
         }
         return it->second;
     }
 
-    [[nodiscard]] auto remove(std::string_view sop_instance_uid) -> VoidResult override {
+    [[nodiscard]] auto remove(std::string_view sop_instance_uid)
+        -> storage::VoidResult override {
         datasets_.erase(std::string(sop_instance_uid));
-        return VoidResult::ok();
+        return ok();
     }
 
-    [[nodiscard]] auto exists(std::string_view sop_instance_uid) const -> bool override {
+    [[nodiscard]] auto exists(std::string_view sop_instance_uid) const
+        -> bool override {
         return datasets_.find(std::string(sop_instance_uid)) != datasets_.end();
     }
 
-    [[nodiscard]] auto find(const dicom_dataset& /* query */)
-        -> Result<std::vector<dicom_dataset>> override {
-        std::vector<dicom_dataset> results;
+    [[nodiscard]] auto find(const core::dicom_dataset& /* query */)
+        -> storage::Result<std::vector<core::dicom_dataset>> override {
+        std::vector<core::dicom_dataset> results;
         for (const auto& [uid, ds] : datasets_) {
             results.push_back(ds);
         }
         return results;
     }
 
-    [[nodiscard]] auto get_statistics() const -> storage_statistics override {
-        storage_statistics stats;
+    [[nodiscard]] auto get_statistics() const
+        -> storage::storage_statistics override {
+        storage::storage_statistics stats;
         stats.total_instances = datasets_.size();
         return stats;
     }
 
-    [[nodiscard]] auto verify_integrity() -> VoidResult override {
-        return VoidResult::ok();
+    [[nodiscard]] auto verify_integrity() -> storage::VoidResult override {
+        return ok();
     }
 
 private:
-    std::map<std::string, dicom_dataset> datasets_;
+    std::map<std::string, core::dicom_dataset> datasets_;
 };
 
 // ============================================================================
@@ -82,53 +93,63 @@ private:
 
 namespace {
 
-dicom_dataset create_sr_dataset(const std::string& sop_instance_uid,
-                                const std::string& study_uid,
-                                const std::string& series_uid) {
-    dicom_dataset ds;
+core::dicom_dataset create_sr_dataset(const std::string& sop_instance_uid,
+                                      const std::string& study_uid,
+                                      const std::string& series_uid) {
+    core::dicom_dataset ds;
 
     // Required tags
-    ds.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                   "1.2.840.10008.5.1.4.1.1.88.22");  // Enhanced SR
-    ds.set_string(tags::sop_instance_uid, encoding::vr_type::UI, sop_instance_uid);
-    ds.set_string(tags::study_instance_uid, encoding::vr_type::UI, study_uid);
-    ds.set_string(tags::series_instance_uid, encoding::vr_type::UI, series_uid);
-    ds.set_string(tags::modality, encoding::vr_type::CS, "SR");
+    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI,
+                  sop_instance_uid);
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
+                  study_uid);
+    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI,
+                  series_uid);
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "SR");
 
     return ds;
 }
 
-dicom_dataset create_seg_dataset(const std::string& sop_instance_uid,
-                                 const std::string& study_uid,
-                                 const std::string& series_uid) {
-    dicom_dataset ds;
+core::dicom_dataset create_seg_dataset(const std::string& sop_instance_uid,
+                                       const std::string& study_uid,
+                                       const std::string& series_uid) {
+    core::dicom_dataset ds;
 
     // Required tags
-    ds.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                   "1.2.840.10008.5.1.4.1.1.66.4");  // Segmentation
-    ds.set_string(tags::sop_instance_uid, encoding::vr_type::UI, sop_instance_uid);
-    ds.set_string(tags::study_instance_uid, encoding::vr_type::UI, study_uid);
-    ds.set_string(tags::series_instance_uid, encoding::vr_type::UI, series_uid);
-    ds.set_string(tags::modality, encoding::vr_type::CS, "SEG");
+    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI,
+                  sop_instance_uid);
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
+                  study_uid);
+    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI,
+                  series_uid);
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "SEG");
 
     // Segmentation-specific tags
-    ds.set_string(dicom_tag(0x0062, 0x0001), encoding::vr_type::CS, "BINARY");
+    ds.set_string(core::dicom_tag(0x0062, 0x0001), encoding::vr_type::CS,
+                  "BINARY");
 
     return ds;
 }
 
-dicom_dataset create_pr_dataset(const std::string& sop_instance_uid,
-                                const std::string& study_uid,
-                                const std::string& series_uid) {
-    dicom_dataset ds;
+core::dicom_dataset create_pr_dataset(const std::string& sop_instance_uid,
+                                      const std::string& study_uid,
+                                      const std::string& series_uid) {
+    core::dicom_dataset ds;
 
     // Required tags
-    ds.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                   "1.2.840.10008.5.1.4.1.1.11.1");  // Grayscale Softcopy PS
-    ds.set_string(tags::sop_instance_uid, encoding::vr_type::UI, sop_instance_uid);
-    ds.set_string(tags::study_instance_uid, encoding::vr_type::UI, study_uid);
-    ds.set_string(tags::series_instance_uid, encoding::vr_type::UI, series_uid);
-    ds.set_string(tags::modality, encoding::vr_type::CS, "PR");
+    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI,
+                  sop_instance_uid);
+    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
+                  study_uid);
+    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI,
+                  series_uid);
+    ds.set_string(core::tags::modality, encoding::vr_type::CS, "PR");
 
     return ds;
 }
@@ -140,8 +161,8 @@ dicom_dataset create_pr_dataset(const std::string& sop_instance_uid,
 // ============================================================================
 
 TEST_CASE("ai_result_handler default configuration", "[ai][handler]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
     SECTION("default config values") {
         auto config = handler->get_config();
@@ -153,7 +174,7 @@ TEST_CASE("ai_result_handler default configuration", "[ai][handler]") {
     }
 
     SECTION("configure changes settings") {
-        ai_handler_config new_config;
+        ai::ai_handler_config new_config;
         new_config.validate_source_references = false;
         new_config.validate_sr_templates = false;
         new_config.max_segments = 128;
@@ -172,28 +193,26 @@ TEST_CASE("ai_result_handler default configuration", "[ai][handler]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler receive_structured_report", "[ai][handler][sr]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
     // Disable source reference validation for testing
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
     SECTION("valid SR is stored successfully") {
-        auto sr = create_sr_dataset(
-            "1.2.3.4.5.6.7.8.9",
-            "1.2.3.4.5.6.1",
-            "1.2.3.4.5.6.2");
+        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1",
+                                    "1.2.3.4.5.6.2");
 
         auto result = handler->receive_structured_report(sr);
         CHECK(result.is_ok());
-        CHECK(storage->exists("1.2.3.4.5.6.7.8.9"));
+        CHECK(storage_ptr->exists("1.2.3.4.5.6.7.8.9"));
     }
 
     SECTION("SR missing required tags is rejected") {
-        dicom_dataset sr;
-        sr.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+        core::dicom_dataset sr;
+        sr.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                       "1.2.840.10008.5.1.4.1.1.88.22");
 
         auto result = handler->receive_structured_report(sr);
@@ -201,13 +220,16 @@ TEST_CASE("ai_result_handler receive_structured_report", "[ai][handler][sr]") {
     }
 
     SECTION("non-SR SOP class is rejected") {
-        dicom_dataset not_sr;
-        not_sr.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+        core::dicom_dataset not_sr;
+        not_sr.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                           "1.2.840.10008.5.1.4.1.1.2");  // CT Image Storage
-        not_sr.set_string(tags::sop_instance_uid, encoding::vr_type::UI, "1.2.3.4.5");
-        not_sr.set_string(tags::study_instance_uid, encoding::vr_type::UI, "1.2.3.4.5.6");
-        not_sr.set_string(tags::series_instance_uid, encoding::vr_type::UI, "1.2.3.4.5.7");
-        not_sr.set_string(tags::modality, encoding::vr_type::CS, "CT");
+        not_sr.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI,
+                          "1.2.3.4.5");
+        not_sr.set_string(core::tags::study_instance_uid, encoding::vr_type::UI,
+                          "1.2.3.4.5.6");
+        not_sr.set_string(core::tags::series_instance_uid, encoding::vr_type::UI,
+                          "1.2.3.4.5.7");
+        not_sr.set_string(core::tags::modality, encoding::vr_type::CS, "CT");
 
         auto result = handler->receive_structured_report(not_sr);
         CHECK(result.is_err());
@@ -215,27 +237,28 @@ TEST_CASE("ai_result_handler receive_structured_report", "[ai][handler][sr]") {
 }
 
 TEST_CASE("ai_result_handler validate_sr_template", "[ai][handler][sr]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
     SECTION("SR without configured templates passes") {
         auto sr = create_sr_dataset("1.2.3.4.5", "1.2.3.1", "1.2.3.2");
 
         auto result = handler->validate_sr_template(sr);
-        CHECK(result.status == validation_status::valid);
+        CHECK(result.status == ai::validation_status::valid);
     }
 
     SECTION("SR template validation with accepted list") {
-        ai_handler_config config;
+        ai::ai_handler_config config;
         config.accepted_sr_templates = {"TID1500"};  // CAD SR template
         handler->configure(config);
 
         auto sr = create_sr_dataset("1.2.3.4.5", "1.2.3.1", "1.2.3.2");
         // Set a different template ID
-        sr.set_string(dicom_tag(0x0040, 0xDB00), encoding::vr_type::CS, "TID9999");
+        sr.set_string(core::dicom_tag(0x0040, 0xDB00), encoding::vr_type::CS,
+                      "TID9999");
 
         auto result = handler->validate_sr_template(sr);
-        CHECK(result.status == validation_status::invalid_template);
+        CHECK(result.status == ai::validation_status::invalid_template);
     }
 }
 
@@ -244,27 +267,25 @@ TEST_CASE("ai_result_handler validate_sr_template", "[ai][handler][sr]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler receive_segmentation", "[ai][handler][seg]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
     SECTION("valid SEG is stored successfully") {
-        auto seg = create_seg_dataset(
-            "1.2.3.4.5.6.7.8.10",
-            "1.2.3.4.5.6.1",
-            "1.2.3.4.5.6.3");
+        auto seg = create_seg_dataset("1.2.3.4.5.6.7.8.10", "1.2.3.4.5.6.1",
+                                      "1.2.3.4.5.6.3");
 
         auto result = handler->receive_segmentation(seg);
         CHECK(result.is_ok());
-        CHECK(storage->exists("1.2.3.4.5.6.7.8.10"));
+        CHECK(storage_ptr->exists("1.2.3.4.5.6.7.8.10"));
     }
 
     SECTION("SEG missing required tags is rejected") {
-        dicom_dataset seg;
-        seg.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+        core::dicom_dataset seg;
+        seg.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                        "1.2.840.10008.5.1.4.1.1.66.4");
 
         auto result = handler->receive_segmentation(seg);
@@ -280,30 +301,32 @@ TEST_CASE("ai_result_handler receive_segmentation", "[ai][handler][seg]") {
 }
 
 TEST_CASE("ai_result_handler validate_segmentation", "[ai][handler][seg]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
     SECTION("valid BINARY segmentation passes") {
         auto seg = create_seg_dataset("1.2.3.4.5", "1.2.3.1", "1.2.3.2");
 
         auto result = handler->validate_segmentation(seg);
-        CHECK(result.status == validation_status::valid);
+        CHECK(result.status == ai::validation_status::valid);
     }
 
     SECTION("valid FRACTIONAL segmentation passes") {
         auto seg = create_seg_dataset("1.2.3.4.5", "1.2.3.1", "1.2.3.2");
-        seg.set_string(dicom_tag(0x0062, 0x0001), encoding::vr_type::CS, "FRACTIONAL");
+        seg.set_string(core::dicom_tag(0x0062, 0x0001), encoding::vr_type::CS,
+                       "FRACTIONAL");
 
         auto result = handler->validate_segmentation(seg);
-        CHECK(result.status == validation_status::valid);
+        CHECK(result.status == ai::validation_status::valid);
     }
 
     SECTION("invalid segmentation type is rejected") {
         auto seg = create_seg_dataset("1.2.3.4.5", "1.2.3.1", "1.2.3.2");
-        seg.set_string(dicom_tag(0x0062, 0x0001), encoding::vr_type::CS, "INVALID");
+        seg.set_string(core::dicom_tag(0x0062, 0x0001), encoding::vr_type::CS,
+                       "INVALID");
 
         auto result = handler->validate_segmentation(seg);
-        CHECK(result.status == validation_status::invalid_segment_data);
+        CHECK(result.status == ai::validation_status::invalid_segment_data);
     }
 }
 
@@ -312,27 +335,25 @@ TEST_CASE("ai_result_handler validate_segmentation", "[ai][handler][seg]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler receive_presentation_state", "[ai][handler][pr]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
     SECTION("valid PR is stored successfully") {
-        auto pr = create_pr_dataset(
-            "1.2.3.4.5.6.7.8.11",
-            "1.2.3.4.5.6.1",
-            "1.2.3.4.5.6.4");
+        auto pr = create_pr_dataset("1.2.3.4.5.6.7.8.11", "1.2.3.4.5.6.1",
+                                    "1.2.3.4.5.6.4");
 
         auto result = handler->receive_presentation_state(pr);
         CHECK(result.is_ok());
-        CHECK(storage->exists("1.2.3.4.5.6.7.8.11"));
+        CHECK(storage_ptr->exists("1.2.3.4.5.6.7.8.11"));
     }
 
     SECTION("PR missing required tags is rejected") {
-        dicom_dataset pr;
-        pr.set_string(tags::sop_class_uid, encoding::vr_type::UI,
+        core::dicom_dataset pr;
+        pr.set_string(core::tags::sop_class_uid, encoding::vr_type::UI,
                       "1.2.840.10008.5.1.4.1.1.11.1");
 
         auto result = handler->receive_presentation_state(pr);
@@ -352,10 +373,10 @@ TEST_CASE("ai_result_handler receive_presentation_state", "[ai][handler][pr]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler source linking", "[ai][handler][linking]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
@@ -365,7 +386,8 @@ TEST_CASE("ai_result_handler source linking", "[ai][handler][linking]") {
 
     // Store a test SR
     auto sr = create_sr_dataset(sop_uid, study_uid, series_uid);
-    handler->receive_structured_report(sr);
+    auto store_result = handler->receive_structured_report(sr);
+    REQUIRE(store_result.is_ok());
 
     SECTION("auto link to source creates reference") {
         auto ref_result = handler->get_source_reference(sop_uid);
@@ -385,7 +407,7 @@ TEST_CASE("ai_result_handler source linking", "[ai][handler][linking]") {
     }
 
     SECTION("link_to_source with full reference") {
-        source_reference ref;
+        ai::source_reference ref;
         ref.study_instance_uid = "1.2.3.4.5.100";
         ref.series_instance_uid = "1.2.3.4.5.101";
         ref.sop_instance_uids = {"1.2.3.4.5.102", "1.2.3.4.5.103"};
@@ -411,26 +433,26 @@ TEST_CASE("ai_result_handler source linking", "[ai][handler][linking]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler query operations", "[ai][handler][query]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
     const std::string study_uid = "1.2.3.4.5.6.1";
 
     // Store multiple AI results for the same study
-    handler->receive_structured_report(
-        create_sr_dataset("1.2.3.4.5.6.7.1", study_uid, "1.2.3.4.5.6.2.1"));
-    handler->receive_segmentation(
-        create_seg_dataset("1.2.3.4.5.6.7.2", study_uid, "1.2.3.4.5.6.2.2"));
-    handler->receive_presentation_state(
-        create_pr_dataset("1.2.3.4.5.6.7.3", study_uid, "1.2.3.4.5.6.2.3"));
+    REQUIRE(handler->receive_structured_report(
+        create_sr_dataset("1.2.3.4.5.6.7.1", study_uid, "1.2.3.4.5.6.2.1")).is_ok());
+    REQUIRE(handler->receive_segmentation(
+        create_seg_dataset("1.2.3.4.5.6.7.2", study_uid, "1.2.3.4.5.6.2.2")).is_ok());
+    REQUIRE(handler->receive_presentation_state(
+        create_pr_dataset("1.2.3.4.5.6.7.3", study_uid, "1.2.3.4.5.6.2.3")).is_ok());
 
     // Store another result for a different study
-    handler->receive_structured_report(
-        create_sr_dataset("1.2.3.4.5.6.7.4", "1.2.3.4.5.99", "1.2.3.4.5.6.2.4"));
+    REQUIRE(handler->receive_structured_report(
+        create_sr_dataset("1.2.3.4.5.6.7.4", "1.2.3.4.5.99", "1.2.3.4.5.6.2.4")).is_ok());
 
     SECTION("find_ai_results_for_study returns all results for study") {
         auto result = handler->find_ai_results_for_study(study_uid);
@@ -440,17 +462,17 @@ TEST_CASE("ai_result_handler query operations", "[ai][handler][query]") {
 
     SECTION("find_ai_results_by_type filters by type") {
         auto sr_results = handler->find_ai_results_by_type(
-            study_uid, ai_result_type::structured_report);
+            study_uid, ai::ai_result_type::structured_report);
         CHECK(sr_results.is_ok());
         CHECK(sr_results.value().size() == 1);
 
         auto seg_results = handler->find_ai_results_by_type(
-            study_uid, ai_result_type::segmentation);
+            study_uid, ai::ai_result_type::segmentation);
         CHECK(seg_results.is_ok());
         CHECK(seg_results.value().size() == 1);
 
         auto pr_results = handler->find_ai_results_by_type(
-            study_uid, ai_result_type::presentation_state);
+            study_uid, ai::ai_result_type::presentation_state);
         CHECK(pr_results.is_ok());
         CHECK(pr_results.value().size() == 1);
     }
@@ -459,7 +481,7 @@ TEST_CASE("ai_result_handler query operations", "[ai][handler][query]") {
         auto info = handler->get_ai_result_info("1.2.3.4.5.6.7.1");
         REQUIRE(info.has_value());
         CHECK(info->sop_instance_uid == "1.2.3.4.5.6.7.1");
-        CHECK(info->type == ai_result_type::structured_report);
+        CHECK(info->type == ai::ai_result_type::structured_report);
         CHECK(info->source_study_uid == study_uid);
     }
 
@@ -484,10 +506,10 @@ TEST_CASE("ai_result_handler query operations", "[ai][handler][query]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler removal operations", "[ai][handler][removal]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
@@ -496,7 +518,7 @@ TEST_CASE("ai_result_handler removal operations", "[ai][handler][removal]") {
 
     // Store a test SR
     auto sr = create_sr_dataset(sop_uid, study_uid, "1.2.3.4.5.6.2");
-    handler->receive_structured_report(sr);
+    REQUIRE(handler->receive_structured_report(sr).is_ok());
 
     SECTION("remove deletes AI result") {
         CHECK(handler->exists(sop_uid));
@@ -508,8 +530,8 @@ TEST_CASE("ai_result_handler removal operations", "[ai][handler][removal]") {
 
     SECTION("remove_ai_results_for_study removes all results") {
         // Add more results for the same study
-        handler->receive_segmentation(
-            create_seg_dataset("1.2.3.4.5.6.7.10", study_uid, "1.2.3.4.5.6.3"));
+        REQUIRE(handler->receive_segmentation(
+            create_seg_dataset("1.2.3.4.5.6.7.10", study_uid, "1.2.3.4.5.6.3")).is_ok());
 
         auto result = handler->remove_ai_results_for_study(study_uid);
         CHECK(result.is_ok());
@@ -531,10 +553,10 @@ TEST_CASE("ai_result_handler removal operations", "[ai][handler][removal]") {
 // ============================================================================
 
 TEST_CASE("ai_result_handler callbacks", "[ai][handler][callbacks]") {
-    auto storage = std::make_shared<mock_storage>();
-    auto handler = ai_result_handler::create(storage, nullptr);
+    auto storage_ptr = std::make_shared<mock_storage>();
+    auto handler = ai::ai_result_handler::create(storage_ptr, nullptr);
 
-    ai_handler_config config;
+    ai::ai_handler_config config;
     config.validate_source_references = false;
     handler->configure(config);
 
@@ -542,39 +564,44 @@ TEST_CASE("ai_result_handler callbacks", "[ai][handler][callbacks]") {
         bool callback_called = false;
         std::string received_uid;
 
-        handler->set_received_callback([&](const ai_result_info& info) {
+        handler->set_received_callback([&](const ai::ai_result_info& info) {
             callback_called = true;
             received_uid = info.sop_instance_uid;
         });
 
-        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1", "1.2.3.4.5.6.2");
-        handler->receive_structured_report(sr);
+        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1",
+                                    "1.2.3.4.5.6.2");
+        REQUIRE(handler->receive_structured_report(sr).is_ok());
 
         CHECK(callback_called);
         CHECK(received_uid == "1.2.3.4.5.6.7.8.9");
     }
 
     SECTION("pre_store_validator can reject storage") {
-        handler->set_pre_store_validator([](const core::dicom_dataset&, ai_result_type) {
-            return false;  // Reject all
-        });
+        handler->set_pre_store_validator(
+            [](const core::dicom_dataset&, ai::ai_result_type) {
+                return false;  // Reject all
+            });
 
-        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1", "1.2.3.4.5.6.2");
+        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1",
+                                    "1.2.3.4.5.6.2");
         auto result = handler->receive_structured_report(sr);
 
         CHECK(result.is_err());
-        CHECK_FALSE(storage->exists("1.2.3.4.5.6.7.8.9"));
+        CHECK_FALSE(storage_ptr->exists("1.2.3.4.5.6.7.8.9"));
     }
 
     SECTION("pre_store_validator can accept storage") {
-        handler->set_pre_store_validator([](const core::dicom_dataset&, ai_result_type) {
-            return true;  // Accept all
-        });
+        handler->set_pre_store_validator(
+            [](const core::dicom_dataset&, ai::ai_result_type) {
+                return true;  // Accept all
+            });
 
-        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1", "1.2.3.4.5.6.2");
+        auto sr = create_sr_dataset("1.2.3.4.5.6.7.8.9", "1.2.3.4.5.6.1",
+                                    "1.2.3.4.5.6.2");
         auto result = handler->receive_structured_report(sr);
 
         CHECK(result.is_ok());
-        CHECK(storage->exists("1.2.3.4.5.6.7.8.9"));
+        CHECK(storage_ptr->exists("1.2.3.4.5.6.7.8.9"));
     }
 }

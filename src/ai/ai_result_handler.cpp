@@ -13,6 +13,10 @@
 
 namespace pacs::ai {
 
+// Use common_system's ok() function
+using kcenon::common::ok;
+using kcenon::common::make_error;
+
 // =============================================================================
 // SOP Class UIDs for AI-related objects
 // =============================================================================
@@ -70,22 +74,6 @@ namespace {
 }
 
 /**
- * @brief Extract Study Instance UID from dataset or referenced sequence
- */
-[[nodiscard]] auto extract_source_study_uid(const core::dicom_dataset& dataset)
-    -> std::optional<std::string> {
-    // First try direct Study Instance UID
-    auto study_uid = dataset.get_string(core::tags::study_instance_uid);
-    if (!study_uid.empty()) {
-        return study_uid;
-    }
-
-    // Try Referenced Study Sequence (for SR/PR)
-    // Note: This is simplified - full implementation would parse the sequence
-    return std::nullopt;
-}
-
-/**
  * @brief Extract algorithm information from dataset
  */
 [[nodiscard]] auto extract_algorithm_info(const core::dicom_dataset& dataset)
@@ -97,11 +85,11 @@ namespace {
     name = dataset.get_string(core::dicom_tag(0x0070, 0x0084));  // Content Creator's Name
     if (name.empty()) {
         // Try Manufacturer for general DICOM objects
-        name = dataset.get_string(core::tags::manufacturer);
+        name = dataset.get_string(core::dicom_tag(0x0008, 0x0070));  // Manufacturer
     }
 
     // Try Software Versions
-    version = dataset.get_string(core::tags::software_versions);
+    version = dataset.get_string(core::dicom_tag(0x0018, 0x1020));  // Software Versions
 
     return {name, version};
 }
@@ -235,7 +223,7 @@ public:
             received_callback_(info);
         }
 
-        return VoidResult::ok();
+        return ok();
     }
 };
 
@@ -354,9 +342,8 @@ auto ai_result_handler::validate_sr_template(const core::dicom_dataset& sr)
     validation_result result;
     result.status = validation_status::valid;
 
-    // Check for Content Sequence (required for SR)
-    // Tag (0040,A730) Content Sequence
-    const core::dicom_tag content_sequence_tag(0x0040, 0xA730);
+    // Note: Content Sequence (0040,A730) validation would be done here
+    // for full SR template conformance checking
 
     // Check for Template Identifier if configured
     if (!pimpl_->config_.accepted_sr_templates.empty()) {
@@ -474,9 +461,8 @@ auto ai_result_handler::validate_segmentation(const core::dicom_dataset& seg)
     validation_result result;
     result.status = validation_status::valid;
 
-    // Check for Segment Sequence (required for SEG)
-    // Tag (0062,0002) Segment Sequence
-    const core::dicom_tag segment_sequence_tag(0x0062, 0x0002);
+    // Note: Segment Sequence (0062,0002) validation would be done here
+    // for full segmentation conformance checking
 
     // Check Segmentation Type
     // Tag (0062,0001) Segmentation Type
@@ -589,12 +575,15 @@ auto ai_result_handler::validate_presentation_state(const core::dicom_dataset& p
     validation_result result;
     result.status = validation_status::valid;
 
-    // Check for Referenced Series Sequence (required for PR)
-    // Tag (0008,1115) Referenced Series Sequence
-    const core::dicom_tag ref_series_seq_tag(0x0008, 0x1115);
+    // Note: Referenced Series Sequence (0008,1115) validation would be done here
+    // for full presentation state conformance checking
 
-    // Basic validation - ensure presentation state has references
-    // Full implementation would validate the complete sequence structure
+    // Basic validation - ensure presentation state has valid SOP Class UID
+    auto sop_class = pr.get_string(core::tags::sop_class_uid);
+    if (sop_class.empty()) {
+        result.status = validation_status::missing_required_tags;
+        result.missing_tags.push_back("SOP Class UID");
+    }
 
     return result;
 }
@@ -636,7 +625,7 @@ auto ai_result_handler::link_to_source(
         it->second.source_study_uid = references.study_instance_uid;
     }
 
-    return VoidResult::ok();
+    return ok();
 }
 
 auto ai_result_handler::get_source_reference(std::string_view result_uid)
@@ -735,7 +724,7 @@ auto ai_result_handler::remove(std::string_view sop_instance_uid) -> VoidResult 
     // Remove source links
     pimpl_->source_links_.erase(uid_str);
 
-    return VoidResult::ok();
+    return ok();
 }
 
 auto ai_result_handler::remove_ai_results_for_study(std::string_view study_instance_uid)
