@@ -480,9 +480,26 @@ cmake --build build
 
 ### Echo SCU (Verification Client)
 
+dcmtk-compatible DICOM connectivity verification tool.
+
 ```bash
-# Test connectivity
-./build/examples/echo_scu/echo_scu --host localhost --port 11112 --ae-title TEST_SCU
+# Basic connectivity test
+./build/bin/echo_scu localhost 11112
+
+# With custom AE Titles
+./build/bin/echo_scu -aet MY_SCU -aec PACS_SCP localhost 11112
+
+# Verbose output with custom timeout
+./build/bin/echo_scu -v -to 60 localhost 11112
+
+# Repeat test for connectivity monitoring
+./build/bin/echo_scu -r 10 --repeat-delay 1000 localhost 11112
+
+# Quiet mode (exit code only)
+./build/bin/echo_scu -q localhost 11112
+
+# Show all options
+./build/bin/echo_scu --help
 ```
 
 ### Secure Echo SCU/SCP (TLS-Secured DICOM)
