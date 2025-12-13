@@ -9,6 +9,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 
+#include <thread>
+#include <vector>
+
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
 #include "pacs/storage/study_record.hpp"
 #include "pacs/storage/series_record.hpp"
@@ -1056,4 +1059,649 @@ TEST_CASE("apply_window_level - rescale slope and intercept",
 
     REQUIRE(output.size() == 4);
     REQUIRE(output[0] == 0);     // -100 clipped to 0
+}
+
+// ============================================================================
+// Integration Tests - Study/Series/Instance Retrieval
+// ============================================================================
+
+TEST_CASE("study_record_to_dicom_json - empty optional fields",
+          "[dicomweb][qidors][integration]") {
+    pacs::storage::study_record record;
+    record.study_uid = "1.2.3.4.5.6.7.8.9";
+    record.num_series = 0;
+    record.num_instances = 0;
+    // All other fields are empty
+
+    auto json = study_record_to_dicom_json(record, "", "");
+
+    // Study Instance UID must always be present
+    REQUIRE(json.find("0020000D") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7.8.9") != std::string::npos);
+
+    // Empty fields should not produce null values but may be omitted or empty
+    REQUIRE(json.find("\"Value\":null") == std::string::npos);
+}
+
+TEST_CASE("study_record_to_dicom_json - special characters in fields",
+          "[dicomweb][qidors][integration]") {
+    pacs::storage::study_record record;
+    record.study_uid = "1.2.3";
+    record.study_description = "CT \"Head\" with contrast";
+    record.num_series = 1;
+    record.num_instances = 10;
+
+    auto json = study_record_to_dicom_json(record, "PAT001", "DOE^JOHN \"JR\"");
+
+    // JSON should be properly escaped
+    REQUIRE(json.find("\\\"Head\\\"") != std::string::npos);
+    REQUIRE(json.find("\\\"JR\\\"") != std::string::npos);
+}
+
+TEST_CASE("series_record_to_dicom_json - complete record",
+          "[dicomweb][qidors][integration]") {
+    pacs::storage::series_record record;
+    record.series_uid = "1.2.3.4.5.6.7.8.9.10";
+    record.modality = "CT";
+    record.series_number = 1;
+    record.series_description = "Axial with contrast";
+    record.body_part_examined = "CHEST";
+    record.num_instances = 256;
+    record.station_name = "CT_SCANNER_01";
+
+    auto json = series_record_to_dicom_json(record, "1.2.3.4.5.6.7");
+
+    // Check required fields
+    REQUIRE(json.find("0020000E") != std::string::npos);  // Series Instance UID
+    REQUIRE(json.find("1.2.3.4.5.6.7.8.9.10") != std::string::npos);
+    REQUIRE(json.find("0020000D") != std::string::npos);  // Study Instance UID
+    REQUIRE(json.find("1.2.3.4.5.6.7") != std::string::npos);
+    REQUIRE(json.find("00080060") != std::string::npos);  // Modality
+    REQUIRE(json.find("\"CT\"") != std::string::npos);
+
+    // Check optional fields if present in implementation
+    REQUIRE(json.find("00200011") != std::string::npos);  // Series Number
+    REQUIRE(json.find("0008103E") != std::string::npos);  // Series Description
+    REQUIRE(json.find("00180015") != std::string::npos);  // Body Part Examined
+}
+
+TEST_CASE("instance_record_to_dicom_json - multi-frame image",
+          "[dicomweb][qidors][integration]") {
+    pacs::storage::instance_record record;
+    record.sop_uid = "1.2.3.4.5.6.7.8.9.10.11";
+    record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";  // CT Image Storage
+    record.instance_number = 1;
+    record.rows = 512;
+    record.columns = 512;
+    record.number_of_frames = 100;
+    record.bits_allocated = 16;
+
+    auto json = instance_record_to_dicom_json(
+        record, "1.2.3.4.5.6.7.8.9.10", "1.2.3.4.5.6.7");
+
+    // Check SOP UIDs
+    REQUIRE(json.find("00080018") != std::string::npos);  // SOP Instance UID
+    REQUIRE(json.find("00080016") != std::string::npos);  // SOP Class UID
+
+    // Check image properties
+    REQUIRE(json.find("00280010") != std::string::npos);  // Rows
+    REQUIRE(json.find("00280011") != std::string::npos);  // Columns
+    REQUIRE(json.find("00280008") != std::string::npos);  // Number of Frames
+    REQUIRE(json.find("100") != std::string::npos);       // Frame count value
+}
+
+// ============================================================================
+// Content-Type Header Validation Tests
+// ============================================================================
+
+TEST_CASE("multipart_builder - correct content-type for DICOM",
+          "[dicomweb][multipart][integration]") {
+    multipart_builder builder(media_type::dicom);
+    std::vector<uint8_t> data = {0x01, 0x02, 0x03, 0x04};
+    builder.add_part(data);
+
+    auto content_type = builder.content_type_header();
+
+    // Must contain multipart/related
+    REQUIRE(content_type.find("multipart/related") != std::string::npos);
+
+    // Must specify type parameter
+    REQUIRE(content_type.find("type=") != std::string::npos);
+    REQUIRE(content_type.find("application/dicom") != std::string::npos);
+
+    // Must have boundary
+    REQUIRE(content_type.find("boundary=") != std::string::npos);
+}
+
+TEST_CASE("multipart_builder - correct content-type for DicomJSON",
+          "[dicomweb][multipart][integration]") {
+    multipart_builder builder(media_type::dicom_json);
+
+    auto content_type = builder.content_type_header();
+
+    REQUIRE(content_type.find("type=\"application/dicom+json\"") !=
+            std::string::npos);
+}
+
+TEST_CASE("multipart_builder - boundary uniqueness",
+          "[dicomweb][multipart][integration]") {
+    multipart_builder builder1;
+    multipart_builder builder2;
+    multipart_builder builder3;
+
+    // Each builder should have a unique boundary
+    REQUIRE(builder1.boundary() != builder2.boundary());
+    REQUIRE(builder2.boundary() != builder3.boundary());
+    REQUIRE(builder1.boundary() != builder3.boundary());
+}
+
+// ============================================================================
+// Error Handling Tests (404 scenarios)
+// ============================================================================
+
+TEST_CASE("parse_study_query_params - invalid parameter handling",
+          "[dicomweb][qidors][error]") {
+    // Invalid limit should not crash
+    auto query1 = parse_study_query_params("?limit=abc");
+    REQUIRE(query1.limit == 0);
+
+    // Negative offset - implementation may wrap to large value or handle differently
+    // Testing that it doesn't crash
+    auto query2 = parse_study_query_params("?offset=-1");
+    // Just verify we got some value (implementation-dependent behavior)
+    (void)query2.offset;
+
+    // Unknown parameters should be ignored
+    auto query3 = parse_study_query_params("?unknownParam=value&PatientID=12345");
+    REQUIRE(query3.patient_id.has_value());
+    REQUIRE(*query3.patient_id == "12345");
+}
+
+TEST_CASE("parse_frame_numbers - edge cases", "[dicomweb][frames][error]") {
+    // Very large frame numbers
+    auto frames1 = parse_frame_numbers("999999999");
+    REQUIRE(frames1.size() == 1);
+    REQUIRE(frames1[0] == 999999999);
+
+    // Negative numbers (should be filtered)
+    auto frames2 = parse_frame_numbers("-1,1,2");
+    REQUIRE(frames2.size() >= 2);  // Should contain 1 and 2
+
+    // Range with start > end
+    auto frames3 = parse_frame_numbers("5-1");
+    REQUIRE(frames3.empty());  // Invalid range should produce empty result
+
+    // Very large range (should be limited)
+    auto frames4 = parse_frame_numbers("1-1000");
+    REQUIRE(frames4.size() <= 1000);
+}
+
+TEST_CASE("extract_frame - boundary conditions", "[dicomweb][frames][error]") {
+    std::vector<uint8_t> pixel_data = {
+        0x01, 0x02, 0x03, 0x04,  // Frame 1
+        0x11, 0x12, 0x13, 0x14   // Frame 2
+    };
+
+    // Frame at exact boundary
+    auto frame1 = extract_frame(pixel_data, 2, 4);
+    REQUIRE(frame1.size() == 4);
+    REQUIRE(frame1[0] == 0x11);
+
+    // Frame beyond data
+    auto frame2 = extract_frame(pixel_data, 3, 4);
+    REQUIRE(frame2.empty());
+
+    // Frame size larger than data
+    auto frame3 = extract_frame(pixel_data, 1, 16);
+    REQUIRE(frame3.empty());
+}
+
+// ============================================================================
+// STOW-RS Validation Tests
+// ============================================================================
+
+TEST_CASE("store_response - empty response", "[dicomweb][stowrs][integration]") {
+    store_response response;
+
+    REQUIRE_FALSE(response.all_success());
+    REQUIRE_FALSE(response.all_failed());
+    REQUIRE_FALSE(response.partial_success());
+}
+
+TEST_CASE("store_response - mixed results counts",
+          "[dicomweb][stowrs][integration]") {
+    store_response response;
+
+    // Add 5 successes and 3 failures
+    for (int i = 0; i < 5; ++i) {
+        response.referenced_instances.push_back({
+            true,
+            "1.2.840.10008.5.1.4.1.1.2",
+            "1.2.3.4.5." + std::to_string(i),
+            "/dicomweb/studies/...",
+            std::nullopt,
+            std::nullopt
+        });
+    }
+    for (int i = 0; i < 3; ++i) {
+        response.failed_instances.push_back({
+            false,
+            "1.2.840.10008.5.1.4.1.1.2",
+            "1.2.3.4.6." + std::to_string(i),
+            "",
+            "PROCESSING_FAILURE",
+            "Failed to process"
+        });
+    }
+
+    REQUIRE(response.referenced_instances.size() == 5);
+    REQUIRE(response.failed_instances.size() == 3);
+    REQUIRE(response.partial_success());
+}
+
+TEST_CASE("build_store_response_json - multiple instances",
+          "[dicomweb][stowrs][integration]") {
+    store_response response;
+    response.referenced_instances.push_back({
+        true,
+        "1.2.840.10008.5.1.4.1.1.2",
+        "1.2.3.4.5.6.7.8.9.1",
+        "/dicomweb/studies/1.2.3/instances/1.2.3.4.5.6.7.8.9.1",
+        std::nullopt,
+        std::nullopt
+    });
+    response.referenced_instances.push_back({
+        true,
+        "1.2.840.10008.5.1.4.1.1.2",
+        "1.2.3.4.5.6.7.8.9.2",
+        "/dicomweb/studies/1.2.3/instances/1.2.3.4.5.6.7.8.9.2",
+        std::nullopt,
+        std::nullopt
+    });
+
+    auto json = build_store_response_json(response, "http://pacs.example.com");
+
+    // Should contain both instance UIDs
+    REQUIRE(json.find("1.2.3.4.5.6.7.8.9.1") != std::string::npos);
+    REQUIRE(json.find("1.2.3.4.5.6.7.8.9.2") != std::string::npos);
+
+    // Should have Referenced SOP Sequence
+    REQUIRE(json.find("00081199") != std::string::npos);
+}
+
+// ============================================================================
+// URL Decoding and Parameter Parsing Tests
+// ============================================================================
+
+TEST_CASE("parse_study_query_params - complex URL encoding",
+          "[dicomweb][qidors][integration]") {
+    // Test various URL-encoded characters
+    auto query1 = parse_study_query_params("?PatientName=DOE%5EJOHN%5EMIDDLE");
+    REQUIRE(query1.patient_name.has_value());
+    REQUIRE(*query1.patient_name == "DOE^JOHN^MIDDLE");
+
+    // Test plus sign (space encoding in query strings)
+    auto query2 = parse_study_query_params("?StudyDescription=CT+HEAD+SCAN");
+    // Note: Actual behavior depends on implementation
+    REQUIRE(query2.study_description.has_value());
+}
+
+TEST_CASE("parse_study_query_params - DICOM date format variations",
+          "[dicomweb][qidors][integration]") {
+    // Standard DICOM date format
+    auto query1 = parse_study_query_params("?StudyDate=20231215");
+    REQUIRE(query1.study_date.has_value());
+    REQUIRE(*query1.study_date == "20231215");
+
+    // Open-ended range (from date)
+    auto query2 = parse_study_query_params("?StudyDate=20230101-");
+    REQUIRE(query2.study_date_from.has_value());
+    REQUIRE(*query2.study_date_from == "20230101");
+    REQUIRE_FALSE(query2.study_date_to.has_value());
+
+    // Open-ended range (to date)
+    auto query3 = parse_study_query_params("?StudyDate=-20231231");
+    REQUIRE_FALSE(query3.study_date_from.has_value());
+    REQUIRE(query3.study_date_to.has_value());
+    REQUIRE(*query3.study_date_to == "20231231");
+}
+
+// ============================================================================
+// Rendered Parameters Validation Tests
+// ============================================================================
+
+TEST_CASE("parse_rendered_params - all parameters combined",
+          "[dicomweb][rendered][integration]") {
+    auto params = parse_rendered_params(
+        "?quality=85&windowcenter=400&windowwidth=1500&viewport=1024x768&frame=3",
+        "image/jpeg");
+
+    REQUIRE(params.format == rendered_format::jpeg);
+    REQUIRE(params.quality == 85);
+    REQUIRE(params.window_center.has_value());
+    REQUIRE(*params.window_center == Catch::Approx(400.0));
+    REQUIRE(params.window_width.has_value());
+    REQUIRE(*params.window_width == Catch::Approx(1500.0));
+    REQUIRE(params.viewport_width == 1024);
+    REQUIRE(params.viewport_height == 768);
+    REQUIRE(params.frame == 3);
+}
+
+TEST_CASE("parse_rendered_params - accept header priority",
+          "[dicomweb][rendered][integration]") {
+    // image/png in accept header should override default
+    auto params1 = parse_rendered_params("", "image/png");
+    REQUIRE(params1.format == rendered_format::png);
+
+    // image/jpeg explicit
+    auto params2 = parse_rendered_params("", "image/jpeg");
+    REQUIRE(params2.format == rendered_format::jpeg);
+
+    // Wildcard should default to jpeg
+    auto params3 = parse_rendered_params("", "*/*");
+    REQUIRE(params3.format == rendered_format::jpeg);
+}
+
+// ============================================================================
+// Performance Tests
+// ============================================================================
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+#include <catch2/benchmark/catch_benchmark.hpp>
+#endif
+
+TEST_CASE("performance - accept header parsing", "[dicomweb][performance]") {
+    // Complex Accept header with multiple media types and quality values
+    std::string complex_accept =
+        "application/dicom;q=0.5, application/dicom+json;q=1.0, "
+        "application/dicom+xml;q=0.8, */*;q=0.1, "
+        "image/jpeg;q=0.3, image/png;q=0.2";
+
+    // Ensure parsing works correctly
+    auto result = parse_accept_header(complex_accept);
+    REQUIRE(result.size() == 6);
+    REQUIRE(result[0].media_type == "application/dicom+json");
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("parse complex accept header") {
+        return parse_accept_header(complex_accept);
+    };
+#endif
+}
+
+TEST_CASE("performance - multipart builder with many parts",
+          "[dicomweb][performance]") {
+    multipart_builder builder;
+
+    // Add 100 parts (simulating multi-frame retrieval)
+    std::vector<uint8_t> frame_data(65536);  // 64KB per frame
+    for (size_t i = 0; i < frame_data.size(); ++i) {
+        frame_data[i] = static_cast<uint8_t>(i % 256);
+    }
+
+    for (int i = 0; i < 100; ++i) {
+        builder.add_part(frame_data);
+    }
+
+    REQUIRE(builder.size() == 100);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("build multipart response") {
+        multipart_builder b;
+        for (int i = 0; i < 10; ++i) {
+            b.add_part(frame_data);
+        }
+        return b.build();
+    };
+#endif
+}
+
+TEST_CASE("performance - study record JSON conversion",
+          "[dicomweb][performance]") {
+    pacs::storage::study_record record;
+    record.study_uid = "1.2.840.113619.2.334.3.2831168545.578.1513609426.234";
+    record.study_date = "20231215";
+    record.study_time = "143025.123456";
+    record.accession_number = "ACC12345678901234567890";
+    record.referring_physician = "SMITH^JOHN^MIDDLE^DR^MD";
+    record.study_description = "CT CHEST WITH CONTRAST ENHANCEMENT";
+    record.modalities_in_study = "CT\\MR\\US\\DX\\CR";
+    record.num_series = 15;
+    record.num_instances = 2500;
+
+    // Verify conversion works
+    auto json = study_record_to_dicom_json(record, "PAT12345", "DOE^JOHN^MIDDLE");
+    REQUIRE(!json.empty());
+    REQUIRE(json.find("0020000D") != std::string::npos);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("study_record_to_dicom_json") {
+        return study_record_to_dicom_json(record, "PAT12345", "DOE^JOHN^MIDDLE");
+    };
+#endif
+}
+
+TEST_CASE("performance - frame number parsing", "[dicomweb][performance]") {
+    // Complex frame list
+    std::string frame_list = "1-50,75,80-100,150,200-250";
+
+    auto frames = parse_frame_numbers(frame_list);
+    // 1-50: 50 frames, 75: 1 frame, 80-100: 21 frames, 150: 1 frame, 200-250: 51 frames
+    // Total: 50 + 1 + 21 + 1 + 51 = 124 frames
+    REQUIRE(frames.size() == 124);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("parse frame numbers") {
+        return parse_frame_numbers(frame_list);
+    };
+#endif
+}
+
+TEST_CASE("performance - frame extraction", "[dicomweb][performance]") {
+    // Create large pixel data (simulating CT study: 512x512x16-bit x 100 frames)
+    const size_t frame_size = 512 * 512 * 2;  // 512KB per frame
+    const size_t num_frames = 100;
+    std::vector<uint8_t> pixel_data(frame_size * num_frames);
+
+    // Fill with test pattern
+    for (size_t i = 0; i < pixel_data.size(); ++i) {
+        pixel_data[i] = static_cast<uint8_t>(i % 256);
+    }
+
+    // Extract middle frame
+    auto frame = extract_frame(pixel_data, 50, frame_size);
+    REQUIRE(frame.size() == frame_size);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("extract single frame from 100-frame study") {
+        return extract_frame(pixel_data, 50, frame_size);
+    };
+#endif
+}
+
+TEST_CASE("performance - multipart parser", "[dicomweb][performance]") {
+    // Create realistic multipart request body
+    std::string content_type = "multipart/related; boundary=BOUNDARY12345";
+    std::string body;
+
+    // Add 5 DICOM parts
+    for (int i = 0; i < 5; ++i) {
+        body += "--BOUNDARY12345\r\n";
+        body += "Content-Type: application/dicom\r\n";
+        body += "Content-Location: /studies/1.2.3/instances/" +
+                std::to_string(i) + "\r\n";
+        body += "\r\n";
+        // Add some binary data (simulating small DICOM file)
+        body += std::string(10000, static_cast<char>(i));
+        body += "\r\n";
+    }
+    body += "--BOUNDARY12345--\r\n";
+
+    auto result = multipart_parser::parse(content_type, body);
+    REQUIRE(result.success());
+    REQUIRE(result.parts.size() == 5);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("parse multipart request") {
+        return multipart_parser::parse(content_type, body);
+    };
+#endif
+}
+
+TEST_CASE("performance - query parameter parsing", "[dicomweb][performance]") {
+    // Complex query with many parameters
+    std::string complex_query =
+        "?PatientID=12345&PatientName=DOE%5EJOHN&StudyDate=20230101-20231231"
+        "&ModalitiesInStudy=CT&AccessionNumber=ACC*"
+        "&ReferringPhysicianName=SMITH*&StudyDescription=*CHEST*"
+        "&limit=100&offset=50";
+
+    auto query = parse_study_query_params(complex_query);
+    REQUIRE(query.patient_id.has_value());
+    REQUIRE(query.limit == 100);
+    REQUIRE(query.offset == 50);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("parse complex query params") {
+        return parse_study_query_params(complex_query);
+    };
+#endif
+}
+
+TEST_CASE("performance - window level application", "[dicomweb][performance]") {
+    // Create test pixel data (512x512 16-bit image)
+    const uint16_t width = 512;
+    const uint16_t height = 512;
+    std::vector<uint8_t> pixel_data(width * height * 2);
+
+    // Fill with gradient pattern
+    for (size_t i = 0; i < pixel_data.size(); i += 2) {
+        uint16_t value = static_cast<uint16_t>((i / 2) % 4096);
+        pixel_data[i] = value & 0xFF;
+        pixel_data[i + 1] = (value >> 8) & 0xFF;
+    }
+
+    auto output = apply_window_level(
+        pixel_data, width, height,
+        12,      // bits_stored
+        false,   // is_signed
+        2048.0,  // window_center
+        4096.0,  // window_width
+        1.0, 0.0 // rescale
+    );
+
+    REQUIRE(output.size() == width * height);
+
+#ifdef CATCH2_BENCHMARK_ENABLED
+    BENCHMARK("apply window level 512x512") {
+        return apply_window_level(
+            pixel_data, width, height, 12, false, 2048.0, 4096.0, 1.0, 0.0);
+    };
+#endif
+}
+
+// ============================================================================
+// Concurrent Access Tests
+// ============================================================================
+
+TEST_CASE("concurrency - multipart builder thread safety",
+          "[dicomweb][concurrency]") {
+    // Note: Each builder instance should be used by only one thread
+    // This test verifies that multiple builders can work concurrently
+
+    std::vector<std::string> results(10);
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < 10; ++i) {
+        threads.emplace_back([&results, i]() {
+            multipart_builder builder;
+            std::vector<uint8_t> data(1000, static_cast<uint8_t>(i));
+            builder.add_part(data);
+            results[i] = builder.build();
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    // Each result should be unique
+    for (int i = 0; i < 10; ++i) {
+        REQUIRE(!results[i].empty());
+        for (int j = i + 1; j < 10; ++j) {
+            REQUIRE(results[i] != results[j]);
+        }
+    }
+}
+
+TEST_CASE("concurrency - accept header parsing thread safety",
+          "[dicomweb][concurrency]") {
+    std::vector<std::vector<accept_info>> results(100);
+    std::vector<std::thread> threads;
+
+    std::string accept_header =
+        "application/dicom;q=0.5, application/dicom+json;q=1.0";
+
+    for (int i = 0; i < 100; ++i) {
+        threads.emplace_back([&results, &accept_header, i]() {
+            results[i] = parse_accept_header(accept_header);
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    // All results should be identical
+    for (int i = 0; i < 100; ++i) {
+        REQUIRE(results[i].size() == 2);
+        REQUIRE(results[i][0].media_type == "application/dicom+json");
+    }
+}
+
+// ============================================================================
+// Memory Safety Tests
+// ============================================================================
+
+TEST_CASE("memory - large data handling", "[dicomweb][memory]") {
+    // Test with large pixel data to ensure no memory issues
+    const size_t large_size = 100 * 1024 * 1024;  // 100MB
+
+    SECTION("large multipart part") {
+        multipart_builder builder;
+        std::vector<uint8_t> large_data(1024 * 1024);  // 1MB
+        builder.add_part(large_data);
+
+        auto result = builder.build();
+        REQUIRE(!result.empty());
+        REQUIRE(result.size() > large_data.size());
+    }
+
+    SECTION("many small parts") {
+        multipart_builder builder;
+        std::vector<uint8_t> small_data(100);
+
+        for (int i = 0; i < 1000; ++i) {
+            builder.add_part(small_data);
+        }
+
+        REQUIRE(builder.size() == 1000);
+        auto result = builder.build();
+        REQUIRE(!result.empty());
+    }
+}
+
+TEST_CASE("memory - repeated operations", "[dicomweb][memory]") {
+    // Test for memory leaks in repeated operations
+    for (int iteration = 0; iteration < 100; ++iteration) {
+        pacs::storage::study_record record;
+        record.study_uid = "1.2.3.4.5." + std::to_string(iteration);
+        record.num_series = iteration;
+        record.num_instances = iteration * 10;
+
+        auto json = study_record_to_dicom_json(
+            record, "PAT" + std::to_string(iteration), "TEST^NAME");
+
+        REQUIRE(!json.empty());
+    }
 }

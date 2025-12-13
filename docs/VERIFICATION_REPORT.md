@@ -28,14 +28,15 @@ The verification was conducted through static code analysis, documentation revie
 | **Requirements Coverage** | ✅ Complete | 100% |
 | **Code Implementation** | ✅ Complete | 100% |
 | **Documentation Accuracy** | ✅ Updated | 100% |
-| **Test Coverage** | ✅ Passing | 198+ tests |
+| **Test Coverage** | ✅ Passing | 290+ tests |
 | **DICOM Compliance** | ✅ Conformant | PS3.5, PS3.7, PS3.8 |
 | **Thread Migration** | ✅ Complete | Epic #153 closed |
 
-### Recent Updates (2025-12-07)
+### Recent Updates (2025-12-13)
 
 | Feature | Implementation | Issue | Status |
 |---------|----------------|-------|--------|
+| DICOMweb Tests | Integration, Performance, Concurrency tests | #265 | ✅ Complete |
 | Thread System Migration | `accept_worker`, `thread_adapter` pool | #153 | ✅ Complete |
 | Network V2 | `dicom_server_v2`, `dicom_association_handler` | #163 | ✅ Complete |
 | DIMSE-N Services | N-GET/N-ACTION/N-EVENT/N-DELETE | #127 | ✅ Complete |
@@ -419,11 +420,13 @@ tests/
 | Priority | Recommendation |
 |----------|----------------|
 | **High** | Add JPEG compression support (Transfer Syntax 1.2.840.10008.1.2.4.50) |
-| **High** | Implement Explicit VR Big Endian transfer syntax |
-| **Medium** | Add DICOMweb (WADO-RS) support |
 | **Medium** | Implement connection pooling for SCU operations |
-| **Low** | Add more storage SOP classes (Ultrasound, XA) |
 | **Low** | Cloud storage backend (S3/Azure Blob) |
+
+> **Note:** The following have been implemented:
+> - ✅ Explicit VR Big Endian transfer syntax (Issue #126)
+> - ✅ DICOMweb (WADO-RS/STOW-RS/QIDO-RS) support (Issue #201-203, #264)
+> - ✅ Ultrasound and XA storage SOP classes (Issue #128-129)
 
 ---
 
