@@ -919,6 +919,140 @@ service.stop();
 - **logger_adapter**: 사전 검색 작업 감사 로깅
 - **monitoring_adapter**: 사전 검색 성공/실패율 메트릭
 
+### 태스크 스케줄러 서비스
+
+**구현**: 정리, 아카이브, 데이터 검증을 포함한 자동화된 유지보수 작업을 스케줄링하고 실행하는 백그라운드 서비스.
+
+**기능**:
+- 유연한 스케줄링: 인터벌 기반, cron 표현식, 일회성 실행
+- 내장 태스크 타입: 정리, 아카이브, 검증, 사용자 정의
+- 태스크 수명주기 관리: 일시정지, 재개, 취소, 즉시 실행
+- 구성 가능한 보존 기간을 갖춘 실행 이력 추적
+- 재시작 복구를 위한 태스크 영속성
+- 통계 및 모니터링 기능
+- 구성 가능한 제한을 갖춘 동시 실행
+
+**클래스**:
+- `task_scheduler` - 스케줄링 및 실행을 위한 메인 서비스 클래스
+- `task_scheduler_config` - 서비스 구성 옵션
+- `cleanup_config` - 저장소 정리 태스크 구성
+- `archive_config` - 검사 아카이브 태스크 구성
+- `verification_config` - 데이터 무결성 검증 구성
+- `scheduled_task` - 스케줄과 콜백을 갖춘 태스크 정의
+- `cron_schedule` - Cron 스타일 스케줄 표현식
+
+**스케줄 타입**:
+
+| 타입 | 설명 | 예시 |
+|------|------|------|
+| `interval_schedule` | 실행 간 고정 간격 | 매 1시간 |
+| `cron_schedule` | 분/시/일을 갖춘 cron 스타일 스케줄 | 매일 오전 2:00 |
+| `one_time_schedule` | 특정 시간에 단일 실행 | 2025-12-15 03:00 |
+
+**태스크 타입**:
+
+| 타입 | 목적 | 구성 |
+|------|------|------|
+| Cleanup | 보존 정책에 따라 오래된 검사 삭제 | `cleanup_config` |
+| Archive | 검사를 아카이브 저장소로 이동 | `archive_config` |
+| Verification | 데이터 무결성 검사 (체크섬, DB 일관성) | `verification_config` |
+| Custom | 사용자 정의 유지보수 태스크 | 사용자 정의 콜백 |
+
+**구성 옵션**:
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `enabled` | bool | true | 스케줄러 활성화/비활성화 |
+| `auto_start` | bool | false | 생성 시 자동 시작 |
+| `max_concurrent_tasks` | size_t | 4 | 최대 병렬 태스크 실행 수 |
+| `check_interval` | seconds | 60 | 예정된 태스크 확인 간격 |
+| `persistence_path` | string | "" | 태스크 영속성 경로 (빈 값=비활성화) |
+
+**예제**:
+```cpp
+#include <pacs/workflow/task_scheduler.hpp>
+#include <pacs/workflow/task_scheduler_config.hpp>
+
+using namespace pacs::workflow;
+
+// 스케줄러 구성
+task_scheduler_config config;
+config.max_concurrent_tasks = 4;
+config.check_interval = std::chrono::seconds{60};
+
+// 정리 태스크 구성
+cleanup_config cleanup;
+cleanup.default_retention = std::chrono::days{365};
+cleanup.modality_retention["CR"] = std::chrono::days{180};
+cleanup.modality_retention["CT"] = std::chrono::days{730};
+cleanup.cleanup_schedule = cron_schedule::daily_at(2, 0);  // 오전 2:00
+config.cleanup = cleanup;
+
+// 아카이브 태스크 구성
+archive_config archive;
+archive.archive_after = std::chrono::days{90};
+archive.destination_type = archive_destination_type::cloud_s3;
+archive.destination = "s3://bucket/archive";
+archive.verify_after_archive = true;
+archive.archive_schedule = cron_schedule::daily_at(3, 0);  // 오전 3:00
+config.archive = archive;
+
+// 검증 태스크 구성
+verification_config verification;
+verification.check_checksums = true;
+verification.check_db_consistency = true;
+verification.verification_schedule = cron_schedule::weekly_on(0, 4, 0);  // 일요일 오전 4:00
+config.verification = verification;
+
+// 콜백 설정
+config.on_task_complete = [](const task_id& id, const task_execution_record& record) {
+    std::cout << "태스크 " << id << " 완료: "
+              << record.duration()->count() << "ms\n";
+};
+
+// 스케줄러 생성 및 시작
+task_scheduler scheduler{database, config};
+scheduler.start();
+
+// 사용자 정의 태스크 추가
+auto custom_id = scheduler.schedule(
+    "daily-backup",
+    "데이터베이스 백업",
+    cron_schedule::daily_at(1, 0),  // 오전 1:00
+    []() -> std::optional<std::string> {
+        // 백업 수행
+        return std::nullopt;  // 성공
+    }
+);
+
+// 태스크 관리
+scheduler.pause_task(custom_id);
+scheduler.resume_task(custom_id);
+scheduler.trigger_task(custom_id);  // 즉시 실행
+
+// 태스크 정보 조회
+auto task = scheduler.get_task(custom_id);
+if (task) {
+    std::cout << "태스크: " << task->name << "\n";
+    std::cout << "상태: " << to_string(task->state) << "\n";
+}
+
+// 통계 조회
+auto stats = scheduler.get_stats();
+std::cout << "스케줄된 태스크: " << stats.scheduled_tasks << "\n";
+std::cout << "실행 중: " << stats.running_tasks << "\n";
+
+// 정상 종료
+scheduler.stop(true);  // 실행 중인 태스크 대기
+```
+
+**통합 포인트**:
+- **index_database**: 정리/아카이브 대상 검사 쿼리
+- **file_storage**: DICOM 파일 삭제 또는 아카이브
+- **thread_pool**: 병렬 태스크 실행
+- **logger_adapter**: 모든 태스크 작업 감사 로깅
+- **monitoring_adapter**: 태스크 성공/실패율 메트릭
+
 ---
 
 ## 계획된 기능
@@ -954,6 +1088,7 @@ service.stop();
 
 | 기능 | 설명 | 이슈 | 상태 |
 |------|------|------|------|
+| 태스크 스케줄러 서비스 | 정리, 아카이브, 검증을 위한 자동화된 태스크 스케줄링 | #207 | ✅ 완료 |
 | 자동 사전 검색 서비스 | 워크리스트 쿼리 기반 이전 검사 자동 사전 검색 | #206 | ✅ 완료 |
 | 계층적 저장소 관리 (HSM) | 자동 연령 기반 마이그레이션을 갖춘 3계층 HSM | #200 | ✅ 완료 |
 | Azure Blob 저장소 | Azure Blob 저장소 백엔드 (목 구현) with 블록 블롭 업로드 | #199 | ✅ 완료 |
@@ -964,7 +1099,7 @@ service.stop();
 
 ---
 
-*문서 버전: 0.1.9.0*
+*문서 버전: 0.2.0.0*
 *작성일: 2025-11-30*
 *수정일: 2025-12-13*
 *작성자: kcenon@naver.com*

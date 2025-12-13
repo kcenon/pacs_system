@@ -927,11 +927,12 @@ else()
     message(STATUS "  [--] pacs_monitoring: OFF (requires pacs_storage)")
 endif()
 
-# Workflow library (auto prefetch service - Issue #206)
+# Workflow library (auto prefetch service - Issue #206, task scheduler - Issue #207)
 # Requires pacs_storage for index_database and pacs_integration for adapters
 if(TARGET pacs_storage)
     add_library(pacs_workflow
         src/workflow/auto_prefetch_service.cpp
+        src/workflow/task_scheduler.cpp
     )
     target_include_directories(pacs_workflow
         PUBLIC
@@ -1361,10 +1362,11 @@ if(PACS_BUILD_TESTS)
         endif()
     endif()
 
-    # Workflow tests (Issue #206 - auto prefetch service)
+    # Workflow tests (Issue #206 - auto prefetch service, Issue #207 - task scheduler)
     if(TARGET pacs_workflow)
         add_executable(workflow_tests
             tests/workflow/auto_prefetch_service_test.cpp
+            tests/workflow/task_scheduler_test.cpp
         )
         target_link_libraries(workflow_tests
             PRIVATE

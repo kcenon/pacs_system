@@ -1157,12 +1157,176 @@ service.stop();
 - **logger_adapter**: Audit logging for prefetch operations
 - **monitoring_adapter**: Metrics for prefetch success/failure rates
 
+### Task Scheduler Service
+
+**Implementation**: Background service for scheduling and executing automated maintenance tasks including cleanup, archive, and data verification.
+
+**Features**:
+- Flexible scheduling: Interval-based, cron-like expressions, and one-time execution
+- Built-in task types: Cleanup, Archive, Verification, Custom
+- Task lifecycle management: Pause, Resume, Cancel, Trigger
+- Execution history tracking with configurable retention
+- Task persistence for recovery across restarts
+- Statistics and monitoring capabilities
+- Concurrent execution with configurable limits
+
+**Classes**:
+- `task_scheduler` - Main service class for scheduling and execution
+- `task_scheduler_config` - Service configuration options
+- `cleanup_config` - Configuration for storage cleanup tasks
+- `archive_config` - Configuration for study archival tasks
+- `verification_config` - Configuration for data integrity verification
+- `scheduled_task` - Task definition with schedule and callbacks
+- `cron_schedule` - Cron-like schedule expression
+
+**Schedule Types**:
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `interval_schedule` | Fixed interval between executions | Every 1 hour |
+| `cron_schedule` | Cron-like schedule with minute/hour/day | Daily at 2:00 AM |
+| `one_time_schedule` | Single execution at specific time | 2025-12-15 03:00 |
+
+**Task Types**:
+
+| Type | Purpose | Configuration |
+|------|---------|---------------|
+| Cleanup | Remove old studies based on retention policy | `cleanup_config` |
+| Archive | Move studies to archive storage | `archive_config` |
+| Verification | Check data integrity (checksums, DB consistency) | `verification_config` |
+| Custom | User-defined maintenance tasks | Custom callback |
+
+**Configuration Options**:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | bool | true | Enable/disable scheduler |
+| `auto_start` | bool | false | Start on construction |
+| `max_concurrent_tasks` | size_t | 4 | Maximum parallel task executions |
+| `check_interval` | seconds | 60 | Interval for checking due tasks |
+| `persistence_path` | string | "" | Path for task persistence (empty=disabled) |
+
+**Example**:
+```cpp
+#include <pacs/workflow/task_scheduler.hpp>
+#include <pacs/workflow/task_scheduler_config.hpp>
+
+using namespace pacs::workflow;
+
+// Configure scheduler
+task_scheduler_config config;
+config.max_concurrent_tasks = 4;
+config.check_interval = std::chrono::seconds{60};
+
+// Configure cleanup task
+cleanup_config cleanup;
+cleanup.default_retention = std::chrono::days{365};
+cleanup.modality_retention["CR"] = std::chrono::days{180};
+cleanup.modality_retention["CT"] = std::chrono::days{730};
+cleanup.cleanup_schedule = cron_schedule::daily_at(2, 0);  // 2:00 AM
+config.cleanup = cleanup;
+
+// Configure archive task
+archive_config archive;
+archive.archive_after = std::chrono::days{90};
+archive.destination_type = archive_destination_type::cloud_s3;
+archive.destination = "s3://bucket/archive";
+archive.verify_after_archive = true;
+archive.archive_schedule = cron_schedule::daily_at(3, 0);  // 3:00 AM
+config.archive = archive;
+
+// Configure verification task
+verification_config verification;
+verification.check_checksums = true;
+verification.check_db_consistency = true;
+verification.verification_schedule = cron_schedule::weekly_on(0, 4, 0);  // Sunday 4:00 AM
+config.verification = verification;
+
+// Set callbacks
+config.on_task_complete = [](const task_id& id, const task_execution_record& record) {
+    std::cout << "Task " << id << " completed in "
+              << record.duration()->count() << "ms\n";
+};
+
+config.on_task_error = [](const task_id& id, const std::string& error) {
+    std::cerr << "Task " << id << " failed: " << error << "\n";
+};
+
+// Create and start scheduler
+task_scheduler scheduler{database, config};
+scheduler.start();
+
+// Add custom task
+auto custom_id = scheduler.schedule(
+    "daily-backup",
+    "Database Backup",
+    cron_schedule::daily_at(1, 0),  // 1:00 AM
+    []() -> std::optional<std::string> {
+        // Perform backup
+        return std::nullopt;  // Success
+    }
+);
+
+// Task management
+scheduler.pause_task(custom_id);
+scheduler.resume_task(custom_id);
+scheduler.trigger_task(custom_id);  // Execute immediately
+
+// Get task info
+auto task = scheduler.get_task(custom_id);
+if (task) {
+    std::cout << "Task: " << task->name << "\n";
+    std::cout << "State: " << to_string(task->state) << "\n";
+    std::cout << "Executions: " << task->execution_count << "\n";
+}
+
+// List all tasks
+for (const auto& t : scheduler.list_tasks()) {
+    std::cout << t.id << ": " << t.name << " [" << to_string(t.state) << "]\n";
+}
+
+// Get statistics
+auto stats = scheduler.get_stats();
+std::cout << "Scheduled: " << stats.scheduled_tasks << "\n";
+std::cout << "Running: " << stats.running_tasks << "\n";
+std::cout << "Total executions: " << stats.total_executions << "\n";
+
+// Graceful shutdown
+scheduler.stop(true);  // Wait for running tasks
+```
+
+**Cron Schedule Helpers**:
+```cpp
+// Every 15 minutes
+auto every_15_min = cron_schedule::every_minutes(15);
+
+// Every 4 hours
+auto every_4_hours = cron_schedule::every_hours(4);
+
+// Daily at 3:30 AM
+auto daily = cron_schedule::daily_at(3, 30);
+
+// Weekly on Sunday at 2:00 AM
+auto weekly = cron_schedule::weekly_on(0, 2, 0);
+
+// Parse cron expression
+auto custom = cron_schedule::parse("0 2 * * 1-5");  // 2:00 AM weekdays
+```
+
+**Integration Points**:
+- **index_database**: Query studies for cleanup/archive eligibility
+- **file_storage**: Delete or archive DICOM files
+- **thread_pool**: Parallel task execution
+- **logger_adapter**: Audit logging for all task operations
+- **monitoring_adapter**: Metrics for task success/failure rates
+
 ---
 
 ## Recently Completed Features (v1.2.0 - 2025-12-13)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | ✅ Complete |
 | Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | ✅ Complete |
 | Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
 | Azure Blob Storage | Azure Blob storage backend (mock implementation) with block blob upload | #199 | ✅ Complete |
@@ -1224,10 +1388,11 @@ service.stop();
 | 1.8.0 | 2025-12-12 | raphaelshin | Added: Azure Blob Storage (mock implementation) with block blob upload for Issue #199 |
 | 1.9.0 | 2025-12-12 | raphaelshin | Added: Hierarchical Storage Management (HSM) with three-tier storage and automatic migration for Issue #200 |
 | 2.0.0 | 2025-12-13 | raphaelshin | Added: Auto Prefetch Service for worklist-triggered prior study prefetch for Issue #206 |
+| 2.1.0 | 2025-12-13 | raphaelshin | Added: Task Scheduler Service for automated cleanup, archive, and verification for Issue #207 |
 
 ---
 
-*Document Version: 0.1.9.0*
+*Document Version: 0.2.0.0*
 *Created: 2025-11-30*
 *Updated: 2025-12-13*
 *Author: kcenon@naver.com*
