@@ -32,8 +32,12 @@ dicom_server_v2::dicom_server_v2(const server_config& config)
 }
 
 dicom_server_v2::~dicom_server_v2() {
-    if (running_) {
-        stop();
+    try {
+        if (running_) {
+            stop();
+        }
+    } catch (...) {
+        // Suppress exceptions in destructor to prevent std::terminate
     }
 }
 
@@ -201,11 +205,14 @@ void dicom_server_v2::stop(duration timeout) {
     }
     handlers_to_stop.clear();
 
-    // Allow any pending callbacks to complete
-    std::this_thread::sleep_for(std::chrono::milliseconds{10});
+    // Allow any pending callbacks to complete before destroying server
+    std::this_thread::sleep_for(std::chrono::milliseconds{50});
 
     // Clean up server
     server_.reset();
+
+    // Additional delay after server cleanup to ensure all resources are released
+    std::this_thread::sleep_for(std::chrono::milliseconds{10});
 #else
     (void)timeout;  // Unused without network_system
 #endif
