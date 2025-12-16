@@ -80,13 +80,13 @@ auto thread_adapter::start() -> bool {
 
     // Use batch enqueue for efficiency
     auto enqueue_result = pool_->enqueue_batch(std::move(workers));
-    if (enqueue_result.has_error()) {
+    if (enqueue_result.is_err()) {
         return false;
     }
 
     // Start the pool
     auto start_result = pool_->start();
-    if (start_result.has_error()) {
+    if (start_result.is_err()) {
         return false;
     }
 
