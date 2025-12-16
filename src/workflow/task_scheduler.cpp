@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <future>
 #include <iomanip>
 #include <random>
 #include <ranges>
@@ -855,26 +856,81 @@ auto task_scheduler::execute_task(scheduled_task& task)
 
     auto start_time = std::chrono::steady_clock::now();
 
-    try {
-        if (!task.callback) {
-            record.state = task_state::failed;
-            record.error_message = "No callback defined";
-        } else {
-            auto result = task.callback();
+    // Retry logic: attempt up to (max_retries + 1) times
+    std::size_t attempt = 0;
+    const std::size_t max_attempts = task.max_retries + 1;
 
-            if (result.has_value()) {
-                record.state = task_state::failed;
-                record.error_message = *result;
-            } else {
-                record.state = task_state::completed;
-            }
+    while (attempt < max_attempts) {
+        attempt++;
+
+        if (attempt > 1) {
+            integration::logger_adapter::info(
+                "Retrying task task_id={} attempt={}/{}",
+                task.id, attempt, max_attempts);
+
+            // Wait before retry
+            std::this_thread::sleep_for(task.retry_delay);
         }
-    } catch (const std::exception& e) {
-        record.state = task_state::failed;
-        record.error_message = e.what();
-        integration::logger_adapter::error(
-            "Task execution failed task_id={} error={}",
-            task.id, e.what());
+
+        try {
+            if (!task.callback) {
+                record.state = task_state::failed;
+                record.error_message = "No callback defined";
+                break;  // No point retrying without callback
+            }
+
+            // Execute with timeout if configured
+            if (task.timeout.count() > 0) {
+                // Run callback in async task with timeout
+                auto future = std::async(std::launch::async, task.callback);
+
+                auto status = future.wait_for(task.timeout);
+                if (status == std::future_status::timeout) {
+                    record.state = task_state::failed;
+                    record.error_message = "Task execution timed out after " +
+                        std::to_string(task.timeout.count()) + " seconds";
+                    integration::logger_adapter::warn(
+                        "Task timed out task_id={} timeout_seconds={}",
+                        task.id, task.timeout.count());
+                    // Continue to retry if attempts remain
+                    continue;
+                }
+
+                // Get result (may throw)
+                auto result = future.get();
+                if (result.has_value()) {
+                    record.state = task_state::failed;
+                    record.error_message = *result;
+                } else {
+                    record.state = task_state::completed;
+                    break;  // Success, no need to retry
+                }
+            } else {
+                // No timeout, execute directly
+                auto result = task.callback();
+
+                if (result.has_value()) {
+                    record.state = task_state::failed;
+                    record.error_message = *result;
+                } else {
+                    record.state = task_state::completed;
+                    break;  // Success, no need to retry
+                }
+            }
+        } catch (const std::exception& e) {
+            record.state = task_state::failed;
+            record.error_message = e.what();
+            integration::logger_adapter::error(
+                "Task execution failed task_id={} attempt={} error={}",
+                task.id, attempt, e.what());
+        }
+
+        // If we've exhausted all retries and still failed
+        if (attempt >= max_attempts && record.state == task_state::failed) {
+            integration::logger_adapter::error(
+                "Task failed after {} attempts task_id={}",
+                max_attempts, task.id);
+        }
     }
 
     record.ended_at = std::chrono::system_clock::now();
@@ -883,13 +939,18 @@ auto task_scheduler::execute_task(scheduled_task& task)
         std::chrono::steady_clock::now() - start_time);
 
     integration::logger_adapter::info(
-        "Task execution completed task_id={} name={} state={} duration_ms={}",
-        task.id, task.name, to_string(record.state), duration.count());
+        "Task execution completed task_id={} name={} state={} duration_ms={} attempts={}",
+        task.id, task.name, to_string(record.state), duration.count(), attempt);
 
     // Record metrics
     integration::monitoring_adapter::record_histogram(
         "scheduler_task_duration_ms",
         static_cast<double>(duration.count()));
+
+    if (attempt > 1) {
+        integration::monitoring_adapter::increment_counter(
+            "scheduler_task_retries_total");
+    }
 
     return record;
 }
@@ -1426,9 +1487,29 @@ auto task_scheduler::serialize_tasks() const -> std::string {
 }
 
 auto task_scheduler::deserialize_tasks(const std::string& json) -> std::size_t {
-    // Simple JSON parsing - in production, use a proper JSON library
-    // For now, just return 0 as we need a JSON parser for proper implementation
-    (void)json;
+    // Note: Full deserialization is not supported without a proper JSON library.
+    //
+    // Limitations:
+    // 1. Callbacks cannot be serialized/deserialized (function pointers)
+    // 2. Schedule details are not currently serialized
+    // 3. Tags and other complex fields are not serialized
+    //
+    // For production use, consider:
+    // 1. Using nlohmann/json or similar library for proper JSON parsing
+    // 2. Storing task configurations separately and re-creating tasks on startup
+    // 3. Using a database-backed persistence layer
+    //
+    // Current implementation returns 0 (no tasks loaded) to indicate
+    // that manual task registration is required after restart.
+
+    if (json.empty()) {
+        return 0;
+    }
+
+    integration::logger_adapter::warn(
+        "deserialize_tasks called but full deserialization is not implemented. "
+        "Tasks must be re-registered programmatically after scheduler restart.");
+
     return 0;
 }
 
