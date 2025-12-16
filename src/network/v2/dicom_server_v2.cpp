@@ -183,13 +183,26 @@ void dicom_server_v2::stop(duration timeout) {
     }
 
     // Phase 3: Force stop remaining handlers
+    // Collect handlers first, then stop them without holding the lock
+    // to avoid potential deadlock if handler->stop() triggers callbacks
+    std::vector<std::shared_ptr<dicom_association_handler>> handlers_to_stop;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
+        handlers_to_stop.reserve(handlers_.size());
         for (auto& [session_id, handler] : handlers_) {
-            handler->stop(false);  // Force abort
+            handlers_to_stop.push_back(handler);
         }
         handlers_.clear();
     }
+
+    // Stop handlers without holding the lock
+    for (auto& handler : handlers_to_stop) {
+        handler->stop(false);  // Force abort
+    }
+    handlers_to_stop.clear();
+
+    // Allow any pending callbacks to complete
+    std::this_thread::sleep_for(std::chrono::milliseconds{10});
 
     // Clean up server
     server_.reset();
@@ -286,6 +299,11 @@ void dicom_server_v2::on_connection(
 }
 
 void dicom_server_v2::on_disconnection(const std::string& session_id) {
+    // Skip if server is shutting down
+    if (!running_) {
+        return;
+    }
+
     // Remove handler for this session
     remove_handler(session_id);
 }
@@ -325,7 +343,8 @@ void dicom_server_v2::on_network_error(
     std::shared_ptr<network_system::session::messaging_session> session,
     std::error_code ec) {
 
-    if (!session) {
+    // Skip if server is shutting down
+    if (!running_ || !session) {
         return;
     }
 
@@ -430,6 +449,11 @@ void dicom_server_v2::create_handler(
 }
 
 void dicom_server_v2::remove_handler(const std::string& session_id) {
+    // Skip if server is shutting down - handlers are cleaned up in stop()
+    if (!running_) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(handlers_mutex_);
     auto it = handlers_.find(session_id);
     if (it != handlers_.end()) {
