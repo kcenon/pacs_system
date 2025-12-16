@@ -931,6 +931,8 @@ service.stop();
 - 재시작 복구를 위한 태스크 영속성
 - 통계 및 모니터링 기능
 - 구성 가능한 제한을 갖춘 동시 실행
+- **재시도 메커니즘**: 실패 시 구성 가능한 시도 횟수와 지연으로 자동 재시도
+- **타임아웃 처리**: 비동기 실행 지원을 갖춘 태스크별 실행 타임아웃
 
 **클래스**:
 - `task_scheduler` - 스케줄링 및 실행을 위한 메인 서비스 클래스
@@ -967,6 +969,16 @@ service.stop();
 | `max_concurrent_tasks` | size_t | 4 | 최대 병렬 태스크 실행 수 |
 | `check_interval` | seconds | 60 | 예정된 태스크 확인 간격 |
 | `persistence_path` | string | "" | 태스크 영속성 경로 (빈 값=비활성화) |
+
+**태스크 옵션 (scheduled_task별)**:
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `timeout` | seconds | 0 | 최대 실행 시간 (0=제한 없음) |
+| `max_retries` | size_t | 0 | 실패 시 재시도 횟수 |
+| `retry_delay` | seconds | 60 | 재시도 간 지연 시간 |
+| `priority` | int | 0 | 태스크 우선순위 (높을수록 중요) |
+| `enabled` | bool | true | 개별 태스크 활성화/비활성화 |
 
 **예제**:
 ```cpp
