@@ -440,9 +440,9 @@ bool process_file(const std::filesystem::path& input_path,
 
     // Save
     auto save_result = output_file.save(output_path);
-    if (!save_result.has_value()) {
+    if (save_result.is_err()) {
         std::cerr << "Error: Failed to save '" << output_path.string()
-                  << "': " << to_string(save_result.error()) << "\n";
+                  << "': " << save_result.error().message << "\n";
         return false;
     }
 
