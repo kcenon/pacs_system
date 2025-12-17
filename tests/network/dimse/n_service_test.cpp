@@ -140,21 +140,21 @@ TEST_CASE("N-CREATE encode/decode", "[dimse][message][n-create][codec]") {
 
     auto encoded =
         dimse_message::encode(original, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [cmd_bytes, ds_bytes] = *encoded;
+    auto& [cmd_bytes, ds_bytes] = encoded.value();
     CHECK_FALSE(cmd_bytes.empty());
     CHECK_FALSE(ds_bytes.empty());
 
     auto decoded = dimse_message::decode(cmd_bytes, ds_bytes,
                                          transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::n_create_rq);
-    CHECK(decoded->message_id() == 42);
-    CHECK(decoded->affected_sop_class_uid() == mpps_class);
-    CHECK(decoded->has_dataset());
-    CHECK(decoded->dataset().get_string(tags::patient_name) == "TEST^PATIENT");
+    CHECK(decoded.value().command() == command_field::n_create_rq);
+    CHECK(decoded.value().message_id() == 42);
+    CHECK(decoded.value().affected_sop_class_uid() == mpps_class);
+    CHECK(decoded.value().has_dataset());
+    CHECK(decoded.value().dataset().get_string(tags::patient_name) == "TEST^PATIENT");
 }
 
 // ============================================================================
@@ -220,18 +220,18 @@ TEST_CASE("N-SET encode/decode", "[dimse][message][n-set][codec]") {
 
     auto encoded =
         dimse_message::encode(original, transfer_syntax::explicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [cmd_bytes, ds_bytes] = *encoded;
+    auto& [cmd_bytes, ds_bytes] = encoded.value();
 
     auto decoded = dimse_message::decode(cmd_bytes, ds_bytes,
                                          transfer_syntax::explicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::n_set_rq);
+    CHECK(decoded.value().command() == command_field::n_set_rq);
     // Note: UI VR may have trailing space padding for even length per DICOM
-    CHECK(decoded->requested_sop_class_uid().starts_with(mpps_class));
-    CHECK(decoded->requested_sop_instance_uid().starts_with(instance_uid));
+    CHECK(decoded.value().requested_sop_class_uid().starts_with(mpps_class));
+    CHECK(decoded.value().requested_sop_instance_uid().starts_with(instance_uid));
 }
 
 // ============================================================================
@@ -311,16 +311,16 @@ TEST_CASE("N-GET attribute identifier list encode/decode",
 
     auto encoded =
         dimse_message::encode(original, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [cmd_bytes, ds_bytes] = *encoded;
+    auto& [cmd_bytes, ds_bytes] = encoded.value();
 
     auto decoded = dimse_message::decode(cmd_bytes, ds_bytes,
                                          transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::n_get_rq);
-    auto decoded_tags = decoded->attribute_identifier_list();
+    CHECK(decoded.value().command() == command_field::n_get_rq);
+    auto decoded_tags = decoded.value().attribute_identifier_list();
     REQUIRE(decoded_tags.size() == 3);
     CHECK(decoded_tags[0] == dicom_tag{0x0010, 0x0010});
     CHECK(decoded_tags[1] == dicom_tag{0x0010, 0x0020});
@@ -386,20 +386,20 @@ TEST_CASE("N-EVENT-REPORT encode/decode", "[dimse][message][n-event-report][code
 
     auto encoded =
         dimse_message::encode(original, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [cmd_bytes, ds_bytes] = *encoded;
+    auto& [cmd_bytes, ds_bytes] = encoded.value();
 
     auto decoded = dimse_message::decode(cmd_bytes, ds_bytes,
                                          transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::n_event_report_rq);
-    CHECK(decoded->message_id() == 50);
-    CHECK(decoded->affected_sop_class_uid() == sc_class);
-    CHECK(decoded->affected_sop_instance_uid() == transaction_uid);
-    REQUIRE(decoded->event_type_id().has_value());
-    CHECK(decoded->event_type_id().value() == 1);
+    CHECK(decoded.value().command() == command_field::n_event_report_rq);
+    CHECK(decoded.value().message_id() == 50);
+    CHECK(decoded.value().affected_sop_class_uid() == sc_class);
+    CHECK(decoded.value().affected_sop_instance_uid() == transaction_uid);
+    REQUIRE(decoded.value().event_type_id().has_value());
+    CHECK(decoded.value().event_type_id().value() == 1);
 }
 
 // ============================================================================
@@ -470,19 +470,19 @@ TEST_CASE("N-ACTION encode/decode", "[dimse][message][n-action][codec]") {
 
     auto encoded =
         dimse_message::encode(original, transfer_syntax::explicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [cmd_bytes, ds_bytes] = *encoded;
+    auto& [cmd_bytes, ds_bytes] = encoded.value();
 
     auto decoded = dimse_message::decode(cmd_bytes, ds_bytes,
                                          transfer_syntax::explicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::n_action_rq);
-    CHECK(decoded->message_id() == 75);
-    CHECK(decoded->requested_sop_class_uid() == sc_class);
-    CHECK(decoded->requested_sop_instance_uid() == sc_instance);
-    CHECK(decoded->action_type_id().value() == 1);
+    CHECK(decoded.value().command() == command_field::n_action_rq);
+    CHECK(decoded.value().message_id() == 75);
+    CHECK(decoded.value().requested_sop_class_uid() == sc_class);
+    CHECK(decoded.value().requested_sop_instance_uid() == sc_instance);
+    CHECK(decoded.value().action_type_id().value() == 1);
 }
 
 // ============================================================================
@@ -538,21 +538,21 @@ TEST_CASE("N-DELETE encode/decode", "[dimse][message][n-delete][codec]") {
 
     auto encoded =
         dimse_message::encode(original, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [cmd_bytes, ds_bytes] = *encoded;
+    auto& [cmd_bytes, ds_bytes] = encoded.value();
     CHECK_FALSE(cmd_bytes.empty());
     CHECK(ds_bytes.empty());  // N-DELETE has no data set
 
     auto decoded = dimse_message::decode(cmd_bytes, ds_bytes,
                                          transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::n_delete_rq);
-    CHECK(decoded->message_id() == 99);
+    CHECK(decoded.value().command() == command_field::n_delete_rq);
+    CHECK(decoded.value().message_id() == 99);
     // Note: UI VR may have trailing space padding for even length per DICOM
-    CHECK(decoded->requested_sop_class_uid().starts_with(print_class));
-    CHECK(decoded->requested_sop_instance_uid().starts_with(session_uid));
+    CHECK(decoded.value().requested_sop_class_uid().starts_with(print_class));
+    CHECK(decoded.value().requested_sop_instance_uid().starts_with(session_uid));
 }
 
 // ============================================================================

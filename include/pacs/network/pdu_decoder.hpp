@@ -2,16 +2,13 @@
 #define PACS_NETWORK_PDU_DECODER_HPP
 
 #include "pdu_types.hpp"
+#include "pacs/core/result.hpp"
 
 #include <cstdint>
 #include <optional>
 #include <span>
 #include <variant>
 #include <vector>
-
-#ifdef PACS_WITH_COMMON_SYSTEM
-#include <kcenon/common/patterns/result.h>
-#endif
 
 namespace pacs::network {
 
@@ -93,60 +90,9 @@ enum class pdu_decode_error : int {
     }
 }
 
-#ifdef PACS_WITH_COMMON_SYSTEM
-/// Result type alias for PDU decoding operations
+/// Result type alias for PDU decoding operations using standardized pacs::Result<T>
 template<typename T>
-using DecodeResult = kcenon::common::Result<T>;
-#else
-/**
- * @brief Simple Result type for PDU decoding when common_system is not available.
- *
- * Provides a minimal Result<T> implementation for standalone use.
- */
-template<typename T>
-class DecodeResult {
-public:
-    /// Construct a success result
-    static DecodeResult ok(T value) {
-        return DecodeResult(std::move(value));
-    }
-
-    /// Construct an error result
-    static DecodeResult error(pdu_decode_error err, const std::string& msg = "") {
-        return DecodeResult(err, msg);
-    }
-
-    /// Check if result is success
-    [[nodiscard]] bool is_ok() const noexcept { return has_value_; }
-
-    /// Check if result is error
-    [[nodiscard]] bool is_error() const noexcept { return !has_value_; }
-
-    /// Get the value (undefined behavior if is_error())
-    [[nodiscard]] T& value() & { return value_; }
-    [[nodiscard]] const T& value() const& { return value_; }
-    [[nodiscard]] T&& value() && { return std::move(value_); }
-
-    /// Get error code (undefined behavior if is_ok())
-    [[nodiscard]] pdu_decode_error error_code() const noexcept { return error_code_; }
-
-    /// Get error message
-    [[nodiscard]] const std::string& error_message() const noexcept { return error_msg_; }
-
-private:
-    DecodeResult(T value)
-        : value_(std::move(value)), has_value_(true),
-          error_code_(pdu_decode_error::success) {}
-
-    DecodeResult(pdu_decode_error err, std::string msg)
-        : has_value_(false), error_code_(err), error_msg_(std::move(msg)) {}
-
-    T value_{};
-    bool has_value_;
-    pdu_decode_error error_code_;
-    std::string error_msg_;
-};
-#endif
+using DecodeResult = pacs::Result<T>;
 
 /**
  * @brief Decoder for DICOM PDU (Protocol Data Unit) messages.

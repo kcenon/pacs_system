@@ -18,6 +18,7 @@
 
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/core/dicom_tag.hpp>
+#include <pacs/core/result.hpp>
 #include <pacs/encoding/transfer_syntax.hpp>
 
 #include <cstdint>
@@ -160,50 +161,12 @@ enum class dimse_error {
 }
 
 /**
- * @brief Result type for DIMSE operations (C++20 compatible)
- *
- * A simple result type that holds either a value or an error.
- * This is a C++20 compatible alternative to std::expected (C++23).
+ * @brief Result type for DIMSE operations using standardized pacs::Result<T>
  *
  * @tparam T The success value type
  */
 template <typename T>
-class dimse_result {
-public:
-    /// Create a success result
-    dimse_result(T value) : data_(std::move(value)) {}
-
-    /// Create an error result
-    dimse_result(dimse_error error) : data_(error) {}
-
-    /// Check if the result is successful
-    [[nodiscard]] bool has_value() const noexcept {
-        return std::holds_alternative<T>(data_);
-    }
-
-    /// Check if the result is successful (operator bool)
-    explicit operator bool() const noexcept { return has_value(); }
-
-    /// Get the value (undefined behavior if error)
-    [[nodiscard]] T& value() & { return std::get<T>(data_); }
-    [[nodiscard]] const T& value() const& { return std::get<T>(data_); }
-    [[nodiscard]] T&& value() && { return std::get<T>(std::move(data_)); }
-
-    /// Dereference operator (undefined behavior if error)
-    [[nodiscard]] T& operator*() & { return value(); }
-    [[nodiscard]] const T& operator*() const& { return value(); }
-    [[nodiscard]] T&& operator*() && { return std::move(*this).value(); }
-
-    /// Arrow operator (undefined behavior if error)
-    [[nodiscard]] T* operator->() { return &value(); }
-    [[nodiscard]] const T* operator->() const { return &value(); }
-
-    /// Get the error (undefined behavior if success)
-    [[nodiscard]] dimse_error error() const { return std::get<dimse_error>(data_); }
-
-private:
-    std::variant<T, dimse_error> data_;
-};
+using dimse_result = pacs::Result<T>;
 
 /**
  * @brief DIMSE message class

@@ -254,19 +254,19 @@ TEST_CASE("dimse_message C-ECHO encode/decode", "[dimse][message][codec]") {
 
     auto encoded = dimse_message::encode(
         original, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [command_bytes, dataset_bytes] = *encoded;
+    auto& [command_bytes, dataset_bytes] = encoded.value();
     CHECK_FALSE(command_bytes.empty());
     CHECK(dataset_bytes.empty());  // C-ECHO has no dataset
 
     auto decoded = dimse_message::decode(
         command_bytes, dataset_bytes, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::c_echo_rq);
-    CHECK(decoded->message_id() == 42);
-    CHECK(decoded->affected_sop_class_uid() == "1.2.840.10008.1.1");
+    CHECK(decoded.value().command() == command_field::c_echo_rq);
+    CHECK(decoded.value().message_id() == 42);
+    CHECK(decoded.value().affected_sop_class_uid() == "1.2.840.10008.1.1");
 }
 
 TEST_CASE("dimse_message C-STORE with dataset encode/decode",
@@ -285,23 +285,23 @@ TEST_CASE("dimse_message C-STORE with dataset encode/decode",
     // Encode with Explicit VR LE
     auto encoded = dimse_message::encode(
         original, transfer_syntax::explicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [command_bytes, dataset_bytes] = *encoded;
+    auto& [command_bytes, dataset_bytes] = encoded.value();
     CHECK_FALSE(command_bytes.empty());
     CHECK_FALSE(dataset_bytes.empty());
 
     // Decode
     auto decoded = dimse_message::decode(
         command_bytes, dataset_bytes, transfer_syntax::explicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::c_store_rq);
-    CHECK(decoded->message_id() == 1);
-    CHECK(decoded->affected_sop_class_uid() == sop_class);
-    CHECK(decoded->affected_sop_instance_uid() == sop_instance);
-    CHECK(decoded->has_dataset());
-    CHECK(decoded->dataset().get_string(tags::patient_name) == "DOE^JOHN");
+    CHECK(decoded.value().command() == command_field::c_store_rq);
+    CHECK(decoded.value().message_id() == 1);
+    CHECK(decoded.value().affected_sop_class_uid() == sop_class);
+    CHECK(decoded.value().affected_sop_instance_uid() == sop_instance);
+    CHECK(decoded.value().has_dataset());
+    CHECK(decoded.value().dataset().get_string(tags::patient_name) == "DOE^JOHN");
 }
 
 TEST_CASE("dimse_message response with status encode/decode",
@@ -310,18 +310,18 @@ TEST_CASE("dimse_message response with status encode/decode",
 
     auto encoded = dimse_message::encode(
         original, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(encoded.has_value());
+    REQUIRE(encoded.is_ok());
 
-    auto& [command_bytes, dataset_bytes] = *encoded;
+    auto& [command_bytes, dataset_bytes] = encoded.value();
 
     auto decoded = dimse_message::decode(
         command_bytes, dataset_bytes, transfer_syntax::implicit_vr_little_endian);
-    REQUIRE(decoded.has_value());
+    REQUIRE(decoded.is_ok());
 
-    CHECK(decoded->command() == command_field::c_echo_rsp);
-    CHECK(decoded->is_response());
-    CHECK(decoded->message_id_responded_to() == 42);
-    CHECK(decoded->status() == status_success);
+    CHECK(decoded.value().command() == command_field::c_echo_rsp);
+    CHECK(decoded.value().is_response());
+    CHECK(decoded.value().message_id_responded_to() == 42);
+    CHECK(decoded.value().status() == status_success);
 }
 
 // ============================================================================

@@ -13,6 +13,17 @@
 
 namespace pacs::network::dimse {
 
+namespace {
+/// Helper to convert dimse_error to pacs::error_info
+inline pacs::error_info make_dimse_error(dimse_error err, const std::string& details = "") {
+    std::string msg = std::string(to_string(err));
+    if (!details.empty()) {
+        msg += ": " + details;
+    }
+    return pacs::error_info{pacs::error_codes::dimse_error, msg, "network"};
+}
+}  // namespace
+
 // ============================================================================
 // Construction
 // ============================================================================
@@ -278,7 +289,7 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
     // Decode command set (always Implicit VR Little Endian)
     auto cmd_result = encoding::implicit_vr_codec::decode(command_data);
     if (cmd_result.is_err()) {
-        return dimse_error::decoding_error;
+        return make_dimse_error(dimse_error::decoding_error, "Failed to decode command set");
     }
 
     auto command_set = std::move(pacs::get_value(cmd_result));
@@ -286,14 +297,14 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
     // Extract command field
     auto cmd_value = command_set.get_numeric<uint16_t>(tag_command_field);
     if (!cmd_value) {
-        return dimse_error::missing_required_field;
+        return make_dimse_error(dimse_error::missing_required_field, "CommandField tag not found");
     }
     auto cmd = static_cast<command_field>(*cmd_value);
 
     // Extract message ID
     auto msg_id = command_set.get_numeric<uint16_t>(tag_message_id);
     if (!msg_id && dimse::is_request(cmd)) {
-        return dimse_error::missing_required_field;
+        return make_dimse_error(dimse_error::missing_required_field, "MessageID tag not found for request");
     }
     // For responses, use message_id_responded_to if message_id is not present
     uint16_t message_id = msg_id.value_or(0);
@@ -309,7 +320,7 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
                 : encoding::explicit_vr_codec::decode(dataset_data);
 
         if (ds_result.is_err()) {
-            return dimse_error::decoding_error;
+            return make_dimse_error(dimse_error::decoding_error, "Failed to decode dataset");
         }
         msg.dataset_ = std::move(pacs::get_value(ds_result));
     }
