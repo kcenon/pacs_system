@@ -12,6 +12,7 @@
 
 #include "dicom_dataset.hpp"
 #include "dicom_tag_constants.hpp"
+#include "result.hpp"
 
 #include <pacs/encoding/transfer_syntax.hpp>
 
@@ -20,122 +21,9 @@
 #include <span>
 #include <string>
 #include <string_view>
-#include <variant>
 #include <vector>
 
 namespace pacs::core {
-
-/**
- * @brief Error codes for DICOM file operations
- */
-enum class dicom_file_error {
-    file_not_found,          ///< File does not exist
-    file_read_error,         ///< Failed to read file
-    file_write_error,        ///< Failed to write file
-    invalid_dicom_file,      ///< Not a valid DICOM Part 10 file
-    missing_dicm_prefix,     ///< Missing "DICM" magic bytes at offset 128
-    invalid_meta_info,       ///< Invalid File Meta Information
-    missing_transfer_syntax, ///< Transfer Syntax UID not found in meta info
-    unsupported_transfer_syntax, ///< Transfer Syntax is not supported
-    decode_error,            ///< Failed to decode data
-    encode_error,            ///< Failed to encode data
-};
-
-/**
- * @brief Convert error code to human-readable string
- * @param error The error code
- * @return String description of the error
- */
-[[nodiscard]] auto to_string(dicom_file_error error) -> std::string;
-
-/**
- * @brief Simple result type for operations that can fail
- *
- * This is a C++20 compatible alternative to std::expected (C++23).
- *
- * @tparam T The success value type
- * @tparam E The error type
- */
-template <typename T, typename E>
-class result {
-public:
-    /// Construct a success result
-    result(T value) : data_(std::move(value)) {}  // NOLINT: implicit
-
-    /// Construct an error result
-    result(E error) : data_(std::move(error)) {}  // NOLINT: implicit
-
-    /// Check if the result contains a value
-    [[nodiscard]] auto has_value() const noexcept -> bool {
-        return std::holds_alternative<T>(data_);
-    }
-
-    /// Implicit conversion to bool
-    explicit operator bool() const noexcept {
-        return has_value();
-    }
-
-    /// Get the value (undefined if has_value() is false)
-    [[nodiscard]] auto value() & -> T& {
-        return std::get<T>(data_);
-    }
-
-    [[nodiscard]] auto value() const& -> const T& {
-        return std::get<T>(data_);
-    }
-
-    [[nodiscard]] auto value() && -> T&& {
-        return std::get<T>(std::move(data_));
-    }
-
-    /// Get the error (undefined if has_value() is true)
-    [[nodiscard]] auto error() const -> const E& {
-        return std::get<E>(data_);
-    }
-
-    /// Dereference operator
-    [[nodiscard]] auto operator*() & -> T& { return value(); }
-    [[nodiscard]] auto operator*() const& -> const T& { return value(); }
-    [[nodiscard]] auto operator*() && -> T&& { return std::move(*this).value(); }
-
-    /// Arrow operator
-    [[nodiscard]] auto operator->() -> T* { return &value(); }
-    [[nodiscard]] auto operator->() const -> const T* { return &value(); }
-
-private:
-    std::variant<T, E> data_;
-};
-
-/**
- * @brief Specialization of result for void value type
- */
-template <typename E>
-class result<void, E> {
-public:
-    /// Construct a success result
-    result() : error_(std::nullopt) {}
-
-    /// Construct an error result
-    result(E error) : error_(std::move(error)) {}  // NOLINT: implicit
-
-    /// Check if the result is successful
-    [[nodiscard]] auto has_value() const noexcept -> bool {
-        return !error_.has_value();
-    }
-
-    /// Implicit conversion to bool
-    explicit operator bool() const noexcept {
-        return has_value();
-    }
-
-    /// Get the error (undefined if has_value() is true)
-    [[nodiscard]] auto error() const -> const E& {
-        return *error_;
-    }
-
-private:
-    std::optional<E> error_;
-};
 
 /**
  * @brief Represents a DICOM Part 10 file
@@ -153,8 +41,8 @@ private:
  * @code
  * // Reading a DICOM file
  * auto result = dicom_file::open("image.dcm");
- * if (result) {
- *     auto& file = *result;
+ * if (result.is_ok()) {
+ *     auto& file = result.value();
  *     std::cout << "Patient: " << file.dataset().get_string(tags::patient_name) << "\n";
  *     std::cout << "Transfer Syntax: " << file.transfer_syntax().name() << "\n";
  * }
@@ -172,9 +60,6 @@ private:
  */
 class dicom_file {
 public:
-    /// Result type alias for convenience
-    template <typename T>
-    using file_result = result<T, dicom_file_error>;
 
     // ========================================================================
     // Static Factory Methods (Reading)
@@ -186,7 +71,7 @@ public:
      * @return Result containing the parsed file or an error
      */
     [[nodiscard]] static auto open(const std::filesystem::path& path)
-        -> file_result<dicom_file>;
+        -> pacs::Result<dicom_file>;
 
     /**
      * @brief Parse a DICOM file from raw bytes
@@ -194,7 +79,7 @@ public:
      * @return Result containing the parsed file or an error
      */
     [[nodiscard]] static auto from_bytes(std::span<const uint8_t> data)
-        -> file_result<dicom_file>;
+        -> pacs::Result<dicom_file>;
 
     // ========================================================================
     // Static Factory Methods (Creation)
@@ -228,7 +113,7 @@ public:
      * @return Result indicating success or failure
      */
     [[nodiscard]] auto save(const std::filesystem::path& path) const
-        -> file_result<void>;
+        -> pacs::VoidResult;
 
     /**
      * @brief Encode the DICOM file to raw bytes
@@ -334,7 +219,7 @@ private:
      */
     [[nodiscard]] static auto parse_meta_information(
         std::span<const uint8_t> data, size_t& bytes_read)
-        -> file_result<dicom_dataset>;
+        -> pacs::Result<dicom_dataset>;
 
     /**
      * @brief Generate File Meta Information for a dataset
@@ -362,7 +247,7 @@ private:
      */
     [[nodiscard]] static auto decode_explicit_vr_le(
         std::span<const uint8_t> data, size_t& bytes_read)
-        -> file_result<dicom_dataset>;
+        -> pacs::Result<dicom_dataset>;
 
     /// File Meta Information (Group 0002)
     dicom_dataset meta_info_;
