@@ -1385,12 +1385,109 @@ auto custom = cron_schedule::parse("0 2 * * 1-5");  // 2:00 AM weekdays
 - **logger_adapter**: Audit logging for all task operations
 - **monitoring_adapter**: Metrics for task success/failure rates
 
+### Study Lock Manager
+
+**Implementation**: Thread-safe lock manager for controlling concurrent access to DICOM studies during modifications, migrations, and other operations that require exclusive access.
+
+**Features**:
+- **Exclusive locks**: Prevent all other access to a study during modifications
+- **Shared locks**: Allow concurrent read access while blocking exclusive locks
+- **Migration locks**: High-priority locks for migration operations
+- **Automatic expiration**: Locks can expire after a configured timeout
+- **Token-based release**: Secure lock release using unique tokens
+- **Force unlock**: Admin capability to forcibly release locks
+- **Statistics tracking**: Lock acquisition, contention, and duration metrics
+- **Event callbacks**: Notifications for lock acquisition, release, and expiration
+
+**Classes**:
+- `study_lock_manager` - Main class for managing study locks
+- `study_lock_manager_config` - Configuration options
+- `lock_token` - Unique token representing a held lock
+- `lock_info` - Detailed information about a lock
+- `lock_type` - Enumeration of lock types (exclusive, shared, migration)
+- `lock_manager_stats` - Statistics for lock operations
+
+**Lock Types**:
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `exclusive` | No other access allowed | Study modifications, deletions |
+| `shared` | Read-only access allowed | Concurrent read operations |
+| `migration` | Highest priority lock | HSM tier migrations |
+
+**Example**:
+```cpp
+#include <pacs/workflow/study_lock_manager.hpp>
+
+using namespace pacs::workflow;
+
+// Configure lock manager
+study_lock_manager_config config;
+config.default_timeout = std::chrono::minutes{30};
+config.max_shared_locks = 100;
+config.allow_force_unlock = true;
+
+study_lock_manager manager{config};
+
+// Acquire exclusive lock for modification
+auto result = manager.lock("1.2.3.4.5", "Study update", "user123");
+if (result.is_ok()) {
+    auto token = result.value();
+
+    // Perform modifications...
+
+    // Release lock
+    manager.unlock(token);
+}
+
+// Acquire shared lock for reading
+auto shared_result = manager.lock(
+    "1.2.3.4.5",
+    lock_type::shared,
+    "Read access",
+    "viewer"
+);
+
+// Check if study is locked
+if (manager.is_locked("1.2.3.4.5")) {
+    auto info = manager.get_lock_info("1.2.3.4.5");
+    if (info) {
+        std::cout << "Locked by: " << info->holder << "\n";
+        std::cout << "Duration: " << info->duration().count() << "ms\n";
+    }
+}
+
+// Force unlock (admin operation)
+manager.force_unlock("1.2.3.4.5", "Emergency release");
+
+// Get lock statistics
+auto stats = manager.get_stats();
+std::cout << "Active locks: " << stats.active_locks << "\n";
+std::cout << "Contentions: " << stats.contention_count << "\n";
+```
+
+**Configuration Options**:
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `default_timeout` | seconds | 0 | Default lock timeout (0=no timeout) |
+| `acquire_wait_timeout` | milliseconds | 5000 | Max time to wait for lock |
+| `cleanup_interval` | seconds | 60 | Interval for expired lock cleanup |
+| `auto_cleanup` | bool | true | Enable automatic expired lock cleanup |
+| `max_shared_locks` | size_t | 100 | Maximum concurrent shared locks |
+| `allow_force_unlock` | bool | true | Allow admin force unlock |
+
+**Integration Points**:
+- **thread_system**: Thread-safe operations via shared_mutex
+- **common_system**: Result<T> pattern for error handling
+- **logger_adapter**: Audit logging for lock operations
+- **monitoring_adapter**: Lock contention and duration metrics
+
 ---
 
 ## Recently Completed Features (v1.2.0 - 2025-12-13)
 
 | Feature | Description | Issue | Status |
 |---------|-------------|-------|--------|
+| Study Lock Manager | Thread-safe lock manager for concurrent access control | #208 | ✅ Complete |
 | Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | ✅ Complete |
 | Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | ✅ Complete |
 | Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
@@ -1516,6 +1613,7 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | 2.0.0 | 2025-12-13 | raphaelshin | Added: Auto Prefetch Service for worklist-triggered prior study prefetch for Issue #206 |
 | 2.1.0 | 2025-12-13 | raphaelshin | Added: Task Scheduler Service for automated cleanup, archive, and verification for Issue #207 |
 | 2.2.0 | 2025-12-17 | raphaelshin | Added: Result<T> pattern for unified error handling, PACS error codes (-700 to -799) for Issue #308 |
+| 2.3.0 | 2025-12-17 | raphaelshin | Added: Study Lock Manager for concurrent access control with exclusive/shared/migration locks for Issue #208 |
 
 ---
 
