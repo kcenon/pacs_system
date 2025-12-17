@@ -7,6 +7,7 @@
 
 #include <pacs/core/dicom_file.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
+#include <pacs/core/result.hpp>
 
 #include <cstring>
 #include <filesystem>
@@ -166,8 +167,8 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
 
         auto result = dicom_file::from_bytes(data);
 
-        REQUIRE(result.has_value());
-        auto& file = *result;
+        REQUIRE(result.is_ok());
+        auto& file = result.value();
 
         // Check meta information
         CHECK(file.meta_information().contains(tags::transfer_syntax_uid));
@@ -183,8 +184,8 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
 
         auto result = dicom_file::from_bytes(data);
 
-        REQUIRE_FALSE(result.has_value());
-        CHECK(result.error() == dicom_file_error::invalid_dicom_file);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::invalid_dicom_file);
     }
 
     SECTION("missing DICM prefix returns error") {
@@ -192,8 +193,8 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
 
         auto result = dicom_file::from_bytes(data);
 
-        REQUIRE_FALSE(result.has_value());
-        CHECK(result.error() == dicom_file_error::missing_dicm_prefix);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::missing_dicm_prefix);
     }
 
     SECTION("wrong DICM prefix returns error") {
@@ -203,8 +204,8 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
 
         auto result = dicom_file::from_bytes(data);
 
-        REQUIRE_FALSE(result.has_value());
-        CHECK(result.error() == dicom_file_error::missing_dicm_prefix);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::missing_dicm_prefix);
     }
 }
 
@@ -212,8 +213,8 @@ TEST_CASE("dicom_file reading from file", "[core][dicom_file]") {
     SECTION("non-existent file returns error") {
         auto result = dicom_file::open("/nonexistent/path/test.dcm");
 
-        REQUIRE_FALSE(result.has_value());
-        CHECK(result.error() == dicom_file_error::file_not_found);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::file_not_found);
     }
 
     SECTION("valid file is read correctly") {
@@ -229,8 +230,8 @@ TEST_CASE("dicom_file reading from file", "[core][dicom_file]") {
 
         auto result = dicom_file::open(temp_path);
 
-        REQUIRE(result.has_value());
-        CHECK(result->dataset().get_string(tags::patient_name) == "DOE^JOHN");
+        REQUIRE(result.is_ok());
+        CHECK(result.value().dataset().get_string(tags::patient_name) == "DOE^JOHN");
 
         // Cleanup
         std::filesystem::remove(temp_path);
@@ -332,7 +333,7 @@ TEST_CASE("dicom_file writing", "[core][dicom_file]") {
         auto temp_path = create_temp_file_path("test_write.dcm");
         auto save_result = file.save(temp_path);
 
-        REQUIRE(save_result.has_value());
+        REQUIRE(save_result.is_ok());
         CHECK(std::filesystem::exists(temp_path));
 
         // Cleanup
@@ -363,8 +364,8 @@ TEST_CASE("dicom_file round-trip", "[core][dicom_file]") {
         auto bytes = original.to_bytes();
         auto restored_result = dicom_file::from_bytes(bytes);
 
-        REQUIRE(restored_result.has_value());
-        auto& restored = *restored_result;
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
 
         // Compare datasets
         CHECK(restored.dataset().get_string(tags::patient_name) ==
@@ -391,12 +392,12 @@ TEST_CASE("dicom_file round-trip", "[core][dicom_file]") {
 
         // Save
         auto save_result = original.save(temp_path);
-        REQUIRE(save_result.has_value());
+        REQUIRE(save_result.is_ok());
 
         // Open
         auto loaded_result = dicom_file::open(temp_path);
-        REQUIRE(loaded_result.has_value());
-        auto& loaded = *loaded_result;
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
 
         // Compare
         CHECK(loaded.dataset().get_string(tags::patient_name) == "ROUNDTRIP^TEST");
@@ -449,20 +450,30 @@ TEST_CASE("dicom_file accessors", "[core][dicom_file]") {
 }
 
 // ============================================================================
-// Error String Tests
+// Error Code Tests
 // ============================================================================
 
-TEST_CASE("dicom_file_error to_string", "[core][dicom_file]") {
-    CHECK_FALSE(to_string(dicom_file_error::file_not_found).empty());
-    CHECK_FALSE(to_string(dicom_file_error::file_read_error).empty());
-    CHECK_FALSE(to_string(dicom_file_error::file_write_error).empty());
-    CHECK_FALSE(to_string(dicom_file_error::invalid_dicom_file).empty());
-    CHECK_FALSE(to_string(dicom_file_error::missing_dicm_prefix).empty());
-    CHECK_FALSE(to_string(dicom_file_error::invalid_meta_info).empty());
-    CHECK_FALSE(to_string(dicom_file_error::missing_transfer_syntax).empty());
-    CHECK_FALSE(to_string(dicom_file_error::unsupported_transfer_syntax).empty());
-    CHECK_FALSE(to_string(dicom_file_error::decode_error).empty());
-    CHECK_FALSE(to_string(dicom_file_error::encode_error).empty());
+TEST_CASE("error codes are used correctly", "[core][dicom_file]") {
+    SECTION("file_not_found error code") {
+        auto result = dicom_file::open("/nonexistent/path/test.dcm");
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::file_not_found);
+        CHECK_FALSE(result.error().message.empty());
+    }
+
+    SECTION("invalid_dicom_file error code") {
+        std::vector<uint8_t> data(100, 0);
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::invalid_dicom_file);
+    }
+
+    SECTION("missing_dicm_prefix error code") {
+        std::vector<uint8_t> data(256, 0);
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::missing_dicm_prefix);
+    }
 }
 
 // ============================================================================
