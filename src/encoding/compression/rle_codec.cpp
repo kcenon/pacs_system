@@ -1,4 +1,5 @@
 #include "pacs/encoding/compression/rle_codec.hpp"
+#include "pacs/encoding/simd/simd_rle.hpp"
 #include <pacs/core/result.hpp>
 
 #include <algorithm>
@@ -252,7 +253,7 @@ private:
             seg.reserve(pixels_per_frame);
         }
 
-        // Extract segments from pixel data
+        // Extract segments from pixel data using SIMD optimization
         // DICOM RLE stores each byte plane separately
         // For 16-bit: high byte first, then low byte
         // For color: each color component separately
@@ -260,12 +261,21 @@ private:
         if (bytes_per_sample == 1) {
             // 8-bit samples
             if (params.samples_per_pixel == 1) {
-                // Grayscale: single segment
-                for (size_t i = 0; i < pixel_data.size(); ++i) {
-                    segments[0].push_back(pixel_data[i]);
-                }
+                // Grayscale: single segment - direct copy
+                segments[0].assign(pixel_data.begin(), pixel_data.end());
+            } else if (params.samples_per_pixel == 3) {
+                // Color (RGB): 3 segments - use SIMD deinterleaving
+                segments[0].resize(pixels_per_frame);
+                segments[1].resize(pixels_per_frame);
+                segments[2].resize(pixels_per_frame);
+                simd::interleaved_to_planar_rgb8(
+                    pixel_data.data(),
+                    segments[0].data(),
+                    segments[1].data(),
+                    segments[2].data(),
+                    pixels_per_frame);
             } else {
-                // Color (RGB): 3 segments
+                // Other sample counts: scalar fallback
                 for (size_t i = 0; i < pixels_per_frame; ++i) {
                     for (int s = 0; s < params.samples_per_pixel; ++s) {
                         segments[s].push_back(pixel_data[i * params.samples_per_pixel + s]);
@@ -276,14 +286,49 @@ private:
             // 16-bit samples (little-endian input)
             // DICOM RLE stores: all high bytes, then all low bytes
             if (params.samples_per_pixel == 1) {
-                // Grayscale: 2 segments (high byte, low byte)
+                // Grayscale: 2 segments (high byte, low byte) - use SIMD
+                segments[0].resize(pixels_per_frame);
+                segments[1].resize(pixels_per_frame);
+                simd::split_16bit_to_planes(
+                    pixel_data.data(),
+                    segments[0].data(),  // High byte
+                    segments[1].data(),  // Low byte
+                    pixels_per_frame);
+            } else if (params.samples_per_pixel == 3) {
+                // 16-bit Color: 6 segments - SIMD for each color component
+                // First deinterleave RGB, then split each into high/low
+                std::vector<uint8_t> r_plane(pixels_per_frame * 2);
+                std::vector<uint8_t> g_plane(pixels_per_frame * 2);
+                std::vector<uint8_t> b_plane(pixels_per_frame * 2);
+
+                // Deinterleave 16-bit RGB (scalar for now, 16-bit RGB is rare)
                 for (size_t i = 0; i < pixels_per_frame; ++i) {
-                    size_t idx = i * 2;
-                    segments[0].push_back(pixel_data[idx + 1]);  // High byte
-                    segments[1].push_back(pixel_data[idx]);      // Low byte
+                    size_t src_idx = i * 6;  // 3 samples * 2 bytes
+                    size_t dst_idx = i * 2;
+                    r_plane[dst_idx] = pixel_data[src_idx];
+                    r_plane[dst_idx + 1] = pixel_data[src_idx + 1];
+                    g_plane[dst_idx] = pixel_data[src_idx + 2];
+                    g_plane[dst_idx + 1] = pixel_data[src_idx + 3];
+                    b_plane[dst_idx] = pixel_data[src_idx + 4];
+                    b_plane[dst_idx + 1] = pixel_data[src_idx + 5];
                 }
+
+                // Split each color plane into high/low using SIMD
+                segments[0].resize(pixels_per_frame);  // R high
+                segments[1].resize(pixels_per_frame);  // R low
+                segments[2].resize(pixels_per_frame);  // G high
+                segments[3].resize(pixels_per_frame);  // G low
+                segments[4].resize(pixels_per_frame);  // B high
+                segments[5].resize(pixels_per_frame);  // B low
+
+                simd::split_16bit_to_planes(r_plane.data(), segments[0].data(),
+                                             segments[1].data(), pixels_per_frame);
+                simd::split_16bit_to_planes(g_plane.data(), segments[2].data(),
+                                             segments[3].data(), pixels_per_frame);
+                simd::split_16bit_to_planes(b_plane.data(), segments[4].data(),
+                                             segments[5].data(), pixels_per_frame);
             } else {
-                // Color: 2 segments per color component
+                // Other sample counts: scalar fallback
                 for (size_t i = 0; i < pixels_per_frame; ++i) {
                     for (int s = 0; s < params.samples_per_pixel; ++s) {
                         size_t idx = (i * params.samples_per_pixel + s) * 2;
@@ -399,16 +444,25 @@ private:
             }
         }
 
-        // Reconstruct pixel data from segments
+        // Reconstruct pixel data from segments using SIMD optimization
         size_t output_size = pixels_per_frame * params.samples_per_pixel * bytes_per_sample;
         std::vector<uint8_t> output(output_size);
 
         if (bytes_per_sample == 1) {
             // 8-bit samples
             if (params.samples_per_pixel == 1) {
+                // Grayscale: direct move
                 output = std::move(decoded_segments[0]);
+            } else if (params.samples_per_pixel == 3) {
+                // Color (RGB): interleave samples using SIMD
+                simd::planar_to_interleaved_rgb8(
+                    decoded_segments[0].data(),
+                    decoded_segments[1].data(),
+                    decoded_segments[2].data(),
+                    output.data(),
+                    pixels_per_frame);
             } else {
-                // Color: interleave samples
+                // Other sample counts: scalar fallback
                 for (size_t i = 0; i < pixels_per_frame; ++i) {
                     for (int s = 0; s < params.samples_per_pixel; ++s) {
                         output[i * params.samples_per_pixel + s] = decoded_segments[s][i];
@@ -418,14 +472,42 @@ private:
         } else {
             // 16-bit samples
             if (params.samples_per_pixel == 1) {
-                // Grayscale: combine high and low byte segments
+                // Grayscale: combine high and low byte segments using SIMD
+                simd::merge_planes_to_16bit(
+                    decoded_segments[0].data(),  // High byte
+                    decoded_segments[1].data(),  // Low byte
+                    output.data(),
+                    pixels_per_frame);
+            } else if (params.samples_per_pixel == 3) {
+                // 16-bit Color: merge each color component, then interleave
+                std::vector<uint8_t> r_plane(pixels_per_frame * 2);
+                std::vector<uint8_t> g_plane(pixels_per_frame * 2);
+                std::vector<uint8_t> b_plane(pixels_per_frame * 2);
+
+                // Merge high/low bytes for each color using SIMD
+                simd::merge_planes_to_16bit(decoded_segments[0].data(),
+                                             decoded_segments[1].data(),
+                                             r_plane.data(), pixels_per_frame);
+                simd::merge_planes_to_16bit(decoded_segments[2].data(),
+                                             decoded_segments[3].data(),
+                                             g_plane.data(), pixels_per_frame);
+                simd::merge_planes_to_16bit(decoded_segments[4].data(),
+                                             decoded_segments[5].data(),
+                                             b_plane.data(), pixels_per_frame);
+
+                // Interleave RGB (scalar for now, 16-bit RGB is rare)
                 for (size_t i = 0; i < pixels_per_frame; ++i) {
-                    size_t idx = i * 2;
-                    output[idx] = decoded_segments[1][i];      // Low byte
-                    output[idx + 1] = decoded_segments[0][i];  // High byte
+                    size_t src_idx = i * 2;
+                    size_t dst_idx = i * 6;  // 3 samples * 2 bytes
+                    output[dst_idx] = r_plane[src_idx];
+                    output[dst_idx + 1] = r_plane[src_idx + 1];
+                    output[dst_idx + 2] = g_plane[src_idx];
+                    output[dst_idx + 3] = g_plane[src_idx + 1];
+                    output[dst_idx + 4] = b_plane[src_idx];
+                    output[dst_idx + 5] = b_plane[src_idx + 1];
                 }
             } else {
-                // Color: combine and interleave
+                // Other sample counts: scalar fallback
                 for (size_t i = 0; i < pixels_per_frame; ++i) {
                     for (int s = 0; s < params.samples_per_pixel; ++s) {
                         size_t idx = (i * params.samples_per_pixel + s) * 2;
