@@ -24,12 +24,12 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <queue>
-#include <condition_variable>
 #include <string>
 #include <string_view>
 #include <variant>
 #include <vector>
+
+#include <kcenon/thread/lockfree/lockfree_queue.h>
 
 #include "pacs/core/result.hpp"
 
@@ -628,10 +628,11 @@ private:
     /// Peer association for in-memory testing
     association* peer_{nullptr};
 
-    /// Incoming message queue for in-memory testing
-    std::deque<std::pair<uint8_t, dimse::dimse_message>> incoming_queue_;
-    mutable std::mutex queue_mutex_;
-    std::condition_variable queue_cv_;
+    /// Incoming message queue for in-memory testing (lock-free)
+    using message_type = std::pair<uint8_t, dimse::dimse_message>;
+    using message_queue_type = kcenon::thread::lockfree_queue<message_type>;
+    mutable std::unique_ptr<message_queue_type> incoming_queue_{
+        std::make_unique<message_queue_type>()};
 };
 
 }  // namespace pacs::network
