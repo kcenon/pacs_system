@@ -794,7 +794,7 @@ std::vector<std::pair<std::filesystem::path, std::string>> analyze_files(
 
     for (const auto& file_path : files) {
         auto result = dicom_file::open(file_path);
-        if (result.has_value()) {
+        if (result.is_ok()) {
             auto sop_class = result.value().sop_class_uid();
             if (!sop_class.empty()) {
                 valid_files.emplace_back(file_path, sop_class);
