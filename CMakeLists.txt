@@ -583,6 +583,7 @@ add_library(pacs_core
     src/core/tag_info.cpp
     src/core/dicom_dictionary.cpp
     src/core/standard_tags_data.cpp
+    src/core/pool_manager.cpp
 )
 target_include_directories(pacs_core
     PUBLIC
@@ -669,6 +670,7 @@ endif()
 add_library(pacs_network
     src/network/pdu_encoder.cpp
     src/network/pdu_decoder.cpp
+    src/network/pdu_buffer_pool.cpp
     src/network/association.cpp
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
