@@ -243,7 +243,7 @@ private:
                 for (const auto& inst : instance_list) {
                     auto path = file_storage_->get_file_path(inst.sop_uid);
                     auto file_result = dicom_file::open(path);
-                    if (file_result.has_value()) {
+                    if (file_result.is_ok()) {
                         results.push_back(std::move(file_result.value()));
                     }
                 }

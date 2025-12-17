@@ -1,7 +1,7 @@
 # PACS 시스템 기능
 
-> **버전:** 0.1.2.0
-> **최종 수정일:** 2025-12-07
+> **버전:** 0.1.9.0
+> **최종 수정일:** 2025-12-17
 > **언어:** [English](FEATURES.md) | **한국어**
 
 이 문서는 PACS 시스템에서 사용 가능한 모든 기능에 대한 포괄적인 세부 정보를 제공합니다.
@@ -18,6 +18,7 @@
 - [보안 기능](#보안-기능)
 - [모니터링 및 관찰성](#모니터링-및-관찰성)
 - [워크플로우 서비스](#워크플로우-서비스)
+- [에러 처리](#에러-처리)
 - [계획된 기능](#계획된-기능)
 
 ---
@@ -1116,6 +1117,67 @@ scheduler.stop(true);  // 실행 중인 태스크 대기
 - **thread_pool**: 병렬 태스크 실행
 - **logger_adapter**: 모든 태스크 작업 감사 로깅
 - **monitoring_adapter**: 태스크 성공/실패율 메트릭
+
+---
+
+## 에러 처리
+
+### Result<T> 패턴
+
+**구현**: 예외 기반 에러 처리를 대체하는 common_system의 `Result<T>` 패턴을 사용한 통합 에러 처리.
+
+**기능**:
+- 예외 없는 타입 안전 에러 전파
+- 코드, 메시지, 모듈, 세부 정보를 포함하는 풍부한 에러 정보
+- 표준화된 PACS 에러 코드 (-700 ~ -799 범위)
+- 에러 변환을 위한 모나딕 연산 (`map`, `and_then`, `or_else`)
+- 일반적인 패턴을 위한 편의 매크로
+
+**에러 코드 범주**:
+
+| 범위 | 범주 | 설명 |
+|------|------|------|
+| -700 ~ -719 | DICOM 파일 | 파일 작업, DICM 접두사, 메타 정보 |
+| -720 ~ -739 | DICOM 요소 | 요소 접근, 값 변환 |
+| -740 ~ -759 | 인코딩 | 인코딩, 디코딩, 압축 |
+| -760 ~ -779 | 네트워크 | Association, DIMSE, PDU |
+| -780 ~ -799 | 스토리지 | 저장, 검색, 조회 작업 |
+
+**클래스 및 타입**:
+- `pacs::Result<T>` - Result 타입 별칭
+- `pacs::VoidResult` - void 작업용 Result
+- `pacs::error_info` - 에러 정보 구조체
+- `pacs::error_codes` - 표준화된 에러 코드
+
+**예제**:
+```cpp
+#include <pacs/core/result.hpp>
+#include <pacs/core/dicom_file.hpp>
+
+using namespace pacs::core;
+
+// Result<T>를 사용한 DICOM 파일 읽기
+auto result = dicom_file::open("image.dcm");
+if (result.is_ok()) {
+    auto& file = result.value();
+    std::cout << "SOP Class: " << file.sop_class_uid() << "\n";
+} else {
+    const auto& err = result.error();
+    std::cerr << "에러 " << err.code << ": " << err.message << "\n";
+}
+
+// 모나딕 연산 사용
+auto sop_uid = dicom_file::open("image.dcm")
+    .map([](dicom_file& f) { return f.sop_instance_uid(); })
+    .unwrap_or("unknown");
+
+// PACS_ASSIGN_OR_RETURN 매크로 사용
+pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
+    PACS_ASSIGN_OR_RETURN(auto file, dicom_file::open(path));
+    return pacs::Result<std::string>::ok(
+        file.dataset().get_string(tags::patient_name));
+}
+```
 
 ---
 
