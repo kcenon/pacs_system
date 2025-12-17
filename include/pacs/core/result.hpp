@@ -37,40 +37,51 @@ using error_info = kcenon::common::error_info;
  * @namespace error_codes
  * @brief PACS-specific error codes
  *
+ * Error code range: -700 to -799
  * Provides access to both common error codes and PACS-specific codes.
  */
 namespace error_codes {
     // Import common error codes
     using namespace kcenon::common::error::codes::common_errors;
 
-    // PACS-specific error codes
-    namespace pacs = kcenon::common::error::codes::pacs_system;
+    // ========================================================================
+    // PACS-specific error codes (-700 to -799)
+    // ========================================================================
+    constexpr int pacs_base = -700;
 
-    // Convenience aliases for frequently used PACS errors
-    using kcenon::common::error::codes::pacs_system::file_not_found;
-    using kcenon::common::error::codes::pacs_system::file_read_error;
-    using kcenon::common::error::codes::pacs_system::file_write_error;
-    using kcenon::common::error::codes::pacs_system::invalid_dicom_file;
-    using kcenon::common::error::codes::pacs_system::missing_dicm_prefix;
-    using kcenon::common::error::codes::pacs_system::invalid_meta_info;
-    using kcenon::common::error::codes::pacs_system::missing_transfer_syntax;
-    using kcenon::common::error::codes::pacs_system::unsupported_transfer_syntax;
-    using kcenon::common::error::codes::pacs_system::element_not_found;
-    using kcenon::common::error::codes::pacs_system::value_conversion_error;
-    using kcenon::common::error::codes::pacs_system::invalid_vr;
-    using kcenon::common::error::codes::pacs_system::invalid_tag;
-    using kcenon::common::error::codes::pacs_system::data_size_mismatch;
-    using kcenon::common::error::codes::pacs_system::decode_error;
-    using kcenon::common::error::codes::pacs_system::encode_error;
-    using kcenon::common::error::codes::pacs_system::compression_error;
-    using kcenon::common::error::codes::pacs_system::decompression_error;
-    using kcenon::common::error::codes::pacs_system::association_rejected;
-    using kcenon::common::error::codes::pacs_system::association_aborted;
-    using kcenon::common::error::codes::pacs_system::dimse_error;
-    using kcenon::common::error::codes::pacs_system::pdu_error;
-    using kcenon::common::error::codes::pacs_system::storage_failed;
-    using kcenon::common::error::codes::pacs_system::retrieve_failed;
-    using kcenon::common::error::codes::pacs_system::query_failed;
+    // DICOM file errors (-700 to -719)
+    constexpr int file_not_found = pacs_base - 0;
+    constexpr int file_read_error = pacs_base - 1;
+    constexpr int file_write_error = pacs_base - 2;
+    constexpr int invalid_dicom_file = pacs_base - 3;
+    constexpr int missing_dicm_prefix = pacs_base - 4;
+    constexpr int invalid_meta_info = pacs_base - 5;
+    constexpr int missing_transfer_syntax = pacs_base - 6;
+    constexpr int unsupported_transfer_syntax = pacs_base - 7;
+
+    // DICOM element errors (-720 to -739)
+    constexpr int element_not_found = pacs_base - 20;
+    constexpr int value_conversion_error = pacs_base - 21;
+    constexpr int invalid_vr = pacs_base - 22;
+    constexpr int invalid_tag = pacs_base - 23;
+    constexpr int data_size_mismatch = pacs_base - 24;
+
+    // Encoding/Decoding errors (-740 to -759)
+    constexpr int decode_error = pacs_base - 40;
+    constexpr int encode_error = pacs_base - 41;
+    constexpr int compression_error = pacs_base - 42;
+    constexpr int decompression_error = pacs_base - 43;
+
+    // Network/Association errors (-760 to -779)
+    constexpr int association_rejected = pacs_base - 60;
+    constexpr int association_aborted = pacs_base - 61;
+    constexpr int dimse_error = pacs_base - 62;
+    constexpr int pdu_error = pacs_base - 63;
+
+    // Storage errors (-780 to -799)
+    constexpr int storage_failed = pacs_base - 80;
+    constexpr int retrieve_failed = pacs_base - 81;
+    constexpr int query_failed = pacs_base - 82;
 } // namespace error_codes
 
 // Re-export common utility functions
