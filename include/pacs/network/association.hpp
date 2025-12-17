@@ -31,9 +31,7 @@
 #include <variant>
 #include <vector>
 
-#ifdef PACS_WITH_COMMON_SYSTEM
-#include <kcenon/common/patterns/result.h>
-#endif
+#include "pacs/core/result.hpp"
 
 namespace pacs::network {
 
@@ -47,32 +45,12 @@ class association;
 // Result Type
 // =============================================================================
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+/// Result type alias using standardized pacs::Result<T>
 template <typename T>
-using Result = kcenon::common::Result<T>;
-#else
-/**
- * @brief Simple result type for error handling
- */
-template <typename T>
-class Result {
-public:
-    Result(T value) : data_(std::move(value)), has_value_(true) {}
-    Result(std::string error) : error_(std::move(error)), has_value_(false) {}
+using Result = pacs::Result<T>;
 
-    [[nodiscard]] bool is_ok() const noexcept { return has_value_; }
-    [[nodiscard]] bool is_err() const noexcept { return !has_value_; }
-    [[nodiscard]] T& value() & { return data_; }
-    [[nodiscard]] const T& value() const& { return data_; }
-    [[nodiscard]] T&& value() && { return std::move(data_); }
-    [[nodiscard]] const std::string& error() const { return error_; }
-
-private:
-    T data_{};
-    std::string error_;
-    bool has_value_;
-};
-#endif
+/// VoidResult type alias for operations without return value
+using VoidResult = pacs::VoidResult;
 
 // =============================================================================
 // Association State

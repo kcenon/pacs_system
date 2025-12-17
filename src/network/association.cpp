@@ -4,7 +4,6 @@
  */
 
 #include "pacs/network/association.hpp"
-#include "pacs/network/association.hpp"
 #include "pacs/network/pdu_encoder.hpp"
 #include "pacs/network/dicom_server.hpp"
 
@@ -12,11 +11,17 @@
 #include <sstream>
 #include <stdexcept>
 
-#ifdef PACS_WITH_COMMON_SYSTEM
-using kcenon::common::error_info;
-#endif
-
 namespace pacs::network {
+
+// Use standardized error_info from pacs::core::result.hpp
+using pacs::error_info;
+using pacs::error_codes::association_rejected;
+using pacs::error_codes::association_aborted;
+using pacs::error_codes::invalid_association_state;
+using pacs::error_codes::no_acceptable_context;
+using pacs::error_codes::release_failed;
+using pacs::error_codes::already_released;
+using pacs::error_codes::receive_timeout;
 
 // =============================================================================
 // rejection_info Implementation
@@ -198,10 +203,10 @@ Result<association> association::connect(
             if (assoc.process_associate_ac(result.value())) {
                 return assoc;
             } else {
-                return error_info("Association negotiation failed");
+                return error_info{no_acceptable_context, "Association negotiation failed", "network"};
             }
         } else {
-            return error_info(result.error());
+            return result.error();
         }
     }
 
@@ -361,19 +366,19 @@ Result<std::monostate> association::send_dimse(
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (state_ != association_state::established) {
-        return error_info("Cannot send DIMSE: association not established");
+        return error_info{invalid_association_state, "Cannot send DIMSE: association not established", "network"};
     }
 
     // Verify context exists
     if (context_to_transfer_syntax_.find(context_id) ==
         context_to_transfer_syntax_.end()) {
-        return error_info("Invalid presentation context ID");
+        return error_info{pacs::error_codes::dimse_error, "Invalid presentation context ID", "network"};
     }
 
     // Message encoding and network send would be handled by network_system
     // For now, validate the message
     if (!msg.is_valid()) {
-        return error_info("Invalid DIMSE message");
+        return error_info{pacs::error_codes::dimse_error, "Invalid DIMSE message", "network"};
     }
 
     // Placeholder for actual send implementation
@@ -393,7 +398,7 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (state_ != association_state::established) {
-            return error_info("Cannot receive DIMSE: association not established");
+            return error_info{invalid_association_state, "Cannot receive DIMSE: association not established", "network"};
         }
     }
 
@@ -416,11 +421,11 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (state_ != association_state::established) {
-            return error_info("Association aborted or released");
+            return error_info{association_aborted, "Association aborted or released", "network"};
         }
     }
 
-    return error_info("Receive timeout");
+    return error_info{receive_timeout, "Receive timeout", "network"};
 }
 
 // =============================================================================
@@ -539,11 +544,11 @@ Result<std::monostate> association::release(duration /*timeout*/) {
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (state_ == association_state::released) {
-        return error_info("Association already released");
+        return error_info{already_released, "Association already released", "network"};
     }
 
     if (state_ != association_state::established) {
-        return error_info("Cannot release: association not established");
+        return error_info{invalid_association_state, "Cannot release: association not established", "network"};
     }
 
     // Transition to awaiting release response
