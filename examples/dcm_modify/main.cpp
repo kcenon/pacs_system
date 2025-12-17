@@ -369,13 +369,13 @@ bool process_file(const std::filesystem::path& input_path,
 
     // Open input file
     auto result = dicom_file::open(input_path);
-    if (!result.has_value()) {
+    if (result.is_err()) {
         std::cerr << "Error: Failed to open '" << input_path.string()
-                  << "': " << to_string(result.error()) << "\n";
+                  << "': " << result.error().message << "\n";
         return false;
     }
 
-    auto file = std::move(*result);
+    auto file = std::move(result.value());
     auto& dataset = file.dataset();
 
     // Dry run mode

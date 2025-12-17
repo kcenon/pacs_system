@@ -546,9 +546,9 @@ int dump_file(const std::filesystem::path& file_path, const options& opts) {
     using namespace pacs::core;
 
     auto result = dicom_file::open(file_path);
-    if (!result.has_value()) {
+    if (result.is_err()) {
         std::cerr << "Error: Failed to open '" << file_path.string()
-                  << "': " << to_string(result.error()) << "\n";
+                  << "': " << result.error().message << "\n";
         return 2;
     }
 
@@ -614,7 +614,7 @@ void scan_directory(const std::filesystem::path& dir_path, const options& opts,
         ++summary.total_files;
 
         auto result = dicom_file::open(file_path);
-        if (!result.has_value()) {
+        if (result.is_err()) {
             ++summary.invalid_files;
             if (opts.verbose) {
                 std::cerr << "  Invalid: " << file_path.filename().string()
