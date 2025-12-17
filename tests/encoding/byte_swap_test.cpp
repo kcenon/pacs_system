@@ -352,3 +352,151 @@ TEST_CASE("swap_fd_bytes swaps double correctly", "[encoding][byte_swap]") {
     CHECK(be_data[6] == 0x00);
     CHECK(be_data[7] == 0x00);
 }
+
+// ============================================================================
+// SIMD Feature Detection Tests
+// ============================================================================
+
+TEST_CASE("SIMD feature detection works", "[encoding][byte_swap][simd]") {
+    using namespace pacs::encoding::simd;
+
+    SECTION("feature detection returns valid flags") {
+        auto features = get_features();
+        // At minimum, we should detect something or nothing
+        // The exact features depend on the CPU
+        (void)features;  // Just ensure it doesn't crash
+    }
+
+    SECTION("optimal vector width is valid") {
+        size_t width = optimal_vector_width();
+        // Valid widths: 0 (no SIMD), 16 (SSE/NEON), 32 (AVX2), 64 (AVX-512)
+        CHECK((width == 0 || width == 16 || width == 32 || width == 64));
+    }
+}
+
+// ============================================================================
+// Large Data SIMD Tests (ensures SIMD paths are exercised)
+// ============================================================================
+
+TEST_CASE("swap_ow_bytes handles large data correctly", "[encoding][byte_swap][simd]") {
+    SECTION("large array (4KB) - exercises SIMD path") {
+        constexpr size_t size = 4096;
+        std::vector<uint8_t> data(size);
+
+        // Fill with pattern
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = static_cast<uint8_t>(i & 0xFF);
+        }
+
+        auto result = swap_ow_bytes(data);
+        REQUIRE(result.size() == size);
+
+        // Verify swaps
+        for (size_t i = 0; i + 1 < size; i += 2) {
+            CHECK(result[i] == data[i + 1]);
+            CHECK(result[i + 1] == data[i]);
+        }
+
+        // Double swap returns original
+        auto restored = swap_ow_bytes(result);
+        CHECK(restored == data);
+    }
+
+    SECTION("unaligned size - tests remainder handling") {
+        constexpr size_t size = 4094;  // Not aligned to 16 or 32
+        std::vector<uint8_t> data(size);
+
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = static_cast<uint8_t>((i * 7) & 0xFF);
+        }
+
+        auto result = swap_ow_bytes(data);
+        auto restored = swap_ow_bytes(result);
+        CHECK(restored == data);
+    }
+}
+
+TEST_CASE("swap_ol_bytes handles large data correctly", "[encoding][byte_swap][simd]") {
+    SECTION("large array (4KB) - exercises SIMD path") {
+        constexpr size_t size = 4096;
+        std::vector<uint8_t> data(size);
+
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = static_cast<uint8_t>(i & 0xFF);
+        }
+
+        auto result = swap_ol_bytes(data);
+        REQUIRE(result.size() == size);
+
+        // Verify swaps (32-bit reversal)
+        for (size_t i = 0; i + 3 < size; i += 4) {
+            CHECK(result[i] == data[i + 3]);
+            CHECK(result[i + 1] == data[i + 2]);
+            CHECK(result[i + 2] == data[i + 1]);
+            CHECK(result[i + 3] == data[i]);
+        }
+
+        // Double swap returns original
+        auto restored = swap_ol_bytes(result);
+        CHECK(restored == data);
+    }
+}
+
+TEST_CASE("swap_od_bytes handles large data correctly", "[encoding][byte_swap][simd]") {
+    SECTION("large array (4KB) - exercises SIMD path") {
+        constexpr size_t size = 4096;
+        std::vector<uint8_t> data(size);
+
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = static_cast<uint8_t>(i & 0xFF);
+        }
+
+        auto result = swap_od_bytes(data);
+        REQUIRE(result.size() == size);
+
+        // Verify swaps (64-bit reversal)
+        for (size_t i = 0; i + 7 < size; i += 8) {
+            CHECK(result[i] == data[i + 7]);
+            CHECK(result[i + 1] == data[i + 6]);
+            CHECK(result[i + 2] == data[i + 5]);
+            CHECK(result[i + 3] == data[i + 4]);
+            CHECK(result[i + 4] == data[i + 3]);
+            CHECK(result[i + 5] == data[i + 2]);
+            CHECK(result[i + 6] == data[i + 1]);
+            CHECK(result[i + 7] == data[i]);
+        }
+
+        // Double swap returns original
+        auto restored = swap_od_bytes(result);
+        CHECK(restored == data);
+    }
+}
+
+TEST_CASE("SIMD byte swap handles medical image sizes", "[encoding][byte_swap][simd]") {
+    SECTION("512x512 16-bit image size (512KB)") {
+        constexpr size_t size = 512 * 512 * 2;
+        std::vector<uint8_t> data(size);
+
+        // Fill with pseudo-random pattern
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = static_cast<uint8_t>((i * 31 + 17) & 0xFF);
+        }
+
+        auto result = swap_ow_bytes(data);
+        auto restored = swap_ow_bytes(result);
+        CHECK(restored == data);
+    }
+
+    SECTION("1024x1024 16-bit image size (2MB)") {
+        constexpr size_t size = 1024 * 1024 * 2;
+        std::vector<uint8_t> data(size);
+
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = static_cast<uint8_t>((i * 13 + 7) & 0xFF);
+        }
+
+        auto result = swap_ow_bytes(data);
+        auto restored = swap_ow_bytes(result);
+        CHECK(restored == data);
+    }
+}
