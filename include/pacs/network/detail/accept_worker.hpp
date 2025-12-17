@@ -14,6 +14,7 @@
 #define PACS_NETWORK_DETAIL_ACCEPT_WORKER_HPP
 
 #include <kcenon/thread/core/thread_base.h>
+#include <kcenon/common/patterns/result.h>
 
 #include <atomic>
 #include <chrono>
@@ -22,6 +23,8 @@
 #include <string>
 
 namespace pacs::network::detail {
+
+namespace common = kcenon::common;
 
 /**
  * @brief Worker thread for accepting incoming DICOM connections
@@ -63,7 +66,7 @@ public:
     // Type Aliases
     // =========================================================================
 
-    using result_void = kcenon::thread::result_void;
+    using result_void = common::VoidResult;
 
     /// Callback type for new connection events
     /// @param session_id Unique identifier for the new session

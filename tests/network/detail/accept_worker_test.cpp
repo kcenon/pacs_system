@@ -68,7 +68,7 @@ TEST_CASE("accept_worker lifecycle", "[accept_worker][lifecycle]") {
         worker.set_wake_interval(50ms);
 
         auto result = worker.start();
-        REQUIRE_FALSE(result.has_error());
+        REQUIRE_FALSE(result.is_err());
 
         // Give the worker time to start and set running state
         std::this_thread::sleep_for(50ms);
@@ -80,7 +80,7 @@ TEST_CASE("accept_worker lifecycle", "[accept_worker][lifecycle]") {
         std::this_thread::sleep_for(100ms);
 
         auto stop_result = worker.stop();
-        REQUIRE_FALSE(stop_result.has_error());
+        REQUIRE_FALSE(stop_result.is_err());
         REQUIRE_FALSE(worker.is_accepting());
     }
 
@@ -88,22 +88,22 @@ TEST_CASE("accept_worker lifecycle", "[accept_worker][lifecycle]") {
         auto result = worker.stop();
         // thread_base returns error when stop is called without start,
         // but this is safe behavior - no crash or undefined behavior
-        REQUIRE(result.has_error());
+        REQUIRE(result.is_err());
         // Verify it's the expected "not running" error
-        REQUIRE(result.get_error().to_string().find("not running") != std::string::npos);
+        REQUIRE(result.error().message.find("not running") != std::string::npos);
     }
 
     SECTION("double start returns error") {
         worker.set_wake_interval(50ms);
 
         auto first = worker.start();
-        REQUIRE_FALSE(first.has_error());
+        REQUIRE_FALSE(first.is_err());
 
         // Wait for thread to fully start
         std::this_thread::sleep_for(50ms);
 
         auto second = worker.start();
-        REQUIRE(second.has_error());
+        REQUIRE(second.is_err());
 
         worker.stop();
     }
@@ -121,7 +121,7 @@ TEST_CASE("accept_worker maintenance callback", "[accept_worker][callback]") {
     worker.set_wake_interval(50ms);
 
     auto result = worker.start();
-    REQUIRE_FALSE(result.has_error());
+    REQUIRE_FALSE(result.is_err());
 
     // Wait for at least 2 maintenance callbacks with generous timeout
     // Using polling with timeout instead of fixed sleep for CI stability
@@ -160,7 +160,7 @@ TEST_CASE("accept_worker graceful shutdown", "[accept_worker][shutdown]") {
     worker.set_wake_interval(10ms);
 
     auto result = worker.start();
-    REQUIRE_FALSE(result.has_error());
+    REQUIRE_FALSE(result.is_err());
 
     // Wait for work to start
     while (!in_work) {
@@ -200,7 +200,7 @@ TEST_CASE("accept_worker destructor stops thread", "[accept_worker][raii]") {
 
         worker.set_wake_interval(50ms);
         auto result = worker.start();
-        REQUIRE_FALSE(result.has_error());
+        REQUIRE_FALSE(result.is_err());
 
         // Give the thread time to transition to running state
         // The thread needs to execute before_start() and enter the wait loop

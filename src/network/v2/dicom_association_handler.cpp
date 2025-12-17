@@ -37,9 +37,13 @@ dicom_association_handler::dicom_association_handler(
 }
 
 dicom_association_handler::~dicom_association_handler() {
-    // Ensure we're stopped
-    if (!is_closed()) {
-        stop(false);  // Force abort if still running
+    try {
+        // Ensure we're stopped
+        if (!is_closed()) {
+            stop(false);  // Force abort if still running
+        }
+    } catch (...) {
+        // Suppress exceptions in destructor to prevent std::terminate
     }
 }
 
@@ -751,20 +755,24 @@ void dicom_association_handler::close_handler(bool graceful) {
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
     // Stop the session
-    {
+    try {
         std::lock_guard<std::mutex> lock(mutex_);
         if (session_) {
             session_->stop_session();
         }
+    } catch (...) {
+        // Suppress exceptions during session cleanup
     }
 #endif
 
     // Notify closed callback
-    {
+    try {
         std::lock_guard<std::mutex> cb_lock(callback_mutex_);
         if (closed_callback_) {
             closed_callback_(session_id(), graceful);
         }
+    } catch (...) {
+        // Suppress exceptions during callback invocation
     }
 }
 

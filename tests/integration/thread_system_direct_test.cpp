@@ -46,9 +46,9 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
 
         // Start pool (should auto-create workers internally)
         auto start_result = pool->start();
-        INFO("start() result: " << (start_result.has_error() ? "error" : "success"));
+        INFO("start() result: " << (start_result.is_err() ? "error" : "success"));
 
-        REQUIRE_FALSE(start_result.has_error());
+        REQUIRE_FALSE(start_result.is_err());
         REQUIRE(pool->is_running());
 
         // Submit a simple task
@@ -66,7 +66,7 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
 
         // Stop pool
         auto stop_result = pool->stop();
-        REQUIRE_FALSE(stop_result.has_error());
+        REQUIRE_FALSE(stop_result.is_err());
     }
 }
 
@@ -95,17 +95,17 @@ TEST_CASE("manual worker batch enqueue - thread_adapter pattern",
 
         // Batch enqueue (this is where thread_adapter does enqueue_batch)
         auto enqueue_result = pool->enqueue_batch(std::move(workers));
-        INFO("enqueue_batch() result: " << (enqueue_result.has_error() ? "error" : "success"));
+        INFO("enqueue_batch() result: " << (enqueue_result.is_err() ? "error" : "success"));
 
-        REQUIRE_FALSE(enqueue_result.has_error());
+        REQUIRE_FALSE(enqueue_result.is_err());
 
         // Start the pool (CRASH POINT on ARM64)
         INFO("About to call pool->start()...");
         auto start_result = pool->start();
         INFO("start() completed");
-        INFO("start() result: " << (start_result.has_error() ? "error" : "success"));
+        INFO("start() result: " << (start_result.is_err() ? "error" : "success"));
 
-        REQUIRE_FALSE(start_result.has_error());
+        REQUIRE_FALSE(start_result.is_err());
         REQUIRE(pool->is_running());
 
         // Submit task
@@ -141,13 +141,13 @@ TEST_CASE("individual worker enqueue", "[thread_system][manual][individual][!may
             auto worker = std::make_unique<kcenon::thread::thread_worker>(false, context);
             auto enqueue_result = pool->enqueue(std::move(worker));
             INFO("enqueue() worker " << i << " result: "
-                                     << (enqueue_result.has_error() ? "error" : "success"));
-            REQUIRE_FALSE(enqueue_result.has_error());
+                                     << (enqueue_result.is_err() ? "error" : "success"));
+            REQUIRE_FALSE(enqueue_result.is_err());
         }
 
         // Start the pool
         auto start_result = pool->start();
-        REQUIRE_FALSE(start_result.has_error());
+        REQUIRE_FALSE(start_result.is_err());
         REQUIRE(pool->is_running());
 
         // Submit task
@@ -190,11 +190,11 @@ TEST_CASE("repeated pool lifecycle", "[thread_system][lifecycle][stress][!mayfai
             }
 
             auto enqueue_result = pool->enqueue_batch(std::move(workers));
-            REQUIRE_FALSE(enqueue_result.has_error());
+            REQUIRE_FALSE(enqueue_result.is_err());
 
             // Start pool
             auto start_result = pool->start();
-            REQUIRE_FALSE(start_result.has_error());
+            REQUIRE_FALSE(start_result.is_err());
 
             // Submit a task
             std::atomic<bool> done{false};

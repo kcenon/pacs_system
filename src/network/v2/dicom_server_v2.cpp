@@ -32,8 +32,12 @@ dicom_server_v2::dicom_server_v2(const server_config& config)
 }
 
 dicom_server_v2::~dicom_server_v2() {
-    if (running_) {
-        stop();
+    try {
+        if (running_) {
+            stop();
+        }
+    } catch (...) {
+        // Suppress exceptions in destructor to prevent std::terminate
     }
 }
 
@@ -117,41 +121,55 @@ Result<std::monostate> dicom_server_v2::start() {
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    // Create messaging_server with server ID based on AE title
-    server_ = std::make_shared<network_system::core::messaging_server>(config_.ae_title);
+    try {
+        // Create messaging_server with server ID based on AE title
+        server_ = std::make_shared<network_system::core::messaging_server>(config_.ae_title);
 
-    // Set up callbacks
-    server_->set_connection_callback(
-        [this](std::shared_ptr<network_system::session::messaging_session> session) {
-            on_connection(std::move(session));
-        });
+        // Set up callbacks
+        server_->set_connection_callback(
+            [this](std::shared_ptr<network_system::session::messaging_session> session) {
+                on_connection(std::move(session));
+            });
 
-    server_->set_disconnection_callback(
-        [this](const std::string& session_id) {
-            on_disconnection(session_id);
-        });
+        server_->set_disconnection_callback(
+            [this](const std::string& session_id) {
+                on_disconnection(session_id);
+            });
 
-    server_->set_receive_callback(
-        [this](std::shared_ptr<network_system::session::messaging_session> session,
-               const std::vector<uint8_t>& data) {
-            on_receive(std::move(session), data);
-        });
+        server_->set_receive_callback(
+            [this](std::shared_ptr<network_system::session::messaging_session> session,
+                   const std::vector<uint8_t>& data) {
+                on_receive(std::move(session), data);
+            });
 
-    server_->set_error_callback(
-        [this](std::shared_ptr<network_system::session::messaging_session> session,
-               std::error_code ec) {
-            on_network_error(std::move(session), ec);
-        });
+        server_->set_error_callback(
+            [this](std::shared_ptr<network_system::session::messaging_session> session,
+                   std::error_code ec) {
+                on_network_error(std::move(session), ec);
+            });
 
-    // Start the messaging server
-    auto result = server_->start_server(config_.port);
-    if (result.is_err()) {
+        // Start the messaging server
+        auto result = server_->start_server(config_.port);
+        if (result.is_err()) {
+            running_ = false;
+            server_.reset();
+            return error_info("Failed to start messaging server: " + result.error().message);
+        }
+
+        return std::monostate{};
+    } catch (const std::exception& e) {
         running_ = false;
-        server_.reset();
-        return error_info("Failed to start messaging server: " + result.error().message);
+        if (server_) {
+            server_.reset();
+        }
+        return error_info(std::string("Exception during server start: ") + e.what());
+    } catch (...) {
+        running_ = false;
+        if (server_) {
+            server_.reset();
+        }
+        return error_info("Unknown exception during server start");
     }
-
-    return std::monostate{};
 #else
     running_ = false;
     return error_info("dicom_server_v2 requires PACS_WITH_NETWORK_SYSTEM");
@@ -166,8 +184,12 @@ void dicom_server_v2::stop(duration timeout) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
     // Phase 1: Stop accepting new connections
     if (server_) {
-        // Stop the messaging_server - this closes the acceptor
-        (void)server_->stop_server();
+        try {
+            // Stop the messaging_server - this closes the acceptor
+            (void)server_->stop_server();
+        } catch (...) {
+            // Suppress exceptions during server stop
+        }
     }
 
     // Phase 2: Wait for handlers to complete gracefully
@@ -183,16 +205,40 @@ void dicom_server_v2::stop(duration timeout) {
     }
 
     // Phase 3: Force stop remaining handlers
+    // Collect handlers first, then stop them without holding the lock
+    // to avoid potential deadlock if handler->stop() triggers callbacks
+    std::vector<std::shared_ptr<dicom_association_handler>> handlers_to_stop;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
+        handlers_to_stop.reserve(handlers_.size());
         for (auto& [session_id, handler] : handlers_) {
-            handler->stop(false);  // Force abort
+            handlers_to_stop.push_back(handler);
         }
         handlers_.clear();
     }
 
+    // Stop handlers without holding the lock
+    for (auto& handler : handlers_to_stop) {
+        try {
+            handler->stop(false);  // Force abort
+        } catch (...) {
+            // Suppress exceptions during handler stop
+        }
+    }
+    handlers_to_stop.clear();
+
+    // Allow any pending callbacks to complete before destroying server
+    std::this_thread::sleep_for(std::chrono::milliseconds{50});
+
     // Clean up server
-    server_.reset();
+    try {
+        server_.reset();
+    } catch (...) {
+        // Suppress exceptions during server cleanup
+    }
+
+    // Additional delay after server cleanup to ensure all resources are released
+    std::this_thread::sleep_for(std::chrono::milliseconds{10});
 #else
     (void)timeout;  // Unused without network_system
 #endif
@@ -286,6 +332,11 @@ void dicom_server_v2::on_connection(
 }
 
 void dicom_server_v2::on_disconnection(const std::string& session_id) {
+    // Skip if server is shutting down
+    if (!running_) {
+        return;
+    }
+
     // Remove handler for this session
     remove_handler(session_id);
 }
@@ -325,7 +376,8 @@ void dicom_server_v2::on_network_error(
     std::shared_ptr<network_system::session::messaging_session> session,
     std::error_code ec) {
 
-    if (!session) {
+    // Skip if server is shutting down
+    if (!running_ || !session) {
         return;
     }
 
@@ -430,6 +482,11 @@ void dicom_server_v2::create_handler(
 }
 
 void dicom_server_v2::remove_handler(const std::string& session_id) {
+    // Skip if server is shutting down - handlers are cleaned up in stop()
+    if (!running_) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(handlers_mutex_);
     auto it = handlers_.find(session_id);
     if (it != handlers_.end()) {

@@ -1169,6 +1169,8 @@ service.stop();
 - Task persistence for recovery across restarts
 - Statistics and monitoring capabilities
 - Concurrent execution with configurable limits
+- **Retry mechanism**: Automatic retry on failure with configurable attempts and delay
+- **Timeout handling**: Per-task execution timeout with async execution support
 
 **Classes**:
 - `task_scheduler` - Main service class for scheduling and execution
@@ -1205,6 +1207,16 @@ service.stop();
 | `max_concurrent_tasks` | size_t | 4 | Maximum parallel task executions |
 | `check_interval` | seconds | 60 | Interval for checking due tasks |
 | `persistence_path` | string | "" | Path for task persistence (empty=disabled) |
+
+**Task Options (per scheduled_task)**:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `timeout` | seconds | 0 | Maximum execution time (0=no limit) |
+| `max_retries` | size_t | 0 | Number of retry attempts on failure |
+| `retry_delay` | seconds | 60 | Delay between retry attempts |
+| `priority` | int | 0 | Task priority (higher = more important) |
+| `enabled` | bool | true | Enable/disable individual task |
 
 **Example**:
 ```cpp
