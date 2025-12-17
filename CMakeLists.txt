@@ -670,6 +670,7 @@ endif()
 add_library(pacs_network
     src/network/pdu_encoder.cpp
     src/network/pdu_decoder.cpp
+    src/network/pdu_buffer_pool.cpp
     src/network/association.cpp
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
