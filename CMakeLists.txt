@@ -583,6 +583,7 @@ add_library(pacs_core
     src/core/tag_info.cpp
     src/core/dicom_dictionary.cpp
     src/core/standard_tags_data.cpp
+    src/core/pool_manager.cpp
 )
 target_include_directories(pacs_core
     PUBLIC
