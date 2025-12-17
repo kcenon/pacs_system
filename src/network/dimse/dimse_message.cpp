@@ -277,11 +277,11 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
     -> dimse_result<dimse_message> {
     // Decode command set (always Implicit VR Little Endian)
     auto cmd_result = encoding::implicit_vr_codec::decode(command_data);
-    if (!cmd_result) {
+    if (cmd_result.is_err()) {
         return dimse_error::decoding_error;
     }
 
-    auto command_set = std::move(*cmd_result);
+    auto command_set = std::move(pacs::get_value(cmd_result));
 
     // Extract command field
     auto cmd_value = command_set.get_numeric<uint16_t>(tag_command_field);
@@ -303,19 +303,15 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
     // Decode dataset if present
     if (!dataset_data.empty()) {
-        encoding::codec_result<core::dicom_dataset> ds_result{
-            encoding::codec_error::success};
+        pacs::Result<core::dicom_dataset> ds_result =
+            (dataset_ts.vr_type() == encoding::vr_encoding::implicit)
+                ? encoding::implicit_vr_codec::decode(dataset_data)
+                : encoding::explicit_vr_codec::decode(dataset_data);
 
-        if (dataset_ts.vr_type() == encoding::vr_encoding::implicit) {
-            ds_result = encoding::implicit_vr_codec::decode(dataset_data);
-        } else {
-            ds_result = encoding::explicit_vr_codec::decode(dataset_data);
-        }
-
-        if (!ds_result) {
+        if (ds_result.is_err()) {
             return dimse_error::decoding_error;
         }
-        msg.dataset_ = std::move(*ds_result);
+        msg.dataset_ = std::move(pacs::get_value(ds_result));
     }
 
     return msg;
