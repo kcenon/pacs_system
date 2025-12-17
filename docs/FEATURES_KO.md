@@ -1118,6 +1118,102 @@ scheduler.stop(true);  // 실행 중인 태스크 대기
 - **logger_adapter**: 모든 태스크 작업 감사 로깅
 - **monitoring_adapter**: 태스크 성공/실패율 메트릭
 
+### 스터디 락 관리자
+
+**구현**: 수정, 마이그레이션 및 배타적 접근이 필요한 작업 중 DICOM 스터디에 대한 동시 접근을 제어하는 스레드 안전 락 관리자.
+
+**기능**:
+- **배타적 락**: 수정 중 스터디에 대한 모든 다른 접근 차단
+- **공유 락**: 배타적 락을 차단하면서 동시 읽기 접근 허용
+- **마이그레이션 락**: 마이그레이션 작업을 위한 최고 우선순위 락
+- **자동 만료**: 구성된 타임아웃 후 락 자동 만료
+- **토큰 기반 해제**: 고유 토큰을 사용한 안전한 락 해제
+- **강제 해제**: 관리자가 강제로 락 해제 가능
+- **통계 추적**: 락 획득, 경합, 지속 시간 메트릭
+- **이벤트 콜백**: 락 획득, 해제, 만료 알림
+
+**클래스**:
+- `study_lock_manager` - 스터디 락 관리 메인 클래스
+- `study_lock_manager_config` - 설정 옵션
+- `lock_token` - 보유한 락을 나타내는 고유 토큰
+- `lock_info` - 락에 대한 상세 정보
+- `lock_type` - 락 유형 열거형 (exclusive, shared, migration)
+- `lock_manager_stats` - 락 작업 통계
+
+**락 유형**:
+| 유형 | 설명 | 사용 사례 |
+|------|------|----------|
+| `exclusive` | 다른 접근 불허 | 스터디 수정, 삭제 |
+| `shared` | 읽기 전용 접근 허용 | 동시 읽기 작업 |
+| `migration` | 최고 우선순위 락 | HSM 계층 마이그레이션 |
+
+**예제**:
+```cpp
+#include <pacs/workflow/study_lock_manager.hpp>
+
+using namespace pacs::workflow;
+
+// 락 관리자 구성
+study_lock_manager_config config;
+config.default_timeout = std::chrono::minutes{30};
+config.max_shared_locks = 100;
+config.allow_force_unlock = true;
+
+study_lock_manager manager{config};
+
+// 수정을 위한 배타적 락 획득
+auto result = manager.lock("1.2.3.4.5", "스터디 업데이트", "user123");
+if (result.is_ok()) {
+    auto token = result.value();
+
+    // 수정 수행...
+
+    // 락 해제
+    manager.unlock(token);
+}
+
+// 읽기를 위한 공유 락 획득
+auto shared_result = manager.lock(
+    "1.2.3.4.5",
+    lock_type::shared,
+    "읽기 접근",
+    "viewer"
+);
+
+// 스터디가 락되어 있는지 확인
+if (manager.is_locked("1.2.3.4.5")) {
+    auto info = manager.get_lock_info("1.2.3.4.5");
+    if (info) {
+        std::cout << "락 보유자: " << info->holder << "\n";
+        std::cout << "지속 시간: " << info->duration().count() << "ms\n";
+    }
+}
+
+// 강제 해제 (관리자 작업)
+manager.force_unlock("1.2.3.4.5", "긴급 해제");
+
+// 락 통계 조회
+auto stats = manager.get_stats();
+std::cout << "활성 락: " << stats.active_locks << "\n";
+std::cout << "경합: " << stats.contention_count << "\n";
+```
+
+**설정 옵션**:
+| 옵션 | 유형 | 기본값 | 설명 |
+|------|------|--------|------|
+| `default_timeout` | seconds | 0 | 기본 락 타임아웃 (0=무제한) |
+| `acquire_wait_timeout` | milliseconds | 5000 | 락 대기 최대 시간 |
+| `cleanup_interval` | seconds | 60 | 만료된 락 정리 간격 |
+| `auto_cleanup` | bool | true | 자동 만료 락 정리 활성화 |
+| `max_shared_locks` | size_t | 100 | 최대 동시 공유 락 수 |
+| `allow_force_unlock` | bool | true | 관리자 강제 해제 허용 |
+
+**통합 포인트**:
+- **thread_system**: shared_mutex를 통한 스레드 안전 작업
+- **common_system**: 에러 처리를 위한 Result<T> 패턴
+- **logger_adapter**: 락 작업 감사 로깅
+- **monitoring_adapter**: 락 경합 및 지속 시간 메트릭
+
 ---
 
 ## 에러 처리

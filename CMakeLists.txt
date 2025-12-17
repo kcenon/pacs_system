@@ -935,6 +935,7 @@ if(TARGET pacs_storage)
     add_library(pacs_workflow
         src/workflow/auto_prefetch_service.cpp
         src/workflow/task_scheduler.cpp
+        src/workflow/study_lock_manager.cpp
     )
     target_include_directories(pacs_workflow
         PUBLIC
@@ -1369,6 +1370,7 @@ if(PACS_BUILD_TESTS)
         add_executable(workflow_tests
             tests/workflow/auto_prefetch_service_test.cpp
             tests/workflow/task_scheduler_test.cpp
+            tests/workflow/study_lock_manager_test.cpp
         )
         target_link_libraries(workflow_tests
             PRIVATE
