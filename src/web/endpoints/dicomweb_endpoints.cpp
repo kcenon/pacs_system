@@ -1471,12 +1471,12 @@ auto render_dicom_image(
         opts.quality = params.quality;
 
         auto result = codec.encode(output_pixels, img_params, opts);
-        if (!result.success) {
+        if (result.is_err()) {
             return rendered_result::error("JPEG encoding failed: " +
-                                          result.error_message);
+                                          pacs::get_error(result).message);
         }
 
-        return rendered_result::ok(std::move(result.data), media_type::jpeg);
+        return rendered_result::ok(std::move(pacs::get_value(result).data), media_type::jpeg);
     } else {
         // PNG encoding - not implemented yet
         // For now, return JPEG as fallback

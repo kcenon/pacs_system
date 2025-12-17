@@ -1,4 +1,5 @@
 #include "pacs/encoding/compression/jpeg_lossless_codec.hpp"
+#include <pacs/core/result.hpp>
 
 #include <algorithm>
 #include <array>
@@ -265,17 +266,17 @@ public:
         [[maybe_unused]] const compression_options& options) const {
 
         if (pixel_data.empty()) {
-            return codec_result::error("Empty pixel data");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty pixel data");
         }
 
         if (!valid_for_jpeg_lossless(params)) {
-            return codec_result::error(
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
                 "Invalid parameters for JPEG Lossless: requires 8/12/16-bit grayscale");
         }
 
         size_t expected_size = params.frame_size_bytes();
         if (pixel_data.size() != expected_size) {
-            return codec_result::error(
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
                 "Pixel data size mismatch: expected " + std::to_string(expected_size) +
                 ", got " + std::to_string(pixel_data.size()));
         }
@@ -283,7 +284,7 @@ public:
         try {
             return encode_frame(pixel_data, params);
         } catch (const std::exception& e) {
-            return codec_result::error(std::string("JPEG Lossless encoding failed: ") + e.what());
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, std::string("JPEG Lossless encoding failed: ") + e.what());
         }
     }
 
@@ -292,13 +293,13 @@ public:
         const image_params& params) const {
 
         if (compressed_data.empty()) {
-            return codec_result::error("Empty compressed data");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty compressed data");
         }
 
         try {
             return decode_frame(compressed_data, params);
         } catch (const std::exception& e) {
-            return codec_result::error(std::string("JPEG Lossless decoding failed: ") + e.what());
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, std::string("JPEG Lossless decoding failed: ") + e.what());
         }
     }
 
@@ -421,7 +422,7 @@ private:
         output.push_back(kEOI);
 
         image_params output_params = params;
-        return codec_result::ok(std::move(output), output_params);
+        return pacs::ok<compression_result>(compression_result{std::move(output), output_params});
     }
 
     void write_sof3(std::vector<uint8_t>& output, const image_params& params) const {
@@ -524,7 +525,7 @@ private:
 
         // Parse SOI
         if (size < 2 || data[0] != kMarkerPrefix || data[1] != kSOI) {
-            return codec_result::error("Invalid JPEG: missing SOI marker");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid JPEG: missing SOI marker");
         }
         pos = 2;
 
@@ -541,7 +542,7 @@ private:
         // Parse markers
         while (pos < size - 1) {
             if (data[pos] != kMarkerPrefix) {
-                return codec_result::error("Invalid JPEG: expected marker");
+                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid JPEG: expected marker");
             }
 
             uint8_t marker = data[pos + 1];
@@ -564,19 +565,19 @@ private:
 
             // Read marker length
             if (pos + 2 > size) {
-                return codec_result::error("Invalid JPEG: truncated marker");
+                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid JPEG: truncated marker");
             }
             uint16_t length = read_be16(&data[pos]);
             pos += 2;
 
             if (pos + length - 2 > size) {
-                return codec_result::error("Invalid JPEG: truncated marker data");
+                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid JPEG: truncated marker data");
             }
 
             if (marker == kSOF3) {
                 // Parse SOF3
                 if (length < 8) {
-                    return codec_result::error("Invalid SOF3 marker");
+                    return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid SOF3 marker");
                 }
                 precision = data[pos];
                 height = read_be16(&data[pos + 1]);
@@ -602,15 +603,15 @@ private:
         }
 
         if (!found_sof || !found_sos) {
-            return codec_result::error("Invalid JPEG: missing required markers");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid JPEG: missing required markers");
         }
 
         // Validate against params if provided
         if (params.width > 0 && params.width != width) {
-            return codec_result::error("Width mismatch");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Width mismatch");
         }
         if (params.height > 0 && params.height != height) {
-            return codec_result::error("Height mismatch");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Height mismatch");
         }
 
         // Find scan data end (EOI marker)
@@ -658,7 +659,7 @@ private:
                 // Decode Huffman category
                 int cat = decode_huffman_category(reader, ht);
                 if (cat < 0 || cat > 16) {
-                    return codec_result::error("Invalid Huffman code");
+                    return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid Huffman code");
                 }
 
                 // Read additional bits
@@ -710,7 +711,7 @@ private:
         output_params.pixel_representation = 0;
         output_params.photometric = photometric_interpretation::monochrome2;
 
-        return codec_result::ok(std::move(output), output_params);
+        return pacs::ok<compression_result>(compression_result{std::move(output), output_params});
     }
 
     int decode_huffman_category(bit_reader& reader, const huffman_table& ht) const {

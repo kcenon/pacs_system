@@ -1,4 +1,5 @@
 #include "pacs/encoding/compression/jpeg2000_codec.hpp"
+#include <pacs/core/result.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -232,7 +233,7 @@ public:
         (void)pixel_data;
         (void)params;
         (void)options;
-        return codec_result::error(
+        return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
             "JPEG 2000 codec not available: OpenJPEG library not found at build time");
 #else
         // Determine if we should use lossless mode
@@ -266,7 +267,7 @@ public:
             color_space);
 
         if (!image) {
-            return codec_result::error("Failed to create OpenJPEG image structure");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to create OpenJPEG image structure");
         }
 
         // Set image offset and reference grid
@@ -294,7 +295,7 @@ public:
 
                 if (src_idx + bytes_per_sample > pixel_data.size()) {
                     opj_image_destroy(image);
-                    return codec_result::error("Pixel data buffer too small");
+                    return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Pixel data buffer too small");
                 }
 
                 OPJ_INT32 value = 0;
@@ -318,7 +319,7 @@ public:
         opj_codec_t* codec = opj_create_compress(OPJ_CODEC_J2K);
         if (!codec) {
             opj_image_destroy(image);
-            return codec_result::error("Failed to create OpenJPEG encoder");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to create OpenJPEG encoder");
         }
 
         // Set up error handling
@@ -356,7 +357,7 @@ public:
         if (!opj_setup_encoder(codec, &parameters, image)) {
             opj_destroy_codec(codec);
             opj_image_destroy(image);
-            return codec_result::error("Failed to setup OpenJPEG encoder: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to setup OpenJPEG encoder: " + error_msg);
         }
 
         // Create output stream
@@ -368,7 +369,7 @@ public:
         if (!stream) {
             opj_destroy_codec(codec);
             opj_image_destroy(image);
-            return codec_result::error("Failed to create OpenJPEG output stream");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to create OpenJPEG output stream");
         }
 
         opj_stream_set_user_data(stream, &output_buf, nullptr);
@@ -382,21 +383,21 @@ public:
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
             opj_image_destroy(image);
-            return codec_result::error("Failed to start JPEG 2000 encoding: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to start JPEG 2000 encoding: " + error_msg);
         }
 
         if (!opj_encode(codec, stream)) {
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
             opj_image_destroy(image);
-            return codec_result::error("Failed to encode JPEG 2000 data: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to encode JPEG 2000 data: " + error_msg);
         }
 
         if (!opj_end_compress(codec, stream)) {
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
             opj_image_destroy(image);
-            return codec_result::error("Failed to finalize JPEG 2000 encoding: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to finalize JPEG 2000 encoding: " + error_msg);
         }
 
         // Cleanup
@@ -407,7 +408,7 @@ public:
         // Trim output buffer to actual size
         output_buf.data.resize(output_buf.offset);
 
-        return codec_result::ok(std::move(output_buf.data), params);
+        return pacs::ok<compression_result>(compression_result{std::move(output_buf.data), params});
 #endif  // PACS_WITH_JPEG2000_CODEC
     }
 
@@ -416,11 +417,11 @@ public:
 #ifndef PACS_WITH_JPEG2000_CODEC
         (void)compressed_data;
         (void)params;
-        return codec_result::error(
+        return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
             "JPEG 2000 codec not available: OpenJPEG library not found at build time");
 #else
         if (compressed_data.empty()) {
-            return codec_result::error("Empty compressed data");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty compressed data");
         }
 
         // Detect format
@@ -429,7 +430,7 @@ public:
         // Create decoder
         opj_codec_t* codec = opj_create_decompress(format);
         if (!codec) {
-            return codec_result::error("Failed to create OpenJPEG decoder");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to create OpenJPEG decoder");
         }
 
         // Set up error handling
@@ -444,7 +445,7 @@ public:
 
         if (!opj_setup_decoder(codec, &parameters)) {
             opj_destroy_codec(codec);
-            return codec_result::error("Failed to setup OpenJPEG decoder: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to setup OpenJPEG decoder: " + error_msg);
         }
 
         // Create input stream
@@ -456,7 +457,7 @@ public:
         opj_stream_t* stream = opj_stream_default_create(OPJ_TRUE);
         if (!stream) {
             opj_destroy_codec(codec);
-            return codec_result::error("Failed to create OpenJPEG input stream");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to create OpenJPEG input stream");
         }
 
         opj_stream_set_user_data(stream, &input_stream, nullptr);
@@ -470,7 +471,7 @@ public:
         if (!opj_read_header(stream, codec, &image)) {
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
-            return codec_result::error("Failed to read JPEG 2000 header: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to read JPEG 2000 header: " + error_msg);
         }
 
         // Decode
@@ -478,14 +479,14 @@ public:
             opj_image_destroy(image);
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
-            return codec_result::error("Failed to decode JPEG 2000 data: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to decode JPEG 2000 data: " + error_msg);
         }
 
         if (!opj_end_decompress(codec, stream)) {
             opj_image_destroy(image);
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
-            return codec_result::error("Failed to finalize JPEG 2000 decoding: " + error_msg);
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Failed to finalize JPEG 2000 decoding: " + error_msg);
         }
 
         // Extract image parameters from decoded data
@@ -515,7 +516,7 @@ public:
             opj_image_destroy(image);
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
-            return codec_result::error("Image width mismatch: expected " +
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Image width mismatch: expected " +
                                         std::to_string(params.width) + ", got " +
                                         std::to_string(output_params.width));
         }
@@ -523,7 +524,7 @@ public:
             opj_image_destroy(image);
             opj_stream_destroy(stream);
             opj_destroy_codec(codec);
-            return codec_result::error("Image height mismatch: expected " +
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Image height mismatch: expected " +
                                         std::to_string(params.height) + ", got " +
                                         std::to_string(output_params.height));
         }
@@ -559,7 +560,7 @@ public:
         opj_destroy_codec(codec);
 
         output_params.planar_configuration = 0;  // Output is always interleaved
-        return codec_result::ok(std::move(output_data), output_params);
+        return pacs::ok<compression_result>(compression_result{std::move(output_data), output_params});
 #endif  // PACS_WITH_JPEG2000_CODEC
     }
 

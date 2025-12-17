@@ -1,4 +1,5 @@
 #include "pacs/encoding/compression/jpeg_ls_codec.hpp"
+#include <pacs/core/result.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -87,16 +88,16 @@ public:
         (void)pixel_data;
         (void)params;
         (void)options;
-        return codec_result::error(
+        return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
             "JPEG-LS codec not available: CharLS library not found at build time");
 #else
         // Validate input
         if (pixel_data.empty()) {
-            return codec_result::error("Empty pixel data");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty pixel data");
         }
 
         if (params.width == 0 || params.height == 0) {
-            return codec_result::error("Invalid image dimensions");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid image dimensions");
         }
 
         // Determine effective NEAR value
@@ -153,13 +154,13 @@ public:
             // Resize to actual size
             destination.resize(bytes_written);
 
-            return codec_result::ok(std::move(destination), params);
+            return pacs::ok<compression_result>(compression_result{std::move(destination), params});
 
         } catch (const charls::jpegls_error& e) {
-            return codec_result::error(
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS encoding failed: ") + e.what());
         } catch (const std::exception& e) {
-            return codec_result::error(
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS encoding failed: ") + e.what());
         }
 #endif  // PACS_WITH_JPEGLS_CODEC
@@ -170,11 +171,11 @@ public:
 #ifndef PACS_WITH_JPEGLS_CODEC
         (void)compressed_data;
         (void)params;
-        return codec_result::error(
+        return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
             "JPEG-LS codec not available: CharLS library not found at build time");
 #else
         if (compressed_data.empty()) {
-            return codec_result::error("Empty compressed data");
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty compressed data");
         }
 
         try {
@@ -206,12 +207,12 @@ public:
 
             // Validate dimensions if provided
             if (params.width > 0 && params.width != output_params.width) {
-                return codec_result::error("Image width mismatch: expected " +
+                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Image width mismatch: expected " +
                                             std::to_string(params.width) + ", got " +
                                             std::to_string(output_params.width));
             }
             if (params.height > 0 && params.height != output_params.height) {
-                return codec_result::error("Image height mismatch: expected " +
+                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Image height mismatch: expected " +
                                             std::to_string(params.height) + ", got " +
                                             std::to_string(output_params.height));
             }
@@ -226,13 +227,13 @@ public:
             // Set output as interleaved
             output_params.planar_configuration = 0;
 
-            return codec_result::ok(std::move(destination), output_params);
+            return pacs::ok<compression_result>(compression_result{std::move(destination), output_params});
 
         } catch (const charls::jpegls_error& e) {
-            return codec_result::error(
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS decoding failed: ") + e.what());
         } catch (const std::exception& e) {
-            return codec_result::error(
+            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS decoding failed: ") + e.what());
         }
 #endif  // PACS_WITH_JPEGLS_CODEC

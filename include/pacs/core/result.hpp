@@ -71,6 +71,12 @@ namespace error_codes {
     constexpr int encode_error = pacs_base - 41;
     constexpr int compression_error = pacs_base - 42;
     constexpr int decompression_error = pacs_base - 43;
+    constexpr int invalid_tag_encoding = pacs_base - 44;
+    constexpr int invalid_length_encoding = pacs_base - 45;
+    constexpr int insufficient_data = pacs_base - 46;
+    constexpr int invalid_sequence = pacs_base - 47;
+    constexpr int unknown_vr = pacs_base - 48;
+    constexpr int codec_not_supported = pacs_base - 49;
 
     // Network/Association errors (-760 to -779)
     constexpr int association_rejected = pacs_base - 60;
