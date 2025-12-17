@@ -46,7 +46,7 @@ jobs:
     - name: Checkout dependencies
       run: |
         git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
+        git clone --depth 1 -b feature/lockfree-queue https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         git clone --depth 1 https://github.com/kcenon/container_system.git
         git clone --depth 1 https://github.com/kcenon/network_system.git

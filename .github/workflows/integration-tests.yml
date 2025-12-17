@@ -74,6 +74,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
+        ref: feature/lockfree-queue
         path: thread_system
 
     - name: Checkout logger_system (Tier 2)
@@ -284,6 +285,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
+        ref: feature/lockfree-queue
         path: thread_system
 
     - name: Checkout logger_system (Tier 2)
@@ -635,6 +637,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
+        ref: feature/lockfree-queue
         path: thread_system
 
     - name: Checkout logger_system (Tier 2)
@@ -876,6 +879,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
+        ref: feature/lockfree-queue
         path: thread_system
 
     - name: Checkout logger_system (Tier 2)
@@ -1038,6 +1042,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/thread_system
+        ref: feature/lockfree-queue
         path: thread_system
 
     - name: Checkout logger_system (Tier 2)

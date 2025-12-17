@@ -57,7 +57,7 @@ jobs:
         # Clone dependencies as siblings to pacs_system in $GITHUB_WORKSPACE
         # CMake expects: ../common_system relative to pacs_system
         git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
+        git clone --depth 1 -b feature/lockfree-queue https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         git clone --depth 1 https://github.com/kcenon/container_system.git
         git clone --depth 1 https://github.com/kcenon/network_system.git
@@ -70,7 +70,7 @@ jobs:
         # Clone dependencies as siblings to pacs_system in $env:GITHUB_WORKSPACE
         # CMake expects: ../common_system relative to pacs_system
         git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
+        git clone --depth 1 -b feature/lockfree-queue https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         git clone --depth 1 https://github.com/kcenon/container_system.git
         git clone --depth 1 https://github.com/kcenon/network_system.git
