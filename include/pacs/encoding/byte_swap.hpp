@@ -3,7 +3,8 @@
  * @brief Byte swapping utilities for endianness conversion
  *
  * This file provides constexpr functions for converting between
- * little-endian and big-endian byte ordering.
+ * little-endian and big-endian byte ordering. Bulk operations use
+ * SIMD optimization when available (SSE/AVX on x86, NEON on ARM).
  *
  * @see DICOM PS3.5 Section 7 - Data Set Encoding
  */
@@ -15,6 +16,8 @@
 #include <cstring>
 #include <span>
 #include <vector>
+
+#include "simd/simd_utils.hpp"
 
 namespace pacs::encoding {
 
@@ -156,14 +159,12 @@ inline void write_be64(std::vector<uint8_t>& buffer, uint64_t value) {
  * @return Byte-swapped copy of the data
  *
  * OW data consists of 16-bit words that need individual byte swapping.
+ * Uses SIMD optimization (SSE/AVX/NEON) when available.
  */
 [[nodiscard]] inline std::vector<uint8_t> swap_ow_bytes(
     std::span<const uint8_t> data) {
     std::vector<uint8_t> result(data.size());
-    for (size_t i = 0; i + 1 < data.size(); i += 2) {
-        result[i] = data[i + 1];
-        result[i + 1] = data[i];
-    }
+    simd::swap_bytes_16_simd(data.data(), result.data(), data.size());
     return result;
 }
 
@@ -173,16 +174,12 @@ inline void write_be64(std::vector<uint8_t>& buffer, uint64_t value) {
  * @return Byte-swapped copy of the data
  *
  * OL data consists of 32-bit values that need individual byte swapping.
+ * Uses SIMD optimization (SSE/AVX/NEON) when available.
  */
 [[nodiscard]] inline std::vector<uint8_t> swap_ol_bytes(
     std::span<const uint8_t> data) {
     std::vector<uint8_t> result(data.size());
-    for (size_t i = 0; i + 3 < data.size(); i += 4) {
-        result[i] = data[i + 3];
-        result[i + 1] = data[i + 2];
-        result[i + 2] = data[i + 1];
-        result[i + 3] = data[i];
-    }
+    simd::swap_bytes_32_simd(data.data(), result.data(), data.size());
     return result;
 }
 
@@ -204,20 +201,12 @@ inline void write_be64(std::vector<uint8_t>& buffer, uint64_t value) {
  * @return Byte-swapped copy of the data
  *
  * OD data consists of 64-bit doubles that need individual byte swapping.
+ * Uses SIMD optimization (SSE/AVX/NEON) when available.
  */
 [[nodiscard]] inline std::vector<uint8_t> swap_od_bytes(
     std::span<const uint8_t> data) {
     std::vector<uint8_t> result(data.size());
-    for (size_t i = 0; i + 7 < data.size(); i += 8) {
-        result[i] = data[i + 7];
-        result[i + 1] = data[i + 6];
-        result[i + 2] = data[i + 5];
-        result[i + 3] = data[i + 4];
-        result[i + 4] = data[i + 3];
-        result[i + 5] = data[i + 2];
-        result[i + 6] = data[i + 1];
-        result[i + 7] = data[i];
-    }
+    simd::swap_bytes_64_simd(data.data(), result.data(), data.size());
     return result;
 }
 
