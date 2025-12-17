@@ -40,9 +40,9 @@ bool save_dataset(
         pacs::encoding::transfer_syntax::explicit_vr_little_endian);
 
     auto result = file.save(path);
-    if (!result.has_value()) {
+    if (result.is_err()) {
         std::cerr << "Failed to save " << path << ": "
-                  << to_string(result.error()) << "\n";
+                  << result.error().message << "\n";
         return false;
     }
 

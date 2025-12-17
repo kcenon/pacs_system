@@ -422,14 +422,14 @@ auto azure_blob_storage::retrieve_with_progress(
 
   // Deserialize DICOM data
   auto parse_result = core::dicom_file::from_bytes(data);
-  if (!parse_result.has_value()) {
+  if (parse_result.is_err()) {
     return make_error<core::dicom_dataset>(
         kSerializationError,
-        "Failed to parse DICOM data: " + core::to_string(parse_result.error()),
+        "Failed to parse DICOM data: " + parse_result.error().message,
         "azure_blob_storage");
   }
 
-  return parse_result->dataset();
+  return parse_result.value().dataset();
 }
 
 auto azure_blob_storage::remove(std::string_view sop_instance_uid)
@@ -480,11 +480,11 @@ auto azure_blob_storage::find(const core::dicom_dataset &query)
     }
 
     auto parse_result = core::dicom_file::from_bytes(download_result.value());
-    if (!parse_result.has_value()) {
+    if (parse_result.is_err()) {
       continue; // Skip invalid DICOM files
     }
 
-    const auto &dataset = parse_result->dataset();
+    const auto &dataset = parse_result.value().dataset();
     if (matches_query(dataset, query)) {
       results.push_back(dataset);
     }
@@ -583,11 +583,11 @@ auto azure_blob_storage::rebuild_index() -> VoidResult {
     }
 
     auto parse_result = core::dicom_file::from_bytes(download_result.value());
-    if (!parse_result.has_value()) {
+    if (parse_result.is_err()) {
       continue;
     }
 
-    const auto &dataset = parse_result->dataset();
+    const auto &dataset = parse_result.value().dataset();
     auto sop_uid = dataset.get_string(core::tags::sop_instance_uid);
     auto study_uid = dataset.get_string(core::tags::study_instance_uid);
     auto series_uid = dataset.get_string(core::tags::series_instance_uid);

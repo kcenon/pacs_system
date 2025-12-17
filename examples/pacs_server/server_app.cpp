@@ -601,7 +601,7 @@ std::vector<core::dicom_file> pacs_server_app::handle_retrieve(
     // Load files
     for (const auto& path : file_paths) {
         auto file_result = core::dicom_file::open(path);
-        if (file_result.has_value()) {
+        if (file_result.is_ok()) {
             files.push_back(std::move(file_result.value()));
         }
     }

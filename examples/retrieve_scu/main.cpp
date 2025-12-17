@@ -552,7 +552,7 @@ bool save_dicom_file(
         pacs::encoding::transfer_syntax::explicit_vr_little_endian);
 
     auto result = file.save(path);
-    return result.has_value();
+    return result.is_ok();
 }
 
 /**

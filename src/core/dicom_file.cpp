@@ -53,10 +53,12 @@ void write_uint32_le(std::vector<uint8_t>& buffer, uint32_t value) {
  * @brief Read file contents into a vector
  */
 [[nodiscard]] auto read_file_contents(const std::filesystem::path& path)
-    -> dicom_file::file_result<std::vector<uint8_t>> {
+    -> pacs::Result<std::vector<uint8_t>> {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) {
-        return dicom_file_error::file_not_found;
+        return pacs::pacs_error<std::vector<uint8_t>>(
+            pacs::error_codes::file_not_found,
+            "File not found: " + path.string());
     }
 
     const auto size = file.tellg();
@@ -65,43 +67,15 @@ void write_uint32_le(std::vector<uint8_t>& buffer, uint32_t value) {
     std::vector<uint8_t> buffer(static_cast<size_t>(size));
     if (!file.read(reinterpret_cast<char*>(buffer.data()),
                    static_cast<std::streamsize>(size))) {
-        return dicom_file_error::file_read_error;
+        return pacs::pacs_error<std::vector<uint8_t>>(
+            pacs::error_codes::file_read_error,
+            "Failed to read file: " + path.string());
     }
 
-    return buffer;
+    return pacs::Result<std::vector<uint8_t>>::ok(std::move(buffer));
 }
 
 }  // namespace
-
-// ============================================================================
-// Error Handling
-// ============================================================================
-
-auto to_string(dicom_file_error error) -> std::string {
-    switch (error) {
-        case dicom_file_error::file_not_found:
-            return "File not found";
-        case dicom_file_error::file_read_error:
-            return "Failed to read file";
-        case dicom_file_error::file_write_error:
-            return "Failed to write file";
-        case dicom_file_error::invalid_dicom_file:
-            return "Invalid DICOM Part 10 file";
-        case dicom_file_error::missing_dicm_prefix:
-            return "Missing DICM prefix at offset 128";
-        case dicom_file_error::invalid_meta_info:
-            return "Invalid File Meta Information";
-        case dicom_file_error::missing_transfer_syntax:
-            return "Transfer Syntax UID not found in meta information";
-        case dicom_file_error::unsupported_transfer_syntax:
-            return "Transfer Syntax is not supported";
-        case dicom_file_error::decode_error:
-            return "Failed to decode DICOM data";
-        case dicom_file_error::encode_error:
-            return "Failed to encode DICOM data";
-    }
-    return "Unknown error";
-}
 
 // ============================================================================
 // Construction
@@ -115,26 +89,30 @@ dicom_file::dicom_file(dicom_dataset meta_info, dicom_dataset main_dataset)
 // ============================================================================
 
 auto dicom_file::open(const std::filesystem::path& path)
-    -> file_result<dicom_file> {
+    -> pacs::Result<dicom_file> {
     auto contents = read_file_contents(path);
-    if (!contents) {
-        return contents.error();
+    if (contents.is_err()) {
+        return pacs::Result<dicom_file>::err(contents.error());
     }
 
-    return from_bytes(*contents);
+    return from_bytes(contents.value());
 }
 
 auto dicom_file::from_bytes(std::span<const uint8_t> data)
-    -> file_result<dicom_file> {
+    -> pacs::Result<dicom_file> {
     // Minimum size: 128 (preamble) + 4 (DICM) + minimal meta info
     if (data.size() < kPreambleSize + 4) {
-        return dicom_file_error::invalid_dicom_file;
+        return pacs::pacs_error<dicom_file>(
+            pacs::error_codes::invalid_dicom_file,
+            "File too small to be valid DICOM Part 10 file");
     }
 
     // Check for DICM prefix at offset 128
     const auto prefix = data.subspan(kPreambleSize, 4);
     if (std::memcmp(prefix.data(), kDicmPrefix, 4) != 0) {
-        return dicom_file_error::missing_dicm_prefix;
+        return pacs::pacs_error<dicom_file>(
+            pacs::error_codes::missing_dicm_prefix,
+            "Missing DICM prefix at offset 128");
     }
 
     // Parse File Meta Information (starts after preamble + DICM)
@@ -142,21 +120,25 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
     size_t meta_bytes_read = 0;
 
     auto meta_result = parse_meta_information(meta_start, meta_bytes_read);
-    if (!meta_result) {
-        return meta_result.error();
+    if (meta_result.is_err()) {
+        return pacs::Result<dicom_file>::err(meta_result.error());
     }
 
     // Extract Transfer Syntax from meta information
-    const auto* ts_elem = meta_result->get(tags::transfer_syntax_uid);
+    const auto* ts_elem = meta_result.value().get(tags::transfer_syntax_uid);
     if (ts_elem == nullptr) {
-        return dicom_file_error::missing_transfer_syntax;
+        return pacs::pacs_error<dicom_file>(
+            pacs::error_codes::missing_transfer_syntax,
+            "Transfer Syntax UID not found in meta information");
     }
 
     const auto ts_uid = ts_elem->as_string();
     encoding::transfer_syntax ts{ts_uid};
 
     if (!ts.is_valid()) {
-        return dicom_file_error::unsupported_transfer_syntax;
+        return pacs::pacs_error<dicom_file>(
+            pacs::error_codes::unsupported_transfer_syntax,
+            "Unsupported Transfer Syntax: " + ts_uid);
     }
 
     // Parse main dataset
@@ -166,11 +148,12 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
     // For Phase 1, only support Explicit VR Little Endian for simplicity
     // TODO: Add support for other transfer syntaxes in Phase 2
     auto dataset_result = decode_explicit_vr_le(dataset_start, dataset_bytes_read);
-    if (!dataset_result) {
-        return dataset_result.error();
+    if (dataset_result.is_err()) {
+        return pacs::Result<dicom_file>::err(dataset_result.error());
     }
 
-    return dicom_file{std::move(*meta_result), std::move(*dataset_result)};
+    return pacs::Result<dicom_file>::ok(
+        dicom_file{std::move(meta_result.value()), std::move(dataset_result.value())});
 }
 
 // ============================================================================
@@ -189,20 +172,24 @@ auto dicom_file::create(dicom_dataset dataset,
 // ============================================================================
 
 auto dicom_file::save(const std::filesystem::path& path) const
-    -> file_result<void> {
+    -> pacs::VoidResult {
     auto bytes = to_bytes();
 
     std::ofstream file(path, std::ios::binary);
     if (!file) {
-        return dicom_file_error::file_write_error;
+        return pacs::pacs_void_error(
+            pacs::error_codes::file_write_error,
+            "Failed to open file for writing: " + path.string());
     }
 
     if (!file.write(reinterpret_cast<const char*>(bytes.data()),
                     static_cast<std::streamsize>(bytes.size()))) {
-        return dicom_file_error::file_write_error;
+        return pacs::pacs_void_error(
+            pacs::error_codes::file_write_error,
+            "Failed to write to file: " + path.string());
     }
 
-    return {};
+    return pacs::ok();
 }
 
 auto dicom_file::to_bytes() const -> std::vector<uint8_t> {
@@ -272,7 +259,7 @@ auto dicom_file::sop_instance_uid() const -> std::string {
 
 auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
                                         size_t& bytes_read)
-    -> file_result<dicom_dataset> {
+    -> pacs::Result<dicom_dataset> {
     // File Meta Information is always encoded as Explicit VR Little Endian
     // First, we need to find the group length to know how much to read
 
@@ -293,7 +280,9 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
 
         // Read VR (2 bytes)
         if (offset + 6 > data.size()) {
-            return dicom_file_error::decode_error;
+            return pacs::pacs_error<dicom_dataset>(
+                pacs::error_codes::decode_error,
+                "Unexpected end of data while reading VR");
         }
 
         const char vr_chars[3] = {
@@ -303,7 +292,9 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
         };
         const auto vr_opt = encoding::from_string(std::string_view(vr_chars, 2));
         if (!vr_opt) {
-            return dicom_file_error::decode_error;
+            return pacs::pacs_error<dicom_dataset>(
+                pacs::error_codes::decode_error,
+                "Invalid VR: " + std::string(vr_chars, 2));
         }
         const auto vr = *vr_opt;
 
@@ -314,14 +305,18 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
         if (encoding::has_explicit_32bit_length(vr)) {
             // VR + 2 reserved bytes + 4 byte length
             if (offset + 12 > data.size()) {
-                return dicom_file_error::decode_error;
+                return pacs::pacs_error<dicom_dataset>(
+                    pacs::error_codes::decode_error,
+                    "Unexpected end of data while reading length field");
             }
             length = read_uint32_le(data.subspan(offset + 8, 4));
             header_size = 12;
         } else {
             // VR + 2 byte length
             if (offset + 8 > data.size()) {
-                return dicom_file_error::decode_error;
+                return pacs::pacs_error<dicom_dataset>(
+                    pacs::error_codes::decode_error,
+                    "Unexpected end of data while reading length field");
             }
             length = read_uint16_le(data.subspan(offset + 6, 2));
             header_size = 8;
@@ -329,7 +324,9 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
 
         // Validate and read value
         if (offset + header_size + length > data.size()) {
-            return dicom_file_error::decode_error;
+            return pacs::pacs_error<dicom_dataset>(
+                pacs::error_codes::decode_error,
+                "Value length exceeds available data");
         }
 
         const auto value_data = data.subspan(offset + header_size, length);
@@ -340,7 +337,7 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
     }
 
     bytes_read = offset;
-    return meta_info;
+    return pacs::Result<dicom_dataset>::ok(std::move(meta_info));
 }
 
 auto dicom_file::generate_meta_information(const dicom_dataset& dataset,
@@ -433,7 +430,7 @@ auto dicom_file::encode_explicit_vr_le(const dicom_dataset& dataset)
 
 auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
                                        size_t& bytes_read)
-    -> file_result<dicom_dataset> {
+    -> pacs::Result<dicom_dataset> {
     dicom_dataset dataset;
     size_t offset = 0;
 
@@ -503,7 +500,7 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
     }
 
     bytes_read = offset;
-    return dataset;
+    return pacs::Result<dicom_dataset>::ok(std::move(dataset));
 }
 
 }  // namespace pacs::core

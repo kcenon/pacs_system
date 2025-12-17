@@ -151,12 +151,11 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
     auto temp_path = generate_temp_filename(file_path);
     auto save_result = dicom_file.save(temp_path);
 
-    if (!save_result.has_value()) {
+    if (save_result.is_err()) {
         std::filesystem::remove(temp_path);
         return make_error<std::monostate>(
             kFileWriteError,
-            "Failed to write DICOM file: " +
-                core::to_string(save_result.error()),
+            "Failed to write DICOM file: " + save_result.error().message,
             "file_storage");
     }
 
@@ -198,15 +197,14 @@ auto file_storage::retrieve(std::string_view sop_instance_uid)
 
     // Read DICOM file
     auto open_result = core::dicom_file::open(file_path);
-    if (!open_result.has_value()) {
+    if (open_result.is_err()) {
         return make_error<core::dicom_dataset>(
             kFileReadError,
-            "Failed to read DICOM file: " +
-                core::to_string(open_result.error()),
+            "Failed to read DICOM file: " + open_result.error().message,
             "file_storage");
     }
 
-    return open_result->dataset();
+    return open_result.value().dataset();
 }
 
 auto file_storage::remove(std::string_view sop_instance_uid) -> VoidResult {
@@ -262,11 +260,11 @@ auto file_storage::find(const core::dicom_dataset& query)
 
     for (const auto& path : paths_to_check) {
         auto open_result = core::dicom_file::open(path);
-        if (!open_result.has_value()) {
+        if (open_result.is_err()) {
             continue;  // Skip files that can't be read
         }
 
-        const auto& dataset = open_result->dataset();
+        const auto& dataset = open_result.value().dataset();
         if (matches_query(dataset, query)) {
             results.push_back(dataset);
         }
@@ -298,8 +296,8 @@ auto file_storage::get_statistics() const -> storage_statistics {
 
         // Read file to get study/series/patient info
         auto open_result = core::dicom_file::open(path);
-        if (open_result.has_value()) {
-            const auto& ds = open_result->dataset();
+        if (open_result.is_ok()) {
+            const auto& ds = open_result.value().dataset();
             auto study_uid = ds.get_string(core::tags::study_instance_uid);
             auto series_uid = ds.get_string(core::tags::series_instance_uid);
             auto patient_id = ds.get_string(core::tags::patient_id);
@@ -342,14 +340,14 @@ auto file_storage::verify_integrity() -> VoidResult {
         }
 
         auto open_result = core::dicom_file::open(path);
-        if (!open_result.has_value()) {
+        if (open_result.is_err()) {
             invalid_entries.push_back(uid + " (invalid DICOM)");
             continue;
         }
 
         // Verify UID matches
         auto file_uid =
-            open_result->dataset().get_string(core::tags::sop_instance_uid);
+            open_result.value().dataset().get_string(core::tags::sop_instance_uid);
         if (file_uid != uid) {
             invalid_entries.push_back(uid + " (UID mismatch)");
         }
@@ -398,12 +396,12 @@ auto file_storage::import_directory(const std::filesystem::path& source)
 
         // Try to open as DICOM file
         auto open_result = core::dicom_file::open(entry.path());
-        if (!open_result.has_value()) {
+        if (open_result.is_err()) {
             continue;  // Not a DICOM file, skip
         }
 
         // Store the dataset
-        auto store_result = store(open_result->dataset());
+        auto store_result = store(open_result.value().dataset());
         if (store_result.is_err()) {
             // Log error but continue with other files
             // In production, this should be logged
@@ -440,12 +438,12 @@ auto file_storage::rebuild_index() -> VoidResult {
 
         // Try to read as DICOM file
         auto open_result = core::dicom_file::open(entry.path());
-        if (!open_result.has_value()) {
+        if (open_result.is_err()) {
             continue;
         }
 
         auto sop_uid =
-            open_result->dataset().get_string(core::tags::sop_instance_uid);
+            open_result.value().dataset().get_string(core::tags::sop_instance_uid);
         if (!sop_uid.empty()) {
             index_[sop_uid] = entry.path();
         }

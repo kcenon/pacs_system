@@ -1,7 +1,7 @@
 # PACS System Features
 
-> **Version:** 0.1.8.0
-> **Last Updated:** 2025-12-12
+> **Version:** 0.1.9.0
+> **Last Updated:** 2025-12-17
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
@@ -18,6 +18,7 @@ This document provides comprehensive details on all features available in the PA
 - [Security Features](#security-features)
 - [Monitoring and Observability](#monitoring-and-observability)
 - [Workflow Services](#workflow-services)
+- [Error Handling](#error-handling)
 - [Planned Features](#planned-features)
 
 ---
@@ -1408,6 +1409,67 @@ auto custom = cron_schedule::parse("0 2 * * 1-5");  // 2:00 AM weekdays
 
 ---
 
+## Error Handling
+
+### Result<T> Pattern
+
+**Implementation**: Unified error handling using `Result<T>` pattern from common_system, replacing exception-based error handling.
+
+**Features**:
+- Type-safe error propagation without exceptions
+- Rich error information with code, message, module, and details
+- Standardized PACS error codes (-700 to -799 range)
+- Monadic operations (`map`, `and_then`, `or_else`) for error transformation
+- Convenience macros for common patterns
+
+**Error Code Categories**:
+
+| Range | Category | Description |
+|-------|----------|-------------|
+| -700 to -719 | DICOM File | File operations, DICM prefix, meta info |
+| -720 to -739 | DICOM Element | Element access, value conversion |
+| -740 to -759 | Encoding | Encoding, decoding, compression |
+| -760 to -779 | Network | Association, DIMSE, PDU |
+| -780 to -799 | Storage | Store, retrieve, query operations |
+
+**Classes and Types**:
+- `pacs::Result<T>` - Result type alias
+- `pacs::VoidResult` - Result for void operations
+- `pacs::error_info` - Error information structure
+- `pacs::error_codes` - Standardized error codes
+
+**Example**:
+```cpp
+#include <pacs/core/result.hpp>
+#include <pacs/core/dicom_file.hpp>
+
+using namespace pacs::core;
+
+// Reading a DICOM file with Result<T>
+auto result = dicom_file::open("image.dcm");
+if (result.is_ok()) {
+    auto& file = result.value();
+    std::cout << "SOP Class: " << file.sop_class_uid() << "\n";
+} else {
+    const auto& err = result.error();
+    std::cerr << "Error " << err.code << ": " << err.message << "\n";
+}
+
+// Using monadic operations
+auto sop_uid = dicom_file::open("image.dcm")
+    .map([](dicom_file& f) { return f.sop_instance_uid(); })
+    .unwrap_or("unknown");
+
+// Using PACS_ASSIGN_OR_RETURN macro
+pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
+    PACS_ASSIGN_OR_RETURN(auto file, dicom_file::open(path));
+    return pacs::Result<std::string>::ok(
+        file.dataset().get_string(tags::patient_name));
+}
+```
+
+---
+
 ## Planned Features
 
 ### Short Term (Next Release)
@@ -1453,6 +1515,7 @@ auto custom = cron_schedule::parse("0 2 * * 1-5");  // 2:00 AM weekdays
 | 1.9.0 | 2025-12-12 | raphaelshin | Added: Hierarchical Storage Management (HSM) with three-tier storage and automatic migration for Issue #200 |
 | 2.0.0 | 2025-12-13 | raphaelshin | Added: Auto Prefetch Service for worklist-triggered prior study prefetch for Issue #206 |
 | 2.1.0 | 2025-12-13 | raphaelshin | Added: Task Scheduler Service for automated cleanup, archive, and verification for Issue #207 |
+| 2.2.0 | 2025-12-17 | raphaelshin | Added: Result<T> pattern for unified error handling, PACS error codes (-700 to -799) for Issue #308 |
 
 ---
 

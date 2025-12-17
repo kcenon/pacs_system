@@ -1337,11 +1337,11 @@ auto render_dicom_image(
     auto dicom_result = core::dicom_file::from_bytes(
         std::span<const uint8_t>(file_data.data(), file_data.size()));
 
-    if (!dicom_result) {
+    if (dicom_result.is_err()) {
         return rendered_result::error("Failed to parse DICOM file");
     }
 
-    const auto& dataset = dicom_result->dataset();
+    const auto& dataset = dicom_result.value().dataset();
 
     // Get image parameters
     auto rows_elem = dataset.get(core::tags::rows);
@@ -1609,7 +1609,7 @@ crow::response build_metadata_response(
     bool first = true;
     for (const auto& path : file_paths) {
         auto result = core::dicom_file::open(path);
-        if (!result) {
+        if (result.is_err()) {
             continue;
         }
 
@@ -1619,7 +1619,7 @@ crow::response build_metadata_response(
         first = false;
 
         oss << dicomweb::dataset_to_dicom_json(
-            result->dataset(), false, bulk_data_uri_prefix);
+            result.value().dataset(), false, bulk_data_uri_prefix);
     }
 
     oss << "]";
@@ -1915,7 +1915,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
 
                 auto dicom_result = core::dicom_file::from_bytes(
                     std::span<const uint8_t>(data.data(), data.size()));
-                if (!dicom_result) {
+                if (dicom_result.is_err()) {
                     res.code = 500;
                     res.add_header("Content-Type", "application/json");
                     res.body = make_error_json("PARSE_ERROR",
@@ -1923,7 +1923,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                const auto& dataset = dicom_result->dataset();
+                const auto& dataset = dicom_result.value().dataset();
 
                 // Get image parameters
                 auto rows_elem = dataset.get(core::tags::rows);
@@ -2204,7 +2204,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     auto dicom_result = core::dicom_file::from_bytes(
                         std::span<const uint8_t>(part.data.data(), part.data.size()));
 
-                    if (!dicom_result) {
+                    if (dicom_result.is_err()) {
                         result.success = false;
                         result.error_code = "INVALID_DATA";
                         result.error_message = "Failed to parse DICOM data";
@@ -2213,7 +2213,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                         continue;
                     }
 
-                    const auto& dataset = dicom_result->dataset();
+                    const auto& dataset = dicom_result.value().dataset();
 
                     // Validate instance
                     auto validation = dicomweb::validate_instance(dataset);
@@ -2359,7 +2359,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     auto dicom_result = core::dicom_file::from_bytes(
                         std::span<const uint8_t>(part.data.data(), part.data.size()));
 
-                    if (!dicom_result) {
+                    if (dicom_result.is_err()) {
                         result.success = false;
                         result.error_code = "INVALID_DATA";
                         result.error_message = "Failed to parse DICOM data";
@@ -2368,7 +2368,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                         continue;
                     }
 
-                    const auto& dataset = dicom_result->dataset();
+                    const auto& dataset = dicom_result.value().dataset();
 
                     // Validate instance with target study UID check
                     auto validation = dicomweb::validate_instance(
