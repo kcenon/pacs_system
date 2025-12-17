@@ -261,6 +261,62 @@ struct association_counters {
 };
 
 /**
+ * @struct pool_counters
+ * @brief Metrics for tracking object pool usage
+ *
+ * Thread-safe counters for tracking pool hit/miss ratios and allocation
+ * statistics to monitor memory pool effectiveness.
+ *
+ * @see Issue #315, #319 - ObjectPool Memory Management
+ */
+struct pool_counters {
+    std::atomic<std::uint64_t> total_acquisitions{0};
+    std::atomic<std::uint64_t> pool_hits{0};
+    std::atomic<std::uint64_t> pool_misses{0};
+    std::atomic<std::uint64_t> total_releases{0};
+    std::atomic<std::uint32_t> current_pool_size{0};
+
+    /// Calculate hit ratio (0.0 to 1.0)
+    [[nodiscard]] double hit_ratio() const noexcept {
+        const auto total = total_acquisitions.load(std::memory_order_relaxed);
+        if (total == 0) {
+            return 0.0;
+        }
+        return static_cast<double>(pool_hits.load(std::memory_order_relaxed))
+               / static_cast<double>(total);
+    }
+
+    /// Record a pool acquisition (hit or miss)
+    void record_acquisition(bool was_pool_hit) noexcept {
+        total_acquisitions.fetch_add(1, std::memory_order_relaxed);
+        if (was_pool_hit) {
+            pool_hits.fetch_add(1, std::memory_order_relaxed);
+        } else {
+            pool_misses.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+
+    /// Record a pool release
+    void record_release() noexcept {
+        total_releases.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    /// Update current pool size
+    void set_pool_size(std::uint32_t size) noexcept {
+        current_pool_size.store(size, std::memory_order_relaxed);
+    }
+
+    /// Reset all counters to zero
+    void reset() noexcept {
+        total_acquisitions.store(0, std::memory_order_relaxed);
+        pool_hits.store(0, std::memory_order_relaxed);
+        pool_misses.store(0, std::memory_order_relaxed);
+        total_releases.store(0, std::memory_order_relaxed);
+        current_pool_size.store(0, std::memory_order_relaxed);
+    }
+};
+
+/**
  * @class pacs_metrics
  * @brief Central metrics collection for PACS DICOM operations
  *
@@ -549,6 +605,58 @@ public:
     }
 
     // =========================================================================
+    // Pool Metrics Access
+    // =========================================================================
+
+    /**
+     * @brief Get element pool counters
+     * @return Const reference to element pool counters
+     */
+    [[nodiscard]] const pool_counters& element_pool() const noexcept {
+        return element_pool_;
+    }
+
+    /**
+     * @brief Get mutable element pool counters
+     * @return Reference to element pool counters
+     */
+    [[nodiscard]] pool_counters& element_pool() noexcept {
+        return element_pool_;
+    }
+
+    /**
+     * @brief Get dataset pool counters
+     * @return Const reference to dataset pool counters
+     */
+    [[nodiscard]] const pool_counters& dataset_pool() const noexcept {
+        return dataset_pool_;
+    }
+
+    /**
+     * @brief Get mutable dataset pool counters
+     * @return Reference to dataset pool counters
+     */
+    [[nodiscard]] pool_counters& dataset_pool() noexcept {
+        return dataset_pool_;
+    }
+
+    /**
+     * @brief Get PDU buffer pool counters
+     * @return Const reference to PDU buffer pool counters
+     */
+    [[nodiscard]] const pool_counters& pdu_buffer_pool() const noexcept {
+        return pdu_buffer_pool_;
+    }
+
+    /**
+     * @brief Get mutable PDU buffer pool counters
+     * @return Reference to PDU buffer pool counters
+     */
+    [[nodiscard]] pool_counters& pdu_buffer_pool() noexcept {
+        return pdu_buffer_pool_;
+    }
+
+    // =========================================================================
     // Export Methods
     // =========================================================================
 
@@ -595,6 +703,9 @@ public:
         n_delete_.reset();
         transfer_.reset();
         associations_.reset();
+        element_pool_.reset();
+        dataset_pool_.reset();
+        pdu_buffer_pool_.reset();
     }
 
 private:
@@ -616,6 +727,11 @@ private:
 
     // Association lifecycle counters
     association_counters associations_;
+
+    // Object pool metrics
+    pool_counters element_pool_;
+    pool_counters dataset_pool_;
+    pool_counters pdu_buffer_pool_;
 };
 
 }  // namespace pacs::monitoring
