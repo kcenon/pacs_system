@@ -1,5 +1,7 @@
 #include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
 
+#include <pacs/core/result.hpp>
+
 #include <algorithm>
 #include <csetjmp>
 #include <cstdio>
@@ -105,6 +107,21 @@ private:
     jpeg_error_handler jerr_{};
 };
 
+// Helper function for creating codec errors
+codec_result make_compression_error(const std::string& message) {
+    return pacs::pacs_error<compression_result>(
+        pacs::error_codes::compression_error, message);
+}
+
+codec_result make_decompression_error(const std::string& message) {
+    return pacs::pacs_error<compression_result>(
+        pacs::error_codes::decompression_error, message);
+}
+
+codec_result make_compression_ok(std::vector<uint8_t> data, const image_params& params) {
+    return pacs::ok<compression_result>(compression_result{std::move(data), params});
+}
+
 }  // namespace
 
 /**
@@ -123,17 +140,17 @@ public:
         const compression_options& options) const {
 
         if (pixel_data.empty()) {
-            return codec_result::error("Empty pixel data");
+            return make_compression_error("Empty pixel data");
         }
 
         if (!params.valid_for_jpeg_baseline()) {
-            return codec_result::error(
+            return make_compression_error(
                 "Invalid parameters for JPEG Baseline: requires 8-bit depth");
         }
 
         size_t expected_size = params.frame_size_bytes();
         if (pixel_data.size() != expected_size) {
-            return codec_result::error(
+            return make_compression_error(
                 "Pixel data size mismatch: expected " + std::to_string(expected_size) +
                 ", got " + std::to_string(pixel_data.size()));
         }
@@ -142,7 +159,7 @@ public:
 
         // Setup error handling with setjmp
         if (setjmp(compressor.error().setjmp_buffer)) {
-            return codec_result::error(
+            return make_compression_error(
                 "JPEG compression failed: " + compressor.error().error_message);
         }
 
@@ -228,7 +245,7 @@ public:
         // Create output params (same as input for compression)
         image_params output_params = params;
 
-        return codec_result::ok(std::move(result), output_params);
+        return make_compression_ok(std::move(result), output_params);
     }
 
     [[nodiscard]] codec_result decode(
@@ -236,14 +253,14 @@ public:
         const image_params& params) const {
 
         if (compressed_data.empty()) {
-            return codec_result::error("Empty compressed data");
+            return make_decompression_error("Empty compressed data");
         }
 
         jpeg_decompressor decompressor;
 
         // Setup error handling with setjmp
         if (setjmp(decompressor.error().setjmp_buffer)) {
-            return codec_result::error(
+            return make_decompression_error(
                 "JPEG decompression failed: " + decompressor.error().error_message);
         }
 
@@ -258,17 +275,17 @@ public:
         // Read JPEG header
         int header_result = jpeg_read_header(&decompressor.get(), TRUE);
         if (header_result != JPEG_HEADER_OK) {
-            return codec_result::error("Invalid JPEG header");
+            return make_decompression_error("Invalid JPEG header");
         }
 
         // Validate dimensions if provided
         if (params.width > 0 && decompressor->image_width != params.width) {
-            return codec_result::error(
+            return make_decompression_error(
                 "Image width mismatch: expected " + std::to_string(params.width) +
                 ", got " + std::to_string(decompressor->image_width));
         }
         if (params.height > 0 && decompressor->image_height != params.height) {
-            return codec_result::error(
+            return make_decompression_error(
                 "Image height mismatch: expected " + std::to_string(params.height) +
                 ", got " + std::to_string(decompressor->image_height));
         }
@@ -314,7 +331,7 @@ public:
             output_params.photometric = photometric_interpretation::rgb;
         }
 
-        return codec_result::ok(std::move(output), output_params);
+        return make_compression_ok(std::move(output), output_params);
     }
 };
 
