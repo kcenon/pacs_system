@@ -537,9 +537,9 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
                 std::span<const uint8_t>(empty_dataset),
                 association_.context_transfer_syntax(pdv.context_id));
 
-            if (!dimse_result.has_value()) {
+            if (dimse_result.is_err()) {
                 report_error("Failed to decode DIMSE message: " +
-                             std::string(dimse::to_string(dimse_result.error())));
+                             dimse_result.error().message);
                 continue;
             }
 
