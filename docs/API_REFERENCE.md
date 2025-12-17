@@ -469,16 +469,22 @@ struct compression_options {
     int chroma_subsampling = 2;  // 0=4:4:4, 1=4:2:2, 2=4:2:0
 };
 
-// Codec operation result
-struct codec_result {
-    std::vector<uint8_t> data;
-    bool success = false;
-    std::string error_message;
-    image_params output_params;
-
-    static codec_result ok(std::vector<uint8_t> d, const image_params& params);
-    static codec_result error(std::string msg);
+// Successful compression/decompression result
+struct compression_result {
+    std::vector<uint8_t> data;    // Processed pixel data
+    image_params output_params;    // Output image parameters
 };
+
+// Result type alias using pacs::Result<T> pattern
+using codec_result = pacs::Result<compression_result>;
+
+// Usage example:
+// auto result = codec.encode(pixels, params, options);
+// if (result.is_err()) {
+//     std::cerr << pacs::get_error(result).message << std::endl;
+// } else {
+//     auto& data = pacs::get_value(result).data;
+// }
 
 // Abstract codec interface
 class compression_codec {

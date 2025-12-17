@@ -467,16 +467,22 @@ struct compression_options {
     int chroma_subsampling = 2;  // 0=4:4:4, 1=4:2:2, 2=4:2:0
 };
 
-// 코덱 연산 결과
-struct codec_result {
-    std::vector<uint8_t> data;
-    bool success = false;
-    std::string error_message;
-    image_params output_params;
-
-    static codec_result ok(std::vector<uint8_t> d, const image_params& params);
-    static codec_result error(std::string msg);
+// 압축/압축해제 성공 결과
+struct compression_result {
+    std::vector<uint8_t> data;    // 처리된 픽셀 데이터
+    image_params output_params;    // 출력 이미지 파라미터
 };
+
+// pacs::Result<T> 패턴을 사용한 결과 타입 별칭
+using codec_result = pacs::Result<compression_result>;
+
+// 사용 예시:
+// auto result = codec.encode(pixels, params, options);
+// if (result.is_err()) {
+//     std::cerr << pacs::get_error(result).message << std::endl;
+// } else {
+//     auto& data = pacs::get_value(result).data;
+// }
 
 // 추상 코덱 인터페이스
 class compression_codec {

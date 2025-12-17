@@ -15,10 +15,9 @@
 #ifndef PACS_ENCODING_EXPLICIT_VR_BIG_ENDIAN_CODEC_HPP
 #define PACS_ENCODING_EXPLICIT_VR_BIG_ENDIAN_CODEC_HPP
 
-#include "implicit_vr_codec.hpp"  // For codec_error and codec_result
-
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/core/dicom_element.hpp>
+#include <pacs/core/result.hpp>
 
 #include <cstdint>
 #include <span>
@@ -64,10 +63,10 @@ namespace pacs::encoding {
 class explicit_vr_big_endian_codec {
 public:
     /**
-     * @brief Result type for decode operations
+     * @brief Result type for decode operations using pacs::Result<T> pattern
      */
     template <typename T>
-    using result = codec_result<T>;
+    using result = pacs::Result<T>;
 
     // ========================================================================
     // Dataset Encoding/Decoding

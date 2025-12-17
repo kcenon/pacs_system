@@ -3,6 +3,7 @@
 
 #include "pacs/encoding/compression/image_params.hpp"
 #include "pacs/encoding/transfer_syntax.hpp"
+#include <pacs/core/result.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -10,10 +11,6 @@
 #include <string>
 #include <string_view>
 #include <vector>
-
-#ifdef PACS_WITH_COMMON_SYSTEM
-#include <kcenon/common/patterns/result.h>
-#endif
 
 namespace pacs::encoding::compression {
 
@@ -42,43 +39,22 @@ struct compression_options {
 };
 
 /**
- * @brief Result of a codec operation.
+ * @brief Successful result of a compression/decompression operation.
  *
- * Contains either the processed data or an error description.
+ * Contains the processed data and output image parameters.
  */
-struct codec_result {
+struct compression_result {
     /// Processed pixel data
     std::vector<uint8_t> data;
 
-    /// True if operation succeeded
-    bool success{false};
-
-    /// Error message if operation failed
-    std::string error_message;
-
     /// Output image parameters (may differ from input for decompression)
     image_params output_params;
-
-    /**
-     * @brief Creates a successful result with data.
-     * @param d The processed data
-     * @param params Output image parameters
-     * @return A successful codec_result
-     */
-    [[nodiscard]] static codec_result ok(std::vector<uint8_t> d,
-                                          const image_params& params) {
-        return {std::move(d), true, "", params};
-    }
-
-    /**
-     * @brief Creates a failed result with error message.
-     * @param msg The error description
-     * @return A failed codec_result
-     */
-    [[nodiscard]] static codec_result error(std::string msg) {
-        return {{}, false, std::move(msg), {}};
-    }
 };
+
+/**
+ * @brief Result type alias for compression operations using pacs::Result<T> pattern
+ */
+using codec_result = pacs::Result<compression_result>;
 
 /**
  * @brief Abstract base class for image compression codecs.

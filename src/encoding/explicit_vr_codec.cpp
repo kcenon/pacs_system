@@ -72,6 +72,19 @@ constexpr bool is_special_tag(core::dicom_tag tag) {
 }  // namespace
 
 // ============================================================================
+// Error Helpers
+// ============================================================================
+
+namespace {
+
+template <typename T>
+pacs::Result<T> make_codec_error(int code, const std::string& message) {
+    return pacs::pacs_error<T>(code, message);
+}
+
+}  // namespace
+
+// ============================================================================
 // Dataset Encoding
 // ============================================================================
 
@@ -190,11 +203,13 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode(
         }
 
         auto result = decode_element(data);
-        if (!result) {
-            return result.error();
+        if (!result.is_ok()) {
+            return pacs::pacs_error<core::dicom_dataset>(
+                pacs::get_error(result).code,
+                pacs::get_error(result).message);
         }
 
-        dataset.insert(std::move(*result));
+        dataset.insert(std::move(pacs::get_value(result)));
     }
 
     return dataset;
@@ -204,7 +219,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_element
     std::span<const uint8_t>& data) {
     // Need at least 8 bytes for standard format: tag (4) + VR (2) + length (2)
     if (data.size() < 8) {
-        return codec_error::insufficient_data;
+        return make_codec_error<core::dicom_element>(
+            pacs::error_codes::insufficient_data,
+            "Insufficient data to decode element");
     }
 
     // Read tag
@@ -228,7 +245,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_element
 
     auto vr_opt = from_string(vr_str);
     if (!vr_opt) {
-        return codec_error::unknown_vr;
+        return make_codec_error<core::dicom_element>(
+            pacs::error_codes::unknown_vr,
+            "Unknown VR type");
     }
     vr_type vr = *vr_opt;
 
@@ -239,7 +258,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_element
     if (has_explicit_32bit_length(vr)) {
         // Extended format: need 12 bytes total
         if (data.size() < 12) {
-            return codec_error::insufficient_data;
+            return make_codec_error<core::dicom_element>(
+                pacs::error_codes::insufficient_data,
+                "Insufficient data for extended VR format");
         }
         // Skip reserved 2 bytes, then read 4-byte length
         length = read_le32(data.data() + 8);
@@ -259,7 +280,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_element
 
     // Check if we have enough data
     if (data.size() < length) {
-        return codec_error::insufficient_data;
+        return make_codec_error<core::dicom_element>(
+            pacs::error_codes::insufficient_data,
+            "Insufficient data for element value");
     }
 
     // Read value
@@ -279,7 +302,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_undefin
         while (!data.empty()) {
             // Check for sequence delimitation
             if (data.size() < 8) {
-                return codec_error::insufficient_data;
+                return make_codec_error<core::dicom_element>(
+                    pacs::error_codes::insufficient_data,
+                    "Insufficient data for sequence delimiter");
             }
 
             uint16_t item_group = read_le16(data.data());
@@ -295,16 +320,20 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_undefin
 
             // Must be an Item tag
             if (!is_item_tag(item_tag)) {
-                return codec_error::invalid_sequence;
+                return make_codec_error<core::dicom_element>(
+                    pacs::error_codes::invalid_sequence,
+                    "Expected Item tag in sequence");
             }
 
             // Decode the sequence item
             auto item_result = decode_sequence_item(data);
-            if (!item_result) {
-                return item_result.error();
+            if (!item_result.is_ok()) {
+                return make_codec_error<core::dicom_element>(
+                    pacs::get_error(item_result).code,
+                    pacs::get_error(item_result).message);
             }
 
-            seq_element.sequence_items().push_back(std::move(*item_result));
+            seq_element.sequence_items().push_back(std::move(pacs::get_value(item_result)));
         }
 
         return seq_element;
@@ -316,7 +345,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_undefin
 
     while (!data.empty()) {
         if (data.size() < 8) {
-            return codec_error::insufficient_data;
+            return make_codec_error<core::dicom_element>(
+                pacs::error_codes::insufficient_data,
+                "Insufficient data for encapsulated data");
         }
 
         uint16_t item_group = read_le16(data.data());
@@ -340,7 +371,9 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_undefin
                 data = data.subspan(item_length);
             }
         } else {
-            return codec_error::invalid_sequence;
+            return make_codec_error<core::dicom_element>(
+                pacs::error_codes::invalid_sequence,
+                "Invalid tag in encapsulated data");
         }
     }
 
@@ -351,7 +384,9 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
     std::span<const uint8_t>& data) {
     // Read Item tag and length (implicit VR format for item tags)
     if (data.size() < 8) {
-        return codec_error::insufficient_data;
+        return make_codec_error<core::dicom_dataset>(
+            pacs::error_codes::insufficient_data,
+            "Insufficient data for sequence item");
     }
 
     uint16_t group = read_le16(data.data());
@@ -359,7 +394,9 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
     core::dicom_tag tag{group, elem};
 
     if (!is_item_tag(tag)) {
-        return codec_error::invalid_sequence;
+        return make_codec_error<core::dicom_dataset>(
+            pacs::error_codes::invalid_sequence,
+            "Expected Item tag for sequence item");
     }
 
     uint32_t item_length = read_le32(data.data() + 4);
@@ -371,7 +408,9 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
 
         while (!data.empty()) {
             if (data.size() < 4) {
-                return codec_error::insufficient_data;
+                return make_codec_error<core::dicom_dataset>(
+                    pacs::error_codes::insufficient_data,
+                    "Insufficient data for item delimiter check");
             }
 
             uint16_t elem_group = read_le16(data.data());
@@ -385,11 +424,13 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
             }
 
             auto elem_result = decode_element(data);
-            if (!elem_result) {
-                return elem_result.error();
+            if (!elem_result.is_ok()) {
+                return make_codec_error<core::dicom_dataset>(
+                    pacs::get_error(elem_result).code,
+                    pacs::get_error(elem_result).message);
             }
 
-            item.insert(std::move(*elem_result));
+            item.insert(std::move(pacs::get_value(elem_result)));
         }
 
         return item;
@@ -397,7 +438,9 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
 
     // Explicit item length
     if (data.size() < item_length) {
-        return codec_error::insufficient_data;
+        return make_codec_error<core::dicom_dataset>(
+            pacs::error_codes::insufficient_data,
+            "Insufficient data for item content");
     }
 
     auto item_data = data.subspan(0, item_length);

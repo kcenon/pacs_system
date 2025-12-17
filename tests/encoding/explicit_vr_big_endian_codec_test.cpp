@@ -154,8 +154,8 @@ TEST_CASE("explicit_vr_big_endian_codec element decoding", "[encoding][big_endia
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        auto& elem = *result;
+        REQUIRE(result.is_ok());
+        auto& elem = pacs::get_value(result);
 
         CHECK(elem.tag() == tags::patient_name);
         CHECK(elem.vr() == vr_type::PN);
@@ -176,8 +176,8 @@ TEST_CASE("explicit_vr_big_endian_codec element decoding", "[encoding][big_endia
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        auto& elem = *result;
+        REQUIRE(result.is_ok());
+        auto& elem = pacs::get_value(result);
 
         CHECK(elem.tag() == tags::rows);
         CHECK(elem.vr() == vr_type::US);
@@ -203,8 +203,8 @@ TEST_CASE("explicit_vr_big_endian_codec element decoding", "[encoding][big_endia
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        auto& elem = *result;
+        REQUIRE(result.is_ok());
+        auto& elem = pacs::get_value(result);
 
         CHECK(elem.tag() == tags::pixel_data);
         CHECK(elem.vr() == vr_type::OW);
@@ -234,8 +234,8 @@ TEST_CASE("explicit_vr_big_endian_codec dataset round-trip", "[encoding][big_end
         auto encoded = explicit_vr_big_endian_codec::encode(original);
         auto result = explicit_vr_big_endian_codec::decode(encoded);
 
-        REQUIRE(result.has_value());
-        auto& decoded = *result;
+        REQUIRE(result.is_ok());
+        auto& decoded = pacs::get_value(result);
 
         // Verify VRs are preserved
         auto* name_elem = decoded.get(tags::patient_name);
@@ -261,8 +261,8 @@ TEST_CASE("explicit_vr_big_endian_codec dataset round-trip", "[encoding][big_end
         auto encoded = explicit_vr_big_endian_codec::encode(original);
         auto result = explicit_vr_big_endian_codec::decode(encoded);
 
-        REQUIRE(result.has_value());
-        auto& decoded = *result;
+        REQUIRE(result.is_ok());
+        auto& decoded = pacs::get_value(result);
 
         CHECK(decoded.get_numeric<uint16_t>(tags::rows) == 0x1234);
         CHECK(decoded.get_numeric<int16_t>(dicom_tag{0x0028, 0x0106}) == -1000);
@@ -279,8 +279,8 @@ TEST_CASE("explicit_vr_big_endian_codec dataset round-trip", "[encoding][big_end
         auto encoded = explicit_vr_big_endian_codec::encode(original);
         auto result = explicit_vr_big_endian_codec::decode(encoded);
 
-        REQUIRE(result.has_value());
-        auto& decoded = *result;
+        REQUIRE(result.is_ok());
+        auto& decoded = pacs::get_value(result);
 
         auto* pixel_elem = decoded.get(tags::pixel_data);
         REQUIRE(pixel_elem != nullptr);
@@ -317,11 +317,11 @@ TEST_CASE("explicit_vr_big_endian_codec sequence handling", "[encoding][big_endi
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        CHECK(result->is_sequence());
-        REQUIRE(result->sequence_items().size() == 1);
+        REQUIRE(result.is_ok());
+        CHECK(pacs::get_value(result).is_sequence());
+        REQUIRE(pacs::get_value(result).sequence_items().size() == 1);
 
-        auto& decoded_item = result->sequence_items()[0];
+        auto& decoded_item = pacs::get_value(result).sequence_items()[0];
         auto* modality_elem = decoded_item.get(tags::modality);
         REQUIRE(modality_elem != nullptr);
         CHECK(modality_elem->vr() == vr_type::CS);
@@ -345,8 +345,8 @@ TEST_CASE("explicit_vr_big_endian_codec error handling", "[encoding][big_endian]
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(!result.has_value());
-        CHECK(result.error() == codec_error::unknown_vr);
+        REQUIRE(!result.is_ok());
+        CHECK(pacs::get_error(result).code == pacs::error_codes::unknown_vr);
     }
 
     SECTION("insufficient data for header") {
@@ -355,8 +355,8 @@ TEST_CASE("explicit_vr_big_endian_codec error handling", "[encoding][big_endian]
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(!result.has_value());
-        CHECK(result.error() == codec_error::insufficient_data);
+        REQUIRE(!result.is_ok());
+        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
     }
 
     SECTION("truncated value data") {
@@ -371,8 +371,8 @@ TEST_CASE("explicit_vr_big_endian_codec error handling", "[encoding][big_endian]
         std::span<const uint8_t> data(bytes);
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
-        REQUIRE(!result.has_value());
-        CHECK(result.error() == codec_error::insufficient_data);
+        REQUIRE(!result.is_ok());
+        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
     }
 }
 
@@ -395,24 +395,24 @@ TEST_CASE("interoperability between LE and BE codecs", "[encoding][big_endian]")
 
         // Decode LE
         auto le_result = explicit_vr_codec::decode(le_bytes);
-        REQUIRE(le_result.has_value());
+        REQUIRE(le_result.is_ok());
 
         // Encode as BE
-        auto be_bytes = explicit_vr_big_endian_codec::encode(*le_result);
+        auto be_bytes = explicit_vr_big_endian_codec::encode(pacs::get_value(le_result));
 
         // Decode BE
         auto be_result = explicit_vr_big_endian_codec::decode(be_bytes);
-        REQUIRE(be_result.has_value());
+        REQUIRE(be_result.is_ok());
 
         // Re-encode as LE
-        auto final_le_bytes = explicit_vr_codec::encode(*be_result);
+        auto final_le_bytes = explicit_vr_codec::encode(pacs::get_value(be_result));
 
         // Verify LE bytes are identical
         CHECK(final_le_bytes == le_bytes);
 
         // Verify values
-        CHECK(be_result->get_numeric<uint16_t>(tags::rows) == 512);
-        CHECK(be_result->get_numeric<uint16_t>(tags::columns) == 512);
+        CHECK(pacs::get_value(be_result).get_numeric<uint16_t>(tags::rows) == 512);
+        CHECK(pacs::get_value(be_result).get_numeric<uint16_t>(tags::columns) == 512);
     }
 
     SECTION("BE to LE conversion preserves data") {
@@ -434,18 +434,18 @@ TEST_CASE("interoperability between LE and BE codecs", "[encoding][big_endian]")
 
         // Decode BE
         auto be_result = explicit_vr_big_endian_codec::decode(be_bytes);
-        REQUIRE(be_result.has_value());
+        REQUIRE(be_result.is_ok());
 
         // Verify decoded values
-        CHECK(be_result->get_numeric<uint16_t>(tags::rows) == 256);
+        CHECK(pacs::get_value(be_result).get_numeric<uint16_t>(tags::rows) == 256);
 
         // Encode as LE
-        auto le_bytes = explicit_vr_codec::encode(*be_result);
+        auto le_bytes = explicit_vr_codec::encode(pacs::get_value(be_result));
 
         // Decode LE and verify
         auto le_result = explicit_vr_codec::decode(le_bytes);
-        REQUIRE(le_result.has_value());
-        CHECK(le_result->get_numeric<uint16_t>(tags::rows) == 256);
+        REQUIRE(le_result.is_ok());
+        CHECK(pacs::get_value(le_result).get_numeric<uint16_t>(tags::rows) == 256);
     }
 }
 

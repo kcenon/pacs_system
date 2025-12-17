@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <pacs/core/result.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
@@ -219,35 +220,35 @@ TEST_CASE("rle_codec 8-bit grayscale round-trip", "[encoding][compression][rle]"
     SECTION("encode succeeds") {
         auto encode_result = codec.encode(original, params);
 
-        REQUIRE(encode_result.success == true);
-        REQUIRE(encode_result.data.size() > 0);
+        REQUIRE(encode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(encode_result).data.size() > 0);
         // RLE data should have 64-byte header
-        REQUIRE(encode_result.data.size() >= 64);
+        REQUIRE(pacs::get_value(encode_result).data.size() >= 64);
     }
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(decode_result.data.size() == original.size());
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
 
         // Lossless verification - must be exactly identical
-        REQUIRE(images_identical(original, decode_result.data));
+        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
     }
 
     SECTION("output params are set correctly") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(decode_result.output_params.width == width);
-        REQUIRE(decode_result.output_params.height == height);
-        REQUIRE(decode_result.output_params.samples_per_pixel == 1);
-        REQUIRE(decode_result.output_params.bits_allocated == 8);
-        REQUIRE(decode_result.output_params.bits_stored == 8);
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(decode_result).output_params.width == width);
+        REQUIRE(pacs::get_value(decode_result).output_params.height == height);
+        REQUIRE(pacs::get_value(decode_result).output_params.samples_per_pixel == 1);
+        REQUIRE(pacs::get_value(decode_result).output_params.bits_allocated == 8);
+        REQUIRE(pacs::get_value(decode_result).output_params.bits_stored == 8);
     }
 }
 
@@ -269,24 +270,24 @@ TEST_CASE("rle_codec 16-bit grayscale round-trip", "[encoding][compression][rle]
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(decode_result.data.size() == original.size());
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
 
         // Lossless verification
-        REQUIRE(images_identical(original, decode_result.data));
+        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
     }
 
     SECTION("output params reflect 16-bit precision") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(decode_result.output_params.bits_allocated == 16);
-        REQUIRE(decode_result.output_params.bits_stored == 16);
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(decode_result).output_params.bits_allocated == 16);
+        REQUIRE(pacs::get_value(decode_result).output_params.bits_stored == 16);
     }
 }
 
@@ -308,20 +309,20 @@ TEST_CASE("rle_codec RGB color round-trip", "[encoding][compression][rle]") {
 
     SECTION("encode succeeds") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
-        REQUIRE(encode_result.data.size() > 0);
+        REQUIRE(encode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(encode_result).data.size() > 0);
     }
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(decode_result.data.size() == original.size());
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
 
         // Lossless verification
-        REQUIRE(images_identical(original, decode_result.data));
+        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
     }
 }
 
@@ -342,21 +343,21 @@ TEST_CASE("rle_codec with solid color image", "[encoding][compression][rle]") {
 
     SECTION("achieves good compression on solid images") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
         // Solid images should compress very well with RLE
         // Original: 128*128 = 16384 bytes
         // Compressed should be much smaller
-        REQUIRE(encode_result.data.size() < original.size());
+        REQUIRE(pacs::get_value(encode_result).data.size() < original.size());
     }
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(images_identical(original, decode_result.data));
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
     }
 }
 
@@ -377,19 +378,19 @@ TEST_CASE("rle_codec with pattern image", "[encoding][compression][rle]") {
 
     SECTION("achieves compression on pattern images") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
         // Pattern images with horizontal bands should compress well with RLE
-        REQUIRE(encode_result.data.size() < original.size());
+        REQUIRE(pacs::get_value(encode_result).data.size() < original.size());
     }
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
-        REQUIRE(images_identical(original, decode_result.data));
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
     }
 }
 
@@ -411,13 +412,13 @@ TEST_CASE("rle_codec with random noise", "[encoding][compression][rle]") {
         auto original = create_noise_image_8bit(width, height, 12345);
 
         auto encode_result = codec.encode(original, params);
-        REQUIRE(encode_result.success == true);
+        REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(encode_result.data, params);
-        REQUIRE(decode_result.success == true);
+        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        REQUIRE(decode_result.is_ok() == true);
 
         // Even high-entropy data must be perfectly reconstructed
-        REQUIRE(images_identical(original, decode_result.data));
+        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
     }
 }
 
@@ -435,8 +436,8 @@ TEST_CASE("rle_codec error handling", "[encoding][compression][rle]") {
         std::vector<uint8_t> empty_data;
         auto result = codec.encode(empty_data, params);
 
-        REQUIRE(result.success == false);
-        REQUIRE_FALSE(result.error_message.empty());
+        REQUIRE(result.is_ok() == false);
+        REQUIRE_FALSE(pacs::get_error(result).message.empty());
     }
 
     SECTION("size mismatch returns error") {
@@ -450,8 +451,8 @@ TEST_CASE("rle_codec error handling", "[encoding][compression][rle]") {
         std::vector<uint8_t> wrong_size(100);  // Should be 64*64 = 4096
         auto result = codec.encode(wrong_size, params);
 
-        REQUIRE(result.success == false);
-        REQUIRE_THAT(result.error_message,
+        REQUIRE(result.is_ok() == false);
+        REQUIRE_THAT(pacs::get_error(result).message,
                      Catch::Matchers::ContainsSubstring("mismatch"));
     }
 
@@ -465,7 +466,7 @@ TEST_CASE("rle_codec error handling", "[encoding][compression][rle]") {
         std::vector<uint8_t> empty_data;
         auto result = codec.decode(empty_data, params);
 
-        REQUIRE(result.success == false);
+        REQUIRE(result.is_ok() == false);
     }
 
     SECTION("too small compressed data returns error") {
@@ -479,7 +480,7 @@ TEST_CASE("rle_codec error handling", "[encoding][compression][rle]") {
         std::vector<uint8_t> small_data(10, 0);
         auto result = codec.decode(small_data, params);
 
-        REQUIRE(result.success == false);
+        REQUIRE(result.is_ok() == false);
     }
 
     SECTION("invalid RLE header returns error") {
@@ -495,7 +496,7 @@ TEST_CASE("rle_codec error handling", "[encoding][compression][rle]") {
 
         auto result = codec.decode(invalid_data, params);
 
-        REQUIRE(result.success == false);
+        REQUIRE(result.is_ok() == false);
     }
 }
 
@@ -623,12 +624,12 @@ TEST_CASE("rle_codec various image sizes", "[encoding][compression][rle]") {
             params.samples_per_pixel = 1;
 
             auto encode_result = codec.encode(original, params);
-            REQUIRE(encode_result.success == true);
+            REQUIRE(encode_result.is_ok() == true);
 
-            auto decode_result = codec.decode(encode_result.data, params);
-            REQUIRE(decode_result.success == true);
+            auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+            REQUIRE(decode_result.is_ok() == true);
 
-            REQUIRE(images_identical(original, decode_result.data));
+            REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
         }
     }
 }
