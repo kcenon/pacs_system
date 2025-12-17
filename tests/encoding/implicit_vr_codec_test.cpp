@@ -9,6 +9,7 @@
 #include <pacs/core/dicom_element.hpp>
 #include <pacs/core/dicom_tag.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
+#include <pacs/core/result.hpp>
 #include <pacs/encoding/implicit_vr_codec.hpp>
 #include <pacs/encoding/vr_type.hpp>
 
@@ -124,8 +125,8 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        auto& elem = *result;
+        REQUIRE(result.is_ok());
+        auto& elem = pacs::get_value(result);
 
         CHECK(elem.tag() == tags::patient_name);
         CHECK(elem.length() == 8);
@@ -146,8 +147,8 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        auto& elem = *result;
+        REQUIRE(result.is_ok());
+        auto& elem = pacs::get_value(result);
 
         CHECK(elem.tag() == tags::rows);
         CHECK(elem.as_numeric<uint16_t>() == 512);
@@ -159,8 +160,8 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(!result.has_value());
-        CHECK(result.error() == codec_error::insufficient_data);
+        REQUIRE(!pacs::is_ok(result));
+        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
     }
 }
 
@@ -179,8 +180,8 @@ TEST_CASE("implicit_vr_codec dataset round-trip", "[encoding][implicit]") {
         auto encoded = implicit_vr_codec::encode(original);
         auto result = implicit_vr_codec::decode(encoded);
 
-        REQUIRE(result.has_value());
-        auto& decoded = *result;
+        REQUIRE(result.is_ok());
+        auto& decoded = pacs::get_value(result);
 
         // Verify string values (may have trailing padding)
         auto patient_name = decoded.get_string(tags::patient_name);
@@ -204,8 +205,8 @@ TEST_CASE("implicit_vr_codec dataset round-trip", "[encoding][implicit]") {
         auto encoded = implicit_vr_codec::encode(original);
         auto result = implicit_vr_codec::decode(encoded);
 
-        REQUIRE(result.has_value());
-        auto& decoded = *result;
+        REQUIRE(result.is_ok());
+        auto& decoded = pacs::get_value(result);
 
         CHECK(decoded.get_string(tags::study_date).find("20250101") == 0);
         CHECK(decoded.get_string(tags::study_time).find("120000") == 0);
@@ -219,8 +220,8 @@ TEST_CASE("implicit_vr_codec dataset round-trip", "[encoding][implicit]") {
         CHECK(encoded.empty());
 
         auto result = implicit_vr_codec::decode(encoded);
-        REQUIRE(result.has_value());
-        CHECK(result->empty());
+        REQUIRE(result.is_ok());
+        CHECK(pacs::get_value(result).empty());
     }
 }
 
@@ -257,8 +258,8 @@ TEST_CASE("implicit_vr_codec sequence handling", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        auto& decoded = *result;
+        REQUIRE(result.is_ok());
+        auto& decoded = pacs::get_value(result);
 
         CHECK(decoded.is_sequence());
         REQUIRE(decoded.sequence_items().size() == 1);
@@ -283,8 +284,8 @@ TEST_CASE("implicit_vr_codec sequence handling", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        CHECK(result->sequence_items().size() == 3);
+        REQUIRE(result.is_ok());
+        CHECK(pacs::get_value(result).sequence_items().size() == 3);
     }
 
     SECTION("empty sequence") {
@@ -295,9 +296,9 @@ TEST_CASE("implicit_vr_codec sequence handling", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(result.has_value());
-        CHECK(result->is_sequence());
-        CHECK(result->sequence_items().empty());
+        REQUIRE(result.is_ok());
+        CHECK(pacs::get_value(result).is_sequence());
+        CHECK(pacs::get_value(result).sequence_items().empty());
     }
 }
 
@@ -317,13 +318,14 @@ TEST_CASE("implicit_vr_codec error handling", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(!result.has_value());
-        CHECK(result.error() == codec_error::insufficient_data);
+        REQUIRE(!pacs::is_ok(result));
+        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
     }
 
-    SECTION("to_string for codec errors") {
-        CHECK(to_string(codec_error::success) == "Success");
-        CHECK(to_string(codec_error::insufficient_data) == "Insufficient data to decode");
-        CHECK(to_string(codec_error::invalid_sequence) == "Malformed sequence structure");
+    SECTION("error codes are properly defined") {
+        // Verify encoding-related error codes exist and have expected values
+        CHECK(pacs::error_codes::insufficient_data == -746);
+        CHECK(pacs::error_codes::invalid_sequence == -747);
+        CHECK(pacs::error_codes::unknown_vr == -748);
     }
 }
