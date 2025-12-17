@@ -84,6 +84,27 @@ namespace error_codes {
     constexpr int dimse_error = pacs_base - 62;
     constexpr int pdu_error = pacs_base - 63;
 
+    // Connection errors (-764 to -769)
+    constexpr int connection_failed = pacs_base - 64;
+    constexpr int connection_timeout = pacs_base - 65;
+    constexpr int send_failed = pacs_base - 66;
+    constexpr int receive_failed = pacs_base - 67;
+    constexpr int receive_timeout = pacs_base - 68;
+
+    // Association state errors (-770 to -774)
+    constexpr int invalid_association_state = pacs_base - 70;
+    constexpr int negotiation_failed = pacs_base - 71;
+    constexpr int no_acceptable_context = pacs_base - 72;
+    constexpr int release_failed = pacs_base - 73;
+    constexpr int already_released = pacs_base - 74;
+
+    // PDU errors (-775 to -779)
+    constexpr int pdu_encoding_error = pacs_base - 75;
+    constexpr int pdu_decoding_error = pacs_base - 76;
+    constexpr int incomplete_pdu = pacs_base - 77;
+    constexpr int invalid_pdu_type = pacs_base - 78;
+    constexpr int malformed_pdu = pacs_base - 79;
+
     // Storage errors (-780 to -799)
     constexpr int storage_failed = pacs_base - 80;
     constexpr int retrieve_failed = pacs_base - 81;
