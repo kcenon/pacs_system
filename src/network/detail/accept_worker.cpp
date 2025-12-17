@@ -82,7 +82,7 @@ accept_worker::result_void accept_worker::before_start() {
     // - Start listening with backlog_ pending connections
 
     accepting_.store(true, std::memory_order_release);
-    return {};
+    return kcenon::common::ok();
 }
 
 accept_worker::result_void accept_worker::do_work() {
@@ -105,7 +105,7 @@ accept_worker::result_void accept_worker::do_work() {
         on_maintenance_();
     }
 
-    return {};
+    return kcenon::common::ok();
 }
 
 accept_worker::result_void accept_worker::after_stop() {
@@ -119,7 +119,7 @@ accept_worker::result_void accept_worker::after_stop() {
     // - Clean up any pending accept operations
 
     accepting_.store(false, std::memory_order_release);
-    return {};
+    return kcenon::common::ok();
 }
 
 bool accept_worker::should_continue_work() const {

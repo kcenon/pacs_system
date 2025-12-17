@@ -131,10 +131,10 @@ Result<std::monostate> dicom_server::start() {
     accept_worker_->set_wake_interval(std::chrono::milliseconds(100));
 
     auto start_result = accept_worker_->start();
-    if (start_result.has_error()) {
+    if (start_result.is_err()) {
         running_ = false;
         return error_info("Failed to start accept worker: " +
-                         start_result.get_error().to_string());
+                         start_result.error().message);
     }
 
     // Register in global registry
