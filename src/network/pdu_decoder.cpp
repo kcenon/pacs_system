@@ -18,36 +18,40 @@ constexpr size_t FIXED_PDU_SIZE = 10;
 /// (version + reserved + called AE + calling AE + reserved)
 constexpr size_t ASSOCIATE_HEADER_SIZE = 68;  // 2 + 2 + 16 + 16 + 32
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+/// Helper to map pdu_decode_error to pacs::error_codes
+inline int to_error_code(pdu_decode_error err) {
+    switch (err) {
+        case pdu_decode_error::incomplete_header:
+        case pdu_decode_error::incomplete_pdu:
+            return pacs::error_codes::incomplete_pdu;
+        case pdu_decode_error::invalid_pdu_type:
+            return pacs::error_codes::invalid_pdu_type;
+        case pdu_decode_error::malformed_pdu:
+        case pdu_decode_error::buffer_overflow:
+            return pacs::error_codes::malformed_pdu;
+        case pdu_decode_error::invalid_protocol_version:
+        case pdu_decode_error::invalid_item_type:
+            return pacs::error_codes::pdu_decoding_error;
+        default:
+            return pacs::error_codes::pdu_error;
+    }
+}
+
+/// Create error result using standardized pacs::error_info
 template<typename T>
 DecodeResult<T> make_error(pdu_decode_error err, const std::string& msg = "") {
     std::string full_msg = to_string(err);
     if (!msg.empty()) {
         full_msg += ": " + msg;
     }
-    return DecodeResult<T>::err(kcenon::common::error_info(
-        static_cast<int>(err), full_msg, "pacs::network::pdu_decoder"));
+    return pacs::error_info{to_error_code(err), full_msg, "network"};
 }
 
+/// Create success result
 template<typename T>
 DecodeResult<T> make_ok(T value) {
-    return DecodeResult<T>::ok(std::move(value));
+    return pacs::ok(std::move(value));
 }
-#else
-template<typename T>
-DecodeResult<T> make_error(pdu_decode_error err, const std::string& msg = "") {
-    std::string full_msg = to_string(err);
-    if (!msg.empty()) {
-        full_msg += ": " + msg;
-    }
-    return DecodeResult<T>::error(err, full_msg);
-}
-
-template<typename T>
-DecodeResult<T> make_ok(T value) {
-    return DecodeResult<T>::ok(std::move(value));
-}
-#endif
 
 }  // namespace
 
@@ -165,84 +169,49 @@ DecodeResult<pdu> pdu_decoder::decode(std::span<const uint8_t> data) {
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         case 0x02: {
             auto result = decode_associate_ac(data);
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         case 0x03: {
             auto result = decode_associate_rj(data);
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         case 0x04: {
             auto result = decode_p_data_tf(data);
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         case 0x05: {
             auto result = decode_release_rq(data);
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         case 0x06: {
             auto result = decode_release_rp(data);
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         case 0x07: {
             auto result = decode_abort(data);
             if (result.is_ok()) {
                 return make_ok<pdu>(std::move(result.value()));
             }
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return make_error<pdu>(pdu_decode_error::malformed_pdu,
-                result.error().message);
-#else
-            return make_error<pdu>(result.error_code(), result.error_message());
-#endif
+            return result.error();
         }
         default:
             return make_error<pdu>(pdu_decode_error::invalid_pdu_type,
@@ -259,13 +228,7 @@ DecodeResult<associate_rj> pdu_decoder::decode_associate_rj(
 
     auto header_result = validate_pdu_header(data, 0x03);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<associate_rj>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<associate_rj>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     // A-ASSOCIATE-RJ is always 10 bytes
@@ -290,13 +253,7 @@ DecodeResult<release_rq_pdu> pdu_decoder::decode_release_rq(
 
     auto header_result = validate_pdu_header(data, 0x05);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<release_rq_pdu>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<release_rq_pdu>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     return make_ok(release_rq_pdu{});
@@ -311,13 +268,7 @@ DecodeResult<release_rp_pdu> pdu_decoder::decode_release_rp(
 
     auto header_result = validate_pdu_header(data, 0x06);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<release_rp_pdu>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<release_rp_pdu>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     return make_ok(release_rp_pdu{});
@@ -330,13 +281,7 @@ DecodeResult<release_rp_pdu> pdu_decoder::decode_release_rp(
 DecodeResult<abort_pdu> pdu_decoder::decode_abort(std::span<const uint8_t> data) {
     auto header_result = validate_pdu_header(data, 0x07);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<abort_pdu>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<abort_pdu>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     if (data.size() < FIXED_PDU_SIZE) {
@@ -359,13 +304,7 @@ DecodeResult<p_data_tf_pdu> pdu_decoder::decode_p_data_tf(
 
     auto header_result = validate_pdu_header(data, 0x04);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<p_data_tf_pdu>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<p_data_tf_pdu>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     const uint32_t pdu_length = header_result.value();
@@ -620,13 +559,7 @@ DecodeResult<associate_rq> pdu_decoder::decode_associate_rq(
 
     auto header_result = validate_pdu_header(data, 0x01);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<associate_rq>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<associate_rq>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     const uint32_t pdu_length = header_result.value();
@@ -682,13 +615,7 @@ DecodeResult<associate_ac> pdu_decoder::decode_associate_ac(
 
     auto header_result = validate_pdu_header(data, 0x02);
     if (header_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return make_error<associate_ac>(pdu_decode_error::incomplete_pdu,
-            header_result.error().message);
-#else
-        return make_error<associate_ac>(header_result.error_code(),
-            header_result.error_message());
-#endif
+        return header_result.error();
     }
 
     const uint32_t pdu_length = header_result.value();
