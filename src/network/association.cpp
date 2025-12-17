@@ -117,6 +117,7 @@ association::association(association&& other) noexcept {
     is_scu_ = other.is_scu_;
     peer_ = other.peer_;
     incoming_queue_ = std::move(other.incoming_queue_);
+    other.incoming_queue_ = std::make_unique<message_queue_type>();
 
     other.state_ = association_state::idle;
     other.peer_ = nullptr;
@@ -148,6 +149,7 @@ association& association::operator=(association&& other) noexcept {
         is_scu_ = other.is_scu_;
         peer_ = other.peer_;
         incoming_queue_ = std::move(other.incoming_queue_);
+        other.incoming_queue_ = std::make_unique<message_queue_type>();
 
         other.state_ = association_state::idle;
         other.peer_ = nullptr;
@@ -405,16 +407,9 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
     // Placeholder - actual receive would be implemented with network_system
     // return error_info("Not implemented: requires network_system integration");
 
-    std::unique_lock<std::mutex> queue_lock(queue_mutex_);
-    // Wait for message or timeout
-    bool received = queue_cv_.wait_for(queue_lock, timeout, [this]{ 
-        return !incoming_queue_.empty(); 
-    });
-
-    if (received) {
-        auto item = std::move(incoming_queue_.front());
-        incoming_queue_.pop_front();
-        return item;
+    // Use lock-free queue with blocking wait
+    if (auto item = incoming_queue_->wait_dequeue(timeout)) {
+        return std::move(*item);
     }
 
     // Check if we were aborted/released while waiting
@@ -585,9 +580,9 @@ void association::abort(uint8_t source, uint8_t reason) {
     abort_source_ = source;
     abort_reason_ = reason;
     state_ = association_state::aborted;
-    
-    // Wake up any waiters
-    queue_cv_.notify_all();
+
+    // Wake up any waiters on the lock-free queue
+    incoming_queue_->notify_all();
 }
 
 void association::process_abort(const abort_source& source, const abort_reason& reason) {
@@ -597,8 +592,8 @@ void association::process_abort(const abort_source& source, const abort_reason& 
     abort_reason_ = static_cast<uint8_t>(reason);
     state_ = association_state::aborted;
 
-    // Wake up any waiters
-    queue_cv_.notify_all();
+    // Wake up any waiters on the lock-free queue
+    incoming_queue_->notify_all();
 }
 
 void association::set_state(association_state new_state) {
@@ -612,9 +607,8 @@ void association::set_peer(association* peer) {
 }
 
 void association::enqueue_message(uint8_t context_id, dimse::dimse_message msg) {
-    std::lock_guard<std::mutex> lock(queue_mutex_);
-    incoming_queue_.push_back({context_id, std::move(msg)});
-    queue_cv_.notify_one();
+    // Lock-free enqueue with automatic notification
+    incoming_queue_->enqueue({context_id, std::move(msg)});
 }
 
 void association::update_peer(association* old_peer, association* new_peer) {
