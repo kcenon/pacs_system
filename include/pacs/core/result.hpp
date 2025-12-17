@@ -109,6 +109,26 @@ namespace error_codes {
     constexpr int storage_failed = pacs_base - 80;
     constexpr int retrieve_failed = pacs_base - 81;
     constexpr int query_failed = pacs_base - 82;
+
+    // Database errors (-783 to -789)
+    constexpr int database_open_error = pacs_base - 83;
+    constexpr int database_connection_error = pacs_base - 84;
+    constexpr int database_query_error = pacs_base - 85;
+    constexpr int database_transaction_error = pacs_base - 86;
+    constexpr int database_migration_error = pacs_base - 87;
+    constexpr int database_integrity_error = pacs_base - 88;
+
+    // Cloud storage errors (-790 to -795)
+    constexpr int bucket_not_found = pacs_base - 90;
+    constexpr int object_not_found = pacs_base - 91;
+    constexpr int upload_error = pacs_base - 92;
+    constexpr int download_error = pacs_base - 93;
+    constexpr int cloud_connection_error = pacs_base - 94;
+
+    // HSM errors (-796 to -799)
+    constexpr int tier_not_available = pacs_base - 96;
+    constexpr int migration_failed = pacs_base - 97;
+    constexpr int instance_not_found = pacs_base - 98;
 } // namespace error_codes
 
 // Re-export common utility functions
