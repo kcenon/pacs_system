@@ -17,82 +17,13 @@
 
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/core/dicom_element.hpp>
+#include <pacs/core/result.hpp>
 
 #include <cstdint>
-#include <optional>
 #include <span>
-#include <string>
-#include <variant>
 #include <vector>
 
 namespace pacs::encoding {
-
-/**
- * @brief Error codes for codec operations
- */
-enum class codec_error {
-    success = 0,
-    invalid_tag,           ///< Invalid or malformed tag
-    invalid_length,        ///< Length field is invalid
-    insufficient_data,     ///< Not enough data to decode
-    invalid_sequence,      ///< Malformed sequence structure
-    unknown_vr,            ///< VR could not be determined from dictionary
-    encoding_failed,       ///< General encoding failure
-    decoding_failed        ///< General decoding failure
-};
-
-/**
- * @brief Converts codec_error to human-readable string
- * @param error The error code
- * @return String description of the error
- */
-[[nodiscard]] std::string to_string(codec_error error);
-
-/**
- * @brief Result type for codec operations (C++20 compatible)
- *
- * A simple result type that holds either a value or an error.
- * This is a C++20 compatible alternative to std::expected (C++23).
- *
- * @tparam T The success value type
- */
-template <typename T>
-class codec_result {
-public:
-    /// Create a success result
-    codec_result(T value) : data_(std::move(value)) {}
-
-    /// Create an error result
-    codec_result(codec_error error) : data_(error) {}
-
-    /// Check if the result is successful
-    [[nodiscard]] bool has_value() const noexcept {
-        return std::holds_alternative<T>(data_);
-    }
-
-    /// Check if the result is successful (operator bool)
-    explicit operator bool() const noexcept { return has_value(); }
-
-    /// Get the value (undefined behavior if error)
-    [[nodiscard]] T& value() & { return std::get<T>(data_); }
-    [[nodiscard]] const T& value() const& { return std::get<T>(data_); }
-    [[nodiscard]] T&& value() && { return std::get<T>(std::move(data_)); }
-
-    /// Dereference operator (undefined behavior if error)
-    [[nodiscard]] T& operator*() & { return value(); }
-    [[nodiscard]] const T& operator*() const& { return value(); }
-    [[nodiscard]] T&& operator*() && { return std::move(*this).value(); }
-
-    /// Arrow operator (undefined behavior if error)
-    [[nodiscard]] T* operator->() { return &value(); }
-    [[nodiscard]] const T* operator->() const { return &value(); }
-
-    /// Get the error (undefined behavior if success)
-    [[nodiscard]] codec_error error() const { return std::get<codec_error>(data_); }
-
-private:
-    std::variant<T, codec_error> data_;
-};
 
 /**
  * @brief Encoder/decoder for Implicit VR Little Endian transfer syntax
@@ -116,10 +47,10 @@ private:
 class implicit_vr_codec {
 public:
     /**
-     * @brief Result type for decode operations
+     * @brief Result type for decode operations using pacs::Result<T> pattern
      */
     template <typename T>
-    using result = codec_result<T>;
+    using result = pacs::Result<T>;
 
     // ========================================================================
     // Dataset Encoding/Decoding
