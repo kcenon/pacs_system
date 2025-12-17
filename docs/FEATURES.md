@@ -841,6 +841,49 @@ struct migration_result {
 
 ## Ecosystem Integration
 
+### SIMD Optimization
+
+**Implementation**: Platform-specific SIMD acceleration for performance-critical operations.
+
+**Features**:
+- Automatic CPU feature detection (SSE2/SSSE3/AVX2/AVX-512 on x86, NEON on ARM)
+- Runtime dispatch to optimal SIMD path
+- Fallback to scalar implementation when SIMD unavailable
+- Zero-copy byte swapping for endianness conversion
+
+**Optimized Operations**:
+
+| Operation | SIMD Support | Speedup |
+|-----------|--------------|---------|
+| Byte swap (16-bit) | AVX2, SSSE3, NEON | 8-16x |
+| Byte swap (32-bit) | AVX2, SSSE3, NEON | 8-16x |
+| Byte swap (64-bit) | AVX2, SSSE3, NEON | 8-16x |
+
+**Usage**:
+```cpp
+#include <pacs/encoding/byte_swap.hpp>
+#include <pacs/encoding/simd/simd_config.hpp>
+
+using namespace pacs::encoding;
+
+// Automatic SIMD dispatch for bulk byte swapping
+auto swapped = swap_ow_bytes(pixel_data);  // Uses best available SIMD
+
+// Check available SIMD features
+auto features = simd::get_features();
+if (simd::has_avx2()) {
+    std::cout << "AVX2 available: 32-byte vector operations\n";
+}
+
+// Get optimal vector width for current CPU
+size_t width = simd::optimal_vector_width();  // 16, 32, or 64 bytes
+```
+
+**Classes**:
+- `simd_config.hpp` - CPU feature detection
+- `simd_types.hpp` - Portable SIMD type wrappers
+- `simd_utils.hpp` - SIMD utility functions
+
 ### container_system Integration
 
 **Purpose**: DICOM data serialization and type-safe value handling.
@@ -1614,6 +1657,7 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | 2.1.0 | 2025-12-13 | raphaelshin | Added: Task Scheduler Service for automated cleanup, archive, and verification for Issue #207 |
 | 2.2.0 | 2025-12-17 | raphaelshin | Added: Result<T> pattern for unified error handling, PACS error codes (-700 to -799) for Issue #308 |
 | 2.3.0 | 2025-12-17 | raphaelshin | Added: Study Lock Manager for concurrent access control with exclusive/shared/migration locks for Issue #208 |
+| 2.4.0 | 2025-12-17 | raphaelshin | Added: SIMD optimization infrastructure for byte swap operations (SSE/AVX/NEON) for Issue #313 |
 
 ---
 

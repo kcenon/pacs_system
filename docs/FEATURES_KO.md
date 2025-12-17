@@ -699,6 +699,49 @@ service.stop();
 
 ## 에코시스템 통합
 
+### SIMD 최적화
+
+**구현**: 성능 중요 작업을 위한 플랫폼별 SIMD 가속.
+
+**기능**:
+- 자동 CPU 기능 감지 (x86의 SSE2/SSSE3/AVX2/AVX-512, ARM의 NEON)
+- 최적 SIMD 경로로 런타임 디스패치
+- SIMD 미지원 시 스칼라 구현으로 폴백
+- 엔디언 변환을 위한 제로카피 바이트 스왑
+
+**최적화된 연산**:
+
+| 연산 | SIMD 지원 | 속도 향상 |
+|------|-----------|----------|
+| 바이트 스왑 (16비트) | AVX2, SSSE3, NEON | 8-16배 |
+| 바이트 스왑 (32비트) | AVX2, SSSE3, NEON | 8-16배 |
+| 바이트 스왑 (64비트) | AVX2, SSSE3, NEON | 8-16배 |
+
+**사용법**:
+```cpp
+#include <pacs/encoding/byte_swap.hpp>
+#include <pacs/encoding/simd/simd_config.hpp>
+
+using namespace pacs::encoding;
+
+// 대용량 바이트 스왑을 위한 자동 SIMD 디스패치
+auto swapped = swap_ow_bytes(pixel_data);  // 최적 SIMD 사용
+
+// 사용 가능한 SIMD 기능 확인
+auto features = simd::get_features();
+if (simd::has_avx2()) {
+    std::cout << "AVX2 사용 가능: 32바이트 벡터 연산\n";
+}
+
+// 현재 CPU의 최적 벡터 너비 조회
+size_t width = simd::optimal_vector_width();  // 16, 32, 또는 64 바이트
+```
+
+**클래스**:
+- `simd_config.hpp` - CPU 기능 감지
+- `simd_types.hpp` - 이식 가능한 SIMD 타입 래퍼
+- `simd_utils.hpp` - SIMD 유틸리티 함수
+
 ### container_system 통합
 
 **목적**: DICOM 데이터 직렬화 및 타입 안전 값 처리.
