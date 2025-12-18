@@ -195,14 +195,26 @@ void register_patient_endpoints_impl(crow::SimpleApp &app,
         storage::patient_query count_query = query;
         count_query.limit = 0;
         count_query.offset = 0;
-        auto all_patients = ctx->database->search_patients(count_query);
-        size_t total_count = all_patients.size();
+        auto all_patients_result = ctx->database->search_patients(count_query);
+        if (!all_patients_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     all_patients_result.error().message);
+          return res;
+        }
+        size_t total_count = all_patients_result.value().size();
 
         // Get paginated results
-        auto patients = ctx->database->search_patients(query);
+        auto patients_result = ctx->database->search_patients(query);
+        if (!patients_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     patients_result.error().message);
+          return res;
+        }
 
         res.code = 200;
-        res.body = patients_to_json(patients, total_count);
+        res.body = patients_to_json(patients_result.value(), total_count);
         return res;
       });
 
@@ -256,10 +268,16 @@ void register_patient_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            auto studies = ctx->database->list_studies(patient_id);
+            auto studies_result = ctx->database->list_studies(patient_id);
+            if (!studies_result.is_ok()) {
+              res.code = 500;
+              res.body = make_error_json("QUERY_ERROR",
+                                         studies_result.error().message);
+              return res;
+            }
 
             res.code = 200;
-            res.body = studies_to_json(studies);
+            res.body = studies_to_json(studies_result.value());
             return res;
           });
 }
