@@ -268,14 +268,26 @@ void register_study_endpoints_impl(crow::SimpleApp &app,
         storage::study_query count_query = query;
         count_query.limit = 0;
         count_query.offset = 0;
-        auto all_studies = ctx->database->search_studies(count_query);
-        size_t total_count = all_studies.size();
+        auto all_studies_result = ctx->database->search_studies(count_query);
+        if (!all_studies_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     all_studies_result.error().message);
+          return res;
+        }
+        size_t total_count = all_studies_result.value().size();
 
         // Get paginated results
-        auto studies = ctx->database->search_studies(query);
+        auto studies_result = ctx->database->search_studies(query);
+        if (!studies_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     studies_result.error().message);
+          return res;
+        }
 
         res.code = 200;
-        res.body = studies_to_json(studies, total_count);
+        res.body = studies_to_json(studies_result.value(), total_count);
         return res;
       });
 
@@ -329,10 +341,16 @@ void register_study_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            auto series_list = ctx->database->list_series(study_uid);
+            auto series_list_result = ctx->database->list_series(study_uid);
+            if (!series_list_result.is_ok()) {
+              res.code = 500;
+              res.body = make_error_json("QUERY_ERROR",
+                                         series_list_result.error().message);
+              return res;
+            }
 
             res.code = 200;
-            res.body = series_list_to_json(series_list);
+            res.body = series_list_to_json(series_list_result.value());
             return res;
           });
 
@@ -361,9 +379,22 @@ void register_study_endpoints_impl(crow::SimpleApp &app,
 
             // Get all series and their instances
             std::vector<storage::instance_record> all_instances;
-            auto series_list = ctx->database->list_series(study_uid);
-            for (const auto &series : series_list) {
-              auto instances = ctx->database->list_instances(series.series_uid);
+            auto series_list_result = ctx->database->list_series(study_uid);
+            if (!series_list_result.is_ok()) {
+              res.code = 500;
+              res.body = make_error_json("QUERY_ERROR",
+                                         series_list_result.error().message);
+              return res;
+            }
+            for (const auto &series : series_list_result.value()) {
+              auto instances_result = ctx->database->list_instances(series.series_uid);
+              if (!instances_result.is_ok()) {
+                res.code = 500;
+                res.body = make_error_json("QUERY_ERROR",
+                                           instances_result.error().message);
+                return res;
+              }
+              const auto& instances = instances_result.value();
               all_instances.insert(all_instances.end(), instances.begin(),
                                    instances.end());
             }

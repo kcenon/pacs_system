@@ -140,14 +140,18 @@ TEST_CASE("Index database worklist operations", "[web][worklist][database]") {
     // Query by modality
     worklist_query query;
     query.modality = "CT";
-    auto results = db->query_worklist(query);
+    auto results_result = db->query_worklist(query);
+    REQUIRE(results_result.is_ok());
+    auto results = results_result.value();
     REQUIRE(results.size() == 1);
     REQUIRE(results[0].modality == "CT");
 
     // Query by station_ae
     query.modality = std::nullopt;
     query.station_ae = "MR_SCANNER";
-    results = db->query_worklist(query);
+    results_result = db->query_worklist(query);
+    REQUIRE(results_result.is_ok());
+    results = results_result.value();
     REQUIRE(results.size() == 1);
     REQUIRE(results[0].station_ae == "MR_SCANNER");
   }
@@ -200,8 +204,12 @@ TEST_CASE("Index database worklist operations", "[web][worklist][database]") {
     item.step_id = "STEP002";
     (void)db->add_worklist_item(item);
 
-    REQUIRE(db->worklist_count() == 2);
-    REQUIRE(db->worklist_count("SCHEDULED") == 2);
+    auto count_result = db->worklist_count();
+    REQUIRE(count_result.is_ok());
+    REQUIRE(count_result.value() == 2);
+    auto count_scheduled_result = db->worklist_count("SCHEDULED");
+    REQUIRE(count_scheduled_result.is_ok());
+    REQUIRE(count_scheduled_result.value() == 2);
   }
 }
 
@@ -323,20 +331,26 @@ TEST_CASE("Index database audit operations", "[web][audit][database]") {
     // Query by event_type
     audit_query query;
     query.event_type = "C_STORE";
-    auto results = db->query_audit_log(query);
+    auto results_result = db->query_audit_log(query);
+    REQUIRE(results_result.is_ok());
+    auto results = results_result.value();
     REQUIRE(results.size() == 2);
 
     // Query by outcome
     query.event_type = std::nullopt;
     query.outcome = "FAILURE";
-    results = db->query_audit_log(query);
+    results_result = db->query_audit_log(query);
+    REQUIRE(results_result.is_ok());
+    results = results_result.value();
     REQUIRE(results.size() == 1);
     REQUIRE(results[0].outcome == "FAILURE");
 
     // Query by source_ae
     query.outcome = std::nullopt;
     query.source_ae = "MODALITY2";
-    results = db->query_audit_log(query);
+    results_result = db->query_audit_log(query);
+    REQUIRE(results_result.is_ok());
+    results = results_result.value();
     REQUIRE(results.size() == 1);
     REQUIRE(results[0].event_type == "C_FIND");
   }
@@ -349,7 +363,9 @@ TEST_CASE("Index database audit operations", "[web][audit][database]") {
     (void)db->add_audit_log(record);
     (void)db->add_audit_log(record);
 
-    REQUIRE(db->audit_count() == 3);
+    auto count_result = db->audit_count();
+    REQUIRE(count_result.is_ok());
+    REQUIRE(count_result.value() == 3);
   }
 
   SECTION("query with pagination") {
@@ -365,12 +381,14 @@ TEST_CASE("Index database audit operations", "[web][audit][database]") {
     audit_query query;
     query.limit = 5;
     query.offset = 0;
-    auto page1 = db->query_audit_log(query);
-    REQUIRE(page1.size() == 5);
+    auto page1_result = db->query_audit_log(query);
+    REQUIRE(page1_result.is_ok());
+    REQUIRE(page1_result.value().size() == 5);
 
     query.offset = 5;
-    auto page2 = db->query_audit_log(query);
-    REQUIRE(page2.size() == 5);
+    auto page2_result = db->query_audit_log(query);
+    REQUIRE(page2_result.is_ok());
+    REQUIRE(page2_result.value().size() == 5);
   }
 }
 

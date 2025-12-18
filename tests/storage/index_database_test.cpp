@@ -175,7 +175,7 @@ TEST_CASE("index_database: update existing patient", "[storage][patient]") {
     REQUIRE(result.is_ok());
 
     // Verify only one patient exists
-    CHECK(db->patient_count() == 1);
+    CHECK(db->patient_count().value() == 1);
 
     // Verify update was applied
     auto patient = db->find_patient("12345");
@@ -248,7 +248,7 @@ TEST_CASE("index_database: search patients by name wildcard",
         patient_query query;
         query.patient_name = "Doe*";
 
-        auto results = db->search_patients(query);
+        auto results = db->search_patients(query).value();
 
         CHECK(results.size() == 2);
         CHECK(results[0].patient_name == "Doe^Jane");  // Ordered by name
@@ -259,7 +259,7 @@ TEST_CASE("index_database: search patients by name wildcard",
         patient_query query;
         query.patient_name = "*John";
 
-        auto results = db->search_patients(query);
+        auto results = db->search_patients(query).value();
 
         CHECK(results.size() == 1);
         CHECK(results[0].patient_name == "Doe^John");
@@ -269,7 +269,7 @@ TEST_CASE("index_database: search patients by name wildcard",
         patient_query query;
         query.patient_name = "*o*";
 
-        auto results = db->search_patients(query);
+        auto results = db->search_patients(query).value();
 
         // Matches: Doe^John, Doe^Jane, Johnson^Mary, Smith^Bob
         CHECK(results.size() == 4);
@@ -287,7 +287,7 @@ TEST_CASE("index_database: search patients by patient_id wildcard",
     patient_query query;
     query.patient_id = "ABC*";
 
-    auto results = db->search_patients(query);
+    auto results = db->search_patients(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -302,7 +302,7 @@ TEST_CASE("index_database: search patients by sex", "[storage][patient]") {
     patient_query query;
     query.sex = "M";
 
-    auto results = db->search_patients(query);
+    auto results = db->search_patients(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -319,7 +319,7 @@ TEST_CASE("index_database: search patients by birth date range",
         patient_query query;
         query.birth_date = "19850615";
 
-        auto results = db->search_patients(query);
+        auto results = db->search_patients(query).value();
         CHECK(results.size() == 1);
         CHECK(results[0].patient_id == "002");
     }
@@ -329,7 +329,7 @@ TEST_CASE("index_database: search patients by birth date range",
         query.birth_date_from = "19800101";
         query.birth_date_to = "19851231";
 
-        auto results = db->search_patients(query);
+        auto results = db->search_patients(query).value();
         CHECK(results.size() == 2);
     }
 }
@@ -348,16 +348,16 @@ TEST_CASE("index_database: search patients with pagination",
     query.limit = 3;
     query.offset = 0;
 
-    auto page1 = db->search_patients(query);
+    auto page1 = db->search_patients(query).value();
     CHECK(page1.size() == 3);
 
     query.offset = 3;
-    auto page2 = db->search_patients(query);
+    auto page2 = db->search_patients(query).value();
     CHECK(page2.size() == 3);
 
     // Last page
     query.offset = 9;
-    auto page4 = db->search_patients(query);
+    auto page4 = db->search_patients(query).value();
     CHECK(page4.size() == 1);
 }
 
@@ -373,7 +373,7 @@ TEST_CASE("index_database: search with multiple criteria",
     query.patient_name = "Doe*";
     query.sex = "M";
 
-    auto results = db->search_patients(query);
+    auto results = db->search_patients(query).value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].patient_id == "001");
@@ -387,12 +387,12 @@ TEST_CASE("index_database: delete patient", "[storage][patient]") {
     auto db = create_test_database();
 
     REQUIRE(db->upsert_patient("12345", "Doe^John", "19800115", "M").is_ok());
-    CHECK(db->patient_count() == 1);
+    CHECK(db->patient_count().value() == 1);
 
     auto result = db->delete_patient("12345");
     REQUIRE(result.is_ok());
 
-    CHECK(db->patient_count() == 0);
+    CHECK(db->patient_count().value() == 0);
     CHECK_FALSE(db->find_patient("12345").has_value());
 }
 
@@ -412,16 +412,16 @@ TEST_CASE("index_database: delete non-existent patient",
 TEST_CASE("index_database: patient count", "[storage][patient]") {
     auto db = create_test_database();
 
-    CHECK(db->patient_count() == 0);
+    CHECK(db->patient_count().value() == 0);
 
     REQUIRE(db->upsert_patient("001", "Test1", "", "").is_ok());
-    CHECK(db->patient_count() == 1);
+    CHECK(db->patient_count().value() == 1);
 
     REQUIRE(db->upsert_patient("002", "Test2", "", "").is_ok());
-    CHECK(db->patient_count() == 2);
+    CHECK(db->patient_count().value() == 2);
 
     REQUIRE(db->delete_patient("001").is_ok());
-    CHECK(db->patient_count() == 1);
+    CHECK(db->patient_count().value() == 1);
 }
 
 // ============================================================================
@@ -573,7 +573,7 @@ TEST_CASE("index_database: update existing study", "[storage][study]") {
     REQUIRE(result.is_ok());
 
     // Verify only one study exists
-    CHECK(db->study_count() == 1);
+    CHECK(db->study_count().value() == 1);
 
     // Verify update was applied
     auto study = db->find_study("1.2.3.4.5.6.7");
@@ -652,7 +652,9 @@ TEST_CASE("index_database: list studies for patient", "[storage][study]") {
         db->upsert_study(patient2_pk, "1.2.3.3", "STUDY03", "20231125").is_ok());
 
     // List studies for patient 1
-    auto studies = db->list_studies("P001");
+    auto studies_result = db->list_studies("P001");
+    REQUIRE(studies_result.is_ok());
+    auto& studies = studies_result.value();
 
     CHECK(studies.size() == 2);
     // Should be ordered by date DESC
@@ -673,7 +675,7 @@ TEST_CASE("index_database: search studies by patient id", "[storage][study]") {
     study_query query;
     query.patient_id = "PAT001";
 
-    auto results = db->search_studies(query);
+    auto results = db->search_studies(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -690,7 +692,7 @@ TEST_CASE("index_database: search studies by date range", "[storage][study]") {
         study_query query;
         query.study_date = "20231115";
 
-        auto results = db->search_studies(query);
+        auto results = db->search_studies(query).value();
         CHECK(results.size() == 1);
         CHECK(results[0].study_id == "S2");
     }
@@ -700,7 +702,7 @@ TEST_CASE("index_database: search studies by date range", "[storage][study]") {
         query.study_date_from = "20231110";
         query.study_date_to = "20231125";
 
-        auto results = db->search_studies(query);
+        auto results = db->search_studies(query).value();
         CHECK(results.size() == 1);
         CHECK(results[0].study_id == "S2");
     }
@@ -721,7 +723,7 @@ TEST_CASE("index_database: search studies by accession number",
     study_query query;
     query.accession_number = "ACC00*";
 
-    auto results = db->search_studies(query);
+    auto results = db->search_studies(query).value();
 
     CHECK(results.size() == 3);
 }
@@ -743,16 +745,16 @@ TEST_CASE("index_database: search studies with pagination",
     query.limit = 3;
     query.offset = 0;
 
-    auto page1 = db->search_studies(query);
+    auto page1 = db->search_studies(query).value();
     CHECK(page1.size() == 3);
 
     query.offset = 3;
-    auto page2 = db->search_studies(query);
+    auto page2 = db->search_studies(query).value();
     CHECK(page2.size() == 3);
 
     // Last page
     query.offset = 9;
-    auto page4 = db->search_studies(query);
+    auto page4 = db->search_studies(query).value();
     CHECK(page4.size() == 1);
 }
 
@@ -775,7 +777,7 @@ TEST_CASE("index_database: search studies with multiple criteria",
     query.study_date = "20231115";
     query.referring_physician = "Dr. Smith";
 
-    auto results = db->search_studies(query);
+    auto results = db->search_studies(query).value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].study_id == "S1");
@@ -790,12 +792,12 @@ TEST_CASE("index_database: delete study", "[storage][study]") {
     auto patient_pk = create_test_patient(*db);
 
     REQUIRE(db->upsert_study(patient_pk, "1.2.3.4.5.6.7", "STUDY001").is_ok());
-    CHECK(db->study_count() == 1);
+    CHECK(db->study_count().value() == 1);
 
     auto result = db->delete_study("1.2.3.4.5.6.7");
     REQUIRE(result.is_ok());
 
-    CHECK(db->study_count() == 0);
+    CHECK(db->study_count().value() == 0);
     CHECK_FALSE(db->find_study("1.2.3.4.5.6.7").has_value());
 }
 
@@ -815,16 +817,16 @@ TEST_CASE("index_database: study count", "[storage][study]") {
     auto db = create_test_database();
     auto patient_pk = create_test_patient(*db);
 
-    CHECK(db->study_count() == 0);
+    CHECK(db->study_count().value() == 0);
 
     REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1").is_ok());
-    CHECK(db->study_count() == 1);
+    CHECK(db->study_count().value() == 1);
 
     REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2").is_ok());
-    CHECK(db->study_count() == 2);
+    CHECK(db->study_count().value() == 2);
 
     REQUIRE(db->delete_study("1.2.3.1").is_ok());
-    CHECK(db->study_count() == 1);
+    CHECK(db->study_count().value() == 1);
 }
 
 TEST_CASE("index_database: study count for patient", "[storage][study]") {
@@ -837,9 +839,9 @@ TEST_CASE("index_database: study count for patient", "[storage][study]") {
     REQUIRE(db->upsert_study(patient1_pk, "1.2.3.2", "S2").is_ok());
     REQUIRE(db->upsert_study(patient2_pk, "1.2.3.3", "S3").is_ok());
 
-    CHECK(db->study_count("P001") == 2);
-    CHECK(db->study_count("P002") == 1);
-    CHECK(db->study_count("P999") == 0);
+    CHECK(db->study_count("P001").value() == 2);
+    CHECK(db->study_count("P002").value() == 1);
+    CHECK(db->study_count("P999").value() == 0);
 }
 
 // ============================================================================
@@ -876,12 +878,12 @@ TEST_CASE("index_database: delete patient cascades to studies",
     REQUIRE(db->upsert_study(patient_pk, "1.2.3.1", "S1").is_ok());
     REQUIRE(db->upsert_study(patient_pk, "1.2.3.2", "S2").is_ok());
 
-    CHECK(db->study_count() == 2);
+    CHECK(db->study_count().value() == 2);
 
     // Delete patient should cascade to studies
     REQUIRE(db->delete_patient("P001").is_ok());
 
-    CHECK(db->study_count() == 0);
+    CHECK(db->study_count().value() == 0);
     CHECK_FALSE(db->find_study("1.2.3.1").has_value());
     CHECK_FALSE(db->find_study("1.2.3.2").has_value());
 }
@@ -1014,7 +1016,7 @@ TEST_CASE("index_database: update existing series", "[storage][series]") {
     REQUIRE(result.is_ok());
 
     // Verify only one series exists
-    CHECK(db->series_count() == 1);
+    CHECK(db->series_count().value() == 1);
 
     // Verify update was applied
     auto series = db->find_series("1.2.3.4.5.6.7.1");
@@ -1092,7 +1094,9 @@ TEST_CASE("index_database: list series for study", "[storage][series]") {
     REQUIRE(db->upsert_series(study2_pk, "1.2.3.3", "MR", 1).is_ok());
 
     // List series for study 1
-    auto series_list = db->list_series("1.2.3.4.5.6.7");
+    auto series_list_result = db->list_series("1.2.3.4.5.6.7");
+    REQUIRE(series_list_result.is_ok());
+    auto& series_list = series_list_result.value();
 
     CHECK(series_list.size() == 2);
     // Should be ordered by series number
@@ -1112,7 +1116,7 @@ TEST_CASE("index_database: search series by modality", "[storage][series]") {
     series_query query;
     query.modality = "CT";
 
-    auto results = db->search_series(query);
+    auto results = db->search_series(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -1130,7 +1134,7 @@ TEST_CASE("index_database: search series by study_uid", "[storage][series]") {
     series_query query;
     query.study_uid = "1.2.3.4.5.6.7";
 
-    auto results = db->search_series(query);
+    auto results = db->search_series(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -1150,16 +1154,16 @@ TEST_CASE("index_database: search series with pagination", "[storage][series]") 
     query.limit = 3;
     query.offset = 0;
 
-    auto page1 = db->search_series(query);
+    auto page1 = db->search_series(query).value();
     CHECK(page1.size() == 3);
 
     query.offset = 3;
-    auto page2 = db->search_series(query);
+    auto page2 = db->search_series(query).value();
     CHECK(page2.size() == 3);
 
     // Last page
     query.offset = 9;
-    auto page4 = db->search_series(query);
+    auto page4 = db->search_series(query).value();
     CHECK(page4.size() == 1);
 }
 
@@ -1177,7 +1181,7 @@ TEST_CASE("index_database: search series with multiple criteria",
     query.modality = "CT";
     query.body_part_examined = "HEAD";
 
-    auto results = db->search_series(query);
+    auto results = db->search_series(query).value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].series_uid == "1.2.3.1");
@@ -1193,12 +1197,12 @@ TEST_CASE("index_database: delete series", "[storage][series]") {
     auto study_pk = create_test_study(*db, patient_pk);
 
     REQUIRE(db->upsert_series(study_pk, "1.2.3.4.5.6.7.1", "CT").is_ok());
-    CHECK(db->series_count() == 1);
+    CHECK(db->series_count().value() == 1);
 
     auto result = db->delete_series("1.2.3.4.5.6.7.1");
     REQUIRE(result.is_ok());
 
-    CHECK(db->series_count() == 0);
+    CHECK(db->series_count().value() == 0);
     CHECK_FALSE(db->find_series("1.2.3.4.5.6.7.1").has_value());
 }
 
@@ -1219,16 +1223,16 @@ TEST_CASE("index_database: series count", "[storage][series]") {
     auto patient_pk = create_test_patient(*db);
     auto study_pk = create_test_study(*db, patient_pk);
 
-    CHECK(db->series_count() == 0);
+    CHECK(db->series_count().value() == 0);
 
     REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
-    CHECK(db->series_count() == 1);
+    CHECK(db->series_count().value() == 1);
 
     REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
-    CHECK(db->series_count() == 2);
+    CHECK(db->series_count().value() == 2);
 
     REQUIRE(db->delete_series("1.2.3.1").is_ok());
-    CHECK(db->series_count() == 1);
+    CHECK(db->series_count().value() == 1);
 }
 
 TEST_CASE("index_database: series count for study", "[storage][series]") {
@@ -1241,9 +1245,9 @@ TEST_CASE("index_database: series count for study", "[storage][series]") {
     REQUIRE(db->upsert_series(study1_pk, "1.2.3.2", "CT").is_ok());
     REQUIRE(db->upsert_series(study2_pk, "1.2.3.3", "MR").is_ok());
 
-    CHECK(db->series_count("1.2.3.4.5.6.7") == 2);
-    CHECK(db->series_count("1.2.3.4.5.6.8") == 1);
-    CHECK(db->series_count("9.9.9.9.9.9.9") == 0);
+    CHECK(db->series_count("1.2.3.4.5.6.7").value() == 2);
+    CHECK(db->series_count("1.2.3.4.5.6.8").value() == 1);
+    CHECK(db->series_count("9.9.9.9.9.9.9").value() == 0);
 }
 
 // ============================================================================
@@ -1281,12 +1285,12 @@ TEST_CASE("index_database: delete study cascades to series",
     REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
     REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT").is_ok());
 
-    CHECK(db->series_count() == 2);
+    CHECK(db->series_count().value() == 2);
 
     // Delete study should cascade to series
     REQUIRE(db->delete_study("1.2.3.4.5.6.7").is_ok());
 
-    CHECK(db->series_count() == 0);
+    CHECK(db->series_count().value() == 0);
     CHECK_FALSE(db->find_series("1.2.3.1").has_value());
     CHECK_FALSE(db->find_series("1.2.3.2").has_value());
 }
@@ -1385,7 +1389,9 @@ TEST_CASE("index_database: series ordering by series_number",
     REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT", 1).is_ok());
     REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "CT", 2).is_ok());
 
-    auto series_list = db->list_series("1.2.3.4.5.6.7");
+    auto series_list_result = db->list_series("1.2.3.4.5.6.7");
+    REQUIRE(series_list_result.is_ok());
+    auto& series_list = series_list_result.value();
 
     REQUIRE(series_list.size() == 3);
     CHECK(series_list[0].series_number.value_or(-1) == 1);
@@ -1562,7 +1568,7 @@ TEST_CASE("index_database: update existing instance", "[storage][instance]") {
     REQUIRE(result.is_ok());
 
     // Verify only one instance exists
-    CHECK(db->instance_count() == 1);
+    CHECK(db->instance_count().value() == 1);
 
     // Verify update was applied
     auto instance = db->find_instance("1.2.3.4.5.6.7.1.1");
@@ -1636,7 +1642,9 @@ TEST_CASE("index_database: list instances for series", "[storage][instance]") {
         "/storage/3.dcm", 1024, "", 1).is_ok());
 
     // List instances for series 1
-    auto instance_list = db->list_instances("1.2.3.4.5.6.7.1");
+    auto instance_list_result = db->list_instances("1.2.3.4.5.6.7.1");
+    REQUIRE(instance_list_result.is_ok());
+    auto& instance_list = instance_list_result.value();
 
     CHECK(instance_list.size() == 2);
     // Should be ordered by instance number
@@ -1666,7 +1674,7 @@ TEST_CASE("index_database: search instances by sop_class_uid",
     instance_query query;
     query.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";  // CT Image Storage
 
-    auto results = db->search_instances(query);
+    auto results = db->search_instances(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -1692,7 +1700,7 @@ TEST_CASE("index_database: search instances by series_uid",
     instance_query query;
     query.series_uid = "1.2.3.4.5.6.7.1";
 
-    auto results = db->search_instances(query);
+    auto results = db->search_instances(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -1717,16 +1725,16 @@ TEST_CASE("index_database: search instances with pagination",
     query.limit = 3;
     query.offset = 0;
 
-    auto page1 = db->search_instances(query);
+    auto page1 = db->search_instances(query).value();
     CHECK(page1.size() == 3);
 
     query.offset = 3;
-    auto page2 = db->search_instances(query);
+    auto page2 = db->search_instances(query).value();
     CHECK(page2.size() == 3);
 
     // Last page
     query.offset = 9;
-    auto page4 = db->search_instances(query);
+    auto page4 = db->search_instances(query).value();
     CHECK(page4.size() == 1);
 }
 
@@ -1743,12 +1751,12 @@ TEST_CASE("index_database: delete instance", "[storage][instance]") {
     REQUIRE(db->upsert_instance(
         series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/file.dcm", 1024).is_ok());
-    CHECK(db->instance_count() == 1);
+    CHECK(db->instance_count().value() == 1);
 
     auto result = db->delete_instance("1.2.3.4.5.6.7.1.1");
     REQUIRE(result.is_ok());
 
-    CHECK(db->instance_count() == 0);
+    CHECK(db->instance_count().value() == 0);
     CHECK_FALSE(db->find_instance("1.2.3.4.5.6.7.1.1").has_value());
 }
 
@@ -1771,20 +1779,20 @@ TEST_CASE("index_database: instance count", "[storage][instance]") {
     auto study_pk = create_test_study(*db, patient_pk);
     auto series_pk = create_test_series_helper(*db, study_pk);
 
-    CHECK(db->instance_count() == 0);
+    CHECK(db->instance_count().value() == 0);
 
     REQUIRE(db->upsert_instance(
         series_pk, "1.2.3.1", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/1.dcm", 1024).is_ok());
-    CHECK(db->instance_count() == 1);
+    CHECK(db->instance_count().value() == 1);
 
     REQUIRE(db->upsert_instance(
         series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/2.dcm", 1024).is_ok());
-    CHECK(db->instance_count() == 2);
+    CHECK(db->instance_count().value() == 2);
 
     REQUIRE(db->delete_instance("1.2.3.1").is_ok());
-    CHECK(db->instance_count() == 1);
+    CHECK(db->instance_count().value() == 1);
 }
 
 TEST_CASE("index_database: instance count for series", "[storage][instance]") {
@@ -1804,9 +1812,9 @@ TEST_CASE("index_database: instance count for series", "[storage][instance]") {
         series2_pk, "1.2.3.3", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/3.dcm", 1024).is_ok());
 
-    CHECK(db->instance_count("1.2.3.4.5.6.7.1") == 2);
-    CHECK(db->instance_count("1.2.3.4.5.6.7.2") == 1);
-    CHECK(db->instance_count("9.9.9.9.9.9.9") == 0);
+    CHECK(db->instance_count("1.2.3.4.5.6.7.1").value() == 2);
+    CHECK(db->instance_count("1.2.3.4.5.6.7.2").value() == 1);
+    CHECK(db->instance_count("9.9.9.9.9.9.9").value() == 0);
 }
 
 // ============================================================================
@@ -1852,12 +1860,12 @@ TEST_CASE("index_database: delete series cascades to instances",
         series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/2.dcm", 1024).is_ok());
 
-    CHECK(db->instance_count() == 2);
+    CHECK(db->instance_count().value() == 2);
 
     // Delete series should cascade to instances
     REQUIRE(db->delete_series("1.2.3.4.5.6.7.1").is_ok());
 
-    CHECK(db->instance_count() == 0);
+    CHECK(db->instance_count().value() == 0);
     CHECK_FALSE(db->find_instance("1.2.3.1").has_value());
     CHECK_FALSE(db->find_instance("1.2.3.2").has_value());
 }
@@ -1962,7 +1970,9 @@ TEST_CASE("index_database: get_file_path returns path for existing instance",
         series_pk, "1.2.3.4.5.6.7.1.1", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/test/file.dcm", 1024).is_ok());
 
-    auto path = db->get_file_path("1.2.3.4.5.6.7.1.1");
+    auto path_result = db->get_file_path("1.2.3.4.5.6.7.1.1");
+    REQUIRE(path_result.is_ok());
+    auto& path = path_result.value();
 
     REQUIRE(path.has_value());
     CHECK(*path == "/storage/test/file.dcm");
@@ -1972,7 +1982,9 @@ TEST_CASE("index_database: get_file_path returns empty for non-existent instance
           "[storage][file_path]") {
     auto db = create_test_database();
 
-    auto path = db->get_file_path("non.existent.uid");
+    auto path_result = db->get_file_path("non.existent.uid");
+    REQUIRE(path_result.is_ok());
+    auto& path = path_result.value();
 
     CHECK_FALSE(path.has_value());
 }
@@ -1998,7 +2010,9 @@ TEST_CASE("index_database: get_study_files returns all files in study",
         series2_pk, "1.2.3.2.1", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/s2_1.dcm", 1024, "", 1).is_ok());
 
-    auto files = db->get_study_files("1.2.3.4.5.6.7");
+    auto files_result = db->get_study_files("1.2.3.4.5.6.7");
+    REQUIRE(files_result.is_ok());
+    auto& files = files_result.value();
 
     CHECK(files.size() == 3);
     // Check all expected files are present
@@ -2011,7 +2025,9 @@ TEST_CASE("index_database: get_study_files returns empty for non-existent study"
           "[storage][file_path]") {
     auto db = create_test_database();
 
-    auto files = db->get_study_files("non.existent.study");
+    auto files_result = db->get_study_files("non.existent.study");
+    REQUIRE(files_result.is_ok());
+    auto& files = files_result.value();
 
     CHECK(files.empty());
 }
@@ -2033,7 +2049,9 @@ TEST_CASE("index_database: get_series_files returns all files in series",
         series_pk, "1.2.3.3", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/file3.dcm", 1024, "", 3).is_ok());
 
-    auto files = db->get_series_files("1.2.3.4.5.6.7.1");
+    auto files_result = db->get_series_files("1.2.3.4.5.6.7.1");
+    REQUIRE(files_result.is_ok());
+    auto& files = files_result.value();
 
     CHECK(files.size() == 3);
     // Should be ordered by instance number
@@ -2110,7 +2128,9 @@ TEST_CASE("index_database: get_storage_stats returns correct counts",
     auto db = create_test_database();
 
     // Initially empty
-    auto stats = db->get_storage_stats();
+    auto stats_result = db->get_storage_stats();
+    REQUIRE(stats_result.is_ok());
+    auto stats = stats_result.value();
     CHECK(stats.total_patients == 0);
     CHECK(stats.total_studies == 0);
     CHECK(stats.total_series == 0);
@@ -2129,7 +2149,9 @@ TEST_CASE("index_database: get_storage_stats returns correct counts",
         series_pk, "1.2.3.2", "1.2.840.10008.5.1.4.1.1.2",
         "/storage/file2.dcm", 2048000).is_ok());  // 2MB
 
-    stats = db->get_storage_stats();
+    stats_result = db->get_storage_stats();
+    REQUIRE(stats_result.is_ok());
+    stats = stats_result.value();
     CHECK(stats.total_patients == 1);
     CHECK(stats.total_studies == 1);
     CHECK(stats.total_series == 1);

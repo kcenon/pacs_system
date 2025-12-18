@@ -207,26 +207,28 @@ private:
             auto pat_name_val = query_keys.get_string(tags::patient_name);
             if (!pat_name_val.empty()) query.patient_name = pat_name_val;
 
-            auto studies = database_->search_studies(query);
-            for (const auto& study : studies) {
-                dicom_dataset ds;
-                ds.set_string(tags::study_instance_uid, vr_type::UI, study.study_uid);
-                ds.set_string(tags::study_id, vr_type::SH, study.study_id);
-                ds.set_string(tags::study_date, vr_type::DA, study.study_date);
-                ds.set_string(tags::study_time, vr_type::TM, study.study_time);
-                ds.set_string(tags::accession_number, vr_type::SH, study.accession_number);
-                ds.set_string(tags::study_description, vr_type::LO, study.study_description);
-                ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+            auto studies_result = database_->search_studies(query);
+            if (studies_result.is_ok()) {
+                for (const auto& study : studies_result.value()) {
+                    dicom_dataset ds;
+                    ds.set_string(tags::study_instance_uid, vr_type::UI, study.study_uid);
+                    ds.set_string(tags::study_id, vr_type::SH, study.study_id);
+                    ds.set_string(tags::study_date, vr_type::DA, study.study_date);
+                    ds.set_string(tags::study_time, vr_type::TM, study.study_time);
+                    ds.set_string(tags::accession_number, vr_type::SH, study.accession_number);
+                    ds.set_string(tags::study_description, vr_type::LO, study.study_description);
+                    ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
 
-                auto patient = database_->find_patient_by_pk(study.patient_pk);
-                if (patient) {
-                    ds.set_string(tags::patient_name, vr_type::PN, patient->patient_name);
-                    ds.set_string(tags::patient_id, vr_type::LO, patient->patient_id);
-                    ds.set_string(tags::patient_birth_date, vr_type::DA, patient->birth_date);
-                    ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
+                    auto patient = database_->find_patient_by_pk(study.patient_pk);
+                    if (patient) {
+                        ds.set_string(tags::patient_name, vr_type::PN, patient->patient_name);
+                        ds.set_string(tags::patient_id, vr_type::LO, patient->patient_id);
+                        ds.set_string(tags::patient_birth_date, vr_type::DA, patient->birth_date);
+                        ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
+                    }
+
+                    results.push_back(std::move(ds));
                 }
-                
-                results.push_back(std::move(ds));
             }
         }
         return results;
@@ -237,14 +239,18 @@ private:
 
         auto study_uid = query_keys.get_string(tags::study_instance_uid);
         if (!study_uid.empty()) {
-            auto series_list = database_->list_series(study_uid);
-            for (const auto& series : series_list) {
-                auto instance_list = database_->list_instances(series.series_uid);
-                for (const auto& inst : instance_list) {
-                    auto path = file_storage_->get_file_path(inst.sop_uid);
-                    auto file_result = dicom_file::open(path);
-                    if (file_result.is_ok()) {
-                        results.push_back(std::move(file_result.value()));
+            auto series_list_result = database_->list_series(study_uid);
+            if (series_list_result.is_ok()) {
+                for (const auto& series : series_list_result.value()) {
+                    auto instance_list_result = database_->list_instances(series.series_uid);
+                    if (instance_list_result.is_ok()) {
+                        for (const auto& inst : instance_list_result.value()) {
+                            auto path = file_storage_->get_file_path(inst.sop_uid);
+                            auto file_result = dicom_file::open(path);
+                            if (file_result.is_ok()) {
+                                results.push_back(std::move(file_result.value()));
+                            }
+                        }
                     }
                 }
             }

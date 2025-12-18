@@ -145,10 +145,16 @@ void register_series_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            auto instances = ctx->database->list_instances(series_uid);
+            auto instances_result = ctx->database->list_instances(series_uid);
+            if (!instances_result.is_ok()) {
+              res.code = 500;
+              res.body = make_error_json("QUERY_ERROR",
+                                         instances_result.error().message);
+              return res;
+            }
 
             res.code = 200;
-            res.body = instances_to_json(instances);
+            res.body = instances_to_json(instances_result.value());
             return res;
           });
 }

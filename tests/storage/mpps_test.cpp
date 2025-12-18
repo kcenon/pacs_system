@@ -255,7 +255,7 @@ TEST_CASE("MPPS: list active by station", "[storage][mpps]") {
     REQUIRE(db->update_mpps("1.2.3.4.5.100", "COMPLETED", "20231115130000").is_ok());
 
     // List active MPPS for CT_SCANNER_1
-    auto results = db->list_active_mpps("CT_SCANNER_1");
+    auto results = db->list_active_mpps("CT_SCANNER_1").value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].mpps_uid == "1.2.3.4.5.101");
@@ -272,7 +272,7 @@ TEST_CASE("MPPS: find by study", "[storage][mpps]") {
     REQUIRE(db->create_mpps("1.2.3.4.5.102", "MR_SCANNER_1", "MR", "1.2.3.4.6", "ACC002",
                     "20231115130000").is_ok());  // Different study
 
-    auto results = db->find_mpps_by_study("1.2.3.4.5");
+    auto results = db->find_mpps_by_study("1.2.3.4.5").value();
 
     CHECK(results.size() == 2);
 }
@@ -292,7 +292,7 @@ TEST_CASE("MPPS: search with query", "[storage][mpps]") {
         mpps_query query;
         query.modality = "MR";
 
-        auto results = db->search_mpps(query);
+        auto results = db->search_mpps(query).value();
         CHECK(results.size() == 2);
     }
 
@@ -300,7 +300,7 @@ TEST_CASE("MPPS: search with query", "[storage][mpps]") {
         mpps_query query;
         query.station_ae = "CT_SCANNER_1";
 
-        auto results = db->search_mpps(query);
+        auto results = db->search_mpps(query).value();
         CHECK(results.size() == 2);
     }
 
@@ -309,7 +309,7 @@ TEST_CASE("MPPS: search with query", "[storage][mpps]") {
         query.start_date_from = "20231115";
         query.start_date_to = "20231115";
 
-        auto results = db->search_mpps(query);
+        auto results = db->search_mpps(query).value();
         CHECK(results.size() == 2);
     }
 
@@ -317,7 +317,7 @@ TEST_CASE("MPPS: search with query", "[storage][mpps]") {
         mpps_query query;
         query.limit = 1;
 
-        auto results = db->search_mpps(query);
+        auto results = db->search_mpps(query).value();
         CHECK(results.size() == 1);
     }
 
@@ -328,7 +328,7 @@ TEST_CASE("MPPS: search with query", "[storage][mpps]") {
         mpps_query query;
         query.status = "IN PROGRESS";
 
-        auto results = db->search_mpps(query);
+        auto results = db->search_mpps(query).value();
         CHECK(results.size() == 2);
     }
 }
@@ -355,13 +355,13 @@ TEST_CASE("MPPS: delete by UID", "[storage][mpps]") {
 TEST_CASE("MPPS: count total", "[storage][mpps]") {
     auto db = create_test_database();
 
-    CHECK(db->mpps_count() == 0);
+    CHECK(db->mpps_count().value() == 0);
 
     create_test_mpps(*db, "1.2.3.4.5.100");
-    CHECK(db->mpps_count() == 1);
+    CHECK(db->mpps_count().value() == 1);
 
     create_test_mpps(*db, "1.2.3.4.5.101");
-    CHECK(db->mpps_count() == 2);
+    CHECK(db->mpps_count().value() == 2);
 }
 
 TEST_CASE("MPPS: count by status", "[storage][mpps]") {
@@ -371,20 +371,20 @@ TEST_CASE("MPPS: count by status", "[storage][mpps]") {
     create_test_mpps(*db, "1.2.3.4.5.101");
     create_test_mpps(*db, "1.2.3.4.5.102");
 
-    CHECK(db->mpps_count("IN PROGRESS") == 3);
-    CHECK(db->mpps_count("COMPLETED") == 0);
+    CHECK(db->mpps_count("IN PROGRESS").value() == 3);
+    CHECK(db->mpps_count("COMPLETED").value() == 0);
 
     // Complete one
     REQUIRE(db->update_mpps("1.2.3.4.5.100", "COMPLETED", "20231115130000").is_ok());
 
-    CHECK(db->mpps_count("IN PROGRESS") == 2);
-    CHECK(db->mpps_count("COMPLETED") == 1);
+    CHECK(db->mpps_count("IN PROGRESS").value() == 2);
+    CHECK(db->mpps_count("COMPLETED").value() == 1);
 
     // Discontinue one
     REQUIRE(db->update_mpps("1.2.3.4.5.101", "DISCONTINUED", "20231115131500").is_ok());
 
-    CHECK(db->mpps_count("IN PROGRESS") == 1);
-    CHECK(db->mpps_count("DISCONTINUED") == 1);
+    CHECK(db->mpps_count("IN PROGRESS").value() == 1);
+    CHECK(db->mpps_count("DISCONTINUED").value() == 1);
 }
 
 // ============================================================================

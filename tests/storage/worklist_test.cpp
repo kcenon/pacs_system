@@ -156,7 +156,7 @@ TEST_CASE("worklist: query all scheduled items", "[storage][worklist]") {
     }
 
     worklist_query query;
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
 
     CHECK(results.size() == 5);
 }
@@ -177,7 +177,7 @@ TEST_CASE("worklist: query by station_ae", "[storage][worklist]") {
 
     worklist_query query;
     query.station_ae = "CT_SCANNER_1";
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].station_ae == "CT_SCANNER_1");
@@ -199,7 +199,7 @@ TEST_CASE("worklist: query by modality", "[storage][worklist]") {
 
     worklist_query query;
     query.modality = "MR";
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].modality == "MR");
@@ -228,7 +228,7 @@ TEST_CASE("worklist: query by scheduled date range", "[storage][worklist]") {
     worklist_query query;
     query.scheduled_date_from = "20231116";
     query.scheduled_date_to = "20231116";
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
 
     CHECK(results.size() == 1);
     CHECK(results[0].step_id == "SPS002");
@@ -255,7 +255,7 @@ TEST_CASE("worklist: query by patient_id wildcard", "[storage][worklist]") {
 
     worklist_query query;
     query.patient_id = "PAT*";
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
 
     CHECK(results.size() == 2);
 }
@@ -272,12 +272,12 @@ TEST_CASE("worklist: query only returns scheduled by default",
 
     // Default query should not return it
     worklist_query query;
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
     CHECK(results.empty());
 
     // With include_all_status, it should return
     query.include_all_status = true;
-    results = db->query_worklist(query);
+    results = db->query_worklist(query).value();
     CHECK(results.size() == 1);
     CHECK(results[0].step_status == "STARTED");
 }
@@ -297,11 +297,11 @@ TEST_CASE("worklist: query with limit and offset", "[storage][worklist]") {
 
     worklist_query query;
     query.limit = 3;
-    auto results = db->query_worklist(query);
+    auto results = db->query_worklist(query).value();
     CHECK(results.size() == 3);
 
     query.offset = 5;
-    results = db->query_worklist(query);
+    results = db->query_worklist(query).value();
     CHECK(results.size() == 3);
 }
 
@@ -418,7 +418,7 @@ TEST_CASE("worklist: delete non-existent item succeeds",
 TEST_CASE("worklist: count all items", "[storage][worklist]") {
     auto db = create_test_database();
 
-    CHECK(db->worklist_count() == 0);
+    CHECK(db->worklist_count().value() == 0);
 
     for (int i = 1; i <= 5; ++i) {
         auto item = create_test_item();
@@ -427,7 +427,7 @@ TEST_CASE("worklist: count all items", "[storage][worklist]") {
         REQUIRE(db->add_worklist_item(item).is_ok());
     }
 
-    CHECK(db->worklist_count() == 5);
+    CHECK(db->worklist_count().value() == 5);
 }
 
 TEST_CASE("worklist: count by status", "[storage][worklist]") {
@@ -447,9 +447,9 @@ TEST_CASE("worklist: count by status", "[storage][worklist]") {
     // Update one to COMPLETED
     REQUIRE(db->update_worklist_status("SPS2", "ACC2", "COMPLETED").is_ok());
 
-    CHECK(db->worklist_count("SCHEDULED") == 1);
-    CHECK(db->worklist_count("STARTED") == 1);
-    CHECK(db->worklist_count("COMPLETED") == 1);
+    CHECK(db->worklist_count("SCHEDULED").value() == 1);
+    CHECK(db->worklist_count("STARTED").value() == 1);
+    CHECK(db->worklist_count("COMPLETED").value() == 1);
 }
 
 // ============================================================================

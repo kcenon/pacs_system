@@ -5,6 +5,7 @@
 
 #include <pacs/storage/index_database.hpp>
 
+#include <pacs/core/result.hpp>
 #include <sqlite3.h>
 
 #include <chrono>
@@ -20,6 +21,9 @@ namespace pacs::storage {
 // Use common_system's result helpers
 using kcenon::common::make_error;
 using kcenon::common::ok;
+
+// Use pacs error codes
+using namespace pacs::error_codes;
 
 // ============================================================================
 // Helper Functions
@@ -321,7 +325,7 @@ auto index_database::find_patient_by_pk(int64_t pk) const
 }
 
 auto index_database::search_patients(const patient_query& query) const
-    -> std::vector<patient_record> {
+    -> Result<std::vector<patient_record>> {
     std::vector<patient_record> results;
 
     std::string sql = R"(
@@ -376,7 +380,9 @@ auto index_database::search_patients(const patient_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<patient_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     // Bind parameters
@@ -390,7 +396,7 @@ auto index_database::search_patients(const patient_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
@@ -420,13 +426,15 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
     return ok();
 }
 
-auto index_database::patient_count() const -> size_t {
+auto index_database::patient_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM patients;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     size_t count = 0;
@@ -435,7 +443,7 @@ auto index_database::patient_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 // ============================================================================
@@ -660,7 +668,7 @@ auto index_database::find_study_by_pk(int64_t pk) const
 }
 
 auto index_database::list_studies(std::string_view patient_id) const
-    -> std::vector<study_record> {
+    -> Result<std::vector<study_record>> {
     std::vector<study_record> results;
 
     const char* sql = R"(
@@ -677,7 +685,9 @@ auto index_database::list_studies(std::string_view patient_id) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<study_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, patient_id.data(),
@@ -688,11 +698,11 @@ auto index_database::list_studies(std::string_view patient_id) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::search_studies(const study_query& query) const
-    -> std::vector<study_record> {
+    -> Result<std::vector<study_record>> {
     std::vector<study_record> results;
 
     std::string sql = R"(
@@ -782,7 +792,9 @@ auto index_database::search_studies(const study_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<study_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     // Bind parameters
@@ -796,7 +808,7 @@ auto index_database::search_studies(const study_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
@@ -826,13 +838,15 @@ auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
     return ok();
 }
 
-auto index_database::study_count() const -> size_t {
+auto index_database::study_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM studies;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     size_t count = 0;
@@ -841,10 +855,10 @@ auto index_database::study_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
-auto index_database::study_count(std::string_view patient_id) const -> size_t {
+auto index_database::study_count(std::string_view patient_id) const -> Result<size_t> {
     const char* sql = R"(
         SELECT COUNT(*) FROM studies s
         JOIN patients p ON s.patient_pk = p.patient_pk
@@ -854,7 +868,9 @@ auto index_database::study_count(std::string_view patient_id) const -> size_t {
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, patient_id.data(),
@@ -866,7 +882,7 @@ auto index_database::study_count(std::string_view patient_id) const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::update_modalities_in_study(int64_t study_pk)
@@ -1104,7 +1120,7 @@ auto index_database::find_series_by_pk(int64_t pk) const
 }
 
 auto index_database::list_series(std::string_view study_uid) const
-    -> std::vector<series_record> {
+    -> Result<std::vector<series_record>> {
     std::vector<series_record> results;
 
     const char* sql = R"(
@@ -1120,7 +1136,9 @@ auto index_database::list_series(std::string_view study_uid) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<series_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, study_uid.data(),
@@ -1131,11 +1149,11 @@ auto index_database::list_series(std::string_view study_uid) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::search_series(const series_query& query) const
-    -> std::vector<series_record> {
+    -> Result<std::vector<series_record>> {
     std::vector<series_record> results;
 
     std::string sql = R"(
@@ -1187,7 +1205,9 @@ auto index_database::search_series(const series_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<series_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     // Bind parameters
@@ -1218,7 +1238,7 @@ auto index_database::search_series(const series_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
@@ -1257,13 +1277,15 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     return ok();
 }
 
-auto index_database::series_count() const -> size_t {
+auto index_database::series_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM series;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     size_t count = 0;
@@ -1272,10 +1294,10 @@ auto index_database::series_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
-auto index_database::series_count(std::string_view study_uid) const -> size_t {
+auto index_database::series_count(std::string_view study_uid) const -> Result<size_t> {
     const char* sql = R"(
         SELECT COUNT(*) FROM series se
         JOIN studies st ON se.study_pk = st.study_pk
@@ -1285,7 +1307,9 @@ auto index_database::series_count(std::string_view study_uid) const -> size_t {
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, study_uid.data(),
@@ -1297,7 +1321,7 @@ auto index_database::series_count(std::string_view study_uid) const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::parse_series_row(void* stmt_ptr) const -> series_record {
@@ -1538,7 +1562,7 @@ auto index_database::find_instance_by_pk(int64_t pk) const
 }
 
 auto index_database::list_instances(std::string_view series_uid) const
-    -> std::vector<instance_record> {
+    -> Result<std::vector<instance_record>> {
     std::vector<instance_record> results;
 
     const char* sql = R"(
@@ -1556,7 +1580,9 @@ auto index_database::list_instances(std::string_view series_uid) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<instance_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, series_uid.data(),
@@ -1567,11 +1593,11 @@ auto index_database::list_instances(std::string_view series_uid) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::search_instances(const instance_query& query) const
-    -> std::vector<instance_record> {
+    -> Result<std::vector<instance_record>> {
     std::vector<instance_record> results;
 
     std::string sql = R"(
@@ -1630,7 +1656,9 @@ auto index_database::search_instances(const instance_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<instance_record>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     // Bind parameters
@@ -1655,7 +1683,7 @@ auto index_database::search_instances(const instance_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
@@ -1686,13 +1714,15 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
     return ok();
 }
 
-auto index_database::instance_count() const -> size_t {
+auto index_database::instance_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM instances;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     size_t count = 0;
@@ -1701,11 +1731,11 @@ auto index_database::instance_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::instance_count(std::string_view series_uid) const
-    -> size_t {
+    -> Result<size_t> {
     const char* sql = R"(
         SELECT COUNT(*) FROM instances i
         JOIN series s ON i.series_pk = s.series_pk
@@ -1715,7 +1745,9 @@ auto index_database::instance_count(std::string_view series_uid) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, series_uid.data(),
@@ -1727,7 +1759,7 @@ auto index_database::instance_count(std::string_view series_uid) const
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::parse_instance_row(void* stmt_ptr) const
@@ -1781,13 +1813,15 @@ auto index_database::parse_instance_row(void* stmt_ptr) const
 // ============================================================================
 
 auto index_database::get_file_path(std::string_view sop_instance_uid) const
-    -> std::optional<std::string> {
+    -> Result<std::optional<std::string>> {
     const char* sql = "SELECT file_path FROM instances WHERE sop_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return std::nullopt;
+        return pacs_error<std::optional<std::string>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, sop_instance_uid.data(),
@@ -1797,17 +1831,17 @@ auto index_database::get_file_path(std::string_view sop_instance_uid) const
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
         sqlite3_finalize(stmt);
-        return std::nullopt;
+        return ok(std::optional<std::string>(std::nullopt));
     }
 
     auto path = get_text(stmt, 0);
     sqlite3_finalize(stmt);
 
-    return path;
+    return ok(std::optional<std::string>(path));
 }
 
 auto index_database::get_study_files(std::string_view study_instance_uid) const
-    -> std::vector<std::string> {
+    -> Result<std::vector<std::string>> {
     std::vector<std::string> results;
 
     const char* sql = R"(
@@ -1822,7 +1856,9 @@ auto index_database::get_study_files(std::string_view study_instance_uid) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<std::string>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, study_instance_uid.data(),
@@ -1834,11 +1870,11 @@ auto index_database::get_study_files(std::string_view study_instance_uid) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::get_series_files(std::string_view series_instance_uid)
-    const -> std::vector<std::string> {
+    const -> Result<std::vector<std::string>> {
     std::vector<std::string> results;
 
     const char* sql = R"(
@@ -1852,7 +1888,9 @@ auto index_database::get_series_files(std::string_view series_instance_uid)
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return pacs_error<std::vector<std::string>>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
 
     sqlite3_bind_text(stmt, 1, series_instance_uid.data(),
@@ -1864,7 +1902,7 @@ auto index_database::get_series_files(std::string_view series_instance_uid)
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 // ============================================================================
@@ -1941,24 +1979,47 @@ auto index_database::native_handle() const noexcept -> sqlite3* {
 // Storage Statistics
 // ============================================================================
 
-auto index_database::get_storage_stats() const -> storage_stats {
+auto index_database::get_storage_stats() const -> Result<storage_stats> {
     storage_stats stats;
 
-    stats.total_patients = patient_count();
-    stats.total_studies = study_count();
-    stats.total_series = series_count();
-    stats.total_instances = instance_count();
+    auto patient_count_result = patient_count();
+    if (patient_count_result.is_err()) {
+        return Result<storage_stats>::err(patient_count_result.error());
+    }
+    stats.total_patients = patient_count_result.value();
+
+    auto study_count_result = study_count();
+    if (study_count_result.is_err()) {
+        return Result<storage_stats>::err(study_count_result.error());
+    }
+    stats.total_studies = study_count_result.value();
+
+    auto series_count_result = series_count();
+    if (series_count_result.is_err()) {
+        return Result<storage_stats>::err(series_count_result.error());
+    }
+    stats.total_series = series_count_result.value();
+
+    auto instance_count_result = instance_count();
+    if (instance_count_result.is_err()) {
+        return Result<storage_stats>::err(instance_count_result.error());
+    }
+    stats.total_instances = instance_count_result.value();
 
     // Get total file size
     const char* file_size_sql = "SELECT COALESCE(SUM(file_size), 0) FROM instances;";
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, file_size_sql, -1, &stmt, nullptr);
-    if (rc == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            stats.total_file_size = sqlite3_column_int64(stmt, 0);
-        }
-        sqlite3_finalize(stmt);
+    if (rc != SQLITE_OK) {
+        return pacs_error<storage_stats>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
     }
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        stats.total_file_size = sqlite3_column_int64(stmt, 0);
+    }
+    sqlite3_finalize(stmt);
 
     // Get database file size
     if (path_ != ":memory:") {
@@ -1969,7 +2030,7 @@ auto index_database::get_storage_stats() const -> storage_stats {
         }
     }
 
-    return stats;
+    return ok(std::move(stats));
 }
 
 // ============================================================================
@@ -2207,7 +2268,7 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
 }
 
 auto index_database::list_active_mpps(std::string_view station_ae) const
-    -> std::vector<mpps_record> {
+    -> Result<std::vector<mpps_record>> {
     std::vector<mpps_record> results;
 
     const char* sql = R"(
@@ -2223,7 +2284,10 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return make_error<std::vector<mpps_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     sqlite3_bind_text(stmt, 1, station_ae.data(),
@@ -2234,11 +2298,11 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::find_mpps_by_study(std::string_view study_uid) const
-    -> std::vector<mpps_record> {
+    -> Result<std::vector<mpps_record>> {
     std::vector<mpps_record> results;
 
     const char* sql = R"(
@@ -2254,7 +2318,10 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return make_error<std::vector<mpps_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     sqlite3_bind_text(stmt, 1, study_uid.data(),
@@ -2265,11 +2332,11 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::search_mpps(const mpps_query& query) const
-    -> std::vector<mpps_record> {
+    -> Result<std::vector<mpps_record>> {
     std::vector<mpps_record> results;
 
     std::string sql = R"(
@@ -2336,7 +2403,10 @@ auto index_database::search_mpps(const mpps_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return make_error<std::vector<mpps_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     // Bind parameters
@@ -2350,7 +2420,7 @@ auto index_database::search_mpps(const mpps_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
@@ -2380,13 +2450,16 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
     return ok();
 }
 
-auto index_database::mpps_count() const -> size_t {
+auto index_database::mpps_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM mpps;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     size_t count = 0;
@@ -2395,16 +2468,19 @@ auto index_database::mpps_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
-auto index_database::mpps_count(std::string_view status) const -> size_t {
+auto index_database::mpps_count(std::string_view status) const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM mpps WHERE status = ?;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     sqlite3_bind_text(stmt, 1, status.data(), static_cast<int>(status.size()),
@@ -2416,7 +2492,7 @@ auto index_database::mpps_count(std::string_view status) const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::parse_mpps_row(void* stmt_ptr) const -> mpps_record {
@@ -2578,7 +2654,7 @@ auto index_database::update_worklist_status(std::string_view step_id,
 }
 
 auto index_database::query_worklist(const worklist_query& query) const
-    -> std::vector<worklist_item> {
+    -> Result<std::vector<worklist_item>> {
     std::vector<worklist_item> results;
 
     std::string sql = R"(
@@ -2651,7 +2727,10 @@ auto index_database::query_worklist(const worklist_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return make_error<std::vector<worklist_item>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     // Bind parameters
@@ -2665,7 +2744,7 @@ auto index_database::query_worklist(const worklist_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::find_worklist_item(std::string_view step_id,
@@ -2815,13 +2894,16 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     return static_cast<size_t>(sqlite3_changes(db_));
 }
 
-auto index_database::worklist_count() const -> size_t {
+auto index_database::worklist_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM worklist;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     size_t count = 0;
@@ -2830,16 +2912,19 @@ auto index_database::worklist_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
-auto index_database::worklist_count(std::string_view status) const -> size_t {
+auto index_database::worklist_count(std::string_view status) const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM worklist WHERE step_status = ?;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     sqlite3_bind_text(stmt, 1, status.data(), static_cast<int>(status.size()),
@@ -2851,7 +2936,7 @@ auto index_database::worklist_count(std::string_view status) const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::parse_worklist_row(void* stmt_ptr) const -> worklist_item {
@@ -2935,7 +3020,7 @@ auto index_database::add_audit_log(const audit_record& record)
 }
 
 auto index_database::query_audit_log(const audit_query& query) const
-    -> std::vector<audit_record> {
+    -> Result<std::vector<audit_record>> {
     std::vector<audit_record> results;
 
     std::ostringstream sql;
@@ -3000,7 +3085,10 @@ auto index_database::query_audit_log(const audit_query& query) const
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql.str().c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return results;
+        return make_error<std::vector<audit_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     for (size_t i = 0; i < params.size(); ++i) {
@@ -3013,7 +3101,7 @@ auto index_database::query_audit_log(const audit_query& query) const
     }
 
     sqlite3_finalize(stmt);
-    return results;
+    return ok(std::move(results));
 }
 
 auto index_database::find_audit_by_pk(int64_t pk) const
@@ -3040,13 +3128,16 @@ auto index_database::find_audit_by_pk(int64_t pk) const
     return result;
 }
 
-auto index_database::audit_count() const -> size_t {
+auto index_database::audit_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM audit_log;";
 
     sqlite3_stmt* stmt = nullptr;
     auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        return 0;
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
     size_t count = 0;
@@ -3055,7 +3146,7 @@ auto index_database::audit_count() const -> size_t {
     }
 
     sqlite3_finalize(stmt);
-    return count;
+    return ok(count);
 }
 
 auto index_database::cleanup_old_audit_logs(std::chrono::hours age)

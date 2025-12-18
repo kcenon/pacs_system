@@ -170,9 +170,9 @@ TEST_CASE("Index database patient operations", "[web][patient][database]") {
 
     patient_query query;
     query.patient_name = "Doe*";
-    auto results = db->search_patients(query);
-
-    REQUIRE(results.size() == 2);
+    auto results_result = db->search_patients(query);
+    REQUIRE(results_result.is_ok());
+    REQUIRE(results_result.value().size() == 2);
   }
 
   SECTION("search patients with pagination") {
@@ -184,12 +184,14 @@ TEST_CASE("Index database patient operations", "[web][patient][database]") {
     patient_query query;
     query.limit = 5;
     query.offset = 0;
-    auto page1 = db->search_patients(query);
-    REQUIRE(page1.size() == 5);
+    auto page1_result = db->search_patients(query);
+    REQUIRE(page1_result.is_ok());
+    REQUIRE(page1_result.value().size() == 5);
 
     query.offset = 5;
-    auto page2 = db->search_patients(query);
-    REQUIRE(page2.size() == 5);
+    auto page2_result = db->search_patients(query);
+    REQUIRE(page2_result.is_ok());
+    REQUIRE(page2_result.value().size() == 5);
   }
 }
 
@@ -221,8 +223,9 @@ TEST_CASE("Index database study operations", "[web][study][database]") {
     db->upsert_study(patient_pk.value(), "1.2.840.2", "S002", "20231002", "",
                      "ACC002", "", "Study 2");
 
-    auto studies = db->list_studies("P001");
-    REQUIRE(studies.size() == 2);
+    auto studies_result = db->list_studies("P001");
+    REQUIRE(studies_result.is_ok());
+    REQUIRE(studies_result.value().size() == 2);
   }
 
   SECTION("delete study") {
@@ -267,7 +270,8 @@ TEST_CASE("Index database series operations", "[web][series][database]") {
     db->upsert_series(study_pk.value(), "1.2.840.series1", "CT", 1, "", "", "");
     db->upsert_series(study_pk.value(), "1.2.840.series2", "CT", 2, "", "", "");
 
-    auto series_list = db->list_series("1.2.840.study");
-    REQUIRE(series_list.size() == 2);
+    auto series_list_result = db->list_series("1.2.840.study");
+    REQUIRE(series_list_result.is_ok());
+    REQUIRE(series_list_result.value().size() == 2);
   }
 }

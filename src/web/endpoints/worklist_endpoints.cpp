@@ -262,14 +262,26 @@ void register_worklist_endpoints_impl(
         storage::worklist_query count_query = query;
         count_query.limit = 0;
         count_query.offset = 0;
-        auto all_items = ctx->database->query_worklist(count_query);
-        size_t total_count = all_items.size();
+        auto all_items_result = ctx->database->query_worklist(count_query);
+        if (!all_items_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     all_items_result.error().message);
+          return res;
+        }
+        size_t total_count = all_items_result.value().size();
 
         // Get paginated results
-        auto items = ctx->database->query_worklist(query);
+        auto items_result = ctx->database->query_worklist(query);
+        if (!items_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     items_result.error().message);
+          return res;
+        }
 
         res.code = 200;
-        res.body = worklist_items_to_json(items, total_count);
+        res.body = worklist_items_to_json(items_result.value(), total_count);
         return res;
       });
 

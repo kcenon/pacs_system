@@ -225,11 +225,24 @@ void register_audit_endpoints_impl(
         storage::audit_query count_query = query;
         count_query.limit = 0;
         count_query.offset = 0;
-        auto all_records = ctx->database->query_audit_log(count_query);
-        size_t total_count = all_records.size();
+        auto all_records_result = ctx->database->query_audit_log(count_query);
+        if (!all_records_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     all_records_result.error().message);
+          return res;
+        }
+        size_t total_count = all_records_result.value().size();
 
         // Get paginated results
-        auto records = ctx->database->query_audit_log(query);
+        auto records_result = ctx->database->query_audit_log(query);
+        if (!records_result.is_ok()) {
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     records_result.error().message);
+          return res;
+        }
+        auto records = std::move(records_result.value());
 
         if (export_csv) {
           res.add_header("Content-Type", "text/csv");
@@ -313,7 +326,15 @@ void register_audit_endpoints_impl(
           query.date_to = date_to;
         }
 
-        auto records = ctx->database->query_audit_log(query);
+        auto records_result = ctx->database->query_audit_log(query);
+        if (!records_result.is_ok()) {
+          res.add_header("Content-Type", "application/json");
+          res.code = 500;
+          res.body = make_error_json("QUERY_ERROR",
+                                     records_result.error().message);
+          return res;
+        }
+        auto records = std::move(records_result.value());
 
         // Check export format
         auto format_param = req.url_params.get("format");
