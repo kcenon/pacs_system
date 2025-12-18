@@ -4,6 +4,7 @@
  */
 
 #include "pacs/services/verification_scp.hpp"
+#include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -22,14 +23,10 @@ network::Result<std::monostate> verification_scp::handle_message(
 
     // Verify the message is a C-ECHO request
     if (request.command() != command_field::c_echo_rq) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("Expected C-ECHO-RQ but received ") +
+        return pacs::pacs_void_error(
+            pacs::error_codes::echo_unexpected_command,
+            "Expected C-ECHO-RQ but received " +
             std::string(to_string(request.command())));
-#else
-        return std::string("Expected C-ECHO-RQ but received ") +
-               std::string(to_string(request.command()));
-#endif
     }
 
     // Build C-ECHO response using the factory function
