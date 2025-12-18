@@ -1659,16 +1659,30 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 // Check if metadata is requested
                 if (dicomweb::is_acceptable(accept_infos,
                                             dicomweb::media_type::dicom_json)) {
-                    auto files = ctx->database->get_study_files(study_uid);
+                    auto files_result = ctx->database->get_study_files(study_uid);
+                    if (!files_result.is_ok()) {
+                        res.code = 500;
+                        res.add_header("Content-Type", "application/json");
+                        res.body = make_error_json("QUERY_ERROR",
+                                                   files_result.error().message);
+                        return res;
+                    }
                     std::string bulk_uri = "/dicomweb/studies/" + study_uid +
                                            "/bulkdata/";
-                    return build_metadata_response(files, *ctx, bulk_uri);
+                    return build_metadata_response(files_result.value(), *ctx, bulk_uri);
                 }
 
                 // Return DICOM instances
-                auto files = ctx->database->get_study_files(study_uid);
+                auto files_result = ctx->database->get_study_files(study_uid);
+                if (!files_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               files_result.error().message);
+                    return res;
+                }
                 std::string base_uri = "/dicomweb/studies/" + study_uid;
-                return build_multipart_dicom_response(files, *ctx, base_uri);
+                return build_multipart_dicom_response(files_result.value(), *ctx, base_uri);
             });
 
     // GET /dicomweb/studies/{studyUID}/metadata - Study metadata
@@ -1686,10 +1700,17 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto files = ctx->database->get_study_files(study_uid);
+                auto files_result = ctx->database->get_study_files(study_uid);
+                if (!files_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               files_result.error().message);
+                    return res;
+                }
                 std::string bulk_uri = "/dicomweb/studies/" + study_uid +
                                        "/bulkdata/";
-                return build_metadata_response(files, *ctx, bulk_uri);
+                return build_metadata_response(files_result.value(), *ctx, bulk_uri);
             });
 
     // ========================================================================
@@ -1729,16 +1750,30 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 // Check if metadata is requested
                 if (dicomweb::is_acceptable(accept_infos,
                                             dicomweb::media_type::dicom_json)) {
-                    auto files = ctx->database->get_series_files(series_uid);
+                    auto files_result = ctx->database->get_series_files(series_uid);
+                    if (!files_result.is_ok()) {
+                        res.code = 500;
+                        res.add_header("Content-Type", "application/json");
+                        res.body = make_error_json("QUERY_ERROR",
+                                                   files_result.error().message);
+                        return res;
+                    }
                     std::string bulk_uri = "/dicomweb/studies/" + study_uid +
                                            "/series/" + series_uid + "/bulkdata/";
-                    return build_metadata_response(files, *ctx, bulk_uri);
+                    return build_metadata_response(files_result.value(), *ctx, bulk_uri);
                 }
 
-                auto files = ctx->database->get_series_files(series_uid);
+                auto files_result = ctx->database->get_series_files(series_uid);
+                if (!files_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               files_result.error().message);
+                    return res;
+                }
                 std::string base_uri = "/dicomweb/studies/" + study_uid +
                                        "/series/" + series_uid;
-                return build_multipart_dicom_response(files, *ctx, base_uri);
+                return build_multipart_dicom_response(files_result.value(), *ctx, base_uri);
             });
 
     // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/metadata
@@ -1758,10 +1793,17 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto files = ctx->database->get_series_files(series_uid);
+                auto files_result = ctx->database->get_series_files(series_uid);
+                if (!files_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               files_result.error().message);
+                    return res;
+                }
                 std::string bulk_uri = "/dicomweb/studies/" + study_uid +
                                        "/series/" + series_uid + "/bulkdata/";
-                return build_metadata_response(files, *ctx, bulk_uri);
+                return build_metadata_response(files_result.value(), *ctx, bulk_uri);
             });
 
     // ========================================================================
@@ -1787,7 +1829,15 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto file_path = ctx->database->get_file_path(sop_uid);
+                auto file_path_result = ctx->database->get_file_path(sop_uid);
+                if (!file_path_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               file_path_result.error().message);
+                    return res;
+                }
+                const auto& file_path = file_path_result.value();
                 if (!file_path) {
                     res.code = 404;
                     res.add_header("Content-Type", "application/json");
@@ -1846,7 +1896,15 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto file_path = ctx->database->get_file_path(sop_uid);
+                auto file_path_result = ctx->database->get_file_path(sop_uid);
+                if (!file_path_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               file_path_result.error().message);
+                    return res;
+                }
+                const auto& file_path = file_path_result.value();
                 if (!file_path) {
                     res.code = 404;
                     res.add_header("Content-Type", "application/json");
@@ -1885,7 +1943,15 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto file_path = ctx->database->get_file_path(sop_uid);
+                auto file_path_result = ctx->database->get_file_path(sop_uid);
+                if (!file_path_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               file_path_result.error().message);
+                    return res;
+                }
+                const auto& file_path = file_path_result.value();
                 if (!file_path) {
                     res.code = 404;
                     res.add_header("Content-Type", "application/json");
@@ -2041,7 +2107,15 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto file_path = ctx->database->get_file_path(sop_uid);
+                auto file_path_result = ctx->database->get_file_path(sop_uid);
+                if (!file_path_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               file_path_result.error().message);
+                    return res;
+                }
+                const auto& file_path = file_path_result.value();
                 if (!file_path) {
                     res.code = 404;
                     res.add_header("Content-Type", "application/json");
@@ -2091,7 +2165,15 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                auto file_path = ctx->database->get_file_path(sop_uid);
+                auto file_path_result = ctx->database->get_file_path(sop_uid);
+                if (!file_path_result.is_ok()) {
+                    res.code = 500;
+                    res.add_header("Content-Type", "application/json");
+                    res.body = make_error_json("QUERY_ERROR",
+                                               file_path_result.error().message);
+                    return res;
+                }
+                const auto& file_path = file_path_result.value();
                 if (!file_path) {
                     res.code = 404;
                     res.add_header("Content-Type", "application/json");
@@ -2248,9 +2330,9 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     std::string series_uid = series_uid_elem->as_string();
 
                     // Check for duplicate
-                    auto existing = ctx->database->get_file_path(
+                    auto existing_result = ctx->database->get_file_path(
                         result.sop_instance_uid);
-                    if (existing) {
+                    if (existing_result.is_ok() && existing_result.value()) {
                         result.success = false;
                         result.error_code = "DUPLICATE";
                         result.error_message = "Instance already exists";
@@ -2400,9 +2482,9 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     std::string series_uid = series_uid_elem->as_string();
 
                     // Check for duplicate
-                    auto existing = ctx->database->get_file_path(
+                    auto existing_result = ctx->database->get_file_path(
                         result.sop_instance_uid);
-                    if (existing) {
+                    if (existing_result.is_ok() && existing_result.value()) {
                         result.success = false;
                         result.error_code = "DUPLICATE";
                         result.error_message = "Instance already exists";
@@ -2475,14 +2557,20 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 }
 
                 // Execute search
-                auto studies = ctx->database->search_studies(query);
+                auto studies_result = ctx->database->search_studies(query);
+                if (!studies_result.is_ok()) {
+                    res.code = 500;
+                    res.body = make_error_json("QUERY_ERROR",
+                                               studies_result.error().message);
+                    return res;
+                }
 
                 // Build response
                 std::ostringstream oss;
                 oss << "[";
 
                 bool first = true;
-                for (const auto& study : studies) {
+                for (const auto& study : studies_result.value()) {
                     if (!first) oss << ",";
                     first = false;
 
@@ -2530,14 +2618,20 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 }
 
                 // Execute search
-                auto series_list = ctx->database->search_series(query);
+                auto series_list_result = ctx->database->search_series(query);
+                if (!series_list_result.is_ok()) {
+                    res.code = 500;
+                    res.body = make_error_json("QUERY_ERROR",
+                                               series_list_result.error().message);
+                    return res;
+                }
 
                 // Build response
                 std::ostringstream oss;
                 oss << "[";
 
                 bool first = true;
-                for (const auto& series : series_list) {
+                for (const auto& series : series_list_result.value()) {
                     if (!first) oss << ",";
                     first = false;
 
@@ -2582,14 +2676,20 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 }
 
                 // Execute search
-                auto instances = ctx->database->search_instances(query);
+                auto instances_result = ctx->database->search_instances(query);
+                if (!instances_result.is_ok()) {
+                    res.code = 500;
+                    res.body = make_error_json("QUERY_ERROR",
+                                               instances_result.error().message);
+                    return res;
+                }
 
                 // Build response
                 std::ostringstream oss;
                 oss << "[";
 
                 bool first = true;
-                for (const auto& instance : instances) {
+                for (const auto& instance : instances_result.value()) {
                     if (!first) oss << ",";
                     first = false;
 
@@ -2648,14 +2748,20 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 }
 
                 // Execute search
-                auto series_list = ctx->database->search_series(query);
+                auto series_list_result = ctx->database->search_series(query);
+                if (!series_list_result.is_ok()) {
+                    res.code = 500;
+                    res.body = make_error_json("QUERY_ERROR",
+                                               series_list_result.error().message);
+                    return res;
+                }
 
                 // Build response
                 std::ostringstream oss;
                 oss << "[";
 
                 bool first = true;
-                for (const auto& series : series_list) {
+                for (const auto& series : series_list_result.value()) {
                     if (!first) oss << ",";
                     first = false;
 
@@ -2696,7 +2802,13 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 // Get all series in this study and then instances
                 storage::series_query series_query;
                 series_query.study_uid = study_uid;
-                auto series_list = ctx->database->search_series(series_query);
+                auto series_list_result = ctx->database->search_series(series_query);
+                if (!series_list_result.is_ok()) {
+                    res.code = 500;
+                    res.body = make_error_json("QUERY_ERROR",
+                                               series_list_result.error().message);
+                    return res;
+                }
 
                 // Parse query parameters for additional filters
                 auto inst_query = dicomweb::parse_instance_query_params(req.raw_url);
@@ -2712,7 +2824,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 size_t count = 0;
                 size_t skipped = 0;
 
-                for (const auto& series : series_list) {
+                for (const auto& series : series_list_result.value()) {
                     if (count >= inst_query.limit) break;
 
                     // Search instances in this series
@@ -2729,8 +2841,11 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     }
                     query.limit = inst_query.limit - count;
 
-                    auto instances = ctx->database->search_instances(query);
-                    for (const auto& instance : instances) {
+                    auto instances_result = ctx->database->search_instances(query);
+                    if (!instances_result.is_ok()) {
+                        continue;
+                    }
+                    for (const auto& instance : instances_result.value()) {
                         // Handle offset
                         if (skipped < inst_query.offset) {
                             ++skipped;
@@ -2799,14 +2914,20 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 }
 
                 // Execute search
-                auto instances = ctx->database->search_instances(query);
+                auto instances_result = ctx->database->search_instances(query);
+                if (!instances_result.is_ok()) {
+                    res.code = 500;
+                    res.body = make_error_json("QUERY_ERROR",
+                                               instances_result.error().message);
+                    return res;
+                }
 
                 // Build response
                 std::ostringstream oss;
                 oss << "[";
 
                 bool first = true;
-                for (const auto& instance : instances) {
+                for (const auto& instance : instances_result.value()) {
                     if (!first) oss << ",";
                     first = false;
 

@@ -325,8 +325,15 @@ int list_patients(index_database& db, const options& opts) {
     query.limit = opts.limit;
     query.offset = opts.offset;
 
-    auto patients = db.search_patients(query);
-    auto total = db.patient_count();
+    auto patients_result = db.search_patients(query);
+    if (patients_result.is_err()) {
+        std::cerr << "Error: " << patients_result.error().message << "\n";
+        return 2;
+    }
+    const auto& patients = patients_result.value();
+
+    auto total_result = db.patient_count();
+    size_t total = total_result.is_ok() ? total_result.value() : 0;
 
     std::cout << "\n=== Patients (" << patients.size();
     if (opts.limit > 0 && patients.size() == opts.limit) {
@@ -348,7 +355,8 @@ int list_patients(index_database& db, const options& opts) {
     print_separator(widths);
 
     for (const auto& patient : patients) {
-        auto study_count = db.study_count(patient.patient_id);
+        auto study_count_result = db.study_count(patient.patient_id);
+        size_t study_count = study_count_result.is_ok() ? study_count_result.value() : 0;
         std::vector<std::string> row = {patient.patient_id, patient.patient_name,
                                         format_date(patient.birth_date),
                                         patient.sex.empty() ? "-" : patient.sex,
@@ -397,8 +405,15 @@ int list_studies(index_database& db, const options& opts) {
     query.limit = opts.limit;
     query.offset = opts.offset;
 
-    auto studies = db.search_studies(query);
-    auto total = db.study_count();
+    auto studies_result = db.search_studies(query);
+    if (studies_result.is_err()) {
+        std::cerr << "Error: " << studies_result.error().message << "\n";
+        return 2;
+    }
+    const auto& studies = studies_result.value();
+
+    auto total_result = db.study_count();
+    size_t total = total_result.is_ok() ? total_result.value() : 0;
 
     std::cout << "\n=== Studies (" << studies.size();
     if (opts.limit > 0 && studies.size() == opts.limit) {
@@ -456,8 +471,15 @@ int list_series(index_database& db, const options& opts) {
     query.limit = opts.limit;
     query.offset = opts.offset;
 
-    auto series_list = db.search_series(query);
-    auto total = db.series_count();
+    auto series_result = db.search_series(query);
+    if (series_result.is_err()) {
+        std::cerr << "Error: " << series_result.error().message << "\n";
+        return 2;
+    }
+    const auto& series_list = series_result.value();
+
+    auto total_result = db.series_count();
+    size_t total = total_result.is_ok() ? total_result.value() : 0;
 
     std::cout << "\n=== Series (" << series_list.size();
     if (opts.limit > 0 && series_list.size() == opts.limit) {
@@ -510,8 +532,15 @@ int list_instances(index_database& db, const options& opts) {
     query.limit = opts.limit;
     query.offset = opts.offset;
 
-    auto instances = db.search_instances(query);
-    auto total = db.instance_count();
+    auto instances_result = db.search_instances(query);
+    if (instances_result.is_err()) {
+        std::cerr << "Error: " << instances_result.error().message << "\n";
+        return 2;
+    }
+    const auto& instances = instances_result.value();
+
+    auto total_result = db.instance_count();
+    size_t total = total_result.is_ok() ? total_result.value() : 0;
 
     std::cout << "\n=== Instances (" << instances.size();
     if (opts.limit > 0 && instances.size() == opts.limit) {
@@ -558,7 +587,12 @@ int list_instances(index_database& db, const options& opts) {
  * @return Exit code
  */
 int show_stats(index_database& db, [[maybe_unused]] const options& opts) {
-    auto stats = db.get_storage_stats();
+    auto stats_result = db.get_storage_stats();
+    if (stats_result.is_err()) {
+        std::cerr << "Error: " << stats_result.error().message << "\n";
+        return 2;
+    }
+    const auto& stats = stats_result.value();
 
     std::cout << "\n";
     std::cout << "========================================\n";
@@ -599,16 +633,26 @@ int show_stats(index_database& db, [[maybe_unused]] const options& opts) {
 int do_vacuum(index_database& db, [[maybe_unused]] const options& opts) {
     std::cout << "Performing VACUUM operation...\n";
 
-    auto stats_before = db.get_storage_stats();
-    auto result = db.vacuum();
+    auto stats_before_result = db.get_storage_stats();
+    if (stats_before_result.is_err()) {
+        std::cerr << "Error: " << stats_before_result.error().message << "\n";
+        return 2;
+    }
+    const auto& stats_before = stats_before_result.value();
 
+    auto result = db.vacuum();
     if (result.is_err()) {
         std::cerr << "Error: VACUUM failed: " << result.error().message
                   << "\n";
         return 2;
     }
 
-    auto stats_after = db.get_storage_stats();
+    auto stats_after_result = db.get_storage_stats();
+    if (stats_after_result.is_err()) {
+        std::cerr << "Error: " << stats_after_result.error().message << "\n";
+        return 2;
+    }
+    const auto& stats_after = stats_after_result.value();
 
     std::cout << "VACUUM completed successfully.\n";
     std::cout << "  Before: " << format_size(stats_before.database_size) << "\n";
@@ -633,7 +677,12 @@ int do_verify(index_database& db, const options& opts) {
 
     instance_query query;
     query.limit = 0;  // No limit for verification
-    auto instances = db.search_instances(query);
+    auto instances_result = db.search_instances(query);
+    if (instances_result.is_err()) {
+        std::cerr << "Error: " << instances_result.error().message << "\n";
+        return 2;
+    }
+    const auto& instances = instances_result.value();
 
     size_t total = instances.size();
     size_t existing = 0;

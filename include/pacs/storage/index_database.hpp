@@ -193,10 +193,10 @@ public:
      * - "*oh*" matches names containing "oh"
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching patient records
+     * @return Result containing vector of matching patient records or error
      */
     [[nodiscard]] auto search_patients(const patient_query& query) const
-        -> std::vector<patient_record>;
+        -> Result<std::vector<patient_record>>;
 
     /**
      * @brief Delete a patient by patient ID
@@ -213,9 +213,9 @@ public:
     /**
      * @brief Get total patient count
      *
-     * @return Number of patients in the database
+     * @return Result containing number of patients in the database or error
      */
-    [[nodiscard]] auto patient_count() const -> size_t;
+    [[nodiscard]] auto patient_count() const -> Result<size_t>;
 
     // ========================================================================
     // Study Operations
@@ -278,10 +278,10 @@ public:
      * @brief List all studies for a patient
      *
      * @param patient_id The patient ID to list studies for
-     * @return Vector of study records for the patient
+     * @return Result containing vector of study records for the patient or error
      */
     [[nodiscard]] auto list_studies(std::string_view patient_id) const
-        -> std::vector<study_record>;
+        -> Result<std::vector<study_record>>;
 
     /**
      * @brief Search studies with query criteria
@@ -290,10 +290,10 @@ public:
      * Can filter by patient attributes, study attributes, and date ranges.
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching study records
+     * @return Result containing vector of matching study records or error
      */
     [[nodiscard]] auto search_studies(const study_query& query) const
-        -> std::vector<study_record>;
+        -> Result<std::vector<study_record>>;
 
     /**
      * @brief Delete a study by Study Instance UID
@@ -308,17 +308,17 @@ public:
     /**
      * @brief Get total study count
      *
-     * @return Number of studies in the database
+     * @return Result containing number of studies in the database or error
      */
-    [[nodiscard]] auto study_count() const -> size_t;
+    [[nodiscard]] auto study_count() const -> Result<size_t>;
 
     /**
      * @brief Get study count for a specific patient
      *
      * @param patient_id The patient ID
-     * @return Number of studies for the patient
+     * @return Result containing number of studies for the patient or error
      */
-    [[nodiscard]] auto study_count(std::string_view patient_id) const -> size_t;
+    [[nodiscard]] auto study_count(std::string_view patient_id) const -> Result<size_t>;
 
     /**
      * @brief Update modalities in study (denormalized field)
@@ -390,10 +390,10 @@ public:
      * @brief List all series for a study
      *
      * @param study_uid The Study Instance UID to list series for
-     * @return Vector of series records for the study, ordered by series number
+     * @return Result containing vector of series records for the study or error
      */
     [[nodiscard]] auto list_series(std::string_view study_uid) const
-        -> std::vector<series_record>;
+        -> Result<std::vector<series_record>>;
 
     /**
      * @brief Search series with query criteria
@@ -402,10 +402,10 @@ public:
      * Can filter by study UID, modality, and other attributes.
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching series records
+     * @return Result containing vector of matching series records or error
      */
     [[nodiscard]] auto search_series(const series_query& query) const
-        -> std::vector<series_record>;
+        -> Result<std::vector<series_record>>;
 
     /**
      * @brief Delete a series by Series Instance UID
@@ -420,17 +420,17 @@ public:
     /**
      * @brief Get total series count
      *
-     * @return Number of series in the database
+     * @return Result containing number of series in the database or error
      */
-    [[nodiscard]] auto series_count() const -> size_t;
+    [[nodiscard]] auto series_count() const -> Result<size_t>;
 
     /**
      * @brief Get series count for a specific study
      *
      * @param study_uid The Study Instance UID
-     * @return Number of series for the study
+     * @return Result containing number of series for the study or error
      */
-    [[nodiscard]] auto series_count(std::string_view study_uid) const -> size_t;
+    [[nodiscard]] auto series_count(std::string_view study_uid) const -> Result<size_t>;
 
     // ========================================================================
     // Instance Operations
@@ -491,10 +491,10 @@ public:
      * @brief List all instances for a series
      *
      * @param series_uid The Series Instance UID to list instances for
-     * @return Vector of instance records for the series, ordered by instance number
+     * @return Result containing vector of instance records for the series or error
      */
     [[nodiscard]] auto list_instances(std::string_view series_uid) const
-        -> std::vector<instance_record>;
+        -> Result<std::vector<instance_record>>;
 
     /**
      * @brief Search instances with query criteria
@@ -502,10 +502,10 @@ public:
      * Can filter by series UID, SOP class, and other attributes.
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching instance records
+     * @return Result containing vector of matching instance records or error
      */
     [[nodiscard]] auto search_instances(const instance_query& query) const
-        -> std::vector<instance_record>;
+        -> Result<std::vector<instance_record>>;
 
     /**
      * @brief Delete an instance by SOP Instance UID
@@ -518,17 +518,17 @@ public:
     /**
      * @brief Get total instance count
      *
-     * @return Number of instances in the database
+     * @return Result containing number of instances in the database or error
      */
-    [[nodiscard]] auto instance_count() const -> size_t;
+    [[nodiscard]] auto instance_count() const -> Result<size_t>;
 
     /**
      * @brief Get instance count for a specific series
      *
      * @param series_uid The Series Instance UID
-     * @return Number of instances for the series
+     * @return Result containing number of instances for the series or error
      */
-    [[nodiscard]] auto instance_count(std::string_view series_uid) const -> size_t;
+    [[nodiscard]] auto instance_count(std::string_view series_uid) const -> Result<size_t>;
 
     // ========================================================================
     // MPPS Operations
@@ -616,28 +616,28 @@ public:
      * @brief List active (IN PROGRESS) MPPS records for a station
      *
      * @param station_ae The station AE Title to filter by
-     * @return Vector of active MPPS records
+     * @return Result containing vector of active MPPS records or error
      */
     [[nodiscard]] auto list_active_mpps(std::string_view station_ae) const
-        -> std::vector<mpps_record>;
+        -> Result<std::vector<mpps_record>>;
 
     /**
      * @brief Find MPPS records by Study Instance UID
      *
      * @param study_uid The Study Instance UID to search for
-     * @return Vector of MPPS records associated with the study
+     * @return Result containing vector of MPPS records associated with the study or error
      */
     [[nodiscard]] auto find_mpps_by_study(std::string_view study_uid) const
-        -> std::vector<mpps_record>;
+        -> Result<std::vector<mpps_record>>;
 
     /**
      * @brief Search MPPS records with query criteria
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching MPPS records
+     * @return Result containing vector of matching MPPS records or error
      */
     [[nodiscard]] auto search_mpps(const mpps_query& query) const
-        -> std::vector<mpps_record>;
+        -> Result<std::vector<mpps_record>>;
 
     /**
      * @brief Delete an MPPS record
@@ -650,17 +650,17 @@ public:
     /**
      * @brief Get total MPPS count
      *
-     * @return Number of MPPS records in the database
+     * @return Result containing number of MPPS records in the database or error
      */
-    [[nodiscard]] auto mpps_count() const -> size_t;
+    [[nodiscard]] auto mpps_count() const -> Result<size_t>;
 
     /**
      * @brief Get MPPS count by status
      *
      * @param status The status to count (IN PROGRESS, COMPLETED, DISCONTINUED)
-     * @return Number of MPPS records with the given status
+     * @return Result containing number of MPPS records with the given status or error
      */
-    [[nodiscard]] auto mpps_count(std::string_view status) const -> size_t;
+    [[nodiscard]] auto mpps_count(std::string_view status) const -> Result<size_t>;
 
     // ========================================================================
     // Worklist Operations
@@ -702,10 +702,10 @@ public:
      * Used for MWL C-FIND operations.
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching worklist items
+     * @return Result containing vector of matching worklist items or error
      */
     [[nodiscard]] auto query_worklist(const worklist_query& query) const
-        -> std::vector<worklist_item>;
+        -> Result<std::vector<worklist_item>>;
 
     /**
      * @brief Find a worklist item by step ID and accession number
@@ -753,17 +753,17 @@ public:
     /**
      * @brief Get total worklist count
      *
-     * @return Number of worklist items in the database
+     * @return Result containing number of worklist items in the database or error
      */
-    [[nodiscard]] auto worklist_count() const -> size_t;
+    [[nodiscard]] auto worklist_count() const -> Result<size_t>;
 
     /**
      * @brief Get worklist count by status
      *
      * @param status The status to count (SCHEDULED, STARTED, COMPLETED)
-     * @return Number of worklist items with the given status
+     * @return Result containing number of worklist items with the given status or error
      */
-    [[nodiscard]] auto worklist_count(std::string_view status) const -> size_t;
+    [[nodiscard]] auto worklist_count(std::string_view status) const -> Result<size_t>;
 
     // ========================================================================
     // Audit Log Operations
@@ -786,10 +786,10 @@ public:
      * Returns audit log entries matching the query criteria.
      *
      * @param query Query parameters with optional filters
-     * @return Vector of matching audit records
+     * @return Result containing vector of matching audit records or error
      */
     [[nodiscard]] auto query_audit_log(const audit_query& query) const
-        -> std::vector<audit_record>;
+        -> Result<std::vector<audit_record>>;
 
     /**
      * @brief Find an audit log entry by primary key
@@ -803,9 +803,9 @@ public:
     /**
      * @brief Get total audit log count
      *
-     * @return Number of audit log entries in the database
+     * @return Result containing number of audit log entries in the database or error
      */
-    [[nodiscard]] auto audit_count() const -> size_t;
+    [[nodiscard]] auto audit_count() const -> Result<size_t>;
 
     /**
      * @brief Cleanup old audit log entries
@@ -854,10 +854,10 @@ public:
      * DICOM instance without loading the full record.
      *
      * @param sop_instance_uid The SOP Instance UID to look up
-     * @return Optional containing the file path if found
+     * @return Result containing optional file path (empty if not found) or error
      */
     [[nodiscard]] auto get_file_path(std::string_view sop_instance_uid) const
-        -> std::optional<std::string>;
+        -> Result<std::optional<std::string>>;
 
     /**
      * @brief Get all file paths for a study
@@ -866,10 +866,10 @@ public:
      * Useful for bulk operations like C-MOVE or study export.
      *
      * @param study_instance_uid The Study Instance UID
-     * @return Vector of file paths for all instances in the study
+     * @return Result containing vector of file paths for all instances in the study or error
      */
     [[nodiscard]] auto get_study_files(std::string_view study_instance_uid) const
-        -> std::vector<std::string>;
+        -> Result<std::vector<std::string>>;
 
     /**
      * @brief Get all file paths for a series
@@ -877,10 +877,10 @@ public:
      * Returns all DICOM file paths associated with a series.
      *
      * @param series_instance_uid The Series Instance UID
-     * @return Vector of file paths for all instances in the series
+     * @return Result containing vector of file paths for all instances in the series or error
      */
     [[nodiscard]] auto get_series_files(std::string_view series_instance_uid) const
-        -> std::vector<std::string>;
+        -> Result<std::vector<std::string>>;
 
     // ========================================================================
     // Database Maintenance Operations
@@ -965,9 +965,9 @@ public:
      *
      * Returns aggregate statistics about the database contents.
      *
-     * @return Storage statistics structure
+     * @return Result containing storage statistics structure or error
      */
-    [[nodiscard]] auto get_storage_stats() const -> storage_stats;
+    [[nodiscard]] auto get_storage_stats() const -> Result<storage_stats>;
 
 private:
     /**

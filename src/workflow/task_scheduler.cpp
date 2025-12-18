@@ -1092,12 +1092,18 @@ auto task_scheduler::create_cleanup_callback(const cleanup_config& config)
             query.study_date_to = cutoff_date;
             query.limit = config.max_deletions_per_cycle;
 
-            auto studies = database_.search_studies(query);
+            auto studies_result = database_.search_studies(query);
+            if (!studies_result.is_ok()) {
+                integration::logger_adapter::error(
+                    "Failed to query studies error={}",
+                    studies_result.error().message);
+                return "Cleanup failed: " + studies_result.error().message;
+            }
 
             std::size_t deleted_count = 0;
             std::size_t skipped_count = 0;
 
-            for (const auto& study : studies) {
+            for (const auto& study : studies_result.value()) {
                 // Check modality-specific retention
                 auto modality_retention = config.retention_for(study.modalities_in_study);
                 auto modality_cutoff = now - modality_retention;
@@ -1136,16 +1142,18 @@ auto task_scheduler::create_cleanup_callback(const cleanup_config& config)
 
                 // Delete files from storage if not database_only
                 if (!config.database_only && file_storage_ != nullptr) {
-                    auto file_paths = database_.get_study_files(study.study_uid);
-                    for (const auto& file_path : file_paths) {
-                        // Extract SOP UID from file path for removal
-                        std::filesystem::path p(file_path);
-                        std::string sop_uid = p.stem().string();
-                        auto remove_result = file_storage_->remove(sop_uid);
-                        if (remove_result.is_err()) {
-                            integration::logger_adapter::warn(
-                                "Failed to remove file file_path={} error={}",
-                                file_path, remove_result.error().message);
+                    auto file_paths_result = database_.get_study_files(study.study_uid);
+                    if (file_paths_result.is_ok()) {
+                        for (const auto& file_path : file_paths_result.value()) {
+                            // Extract SOP UID from file path for removal
+                            std::filesystem::path p(file_path);
+                            std::string sop_uid = p.stem().string();
+                            auto remove_result = file_storage_->remove(sop_uid);
+                            if (remove_result.is_err()) {
+                                integration::logger_adapter::warn(
+                                    "Failed to remove file file_path={} error={}",
+                                    file_path, remove_result.error().message);
+                            }
                         }
                     }
                 }
@@ -1201,7 +1209,13 @@ auto task_scheduler::create_archive_callback(const archive_config& config)
             query.study_date_to = cutoff_date;
             query.limit = config.max_archives_per_cycle;
 
-            auto studies = database_.search_studies(query);
+            auto studies_result = database_.search_studies(query);
+            if (!studies_result.is_ok()) {
+                integration::logger_adapter::error(
+                    "Failed to query studies error={}",
+                    studies_result.error().message);
+                return "Archive failed: " + studies_result.error().message;
+            }
 
             std::size_t archived_count = 0;
             std::size_t failed_count = 0;
@@ -1212,12 +1226,13 @@ auto task_scheduler::create_archive_callback(const archive_config& config)
                 std::filesystem::create_directories(dest_path);
             }
 
-            for (const auto& study : studies) {
+            for (const auto& study : studies_result.value()) {
                 // Get all files for this study
-                auto file_paths = database_.get_study_files(study.study_uid);
-                if (file_paths.empty()) {
+                auto file_paths_result = database_.get_study_files(study.study_uid);
+                if (!file_paths_result.is_ok() || file_paths_result.value().empty()) {
                     continue;
                 }
+                const auto& file_paths = file_paths_result.value();
 
                 // Create study archive directory
                 std::filesystem::path study_dest = dest_path / study.study_uid;
@@ -1330,13 +1345,26 @@ auto task_scheduler::create_verification_callback(const verification_config& con
             // Get studies for verification
             storage::study_query query;
             query.limit = config.max_verifications_per_cycle;
-            auto studies = database_.search_studies(query);
+            auto studies_result = database_.search_studies(query);
+            if (!studies_result.is_ok()) {
+                integration::logger_adapter::error(
+                    "Failed to query studies error={}",
+                    studies_result.error().message);
+                return "Verification failed: " + studies_result.error().message;
+            }
 
-            for (const auto& study : studies) {
+            for (const auto& study : studies_result.value()) {
                 // Get all files for this study
-                auto file_paths = database_.get_study_files(study.study_uid);
+                auto file_paths_result = database_.get_study_files(study.study_uid);
+                if (!file_paths_result.is_ok()) {
+                    integration::logger_adapter::error(
+                        "Failed to get study files study_uid={} error={}",
+                        study.study_uid, file_paths_result.error().message);
+                    ++errors;
+                    continue;
+                }
 
-                for (const auto& file_path : file_paths) {
+                for (const auto& file_path : file_paths_result.value()) {
                     std::filesystem::path path(file_path);
 
                     // Check file existence

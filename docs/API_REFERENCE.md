@@ -2470,6 +2470,105 @@ public:
 
 ---
 
+### `pacs::storage::index_database`
+
+SQLite-based index database for PACS metadata.
+
+All query methods return `Result<T>` for proper error handling.
+
+```cpp
+#include <pacs/storage/index_database.hpp>
+
+namespace pacs::storage {
+
+class index_database {
+public:
+    // Factory method
+    static Result<std::unique_ptr<index_database>> open(const std::string& path);
+
+    // Patient operations
+    Result<int64_t> upsert_patient(const std::string& patient_id,
+                                    const std::string& patient_name,
+                                    const std::string& birth_date,
+                                    const std::string& sex);
+    std::optional<patient_record> find_patient(const std::string& patient_id);
+    Result<std::vector<patient_record>> search_patients(const patient_query& query);
+
+    // Study operations
+    Result<int64_t> upsert_study(int64_t patient_pk, const std::string& study_uid, ...);
+    std::optional<study_record> find_study(const std::string& study_uid);
+    Result<std::vector<study_record>> search_studies(const study_query& query);
+    Result<std::vector<study_record>> list_studies(const std::string& patient_id);
+    Result<void> delete_study(const std::string& study_uid);
+
+    // Series operations
+    Result<int64_t> upsert_series(int64_t study_pk, const std::string& series_uid, ...);
+    std::optional<series_record> find_series(const std::string& series_uid);
+    Result<std::vector<series_record>> search_series(const series_query& query);
+    Result<std::vector<series_record>> list_series(const std::string& study_uid);
+
+    // Instance operations
+    Result<int64_t> upsert_instance(int64_t series_pk, const std::string& sop_uid, ...);
+    std::optional<instance_record> find_instance(const std::string& sop_uid);
+    Result<std::vector<instance_record>> search_instances(const instance_query& query);
+    Result<std::vector<instance_record>> list_instances(const std::string& series_uid);
+    Result<std::optional<std::string>> get_file_path(const std::string& sop_uid);
+
+    // File path operations
+    Result<std::vector<std::string>> get_study_files(const std::string& study_uid);
+    Result<std::vector<std::string>> get_series_files(const std::string& series_uid);
+
+    // Count operations
+    Result<size_t> patient_count();
+    Result<size_t> study_count();
+    Result<size_t> study_count(const std::string& patient_id);
+    Result<size_t> series_count();
+    Result<size_t> series_count(const std::string& study_uid);
+    Result<size_t> instance_count();
+    Result<size_t> instance_count(const std::string& series_uid);
+
+    // Audit operations
+    Result<int64_t> add_audit_log(const audit_record& record);
+    Result<std::vector<audit_record>> query_audit_log(const audit_query& query);
+    Result<size_t> audit_count();
+
+    // Worklist operations
+    Result<int64_t> add_worklist_item(const worklist_item& item);
+    Result<std::vector<worklist_item>> query_worklist(const worklist_query& query);
+    Result<size_t> worklist_count(const std::string& status = "");
+
+    // Database integrity
+    Result<void> verify_integrity();
+};
+
+} // namespace pacs::storage
+```
+
+**Example - Using Result<T> pattern:**
+```cpp
+auto db_result = pacs::storage::index_database::open("/data/pacs/index.db");
+if (!db_result.is_ok()) {
+    std::cerr << "Failed to open database: " << db_result.error().message << "\n";
+    return;
+}
+auto& db = db_result.value();
+
+// Query studies with error handling
+pacs::storage::study_query query;
+query.patient_id = "P001";
+auto studies_result = db->search_studies(query);
+if (!studies_result.is_ok()) {
+    std::cerr << "Query failed: " << studies_result.error().message << "\n";
+    return;
+}
+
+for (const auto& study : studies_result.value()) {
+    std::cout << "Study: " << study.study_uid << "\n";
+}
+```
+
+---
+
 ## DX Modality Module
 
 ### `pacs::services::sop_classes::dx_storage`
