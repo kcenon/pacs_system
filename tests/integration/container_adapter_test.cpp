@@ -69,7 +69,9 @@ TEST_CASE("container_adapter roundtrip for string VR",
         auto restored = container_adapter::from_container_value(
             tags::patient_name, vr_type::PN, value);
 
-        REQUIRE(restored.as_string() == "Doe^John^Middle");
+        auto result = restored.as_string();
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value() == "Doe^John^Middle");
     }
 }
 
@@ -137,7 +139,9 @@ TEST_CASE("container_adapter roundtrip for numeric VR",
         auto restored = container_adapter::from_container_value(
             tags::rows, vr_type::US, value);
 
-        REQUIRE(restored.as_numeric<uint16_t>() == 512);
+        auto result = restored.as_numeric<uint16_t>();
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value() == 512);
     }
 
     SECTION("Float roundtrip") {
@@ -147,7 +151,9 @@ TEST_CASE("container_adapter roundtrip for numeric VR",
         auto restored = container_adapter::from_container_value(
             dicom_tag{0x0018, 0x0088}, vr_type::FL, value);
 
-        REQUIRE_THAT(restored.as_numeric<float>(),
+        auto result = restored.as_numeric<float>();
+        REQUIRE(result.is_ok());
+        REQUIRE_THAT(result.value(),
                      Catch::Matchers::WithinRel(3.14159f, 0.00001f));
     }
 }

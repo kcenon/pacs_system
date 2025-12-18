@@ -132,7 +132,13 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
             "Transfer Syntax UID not found in meta information");
     }
 
-    const auto ts_uid = ts_elem->as_string();
+    auto ts_uid_result = ts_elem->as_string();
+    if (ts_uid_result.is_err()) {
+        return pacs::pacs_error<dicom_file>(
+            pacs::error_codes::value_conversion_error,
+            "Failed to read Transfer Syntax UID");
+    }
+    const auto ts_uid = ts_uid_result.value();
     encoding::transfer_syntax ts{ts_uid};
 
     if (!ts.is_valid()) {

@@ -728,7 +728,7 @@ auto azure_blob_storage::matches_query(const core::dicom_dataset &dataset,
 
   // Check each query element
   for (const auto &[tag, element] : query) {
-    auto query_value = element.as_string();
+    auto query_value = element.as_string().unwrap_or("");
     if (query_value.empty()) {
       continue; // Empty value acts as wildcard
     }

@@ -10,6 +10,7 @@
 
 #include <pacs/core/dicom_element.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
+#include <pacs/core/result.hpp>
 
 using namespace pacs::core;
 using namespace pacs::encoding;
@@ -48,7 +49,9 @@ TEST_CASE("dicom_element string handling", "[core][dicom_element]") {
         auto elem = dicom_element::from_string(
             tags::patient_name, vr_type::PN, "DOE^JOHN");
 
-        CHECK(elem.as_string() == "DOE^JOHN");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "DOE^JOHN");
     }
 
     SECTION("string with odd length gets padded") {
@@ -57,20 +60,26 @@ TEST_CASE("dicom_element string handling", "[core][dicom_element]") {
 
         // LO VR should pad to even length with space
         CHECK(elem.length() == 4);  // "TEST" is already even
-        CHECK(elem.as_string() == "TEST");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "TEST");
 
         auto elem_odd = dicom_element::from_string(
             tags::patient_id, vr_type::LO, "ABC");
 
         CHECK(elem_odd.length() == 4);  // "ABC" + space padding
-        CHECK(elem_odd.as_string() == "ABC");  // Padding removed on read
+        auto result_odd = elem_odd.as_string();
+        REQUIRE(result_odd.is_ok());
+        CHECK(result_odd.value() == "ABC");  // Padding removed on read
     }
 
     SECTION("string with existing padding is trimmed") {
         std::vector<uint8_t> data = {'T', 'E', 'S', 'T', ' ', ' '};
         dicom_element elem{tags::patient_id, vr_type::LO, data};
 
-        CHECK(elem.as_string() == "TEST");  // Trailing spaces trimmed
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "TEST");  // Trailing spaces trimmed
     }
 
     SECTION("UI VR uses null padding") {
@@ -78,14 +87,18 @@ TEST_CASE("dicom_element string handling", "[core][dicom_element]") {
             tags::study_instance_uid, vr_type::UI, "1.2.3");
 
         CHECK(elem.length() == 6);  // "1.2.3" + null padding
-        CHECK(elem.as_string() == "1.2.3");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "1.2.3");
     }
 
     SECTION("value multiplicity with backslash") {
         auto elem = dicom_element::from_string(
             tags::image_type, vr_type::CS, "ORIGINAL\\PRIMARY\\AXIAL");
 
-        auto values = elem.as_string_list();
+        auto result = elem.as_string_list();
+        REQUIRE(result.is_ok());
+        auto values = result.value();
         REQUIRE(values.size() == 3);
         CHECK(values[0] == "ORIGINAL");
         CHECK(values[1] == "PRIMARY");
@@ -96,7 +109,9 @@ TEST_CASE("dicom_element string handling", "[core][dicom_element]") {
         auto elem = dicom_element::from_string(
             tags::modality, vr_type::CS, "CT");
 
-        auto values = elem.as_string_list();
+        auto result = elem.as_string_list();
+        REQUIRE(result.is_ok());
+        auto values = result.value();
         REQUIRE(values.size() == 1);
         CHECK(values[0] == "CT");
     }
@@ -104,8 +119,9 @@ TEST_CASE("dicom_element string handling", "[core][dicom_element]") {
     SECTION("empty string returns empty list") {
         dicom_element elem{tags::patient_name, vr_type::PN};
 
-        auto values = elem.as_string_list();
-        CHECK(values.empty());
+        auto result = elem.as_string_list();
+        REQUIRE(result.is_ok());
+        CHECK(result.value().empty());
     }
 }
 
@@ -118,7 +134,9 @@ TEST_CASE("dicom_element numeric handling", "[core][dicom_element]") {
         auto elem = dicom_element::from_numeric<uint16_t>(
             tags::rows, vr_type::US, 512);
 
-        CHECK(elem.as_numeric<uint16_t>() == 512);
+        auto result = elem.as_numeric<uint16_t>();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == 512);
         CHECK(elem.length() == 2);
     }
 
@@ -126,14 +144,18 @@ TEST_CASE("dicom_element numeric handling", "[core][dicom_element]") {
         auto elem = dicom_element::from_numeric<int16_t>(
             tags::smallest_image_pixel_value, vr_type::SS, -100);
 
-        CHECK(elem.as_numeric<int16_t>() == -100);
+        auto result = elem.as_numeric<int16_t>();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == -100);
     }
 
     SECTION("unsigned long (UL)") {
         auto elem = dicom_element::from_numeric<uint32_t>(
             dicom_tag{0x0028, 0x0008}, vr_type::UL, 1000000);
 
-        CHECK(elem.as_numeric<uint32_t>() == 1000000);
+        auto result = elem.as_numeric<uint32_t>();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == 1000000);
         CHECK(elem.length() == 4);
     }
 
@@ -141,7 +163,9 @@ TEST_CASE("dicom_element numeric handling", "[core][dicom_element]") {
         auto elem = dicom_element::from_numeric<float>(
             dicom_tag{0x0018, 0x0050}, vr_type::FL, 1.5f);
 
-        CHECK(elem.as_numeric<float>() == Catch::Approx(1.5f));
+        auto result = elem.as_numeric<float>();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == Catch::Approx(1.5f));
         CHECK(elem.length() == 4);
     }
 
@@ -149,7 +173,9 @@ TEST_CASE("dicom_element numeric handling", "[core][dicom_element]") {
         auto elem = dicom_element::from_numeric<double>(
             dicom_tag{0x0018, 0x0088}, vr_type::FD, 3.14159265359);
 
-        CHECK(elem.as_numeric<double>() == Catch::Approx(3.14159265359));
+        auto result = elem.as_numeric<double>();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == Catch::Approx(3.14159265359));
         CHECK(elem.length() == 8);
     }
 
@@ -160,17 +186,21 @@ TEST_CASE("dicom_element numeric handling", "[core][dicom_element]") {
             std::span<const uint16_t>{values});
 
         auto result = elem.as_numeric_list<uint16_t>();
-        REQUIRE(result.size() == 3);
-        CHECK(result[0] == 100);
-        CHECK(result[1] == 200);
-        CHECK(result[2] == 300);
+        REQUIRE(result.is_ok());
+        auto list = result.value();
+        REQUIRE(list.size() == 3);
+        CHECK(list[0] == 100);
+        CHECK(list[1] == 200);
+        CHECK(list[2] == 300);
     }
 
     SECTION("numeric as_string conversion") {
         auto elem = dicom_element::from_numeric<uint16_t>(
             tags::rows, vr_type::US, 512);
 
-        CHECK(elem.as_string() == "512");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "512");
     }
 }
 
@@ -179,18 +209,22 @@ TEST_CASE("dicom_element numeric handling", "[core][dicom_element]") {
 // ============================================================================
 
 TEST_CASE("dicom_element error handling", "[core][dicom_element]") {
-    SECTION("numeric conversion with insufficient data throws") {
+    SECTION("numeric conversion with insufficient data returns error") {
         std::vector<uint8_t> data = {0x01};  // Only 1 byte
         dicom_element elem{tags::rows, vr_type::US, data};
 
-        CHECK_THROWS_AS(elem.as_numeric<uint16_t>(), value_conversion_error);
+        auto result = elem.as_numeric<uint16_t>();
+        CHECK(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::data_size_mismatch);
     }
 
-    SECTION("numeric list with unaligned data throws") {
+    SECTION("numeric list with unaligned data returns error") {
         std::vector<uint8_t> data = {0x01, 0x02, 0x03};  // 3 bytes, not divisible by 2
         dicom_element elem{tags::rows, vr_type::US, data};
 
-        CHECK_THROWS_AS(elem.as_numeric_list<uint16_t>(), value_conversion_error);
+        auto result = elem.as_numeric_list<uint16_t>();
+        CHECK(result.is_err());
+        CHECK(result.error().code == pacs::error_codes::data_size_mismatch);
     }
 }
 
@@ -226,7 +260,9 @@ TEST_CASE("dicom_element modification", "[core][dicom_element]") {
         elem.set_value(data);
 
         CHECK(elem.length() == 4);
-        CHECK(elem.as_string() == "NEW");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "NEW");
     }
 
     SECTION("set_string replaces string value") {
@@ -235,7 +271,9 @@ TEST_CASE("dicom_element modification", "[core][dicom_element]") {
 
         elem.set_string("NEW^NAME");
 
-        CHECK(elem.as_string() == "NEW^NAME");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "NEW^NAME");
     }
 
     SECTION("set_numeric replaces numeric value") {
@@ -244,7 +282,9 @@ TEST_CASE("dicom_element modification", "[core][dicom_element]") {
 
         elem.set_numeric<uint16_t>(512);
 
-        CHECK(elem.as_numeric<uint16_t>() == 512);
+        auto result = elem.as_numeric<uint16_t>();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == 512);
     }
 }
 
@@ -261,7 +301,11 @@ TEST_CASE("dicom_element copy and move", "[core][dicom_element]") {
 
         CHECK(copy.tag() == original.tag());
         CHECK(copy.vr() == original.vr());
-        CHECK(copy.as_string() == original.as_string());
+        auto copy_result = copy.as_string();
+        auto orig_result = original.as_string();
+        REQUIRE(copy_result.is_ok());
+        REQUIRE(orig_result.is_ok());
+        CHECK(copy_result.value() == orig_result.value());
     }
 
     SECTION("move construction") {
@@ -271,7 +315,9 @@ TEST_CASE("dicom_element copy and move", "[core][dicom_element]") {
         dicom_element moved{std::move(original)};
 
         CHECK(moved.tag() == tags::patient_name);
-        CHECK(moved.as_string() == "DOE^JOHN");
+        auto result = moved.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "DOE^JOHN");
     }
 
     SECTION("copy assignment") {
@@ -281,7 +327,9 @@ TEST_CASE("dicom_element copy and move", "[core][dicom_element]") {
 
         copy = original;
 
-        CHECK(copy.as_string() == "DOE^JOHN");
+        auto result = copy.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "DOE^JOHN");
     }
 
     SECTION("move assignment") {
@@ -291,7 +339,9 @@ TEST_CASE("dicom_element copy and move", "[core][dicom_element]") {
 
         moved = std::move(original);
 
-        CHECK(moved.as_string() == "DOE^JOHN");
+        auto result = moved.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "DOE^JOHN");
     }
 }
 
@@ -305,7 +355,9 @@ TEST_CASE("dicom_element edge cases", "[core][dicom_element]") {
             tags::patient_name, vr_type::PN, "");
 
         CHECK(elem.is_empty());
-        CHECK(elem.as_string().empty());
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value().empty());
     }
 
     SECTION("raw_data returns correct span") {
@@ -325,6 +377,8 @@ TEST_CASE("dicom_element edge cases", "[core][dicom_element]") {
             tags::patient_name, vr_type::PN,
             "DOE^JOHN^MIDDLE^PREFIX^SUFFIX");
 
-        CHECK(elem.as_string() == "DOE^JOHN^MIDDLE^PREFIX^SUFFIX");
+        auto result = elem.as_string();
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == "DOE^JOHN^MIDDLE^PREFIX^SUFFIX");
     }
 }

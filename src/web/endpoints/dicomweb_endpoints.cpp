@@ -546,28 +546,28 @@ auto validate_instance(
 
     // Check required DICOM tags
     auto sop_class = dataset.get(core::tags::sop_class_uid);
-    if (!sop_class || sop_class->as_string().empty()) {
+    if (!sop_class || sop_class->as_string().unwrap_or("").empty()) {
         return validation_result::error(
             "MISSING_SOP_CLASS",
             "SOP Class UID (0008,0016) is required");
     }
 
     auto sop_instance = dataset.get(core::tags::sop_instance_uid);
-    if (!sop_instance || sop_instance->as_string().empty()) {
+    if (!sop_instance || sop_instance->as_string().unwrap_or("").empty()) {
         return validation_result::error(
             "MISSING_SOP_INSTANCE",
             "SOP Instance UID (0008,0018) is required");
     }
 
     auto study_uid = dataset.get(core::tags::study_instance_uid);
-    if (!study_uid || study_uid->as_string().empty()) {
+    if (!study_uid || study_uid->as_string().unwrap_or("").empty()) {
         return validation_result::error(
             "MISSING_STUDY_UID",
             "Study Instance UID (0020,000D) is required");
     }
 
     auto series_uid = dataset.get(core::tags::series_instance_uid);
-    if (!series_uid || series_uid->as_string().empty()) {
+    if (!series_uid || series_uid->as_string().unwrap_or("").empty()) {
         return validation_result::error(
             "MISSING_SERIES_UID",
             "Series Instance UID (0020,000E) is required");
@@ -575,7 +575,7 @@ auto validate_instance(
 
     // Validate study UID matches target if specified
     if (target_study_uid.has_value()) {
-        auto instance_study_uid = study_uid->as_string();
+        auto instance_study_uid = study_uid->as_string().unwrap_or("");
         if (instance_study_uid != *target_study_uid) {
             return validation_result::error(
                 "STUDY_UID_MISMATCH",
@@ -693,7 +693,7 @@ auto dataset_to_dicom_json(
             }
         } else {
             // Add Value based on VR type
-            auto value_str = elem.as_string();
+            auto value_str = elem.as_string().unwrap_or("");
             if (!value_str.empty()) {
                 oss << ",\"Value\":[";
 
@@ -1356,16 +1356,16 @@ auto render_dicom_image(
         return rendered_result::error("Missing required image attributes");
     }
 
-    uint16_t rows = rows_elem->as_numeric<uint16_t>();
-    uint16_t cols = cols_elem->as_numeric<uint16_t>();
+    uint16_t rows = rows_elem->as_numeric<uint16_t>().unwrap_or(0);
+    uint16_t cols = cols_elem->as_numeric<uint16_t>().unwrap_or(0);
     uint16_t bits_stored = bits_stored_elem ?
-        bits_stored_elem->as_numeric<uint16_t>() : 8;
+        bits_stored_elem->as_numeric<uint16_t>().unwrap_or(8) : 8;
     uint16_t bits_allocated = bits_allocated_elem ?
-        bits_allocated_elem->as_numeric<uint16_t>() : 8;
+        bits_allocated_elem->as_numeric<uint16_t>().unwrap_or(8) : 8;
     uint16_t pixel_rep = pixel_rep_elem ?
-        pixel_rep_elem->as_numeric<uint16_t>() : 0;
+        pixel_rep_elem->as_numeric<uint16_t>().unwrap_or(0) : 0;
     uint16_t samples_per_pixel = samples_elem ?
-        samples_elem->as_numeric<uint16_t>() : 1;
+        samples_elem->as_numeric<uint16_t>().unwrap_or(1) : 1;
 
     bool is_signed = (pixel_rep == 1);
 
@@ -1377,9 +1377,9 @@ auto render_dicom_image(
         window_center = *params.window_center;
     } else if (auto wc = dataset.get(core::tags::window_center)) {
         try {
-            auto values = wc->as_string_list();
-            if (!values.empty()) {
-                window_center = std::stod(values[0]);
+            auto values_result = wc->as_string_list();
+            if (values_result.is_ok() && !values_result.value().empty()) {
+                window_center = std::stod(values_result.value()[0]);
             }
         } catch (...) {}
     }
@@ -1388,9 +1388,9 @@ auto render_dicom_image(
         window_width = *params.window_width;
     } else if (auto ww = dataset.get(core::tags::window_width)) {
         try {
-            auto values = ww->as_string_list();
-            if (!values.empty()) {
-                window_width = std::stod(values[0]);
+            auto values_result = ww->as_string_list();
+            if (values_result.is_ok() && !values_result.value().empty()) {
+                window_width = std::stod(values_result.value()[0]);
             }
         } catch (...) {}
     }
@@ -1401,12 +1401,12 @@ auto render_dicom_image(
 
     if (auto rs = dataset.get(core::tags::rescale_slope)) {
         try {
-            rescale_slope = std::stod(rs->as_string());
+            rescale_slope = std::stod(rs->as_string().unwrap_or("1.0"));
         } catch (...) {}
     }
     if (auto ri = dataset.get(core::tags::rescale_intercept)) {
         try {
-            rescale_intercept = std::stod(ri->as_string());
+            rescale_intercept = std::stod(ri->as_string().unwrap_or("0.0"));
         } catch (...) {}
     }
 
@@ -2009,16 +2009,16 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                uint16_t rows = rows_elem->as_numeric<uint16_t>();
-                uint16_t cols = cols_elem->as_numeric<uint16_t>();
+                uint16_t rows = rows_elem->as_numeric<uint16_t>().unwrap_or(0);
+                uint16_t cols = cols_elem->as_numeric<uint16_t>().unwrap_or(0);
                 uint16_t bits_allocated = bits_alloc_elem ?
-                    bits_alloc_elem->as_numeric<uint16_t>() : 16;
+                    bits_alloc_elem->as_numeric<uint16_t>().unwrap_or(16) : 16;
                 uint16_t samples_per_pixel = samples_elem ?
-                    samples_elem->as_numeric<uint16_t>() : 1;
+                    samples_elem->as_numeric<uint16_t>().unwrap_or(1) : 1;
                 uint32_t num_frames = 1;
                 if (num_frames_elem) {
                     try {
-                        num_frames = std::stoul(num_frames_elem->as_string());
+                        num_frames = std::stoul(num_frames_elem->as_string().unwrap_or("1"));
                     } catch (...) {}
                 }
 
@@ -2306,10 +2306,10 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
 
                         // Try to extract UIDs for error reporting
                         if (auto elem = dataset.get(core::tags::sop_class_uid)) {
-                            result.sop_class_uid = elem->as_string();
+                            result.sop_class_uid = elem->as_string().unwrap_or("");
                         }
                         if (auto elem = dataset.get(core::tags::sop_instance_uid)) {
-                            result.sop_instance_uid = elem->as_string();
+                            result.sop_instance_uid = elem->as_string().unwrap_or("");
                         }
 
                         store_response.failed_instances.push_back(
@@ -2323,11 +2323,11 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     auto study_uid_elem = dataset.get(core::tags::study_instance_uid);
                     auto series_uid_elem = dataset.get(core::tags::series_instance_uid);
 
-                    result.sop_class_uid = sop_class_elem->as_string();
-                    result.sop_instance_uid = sop_instance_elem->as_string();
+                    result.sop_class_uid = sop_class_elem->as_string().unwrap_or("");
+                    result.sop_instance_uid = sop_instance_elem->as_string().unwrap_or("");
 
-                    std::string study_uid = study_uid_elem->as_string();
-                    std::string series_uid = series_uid_elem->as_string();
+                    std::string study_uid = study_uid_elem->as_string().unwrap_or("");
+                    std::string series_uid = series_uid_elem->as_string().unwrap_or("");
 
                     // Check for duplicate
                     auto existing_result = ctx->database->get_file_path(
@@ -2461,10 +2461,10 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                         result.error_message = validation.error_message;
 
                         if (auto elem = dataset.get(core::tags::sop_class_uid)) {
-                            result.sop_class_uid = elem->as_string();
+                            result.sop_class_uid = elem->as_string().unwrap_or("");
                         }
                         if (auto elem = dataset.get(core::tags::sop_instance_uid)) {
-                            result.sop_instance_uid = elem->as_string();
+                            result.sop_instance_uid = elem->as_string().unwrap_or("");
                         }
 
                         store_response.failed_instances.push_back(
@@ -2477,9 +2477,9 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                     auto sop_instance_elem = dataset.get(core::tags::sop_instance_uid);
                     auto series_uid_elem = dataset.get(core::tags::series_instance_uid);
 
-                    result.sop_class_uid = sop_class_elem->as_string();
-                    result.sop_instance_uid = sop_instance_elem->as_string();
-                    std::string series_uid = series_uid_elem->as_string();
+                    result.sop_class_uid = sop_class_elem->as_string().unwrap_or("");
+                    result.sop_instance_uid = sop_instance_elem->as_string().unwrap_or("");
+                    std::string series_uid = series_uid_elem->as_string().unwrap_or("");
 
                     // Check for duplicate
                     auto existing_result = ctx->database->get_file_path(

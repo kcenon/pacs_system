@@ -89,7 +89,7 @@ TEST_CASE("dicom_dataset element access", "[core][dicom_dataset]") {
         auto* elem = ds.get(tags::patient_name);
 
         REQUIRE(elem != nullptr);
-        CHECK(elem->as_string() == "DOE^JOHN");
+        CHECK(elem->as_string().unwrap_or("") == "DOE^JOHN");
     }
 
     SECTION("get returns nullptr for non-existing element") {
@@ -103,7 +103,7 @@ TEST_CASE("dicom_dataset element access", "[core][dicom_dataset]") {
         const auto* elem = const_ds.get(tags::patient_name);
 
         REQUIRE(elem != nullptr);
-        CHECK(elem->as_string() == "DOE^JOHN");
+        CHECK(elem->as_string().unwrap_or("") == "DOE^JOHN");
     }
 }
 
