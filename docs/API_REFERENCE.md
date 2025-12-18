@@ -2518,6 +2518,15 @@ public:
     Result<std::vector<std::string>> get_study_files(const std::string& study_uid);
     Result<std::vector<std::string>> get_series_files(const std::string& series_uid);
 
+    // Count operations
+    Result<size_t> patient_count();
+    Result<size_t> study_count();
+    Result<size_t> study_count(const std::string& patient_id);
+    Result<size_t> series_count();
+    Result<size_t> series_count(const std::string& study_uid);
+    Result<size_t> instance_count();
+    Result<size_t> instance_count(const std::string& series_uid);
+
     // Audit operations
     Result<int64_t> add_audit_log(const audit_record& record);
     Result<std::vector<audit_record>> query_audit_log(const audit_query& query);
