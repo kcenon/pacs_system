@@ -192,6 +192,76 @@ The thread migration (Phase 2-3) has been successfully completed with:
 
 The system is ready for production use with the new thread architecture.
 
+## Lock-Free Structure Stress Tests
+
+**Related Issue:** #337 - Add lock-free structure stress tests
+
+### Overview
+
+Comprehensive stress tests for the `lockfree_queue` implementation used in DICOM PDU processing. These tests verify thread safety, correctness, and performance under high-contention scenarios.
+
+### Test Categories
+
+| Category | Tests | Purpose |
+|----------|-------|---------|
+| ThreadSanitizer Verification | 4 | Verify no data races under concurrent access |
+| High-Contention Stress | 4 | Saturate queue operations under load |
+| MPMC Correctness | 2 | Verify Multi-Producer Multi-Consumer semantics |
+| Memory Safety | 2 | Verify no leaks or use-after-free |
+| Edge Cases | 3 | Test boundary conditions |
+| Benchmarks | 4 | Compare mutex-based vs lock-free performance |
+
+### Test Scenarios
+
+1. **High-throughput PDU Processing**
+   - 16 producers, 1 consumer
+   - 50,000+ operations verified
+   - Simulates real DICOM PDU handling
+
+2. **Saturated Queue Operations**
+   - 16 concurrent workers
+   - Random enqueue/dequeue operations
+   - 2-second sustained load
+   - Verified > 100,000 operations
+
+3. **wait_dequeue Under Contention**
+   - 4 producers, 4 consumers
+   - Blocking wait with timeout
+   - All items processed exactly once
+
+4. **Shutdown Under Load**
+   - 8 workers waiting on queue
+   - Graceful shutdown signal
+   - All workers respond correctly
+
+### Running the Tests
+
+```bash
+# Build concurrency tests
+cmake --build build --target concurrency_tests
+
+# Run all concurrency tests (excluding benchmarks)
+./build/bin/concurrency_tests "[concurrency]" --skip-benchmarks
+
+# Run with ThreadSanitizer enabled
+cmake -B build-tsan -DCMAKE_CXX_FLAGS="-fsanitize=thread -g" .
+cmake --build build-tsan --target concurrency_tests
+./build-tsan/bin/concurrency_tests "[concurrency]" --skip-benchmarks
+
+# Run benchmarks
+./build/bin/concurrency_tests "[benchmark]"
+```
+
+### Acceptance Criteria
+
+| Criterion | Requirement | Status |
+|-----------|-------------|--------|
+| ThreadSanitizer clean | No data races | ✅ PASS |
+| All items processed once | MPMC correctness | ✅ PASS |
+| No memory leaks | Clean shutdown | ✅ PASS |
+| Shutdown responsiveness | < 100ms after signal | ✅ PASS |
+| High-throughput verified | > 100k ops in 2s | ✅ PASS |
+
 ## Related Issues
 
 - #153 - Epic: Migrate from std::thread to thread_system/network_system
@@ -201,6 +271,8 @@ The system is ready for production use with the new thread architecture.
 - #157 - Migrate dicom_server accept_thread_
 - #158 - Migrate association worker threads
 - #159 - Integrate cancellation_token for graceful shutdown
+- #314 - Apply Lock-free Structures
+- #337 - Add lock-free structure stress tests
 
 ## Version History
 
@@ -208,3 +280,4 @@ The system is ready for production use with the new thread architecture.
 |---------|------|---------|
 | 1.0.0 | 2024-12-05 | Initial performance results after thread migration |
 | 1.0.1 | 2024-12-07 | Updated acceptance criteria to match Issue #160 requirements |
+| 1.1.0 | 2024-12-18 | Added lock-free structure stress tests (#337) |

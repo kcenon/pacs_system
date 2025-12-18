@@ -1455,6 +1455,32 @@ if(PACS_BUILD_TESTS)
         endif()
     endif()
 
+    # Concurrency tests (Issue #337 - Lock-free structure stress tests)
+    if(TARGET thread_base OR TARGET ThreadSystem)
+        add_executable(concurrency_tests
+            tests/concurrency/lockfree_stress_test.cpp
+        )
+        target_link_libraries(concurrency_tests
+            PRIVATE
+                Catch2::Catch2WithMain
+        )
+        # Link thread_system for lockfree_queue
+        if(TARGET ThreadSystem)
+            target_link_libraries(concurrency_tests PRIVATE ThreadSystem)
+        elseif(TARGET thread_base)
+            target_link_libraries(concurrency_tests PRIVATE thread_base)
+        endif()
+        # Add thread_system include directory explicitly
+        if(PACS_THREAD_SYSTEM_INCLUDE_DIR)
+            target_include_directories(concurrency_tests PRIVATE ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
+        endif()
+        # Suppress deprecated warnings
+        target_compile_options(concurrency_tests PRIVATE
+            $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
+            $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
+        )
+    endif()
+
     include(CTest)
     include(Catch)
 
@@ -1517,6 +1543,16 @@ if(PACS_BUILD_TESTS)
     if(TARGET di_tests)
         catch_discover_tests(di_tests
             PROPERTIES LABELS "unit"
+        )
+    endif()
+
+    # Concurrency stress tests (Issue #337 - Lock-free structure stress tests)
+    # TEST_PREFIX ensures these tests are excluded from unit test runs
+    # Label "stress" allows separate CI runs for long-running tests
+    if(TARGET concurrency_tests)
+        catch_discover_tests(concurrency_tests
+            TEST_PREFIX "stress::"
+            PROPERTIES LABELS "stress"
         )
     endif()
 
