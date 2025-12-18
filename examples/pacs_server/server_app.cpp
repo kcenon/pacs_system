@@ -477,14 +477,16 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_query(
                 query.patient_name = name;
             }
 
-            auto patients = database_->search_patients(query);
-            for (const auto& patient : patients) {
-                core::dicom_dataset ds;
-                ds.set_string(core::tags::patient_id, encoding::vr_type::LO, patient.patient_id);
-                ds.set_string(core::tags::patient_name, encoding::vr_type::PN, patient.patient_name);
-                ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, patient.birth_date);
-                ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, patient.sex);
-                results.push_back(std::move(ds));
+            auto patients_result = database_->search_patients(query);
+            if (patients_result.is_ok()) {
+                for (const auto& patient : patients_result.value()) {
+                    core::dicom_dataset ds;
+                    ds.set_string(core::tags::patient_id, encoding::vr_type::LO, patient.patient_id);
+                    ds.set_string(core::tags::patient_name, encoding::vr_type::PN, patient.patient_name);
+                    ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, patient.birth_date);
+                    ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, patient.sex);
+                    results.push_back(std::move(ds));
+                }
             }
             break;
         }
@@ -504,15 +506,17 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_query(
                 query.study_date = date;
             }
 
-            auto studies = database_->search_studies(query);
-            for (const auto& study : studies) {
-                core::dicom_dataset ds;
-                ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, study.study_uid);
-                ds.set_string(core::tags::study_date, encoding::vr_type::DA, study.study_date);
-                ds.set_string(core::tags::study_time, encoding::vr_type::TM, study.study_time);
-                ds.set_string(core::tags::accession_number, encoding::vr_type::SH, study.accession_number);
-                ds.set_string(core::tags::study_description, encoding::vr_type::LO, study.study_description);
-                results.push_back(std::move(ds));
+            auto studies_result = database_->search_studies(query);
+            if (studies_result.is_ok()) {
+                for (const auto& study : studies_result.value()) {
+                    core::dicom_dataset ds;
+                    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, study.study_uid);
+                    ds.set_string(core::tags::study_date, encoding::vr_type::DA, study.study_date);
+                    ds.set_string(core::tags::study_time, encoding::vr_type::TM, study.study_time);
+                    ds.set_string(core::tags::accession_number, encoding::vr_type::SH, study.accession_number);
+                    ds.set_string(core::tags::study_description, encoding::vr_type::LO, study.study_description);
+                    results.push_back(std::move(ds));
+                }
             }
             break;
         }
@@ -528,17 +532,19 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_query(
                 query.modality = mod;
             }
 
-            auto series_list = database_->search_series(query);
-            for (const auto& series : series_list) {
-                core::dicom_dataset ds;
-                ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI, series.series_uid);
-                ds.set_string(core::tags::modality, encoding::vr_type::CS, series.modality);
-                if (series.series_number.has_value()) {
-                    ds.set_string(core::tags::series_number, encoding::vr_type::IS,
-                                  std::to_string(series.series_number.value()));
+            auto series_result = database_->search_series(query);
+            if (series_result.is_ok()) {
+                for (const auto& series : series_result.value()) {
+                    core::dicom_dataset ds;
+                    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI, series.series_uid);
+                    ds.set_string(core::tags::modality, encoding::vr_type::CS, series.modality);
+                    if (series.series_number.has_value()) {
+                        ds.set_string(core::tags::series_number, encoding::vr_type::IS,
+                                      std::to_string(series.series_number.value()));
+                    }
+                    ds.set_string(core::tags::series_description, encoding::vr_type::LO, series.series_description);
+                    results.push_back(std::move(ds));
                 }
-                ds.set_string(core::tags::series_description, encoding::vr_type::LO, series.series_description);
-                results.push_back(std::move(ds));
             }
             break;
         }
@@ -550,16 +556,18 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_query(
                 query.series_uid = uid;
             }
 
-            auto instances = database_->search_instances(query);
-            for (const auto& instance : instances) {
-                core::dicom_dataset ds;
-                ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI, instance.sop_uid);
-                ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI, instance.sop_class_uid);
-                if (instance.instance_number.has_value()) {
-                    ds.set_string(core::tags::instance_number, encoding::vr_type::IS,
-                                  std::to_string(instance.instance_number.value()));
+            auto instances_result = database_->search_instances(query);
+            if (instances_result.is_ok()) {
+                for (const auto& instance : instances_result.value()) {
+                    core::dicom_dataset ds;
+                    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI, instance.sop_uid);
+                    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI, instance.sop_class_uid);
+                    if (instance.instance_number.has_value()) {
+                        ds.set_string(core::tags::instance_number, encoding::vr_type::IS,
+                                      std::to_string(instance.instance_number.value()));
+                    }
+                    results.push_back(std::move(ds));
                 }
-                results.push_back(std::move(ds));
             }
             break;
         }
@@ -581,19 +589,26 @@ std::vector<core::dicom_file> pacs_server_app::handle_retrieve(
     auto sop_uid = query_keys.get_string(core::tags::sop_instance_uid);
     if (!sop_uid.empty()) {
         // Instance level
-        if (auto path = database_->get_file_path(sop_uid)) {
-            file_paths.push_back(path.value());
+        auto path_result = database_->get_file_path(sop_uid);
+        if (path_result.is_ok() && path_result.value().has_value()) {
+            file_paths.push_back(path_result.value().value());
         }
     } else {
         auto series_uid = query_keys.get_string(core::tags::series_instance_uid);
         if (!series_uid.empty()) {
             // Series level
-            file_paths = database_->get_series_files(series_uid);
+            auto series_files_result = database_->get_series_files(series_uid);
+            if (series_files_result.is_ok()) {
+                file_paths = std::move(series_files_result.value());
+            }
         } else {
             auto study_uid = query_keys.get_string(core::tags::study_instance_uid);
             if (!study_uid.empty()) {
                 // Study level
-                file_paths = database_->get_study_files(study_uid);
+                auto study_files_result = database_->get_study_files(study_uid);
+                if (study_files_result.is_ok()) {
+                    file_paths = std::move(study_files_result.value());
+                }
             }
         }
     }
@@ -624,15 +639,17 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_worklist_query(
         query.patient_id = id;
     }
 
-    auto items = database_->query_worklist(query);
+    auto items_result = database_->query_worklist(query);
 
-    for (const auto& item : items) {
-        core::dicom_dataset ds;
-        ds.set_string(core::tags::patient_id, encoding::vr_type::LO, item.patient_id);
-        ds.set_string(core::tags::patient_name, encoding::vr_type::PN, item.patient_name);
-        ds.set_string(core::tags::accession_number, encoding::vr_type::SH, item.accession_no);
-        ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, item.study_uid);
-        results.push_back(std::move(ds));
+    if (items_result.is_ok()) {
+        for (const auto& item : items_result.value()) {
+            core::dicom_dataset ds;
+            ds.set_string(core::tags::patient_id, encoding::vr_type::LO, item.patient_id);
+            ds.set_string(core::tags::patient_name, encoding::vr_type::PN, item.patient_name);
+            ds.set_string(core::tags::accession_number, encoding::vr_type::SH, item.accession_no);
+            ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, item.study_uid);
+            results.push_back(std::move(ds));
+        }
     }
 
     std::cout << log_prefix() << "  Found " << results.size() << " worklist items\n";
