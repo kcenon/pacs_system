@@ -15,6 +15,7 @@
 #include <pacs/encoding/compression/compression_codec.hpp>
 #include <pacs/integration/network_adapter.hpp>
 #include <pacs/network/dicom_server.hpp>
+#include <pacs/di/ilogger.hpp>
 
 #include <memory>
 #include <string>

@@ -468,7 +468,7 @@ TEST_CASE("dicom_server_v2 C-STORE integration", "[v2][integration][store]") {
         REQUIRE(connect.is_ok());
 
         auto& assoc = connect.value();
-        storage_scu scu{{}};
+        storage_scu scu;
 
         constexpr int num_images = 5;
         auto study_uid = generate_uid();
@@ -535,7 +535,7 @@ TEST_CASE("dicom_server_v2 concurrent storage stress test", "[v2][stress][concur
                 }
 
                 auto& assoc = connect.value();
-                storage_scu scu{{}};
+                storage_scu scu;
 
                 auto study_uid = generate_uid();
                 for (int j = 0; j < files_per_worker; ++j) {
@@ -932,7 +932,7 @@ TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
 
                 if (connect.is_ok()) {
                     auto& assoc = connect.value();
-                    storage_scu scu{{}};
+                    storage_scu scu;
                     auto ds = generate_ct_dataset();
                     auto result = scu.store(assoc, ds);
                     if (result.is_ok() && result.value().is_success()) {

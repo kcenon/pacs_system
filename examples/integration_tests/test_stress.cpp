@@ -661,7 +661,7 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
                     "localhost", port, config, default_timeout);
                 if (connect.is_ok()) {
                     auto& assoc = connect.value();
-                    storage_scu scu{{}};
+                    storage_scu scu;
                     auto ds = generate_ct_dataset();
                     auto result = scu.store(assoc, ds);
                     if (result.is_ok() && result.value().is_success()) {

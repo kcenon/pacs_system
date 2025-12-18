@@ -18,6 +18,7 @@
 #include "pacs/core/dicom_dataset.hpp"
 #include "pacs/network/association.hpp"
 #include "pacs/network/dimse/dimse_message.hpp"
+#include "pacs/di/ilogger.hpp"
 
 #include <atomic>
 #include <cstdint>
@@ -165,14 +166,19 @@ public:
 
     /**
      * @brief Construct a Storage SCU with default configuration
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
      */
-    storage_scu();
+    explicit storage_scu(std::shared_ptr<di::ILogger> logger = nullptr);
 
     /**
      * @brief Construct a Storage SCU with custom configuration
+     *
      * @param config Configuration options
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
      */
-    explicit storage_scu(const storage_scu_config& config);
+    explicit storage_scu(const storage_scu_config& config,
+                         std::shared_ptr<di::ILogger> logger = nullptr);
 
     ~storage_scu() = default;
 
@@ -309,6 +315,9 @@ private:
     // =========================================================================
     // Private Members
     // =========================================================================
+
+    /// Logger instance for service logging
+    std::shared_ptr<di::ILogger> logger_;
 
     /// Configuration
     storage_scu_config config_;

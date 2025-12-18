@@ -14,6 +14,7 @@
 
 #include "pacs/network/association.hpp"
 #include "pacs/network/dimse/dimse_message.hpp"
+#include "pacs/di/ilogger.hpp"
 
 #include <memory>
 #include <string>
@@ -49,7 +50,14 @@ public:
     // Construction / Destruction
     // =========================================================================
 
-    scp_service() = default;
+    /**
+     * @brief Construct SCP service with optional logger
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
+     */
+    explicit scp_service(std::shared_ptr<di::ILogger> logger = nullptr)
+        : logger_(logger ? std::move(logger) : di::null_logger()) {}
+
     virtual ~scp_service() = default;
 
     // Non-copyable but movable
@@ -57,6 +65,28 @@ public:
     scp_service& operator=(const scp_service&) = delete;
     scp_service(scp_service&&) = default;
     scp_service& operator=(scp_service&&) = default;
+
+    // =========================================================================
+    // Logger Access
+    // =========================================================================
+
+    /**
+     * @brief Set the logger instance
+     *
+     * @param logger New logger instance (nullptr uses null_logger)
+     */
+    void set_logger(std::shared_ptr<di::ILogger> logger) {
+        logger_ = logger ? std::move(logger) : di::null_logger();
+    }
+
+    /**
+     * @brief Get the current logger instance
+     *
+     * @return Shared pointer to the logger
+     */
+    [[nodiscard]] const std::shared_ptr<di::ILogger>& logger() const noexcept {
+        return logger_;
+    }
 
     // =========================================================================
     // Service Interface
@@ -110,6 +140,14 @@ public:
         }
         return false;
     }
+
+protected:
+    // =========================================================================
+    // Protected Members
+    // =========================================================================
+
+    /// Logger instance for service logging
+    std::shared_ptr<di::ILogger> logger_;
 };
 
 /**

@@ -183,7 +183,13 @@ public:
     // Construction
     // =========================================================================
 
-    query_scp();
+    /**
+     * @brief Construct Query SCP with optional logger
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
+     */
+    explicit query_scp(std::shared_ptr<di::ILogger> logger = nullptr);
+
     ~query_scp() override = default;
 
     // =========================================================================

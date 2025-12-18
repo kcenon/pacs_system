@@ -51,6 +51,9 @@ struct registration_config {
     /// Enable codec services (default: true)
     bool enable_codecs = true;
 
+    /// Enable logger services (default: true)
+    bool enable_logger = true;
+
     /// Use singleton lifetime for services (default: true)
     bool use_singletons = true;
 
@@ -123,6 +126,22 @@ struct registration_config {
         auto result = container.register_factory<IDicomNetwork>(
             [](IServiceContainer&) -> std::shared_ptr<IDicomNetwork> {
                 return std::make_shared<DicomNetworkService>();
+            },
+            lifetime
+        );
+
+        if (result.is_err()) {
+            return result;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Register ILogger
+    // -------------------------------------------------------------------------
+    if (config.enable_logger) {
+        auto result = container.register_factory<ILogger>(
+            [](IServiceContainer&) -> std::shared_ptr<ILogger> {
+                return std::make_shared<LoggerService>();
             },
             lifetime
         );
@@ -209,6 +228,44 @@ template<typename TNetwork>
     std::shared_ptr<IDicomNetwork> instance) {
 
     return container.register_instance<IDicomNetwork>(std::move(instance));
+}
+
+/**
+ * @brief Register logger service with custom implementation
+ *
+ * @tparam TLogger Logger implementation type (must derive from ILogger)
+ * @param container The service container
+ * @param factory Factory function for creating logger instances
+ * @param lifetime Service lifetime (default: singleton)
+ * @return VoidResult indicating success or error
+ */
+template<typename TLogger>
+    requires std::derived_from<TLogger, ILogger>
+[[nodiscard]] inline kcenon::common::VoidResult register_logger(
+    kcenon::common::di::IServiceContainer& container,
+    std::function<std::shared_ptr<TLogger>(kcenon::common::di::IServiceContainer&)> factory,
+    kcenon::common::di::service_lifetime lifetime = kcenon::common::di::service_lifetime::singleton) {
+
+    return container.register_factory<ILogger>(
+        [f = std::move(factory)](kcenon::common::di::IServiceContainer& c) -> std::shared_ptr<ILogger> {
+            return f(c);
+        },
+        lifetime
+    );
+}
+
+/**
+ * @brief Register logger service with pre-created instance
+ *
+ * @param container The service container
+ * @param instance The logger instance to register
+ * @return VoidResult indicating success or error
+ */
+[[nodiscard]] inline kcenon::common::VoidResult register_logger_instance(
+    kcenon::common::di::IServiceContainer& container,
+    std::shared_ptr<ILogger> instance) {
+
+    return container.register_instance<ILogger>(std::move(instance));
 }
 
 // =============================================================================
