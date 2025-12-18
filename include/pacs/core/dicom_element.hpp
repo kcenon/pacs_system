@@ -12,6 +12,7 @@
 #pragma once
 
 #include "dicom_tag.hpp"
+#include "result.hpp"
 
 #include <pacs/encoding/vr_type.hpp>
 
@@ -31,8 +32,10 @@ class dicom_dataset;
 
 /**
  * @brief Exception thrown when value conversion fails
+ * @deprecated Use Result<T> pattern instead. Error codes are in pacs::error_codes.
  */
-class value_conversion_error : public std::runtime_error {
+class [[deprecated("Use Result<T> pattern instead")]] value_conversion_error
+    : public std::runtime_error {
 public:
     using std::runtime_error::runtime_error;
 };
@@ -196,19 +199,19 @@ public:
      * For string VRs, returns the value with trailing padding removed.
      * For numeric VRs, converts the value to a string representation.
      *
-     * @return The value as a string
-     * @throws value_conversion_error if conversion fails
+     * @return Result containing the string value, or error if conversion fails
      */
-    [[nodiscard]] auto as_string() const -> std::string;
+    [[nodiscard]] auto as_string() const -> pacs::Result<std::string>;
 
     /**
      * @brief Get multi-valued string as a list
      *
      * Splits the value by backslash delimiter (DICOM VM > 1).
      *
-     * @return Vector of individual string values
+     * @return Result containing vector of individual string values, or error
      */
-    [[nodiscard]] auto as_string_list() const -> std::vector<std::string>;
+    [[nodiscard]] auto as_string_list() const
+        -> pacs::Result<std::vector<std::string>>;
 
     // ========================================================================
     // Numeric Value Access
@@ -217,22 +220,20 @@ public:
     /**
      * @brief Get the value as a numeric type
      * @tparam T The target numeric type
-     * @return The numeric value
-     * @throws value_conversion_error if conversion fails or data is wrong size
+     * @return Result containing the numeric value, or error if conversion fails
      */
     template <typename T>
         requires std::is_arithmetic_v<T>
-    [[nodiscard]] auto as_numeric() const -> T;
+    [[nodiscard]] auto as_numeric() const -> pacs::Result<T>;
 
     /**
      * @brief Get multi-valued numeric data as a list
      * @tparam T The target numeric type
-     * @return Vector of numeric values
-     * @throws value_conversion_error if conversion fails
+     * @return Result containing vector of numeric values, or error if conversion fails
      */
     template <typename T>
         requires std::is_arithmetic_v<T>
-    [[nodiscard]] auto as_numeric_list() const -> std::vector<T>;
+    [[nodiscard]] auto as_numeric_list() const -> pacs::Result<std::vector<T>>;
 
     // ========================================================================
     // Sequence Access
@@ -337,27 +338,29 @@ auto dicom_element::from_numeric_list(dicom_tag tag, encoding::vr_type vr,
 
 template <typename T>
     requires std::is_arithmetic_v<T>
-auto dicom_element::as_numeric() const -> T {
+auto dicom_element::as_numeric() const -> pacs::Result<T> {
     if (data_.size() < sizeof(T)) {
-        throw value_conversion_error(
+        return pacs::pacs_error<T>(
+            pacs::error_codes::data_size_mismatch,
             "Insufficient data for numeric conversion: expected " +
-            std::to_string(sizeof(T)) + " bytes, got " +
-            std::to_string(data_.size()));
+                std::to_string(sizeof(T)) + " bytes, got " +
+                std::to_string(data_.size()));
     }
 
     T result{};
     std::memcpy(&result, data_.data(), sizeof(T));
-    return result;
+    return pacs::ok(result);
 }
 
 template <typename T>
     requires std::is_arithmetic_v<T>
-auto dicom_element::as_numeric_list() const -> std::vector<T> {
+auto dicom_element::as_numeric_list() const -> pacs::Result<std::vector<T>> {
     if (data_.size() % sizeof(T) != 0) {
-        throw value_conversion_error(
+        return pacs::pacs_error<std::vector<T>>(
+            pacs::error_codes::data_size_mismatch,
             "Data size not aligned for numeric type: " +
-            std::to_string(data_.size()) + " bytes is not divisible by " +
-            std::to_string(sizeof(T)));
+                std::to_string(data_.size()) + " bytes is not divisible by " +
+                std::to_string(sizeof(T)));
     }
 
     const size_t count = data_.size() / sizeof(T);
@@ -367,7 +370,7 @@ auto dicom_element::as_numeric_list() const -> std::vector<T> {
         std::memcpy(&result[i], data_.data() + i * sizeof(T), sizeof(T));
     }
 
-    return result;
+    return pacs::ok(result);
 }
 
 template <typename T>

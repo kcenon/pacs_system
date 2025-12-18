@@ -436,7 +436,7 @@ auto anonymizer::apply_action(
         return record;
     }
 
-    record.original_value = element->as_string();
+    record.original_value = element->as_string().unwrap_or("");
 
     switch (config.action) {
         case tag_action::remove:

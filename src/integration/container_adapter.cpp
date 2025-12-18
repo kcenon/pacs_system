@@ -47,48 +47,92 @@ auto container_adapter::to_container_value(const core::dicom_element& element)
     // Map VR to appropriate container type
     if (encoding::is_string_vr(vr)) {
         result.type = container_module::value_types::string_value;
-        result.data = element.as_string();
+        result.data = element.as_string().unwrap_or("");
     } else if (encoding::is_numeric_vr(vr)) {
         // Map numeric VRs to appropriate types
+        // Use fallback to bytes if numeric conversion fails
+        bool converted = false;
         switch (vr) {
-            case encoding::vr_type::SS:  // Signed Short (2 bytes)
-                result.type = container_module::value_types::short_value;
-                result.data = element.as_numeric<short>();
+            case encoding::vr_type::SS: {  // Signed Short (2 bytes)
+                auto val = element.as_numeric<short>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::short_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::US:  // Unsigned Short (2 bytes)
-                result.type = container_module::value_types::ushort_value;
-                result.data = element.as_numeric<unsigned short>();
+            }
+            case encoding::vr_type::US: {  // Unsigned Short (2 bytes)
+                auto val = element.as_numeric<unsigned short>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::ushort_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::SL:  // Signed Long (4 bytes)
-                result.type = container_module::value_types::int_value;
-                result.data = element.as_numeric<int>();
+            }
+            case encoding::vr_type::SL: {  // Signed Long (4 bytes)
+                auto val = element.as_numeric<int>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::int_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::UL:  // Unsigned Long (4 bytes)
-                result.type = container_module::value_types::uint_value;
-                result.data = element.as_numeric<unsigned int>();
+            }
+            case encoding::vr_type::UL: {  // Unsigned Long (4 bytes)
+                auto val = element.as_numeric<unsigned int>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::uint_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::SV:  // Signed 64-bit
-                result.type = container_module::value_types::llong_value;
-                result.data = element.as_numeric<long long>();
+            }
+            case encoding::vr_type::SV: {  // Signed 64-bit
+                auto val = element.as_numeric<long long>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::llong_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::UV:  // Unsigned 64-bit
-                result.type = container_module::value_types::ullong_value;
-                result.data = element.as_numeric<unsigned long long>();
+            }
+            case encoding::vr_type::UV: {  // Unsigned 64-bit
+                auto val = element.as_numeric<unsigned long long>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::ullong_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::FL:  // Float
-                result.type = container_module::value_types::float_value;
-                result.data = element.as_numeric<float>();
+            }
+            case encoding::vr_type::FL: {  // Float
+                auto val = element.as_numeric<float>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::float_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
-            case encoding::vr_type::FD:  // Double
-                result.type = container_module::value_types::double_value;
-                result.data = element.as_numeric<double>();
+            }
+            case encoding::vr_type::FD: {  // Double
+                auto val = element.as_numeric<double>();
+                if (val.is_ok()) {
+                    result.type = container_module::value_types::double_value;
+                    result.data = val.value();
+                    converted = true;
+                }
                 break;
+            }
             default:
-                // Fallback to bytes for unhandled numeric types
-                result.type = container_module::value_types::bytes_value;
-                auto raw = element.raw_data();
-                result.data = std::vector<uint8_t>(raw.begin(), raw.end());
                 break;
+        }
+        if (!converted) {
+            // Fallback to bytes for unhandled or failed numeric types
+            result.type = container_module::value_types::bytes_value;
+            auto raw = element.raw_data();
+            result.data = std::vector<uint8_t>(raw.begin(), raw.end());
         }
     } else if (encoding::is_binary_vr(vr)) {
         result.type = container_module::value_types::bytes_value;
@@ -96,8 +140,15 @@ auto container_adapter::to_container_value(const core::dicom_element& element)
         result.data = std::vector<uint8_t>(raw.begin(), raw.end());
     } else if (vr == encoding::vr_type::AT) {
         // Attribute Tag - store as 32-bit unsigned
-        result.type = container_module::value_types::uint_value;
-        result.data = element.as_numeric<unsigned int>();
+        auto val = element.as_numeric<unsigned int>();
+        if (val.is_ok()) {
+            result.type = container_module::value_types::uint_value;
+            result.data = val.value();
+        } else {
+            result.type = container_module::value_types::bytes_value;
+            auto raw = element.raw_data();
+            result.data = std::vector<uint8_t>(raw.begin(), raw.end());
+        }
     } else {
         // Default: store as bytes
         result.type = container_module::value_types::bytes_value;
