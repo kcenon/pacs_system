@@ -82,8 +82,9 @@ public:
      * @return true if study count matches
      */
     bool verify_study_count(const std::string& patient_id, size_t expected) {
-        auto studies = db_.list_studies(patient_id);
-        return studies.size() == expected;
+        auto studies_result = db_.list_studies(patient_id);
+        if (studies_result.is_err()) return false;
+        return studies_result.value().size() == expected;
     }
 
     /**
@@ -96,10 +97,11 @@ public:
         const std::string& study_uid,
         const std::vector<std::string>& expected_modalities) {
 
-        auto series_list = db_.list_series(study_uid);
+        auto series_list_result = db_.list_series(study_uid);
+        if (series_list_result.is_err()) return false;
 
         std::set<std::string> found_modalities;
-        for (const auto& series : series_list) {
+        for (const auto& series : series_list_result.value()) {
             if (!series.modality.empty()) {
                 found_modalities.insert(series.modality);
             }
@@ -120,7 +122,9 @@ public:
      * @return true if series count matches
      */
     bool verify_series_count(const std::string& study_uid, size_t expected) {
-        return db_.series_count(study_uid) == expected;
+        auto count_result = db_.series_count(study_uid);
+        if (count_result.is_err()) return false;
+        return count_result.value() == expected;
     }
 
     /**
@@ -130,7 +134,9 @@ public:
      * @return true if image count matches
      */
     bool verify_image_count(const std::string& series_uid, size_t expected) {
-        return db_.instance_count(series_uid) == expected;
+        auto count_result = db_.instance_count(series_uid);
+        if (count_result.is_err()) return false;
+        return count_result.value() == expected;
     }
 
     /**
@@ -139,13 +145,15 @@ public:
      * @return true if all UIDs are unique
      */
     bool verify_unique_uids(const std::string& study_uid) {
-        auto series_list = db_.list_series(study_uid);
+        auto series_list_result = db_.list_series(study_uid);
+        if (series_list_result.is_err()) return false;
 
         std::set<std::string> uids;
-        for (const auto& series : series_list) {
-            auto instances = db_.list_instances(series.series_uid);
+        for (const auto& series : series_list_result.value()) {
+            auto instances_result = db_.list_instances(series.series_uid);
+            if (instances_result.is_err()) return false;
 
-            for (const auto& instance : instances) {
+            for (const auto& instance : instances_result.value()) {
                 if (uids.find(instance.sop_uid) != uids.end()) {
                     return false;  // Duplicate found
                 }
@@ -162,10 +170,14 @@ public:
      */
     size_t get_instance_count(const std::string& study_uid) {
         size_t count = 0;
-        auto series_list = db_.list_series(study_uid);
+        auto series_list_result = db_.list_series(study_uid);
+        if (series_list_result.is_err()) return 0;
 
-        for (const auto& series : series_list) {
-            count += db_.instance_count(series.series_uid);
+        for (const auto& series : series_list_result.value()) {
+            auto count_result = db_.instance_count(series.series_uid);
+            if (count_result.is_ok()) {
+                count += count_result.value();
+            }
         }
         return count;
     }
@@ -406,26 +418,28 @@ private:
             auto pat_name_val = query_keys.get_string(tags::patient_name);
             if (!pat_name_val.empty()) query.patient_name = std::string(pat_name_val);
 
-            auto studies = database_->search_studies(query);
-            for (const auto& study : studies) {
-                dicom_dataset ds;
-                ds.set_string(tags::study_instance_uid, vr_type::UI, study.study_uid);
-                ds.set_string(tags::study_id, vr_type::SH, study.study_id);
-                ds.set_string(tags::study_date, vr_type::DA, study.study_date);
-                ds.set_string(tags::study_time, vr_type::TM, study.study_time);
-                ds.set_string(tags::accession_number, vr_type::SH, study.accession_number);
-                ds.set_string(tags::study_description, vr_type::LO, study.study_description);
-                ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+            auto studies_result = database_->search_studies(query);
+            if (studies_result.is_ok()) {
+                for (const auto& study : studies_result.value()) {
+                    dicom_dataset ds;
+                    ds.set_string(tags::study_instance_uid, vr_type::UI, study.study_uid);
+                    ds.set_string(tags::study_id, vr_type::SH, study.study_id);
+                    ds.set_string(tags::study_date, vr_type::DA, study.study_date);
+                    ds.set_string(tags::study_time, vr_type::TM, study.study_time);
+                    ds.set_string(tags::accession_number, vr_type::SH, study.accession_number);
+                    ds.set_string(tags::study_description, vr_type::LO, study.study_description);
+                    ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
 
-                auto patient = database_->find_patient_by_pk(study.patient_pk);
-                if (patient) {
-                    ds.set_string(tags::patient_name, vr_type::PN, patient->patient_name);
-                    ds.set_string(tags::patient_id, vr_type::LO, patient->patient_id);
-                    ds.set_string(tags::patient_birth_date, vr_type::DA, patient->birth_date);
-                    ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
+                    auto patient = database_->find_patient_by_pk(study.patient_pk);
+                    if (patient) {
+                        ds.set_string(tags::patient_name, vr_type::PN, patient->patient_name);
+                        ds.set_string(tags::patient_id, vr_type::LO, patient->patient_id);
+                        ds.set_string(tags::patient_birth_date, vr_type::DA, patient->birth_date);
+                        ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
+                    }
+
+                    results.push_back(std::move(ds));
                 }
-
-                results.push_back(std::move(ds));
             }
         }
         return results;
