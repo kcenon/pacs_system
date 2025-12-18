@@ -1433,6 +1433,28 @@ if(PACS_BUILD_TESTS)
         )
     endif()
 
+    # DI tests (Issue #312 - ServiceContainer based DI Integration)
+    if(TARGET pacs_integration AND TARGET pacs_storage)
+        add_executable(di_tests
+            tests/di/service_registration_test.cpp
+        )
+        target_link_libraries(di_tests
+            PRIVATE
+                pacs_core
+                pacs_storage
+                pacs_network
+                pacs_integration
+                pacs_encoding
+                Catch2::Catch2WithMain
+        )
+        if(TARGET thread_system_lib)
+            target_link_libraries(di_tests PRIVATE thread_system_lib)
+        endif()
+        if(TARGET common_system_lib)
+            target_link_libraries(di_tests PRIVATE common_system_lib)
+        endif()
+    endif()
+
     include(CTest)
     include(Catch)
 
@@ -1488,6 +1510,12 @@ if(PACS_BUILD_TESTS)
     
     if(TARGET security_tests)
         catch_discover_tests(security_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+
+    if(TARGET di_tests)
+        catch_discover_tests(di_tests
             PROPERTIES LABELS "unit"
         )
     endif()
@@ -1711,6 +1739,9 @@ if(PACS_BUILD_TESTS)
     endif()
     if(TARGET pacs_integration_tests)
         pacs_apply_warnings(pacs_integration_tests)
+    endif()
+    if(TARGET di_tests)
+        pacs_apply_warnings(di_tests)
     endif()
 endif()
 
