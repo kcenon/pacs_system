@@ -17,6 +17,7 @@
 - [AI Module](#ai-module)
 - [Monitoring Module](#monitoring-module)
 - [Integration Module](#integration-module)
+- [DI Module](#di-module)
 - [Web Module](#web-module)
 - [Common Module](#common-module)
 
@@ -4628,7 +4629,108 @@ public:
 
 ---
 
-*Document Version: 0.1.8.0*
+## DI Module
+
+The DI (Dependency Injection) module provides ServiceContainer-based dependency injection for PACS services.
+
+### `pacs::di::IDicomStorage`
+
+Alias for `pacs::storage::storage_interface`. Used for service registration and resolution.
+
+### `pacs::di::IDicomNetwork`
+
+Interface for DICOM network operations.
+
+```cpp
+#include <pacs/di/service_interfaces.hpp>
+
+namespace pacs::di {
+
+class IDicomNetwork {
+public:
+    virtual ~IDicomNetwork() = default;
+
+    // Create a DICOM server
+    [[nodiscard]] virtual std::unique_ptr<network::dicom_server> create_server(
+        const network::server_config& config,
+        const integration::tls_config& tls_cfg = {}) = 0;
+
+    // Connect to a remote DICOM peer
+    [[nodiscard]] virtual integration::Result<integration::network_adapter::session_ptr>
+        connect(const integration::connection_config& config) = 0;
+
+    [[nodiscard]] virtual integration::Result<integration::network_adapter::session_ptr>
+        connect(const std::string& host, uint16_t port,
+                std::chrono::milliseconds timeout = std::chrono::seconds{30}) = 0;
+};
+
+} // namespace pacs::di
+```
+
+### `pacs::di::register_services`
+
+Register all PACS services with a ServiceContainer.
+
+```cpp
+#include <pacs/di/service_registration.hpp>
+
+// Create container and register services
+kcenon::common::di::service_container container;
+auto result = pacs::di::register_services(container);
+
+// Resolve services
+auto storage = container.resolve<pacs::di::IDicomStorage>().value();
+auto network = container.resolve<pacs::di::IDicomNetwork>().value();
+```
+
+### Configuration
+
+```cpp
+pacs::di::registration_config config;
+config.storage_path = "/path/to/storage";  // Custom storage path
+config.enable_network = true;              // Enable network services
+config.use_singletons = true;              // Use singleton lifetime
+
+auto result = pacs::di::register_services(container, config);
+```
+
+### `pacs::di::create_container`
+
+Convenience function to create a configured container.
+
+```cpp
+auto container = pacs::di::create_container();
+// Container has all services registered with default configuration
+```
+
+### Test Support
+
+The module provides mock implementations for unit testing.
+
+```cpp
+#include <pacs/di/test_support.hpp>
+
+// Create a test container with mock services
+auto container = pacs::di::test::create_test_container();
+
+// Or use the builder for more control
+auto mock_storage = std::make_shared<pacs::di::test::MockStorage>();
+auto container = pacs::di::test::TestContainerBuilder()
+    .with_storage(mock_storage)
+    .with_mock_network()
+    .build();
+
+// Use in tests
+auto storage = container->resolve<pacs::di::IDicomStorage>().value();
+storage->store(dataset);  // Uses mock implementation
+
+// Verify mock interactions
+EXPECT_EQ(mock_storage->store_count(), 1);
+```
+
+---
+
+*Document Version: 0.1.9.0*
 *Created: 2025-11-30*
-*Last Updated: 2025-12-11*
+*Last Updated: 2025-12-18*
 *Author: kcenon@naver.com*
