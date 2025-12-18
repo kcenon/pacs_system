@@ -292,7 +292,7 @@ TEST_CASE("Invalid SOP Class rejection", "[error][sop_class]") {
 
     if (mr_context) {
         // If context was accepted, store should fail
-        storage_scu scu{{}};
+        storage_scu scu;
         auto mr_dataset = generate_mr_dataset();
         auto result = scu.store(assoc, mr_dataset);
 
@@ -334,7 +334,7 @@ TEST_CASE("Server rejection of all stores", "[error][rejection]") {
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
-    storage_scu scu{{}};
+    storage_scu scu;
 
     auto dataset = generate_ct_dataset();
     auto result = scu.store(assoc, dataset);
@@ -407,7 +407,7 @@ TEST_CASE("Server restart during operations", "[error][restart]") {
         auto connect = association::connect("localhost", port, config, default_timeout);
         REQUIRE(connect.is_ok());
 
-        storage_scu scu{{}};
+        storage_scu scu;
         auto ds = generate_ct_dataset();
         auto result = scu.store(connect.value(), ds);
         REQUIRE(result.is_ok());
@@ -605,7 +605,7 @@ TEST_CASE("Duplicate SOP Instance handling", "[error][duplicate]") {
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
-    storage_scu scu{{}};
+    storage_scu scu;
 
     // Create dataset with fixed SOP Instance UID
     auto sop_instance_uid = generate_uid();
