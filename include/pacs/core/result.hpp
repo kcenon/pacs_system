@@ -129,6 +129,53 @@ namespace error_codes {
     constexpr int tier_not_available = pacs_base - 96;
     constexpr int migration_failed = pacs_base - 97;
     constexpr int instance_not_found = pacs_base - 98;
+
+    // ========================================================================
+    // Service-specific error codes (-800 to -899)
+    // ========================================================================
+    constexpr int service_base = -800;
+
+    // C-STORE service errors (-800 to -819)
+    constexpr int store_handler_not_set = service_base - 0;
+    constexpr int store_missing_sop_class_uid = service_base - 1;
+    constexpr int store_missing_sop_instance_uid = service_base - 2;
+    constexpr int store_no_accepted_context = service_base - 3;
+    constexpr int store_pre_validation_failed = service_base - 4;
+    constexpr int store_dataset_required = service_base - 5;
+    constexpr int store_unexpected_command = service_base - 6;
+
+    // C-FIND service errors (-820 to -839)
+    constexpr int find_handler_not_set = service_base - 20;
+    constexpr int find_invalid_query_level = service_base - 21;
+    constexpr int find_missing_query_level = service_base - 22;
+    constexpr int find_unexpected_command = service_base - 23;
+    constexpr int find_query_cancelled = service_base - 24;
+
+    // C-MOVE/C-GET service errors (-840 to -859)
+    constexpr int retrieve_handler_not_set = service_base - 40;
+    constexpr int retrieve_missing_destination = service_base - 41;
+    constexpr int retrieve_unknown_destination = service_base - 42;
+    constexpr int retrieve_sub_operation_failed = service_base - 43;
+    constexpr int retrieve_unexpected_command = service_base - 44;
+    constexpr int retrieve_cancelled = service_base - 45;
+
+    // Verification service errors (-860 to -869)
+    constexpr int echo_unexpected_command = service_base - 60;
+
+    // MPPS service errors (-870 to -879)
+    constexpr int mpps_handler_not_set = service_base - 70;
+    constexpr int mpps_invalid_state = service_base - 71;
+    constexpr int mpps_unexpected_command = service_base - 72;
+
+    // Worklist service errors (-880 to -889)
+    constexpr int worklist_handler_not_set = service_base - 80;
+    constexpr int worklist_unexpected_command = service_base - 81;
+
+    // General service errors (-890 to -899)
+    constexpr int association_not_established = service_base - 90;
+    constexpr int file_not_found_service = service_base - 91;
+    constexpr int not_a_regular_file = service_base - 92;
+    constexpr int file_parsing_not_implemented = service_base - 93;
 } // namespace error_codes
 
 // Re-export common utility functions
