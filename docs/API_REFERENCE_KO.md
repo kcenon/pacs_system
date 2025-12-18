@@ -16,6 +16,7 @@
 - [AI 모듈](#ai-모듈)
 - [모니터링 모듈](#모니터링-모듈)
 - [통합 모듈](#통합-모듈)
+- [DI 모듈](#di-모듈)
 - [공통 모듈](#공통-모듈)
 
 ---
@@ -3542,10 +3543,99 @@ namespace pacs::web::dicomweb {
 | 1.9.0 | 2025-12-13 | STOW-RS (Store Over the Web) API 엔드포인트 및 멀티파트 파서 추가 |
 | 1.10.0 | 2025-12-13 | QIDO-RS (Query based on ID for DICOM Objects) API 엔드포인트 추가 |
 | 1.11.0 | 2025-12-13 | WADO-RS 프레임 조회 및 렌더링 이미지 엔드포인트 추가 |
+| 1.12.0 | 2025-12-18 | DI 모듈 추가 (ServiceContainer 기반 의존성 주입) |
 
 ---
 
-*문서 버전: 0.1.11.0*
+## DI 모듈
+
+DI (Dependency Injection) 모듈은 PACS 서비스를 위한 ServiceContainer 기반 의존성 주입을 제공합니다.
+
+### `pacs::di::IDicomStorage`
+
+`pacs::storage::storage_interface`의 별칭입니다. 서비스 등록 및 해결에 사용됩니다.
+
+### `pacs::di::IDicomNetwork`
+
+DICOM 네트워크 작업을 위한 인터페이스입니다.
+
+```cpp
+#include <pacs/di/service_interfaces.hpp>
+
+namespace pacs::di {
+
+class IDicomNetwork {
+public:
+    virtual ~IDicomNetwork() = default;
+
+    // DICOM 서버 생성
+    [[nodiscard]] virtual std::unique_ptr<network::dicom_server> create_server(
+        const network::server_config& config,
+        const integration::tls_config& tls_cfg = {}) = 0;
+
+    // 원격 DICOM 피어에 연결
+    [[nodiscard]] virtual integration::Result<integration::network_adapter::session_ptr>
+        connect(const integration::connection_config& config) = 0;
+};
+
+} // namespace pacs::di
+```
+
+### `pacs::di::register_services`
+
+ServiceContainer에 모든 PACS 서비스를 등록합니다.
+
+```cpp
+#include <pacs/di/service_registration.hpp>
+
+// 컨테이너 생성 및 서비스 등록
+kcenon::common::di::service_container container;
+auto result = pacs::di::register_services(container);
+
+// 서비스 해결
+auto storage = container.resolve<pacs::di::IDicomStorage>().value();
+auto network = container.resolve<pacs::di::IDicomNetwork>().value();
+```
+
+### 설정
+
+```cpp
+pacs::di::registration_config config;
+config.storage_path = "/path/to/storage";  // 사용자 지정 저장 경로
+config.enable_network = true;              // 네트워크 서비스 활성화
+config.use_singletons = true;              // 싱글톤 수명 사용
+
+auto result = pacs::di::register_services(container, config);
+```
+
+### 테스트 지원
+
+이 모듈은 단위 테스트를 위한 모의 구현을 제공합니다.
+
+```cpp
+#include <pacs/di/test_support.hpp>
+
+// 모의 서비스가 포함된 테스트 컨테이너 생성
+auto container = pacs::di::test::create_test_container();
+
+// 또는 빌더를 사용하여 더 세밀한 제어
+auto mock_storage = std::make_shared<pacs::di::test::MockStorage>();
+auto container = pacs::di::test::TestContainerBuilder()
+    .with_storage(mock_storage)
+    .with_mock_network()
+    .build();
+
+// 테스트에서 사용
+auto storage = container->resolve<pacs::di::IDicomStorage>().value();
+storage->store(dataset);  // 모의 구현 사용
+
+// 모의 상호작용 확인
+EXPECT_EQ(mock_storage->store_count(), 1);
+```
+
+---
+
+*문서 버전: 0.1.12.0*
 *작성일: 2025-11-30*
-*최종 수정일: 2025-12-13*
+*최종 수정일: 2025-12-18*
 *작성자: kcenon@naver.com*
