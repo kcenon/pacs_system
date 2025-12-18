@@ -796,6 +796,37 @@ auto restored_dataset = container_adapter::from_container(container);
 - 오류 조건
 - 보안 이벤트 (감사)
 
+**ILogger 인터페이스 (Issue #309)**:
+
+모든 DICOM 서비스는 `ILogger` 인터페이스를 통한 주입 가능한 로깅을 지원합니다:
+
+| 컴포넌트 | 로거 지원 |
+|---------|----------|
+| 모든 SCP 서비스 | 생성자/설정자 주입 |
+| storage_scu | 생성자 주입 |
+| scp_service 기본 클래스 | Protected 로거 멤버 |
+
+**장점**:
+- 모의 로거로 테스트 가능한 서비스
+- 기본 무출력 동작 (NullLogger)
+- 런타임 로거 전환
+- DI 컨테이너 통합
+
+**예시**:
+```cpp
+// 기본: 무출력 (NullLogger)
+verification_scp scp;
+
+// LoggerService로 로깅
+auto logger = std::make_shared<pacs::di::LoggerService>();
+verification_scp scp_with_logging(logger);
+
+// DI 컨테이너 통해
+auto container = pacs::di::create_container();
+auto logger = container->resolve<pacs::di::ILogger>().value();
+storage_scp scp_via_di(logger);
+```
+
 ### monitoring_system 통합
 
 **목적**: 성능 메트릭 및 상태 모니터링.
