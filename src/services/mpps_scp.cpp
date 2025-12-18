@@ -6,6 +6,7 @@
 #include "pacs/services/mpps_scp.hpp"
 
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -53,14 +54,10 @@ network::Result<std::monostate> mpps_scp::handle_message(
             return handle_n_set(assoc, context_id, request);
 
         default:
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return kcenon::common::error_info(
-                std::string("Unexpected command for MPPS SCP: ") +
+            return pacs::pacs_void_error(
+                pacs::error_codes::mpps_unexpected_command,
+                "Unexpected command for MPPS SCP: " +
                 std::string(to_string(request.command())));
-#else
-            return std::string("Unexpected command for MPPS SCP: ") +
-                   std::string(to_string(request.command()));
-#endif
     }
 }
 
@@ -108,12 +105,9 @@ network::Result<std::monostate> mpps_scp::handle_n_create(
 
     // Verify we have a handler configured
     if (!create_handler_) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("No N-CREATE handler configured for MPPS SCP"));
-#else
-        return std::string("No N-CREATE handler configured for MPPS SCP");
-#endif
+        return pacs::pacs_void_error(
+            pacs::error_codes::mpps_handler_not_set,
+            "No N-CREATE handler configured for MPPS SCP");
     }
 
     // Verify the SOP Class is MPPS
@@ -196,12 +190,9 @@ network::Result<std::monostate> mpps_scp::handle_n_set(
 
     // Verify we have a handler configured
     if (!set_handler_) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("No N-SET handler configured for MPPS SCP"));
-#else
-        return std::string("No N-SET handler configured for MPPS SCP");
-#endif
+        return pacs::pacs_void_error(
+            pacs::error_codes::mpps_handler_not_set,
+            "No N-SET handler configured for MPPS SCP");
     }
 
     // Verify the SOP Class is MPPS

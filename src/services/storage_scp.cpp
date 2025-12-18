@@ -5,6 +5,7 @@
 
 #include "pacs/services/storage_scp.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -54,14 +55,10 @@ network::Result<std::monostate> storage_scp::handle_message(
 
     // Verify the message is a C-STORE request
     if (request.command() != command_field::c_store_rq) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("Expected C-STORE-RQ but received ") +
+        return pacs::pacs_void_error(
+            pacs::error_codes::store_unexpected_command,
+            "Expected C-STORE-RQ but received " +
             std::string(to_string(request.command())));
-#else
-        return std::string("Expected C-STORE-RQ but received ") +
-               std::string(to_string(request.command()));
-#endif
     }
 
     // Extract SOP Class and Instance UIDs from the command set

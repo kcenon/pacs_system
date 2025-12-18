@@ -6,6 +6,7 @@
 #include "pacs/services/worklist_scp.hpp"
 
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -56,24 +57,17 @@ network::Result<std::monostate> worklist_scp::handle_message(
 
     // Verify the message is a C-FIND request
     if (request.command() != command_field::c_find_rq) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("Expected C-FIND-RQ but received ") +
+        return pacs::pacs_void_error(
+            pacs::error_codes::worklist_unexpected_command,
+            "Expected C-FIND-RQ but received " +
             std::string(to_string(request.command())));
-#else
-        return std::string("Expected C-FIND-RQ but received ") +
-               std::string(to_string(request.command()));
-#endif
     }
 
     // Verify we have a handler
     if (!handler_) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("No worklist handler configured"));
-#else
-        return std::string("No worklist handler configured");
-#endif
+        return pacs::pacs_void_error(
+            pacs::error_codes::worklist_handler_not_set,
+            "No worklist handler configured");
     }
 
     // Get the SOP Class UID from the request

@@ -6,6 +6,7 @@
 #include "pacs/services/retrieve_scp.hpp"
 
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -66,14 +67,10 @@ network::Result<std::monostate> retrieve_scp::handle_message(
             return handle_c_get(assoc, context_id, request);
 
         default:
-#ifdef PACS_WITH_COMMON_SYSTEM
-            return kcenon::common::error_info(
-                std::string("Expected C-MOVE-RQ or C-GET-RQ but received ") +
+            return pacs::pacs_void_error(
+                pacs::error_codes::retrieve_unexpected_command,
+                "Expected C-MOVE-RQ or C-GET-RQ but received " +
                 std::string(to_string(request.command())));
-#else
-            return std::string("Expected C-MOVE-RQ or C-GET-RQ but received ") +
-                   std::string(to_string(request.command()));
-#endif
     }
 }
 
@@ -116,22 +113,16 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
 
     // Verify we have a retrieve handler
     if (!retrieve_handler_) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("No retrieve handler configured"));
-#else
-        return std::string("No retrieve handler configured");
-#endif
+        return pacs::pacs_void_error(
+            pacs::error_codes::retrieve_handler_not_set,
+            "No retrieve handler configured");
     }
 
     // Verify we have a destination resolver for C-MOVE
     if (!destination_resolver_) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("No destination resolver configured for C-MOVE"));
-#else
-        return std::string("No destination resolver configured for C-MOVE");
-#endif
+        return pacs::pacs_void_error(
+            pacs::error_codes::retrieve_missing_destination,
+            "No destination resolver configured for C-MOVE");
     }
 
     auto sop_class_uid = request.affected_sop_class_uid();
@@ -253,12 +244,9 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
 
     // Verify we have a retrieve handler
     if (!retrieve_handler_) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("No retrieve handler configured"));
-#else
-        return std::string("No retrieve handler configured");
-#endif
+        return pacs::pacs_void_error(
+            pacs::error_codes::retrieve_handler_not_set,
+            "No retrieve handler configured");
     }
 
     auto sop_class_uid = request.affected_sop_class_uid();

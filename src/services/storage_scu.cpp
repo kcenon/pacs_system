@@ -5,6 +5,7 @@
 
 #include "pacs/services/storage_scu.hpp"
 #include "pacs/services/storage_scp.hpp"
+#include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
@@ -72,42 +73,32 @@ network::Result<store_result> storage_scu::store_impl(
     // Extract SOP Class UID from dataset
     const auto sop_class_uid = dataset.get_string(tag_sop_class_uid);
     if (sop_class_uid.empty()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info("Missing SOP Class UID in dataset");
-#else
-        return std::string("Missing SOP Class UID in dataset");
-#endif
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::store_missing_sop_class_uid,
+            "Missing SOP Class UID in dataset");
     }
 
     // Extract SOP Instance UID from dataset
     const auto sop_instance_uid = dataset.get_string(tag_sop_instance_uid);
     if (sop_instance_uid.empty()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info("Missing SOP Instance UID in dataset");
-#else
-        return std::string("Missing SOP Instance UID in dataset");
-#endif
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::store_missing_sop_instance_uid,
+            "Missing SOP Instance UID in dataset");
     }
 
     // Verify association is established
     if (!assoc.is_established()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info("Association not established");
-#else
-        return std::string("Association not established");
-#endif
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::association_not_established,
+            "Association not established");
     }
 
     // Get accepted presentation context for this SOP class
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::store_no_accepted_context,
             "No accepted presentation context for SOP Class: " + sop_class_uid);
-#else
-        return std::string(
-            "No accepted presentation context for SOP Class: " + sop_class_uid);
-#endif
     }
 
     // Build C-STORE-RQ message
@@ -140,14 +131,10 @@ network::Result<store_result> storage_scu::store_impl(
     // Verify it's a C-STORE response
     if (response.command() != command_field::c_store_rsp) {
         failures_.fetch_add(1, std::memory_order_relaxed);
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
-            std::string("Expected C-STORE-RSP but received ") +
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::store_unexpected_command,
+            "Expected C-STORE-RSP but received " +
             std::string(to_string(response.command())));
-#else
-        return std::string("Expected C-STORE-RSP but received ") +
-               std::string(to_string(response.command()));
-#endif
     }
 
     // Build result from response
@@ -200,11 +187,7 @@ std::vector<store_result> storage_scu::store_batch(
             store_result failure_result;
             failure_result.sop_instance_uid = dataset.get_string(tag_sop_instance_uid);
             failure_result.status = static_cast<uint16_t>(storage_status::cannot_understand);
-#ifdef PACS_WITH_COMMON_SYSTEM
             failure_result.error_comment = result.error().message;
-#else
-            failure_result.error_comment = result.error();
-#endif
             results.push_back(std::move(failure_result));
 
             // Stop on error if configured
@@ -234,33 +217,24 @@ network::Result<store_result> storage_scu::store_file(
 
     // Check if file exists
     if (!std::filesystem::exists(file_path)) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::file_not_found_service,
             "File not found: " + file_path.string());
-#else
-        return std::string("File not found: " + file_path.string());
-#endif
     }
 
     // Check if it's a regular file
     if (!std::filesystem::is_regular_file(file_path)) {
-#ifdef PACS_WITH_COMMON_SYSTEM
-        return kcenon::common::error_info(
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::not_a_regular_file,
             "Not a regular file: " + file_path.string());
-#else
-        return std::string("Not a regular file: " + file_path.string());
-#endif
     }
 
     // TODO: Implement DICOM file parsing
     // For now, return an error indicating file parsing is not yet implemented
     // This would require the core module's file parser
-#ifdef PACS_WITH_COMMON_SYSTEM
-    return kcenon::common::error_info(
+    return pacs::pacs_error<store_result>(
+        pacs::error_codes::file_parsing_not_implemented,
         "DICOM file parsing not yet implemented");
-#else
-    return std::string("DICOM file parsing not yet implemented");
-#endif
 }
 
 std::vector<store_result> storage_scu::store_directory(
@@ -290,11 +264,7 @@ std::vector<store_result> storage_scu::store_directory(
             store_result failure_result;
             failure_result.sop_instance_uid = file_path.filename().string();
             failure_result.status = static_cast<uint16_t>(storage_status::cannot_understand);
-#ifdef PACS_WITH_COMMON_SYSTEM
             failure_result.error_comment = result.error().message;
-#else
-            failure_result.error_comment = result.error();
-#endif
             results.push_back(std::move(failure_result));
 
             // Stop on error if configured
