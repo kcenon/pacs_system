@@ -40,7 +40,7 @@ namespace {
 /**
  * @brief Output format options
  */
-enum class output_format { human_readable, json };
+enum class output_format { human_readable, json, xml };
 
 /**
  * @brief Command line options
@@ -48,12 +48,18 @@ enum class output_format { human_readable, json };
 struct options {
     std::filesystem::path path;
     std::vector<std::string> filter_tags;  // Keywords to filter
+    std::string search_keyword;            // Search by tag name
     bool pixel_info{false};
     output_format format{output_format::human_readable};
     bool recursive{false};
     bool summary{false};
     bool show_meta{true};
     bool verbose{false};
+    bool quiet{false};
+    int max_depth{-1};      // -1 means unlimited
+    bool no_pixel{false};   // Exclude pixel data
+    bool show_private{false};
+    std::string charset{"UTF-8"};
 };
 
 /**
@@ -82,15 +88,22 @@ Arguments:
   path              DICOM file or directory to inspect
 
 Options:
-  --tags <list>     Show only specific tags (comma-separated keywords)
-                    Example: --tags PatientName,PatientID,StudyDate
-  --pixel-info      Show pixel data information
-  --format <fmt>    Output format: human (default), json
-  --recursive, -r   Recursively scan directories
-  --summary         Show summary only (for directories)
-  --no-meta         Don't show File Meta Information
-  --verbose, -v     Show additional details
-  --help, -h        Show this help message
+  -h, --help              Show this help message
+  -v, --verbose           Verbose output mode
+  -q, --quiet             Minimal output mode (errors only)
+  -f, --format <format>   Output format: text (default), json, xml
+  -t, --tag <tag>         Output specific tag only (e.g., 0010,0010)
+  --tags <list>           Show only specific tags (comma-separated keywords)
+                          Example: --tags PatientName,PatientID,StudyDate
+  -s, --search <keyword>  Search by tag name (case-insensitive)
+  -d, --depth <n>         Limit sequence output depth (default: unlimited)
+  --pixel-info            Show pixel data information
+  --no-pixel              Exclude pixel data from output
+  --show-private          Show private tags (hidden by default)
+  --charset <charset>     Specify character set (default: UTF-8)
+  --recursive, -r         Recursively scan directories
+  --summary               Show summary only (for directories)
+  --no-meta               Don't show File Meta Information
 
 Examples:
   )" << program_name
@@ -98,17 +111,26 @@ Examples:
   )" << program_name
               << R"( image.dcm --tags PatientName,PatientID,StudyDate
   )" << program_name
+              << R"( image.dcm -t 0010,0010
+  )" << program_name
+              << R"( image.dcm --search Patient
+  )" << program_name
               << R"( image.dcm --pixel-info
   )" << program_name
               << R"( image.dcm --format json
   )" << program_name
+              << R"( image.dcm --format xml
+  )" << program_name
+              << R"( image.dcm -d 2             # Limit sequence depth to 2
+  )" << program_name
               << R"( ./dicom_folder/ --recursive --summary
 
 Output Format:
-  Human-readable output shows tags in the format:
+  Human-readable (text) output shows tags in the format:
     (GGGG,EEEE) VR Keyword                      [value]
 
-  JSON output provides structured data for programmatic use.
+  JSON output provides DICOM PS3.18-compatible structured data.
+  XML output provides DICOM Native XML format (PS3.19).
 
 Exit Codes:
   0  Success - File(s) parsed successfully
@@ -124,6 +146,25 @@ Exit Codes:
  * @param opts Output: parsed options
  * @return true if arguments are valid
  */
+/**
+ * @brief Parse a tag string like "0010,0010" or "(0010,0010)"
+ * @param tag_str The tag string
+ * @return Parsed tag or empty string if invalid
+ */
+std::string parse_tag_string(const std::string& tag_str) {
+    std::string s = tag_str;
+    // Remove parentheses if present
+    if (!s.empty() && s.front() == '(') s.erase(0, 1);
+    if (!s.empty() && s.back() == ')') s.pop_back();
+    // Validate format: should be GGGG,EEEE or GGGGEEEE
+    if (s.length() == 9 && s[4] == ',') {
+        return s;  // Already in GGGG,EEEE format
+    } else if (s.length() == 8) {
+        return s.substr(0, 4) + "," + s.substr(4, 4);
+    }
+    return "";
+}
+
 bool parse_arguments(int argc, char* argv[], options& opts) {
     if (argc < 2) {
         return false;
@@ -147,16 +188,45 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
                     opts.filter_tags.push_back(tag);
                 }
             }
+        } else if ((arg == "--tag" || arg == "-t") && i + 1 < argc) {
+            // Parse single tag in format (GGGG,EEEE) or GGGG,EEEE
+            std::string tag_str = parse_tag_string(argv[++i]);
+            if (tag_str.empty()) {
+                std::cerr << "Error: Invalid tag format. Use GGGG,EEEE (e.g., 0010,0010)\n";
+                return false;
+            }
+            opts.filter_tags.push_back(tag_str);
+        } else if ((arg == "--search" || arg == "-s") && i + 1 < argc) {
+            opts.search_keyword = argv[++i];
+        } else if ((arg == "--depth" || arg == "-d") && i + 1 < argc) {
+            try {
+                opts.max_depth = std::stoi(argv[++i]);
+                if (opts.max_depth < 0) {
+                    std::cerr << "Error: Depth must be non-negative\n";
+                    return false;
+                }
+            } catch (...) {
+                std::cerr << "Error: Invalid depth value\n";
+                return false;
+            }
         } else if (arg == "--pixel-info") {
             opts.pixel_info = true;
-        } else if (arg == "--format" && i + 1 < argc) {
+        } else if (arg == "--no-pixel") {
+            opts.no_pixel = true;
+        } else if (arg == "--show-private") {
+            opts.show_private = true;
+        } else if (arg == "--charset" && i + 1 < argc) {
+            opts.charset = argv[++i];
+        } else if ((arg == "--format" || arg == "-f") && i + 1 < argc) {
             std::string fmt = argv[++i];
             if (fmt == "json") {
                 opts.format = output_format::json;
-            } else if (fmt == "human") {
+            } else if (fmt == "human" || fmt == "text") {
                 opts.format = output_format::human_readable;
+            } else if (fmt == "xml") {
+                opts.format = output_format::xml;
             } else {
-                std::cerr << "Error: Unknown format '" << fmt << "'\n";
+                std::cerr << "Error: Unknown format '" << fmt << "'. Use: text, json, xml\n";
                 return false;
             }
         } else if (arg == "--recursive" || arg == "-r") {
@@ -167,6 +237,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
             opts.show_meta = false;
         } else if (arg == "--verbose" || arg == "-v") {
             opts.verbose = true;
+        } else if (arg == "--quiet" || arg == "-q") {
+            opts.quiet = true;
         } else if (arg[0] == '-') {
             std::cerr << "Error: Unknown option '" << arg << "'\n";
             return false;
@@ -181,6 +253,11 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
     if (opts.path.empty()) {
         std::cerr << "Error: No path specified\n";
         return false;
+    }
+
+    // Quiet mode overrides verbose
+    if (opts.quiet) {
+        opts.verbose = false;
     }
 
     return true;
@@ -343,41 +420,105 @@ std::string format_value(const pacs::core::dicom_element& element,
 }
 
 /**
+ * @brief Case-insensitive string contains check
+ * @param haystack String to search in
+ * @param needle String to search for
+ * @return true if needle is found (case-insensitive)
+ */
+bool contains_ci(const std::string& haystack, const std::string& needle) {
+    if (needle.empty()) return true;
+    if (haystack.empty()) return false;
+
+    std::string h = haystack;
+    std::string n = needle;
+    std::transform(h.begin(), h.end(), h.begin(), ::tolower);
+    std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+    return h.find(n) != std::string::npos;
+}
+
+/**
+ * @brief Check if a tag is a private tag (odd group number)
+ * @param tag The DICOM tag
+ * @return true if tag is private
+ */
+bool is_private_tag(const pacs::core::dicom_tag& tag) {
+    return (tag.group() % 2) != 0;
+}
+
+/**
+ * @brief Check if a tag is pixel data
+ * @param tag The DICOM tag
+ * @return true if tag is pixel data
+ */
+bool is_pixel_data_tag(const pacs::core::dicom_tag& tag) {
+    return tag.group() == 0x7FE0 && tag.element() == 0x0010;
+}
+
+/**
  * @brief Check if a tag should be displayed based on filter
  * @param tag The DICOM tag
- * @param filter_tags List of keywords to include
+ * @param opts Command line options
  * @param dict Reference to the dictionary
  * @return true if tag should be displayed
  */
 bool should_display_tag(const pacs::core::dicom_tag& tag,
-                        const std::vector<std::string>& filter_tags,
+                        const options& opts,
                         const pacs::core::dicom_dictionary& dict) {
-    if (filter_tags.empty()) {
-        return true;
-    }
-
-    auto info = dict.find(tag);
-    if (!info) {
+    // Handle pixel data exclusion
+    if (opts.no_pixel && is_pixel_data_tag(tag)) {
         return false;
     }
 
-    for (const auto& keyword : filter_tags) {
-        if (info->keyword == keyword) {
-            return true;
+    // Handle private tags
+    if (is_private_tag(tag) && !opts.show_private) {
+        return false;
+    }
+
+    auto info = dict.find(tag);
+    std::string keyword = info ? std::string(info->keyword) : "";
+
+    // Handle search keyword
+    if (!opts.search_keyword.empty()) {
+        if (!contains_ci(keyword, opts.search_keyword) &&
+            !contains_ci(tag.to_string(), opts.search_keyword)) {
+            return false;
         }
     }
 
-    return false;
+    // Handle tag filter list
+    if (!opts.filter_tags.empty()) {
+        for (const auto& filter : opts.filter_tags) {
+            // Check if filter is a tag string (contains comma or is 8 hex chars)
+            if (filter.find(',') != std::string::npos || filter.length() == 8) {
+                // Compare as tag string
+                std::string tag_str = tag.to_string();
+                // Remove parentheses for comparison
+                std::string tag_cmp = tag_str.substr(1, tag_str.length() - 2);
+                if (tag_cmp == filter) {
+                    return true;
+                }
+            } else {
+                // Compare as keyword
+                if (keyword == filter) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    return true;
 }
 
 /**
  * @brief Print dataset in human-readable format
  * @param dataset The dataset to print
  * @param opts Command line options
+ * @param current_depth Current depth level (for depth limiting)
  * @param indent Indentation level for nested sequences
  */
 void print_dataset_human(const pacs::core::dicom_dataset& dataset,
-                         const options& opts, int indent = 0) {
+                         const options& opts, int current_depth = 0, int indent = 0) {
     using namespace pacs::core;
     using namespace pacs::encoding;
 
@@ -386,7 +527,7 @@ void print_dataset_human(const pacs::core::dicom_dataset& dataset,
 
     for (const auto& [tag, element] : dataset) {
         // Check filter
-        if (!should_display_tag(tag, opts.filter_tags, dict)) {
+        if (!should_display_tag(tag, opts, dict)) {
             continue;
         }
 
@@ -395,6 +536,11 @@ void print_dataset_human(const pacs::core::dicom_dataset& dataset,
         std::string keyword =
             info ? std::string(info->keyword) : "UnknownTag";
 
+        // Mark private tags
+        if (is_private_tag(tag)) {
+            keyword = "Private: " + keyword;
+        }
+
         // Format: (GGGG,EEEE) VR Keyword                      [value]
         std::cout << indent_str << tag.to_string() << " "
                   << to_string(element.vr()) << " " << std::left
@@ -402,12 +548,19 @@ void print_dataset_human(const pacs::core::dicom_dataset& dataset,
 
         // Handle sequences specially
         if (element.is_sequence()) {
-            std::cout << "\n";
             const auto& items = element.sequence_items();
+            std::cout << "(" << items.size() << " items)\n";
+
+            // Check depth limit
+            if (opts.max_depth >= 0 && current_depth >= opts.max_depth) {
+                std::cout << indent_str << "  ... (depth limit reached)\n";
+                continue;
+            }
+
             int item_num = 0;
             for (const auto& item : items) {
                 std::cout << indent_str << "  > Item #" << item_num++ << "\n";
-                print_dataset_human(item, opts, indent + 2);
+                print_dataset_human(item, opts, current_depth + 1, indent + 2);
             }
         } else {
             std::cout << "[" << format_value(element) << "]\n";
@@ -416,13 +569,14 @@ void print_dataset_human(const pacs::core::dicom_dataset& dataset,
 }
 
 /**
- * @brief Print dataset as JSON
+ * @brief Print dataset as JSON (DICOM PS3.18 compatible)
  * @param dataset The dataset to print
  * @param opts Command line options
+ * @param current_depth Current depth level
  * @param indent Current indentation
  */
 void print_dataset_json(const pacs::core::dicom_dataset& dataset,
-                        const options& opts, int indent = 2) {
+                        const options& opts, int current_depth = 0, int indent = 2) {
     using namespace pacs::core;
     using namespace pacs::encoding;
 
@@ -431,54 +585,160 @@ void print_dataset_json(const pacs::core::dicom_dataset& dataset,
 
     std::cout << "{\n";
 
-    size_t count = 0;
-    size_t total = dataset.size();
+    bool first = true;
 
     for (const auto& [tag, element] : dataset) {
-        ++count;
-
         // Check filter
-        if (!should_display_tag(tag, opts.filter_tags, dict)) {
+        if (!should_display_tag(tag, opts, dict)) {
             continue;
         }
+
+        if (!first) {
+            std::cout << ",\n";
+        }
+        first = false;
 
         auto info = dict.find(tag);
         std::string keyword =
             info ? std::string(info->keyword) : tag.to_string();
 
-        std::cout << indent_str << "  \"" << keyword << "\": {\n";
-        std::cout << indent_str << "    \"tag\": \"" << tag.to_string()
-                  << "\",\n";
-        std::cout << indent_str << "    \"vr\": \"" << to_string(element.vr())
-                  << "\",\n";
-        std::cout << indent_str
-                  << "    \"length\": " << element.length() << ",\n";
+        // Use DICOM PS3.18 JSON format: tag as key in GGGGEEEE format
+        std::string tag_key = tag.to_string();
+        tag_key.erase(std::remove(tag_key.begin(), tag_key.end(), '('), tag_key.end());
+        tag_key.erase(std::remove(tag_key.begin(), tag_key.end(), ')'), tag_key.end());
+        tag_key.erase(std::remove(tag_key.begin(), tag_key.end(), ','), tag_key.end());
+
+        std::cout << indent_str << "  \"" << tag_key << "\": {\n";
+        std::cout << indent_str << "    \"vr\": \"" << to_string(element.vr()) << "\"";
 
         if (element.is_sequence()) {
-            std::cout << indent_str << "    \"value\": [\n";
-            const auto& items = element.sequence_items();
-            for (size_t i = 0; i < items.size(); ++i) {
-                std::cout << indent_str << "      ";
-                print_dataset_json(items[i], opts, indent + 6);
-                if (i < items.size() - 1) {
-                    std::cout << ",";
+            std::cout << ",\n" << indent_str << "    \"Value\": [\n";
+
+            // Check depth limit
+            if (opts.max_depth >= 0 && current_depth >= opts.max_depth) {
+                std::cout << indent_str << "      { \"_note\": \"depth limit reached\" }\n";
+            } else {
+                const auto& items = element.sequence_items();
+                for (size_t i = 0; i < items.size(); ++i) {
+                    std::cout << indent_str << "      ";
+                    print_dataset_json(items[i], opts, current_depth + 1, indent + 6);
+                    if (i < items.size() - 1) {
+                        std::cout << ",";
+                    }
+                    std::cout << "\n";
                 }
-                std::cout << "\n";
             }
             std::cout << indent_str << "    ]\n";
         } else {
             std::string value = json_escape(format_value(element, 256));
-            std::cout << indent_str << "    \"value\": \"" << value << "\"\n";
+            std::cout << ",\n" << indent_str << "    \"Value\": [\"" << value << "\"]\n";
         }
 
         std::cout << indent_str << "  }";
-        if (count < total) {
-            std::cout << ",";
-        }
-        std::cout << "\n";
     }
 
-    std::cout << indent_str << "}";
+    std::cout << "\n" << indent_str << "}";
+}
+
+/**
+ * @brief Escape string for XML output
+ * @param str Input string
+ * @return XML-escaped string
+ */
+std::string xml_escape(const std::string& str) {
+    std::ostringstream oss;
+    for (char c : str) {
+        switch (c) {
+            case '<': oss << "&lt;"; break;
+            case '>': oss << "&gt;"; break;
+            case '&': oss << "&amp;"; break;
+            case '"': oss << "&quot;"; break;
+            case '\'': oss << "&apos;"; break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20 && c != '\t' && c != '\n' && c != '\r') {
+                    oss << "&#" << static_cast<int>(static_cast<unsigned char>(c)) << ";";
+                } else {
+                    oss << c;
+                }
+        }
+    }
+    return oss.str();
+}
+
+/**
+ * @brief Print dataset as DICOM Native XML (PS3.19)
+ * @param dataset The dataset to print
+ * @param opts Command line options
+ * @param current_depth Current depth level
+ * @param indent Current indentation
+ */
+void print_dataset_xml(const pacs::core::dicom_dataset& dataset,
+                       const options& opts, int current_depth = 0, int indent = 2) {
+    using namespace pacs::core;
+    using namespace pacs::encoding;
+
+    auto& dict = dicom_dictionary::instance();
+    std::string indent_str(indent, ' ');
+
+    for (const auto& [tag, element] : dataset) {
+        // Check filter
+        if (!should_display_tag(tag, opts, dict)) {
+            continue;
+        }
+
+        auto info = dict.find(tag);
+        std::string keyword = info ? std::string(info->keyword) : "UnknownTag";
+        std::string vr_str{to_string(element.vr())};
+
+        // Format tag as GGGGEEEE
+        std::string tag_str = tag.to_string();
+        tag_str.erase(std::remove(tag_str.begin(), tag_str.end(), '('), tag_str.end());
+        tag_str.erase(std::remove(tag_str.begin(), tag_str.end(), ')'), tag_str.end());
+        tag_str.erase(std::remove(tag_str.begin(), tag_str.end(), ','), tag_str.end());
+
+        std::cout << indent_str << "<DicomAttribute tag=\"" << tag_str
+                  << "\" vr=\"" << vr_str
+                  << "\" keyword=\"" << xml_escape(keyword) << "\"";
+
+        if (element.is_sequence()) {
+            std::cout << ">\n";
+
+            // Check depth limit
+            if (opts.max_depth >= 0 && current_depth >= opts.max_depth) {
+                std::cout << indent_str << "  <!-- depth limit reached -->\n";
+            } else {
+                const auto& items = element.sequence_items();
+                int item_num = 1;
+                for (const auto& item : items) {
+                    std::cout << indent_str << "  <Item number=\"" << item_num++ << "\">\n";
+                    print_dataset_xml(item, opts, current_depth + 1, indent + 4);
+                    std::cout << indent_str << "  </Item>\n";
+                }
+            }
+            std::cout << indent_str << "</DicomAttribute>\n";
+        } else if (element.is_empty()) {
+            std::cout << "/>\n";
+        } else {
+            std::cout << ">\n";
+
+            // Handle PersonName VR specially
+            if (element.vr() == vr_type::PN) {
+                auto result = element.as_string();
+                if (result.is_ok()) {
+                    std::cout << indent_str << "  <PersonName>\n";
+                    std::cout << indent_str << "    <Alphabetic>\n";
+                    std::cout << indent_str << "      <FamilyName>" << xml_escape(result.value()) << "</FamilyName>\n";
+                    std::cout << indent_str << "    </Alphabetic>\n";
+                    std::cout << indent_str << "  </PersonName>\n";
+                }
+            } else {
+                std::string value = format_value(element, 1024);
+                std::cout << indent_str << "  <Value number=\"1\">" << xml_escape(value) << "</Value>\n";
+            }
+
+            std::cout << indent_str << "</DicomAttribute>\n";
+        }
+    }
 }
 
 /**
@@ -569,10 +829,15 @@ int dump_file(const std::filesystem::path& file_path, const options& opts) {
         return 2;
     }
 
+    // Quiet mode: only show errors
+    if (opts.quiet) {
+        return 0;
+    }
+
     auto& file = result.value();
 
     if (opts.format == output_format::json) {
-        // JSON output
+        // JSON output (DICOM PS3.18 compatible)
         std::cout << "{\n";
         std::cout << "  \"file\": \"" << json_escape(file_path.string())
                   << "\",\n";
@@ -591,8 +856,25 @@ int dump_file(const std::filesystem::path& file_path, const options& opts) {
         std::cout << "  \"dataset\": ";
         print_dataset_json(file.dataset(), opts);
         std::cout << "\n}\n";
+    } else if (opts.format == output_format::xml) {
+        // XML output (DICOM Native XML PS3.19)
+        std::cout << "<?xml version=\"1.0\" encoding=\"" << opts.charset << "\"?>\n";
+        std::cout << "<NativeDicomModel>\n";
+        std::cout << "  <!-- File: " << xml_escape(file_path.string()) << " -->\n";
+        std::cout << "  <!-- Transfer Syntax: " << file.transfer_syntax().name() << " -->\n";
+        std::cout << "  <!-- SOP Class: " << file.sop_class_uid() << " -->\n";
+        std::cout << "  <!-- SOP Instance: " << file.sop_instance_uid() << " -->\n";
+
+        if (opts.show_meta) {
+            std::cout << "  <!-- File Meta Information -->\n";
+            print_dataset_xml(file.meta_information(), opts);
+        }
+
+        std::cout << "  <!-- Dataset -->\n";
+        print_dataset_xml(file.dataset(), opts);
+        std::cout << "</NativeDicomModel>\n";
     } else {
-        // Human-readable output
+        // Human-readable (text) output
         std::cout << "# File: " << file_path.string() << "\n";
         std::cout << "# Transfer Syntax: " << file.transfer_syntax().name()
                   << " (" << file.transfer_syntax().uid() << ")\n";
@@ -756,7 +1038,11 @@ void print_summary(const scan_summary& summary, const options& opts) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    std::cout << R"(
+    options opts;
+
+    if (!parse_arguments(argc, argv, opts)) {
+        // Show banner for help
+        std::cout << R"(
   ____   ____ __  __   ____  _   _ __  __ ____
  |  _ \ / ___|  \/  | |  _ \| | | |  \/  |  _ \
  | | | | |   | |\/| | | | | | | | | |\/| | |_) |
@@ -765,10 +1051,6 @@ int main(int argc, char* argv[]) {
 
         DICOM File Inspection Utility
 )" << "\n";
-
-    options opts;
-
-    if (!parse_arguments(argc, argv, opts)) {
         print_usage(argv[0]);
         return 1;
     }
@@ -780,18 +1062,35 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
+    // Show banner only in non-quiet text/human mode
+    if (!opts.quiet && opts.format == output_format::human_readable) {
+        std::cout << R"(
+  ____   ____ __  __   ____  _   _ __  __ ____
+ |  _ \ / ___|  \/  | |  _ \| | | |  \/  |  _ \
+ | | | | |   | |\/| | | | | | | | | |\/| | |_) |
+ | |_| | |___| |  | | | |_| | |_| | |  | |  __/
+ |____/ \____|_|  |_| |____/ \___/|_|  |_|_|
+
+        DICOM File Inspection Utility
+)" << "\n";
+    }
+
     // Handle directory vs file
     if (std::filesystem::is_directory(opts.path)) {
         if (opts.summary) {
-            std::cout << "Scanning directory: " << opts.path.string() << "\n";
-            if (opts.recursive) {
-                std::cout << "Mode: Recursive\n";
+            if (!opts.quiet) {
+                std::cout << "Scanning directory: " << opts.path.string() << "\n";
+                if (opts.recursive) {
+                    std::cout << "Mode: Recursive\n";
+                }
+                std::cout << "\n";
             }
-            std::cout << "\n";
 
             scan_summary summary;
             scan_directory(opts.path, opts, summary);
-            print_summary(summary, opts);
+            if (!opts.quiet) {
+                print_summary(summary, opts);
+            }
             return summary.invalid_files > 0 ? 1 : 0;
         } else {
             // Dump each file
