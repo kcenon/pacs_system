@@ -302,11 +302,11 @@ auto dicom_dataset::get_numeric(dicom_tag tag) const -> std::optional<T> {
         return std::nullopt;
     }
 
-    try {
-        return elem->as_numeric<T>();
-    } catch (const value_conversion_error&) {
-        return std::nullopt;
+    auto result = elem->as_numeric<T>();
+    if (result.is_ok()) {
+        return result.value();
     }
+    return std::nullopt;
 }
 
 template <typename T>

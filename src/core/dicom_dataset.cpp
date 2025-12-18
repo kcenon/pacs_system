@@ -42,7 +42,7 @@ auto dicom_dataset::get_string(dicom_tag tag,
     if (elem == nullptr) {
         return std::string{default_value};
     }
-    return elem->as_string();
+    return elem->as_string().unwrap_or(std::string{default_value});
 }
 
 // ============================================================================

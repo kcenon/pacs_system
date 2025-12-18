@@ -5,6 +5,7 @@
 
 #include <pacs/core/dicom_element.hpp>
 #include <pacs/core/dicom_dataset.hpp>
+#include <pacs/core/result.hpp>
 
 #include <algorithm>
 #include <charconv>
@@ -44,16 +45,16 @@ auto dicom_element::from_string(dicom_tag tag, encoding::vr_type vr,
 // String Value Access
 // ============================================================================
 
-auto dicom_element::as_string() const -> std::string {
+auto dicom_element::as_string() const -> pacs::Result<std::string> {
     if (data_.empty()) {
-        return {};
+        return pacs::ok(std::string{});
     }
 
     // For string VRs, convert bytes to string and remove padding
     if (encoding::is_string_vr(vr_)) {
         std::string_view raw{reinterpret_cast<const char*>(data_.data()),
                              data_.size()};
-        return remove_padding(raw, vr_);
+        return pacs::ok(remove_padding(raw, vr_));
     }
 
     // For numeric VRs, convert to string representation
@@ -61,42 +62,50 @@ auto dicom_element::as_string() const -> std::string {
         switch (vr_) {
             case encoding::vr_type::US:
                 if (data_.size() >= 2) {
-                    return std::to_string(as_numeric<uint16_t>());
+                    if (auto val = as_numeric<uint16_t>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::SS:
                 if (data_.size() >= 2) {
-                    return std::to_string(as_numeric<int16_t>());
+                    if (auto val = as_numeric<int16_t>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::UL:
                 if (data_.size() >= 4) {
-                    return std::to_string(as_numeric<uint32_t>());
+                    if (auto val = as_numeric<uint32_t>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::SL:
                 if (data_.size() >= 4) {
-                    return std::to_string(as_numeric<int32_t>());
+                    if (auto val = as_numeric<int32_t>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::UV:
                 if (data_.size() >= 8) {
-                    return std::to_string(as_numeric<uint64_t>());
+                    if (auto val = as_numeric<uint64_t>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::SV:
                 if (data_.size() >= 8) {
-                    return std::to_string(as_numeric<int64_t>());
+                    if (auto val = as_numeric<int64_t>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::FL:
                 if (data_.size() >= 4) {
-                    return std::to_string(as_numeric<float>());
+                    if (auto val = as_numeric<float>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             case encoding::vr_type::FD:
                 if (data_.size() >= 8) {
-                    return std::to_string(as_numeric<double>());
+                    if (auto val = as_numeric<double>(); val.is_ok())
+                        return pacs::ok(std::to_string(val.value()));
                 }
                 break;
             default:
@@ -105,15 +114,22 @@ auto dicom_element::as_string() const -> std::string {
     }
 
     // For binary VRs or unknown, return raw bytes as string
-    return std::string{reinterpret_cast<const char*>(data_.data()), data_.size()};
+    return pacs::ok(
+        std::string{reinterpret_cast<const char*>(data_.data()), data_.size()});
 }
 
-auto dicom_element::as_string_list() const -> std::vector<std::string> {
-    std::vector<std::string> result;
-    const std::string str = as_string();
+auto dicom_element::as_string_list() const
+    -> pacs::Result<std::vector<std::string>> {
+    auto str_result = as_string();
+    if (str_result.is_err()) {
+        return pacs::pacs_error<std::vector<std::string>>(
+            str_result.error().code, str_result.error().message);
+    }
+    const std::string str = str_result.value();
 
+    std::vector<std::string> result;
     if (str.empty()) {
-        return result;
+        return pacs::ok(result);
     }
 
     // Split by backslash (DICOM VM delimiter)
@@ -128,7 +144,7 @@ auto dicom_element::as_string_list() const -> std::vector<std::string> {
     // Add the last segment
     result.push_back(str.substr(start));
 
-    return result;
+    return pacs::ok(result);
 }
 
 // ============================================================================

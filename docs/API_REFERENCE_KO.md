@@ -114,12 +114,15 @@ public:
     uint32_t length() const noexcept;
     bool is_empty() const noexcept;
 
-    // 값 접근
-    std::string as_string() const;
-    std::vector<std::string> as_strings() const;  // 다중 값
+    // 값 접근 (예외 없는 오류 처리를 위해 Result<T> 반환)
+    pacs::Result<std::string> as_string() const;
+    pacs::Result<std::vector<std::string>> as_string_list() const;  // 다중 값
 
     template<typename T>
-    T as_numeric() const;
+    pacs::Result<T> as_numeric() const;
+
+    template<typename T>
+    pacs::Result<std::vector<T>> as_numeric_list() const;  // 다중 값
 
     std::vector<uint8_t> as_bytes() const;
 
@@ -164,9 +167,16 @@ auto rows = dicom_element::create_numeric(
     uint16_t{512}
 );
 
-// 값 접근
-std::cout << patient_name.as_string() << std::endl;  // "Doe^John"
-std::cout << rows.as_numeric<uint16_t>() << std::endl;  // 512
+// 값 접근 (예외 없는 오류 처리를 위해 Result<T> 사용)
+std::cout << patient_name.as_string().unwrap_or("") << std::endl;  // "Doe^John"
+std::cout << rows.as_numeric<uint16_t>().unwrap_or(0) << std::endl;  // 512
+
+// 또는 오류 확인
+if (auto result = patient_name.as_string(); result.is_ok()) {
+    std::cout << result.value() << std::endl;
+} else {
+    std::cerr << "오류: " << result.error().message() << std::endl;
+}
 ```
 
 ---
@@ -271,7 +281,7 @@ if (dataset.contains(tags::PixelData)) {
 // 반복
 for (const auto& element : dataset) {
     std::cout << element.tag().to_string() << ": "
-              << element.as_string() << std::endl;
+              << element.as_string().unwrap_or("") << std::endl;
 }
 ```
 

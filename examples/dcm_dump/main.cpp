@@ -285,39 +285,56 @@ std::string format_value(const pacs::core::dicom_element& element,
 
     // Handle string VRs
     if (is_string_vr(vr)) {
-        std::string value = element.as_string();
-        if (value.length() > max_length) {
-            value = value.substr(0, max_length - 3) + "...";
+        auto result = element.as_string();
+        if (result.is_ok()) {
+            std::string value = result.value();
+            if (value.length() > max_length) {
+                value = value.substr(0, max_length - 3) + "...";
+            }
+            return value;
         }
-        return value;
+        // Fall through to raw data display on error
     }
 
     // Handle numeric VRs
     if (is_numeric_vr(vr)) {
-        try {
-            switch (vr) {
-                case vr_type::US:
-                    return std::to_string(element.as_numeric<uint16_t>());
-                case vr_type::SS:
-                    return std::to_string(element.as_numeric<int16_t>());
-                case vr_type::UL:
-                    return std::to_string(element.as_numeric<uint32_t>());
-                case vr_type::SL:
-                    return std::to_string(element.as_numeric<int32_t>());
-                case vr_type::FL:
-                    return std::to_string(element.as_numeric<float>());
-                case vr_type::FD:
-                    return std::to_string(element.as_numeric<double>());
-                case vr_type::UV:
-                    return std::to_string(element.as_numeric<uint64_t>());
-                case vr_type::SV:
-                    return std::to_string(element.as_numeric<int64_t>());
-                default:
-                    break;
-            }
-        } catch (const pacs::core::value_conversion_error&) {
-            // Fall through to raw data display
+        switch (vr) {
+            case vr_type::US:
+                if (auto val = element.as_numeric<uint16_t>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::SS:
+                if (auto val = element.as_numeric<int16_t>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::UL:
+                if (auto val = element.as_numeric<uint32_t>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::SL:
+                if (auto val = element.as_numeric<int32_t>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::FL:
+                if (auto val = element.as_numeric<float>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::FD:
+                if (auto val = element.as_numeric<double>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::UV:
+                if (auto val = element.as_numeric<uint64_t>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            case vr_type::SV:
+                if (auto val = element.as_numeric<int64_t>(); val.is_ok())
+                    return std::to_string(val.value());
+                break;
+            default:
+                break;
         }
+        // Fall through to raw data display on error
     }
 
     // Fallback: show raw bytes

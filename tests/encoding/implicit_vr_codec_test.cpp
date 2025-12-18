@@ -151,7 +151,9 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         auto& elem = pacs::get_value(result);
 
         CHECK(elem.tag() == tags::rows);
-        CHECK(elem.as_numeric<uint16_t>() == 512);
+        auto num_result = elem.as_numeric<uint16_t>();
+        REQUIRE(num_result.is_ok());
+        CHECK(num_result.value() == 512);
     }
 
     SECTION("insufficient data returns error") {
