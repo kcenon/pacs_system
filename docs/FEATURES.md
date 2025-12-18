@@ -1571,6 +1571,13 @@ std::cout << "Contentions: " << stats.contention_count << "\n";
 | -740 to -759 | Encoding | Encoding, decoding, compression |
 | -760 to -779 | Network | Association, DIMSE, PDU |
 | -780 to -799 | Storage | Store, retrieve, query operations |
+| -800 to -819 | C-STORE Service | Storage SCP/SCU operations |
+| -820 to -839 | C-FIND Service | Query SCP operations |
+| -840 to -859 | C-MOVE/C-GET Service | Retrieve SCP operations |
+| -860 to -869 | Verification Service | C-ECHO operations |
+| -870 to -879 | MPPS Service | MPPS N-CREATE/N-SET operations |
+| -880 to -889 | Worklist Service | Modality Worklist operations |
+| -890 to -899 | General Service | Common service errors |
 
 **Classes and Types**:
 - `pacs::Result<T>` - Result type alias
@@ -1658,6 +1665,7 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | 2.2.0 | 2025-12-17 | raphaelshin | Added: Result<T> pattern for unified error handling, PACS error codes (-700 to -799) for Issue #308 |
 | 2.3.0 | 2025-12-17 | raphaelshin | Added: Study Lock Manager for concurrent access control with exclusive/shared/migration locks for Issue #208 |
 | 2.4.0 | 2025-12-17 | raphaelshin | Added: SIMD optimization infrastructure for byte swap operations (SSE/AVX/NEON) for Issue #313 |
+| 2.5.0 | 2025-12-18 | raphaelshin | Added: Service-specific error codes (-800 to -899), unified Result<T> pattern for services module for Issue #325 |
 
 ---
 
