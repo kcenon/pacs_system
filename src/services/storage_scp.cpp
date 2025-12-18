@@ -15,9 +15,12 @@ namespace pacs::services {
 // Construction
 // =============================================================================
 
-storage_scp::storage_scp() : storage_scp(storage_scp_config{}) {}
+storage_scp::storage_scp(std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger)) {}
 
-storage_scp::storage_scp(const storage_scp_config& config) : config_(config) {}
+storage_scp::storage_scp(const storage_scp_config& config,
+                         std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger)), config_(config) {}
 
 // =============================================================================
 // Handler Registration

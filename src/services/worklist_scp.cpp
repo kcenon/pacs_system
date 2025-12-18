@@ -16,7 +16,8 @@ namespace pacs::services {
 // Construction
 // =============================================================================
 
-worklist_scp::worklist_scp() = default;
+worklist_scp::worklist_scp(std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger)) {}
 
 // =============================================================================
 // Configuration

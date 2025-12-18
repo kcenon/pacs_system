@@ -228,9 +228,11 @@ public:
     // =========================================================================
 
     /**
-     * @brief Construct a Retrieve SCP
+     * @brief Construct a Retrieve SCP with optional logger
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
      */
-    retrieve_scp();
+    explicit retrieve_scp(std::shared_ptr<di::ILogger> logger = nullptr);
 
     ~retrieve_scp() override = default;
 

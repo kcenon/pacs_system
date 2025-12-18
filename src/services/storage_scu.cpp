@@ -48,9 +48,12 @@ constexpr std::array<std::string_view, 4> dicom_extensions = {
 // Construction
 // =============================================================================
 
-storage_scu::storage_scu() : storage_scu(storage_scu_config{}) {}
+storage_scu::storage_scu(std::shared_ptr<di::ILogger> logger)
+    : logger_(logger ? std::move(logger) : di::null_logger()) {}
 
-storage_scu::storage_scu(const storage_scu_config& config) : config_(config) {}
+storage_scu::storage_scu(const storage_scu_config& config,
+                         std::shared_ptr<di::ILogger> logger)
+    : logger_(logger ? std::move(logger) : di::null_logger()), config_(config) {}
 
 // =============================================================================
 // Single Image Operations
