@@ -1718,6 +1718,16 @@ if(PACS_BUILD_BENCHMARKS)
     else()
         message(STATUS "  [--] thread_performance_benchmarks: OFF (requires pacs_integration and Catch2)")
     endif()
+
+    # SIMD Performance Benchmarks
+    # @see Issue #332 - Add SIMD optimization benchmarks
+    # @see Issue #313 - Apply SIMD Optimization (Image Processing)
+    if(TARGET pacs_encoding AND TARGET Catch2::Catch2WithMain)
+        add_subdirectory(benchmarks/simd_performance)
+        message(STATUS "  [OK] simd_performance_benchmarks: SIMD optimization measurement")
+    else()
+        message(STATUS "  [--] simd_performance_benchmarks: OFF (requires pacs_encoding and Catch2)")
+    endif()
 endif()
 
 ##################################################

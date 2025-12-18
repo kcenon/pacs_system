@@ -11,6 +11,7 @@
 #ifndef PACS_ENCODING_SIMD_CONFIG_HPP
 #define PACS_ENCODING_SIMD_CONFIG_HPP
 
+#include <cstddef>
 #include <cstdint>
 
 // Platform detection
