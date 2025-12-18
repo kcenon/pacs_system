@@ -20,6 +20,7 @@
 
 #include <kcenon/thread/lockfree/lockfree_queue.h>
 
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
