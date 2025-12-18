@@ -157,14 +157,19 @@ public:
 
     /**
      * @brief Construct a Storage SCP with default configuration
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
      */
-    storage_scp();
+    explicit storage_scp(std::shared_ptr<di::ILogger> logger = nullptr);
 
     /**
      * @brief Construct a Storage SCP with custom configuration
+     *
      * @param config Configuration options
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
      */
-    explicit storage_scp(const storage_scp_config& config);
+    explicit storage_scp(const storage_scp_config& config,
+                         std::shared_ptr<di::ILogger> logger = nullptr);
 
     ~storage_scp() override = default;
 

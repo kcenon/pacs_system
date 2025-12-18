@@ -16,7 +16,8 @@ namespace pacs::services {
 // Construction
 // =============================================================================
 
-mpps_scp::mpps_scp() = default;
+mpps_scp::mpps_scp(std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger)) {}
 
 // =============================================================================
 // Configuration

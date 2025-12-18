@@ -517,7 +517,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
-    storage_scu scu{{}};
+    storage_scu scu;
 
     auto ct_result = scu.store(assoc, ct_dataset);
     REQUIRE(ct_result.is_ok());
@@ -605,7 +605,7 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
-    storage_scu scu{{}};
+    storage_scu scu;
 
     for (const auto& name : patient_names) {
         auto ds = generate_ct_dataset();

@@ -71,7 +71,14 @@ public:
     // Construction
     // =========================================================================
 
-    verification_scp() = default;
+    /**
+     * @brief Construct Verification SCP with optional logger
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
+     */
+    explicit verification_scp(std::shared_ptr<di::ILogger> logger = nullptr)
+        : scp_service(std::move(logger)) {}
+
     ~verification_scp() override = default;
 
     // =========================================================================

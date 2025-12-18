@@ -228,7 +228,13 @@ public:
     // Construction
     // =========================================================================
 
-    mpps_scp();
+    /**
+     * @brief Construct MPPS SCP with optional logger
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
+     */
+    explicit mpps_scp(std::shared_ptr<di::ILogger> logger = nullptr);
+
     ~mpps_scp() override = default;
 
     // =========================================================================

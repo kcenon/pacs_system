@@ -3591,6 +3591,73 @@ public:
 } // namespace pacs::di
 ```
 
+### `pacs::di::ILogger`
+
+의존성 주입을 위한 추상 로거 인터페이스입니다. 모의 구현을 허용하여 테스트 가능한 로깅을 지원합니다.
+
+```cpp
+#include <pacs/di/ilogger.hpp>
+
+namespace pacs::di {
+
+class ILogger {
+public:
+    virtual ~ILogger() = default;
+
+    // 로그 레벨 메서드
+    virtual void trace(std::string_view message) = 0;
+    virtual void debug(std::string_view message) = 0;
+    virtual void info(std::string_view message) = 0;
+    virtual void warn(std::string_view message) = 0;
+    virtual void error(std::string_view message) = 0;
+    virtual void fatal(std::string_view message) = 0;
+
+    // 로그 레벨 활성화 여부 확인
+    [[nodiscard]] virtual bool is_enabled(integration::log_level level) const noexcept = 0;
+
+    // 포맷 로깅 편의 메서드 (템플릿)
+    template <typename... Args>
+    void trace_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    template <typename... Args>
+    void debug_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    // ... (info_fmt, warn_fmt, error_fmt, fatal_fmt)
+};
+
+// 무동작 로거 구현 (로거가 제공되지 않을 때 기본값)
+class NullLogger final : public ILogger;
+
+// logger_adapter에 위임하는 기본 구현
+class LoggerService final : public ILogger;
+
+// 공유 null 로거 인스턴스 반환 (싱글톤)
+[[nodiscard]] std::shared_ptr<ILogger> null_logger();
+
+} // namespace pacs::di
+```
+
+**서비스에서의 사용**:
+
+모든 SCP/SCU 서비스는 선택적 로거 주입을 지원합니다:
+
+```cpp
+#include <pacs/services/storage_scp.hpp>
+#include <pacs/di/ilogger.hpp>
+
+// 기본 생성은 null_logger 사용 (무출력)
+storage_scp scp;
+
+// 사용자 지정 로거 주입
+auto logger = std::make_shared<pacs::di::LoggerService>();
+storage_scp scp_with_logging(logger);
+
+// 런타임에 로거 변경
+scp.set_logger(another_logger);
+
+// 현재 로거 접근
+auto& current = scp.logger();
+current->info("Storage SCP 준비 완료");
+```
+
 ### `pacs::di::register_services`
 
 ServiceContainer에 모든 PACS 서비스를 등록합니다.
@@ -3613,9 +3680,33 @@ auto network = container.resolve<pacs::di::IDicomNetwork>().value();
 pacs::di::registration_config config;
 config.storage_path = "/path/to/storage";  // 사용자 지정 저장 경로
 config.enable_network = true;              // 네트워크 서비스 활성화
+config.enable_logger = true;               // 로거 서비스 활성화 (기본값: true)
 config.use_singletons = true;              // 싱글톤 수명 사용
 
 auto result = pacs::di::register_services(container, config);
+```
+
+### 로거 등록
+
+사용자 지정 로거 구현 등록:
+
+```cpp
+#include <pacs/di/service_registration.hpp>
+
+// 사용자 지정 로거 팩토리 등록
+auto result = pacs::di::register_logger<MyCustomLogger>(
+    container,
+    [](IServiceContainer&) { return std::make_shared<MyCustomLogger>(); },
+    service_lifetime::singleton
+);
+
+// 또는 미리 생성된 로거 인스턴스 등록
+auto my_logger = std::make_shared<pacs::di::LoggerService>();
+auto result = pacs::di::register_logger_instance(container, my_logger);
+
+// 해결 및 사용
+auto logger = container.resolve<pacs::di::ILogger>().value();
+logger->info("DI 컨테이너에서 로거 해결됨");
 ```
 
 ### 테스트 지원

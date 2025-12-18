@@ -16,7 +16,8 @@ namespace pacs::services {
 // Construction
 // =============================================================================
 
-query_scp::query_scp() = default;
+query_scp::query_scp(std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger)) {}
 
 // =============================================================================
 // Configuration

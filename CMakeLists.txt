@@ -1434,9 +1434,11 @@ if(PACS_BUILD_TESTS)
     endif()
 
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
+    # (Issue #309 - Full Adoption of ILogger Interface)
     if(TARGET pacs_integration AND TARGET pacs_storage)
         add_executable(di_tests
             tests/di/service_registration_test.cpp
+            tests/di/ilogger_test.cpp
         )
         target_link_libraries(di_tests
             PRIVATE
@@ -1445,6 +1447,7 @@ if(PACS_BUILD_TESTS)
                 pacs_network
                 pacs_integration
                 pacs_encoding
+                pacs_services
                 Catch2::Catch2WithMain
         )
         if(TARGET thread_system_lib)

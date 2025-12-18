@@ -985,6 +985,37 @@ server.start();
 - Error conditions
 - Security events (audit)
 
+**ILogger Interface (Issue #309)**:
+
+All DICOM services support injectable logging via `ILogger` interface:
+
+| Component | Logger Support |
+|-----------|---------------|
+| All SCP services | Constructor/setter injection |
+| storage_scu | Constructor injection |
+| scp_service base | Protected logger member |
+
+**Benefits**:
+- Testable services with mock loggers
+- Silent default behavior (NullLogger)
+- Runtime logger switching
+- DI container integration
+
+**Example**:
+```cpp
+// Default: silent (NullLogger)
+verification_scp scp;
+
+// With logging via LoggerService
+auto logger = std::make_shared<pacs::di::LoggerService>();
+verification_scp scp_with_logging(logger);
+
+// Via DI container
+auto container = pacs::di::create_container();
+auto logger = container->resolve<pacs::di::ILogger>().value();
+storage_scp scp_via_di(logger);
+```
+
 ### monitoring_system Integration
 
 **Purpose**: Performance metrics and health monitoring.

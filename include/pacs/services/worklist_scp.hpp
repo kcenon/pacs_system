@@ -189,7 +189,13 @@ public:
     // Construction
     // =========================================================================
 
-    worklist_scp();
+    /**
+     * @brief Construct Worklist SCP with optional logger
+     *
+     * @param logger Logger instance for service logging (nullptr uses null_logger)
+     */
+    explicit worklist_scp(std::shared_ptr<di::ILogger> logger = nullptr);
+
     ~worklist_scp() override = default;
 
     // =========================================================================

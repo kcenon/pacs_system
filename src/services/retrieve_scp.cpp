@@ -16,7 +16,8 @@ namespace pacs::services {
 // Construction
 // =============================================================================
 
-retrieve_scp::retrieve_scp() = default;
+retrieve_scp::retrieve_scp(std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger)) {}
 
 // =============================================================================
 // Configuration

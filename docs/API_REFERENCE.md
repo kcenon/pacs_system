@@ -4677,6 +4677,80 @@ public:
 } // namespace pacs::di
 ```
 
+### `pacs::di::ILogger`
+
+Abstract logger interface for dependency injection. Enables testable logging by allowing mock implementations.
+
+```cpp
+#include <pacs/di/ilogger.hpp>
+
+namespace pacs::di {
+
+class ILogger {
+public:
+    virtual ~ILogger() = default;
+
+    // Log level methods
+    virtual void trace(std::string_view message) = 0;
+    virtual void debug(std::string_view message) = 0;
+    virtual void info(std::string_view message) = 0;
+    virtual void warn(std::string_view message) = 0;
+    virtual void error(std::string_view message) = 0;
+    virtual void fatal(std::string_view message) = 0;
+
+    // Check if a log level is enabled
+    [[nodiscard]] virtual bool is_enabled(integration::log_level level) const noexcept = 0;
+
+    // Formatted logging convenience methods (template)
+    template <typename... Args>
+    void trace_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    template <typename... Args>
+    void debug_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    template <typename... Args>
+    void info_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    template <typename... Args>
+    void warn_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    template <typename... Args>
+    void error_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+    template <typename... Args>
+    void fatal_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args);
+};
+
+// No-op logger implementation (default when no logger is provided)
+class NullLogger final : public ILogger;
+
+// Default implementation that delegates to logger_adapter
+class LoggerService final : public ILogger;
+
+// Get a shared null logger instance (singleton)
+[[nodiscard]] std::shared_ptr<ILogger> null_logger();
+
+} // namespace pacs::di
+```
+
+**Usage in Services**:
+
+All SCP/SCU services support optional logger injection:
+
+```cpp
+#include <pacs/services/storage_scp.hpp>
+#include <pacs/di/ilogger.hpp>
+
+// Default construction uses null_logger (silent)
+storage_scp scp;
+
+// Inject a custom logger
+auto logger = std::make_shared<pacs::di::LoggerService>();
+storage_scp scp_with_logging(logger);
+
+// Change logger at runtime
+scp.set_logger(another_logger);
+
+// Access current logger
+auto& current = scp.logger();
+current->info("Storage SCP ready");
+```
+
 ### `pacs::di::register_services`
 
 Register all PACS services with a ServiceContainer.
@@ -4699,9 +4773,33 @@ auto network = container.resolve<pacs::di::IDicomNetwork>().value();
 pacs::di::registration_config config;
 config.storage_path = "/path/to/storage";  // Custom storage path
 config.enable_network = true;              // Enable network services
+config.enable_logger = true;               // Enable logger services (default: true)
 config.use_singletons = true;              // Use singleton lifetime
 
 auto result = pacs::di::register_services(container, config);
+```
+
+### Logger Registration
+
+Register a custom logger implementation:
+
+```cpp
+#include <pacs/di/service_registration.hpp>
+
+// Register a custom logger factory
+auto result = pacs::di::register_logger<MyCustomLogger>(
+    container,
+    [](IServiceContainer&) { return std::make_shared<MyCustomLogger>(); },
+    service_lifetime::singleton
+);
+
+// Or register a pre-created logger instance
+auto my_logger = std::make_shared<pacs::di::LoggerService>();
+auto result = pacs::di::register_logger_instance(container, my_logger);
+
+// Resolve and use
+auto logger = container.resolve<pacs::di::ILogger>().value();
+logger->info("Logger resolved from DI container");
 ```
 
 ### `pacs::di::create_container`
