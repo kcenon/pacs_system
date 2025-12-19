@@ -1391,6 +1391,7 @@ if(PACS_BUILD_TESTS)
             tests/monitoring/health_checker_test.cpp
             tests/monitoring/health_json_test.cpp
             tests/monitoring/pacs_metrics_test.cpp
+            tests/monitoring/collectors_test.cpp
         )
         target_link_libraries(monitoring_tests
             PRIVATE

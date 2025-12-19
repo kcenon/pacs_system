@@ -2921,6 +2921,291 @@ std::string prom = metrics.to_prometheus();      // Prometheus용
 
 ---
 
+### `pacs::monitoring::dicom_association_collector`
+
+DICOM 연결 수명주기 메트릭 수집기. 플러그인 호환 인터페이스를 통해 모니터링 시스템과 통합.
+
+```cpp
+#include <pacs/monitoring/collectors/dicom_association_collector.hpp>
+
+namespace pacs::monitoring {
+
+struct association_metric {
+    std::string name;
+    double value;
+    std::string type;  // "gauge" 또는 "counter"
+    std::chrono::system_clock::time_point timestamp;
+    std::unordered_map<std::string, std::string> labels;
+};
+
+class dicom_association_collector {
+public:
+    // 생성
+    explicit dicom_association_collector(std::string ae_title = "PACS_SCP");
+    ~dicom_association_collector() = default;
+
+    // 수집기 플러그인 인터페이스
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config);
+    [[nodiscard]] std::vector<association_metric> collect();
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] std::vector<std::string> get_metric_types() const;
+    [[nodiscard]] bool is_healthy() const;
+    [[nodiscard]] std::unordered_map<std::string, double> get_statistics() const;
+
+    // 설정
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+};
+
+} // namespace pacs::monitoring
+```
+
+**수집 메트릭:**
+
+| 메트릭 이름 | 유형 | 설명 |
+|------------|------|------|
+| `dicom_associations_active` | gauge | 현재 활성 연결 수 |
+| `dicom_associations_peak_active` | gauge | 최대 동시 연결 수 |
+| `dicom_associations_established_total` | counter | 총 수립된 연결 수 |
+| `dicom_associations_rejected_total` | counter | 총 거부된 연결 수 |
+| `dicom_associations_aborted_total` | counter | 총 중단된 연결 수 |
+| `dicom_associations_success_ratio` | gauge | 성공률 (0.0-1.0) |
+
+---
+
+### `pacs::monitoring::dicom_service_collector`
+
+DICOM DIMSE 서비스 작업 메트릭 수집기. 11개 DIMSE 작업의 횟수, 타이밍, 성공/실패 통계 추적.
+
+```cpp
+#include <pacs/monitoring/collectors/dicom_service_collector.hpp>
+
+namespace pacs::monitoring {
+
+struct service_metric {
+    std::string name;
+    double value;
+    std::string type;  // "gauge" 또는 "counter"
+    std::chrono::system_clock::time_point timestamp;
+    std::unordered_map<std::string, std::string> labels;
+};
+
+class dicom_service_collector {
+public:
+    // 생성
+    explicit dicom_service_collector(std::string ae_title = "PACS_SCP");
+    ~dicom_service_collector() = default;
+
+    // 수집기 플러그인 인터페이스
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config);
+    [[nodiscard]] std::vector<service_metric> collect();
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] std::vector<std::string> get_metric_types() const;
+    [[nodiscard]] bool is_healthy() const;
+    [[nodiscard]] std::unordered_map<std::string, double> get_statistics() const;
+
+    // 설정
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+    void set_operation_enabled(dimse_operation op, bool enabled);
+    [[nodiscard]] bool is_operation_enabled(dimse_operation op) const;
+};
+
+} // namespace pacs::monitoring
+```
+
+**수집 메트릭 (DIMSE 작업별):**
+
+| 메트릭 이름 패턴 | 유형 | 설명 |
+|-----------------|------|------|
+| `dicom_{op}_requests_total` | counter | 총 요청 횟수 |
+| `dicom_{op}_success_total` | counter | 성공 횟수 |
+| `dicom_{op}_failure_total` | counter | 실패 횟수 |
+| `dicom_{op}_duration_seconds_avg` | gauge | 평균 지속 시간 |
+| `dicom_{op}_duration_seconds_min` | gauge | 최소 지속 시간 |
+| `dicom_{op}_duration_seconds_max` | gauge | 최대 지속 시간 |
+| `dicom_{op}_duration_seconds_sum` | counter | 누적 지속 시간 |
+
+`{op}`: `c_echo`, `c_store`, `c_find`, `c_move`, `c_get`, `n_create`, `n_set`, `n_get`, `n_action`, `n_event`, `n_delete` 중 하나.
+
+---
+
+### `pacs::monitoring::dicom_storage_collector`
+
+DICOM 저장 및 데이터 전송 메트릭 수집기. 메모리 관리 모니터링을 위한 오브젝트 풀 통계 포함.
+
+```cpp
+#include <pacs/monitoring/collectors/dicom_storage_collector.hpp>
+
+namespace pacs::monitoring {
+
+struct storage_metric {
+    std::string name;
+    double value;
+    std::string type;  // "gauge" 또는 "counter"
+    std::string unit;  // "bytes", "count" 등
+    std::chrono::system_clock::time_point timestamp;
+    std::unordered_map<std::string, std::string> labels;
+};
+
+class dicom_storage_collector {
+public:
+    // 생성
+    explicit dicom_storage_collector(std::string ae_title = "PACS_SCP");
+    ~dicom_storage_collector() = default;
+
+    // 수집기 플러그인 인터페이스
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config);
+    [[nodiscard]] std::vector<storage_metric> collect();
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] std::vector<std::string> get_metric_types() const;
+    [[nodiscard]] bool is_healthy() const;
+    [[nodiscard]] std::unordered_map<std::string, double> get_statistics() const;
+
+    // 설정
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+    void set_pool_metrics_enabled(bool enabled);
+    [[nodiscard]] bool is_pool_metrics_enabled() const;
+};
+
+} // namespace pacs::monitoring
+```
+
+**수집 메트릭:**
+
+| 메트릭 이름 | 유형 | 단위 | 설명 |
+|------------|------|------|------|
+| `dicom_bytes_sent_total` | counter | bytes | 총 송신 바이트 |
+| `dicom_bytes_received_total` | counter | bytes | 총 수신 바이트 |
+| `dicom_images_stored_total` | counter | count | 저장된 이미지 수 |
+| `dicom_images_retrieved_total` | counter | count | 검색된 이미지 수 |
+| `dicom_bytes_sent_rate` | gauge | bytes/s | 송신 처리량 |
+| `dicom_bytes_received_rate` | gauge | bytes/s | 수신 처리량 |
+| `dicom_{pool}_pool_acquisitions_total` | counter | count | 풀 획득 횟수 |
+| `dicom_{pool}_pool_hit_ratio` | gauge | ratio | 풀 히트율 |
+| `dicom_{pool}_pool_size` | gauge | count | 현재 풀 크기 |
+
+`{pool}`: `element`, `dataset`, `pdu_buffer` 중 하나.
+
+---
+
+### `pacs::monitoring::pacs_monitor`
+
+모든 DICOM 메트릭 수집기를 통합하고 상태 확인 및 Prometheus 내보내기를 지원하는 통합 모니터링 클래스.
+
+```cpp
+#include <pacs/monitoring/pacs_monitor.hpp>
+
+namespace pacs::monitoring {
+
+// 단일 컴포넌트의 상태 확인 결과
+struct health_check_result {
+    std::string name;
+    bool healthy;
+    std::string message;
+    std::chrono::milliseconds latency{0};
+    std::chrono::system_clock::time_point timestamp;
+};
+
+// 모든 메트릭의 집계된 스냅샷
+struct metrics_snapshot {
+    std::vector<association_metric> association_metrics;
+    std::vector<service_metric> service_metrics;
+    std::vector<storage_metric> storage_metrics;
+    std::unordered_map<std::string, double> custom_metrics;
+    std::chrono::system_clock::time_point timestamp;
+};
+
+class pacs_monitor {
+public:
+    // 싱글톤 접근 (Meyer's 싱글톤)
+    static pacs_monitor& global_monitor() noexcept;
+
+    // 초기화
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config = {});
+    [[nodiscard]] bool is_initialized() const noexcept;
+
+    // 커스텀 메트릭
+    void record_metric(std::string_view name, double value);
+    [[nodiscard]] std::optional<double> get_metric(std::string_view name) const;
+
+    // 메트릭 수집
+    [[nodiscard]] metrics_snapshot get_metrics();
+
+    // 상태 확인
+    void register_health_check(std::string_view component,
+                               std::function<bool()> check);
+    void unregister_health_check(std::string_view component);
+    [[nodiscard]] health_check_result check_health(std::string_view component);
+    [[nodiscard]] std::vector<health_check_result> check_all_health();
+    [[nodiscard]] bool is_healthy() const;
+
+    // 내보내기 형식
+    [[nodiscard]] std::string to_prometheus() const;
+    [[nodiscard]] std::string to_json() const;
+
+    // 설정
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+
+    // 수명주기
+    void reset();
+
+private:
+    pacs_monitor() = default;  // 싱글톤
+};
+
+} // namespace pacs::monitoring
+```
+
+**사용 예제:**
+
+```cpp
+#include <pacs/monitoring/pacs_monitor.hpp>
+using namespace pacs::monitoring;
+
+// 전역 모니터 초기화
+auto& monitor = pacs_monitor::global_monitor();
+monitor.initialize({{"ae_title", "MY_PACS"}});
+
+// 커스텀 상태 확인 등록
+monitor.register_health_check("database", []() {
+    return db_connection.is_alive();
+});
+monitor.register_health_check("storage", []() {
+    return storage.free_space_gb() > 10;
+});
+
+// 커스텀 메트릭 기록
+monitor.record_metric("active_studies", 42.0);
+
+// 모든 메트릭 스냅샷 가져오기
+auto snapshot = monitor.get_metrics();
+for (const auto& m : snapshot.association_metrics) {
+    std::cout << m.name << ": " << m.value << "\n";
+}
+
+// Prometheus용 내보내기
+std::string prometheus_output = monitor.to_prometheus();
+// 예제 출력:
+// # HELP dicom_associations_active 현재 활성 연결 수
+// # TYPE dicom_associations_active gauge
+// dicom_associations_active{ae="MY_PACS"} 5
+
+// 상태 확인
+auto health = monitor.check_all_health();
+for (const auto& h : health) {
+    std::cout << h.name << ": " << (h.healthy ? "OK" : "FAIL") << "\n";
+}
+```
+
+---
+
 ## 공통 모듈
 
 ### 오류 코드
