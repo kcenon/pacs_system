@@ -258,6 +258,8 @@ pacs_system/
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
 │   ├── dcm_to_json/             # DICOM to JSON conversion utility (PS3.18)
 │   ├── json_to_dcm/             # JSON to DICOM conversion utility (PS3.18)
+│   ├── dcm_to_xml/              # DICOM to XML conversion utility (PS3.19)
+│   ├── xml_to_dcm/              # XML to DICOM conversion utility (PS3.19)
 │   ├── db_browser/              # PACS index database browser
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
@@ -561,6 +563,66 @@ Convert JSON files (DICOM PS3.18 format) back to DICOM format.
 
 # Resolve BulkDataURI from specific directory
 ./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
+```
+
+### DCM to XML (DICOM to XML Conversion)
+
+Convert DICOM files to DICOM Native XML format (PS3.19).
+
+```bash
+# Convert DICOM to XML (stdout)
+./build/bin/dcm_to_xml image.dcm
+
+# Convert to file with pretty formatting
+./build/bin/dcm_to_xml image.dcm output.xml --pretty
+
+# Include binary data as Base64
+./build/bin/dcm_to_xml image.dcm output.xml --bulk-data inline
+
+# Save binary data to separate files with URI references
+./build/bin/dcm_to_xml image.dcm output.xml --bulk-data uri --bulk-data-dir ./bulk/
+
+# Exclude pixel data
+./build/bin/dcm_to_xml image.dcm output.xml --no-pixel
+
+# Filter specific tags
+./build/bin/dcm_to_xml image.dcm -t 0010,0010 -t 0010,0020
+
+# Process directory recursively
+./build/bin/dcm_to_xml ./dicom_folder/ --recursive --no-pixel
+```
+
+Output format (DICOM Native XML PS3.19):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<NativeDicomModel xmlns="http://dicom.nema.org/PS3.19/models/NativeDICOM">
+  <DicomAttribute tag="00100010" vr="PN" keyword="PatientName">
+    <PersonName number="1">
+      <Alphabetic>
+        <FamilyName>DOE</FamilyName>
+        <GivenName>JOHN</GivenName>
+      </Alphabetic>
+    </PersonName>
+  </DicomAttribute>
+</NativeDicomModel>
+```
+
+### XML to DCM (XML to DICOM Conversion)
+
+Convert XML files (DICOM Native XML PS3.19 format) back to DICOM format.
+
+```bash
+# Convert XML to DICOM
+./build/bin/xml_to_dcm metadata.xml output.dcm
+
+# Use template DICOM for pixel data and missing tags
+./build/bin/xml_to_dcm metadata.xml output.dcm --template original.dcm
+
+# Specify transfer syntax
+./build/bin/xml_to_dcm metadata.xml output.dcm -t 1.2.840.10008.1.2.1
+
+# Resolve BulkData URI from specific directory
+./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
 
 ### DB Browser (Database Viewer)
