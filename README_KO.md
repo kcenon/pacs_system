@@ -359,25 +359,49 @@ cmake --build build
 
 ### DCM Modify (태그 수정 유틸리티)
 
+dcmtk 호환 DICOM 태그 수정 유틸리티. 숫자 태그 형식 `(GGGG,EEEE)`과 키워드 형식 모두 지원.
+
 ```bash
-# 단일 태그 수정
-./build/bin/dcm_modify image.dcm --set PatientName="Anonymous" -o modified.dcm
+# 태그 삽입 (존재하지 않으면 생성) - 두 가지 태그 형식 지원
+./build/bin/dcm_modify -i "(0010,0010)=Anonymous" patient.dcm
+./build/bin/dcm_modify -i PatientName=Anonymous -o modified.dcm patient.dcm
 
-# 여러 태그 수정
-./build/bin/dcm_modify image.dcm \
-  --set PatientName="Anonymous" \
-  --set PatientID="ANON001" \
-  --delete PatientBirthDate \
-  -o anonymized.dcm
+# 기존 태그 수정 (존재하지 않으면 오류)
+./build/bin/dcm_modify -m "(0010,0020)=NEW_ID" patient.dcm
 
-# 기본 익명화 적용 (DICOM PS3.15)
-./build/bin/dcm_modify image.dcm --anonymize -o anonymized.dcm
+# 태그 삭제
+./build/bin/dcm_modify -e "(0010,1000)" patient.dcm
+./build/bin/dcm_modify -e OtherPatientIDs patient.dcm
 
-# Transfer Syntax 변환
-./build/bin/dcm_modify image.dcm --transfer-syntax explicit-le -o converted.dcm
+# 모든 매칭 태그 삭제 (시퀀스 내 포함)
+./build/bin/dcm_modify -ea "(0010,1001)" patient.dcm
 
-# 디렉토리 일괄 익명화
-./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
+# 모든 private 태그 삭제
+./build/bin/dcm_modify -ep patient.dcm
+
+# UID 재생성
+./build/bin/dcm_modify -gst -gse -gin -o anonymized.dcm patient.dcm
+
+# 스크립트 파일로 일괄 수정
+./build/bin/dcm_modify --script modify.txt *.dcm
+
+# 제자리 수정 (.bak 백업 생성)
+./build/bin/dcm_modify -i PatientID=NEW_ID patient.dcm
+
+# 백업 없이 제자리 수정 (주의!)
+./build/bin/dcm_modify -i PatientID=NEW_ID -nb patient.dcm
+
+# 디렉토리 재귀 처리
+./build/bin/dcm_modify -i PatientName=Anonymous -r ./dicom_folder/ -o ./output/
+```
+
+스크립트 파일 형식 (`modify.txt`):
+```
+# 주석은 #으로 시작
+i (0010,0010)=Anonymous     # 태그 삽입/수정
+m (0008,0050)=ACC001        # 기존 태그 수정
+e (0010,1000)               # 태그 삭제
+ea (0010,1001)              # 모든 매칭 태그 삭제
 ```
 
 ### DCM Conv (Transfer Syntax 변환기)
