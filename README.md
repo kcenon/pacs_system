@@ -255,6 +255,8 @@ pacs_system/
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
+│   ├── dcm_to_json/             # DICOM to JSON conversion utility (PS3.18)
+│   ├── json_to_dcm/             # JSON to DICOM conversion utility (PS3.18)
 │   ├── db_browser/              # PACS index database browser
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
@@ -496,6 +498,68 @@ ea (0010,1001)              # Erase all matching tags
 
 # Convert with explicit Transfer Syntax UID
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
+```
+
+### DCM to JSON (DICOM PS3.18 JSON Converter)
+
+Convert DICOM files to JSON format following the DICOM PS3.18 JSON representation standard.
+
+```bash
+# Convert DICOM to JSON (stdout)
+./build/bin/dcm_to_json image.dcm
+
+# Convert to file with pretty formatting
+./build/bin/dcm_to_json image.dcm output.json --pretty
+
+# Compact output (no formatting)
+./build/bin/dcm_to_json image.dcm output.json --compact
+
+# Include binary data as Base64
+./build/bin/dcm_to_json image.dcm output.json --bulk-data inline
+
+# Save binary data to separate files with URI references
+./build/bin/dcm_to_json image.dcm output.json --bulk-data uri --bulk-data-dir ./bulk/
+
+# Exclude pixel data
+./build/bin/dcm_to_json image.dcm output.json --no-pixel
+
+# Filter specific tags
+./build/bin/dcm_to_json image.dcm -t 0010,0010 -t 0010,0020
+
+# Process directory recursively
+./build/bin/dcm_to_json ./dicom_folder/ --recursive --no-pixel
+```
+
+Output format (DICOM PS3.18):
+```json
+{
+  "00100010": {
+    "vr": "PN",
+    "Value": [{"Alphabetic": "DOE^JOHN"}]
+  },
+  "00100020": {
+    "vr": "LO",
+    "Value": ["12345678"]
+  }
+}
+```
+
+### JSON to DCM (JSON to DICOM Converter)
+
+Convert JSON files (DICOM PS3.18 format) back to DICOM format.
+
+```bash
+# Convert JSON to DICOM
+./build/bin/json_to_dcm metadata.json output.dcm
+
+# Use template DICOM for pixel data and missing tags
+./build/bin/json_to_dcm metadata.json output.dcm --template original.dcm
+
+# Specify transfer syntax
+./build/bin/json_to_dcm metadata.json output.dcm -t 1.2.840.10008.1.2.1
+
+# Resolve BulkDataURI from specific directory
+./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
 ```
 
 ### DB Browser (Database Viewer)

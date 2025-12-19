@@ -1606,6 +1606,14 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/dcm_modify)
     message(STATUS "  [OK] dcm_modify: DICOM tag modification utility")
 
+    # DCM to JSON - DICOM to JSON conversion utility (DICOM PS3.18)
+    add_subdirectory(examples/dcm_to_json)
+    message(STATUS "  [OK] dcm_to_json: DICOM to JSON conversion utility")
+
+    # JSON to DCM - JSON to DICOM conversion utility (DICOM PS3.18)
+    add_subdirectory(examples/json_to_dcm)
+    message(STATUS "  [OK] json_to_dcm: JSON to DICOM conversion utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
