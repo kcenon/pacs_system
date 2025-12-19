@@ -5,12 +5,97 @@
 # @see Issue #313 - Apply SIMD Optimization (Image Processing)
 
 ##################################################
-# Benchmark Executable
+# Benchmark Executable (Catch2-based)
 ##################################################
 
 add_executable(simd_performance_benchmarks
     byte_swap_benchmark.cpp
     rle_simd_benchmark.cpp
+)
+
+##################################################
+# Standalone Benchmark Executables
+##################################################
+
+# Photometric conversion benchmarks
+add_executable(photometric_benchmark
+    photometric_benchmark.cpp
+)
+
+target_include_directories(photometric_benchmark
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(photometric_benchmark
+    PRIVATE
+        pacs_encoding
+        Threads::Threads
+)
+
+target_compile_features(photometric_benchmark PRIVATE cxx_std_20)
+
+# Window/Level benchmarks
+add_executable(windowing_benchmark
+    windowing_benchmark.cpp
+)
+
+target_include_directories(windowing_benchmark
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(windowing_benchmark
+    PRIVATE
+        pacs_encoding
+        Threads::Threads
+)
+
+target_compile_features(windowing_benchmark PRIVATE cxx_std_20)
+
+# Enable SIMD optimizations for standalone benchmarks
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i686")
+        target_compile_options(photometric_benchmark PRIVATE
+            -msse2 -msse3 -mssse3 -msse4.1 -msse4.2
+        )
+        target_compile_options(windowing_benchmark PRIVATE
+            -msse2 -msse3 -mssse3 -msse4.1 -msse4.2
+        )
+        include(CheckCXXCompilerFlag)
+        check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
+        if(COMPILER_SUPPORTS_AVX2)
+            target_compile_options(photometric_benchmark PRIVATE -mavx2)
+            target_compile_options(windowing_benchmark PRIVATE -mavx2)
+        endif()
+    endif()
+endif()
+
+if(MSVC)
+    target_compile_options(photometric_benchmark PRIVATE /arch:AVX2)
+    target_compile_options(windowing_benchmark PRIVATE /arch:AVX2)
+endif()
+
+# Custom targets for running new benchmarks
+add_custom_target(run_photometric_benchmark
+    COMMAND photometric_benchmark
+    DEPENDS photometric_benchmark
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running photometric conversion benchmarks..."
+)
+
+add_custom_target(run_windowing_benchmark
+    COMMAND windowing_benchmark
+    DEPENDS windowing_benchmark
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running window/level benchmarks..."
+)
+
+# Install standalone benchmarks
+install(TARGETS photometric_benchmark windowing_benchmark
+    RUNTIME DESTINATION bin/benchmarks
 )
 
 target_include_directories(simd_performance_benchmarks
