@@ -1209,6 +1209,7 @@ if(PACS_BUILD_TESTS)
         tests/core/dicom_file_test.cpp
         tests/core/tag_info_test.cpp
         tests/core/dicom_dictionary_test.cpp
+        tests/core/events_test.cpp
     )
     target_link_libraries(core_tests
         PRIVATE
@@ -1216,6 +1217,7 @@ if(PACS_BUILD_TESTS)
             pacs_encoding
             Catch2::Catch2WithMain
     )
+    target_include_directories(core_tests PRIVATE ${COMMON_SYSTEM_INCLUDE_DIR})
 
     # Utilities tests (dcm_modify, etc.)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/utilities)
