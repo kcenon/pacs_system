@@ -1217,6 +1217,18 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    # Utilities tests (dcm_modify, etc.)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/utilities)
+    add_executable(utilities_tests
+        tests/utilities/dcm_modify_test.cpp
+    )
+    target_link_libraries(utilities_tests
+        PRIVATE
+            pacs_core
+            pacs_encoding
+            Catch2::Catch2WithMain
+    )
+
     # Encoding tests
     add_executable(encoding_tests
         tests/encoding/transfer_syntax_test.cpp
@@ -1501,6 +1513,9 @@ if(PACS_BUILD_TESTS)
 
     # Unit tests - fast, isolated component tests
     catch_discover_tests(core_tests
+        PROPERTIES LABELS "unit"
+    )
+    catch_discover_tests(utilities_tests
         PROPERTIES LABELS "unit"
     )
     catch_discover_tests(encoding_tests
