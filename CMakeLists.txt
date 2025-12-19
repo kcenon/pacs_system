@@ -1616,6 +1616,14 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/json_to_dcm)
     message(STATUS "  [OK] json_to_dcm: JSON to DICOM conversion utility")
 
+    # DCM to XML - DICOM to XML conversion utility (DICOM Native XML PS3.19)
+    add_subdirectory(examples/dcm_to_xml)
+    message(STATUS "  [OK] dcm_to_xml: DICOM to XML conversion utility")
+
+    # XML to DCM - XML to DICOM conversion utility (DICOM Native XML PS3.19)
+    add_subdirectory(examples/xml_to_dcm)
+    message(STATUS "  [OK] xml_to_dcm: XML to DICOM conversion utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
