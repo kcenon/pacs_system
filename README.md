@@ -431,25 +431,49 @@ cmake --build build
 
 ### DCM Modify (Tag Modification Utility)
 
+dcmtk-compatible DICOM tag modification utility supporting numeric tag format `(GGGG,EEEE)` and keyword format.
+
 ```bash
-# Modify single tag
-./build/bin/dcm_modify image.dcm --set PatientName="Anonymous" -o modified.dcm
+# Insert tag (creates if not exists) - supports both tag formats
+./build/bin/dcm_modify -i "(0010,0010)=Anonymous" patient.dcm
+./build/bin/dcm_modify -i PatientName=Anonymous -o modified.dcm patient.dcm
 
-# Modify multiple tags
-./build/bin/dcm_modify image.dcm \
-  --set PatientName="Anonymous" \
-  --set PatientID="ANON001" \
-  --delete PatientBirthDate \
-  -o anonymized.dcm
+# Modify existing tag (error if not exists)
+./build/bin/dcm_modify -m "(0010,0020)=NEW_ID" patient.dcm
 
-# Apply basic anonymization (DICOM PS3.15)
-./build/bin/dcm_modify image.dcm --anonymize -o anonymized.dcm
+# Delete tag
+./build/bin/dcm_modify -e "(0010,1000)" patient.dcm
+./build/bin/dcm_modify -e OtherPatientIDs patient.dcm
 
-# Convert transfer syntax
-./build/bin/dcm_modify image.dcm --transfer-syntax explicit-le -o converted.dcm
+# Delete all matching tags (including in sequences)
+./build/bin/dcm_modify -ea "(0010,1001)" patient.dcm
 
-# Batch anonymize directory
-./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
+# Delete all private tags
+./build/bin/dcm_modify -ep patient.dcm
+
+# Regenerate UIDs
+./build/bin/dcm_modify -gst -gse -gin -o anonymized.dcm patient.dcm
+
+# Use script file for batch modifications
+./build/bin/dcm_modify --script modify.txt *.dcm
+
+# In-place modification (creates .bak backup)
+./build/bin/dcm_modify -i PatientID=NEW_ID patient.dcm
+
+# In-place without backup (DANGEROUS!)
+./build/bin/dcm_modify -i PatientID=NEW_ID -nb patient.dcm
+
+# Process directory recursively
+./build/bin/dcm_modify -i PatientName=Anonymous -r ./dicom_folder/ -o ./output/
+```
+
+Script file format (`modify.txt`):
+```
+# Comments start with #
+i (0010,0010)=Anonymous     # Insert/modify tag
+m (0008,0050)=ACC001        # Modify existing tag
+e (0010,1000)               # Erase tag
+ea (0010,1001)              # Erase all matching tags
 ```
 
 ### DCM Conv (Transfer Syntax Converter)
