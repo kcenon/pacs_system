@@ -6,11 +6,27 @@
 #include "pacs/services/query_scp.hpp"
 
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/events.hpp"
 #include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
+#include <kcenon/common/patterns/event_bus.h>
+
 namespace pacs::services {
+
+namespace {
+// Convert services::query_level to events::query_level
+pacs::events::query_level to_event_level(query_level level) {
+    switch (level) {
+        case query_level::patient: return pacs::events::query_level::patient;
+        case query_level::study: return pacs::events::query_level::study;
+        case query_level::series: return pacs::events::query_level::series;
+        case query_level::image: return pacs::events::query_level::image;
+        default: return pacs::events::query_level::patient;
+    }
+}
+}  // namespace
 
 // =============================================================================
 // Construction
@@ -56,6 +72,8 @@ network::Result<std::monostate> query_scp::handle_message(
     const network::dimse::dimse_message& request) {
 
     using namespace network::dimse;
+    auto start_time = std::chrono::steady_clock::now();
+    std::string calling_ae{assoc.calling_ae()};
 
     // Verify the message is a C-FIND request
     if (request.command() != command_field::c_find_rq) {
@@ -67,6 +85,13 @@ network::Result<std::monostate> query_scp::handle_message(
 
     // Verify we have a handler
     if (!handler_) {
+        kcenon::common::get_event_bus().publish(
+            pacs::events::query_failed_event{
+                calling_ae,
+                static_cast<int>(pacs::error_codes::find_handler_not_set),
+                "No query handler configured"
+            }
+        );
         return pacs::pacs_void_error(
             pacs::error_codes::find_handler_not_set,
             "No query handler configured");
@@ -92,9 +117,6 @@ network::Result<std::monostate> query_scp::handle_message(
             assoc, context_id, request.message_id(),
             sop_class_uid, status_error_cannot_understand);
     }
-
-    // Get calling AE for logging and access control
-    std::string calling_ae{assoc.calling_ae()};
 
     // Call the handler to get matching results
     auto results = handler_(level.value(), query_keys, calling_ae);
@@ -129,6 +151,21 @@ network::Result<std::monostate> query_scp::handle_message(
 
     // Increment statistics
     ++queries_processed_;
+
+    // Calculate execution time
+    auto end_time = std::chrono::steady_clock::now();
+    auto execution_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - start_time).count();
+
+    // Publish query executed event
+    kcenon::common::get_event_bus().publish(
+        pacs::events::query_executed_event{
+            to_event_level(level.value()),
+            calling_ae,
+            results.size(),
+            static_cast<uint64_t>(execution_time_ms)
+        }
+    );
 
     // Send final success response (no dataset)
     return send_final_response(
