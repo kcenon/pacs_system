@@ -904,6 +904,64 @@ pacs_pool_pdu_buffer_hits_total{}
 pacs_pool_pdu_buffer_misses_total{}
 ```
 
+### DICOM 메트릭 수집기
+
+**구현**: 외부 모니터링 시스템과의 통합을 위한 플러그인 호환 인터페이스 패턴을 따르는 모듈형 메트릭 수집기.
+
+**수집기**:
+| 수집기 | 설명 | 메트릭 |
+|--------|------|--------|
+| `dicom_association_collector` | 연결 수명주기 메트릭 | 활성, 최대, 수립, 거부, 중단, 성공률 |
+| `dicom_service_collector` | DIMSE 작업 메트릭 | 요청, 성공/실패, 작업별 지속 시간 통계 |
+| `dicom_storage_collector` | 저장 및 전송 메트릭 | 송수신 바이트, 저장/검색된 이미지, 처리량 |
+
+**기능**:
+- 원자적 카운터를 사용한 스레드 안전 수집
+- Prometheus 텍스트 노출 형식 지원
+- REST API 통합을 위한 JSON 내보내기
+- 작업별 메트릭 수집 설정 가능
+- 오브젝트 풀 모니터링 (요소, 데이터셋, PDU 버퍼 풀)
+
+**사용법**:
+```cpp
+#include <pacs/monitoring/pacs_monitor.hpp>
+using namespace pacs::monitoring;
+
+// 전역 모니터 인스턴스 획득
+auto& monitor = pacs_monitor::global_monitor();
+monitor.initialize({{"ae_title", "PACS_SCP"}});
+
+// 모든 메트릭 수집
+auto snapshot = monitor.get_metrics();
+for (const auto& m : snapshot.association_metrics) {
+    std::cout << m.name << ": " << m.value << "\n";
+}
+
+// Prometheus 형식으로 내보내기
+std::string prometheus_output = monitor.to_prometheus();
+
+// 커스텀 상태 확인 등록
+monitor.register_health_check("database", []() {
+    return database_is_healthy();
+});
+
+// 전체 상태 확인
+bool healthy = monitor.is_healthy();
+```
+
+**IMonitor와의 통합**:
+`pacs_monitor` 클래스는 `common_system`의 `IMonitor`와 동일한 인터페이스 패턴을 따르므로, 모니터링 인프라와 원활하게 통합됩니다:
+
+```cpp
+// 커스텀 메트릭 기록
+monitor.record_metric("custom_gauge", 42.0);
+
+// 타이밍 포함 상태 확인
+auto result = monitor.check_health("database");
+std::cout << "Database: " << (result.healthy ? "OK" : "FAIL")
+          << " (" << result.latency.count() << "ms)\n";
+```
+
 ### 오브젝트 풀 메모리 관리
 
 **목적**: 자주 사용되는 DICOM 객체의 할당 오버헤드와 메모리 단편화 감소.
