@@ -225,8 +225,9 @@ pacs_system/
 │   ├── monitoring/              # Health check 테스트 (3개 파일, 50 테스트)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (15개, ~10,500줄)
+├── examples/                    # 예제 애플리케이션 (16개, ~11,000줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
+│   ├── dcm_conv/                # Transfer Syntax 변환 유틸리티
 │   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
 │   ├── db_browser/              # PACS 인덱스 데이터베이스 브라우저
 │   ├── echo_scp/                # DICOM Echo SCP 서버
@@ -377,6 +378,28 @@ cmake --build build
 
 # 디렉토리 일괄 익명화
 ./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
+```
+
+### DCM Conv (Transfer Syntax 변환기)
+
+```bash
+# Explicit VR Little Endian으로 변환 (기본값)
+./build/bin/dcm_conv image.dcm converted.dcm --explicit
+
+# Implicit VR Little Endian으로 변환
+./build/bin/dcm_conv image.dcm output.dcm --implicit
+
+# JPEG Baseline으로 변환 (품질 설정 포함)
+./build/bin/dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 85
+
+# 디렉토리 재귀 변환 및 검증
+./build/bin/dcm_conv ./input_dir/ ./output_dir/ --recursive --verify
+
+# 지원되는 Transfer Syntax 목록 표시
+./build/bin/dcm_conv --list-syntaxes
+
+# Transfer Syntax UID 직접 지정
+./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
 
 ### DB Browser (데이터베이스 뷰어)

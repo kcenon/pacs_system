@@ -521,3 +521,167 @@ TEST_CASE("dicom_file construction", "[core][dicom_file]") {
         CHECK(moved.dataset().get_string(tags::patient_name) == "MOVE^TEST");
     }
 }
+
+// ============================================================================
+// Transfer Syntax Conversion Tests (Issue #280)
+// ============================================================================
+
+TEST_CASE("dicom_file transfer syntax conversion", "[core][dicom_file][conversion]") {
+    SECTION("convert from Explicit VR LE to Implicit VR LE") {
+        // Create original file with Explicit VR LE
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "CONVERT^TEST");
+        ds.set_string(tags::patient_id, vr_type::LO, "CONV123");
+        ds.set_string(tags::modality, vr_type::CS, "CT");
+
+        auto original = dicom_file::create(
+            ds,  // copy, not move
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to Implicit VR LE
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Verify transfer syntax changed
+        CHECK(converted.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(converted.meta_information().get_string(tags::transfer_syntax_uid) ==
+              "1.2.840.10008.1.2");
+
+        // Verify data preserved
+        CHECK(converted.dataset().get_string(tags::patient_name) == "CONVERT^TEST");
+        CHECK(converted.dataset().get_string(tags::patient_id) == "CONV123");
+        CHECK(converted.dataset().get_string(tags::modality) == "CT");
+    }
+
+    SECTION("convert from Implicit VR LE to Explicit VR LE") {
+        // Create original file with Implicit VR LE
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "9.8.7.6.5.4.3.2.1");
+        ds.set_string(tags::patient_name, vr_type::PN, "IMPLICIT^TO^EXPLICIT");
+        ds.set_string(tags::study_description, vr_type::LO, "Test Study");
+
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Convert to Explicit VR LE
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Verify transfer syntax changed
+        CHECK(converted.transfer_syntax() == transfer_syntax::explicit_vr_little_endian);
+
+        // Verify data preserved
+        CHECK(converted.dataset().get_string(tags::patient_name) == "IMPLICIT^TO^EXPLICIT");
+        CHECK(converted.dataset().get_string(tags::study_description) == "Test Study");
+    }
+
+    SECTION("round-trip conversion preserves all data") {
+        // Create original with Explicit VR LE
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.1.1.1.1");
+        ds.set_string(tags::patient_name, vr_type::PN, "ROUNDTRIP^CONVERSION");
+        ds.set_string(tags::patient_id, vr_type::LO, "RT001");
+        ds.set_string(tags::study_instance_uid, vr_type::UI, "2.2.2.2.2");
+        ds.set_string(tags::series_instance_uid, vr_type::UI, "3.3.3.3.3");
+        ds.set_string(tags::modality, vr_type::CS, "MR");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 512);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 512);
+
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to Implicit VR LE
+        auto implicit_file = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Convert back to Explicit VR LE
+        auto back_to_explicit = dicom_file::create(
+            implicit_file.dataset(),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Verify all data preserved after round-trip
+        CHECK(back_to_explicit.dataset().get_string(tags::patient_name) ==
+              original.dataset().get_string(tags::patient_name));
+        CHECK(back_to_explicit.dataset().get_string(tags::patient_id) ==
+              original.dataset().get_string(tags::patient_id));
+        CHECK(back_to_explicit.dataset().get_string(tags::modality) ==
+              original.dataset().get_string(tags::modality));
+
+        auto orig_rows = original.dataset().get_numeric<uint16_t>(tags::rows);
+        auto conv_rows = back_to_explicit.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(orig_rows.has_value());
+        REQUIRE(conv_rows.has_value());
+        CHECK(*conv_rows == *orig_rows);
+    }
+
+    SECTION("save and reload with different transfer syntax") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "5.5.5.5.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "FILE^CONVERSION");
+
+        // Create with Explicit VR LE
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert and save as Implicit VR LE
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_ts_conversion.dcm");
+        auto save_result = converted.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        // Reload and verify
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        CHECK(loaded.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "FILE^CONVERSION");
+
+        // Cleanup
+        std::filesystem::remove(temp_path);
+    }
+
+    SECTION("convert to Explicit VR Big Endian") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "6.6.6.6.6");
+        ds.set_string(tags::patient_name, vr_type::PN, "BIGENDIAN^TEST");
+
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to Explicit VR Big Endian
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        CHECK(converted.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+        CHECK(converted.dataset().get_string(tags::patient_name) == "BIGENDIAN^TEST");
+    }
+}
