@@ -1624,6 +1624,10 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/xml_to_dcm)
     message(STATUS "  [OK] xml_to_dcm: XML to DICOM conversion utility")
 
+    # DCM Anonymize - DICOM de-identification utility (PS3.15)
+    add_subdirectory(examples/dcm_anonymize)
+    message(STATUS "  [OK] dcm_anonymize: DICOM de-identification utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
