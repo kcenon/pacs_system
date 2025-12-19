@@ -231,6 +231,8 @@ pacs_system/
 │   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
 │   ├── dcm_to_json/             # DICOM → JSON 변환 유틸리티 (PS3.18)
 │   ├── json_to_dcm/             # JSON → DICOM 변환 유틸리티 (PS3.18)
+│   ├── dcm_to_xml/              # DICOM → XML 변환 유틸리티 (PS3.19)
+│   ├── xml_to_dcm/              # XML → DICOM 변환 유틸리티 (PS3.19)
 │   ├── db_browser/              # PACS 인덱스 데이터베이스 브라우저
 │   ├── echo_scp/                # DICOM Echo SCP 서버
 │   ├── echo_scu/                # DICOM Echo SCU 클라이언트
@@ -488,6 +490,66 @@ DICOM PS3.18 형식의 JSON 파일을 DICOM 파일로 변환합니다.
 
 # BulkDataURI 해석을 위한 디렉토리 지정
 ./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
+```
+
+### DCM to XML (DICOM → XML 변환)
+
+DICOM 파일을 DICOM Native XML 형식(PS3.19)으로 변환합니다.
+
+```bash
+# DICOM을 XML로 변환 (stdout)
+./build/bin/dcm_to_xml image.dcm
+
+# 포맷팅된 출력
+./build/bin/dcm_to_xml image.dcm output.xml --pretty
+
+# 바이너리 데이터를 Base64로 포함
+./build/bin/dcm_to_xml image.dcm output.xml --bulk-data inline
+
+# 바이너리 데이터를 별도 파일로 저장하고 URI로 참조
+./build/bin/dcm_to_xml image.dcm output.xml --bulk-data uri --bulk-data-dir ./bulk/
+
+# 픽셀 데이터 제외
+./build/bin/dcm_to_xml image.dcm output.xml --no-pixel
+
+# 특정 태그만 필터링
+./build/bin/dcm_to_xml image.dcm -t 0010,0010 -t 0010,0020
+
+# 디렉토리 재귀 처리
+./build/bin/dcm_to_xml ./dicom_folder/ --recursive --no-pixel
+```
+
+출력 형식 (DICOM Native XML PS3.19):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<NativeDicomModel xmlns="http://dicom.nema.org/PS3.19/models/NativeDICOM">
+  <DicomAttribute tag="00100010" vr="PN" keyword="PatientName">
+    <PersonName number="1">
+      <Alphabetic>
+        <FamilyName>DOE</FamilyName>
+        <GivenName>JOHN</GivenName>
+      </Alphabetic>
+    </PersonName>
+  </DicomAttribute>
+</NativeDicomModel>
+```
+
+### XML to DCM (XML → DICOM 변환)
+
+XML 파일(DICOM Native XML PS3.19 형식)을 DICOM 형식으로 변환합니다.
+
+```bash
+# XML을 DICOM으로 변환
+./build/bin/xml_to_dcm metadata.xml output.dcm
+
+# 템플릿 DICOM 사용 (픽셀 데이터 및 누락된 태그 복사)
+./build/bin/xml_to_dcm metadata.xml output.dcm --template original.dcm
+
+# Transfer Syntax 지정
+./build/bin/xml_to_dcm metadata.xml output.dcm -t 1.2.840.10008.1.2.1
+
+# BulkData URI 해석을 위한 디렉토리 지정
+./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
 
 ### DB Browser (데이터베이스 뷰어)
