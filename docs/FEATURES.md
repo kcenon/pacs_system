@@ -1097,6 +1097,64 @@ pacs_pool_pdu_buffer_hits_total{}
 pacs_pool_pdu_buffer_misses_total{}
 ```
 
+### DICOM Metric Collectors
+
+**Implementation**: Modular metric collectors following a plugin-compatible interface pattern for integration with external monitoring systems.
+
+**Collectors**:
+| Collector | Description | Metrics |
+|-----------|-------------|---------|
+| `dicom_association_collector` | Association lifecycle metrics | Active, peak, established, rejected, aborted, success ratio |
+| `dicom_service_collector` | DIMSE operation metrics | Requests, success/failure, duration stats per operation |
+| `dicom_storage_collector` | Storage and transfer metrics | Bytes sent/received, images stored/retrieved, throughput |
+
+**Features**:
+- Thread-safe collection using atomic counters
+- Prometheus text exposition format support
+- JSON export for REST API integration
+- Configurable per-operation metric collection
+- Object pool monitoring (element, dataset, PDU buffer pools)
+
+**Usage**:
+```cpp
+#include <pacs/monitoring/pacs_monitor.hpp>
+using namespace pacs::monitoring;
+
+// Get the global monitor instance
+auto& monitor = pacs_monitor::global_monitor();
+monitor.initialize({{"ae_title", "PACS_SCP"}});
+
+// Collect all metrics
+auto snapshot = monitor.get_metrics();
+for (const auto& m : snapshot.association_metrics) {
+    std::cout << m.name << ": " << m.value << "\n";
+}
+
+// Export to Prometheus format
+std::string prometheus_output = monitor.to_prometheus();
+
+// Register custom health checks
+monitor.register_health_check("database", []() {
+    return database_is_healthy();
+});
+
+// Check overall health
+bool healthy = monitor.is_healthy();
+```
+
+**Integration with IMonitor**:
+The `pacs_monitor` class follows the same interface pattern as `IMonitor` from `common_system`, enabling seamless integration with the monitoring infrastructure:
+
+```cpp
+// Record custom metrics
+monitor.record_metric("custom_gauge", 42.0);
+
+// Health check with timing
+auto result = monitor.check_health("database");
+std::cout << "Database: " << (result.healthy ? "OK" : "FAIL")
+          << " (" << result.latency.count() << "ms)\n";
+```
+
 ### Object Pool Memory Management
 
 **Purpose**: Reduce allocation overhead and memory fragmentation for frequently used DICOM objects.

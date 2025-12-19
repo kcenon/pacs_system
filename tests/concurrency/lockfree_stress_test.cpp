@@ -939,6 +939,8 @@ TEST_CASE("lockfree_queue edge cases", "[concurrency][edge]") {
 
         CHECK_FALSE(result.has_value());
         CHECK(elapsed >= 100ms);
-        CHECK(elapsed < 200ms);  // Allow some timing tolerance
+        // CI environments (especially macOS) may have scheduling delays
+        // Use generous upper bound to avoid flaky tests
+        CHECK(elapsed < 1s);
     }
 }

@@ -3555,6 +3555,291 @@ std::string prom = metrics.to_prometheus();      // For Prometheus
 
 ---
 
+### `pacs::monitoring::dicom_association_collector`
+
+Collector for DICOM association lifecycle metrics. Provides integration with monitoring systems via a plugin-compatible interface.
+
+```cpp
+#include <pacs/monitoring/collectors/dicom_association_collector.hpp>
+
+namespace pacs::monitoring {
+
+struct association_metric {
+    std::string name;
+    double value;
+    std::string type;  // "gauge" or "counter"
+    std::chrono::system_clock::time_point timestamp;
+    std::unordered_map<std::string, std::string> labels;
+};
+
+class dicom_association_collector {
+public:
+    // Construction
+    explicit dicom_association_collector(std::string ae_title = "PACS_SCP");
+    ~dicom_association_collector() = default;
+
+    // Collector Plugin Interface
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config);
+    [[nodiscard]] std::vector<association_metric> collect();
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] std::vector<std::string> get_metric_types() const;
+    [[nodiscard]] bool is_healthy() const;
+    [[nodiscard]] std::unordered_map<std::string, double> get_statistics() const;
+
+    // Configuration
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+};
+
+} // namespace pacs::monitoring
+```
+
+**Collected Metrics:**
+
+| Metric Name | Type | Description |
+|-------------|------|-------------|
+| `dicom_associations_active` | gauge | Currently active associations |
+| `dicom_associations_peak_active` | gauge | Peak concurrent associations |
+| `dicom_associations_established_total` | counter | Total established associations |
+| `dicom_associations_rejected_total` | counter | Total rejected associations |
+| `dicom_associations_aborted_total` | counter | Total aborted associations |
+| `dicom_associations_success_ratio` | gauge | Success rate (0.0-1.0) |
+
+---
+
+### `pacs::monitoring::dicom_service_collector`
+
+Collector for DICOM DIMSE service operation metrics. Tracks all 11 DIMSE operations with counts, timing, and success/failure statistics.
+
+```cpp
+#include <pacs/monitoring/collectors/dicom_service_collector.hpp>
+
+namespace pacs::monitoring {
+
+struct service_metric {
+    std::string name;
+    double value;
+    std::string type;  // "gauge" or "counter"
+    std::chrono::system_clock::time_point timestamp;
+    std::unordered_map<std::string, std::string> labels;
+};
+
+class dicom_service_collector {
+public:
+    // Construction
+    explicit dicom_service_collector(std::string ae_title = "PACS_SCP");
+    ~dicom_service_collector() = default;
+
+    // Collector Plugin Interface
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config);
+    [[nodiscard]] std::vector<service_metric> collect();
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] std::vector<std::string> get_metric_types() const;
+    [[nodiscard]] bool is_healthy() const;
+    [[nodiscard]] std::unordered_map<std::string, double> get_statistics() const;
+
+    // Configuration
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+    void set_operation_enabled(dimse_operation op, bool enabled);
+    [[nodiscard]] bool is_operation_enabled(dimse_operation op) const;
+};
+
+} // namespace pacs::monitoring
+```
+
+**Collected Metrics (per DIMSE operation):**
+
+| Metric Name Pattern | Type | Description |
+|---------------------|------|-------------|
+| `dicom_{op}_requests_total` | counter | Total requests for operation |
+| `dicom_{op}_success_total` | counter | Successful operations |
+| `dicom_{op}_failure_total` | counter | Failed operations |
+| `dicom_{op}_duration_seconds_avg` | gauge | Average duration |
+| `dicom_{op}_duration_seconds_min` | gauge | Minimum duration |
+| `dicom_{op}_duration_seconds_max` | gauge | Maximum duration |
+| `dicom_{op}_duration_seconds_sum` | counter | Cumulative duration |
+
+Where `{op}` is one of: `c_echo`, `c_store`, `c_find`, `c_move`, `c_get`, `n_create`, `n_set`, `n_get`, `n_action`, `n_event`, `n_delete`.
+
+---
+
+### `pacs::monitoring::dicom_storage_collector`
+
+Collector for DICOM storage and data transfer metrics. Includes object pool statistics for memory management monitoring.
+
+```cpp
+#include <pacs/monitoring/collectors/dicom_storage_collector.hpp>
+
+namespace pacs::monitoring {
+
+struct storage_metric {
+    std::string name;
+    double value;
+    std::string type;  // "gauge" or "counter"
+    std::string unit;  // "bytes", "count", etc.
+    std::chrono::system_clock::time_point timestamp;
+    std::unordered_map<std::string, std::string> labels;
+};
+
+class dicom_storage_collector {
+public:
+    // Construction
+    explicit dicom_storage_collector(std::string ae_title = "PACS_SCP");
+    ~dicom_storage_collector() = default;
+
+    // Collector Plugin Interface
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config);
+    [[nodiscard]] std::vector<storage_metric> collect();
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] std::vector<std::string> get_metric_types() const;
+    [[nodiscard]] bool is_healthy() const;
+    [[nodiscard]] std::unordered_map<std::string, double> get_statistics() const;
+
+    // Configuration
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+    void set_pool_metrics_enabled(bool enabled);
+    [[nodiscard]] bool is_pool_metrics_enabled() const;
+};
+
+} // namespace pacs::monitoring
+```
+
+**Collected Metrics:**
+
+| Metric Name | Type | Unit | Description |
+|-------------|------|------|-------------|
+| `dicom_bytes_sent_total` | counter | bytes | Total bytes sent |
+| `dicom_bytes_received_total` | counter | bytes | Total bytes received |
+| `dicom_images_stored_total` | counter | count | Images stored |
+| `dicom_images_retrieved_total` | counter | count | Images retrieved |
+| `dicom_bytes_sent_rate` | gauge | bytes/s | Send throughput |
+| `dicom_bytes_received_rate` | gauge | bytes/s | Receive throughput |
+| `dicom_{pool}_pool_acquisitions_total` | counter | count | Pool acquisitions |
+| `dicom_{pool}_pool_hit_ratio` | gauge | ratio | Pool hit ratio |
+| `dicom_{pool}_pool_size` | gauge | count | Current pool size |
+
+Where `{pool}` is one of: `element`, `dataset`, `pdu_buffer`.
+
+---
+
+### `pacs::monitoring::pacs_monitor`
+
+Unified monitoring class integrating all DICOM metric collectors with health check support and Prometheus export.
+
+```cpp
+#include <pacs/monitoring/pacs_monitor.hpp>
+
+namespace pacs::monitoring {
+
+// Health check result for a single component
+struct health_check_result {
+    std::string name;
+    bool healthy;
+    std::string message;
+    std::chrono::milliseconds latency{0};
+    std::chrono::system_clock::time_point timestamp;
+};
+
+// Aggregated snapshot of all metrics
+struct metrics_snapshot {
+    std::vector<association_metric> association_metrics;
+    std::vector<service_metric> service_metrics;
+    std::vector<storage_metric> storage_metrics;
+    std::unordered_map<std::string, double> custom_metrics;
+    std::chrono::system_clock::time_point timestamp;
+};
+
+class pacs_monitor {
+public:
+    // Singleton access (Meyer's singleton)
+    static pacs_monitor& global_monitor() noexcept;
+
+    // Initialization
+    [[nodiscard]] bool initialize(
+        const std::unordered_map<std::string, std::string>& config = {});
+    [[nodiscard]] bool is_initialized() const noexcept;
+
+    // Custom metrics
+    void record_metric(std::string_view name, double value);
+    [[nodiscard]] std::optional<double> get_metric(std::string_view name) const;
+
+    // Metric collection
+    [[nodiscard]] metrics_snapshot get_metrics();
+
+    // Health checks
+    void register_health_check(std::string_view component,
+                               std::function<bool()> check);
+    void unregister_health_check(std::string_view component);
+    [[nodiscard]] health_check_result check_health(std::string_view component);
+    [[nodiscard]] std::vector<health_check_result> check_all_health();
+    [[nodiscard]] bool is_healthy() const;
+
+    // Export formats
+    [[nodiscard]] std::string to_prometheus() const;
+    [[nodiscard]] std::string to_json() const;
+
+    // Configuration
+    void set_ae_title(std::string ae_title);
+    [[nodiscard]] std::string get_ae_title() const;
+
+    // Lifecycle
+    void reset();
+
+private:
+    pacs_monitor() = default;  // Singleton
+};
+
+} // namespace pacs::monitoring
+```
+
+**Usage Example:**
+
+```cpp
+#include <pacs/monitoring/pacs_monitor.hpp>
+using namespace pacs::monitoring;
+
+// Initialize the global monitor
+auto& monitor = pacs_monitor::global_monitor();
+monitor.initialize({{"ae_title", "MY_PACS"}});
+
+// Register custom health checks
+monitor.register_health_check("database", []() {
+    return db_connection.is_alive();
+});
+monitor.register_health_check("storage", []() {
+    return storage.free_space_gb() > 10;
+});
+
+// Record custom metrics
+monitor.record_metric("active_studies", 42.0);
+
+// Get all metrics snapshot
+auto snapshot = monitor.get_metrics();
+for (const auto& m : snapshot.association_metrics) {
+    std::cout << m.name << ": " << m.value << "\n";
+}
+
+// Export for Prometheus
+std::string prometheus_output = monitor.to_prometheus();
+// Example output:
+// # HELP dicom_associations_active Currently active associations
+// # TYPE dicom_associations_active gauge
+// dicom_associations_active{ae="MY_PACS"} 5
+
+// Check health status
+auto health = monitor.check_all_health();
+for (const auto& h : health) {
+    std::cout << h.name << ": " << (h.healthy ? "OK" : "FAIL") << "\n";
+}
+```
+
+---
+
 ## Common Module
 
 ### Error Codes

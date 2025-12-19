@@ -2,7 +2,7 @@
 
 **Issue**: #155 - Verify thread_system stability and jthread support
 **Date**: 2024-12-04
-**Last Updated**: 2024-12-05 (Phase 3 cancellation_token integration)
+**Last Updated**: 2025-12-19 (CI timing tolerance fix for lockfree_queue tests)
 **Platform**: macOS ARM64 (Apple Silicon), Ubuntu 24.04 (x64)
 **Author**: Core Maintainer
 
@@ -390,6 +390,45 @@ All 13 assertions pass across 5 test sections.
 - [x] Cancellation propagates to all workers
 - [x] DICOM associations properly released before abort
 - [x] All tests pass
+
+## CI Timing Tolerance Fix (2025-12-19)
+
+### Problem Description
+
+The `lockfree_queue edge cases` test was failing intermittently on macOS CI runners. Specifically, the `wait_dequeue timeout behavior` section failed because the elapsed time exceeded the 200ms upper bound.
+
+### Root Cause
+
+CI environments, especially macOS runners, can experience scheduling delays due to:
+- Shared resources with other CI jobs
+- Virtualization overhead
+- System load variations
+
+The original test had a strict timing check:
+```cpp
+CHECK(elapsed < 200ms);  // Too strict for CI
+```
+
+### Solution Applied
+
+Increased the timing tolerance to 1 second to prevent flaky test failures:
+
+```cpp
+// CI environments (especially macOS) may have scheduling delays
+// Use generous upper bound to avoid flaky tests
+CHECK(elapsed < 1s);
+```
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `tests/concurrency/lockfree_stress_test.cpp` | Increased timeout tolerance from 200ms to 1s |
+
+### Verification
+
+- The 100ms lower bound check remains unchanged to verify correct behavior
+- The generous upper bound prevents false negatives in CI while still catching significant timing issues
 
 ## References
 
