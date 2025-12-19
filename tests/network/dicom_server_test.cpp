@@ -11,6 +11,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <latch>
 #include <thread>
 
 using namespace pacs::network;
@@ -538,15 +539,17 @@ TEST_CASE("dicom_server cancellation token integration", "[dicom_server][cancell
         REQUIRE(result.is_ok());
 
         std::atomic<bool> waiter_notified{false};
+        std::latch ready_latch{1};
 
         // Start a thread that waits for shutdown
         std::thread waiter([&]() {
+            ready_latch.count_down();  // Signal ready to wait
             server.wait_for_shutdown();
             waiter_notified = true;
         });
 
-        // Give the waiter thread time to start waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds{50});
+        // Wait for waiter thread to be ready
+        ready_latch.wait();
 
         // Stop should notify the waiter
         server.stop(std::chrono::milliseconds{100});
