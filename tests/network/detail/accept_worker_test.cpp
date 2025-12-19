@@ -15,6 +15,25 @@
 using namespace pacs::network::detail;
 using namespace std::chrono_literals;
 
+namespace {
+
+/**
+ * @brief Wait for a condition with timeout
+ */
+template <typename Pred>
+bool wait_for_condition(Pred condition, std::chrono::milliseconds timeout = 2000ms) {
+    auto start = std::chrono::steady_clock::now();
+    while (!condition()) {
+        if (std::chrono::steady_clock::now() - start > timeout) {
+            return false;
+        }
+        std::this_thread::sleep_for(10ms);
+    }
+    return true;
+}
+
+}  // namespace
+
 TEST_CASE("accept_worker construction", "[accept_worker][construction]") {
     SECTION("constructs with valid parameters") {
         bool callback_invoked = false;
@@ -70,14 +89,8 @@ TEST_CASE("accept_worker lifecycle", "[accept_worker][lifecycle]") {
         auto result = worker.start();
         REQUIRE_FALSE(result.is_err());
 
-        // Give the worker time to start and set running state
-        std::this_thread::sleep_for(50ms);
-
-        // Check accepting state (set in before_start)
-        REQUIRE(worker.is_accepting());
-
-        // Give the worker time to run at least one iteration
-        std::this_thread::sleep_for(100ms);
+        // Wait for worker to reach accepting state
+        REQUIRE(wait_for_condition([&]() { return worker.is_accepting(); }));
 
         auto stop_result = worker.stop();
         REQUIRE_FALSE(stop_result.is_err());
@@ -100,7 +113,7 @@ TEST_CASE("accept_worker lifecycle", "[accept_worker][lifecycle]") {
         REQUIRE_FALSE(first.is_err());
 
         // Wait for thread to fully start
-        std::this_thread::sleep_for(50ms);
+        REQUIRE(wait_for_condition([&]() { return worker.is_running(); }));
 
         auto second = worker.start();
         REQUIRE(second.is_err());
@@ -202,9 +215,8 @@ TEST_CASE("accept_worker destructor stops thread", "[accept_worker][raii]") {
         auto result = worker.start();
         REQUIRE_FALSE(result.is_err());
 
-        // Give the thread time to transition to running state
-        // The thread needs to execute before_start() and enter the wait loop
-        std::this_thread::sleep_for(50ms);
+        // Wait for thread to transition to running state
+        REQUIRE(wait_for_condition([&]() { return worker.is_running(); }));
 
         was_running = worker.is_running();
         // Destructor should be called here

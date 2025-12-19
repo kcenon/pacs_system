@@ -53,6 +53,28 @@ auto read_file_contents(const std::filesystem::path& path) -> std::string {
 }
 
 /**
+ * @brief Wait for a file to contain expected content with timeout
+ * @param path File path to check
+ * @param expected Substring that must be present
+ * @param timeout Maximum wait time
+ * @return File contents if found, empty string if timed out
+ */
+auto wait_for_file_content(const std::filesystem::path& path,
+                           const std::string& expected,
+                           std::chrono::milliseconds timeout = std::chrono::milliseconds{2000})
+    -> std::string {
+    auto start = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now() - start < timeout) {
+        auto content = read_file_contents(path);
+        if (!content.empty() && content.find(expected) != std::string::npos) {
+            return content;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds{10});
+    }
+    return read_file_contents(path);  // Return final content for error messages
+}
+
+/**
  * @brief RAII wrapper for logger initialization/shutdown
  */
 class logger_test_fixture {
@@ -139,9 +161,7 @@ TEST_CASE("logger_adapter standard logging", "[logger_adapter][logging]") {
         logger_adapter::error("Error message: {}", 5);
 
         logger_adapter::flush();
-
-        // Give async logger time to write
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        // Note: No need to wait here since we don't verify file contents
     }
 
     SECTION("Log level filtering") {
@@ -183,10 +203,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
             "MODALITY1", "PACS_SERVER", "192.168.1.100");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "ASSOCIATION_ESTABLISHED");
 
         REQUIRE(content.find("ASSOCIATION_ESTABLISHED") != std::string::npos);
         REQUIRE(content.find("MODALITY1") != std::string::npos);
@@ -198,10 +217,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
         logger_adapter::log_association_released("MODALITY1", "PACS_SERVER");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "ASSOCIATION_RELEASED");
 
         REQUIRE(content.find("ASSOCIATION_RELEASED") != std::string::npos);
     }
@@ -212,10 +230,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
             storage_status::success);
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "C-STORE");
 
         REQUIRE(content.find("C-STORE") != std::string::npos);
         REQUIRE(content.find("success") != std::string::npos);
@@ -229,10 +246,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
             storage_status::out_of_resources);
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "C-STORE");
 
         REQUIRE(content.find("C-STORE") != std::string::npos);
         REQUIRE(content.find("failure") != std::string::npos);
@@ -244,10 +260,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
             "WORKSTATION1", query_level::study, 42);
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "C-FIND");
 
         REQUIRE(content.find("C-FIND") != std::string::npos);
         REQUIRE(content.find("STUDY") != std::string::npos);
@@ -260,10 +275,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
             move_status::success);
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "C-MOVE");
 
         REQUIRE(content.find("C-MOVE") != std::string::npos);
         REQUIRE(content.find("success") != std::string::npos);
@@ -276,10 +290,9 @@ TEST_CASE("logger_adapter DICOM audit logging", "[logger_adapter][audit]") {
             move_status::refused_move_destination_unknown);
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "C-MOVE");
 
         REQUIRE(content.find("C-MOVE") != std::string::npos);
         REQUIRE(content.find("failure") != std::string::npos);
@@ -308,10 +321,9 @@ TEST_CASE("logger_adapter security event logging", "[logger_adapter][security]")
             "admin_user");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "authentication_success");
 
         REQUIRE(content.find("SECURITY") != std::string::npos);
         REQUIRE(content.find("authentication_success") != std::string::npos);
@@ -325,10 +337,9 @@ TEST_CASE("logger_adapter security event logging", "[logger_adapter][security]")
             "192.168.1.50");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "authentication_failure");
 
         REQUIRE(content.find("authentication_failure") != std::string::npos);
     }
@@ -340,10 +351,9 @@ TEST_CASE("logger_adapter security event logging", "[logger_adapter][security]")
             "unauthorized_user");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "access_denied");
 
         REQUIRE(content.find("access_denied") != std::string::npos);
     }
@@ -354,10 +364,9 @@ TEST_CASE("logger_adapter security event logging", "[logger_adapter][security]")
             "Storage path changed to /new/path");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "configuration_change");
 
         REQUIRE(content.find("configuration_change") != std::string::npos);
     }
@@ -369,10 +378,9 @@ TEST_CASE("logger_adapter security event logging", "[logger_adapter][security]")
             "technician1");
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "data_export");
 
         REQUIRE(content.find("data_export") != std::string::npos);
     }
@@ -443,10 +451,9 @@ TEST_CASE("logger_adapter audit log JSON format", "[logger_adapter][audit][json]
         storage_status::success);
 
     logger_adapter::flush();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     auto audit_path = temp_dir / "audit.json";
-    auto content = read_file_contents(audit_path);
+    auto content = wait_for_file_content(audit_path, "C-STORE");
 
     // Verify JSON structure
     REQUIRE(content.find("{") != std::string::npos);
@@ -479,10 +486,9 @@ TEST_CASE("logger_adapter handles empty values", "[logger_adapter][empty]") {
             "");  // Empty user_id
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "authentication_failure");
 
         REQUIRE(content.find("authentication_failure") != std::string::npos);
         // user_id should not be present when empty
@@ -493,10 +499,9 @@ TEST_CASE("logger_adapter handles empty values", "[logger_adapter][empty]") {
             "TEST_AE", query_level::patient, 0);
 
         logger_adapter::flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         auto audit_path = temp_dir / "audit.json";
-        auto content = read_file_contents(audit_path);
+        auto content = wait_for_file_content(audit_path, "C-FIND");
 
         REQUIRE(content.find("C-FIND") != std::string::npos);
         REQUIRE(content.find("\"matches_returned\":\"0\"") != std::string::npos);
@@ -541,9 +546,12 @@ TEST_CASE("logger_adapter thread safety", "[logger_adapter][thread]") {
     }
 
     logger_adapter::flush();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    // Verify no crashes and audit log was created
+    // Wait for audit log file to be created and contain expected content
     auto audit_path = temp_dir / "audit.json";
+    auto content = wait_for_file_content(audit_path, "C-FIND");
+
+    // Verify no crashes and audit log was created with content
     REQUIRE(std::filesystem::exists(audit_path));
+    REQUIRE(!content.empty());
 }
