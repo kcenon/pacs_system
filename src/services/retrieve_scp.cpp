@@ -6,9 +6,12 @@
 #include "pacs/services/retrieve_scp.hpp"
 
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/events.hpp"
 #include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
+
+#include <kcenon/common/patterns/event_bus.h>
 
 namespace pacs::services {
 
@@ -171,6 +174,21 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
     // Retrieve matching files
     const auto& query_keys = request.dataset();
     auto files = retrieve_handler_(query_keys);
+    auto start_time = std::chrono::steady_clock::now();
+
+    // Get study UID for event
+    std::string study_uid = query_keys.get_string(core::tags::study_instance_uid);
+
+    // Publish retrieve started event
+    kcenon::common::get_event_bus().publish(
+        pacs::events::retrieve_started_event{
+            pacs::events::retrieve_operation::c_move,
+            calling_ae,
+            dest_ae,
+            study_uid,
+            static_cast<uint16_t>(files.size())
+        }
+    );
 
     // Initialize sub-operation statistics
     sub_operation_stats stats;
@@ -226,6 +244,23 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
     // Update operation count
     ++move_operations_;
 
+    // Calculate duration and publish completed event
+    auto end_time = std::chrono::steady_clock::now();
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - start_time).count();
+
+    kcenon::common::get_event_bus().publish(
+        pacs::events::retrieve_completed_event{
+            pacs::events::retrieve_operation::c_move,
+            calling_ae,
+            dest_ae,
+            stats.completed,
+            stats.failed,
+            stats.warning,
+            static_cast<uint64_t>(duration_ms)
+        }
+    );
+
     // Send final response
     return send_final_response(
         assoc, context_id, message_id,
@@ -267,6 +302,21 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
     // Retrieve matching files
     const auto& query_keys = request.dataset();
     auto files = retrieve_handler_(query_keys);
+    auto start_time = std::chrono::steady_clock::now();
+
+    // Get study UID for event
+    std::string study_uid = query_keys.get_string(core::tags::study_instance_uid);
+
+    // Publish retrieve started event (C-GET has no destination AE)
+    kcenon::common::get_event_bus().publish(
+        pacs::events::retrieve_started_event{
+            pacs::events::retrieve_operation::c_get,
+            calling_ae,
+            "",  // No destination for C-GET
+            study_uid,
+            static_cast<uint16_t>(files.size())
+        }
+    );
 
     // Initialize sub-operation statistics
     sub_operation_stats stats;
@@ -370,6 +420,23 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
 
     // Update operation count
     ++get_operations_;
+
+    // Calculate duration and publish completed event
+    auto end_time = std::chrono::steady_clock::now();
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - start_time).count();
+
+    kcenon::common::get_event_bus().publish(
+        pacs::events::retrieve_completed_event{
+            pacs::events::retrieve_operation::c_get,
+            calling_ae,
+            "",  // No destination for C-GET
+            stats.completed,
+            stats.failed,
+            stats.warning,
+            static_cast<uint64_t>(duration_ms)
+        }
+    );
 
     // Send final response
     return send_final_response(

@@ -153,7 +153,8 @@ pacs_system/
 │   │   ├── dicom_dataset.hpp    # Data Set
 │   │   ├── dicom_file.hpp       # DICOM File (Part 10)
 │   │   ├── dicom_dictionary.hpp # Tag Dictionary
-│   │   └── tag_info.hpp         # Tag metadata
+│   │   ├── tag_info.hpp         # Tag metadata
+│   │   └── events.hpp           # Event Bus integration events
 │   │
 │   ├── encoding/                # Encoding/Decoding (✅ Complete)
 │   │   ├── vr_type.hpp          # Value Representation enum
@@ -881,6 +882,42 @@ database:
 - **Stability**: Memory leak detection, connection pool exhaustion, long-running operations
 - **Stress**: Concurrent SCUs, rapid connections, large datasets
 - **Error Recovery**: Invalid SOP class, server restart, abort handling
+
+### Event Bus Integration
+
+The PACS system integrates with `common_system` Event Bus for inter-module communication and event-driven workflows.
+
+```cpp
+#include "pacs/core/events.hpp"
+#include <kcenon/common/patterns/event_bus.h>
+
+// Subscribe to image storage events
+auto& bus = kcenon::common::get_event_bus();
+auto sub_id = bus.subscribe<pacs::events::image_received_event>(
+    [](const pacs::events::image_received_event& evt) {
+        std::cout << "Received image: " << evt.sop_instance_uid
+                  << " from " << evt.calling_ae << std::endl;
+        // Trigger workflow, update cache, send notification, etc.
+    }
+);
+
+// Subscribe to association events
+bus.subscribe<pacs::events::association_established_event>(
+    [](const pacs::events::association_established_event& evt) {
+        std::cout << "New association: " << evt.calling_ae
+                  << " -> " << evt.called_ae << std::endl;
+    }
+);
+
+// Cleanup when done
+bus.unsubscribe(sub_id);
+```
+
+**Available Event Types**:
+- `association_established_event` / `association_released_event` / `association_aborted_event`
+- `image_received_event` / `storage_failed_event`
+- `query_executed_event` / `query_failed_event`
+- `retrieve_started_event` / `retrieve_completed_event`
 
 ---
 

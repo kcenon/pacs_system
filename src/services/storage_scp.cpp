@@ -5,9 +5,12 @@
 
 #include "pacs/services/storage_scp.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/core/events.hpp"
 #include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
+
+#include <kcenon/common/patterns/event_bus.h>
 
 namespace pacs::services {
 
@@ -114,12 +117,12 @@ network::Result<std::monostate> storage_scp::handle_message(
         );
 
         // Call post-store handler for cache invalidation and notifications
-        if (post_store_handler_) {
-            const auto& dataset = request.dataset();
-            auto patient_id = dataset.get_string(core::tags::patient_id);
-            auto study_uid = dataset.get_string(core::tags::study_instance_uid);
-            auto series_uid = dataset.get_string(core::tags::series_instance_uid);
+        const auto& dataset = request.dataset();
+        auto patient_id = dataset.get_string(core::tags::patient_id);
+        auto study_uid = dataset.get_string(core::tags::study_instance_uid);
+        auto series_uid = dataset.get_string(core::tags::series_instance_uid);
 
+        if (post_store_handler_) {
             post_store_handler_(
                 dataset,
                 patient_id,
@@ -128,6 +131,33 @@ network::Result<std::monostate> storage_scp::handle_message(
                 sop_instance_uid
             );
         }
+
+        // Publish image received event
+        kcenon::common::get_event_bus().publish(
+            pacs::events::image_received_event{
+                patient_id,
+                study_uid,
+                series_uid,
+                sop_instance_uid,
+                sop_class_uid,
+                std::string(assoc.calling_ae()),
+                bytes_received_.load(std::memory_order_relaxed)
+            }
+        );
+    } else {
+        // Storage failed - publish failure event
+        const auto& dataset = request.dataset();
+        auto patient_id = dataset.get_string(core::tags::patient_id);
+
+        kcenon::common::get_event_bus().publish(
+            pacs::events::storage_failed_event{
+                patient_id,
+                sop_instance_uid,
+                std::string(assoc.calling_ae()),
+                static_cast<int>(status),
+                "C-STORE operation failed"
+            }
+        );
     }
 
     // Build and send the response
