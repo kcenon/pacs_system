@@ -701,3 +701,379 @@ TEST_CASE("task_scheduler: callbacks", "[workflow][scheduler][callbacks]") {
         CHECK(called.load() == false);  // Not called yet
     }
 }
+
+// ============================================================================
+// Concurrency Tests
+// ============================================================================
+
+TEST_CASE("task_scheduler: concurrent task scheduling", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+    config.max_concurrent_tasks = 4;
+
+    task_scheduler scheduler(*db, config);
+
+    SECTION("multiple threads can schedule tasks simultaneously") {
+        constexpr int num_threads = 8;
+        constexpr int tasks_per_thread = 10;
+        std::vector<std::thread> threads;
+        std::atomic<int> scheduled_count{0};
+
+        for (int t = 0; t < num_threads; ++t) {
+            threads.emplace_back([&scheduler, &scheduled_count, t]() {
+                for (int i = 0; i < tasks_per_thread; ++i) {
+                    std::string name = "thread_" + std::to_string(t) + "_task_" + std::to_string(i);
+                    auto task_id = scheduler.schedule(
+                        name, "Concurrent test task", 3600s,
+                        []() { return std::optional<std::string>{}; });
+                    if (!task_id.empty()) {
+                        ++scheduled_count;
+                    }
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
+        CHECK(scheduled_count.load() == num_threads * tasks_per_thread);
+
+        auto tasks = scheduler.list_tasks();
+        CHECK(tasks.size() == static_cast<std::size_t>(num_threads * tasks_per_thread));
+    }
+}
+
+TEST_CASE("task_scheduler: concurrent task management", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+
+    task_scheduler scheduler(*db, config);
+
+    // Create tasks first
+    std::vector<task_id> task_ids;
+    for (int i = 0; i < 20; ++i) {
+        auto id = scheduler.schedule(
+            "task_" + std::to_string(i), "Test task", 3600s,
+            []() { return std::optional<std::string>{}; });
+        task_ids.push_back(id);
+    }
+
+    SECTION("concurrent pause and resume operations") {
+        std::vector<std::thread> threads;
+        std::atomic<int> operations{0};
+
+        // Half the threads pause tasks
+        for (int t = 0; t < 4; ++t) {
+            threads.emplace_back([&scheduler, &task_ids, &operations, t]() {
+                for (std::size_t i = t; i < task_ids.size(); i += 4) {
+                    scheduler.pause_task(task_ids[i]);
+                    ++operations;
+                    std::this_thread::sleep_for(1ms);
+                    scheduler.resume_task(task_ids[i]);
+                    ++operations;
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
+        // All operations should complete without crash
+        CHECK(operations.load() > 0);
+
+        // All tasks should be in pending state after resume
+        auto tasks = scheduler.list_tasks();
+        for (const auto& task : tasks) {
+            CHECK((task.state == task_state::pending || task.state == task_state::paused));
+        }
+    }
+
+    SECTION("concurrent list_tasks is thread-safe") {
+        std::vector<std::thread> threads;
+        std::atomic<int> list_count{0};
+
+        for (int t = 0; t < 8; ++t) {
+            threads.emplace_back([&scheduler, &list_count]() {
+                for (int i = 0; i < 50; ++i) {
+                    auto tasks = scheduler.list_tasks();
+                    if (!tasks.empty()) {
+                        ++list_count;
+                    }
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
+        CHECK(list_count.load() == 8 * 50);
+    }
+}
+
+TEST_CASE("task_scheduler: concurrent execution with max limit", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+    config.check_interval = std::chrono::seconds{1};
+    config.max_concurrent_tasks = 2;
+
+    task_scheduler scheduler(*db, config);
+
+    std::atomic<int> concurrent_running{0};
+    std::atomic<int> max_concurrent{0};
+    std::atomic<int> completed{0};
+    constexpr int total_tasks = 6;
+
+    // Schedule multiple tasks that track concurrency
+    auto past_time = std::chrono::system_clock::now() - 1s;
+    for (int i = 0; i < total_tasks; ++i) {
+        scheduler.schedule_once(
+            "concurrent_" + std::to_string(i),
+            "Test max concurrency",
+            past_time,
+            [&concurrent_running, &max_concurrent, &completed]() -> std::optional<std::string> {
+                ++concurrent_running;
+
+                // Update max observed concurrency
+                int current = concurrent_running.load();
+                int expected = max_concurrent.load();
+                while (current > expected) {
+                    if (max_concurrent.compare_exchange_weak(expected, current)) {
+                        break;
+                    }
+                }
+
+                std::this_thread::sleep_for(50ms);
+                --concurrent_running;
+                ++completed;
+                return std::nullopt;
+            });
+    }
+
+    scheduler.start();
+
+    // Wait for all tasks to complete
+    for (int i = 0; i < 100 && completed.load() < total_tasks; ++i) {
+        std::this_thread::sleep_for(50ms);
+    }
+
+    scheduler.stop();
+
+    CHECK(completed.load() == total_tasks);
+    CHECK(static_cast<std::size_t>(max_concurrent.load()) <= config.max_concurrent_tasks);
+}
+
+TEST_CASE("task_scheduler: stress test rapid scheduling", "[workflow][scheduler][concurrency][stress]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+
+    task_scheduler scheduler(*db, config);
+
+    SECTION("rapid schedule and cancel") {
+        constexpr int iterations = 100;
+        std::vector<task_id> ids;
+
+        for (int i = 0; i < iterations; ++i) {
+            auto id = scheduler.schedule(
+                "rapid_" + std::to_string(i), "Rapid test", 3600s,
+                []() { return std::optional<std::string>{}; });
+            ids.push_back(id);
+        }
+
+        // Cancel half immediately
+        for (int i = 0; i < iterations / 2; ++i) {
+            scheduler.cancel_task(ids[i]);
+        }
+
+        auto all_tasks = scheduler.list_tasks();
+        CHECK(all_tasks.size() == iterations);
+
+        auto enabled_count = std::count_if(all_tasks.begin(), all_tasks.end(),
+            [](const auto& t) { return t.enabled; });
+        CHECK(enabled_count == iterations / 2);
+    }
+}
+
+// ============================================================================
+// Thread System Integration Tests
+// ============================================================================
+
+TEST_CASE("task_scheduler: statistics under concurrent load", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+    config.check_interval = std::chrono::seconds{1};
+    config.max_concurrent_tasks = 4;
+
+    task_scheduler scheduler(*db, config);
+
+    std::atomic<int> completed{0};
+    constexpr int total_tasks = 10;
+
+    // Schedule tasks that complete quickly
+    auto past_time = std::chrono::system_clock::now() - 1s;
+    for (int i = 0; i < total_tasks; ++i) {
+        scheduler.schedule_once(
+            "stats_test_" + std::to_string(i),
+            "Statistics test",
+            past_time,
+            [&completed]() -> std::optional<std::string> {
+                std::this_thread::sleep_for(10ms);
+                ++completed;
+                return std::nullopt;
+            });
+    }
+
+    scheduler.start();
+
+    // Wait for completion
+    for (int i = 0; i < 100 && completed.load() < total_tasks; ++i) {
+        std::this_thread::sleep_for(50ms);
+    }
+
+    scheduler.stop();
+
+    auto stats = scheduler.get_stats();
+    CHECK(stats.total_executions == total_tasks);
+    CHECK(stats.successful_executions == total_tasks);
+    CHECK(stats.failed_executions == 0);
+    CHECK(stats.avg_execution_time.count() > 0);
+}
+
+TEST_CASE("task_scheduler: execution history under load", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+    config.check_interval = std::chrono::seconds{1};
+
+    task_scheduler scheduler(*db, config);
+
+    std::atomic<int> completed{0};
+    constexpr int total_tasks = 5;
+
+    auto past_time = std::chrono::system_clock::now() - 1s;
+    std::vector<task_id> task_ids;
+
+    for (int i = 0; i < total_tasks; ++i) {
+        auto id = scheduler.schedule_once(
+            "history_load_" + std::to_string(i),
+            "History load test",
+            past_time,
+            [&completed]() -> std::optional<std::string> {
+                ++completed;
+                return std::nullopt;
+            });
+        task_ids.push_back(id);
+    }
+
+    scheduler.start();
+
+    for (int i = 0; i < 100 && completed.load() < total_tasks; ++i) {
+        std::this_thread::sleep_for(50ms);
+    }
+
+    scheduler.stop();
+
+    // Verify execution history for each task
+    for (const auto& id : task_ids) {
+        auto history = scheduler.get_execution_history(id);
+        CHECK(history.size() >= 1);
+        CHECK(history.back().state == task_state::completed);
+    }
+
+    // Verify recent executions
+    auto recent = scheduler.get_recent_executions(total_tasks);
+    CHECK(recent.size() == total_tasks);
+}
+
+TEST_CASE("task_scheduler: retry mechanism under concurrency", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+    config.check_interval = std::chrono::seconds{1};
+
+    task_scheduler scheduler(*db, config);
+
+    std::atomic<int> attempt_count{0};
+    constexpr int max_retries = 2;
+
+    // Create task with retries
+    scheduled_task task;
+    task.id = "retry_test";
+    task.name = "Retry Test";
+    task.description = "Tests retry mechanism";
+    task.type = task_type::custom;
+    task.task_schedule = one_time_schedule{std::chrono::system_clock::now() - 1s};
+    task.enabled = true;
+    task.max_retries = max_retries;
+    task.retry_delay = std::chrono::seconds{1};
+    task.next_run_at = std::chrono::system_clock::now() - 1s;  // Ensure it runs immediately
+    task.created_at = std::chrono::system_clock::now();
+    task.updated_at = task.created_at;
+    task.callback = [&attempt_count]() -> std::optional<std::string> {
+        ++attempt_count;
+        if (attempt_count.load() <= max_retries) {
+            return "Intentional failure for retry test";
+        }
+        return std::nullopt;  // Success on final attempt
+    };
+
+    scheduler.schedule(std::move(task));
+    scheduler.start();
+
+    // Wait for retries to complete (longer wait for retry delays)
+    for (int i = 0; i < 100 && attempt_count.load() < max_retries + 1; ++i) {
+        std::this_thread::sleep_for(100ms);
+    }
+
+    scheduler.stop();
+
+    // Should have attempted max_retries + 1 times (initial + retries)
+    CHECK(attempt_count.load() == max_retries + 1);
+}
+
+TEST_CASE("task_scheduler: trigger_task under concurrent execution", "[workflow][scheduler][concurrency]") {
+    auto db = create_test_database();
+    task_scheduler_config config;
+    config.auto_start = false;
+    config.check_interval = std::chrono::seconds{1};
+
+    task_scheduler scheduler(*db, config);
+
+    std::atomic<int> execution_count{0};
+
+    // Schedule a task with future execution time
+    auto future_time = std::chrono::system_clock::now() + std::chrono::hours{24};
+    auto task_id = scheduler.schedule_once(
+        "trigger_test",
+        "Trigger test task",
+        future_time,
+        [&execution_count]() -> std::optional<std::string> {
+            ++execution_count;
+            return std::nullopt;
+        });
+
+    scheduler.start();
+
+    // Initially, task should not execute (scheduled for future)
+    std::this_thread::sleep_for(200ms);
+    CHECK(execution_count.load() == 0);
+
+    // Trigger immediate execution
+    CHECK(scheduler.trigger_task(task_id) == true);
+
+    // Wait for triggered execution
+    for (int i = 0; i < 50 && execution_count.load() == 0; ++i) {
+        std::this_thread::sleep_for(50ms);
+    }
+
+    scheduler.stop();
+
+    CHECK(execution_count.load() == 1);
+}
