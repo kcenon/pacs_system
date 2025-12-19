@@ -251,8 +251,9 @@ pacs_system/
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (18 apps, ~13,000 lines)
+├── examples/                    # Example Applications (19 apps, ~13,500 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
+│   ├── dcm_conv/                # Transfer Syntax conversion utility
 │   ├── dcm_modify/              # DICOM tag modification & anonymization utility
 │   ├── db_browser/              # PACS index database browser
 │   ├── echo_scp/                # DICOM Echo SCP server
@@ -449,6 +450,28 @@ cmake --build build
 
 # Batch anonymize directory
 ./build/bin/dcm_modify ./input/ --anonymize -o ./output/ --recursive
+```
+
+### DCM Conv (Transfer Syntax Converter)
+
+```bash
+# Convert to Explicit VR Little Endian (default)
+./build/bin/dcm_conv image.dcm converted.dcm --explicit
+
+# Convert to Implicit VR Little Endian
+./build/bin/dcm_conv image.dcm output.dcm --implicit
+
+# Convert to JPEG Baseline with quality setting
+./build/bin/dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 85
+
+# Convert directory recursively with verification
+./build/bin/dcm_conv ./input_dir/ ./output_dir/ --recursive --verify
+
+# List all supported Transfer Syntaxes
+./build/bin/dcm_conv --list-syntaxes
+
+# Convert with explicit Transfer Syntax UID
+./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
 
 ### DB Browser (Database Viewer)
