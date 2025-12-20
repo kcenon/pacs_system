@@ -42,6 +42,10 @@
 #include <jpeglib.h>
 #endif
 
+#ifdef PACS_PNG_FOUND
+#include <png.h>
+#endif
+
 namespace {
 
 /**
@@ -50,6 +54,7 @@ namespace {
 enum class output_format {
     raw,   // Raw pixel data
     jpeg,  // JPEG image
+    png,   // PNG image
     ppm    // PPM/PGM (portable pixmap/graymap)
 };
 
@@ -120,6 +125,7 @@ Arguments:
 Output Format Options:
   --raw               Raw pixel data (default)
   --jpeg              JPEG image (requires libjpeg)
+  --png               PNG image (requires libpng)
   --ppm               PPM/PGM portable image format
 
 JPEG Options:
@@ -153,6 +159,8 @@ Examples:
               << R"( image.dcm output.raw --raw      # Extract raw pixels
   )" << program_name
               << R"( image.dcm output.jpg --jpeg     # Extract as JPEG
+  )" << program_name
+              << R"( image.dcm output.png --png      # Extract as PNG
   )" << program_name
               << R"( image.dcm output.ppm --ppm      # Extract as PPM
   )" << program_name
@@ -190,6 +198,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
             opts.format = output_format::raw;
         } else if (arg == "--jpeg") {
             opts.format = output_format::jpeg;
+        } else if (arg == "--png") {
+            opts.format = output_format::png;
         } else if (arg == "--ppm") {
             opts.format = output_format::ppm;
         } else if ((arg == "-q" || arg == "--quality") && i + 1 < argc) {
@@ -434,6 +444,89 @@ bool write_jpeg(const std::filesystem::path& output_path,
 }
 #endif
 
+#ifdef PACS_PNG_FOUND
+/**
+ * @brief Write pixel data as PNG
+ * @param output_path Output file path
+ * @param pixels Pixel data
+ * @param width Image width
+ * @param height Image height
+ * @param components Number of color components (1=grayscale, 3=RGB)
+ * @return true on success
+ */
+bool write_png(const std::filesystem::path& output_path,
+               const std::vector<uint8_t>& pixels,
+               int width, int height, int components) {
+    FILE* file = fopen(output_path.string().c_str(), "wb");
+    if (file == nullptr) {
+        std::cerr << "Error: Cannot create file: " << output_path << "\n";
+        return false;
+    }
+
+    // Create PNG write struct
+    png_structp png_ptr = png_create_write_struct(
+        PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (png_ptr == nullptr) {
+        std::cerr << "Error: Failed to create PNG write struct\n";
+        fclose(file);
+        return false;
+    }
+
+    // Create PNG info struct
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == nullptr) {
+        std::cerr << "Error: Failed to create PNG info struct\n";
+        png_destroy_write_struct(&png_ptr, nullptr);
+        fclose(file);
+        return false;
+    }
+
+    // Set up error handling (required for libpng)
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        std::cerr << "Error: PNG write error\n";
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        fclose(file);
+        return false;
+    }
+
+    // Initialize I/O
+    png_init_io(png_ptr, file);
+
+    // Set compression level (6 = default, good balance of speed/size)
+    png_set_compression_level(png_ptr, 6);
+
+    // Set image attributes
+    int color_type = (components == 1) ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_RGB;
+    png_set_IHDR(png_ptr, info_ptr,
+                 static_cast<png_uint_32>(width),
+                 static_cast<png_uint_32>(height),
+                 8,  // Bit depth
+                 color_type,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
+
+    // Write header
+    png_write_info(png_ptr, info_ptr);
+
+    // Write image data row by row
+    int row_stride = width * components;
+    for (int y = 0; y < height; ++y) {
+        png_bytep row = const_cast<png_bytep>(&pixels[static_cast<size_t>(y) * row_stride]);
+        png_write_row(png_ptr, row);
+    }
+
+    // Finish writing
+    png_write_end(png_ptr, nullptr);
+
+    // Cleanup
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    fclose(file);
+
+    return true;
+}
+#endif
+
 /**
  * @brief Write pixel data as PPM/PGM
  * @param output_path Output file path
@@ -637,6 +730,16 @@ bool extract_file(const std::filesystem::path& input_path,
 #endif
             break;
 
+        case output_format::png:
+#ifdef PACS_PNG_FOUND
+            success = write_png(output_path, pixels, info.columns, info.rows,
+                                info.samples_per_pixel);
+#else
+            std::cerr << "Error: PNG support not available. Install libpng.\n";
+            success = false;
+#endif
+            break;
+
         case output_format::ppm:
             success =
                 write_ppm(output_path, pixels, info.columns, info.rows, info.samples_per_pixel);
@@ -661,6 +764,8 @@ std::string get_output_extension(output_format format) {
             return ".raw";
         case output_format::jpeg:
             return ".jpg";
+        case output_format::png:
+            return ".png";
         case output_format::ppm:
             return ".ppm";
     }
