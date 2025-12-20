@@ -1727,6 +1727,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] store_scp: OFF (requires pacs_storage and pacs_integration)")
     endif()
 
+    # Query/Retrieve SCP - DICOM Q/R server (C-FIND, C-MOVE, C-GET)
+    if(TARGET pacs_storage AND TARGET pacs_integration)
+        add_subdirectory(examples/qr_scp)
+        message(STATUS "  [OK] qr_scp: DICOM Query/Retrieve server")
+    else()
+        message(STATUS "  [--] qr_scp: OFF (requires pacs_storage and pacs_integration)")
+    endif()
+
     # Database Browser - PACS index database viewer
     if(TARGET pacs_storage)
         add_subdirectory(examples/db_browser)
