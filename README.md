@@ -255,7 +255,8 @@ pacs_system/
 ├── examples/                    # Example Applications (19 apps, ~13,500 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
-│   ├── dcm_modify/              # DICOM tag modification & anonymization utility
+│   ├── dcm_modify/              # DICOM tag modification utility
+│   ├── dcm_anonymize/           # DICOM de-identification utility (PS3.15)
 │   ├── dcm_to_json/             # DICOM to JSON conversion utility (PS3.18)
 │   ├── json_to_dcm/             # JSON to DICOM conversion utility (PS3.18)
 │   ├── dcm_to_xml/              # DICOM to XML conversion utility (PS3.19)
@@ -502,6 +503,54 @@ ea (0010,1001)              # Erase all matching tags
 # Convert with explicit Transfer Syntax UID
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
+
+### DCM Anonymize (De-identification Utility)
+
+DICOM de-identification utility compliant with DICOM PS3.15 Security Profiles.
+
+```bash
+# Basic anonymization (removes direct identifiers)
+./build/bin/dcm_anonymize patient.dcm anonymous.dcm
+
+# HIPAA Safe Harbor compliance (18-identifier removal)
+./build/bin/dcm_anonymize --profile hipaa_safe_harbor patient.dcm output.dcm
+
+# GDPR-compliant pseudonymization
+./build/bin/dcm_anonymize --profile gdpr_compliant patient.dcm output.dcm
+
+# Keep specific tags unchanged
+./build/bin/dcm_anonymize -k PatientSex -k PatientAge patient.dcm output.dcm
+
+# Replace tags with custom values
+./build/bin/dcm_anonymize -r "InstitutionName=Research Hospital" patient.dcm output.dcm
+
+# Set new patient identifiers
+./build/bin/dcm_anonymize --patient-id "STUDY001_001" --patient-name "Anonymous" patient.dcm
+
+# Use UID mapping for consistent anonymization across study files
+./build/bin/dcm_anonymize -m mapping.json patient.dcm output.dcm
+
+# Shift dates for longitudinal studies
+./build/bin/dcm_anonymize --profile retain_longitudinal --date-offset -30 patient.dcm
+
+# Batch processing with directory recursion
+./build/bin/dcm_anonymize --recursive -o anonymized/ ./originals/
+
+# Dry-run mode to preview changes
+./build/bin/dcm_anonymize --dry-run --verbose patient.dcm
+
+# Verify anonymization completeness
+./build/bin/dcm_anonymize --verify patient.dcm anonymous.dcm
+```
+
+Available anonymization profiles:
+- `basic` - Remove direct patient identifiers (default)
+- `clean_pixel` - Remove burned-in annotations from pixel data
+- `clean_descriptions` - Clean free-text fields that may contain PHI
+- `retain_longitudinal` - Preserve temporal relationships with date shifting
+- `retain_patient_characteristics` - Keep demographics (sex, age, size, weight)
+- `hipaa_safe_harbor` - Full HIPAA 18-identifier removal
+- `gdpr_compliant` - GDPR pseudonymization requirements
 
 ### DCM to JSON (DICOM PS3.18 JSON Converter)
 
