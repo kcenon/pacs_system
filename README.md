@@ -252,7 +252,7 @@ pacs_system/
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (21 apps, ~14,950 lines)
+├── examples/                    # Example Applications (23 apps, ~16,500 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_info/                # DICOM file summary utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
@@ -263,6 +263,8 @@ pacs_system/
 │   ├── json_to_dcm/             # JSON to DICOM conversion utility (PS3.18)
 │   ├── dcm_to_xml/              # DICOM to XML conversion utility (PS3.19)
 │   ├── xml_to_dcm/              # XML to DICOM conversion utility (PS3.19)
+│   ├── img_to_dcm/              # Image to DICOM conversion utility
+│   ├── dcm_extract/             # DICOM pixel data extraction utility
 │   ├── db_browser/              # PACS index database browser
 │   ├── echo_scp/                # DICOM Echo SCP server
 │   ├── echo_scu/                # DICOM Echo SCU client
@@ -735,6 +737,68 @@ Convert XML files (DICOM Native XML PS3.19 format) back to DICOM format.
 # Resolve BulkData URI from specific directory
 ./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
+
+### Img to DCM (Image to DICOM Conversion)
+
+Convert standard image files (JPEG) to DICOM format using Secondary Capture SOP Class.
+
+```bash
+# Basic conversion
+./build/bin/img_to_dcm photo.jpg output.dcm
+
+# With patient metadata
+./build/bin/img_to_dcm photo.jpg output.dcm \
+  --patient-name "DOE^JOHN" \
+  --patient-id "12345" \
+  --study-description "Photograph"
+
+# Convert directory of images
+./build/bin/img_to_dcm ./photos/ ./dicom/ --recursive
+
+# With verbose output
+./build/bin/img_to_dcm photo.jpg output.dcm -v
+
+# Overwrite existing files
+./build/bin/img_to_dcm ./photos/ ./dicom/ --recursive --overwrite
+```
+
+Features:
+- Converts JPEG images to DICOM Secondary Capture format
+- Automatic UID generation for Study, Series, and Instance
+- Customizable patient and study metadata
+- Batch processing with recursive directory support
+- Requires libjpeg-turbo for JPEG support
+
+### DCM Extract (Pixel Data Extraction)
+
+Extract pixel data from DICOM files to standard image formats.
+
+```bash
+# Show pixel data information
+./build/bin/dcm_extract image.dcm --info
+
+# Extract to raw binary format
+./build/bin/dcm_extract image.dcm output.raw --raw
+
+# Extract to JPEG (requires libjpeg)
+./build/bin/dcm_extract image.dcm output.jpg --jpeg -q 90
+
+# Extract to PPM/PGM format
+./build/bin/dcm_extract image.dcm output.ppm --ppm
+
+# Apply window level transformation
+./build/bin/dcm_extract image.dcm output.jpg --jpeg --window 40 400
+
+# Batch extraction from directory
+./build/bin/dcm_extract ./dicom/ ./images/ --recursive --jpeg
+```
+
+Features:
+- Supports RAW, JPEG, and PPM/PGM output formats
+- Window level (center/width) transformation
+- Automatic 16-bit to 8-bit conversion
+- MONOCHROME1/MONOCHROME2 handling
+- Batch processing with recursive directory support
 
 ### DB Browser (Database Viewer)
 
