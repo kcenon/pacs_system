@@ -225,8 +225,9 @@ pacs_system/
 │   ├── monitoring/              # Health check 테스트 (3개 파일, 50 테스트)
 │   └── integration/             # Adapter 테스트 (5개 파일)
 │
-├── examples/                    # 예제 애플리케이션 (16개, ~11,000줄)
+├── examples/                    # 예제 애플리케이션 (20개, ~14,300줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
+│   ├── dcm_info/                # DICOM 파일 요약 유틸리티
 │   ├── dcm_conv/                # Transfer Syntax 변환 유틸리티
 │   ├── dcm_modify/              # DICOM 태그 수정 유틸리티
 │   ├── dcm_anonymize/           # DICOM 비식별화 유틸리티 (PS3.15)
@@ -361,6 +362,22 @@ cmake --build build
 
 # 디렉토리 재귀 스캔 및 요약
 ./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
+### DCM Info (파일 요약 유틸리티)
+
+```bash
+# DICOM 파일 요약 정보 표시
+./build/bin/dcm_info image.dcm
+
+# 상세 모드 (모든 필드 표시)
+./build/bin/dcm_info image.dcm --verbose
+
+# JSON 출력 (스크립트 연동용)
+./build/bin/dcm_info image.dcm --format json
+
+# 여러 파일 빠른 확인
+./build/bin/dcm_info ./dicom_folder/ -r -q
 ```
 
 ### DCM Modify (태그 수정 유틸리티)
