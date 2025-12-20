@@ -230,6 +230,7 @@ pacs_system/
 │   ├── dcm_conv/                # Transfer Syntax 변환 유틸리티
 │   ├── dcm_modify/              # DICOM 태그 수정 유틸리티
 │   ├── dcm_anonymize/           # DICOM 비식별화 유틸리티 (PS3.15)
+│   ├── dcm_dir/                 # DICOMDIR 생성/관리 유틸리티 (PS3.10)
 │   ├── dcm_to_json/             # DICOM → JSON 변환 유틸리티 (PS3.18)
 │   ├── json_to_dcm/             # JSON → DICOM 변환 유틸리티 (PS3.18)
 │   ├── dcm_to_xml/              # DICOM → XML 변환 유틸리티 (PS3.19)
@@ -478,6 +479,47 @@ DICOM PS3.15 보안 프로파일을 준수하는 DICOM 비식별화 유틸리티
 - `retain_patient_characteristics` - 인구통계 정보 유지 (성별, 나이, 키, 체중)
 - `hipaa_safe_harbor` - 완전한 HIPAA 18개 식별자 제거
 - `gdpr_compliant` - GDPR 가명처리 요구사항
+
+### DCM Dir (DICOMDIR 생성/관리 유틸리티)
+
+DICOM PS3.10 표준에 따라 DICOM 미디어 저장용 DICOMDIR 파일을 생성하고 관리합니다.
+
+```bash
+# 디렉토리에서 DICOMDIR 생성
+./build/bin/dcm_dir create ./patient_data/
+
+# 사용자 정의 출력 경로 및 파일셋 ID로 생성
+./build/bin/dcm_dir create -o DICOMDIR --file-set-id "STUDY001" ./patient_data/
+
+# 상세 출력으로 생성
+./build/bin/dcm_dir create -v ./patient_data/
+
+# DICOMDIR 내용을 트리 형식으로 표시
+./build/bin/dcm_dir list DICOMDIR
+
+# 상세 정보와 함께 표시
+./build/bin/dcm_dir list -l DICOMDIR
+
+# 파일 목록만 표시 (플랫 형식)
+./build/bin/dcm_dir list --flat DICOMDIR
+
+# DICOMDIR 구조 검증
+./build/bin/dcm_dir verify DICOMDIR
+
+# 참조 파일 존재 확인
+./build/bin/dcm_dir verify --check-files DICOMDIR
+
+# 일관성 검사 (중복 SOP Instance UID 감지)
+./build/bin/dcm_dir verify --check-consistency DICOMDIR
+
+# 새 파일을 추가하여 DICOMDIR 업데이트
+./build/bin/dcm_dir update -a ./new_study/ DICOMDIR
+```
+
+DICOMDIR 구조는 DICOM 계층을 따릅니다:
+- PATIENT → STUDY → SERIES → IMAGE (계층적 레코드 구조)
+- 참조 파일 ID는 ISO 9660 호환성을 위해 백슬래시 구분자 사용
+- 표준 레코드 유형 지원: PATIENT, STUDY, SERIES, IMAGE
 
 ### DCM to JSON (DICOM PS3.18 JSON 변환기)
 
