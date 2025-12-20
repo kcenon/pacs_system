@@ -252,8 +252,9 @@ pacs_system/
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (19 apps, ~13,500 lines)
+├── examples/                    # Example Applications (20 apps, ~14,300 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
+│   ├── dcm_info/                # DICOM file summary utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
 │   ├── dcm_modify/              # DICOM tag modification utility
 │   ├── dcm_anonymize/           # DICOM de-identification utility (PS3.15)
@@ -434,6 +435,22 @@ cmake --build build
 
 # Scan directory recursively with summary
 ./build/bin/dcm_dump ./dicom_folder/ --recursive --summary
+```
+
+### DCM Info (File Summary Utility)
+
+```bash
+# Display DICOM file summary
+./build/bin/dcm_info image.dcm
+
+# Verbose mode with all available fields
+./build/bin/dcm_info image.dcm --verbose
+
+# JSON output for scripting
+./build/bin/dcm_info image.dcm --format json
+
+# Quick view of multiple files
+./build/bin/dcm_info ./dicom_folder/ -r -q
 ```
 
 ### DCM Modify (Tag Modification Utility)

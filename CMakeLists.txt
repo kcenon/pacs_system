@@ -1600,6 +1600,10 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/dcm_dump)
     message(STATUS "  [OK] dcm_dump: DICOM file inspection utility")
 
+    # DCM Info - DICOM file summary utility (no network dependencies)
+    add_subdirectory(examples/dcm_info)
+    message(STATUS "  [OK] dcm_info: DICOM file summary utility")
+
     # DCM Conv - Transfer Syntax conversion utility (no network dependencies)
     add_subdirectory(examples/dcm_conv)
     message(STATUS "  [OK] dcm_conv: Transfer Syntax conversion utility")
