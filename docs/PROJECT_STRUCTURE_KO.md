@@ -227,6 +227,9 @@ pacs_system/
 │   │   └── main.cpp
 │   ├── store_scp/              # C-STORE SCP
 │   │   └── main.cpp
+│   ├── qr_scp/                 # Query/Retrieve SCP (C-FIND, C-MOVE, C-GET)
+│   │   ├── CMakeLists.txt
+│   │   └── main.cpp
 │   ├── query_scu/              # Query SCU (레거시)
 │   │   └── main.cpp
 │   └── pacs_server/            # 전체 PACS 서버
