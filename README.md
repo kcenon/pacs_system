@@ -783,6 +783,9 @@ Extract pixel data from DICOM files to standard image formats.
 # Extract to JPEG (requires libjpeg)
 ./build/bin/dcm_extract image.dcm output.jpg --jpeg -q 90
 
+# Extract to PNG (requires libpng)
+./build/bin/dcm_extract image.dcm output.png --png
+
 # Extract to PPM/PGM format
 ./build/bin/dcm_extract image.dcm output.ppm --ppm
 
@@ -794,7 +797,7 @@ Extract pixel data from DICOM files to standard image formats.
 ```
 
 Features:
-- Supports RAW, JPEG, and PPM/PGM output formats
+- Supports RAW, JPEG, PNG, and PPM/PGM output formats
 - Window level (center/width) transformation
 - Automatic 16-bit to 8-bit conversion
 - MONOCHROME1/MONOCHROME2 handling
