@@ -1636,6 +1636,14 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/dcm_dir)
     message(STATUS "  [OK] dcm_dir: DICOMDIR creation/management utility")
 
+    # Img to DCM - Image to DICOM conversion utility
+    add_subdirectory(examples/img_to_dcm)
+    message(STATUS "  [OK] img_to_dcm: Image to DICOM conversion utility")
+
+    # DCM Extract - DICOM pixel data extraction utility
+    add_subdirectory(examples/dcm_extract)
+    message(STATUS "  [OK] dcm_extract: DICOM pixel data extraction utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
