@@ -390,6 +390,9 @@ inline constexpr dicom_tag scheduled_procedure_step_sequence{0x0040, 0x0100};
 /// Requested Procedure ID
 inline constexpr dicom_tag requested_procedure_id{0x0040, 0x1001};
 
+/// Requested Procedure Description
+inline constexpr dicom_tag requested_procedure_description{0x0032, 0x1060};
+
 /// Performed Procedure Step Start Date
 inline constexpr dicom_tag performed_procedure_step_start_date{0x0040, 0x0244};
 
