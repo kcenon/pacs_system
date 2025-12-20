@@ -242,6 +242,7 @@ pacs_system/
 │   ├── secure_dicom/            # TLS 보안 DICOM Echo SCU/SCP
 │   ├── store_scp/               # DICOM Storage SCP 서버
 │   ├── store_scu/               # DICOM Storage SCU 클라이언트
+│   ├── qr_scp/                  # Query/Retrieve SCP (C-FIND/C-MOVE/C-GET 서버)
 │   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
 │   ├── retrieve_scu/            # DICOM Retrieve SCU 클라이언트 (C-MOVE/C-GET)
 │   ├── worklist_scu/            # Modality Worklist 조회 클라이언트 (MWL C-FIND)
@@ -841,6 +842,38 @@ cd examples/secure_dicom
   --modality MR \
   --verbose
 ```
+
+### Query/Retrieve SCP (C-FIND/C-MOVE/C-GET 서버)
+
+저장 디렉토리에서 DICOM 파일을 제공하는 경량 Query/Retrieve SCP 서버입니다.
+
+```bash
+# 기본 사용법 - 디렉토리에서 파일 제공
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom
+
+# 영구 인덱스 데이터베이스 사용 (재시작 시 더 빠름)
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --index-db ./pacs.db
+
+# C-MOVE 대상 피어 설정
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --peer VIEWER:192.168.1.10:11113
+
+# 다중 대상 C-MOVE를 위한 여러 피어 설정
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom \
+  --peer WS1:10.0.0.1:104 --peer WS2:10.0.0.2:104
+
+# 서버 시작 없이 스토리지 스캔 및 인덱싱만 수행
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --scan-only
+
+# 연결 제한 커스터마이징
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --max-assoc 20 --timeout 600
+```
+
+기능:
+- **C-FIND**: Patient, Study, Series, Image 레벨에서 조회
+- **C-MOVE**: 설정된 대상 AE Title로 이미지 전송
+- **C-GET**: 동일 연결을 통한 직접 이미지 검색
+- **자동 인덱싱**: SQLite 기반 빠른 쿼리 응답
+- **정상 종료**: 시그널 처리 (SIGINT, SIGTERM)
 
 ### 전체 PACS 서버
 

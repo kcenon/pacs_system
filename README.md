@@ -269,6 +269,7 @@ pacs_system/
 │   ├── secure_dicom/            # TLS-secured DICOM Echo SCU/SCP
 │   ├── store_scp/               # DICOM Storage SCP server
 │   ├── store_scu/               # DICOM Storage SCU client
+│   ├── qr_scp/                  # Query/Retrieve SCP (C-FIND/C-MOVE/C-GET server)
 │   ├── query_scu/               # DICOM Query SCU client (C-FIND)
 │   ├── find_scu/                # dcmtk-compatible C-FIND SCU utility
 │   ├── retrieve_scu/            # DICOM Retrieve SCU client (C-MOVE/C-GET)
@@ -992,6 +993,38 @@ The following utilities provide dcmtk-compatible command-line interfaces for int
   --modality MR \
   --verbose
 ```
+
+### Query/Retrieve SCP (C-FIND/C-MOVE/C-GET Server)
+
+Lightweight Query/Retrieve SCP server for serving DICOM files from a storage directory.
+
+```bash
+# Basic usage - serve files from a directory
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom
+
+# With persistent index database (faster restart)
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --index-db ./pacs.db
+
+# With known peers for C-MOVE destinations
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --peer VIEWER:192.168.1.10:11113
+
+# Multiple peers for multi-destination C-MOVE
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom \
+  --peer WS1:10.0.0.1:104 --peer WS2:10.0.0.2:104
+
+# Scan and index storage without starting server
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --scan-only
+
+# Customize association limits
+./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --max-assoc 20 --timeout 600
+```
+
+Features:
+- **C-FIND**: Query at Patient, Study, Series, and Image levels
+- **C-MOVE**: Send images to configured destination AE titles
+- **C-GET**: Direct image retrieval over the same association
+- **Automatic Indexing**: SQLite-based fast query responses
+- **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
 
 ### Full PACS Server
 

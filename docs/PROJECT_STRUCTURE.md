@@ -243,6 +243,9 @@ pacs_system/
 │   │   └── main.cpp
 │   ├── store_scp/              # C-STORE SCP
 │   │   └── main.cpp
+│   ├── qr_scp/                 # Query/Retrieve SCP (C-FIND, C-MOVE, C-GET)
+│   │   ├── CMakeLists.txt
+│   │   └── main.cpp
 │   ├── query_scu/              # Query SCU (legacy)
 │   │   └── main.cpp
 │   └── pacs_server/            # Full PACS Server
