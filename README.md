@@ -276,6 +276,7 @@ pacs_system/
 │   ├── move_scu/                # dcmtk-compatible C-MOVE SCU utility
 │   ├── get_scu/                 # dcmtk-compatible C-GET SCU utility
 │   ├── worklist_scu/            # Modality Worklist Query client (MWL C-FIND)
+│   ├── worklist_scp/            # Modality Worklist SCP server (MWL C-FIND)
 │   ├── mpps_scu/                # MPPS client (N-CREATE/N-SET)
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
@@ -1024,6 +1025,47 @@ Features:
 - **C-MOVE**: Send images to configured destination AE titles
 - **C-GET**: Direct image retrieval over the same association
 - **Automatic Indexing**: SQLite-based fast query responses
+- **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
+
+### Modality Worklist SCP
+
+A standalone Modality Worklist (MWL) server for providing scheduled procedure information to modalities.
+
+```bash
+# Basic usage with JSON worklist file
+./build/bin/worklist_scp 11112 MY_WORKLIST --worklist-file ./worklist.json
+
+# Load worklist from directory
+./build/bin/worklist_scp 11112 MY_WORKLIST --worklist-dir ./worklist_data
+
+# With result limit
+./build/bin/worklist_scp 11112 MY_WORKLIST --worklist-file ./worklist.json --max-results 100
+```
+
+**Sample Worklist JSON** (`worklist.json`):
+```json
+[
+  {
+    "patientId": "12345",
+    "patientName": "DOE^JOHN",
+    "patientBirthDate": "19800101",
+    "patientSex": "M",
+    "studyInstanceUid": "1.2.3.4.5.6.7.8.9",
+    "accessionNumber": "ACC001",
+    "scheduledStationAeTitle": "CT_01",
+    "scheduledProcedureStepStartDate": "20241220",
+    "scheduledProcedureStepStartTime": "100000",
+    "modality": "CT",
+    "scheduledProcedureStepId": "SPS001",
+    "scheduledProcedureStepDescription": "CT Abdomen"
+  }
+]
+```
+
+Features:
+- **MWL C-FIND**: Responds to Modality Worklist queries
+- **JSON Data Source**: Load worklist items from JSON files
+- **Filtering**: Patient ID, name, modality, station AE, scheduled date
 - **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
 
 ### Full PACS Server

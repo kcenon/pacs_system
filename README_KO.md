@@ -246,6 +246,7 @@ pacs_system/
 │   ├── query_scu/               # DICOM Query SCU 클라이언트 (C-FIND)
 │   ├── retrieve_scu/            # DICOM Retrieve SCU 클라이언트 (C-MOVE/C-GET)
 │   ├── worklist_scu/            # Modality Worklist 조회 클라이언트 (MWL C-FIND)
+│   ├── worklist_scp/            # Modality Worklist SCP 서버 (MWL C-FIND)
 │   ├── mpps_scu/                # MPPS N-CREATE/N-SET 클라이언트
 │   ├── pacs_server/             # 전체 PACS 서버 예제
 │   └── integration_tests/       # 통합 테스트 스위트
@@ -873,6 +874,47 @@ cd examples/secure_dicom
 - **C-MOVE**: 설정된 대상 AE Title로 이미지 전송
 - **C-GET**: 동일 연결을 통한 직접 이미지 검색
 - **자동 인덱싱**: SQLite 기반 빠른 쿼리 응답
+- **정상 종료**: 시그널 처리 (SIGINT, SIGTERM)
+
+### Modality Worklist SCP
+
+모달리티에 예약된 검사 정보를 제공하는 독립 실행형 Modality Worklist (MWL) 서버입니다.
+
+```bash
+# JSON 워크리스트 파일로 기본 사용
+./build/bin/worklist_scp 11112 MY_WORKLIST --worklist-file ./worklist.json
+
+# 디렉토리에서 워크리스트 로드
+./build/bin/worklist_scp 11112 MY_WORKLIST --worklist-dir ./worklist_data
+
+# 결과 제한 설정
+./build/bin/worklist_scp 11112 MY_WORKLIST --worklist-file ./worklist.json --max-results 100
+```
+
+**샘플 워크리스트 JSON** (`worklist.json`):
+```json
+[
+  {
+    "patientId": "12345",
+    "patientName": "DOE^JOHN",
+    "patientBirthDate": "19800101",
+    "patientSex": "M",
+    "studyInstanceUid": "1.2.3.4.5.6.7.8.9",
+    "accessionNumber": "ACC001",
+    "scheduledStationAeTitle": "CT_01",
+    "scheduledProcedureStepStartDate": "20241220",
+    "scheduledProcedureStepStartTime": "100000",
+    "modality": "CT",
+    "scheduledProcedureStepId": "SPS001",
+    "scheduledProcedureStepDescription": "CT Abdomen"
+  }
+]
+```
+
+기능:
+- **MWL C-FIND**: Modality Worklist 쿼리 응답
+- **JSON 데이터 소스**: JSON 파일에서 워크리스트 항목 로드
+- **필터링**: Patient ID, 이름, 모달리티, 스테이션 AE, 예약 날짜
 - **정상 종료**: 시그널 처리 (SIGINT, SIGTERM)
 
 ### 전체 PACS 서버
