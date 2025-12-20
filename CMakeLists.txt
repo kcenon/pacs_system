@@ -158,6 +158,29 @@ else()
     set(PACS_JPEG_FOUND FALSE)
 endif()
 
+# libpng (for PNG image output)
+message(STATUS "")
+message(STATUS "=== Finding libpng (for PNG image output) ===")
+
+# Try to find system libpng
+find_package(PNG QUIET)
+
+if(PNG_FOUND)
+    message(STATUS "Found system libpng: ${PNG_VERSION_STRING}")
+    set(PACS_PNG_FOUND TRUE)
+    set(PACS_PNG_TARGET PNG::PNG)
+else()
+    message(WARNING
+        "libpng not found!\n"
+        "PNG output will be disabled.\n"
+        "\n"
+        "To enable PNG support, install libpng:\n"
+        "  - Ubuntu: sudo apt install libpng-dev\n"
+        "  - macOS: brew install libpng\n"
+        "  - Windows: vcpkg install libpng:x64-windows")
+    set(PACS_PNG_FOUND FALSE)
+endif()
+
 # OpenJPEG (for JPEG 2000 compression codec)
 message(STATUS "")
 message(STATUS "=== Finding OpenJPEG (for JPEG 2000 compression) ===")
