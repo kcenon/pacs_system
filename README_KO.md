@@ -228,7 +228,8 @@ pacs_system/
 ├── examples/                    # 예제 애플리케이션 (16개, ~11,000줄)
 │   ├── dcm_dump/                # DICOM 파일 검사 유틸리티
 │   ├── dcm_conv/                # Transfer Syntax 변환 유틸리티
-│   ├── dcm_modify/              # DICOM 태그 수정 및 익명화 유틸리티
+│   ├── dcm_modify/              # DICOM 태그 수정 유틸리티
+│   ├── dcm_anonymize/           # DICOM 비식별화 유틸리티 (PS3.15)
 │   ├── dcm_to_json/             # DICOM → JSON 변환 유틸리티 (PS3.18)
 │   ├── json_to_dcm/             # JSON → DICOM 변환 유틸리티 (PS3.18)
 │   ├── dcm_to_xml/              # DICOM → XML 변환 유틸리티 (PS3.19)
@@ -429,6 +430,54 @@ ea (0010,1001)              # 모든 매칭 태그 삭제
 # Transfer Syntax UID 직접 지정
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
+
+### DCM Anonymize (비식별화 유틸리티)
+
+DICOM PS3.15 보안 프로파일을 준수하는 DICOM 비식별화 유틸리티입니다.
+
+```bash
+# 기본 익명화 (직접 식별자 제거)
+./build/bin/dcm_anonymize patient.dcm anonymous.dcm
+
+# HIPAA Safe Harbor 규정 준수 (18개 식별자 제거)
+./build/bin/dcm_anonymize --profile hipaa_safe_harbor patient.dcm output.dcm
+
+# GDPR 규정 준수 가명처리
+./build/bin/dcm_anonymize --profile gdpr_compliant patient.dcm output.dcm
+
+# 특정 태그 유지
+./build/bin/dcm_anonymize -k PatientSex -k PatientAge patient.dcm output.dcm
+
+# 사용자 정의 값으로 태그 대체
+./build/bin/dcm_anonymize -r "InstitutionName=연구병원" patient.dcm output.dcm
+
+# 새 환자 식별자 설정
+./build/bin/dcm_anonymize --patient-id "STUDY001_001" --patient-name "Anonymous" patient.dcm
+
+# UID 매핑 파일로 일관된 익명화 (동일 검사 파일들 간)
+./build/bin/dcm_anonymize -m mapping.json patient.dcm output.dcm
+
+# 종단 연구를 위한 날짜 이동
+./build/bin/dcm_anonymize --profile retain_longitudinal --date-offset -30 patient.dcm
+
+# 디렉토리 재귀 일괄 처리
+./build/bin/dcm_anonymize --recursive -o anonymized/ ./originals/
+
+# 미리보기 모드 (변경 사항만 표시)
+./build/bin/dcm_anonymize --dry-run --verbose patient.dcm
+
+# 익명화 완료 검증
+./build/bin/dcm_anonymize --verify patient.dcm anonymous.dcm
+```
+
+사용 가능한 익명화 프로파일:
+- `basic` - 직접 환자 식별자 제거 (기본값)
+- `clean_pixel` - 픽셀 데이터에서 번인된 주석 제거
+- `clean_descriptions` - PHI가 포함될 수 있는 자유 텍스트 필드 정리
+- `retain_longitudinal` - 날짜 이동으로 시간적 관계 유지
+- `retain_patient_characteristics` - 인구통계 정보 유지 (성별, 나이, 키, 체중)
+- `hipaa_safe_harbor` - 완전한 HIPAA 18개 식별자 제거
+- `gdpr_compliant` - GDPR 가명처리 요구사항
 
 ### DCM to JSON (DICOM PS3.18 JSON 변환기)
 
