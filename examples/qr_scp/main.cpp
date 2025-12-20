@@ -276,6 +276,8 @@ bool parse_arguments(int argc, char* argv[], qr_scp_args& args) {
 /**
  * @brief Format timestamp for logging
  * @return Current time as formatted string
+ *
+ * Uses thread-safe time conversion for multi-association handling.
  */
 std::string current_timestamp() {
     auto now = std::chrono::system_clock::now();
@@ -283,8 +285,15 @@ std::string current_timestamp() {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         now.time_since_epoch()) % 1000;
 
+    std::tm tm_buf{};
+#ifdef _WIN32
+    localtime_s(&tm_buf, &time_t_now);
+#else
+    localtime_r(&time_t_now, &tm_buf);
+#endif
+
     std::ostringstream oss;
-    oss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d %H:%M:%S");
+    oss << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S");
     oss << '.' << std::setfill('0') << std::setw(3) << ms.count();
     return oss.str();
 }
