@@ -252,7 +252,7 @@ pacs_system/
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (20 apps, ~14,300 lines)
+├── examples/                    # Example Applications (21 apps, ~14,950 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_info/                # DICOM file summary utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
@@ -278,6 +278,7 @@ pacs_system/
 │   ├── worklist_scu/            # Modality Worklist Query client (MWL C-FIND)
 │   ├── worklist_scp/            # Modality Worklist SCP server (MWL C-FIND)
 │   ├── mpps_scu/                # MPPS client (N-CREATE/N-SET)
+│   ├── mpps_scp/                # MPPS server (N-CREATE/N-SET)
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
 │
@@ -994,6 +995,34 @@ The following utilities provide dcmtk-compatible command-line interfaces for int
   --modality MR \
   --verbose
 ```
+
+### MPPS SCP (Modality Performed Procedure Step Server)
+
+A standalone MPPS server for receiving procedure status updates from modality devices.
+
+```bash
+# Basic usage - listen for MPPS messages
+./build/bin/mpps_scp 11112 MY_MPPS
+
+# Store MPPS records to individual JSON files
+./build/bin/mpps_scp 11112 MY_MPPS --output-dir ./mpps_records
+
+# Append MPPS records to a single JSON file
+./build/bin/mpps_scp 11112 MY_MPPS --output-file ./mpps.json
+
+# With custom association limits
+./build/bin/mpps_scp 11112 MY_MPPS --max-assoc 20 --timeout 600
+
+# Show help
+./build/bin/mpps_scp --help
+```
+
+Features:
+- **N-CREATE**: Receive procedure start notifications (status = IN PROGRESS)
+- **N-SET**: Receive procedure completion (COMPLETED) or cancellation (DISCONTINUED)
+- **JSON Storage**: Store MPPS records to JSON files for integration
+- **Statistics**: Display session statistics on shutdown
+- **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
 
 ### Query/Retrieve SCP (C-FIND/C-MOVE/C-GET Server)
 

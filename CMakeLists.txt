@@ -1743,6 +1743,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] worklist_scp: OFF (requires pacs_integration)")
     endif()
 
+    # MPPS SCP - DICOM Modality Performed Procedure Step server
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/mpps_scp)
+        message(STATUS "  [OK] mpps_scp: MPPS N-CREATE/N-SET server")
+    else()
+        message(STATUS "  [--] mpps_scp: OFF (requires pacs_integration)")
+    endif()
+
     # Database Browser - PACS index database viewer
     if(TARGET pacs_storage)
         add_subdirectory(examples/db_browser)

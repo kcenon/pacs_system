@@ -248,6 +248,7 @@ pacs_system/
 │   ├── worklist_scu/            # Modality Worklist 조회 클라이언트 (MWL C-FIND)
 │   ├── worklist_scp/            # Modality Worklist SCP 서버 (MWL C-FIND)
 │   ├── mpps_scu/                # MPPS N-CREATE/N-SET 클라이언트
+│   ├── mpps_scp/                # MPPS N-CREATE/N-SET 서버
 │   ├── pacs_server/             # 전체 PACS 서버 예제
 │   └── integration_tests/       # 통합 테스트 스위트
 │
@@ -843,6 +844,34 @@ cd examples/secure_dicom
   --modality MR \
   --verbose
 ```
+
+### MPPS SCP (검사 수행 상태 서버)
+
+모달리티 장비로부터 검사 수행 상태 업데이트를 수신하는 독립형 MPPS 서버입니다.
+
+```bash
+# 기본 사용법 - MPPS 메시지 수신
+./build/bin/mpps_scp 11112 MY_MPPS
+
+# MPPS 레코드를 개별 JSON 파일로 저장
+./build/bin/mpps_scp 11112 MY_MPPS --output-dir ./mpps_records
+
+# MPPS 레코드를 단일 JSON 파일에 추가
+./build/bin/mpps_scp 11112 MY_MPPS --output-file ./mpps.json
+
+# 사용자 정의 연결 제한
+./build/bin/mpps_scp 11112 MY_MPPS --max-assoc 20 --timeout 600
+
+# 도움말 표시
+./build/bin/mpps_scp --help
+```
+
+주요 기능:
+- **N-CREATE**: 검사 시작 알림 수신 (상태 = IN PROGRESS)
+- **N-SET**: 검사 완료 (COMPLETED) 또는 취소 (DISCONTINUED) 수신
+- **JSON 저장**: 통합을 위한 JSON 파일로 MPPS 레코드 저장
+- **통계**: 종료 시 세션 통계 표시
+- **우아한 종료**: 시그널 처리 (SIGINT, SIGTERM)
 
 ### Query/Retrieve SCP (C-FIND/C-MOVE/C-GET 서버)
 
