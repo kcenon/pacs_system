@@ -257,6 +257,7 @@ pacs_system/
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
 │   ├── dcm_modify/              # DICOM tag modification utility
 │   ├── dcm_anonymize/           # DICOM de-identification utility (PS3.15)
+│   ├── dcm_dir/                 # DICOMDIR creation/management utility (PS3.10)
 │   ├── dcm_to_json/             # DICOM to JSON conversion utility (PS3.18)
 │   ├── json_to_dcm/             # JSON to DICOM conversion utility (PS3.18)
 │   ├── dcm_to_xml/              # DICOM to XML conversion utility (PS3.19)
@@ -551,6 +552,47 @@ Available anonymization profiles:
 - `retain_patient_characteristics` - Keep demographics (sex, age, size, weight)
 - `hipaa_safe_harbor` - Full HIPAA 18-identifier removal
 - `gdpr_compliant` - GDPR pseudonymization requirements
+
+### DCM Dir (DICOMDIR Creation/Management Utility)
+
+Create and manage DICOMDIR files for DICOM media storage following DICOM PS3.10 standard.
+
+```bash
+# Create DICOMDIR from directory
+./build/bin/dcm_dir create ./patient_data/
+
+# Create with custom output path and file-set ID
+./build/bin/dcm_dir create -o DICOMDIR --file-set-id "STUDY001" ./patient_data/
+
+# Create with verbose output
+./build/bin/dcm_dir create -v ./patient_data/
+
+# List DICOMDIR contents in tree format
+./build/bin/dcm_dir list DICOMDIR
+
+# List with detailed information
+./build/bin/dcm_dir list -l DICOMDIR
+
+# List as flat file list
+./build/bin/dcm_dir list --flat DICOMDIR
+
+# Verify DICOMDIR structure
+./build/bin/dcm_dir verify DICOMDIR
+
+# Verify with file existence check
+./build/bin/dcm_dir verify --check-files DICOMDIR
+
+# Verify with consistency check (duplicate SOP Instance UID detection)
+./build/bin/dcm_dir verify --check-consistency DICOMDIR
+
+# Update DICOMDIR by adding new files
+./build/bin/dcm_dir update -a ./new_study/ DICOMDIR
+```
+
+DICOMDIR structure follows DICOM hierarchy:
+- PATIENT → STUDY → SERIES → IMAGE (hierarchical record structure)
+- Referenced File IDs use backslash separator for ISO 9660 compatibility
+- Supports standard record types: PATIENT, STUDY, SERIES, IMAGE
 
 ### DCM to JSON (DICOM PS3.18 JSON Converter)
 

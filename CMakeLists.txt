@@ -1628,6 +1628,10 @@ if(PACS_BUILD_EXAMPLES)
     add_subdirectory(examples/dcm_anonymize)
     message(STATUS "  [OK] dcm_anonymize: DICOM de-identification utility")
 
+    # DCM Dir - DICOMDIR creation/management utility (PS3.10)
+    add_subdirectory(examples/dcm_dir)
+    message(STATUS "  [OK] dcm_dir: DICOMDIR creation/management utility")
+
     # Echo SCU/SCP samples - basic connectivity test
     if(TARGET pacs_integration)
         add_subdirectory(examples/echo_scu)
