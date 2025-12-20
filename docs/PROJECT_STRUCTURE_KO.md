@@ -1,7 +1,7 @@
 # 프로젝트 구조 - PACS 시스템
 
-> **버전:** 0.1.2.0
-> **최종 수정일:** 2025-12-07
+> **버전:** 0.1.3.0
+> **최종 수정일:** 2025-12-20
 > **언어:** [English](PROJECT_STRUCTURE.md) | **한국어**
 
 ---
@@ -76,6 +76,13 @@ pacs_system/
 │       │   ├── dicom_server.hpp    # 다중 연결 서버
 │       │   ├── server_config.hpp   # 서버 구성
 │       │   │
+│       │   ├── detail/             # 내부 구현
+│       │   │   └── accept_worker.hpp   # Accept 루프 (thread_base) [NEW v1.1.0]
+│       │   │
+│       │   ├── v2/                 # network_system V2 [NEW v1.1.0]
+│       │   │   ├── dicom_server_v2.hpp           # messaging_server 기반
+│       │   │   └── dicom_association_handler.hpp # 세션별 핸들러
+│       │   │
 │       │   └── dimse/              # DIMSE 프로토콜
 │       │       ├── dimse_message.hpp
 │       │       ├── command_field.hpp
@@ -112,6 +119,9 @@ pacs_system/
 │       │   ├── instance_record.hpp   # 인스턴스 데이터 모델
 │       │   ├── worklist_record.hpp   # 워크리스트 데이터 모델
 │       │   └── mpps_record.hpp       # MPPS 데이터 모델
+│       │
+│       ├── ai/                 # AI 결과 처리 [NEW v1.3.0]
+│       │   └── ai_result_handler.hpp # AI 생성 DICOM 객체 (SR, SEG, PR) 핸들러
 │       │
 │       └── integration/        # 에코시스템 어댑터
 │           ├── container_adapter.hpp # container_system 통합
@@ -170,6 +180,9 @@ pacs_system/
 │   │   ├── index_database.cpp
 │   │   └── CMakeLists.txt
 │   │
+│   ├── ai/                     # AI 결과 처리 [NEW v1.3.0]
+│   │   └── ai_result_handler.cpp
+│   │
 │   └── integration/
 │       ├── container_adapter.cpp
 │       ├── network_adapter.cpp
@@ -200,6 +213,9 @@ pacs_system/
 │   │   ├── test_interop.cpp
 │   │   └── test_conformance.cpp
 │   │
+│   ├── ai/                     # AI 모듈 테스트 [NEW v1.3.0]
+│   │   └── ai_result_handler_test.cpp
+│   │
 │   └── fixtures/
 │       ├── sample_ct.dcm
 │       ├── sample_mr.dcm
@@ -226,6 +242,9 @@ pacs_system/
 │   ├── echo_scp/               # C-ECHO SCP
 │   │   └── main.cpp
 │   ├── store_scp/              # C-STORE SCP
+│   │   └── main.cpp
+│   ├── qr_scp/                 # Query/Retrieve SCP (C-FIND, C-MOVE, C-GET)
+│   │   ├── CMakeLists.txt
 │   │   └── main.cpp
 │   ├── query_scu/              # Query SCU (레거시)
 │   │   └── main.cpp
@@ -373,6 +392,19 @@ DICOM 서비스 구현:
 | `index_database.hpp` | SQLite 인덱스 |
 | `storage_config.hpp` | 저장 구성 |
 
+### AI 모듈 (`include/pacs/ai/`) [NEW v1.3.0]
+
+AI 생성 DICOM 객체 핸들러:
+
+| 파일 | 설명 |
+|------|------|
+| `ai_result_handler.hpp` | AI 생성 DICOM 객체 (SR, SEG, PR) 핸들러 |
+
+지원:
+- CAD 결과를 포함한 구조화 보고서 (SR)
+- 이진/분수 세그먼트를 포함한 세그멘테이션 객체 (SEG)
+- 주석 및 측정을 포함한 표시 상태 (PR)
+
 ### 통합 모듈 (`include/pacs/integration/`)
 
 에코시스템 통합 어댑터:
@@ -423,6 +455,7 @@ namespace pacs {
     }
     namespace services { /* DICOM 서비스 */ }
     namespace storage { /* 저장 백엔드 */ }
+    namespace ai { /* AI 결과 처리 [NEW v1.3.0] */ }
     namespace integration { /* 에코시스템 어댑터 */ }
 }
 ```
@@ -514,6 +547,7 @@ endif()
 | `pacs_network` | STATIC | 네트워크 프로토콜 |
 | `pacs_services` | STATIC | DICOM 서비스 |
 | `pacs_storage` | STATIC | 저장 백엔드 |
+| `pacs_ai` | STATIC | AI 결과 처리 [NEW v1.3.0] |
 | `pacs_system` | INTERFACE | 올인원 타겟 |
 
 ---
@@ -580,7 +614,19 @@ TEST(DicomElement, SetValue) {
 
 ---
 
-*문서 버전: 0.1.0.0*
+## 문서 히스토리
+
+| 버전 | 날짜 | 작성자 | 변경사항 |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon | 최초 릴리스 |
+| 1.1.0 | 2025-12-04 | kcenon | SOP 클래스 및 검증 디렉토리 추가 |
+| 1.2.0 | 2025-12-07 | kcenon | 추가: network/detail/ (accept_worker), network/v2/ (dicom_server_v2, dicom_association_handler) |
+| 1.3.0 | 2025-12-13 | kcenon | 추가: ai/ 모듈 - AI 생성 DICOM 객체 (SR, SEG, PR) 핸들러 |
+| 1.4.0 | 2025-12-20 | kcenon | 추가: qr_scp 유틸리티 - Query/Retrieve SCP (C-FIND/C-MOVE/C-GET) |
+
+---
+
+*문서 버전: 0.1.3.0*
 *작성일: 2025-11-30*
-*수정일: 2025-12-01*
+*수정일: 2025-12-20*
 *작성자: kcenon@naver.com*
