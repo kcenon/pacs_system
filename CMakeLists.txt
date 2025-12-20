@@ -1735,6 +1735,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] qr_scp: OFF (requires pacs_storage and pacs_integration)")
     endif()
 
+    # Modality Worklist SCP - DICOM MWL server
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/worklist_scp)
+        message(STATUS "  [OK] worklist_scp: Modality Worklist server")
+    else()
+        message(STATUS "  [--] worklist_scp: OFF (requires pacs_integration)")
+    endif()
+
     # Database Browser - PACS index database viewer
     if(TARGET pacs_storage)
         add_subdirectory(examples/db_browser)
