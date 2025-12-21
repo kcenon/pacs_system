@@ -29,11 +29,8 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Forward declarations for network_system types
-namespace network_system::session {
-class messaging_session;
-class secure_session;
-}  // namespace network_system::session
+// Forward declarations for network_system types (no ASIO dependency)
+#include <network_system/forward.h>
 
 namespace pacs::integration {
 
