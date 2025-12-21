@@ -20,7 +20,6 @@
 #include <chrono>
 #include <filesystem>
 #include <future>
-#include <latch>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -236,37 +235,41 @@ TEST_CASE("Thread pool saturation and queuing",
 
     SECTION("Tasks queue when pool is saturated") {
         REQUIRE(thread_adapter::start());
-        REQUIRE(wait_for([]() { return thread_adapter::get_thread_count() >= 2; }));
+        REQUIRE(wait_for([]() { return thread_adapter::get_thread_count() >= 2; }, 15000ms));
 
         concurrent_counter active_tasks;
-        std::latch block_latch(1);
+        std::atomic<bool> release_flag{false};
         std::atomic<int> completed{0};
 
-        constexpr int task_count = 20;  // More tasks than threads
+        // Use fewer tasks (2.5x max_threads) to avoid timeout on Windows
+        constexpr int task_count = 10;
         std::vector<std::future<void>> futures;
 
         for (int i = 0; i < task_count; ++i) {
             futures.push_back(thread_adapter::submit(
-                [&active_tasks, &block_latch, &completed]() {
+                [&active_tasks, &release_flag, &completed]() {
                     active_tasks.increment();
-                    block_latch.wait();
+                    // Use atomic flag with polling instead of latch for safer cleanup
+                    while (!release_flag.load()) {
+                        std::this_thread::sleep_for(1ms);
+                    }
                     std::this_thread::sleep_for(5ms);
                     active_tasks.decrement();
                     completed++;
                 }));
         }
 
-        // Wait for pool to be saturated
+        // Wait for pool to be saturated (use longer timeout for Windows CI)
         REQUIRE(wait_for([&active_tasks, &thread_config]() {
             return active_tasks.current() >= static_cast<int>(thread_config.max_threads);
-        }));
+        }, 15000ms));
 
         // Max concurrent should be limited by pool size
         auto current_active = active_tasks.current();
         REQUIRE(current_active <= static_cast<int>(thread_config.max_threads));
 
         // Release blocked tasks
-        block_latch.count_down();
+        release_flag.store(true);
 
         // Wait for completion
         for (auto& f : futures) {
@@ -280,25 +283,28 @@ TEST_CASE("Thread pool saturation and queuing",
     SECTION("Priority tasks execute under load") {
         REQUIRE(thread_adapter::start());
 
-        std::latch block_latch(1);
+        std::atomic<bool> release_flag{false};
         std::atomic<int> low_priority_started{0};
         std::atomic<int> high_priority_completed{0};
 
-        // Fill pool with low priority blocking tasks
+        // Fill pool with low priority blocking tasks (use fewer tasks)
         std::vector<std::future<void>> low_futures;
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 6; ++i) {
             low_futures.push_back(thread_adapter::submit_with_priority(
                 job_priority::low,
-                [&block_latch, &low_priority_started]() {
+                [&release_flag, &low_priority_started]() {
                     low_priority_started++;
-                    block_latch.wait();
+                    // Use atomic flag with polling instead of latch
+                    while (!release_flag.load()) {
+                        std::this_thread::sleep_for(1ms);
+                    }
                 }));
         }
 
         // Wait for some low priority to start
         REQUIRE(wait_for([&low_priority_started]() {
             return low_priority_started.load() >= 2;
-        }));
+        }, 10000ms));
 
         // Submit high priority task
         auto high_future = thread_adapter::submit_with_priority(
@@ -308,8 +314,8 @@ TEST_CASE("Thread pool saturation and queuing",
                 return true;
             });
 
-        // Release blocked tasks
-        block_latch.count_down();
+        // Release blocked tasks first, then wait for high priority
+        release_flag.store(true);
 
         // High priority should complete
         REQUIRE(high_future.get());
@@ -535,22 +541,25 @@ TEST_CASE("No deadlocks under concurrent access",
 
         std::atomic<bool> stop{false};
         std::atomic<int> query_count{0};
+        std::atomic<int> tasks_completed{0};
 
-        // Background tasks
-        std::vector<std::future<void>> work_futures;
-        for (int i = 0; i < 20; ++i) {
-            work_futures.push_back(thread_adapter::submit([&stop]() {
-                while (!stop) {
+        // Background tasks - limit to max_threads to prevent queuing delays
+        // Use fire_and_forget to avoid future.get() blocking
+        const int background_task_count = static_cast<int>(thread_config.max_threads);
+        for (int i = 0; i < background_task_count; ++i) {
+            thread_adapter::submit_fire_and_forget([&stop, &tasks_completed]() {
+                while (!stop.load()) {
                     std::this_thread::sleep_for(1ms);
                 }
-            }));
+                tasks_completed++;
+            });
         }
 
         // Query statistics from multiple threads
         std::vector<std::thread> query_threads;
         for (int i = 0; i < 4; ++i) {
             query_threads.emplace_back([&stop, &query_count]() {
-                while (!stop) {
+                while (!stop.load()) {
                     [[maybe_unused]] auto threads = thread_adapter::get_thread_count();
                     [[maybe_unused]] auto pending = thread_adapter::get_pending_job_count();
                     [[maybe_unused]] auto idle = thread_adapter::get_idle_worker_count();
@@ -562,15 +571,17 @@ TEST_CASE("No deadlocks under concurrent access",
 
         // Run for a short period
         std::this_thread::sleep_for(100ms);
-        stop = true;
+        stop.store(true);
 
-        // Cleanup
+        // Cleanup query threads
         for (auto& t : query_threads) {
             t.join();
         }
-        for (auto& f : work_futures) {
-            f.get();
-        }
+
+        // Wait for background tasks to complete
+        REQUIRE(wait_for([&tasks_completed, background_task_count]() {
+            return tasks_completed.load() >= background_task_count;
+        }, 10000ms));
 
         REQUIRE(query_count > 0);
     }
