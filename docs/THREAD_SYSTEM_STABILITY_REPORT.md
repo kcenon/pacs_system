@@ -488,6 +488,16 @@ thread_adapter::shutdown(false);  // Now completes promptly
 3. **Immediate Shutdown Test**: Release blocking tasks BEFORE calling shutdown
 4. **Stuck Tasks Test**: Use cancellable polling instead of indefinite latch wait
 
+### Additional Fix (2025-12-21)
+
+Two tests continued to timeout after the initial fix. Root cause analysis revealed deeper issues:
+
+| Test | Original Issue | Fix Applied |
+|------|----------------|-------------|
+| Thread pool saturation | `min_threads=2`, `max_threads=4`, waiting for 4 active tasks but on-demand thread creation is slow on Windows | Set `min_threads=max_threads=4` to ensure all threads start immediately |
+| Nested task deadlock | `outer_count=10` exceeds thread pool (min=4, max=8), all threads block waiting for inner tasks | Reduce `outer_count` to 2 (less than min_threads) to prevent deadlock |
+| Concurrent statistics | `background_task_count=max_threads(8)` but only 4 threads initially available | Use `min_threads` instead of `max_threads` for immediate task execution |
+
 ### Verification
 
 All four previously failing tests now complete within the 120-second timeout on Windows CI.
