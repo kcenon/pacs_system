@@ -27,12 +27,8 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Include network_system types (with backward compatibility aliases)
-#include <network_system/core/messaging_server.h>
-#include <network_system/core/messaging_client.h>
-#include <network_system/core/secure_messaging_server.h>
-#include <network_system/session/messaging_session.h>
-#include <network_system/session/secure_session.h>
+// Forward declarations for network_system types (no ASIO dependency)
+#include <network_system/forward.h>
 
 namespace pacs::network {
 class dicom_server;

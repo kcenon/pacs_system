@@ -30,8 +30,8 @@
 #include <string>
 #include <vector>
 
-// Include network_system types (with backward compatibility aliases)
-#include <network_system/session/messaging_session.h>
+// Forward declarations for network_system types (no ASIO dependency)
+#include <network_system/forward.h>
 
 namespace pacs::network::v2 {
 
