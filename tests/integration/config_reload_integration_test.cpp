@@ -160,7 +160,7 @@ TEST_CASE("Logger runtime configuration changes",
 
         futures.clear();
         for (int i = 0; i < 10; ++i) {
-            futures.push_back(thread_adapter::submit([i, &debug_logs, &error_logs]() {
+            futures.push_back(thread_adapter::submit([i, &debug_logs]() {
                 if (logger_adapter::is_level_enabled(log_level::debug)) {
                     logger_adapter::debug("Debug from task {} (round 2)", i);
                     debug_logs++;

@@ -347,7 +347,7 @@ TEST_CASE("C-MOVE workflow with thread pool",
 
             for (int i = 0; i < instance_count; ++i) {
                 store_futures.push_back(thread_adapter::submit(
-                    [i, &sub_operations_completed]() {
+                    [&sub_operations_completed]() {
                         // Simulate C-STORE sub-operation
                         std::this_thread::sleep_for(5ms);
                         sub_operations_completed++;
@@ -417,8 +417,8 @@ TEST_CASE("Thread pool statistics during DICOM workflow",
             return running_count.load() >= 4;  // At least min_threads running
         }));
 
-        // Check pending jobs
-        auto pending = thread_adapter::get_pending_job_count();
+        // Check pending jobs - verify thread pool is active
+        [[maybe_unused]] auto pending = thread_adapter::get_pending_job_count();
         // Some tasks should be pending since we submitted more than thread count
 
         // Release tasks

@@ -129,17 +129,17 @@ auto simulate_operation(simulated_error error_type) -> Result<std::string> {
         case simulated_error::none:
             return std::string("success");
         case simulated_error::network_timeout:
-            return error_info{-1, "Network timeout", "network"};
+            return error_info(-1, "Network timeout", "network");
         case simulated_error::connection_refused:
-            return error_info{-2, "Connection refused", "network"};
+            return error_info(-2, "Connection refused", "network");
         case simulated_error::protocol_error:
-            return error_info{-3, "Protocol error", "dicom"};
+            return error_info(-3, "Protocol error", "dicom");
         case simulated_error::storage_full:
-            return error_info{-4, "Storage full", "storage"};
+            return error_info(-4, "Storage full", "storage");
         case simulated_error::invalid_data:
-            return error_info{-5, "Invalid DICOM data", "parser"};
+            return error_info(-5, "Invalid DICOM data", "parser");
     }
-    return error_info{-99, "Unknown error", "unknown"};
+    return error_info(-99, "Unknown error", "unknown");
 }
 
 }  // namespace
@@ -409,17 +409,18 @@ TEST_CASE("Error recovery and retry patterns",
         REQUIRE(thread_adapter::start());
 
         std::atomic<int> attempt_count{0};
-        constexpr int max_retries = 3;
-        constexpr int succeed_on_attempt = 2;  // Succeed on 2nd attempt
+        constexpr int succeed_on_attempt = 2;
 
         auto future = thread_adapter::submit(
-            [&attempt_count, max_retries, succeed_on_attempt]() {
-                Result<std::string> result = error_info{"transient", "retry"};
+            [&attempt_count]() {
+                constexpr int max_retries = 3;
+                constexpr int succeed_threshold = 2;
+                Result<std::string> result = error_info("transient error");
 
                 for (int retry = 0; retry < max_retries && result.is_err(); ++retry) {
                     attempt_count++;
 
-                    if (attempt_count >= succeed_on_attempt) {
+                    if (attempt_count >= succeed_threshold) {
                         result = std::string("success after retry");
                     } else {
                         logger_adapter::warn("Attempt {} failed, retrying...",
@@ -572,9 +573,9 @@ TEST_CASE("Nested operations with error handling",
             std::vector<std::future<Result<int>>> child_futures;
 
             for (int i = 0; i < 5; ++i) {
-                child_futures.push_back(thread_adapter::submit([i]() {
+                child_futures.push_back(thread_adapter::submit([i]() -> Result<int> {
                     if (i % 2 == 0) {
-                        return Result<int>(error_info{"child error", "child"});
+                        return Result<int>(error_info("child error"));
                     }
                     return Result<int>(i * 10);
                 }));
