@@ -111,18 +111,13 @@ public:
 
     void log(log_level level,
              const std::string& message,
-             const std::string& file,
-             int line,
-             const std::string& function) {
-        if (!initialized_ || !logger_) {
-            return;
-        }
-
-        if (!is_level_enabled(level)) {
-            return;
-        }
-
-        logger_->log(convert_log_level(level), message, file, line, function);
+             [[maybe_unused]] const std::string& file,
+             [[maybe_unused]] int line,
+             [[maybe_unused]] const std::string& function) {
+        // Delegate to the simple log method.
+        // Source location is now auto-captured by the underlying logger.
+        // The file, line, and function parameters are ignored.
+        log(level, message);
     }
 
     [[nodiscard]] auto is_level_enabled(log_level level) const noexcept -> bool {
@@ -297,6 +292,16 @@ void logger_adapter::log(log_level level, const std::string& message) {
     pimpl_->log(level, message);
 }
 
+// Suppress deprecation warning for deprecated method implementation
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
 void logger_adapter::log(log_level level,
                          const std::string& message,
                          const std::string& file,
@@ -304,6 +309,13 @@ void logger_adapter::log(log_level level,
                          const std::string& function) {
     pimpl_->log(level, message, file, line, function);
 }
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 auto logger_adapter::is_level_enabled(log_level level) noexcept -> bool {
     return pimpl_->is_level_enabled(level);

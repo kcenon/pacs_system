@@ -176,9 +176,33 @@ TEST_CASE("logger_adapter standard logging", "[logger_adapter][logging]") {
         REQUIRE(logger_adapter::is_level_enabled(log_level::fatal));
     }
 
-    SECTION("Log with source location") {
+    SECTION("Log with source location (deprecated API - tests backward compatibility)") {
+        // Suppress deprecation warning for backward compatibility test
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
         logger_adapter::log(log_level::info, "Test message with location",
                            __FILE__, __LINE__, __FUNCTION__);
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+        logger_adapter::flush();
+    }
+
+    SECTION("Log without source location (recommended API)") {
+        // This is the recommended way to log - source location is auto-captured
+        logger_adapter::log(log_level::info, "Test message without explicit location");
         logger_adapter::flush();
     }
 }

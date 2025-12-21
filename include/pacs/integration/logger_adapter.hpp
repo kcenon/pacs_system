@@ -290,7 +290,14 @@ public:
      * @param file Source file name
      * @param line Line number
      * @param function Function name
+     *
+     * @deprecated Use log(log_level, const std::string&) instead.
+     *             Source location is now auto-captured by the underlying logger.
+     *             This overload will be removed in v3.0.0.
+     * @see https://github.com/kcenon/common_system/blob/main/docs/DEPRECATION.md
      */
+    [[deprecated("Use log(log_level, const std::string&) instead. "
+                 "Source location is auto-captured. Will be removed in v3.0.0.")]]
     static void log(log_level level,
                     const std::string& message,
                     const std::string& file,
