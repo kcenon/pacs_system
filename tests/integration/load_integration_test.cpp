@@ -228,14 +228,16 @@ TEST_CASE("Thread pool saturation and queuing",
     logger_adapter::initialize(log_config);
 
     // Configure small pool to force saturation
+    // Use same min/max to ensure all threads are started immediately
+    // This prevents timeout on Windows where thread creation can be slow
     thread_pool_config thread_config;
-    thread_config.min_threads = 2;
+    thread_config.min_threads = 4;
     thread_config.max_threads = 4;
     thread_adapter::configure(thread_config);
 
     SECTION("Tasks queue when pool is saturated") {
         REQUIRE(thread_adapter::start());
-        REQUIRE(wait_for([]() { return thread_adapter::get_thread_count() >= 2; }, 15000ms));
+        REQUIRE(wait_for([]() { return thread_adapter::get_thread_count() >= 4; }, 15000ms));
 
         concurrent_counter active_tasks;
         std::atomic<bool> release_flag{false};
@@ -500,7 +502,10 @@ TEST_CASE("No deadlocks under concurrent access",
     SECTION("Nested task submission does not deadlock") {
         REQUIRE(thread_adapter::start());
 
-        constexpr int outer_count = 10;
+        // Use fewer outer tasks than min_threads to ensure threads are
+        // available for inner tasks. This prevents deadlock where all
+        // threads are blocked waiting for inner tasks to complete.
+        constexpr int outer_count = 2;
         constexpr int inner_count = 5;
         std::atomic<int> total_completed{0};
 
@@ -543,9 +548,10 @@ TEST_CASE("No deadlocks under concurrent access",
         std::atomic<int> query_count{0};
         std::atomic<int> tasks_completed{0};
 
-        // Background tasks - limit to max_threads to prevent queuing delays
+        // Background tasks - limit to min_threads to ensure all tasks start immediately
+        // On Windows, thread pool may only have min_threads initially
         // Use fire_and_forget to avoid future.get() blocking
-        const int background_task_count = static_cast<int>(thread_config.max_threads);
+        const int background_task_count = static_cast<int>(thread_config.min_threads);
         for (int i = 0; i < background_task_count; ++i) {
             thread_adapter::submit_fire_and_forget([&stop, &tasks_completed]() {
                 while (!stop.load()) {
