@@ -30,10 +30,8 @@
 #include <string>
 #include <vector>
 
-// Forward declarations for network_system types
-namespace network_system::session {
-class messaging_session;
-}  // namespace network_system::session
+// Forward declarations for network_system types (no ASIO dependency)
+#include <network_system/forward.h>
 
 namespace pacs::network::v2 {
 

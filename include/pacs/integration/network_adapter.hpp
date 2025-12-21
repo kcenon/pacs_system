@@ -27,17 +27,8 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Forward declarations for network_system types
-namespace network_system::core {
-class messaging_server;
-class messaging_client;
-class secure_messaging_server;
-}  // namespace network_system::core
-
-namespace network_system::session {
-class messaging_session;
-class secure_session;
-}  // namespace network_system::session
+// Forward declarations for network_system types (no ASIO dependency)
+#include <network_system/forward.h>
 
 namespace pacs::network {
 class dicom_server;

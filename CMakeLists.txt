@@ -1462,6 +1462,12 @@ if(PACS_BUILD_TESTS)
             tests/integration/thread_system_direct_test.cpp
             tests/integration/network_adapter_test.cpp
             tests/integration/monitoring_adapter_test.cpp
+            # Cross-system integration tests (Issue #390)
+            tests/integration/dicom_workflow_integration_test.cpp
+            tests/integration/error_propagation_integration_test.cpp
+            tests/integration/load_integration_test.cpp
+            tests/integration/shutdown_integration_test.cpp
+            tests/integration/config_reload_integration_test.cpp
         )
         target_link_libraries(pacs_integration_tests
             PRIVATE
