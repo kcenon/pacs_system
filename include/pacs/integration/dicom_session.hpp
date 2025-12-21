@@ -29,11 +29,9 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Forward declarations for network_system types
-namespace network_system::session {
-class messaging_session;
-class secure_session;
-}  // namespace network_system::session
+// Include network_system types (with backward compatibility aliases)
+#include <network_system/session/messaging_session.h>
+#include <network_system/session/secure_session.h>
 
 namespace pacs::integration {
 

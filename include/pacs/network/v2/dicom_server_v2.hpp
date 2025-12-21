@@ -31,14 +31,9 @@
 #include <unordered_map>
 #include <vector>
 
-// Forward declarations for network_system types
-namespace network_system::core {
-class messaging_server;
-}  // namespace network_system::core
-
-namespace network_system::session {
-class messaging_session;
-}  // namespace network_system::session
+// Include network_system types (with backward compatibility aliases)
+#include <network_system/core/messaging_server.h>
+#include <network_system/session/messaging_session.h>
 
 namespace pacs::network::v2 {
 

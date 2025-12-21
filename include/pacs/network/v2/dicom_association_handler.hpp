@@ -30,10 +30,8 @@
 #include <string>
 #include <vector>
 
-// Forward declarations for network_system types
-namespace network_system::session {
-class messaging_session;
-}  // namespace network_system::session
+// Include network_system types (with backward compatibility aliases)
+#include <network_system/session/messaging_session.h>
 
 namespace pacs::network::v2 {
 
