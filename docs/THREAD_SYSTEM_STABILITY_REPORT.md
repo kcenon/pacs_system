@@ -2,7 +2,7 @@
 
 **Issue**: #155 - Verify thread_system stability and jthread support
 **Date**: 2024-12-04
-**Last Updated**: 2025-12-19 (CI timing tolerance fix for lockfree_queue tests)
+**Last Updated**: 2025-12-21 (Cross-system integration tests - Issue #390)
 **Platform**: macOS ARM64 (Apple Silicon), Ubuntu 24.04 (x64)
 **Author**: Core Maintainer
 
@@ -430,6 +430,100 @@ CHECK(elapsed < 1s);
 - The 100ms lower bound check remains unchanged to verify correct behavior
 - The generous upper bound prevents false negatives in CI while still catching significant timing issues
 
+## Cross-System Integration Tests (Issue #390)
+
+### Overview
+
+Issue #390 added comprehensive cross-system integration tests to verify interactions between thread_system, logger_system, and network_system adapters. These tests expand on the existing adapter tests to cover real-world workflow scenarios.
+
+### New Test Files (2025-12-21)
+
+| File | Purpose | Test Count |
+|------|---------|------------|
+| `dicom_workflow_integration_test.cpp` | DICOM Store-and-Forward workflows | 6 test sections |
+| `error_propagation_integration_test.cpp` | Error handling and RAII cleanup | 10 test sections |
+| `load_integration_test.cpp` | High load concurrent operations | 8 test sections |
+| `shutdown_integration_test.cpp` | Graceful shutdown scenarios | 10 test sections |
+| `config_reload_integration_test.cpp` | Runtime configuration changes | 8 test sections |
+
+### Test Categories
+
+#### 1. DICOM Workflow Integration (Issue #391)
+
+Tests cross-system interactions during DICOM operations:
+- Single C-STORE with thread pool and logging
+- Multiple concurrent C-STORE operations
+- C-STORE with priority scheduling
+- Association lifecycle with audit logging
+- C-MOVE with sub-operations
+
+#### 2. Error Propagation Chain (Issue #392)
+
+Tests error handling patterns across systems:
+- Result<T> error propagation through futures
+- RAII cleanup during exceptions
+- Exception propagation through thread pool
+- Error recovery and retry patterns
+- Error events logged to audit trail
+
+#### 3. High Load Concurrent Operations (Issue #393)
+
+Tests behavior under high load conditions:
+- 100 concurrent tasks
+- Thread pool saturation and queuing
+- Priority task execution under load
+- Simulated concurrent associations (50+)
+- Stress tests with rapid fire-and-forget
+- Deadlock prevention verification
+- Memory stability under load
+
+#### 4. Graceful Shutdown (Issue #394)
+
+Tests shutdown behavior:
+- Pending tasks complete before shutdown
+- Long-running tasks complete during graceful shutdown
+- Immediate shutdown behavior
+- Resource cleanup during shutdown
+- Restart after shutdown
+- System shutdown order
+- Concurrent shutdown attempts
+
+#### 5. Configuration Hot-Reload (Issue #395)
+
+Tests runtime configuration changes:
+- Log level changes at runtime
+- Thread pool reconfiguration after restart
+- Configuration consistency across systems
+- Invalid configuration handling
+- Configuration query at runtime
+- Configuration changes under load
+
+### Test Markers
+
+All tests use the `[!mayfail]` tag to handle platform-specific variations while still running on all platforms. This is consistent with existing thread_adapter tests.
+
+### Running the Tests
+
+```bash
+# Run all integration tests
+ctest -L integration
+
+# Run specific cross-system test file
+./build/bin/pacs_integration_tests "[integration][workflow]"
+./build/bin/pacs_integration_tests "[integration][error]"
+./build/bin/pacs_integration_tests "[integration][load]"
+./build/bin/pacs_integration_tests "[integration][shutdown]"
+./build/bin/pacs_integration_tests "[integration][config]"
+```
+
+### Acceptance Criteria (Issue #390)
+
+- [x] At least 5 new integration tests covering cross-system scenarios
+- [x] Tests run in CI pipeline (via `integration::` prefix)
+- [x] Test execution time < 5 minutes total
+- [x] All tests pass with ASAN/TSAN enabled
+- [x] Test documentation updated
+
 ## References
 
 - Issue #96: thread_adapter SIGILL error (Closed)
@@ -438,6 +532,8 @@ CHECK(elapsed < 1s);
 - **Issue #156: Implement accept_worker (ABI fix documented here)**
 - Issue #158: Worker pool migration (Complete)
 - **Issue #159: Cancellation token integration (Complete)**
+- **Issue #390: Enhance cross-system integration tests (Complete)**
+- **Issue #391-#395: Cross-system integration test sub-issues (Complete)**
 - thread_system #223: Original ARM64 bug (Closed)
 - thread_system #224: Static assertion fix (Merged)
 - thread_system #225: Follow-up EXC_BAD_ACCESS bug (Closed, fixed in #226)
