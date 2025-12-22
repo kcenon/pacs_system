@@ -284,27 +284,6 @@ public:
     static void log(log_level level, const std::string& message);
 
     /**
-     * @brief Log a message with source location
-     * @param level Log severity level
-     * @param message The message to log
-     * @param file Source file name
-     * @param line Line number
-     * @param function Function name
-     *
-     * @deprecated Use log(log_level, const std::string&) instead.
-     *             Source location is now auto-captured by the underlying logger.
-     *             This overload will be removed in v3.0.0.
-     * @see https://github.com/kcenon/common_system/blob/main/docs/DEPRECATION.md
-     */
-    [[deprecated("Use log(log_level, const std::string&) instead. "
-                 "Source location is auto-captured. Will be removed in v3.0.0.")]]
-    static void log(log_level level,
-                    const std::string& message,
-                    const std::string& file,
-                    int line,
-                    const std::string& function);
-
-    /**
      * @brief Check if a log level is enabled
      * @param level The level to check
      * @return true if messages at this level will be logged
