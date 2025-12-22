@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(pacs_system
-    VERSION 1.0.0
+    VERSION 0.1.0.0
     DESCRIPTION "Modern C++20 PACS implementation"
     LANGUAGES CXX
 )
