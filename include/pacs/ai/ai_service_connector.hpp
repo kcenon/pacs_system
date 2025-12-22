@@ -22,7 +22,12 @@
 #include <string_view>
 #include <vector>
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+// KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
+#ifndef KCENON_HAS_COMMON_SYSTEM
+#define KCENON_HAS_COMMON_SYSTEM 0
+#endif
+
+#if KCENON_HAS_COMMON_SYSTEM
 #include <kcenon/common/patterns/result.h>
 #endif
 
@@ -32,7 +37,7 @@ namespace pacs::ai {
 // Result Type (fallback when common_system is unavailable)
 // =============================================================================
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
 template <typename T>
 using Result = kcenon::common::Result<T>;
 
