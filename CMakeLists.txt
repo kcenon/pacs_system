@@ -768,6 +768,17 @@ else()
     message(STATUS "std::jthread not available - using std::thread fallback")
 endif()
 
+# CRITICAL: Define KCENON_HAS_COMMON_EXECUTOR for thread_system ABI compatibility
+# thread_system's thread_pool.h uses conditional compilation:
+#   - KCENON_HAS_COMMON_EXECUTOR=1: is_running() declared with 'override' (virtual)
+#   - KCENON_HAS_COMMON_EXECUTOR=0: is_running() declared as non-virtual
+# When common_system is available, thread_system compiles with KCENON_HAS_COMMON_EXECUTOR=1.
+# Consumer code must use the same definition to match the library's function signatures.
+if(PACS_COMMON_SYSTEM_FOUND)
+    message(STATUS "common_system found - enabling KCENON_HAS_COMMON_EXECUTOR for ABI compatibility")
+    target_compile_definitions(pacs_network PUBLIC KCENON_HAS_COMMON_EXECUTOR=1)
+endif()
+
 # Services library
 add_library(pacs_services
     src/services/verification_scp.cpp
@@ -1140,9 +1151,11 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
         # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
         # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+        # KCENON_HAS_COMMON_EXECUTOR is required for thread_system ABI compatibility
         target_compile_definitions(pacs_integration PUBLIC
             KCENON_HAS_COMMON_SYSTEM=1
             PACS_WITH_COMMON_SYSTEM=1
+            KCENON_HAS_COMMON_EXECUTOR=1
         )
     endif()
 
