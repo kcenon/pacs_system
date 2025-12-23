@@ -14,7 +14,12 @@
 #include <algorithm>
 #include <sstream>
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+// KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
+#ifndef KCENON_HAS_COMMON_SYSTEM
+#define KCENON_HAS_COMMON_SYSTEM 0
+#endif
+
+#if KCENON_HAS_COMMON_SYSTEM
 using kcenon::common::error_info;
 #endif
 

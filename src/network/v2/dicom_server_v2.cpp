@@ -10,12 +10,17 @@
 #include <algorithm>
 #include <sstream>
 
+// KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
+#ifndef KCENON_HAS_COMMON_SYSTEM
+#define KCENON_HAS_COMMON_SYSTEM 0
+#endif
+
 #ifdef PACS_WITH_NETWORK_SYSTEM
 #include <kcenon/network/core/messaging_server.h>
 #include <kcenon/network/session/messaging_session.h>
 #endif
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
 using kcenon::common::error_info;
 #endif
 

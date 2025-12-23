@@ -281,7 +281,7 @@ auto ai_result_handler::receive_structured_report(const core::dicom_dataset& sr)
     auto sop_class = sr.get_string(core::tags::sop_class_uid);
     auto type = determine_result_type(sop_class);
     if (!type || *type != ai_result_type::structured_report) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Invalid SOP Class for Structured Report");
 #else
         return std::string("Invalid SOP Class for Structured Report");
@@ -291,7 +291,7 @@ auto ai_result_handler::receive_structured_report(const core::dicom_dataset& sr)
     // Run common validation
     auto common_validation = pimpl_->validate_common_tags(sr);
     if (common_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             common_validation.error_message.value_or("Validation failed"));
 #else
@@ -303,7 +303,7 @@ auto ai_result_handler::receive_structured_report(const core::dicom_dataset& sr)
     if (pimpl_->config_.validate_sr_templates) {
         auto template_validation = validate_sr_template(sr);
         if (template_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
             return kcenon::common::error_info(
                 template_validation.error_message.value_or("SR template validation failed"));
 #else
@@ -315,7 +315,7 @@ auto ai_result_handler::receive_structured_report(const core::dicom_dataset& sr)
     // Validate source references if configured
     auto ref_validation = pimpl_->validate_source_references_exist(sr);
     if (ref_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             ref_validation.error_message.value_or("Source reference validation failed"));
 #else
@@ -326,7 +326,7 @@ auto ai_result_handler::receive_structured_report(const core::dicom_dataset& sr)
     // Call pre-store validator if set
     if (pimpl_->pre_store_validator_ &&
         !pimpl_->pre_store_validator_(sr, ai_result_type::structured_report)) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Pre-store validation rejected the SR");
 #else
         return std::string("Pre-store validation rejected the SR");
@@ -373,7 +373,7 @@ auto ai_result_handler::get_cad_findings(std::string_view sr_sop_instance_uid)
     // Retrieve the SR dataset
     auto retrieve_result = pimpl_->storage_->retrieve(sr_sop_instance_uid);
     if (retrieve_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Failed to retrieve SR: " +
             std::string(sr_sop_instance_uid));
 #else
@@ -402,7 +402,7 @@ auto ai_result_handler::receive_segmentation(const core::dicom_dataset& seg)
     auto sop_class = seg.get_string(core::tags::sop_class_uid);
     auto type = determine_result_type(sop_class);
     if (!type || *type != ai_result_type::segmentation) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Invalid SOP Class for Segmentation");
 #else
         return std::string("Invalid SOP Class for Segmentation");
@@ -412,7 +412,7 @@ auto ai_result_handler::receive_segmentation(const core::dicom_dataset& seg)
     // Run common validation
     auto common_validation = pimpl_->validate_common_tags(seg);
     if (common_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             common_validation.error_message.value_or("Validation failed"));
 #else
@@ -423,7 +423,7 @@ auto ai_result_handler::receive_segmentation(const core::dicom_dataset& seg)
     // Validate segmentation data
     auto seg_validation = validate_segmentation(seg);
     if (seg_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             seg_validation.error_message.value_or("Segmentation validation failed"));
 #else
@@ -434,7 +434,7 @@ auto ai_result_handler::receive_segmentation(const core::dicom_dataset& seg)
     // Validate source references if configured
     auto ref_validation = pimpl_->validate_source_references_exist(seg);
     if (ref_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             ref_validation.error_message.value_or("Source reference validation failed"));
 #else
@@ -445,7 +445,7 @@ auto ai_result_handler::receive_segmentation(const core::dicom_dataset& seg)
     // Call pre-store validator if set
     if (pimpl_->pre_store_validator_ &&
         !pimpl_->pre_store_validator_(seg, ai_result_type::segmentation)) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Pre-store validation rejected the segmentation");
 #else
         return std::string("Pre-store validation rejected the segmentation");
@@ -489,7 +489,7 @@ auto ai_result_handler::get_segment_info(std::string_view seg_sop_instance_uid)
     // Retrieve the SEG dataset
     auto retrieve_result = pimpl_->storage_->retrieve(seg_sop_instance_uid);
     if (retrieve_result.is_err()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Failed to retrieve SEG: " +
             std::string(seg_sop_instance_uid));
 #else
@@ -516,7 +516,7 @@ auto ai_result_handler::receive_presentation_state(const core::dicom_dataset& pr
     auto sop_class = pr.get_string(core::tags::sop_class_uid);
     auto type = determine_result_type(sop_class);
     if (!type || *type != ai_result_type::presentation_state) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Invalid SOP Class for Presentation State");
 #else
         return std::string("Invalid SOP Class for Presentation State");
@@ -526,7 +526,7 @@ auto ai_result_handler::receive_presentation_state(const core::dicom_dataset& pr
     // Run common validation
     auto common_validation = pimpl_->validate_common_tags(pr);
     if (common_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             common_validation.error_message.value_or("Validation failed"));
 #else
@@ -537,7 +537,7 @@ auto ai_result_handler::receive_presentation_state(const core::dicom_dataset& pr
     // Validate presentation state
     auto pr_validation = validate_presentation_state(pr);
     if (pr_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             pr_validation.error_message.value_or("Presentation state validation failed"));
 #else
@@ -548,7 +548,7 @@ auto ai_result_handler::receive_presentation_state(const core::dicom_dataset& pr
     // Validate source references if configured
     auto ref_validation = pimpl_->validate_source_references_exist(pr);
     if (ref_validation.status != validation_status::valid) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info(
             ref_validation.error_message.value_or("Source reference validation failed"));
 #else
@@ -559,7 +559,7 @@ auto ai_result_handler::receive_presentation_state(const core::dicom_dataset& pr
     // Call pre-store validator if set
     if (pimpl_->pre_store_validator_ &&
         !pimpl_->pre_store_validator_(pr, ai_result_type::presentation_state)) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("Pre-store validation rejected the presentation state");
 #else
         return std::string("Pre-store validation rejected the presentation state");
@@ -608,7 +608,7 @@ auto ai_result_handler::link_to_source(
     if (it == pimpl_->ai_results_cache_.end()) {
         // Try to check storage
         if (!pimpl_->storage_->exists(result_uid)) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
             return kcenon::common::error_info("AI result not found: " +
                 std::string(result_uid));
 #else
@@ -632,7 +632,7 @@ auto ai_result_handler::get_source_reference(std::string_view result_uid)
     -> Result<source_reference> {
     auto it = pimpl_->source_links_.find(std::string(result_uid));
     if (it == pimpl_->source_links_.end()) {
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
         return kcenon::common::error_info("No source reference found for: " +
             std::string(result_uid));
 #else
