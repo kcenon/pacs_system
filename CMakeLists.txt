@@ -617,7 +617,12 @@ target_include_directories(pacs_core
 # Link common_system (Tier 0) - Result<T> pattern
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
     target_include_directories(pacs_core PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-    target_compile_definitions(pacs_core PUBLIC PACS_WITH_COMMON_SYSTEM)
+    # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+    # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+    target_compile_definitions(pacs_core PUBLIC
+        KCENON_HAS_COMMON_SYSTEM=1
+        PACS_WITH_COMMON_SYSTEM=1
+    )
 endif()
 
 # Link container_system (Tier 1) - DICOM serialization
@@ -763,6 +768,17 @@ else()
     message(STATUS "std::jthread not available - using std::thread fallback")
 endif()
 
+# CRITICAL: Define KCENON_HAS_COMMON_EXECUTOR for thread_system ABI compatibility
+# thread_system's thread_pool.h uses conditional compilation:
+#   - KCENON_HAS_COMMON_EXECUTOR=1: is_running() declared with 'override' (virtual)
+#   - KCENON_HAS_COMMON_EXECUTOR=0: is_running() declared as non-virtual
+# When common_system is available, thread_system compiles with KCENON_HAS_COMMON_EXECUTOR=1.
+# Consumer code must use the same definition to match the library's function signatures.
+if(PACS_COMMON_SYSTEM_FOUND)
+    message(STATUS "common_system found - enabling KCENON_HAS_COMMON_EXECUTOR for ABI compatibility")
+    target_compile_definitions(pacs_network PUBLIC KCENON_HAS_COMMON_EXECUTOR=1)
+endif()
+
 # Services library
 add_library(pacs_services
     src/services/verification_scp.cpp
@@ -807,7 +823,12 @@ target_link_libraries(pacs_services
 # Link common_system for Result<T>
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
     target_include_directories(pacs_services PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-    target_compile_definitions(pacs_services PUBLIC PACS_WITH_COMMON_SYSTEM)
+    # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+    # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+    target_compile_definitions(pacs_services PUBLIC
+        KCENON_HAS_COMMON_SYSTEM=1
+        PACS_WITH_COMMON_SYSTEM=1
+    )
 endif()
 
 message(STATUS "  [OK] pacs_services: ON")
@@ -842,7 +863,12 @@ target_link_libraries(pacs_security PUBLIC pacs_core pacs_encoding)
 # Link common_system (Tier 0)
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
     target_include_directories(pacs_security PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-    target_compile_definitions(pacs_security PUBLIC PACS_WITH_COMMON_SYSTEM)
+    # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+    # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+    target_compile_definitions(pacs_security PUBLIC
+        KCENON_HAS_COMMON_SYSTEM=1
+        PACS_WITH_COMMON_SYSTEM=1
+    )
 endif()
 
 # Link OpenSSL for digital signatures (Issue #191)
@@ -876,7 +902,12 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_storage PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-        target_compile_definitions(pacs_storage PUBLIC PACS_WITH_COMMON_SYSTEM)
+        # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+        # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+        target_compile_definitions(pacs_storage PUBLIC
+            KCENON_HAS_COMMON_SYSTEM=1
+            PACS_WITH_COMMON_SYSTEM=1
+        )
     endif()
 
     # Link SQLite3
@@ -920,7 +951,12 @@ if(TARGET pacs_storage)
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_ai PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-        target_compile_definitions(pacs_ai PUBLIC PACS_WITH_COMMON_SYSTEM)
+        # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+        # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+        target_compile_definitions(pacs_ai PUBLIC
+            KCENON_HAS_COMMON_SYSTEM=1
+            PACS_WITH_COMMON_SYSTEM=1
+        )
     endif()
 
     # Note: pacs_integration is linked later after it's defined (for ai_service_connector)
@@ -972,7 +1008,12 @@ if(TARGET pacs_storage)
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_workflow PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-        target_compile_definitions(pacs_workflow PUBLIC PACS_WITH_COMMON_SYSTEM)
+        # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+        # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+        target_compile_definitions(pacs_workflow PUBLIC
+            KCENON_HAS_COMMON_SYSTEM=1
+            PACS_WITH_COMMON_SYSTEM=1
+        )
     endif()
 
     message(STATUS "  [OK] pacs_workflow: ON (auto prefetch service)")
@@ -1108,7 +1149,14 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
         target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_COMMON_SYSTEM)
+        # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
+        # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
+        # KCENON_HAS_COMMON_EXECUTOR is required for thread_system ABI compatibility
+        target_compile_definitions(pacs_integration PUBLIC
+            KCENON_HAS_COMMON_SYSTEM=1
+            PACS_WITH_COMMON_SYSTEM=1
+            KCENON_HAS_COMMON_EXECUTOR=1
+        )
     endif()
 
     # Link network_system (REQUIRED for network_adapter)

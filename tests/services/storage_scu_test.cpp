@@ -17,6 +17,11 @@
 #include <filesystem>
 #include <fstream>
 
+// KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
+#ifndef KCENON_HAS_COMMON_SYSTEM
+#define KCENON_HAS_COMMON_SYSTEM 0
+#endif
+
 using namespace pacs::services;
 using namespace pacs::network;
 using namespace pacs::network::dimse;
@@ -488,7 +493,7 @@ TEST_CASE("store_file with non-existent file", "[services][storage_scu]") {
     auto result = scu.store_file(assoc, "/non/existent/file.dcm");
 
     CHECK(result.is_err());
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
     CHECK(result.error().message.find("File not found") != std::string::npos);
 #else
     CHECK(result.error().find("File not found") != std::string::npos);

@@ -25,7 +25,12 @@
 #include <variant>
 #include <vector>
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+// KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
+#ifndef KCENON_HAS_COMMON_SYSTEM
+#define KCENON_HAS_COMMON_SYSTEM 0
+#endif
+
+#if KCENON_HAS_COMMON_SYSTEM
 #include <kcenon/common/patterns/result.h>
 #endif
 
@@ -38,7 +43,7 @@ namespace pacs::integration {
 // Result Type and Error Info
 // =============================================================================
 
-#ifdef PACS_WITH_COMMON_SYSTEM
+#if KCENON_HAS_COMMON_SYSTEM
 template <typename T>
 using Result = kcenon::common::Result<T>;
 
