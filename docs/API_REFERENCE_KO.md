@@ -128,8 +128,12 @@ public:
 
     // SQ (시퀀스)용
     bool is_sequence() const noexcept;
-    std::vector<dicom_dataset>& items();
-    const std::vector<dicom_dataset>& items() const;
+    std::size_t sequence_item_count() const noexcept;
+    const dicom_dataset& sequence_item(std::size_t index) const;
+    dicom_dataset& sequence_item(std::size_t index);
+    std::vector<dicom_dataset>& sequence_items();
+    const std::vector<dicom_dataset>& sequence_items() const;
+    void add_sequence_item(dicom_dataset item);
 
     // 값 수정
     void set_string(const std::string& value);
@@ -224,6 +228,12 @@ public:
     void add(dicom_element element);
     void remove(dicom_tag tag);
     void clear();
+
+    // 시퀀스 접근
+    bool has_sequence(dicom_tag tag) const noexcept;
+    const std::vector<dicom_dataset>* get_sequence(dicom_tag tag) const noexcept;
+    std::vector<dicom_dataset>* get_sequence(dicom_tag tag) noexcept;
+    std::vector<dicom_dataset>& get_or_create_sequence(dicom_tag tag);
 
     // 반복 (태그 순서)
     using iterator = /* 구현 정의 */;

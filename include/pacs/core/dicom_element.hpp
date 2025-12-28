@@ -248,6 +248,31 @@ public:
     }
 
     /**
+     * @brief Get the number of items in the sequence
+     * @return Number of sequence items, or 0 if not a sequence or empty
+     */
+    [[nodiscard]] auto sequence_item_count() const noexcept -> std::size_t;
+
+    /**
+     * @brief Get a specific sequence item by index
+     * @param index The zero-based index of the item
+     * @return Const reference to the dataset at the given index
+     * @throws std::out_of_range if index >= sequence_item_count()
+     * @note Only valid if is_sequence() returns true
+     */
+    [[nodiscard]] auto sequence_item(std::size_t index) const
+        -> const dicom_dataset&;
+
+    /**
+     * @brief Get a specific sequence item by index (mutable)
+     * @param index The zero-based index of the item
+     * @return Reference to the dataset at the given index
+     * @throws std::out_of_range if index >= sequence_item_count()
+     * @note Only valid if is_sequence() returns true
+     */
+    [[nodiscard]] auto sequence_item(std::size_t index) -> dicom_dataset&;
+
+    /**
      * @brief Get mutable access to sequence items
      * @return Reference to the sequence items vector
      * @note Only valid if is_sequence() returns true
@@ -260,6 +285,13 @@ public:
      * @note Only valid if is_sequence() returns true
      */
     [[nodiscard]] auto sequence_items() const -> const std::vector<dicom_dataset>&;
+
+    /**
+     * @brief Add a new item to the sequence
+     * @param item The dataset to add (will be moved)
+     * @note Only valid if is_sequence() returns true
+     */
+    void add_sequence_item(dicom_dataset item);
 
     // ========================================================================
     // Modification

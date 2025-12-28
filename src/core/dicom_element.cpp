@@ -151,12 +151,29 @@ auto dicom_element::as_string_list() const
 // Sequence Access
 // ============================================================================
 
+auto dicom_element::sequence_item_count() const noexcept -> std::size_t {
+    return sequence_items_.size();
+}
+
+auto dicom_element::sequence_item(std::size_t index) const
+    -> const dicom_dataset& {
+    return sequence_items_.at(index);
+}
+
+auto dicom_element::sequence_item(std::size_t index) -> dicom_dataset& {
+    return sequence_items_.at(index);
+}
+
 auto dicom_element::sequence_items() -> std::vector<dicom_dataset>& {
     return sequence_items_;
 }
 
 auto dicom_element::sequence_items() const -> const std::vector<dicom_dataset>& {
     return sequence_items_;
+}
+
+void dicom_element::add_sequence_item(dicom_dataset item) {
+    sequence_items_.push_back(std::move(item));
 }
 
 // ============================================================================

@@ -151,6 +151,54 @@ public:
     [[nodiscard]] auto get_numeric(dicom_tag tag) const -> std::optional<T>;
 
     // ========================================================================
+    // Sequence Access
+    // ========================================================================
+
+    /**
+     * @brief Check if the dataset contains a sequence element with the given tag
+     * @param tag The DICOM tag to check
+     * @return true if an element with this tag exists and is a sequence (VR = SQ)
+     */
+    [[nodiscard]] auto has_sequence(dicom_tag tag) const noexcept -> bool;
+
+    /**
+     * @brief Get read-only access to sequence items for a given tag
+     * @param tag The DICOM tag of the sequence element
+     * @return Pointer to the sequence items vector, or nullptr if not found or not a sequence
+     *
+     * @example
+     * @code
+     * // Access Performed Series Sequence (0040,0340)
+     * if (const auto* series = dataset.get_sequence(tags::performed_series_sequence)) {
+     *     for (const auto& item : *series) {
+     *         auto series_uid = item.get_string(tags::series_instance_uid);
+     *     }
+     * }
+     * @endcode
+     */
+    [[nodiscard]] auto get_sequence(dicom_tag tag) const noexcept
+        -> const std::vector<dicom_dataset>*;
+
+    /**
+     * @brief Get mutable access to sequence items for a given tag
+     * @param tag The DICOM tag of the sequence element
+     * @return Pointer to the sequence items vector, or nullptr if not found or not a sequence
+     */
+    [[nodiscard]] auto get_sequence(dicom_tag tag) noexcept
+        -> std::vector<dicom_dataset>*;
+
+    /**
+     * @brief Insert or create a sequence element with the given tag
+     * @param tag The DICOM tag for the sequence
+     * @return Reference to the sequence items vector (creates empty sequence if not exists)
+     *
+     * If an element with the tag already exists and is not a sequence, it will be
+     * replaced with an empty sequence.
+     */
+    [[nodiscard]] auto get_or_create_sequence(dicom_tag tag)
+        -> std::vector<dicom_dataset>&;
+
+    // ========================================================================
     // Modification
     // ========================================================================
 

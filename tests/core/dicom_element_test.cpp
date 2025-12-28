@@ -8,6 +8,7 @@
 
 #include <array>
 
+#include <pacs/core/dicom_dataset.hpp>
 #include <pacs/core/dicom_element.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
 #include <pacs/core/result.hpp>
@@ -239,12 +240,131 @@ TEST_CASE("dicom_element sequence handling", "[core][dicom_element]") {
 
         CHECK(elem.is_sequence());
         CHECK(elem.sequence_items().empty());
+        CHECK(elem.sequence_item_count() == 0);
     }
 
     SECTION("non-SQ VR is not a sequence") {
         dicom_element elem{tags::patient_name, vr_type::PN};
 
         CHECK_FALSE(elem.is_sequence());
+    }
+
+    SECTION("add_sequence_item adds items to sequence") {
+        dicom_element elem{
+            tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        dicom_dataset item1;
+        item1.set_string(tags::modality, vr_type::CS, "CT");
+
+        dicom_dataset item2;
+        item2.set_string(tags::modality, vr_type::CS, "MR");
+
+        elem.add_sequence_item(item1);
+        elem.add_sequence_item(std::move(item2));
+
+        CHECK(elem.sequence_item_count() == 2);
+        CHECK(elem.sequence_items().size() == 2);
+    }
+
+    SECTION("sequence_item returns item at index") {
+        dicom_element elem{
+            tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        dicom_dataset item1;
+        item1.set_string(tags::modality, vr_type::CS, "CT");
+        item1.set_string(tags::station_name, vr_type::SH, "STATION1");
+
+        dicom_dataset item2;
+        item2.set_string(tags::modality, vr_type::CS, "MR");
+        item2.set_string(tags::station_name, vr_type::SH, "STATION2");
+
+        elem.add_sequence_item(item1);
+        elem.add_sequence_item(item2);
+
+        const auto& first_item = elem.sequence_item(0);
+        CHECK(first_item.get_string(tags::modality) == "CT");
+        CHECK(first_item.get_string(tags::station_name) == "STATION1");
+
+        const auto& second_item = elem.sequence_item(1);
+        CHECK(second_item.get_string(tags::modality) == "MR");
+        CHECK(second_item.get_string(tags::station_name) == "STATION2");
+    }
+
+    SECTION("sequence_item throws on out of range index") {
+        dicom_element elem{
+            tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        CHECK_THROWS_AS(elem.sequence_item(0), std::out_of_range);
+
+        dicom_dataset item;
+        elem.add_sequence_item(item);
+
+        CHECK_NOTHROW(elem.sequence_item(0));
+        CHECK_THROWS_AS(elem.sequence_item(1), std::out_of_range);
+    }
+
+    SECTION("mutable sequence_item allows modification") {
+        dicom_element elem{
+            tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        dicom_dataset item;
+        item.set_string(tags::modality, vr_type::CS, "CT");
+        elem.add_sequence_item(item);
+
+        // Modify through mutable access
+        elem.sequence_item(0).set_string(tags::modality, vr_type::CS, "MR");
+
+        CHECK(elem.sequence_item(0).get_string(tags::modality) == "MR");
+    }
+
+    SECTION("sequence supports range-based for loop") {
+        dicom_element elem{
+            tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        for (int i = 0; i < 3; ++i) {
+            dicom_dataset item;
+            item.set_string(tags::modality, vr_type::CS, std::to_string(i));
+            elem.add_sequence_item(item);
+        }
+
+        int count = 0;
+        for (const auto& item : elem.sequence_items()) {
+            CHECK(item.get_string(tags::modality) == std::to_string(count));
+            ++count;
+        }
+        CHECK(count == 3);
+    }
+
+    SECTION("nested sequences are supported") {
+        // Outer sequence
+        dicom_element outer_seq{
+            tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        // Create item with nested sequence
+        dicom_dataset outer_item;
+        outer_item.set_string(tags::modality, vr_type::CS, "CT");
+
+        // Create nested sequence element
+        dicom_element inner_seq{
+            dicom_tag{0x0040, 0x0321}, vr_type::SQ};  // Referenced SOP Sequence
+
+        dicom_dataset inner_item;
+        inner_item.set_string(tags::sop_class_uid, vr_type::UI, "1.2.3.4");
+        inner_seq.add_sequence_item(inner_item);
+
+        outer_item.insert(std::move(inner_seq));
+        outer_seq.add_sequence_item(outer_item);
+
+        // Verify nested structure
+        CHECK(outer_seq.sequence_item_count() == 1);
+
+        const auto& retrieved_outer = outer_seq.sequence_item(0);
+        CHECK(retrieved_outer.get_string(tags::modality) == "CT");
+
+        const auto* inner = retrieved_outer.get_sequence(dicom_tag{0x0040, 0x0321});
+        REQUIRE(inner != nullptr);
+        REQUIRE(inner->size() == 1);
+        CHECK((*inner)[0].get_string(tags::sop_class_uid) == "1.2.3.4");
     }
 }
 
