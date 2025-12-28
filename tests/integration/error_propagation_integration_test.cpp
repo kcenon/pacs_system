@@ -6,9 +6,24 @@
  * propagation and recovery patterns involving Result<T>, RAII cleanup,
  * and monitoring system interactions.
  *
+ * @note This file uses the deprecated thread_adapter API for backward
+ *       compatibility testing.
+ *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #392 - Error Propagation Chain integration test
  */
+
+// Suppress deprecation warnings for testing the deprecated API
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
 
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/network_adapter.hpp>
@@ -599,3 +614,12 @@ TEST_CASE("Nested operations with error handling",
         REQUIRE(result == 10 + 30);    // 1*10 + 3*10
     }
 }
+
+// Restore warning settings
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

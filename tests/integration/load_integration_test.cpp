@@ -6,9 +6,24 @@
  * under high load conditions including concurrent associations, thread
  * pool saturation, and connection pool management.
  *
+ * @note This file uses the deprecated thread_adapter API for backward
+ *       compatibility testing.
+ *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #393 - High Load Concurrent Associations integration test
  */
+
+// Suppress deprecation warnings for testing the deprecated API
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
 
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/thread_adapter.hpp>
@@ -638,3 +653,12 @@ TEST_CASE("Memory stability under load",
         REQUIRE(true);
     }
 }
+
+// Restore warning settings
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

@@ -616,11 +616,19 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
             info_ptr->processing = true;
 
             // Submit with high priority - association message handling is important
+            // TODO(#412): Migrate to thread_pool_adapter with DI
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
             integration::thread_adapter::submit_fire_and_forget(
                 [this, info_ptr]() {
                     message_loop(*info_ptr);
                 }
             );
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
         }
     }
 
