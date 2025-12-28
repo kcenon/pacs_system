@@ -53,15 +53,17 @@ The verification was conducted through static code analysis, documentation revie
 | Metric | Value | Notes |
 |--------|-------|-------|
 | **Total Commits** | 70+ | Stable development history |
-| **Source Files (.cpp)** | 35 | Well-organized implementation |
-| **Header Files (.hpp)** | 52 | Clean interface definitions |
-| **Test Files** | 41 | Comprehensive coverage |
-| **Documentation Files** | 28 | Bilingual (EN/KO) |
-| **Example Applications** | 15 | Working samples |
-| **Source LOC** | ~15,500 | |
-| **Header LOC** | ~14,500 | |
-| **Test LOC** | ~17,000 | |
-| **Total LOC** | ~47,000 | |
+| **Source Files (.cpp)** | 97 | Well-organized implementation |
+| **Header Files (.hpp)** | 155 | Clean interface definitions |
+| **Test Files** | 102 | Comprehensive coverage |
+| **Documentation Files** | 37 | Bilingual (EN/KO) |
+| **Example Applications** | 30 | Working samples |
+| **Source LOC** | ~48,500 | |
+| **Header LOC** | ~43,900 | |
+| **Test LOC** | ~50,800 | |
+| **Example LOC** | ~35,600 | |
+| **Total LOC** | ~178,800 | |
+| **Last Updated** | 2024-12-28 | |
 
 ### 1.2 Technology Stack
 

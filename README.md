@@ -232,7 +232,7 @@ pacs_system/
 │       ├── monitoring_adapter.hpp # monitoring_system integration
 │       └── dicom_session.hpp    # High-level session
 │
-├── src/                         # Source files (~15,500 lines)
+├── src/                         # Source files (~48,500 lines)
 │   ├── core/                    # Core implementations (7 files)
 │   ├── encoding/                # Encoding implementations (4 files)
 │   ├── network/                 # Network implementations (8 files)
@@ -242,7 +242,7 @@ pacs_system/
 │   ├── monitoring/              # Health check implementations (1 file)
 │   └── integration/             # Adapter implementations (6 files)
 │
-├── tests/                       # Test suites (43 files, 180+ tests)
+├── tests/                       # Test suites (102 files, 170+ tests)
 │   ├── core/                    # Core module tests (6 files)
 │   ├── encoding/                # Encoding module tests (5 files)
 │   ├── network/                 # Network module tests (5 files)
@@ -252,7 +252,7 @@ pacs_system/
 │   ├── monitoring/              # Health check tests (3 files, 50 tests)
 │   └── integration/             # Adapter tests (5 files)
 │
-├── examples/                    # Example Applications (23 apps, ~16,500 lines)
+├── examples/                    # Example Applications (30 apps, ~35,600 lines)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_info/                # DICOM file summary utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
@@ -284,7 +284,7 @@ pacs_system/
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
 │
-├── docs/                        # Documentation (30+ files)
+├── docs/                        # Documentation (37 files)
 └── CMakeLists.txt               # Build configuration (v0.2.0)
 ```
 
@@ -1302,17 +1302,20 @@ cmake --build build --target run_full_benchmarks
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 50+ files |
-| **Source Files** | 35+ files |
-| **Header LOC** | ~14,500 lines |
-| **Source LOC** | ~15,000 lines |
-| **Example LOC** | ~10,500 lines |
-| **Total LOC** | ~40,000 lines |
-| **Test Files** | 42 files |
+| **Header Files** | 155 files |
+| **Source Files** | 97 files |
+| **Header LOC** | ~43,900 lines |
+| **Source LOC** | ~48,500 lines |
+| **Example LOC** | ~35,600 lines |
+| **Test LOC** | ~50,800 lines |
+| **Total LOC** | ~178,800 lines |
+| **Test Files** | 102 files |
 | **Test Cases** | 170+ tests |
-| **Documentation** | 30+ markdown files |
+| **Example Programs** | 30 apps |
+| **Documentation** | 37 markdown files |
 | **CI/CD Workflows** | 7 workflows |
 | **Version** | 0.2.0 |
+| **Last Updated** | 2024-12-28 |
 
 ---
 
