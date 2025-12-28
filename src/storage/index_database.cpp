@@ -2894,6 +2894,49 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     return static_cast<size_t>(sqlite3_changes(db_));
 }
 
+auto index_database::cleanup_worklist_items_before(
+    std::chrono::system_clock::time_point before) -> Result<size_t> {
+    // Convert time_point to datetime string
+    auto before_time = std::chrono::system_clock::to_time_t(before);
+
+    std::tm tm{};
+    pacs::compat::localtime_safe(&before_time, &tm);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    auto before_str = oss.str();
+
+    // Delete items scheduled before the specified time that are not SCHEDULED
+    const char* sql = R"(
+        DELETE FROM worklist
+        WHERE step_status != 'SCHEDULED'
+          AND scheduled_datetime < ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare cleanup: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, before_str.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to cleanup worklist items before {}: {}",
+                       before_str, sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return static_cast<size_t>(sqlite3_changes(db_));
+}
+
 auto index_database::worklist_count() const -> Result<size_t> {
     const char* sql = "SELECT COUNT(*) FROM worklist;";
 
