@@ -1,0 +1,189 @@
+# Documentation Statistics Workflow
+# Tracks code statistics and prevents documentation drift
+#
+# This workflow:
+# - Calculates actual code statistics on relevant file changes
+# - Checks if documented statistics in README.md are within 10% of actual
+# - Generates statistics report as CI artifact
+# - Optionally auto-updates README.md on main branch merges
+
+name: Documentation Statistics
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'tests/**'
+      - 'examples/**'
+      - 'docs/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'tests/**'
+      - 'examples/**'
+      - 'docs/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+    inputs:
+      update_readme:
+        description: 'Update README.md statistics'
+        required: false
+        default: 'false'
+        type: boolean
+
+# Ensure only one workflow runs per branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calculate-stats:
+    name: Calculate Statistics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/calculate-stats.sh
+          chmod +x scripts/check-stats-drift.sh
+          chmod +x scripts/update-readme-stats.sh
+
+      - name: Calculate statistics
+        run: |
+          echo "## Code Statistics Report" > stats-report.md
+          echo "" >> stats-report.md
+          echo "Generated: $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)" >> stats-report.md
+          echo "" >> stats-report.md
+          ./scripts/calculate-stats.sh --markdown >> stats-report.md
+          echo "" >> stats-report.md
+          echo "### Raw Values (JSON)" >> stats-report.md
+          echo '```json' >> stats-report.md
+          ./scripts/calculate-stats.sh --json >> stats-report.md
+          echo '```' >> stats-report.md
+
+      - name: Display statistics
+        run: cat stats-report.md
+
+      - name: Upload statistics report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-statistics
+          path: stats-report.md
+          retention-days: 30
+
+  check-drift:
+    name: Check Documentation Drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: calculate-stats
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/calculate-stats.sh
+          chmod +x scripts/check-stats-drift.sh
+
+      - name: Check for drift
+        id: drift-check
+        run: |
+          if ! ./scripts/check-stats-drift.sh --threshold 10; then
+            echo "drift_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "drift_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR if drift detected
+        if: github.event_name == 'pull_request' && steps.drift-check.outputs.drift_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Run drift check and capture output
+            const { execSync } = require('child_process');
+            let output;
+            try {
+              output = execSync('./scripts/check-stats-drift.sh --threshold 10 2>&1', { encoding: 'utf-8' });
+            } catch (e) {
+              output = e.stdout || e.message;
+            }
+
+            const body = `## :warning: Documentation Statistics Drift Detected
+
+            Some code statistics in README.md are more than 10% different from actual values.
+
+            <details>
+            <summary>Drift Report</summary>
+
+            \`\`\`
+            ${output}
+            \`\`\`
+
+            </details>
+
+            **Action Required:** Please update the Code Statistics section in README.md by running:
+            \`\`\`bash
+            ./scripts/update-readme-stats.sh
+            \`\`\`
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  auto-update:
+    name: Auto-Update README (Main Only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [calculate-stats, check-drift]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.inputs.update_readme == 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/calculate-stats.sh
+          chmod +x scripts/update-readme-stats.sh
+
+      - name: Update README statistics
+        run: ./scripts/update-readme-stats.sh
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet README.md; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: update code statistics [skip ci]"
+          git push
