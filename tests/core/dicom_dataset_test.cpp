@@ -483,6 +483,199 @@ TEST_CASE("dicom_dataset merge", "[core][dicom_dataset]") {
 }
 
 // ============================================================================
+// Sequence Access Tests
+// ============================================================================
+
+TEST_CASE("dicom_dataset sequence access", "[core][dicom_dataset]") {
+    SECTION("has_sequence returns false for non-existing tag") {
+        dicom_dataset ds;
+
+        CHECK_FALSE(ds.has_sequence(tags::scheduled_procedure_step_sequence));
+    }
+
+    SECTION("has_sequence returns false for non-sequence element") {
+        dicom_dataset ds;
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        CHECK_FALSE(ds.has_sequence(tags::patient_name));
+    }
+
+    SECTION("has_sequence returns true for sequence element") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+        ds.insert(std::move(seq));
+
+        CHECK(ds.has_sequence(tags::scheduled_procedure_step_sequence));
+    }
+
+    SECTION("get_sequence returns nullptr for non-existing tag") {
+        dicom_dataset ds;
+
+        CHECK(ds.get_sequence(tags::scheduled_procedure_step_sequence) == nullptr);
+    }
+
+    SECTION("get_sequence returns nullptr for non-sequence element") {
+        dicom_dataset ds;
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        CHECK(ds.get_sequence(tags::patient_name) == nullptr);
+    }
+
+    SECTION("get_sequence returns pointer to sequence items") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        dicom_dataset item;
+        item.set_string(tags::modality, vr_type::CS, "CT");
+        seq.add_sequence_item(item);
+
+        ds.insert(std::move(seq));
+
+        const auto* items = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+        REQUIRE(items != nullptr);
+        REQUIRE(items->size() == 1);
+        CHECK((*items)[0].get_string(tags::modality) == "CT");
+    }
+
+    SECTION("const get_sequence works correctly") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+        ds.insert(std::move(seq));
+
+        const auto& const_ds = ds;
+        const auto* items = const_ds.get_sequence(tags::scheduled_procedure_step_sequence);
+
+        REQUIRE(items != nullptr);
+        CHECK(items->empty());
+    }
+
+    SECTION("mutable get_sequence allows modification") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+        ds.insert(std::move(seq));
+
+        auto* items = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+        REQUIRE(items != nullptr);
+
+        dicom_dataset new_item;
+        new_item.set_string(tags::modality, vr_type::CS, "MR");
+        items->push_back(std::move(new_item));
+
+        const auto* const_items = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+        REQUIRE(const_items != nullptr);
+        REQUIRE(const_items->size() == 1);
+        CHECK((*const_items)[0].get_string(tags::modality) == "MR");
+    }
+
+    SECTION("get_or_create_sequence creates new sequence if not exists") {
+        dicom_dataset ds;
+
+        auto& items = ds.get_or_create_sequence(tags::scheduled_procedure_step_sequence);
+
+        CHECK(ds.has_sequence(tags::scheduled_procedure_step_sequence));
+        CHECK(items.empty());
+
+        // Add an item through the returned reference
+        dicom_dataset item;
+        item.set_string(tags::modality, vr_type::CS, "CT");
+        items.push_back(std::move(item));
+
+        CHECK(ds.get_sequence(tags::scheduled_procedure_step_sequence)->size() == 1);
+    }
+
+    SECTION("get_or_create_sequence returns existing sequence") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        dicom_dataset item;
+        item.set_string(tags::modality, vr_type::CS, "CT");
+        seq.add_sequence_item(item);
+
+        ds.insert(std::move(seq));
+
+        auto& items = ds.get_or_create_sequence(tags::scheduled_procedure_step_sequence);
+
+        REQUIRE(items.size() == 1);
+        CHECK(items[0].get_string(tags::modality) == "CT");
+    }
+
+    SECTION("get_or_create_sequence replaces non-sequence element") {
+        dicom_dataset ds;
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        // This should replace the PN element with an empty SQ
+        auto& items = ds.get_or_create_sequence(tags::patient_name);
+
+        CHECK(ds.has_sequence(tags::patient_name));
+        CHECK(items.empty());
+    }
+
+    SECTION("sequence access with range-based for loop") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+
+        for (int i = 0; i < 3; ++i) {
+            dicom_dataset item;
+            item.set_string(tags::modality, vr_type::CS, std::to_string(i));
+            seq.add_sequence_item(std::move(item));
+        }
+
+        ds.insert(std::move(seq));
+
+        const auto* items = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+        REQUIRE(items != nullptr);
+
+        int count = 0;
+        for (const auto& item : *items) {
+            CHECK(item.get_string(tags::modality) == std::to_string(count));
+            ++count;
+        }
+        CHECK(count == 3);
+    }
+
+    SECTION("MPPS Performed Series Sequence extraction example") {
+        // This test demonstrates the use case from issue #404
+        dicom_dataset mpps_data;
+        mpps_data.set_string(tags::performed_procedure_step_id, vr_type::SH, "MPPS001");
+
+        // Create Performed Series Sequence (0040,0340)
+        dicom_tag performed_series_seq_tag{0x0040, 0x0340};
+        dicom_element performed_series_seq{performed_series_seq_tag, vr_type::SQ};
+
+        // Add series item
+        dicom_dataset series_item;
+        series_item.set_string(tags::series_instance_uid, vr_type::UI, "1.2.3.4.5");
+        series_item.set_string(tags::series_description, vr_type::LO, "CT Chest");
+        performed_series_seq.add_sequence_item(series_item);
+
+        mpps_data.insert(std::move(performed_series_seq));
+
+        // Extract like the pacs_bridge would
+        if (const auto* series_list = mpps_data.get_sequence(performed_series_seq_tag)) {
+            REQUIRE(series_list->size() == 1);
+
+            const auto& first_series = (*series_list)[0];
+            CHECK(first_series.get_string(tags::series_instance_uid) == "1.2.3.4.5");
+            CHECK(first_series.get_string(tags::series_description) == "CT Chest");
+        } else {
+            FAIL("Performed Series Sequence should exist");
+        }
+    }
+
+    SECTION("empty sequence handling") {
+        dicom_dataset ds;
+        dicom_element seq{tags::scheduled_procedure_step_sequence, vr_type::SQ};
+        ds.insert(std::move(seq));
+
+        CHECK(ds.has_sequence(tags::scheduled_procedure_step_sequence));
+
+        const auto* items = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+        REQUIRE(items != nullptr);
+        CHECK(items->empty());
+    }
+}
+
+// ============================================================================
 // Edge Cases
 // ============================================================================
 

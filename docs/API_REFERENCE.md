@@ -130,8 +130,12 @@ public:
 
     // For SQ (Sequence)
     bool is_sequence() const noexcept;
-    std::vector<dicom_dataset>& items();
-    const std::vector<dicom_dataset>& items() const;
+    std::size_t sequence_item_count() const noexcept;
+    const dicom_dataset& sequence_item(std::size_t index) const;
+    dicom_dataset& sequence_item(std::size_t index);
+    std::vector<dicom_dataset>& sequence_items();
+    const std::vector<dicom_dataset>& sequence_items() const;
+    void add_sequence_item(dicom_dataset item);
 
     // Value modification
     void set_string(const std::string& value);
@@ -227,6 +231,12 @@ public:
     void remove(dicom_tag tag);
     void clear();
 
+    // Sequence access
+    bool has_sequence(dicom_tag tag) const noexcept;
+    const std::vector<dicom_dataset>* get_sequence(dicom_tag tag) const noexcept;
+    std::vector<dicom_dataset>* get_sequence(dicom_tag tag) noexcept;
+    std::vector<dicom_dataset>& get_or_create_sequence(dicom_tag tag);
+
     // Iteration (tag order)
     using iterator = /* implementation-defined */;
     using const_iterator = /* implementation-defined */;
@@ -284,6 +294,23 @@ if (dataset.contains(tags::PixelData)) {
 for (const auto& element : dataset) {
     std::cout << element.tag().to_string() << ": "
               << element.as_string().unwrap_or("") << std::endl;
+}
+
+// Sequence access (e.g., MPPS Performed Series Sequence)
+dicom_tag performed_series_seq{0x0040, 0x0340};
+
+// Create and populate a sequence
+auto& series_items = dataset.get_or_create_sequence(performed_series_seq);
+dicom_dataset series_item;
+series_item.set_string(tags::SeriesInstanceUID, "1.2.3.4.5");
+series_item.set_string(tags::SeriesDescription, "CT Chest");
+series_items.push_back(std::move(series_item));
+
+// Access sequence items
+if (const auto* items = dataset.get_sequence(performed_series_seq)) {
+    for (const auto& item : *items) {
+        std::cout << "Series UID: " << item.get_string(tags::SeriesInstanceUID) << std::endl;
+    }
 }
 ```
 

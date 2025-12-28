@@ -46,6 +46,44 @@ auto dicom_dataset::get_string(dicom_tag tag,
 }
 
 // ============================================================================
+// Sequence Access
+// ============================================================================
+
+auto dicom_dataset::has_sequence(dicom_tag tag) const noexcept -> bool {
+    const auto* elem = get(tag);
+    return elem != nullptr && elem->is_sequence();
+}
+
+auto dicom_dataset::get_sequence(dicom_tag tag) const noexcept
+    -> const std::vector<dicom_dataset>* {
+    const auto* elem = get(tag);
+    if (elem == nullptr || !elem->is_sequence()) {
+        return nullptr;
+    }
+    return &elem->sequence_items();
+}
+
+auto dicom_dataset::get_sequence(dicom_tag tag) noexcept
+    -> std::vector<dicom_dataset>* {
+    auto* elem = get(tag);
+    if (elem == nullptr || !elem->is_sequence()) {
+        return nullptr;
+    }
+    return &elem->sequence_items();
+}
+
+auto dicom_dataset::get_or_create_sequence(dicom_tag tag)
+    -> std::vector<dicom_dataset>& {
+    auto* elem = get(tag);
+    if (elem != nullptr && elem->is_sequence()) {
+        return elem->sequence_items();
+    }
+    // Create or replace with empty sequence
+    insert(dicom_element{tag, encoding::vr_type::SQ});
+    return get(tag)->sequence_items();
+}
+
+// ============================================================================
 // Modification
 // ============================================================================
 
