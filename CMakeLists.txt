@@ -1083,6 +1083,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         src/integration/container_adapter.cpp
         src/integration/logger_adapter.cpp
         src/integration/thread_adapter.cpp
+        src/integration/thread_pool_adapter.cpp
         src/integration/network_adapter.cpp
         src/integration/dicom_session.cpp
     )
