@@ -77,6 +77,23 @@ struct thread_pool_config {
  * @class thread_adapter
  * @brief Adapter for integrating thread_system job queue and thread pool
  *
+ * @deprecated This singleton-based class is deprecated. Use thread_pool_adapter
+ *             with dependency injection instead. The static API remains for
+ *             backward compatibility but will be removed in a future version.
+ *
+ * Migration example:
+ * @code
+ * // Before (deprecated)
+ * thread_adapter::configure(config);
+ * thread_adapter::start();
+ * thread_adapter::submit([](){ work(); });
+ *
+ * // After (recommended)
+ * auto pool = std::make_shared<thread_pool_adapter>(config);
+ * pool->start();
+ * pool->submit([](){ work(); });
+ * @endcode
+ *
  * This class provides a PACS-specific interface to thread_system's
  * high-performance thread pool. Key features include:
  *
@@ -89,6 +106,9 @@ struct thread_pool_config {
  *
  * Thread Safety: All public methods are thread-safe and can be called
  * from any thread.
+ *
+ * @see thread_pool_adapter for the recommended replacement
+ * @see thread_pool_interface for the abstract interface
  *
  * @example
  * @code
@@ -119,7 +139,7 @@ struct thread_pool_config {
  * thread_adapter::shutdown();
  * @endcode
  */
-class thread_adapter {
+class [[deprecated("Use thread_pool_adapter with DI instead")]] thread_adapter {
 public:
     // ─────────────────────────────────────────────────────
     // Thread Pool Management

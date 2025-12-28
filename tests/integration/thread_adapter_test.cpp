@@ -5,6 +5,9 @@
  * This file contains comprehensive tests for verifying thread_system stability
  * and jthread support as part of Issue #155.
  *
+ * @note This file tests the deprecated thread_adapter API for backward
+ *       compatibility. New tests should use thread_pool_adapter.
+ *
  * Test Categories:
  * - Configuration Tests: Verify thread pool configuration handling
  * - Pool Management Tests: Test lifecycle management of thread pool
@@ -17,6 +20,18 @@
  * - jthread Cleanup Tests: Verify automatic resource cleanup
  * - Cancellation Token Tests: Test cancellation propagation
  */
+
+// Suppress deprecation warnings for testing the deprecated API
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
 
 #include <pacs/integration/thread_adapter.hpp>
 
@@ -795,3 +810,12 @@ TEST_CASE("platform stability verification", "[thread_adapter][platform][stabili
         REQUIRE(completed == tasks_per_priority * 4);
     }
 }
+
+// Restore warning settings
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

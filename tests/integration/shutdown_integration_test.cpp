@@ -6,9 +6,24 @@
  * shutdown behavior with pending tasks, resource cleanup, and system
  * state transitions.
  *
+ * @note This file uses the deprecated thread_adapter API for backward
+ *       compatibility testing.
+ *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #394 - Graceful Shutdown integration test
  */
+
+// Suppress deprecation warnings for testing the deprecated API
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
 
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/thread_adapter.hpp>
@@ -614,3 +629,12 @@ TEST_CASE("Shutdown behavior with stuck tasks",
         REQUIRE_FALSE(thread_adapter::is_running());
     }
 }
+
+// Restore warning settings
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

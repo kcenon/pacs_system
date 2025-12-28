@@ -6,9 +6,24 @@
  * Store-and-Forward workflows involving network_system, thread_system,
  * and logger_system interactions.
  *
+ * @note This file uses the deprecated thread_adapter API for backward
+ *       compatibility testing. New tests should use thread_pool_adapter.
+ *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #391 - DICOM Store-and-Forward integration test
  */
+
+// Suppress deprecation warnings for testing the deprecated API
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
 
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/network_adapter.hpp>
@@ -433,3 +448,12 @@ TEST_CASE("Thread pool statistics during DICOM workflow",
         logger_adapter::flush();
     }
 }
+
+// Restore warning settings
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif
