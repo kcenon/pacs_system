@@ -1314,7 +1314,7 @@ cmake --build build --target run_full_benchmarks
 | **Test Files** | 102 files |
 | **Test Cases** | 1529+ tests |
 | **Example Programs** | 30 apps |
-| **Documentation** | 38 markdown files |
+| **Documentation** | 39 markdown files |
 | **CI/CD Workflows** | 8 workflows |
 | **Version** | 0.1.0 |
 | **Last Updated** | 2025-12-28 |
