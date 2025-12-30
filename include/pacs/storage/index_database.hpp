@@ -1083,6 +1083,13 @@ private:
     [[nodiscard]] auto parse_patient_from_row(
         const std::map<std::string, database::database_value>& row) const
         -> patient_record;
+
+    /**
+     * @brief Parse study record from database_system result row
+     */
+    [[nodiscard]] auto parse_study_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> study_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
