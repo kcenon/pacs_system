@@ -869,6 +869,18 @@ if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
     )
 endif()
 
+# Link database_system for database_cursor query building (Issue #420)
+if(TARGET database)
+    target_link_libraries(pacs_services PUBLIC database)
+    target_include_directories(pacs_services PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
+    target_compile_definitions(pacs_services PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
+    # Suppress deprecated warnings from database_system (database_base is deprecated)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        target_compile_options(pacs_services PRIVATE -Wno-deprecated-declarations)
+    endif()
+    message(STATUS "    database_system: linked for pacs_services (Issue #420)")
+endif()
+
 message(STATUS "  [OK] pacs_services: ON")
 
 # Security library
@@ -1956,6 +1968,14 @@ pacs_apply_warnings(pacs_core)
 pacs_apply_warnings(pacs_encoding)
 pacs_apply_warnings(pacs_network)
 pacs_apply_warnings(pacs_services)
+
+# Suppress deprecated warnings from database_system for pacs_services (Issue #420)
+if(TARGET database)
+    target_compile_options(pacs_services PRIVATE
+        $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
+    )
+endif()
 
 # Optional PACS libraries
 if(TARGET pacs_storage)
