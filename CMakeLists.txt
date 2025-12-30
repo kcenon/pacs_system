@@ -1986,6 +1986,8 @@ if(PACS_BUILD_TESTS)
     pacs_apply_warnings(services_tests)
     if(TARGET storage_tests)
         pacs_apply_warnings(storage_tests)
+        # Suppress deprecated warnings from database_system headers
+        target_compile_options(storage_tests PRIVATE -Wno-deprecated-declarations)
     endif()
     if(TARGET ai_tests)
         pacs_apply_warnings(ai_tests)

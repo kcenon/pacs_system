@@ -158,10 +158,13 @@ auto index_database::open(std::string_view db_path, const index_config& config)
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Initialize database_system for query building
-    auto db_init_result = instance->initialize_database_system();
-    if (db_init_result.is_err()) {
-        // Log warning but continue - fallback to direct SQLite
-        // This allows graceful degradation if database_system fails
+    // Note: Skip for in-memory databases as each connection sees a separate DB
+    if (db_path != ":memory:") {
+        auto db_init_result = instance->initialize_database_system();
+        if (db_init_result.is_err()) {
+            // Log warning but continue - fallback to direct SQLite
+            // This allows graceful degradation if database_system fails
+        }
     }
 #endif
 
@@ -324,6 +327,29 @@ auto index_database::upsert_patient(const patient_record& record)
 
 auto index_database::find_patient(std::string_view patient_id) const
     -> std::optional<patient_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "patient_pk", "patient_id", "patient_name", "birth_date",
+                    "sex", "other_ids", "ethnic_group", "comments",
+                    "created_at", "updated_at"})
+                .from("patients")
+                .where("patient_id", "=", std::string(patient_id))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_patient_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT patient_pk, patient_id, patient_name, birth_date, sex,
                other_ids, ethnic_group, comments, created_at, updated_at
@@ -3264,5 +3290,73 @@ auto index_database::parse_audit_row(void* stmt_ptr) const -> audit_record {
 
     return record;
 }
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+namespace {
+
+/**
+ * @brief Helper to extract string from database_value
+ */
+auto get_string_value(
+    const std::map<std::string, database::core::database_value>& row,
+    const std::string& key) -> std::string {
+    auto it = row.find(key);
+    if (it == row.end()) {
+        return {};
+    }
+    if (std::holds_alternative<std::string>(it->second)) {
+        return std::get<std::string>(it->second);
+    }
+    return {};
+}
+
+/**
+ * @brief Helper to extract int64 from database_value
+ */
+auto get_int64_value(
+    const std::map<std::string, database::core::database_value>& row,
+    const std::string& key) -> int64_t {
+    auto it = row.find(key);
+    if (it == row.end()) {
+        return 0;
+    }
+    if (std::holds_alternative<int64_t>(it->second)) {
+        return std::get<int64_t>(it->second);
+    }
+    if (std::holds_alternative<std::string>(it->second)) {
+        try {
+            return std::stoll(std::get<std::string>(it->second));
+        } catch (...) {
+            return 0;
+        }
+    }
+    return 0;
+}
+
+}  // namespace
+
+auto index_database::parse_patient_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> patient_record {
+    patient_record record;
+
+    record.pk = get_int64_value(row, "patient_pk");
+    record.patient_id = get_string_value(row, "patient_id");
+    record.patient_name = get_string_value(row, "patient_name");
+    record.birth_date = get_string_value(row, "birth_date");
+    record.sex = get_string_value(row, "sex");
+    record.other_ids = get_string_value(row, "other_ids");
+    record.ethnic_group = get_string_value(row, "ethnic_group");
+    record.comments = get_string_value(row, "comments");
+
+    auto created_str = get_string_value(row, "created_at");
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_string_value(row, "updated_at");
+    record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+#endif
 
 }  // namespace pacs::storage

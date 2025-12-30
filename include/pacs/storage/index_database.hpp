@@ -1032,12 +1032,20 @@ private:
     std::shared_ptr<database::database_context> db_context_;
 
     /// Database manager for database_system queries
-    std::shared_ptr<database::database_manager> db_manager_;
+    /// Marked mutable to allow use in const member functions (queries are read-only)
+    mutable std::shared_ptr<database::database_manager> db_manager_;
 
     /**
      * @brief Initialize database_system connection
      */
     [[nodiscard]] auto initialize_database_system() -> VoidResult;
+
+    /**
+     * @brief Parse patient record from database_system result row
+     */
+    [[nodiscard]] auto parse_patient_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> patient_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
