@@ -22,6 +22,7 @@
 #include <pacs/compat/format.hpp>
 #include <pacs/compat/time.hpp>
 #include <iomanip>
+#include <set>
 #include <sstream>
 #include <variant>
 
@@ -836,7 +837,75 @@ auto index_database::upsert_study(const study_record& record)
                                    "storage");
     }
 
-    // Use INSERT OR REPLACE for upsert behavior
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // Check if study exists
+        database::sql_query_builder check_builder;
+        auto check_sql =
+            check_builder
+                .select(std::vector<std::string>{"study_pk"})
+                .from("studies")
+                .where("study_uid", "=", record.study_uid)
+                .build_for_database(database::database_types::sqlite);
+
+        auto check_result = db_manager_->select_query_result(check_sql);
+
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                // Study exists - update
+                auto existing = find_study(record.study_uid);
+                if (existing.has_value()) {
+                    database::sql_query_builder update_builder;
+                    auto update_sql =
+                        update_builder.update("studies")
+                            .set({{"patient_pk", std::to_string(record.patient_pk)},
+                                  {"study_id", record.study_id},
+                                  {"study_date", record.study_date},
+                                  {"study_time", record.study_time},
+                                  {"accession_number", record.accession_number},
+                                  {"referring_physician", record.referring_physician},
+                                  {"study_description", record.study_description},
+                                  {"updated_at", "datetime('now')"}})
+                            .where("study_uid", "=", record.study_uid)
+                            .build_for_database(database::database_types::sqlite);
+
+                    auto update_result = db_manager_->update_query_result(update_sql);
+                    if (update_result.is_ok()) {
+                        return existing->pk;
+                    }
+                    // Update failed, fall through to SQLite
+                }
+            } else {
+                // Study doesn't exist - insert
+                database::sql_query_builder insert_builder;
+                auto insert_sql =
+                    insert_builder.insert_into("studies")
+                        .values({{"patient_pk", std::to_string(record.patient_pk)},
+                                 {"study_uid", record.study_uid},
+                                 {"study_id", record.study_id},
+                                 {"study_date", record.study_date},
+                                 {"study_time", record.study_time},
+                                 {"accession_number", record.accession_number},
+                                 {"referring_physician", record.referring_physician},
+                                 {"study_description", record.study_description}})
+                        .build_for_database(database::database_types::sqlite);
+
+                auto insert_result = db_manager_->insert_query_result(insert_sql);
+                if (insert_result.is_ok()) {
+                    // Retrieve the inserted study to get pk
+                    auto inserted = find_study(record.study_uid);
+                    if (inserted.has_value()) {
+                        return inserted->pk;
+                    }
+                }
+                // Insert failed, fall through to SQLite
+            }
+        }
+        // Query failed (table may not exist), fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite with UPSERT
     const char* sql = R"(
         INSERT INTO studies (
             patient_pk, study_uid, study_id, study_date, study_time,
@@ -894,6 +963,31 @@ auto index_database::upsert_study(const study_record& record)
 
 auto index_database::find_study(std::string_view study_uid) const
     -> std::optional<study_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "study_pk", "patient_pk", "study_uid", "study_id",
+                    "study_date", "study_time", "accession_number",
+                    "referring_physician", "study_description",
+                    "modalities_in_study", "num_series", "num_instances",
+                    "created_at", "updated_at"})
+                .from("studies")
+                .where("study_uid", "=", std::string(study_uid))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_study_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT study_pk, patient_pk, study_uid, study_id, study_date,
                study_time, accession_number, referring_physician,
@@ -926,6 +1020,31 @@ auto index_database::find_study(std::string_view study_uid) const
 
 auto index_database::find_study_by_pk(int64_t pk) const
     -> std::optional<study_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "study_pk", "patient_pk", "study_uid", "study_id",
+                    "study_date", "study_time", "accession_number",
+                    "referring_physician", "study_description",
+                    "modalities_in_study", "num_series", "num_instances",
+                    "created_at", "updated_at"})
+                .from("studies")
+                .where("study_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_study_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT study_pk, patient_pk, study_uid, study_id, study_date,
                study_time, accession_number, referring_physician,
@@ -957,6 +1076,42 @@ auto index_database::find_study_by_pk(int64_t pk) const
 
 auto index_database::list_studies(std::string_view patient_id) const
     -> Result<std::vector<study_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // First find patient_pk by patient_id
+        auto patient = find_patient(patient_id);
+        if (!patient.has_value()) {
+            return ok(std::vector<study_record>{});  // No patient, no studies
+        }
+
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "study_pk", "patient_pk", "study_uid", "study_id", "study_date",
+            "study_time", "accession_number", "referring_physician",
+            "study_description", "modalities_in_study", "num_series",
+            "num_instances", "created_at", "updated_at"});
+        builder.from("studies");
+        builder.where("patient_pk", "=", patient->pk);
+        builder.order_by("study_date", database::sort_order::desc);
+        builder.order_by("study_time", database::sort_order::desc);
+
+        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<study_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<study_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_study_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<study_record> results;
 
     const char* sql = R"(
@@ -991,6 +1146,93 @@ auto index_database::list_studies(std::string_view patient_id) const
 
 auto index_database::search_studies(const study_query& query) const
     -> Result<std::vector<study_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Use Query Builder when no patient-related filters are present
+    // (patient filters require JOIN with patients table)
+    if (db_manager_ && !query.patient_id.has_value() &&
+        !query.patient_name.has_value()) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "study_pk", "patient_pk", "study_uid", "study_id", "study_date",
+            "study_time", "accession_number", "referring_physician",
+            "study_description", "modalities_in_study", "num_series",
+            "num_instances", "created_at", "updated_at"});
+        builder.from("studies");
+
+        if (query.study_uid.has_value()) {
+            builder.where("study_uid", "=", *query.study_uid);
+        }
+
+        if (query.study_id.has_value()) {
+            builder.where("study_id", "LIKE", to_like_pattern(*query.study_id));
+        }
+
+        if (query.study_date.has_value()) {
+            builder.where("study_date", "=", *query.study_date);
+        }
+
+        if (query.study_date_from.has_value()) {
+            builder.where("study_date", ">=", *query.study_date_from);
+        }
+
+        if (query.study_date_to.has_value()) {
+            builder.where("study_date", "<=", *query.study_date_to);
+        }
+
+        if (query.accession_number.has_value()) {
+            builder.where("accession_number", "LIKE",
+                          to_like_pattern(*query.accession_number));
+        }
+
+        if (query.referring_physician.has_value()) {
+            builder.where("referring_physician", "LIKE",
+                          to_like_pattern(*query.referring_physician));
+        }
+
+        if (query.study_description.has_value()) {
+            builder.where("study_description", "LIKE",
+                          to_like_pattern(*query.study_description));
+        }
+
+        // Note: modality filter requires complex OR conditions
+        // which Query Builder may not support well, fallback handles this
+
+        builder.order_by("study_date", database::sort_order::desc);
+        builder.order_by("study_time", database::sort_order::desc);
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_ok()) {
+            std::vector<study_record> results;
+            for (const auto& row : result.value()) {
+                auto record = parse_study_from_row(row);
+                // Apply modality filter manually if present
+                if (query.modality.has_value()) {
+                    const auto& mod = *query.modality;
+                    const auto& mods = record.modalities_in_study;
+                    if (mods != mod && mods.find("\\" + mod) == std::string::npos &&
+                        mods.find(mod + "\\") == std::string::npos) {
+                        continue;  // Skip non-matching modality
+                    }
+                }
+                results.push_back(std::move(record));
+            }
+            return ok(std::move(results));
+        }
+        // Query failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite for complex queries with JOINs
     std::vector<study_record> results;
 
     std::string sql = R"(
@@ -1051,9 +1293,9 @@ auto index_database::search_studies(const study_query& query) const
                "s.modalities_in_study LIKE ? OR "
                "s.modalities_in_study LIKE ? OR "
                "s.modalities_in_study LIKE ?)";
-        params.push_back(*query.modality);  // Exact match
-        params.push_back(*query.modality + "\\%");  // Start
-        params.push_back("%\\" + *query.modality);  // End
+        params.push_back(*query.modality);              // Exact match
+        params.push_back(*query.modality + "\\%");      // Start
+        params.push_back("%\\" + *query.modality);      // End
         params.push_back("%\\" + *query.modality + "\\%");  // Middle
     }
 
@@ -1100,6 +1342,26 @@ auto index_database::search_studies(const study_query& query) const
 }
 
 auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto delete_sql = builder.delete_from("studies")
+                              .where("study_uid", "=", std::string(study_uid))
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_err()) {
+            return make_error<std::monostate>(
+                error_codes::database_query_error,
+                pacs::compat::format("Failed to delete study: {}",
+                                     result.error().message),
+                "storage");
+        }
+        return ok();
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "DELETE FROM studies WHERE study_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -1127,6 +1389,38 @@ auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
 }
 
 auto index_database::study_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("studies")
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                }
+                if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(static_cast<size_t>(0));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM studies;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -1147,6 +1441,45 @@ auto index_database::study_count() const -> Result<size_t> {
 }
 
 auto index_database::study_count(std::string_view patient_id) const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // First find patient_pk by patient_id
+        auto patient = find_patient(patient_id);
+        if (!patient.has_value()) {
+            return ok(static_cast<size_t>(0));  // No patient, no studies
+        }
+
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("studies")
+                             .where("patient_pk", "=", patient->pk)
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                }
+                if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(static_cast<size_t>(0));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT COUNT(*) FROM studies s
         JOIN patients p ON s.patient_pk = p.patient_pk
@@ -1175,7 +1508,60 @@ auto index_database::study_count(std::string_view patient_id) const -> Result<si
 
 auto index_database::update_modalities_in_study(int64_t study_pk)
     -> VoidResult {
-    // Aggregate all unique modalities from series
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // Step 1: Get distinct modalities from series table
+        database::sql_query_builder select_builder;
+        auto select_sql =
+            select_builder
+                .select(std::vector<std::string>{"DISTINCT modality"})
+                .from("series")
+                .where("study_pk", "=", study_pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto select_result = db_manager_->select_query_result(select_sql);
+        if (select_result.is_ok()) {
+            // Step 2: Build modalities string with backslash separator
+            std::set<std::string> unique_modalities;
+            for (const auto& row : select_result.value()) {
+                auto it = row.find("modality");
+                if (it != row.end() &&
+                    std::holds_alternative<std::string>(it->second)) {
+                    auto mod = std::get<std::string>(it->second);
+                    if (!mod.empty()) {
+                        unique_modalities.insert(mod);
+                    }
+                }
+            }
+
+            std::string modalities_str;
+            for (const auto& mod : unique_modalities) {
+                if (!modalities_str.empty()) {
+                    modalities_str += "\\";  // DICOM multi-value separator
+                }
+                modalities_str += mod;
+            }
+
+            // Step 3: Update studies table
+            database::sql_query_builder update_builder;
+            auto update_sql =
+                update_builder.update("studies")
+                    .set({{"modalities_in_study", modalities_str},
+                          {"updated_at", "datetime('now')"}})
+                    .where("study_pk", "=", study_pk)
+                    .build_for_database(database::database_types::sqlite);
+
+            auto update_result = db_manager_->update_query_result(update_sql);
+            if (update_result.is_ok()) {
+                return ok();
+            }
+            // Update failed, fall through to SQLite
+        }
+        // Select failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite with subquery
     // Note: DICOM uses backslash (\) as multi-value separator
     // SQLite doesn't support GROUP_CONCAT(DISTINCT col, separator), so we use
     // a subquery
@@ -3606,6 +3992,34 @@ auto index_database::parse_patient_from_row(
     record.other_ids = get_string_value(row, "other_ids");
     record.ethnic_group = get_string_value(row, "ethnic_group");
     record.comments = get_string_value(row, "comments");
+
+    auto created_str = get_string_value(row, "created_at");
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_string_value(row, "updated_at");
+    record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+
+auto index_database::parse_study_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> study_record {
+    study_record record;
+
+    record.pk = get_int64_value(row, "study_pk");
+    record.patient_pk = get_int64_value(row, "patient_pk");
+    record.study_uid = get_string_value(row, "study_uid");
+    record.study_id = get_string_value(row, "study_id");
+    record.study_date = get_string_value(row, "study_date");
+    record.study_time = get_string_value(row, "study_time");
+    record.accession_number = get_string_value(row, "accession_number");
+    record.referring_physician = get_string_value(row, "referring_physician");
+    record.study_description = get_string_value(row, "study_description");
+    record.modalities_in_study = get_string_value(row, "modalities_in_study");
+    record.num_series = static_cast<int>(get_int64_value(row, "num_series"));
+    record.num_instances =
+        static_cast<int>(get_int64_value(row, "num_instances"));
 
     auto created_str = get_string_value(row, "created_at");
     record.created_at = parse_datetime(created_str.c_str());
