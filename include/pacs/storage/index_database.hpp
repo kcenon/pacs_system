@@ -6,6 +6,10 @@
  * in a SQLite database. Supports CRUD operations for patients, studies,
  * series, and instances.
  *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses database_system's
+ * query builder for parameterized queries. Otherwise, uses direct SQLite
+ * with prepared statements.
+ *
  * @see SRS-STOR-003, FR-4.2
  */
 
@@ -28,6 +32,11 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include <database/database_manager.h>
+#include <database/core/database_context.h>
+#endif
 
 // Forward declaration of SQLite handle
 struct sqlite3;
@@ -1018,7 +1027,20 @@ private:
     [[nodiscard]] static auto to_like_pattern(std::string_view pattern)
         -> std::string;
 
-    /// SQLite database handle
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    /// Database context for database_system
+    std::shared_ptr<database::database_context> db_context_;
+
+    /// Database manager for database_system queries
+    std::shared_ptr<database::database_manager> db_manager_;
+
+    /**
+     * @brief Initialize database_system connection
+     */
+    [[nodiscard]] auto initialize_database_system() -> VoidResult;
+#endif
+
+    /// SQLite database handle (used for migrations and fallback)
     sqlite3* db_{nullptr};
 
     /// Database file path

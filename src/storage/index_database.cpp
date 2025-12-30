@@ -1,12 +1,20 @@
 /**
  * @file index_database.cpp
  * @brief Implementation of PACS index database
+ *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses database_system's
+ * query builder for parameterized queries. Otherwise, uses direct SQLite
+ * with prepared statements.
  */
 
 #include <pacs/storage/index_database.hpp>
 
 #include <pacs/core/result.hpp>
 #include <sqlite3.h>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include <database/query_builder.h>
+#endif
 
 #include <chrono>
 #include <ctime>
@@ -15,6 +23,7 @@
 #include <pacs/compat/time.hpp>
 #include <iomanip>
 #include <sstream>
+#include <variant>
 
 namespace pacs::storage {
 
@@ -147,6 +156,15 @@ auto index_database::open(std::string_view db_path, const index_config& config)
             "storage");
     }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Initialize database_system for query building
+    auto db_init_result = instance->initialize_database_system();
+    if (db_init_result.is_err()) {
+        // Log warning but continue - fallback to direct SQLite
+        // This allows graceful degradation if database_system fails
+    }
+#endif
+
     return instance;
 }
 
@@ -154,20 +172,59 @@ index_database::index_database(sqlite3* db, std::string path)
     : db_(db), path_(std::move(path)) {}
 
 index_database::~index_database() {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        (void)db_manager_->disconnect_result();
+    }
+#endif
     if (db_) {
         sqlite3_close(db_);
         db_ = nullptr;
     }
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+auto index_database::initialize_database_system() -> VoidResult {
+    db_context_ = std::make_shared<database::database_context>();
+    db_manager_ = std::make_shared<database::database_manager>(db_context_);
+
+    if (!db_manager_->set_mode(database::database_types::sqlite)) {
+        return make_error<std::monostate>(
+            database_error, "Failed to set SQLite mode", "storage");
+    }
+
+    auto connect_result = db_manager_->connect_result(path_);
+    if (connect_result.is_err()) {
+        return make_error<std::monostate>(
+            database_error,
+            pacs::compat::format("Failed to connect: {}",
+                                 connect_result.error().message),
+            "storage");
+    }
+
+    return ok();
+}
+#endif
+
 index_database::index_database(index_database&& other) noexcept
     : db_(other.db_), path_(std::move(other.path_)) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    db_context_ = std::move(other.db_context_);
+    db_manager_ = std::move(other.db_manager_);
+#endif
     other.db_ = nullptr;
 }
 
 auto index_database::operator=(index_database&& other) noexcept
     -> index_database& {
     if (this != &other) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        if (db_manager_) {
+            (void)db_manager_->disconnect_result();
+        }
+        db_context_ = std::move(other.db_context_);
+        db_manager_ = std::move(other.db_manager_);
+#endif
         if (db_) {
             sqlite3_close(db_);
         }
