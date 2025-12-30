@@ -29,7 +29,6 @@ using kcenon::common::ok;
 namespace {
 constexpr int kSqliteError = 1;
 constexpr int kUserNotFound = 2;
-constexpr int kNotImplemented = 3;
 constexpr int kDatabaseNotConnected = 4;
 } // namespace
 
@@ -102,7 +101,7 @@ auto sqlite_security_storage::create_user(const User &user) -> VoidResult {
   // Use query builder for SQL injection protection
   auto builder = db_manager_->create_query_builder();
   auto insert_sql = builder
-                        .insert({{" id", user.id},
+                        .insert({{"id", user.id},
                                  {"username", user.username},
                                  {"active", user.active ? 1 : 0}})
                         .from("users")
