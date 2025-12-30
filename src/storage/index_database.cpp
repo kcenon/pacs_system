@@ -2058,6 +2058,13 @@ auto index_database::native_handle() const noexcept -> sqlite3* {
     return db_;
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+auto index_database::db_manager() const noexcept
+    -> std::shared_ptr<database::database_manager> {
+    return db_manager_;
+}
+#endif
+
 // ============================================================================
 // Storage Statistics
 // ============================================================================

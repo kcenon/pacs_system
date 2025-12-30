@@ -968,6 +968,17 @@ public:
      */
     [[nodiscard]] auto native_handle() const noexcept -> sqlite3*;
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    /**
+     * @brief Get the database manager for database_system integration
+     *
+     * @return Shared pointer to the database manager
+     * @see Issue #420 - Migrate database_cursor to database_system
+     */
+    [[nodiscard]] auto db_manager() const noexcept
+        -> std::shared_ptr<database::database_manager>;
+#endif
+
     /**
      * @brief Checkpoint WAL file
      *

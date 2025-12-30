@@ -1,6 +1,8 @@
 /**
  * @file query_result_stream.cpp
  * @brief Implementation of streaming query results with pagination
+ *
+ * @see Issue #420 - Migrate database_cursor to database_system
  */
 
 #include "pacs/services/cache/query_result_stream.hpp"
@@ -9,7 +11,9 @@
 #include "pacs/encoding/vr_type.hpp"
 #include "pacs/storage/index_database.hpp"
 
+#ifndef PACS_WITH_DATABASE_SYSTEM
 #include <sqlite3.h>
+#endif
 
 #include <sstream>
 
@@ -216,15 +220,45 @@ auto query_result_stream::create(storage::index_database* db, query_level level,
         return kcenon::common::error_info(std::string("Database is not open"));
     }
 
-    // Get the raw SQLite handle from the database
+    // Create the appropriate cursor based on query level
+    Result<std::unique_ptr<database_cursor>> cursor_result = kcenon::common::error_info(
+        std::string("Unknown query level"));
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Use database_system's database_manager for SQL injection safe queries
+    auto db_mgr = db->db_manager();
+    if (!db_mgr) {
+        return kcenon::common::error_info(std::string("Invalid database manager"));
+    }
+
+    switch (level) {
+        case query_level::patient: {
+            auto query = extract_patient_query(query_keys);
+            cursor_result = database_cursor::create_patient_cursor(db_mgr, query);
+            break;
+        }
+        case query_level::study: {
+            auto query = extract_study_query(query_keys);
+            cursor_result = database_cursor::create_study_cursor(db_mgr, query);
+            break;
+        }
+        case query_level::series: {
+            auto query = extract_series_query(query_keys);
+            cursor_result = database_cursor::create_series_cursor(db_mgr, query);
+            break;
+        }
+        case query_level::image: {
+            auto query = extract_instance_query(query_keys);
+            cursor_result = database_cursor::create_instance_cursor(db_mgr, query);
+            break;
+        }
+    }
+#else
+    // Fallback to direct SQLite access
     sqlite3* sqlite_db = db->native_handle();
     if (!sqlite_db) {
         return kcenon::common::error_info(std::string("Invalid database handle"));
     }
-
-    // Create the appropriate cursor based on query level
-    Result<std::unique_ptr<database_cursor>> cursor_result = kcenon::common::error_info(
-        std::string("Unknown query level"));
 
     switch (level) {
         case query_level::patient: {
@@ -248,6 +282,7 @@ auto query_result_stream::create(storage::index_database* db, query_level level,
             break;
         }
     }
+#endif
 
     if (cursor_result.is_err()) {
         return kcenon::common::error_info(
