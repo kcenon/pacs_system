@@ -525,3 +525,141 @@ TEST_CASE("worklist_query: has_criteria check", "[storage][worklist]") {
     query3.patient_id = "PAT*";
     CHECK(query3.has_criteria());
 }
+
+// ============================================================================
+// Worklist Cleanup Tests
+// ============================================================================
+
+TEST_CASE("worklist: cleanup_old_worklist_items removes old non-scheduled items",
+          "[storage][worklist][cleanup]") {
+    auto db = create_test_database();
+
+    // Add items
+    for (int i = 1; i <= 3; ++i) {
+        auto item = create_test_item();
+        item.step_id = "SPS" + std::to_string(i);
+        item.accession_no = "ACC" + std::to_string(i);
+        REQUIRE(db->add_worklist_item(item).is_ok());
+    }
+
+    // Mark one as COMPLETED (eligible for cleanup)
+    REQUIRE(db->update_worklist_status("SPS1", "ACC1", "COMPLETED").is_ok());
+
+    // Cleanup with negative hours (future cutoff) ensures all completed items are deleted
+    // Using -1 hour means cutoff = now + 1 hour, so created_at < cutoff is always true
+    auto result = db->cleanup_old_worklist_items(std::chrono::hours(-1));
+    REQUIRE(result.is_ok());
+    CHECK(result.value() == 1);
+
+    // SCHEDULED items should remain
+    CHECK(db->worklist_count("SCHEDULED").value() == 2);
+}
+
+TEST_CASE("worklist: cleanup_old_worklist_items preserves scheduled items",
+          "[storage][worklist][cleanup]") {
+    auto db = create_test_database();
+
+    // Add a scheduled item
+    auto item = create_test_item();
+    REQUIRE(db->add_worklist_item(item).is_ok());
+
+    // Try cleanup with 0 hours - should not delete scheduled items
+    auto result = db->cleanup_old_worklist_items(std::chrono::hours(0));
+    REQUIRE(result.is_ok());
+    CHECK(result.value() == 0);
+
+    // Item should still exist
+    auto found = db->find_worklist_item("SPS001", "ACC001");
+    REQUIRE(found.has_value());
+    CHECK(found->step_status == "SCHEDULED");
+}
+
+TEST_CASE("worklist: cleanup_worklist_items_before removes items by date",
+          "[storage][worklist][cleanup]") {
+    auto db = create_test_database();
+
+    // Add items with different scheduled dates
+    auto item1 = create_test_item();
+    item1.scheduled_datetime = "2023-10-15 09:30:00";  // Old
+    REQUIRE(db->add_worklist_item(item1).is_ok());
+
+    auto item2 = create_test_item();
+    item2.step_id = "SPS002";
+    item2.accession_no = "ACC002";
+    item2.scheduled_datetime = "2024-12-15 09:30:00";  // Future
+    REQUIRE(db->add_worklist_item(item2).is_ok());
+
+    // Mark both as COMPLETED (eligible for cleanup)
+    REQUIRE(db->update_worklist_status("SPS001", "ACC001", "COMPLETED").is_ok());
+    REQUIRE(db->update_worklist_status("SPS002", "ACC002", "COMPLETED").is_ok());
+
+    // Cleanup items scheduled before 2024-01-01
+    std::tm tm = {};
+    tm.tm_year = 2024 - 1900;  // Year since 1900
+    tm.tm_mon = 0;             // January (0-based)
+    tm.tm_mday = 1;
+    auto cutoff_time = std::mktime(&tm);
+    auto cutoff = std::chrono::system_clock::from_time_t(cutoff_time);
+
+    auto result = db->cleanup_worklist_items_before(cutoff);
+    REQUIRE(result.is_ok());
+    CHECK(result.value() == 1);
+
+    // Only the future item should remain
+    CHECK(db->worklist_count().value() == 1);
+    auto found = db->find_worklist_item("SPS002", "ACC002");
+    REQUIRE(found.has_value());
+}
+
+TEST_CASE("worklist: cleanup_worklist_items_before preserves scheduled items",
+          "[storage][worklist][cleanup]") {
+    auto db = create_test_database();
+
+    // Add an old scheduled item
+    auto item = create_test_item();
+    item.scheduled_datetime = "2023-10-15 09:30:00";  // Old but SCHEDULED
+    REQUIRE(db->add_worklist_item(item).is_ok());
+
+    // Cleanup items before now - should preserve SCHEDULED
+    auto now = std::chrono::system_clock::now();
+    auto result = db->cleanup_worklist_items_before(now);
+    REQUIRE(result.is_ok());
+    CHECK(result.value() == 0);
+
+    // Scheduled item should still exist
+    auto found = db->find_worklist_item("SPS001", "ACC001");
+    REQUIRE(found.has_value());
+    CHECK(found->step_status == "SCHEDULED");
+}
+
+TEST_CASE("worklist: cleanup_worklist_items_before exact boundary",
+          "[storage][worklist][cleanup]") {
+    auto db = create_test_database();
+
+    // Add item at exact boundary time
+    auto item = create_test_item();
+    item.scheduled_datetime = "2024-06-15 12:00:00";  // Exactly at boundary
+    REQUIRE(db->add_worklist_item(item).is_ok());
+    REQUIRE(db->update_worklist_status("SPS001", "ACC001", "COMPLETED").is_ok());
+
+    // Cleanup before exact same time - should NOT delete (strictly less than)
+    std::tm tm = {};
+    tm.tm_year = 2024 - 1900;
+    tm.tm_mon = 5;   // June (0-based)
+    tm.tm_mday = 15;
+    tm.tm_hour = 12;
+    tm.tm_min = 0;
+    tm.tm_sec = 0;
+    auto boundary_time = std::mktime(&tm);
+    auto boundary = std::chrono::system_clock::from_time_t(boundary_time);
+
+    auto result = db->cleanup_worklist_items_before(boundary);
+    REQUIRE(result.is_ok());
+    CHECK(result.value() == 0);
+
+    // Cleanup 1 second later - should delete
+    auto after_boundary = boundary + std::chrono::seconds(1);
+    result = db->cleanup_worklist_items_before(after_boundary);
+    REQUIRE(result.is_ok());
+    CHECK(result.value() == 1);
+}
