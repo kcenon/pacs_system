@@ -2856,8 +2856,9 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     auto cutoff = now - age;
     auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
 
+    // Use gmtime_safe for UTC consistency with SQLite's datetime('now')
     std::tm tm{};
-    pacs::compat::localtime_safe(&cutoff_time, &tm);
+    pacs::compat::gmtime_safe(&cutoff_time, &tm);
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     auto cutoff_str = oss.str();
@@ -2899,6 +2900,8 @@ auto index_database::cleanup_worklist_items_before(
     // Convert time_point to datetime string
     auto before_time = std::chrono::system_clock::to_time_t(before);
 
+    // Use localtime_safe since scheduled_datetime is typically stored as local time
+    // (DICOM datetime values don't include timezone information)
     std::tm tm{};
     pacs::compat::localtime_safe(&before_time, &tm);
     std::ostringstream oss;

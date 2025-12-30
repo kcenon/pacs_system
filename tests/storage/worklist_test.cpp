@@ -545,8 +545,9 @@ TEST_CASE("worklist: cleanup_old_worklist_items removes old non-scheduled items"
     // Mark one as COMPLETED (eligible for cleanup)
     REQUIRE(db->update_worklist_status("SPS1", "ACC1", "COMPLETED").is_ok());
 
-    // Cleanup with 0 hours should remove the completed item
-    auto result = db->cleanup_old_worklist_items(std::chrono::hours(0));
+    // Cleanup with negative hours (future cutoff) ensures all completed items are deleted
+    // Using -1 hour means cutoff = now + 1 hour, so created_at < cutoff is always true
+    auto result = db->cleanup_old_worklist_items(std::chrono::hours(-1));
     REQUIRE(result.is_ok());
     CHECK(result.value() == 1);
 
