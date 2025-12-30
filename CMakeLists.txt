@@ -466,6 +466,44 @@ elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
         "  - Set LOGGER_SYSTEM_ROOT environment variable")
 endif()
 
+# database_system (OPTIONAL - Tier 3, for secure database operations)
+if(PACS_BUILD_STORAGE)
+    message(STATUS "")
+    message(STATUS "=== Finding database_system (OPTIONAL - Tier 3) ===")
+
+    set(_PACS_DATABASE_PATHS
+        "$ENV{DATABASE_SYSTEM_ROOT}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../database_system"
+        "${CMAKE_CURRENT_SOURCE_DIR}/database_system"
+    )
+
+    set(DATABASE_SYSTEM_FOUND FALSE)
+    foreach(_path ${_PACS_DATABASE_PATHS})
+        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/database/database_manager.h")
+            message(STATUS "Found database_system at: ${_path}")
+            set(PACS_DATABASE_SYSTEM_DIR "${_path}")
+            set(PACS_DATABASE_SYSTEM_INCLUDE_DIR "${_path}")
+            set(DATABASE_SYSTEM_FOUND TRUE)
+            break()
+        endif()
+    endforeach()
+
+    if(DATABASE_SYSTEM_FOUND AND NOT TARGET database)
+        set(BUILD_DATABASE_SAMPLES OFF CACHE BOOL "" FORCE)
+        set(USE_UNIT_TEST OFF CACHE BOOL "" FORCE)
+        set(DATABASE_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+        set(DATABASE_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+        set(USE_SQLITE ON CACHE BOOL "" FORCE)
+        add_subdirectory("${PACS_DATABASE_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/database_system_build")
+        message(STATUS "  [OK] database_system added as subdirectory")
+    elseif(DATABASE_SYSTEM_FOUND)
+        message(STATUS "  [OK] database_system already available")
+    else()
+        message(STATUS "  [--] database_system not found - SQL injection protection via query builder disabled")
+        message(STATUS "       Install database_system at ../database_system for secure database operations")
+    endif()
+endif()
+
 # network_system (REQUIRED - Tier 4)
 if(PACS_WITH_NETWORK_SYSTEM)
     message(STATUS "")
@@ -919,6 +957,18 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
 
     # Link pacs_core for dicom_dataset and pacs_encoding for transfer_syntax
     target_link_libraries(pacs_storage PUBLIC pacs_core pacs_encoding pacs_security)
+
+    # Link database_system for secure query building (SQL injection prevention)
+    if(TARGET database)
+        target_link_libraries(pacs_storage PUBLIC database)
+        target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
+        target_compile_definitions(pacs_storage PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
+        # Suppress deprecated warnings from database_system (database_base is deprecated)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            target_compile_options(pacs_storage PRIVATE -Wno-deprecated-declarations)
+        endif()
+        message(STATUS "    database_system: linked (SQL injection protection enabled)")
+    endif()
 
     # Link fmt library for format compatibility (if needed)
     if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
