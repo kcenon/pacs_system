@@ -273,7 +273,76 @@ auto index_database::upsert_patient(const patient_record& record)
             -1, "Invalid sex value. Must be M, F, or O", "storage");
     }
 
-    // Use INSERT OR REPLACE for upsert behavior
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // Check if patient exists using db_manager_
+        // If table doesn't exist (e.g., WAL mode timing), fall through to SQLite
+        database::sql_query_builder check_builder;
+        auto check_sql =
+            check_builder
+                .select(std::vector<std::string>{"patient_pk"})
+                .from("patients")
+                .where("patient_id", "=", record.patient_id)
+                .build_for_database(database::database_types::sqlite);
+
+        auto check_result = db_manager_->select_query_result(check_sql);
+
+        // If query failed (e.g., table doesn't exist), fall through to SQLite
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                // Patient exists - update
+                auto existing = find_patient(record.patient_id);
+                if (existing.has_value()) {
+                    database::sql_query_builder update_builder;
+                    auto update_sql =
+                        update_builder.update("patients")
+                            .set({{"patient_name", record.patient_name},
+                                  {"birth_date", record.birth_date},
+                                  {"sex", record.sex},
+                                  {"other_ids", record.other_ids},
+                                  {"ethnic_group", record.ethnic_group},
+                                  {"comments", record.comments},
+                                  {"updated_at", "datetime('now')"}})
+                            .where("patient_id", "=", record.patient_id)
+                            .build_for_database(database::database_types::sqlite);
+
+                    auto update_result = db_manager_->update_query_result(update_sql);
+                    if (update_result.is_ok()) {
+                        return existing->pk;
+                    }
+                    // Update failed, fall through to SQLite
+                }
+            } else {
+                // Patient doesn't exist - insert
+                database::sql_query_builder insert_builder;
+                auto insert_sql =
+                    insert_builder.insert_into("patients")
+                        .values({{"patient_id", record.patient_id},
+                                 {"patient_name", record.patient_name},
+                                 {"birth_date", record.birth_date},
+                                 {"sex", record.sex},
+                                 {"other_ids", record.other_ids},
+                                 {"ethnic_group", record.ethnic_group},
+                                 {"comments", record.comments}})
+                        .build_for_database(database::database_types::sqlite);
+
+                auto insert_result = db_manager_->insert_query_result(insert_sql);
+                if (insert_result.is_ok()) {
+                    // Retrieve the inserted patient to get pk
+                    auto inserted = find_patient(record.patient_id);
+                    if (inserted.has_value()) {
+                        return inserted->pk;
+                    }
+                }
+                // Insert failed, fall through to SQLite
+            }
+        }
+        // Query failed (table may not exist in db_manager_ connection)
+        // Fall through to direct SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite with UPSERT
     const char* sql = R"(
         INSERT INTO patients (
             patient_id, patient_name, birth_date, sex,
@@ -380,6 +449,29 @@ auto index_database::find_patient(std::string_view patient_id) const
 
 auto index_database::find_patient_by_pk(int64_t pk) const
     -> std::optional<patient_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "patient_pk", "patient_id", "patient_name", "birth_date",
+                    "sex", "other_ids", "ethnic_group", "comments",
+                    "created_at", "updated_at"})
+                .from("patients")
+                .where("patient_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_patient_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT patient_pk, patient_id, patient_name, birth_date, sex,
                other_ids, ethnic_group, comments, created_at, updated_at
@@ -409,6 +501,67 @@ auto index_database::find_patient_by_pk(int64_t pk) const
 
 auto index_database::search_patients(const patient_query& query) const
     -> Result<std::vector<patient_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "patient_pk", "patient_id", "patient_name", "birth_date",
+            "sex", "other_ids", "ethnic_group", "comments",
+            "created_at", "updated_at"});
+        builder.from("patients");
+
+        if (query.patient_id.has_value()) {
+            builder.where("patient_id", "LIKE", to_like_pattern(*query.patient_id));
+        }
+
+        if (query.patient_name.has_value()) {
+            builder.where("patient_name", "LIKE", to_like_pattern(*query.patient_name));
+        }
+
+        if (query.birth_date.has_value()) {
+            builder.where("birth_date", "=", *query.birth_date);
+        }
+
+        if (query.birth_date_from.has_value()) {
+            builder.where("birth_date", ">=", *query.birth_date_from);
+        }
+
+        if (query.birth_date_to.has_value()) {
+            builder.where("birth_date", "<=", *query.birth_date_to);
+        }
+
+        if (query.sex.has_value()) {
+            builder.where("sex", "=", *query.sex);
+        }
+
+        builder.order_by("patient_name");
+        builder.order_by("patient_id");
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<patient_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<patient_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_patient_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<patient_record> results;
 
     std::string sql = R"(
@@ -483,6 +636,26 @@ auto index_database::search_patients(const patient_query& query) const
 }
 
 auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto delete_sql = builder.delete_from("patients")
+                              .where("patient_id", "=", std::string(patient_id))
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_err()) {
+            return make_error<std::monostate>(
+                error_codes::database_query_error,
+                pacs::compat::format("Failed to delete patient: {}",
+                                     result.error().message),
+                "storage");
+        }
+        return ok();
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "DELETE FROM patients WHERE patient_id = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -510,6 +683,38 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 }
 
 auto index_database::patient_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("patients")
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                }
+                if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(static_cast<size_t>(0));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM patients;";
 
     sqlite3_stmt* stmt = nullptr;
