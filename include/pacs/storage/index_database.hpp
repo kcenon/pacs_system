@@ -22,6 +22,7 @@
 
 #include <kcenon/common/patterns/result.h>
 
+#include <chrono>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -749,6 +750,31 @@ public:
      */
     [[nodiscard]] auto cleanup_old_worklist_items(std::chrono::hours age)
         -> Result<size_t>;
+
+    /**
+     * @brief Cleanup worklist items scheduled before a specific time
+     *
+     * Removes worklist items with scheduled_datetime before the specified
+     * time point. Only deletes items that are not in SCHEDULED status.
+     * This provides more precise control than the duration-based cleanup,
+     * eliminating timezone conversion ambiguities.
+     *
+     * @param before Time point; items scheduled before this are eligible for deletion
+     * @return Result containing the number of deleted items or error
+     *
+     * @example
+     * @code
+     * // Delete items scheduled before 2024-01-01 00:00:00 UTC
+     * std::tm tm = {};
+     * tm.tm_year = 2024 - 1900;
+     * tm.tm_mon = 0;
+     * tm.tm_mday = 1;
+     * auto time = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+     * auto result = db->cleanup_worklist_items_before(time);
+     * @endcode
+     */
+    [[nodiscard]] auto cleanup_worklist_items_before(
+        std::chrono::system_clock::time_point before) -> Result<size_t>;
 
     /**
      * @brief Get total worklist count
