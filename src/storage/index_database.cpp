@@ -190,13 +190,13 @@ auto index_database::initialize_database_system() -> VoidResult {
 
     if (!db_manager_->set_mode(database::database_types::sqlite)) {
         return make_error<std::monostate>(
-            database_error, "Failed to set SQLite mode", "storage");
+            database_connection_error, "Failed to set SQLite mode", "storage");
     }
 
     auto connect_result = db_manager_->connect_result(path_);
     if (connect_result.is_err()) {
         return make_error<std::monostate>(
-            database_error,
+            database_connection_error,
             pacs::compat::format("Failed to connect: {}",
                                  connect_result.error().message),
             "storage");
