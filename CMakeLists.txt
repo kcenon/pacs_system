@@ -1987,7 +1987,10 @@ if(PACS_BUILD_TESTS)
     if(TARGET storage_tests)
         pacs_apply_warnings(storage_tests)
         # Suppress deprecated warnings from database_system headers
-        target_compile_options(storage_tests PRIVATE -Wno-deprecated-declarations)
+        target_compile_options(storage_tests PRIVATE
+            $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
+            $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
+        )
     endif()
     if(TARGET ai_tests)
         pacs_apply_warnings(ai_tests)
