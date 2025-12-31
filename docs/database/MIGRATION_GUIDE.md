@@ -1,7 +1,7 @@
 # database_system Migration Guide
 
-> **Version:** 1.0.0
-> **Last Updated:** 2025-12-31
+> **Version:** 1.0.1
+> **Last Updated:** 2026-01-01
 > **Related Epic:** [#418](https://github.com/kcenon/pacs_system/issues/418)
 
 ---
@@ -63,7 +63,7 @@ The following tables in `index_database.cpp` have been migrated to use `sql_quer
 | `instances` | #428 | Complete | DICOM instance metadata |
 | `mpps` | #429 | Complete | Modality Performed Procedure Step |
 | `worklist` | #430 | Complete | Modality Worklist |
-| `audit_logs` | #431 | Pending | Audit trail records |
+| `audit_logs` | #431 | Complete | Audit trail records |
 
 ---
 
@@ -529,6 +529,6 @@ auto result = db_manager->execute_query_result(create_sql);
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 1.0.1*
 *Created: 2025-12-31*
 *Author: pacs_system documentation team*
