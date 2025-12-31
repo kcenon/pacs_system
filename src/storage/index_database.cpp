@@ -4295,6 +4295,30 @@ auto index_database::parse_worklist_from_row(
 
     return item;
 }
+
+auto index_database::parse_audit_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> audit_record {
+    audit_record record;
+
+    record.pk = get_int64_value(row, "audit_pk");
+    record.event_type = get_string_value(row, "event_type");
+    record.outcome = get_string_value(row, "outcome");
+
+    auto timestamp_str = get_string_value(row, "timestamp");
+    record.timestamp = parse_datetime(timestamp_str.c_str());
+
+    record.user_id = get_string_value(row, "user_id");
+    record.source_ae = get_string_value(row, "source_ae");
+    record.target_ae = get_string_value(row, "target_ae");
+    record.source_ip = get_string_value(row, "source_ip");
+    record.patient_id = get_string_value(row, "patient_id");
+    record.study_uid = get_string_value(row, "study_uid");
+    record.message = get_string_value(row, "message");
+    record.details = get_string_value(row, "details");
+
+    return record;
+}
 #endif
 
 // ============================================================================
@@ -5087,6 +5111,36 @@ auto index_database::parse_worklist_row(void* stmt_ptr) const -> worklist_item {
 
 auto index_database::add_audit_log(const audit_record& record)
     -> Result<int64_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto insert_sql =
+            builder.insert_into("audit_log")
+                .values({{"event_type", record.event_type},
+                         {"outcome", record.outcome},
+                         {"user_id", record.user_id},
+                         {"source_ae", record.source_ae},
+                         {"target_ae", record.target_ae},
+                         {"source_ip", record.source_ip},
+                         {"patient_id", record.patient_id},
+                         {"study_uid", record.study_uid},
+                         {"message", record.message},
+                         {"details", record.details}})
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->insert_query_result(insert_sql);
+        if (result.is_err()) {
+            return pacs_error<int64_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Failed to insert audit log: {}",
+                                     result.error().message));
+        }
+
+        return result.value();
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         INSERT INTO audit_log (
             event_type, outcome, user_id, source_ae, target_ae,
@@ -5131,6 +5185,79 @@ auto index_database::add_audit_log(const audit_record& record)
 
 auto index_database::query_audit_log(const audit_query& query) const
     -> Result<std::vector<audit_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "audit_pk", "event_type", "outcome", "timestamp", "user_id",
+            "source_ae", "target_ae", "source_ip", "patient_id", "study_uid",
+            "message", "details"});
+        builder.from("audit_log");
+
+        if (query.event_type.has_value()) {
+            builder.where("event_type", "=", *query.event_type);
+        }
+
+        if (query.outcome.has_value()) {
+            builder.where("outcome", "=", *query.outcome);
+        }
+
+        if (query.user_id.has_value()) {
+            builder.where("user_id", "LIKE", to_like_pattern(*query.user_id));
+        }
+
+        if (query.source_ae.has_value()) {
+            builder.where("source_ae", "=", *query.source_ae);
+        }
+
+        if (query.patient_id.has_value()) {
+            builder.where("patient_id", "=", *query.patient_id);
+        }
+
+        if (query.study_uid.has_value()) {
+            builder.where("study_uid", "=", *query.study_uid);
+        }
+
+        if (query.date_from.has_value()) {
+            builder.where_raw(
+                pacs::compat::format("date(timestamp) >= date('{}')",
+                                     *query.date_from));
+        }
+
+        if (query.date_to.has_value()) {
+            builder.where_raw(
+                pacs::compat::format("date(timestamp) <= date('{}')",
+                                     *query.date_to));
+        }
+
+        builder.order_by("timestamp", database::sort_order::desc);
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<audit_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<audit_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_audit_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<audit_record> results;
 
     std::ostringstream sql;
@@ -5216,6 +5343,29 @@ auto index_database::query_audit_log(const audit_query& query) const
 
 auto index_database::find_audit_by_pk(int64_t pk) const
     -> std::optional<audit_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "audit_pk", "event_type", "outcome", "timestamp", "user_id",
+                    "source_ae", "target_ae", "source_ip", "patient_id",
+                    "study_uid", "message", "details"})
+                .from("audit_log")
+                .where("audit_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_audit_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql =
         "SELECT audit_pk, event_type, outcome, timestamp, user_id, "
         "source_ae, target_ae, source_ip, patient_id, study_uid, "
@@ -5239,6 +5389,29 @@ auto index_database::find_audit_by_pk(int64_t pk) const
 }
 
 auto index_database::audit_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("audit_log")
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            return ok(static_cast<size_t>(
+                get_int64_value(result.value()[0], "COUNT(*)")));
+        }
+        return ok(static_cast<size_t>(0));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM audit_log;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -5267,6 +5440,23 @@ auto index_database::cleanup_old_audit_logs(std::chrono::hours age)
     oss << std::put_time(std::gmtime(&cutoff_time), "%Y-%m-%d %H:%M:%S");
     auto cutoff_str = oss.str();
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.delete_from("audit_log");
+        builder.where_raw(pacs::compat::format("timestamp < '{}'", cutoff_str));
+
+        auto delete_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_ok()) {
+            return ok(static_cast<size_t>(result.value()));
+        }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "DELETE FROM audit_log WHERE timestamp < ?;";
 
     sqlite3_stmt* stmt = nullptr;
