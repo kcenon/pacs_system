@@ -529,6 +529,6 @@ auto result = db_manager->execute_query_result(create_sql);
 
 ---
 
-*Document Version: 1.0.0*
+*Document Version: 1.0.1*
 *Created: 2025-12-31*
 *Author: pacs_system documentation team*
