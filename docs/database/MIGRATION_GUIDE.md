@@ -62,7 +62,7 @@ The following tables in `index_database.cpp` have been migrated to use `sql_quer
 | `series` | #427 | Complete | Series metadata |
 | `instances` | #428 | Complete | DICOM instance metadata |
 | `mpps` | #429 | Complete | Modality Performed Procedure Step |
-| `worklist` | #430 | Pending | Modality Worklist |
+| `worklist` | #430 | Complete | Modality Worklist |
 | `audit_logs` | #431 | Pending | Audit trail records |
 
 ---

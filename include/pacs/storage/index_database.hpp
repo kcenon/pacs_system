@@ -1111,6 +1111,13 @@ private:
     [[nodiscard]] auto parse_mpps_from_row(
         const std::map<std::string, database::database_value>& row) const
         -> mpps_record;
+
+    /**
+     * @brief Parse worklist record from database_system result row
+     */
+    [[nodiscard]] auto parse_worklist_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> worklist_item;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
