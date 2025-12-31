@@ -1097,6 +1097,13 @@ private:
     [[nodiscard]] auto parse_series_from_row(
         const std::map<std::string, database::database_value>& row) const
         -> series_record;
+
+    /**
+     * @brief Parse instance record from database_system result row
+     */
+    [[nodiscard]] auto parse_instance_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> instance_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
