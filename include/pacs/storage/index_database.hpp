@@ -1104,6 +1104,13 @@ private:
     [[nodiscard]] auto parse_instance_from_row(
         const std::map<std::string, database::database_value>& row) const
         -> instance_record;
+
+    /**
+     * @brief Parse MPPS record from database_system result row
+     */
+    [[nodiscard]] auto parse_mpps_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> mpps_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)

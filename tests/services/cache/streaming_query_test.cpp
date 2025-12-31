@@ -1,6 +1,9 @@
 /**
  * @file streaming_query_test.cpp
  * @brief Unit tests for streaming query functionality
+ *
+ * @note When compiled with PACS_WITH_DATABASE_SYSTEM, uses database_system's
+ *       database_manager for cursor creation. Otherwise, uses native SQLite handles.
  */
 
 #include <pacs/services/cache/database_cursor.hpp>
@@ -21,6 +24,13 @@ using namespace pacs::services;
 using namespace pacs::storage;
 using namespace pacs::core;
 using namespace pacs::encoding;
+
+// Helper macro to get cursor handle based on build configuration
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#define GET_CURSOR_HANDLE(db) (db)->db_manager()
+#else
+#define GET_CURSOR_HANDLE(db) (db)->native_handle()
+#endif
 
 // ============================================================================
 // Test Fixtures
@@ -125,7 +135,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     SECTION("create_patient_cursor creates valid cursor") {
         patient_query query;
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
 
         REQUIRE(result.is_ok());
         auto& cursor = result.value();
@@ -138,7 +148,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     SECTION("fetch_next returns records") {
         patient_query query;
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -156,7 +166,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     SECTION("fetch_batch returns multiple records") {
         patient_query query;
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -169,7 +179,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     SECTION("cursor exhaustion works correctly") {
         patient_query query;
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -187,7 +197,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
         query.sex = "M";
 
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -206,7 +216,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     SECTION("reset allows re-iteration") {
         patient_query query;
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -231,7 +241,7 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     SECTION("serialize creates valid state string") {
         patient_query query;
         auto result =
-            database_cursor::create_patient_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_patient_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -251,7 +261,7 @@ TEST_CASE("database_cursor study queries", "[services][streaming]") {
     SECTION("create_study_cursor returns all studies") {
         study_query query;
         auto result =
-            database_cursor::create_study_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_study_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -266,7 +276,7 @@ TEST_CASE("database_cursor study queries", "[services][streaming]") {
         query.patient_id = "PAT1";
 
         auto result =
-            database_cursor::create_study_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_study_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();
@@ -281,7 +291,7 @@ TEST_CASE("database_cursor study queries", "[services][streaming]") {
         query.study_date_to = "20240102";
 
         auto result =
-            database_cursor::create_study_cursor(fixture.db()->native_handle(), query);
+            database_cursor::create_study_cursor(GET_CURSOR_HANDLE(fixture.db()), query);
         REQUIRE(result.is_ok());
 
         auto& cursor = result.value();

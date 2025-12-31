@@ -30,8 +30,8 @@
 #include <string>
 #include <vector>
 
-// Forward declarations for network_system types (no ASIO dependency)
-#include <network_system/forward.h>
+// Note: Forward declarations for network_system types are provided by
+// pacs/integration/dicom_session.hpp which is included above
 
 namespace pacs::network::v2 {
 

@@ -34,8 +34,19 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Forward declarations for network_system types (no ASIO dependency)
-#include <network_system/forward.h>
+// Forward declarations for kcenon::network types (no ASIO dependency)
+// Using direct forward declarations to reduce external header dependencies
+// and maintain compatibility with network_system namespace refactoring
+namespace kcenon::network::session {
+class messaging_session;
+class secure_session;
+}  // namespace kcenon::network::session
+
+// Legacy namespace aliases for backward compatibility
+namespace network_system::session {
+using messaging_session = kcenon::network::session::messaging_session;
+using secure_session = kcenon::network::session::secure_session;
+}  // namespace network_system::session
 
 namespace pacs::integration {
 

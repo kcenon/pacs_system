@@ -51,6 +51,20 @@ The following files were migrated as part of Epic #418:
 | `index_database.cpp` | #421 | Complete | High |
 | `migration_runner.cpp` | #422 | Complete | Medium |
 
+### 1.4 Table-by-Table Migration Status
+
+The following tables in `index_database.cpp` have been migrated to use `sql_query_builder`:
+
+| Table | Issue | Status | Description |
+|-------|-------|--------|-------------|
+| `patients` | #425 | Complete | Patient demographics |
+| `studies` | #426 | Complete | Study metadata |
+| `series` | #427 | Complete | Series metadata |
+| `instances` | #428 | Complete | DICOM instance metadata |
+| `mpps` | #429 | Complete | Modality Performed Procedure Step |
+| `worklist` | #430 | Pending | Modality Worklist |
+| `audit_logs` | #431 | Pending | Audit trail records |
+
 ---
 
 ## 2. Prerequisites
@@ -305,6 +319,35 @@ std::shared_ptr<database::database_manager> db_manager_;
 sqlite3* db_{nullptr};
 #endif
 ```
+
+### 4.1.1 Test Code Conditional Compilation
+
+When writing tests that use `database_cursor`, use a helper macro to select the appropriate handle type based on build configuration:
+
+```cpp
+// In test files
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#define GET_CURSOR_HANDLE(db) (db)->db_manager()
+#else
+#define GET_CURSOR_HANDLE(db) (db)->native_handle()
+#endif
+
+// Usage in tests
+TEST_CASE("cursor test") {
+    auto db_result = index_database::open(":memory:");
+    REQUIRE(db_result.is_ok());
+    auto db = std::move(db_result.value());
+
+    patient_query query;
+    auto result = database_cursor::create_patient_cursor(
+        GET_CURSOR_HANDLE(db.get()), query);
+    REQUIRE(result.is_ok());
+}
+```
+
+This pattern ensures tests compile correctly in both:
+- **With database_system**: Uses `db_manager()` returning `std::shared_ptr<database::database_manager>`
+- **Without database_system**: Uses `native_handle()` returning `sqlite3*`
 
 ### 4.2 Value Extraction Helpers
 
