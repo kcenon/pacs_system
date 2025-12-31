@@ -70,6 +70,47 @@ auto get_text(sqlite3_stmt* stmt, int col) -> std::string {
     return text ? std::string(text) : std::string{};
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+/**
+ * @brief Helper to extract string from database_value
+ */
+auto get_string_value(
+    const std::map<std::string, database::core::database_value>& row,
+    const std::string& key) -> std::string {
+    auto it = row.find(key);
+    if (it == row.end()) {
+        return {};
+    }
+    if (std::holds_alternative<std::string>(it->second)) {
+        return std::get<std::string>(it->second);
+    }
+    return {};
+}
+
+/**
+ * @brief Helper to extract int64 from database_value
+ */
+auto get_int64_value(
+    const std::map<std::string, database::core::database_value>& row,
+    const std::string& key) -> int64_t {
+    auto it = row.find(key);
+    if (it == row.end()) {
+        return 0;
+    }
+    if (std::holds_alternative<int64_t>(it->second)) {
+        return std::get<int64_t>(it->second);
+    }
+    if (std::holds_alternative<std::string>(it->second)) {
+        try {
+            return std::stoll(std::get<std::string>(it->second));
+        } catch (...) {
+            return 0;
+        }
+    }
+    return 0;
+}
+#endif
+
 }  // namespace
 
 // ============================================================================
@@ -2499,6 +2540,31 @@ auto index_database::upsert_instance(const instance_record& record)
 
 auto index_database::find_instance(std::string_view sop_uid) const
     -> std::optional<instance_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+                    "instance_number", "transfer_syntax", "content_date",
+                    "content_time", "rows", "columns", "bits_allocated",
+                    "number_of_frames", "file_path", "file_size", "file_hash",
+                    "created_at"})
+                .from("instances")
+                .where("sop_uid", "=", std::string(sop_uid))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_instance_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT instance_pk, series_pk, sop_uid, sop_class_uid, instance_number,
                transfer_syntax, content_date, content_time,
@@ -2531,6 +2597,31 @@ auto index_database::find_instance(std::string_view sop_uid) const
 
 auto index_database::find_instance_by_pk(int64_t pk) const
     -> std::optional<instance_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+                    "instance_number", "transfer_syntax", "content_date",
+                    "content_time", "rows", "columns", "bits_allocated",
+                    "number_of_frames", "file_path", "file_size", "file_hash",
+                    "created_at"})
+                .from("instances")
+                .where("instance_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_instance_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT instance_pk, series_pk, sop_uid, sop_class_uid, instance_number,
                transfer_syntax, content_date, content_time,
@@ -2562,6 +2653,43 @@ auto index_database::find_instance_by_pk(int64_t pk) const
 
 auto index_database::list_instances(std::string_view series_uid) const
     -> Result<std::vector<instance_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // First get series_pk from series_uid
+        auto series = find_series(series_uid);
+        if (!series.has_value()) {
+            return ok(std::vector<instance_record>{});
+        }
+
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+            "instance_number", "transfer_syntax", "content_date",
+            "content_time", "rows", "columns", "bits_allocated",
+            "number_of_frames", "file_path", "file_size", "file_hash",
+            "created_at"});
+        builder.from("instances");
+        builder.where("series_pk", "=", series->pk);
+        builder.order_by("instance_number");
+        builder.order_by("sop_uid");
+
+        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<instance_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<instance_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_instance_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<instance_record> results;
 
     const char* sql = R"(
@@ -2597,6 +2725,78 @@ auto index_database::list_instances(std::string_view series_uid) const
 
 auto index_database::search_instances(const instance_query& query) const
     -> Result<std::vector<instance_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+            "instance_number", "transfer_syntax", "content_date",
+            "content_time", "rows", "columns", "bits_allocated",
+            "number_of_frames", "file_path", "file_size", "file_hash",
+            "created_at"});
+        builder.from("instances");
+
+        // Handle series_uid filter by getting series_pk first
+        if (query.series_uid.has_value()) {
+            auto series = find_series(*query.series_uid);
+            if (!series.has_value()) {
+                return ok(std::vector<instance_record>{});
+            }
+            builder.where("series_pk", "=", series->pk);
+        }
+
+        if (query.sop_uid.has_value()) {
+            builder.where("sop_uid", "=", *query.sop_uid);
+        }
+
+        if (query.sop_class_uid.has_value()) {
+            builder.where("sop_class_uid", "=", *query.sop_class_uid);
+        }
+
+        if (query.content_date.has_value()) {
+            builder.where("content_date", "=", *query.content_date);
+        }
+
+        if (query.content_date_from.has_value()) {
+            builder.where("content_date", ">=", *query.content_date_from);
+        }
+
+        if (query.content_date_to.has_value()) {
+            builder.where("content_date", "<=", *query.content_date_to);
+        }
+
+        if (query.instance_number.has_value()) {
+            builder.where("instance_number", "=", *query.instance_number);
+        }
+
+        builder.order_by("instance_number");
+        builder.order_by("sop_uid");
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<instance_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<instance_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_instance_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<instance_record> results;
 
     std::string sql = R"(
@@ -2686,6 +2886,25 @@ auto index_database::search_instances(const instance_query& query) const
 }
 
 auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto delete_sql = builder.delete_from("instances")
+                              .where("sop_uid", "=", std::string(sop_uid))
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_err()) {
+            return make_error<std::monostate>(
+                database_query_error,
+                pacs::compat::format("Delete failed: {}", result.error().message),
+                "storage");
+        }
+        return ok();
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "DELETE FROM instances WHERE sop_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -2714,6 +2933,36 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
 }
 
 auto index_database::instance_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("instances")
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Count query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                } else if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(size_t{0});
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM instances;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -2735,6 +2984,43 @@ auto index_database::instance_count() const -> Result<size_t> {
 
 auto index_database::instance_count(std::string_view series_uid) const
     -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // First get series_pk from series_uid
+        auto series = find_series(series_uid);
+        if (!series.has_value()) {
+            return ok(size_t{0});
+        }
+
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("instances")
+                             .where("series_pk", "=", series->pk)
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Count query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                } else if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(size_t{0});
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT COUNT(*) FROM instances i
         JOIN series s ON i.series_pk = s.series_pk
@@ -2813,6 +3099,25 @@ auto index_database::parse_instance_row(void* stmt_ptr) const
 
 auto index_database::get_file_path(std::string_view sop_instance_uid) const
     -> Result<std::optional<std::string>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql = builder.select(std::vector<std::string>{"file_path"})
+                              .from("instances")
+                              .where("sop_uid", "=", std::string(sop_instance_uid))
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return ok(std::optional<std::string>(std::nullopt));
+        }
+
+        auto path = get_string_value(result.value()[0], "file_path");
+        return ok(std::optional<std::string>(path));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT file_path FROM instances WHERE sop_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -2841,6 +3146,50 @@ auto index_database::get_file_path(std::string_view sop_instance_uid) const
 
 auto index_database::get_study_files(std::string_view study_instance_uid) const
     -> Result<std::vector<std::string>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // Get all series for this study, then get all instances for each series
+        auto study = find_study(study_instance_uid);
+        if (!study.has_value()) {
+            return ok(std::vector<std::string>{});
+        }
+
+        // Get all series PKs for this study
+        database::sql_query_builder series_builder;
+        auto series_sql = series_builder.select(std::vector<std::string>{"series_pk"})
+                              .from("series")
+                              .where("study_pk", "=", study->pk)
+                              .order_by("series_number")
+                              .build_for_database(database::database_types::sqlite);
+
+        auto series_result = db_manager_->select_query_result(series_sql);
+        if (series_result.is_err() || series_result.value().empty()) {
+            return ok(std::vector<std::string>{});
+        }
+
+        std::vector<std::string> results;
+        for (const auto& series_row : series_result.value()) {
+            auto series_pk = get_int64_value(series_row, "series_pk");
+
+            database::sql_query_builder inst_builder;
+            auto inst_sql = inst_builder.select(std::vector<std::string>{"file_path"})
+                                .from("instances")
+                                .where("series_pk", "=", series_pk)
+                                .order_by("instance_number")
+                                .build_for_database(database::database_types::sqlite);
+
+            auto inst_result = db_manager_->select_query_result(inst_sql);
+            if (inst_result.is_ok()) {
+                for (const auto& inst_row : inst_result.value()) {
+                    results.push_back(get_string_value(inst_row, "file_path"));
+                }
+            }
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<std::string> results;
 
     const char* sql = R"(
@@ -2874,6 +3223,36 @@ auto index_database::get_study_files(std::string_view study_instance_uid) const
 
 auto index_database::get_series_files(std::string_view series_instance_uid)
     const -> Result<std::vector<std::string>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        auto series = find_series(series_instance_uid);
+        if (!series.has_value()) {
+            return ok(std::vector<std::string>{});
+        }
+
+        database::sql_query_builder builder;
+        auto select_sql = builder.select(std::vector<std::string>{"file_path"})
+                              .from("instances")
+                              .where("series_pk", "=", series->pk)
+                              .order_by("instance_number")
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<std::string>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<std::string> results;
+        for (const auto& row : result.value()) {
+            results.push_back(get_string_value(row, "file_path"));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<std::string> results;
 
     const char* sql = R"(
@@ -4261,49 +4640,6 @@ auto index_database::parse_audit_row(void* stmt_ptr) const -> audit_record {
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-namespace {
-
-/**
- * @brief Helper to extract string from database_value
- */
-auto get_string_value(
-    const std::map<std::string, database::core::database_value>& row,
-    const std::string& key) -> std::string {
-    auto it = row.find(key);
-    if (it == row.end()) {
-        return {};
-    }
-    if (std::holds_alternative<std::string>(it->second)) {
-        return std::get<std::string>(it->second);
-    }
-    return {};
-}
-
-/**
- * @brief Helper to extract int64 from database_value
- */
-auto get_int64_value(
-    const std::map<std::string, database::core::database_value>& row,
-    const std::string& key) -> int64_t {
-    auto it = row.find(key);
-    if (it == row.end()) {
-        return 0;
-    }
-    if (std::holds_alternative<int64_t>(it->second)) {
-        return std::get<int64_t>(it->second);
-    }
-    if (std::holds_alternative<std::string>(it->second)) {
-        try {
-            return std::stoll(std::get<std::string>(it->second));
-        } catch (...) {
-            return 0;
-        }
-    }
-    return 0;
-}
-
-}  // namespace
-
 auto index_database::parse_patient_from_row(
     const std::map<std::string, database::core::database_value>& row) const
     -> patient_record {
@@ -4389,6 +4725,92 @@ auto index_database::parse_series_from_row(
 
     auto updated_str2 = get_string_value(row, "updated_at");
     record.updated_at = parse_datetime(updated_str2.c_str());
+
+    return record;
+}
+
+auto index_database::parse_instance_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> instance_record {
+    instance_record record;
+
+    record.pk = get_int64_value(row, "instance_pk");
+    record.series_pk = get_int64_value(row, "series_pk");
+    record.sop_uid = get_string_value(row, "sop_uid");
+    record.sop_class_uid = get_string_value(row, "sop_class_uid");
+
+    // Handle nullable instance_number
+    auto it = row.find("instance_number");
+    if (it != row.end()) {
+        if (std::holds_alternative<int64_t>(it->second)) {
+            record.instance_number = static_cast<int>(std::get<int64_t>(it->second));
+        } else if (std::holds_alternative<std::string>(it->second)) {
+            const auto& str = std::get<std::string>(it->second);
+            if (!str.empty()) {
+                record.instance_number = std::stoi(str);
+            }
+        }
+    }
+
+    record.transfer_syntax = get_string_value(row, "transfer_syntax");
+    record.content_date = get_string_value(row, "content_date");
+    record.content_time = get_string_value(row, "content_time");
+
+    // Handle nullable image properties
+    auto rows_it = row.find("rows");
+    if (rows_it != row.end()) {
+        if (std::holds_alternative<int64_t>(rows_it->second)) {
+            record.rows = static_cast<int>(std::get<int64_t>(rows_it->second));
+        } else if (std::holds_alternative<std::string>(rows_it->second)) {
+            const auto& str = std::get<std::string>(rows_it->second);
+            if (!str.empty()) {
+                record.rows = std::stoi(str);
+            }
+        }
+    }
+
+    auto cols_it = row.find("columns");
+    if (cols_it != row.end()) {
+        if (std::holds_alternative<int64_t>(cols_it->second)) {
+            record.columns = static_cast<int>(std::get<int64_t>(cols_it->second));
+        } else if (std::holds_alternative<std::string>(cols_it->second)) {
+            const auto& str = std::get<std::string>(cols_it->second);
+            if (!str.empty()) {
+                record.columns = std::stoi(str);
+            }
+        }
+    }
+
+    auto bits_it = row.find("bits_allocated");
+    if (bits_it != row.end()) {
+        if (std::holds_alternative<int64_t>(bits_it->second)) {
+            record.bits_allocated = static_cast<int>(std::get<int64_t>(bits_it->second));
+        } else if (std::holds_alternative<std::string>(bits_it->second)) {
+            const auto& str = std::get<std::string>(bits_it->second);
+            if (!str.empty()) {
+                record.bits_allocated = std::stoi(str);
+            }
+        }
+    }
+
+    auto frames_it = row.find("number_of_frames");
+    if (frames_it != row.end()) {
+        if (std::holds_alternative<int64_t>(frames_it->second)) {
+            record.number_of_frames = static_cast<int>(std::get<int64_t>(frames_it->second));
+        } else if (std::holds_alternative<std::string>(frames_it->second)) {
+            const auto& str = std::get<std::string>(frames_it->second);
+            if (!str.empty()) {
+                record.number_of_frames = std::stoi(str);
+            }
+        }
+    }
+
+    record.file_path = get_string_value(row, "file_path");
+    record.file_size = get_int64_value(row, "file_size");
+    record.file_hash = get_string_value(row, "file_hash");
+
+    auto created_str = get_string_value(row, "created_at");
+    record.created_at = parse_datetime(created_str.c_str());
 
     return record;
 }
