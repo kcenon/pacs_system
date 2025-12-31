@@ -3453,6 +3453,37 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
             "storage");
     }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto insert_sql =
+            builder.insert_into("mpps")
+                .values({{"mpps_uid", record.mpps_uid},
+                         {"status", std::string("IN PROGRESS")},
+                         {"start_datetime", record.start_datetime},
+                         {"station_ae", record.station_ae},
+                         {"station_name", record.station_name},
+                         {"modality", record.modality},
+                         {"study_uid", record.study_uid},
+                         {"accession_no", record.accession_no},
+                         {"scheduled_step_id", record.scheduled_step_id},
+                         {"requested_proc_id", record.requested_proc_id},
+                         {"performed_series", record.performed_series}})
+                .build_for_database(database::database_types::sqlite);
+
+        auto insert_result = db_manager_->insert_query_result(insert_sql);
+        if (insert_result.is_ok()) {
+            // Retrieve the inserted MPPS to get pk
+            auto inserted = find_mpps(record.mpps_uid);
+            if (inserted.has_value()) {
+                return inserted->pk;
+            }
+        }
+        // Insert failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         INSERT INTO mpps (
             mpps_uid, status, start_datetime, station_ae, station_name,
@@ -3534,6 +3565,35 @@ auto index_database::update_mpps(std::string_view mpps_uid,
             "storage");
     }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.update("mpps");
+        builder.set({{"status", std::string(new_status)}});
+
+        // Only update end_datetime if not empty
+        if (!end_datetime.empty()) {
+            builder.set({{"end_datetime", std::string(end_datetime)}});
+        }
+
+        // Only update performed_series if not empty
+        if (!performed_series.empty()) {
+            builder.set({{"performed_series", std::string(performed_series)}});
+        }
+
+        builder.where("mpps_uid", "=", std::string(mpps_uid));
+
+        auto update_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->update_query_result(update_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Update failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         UPDATE mpps
         SET status = ?,
@@ -3591,6 +3651,31 @@ auto index_database::update_mpps(const mpps_record& record) -> VoidResult {
 
 auto index_database::find_mpps(std::string_view mpps_uid) const
     -> std::optional<mpps_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "mpps_pk", "mpps_uid", "status", "start_datetime",
+                    "end_datetime", "station_ae", "station_name", "modality",
+                    "study_uid", "accession_no", "scheduled_step_id",
+                    "requested_proc_id", "performed_series", "created_at",
+                    "updated_at"})
+                .from("mpps")
+                .where("mpps_uid", "=", std::string(mpps_uid))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_mpps_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
                station_ae, station_name, modality, study_uid, accession_no,
@@ -3623,6 +3708,31 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
 
 auto index_database::find_mpps_by_pk(int64_t pk) const
     -> std::optional<mpps_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "mpps_pk", "mpps_uid", "status", "start_datetime",
+                    "end_datetime", "station_ae", "station_name", "modality",
+                    "study_uid", "accession_no", "scheduled_step_id",
+                    "requested_proc_id", "performed_series", "created_at",
+                    "updated_at"})
+                .from("mpps")
+                .where("mpps_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_mpps_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
                station_ae, station_name, modality, study_uid, accession_no,
@@ -3654,6 +3764,37 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
 
 auto index_database::list_active_mpps(std::string_view station_ae) const
     -> Result<std::vector<mpps_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
+            "station_ae", "station_name", "modality", "study_uid",
+            "accession_no", "scheduled_step_id", "requested_proc_id",
+            "performed_series", "created_at", "updated_at"});
+        builder.from("mpps");
+        builder.where("status", "=", std::string("IN PROGRESS"));
+        builder.where("station_ae", "=", std::string(station_ae));
+        builder.order_by("start_datetime", database::sort_order::desc);
+
+        auto select_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<mpps_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<mpps_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_mpps_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<mpps_record> results;
 
     const char* sql = R"(
@@ -3688,6 +3829,36 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
 
 auto index_database::find_mpps_by_study(std::string_view study_uid) const
     -> Result<std::vector<mpps_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
+            "station_ae", "station_name", "modality", "study_uid",
+            "accession_no", "scheduled_step_id", "requested_proc_id",
+            "performed_series", "created_at", "updated_at"});
+        builder.from("mpps");
+        builder.where("study_uid", "=", std::string(study_uid));
+        builder.order_by("start_datetime", database::sort_order::desc);
+
+        auto select_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<mpps_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<mpps_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_mpps_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<mpps_record> results;
 
     const char* sql = R"(
@@ -3722,6 +3893,79 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
 
 auto index_database::search_mpps(const mpps_query& query) const
     -> Result<std::vector<mpps_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
+            "station_ae", "station_name", "modality", "study_uid",
+            "accession_no", "scheduled_step_id", "requested_proc_id",
+            "performed_series", "created_at", "updated_at"});
+        builder.from("mpps");
+
+        if (query.mpps_uid.has_value()) {
+            builder.where("mpps_uid", "=", *query.mpps_uid);
+        }
+
+        if (query.status.has_value()) {
+            builder.where("status", "=", *query.status);
+        }
+
+        if (query.station_ae.has_value()) {
+            builder.where("station_ae", "=", *query.station_ae);
+        }
+
+        if (query.modality.has_value()) {
+            builder.where("modality", "=", *query.modality);
+        }
+
+        if (query.study_uid.has_value()) {
+            builder.where("study_uid", "=", *query.study_uid);
+        }
+
+        if (query.accession_no.has_value()) {
+            builder.where("accession_no", "=", *query.accession_no);
+        }
+
+        if (query.start_date_from.has_value()) {
+            builder.where_raw(
+                pacs::compat::format("substr(start_datetime, 1, 8) >= '{}'",
+                                     *query.start_date_from));
+        }
+
+        if (query.start_date_to.has_value()) {
+            builder.where_raw(pacs::compat::format(
+                "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to));
+        }
+
+        builder.order_by("start_datetime", database::sort_order::desc);
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<mpps_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<mpps_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_mpps_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<mpps_record> results;
 
     std::string sql = R"(
@@ -3809,6 +4053,26 @@ auto index_database::search_mpps(const mpps_query& query) const
 }
 
 auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto delete_sql = builder.delete_from("mpps")
+                              .where("mpps_uid", "=", std::string(mpps_uid))
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_err()) {
+            return make_error<std::monostate>(
+                database_query_error,
+                pacs::compat::format("Failed to delete MPPS: {}",
+                                     result.error().message),
+                "storage");
+        }
+        return ok();
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "DELETE FROM mpps WHERE mpps_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -3836,6 +4100,37 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
 }
 
 auto index_database::mpps_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("mpps")
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                } else if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(size_t{0});
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM mpps;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -3857,6 +4152,38 @@ auto index_database::mpps_count() const -> Result<size_t> {
 }
 
 auto index_database::mpps_count(std::string_view status) const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("mpps")
+                             .where("status", "=", std::string(status))
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                } else if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(size_t{0});
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM mpps WHERE status = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -3906,6 +4233,36 @@ auto index_database::parse_mpps_row(void* stmt_ptr) const -> mpps_record {
 
     return record;
 }
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+auto index_database::parse_mpps_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> mpps_record {
+    mpps_record record;
+
+    record.pk = get_int64_value(row, "mpps_pk");
+    record.mpps_uid = get_string_value(row, "mpps_uid");
+    record.status = get_string_value(row, "status");
+    record.start_datetime = get_string_value(row, "start_datetime");
+    record.end_datetime = get_string_value(row, "end_datetime");
+    record.station_ae = get_string_value(row, "station_ae");
+    record.station_name = get_string_value(row, "station_name");
+    record.modality = get_string_value(row, "modality");
+    record.study_uid = get_string_value(row, "study_uid");
+    record.accession_no = get_string_value(row, "accession_no");
+    record.scheduled_step_id = get_string_value(row, "scheduled_step_id");
+    record.requested_proc_id = get_string_value(row, "requested_proc_id");
+    record.performed_series = get_string_value(row, "performed_series");
+
+    auto created_str = get_string_value(row, "created_at");
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_string_value(row, "updated_at");
+    record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+#endif
 
 // ============================================================================
 // Worklist Operations

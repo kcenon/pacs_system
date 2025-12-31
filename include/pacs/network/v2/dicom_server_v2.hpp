@@ -31,8 +31,20 @@
 #include <unordered_map>
 #include <vector>
 
-// Forward declarations for network_system types (no ASIO dependency)
-#include <network_system/forward.h>
+// Forward declarations for kcenon::network types (no ASIO dependency)
+// Using direct forward declarations to reduce external header dependencies
+// and maintain compatibility with network_system namespace refactoring
+namespace kcenon::network::core {
+class messaging_server;
+}  // namespace kcenon::network::core
+
+// Legacy namespace alias for backward compatibility
+namespace network_system::core {
+using messaging_server = kcenon::network::core::messaging_server;
+}  // namespace network_system::core
+
+// Note: messaging_session forward declarations are provided by
+// pacs/network/v2/dicom_association_handler.hpp via pacs/integration/dicom_session.hpp
 
 namespace pacs::network::v2 {
 

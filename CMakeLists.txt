@@ -517,7 +517,7 @@ if(PACS_WITH_NETWORK_SYSTEM)
 
     set(NETWORK_SYSTEM_FOUND FALSE)
     foreach(_path ${_PACS_NETWORK_PATHS})
-        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/network_system/network_system.h")
+        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/network/network_system.h")
             message(STATUS "Found network_system at: ${_path}")
             set(PACS_NETWORK_SYSTEM_DIR "${_path}")
             set(NETWORK_SYSTEM_FOUND TRUE)
