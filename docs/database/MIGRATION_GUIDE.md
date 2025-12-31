@@ -320,6 +320,35 @@ sqlite3* db_{nullptr};
 #endif
 ```
 
+### 4.1.1 Test Code Conditional Compilation
+
+When writing tests that use `database_cursor`, use a helper macro to select the appropriate handle type based on build configuration:
+
+```cpp
+// In test files
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#define GET_CURSOR_HANDLE(db) (db)->db_manager()
+#else
+#define GET_CURSOR_HANDLE(db) (db)->native_handle()
+#endif
+
+// Usage in tests
+TEST_CASE("cursor test") {
+    auto db_result = index_database::open(":memory:");
+    REQUIRE(db_result.is_ok());
+    auto db = std::move(db_result.value());
+
+    patient_query query;
+    auto result = database_cursor::create_patient_cursor(
+        GET_CURSOR_HANDLE(db.get()), query);
+    REQUIRE(result.is_ok());
+}
+```
+
+This pattern ensures tests compile correctly in both:
+- **With database_system**: Uses `db_manager()` returning `std::shared_ptr<database::database_manager>`
+- **Without database_system**: Uses `native_handle()` returning `sqlite3*`
+
 ### 4.2 Value Extraction Helpers
 
 ```cpp
