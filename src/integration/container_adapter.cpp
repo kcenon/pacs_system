@@ -270,14 +270,13 @@ auto container_adapter::serialize_dataset(const core::dicom_dataset& dataset)
     auto container = std::make_shared<container_module::value_container>();
 
     // Add metadata
-    container->set_value(std::string(kVersionKey), std::string(kProtocolVersion));
-    container->set_value(std::string(kElementCountKey),
-                         static_cast<unsigned int>(dataset.size()));
+    container->set(kVersionKey, std::string(kProtocolVersion));
+    container->set(kElementCountKey, static_cast<unsigned int>(dataset.size()));
 
     // Serialize each element
     for (const auto& [tag, element] : dataset) {
         auto value = to_container_value(element);
-        container->set_unit(value);
+        container->set(value);
     }
 
     return container;
@@ -437,7 +436,7 @@ auto container_adapter::sequence_to_container(const core::dicom_element& element
     auto container = std::make_shared<container_module::value_container>();
 
     const auto& items = element.sequence_items();
-    container->set_value("_item_count", static_cast<unsigned int>(items.size()));
+    container->set("_item_count", static_cast<unsigned int>(items.size()));
 
     size_t item_index = 0;
     for (const auto& item : items) {
@@ -446,7 +445,7 @@ auto container_adapter::sequence_to_container(const core::dicom_element& element
         val.name = pacs::compat::format("item_{}", item_index++);
         val.type = container_module::value_types::container_value;
         val.data = item_container;
-        container->set_unit(val);
+        container->set(val);
     }
 
     return container;
