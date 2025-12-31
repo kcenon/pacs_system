@@ -51,6 +51,20 @@ The following files were migrated as part of Epic #418:
 | `index_database.cpp` | #421 | Complete | High |
 | `migration_runner.cpp` | #422 | Complete | Medium |
 
+### 1.4 Table-by-Table Migration Status
+
+The following tables in `index_database.cpp` have been migrated to use `sql_query_builder`:
+
+| Table | Issue | Status | Description |
+|-------|-------|--------|-------------|
+| `patients` | #425 | Complete | Patient demographics |
+| `studies` | #426 | Complete | Study metadata |
+| `series` | #427 | Complete | Series metadata |
+| `instances` | #428 | Complete | DICOM instance metadata |
+| `mpps` | #429 | Complete | Modality Performed Procedure Step |
+| `worklist` | #430 | Pending | Modality Worklist |
+| `audit_logs` | #431 | Pending | Audit trail records |
+
 ---
 
 ## 2. Prerequisites
