@@ -1090,6 +1090,13 @@ private:
     [[nodiscard]] auto parse_study_from_row(
         const std::map<std::string, database::database_value>& row) const
         -> study_record;
+
+    /**
+     * @brief Parse series record from database_system result row
+     */
+    [[nodiscard]] auto parse_series_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> series_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
