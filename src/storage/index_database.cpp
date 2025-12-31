@@ -1669,7 +1669,86 @@ auto index_database::upsert_series(const series_record& record)
         return make_error<int64_t>(-1, "Valid study_pk is required", "storage");
     }
 
-    // Use INSERT OR REPLACE for upsert behavior
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // Check if series exists
+        database::sql_query_builder check_builder;
+        auto check_sql =
+            check_builder
+                .select(std::vector<std::string>{"series_pk"})
+                .from("series")
+                .where("series_uid", "=", record.series_uid)
+                .build_for_database(database::database_types::sqlite);
+
+        auto check_result = db_manager_->select_query_result(check_sql);
+
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                // Series exists - update
+                auto existing = find_series(record.series_uid);
+                if (existing.has_value()) {
+                    database::sql_query_builder update_builder;
+                    update_builder.update("series")
+                        .set({{"study_pk", std::to_string(record.study_pk)},
+                              {"modality", record.modality},
+                              {"series_description", record.series_description},
+                              {"body_part_examined", record.body_part_examined},
+                              {"station_name", record.station_name},
+                              {"updated_at", "datetime('now')"}});
+
+                    if (record.series_number.has_value()) {
+                        update_builder.set({{"series_number",
+                                             std::to_string(*record.series_number)}});
+                    }
+
+                    auto update_sql =
+                        update_builder.where("series_uid", "=", record.series_uid)
+                            .build_for_database(database::database_types::sqlite);
+
+                    auto update_result = db_manager_->update_query_result(update_sql);
+                    if (update_result.is_ok()) {
+                        // Update modalities in study
+                        (void)update_modalities_in_study(record.study_pk);
+                        return existing->pk;
+                    }
+                    // Update failed, fall through to SQLite
+                }
+            } else {
+                // Series doesn't exist - insert
+                database::sql_query_builder insert_builder;
+                insert_builder.insert_into("series")
+                    .values({{"study_pk", std::to_string(record.study_pk)},
+                             {"series_uid", record.series_uid},
+                             {"modality", record.modality},
+                             {"series_description", record.series_description},
+                             {"body_part_examined", record.body_part_examined},
+                             {"station_name", record.station_name}});
+
+                if (record.series_number.has_value()) {
+                    insert_builder.values(
+                        {{"series_number", std::to_string(*record.series_number)}});
+                }
+
+                auto insert_sql =
+                    insert_builder.build_for_database(database::database_types::sqlite);
+
+                auto insert_result = db_manager_->insert_query_result(insert_sql);
+                if (insert_result.is_ok()) {
+                    // Retrieve the inserted series to get pk
+                    auto inserted = find_series(record.series_uid);
+                    if (inserted.has_value()) {
+                        // Update modalities in study
+                        (void)update_modalities_in_study(record.study_pk);
+                        return inserted->pk;
+                    }
+                }
+            }
+        }
+        // Fall through to SQLite fallback on any error
+    }
+#endif
+
+    // Fallback to direct SQLite - Use INSERT OR REPLACE for upsert behavior
     const char* sql = R"(
         INSERT INTO series (
             study_pk, series_uid, modality, series_number,
@@ -1734,6 +1813,29 @@ auto index_database::upsert_series(const series_record& record)
 
 auto index_database::find_series(std::string_view series_uid) const
     -> std::optional<series_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "series_pk", "study_pk", "series_uid", "modality",
+                    "series_number", "series_description", "body_part_examined",
+                    "station_name", "num_instances", "created_at", "updated_at"})
+                .from("series")
+                .where("series_uid", "=", std::string(series_uid))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_series_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT series_pk, study_pk, series_uid, modality, series_number,
                series_description, body_part_examined, station_name,
@@ -1765,6 +1867,29 @@ auto index_database::find_series(std::string_view series_uid) const
 
 auto index_database::find_series_by_pk(int64_t pk) const
     -> std::optional<series_record> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "series_pk", "study_pk", "series_uid", "modality",
+                    "series_number", "series_description", "body_part_examined",
+                    "station_name", "num_instances", "created_at", "updated_at"})
+                .from("series")
+                .where("series_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_series_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT series_pk, study_pk, series_uid, modality, series_number,
                series_description, body_part_examined, station_name,
@@ -1795,6 +1920,43 @@ auto index_database::find_series_by_pk(int64_t pk) const
 
 auto index_database::list_series(std::string_view study_uid) const
     -> Result<std::vector<series_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // First get study_pk from study_uid
+        auto study = find_study(study_uid);
+        if (!study.has_value()) {
+            return ok(std::vector<series_record>{});
+        }
+
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "series_pk", "study_pk", "series_uid", "modality",
+                    "series_number", "series_description", "body_part_examined",
+                    "station_name", "num_instances", "created_at", "updated_at"})
+                .from("series")
+                .where("study_pk", "=", study->pk)
+                .order_by("series_number")
+                .order_by("series_uid")
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<series_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<series_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_series_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<series_record> results;
 
     const char* sql = R"(
@@ -1828,6 +1990,73 @@ auto index_database::list_series(std::string_view study_uid) const
 
 auto index_database::search_series(const series_query& query) const
     -> Result<std::vector<series_record>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "series_pk", "study_pk", "series_uid", "modality",
+            "series_number", "series_description", "body_part_examined",
+            "station_name", "num_instances", "created_at", "updated_at"});
+        builder.from("series");
+
+        // If study_uid filter is specified, get study_pk first
+        if (query.study_uid.has_value()) {
+            auto study = find_study(*query.study_uid);
+            if (!study.has_value()) {
+                return ok(std::vector<series_record>{});
+            }
+            builder.where("study_pk", "=", study->pk);
+        }
+
+        if (query.series_uid.has_value()) {
+            builder.where("series_uid", "=", *query.series_uid);
+        }
+
+        if (query.modality.has_value()) {
+            builder.where("modality", "=", *query.modality);
+        }
+
+        if (query.series_description.has_value()) {
+            builder.where("series_description", "LIKE",
+                          to_like_pattern(*query.series_description));
+        }
+
+        if (query.body_part_examined.has_value()) {
+            builder.where("body_part_examined", "=", *query.body_part_examined);
+        }
+
+        if (query.series_number.has_value()) {
+            builder.where("series_number", "=", *query.series_number);
+        }
+
+        builder.order_by("series_number");
+        builder.order_by("series_uid");
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<series_record>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<series_record> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_series_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<series_record> results;
 
     std::string sql = R"(
@@ -1920,6 +2149,31 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     auto series = find_series(series_uid);
     int64_t study_pk = series ? series->study_pk : 0;
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto delete_sql = builder.delete_from("series")
+                              .where("series_uid", "=", std::string(series_uid))
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_err()) {
+            return make_error<std::monostate>(
+                error_codes::database_query_error,
+                pacs::compat::format("Failed to delete series: {}",
+                                     result.error().message),
+                "storage");
+        }
+
+        // Update modalities in study
+        if (study_pk > 0) {
+            (void)update_modalities_in_study(study_pk);
+        }
+        return ok();
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "DELETE FROM series WHERE series_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -1952,6 +2206,38 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
 }
 
 auto index_database::series_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("series")
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                }
+                if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(static_cast<size_t>(0));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM series;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -1972,6 +2258,45 @@ auto index_database::series_count() const -> Result<size_t> {
 }
 
 auto index_database::series_count(std::string_view study_uid) const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        // First get study_pk from study_uid
+        auto study = find_study(study_uid);
+        if (!study.has_value()) {
+            return ok(static_cast<size_t>(0));
+        }
+
+        database::sql_query_builder builder;
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("series")
+                             .where("study_pk", "=", study->pk)
+                             .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(count_sql);
+        if (result.is_err()) {
+            return pacs_error<size_t>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        if (!result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end()) {
+                if (std::holds_alternative<int64_t>(it->second)) {
+                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+                }
+                if (std::holds_alternative<std::string>(it->second)) {
+                    return ok(static_cast<size_t>(
+                        std::stoll(std::get<std::string>(it->second))));
+                }
+            }
+        }
+        return ok(static_cast<size_t>(0));
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT COUNT(*) FROM series se
         JOIN studies st ON se.study_pk = st.study_pk
@@ -4026,6 +4351,44 @@ auto index_database::parse_study_from_row(
 
     auto updated_str = get_string_value(row, "updated_at");
     record.updated_at = parse_datetime(updated_str.c_str());
+
+    return record;
+}
+
+auto index_database::parse_series_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> series_record {
+    series_record record;
+
+    record.pk = get_int64_value(row, "series_pk");
+    record.study_pk = get_int64_value(row, "study_pk");
+    record.series_uid = get_string_value(row, "series_uid");
+    record.modality = get_string_value(row, "modality");
+
+    // Handle nullable series_number
+    auto it = row.find("series_number");
+    if (it != row.end()) {
+        if (std::holds_alternative<int64_t>(it->second)) {
+            record.series_number = static_cast<int>(std::get<int64_t>(it->second));
+        } else if (std::holds_alternative<std::string>(it->second)) {
+            const auto& str = std::get<std::string>(it->second);
+            if (!str.empty()) {
+                record.series_number = std::stoi(str);
+            }
+        }
+    }
+
+    record.series_description = get_string_value(row, "series_description");
+    record.body_part_examined = get_string_value(row, "body_part_examined");
+    record.station_name = get_string_value(row, "station_name");
+    record.num_instances =
+        static_cast<int>(get_int64_value(row, "num_instances"));
+
+    auto created_str = get_string_value(row, "created_at");
+    record.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str2 = get_string_value(row, "updated_at");
+    record.updated_at = parse_datetime(updated_str2.c_str());
 
     return record;
 }
