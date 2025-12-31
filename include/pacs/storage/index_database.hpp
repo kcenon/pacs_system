@@ -1118,6 +1118,13 @@ private:
     [[nodiscard]] auto parse_worklist_from_row(
         const std::map<std::string, database::database_value>& row) const
         -> worklist_item;
+
+    /**
+     * @brief Parse audit record from database_system result row
+     */
+    [[nodiscard]] auto parse_audit_from_row(
+        const std::map<std::string, database::database_value>& row) const
+        -> audit_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
