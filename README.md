@@ -138,6 +138,7 @@ This project leverages the following kcenon ecosystem components:
 | **logger_system** | Logging | Async logging, 4.34M msg/s |
 | **monitoring_system** | Observability | Metrics, distributed tracing |
 | **network_system** | Network I/O | TCP/TLS, async operations |
+| **database_system** | Database abstraction | SQL injection prevention, multi-DB support (Optional) |
 
 ---
 
@@ -299,6 +300,12 @@ pacs_system/
 - 📁 [Project Structure](docs/PROJECT_STRUCTURE.md) - Directory structure
 - 🔧 [API Reference](docs/API_REFERENCE.md) - API documentation
 - 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - Thread system migration summary
+
+**Database Integration:**
+- 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system integration guide
+- 📚 [API Reference (Database)](docs/database/API_REFERENCE.md) - Query Builder API documentation
+- 🏛️ [ADR-001](docs/adr/ADR-001-database-system-integration.md) - Architecture Decision Record
+- ⚡ [Performance Guide](docs/database/PERFORMANCE_GUIDE.md) - Database optimization tips
 
 ---
 
