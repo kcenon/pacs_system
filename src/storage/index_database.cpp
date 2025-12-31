@@ -4262,6 +4262,39 @@ auto index_database::parse_mpps_from_row(
 
     return record;
 }
+
+auto index_database::parse_worklist_from_row(
+    const std::map<std::string, database::core::database_value>& row) const
+    -> worklist_item {
+    worklist_item item;
+
+    item.pk = get_int64_value(row, "worklist_pk");
+    item.step_id = get_string_value(row, "step_id");
+    item.step_status = get_string_value(row, "step_status");
+    item.patient_id = get_string_value(row, "patient_id");
+    item.patient_name = get_string_value(row, "patient_name");
+    item.birth_date = get_string_value(row, "birth_date");
+    item.sex = get_string_value(row, "sex");
+    item.accession_no = get_string_value(row, "accession_no");
+    item.requested_proc_id = get_string_value(row, "requested_proc_id");
+    item.study_uid = get_string_value(row, "study_uid");
+    item.scheduled_datetime = get_string_value(row, "scheduled_datetime");
+    item.station_ae = get_string_value(row, "station_ae");
+    item.station_name = get_string_value(row, "station_name");
+    item.modality = get_string_value(row, "modality");
+    item.procedure_desc = get_string_value(row, "procedure_desc");
+    item.protocol_code = get_string_value(row, "protocol_code");
+    item.referring_phys = get_string_value(row, "referring_phys");
+    item.referring_phys_id = get_string_value(row, "referring_phys_id");
+
+    auto created_str = get_string_value(row, "created_at");
+    item.created_at = parse_datetime(created_str.c_str());
+
+    auto updated_str = get_string_value(row, "updated_at");
+    item.updated_at = parse_datetime(updated_str.c_str());
+
+    return item;
+}
 #endif
 
 // ============================================================================
@@ -4287,6 +4320,43 @@ auto index_database::add_worklist_item(const worklist_item& item)
                                    "storage");
     }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto insert_sql =
+            builder.insert_into("worklist")
+                .values({{"step_id", item.step_id},
+                         {"step_status", std::string("SCHEDULED")},
+                         {"patient_id", item.patient_id},
+                         {"patient_name", item.patient_name},
+                         {"birth_date", item.birth_date},
+                         {"sex", item.sex},
+                         {"accession_no", item.accession_no},
+                         {"requested_proc_id", item.requested_proc_id},
+                         {"study_uid", item.study_uid},
+                         {"scheduled_datetime", item.scheduled_datetime},
+                         {"station_ae", item.station_ae},
+                         {"station_name", item.station_name},
+                         {"modality", item.modality},
+                         {"procedure_desc", item.procedure_desc},
+                         {"protocol_code", item.protocol_code},
+                         {"referring_phys", item.referring_phys},
+                         {"referring_phys_id", item.referring_phys_id}})
+                .build_for_database(database::database_types::sqlite);
+
+        auto insert_result = db_manager_->insert_query_result(insert_sql);
+        if (insert_result.is_ok()) {
+            // Retrieve the inserted worklist item to get pk
+            auto inserted = find_worklist_item(item.step_id, item.accession_no);
+            if (inserted.has_value()) {
+                return inserted->pk;
+            }
+        }
+        // Insert failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         INSERT INTO worklist (
             step_id, step_status, patient_id, patient_name, birth_date, sex,
@@ -4358,6 +4428,25 @@ auto index_database::update_worklist_status(std::string_view step_id,
             "storage");
     }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.update("worklist");
+        builder.set({{"step_status", std::string(new_status)}});
+        builder.where("step_id", "=", std::string(step_id));
+        builder.where("accession_no", "=", std::string(accession_no));
+
+        auto update_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->update_query_result(update_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Update failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         UPDATE worklist
         SET step_status = ?,
@@ -4397,6 +4486,88 @@ auto index_database::update_worklist_status(std::string_view step_id,
 
 auto index_database::query_worklist(const worklist_query& query) const
     -> Result<std::vector<worklist_item>> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.select(std::vector<std::string>{
+            "worklist_pk", "step_id", "step_status", "patient_id",
+            "patient_name", "birth_date", "sex", "accession_no",
+            "requested_proc_id", "study_uid", "scheduled_datetime",
+            "station_ae", "station_name", "modality", "procedure_desc",
+            "protocol_code", "referring_phys", "referring_phys_id",
+            "created_at", "updated_at"});
+        builder.from("worklist");
+
+        // Default: only return SCHEDULED items unless include_all_status is set
+        if (!query.include_all_status) {
+            builder.where("step_status", "=", std::string("SCHEDULED"));
+        }
+
+        if (query.station_ae.has_value()) {
+            builder.where("station_ae", "=", *query.station_ae);
+        }
+
+        if (query.modality.has_value()) {
+            builder.where("modality", "=", *query.modality);
+        }
+
+        if (query.scheduled_date_from.has_value()) {
+            builder.where_raw(
+                pacs::compat::format("substr(scheduled_datetime, 1, 8) >= '{}'",
+                                     *query.scheduled_date_from));
+        }
+
+        if (query.scheduled_date_to.has_value()) {
+            builder.where_raw(
+                pacs::compat::format("substr(scheduled_datetime, 1, 8) <= '{}'",
+                                     *query.scheduled_date_to));
+        }
+
+        if (query.patient_id.has_value()) {
+            builder.where("patient_id", "LIKE", to_like_pattern(*query.patient_id));
+        }
+
+        if (query.patient_name.has_value()) {
+            builder.where("patient_name", "LIKE",
+                          to_like_pattern(*query.patient_name));
+        }
+
+        if (query.accession_no.has_value()) {
+            builder.where("accession_no", "=", *query.accession_no);
+        }
+
+        if (query.step_id.has_value()) {
+            builder.where("step_id", "=", *query.step_id);
+        }
+
+        builder.order_by("scheduled_datetime", database::sort_order::asc);
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err()) {
+            return pacs_error<std::vector<worklist_item>>(
+                error_codes::database_query_error,
+                pacs::compat::format("Query failed: {}", result.error().message));
+        }
+
+        std::vector<worklist_item> results;
+        for (const auto& row : result.value()) {
+            results.push_back(parse_worklist_from_row(row));
+        }
+        return ok(std::move(results));
+    }
+#endif
+
+    // Fallback to direct SQLite
     std::vector<worklist_item> results;
 
     std::string sql = R"(
@@ -4492,6 +4663,33 @@ auto index_database::query_worklist(const worklist_query& query) const
 auto index_database::find_worklist_item(std::string_view step_id,
                                         std::string_view accession_no) const
     -> std::optional<worklist_item> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "worklist_pk", "step_id", "step_status", "patient_id",
+                    "patient_name", "birth_date", "sex", "accession_no",
+                    "requested_proc_id", "study_uid", "scheduled_datetime",
+                    "station_ae", "station_name", "modality", "procedure_desc",
+                    "protocol_code", "referring_phys", "referring_phys_id",
+                    "created_at", "updated_at"})
+                .from("worklist")
+                .where("step_id", "=", std::string(step_id))
+                .where("accession_no", "=", std::string(accession_no))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_worklist_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
                birth_date, sex, accession_no, requested_proc_id, study_uid,
@@ -4527,6 +4725,32 @@ auto index_database::find_worklist_item(std::string_view step_id,
 
 auto index_database::find_worklist_by_pk(int64_t pk) const
     -> std::optional<worklist_item> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "worklist_pk", "step_id", "step_status", "patient_id",
+                    "patient_name", "birth_date", "sex", "accession_no",
+                    "requested_proc_id", "study_uid", "scheduled_datetime",
+                    "station_ae", "station_name", "modality", "procedure_desc",
+                    "protocol_code", "referring_phys", "referring_phys_id",
+                    "created_at", "updated_at"})
+                .from("worklist")
+                .where("worklist_pk", "=", pk)
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_err() || result.value().empty()) {
+            return std::nullopt;
+        }
+
+        return parse_worklist_from_row(result.value()[0]);
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = R"(
         SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
                birth_date, sex, accession_no, requested_proc_id, study_uid,
@@ -4560,6 +4784,24 @@ auto index_database::find_worklist_by_pk(int64_t pk) const
 auto index_database::delete_worklist_item(std::string_view step_id,
                                           std::string_view accession_no)
     -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.delete_from("worklist");
+        builder.where("step_id", "=", std::string(step_id));
+        builder.where("accession_no", "=", std::string(accession_no));
+
+        auto delete_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql =
         "DELETE FROM worklist WHERE step_id = ? AND accession_no = ?;";
 
@@ -4605,6 +4847,25 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     auto cutoff_str = oss.str();
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.delete_from("worklist");
+        builder.where("step_status", "!=", std::string("SCHEDULED"));
+        builder.where_raw(
+            pacs::compat::format("created_at < '{}'", cutoff_str));
+
+        auto delete_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_ok()) {
+            return ok(static_cast<size_t>(result.value()));
+        }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     // Delete old items that are not SCHEDULED
     const char* sql = R"(
         DELETE FROM worklist
@@ -4650,6 +4911,25 @@ auto index_database::cleanup_worklist_items_before(
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     auto before_str = oss.str();
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        builder.delete_from("worklist");
+        builder.where("step_status", "!=", std::string("SCHEDULED"));
+        builder.where_raw(
+            pacs::compat::format("scheduled_datetime < '{}'", before_str));
+
+        auto delete_sql =
+            builder.build_for_database(database::database_types::sqlite);
+        auto result = db_manager_->delete_query_result(delete_sql);
+        if (result.is_ok()) {
+            return ok(static_cast<size_t>(result.value()));
+        }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     // Delete items scheduled before the specified time that are not SCHEDULED
     const char* sql = R"(
         DELETE FROM worklist
@@ -4683,6 +4963,26 @@ auto index_database::cleanup_worklist_items_before(
 }
 
 auto index_database::worklist_count() const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                              .from("worklist")
+                              .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+            }
+        }
+        // Query failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM worklist;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -4704,6 +5004,28 @@ auto index_database::worklist_count() const -> Result<size_t> {
 }
 
 auto index_database::worklist_count(std::string_view status) const -> Result<size_t> {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_manager_) {
+        database::sql_query_builder builder;
+        auto select_sql =
+            builder.select(std::vector<std::string>{"COUNT(*)"})
+                .from("worklist")
+                .where("step_status", "=", std::string(status))
+                .build_for_database(database::database_types::sqlite);
+
+        auto result = db_manager_->select_query_result(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
+            }
+        }
+        // Query failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
     const char* sql = "SELECT COUNT(*) FROM worklist WHERE step_status = ?;";
 
     sqlite3_stmt* stmt = nullptr;
