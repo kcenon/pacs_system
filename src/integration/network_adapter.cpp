@@ -7,11 +7,11 @@
 #include <pacs/integration/dicom_session.hpp>
 #include <pacs/network/dicom_server.hpp>
 
-#include <network_system/core/messaging_server.h>
-#include <network_system/core/messaging_client.h>
-#include <network_system/core/secure_messaging_server.h>
-#include <network_system/session/messaging_session.h>
-#include <network_system/session/secure_session.h>
+#include <kcenon/network/core/messaging_server.h>
+#include <kcenon/network/core/messaging_client.h>
+#include <kcenon/network/core/secure_messaging_server.h>
+#include <kcenon/network/session/messaging_session.h>
+#include <kcenon/network/session/secure_session.h>
 
 #include <filesystem>
 #include <future>
@@ -67,7 +67,7 @@ network_adapter::connect(const connection_config& config) {
 
     try {
         // Create messaging client
-        auto client = std::make_shared<network_system::core::messaging_client>(
+        auto client = std::make_shared<kcenon::network::core::messaging_client>(
             "pacs_client");
 
         // Set up promise/future for synchronous connection
@@ -75,7 +75,7 @@ network_adapter::connect(const connection_config& config) {
         auto connect_future = connect_promise.get_future();
 
         // Track the session when connected
-        std::shared_ptr<network_system::session::messaging_session> connected_session;
+        std::shared_ptr<kcenon::network::session::messaging_session> connected_session;
 
         // Set connection callback
         client->set_connected_callback([&connect_promise]() {

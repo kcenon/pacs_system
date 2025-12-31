@@ -5,8 +5,8 @@
 
 #include <pacs/integration/dicom_session.hpp>
 
-#include <network_system/session/messaging_session.h>
-#include <network_system/session/secure_session.h>
+#include <kcenon/network/session/messaging_session.h>
+#include <kcenon/network/session/secure_session.h>
 
 #include <algorithm>
 #include <cstring>
