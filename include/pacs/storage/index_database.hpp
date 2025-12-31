@@ -35,8 +35,9 @@
 #include <vector>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include <database/database_manager.h>
+#include <database/core/database_backend.h>
 #include <database/core/database_context.h>
+#include <database/database_manager.h>
 #endif
 
 // Forward declaration of SQLite handle
@@ -1081,49 +1082,49 @@ private:
      * @brief Parse patient record from database_system result row
      */
     [[nodiscard]] auto parse_patient_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> patient_record;
 
     /**
      * @brief Parse study record from database_system result row
      */
     [[nodiscard]] auto parse_study_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> study_record;
 
     /**
      * @brief Parse series record from database_system result row
      */
     [[nodiscard]] auto parse_series_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> series_record;
 
     /**
      * @brief Parse instance record from database_system result row
      */
     [[nodiscard]] auto parse_instance_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> instance_record;
 
     /**
      * @brief Parse MPPS record from database_system result row
      */
     [[nodiscard]] auto parse_mpps_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> mpps_record;
 
     /**
      * @brief Parse worklist record from database_system result row
      */
     [[nodiscard]] auto parse_worklist_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> worklist_item;
 
     /**
      * @brief Parse audit record from database_system result row
      */
     [[nodiscard]] auto parse_audit_from_row(
-        const std::map<std::string, database::database_value>& row) const
+        const std::map<std::string, database::core::database_value>& row) const
         -> audit_record;
 #endif
 
