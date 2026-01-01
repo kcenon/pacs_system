@@ -50,6 +50,7 @@
 #include <windows.h>
 #else
 #include <arpa/inet.h>
+#include <cerrno>
 #include <csignal>
 #include <fcntl.h>
 #include <netinet/in.h>
