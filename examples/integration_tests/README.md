@@ -766,8 +766,12 @@ All operations have configurable timeouts to prevent hanging tests. The test fra
 | `server_ready_timeout()` | 5 seconds | 30 seconds |
 | `dcmtk_server_ready_timeout()` | 10 seconds | 60 seconds |
 | `default_timeout()` | 5 seconds | 30 seconds |
+| `is_port_listening()` connect timeout | 200ms | 1 second |
+| `test_server::start()` delay | 100ms | 300ms |
 | Individual operations | 30 seconds | 30 seconds |
 | Full test suite | 5 minutes | 10 minutes |
+
+The `is_port_listening()` function uses an adaptive timeout for the socket connect operation, which is critical for reliable port detection in slower CI environments. Similarly, `test_server::start()` uses a longer delay in CI to ensure servers are fully initialized before tests proceed.
 
 CI environment is detected by checking these environment variables:
 - `CI` - Generic CI variable (GitHub Actions, GitLab CI, Travis CI)
