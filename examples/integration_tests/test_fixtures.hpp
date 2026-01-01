@@ -536,13 +536,21 @@ public:
     /**
      * @brief Start the server
      * @return true if server started successfully
+     *
+     * Uses adaptive startup delay based on environment:
+     * - Normal: 100ms for quick responsiveness
+     * - CI: 300ms to account for slower VM/container environments
      */
     [[nodiscard]] bool start() {
         auto result = server_->start();
         if (result.is_ok()) {
             running_ = true;
             // Give server time to start accepting connections
-            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+            // Longer delay in CI for slower environments
+            auto startup_delay = is_ci_environment()
+                ? std::chrono::milliseconds{300}
+                : std::chrono::milliseconds{100};
+            std::this_thread::sleep_for(startup_delay);
         }
         return result.is_ok();
     }
