@@ -2,6 +2,7 @@
 # End-to-End workflow tests for PACS system
 #
 # @see Issue #111 - Integration Test Suite
+# @see Issue #450 - DCMTK Process Launcher and Test Utilities
 
 add_executable(pacs_integration_e2e
     main.cpp
@@ -17,6 +18,7 @@ add_executable(pacs_integration_e2e
     test_data_generator.cpp
     test_data_generator_test.cpp
     test_dicom_server_v2_integration.cpp
+    test_dcmtk_tool.cpp
 )
 
 target_include_directories(pacs_integration_e2e
