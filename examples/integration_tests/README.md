@@ -33,6 +33,11 @@ examples/integration_tests/
 ├── test_tls_integration.cpp         # TLS integration tests
 ├── test_stability.cpp               # Long-running stability tests
 ├── test_dicom_server_v2_integration.cpp  # V2 server E2E tests (Issue #163)
+├── test_dcmtk_tool.cpp              # DCMTK tool wrapper unit tests (Issue #450)
+├── test_dcmtk_echo.cpp              # DCMTK C-ECHO interop tests (Issue #451)
+├── test_dcmtk_store.cpp             # DCMTK C-STORE interop tests (Issue #452)
+├── test_dcmtk_find.cpp              # DCMTK C-FIND interop tests (Issue #453)
+├── test_dcmtk_move.cpp              # DCMTK C-MOVE interop tests (Issue #454)
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
@@ -41,6 +46,10 @@ examples/integration_tests/
 │   ├── test_store_retrieve.sh       # PACS storage workflow tests
 │   ├── test_worklist_mpps.sh        # RIS workflow tests
 │   ├── test_secure_dicom.sh         # TLS encrypted communication tests
+│   ├── test_dcmtk_echo.sh           # DCMTK C-ECHO shell tests (Issue #451)
+│   ├── test_dcmtk_store.sh          # DCMTK C-STORE shell tests (Issue #452)
+│   ├── test_dcmtk_find.sh           # DCMTK C-FIND shell tests (Issue #453)
+│   ├── test_dcmtk_move.sh           # DCMTK C-MOVE shell tests (Issue #454)
 │   └── run_all_binary_tests.sh      # Master test runner
 └── test_data/                       # Minimal DICOM test files
     ├── ct_minimal.dcm               # CT Image IOD
@@ -379,6 +388,109 @@ verify_received_dicom /tmp/received 1
 stop_storescp "$storescp_pid"
 ```
 
+## DCMTK Interoperability Tests
+
+The DCMTK interoperability test suite validates bidirectional compatibility between the pacs_system and DCMTK reference implementation. These tests ensure compliance with DICOM standards and interoperability with real-world PACS systems.
+
+### Test Scenarios
+
+| DICOM Operation | C++ Test File | Shell Script | Issue |
+|-----------------|---------------|--------------|-------|
+| C-ECHO | `test_dcmtk_echo.cpp` | `test_dcmtk_echo.sh` | #451 |
+| C-STORE | `test_dcmtk_store.cpp` | `test_dcmtk_store.sh` | #452 |
+| C-FIND | `test_dcmtk_find.cpp` | `test_dcmtk_find.sh` | #453 |
+| C-MOVE | `test_dcmtk_move.cpp` | `test_dcmtk_move.sh` | #454 |
+
+### Running DCMTK Interoperability Tests
+
+```bash
+# Run all DCMTK interoperability tests (C++)
+./build/bin/pacs_integration_e2e "[dcmtk]"
+
+# Run specific DICOM operation tests
+./build/bin/pacs_integration_e2e "[dcmtk][echo]"   # C-ECHO tests
+./build/bin/pacs_integration_e2e "[dcmtk][store]"  # C-STORE tests
+./build/bin/pacs_integration_e2e "[dcmtk][find]"   # C-FIND tests
+./build/bin/pacs_integration_e2e "[dcmtk][move]"   # C-MOVE tests
+
+# Run shell script tests
+./scripts/test_dcmtk_echo.sh
+./scripts/test_dcmtk_store.sh
+./scripts/test_dcmtk_find.sh
+./scripts/test_dcmtk_move.sh
+```
+
+### Test Directions
+
+Each test suite verifies bidirectional interoperability:
+
+1. **pacs_system SCP ← DCMTK SCU**: pacs_system acts as server, DCMTK as client
+2. **pacs_system SCU → DCMTK SCP**: pacs_system acts as client, DCMTK as server
+
+### C-ECHO Test Scenarios (Issue #451)
+
+| Scenario | Direction | Description |
+|----------|-----------|-------------|
+| Basic Echo | pacs_system SCP ← DCMTK echoscu | DCMTK echoscu connects to pacs_system verification_scp |
+| Multiple Echoes | Both | Sequential echo requests for stability |
+| Connection Rejection | pacs_system SCP | Reject unknown AE titles |
+| Concurrent Echoes | pacs_system SCP | Multiple simultaneous echo requests |
+
+### C-STORE Test Scenarios (Issue #452)
+
+| Scenario | Direction | Description |
+|----------|-----------|-------------|
+| Single Store | pacs_system SCP ← DCMTK storescu | Store single DICOM file |
+| Multi-File Store | pacs_system SCP ← DCMTK storescu | Store multiple files in one session |
+| Multi-Frame Store | Both | Store XA/US cine images |
+| Concurrent Store | pacs_system SCP | Multiple parallel store sessions |
+| Reverse Direction | pacs_system SCU → DCMTK storescp | pacs_system sends to DCMTK |
+
+### C-FIND Test Scenarios (Issue #453)
+
+| Scenario | Direction | Description |
+|----------|-----------|-------------|
+| Study Level Query | pacs_system SCP ← DCMTK findscu | Query at STUDY level |
+| Patient Level Query | pacs_system SCP ← DCMTK findscu | Query at PATIENT level |
+| Wildcard Matching | pacs_system SCP | Use * wildcards in queries |
+| Date Range Query | pacs_system SCP | Query by StudyDate range |
+| Return Key Selection | pacs_system SCP | Request specific return keys |
+
+### C-MOVE Test Scenarios (Issue #454)
+
+| Scenario | Direction | Description |
+|----------|-----------|-------------|
+| Study Level Retrieve | pacs_system SCP ← DCMTK movescu | Retrieve entire study |
+| Series Level Retrieve | pacs_system SCP ← DCMTK movescu | Retrieve specific series |
+| Destination Resolution | pacs_system SCP | Resolve destination AE title |
+| Unknown Destination | pacs_system SCP | Reject unknown destination AE |
+| Concurrent Moves | pacs_system SCP | Multiple simultaneous retrievals |
+
+### CI/CD Integration (Issue #455)
+
+DCMTK interoperability tests are automatically executed via GitHub Actions. The workflow is defined in `.github/workflows/dcmtk-interop.yml`.
+
+#### Workflow Jobs
+
+| Job | Platform | Description |
+|-----|----------|-------------|
+| `dcmtk-cpp-tests` | Ubuntu 24.04, macOS 14 | C++ integration tests with Catch2 |
+| `dcmtk-shell-tests` | Ubuntu 24.04, macOS 14 | Shell script tests |
+| `dcmtk-summary` | Ubuntu 24.04 | Test result summary |
+
+#### Running Locally
+
+```bash
+# Install DCMTK (Ubuntu)
+sudo apt-get install dcmtk
+
+# Install DCMTK (macOS)
+brew install dcmtk
+
+# Verify installation
+echoscu --version
+```
+
 ### test_data_generator Class
 
 The `test_data_generator` class provides comprehensive DICOM dataset generators for testing. This supports all modalities, multi-frame images, and edge cases.
@@ -685,7 +797,9 @@ All operations have configurable timeouts to prevent hanging tests:
 
 ## CI/CD Pipeline
 
-Integration tests are automatically executed via GitHub Actions. The pipeline is defined in `.github/workflows/integration-tests.yml`.
+Integration tests are automatically executed via GitHub Actions. The pipelines are defined in:
+- `.github/workflows/integration-tests.yml` - General integration tests
+- `.github/workflows/dcmtk-interop.yml` - DCMTK interoperability tests (Issue #455)
 
 ### Workflow Jobs
 
@@ -697,6 +811,9 @@ Integration tests are automatically executed via GitHub Actions. The pipeline is
 | `binary-integration-tests` | All PRs | Run shell-based binary integration tests |
 | `stress-tests` | Main only | Extended stress tests (5 min) |
 | `test-summary` | Always | Aggregate and report results |
+| `dcmtk-cpp-tests` | All PRs | DCMTK C++ interoperability tests |
+| `dcmtk-shell-tests` | All PRs | DCMTK shell script tests |
+| `dcmtk-summary` | Always | DCMTK test result summary |
 
 ### Running Tests Locally with CTest Labels
 
@@ -722,6 +839,11 @@ ctest -L integration -V
 | `[workflow]` | Clinical workflow tests | All PRs |
 | `[multimodal]` | Multi-modality tests | All PRs |
 | `[tls]` | TLS/SSL security tests | All PRs |
+| `[dcmtk]` | DCMTK interoperability tests | All PRs (dedicated workflow) |
+| `[dcmtk][echo]` | C-ECHO interoperability | All PRs |
+| `[dcmtk][store]` | C-STORE interoperability | All PRs |
+| `[dcmtk][find]` | C-FIND interoperability | All PRs |
+| `[dcmtk][move]` | C-MOVE interoperability | All PRs |
 | `[stability]` | Stability tests | All PRs (smoke only) |
 | `[stress]` | Stress/load tests | Main only |
 | `[.slow]` | Long-running tests (hidden) | Manual only |
