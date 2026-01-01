@@ -19,6 +19,7 @@ examples/integration_tests/
 ├── CMakeLists.txt                   # Build configuration
 ├── main.cpp                         # Test main entry point
 ├── test_fixtures.hpp                # C++ test utilities and process launcher
+├── dcmtk_tool.hpp                   # DCMTK CLI tool wrapper (Issue #450)
 ├── test_data_generator.hpp          # Comprehensive DICOM data generators
 ├── test_data_generator.cpp          # Generator implementations
 ├── test_data_generator_test.cpp     # Generator unit tests
@@ -35,6 +36,7 @@ examples/integration_tests/
 ├── generate_test_data.cpp           # DICOM test file generator
 ├── scripts/                         # Shell test scripts
 │   ├── common.sh                    # Shared utility functions
+│   ├── dcmtk_common.sh              # DCMTK interop test helpers (Issue #450)
 │   ├── test_connectivity.sh         # Echo SCP/SCU tests
 │   ├── test_store_retrieve.sh       # PACS storage workflow tests
 │   ├── test_worklist_mpps.sh        # RIS workflow tests
@@ -303,6 +305,79 @@ auto result = tls_test_client::connect(
 | `PACS_TEST_CERT_DIR` | Directory containing test certificates |
 
 ## C++ Test Utilities
+
+### dcmtk_tool Class (Issue #450)
+
+The `dcmtk_tool` class provides a C++ wrapper for DCMTK command-line tools, enabling interoperability testing with external DICOM implementations.
+
+```cpp
+#include "dcmtk_tool.hpp"
+
+using namespace pacs::integration_test;
+
+// Check DCMTK availability
+if (!dcmtk_tool::is_available()) {
+    SKIP("DCMTK not installed");
+}
+
+// Get DCMTK version
+auto version = dcmtk_tool::version();
+INFO("DCMTK version: " << *version);
+
+// Run C-ECHO client
+auto result = dcmtk_tool::echoscu(
+    "localhost", 11112, "PACS_SCP", "MY_SCU"
+);
+REQUIRE(result.success());
+
+// Run C-STORE client
+auto store_result = dcmtk_tool::storescu(
+    "localhost", 11112, "PACS_SCP",
+    {"/path/to/image.dcm"},
+    "STORE_SCU"
+);
+
+// Run C-FIND client
+auto find_result = dcmtk_tool::findscu(
+    "localhost", 11112, "PACS_SCP",
+    "STUDY",
+    {{"PatientID", "TEST001"}}
+);
+
+// Start DCMTK storescp server
+test_directory output_dir;
+auto server = dcmtk_tool::storescp(11113, "DCMTK_SCP", output_dir.path());
+REQUIRE(server.is_running());
+// Server automatically stopped when guard goes out of scope
+```
+
+#### DCMTK Shell Helpers (dcmtk_common.sh)
+
+For shell-based testing, source `dcmtk_common.sh`:
+
+```bash
+#!/bin/bash
+source scripts/dcmtk_common.sh
+
+# Check DCMTK availability
+skip_if_no_dcmtk || exit 0
+
+# Run C-ECHO
+run_echoscu localhost 11112 PACS_SCP MY_SCU
+verify_echo_success $?
+
+# Start storescp server
+storescp_pid=$(start_storescp 11113 DCMTK_SCP /tmp/received)
+
+# Run C-STORE
+run_storescu localhost 11112 PACS_SCP /path/to/image.dcm
+
+# Verify received files
+verify_received_dicom /tmp/received 1
+
+# Cleanup (automatic with register_dcmtk_cleanup)
+stop_storescp "$storescp_pid"
+```
 
 ### test_data_generator Class
 

@@ -4,6 +4,8 @@
 #
 # Source this file from individual test scripts to use shared functions.
 #
+# @see Issue #450 - DCMTK Process Launcher and Test Utilities
+#
 
 # Colors for output (if terminal supports)
 if [[ -t 1 ]]; then
@@ -115,3 +117,13 @@ check_binary() {
     fi
     return 0
 }
+
+# Mark common.sh as sourced for dependency tracking
+COMMON_SH_SOURCED=1
+
+# Source DCMTK common functions if available
+# @see Issue #450 - DCMTK Process Launcher and Test Utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${SCRIPT_DIR}/dcmtk_common.sh" ]] && [[ -z "${DCMTK_COMMON_SH_SOURCED:-}" ]]; then
+    source "${SCRIPT_DIR}/dcmtk_common.sh"
+fi
