@@ -725,7 +725,26 @@ cmake --build build --target generate_binary_test_data
 
 ## Cross-Platform Considerations
 
-### Port Detection
+### Port Availability and Detection
+
+The C++ tests use robust port availability checking to prevent conflicts in CI environments:
+
+```cpp
+// Check if a port is actually available by attempting to bind
+bool available = is_port_available(port);
+
+// Find an available port with actual socket binding verification
+auto port = find_available_port();
+
+// Use high port range for error handling tests to avoid conflicts
+auto error_test_port = find_available_port(59000);
+```
+
+The `find_available_port()` function:
+1. Attempts actual socket binding to verify port availability
+2. Uses wider port range with randomization to reduce conflicts
+3. Automatically retries up to 200 times to find an available port
+4. Falls back to incremental ports if binding verification fails
 
 The scripts use multiple fallback methods for detecting listening ports:
 1. `lsof -i TCP:port` (preferred on macOS/Linux)
