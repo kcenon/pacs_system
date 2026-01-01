@@ -294,7 +294,7 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
         auto send_result = scu.store(assoc, file_result.value().dataset());
         REQUIRE(send_result.is_ok());
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
 
         // Wait for DCMTK to write the file
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
@@ -331,7 +331,7 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
             REQUIRE(send_result.is_ok());
         }
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
 
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         auto received = find_dicom_files(storage_dir.path());
@@ -404,7 +404,7 @@ TEST_CASE("C-STORE: Bidirectional round-trip verification",
         storage_scu scu;
         auto send_result = scu.store(assoc, read_result.value().dataset());
         REQUIRE(send_result.is_ok());
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
 
         // Verify DCMTK received the file
         std::this_thread::sleep_for(std::chrono::milliseconds{500});

@@ -282,7 +282,7 @@ TEST_CASE("Invalid SOP Class rejection", "[error][sop_class]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -303,7 +303,7 @@ TEST_CASE("Invalid SOP Class rejection", "[error][sop_class]") {
     }
     // If context was not accepted, that's also valid behavior
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
 
     // Verify server rejected the request
     REQUIRE(server.stored_count() == 0);
@@ -330,7 +330,7 @@ TEST_CASE("Server rejection of all stores", "[error][rejection]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -343,7 +343,7 @@ TEST_CASE("Server rejection of all stores", "[error][rejection]") {
     REQUIRE_FALSE(result.value().is_success());
     REQUIRE(result.value().status == static_cast<uint16_t>(storage_status::out_of_resources));
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
 
     REQUIRE(server.stored_count() == 0);
     REQUIRE(server.rejected_count() == 1);
@@ -380,7 +380,7 @@ TEST_CASE("Connection to offline server and retry", "[error][retry]") {
     );
 
     REQUIRE(retry_result.is_ok());
-    (void)retry_result.value().release(default_timeout);
+    (void)retry_result.value().release(default_timeout());
 
     server.stop();
 }
@@ -404,7 +404,7 @@ TEST_CASE("Server restart during operations", "[error][restart]") {
             {"1.2.840.10008.1.2.1"}
         });
 
-        auto connect = association::connect("localhost", port, config, default_timeout);
+        auto connect = association::connect("localhost", port, config, default_timeout());
         REQUIRE(connect.is_ok());
 
         storage_scu scu;
@@ -413,7 +413,7 @@ TEST_CASE("Server restart during operations", "[error][restart]") {
         REQUIRE(result.is_ok());
         REQUIRE(result.value().is_success());
 
-        (void)connect.value().release(default_timeout);
+        (void)connect.value().release(default_timeout());
     }
 
     REQUIRE(server.stored_count() == 1);
@@ -441,7 +441,7 @@ TEST_CASE("Server restart during operations", "[error][restart]") {
         "localhost", port, new_server.ae_title(), "POST_RESTART",
         {"1.2.840.10008.5.1.4.1.1.2"});
     REQUIRE(retry_connect.is_ok());
-    (void)retry_connect.value().release(default_timeout);
+    (void)retry_connect.value().release(default_timeout());
 
     new_server.stop();
 }
@@ -465,7 +465,7 @@ TEST_CASE("Timeout during slow processing", "[error][timeout]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -514,7 +514,7 @@ TEST_CASE("Association abort handling", "[error][abort]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -528,7 +528,7 @@ TEST_CASE("Association abort handling", "[error][abort]") {
         "localhost", port, server.ae_title(), "AFTER_ABORT",
         {std::string(verification_sop_class_uid)});
     REQUIRE(new_connect.is_ok());
-    (void)new_connect.value().release(default_timeout);
+    (void)new_connect.value().release(default_timeout());
 
     server.stop();
 }
@@ -554,7 +554,7 @@ TEST_CASE("Multiple rapid aborts", "[error][rapid_abort]") {
         });
 
         auto connect = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
 
         if (connect.is_ok()) {
             connect.value().abort();
@@ -575,11 +575,11 @@ TEST_CASE("Multiple rapid aborts", "[error][rapid_abort]") {
     auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
     REQUIRE(assoc.send_dimse(*ctx, echo_rq).is_ok());
 
-    auto recv = assoc.receive_dimse(default_timeout);
+    auto recv = assoc.receive_dimse(default_timeout());
     REQUIRE(recv.is_ok());
     REQUIRE(recv.value().second.status() == status_success);
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
     server.stop();
 }
 
@@ -601,7 +601,7 @@ TEST_CASE("Duplicate SOP Instance handling", "[error][duplicate]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -626,6 +626,6 @@ TEST_CASE("Duplicate SOP Instance handling", "[error][duplicate]") {
     REQUIRE(result2.is_ok());
     // Either success (overwrite) or warning (duplicate) is acceptable
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
     server.stop();
 }

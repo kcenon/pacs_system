@@ -327,7 +327,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         });
 
         auto connect_result = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
         REQUIRE(connect_result.is_ok());
 
         auto& assoc = connect_result.value();
@@ -347,7 +347,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
 
         std::vector<dicom_dataset> results;
         while (true) {
-            auto recv_result = assoc.receive_dimse(default_timeout);
+            auto recv_result = assoc.receive_dimse(default_timeout());
             if (recv_result.is_err()) break;
 
             auto& [recv_ctx, rsp] = recv_result.value();
@@ -359,7 +359,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
 
         REQUIRE(results.size() == 3);
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     SECTION("Query by modality filter") {
@@ -374,7 +374,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         });
 
         auto connect_result = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
         REQUIRE(connect_result.is_ok());
 
         auto& assoc = connect_result.value();
@@ -392,7 +392,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
 
         std::vector<dicom_dataset> results;
         while (true) {
-            auto recv_result = assoc.receive_dimse(default_timeout);
+            auto recv_result = assoc.receive_dimse(default_timeout());
             if (recv_result.is_err()) break;
 
             auto& [recv_ctx, rsp] = recv_result.value();
@@ -408,7 +408,7 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
             REQUIRE(result.get_string(tags::modality) == "CT");
         }
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     ris.stop();
@@ -440,7 +440,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
         {"1.2.840.10008.1.2.1"}
     });
 
-    auto wl_connect = association::connect("localhost", port, wl_config, default_timeout);
+    auto wl_connect = association::connect("localhost", port, wl_config, default_timeout());
     REQUIRE(wl_connect.is_ok());
 
     auto& wl_assoc = wl_connect.value();
@@ -456,7 +456,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
 
     std::vector<dicom_dataset> wl_results;
     while (true) {
-        auto recv = wl_assoc.receive_dimse(default_timeout);
+        auto recv = wl_assoc.receive_dimse(default_timeout());
         if (recv.is_err()) break;
         auto& [ctx, rsp] = recv.value();
         if (rsp.status() == status_success) break;
@@ -466,7 +466,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     }
 
     REQUIRE(wl_results.size() == 1);
-    (void)wl_assoc.release(default_timeout);
+    (void)wl_assoc.release(default_timeout());
 
     // Step 2: Create MPPS (IN PROGRESS)
     association_config mpps_config;
@@ -479,7 +479,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
         {"1.2.840.10008.1.2.1"}
     });
 
-    auto mpps_connect = association::connect("localhost", port, mpps_config, default_timeout);
+    auto mpps_connect = association::connect("localhost", port, mpps_config, default_timeout());
     REQUIRE(mpps_connect.is_ok());
 
     auto& mpps_assoc = mpps_connect.value();
@@ -500,7 +500,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     n_create_rq.set_dataset(std::move(mpps_create_ds));
     (void)mpps_assoc.send_dimse(mpps_ctx, n_create_rq);
 
-    auto create_recv = mpps_assoc.receive_dimse(default_timeout);
+    auto create_recv = mpps_assoc.receive_dimse(default_timeout());
     REQUIRE(create_recv.is_ok());
     auto& [create_ctx, create_rsp] = create_recv.value();
     REQUIRE(create_rsp.command() == command_field::n_create_rsp);
@@ -522,7 +522,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     n_set_rq.set_dataset(std::move(mpps_set_ds));
     (void)mpps_assoc.send_dimse(mpps_ctx, n_set_rq);
 
-    auto set_recv = mpps_assoc.receive_dimse(default_timeout);
+    auto set_recv = mpps_assoc.receive_dimse(default_timeout());
     REQUIRE(set_recv.is_ok());
     auto& [set_ctx, set_rsp] = set_recv.value();
     REQUIRE(set_rsp.command() == command_field::n_set_rsp);
@@ -533,7 +533,7 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
     REQUIRE(mpps_opt.has_value());
     REQUIRE(mpps_opt->status == mpps_status::completed);
 
-    (void)mpps_assoc.release(default_timeout);
+    (void)mpps_assoc.release(default_timeout());
     ris.stop();
 }
 
@@ -556,7 +556,7 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
         {"1.2.840.10008.1.2.1"}
     });
 
-    auto connect_result = association::connect("localhost", port, config, default_timeout);
+    auto connect_result = association::connect("localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -577,7 +577,7 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
     n_create.set_dataset(std::move(mpps_ds));
     (void)assoc.send_dimse(ctx, n_create);
 
-    auto create_recv = assoc.receive_dimse(default_timeout);
+    auto create_recv = assoc.receive_dimse(default_timeout());
     REQUIRE(create_recv.is_ok());
     REQUIRE(create_recv.value().second.status() == status_success);
 
@@ -592,7 +592,7 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
     n_set.set_dataset(std::move(disc_ds));
     (void)assoc.send_dimse(ctx, n_set);
 
-    auto set_recv = assoc.receive_dimse(default_timeout);
+    auto set_recv = assoc.receive_dimse(default_timeout());
     REQUIRE(set_recv.is_ok());
     REQUIRE(set_recv.value().second.status() == status_success);
 
@@ -601,7 +601,7 @@ TEST_CASE("MPPS discontinue workflow", "[worklist][mpps][discontinue]") {
     REQUIRE(mpps_opt.has_value());
     REQUIRE(mpps_opt->status == mpps_status::discontinued);
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
     ris.stop();
 }
 
@@ -624,7 +624,7 @@ TEST_CASE("MPPS cannot modify completed procedure", "[worklist][mpps][error]") {
         {"1.2.840.10008.1.2.1"}
     });
 
-    auto connect_result = association::connect("localhost", port, config, default_timeout);
+    auto connect_result = association::connect("localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -641,7 +641,7 @@ TEST_CASE("MPPS cannot modify completed procedure", "[worklist][mpps][error]") {
     auto n_create = make_n_create_rq(1, mpps_sop_class_uid, mpps_uid);
     n_create.set_dataset(std::move(create_ds));
     (void)assoc.send_dimse(ctx, n_create);
-    auto create_recv = assoc.receive_dimse(default_timeout);
+    auto create_recv = assoc.receive_dimse(default_timeout());
     REQUIRE(create_recv.is_ok());
 
     // Complete the MPPS
@@ -650,7 +650,7 @@ TEST_CASE("MPPS cannot modify completed procedure", "[worklist][mpps][error]") {
     auto n_set_complete = make_n_set_rq(2, mpps_sop_class_uid, mpps_uid);
     n_set_complete.set_dataset(std::move(complete_ds));
     (void)assoc.send_dimse(ctx, n_set_complete);
-    auto complete_recv = assoc.receive_dimse(default_timeout);
+    auto complete_recv = assoc.receive_dimse(default_timeout());
     REQUIRE(complete_recv.is_ok());
 
     // Try to modify completed MPPS - should fail
@@ -660,11 +660,11 @@ TEST_CASE("MPPS cannot modify completed procedure", "[worklist][mpps][error]") {
     n_set_modify.set_dataset(std::move(modify_ds));
     (void)assoc.send_dimse(ctx, n_set_modify);
 
-    auto modify_recv = assoc.receive_dimse(default_timeout);
+    auto modify_recv = assoc.receive_dimse(default_timeout());
     REQUIRE(modify_recv.is_ok());
     // Should return error status
     REQUIRE(modify_recv.value().second.status() != status_success);
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
     ris.stop();
 }
