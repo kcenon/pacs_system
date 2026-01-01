@@ -843,8 +843,15 @@ public:
      * @param port Port number
      * @param host Host address
      * @return true if port is accepting connections
+     *
+     * Uses adaptive timeout based on environment:
+     * - Normal: 200ms for quick responsiveness
+     * - CI: 1000ms to account for slower VM/container environments
      */
     static bool is_port_listening(uint16_t port, const std::string& host = "127.0.0.1") {
+        // Adaptive timeout: longer in CI environments where VMs may be slower
+        const long timeout_us = is_ci_environment() ? 1000000 : 200000;  // 1s CI, 200ms normal
+
 #ifdef _WIN32
         WSADATA wsa_data;
         if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {
@@ -872,13 +879,25 @@ public:
         FD_ZERO(&writefds);
         FD_SET(sock, &writefds);
 
-        timeval tv{0, 100000};  // 100ms timeout
+        timeval tv{};
+        tv.tv_sec = static_cast<decltype(tv.tv_sec)>(timeout_us / 1000000);
+        tv.tv_usec = static_cast<decltype(tv.tv_usec)>(timeout_us % 1000000);
         result = select(0, nullptr, &writefds, nullptr, &tv);
+
+        if (result > 0) {
+            // Check if connection actually succeeded
+            int error = 0;
+            int len = sizeof(error);
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &len);
+            closesocket(sock);
+            WSACleanup();
+            return error == 0;
+        }
 
         closesocket(sock);
         WSACleanup();
 
-        return result > 0;
+        return false;
 #else
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
@@ -905,12 +924,14 @@ public:
             return true;
         }
 
-        if (errno == EINPROGRESS) {
+        if (errno == EINPROGRESS || errno == EWOULDBLOCK) {
             fd_set writefds;
             FD_ZERO(&writefds);
             FD_SET(sock, &writefds);
 
-            timeval tv{0, 100000};  // 100ms timeout
+            timeval tv{};
+            tv.tv_sec = static_cast<decltype(tv.tv_sec)>(timeout_us / 1000000);
+            tv.tv_usec = static_cast<decltype(tv.tv_usec)>(timeout_us % 1000000);
             result = select(sock + 1, nullptr, &writefds, nullptr, &tv);
 
             if (result > 0) {
