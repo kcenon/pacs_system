@@ -287,7 +287,7 @@ TEST_CASE("C-FIND: pacs_system SCP with DCMTK findscu", "[dcmtk][interop][find]"
     // Wait for server to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("Basic study-level query succeeds") {
         std::vector<std::pair<std::string, std::string>> keys = {
@@ -442,7 +442,7 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("pacs_system SCU sends C-FIND successfully") {
         auto connect_result = test_association::connect(
@@ -601,7 +601,7 @@ TEST_CASE("C-FIND: Concurrent query operations", "[dcmtk][interop][find][stress]
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("3 concurrent DCMTK findscu clients") {
         constexpr int num_clients = 3;
@@ -758,7 +758,7 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("STUDY level query") {
         std::vector<std::pair<std::string, std::string>> keys = {
@@ -816,7 +816,7 @@ TEST_CASE("C-FIND: Special character handling", "[dcmtk][interop][find][special]
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("Query with special characters in response") {
         std::vector<std::pair<std::string, std::string>> keys = {

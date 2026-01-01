@@ -75,7 +75,7 @@ public:
         }
         return wait_for([this]() {
             return process_launcher::is_port_listening(port_);
-        }, std::chrono::milliseconds{5000});
+        }, server_ready_timeout());
     }
 
     void stop() {
@@ -272,7 +272,7 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{10000}));
+    }, dcmtk_server_ready_timeout()));
 
     SECTION("Single image via storage_scu") {
         auto test_file = create_test_dicom(input_dir.path(), "test.dcm", "CT");
@@ -366,7 +366,7 @@ TEST_CASE("C-STORE: Bidirectional round-trip verification",
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(dcmtk_port);
-    }, std::chrono::milliseconds{10000}));
+    }, dcmtk_server_ready_timeout()));
 
     SECTION("DCMTK -> pacs_system -> DCMTK round-trip") {
         // Create original test file

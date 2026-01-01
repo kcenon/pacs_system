@@ -47,7 +47,7 @@ TEST_CASE("C-ECHO: pacs_system SCP with DCMTK echoscu", "[dcmtk][interop][echo]"
     // Wait for server to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("Basic echo succeeds") {
         auto result = dcmtk_tool::echoscu("localhost", port, ae_title);
@@ -109,7 +109,7 @@ TEST_CASE("C-ECHO: DCMTK storescp with pacs_system SCU", "[dcmtk][interop][echo]
     // Wait for DCMTK server to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{10000}));
+    }, dcmtk_server_ready_timeout()));
 
     SECTION("pacs_system SCU sends C-ECHO successfully") {
         // Connect using association
@@ -186,7 +186,7 @@ TEST_CASE("C-ECHO: DCMTK echoscp with pacs_system SCU", "[dcmtk][interop][echo]"
     // Wait for DCMTK server to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{10000}));
+    }, dcmtk_server_ready_timeout()));
 
     SECTION("pacs_system SCU succeeds with DCMTK echoscp") {
         auto connect_result = test_association::connect(
@@ -231,7 +231,7 @@ TEST_CASE("C-ECHO: Concurrent echo operations", "[dcmtk][interop][echo][stress]"
     // Wait for server to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("5 concurrent DCMTK echoscu clients") {
         constexpr int num_clients = 5;
@@ -361,7 +361,7 @@ TEST_CASE("C-ECHO: Protocol verification", "[dcmtk][interop][echo][protocol]") {
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("Verification SOP Class negotiation") {
         // echoscu should negotiate Verification SOP Class (1.2.840.10008.1.1)

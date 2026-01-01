@@ -284,7 +284,7 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
     // Wait for destination to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(dest_port);
-    }, std::chrono::milliseconds{10000}));
+    }, dcmtk_server_ready_timeout()));
 
     // Setup: pacs_system Move SCP
     test_server server(move_port, move_ae);
@@ -314,7 +314,7 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
     // Wait for server to be ready
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(move_port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("C-MOVE by StudyInstanceUID succeeds") {
         std::vector<std::pair<std::string, std::string>> keys = {
@@ -408,7 +408,7 @@ TEST_CASE("C-MOVE: Unknown destination AE rejection", "[dcmtk][interop][move][er
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("Unknown destination AE is rejected") {
         std::vector<std::pair<std::string, std::string>> keys = {
@@ -491,7 +491,7 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(dest_port);
-    }, std::chrono::milliseconds{10000}));
+    }, dcmtk_server_ready_timeout()));
 
     // Setup pacs_system Move SCP
     test_server server(move_port, move_ae);
@@ -515,7 +515,7 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(move_port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("Multiple concurrent move requests") {
         constexpr int num_requests = 2;
@@ -588,7 +588,7 @@ TEST_CASE("C-MOVE: pacs_system SCU basic operation", "[dcmtk][interop][move]") {
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(dest_port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     // Start Move SCP
     test_server move_server(move_port, move_ae);
@@ -611,7 +611,7 @@ TEST_CASE("C-MOVE: pacs_system SCU basic operation", "[dcmtk][interop][move]") {
 
     REQUIRE(wait_for([&]() {
         return process_launcher::is_port_listening(move_port);
-    }, std::chrono::milliseconds{5000}));
+    }, server_ready_timeout()));
 
     SECTION("pacs_system SCU sends C-MOVE request") {
         // Connect to Move SCP

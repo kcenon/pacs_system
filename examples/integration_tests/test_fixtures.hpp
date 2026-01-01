@@ -61,14 +61,65 @@
 namespace pacs::integration_test {
 
 // =============================================================================
+// CI Environment Detection
+// =============================================================================
+
+/**
+ * @brief Check if running in a CI environment
+ *
+ * Detects CI environments by checking common CI environment variables:
+ * - CI: Generic CI variable (GitHub Actions, GitLab CI, Travis CI)
+ * - GITHUB_ACTIONS: GitHub Actions
+ * - GITLAB_CI: GitLab CI
+ * - JENKINS_URL: Jenkins
+ * - CIRCLECI: CircleCI
+ * - TRAVIS: Travis CI
+ *
+ * @return true if running in CI environment
+ */
+inline bool is_ci_environment() {
+    static const bool ci_detected = []() {
+        const char* ci_vars[] = {
+            "CI", "GITHUB_ACTIONS", "GITLAB_CI",
+            "JENKINS_URL", "CIRCLECI", "TRAVIS"
+        };
+        for (const auto* var : ci_vars) {
+            if (std::getenv(var) != nullptr) {
+                return true;
+            }
+        }
+        return false;
+    }();
+    return ci_detected;
+}
+
+// =============================================================================
 // Constants
 // =============================================================================
 
 /// Default test port range start (use high ports to avoid conflicts)
 constexpr uint16_t default_test_port = 41104;
 
-/// Default timeout for test operations
-constexpr auto default_timeout = std::chrono::milliseconds{5000};
+/// Default timeout for test operations (5s normal, 30s CI)
+inline std::chrono::milliseconds default_timeout() {
+    return is_ci_environment()
+        ? std::chrono::milliseconds{30000}
+        : std::chrono::milliseconds{5000};
+}
+
+/// Port listening timeout for pacs_system servers (5s normal, 30s CI)
+inline std::chrono::milliseconds server_ready_timeout() {
+    return is_ci_environment()
+        ? std::chrono::milliseconds{30000}
+        : std::chrono::milliseconds{5000};
+}
+
+/// Port listening timeout for DCMTK servers (10s normal, 60s CI)
+inline std::chrono::milliseconds dcmtk_server_ready_timeout() {
+    return is_ci_environment()
+        ? std::chrono::milliseconds{60000}
+        : std::chrono::milliseconds{10000};
+}
 
 /// Default AE titles
 constexpr const char* test_scp_ae_title = "TEST_SCP";
@@ -106,14 +157,14 @@ inline uint16_t find_available_port(uint16_t start = default_test_port) {
 /**
  * @brief Wait for a condition with timeout
  * @param condition Condition function
- * @param timeout Maximum wait time
+ * @param timeout Maximum wait time (uses default_timeout() if not specified)
  * @param interval Check interval
  * @return true if condition became true before timeout
  */
 template <typename Func>
 bool wait_for(
     Func&& condition,
-    std::chrono::milliseconds timeout = default_timeout,
+    std::chrono::milliseconds timeout,
     std::chrono::milliseconds interval = std::chrono::milliseconds{50}) {
 
     auto start = std::chrono::steady_clock::now();
@@ -125,6 +176,16 @@ bool wait_for(
         std::this_thread::sleep_for(interval);
     }
     return true;
+}
+
+/**
+ * @brief Wait for a condition with default timeout
+ * @param condition Condition function
+ * @return true if condition became true before timeout
+ */
+template <typename Func>
+bool wait_for(Func&& condition) {
+    return wait_for(std::forward<Func>(condition), default_timeout());
 }
 
 // =============================================================================
@@ -482,7 +543,7 @@ public:
             context_id += 2;
         }
 
-        return network::association::connect(host, port, config, default_timeout);
+        return network::association::connect(host, port, config, default_timeout());
     }
 };
 
