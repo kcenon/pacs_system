@@ -740,10 +740,36 @@ The C++ `process_launcher` class handles platform differences:
 
 ### Timeouts
 
-All operations have configurable timeouts to prevent hanging tests:
-- Server startup: 5-10 seconds
-- Individual operations: 30 seconds
-- Full test suite: 5 minutes
+All operations have configurable timeouts to prevent hanging tests. The test framework automatically detects CI environments (GitHub Actions, GitLab CI, Jenkins, etc.) and adjusts timeouts accordingly:
+
+| Timeout Type | Local | CI Environment |
+|--------------|-------|----------------|
+| `server_ready_timeout()` | 5 seconds | 30 seconds |
+| `dcmtk_server_ready_timeout()` | 10 seconds | 60 seconds |
+| `default_timeout()` | 5 seconds | 30 seconds |
+| Individual operations | 30 seconds | 30 seconds |
+| Full test suite | 5 minutes | 10 minutes |
+
+CI environment is detected by checking these environment variables:
+- `CI` - Generic CI variable (GitHub Actions, GitLab CI, Travis CI)
+- `GITHUB_ACTIONS` - GitHub Actions
+- `GITLAB_CI` - GitLab CI
+- `JENKINS_URL` - Jenkins
+- `CIRCLECI` - CircleCI
+- `TRAVIS` - Travis CI
+
+Usage in tests:
+```cpp
+// Use adaptive timeout for pacs_system server
+REQUIRE(wait_for([&]() {
+    return process_launcher::is_port_listening(port);
+}, server_ready_timeout()));
+
+// Use adaptive timeout for DCMTK server
+REQUIRE(wait_for([&]() {
+    return process_launcher::is_port_listening(dcmtk_port);
+}, dcmtk_server_ready_timeout()));
+```
 
 ## Troubleshooting
 
