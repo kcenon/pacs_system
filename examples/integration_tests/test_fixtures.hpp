@@ -144,13 +144,90 @@ inline std::string generate_uid(const std::string& root = "1.2.826.0.1.3680043.9
 }
 
 /**
- * @brief Find an available port for testing
- * @param start Starting port number
- * @return Available port number
+ * @brief Check if a port is actually available by attempting to bind
+ * @param port Port to check
+ * @return true if port is available
  */
-inline uint16_t find_available_port(uint16_t start = default_test_port) {
-    // Simple increment strategy - in practice, could test with socket binding
+inline bool is_port_available(uint16_t port) {
+#ifdef _WIN32
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET) {
+        return false;
+    }
+
+    int reuse = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+               reinterpret_cast<const char*>(&reuse), sizeof(reuse));
+
+    sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = htons(port);
+
+    bool available = (bind(sock, reinterpret_cast<sockaddr*>(&addr),
+                           sizeof(addr)) == 0);
+    closesocket(sock);
+    return available;
+#else
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        return false;
+    }
+
+    int reuse = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
+    sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = htons(port);
+
+    bool available = (bind(sock, reinterpret_cast<sockaddr*>(&addr),
+                           sizeof(addr)) == 0);
+    close(sock);
+    return available;
+#endif
+}
+
+/**
+ * @brief Find an available port for testing
+ * @param start Starting port number (default: default_test_port)
+ * @param max_attempts Maximum attempts to find an available port
+ * @return Available port number
+ *
+ * This function actually tests port availability by attempting to bind,
+ * which prevents port conflicts in CI environments where multiple tests
+ * may run concurrently.
+ */
+inline uint16_t find_available_port(uint16_t start = default_test_port,
+                                     int max_attempts = 200) {
     static std::atomic<uint16_t> port_offset{0};
+
+    // Use a wider range and randomize starting point to reduce conflicts
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint16_t> dist(0, 500);
+
+    uint16_t base_offset = port_offset.fetch_add(1) % 200;
+    uint16_t random_offset = dist(gen);
+
+    for (int attempt = 0; attempt < max_attempts; ++attempt) {
+        uint16_t port = start + ((base_offset + random_offset + attempt) % 1000);
+
+        // Avoid well-known ports and ensure we stay in a valid range
+        if (port < 1024) {
+            port += 40000;
+        }
+        if (port > 65000) {
+            port = start + (attempt % 500);
+        }
+
+        if (is_port_available(port)) {
+            return port;
+        }
+    }
+
+    // Fallback: return incremental port (original behavior)
     return start + (port_offset++ % 100);
 }
 
