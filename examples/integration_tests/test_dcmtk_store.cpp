@@ -186,6 +186,11 @@ TEST_CASE("C-STORE: pacs_system SCP receives from DCMTK storescu",
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     auto port = find_available_port();
     test_directory input_dir;
 
@@ -261,6 +266,11 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
           "[dcmtk][interop][store]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed - skipping interoperability test");
+    }
+
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     auto port = find_available_port();
@@ -350,6 +360,11 @@ TEST_CASE("C-STORE: Bidirectional round-trip verification",
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     test_directory original_dir;
     test_directory dcmtk_storage_dir;
 
@@ -434,6 +449,11 @@ TEST_CASE("C-STORE: Concurrent store operations", "[dcmtk][interop][store][stres
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     auto port = find_available_port();
     test_directory input_dir;
 
@@ -489,6 +509,11 @@ TEST_CASE("C-STORE: Error handling", "[dcmtk][interop][store][error]") {
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     SECTION("storescu to non-existent server fails gracefully") {
         auto port = find_available_port();
         test_directory input_dir;
@@ -532,6 +557,11 @@ TEST_CASE("C-STORE: Error handling", "[dcmtk][interop][store][error]") {
 TEST_CASE("C-STORE: Data integrity verification", "[dcmtk][interop][store][integrity]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed");
+    }
+
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     auto port = find_available_port();

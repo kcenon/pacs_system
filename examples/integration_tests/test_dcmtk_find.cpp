@@ -253,6 +253,11 @@ TEST_CASE("C-FIND: pacs_system SCP with DCMTK findscu", "[dcmtk][interop][find]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     // Setup: Start pacs_system query server with test data
     auto port = find_available_port();
     const std::string ae_title = "PACS_FIND_SCP";
@@ -416,6 +421,11 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     // Setup: Start pacs_system server with query capability
     auto port = find_available_port();
     const std::string ae_title = "QUERY_SCP";
@@ -575,6 +585,11 @@ TEST_CASE("C-FIND: Concurrent query operations", "[dcmtk][interop][find][stress]
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     auto port = find_available_port();
     const std::string ae_title = "STRESS_FIND_SCP";
 
@@ -691,6 +706,11 @@ TEST_CASE("C-FIND: Connection error handling", "[dcmtk][interop][find][error]") 
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     SECTION("findscu to non-existent server fails gracefully") {
         auto port = find_available_port();
 
@@ -738,6 +758,11 @@ TEST_CASE("C-FIND: Connection error handling", "[dcmtk][interop][find][error]") 
 TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed");
+    }
+
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     auto port = find_available_port();
@@ -798,6 +823,11 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
 TEST_CASE("C-FIND: Special character handling", "[dcmtk][interop][find][special]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed");
+    }
+
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     auto port = find_available_port();

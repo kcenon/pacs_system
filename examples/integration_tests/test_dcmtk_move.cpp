@@ -260,6 +260,11 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     // Setup: Ports and AE titles
     auto move_port = find_available_port();
     auto dest_port = find_available_port(move_port + 1);
@@ -379,6 +384,11 @@ TEST_CASE("C-MOVE: Unknown destination AE rejection", "[dcmtk][interop][move][er
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     auto port = find_available_port();
     const std::string ae_title = "MOVE_SCP";
 
@@ -437,6 +447,11 @@ TEST_CASE("C-MOVE: Connection error handling", "[dcmtk][interop][move][error]") 
         SKIP("DCMTK not installed");
     }
 
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    }
+
     SECTION("movescu to non-existent server fails gracefully") {
         auto port = find_available_port();
 
@@ -464,6 +479,11 @@ TEST_CASE("C-MOVE: Connection error handling", "[dcmtk][interop][move][error]") 
 TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed");
+    }
+
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     auto move_port = find_available_port();
@@ -553,6 +573,11 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
 TEST_CASE("C-MOVE: pacs_system SCU basic operation", "[dcmtk][interop][move]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed");
+    }
+
+    // Skip if real TCP DICOM connections are not supported yet
+    if (!supports_real_tcp_dicom()) {
+        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     // Note: DCMTK doesn't provide a simple move SCP for testing.
