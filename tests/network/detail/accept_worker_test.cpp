@@ -138,8 +138,9 @@ TEST_CASE("accept_worker maintenance callback", "[accept_worker][callback]") {
 
     // Wait for at least 2 maintenance callbacks with generous timeout
     // Using polling with timeout instead of fixed sleep for CI stability
+    // Note: macOS CI can have scheduling delays, so use extended timeout
     constexpr int expected_callbacks = 2;
-    constexpr auto max_wait = 500ms;
+    constexpr auto max_wait = 2000ms;
     constexpr auto poll_interval = 25ms;
 
     auto start = std::chrono::steady_clock::now();

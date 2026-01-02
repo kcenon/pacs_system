@@ -3826,6 +3826,7 @@ private:
 
 **Usage Example:**
 
+{% raw %}
 ```cpp
 #include <pacs/monitoring/pacs_monitor.hpp>
 using namespace pacs::monitoring;
@@ -3864,6 +3865,7 @@ for (const auto& h : health) {
     std::cout << h.name << ": " << (h.healthy ? "OK" : "FAIL") << "\n";
 }
 ```
+{% endraw %}
 
 ---
 

@@ -1,0 +1,72 @@
+# PACS System Documentation
+# Jekyll configuration for GitHub Pages (root level)
+#
+# Note: For GitHub Pages deployment, configure the repository settings:
+# Settings > Pages > Source > "GitHub Actions" (recommended)
+# This enables the custom pages.yml workflow instead of the default build.
+
+title: PACS System Documentation
+description: A modern C++20 PACS implementation built on the kcenon ecosystem
+baseurl: "/pacs_system"
+url: "https://kcenon.github.io"
+
+# Theme
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    default_lang: cpp
+    css_class: highlight
+
+# Exclude non-documentation files from processing
+# This prevents Jekyll from processing source code and build files
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .git
+  - .github
+  - build
+  - cmake
+  - examples
+  - include
+  - src
+  - tests
+  - lib
+  - subprojects
+  - scripts
+  - "*.cpp"
+  - "*.hpp"
+  - "*.h"
+  - "*.c"
+  - CMakeLists.txt
+  - LICENSE
+  - CHANGELOG.md
+  - CONTRIBUTING.md
+  - SECURITY.md
+  - vcpkg.json
+  - vcpkg-configuration.json
+  - .clang-format
+  - .clang-tidy
+  - .gitignore
+  - .gitmodules
+
+# Include documentation
+include:
+  - docs
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"

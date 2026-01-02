@@ -1,0 +1,59 @@
+# PACS System Documentation
+# Jekyll configuration for GitHub Pages
+
+title: PACS System Documentation
+description: A modern C++20 PACS implementation built on the kcenon ecosystem
+baseurl: "/pacs_system"
+url: "https://kcenon.github.io"
+
+# Theme
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    default_lang: cpp
+    css_class: highlight
+
+# File handling
+include:
+  - _pages
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Getting Started
+    url: /getting-started
+  - title: Architecture
+    url: /architecture
+  - title: API Reference
+    url: /api-reference
+  - title: Features
+    url: /features
+  - title: PRD
+    url: /prd
+  - title: SRS
+    url: /srs
+  - title: SDS
+    url: /sds

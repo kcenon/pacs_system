@@ -226,6 +226,7 @@ if (auto it = row.find("active"); it != row.end()) {
 
 ### 3.5 Refactor UPDATE Operations
 
+{% raw %}
 ```cpp
 // Before
 std::string sql = std::format(
@@ -248,6 +249,7 @@ if (result.is_err()) {
         "storage");
 }
 ```
+{% endraw %}
 
 ### 3.6 Refactor DELETE Operations
 
