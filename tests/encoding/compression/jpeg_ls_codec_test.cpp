@@ -124,7 +124,7 @@ int compute_max_error(const std::vector<uint8_t>& original,
     for (size_t i = 0; i < original.size(); ++i) {
         int diff = std::abs(static_cast<int>(original[i]) -
                            static_cast<int>(reconstructed[i]));
-        max_error = std::max(max_error, diff);
+        max_error = (std::max)(max_error, diff);
     }
     return max_error;
 }

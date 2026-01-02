@@ -234,7 +234,7 @@ public:
 
         // Connect with TLS configuration
         // Note: In full implementation, TLS config would be passed to connect
-        return pacs::network::association::connect(host, port, config, default_timeout);
+        return pacs::network::association::connect(host, port, config, default_timeout());
     }
 };
 
@@ -300,7 +300,7 @@ TEST_CASE("TLS C-ECHO connection", "[tls][connectivity]") {
         auto send_result = assoc.send_dimse(*context_id_opt, echo_rq);
         REQUIRE(send_result.is_ok());
 
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(default_timeout());
         REQUIRE(recv_result.is_ok());
 
         auto& [recv_ctx, echo_rsp] = recv_result.value();
@@ -308,7 +308,7 @@ TEST_CASE("TLS C-ECHO connection", "[tls][connectivity]") {
         REQUIRE(echo_rsp.status() == status_success);
 
         // Clean up
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
         server.stop();
     }
 }
@@ -355,7 +355,7 @@ TEST_CASE("TLS certificate validation", "[tls][security]") {
 
         REQUIRE(result.is_ok());
         auto& assoc = result.value();
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     SECTION("Wrong CA fails validation") {
@@ -454,13 +454,13 @@ TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
         auto send_result = assoc.send_dimse(ctx_id, echo_rq);
         REQUIRE(send_result.is_ok());
 
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(default_timeout());
         REQUIRE(recv_result.is_ok());
 
         auto& [recv_ctx, rsp] = recv_result.value();
         REQUIRE(rsp.status() == status_success);
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
         server.stop();
     }
 
@@ -547,7 +547,7 @@ TEST_CASE("TLS version negotiation", "[tls][version]") {
 
         REQUIRE(result.is_ok());
         auto& assoc = result.value();
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
         server.stop();
     }
 
@@ -582,7 +582,7 @@ TEST_CASE("TLS version negotiation", "[tls][version]") {
         // TLS 1.3 may not be supported on all systems
         if (result.is_ok()) {
             auto& assoc = result.value();
-            (void)assoc.release(default_timeout);
+            (void)assoc.release(default_timeout());
         } else {
             INFO("TLS 1.3 not supported: " << result.error().message);
         }
@@ -653,7 +653,7 @@ TEST_CASE("Multiple concurrent TLS connections", "[tls][concurrent]") {
                 return;
             }
 
-            auto recv_result = assoc.receive_dimse(default_timeout);
+            auto recv_result = assoc.receive_dimse(default_timeout());
             if (recv_result.is_ok()) {
                 auto& [ctx, rsp] = recv_result.value();
                 if (rsp.status() == status_success) {
@@ -661,7 +661,7 @@ TEST_CASE("Multiple concurrent TLS connections", "[tls][concurrent]") {
                 }
             }
 
-            (void)assoc.release(default_timeout);
+            (void)assoc.release(default_timeout());
         });
     }
 
@@ -870,14 +870,14 @@ TEST_CASE("TLS C-ECHO with dicom_server_v2", "[tls][v2][connectivity]") {
         auto send_result = assoc.send_dimse(*context_id_opt, echo_rq);
         REQUIRE(send_result.is_ok());
 
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(default_timeout());
         REQUIRE(recv_result.is_ok());
 
         auto& [recv_ctx, echo_rsp] = recv_result.value();
         REQUIRE(echo_rsp.command() == command_field::c_echo_rsp);
         REQUIRE(echo_rsp.status() == status_success);
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
         server.stop();
     }
 }
@@ -940,7 +940,7 @@ TEST_CASE("TLS concurrent connections with dicom_server_v2", "[tls][v2][concurre
                 return;
             }
 
-            auto recv_result = assoc.receive_dimse(default_timeout);
+            auto recv_result = assoc.receive_dimse(default_timeout());
             if (recv_result.is_ok()) {
                 auto& [ctx, rsp] = recv_result.value();
                 if (rsp.status() == status_success) {
@@ -948,7 +948,7 @@ TEST_CASE("TLS concurrent connections with dicom_server_v2", "[tls][v2][concurre
                 }
             }
 
-            (void)assoc.release(default_timeout);
+            (void)assoc.release(default_timeout());
         });
     }
 

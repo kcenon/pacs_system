@@ -337,6 +337,20 @@ PACS_BUILD_BENCHMARKS (OFF)        # 벤치마크 활성화
 PACS_BUILD_STORAGE (ON)            # Storage 모듈 빌드
 ```
 
+### Windows 개발 노트
+
+Windows 호환성을 위해 `std::min`과 `std::max` 호출 시 괄호로 감싸서 Windows.h 매크로와의 충돌을 방지하세요:
+
+```cpp
+// 올바른 방법: 모든 플랫폼에서 작동
+size_t result = (std::min)(a, b);
+auto value = (std::max)(x, y);
+
+// 잘못된 방법: Windows MSVC에서 실패 (error C2589)
+size_t result = std::min(a, b);
+auto value = std::max(x, y);
+```
+
 ---
 
 ## 예제

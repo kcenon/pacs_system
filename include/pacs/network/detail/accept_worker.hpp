@@ -22,6 +22,17 @@
 #include <memory>
 #include <string>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
+
 namespace pacs::network::detail {
 
 namespace common = kcenon::common;
@@ -246,6 +257,17 @@ private:
 
     /// Flag indicating if actively accepting connections
     std::atomic<bool> accepting_{false};
+
+#ifdef _WIN32
+    /// Listen socket handle (Windows)
+    SOCKET listen_socket_{INVALID_SOCKET};
+
+    /// WSA initialized flag
+    bool wsa_initialized_{false};
+#else
+    /// Listen socket file descriptor (POSIX)
+    int listen_socket_{-1};
+#endif
 };
 
 }  // namespace pacs::network::detail

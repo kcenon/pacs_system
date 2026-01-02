@@ -495,7 +495,7 @@ auto s3_storage::upload_multipart(const std::string &key,
   // Simulate multipart upload with progress
   while (bytes_uploaded < total_bytes) {
     std::size_t part_size =
-        std::min(config_.part_size, total_bytes - bytes_uploaded);
+        (std::min)(config_.part_size, total_bytes - bytes_uploaded);
     bytes_uploaded += part_size;
 
     if (callback && !callback(bytes_uploaded, total_bytes)) {

@@ -67,7 +67,7 @@ TEST_CASE("C-ECHO basic connectivity", "[connectivity][echo]") {
         REQUIRE(send_result.is_ok());
 
         // Receive C-ECHO response
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(default_timeout());
         REQUIRE(recv_result.is_ok());
 
         auto& [recv_context_id, echo_rsp] = recv_result.value();
@@ -75,7 +75,7 @@ TEST_CASE("C-ECHO basic connectivity", "[connectivity][echo]") {
         REQUIRE(echo_rsp.status() == status_success);
 
         // Release association gracefully
-        auto release_result = assoc.release(default_timeout);
+        auto release_result = assoc.release(default_timeout());
         REQUIRE(release_result.is_ok());
 
         // Step 3: Stop server
@@ -108,7 +108,7 @@ TEST_CASE("Multiple sequential C-ECHO requests", "[connectivity][echo]") {
         auto send_result = assoc.send_dimse(context_id, echo_rq);
         REQUIRE(send_result.is_ok());
 
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(default_timeout());
         REQUIRE(recv_result.is_ok());
 
         auto& [recv_ctx, echo_rsp] = recv_result.value();
@@ -116,7 +116,7 @@ TEST_CASE("Multiple sequential C-ECHO requests", "[connectivity][echo]") {
         REQUIRE(echo_rsp.status() == status_success);
     }
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
     server.stop();
 }
 
@@ -155,7 +155,7 @@ TEST_CASE("Multiple concurrent associations", "[connectivity][echo]") {
                 return;
             }
 
-            auto recv_result = assoc.receive_dimse(default_timeout);
+            auto recv_result = assoc.receive_dimse(default_timeout());
             if (recv_result.is_ok()) {
                 auto& [ctx, rsp] = recv_result.value();
                 if (rsp.command() == command_field::c_echo_rsp &&
@@ -164,7 +164,7 @@ TEST_CASE("Multiple concurrent associations", "[connectivity][echo]") {
                 }
             }
 
-            (void)assoc.release(default_timeout);
+            (void)assoc.release(default_timeout());
         });
     }
 
@@ -214,7 +214,7 @@ TEST_CASE("Wrong AE title handling", "[connectivity][ae_title]") {
     // We just verify the operation completes without crash
     if (connect_result.is_ok()) {
         auto& assoc = connect_result.value();
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     server.stop();

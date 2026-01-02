@@ -301,21 +301,21 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
         });
 
         auto connect_result = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
         REQUIRE(connect_result.is_ok());
 
         auto& assoc = connect_result.value();
 
         // Create storage SCU and send
         storage_scu_config scu_config;
-        scu_config.response_timeout = default_timeout;
+        scu_config.response_timeout = default_timeout();
         storage_scu scu{scu_config};
 
         auto store_result = scu.store(assoc, dataset);
         REQUIRE(store_result.is_ok());
         REQUIRE(store_result.value().is_success());
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
 
         // Verify stored count
         REQUIRE(server.stored_count() == 1);
@@ -332,7 +332,7 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
         });
 
         auto query_connect = association::connect(
-            "localhost", port, query_config, default_timeout);
+            "localhost", port, query_config, default_timeout());
         REQUIRE(query_connect.is_ok());
 
         auto& query_assoc = query_connect.value();
@@ -358,7 +358,7 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
         // Receive responses
         std::vector<dicom_dataset> query_results;
         while (true) {
-            auto recv_result = query_assoc.receive_dimse(default_timeout);
+            auto recv_result = query_assoc.receive_dimse(default_timeout());
             REQUIRE(recv_result.is_ok());
 
             auto& [recv_ctx, rsp] = recv_result.value();
@@ -376,7 +376,7 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
         REQUIRE(query_results.size() == 1);
         REQUIRE(query_results[0].get_string(tags::study_instance_uid) == study_uid);
 
-        (void)query_assoc.release(default_timeout);
+        (void)query_assoc.release(default_timeout());
     }
 
     server.stop();
@@ -413,7 +413,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -427,7 +427,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
         REQUIRE(result.value().is_success());
     }
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
 
     REQUIRE(server.stored_count() == num_images);
 
@@ -443,7 +443,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     });
 
     auto query_connect = association::connect(
-        "localhost", port, query_config, default_timeout);
+        "localhost", port, query_config, default_timeout());
     REQUIRE(query_connect.is_ok());
 
     auto& query_assoc = query_connect.value();
@@ -463,7 +463,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
 
     std::vector<dicom_dataset> results;
     while (true) {
-        auto recv_result = query_assoc.receive_dimse(default_timeout);
+        auto recv_result = query_assoc.receive_dimse(default_timeout());
         if (recv_result.is_err()) break;
 
         auto& [recv_ctx, rsp] = recv_result.value();
@@ -482,7 +482,7 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
         REQUIRE(std::stoi(num_instances_str) == num_images);
     }
 
-    (void)query_assoc.release(default_timeout);
+    (void)query_assoc.release(default_timeout());
     server.stop();
 }
 
@@ -513,7 +513,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -525,7 +525,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     auto mr_result = scu.store(assoc, mr_dataset);
     REQUIRE(mr_result.is_ok());
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
 
     REQUIRE(server.stored_count() == 2);
 
@@ -541,7 +541,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     });
 
     auto query_connect = association::connect(
-        "localhost", port, query_config, default_timeout);
+        "localhost", port, query_config, default_timeout());
     REQUIRE(query_connect.is_ok());
 
     auto& query_assoc = query_connect.value();
@@ -561,7 +561,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
 
     std::vector<dicom_dataset> ct_results;
     while (true) {
-        auto recv_result = query_assoc.receive_dimse(default_timeout);
+        auto recv_result = query_assoc.receive_dimse(default_timeout());
         if (recv_result.is_err()) break;
 
         auto& [recv_ctx, rsp] = recv_result.value();
@@ -574,7 +574,7 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
     // Should find exactly 1 CT study
     REQUIRE(ct_results.size() == 1);
 
-    (void)query_assoc.release(default_timeout);
+    (void)query_assoc.release(default_timeout());
     server.stop();
 }
 
@@ -601,7 +601,7 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
     });
 
     auto connect_result = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(connect_result.is_ok());
 
     auto& assoc = connect_result.value();
@@ -616,7 +616,7 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
         REQUIRE(result.is_ok());
     }
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
 
     // Query with wildcard
     association_config query_config;
@@ -630,7 +630,7 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
     });
 
     auto query_connect = association::connect(
-        "localhost", port, query_config, default_timeout);
+        "localhost", port, query_config, default_timeout());
     REQUIRE(query_connect.is_ok());
 
     auto& query_assoc = query_connect.value();
@@ -650,7 +650,7 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
 
     std::vector<dicom_dataset> results;
     while (true) {
-        auto recv_result = query_assoc.receive_dimse(default_timeout);
+        auto recv_result = query_assoc.receive_dimse(default_timeout());
         if (recv_result.is_err()) break;
 
         auto& [recv_ctx, rsp] = recv_result.value();
@@ -663,6 +663,6 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
     // Should find 2 SMITH patients
     REQUIRE(results.size() == 2);
 
-    (void)query_assoc.release(default_timeout);
+    (void)query_assoc.release(default_timeout());
     server.stop();
 }

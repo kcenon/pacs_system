@@ -69,7 +69,7 @@ OPJ_SIZE_T opj_memory_stream_read(void* buffer, OPJ_SIZE_T nb_bytes, void* user_
         return static_cast<OPJ_SIZE_T>(-1);
     }
 
-    OPJ_SIZE_T bytes_to_read = std::min(nb_bytes,
+    OPJ_SIZE_T bytes_to_read = (std::min)(nb_bytes,
                                          static_cast<OPJ_SIZE_T>(stream->size - stream->offset));
     std::memcpy(buffer, stream->data + stream->offset, bytes_to_read);
     stream->offset += bytes_to_read;

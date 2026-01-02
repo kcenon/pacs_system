@@ -682,7 +682,7 @@ auto azure_blob_storage::upload_block_blob(const std::string &blob_name,
   std::size_t block_index = 0;
   while (bytes_uploaded < total_bytes) {
     std::size_t block_size =
-        std::min(config_.block_size, total_bytes - bytes_uploaded);
+        (std::min)(config_.block_size, total_bytes - bytes_uploaded);
 
     auto block_id = generate_block_id(block_index);
     block_ids.push_back(block_id);

@@ -69,7 +69,7 @@ std::vector<std::vector<uint8_t>> fragment_data(const std::vector<uint8_t>& data
     size_t offset = 0;
 
     for (size_t size : sizes) {
-        size_t actual_size = std::min(size, data.size() - offset);
+        size_t actual_size = (std::min)(size, data.size() - offset);
         if (actual_size == 0) break;
 
         fragments.emplace_back(data.begin() + offset,

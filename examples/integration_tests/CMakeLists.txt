@@ -3,6 +3,10 @@
 #
 # @see Issue #111 - Integration Test Suite
 # @see Issue #450 - DCMTK Process Launcher and Test Utilities
+# @see Issue #451 - C-ECHO Bidirectional Interoperability Test with DCMTK
+# @see Issue #452 - C-STORE Bidirectional Interoperability Test with DCMTK
+# @see Issue #453 - C-FIND Interoperability Test with DCMTK
+# @see Issue #454 - C-MOVE Interoperability Test with DCMTK
 
 add_executable(pacs_integration_e2e
     main.cpp
@@ -19,6 +23,10 @@ add_executable(pacs_integration_e2e
     test_data_generator_test.cpp
     test_dicom_server_v2_integration.cpp
     test_dcmtk_tool.cpp
+    test_dcmtk_echo.cpp
+    test_dcmtk_store.cpp
+    test_dcmtk_find.cpp
+    test_dcmtk_move.cpp
 )
 
 target_include_directories(pacs_integration_e2e
