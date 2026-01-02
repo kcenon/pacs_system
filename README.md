@@ -419,6 +419,20 @@ PACS_BUILD_BENCHMARKS (OFF)        # Enable benchmarks
 PACS_BUILD_STORAGE (ON)            # Build storage module
 ```
 
+### Windows Development Notes
+
+When writing code for Windows compatibility, wrap `std::min` and `std::max` calls in parentheses to prevent conflicts with Windows.h macros:
+
+```cpp
+// Correct: Works on all platforms
+size_t result = (std::min)(a, b);
+auto value = (std::max)(x, y);
+
+// Incorrect: Fails on Windows MSVC (error C2589)
+size_t result = std::min(a, b);
+auto value = std::max(x, y);
+```
+
 ---
 
 ## Examples
