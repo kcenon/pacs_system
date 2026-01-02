@@ -417,7 +417,7 @@ The PACS System follows a layered architecture:
 | `container_adapter` | DES-INT-001 | VR to container mapping | IR-1 | ✅ |
 | `network_adapter` | DES-INT-002 | TCP/TLS via network_system | IR-2 | ✅ |
 | `thread_adapter` | DES-INT-003 | Job processing, thread pool | IR-3 | ✅ |
-| `accept_worker` | DES-INT-003a | Accept loop (thread_base) | IR-3 | ✅ (v1.1.0) |
+| `accept_worker` | DES-INT-003a | TCP socket bind/listen/accept (thread_base) | IR-3 | ✅ (v1.2.0) |
 | `logger_adapter` | DES-INT-004 | Audit logging | IR-4 | ✅ |
 | `monitoring_adapter` | DES-INT-005 | Performance metrics | IR-5 | ✅ |
 
@@ -548,10 +548,11 @@ The PACS System follows a layered architecture:
 | 1.0.0 | 2025-11-30 | kcenon | Initial release |
 | 1.1.0 | 2025-12-04 | kcenon | Updated component status, added transfer syntax details |
 | 1.2.0 | 2025-12-07 | kcenon | Added: DES-SVC-008~010 (DIMSE-N, Ultrasound, XA), DES-INT-003a (accept_worker), DES-NET-006~007 (Network V2); Updated thread_adapter design for thread_system migration |
+| 1.3.0 | 2026-01-02 | kcenon | Updated accept_worker: Implemented TCP socket bind/listen/accept replacing placeholder implementation |
 
 ---
 
-*Document Version: 0.1.2.0*
+*Document Version: 0.1.3.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2026-01-02*
 *Author: kcenon@naver.com*
