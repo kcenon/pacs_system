@@ -234,6 +234,7 @@ The `ci.yml` workflow explicitly specifies the compiler, while `integration-test
 
 Added explicit compiler specification to all 5 CMake configuration steps in `integration-tests.yml`:
 
+{% raw %}
 ```yaml
 cmake -B build \
   -G Ninja \
@@ -242,6 +243,7 @@ cmake -B build \
   -DCMAKE_CXX_COMPILER=g++ \
   ...
 ```
+{% endraw %}
 
 This ensures consistent compiler behavior across all CI workflows.
 

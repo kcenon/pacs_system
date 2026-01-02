@@ -1116,6 +1116,7 @@ pacs_pool_pdu_buffer_misses_total{}
 - Object pool monitoring (element, dataset, PDU buffer pools)
 
 **Usage**:
+{% raw %}
 ```cpp
 #include <pacs/monitoring/pacs_monitor.hpp>
 using namespace pacs::monitoring;
@@ -1141,6 +1142,7 @@ monitor.register_health_check("database", []() {
 // Check overall health
 bool healthy = monitor.is_healthy();
 ```
+{% endraw %}
 
 **Integration with IMonitor**:
 The `pacs_monitor` class follows the same interface pattern as `IMonitor` from `common_system`, enabling seamless integration with the monitoring infrastructure:
