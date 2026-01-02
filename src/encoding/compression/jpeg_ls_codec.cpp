@@ -140,7 +140,7 @@ public:
             // For high-entropy data, JPEG-LS output may exceed input size.
             // Use the maximum of: CharLS estimate, input size + 20%, or input + 1KB overhead.
             size_t estimated_size = encoder.estimated_destination_size();
-            size_t safe_size = std::max({
+            size_t safe_size = (std::max)({
                 estimated_size,
                 pixel_data.size() + pixel_data.size() / 5,  // input + 20%
                 pixel_data.size() + 1024                     // input + 1KB header overhead

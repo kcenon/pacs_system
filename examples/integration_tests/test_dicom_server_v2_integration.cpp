@@ -341,14 +341,14 @@ TEST_CASE("dicom_server_v2 C-ECHO integration", "[v2][integration][echo]") {
         auto send_result = assoc.send_dimse(*ctx_opt, echo_rq);
         REQUIRE(send_result.is_ok());
 
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(default_timeout());
         REQUIRE(recv_result.is_ok());
 
         auto& [recv_ctx, echo_rsp] = recv_result.value();
         REQUIRE(echo_rsp.command() == command_field::c_echo_rsp);
         REQUIRE(echo_rsp.status() == status_success);
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     SECTION("Multiple sequential C-ECHO operations") {
@@ -368,7 +368,7 @@ TEST_CASE("dicom_server_v2 C-ECHO integration", "[v2][integration][echo]") {
             auto echo_rq = make_c_echo_rq(static_cast<uint16_t>(i + 1),
                                           verification_sop_class_uid);
             if (assoc.send_dimse(*ctx_opt, echo_rq).is_ok()) {
-                auto recv = assoc.receive_dimse(default_timeout);
+                auto recv = assoc.receive_dimse(default_timeout());
                 if (recv.is_ok() && recv.value().second.status() == status_success) {
                     ++success_count;
                 }
@@ -376,7 +376,7 @@ TEST_CASE("dicom_server_v2 C-ECHO integration", "[v2][integration][echo]") {
         }
 
         REQUIRE(success_count == num_echos);
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     server.stop();
@@ -436,7 +436,7 @@ TEST_CASE("dicom_server_v2 C-STORE integration", "[v2][integration][store]") {
         });
 
         auto connect = association::connect(
-            "localhost", port, assoc_config, default_timeout);
+            "localhost", port, assoc_config, default_timeout());
         REQUIRE(connect.is_ok());
 
         auto& assoc = connect.value();
@@ -448,7 +448,7 @@ TEST_CASE("dicom_server_v2 C-STORE integration", "[v2][integration][store]") {
         REQUIRE(result.is_ok());
         REQUIRE(result.value().is_success());
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
         REQUIRE(store_count == 1);
     }
 
@@ -464,7 +464,7 @@ TEST_CASE("dicom_server_v2 C-STORE integration", "[v2][integration][store]") {
         });
 
         auto connect = association::connect(
-            "localhost", port, assoc_config, default_timeout);
+            "localhost", port, assoc_config, default_timeout());
         REQUIRE(connect.is_ok());
 
         auto& assoc = connect.value();
@@ -483,7 +483,7 @@ TEST_CASE("dicom_server_v2 C-STORE integration", "[v2][integration][store]") {
         }
 
         REQUIRE(success_count == num_images);
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
     }
 
     server.stop();
@@ -526,7 +526,7 @@ TEST_CASE("dicom_server_v2 concurrent storage stress test", "[v2][stress][concur
                 });
 
                 auto connect = association::connect(
-                    "localhost", port, config, default_timeout * 2);
+                    "localhost", port, config, default_timeout() * 2);
 
                 if (connect.is_err()) {
                     result.error_message = "Connection failed";
@@ -548,7 +548,7 @@ TEST_CASE("dicom_server_v2 concurrent storage stress test", "[v2][stress][concur
                     }
                 }
 
-                (void)assoc.release(default_timeout);
+                (void)assoc.release(default_timeout());
             } catch (const std::exception& e) {
                 result.error_message = e.what();
             }
@@ -666,7 +666,7 @@ TEST_CASE("dicom_server_v2 max associations handling", "[v2][stress][limits]") {
         {std::string(verification_sop_class_uid)});
 
     REQUIRE(new_connect.is_ok());
-    (void)new_connect.value().release(default_timeout);
+    (void)new_connect.value().release(default_timeout());
 
     // Clean up remaining connections
     for (auto& opt_assoc : held_connections) {
@@ -740,8 +740,8 @@ TEST_CASE("dicom_server_v2 API compatibility with v1", "[v2][migration][api]") {
         REQUIRE(assoc_v1.send_dimse(ctx_v1, echo_rq_1).is_ok());
         REQUIRE(assoc_v2.send_dimse(ctx_v2, echo_rq_2).is_ok());
 
-        auto recv_v1 = assoc_v1.receive_dimse(default_timeout);
-        auto recv_v2 = assoc_v2.receive_dimse(default_timeout);
+        auto recv_v1 = assoc_v1.receive_dimse(default_timeout());
+        auto recv_v2 = assoc_v2.receive_dimse(default_timeout());
 
         REQUIRE(recv_v1.is_ok());
         REQUIRE(recv_v2.is_ok());
@@ -749,8 +749,8 @@ TEST_CASE("dicom_server_v2 API compatibility with v1", "[v2][migration][api]") {
         CHECK(recv_v1.value().second.status() == status_success);
         CHECK(recv_v2.value().second.status() == status_success);
 
-        (void)assoc_v1.release(default_timeout);
-        (void)assoc_v2.release(default_timeout);
+        (void)assoc_v1.release(default_timeout());
+        (void)assoc_v2.release(default_timeout());
     }
 
     SECTION("Statistics consistency") {
@@ -860,7 +860,7 @@ TEST_CASE("dicom_server_v2 callback invocation", "[v2][callbacks]") {
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
     CHECK(established_count == 1);
 
-    (void)connect.value().release(default_timeout);
+    (void)connect.value().release(default_timeout());
     std::this_thread::sleep_for(std::chrono::milliseconds{200});
 
     CHECK(closed_count == 1);
@@ -900,7 +900,7 @@ TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
                     if (ctx) {
                         auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
                         if (assoc.send_dimse(*ctx, echo_rq).is_ok()) {
-                            auto recv = assoc.receive_dimse(default_timeout);
+                            auto recv = assoc.receive_dimse(default_timeout());
                             if (recv.is_ok() &&
                                 recv.value().second.status() == status_success) {
                                 ++echo_success;
@@ -928,7 +928,7 @@ TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
                 });
 
                 auto connect = association::connect(
-                    "localhost", port, config, default_timeout);
+                    "localhost", port, config, default_timeout());
 
                 if (connect.is_ok()) {
                     auto& assoc = connect.value();

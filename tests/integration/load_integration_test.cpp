@@ -127,7 +127,7 @@ public:
     void increment() {
         std::lock_guard lock(mutex_);
         ++count_;
-        max_concurrent_ = std::max(max_concurrent_, count_);
+        max_concurrent_ = (std::max)(max_concurrent_, count_);
     }
 
     void decrement() {

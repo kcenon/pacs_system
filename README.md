@@ -419,6 +419,20 @@ PACS_BUILD_BENCHMARKS (OFF)        # Enable benchmarks
 PACS_BUILD_STORAGE (ON)            # Build storage module
 ```
 
+### Windows Development Notes
+
+When writing code for Windows compatibility, wrap `std::min` and `std::max` calls in parentheses to prevent conflicts with Windows.h macros:
+
+```cpp
+// Correct: Works on all platforms
+size_t result = (std::min)(a, b);
+auto value = (std::max)(x, y);
+
+// Incorrect: Fails on Windows MSVC (error C2589)
+size_t result = std::min(a, b);
+auto value = std::max(x, y);
+```
+
 ---
 
 ## Examples
@@ -1313,18 +1327,18 @@ cmake --build build --target run_full_benchmarks
 |--------|-------|
 | **Header Files** | 157 files |
 | **Source Files** | 98 files |
-| **Header LOC** | ~44,300 lines |
-| **Source LOC** | ~48,800 lines |
-| **Example LOC** | ~32,000 lines |
-| **Test LOC** | ~51,000 lines |
-| **Total LOC** | ~176,100 lines |
+| **Header LOC** | ~44,800 lines |
+| **Source LOC** | ~52,800 lines |
+| **Example LOC** | ~34,700 lines |
+| **Test LOC** | ~51,200 lines |
+| **Total LOC** | ~183,500 lines |
 | **Test Files** | 102 files |
-| **Test Cases** | 1529+ tests |
+| **Test Cases** | 1534+ tests |
 | **Example Programs** | 30 apps |
-| **Documentation** | 39 markdown files |
-| **CI/CD Workflows** | 8 workflows |
+| **Documentation** | 43 markdown files |
+| **CI/CD Workflows** | 9 workflows |
 | **Version** | 0.1.0 |
-| **Last Updated** | 2025-12-28 |
+| **Last Updated** | 2026-01-01 |
 
 <!-- STATS_END -->
 

@@ -287,7 +287,7 @@ worker_result run_storage_worker(
         });
 
         auto connect_result = association::connect(
-            "localhost", server_port, config, default_timeout * 2);
+            "localhost", server_port, config, default_timeout() * 2);
 
         if (connect_result.is_err()) {
             result.error_message = "Connection failed: " + connect_result.error().message;
@@ -297,7 +297,7 @@ worker_result run_storage_worker(
 
         auto& assoc = connect_result.value();
         storage_scu_config scu_config;
-        scu_config.response_timeout = default_timeout;
+        scu_config.response_timeout = default_timeout();
         storage_scu scu{scu_config};
 
         // Generate unique study for this worker
@@ -316,7 +316,7 @@ worker_result run_storage_worker(
             }
         }
 
-        (void)assoc.release(default_timeout);
+        (void)assoc.release(default_timeout());
 
     } catch (const std::exception& e) {
         result.error_message = "Exception: " + std::string(e.what());
@@ -418,7 +418,7 @@ TEST_CASE("Rapid sequential connections", "[stress][sequential]") {
         });
 
         auto connect_result = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
 
         if (connect_result.is_ok()) {
             auto& assoc = connect_result.value();
@@ -508,7 +508,7 @@ TEST_CASE("Large dataset storage", "[stress][large]") {
     REQUIRE(result.is_ok());
     REQUIRE(result.value().is_success());
 
-    (void)assoc.release(default_timeout);
+    (void)assoc.release(default_timeout());
     server.stop();
 }
 
@@ -535,7 +535,7 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
         });
 
         auto connect_result = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
         if (connect_result.is_ok()) {
             held_connections.push_back(std::move(connect_result.value()));
         }
@@ -559,7 +559,7 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
         });
 
         auto connect_result = association::connect(
-            "localhost", port, config, default_timeout);
+            "localhost", port, config, default_timeout());
         if (connect_result.is_ok()) {
             auto& assoc = connect_result.value();
             (void)assoc.release(std::chrono::milliseconds{500});
@@ -589,9 +589,9 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
     });
 
     auto final_connect = association::connect(
-        "localhost", port, config, default_timeout);
+        "localhost", port, config, default_timeout());
     REQUIRE(final_connect.is_ok());
-    (void)final_connect.value().release(default_timeout);
+    (void)final_connect.value().release(default_timeout());
 
     server.stop();
 }
@@ -624,14 +624,14 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
                 });
 
                 auto connect = association::connect(
-                    "localhost", port, config, default_timeout);
+                    "localhost", port, config, default_timeout());
                 if (connect.is_ok()) {
                     auto& assoc = connect.value();
                     auto ctx = assoc.accepted_context_id(verification_sop_class_uid);
                     if (ctx) {
                         auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
                         if (assoc.send_dimse(*ctx, echo_rq).is_ok()) {
-                            auto recv = assoc.receive_dimse(default_timeout);
+                            auto recv = assoc.receive_dimse(default_timeout());
                             if (recv.is_ok() && recv.value().second.status() == status_success) {
                                 ++echo_success;
                             }
@@ -658,7 +658,7 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
                 });
 
                 auto connect = association::connect(
-                    "localhost", port, config, default_timeout);
+                    "localhost", port, config, default_timeout());
                 if (connect.is_ok()) {
                     auto& assoc = connect.value();
                     storage_scu scu;

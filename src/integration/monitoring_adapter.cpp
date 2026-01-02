@@ -315,7 +315,7 @@ public:
                 gauges_[metrics::associations_active]++;
             } else {
                 gauges_[metrics::associations_active] =
-                    std::max(0.0, gauges_[metrics::associations_active] - 1);
+                    (std::max)(0.0, gauges_[metrics::associations_active] - 1);
             }
         }
 
