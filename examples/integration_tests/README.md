@@ -789,6 +789,8 @@ All operations have configurable timeouts to prevent hanging tests. The test fra
 | `test_server::start()` delay | 100ms | 300ms |
 | Individual operations | 30 seconds | 30 seconds |
 | Full test suite | 5 minutes | 10 minutes |
+| DCMTK C++ tests job | N/A | 30 minutes |
+| DCMTK shell tests job | N/A | 25 minutes |
 
 The `is_port_listening()` function uses an adaptive timeout for the socket connect operation, which is critical for reliable port detection in slower CI environments. Similarly, `test_server::start()` uses a longer delay in CI to ensure servers are fully initialized before tests proceed.
 
