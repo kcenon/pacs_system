@@ -353,11 +353,17 @@ auto find_result = dcmtk_tool::findscu(
     {{"PatientID", "TEST001"}}
 );
 
-// Start DCMTK storescp server
+// Start DCMTK storescp server (uses adaptive timeout based on environment)
 test_directory output_dir;
 auto server = dcmtk_tool::storescp(11113, "DCMTK_SCP", output_dir.path());
 REQUIRE(server.is_running());
 // Server automatically stopped when guard goes out of scope
+
+// With custom timeout
+auto server_custom = dcmtk_tool::storescp(
+    11114, "DCMTK_SCP", output_dir.path(),
+    std::chrono::seconds{30}  // Override default timeout
+);
 ```
 
 #### DCMTK Shell Helpers (dcmtk_common.sh)
@@ -765,6 +771,7 @@ All operations have configurable timeouts to prevent hanging tests. The test fra
 |--------------|-------|----------------|
 | `server_ready_timeout()` | 5 seconds | 30 seconds |
 | `dcmtk_server_ready_timeout()` | 10 seconds | 60 seconds |
+| `dcmtk_tool::default_scp_startup_timeout()` | 15 seconds | 60 seconds |
 | `default_timeout()` | 5 seconds | 30 seconds |
 | `is_port_listening()` connect timeout | 200ms | 1 second |
 | `test_server::start()` delay | 100ms | 300ms |
