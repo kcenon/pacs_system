@@ -540,11 +540,11 @@ public:
      *
      * This method:
      * 1. Starts the underlying DICOM server
-     * 2. Waits for the server to be ready using adaptive delay for CI
+     * 2. Waits for the port to actually be listening (with adaptive timeout)
      *
-     * Note: The accept_worker is currently a placeholder implementation that
-     * doesn't open actual TCP sockets. TCP port listening check is skipped
-     * until accept_worker implements real network binding.
+     * The port listening check ensures the server is truly ready to accept
+     * connections, which is critical for reliable tests in CI environments
+     * where process startup can be slower.
      */
     [[nodiscard]] bool start() {
         auto result = server_->start();
@@ -554,14 +554,22 @@ public:
 
         running_ = true;
 
-        // Give server time to initialize internal state
-        // Use adaptive delay based on environment (CI needs more time)
-        auto delay = is_ci_environment()
-                         ? std::chrono::milliseconds{500}
-                         : std::chrono::milliseconds{100};
-        std::this_thread::sleep_for(delay);
+        // Wait for port to actually be listening
+        // This is more reliable than a fixed delay, especially in CI
+        auto timeout = server_ready_timeout();
+        auto start_time = std::chrono::steady_clock::now();
 
-        return true;
+        while (std::chrono::steady_clock::now() - start_time < timeout) {
+            if (check_port_listening(port_)) {
+                return true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds{50});
+        }
+
+        // Timeout waiting for port - stop the server and return failure
+        server_->stop();
+        running_ = false;
+        return false;
     }
 
     /**
