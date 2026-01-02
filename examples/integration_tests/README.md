@@ -398,6 +398,18 @@ stop_storescp "$storescp_pid"
 
 The DCMTK interoperability test suite validates bidirectional compatibility between the pacs_system and DCMTK reference implementation. These tests ensure compliance with DICOM standards and interoperability with real-world PACS systems.
 
+> **Note: Current Limitations**
+>
+> The pacs_system currently does not support real TCP connections for DICOM protocol.
+> The `accept_worker` accepts TCP connections but immediately closes them without
+> performing DICOM handshake. This is documented in `accept_worker.cpp`.
+>
+> As a result, DCMTK interoperability tests are **automatically skipped** using the
+> `supports_real_tcp_dicom()` check in `test_fixtures.hpp`. The test infrastructure
+> is in place and ready for when real TCP DICOM support is implemented.
+>
+> See: `test_fixtures.hpp::supports_real_tcp_dicom()` for details.
+
 ### Test Scenarios
 
 | DICOM Operation | C++ Test File | Shell Script | Issue |
