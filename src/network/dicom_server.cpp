@@ -337,7 +337,7 @@ void dicom_server::message_loop(association_info& info) {
     while (running_ && !info.cancel_token.is_cancelled() && info.assoc.is_established()) {
         // Receive DIMSE message with timeout
         // Use shorter timeout to check cancellation more frequently
-        auto receive_timeout = std::min(
+        auto receive_timeout = (std::min)(
             std::chrono::duration_cast<association::duration>(config_.idle_timeout),
             association::duration{1000}  // Check cancellation at least every second
         );

@@ -229,7 +229,7 @@ association association::accept(
     assoc.calling_ae_ = rq.calling_ae_title;
     assoc.called_ae_ = rq.called_ae_title;
     assoc.our_ae_ = config.ae_title;
-    assoc.max_pdu_size_ = std::min(config.max_pdu_length, rq.user_info.max_pdu_length);
+    assoc.max_pdu_size_ = (std::min)(config.max_pdu_length, rq.user_info.max_pdu_length);
     assoc.our_implementation_class_ = config.implementation_class_uid;
     assoc.our_implementation_version_ = config.implementation_version_name;
     assoc.remote_implementation_class_ = rq.user_info.implementation_class_uid;
@@ -483,7 +483,7 @@ bool association::process_associate_ac(const associate_ac& ac) {
     remote_implementation_version_ = ac.user_info.implementation_version_name;
 
     // Update max PDU size to negotiated value
-    max_pdu_size_ = std::min(max_pdu_size_, ac.user_info.max_pdu_length);
+    max_pdu_size_ = (std::min)(max_pdu_size_, ac.user_info.max_pdu_length);
 
     // Process accepted presentation contexts
     accepted_contexts_.clear();

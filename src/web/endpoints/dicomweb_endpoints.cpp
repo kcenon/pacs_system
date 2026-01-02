@@ -1439,7 +1439,7 @@ auto render_dicom_image(
         output_pixels.resize(static_cast<size_t>(rows) * cols * samples_per_pixel);
         if (bits_allocated == 8) {
             std::copy(frame_data.begin(),
-                      frame_data.begin() + std::min(frame_data.size(),
+                      frame_data.begin() + (std::min)(frame_data.size(),
                                                      output_pixels.size()),
                       output_pixels.begin());
         } else {

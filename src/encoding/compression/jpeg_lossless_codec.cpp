@@ -48,7 +48,7 @@ public:
 
     void write_bits(uint32_t value, int num_bits) {
         while (num_bits > 0) {
-            int bits_to_write = std::min(num_bits, 8 - bit_pos_);
+            int bits_to_write = (std::min)(num_bits, 8 - bit_pos_);
             int shift = num_bits - bits_to_write;
             uint8_t mask = static_cast<uint8_t>((1 << bits_to_write) - 1);
             current_byte_ |= static_cast<uint8_t>(((value >> shift) & mask) << (8 - bit_pos_ - bits_to_write));
@@ -102,7 +102,7 @@ public:
                 advance_byte();
             }
             int bits_available = 8 - bit_pos_;
-            int bits_to_read = std::min(num_bits, bits_available);
+            int bits_to_read = (std::min)(num_bits, bits_available);
             int shift = bits_available - bits_to_read;
             uint8_t mask = static_cast<uint8_t>((1 << bits_to_read) - 1);
             value = (value << bits_to_read) | ((current_byte_ >> shift) & mask);
