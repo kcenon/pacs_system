@@ -248,18 +248,34 @@ public:
     // -------------------------------------------------------------------------
 
     /**
+     * @brief Default startup timeout for DCMTK SCP servers
+     *
+     * Uses adaptive timeout based on environment:
+     * - Normal: 15s for quick responsiveness
+     * - CI: 60s to account for slower VM/container environments
+     *
+     * @return Appropriate startup timeout for current environment
+     */
+    static std::chrono::seconds default_scp_startup_timeout() {
+        return is_ci_environment()
+            ? std::chrono::seconds{60}
+            : std::chrono::seconds{15};
+    }
+
+    /**
      * @brief Start C-STORE SCP (storescp) server
      * @param port Port to listen on
      * @param ae_title AE title for server
      * @param output_dir Directory to store received files
      * @param startup_timeout Maximum time to wait for server to start
+     *                        (default: adaptive based on environment)
      * @return Background process guard for the server
      */
     static background_process_guard storescp(
         uint16_t port,
         const std::string& ae_title,
         const std::filesystem::path& output_dir,
-        std::chrono::seconds startup_timeout = std::chrono::seconds{10}) {
+        std::chrono::seconds startup_timeout = default_scp_startup_timeout()) {
 
         // Ensure output directory exists
         std::filesystem::create_directories(output_dir);
@@ -289,12 +305,13 @@ public:
      * @param port Port to listen on
      * @param ae_title AE title for server
      * @param startup_timeout Maximum time to wait for server to start
+     *                        (default: adaptive based on environment)
      * @return Background process guard for the server
      */
     static background_process_guard echoscp(
         uint16_t port,
         const std::string& ae_title,
-        std::chrono::seconds startup_timeout = std::chrono::seconds{10}) {
+        std::chrono::seconds startup_timeout = default_scp_startup_timeout()) {
 
         std::vector<std::string> args = {
             "-aet", ae_title,
