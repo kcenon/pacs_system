@@ -535,25 +535,41 @@ public:
     }
 
     /**
-     * @brief Start the server
-     * @return true if server started successfully
+     * @brief Start the server and wait for it to be ready
+     * @return true if server started and is accepting connections
      *
-     * Uses adaptive startup delay based on environment:
-     * - Normal: 100ms for quick responsiveness
-     * - CI: 300ms to account for slower VM/container environments
+     * This method:
+     * 1. Starts the underlying DICOM server
+     * 2. Waits for the port to actually be listening (with adaptive timeout)
+     *
+     * The port listening check ensures the server is truly ready to accept
+     * connections, which is critical for reliable tests in CI environments
+     * where process startup can be slower.
      */
     [[nodiscard]] bool start() {
         auto result = server_->start();
-        if (result.is_ok()) {
-            running_ = true;
-            // Give server time to start accepting connections
-            // Longer delay in CI for slower environments
-            auto startup_delay = is_ci_environment()
-                ? std::chrono::milliseconds{300}
-                : std::chrono::milliseconds{100};
-            std::this_thread::sleep_for(startup_delay);
+        if (!result.is_ok()) {
+            return false;
         }
-        return result.is_ok();
+
+        running_ = true;
+
+        // Wait for port to actually be listening
+        // This is more reliable than a fixed delay, especially in CI
+        auto timeout = server_ready_timeout();
+        auto start_time = std::chrono::steady_clock::now();
+
+        while (std::chrono::steady_clock::now() - start_time < timeout) {
+            if (check_port_listening(port_)) {
+                return true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds{50});
+        }
+
+        // Timeout waiting for port - stop the server and return failure
+        server_->stop();
+        running_ = false;
+        return false;
     }
 
     /**
@@ -579,6 +595,86 @@ public:
     [[nodiscard]] network::dicom_server& server() { return *server_; }
 
 private:
+    /**
+     * @brief Check if a port is listening (inline implementation)
+     *
+     * This is a simplified version for use within test_server::start()
+     * since process_launcher is defined later in this file.
+     */
+    static bool check_port_listening(uint16_t port) {
+        const long timeout_us = is_ci_environment() ? 1000000 : 200000;
+
+#ifdef _WIN32
+        WSADATA wsa_data;
+        if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) return false;
+
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (sock == INVALID_SOCKET) { WSACleanup(); return false; }
+
+        u_long mode = 1;
+        ioctlsocket(sock, FIONBIO, &mode);
+
+        sockaddr_in addr{};
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+        connect(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+
+        fd_set writefds;
+        FD_ZERO(&writefds);
+        FD_SET(sock, &writefds);
+
+        timeval tv{};
+        tv.tv_sec = static_cast<decltype(tv.tv_sec)>(timeout_us / 1000000);
+        tv.tv_usec = static_cast<decltype(tv.tv_usec)>(timeout_us % 1000000);
+        int result = select(0, nullptr, &writefds, nullptr, &tv);
+
+        bool listening = false;
+        if (result > 0) {
+            int error = 0;
+            int len = sizeof(error);
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &len);
+            listening = (error == 0);
+        }
+        closesocket(sock);
+        WSACleanup();
+        return listening;
+#else
+        int sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock < 0) return false;
+
+        int flags = fcntl(sock, F_GETFL, 0);
+        fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+
+        sockaddr_in addr{};
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+        connect(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+
+        fd_set writefds;
+        FD_ZERO(&writefds);
+        FD_SET(sock, &writefds);
+
+        timeval tv{};
+        tv.tv_sec = static_cast<decltype(tv.tv_sec)>(timeout_us / 1000000);
+        tv.tv_usec = static_cast<decltype(tv.tv_usec)>(timeout_us % 1000000);
+        int result = select(sock + 1, nullptr, &writefds, nullptr, &tv);
+
+        bool listening = false;
+        if (result > 0) {
+            int error = 0;
+            socklen_t len = sizeof(error);
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len);
+            listening = (error == 0);
+        }
+        close(sock);
+        return listening;
+#endif
+    }
+
     uint16_t port_;
     std::string ae_title_;
     std::unique_ptr<network::dicom_server> server_;
