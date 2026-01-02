@@ -66,7 +66,7 @@ test_pacs_scp_dcmtk_scu() {
 
     # Start pacs_system server
     log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" "$PACS_PORT" "$PACS_AE" &
+    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
     local server_pid=$!
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
@@ -108,7 +108,7 @@ test_query_levels() {
     fi
 
     log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" "$PACS_PORT" "$PACS_AE" &
+    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
     local server_pid=$!
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
@@ -163,7 +163,7 @@ test_wildcard_query() {
     fi
 
     log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" "$PACS_PORT" "$PACS_AE" &
+    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
     local server_pid=$!
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
@@ -203,7 +203,7 @@ test_date_range_query() {
     fi
 
     log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" "$PACS_PORT" "$PACS_AE" &
+    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
     local server_pid=$!
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then

@@ -117,7 +117,7 @@ test_pacs_scp_dcmtk_scu() {
 
     # Start pacs_system server
     log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" "$PACS_PORT" "$PACS_AE" "$storage_dir" &
+    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" --storage-dir "$storage_dir" &
     local server_pid=$!
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then

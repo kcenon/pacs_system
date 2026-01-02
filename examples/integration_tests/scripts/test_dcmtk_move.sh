@@ -135,7 +135,7 @@ test_pacs_scp_dcmtk_movescu() {
     storage_dir=$(create_dcmtk_temp_dir "move_storage")
 
     log_info "Starting pacs_system server on port $MOVE_PORT..."
-    "$server_bin" "$MOVE_PORT" "$MOVE_AE" "$storage_dir" &
+    "$server_bin" --port "$MOVE_PORT" --ae-title "$MOVE_AE" --storage-dir "$storage_dir" &
     local server_pid=$!
 
     if ! wait_for_port "127.0.0.1" "$MOVE_PORT" 15; then
