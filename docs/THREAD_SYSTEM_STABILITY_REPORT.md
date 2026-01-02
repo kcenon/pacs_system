@@ -234,6 +234,7 @@ The `ci.yml` workflow explicitly specifies the compiler, while `integration-test
 
 Added explicit compiler specification to all 5 CMake configuration steps in `integration-tests.yml`:
 
+{% raw %}
 ```yaml
 cmake -B build \
   -G Ninja \
@@ -242,6 +243,7 @@ cmake -B build \
   -DCMAKE_CXX_COMPILER=g++ \
   ...
 ```
+{% endraw %}
 
 This ensures consistent compiler behavior across all CI workflows.
 
@@ -596,6 +598,36 @@ ctest -L integration
 - [x] All tests pass with ASAN/TSAN enabled
 - [x] Test documentation updated
 
+## Task Scheduler Test Stability (PR #458)
+
+### Overview
+
+PR #458 identified timing issues in task_scheduler tests that caused intermittent failures in CI environments, specifically on Ubuntu 24.04.
+
+### Root Cause
+
+The `task_scheduler::run_loop()` waits for `check_interval` (1 second) before executing the first cycle:
+
+```cpp
+cv_.wait_for(lock, config_.check_interval, [this]() {
+    return stop_requested_.load();
+});
+```
+
+Tests were only waiting 50 × 20ms = 1 second, which is exactly the `check_interval` duration. In CI environments with scheduling delays, this timing was insufficient.
+
+### Fix Applied (2026-01-03)
+
+| Test | Original Wait | Fixed Wait | Rationale |
+|------|---------------|------------|-----------|
+| `task_scheduler: task execution` | 50 × 20ms (1s) | 150 × 20ms (3s) | 3× margin for CI overhead |
+| `task_scheduler: task failure handling` | 50 × 20ms (1s) | 150 × 20ms (3s) | 3× margin for CI overhead |
+| `task_scheduler: execution history` | 50 × 20ms (1s) | 150 × 20ms (3s) | 3× margin for CI overhead |
+
+### Verification
+
+All 70 workflow tests pass consistently with the extended timeouts.
+
 ## References
 
 - Issue #96: thread_adapter SIGILL error (Closed)
@@ -606,6 +638,7 @@ ctest -L integration
 - **Issue #159: Cancellation token integration (Complete)**
 - **Issue #390: Enhance cross-system integration tests (Complete)**
 - **Issue #391-#395: Cross-system integration test sub-issues (Complete)**
+- **PR #458: Task scheduler test stability fix**
 - thread_system #223: Original ARM64 bug (Closed)
 - thread_system #224: Static assertion fix (Merged)
 - thread_system #225: Follow-up EXC_BAD_ACCESS bug (Closed, fixed in #226)

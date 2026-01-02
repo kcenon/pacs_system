@@ -101,6 +101,7 @@ endif()
 
 ### Code Pattern
 
+{% raw %}
 ```cpp
 #ifdef PACS_WITH_DATABASE_SYSTEM
 // Secure: Uses query builder with parameterization
@@ -116,6 +117,7 @@ std::string escaped_username = escape_string(user.username);
 std::string sql = std::format("INSERT INTO users ...", escaped_username);
 #endif
 ```
+{% endraw %}
 
 ### Migration Phases
 

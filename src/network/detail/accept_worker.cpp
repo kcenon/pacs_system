@@ -193,7 +193,7 @@ accept_worker::result_void accept_worker::do_work() {
 
     timeval tv{};
     tv.tv_sec = 0;
-    tv.tv_usec = 50000;  // 50ms timeout
+    tv.tv_usec = 10000;  // 10ms timeout for responsive maintenance callbacks
 
     int result = select(0, &readfds, nullptr, nullptr, &tv);
 
@@ -232,7 +232,7 @@ accept_worker::result_void accept_worker::do_work() {
 
     timeval tv{};
     tv.tv_sec = 0;
-    tv.tv_usec = 50000;  // 50ms timeout
+    tv.tv_usec = 10000;  // 10ms timeout for responsive maintenance callbacks
 
     int result = select(listen_socket_ + 1, &readfds, nullptr, nullptr, &tv);
 

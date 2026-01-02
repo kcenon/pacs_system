@@ -923,6 +923,7 @@ pacs_pool_pdu_buffer_misses_total{}
 - 오브젝트 풀 모니터링 (요소, 데이터셋, PDU 버퍼 풀)
 
 **사용법**:
+{% raw %}
 ```cpp
 #include <pacs/monitoring/pacs_monitor.hpp>
 using namespace pacs::monitoring;
@@ -948,6 +949,7 @@ monitor.register_health_check("database", []() {
 // 전체 상태 확인
 bool healthy = monitor.is_healthy();
 ```
+{% endraw %}
 
 **IMonitor와의 통합**:
 `pacs_monitor` 클래스는 `common_system`의 `IMonitor`와 동일한 인터페이스 패턴을 따르므로, 모니터링 인프라와 원활하게 통합됩니다:

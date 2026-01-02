@@ -247,10 +247,11 @@ auto sql = builder
 | Method | Description | Example |
 |--------|-------------|---------|
 | `insert_into(table)` | Target table | `.insert_into("users")` |
-| `values(map)` | Column-value pairs | `.values({{"name", "John"}})` |
+| `values(map)` | Column-value pairs | `.values({% raw %}{{{% endraw %}"name", "John"{% raw %}}}{% endraw %})` |
 
 #### UPDATE Queries
 
+{% raw %}
 ```cpp
 database::sql_query_builder builder;
 auto sql = builder
@@ -259,13 +260,14 @@ auto sql = builder
     .where("id", "=", id)
     .build_for_database(database::database_types::sqlite);
 ```
+{% endraw %}
 
 **Methods:**
 
 | Method | Description | Example |
 |--------|-------------|---------|
 | `update(table)` | Target table | `.update("users")` |
-| `set(map)` | Column-value updates | `.set({{"active", false}})` |
+| `set(map)` | Column-value updates | `.set({% raw %}{{{% endraw %}"active", false{% raw %}}}{% endraw %})` |
 
 #### DELETE Queries
 
@@ -411,6 +413,7 @@ auto get_bool_value(
 
 ### 5.2 Transaction Pattern
 
+{% raw %}
 ```cpp
 auto update_user_with_roles(const User& user) -> VoidResult {
     // Begin transaction
@@ -475,6 +478,7 @@ auto update_user_with_roles(const User& user) -> VoidResult {
     return ok();
 }
 ```
+{% endraw %}
 
 ---
 

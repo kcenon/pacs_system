@@ -565,8 +565,10 @@ TEST_CASE("task_scheduler: task execution", "[workflow][scheduler][execution]") 
 
     scheduler.start();
 
-    // Wait for task to execute
-    for (int i = 0; i < 50 && !task_completed.load(); ++i) {
+    // Wait for task to execute (3 seconds max for CI stability)
+    // The scheduler waits check_interval before first cycle, so we need
+    // sufficient time for scheduling delays in CI environments
+    for (int i = 0; i < 150 && !task_completed.load(); ++i) {
         std::this_thread::sleep_for(20ms);
     }
 
@@ -607,8 +609,8 @@ TEST_CASE("task_scheduler: task failure handling", "[workflow][scheduler][execut
 
     scheduler.start();
 
-    // Wait for error callback
-    for (int i = 0; i < 50 && !error_callback_invoked.load(); ++i) {
+    // Wait for error callback (3 seconds max for CI stability)
+    for (int i = 0; i < 150 && !error_callback_invoked.load(); ++i) {
         std::this_thread::sleep_for(20ms);
     }
 
@@ -644,8 +646,8 @@ TEST_CASE("task_scheduler: execution history", "[workflow][scheduler][history]")
 
     scheduler.start();
 
-    // Wait for task to execute
-    for (int i = 0; i < 50 && !task_done.load(); ++i) {
+    // Wait for task to execute (3 seconds max for CI stability)
+    for (int i = 0; i < 150 && !task_done.load(); ++i) {
         std::this_thread::sleep_for(20ms);
     }
 
