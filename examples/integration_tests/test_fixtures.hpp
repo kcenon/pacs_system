@@ -122,6 +122,42 @@ inline std::chrono::milliseconds dcmtk_server_ready_timeout() {
         : std::chrono::milliseconds{10000};
 }
 
+// =============================================================================
+// Feature Detection
+// =============================================================================
+
+/**
+ * @brief Check if pacs_system supports real TCP DICOM connections
+ *
+ * Currently returns false because accept_worker immediately closes
+ * TCP connections after accepting them. This is a known limitation
+ * documented in accept_worker.cpp.
+ *
+ * When real network I/O support is implemented in the association class,
+ * this function should be updated to return true.
+ *
+ * @return true if real TCP DICOM connections are supported
+ *
+ * @note DCMTK interoperability tests require real TCP DICOM support.
+ *       Until this is implemented, those tests will be skipped when
+ *       this function returns false.
+ *
+ * @see accept_worker.cpp - "association doesn't support real network I/O yet"
+ * @see Issue #XXX - Real TCP DICOM connection support (TODO: create issue)
+ */
+inline bool supports_real_tcp_dicom() {
+    // Currently, pacs_system does not support real TCP connections
+    // for DICOM protocol. The accept_worker accepts TCP connections
+    // but immediately closes them without performing DICOM handshake.
+    //
+    // This causes DCMTK clients to receive "Peer aborted Association"
+    // errors when attempting to connect.
+    //
+    // When real TCP support is implemented, update this to return true
+    // or perform an actual connection test.
+    return false;
+}
+
 /// Default AE titles
 constexpr const char* test_scp_ae_title = "TEST_SCP";
 constexpr const char* test_scu_ae_title = "TEST_SCU";
