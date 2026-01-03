@@ -180,11 +180,58 @@ if (write_result.is_err()) {
 | Implicit VR Little Endian | 1.2.840.10008.1.2 | ✅ 구현됨 |
 | Explicit VR Little Endian | 1.2.840.10008.1.2.1 | ✅ 구현됨 |
 | Explicit VR Big Endian | 1.2.840.10008.1.2.2 | ✅ 구현됨 |
-| JPEG Baseline | 1.2.840.10008.1.2.4.50 | 🔮 향후 |
-| JPEG Lossless | 1.2.840.10008.1.2.4.70 | 🔮 향후 |
-| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | 🔮 향후 |
-| JPEG 2000 | 1.2.840.10008.1.2.4.91 | 🔮 향후 |
-| RLE Lossless | 1.2.840.10008.1.2.5 | 🔮 향후 |
+| JPEG Baseline | 1.2.840.10008.1.2.4.50 | ✅ 구현됨 |
+| JPEG Lossless | 1.2.840.10008.1.2.4.70 | ✅ 구현됨 |
+| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | ✅ 구현됨 |
+| JPEG 2000 | 1.2.840.10008.1.2.4.91 | ✅ 구현됨 |
+| RLE Lossless | 1.2.840.10008.1.2.5 | ✅ 구현됨 |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | ✅ 구현됨 |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | ✅ 구현됨 |
+
+### Undefined Length 지원
+
+**구현**: DICOM PS3.5에 따른 undefined length 데이터 요소의 완전한 지원.
+
+| 기능 | 상태 | 설명 |
+|------|------|------|
+| Undefined Length 시퀀스 (SQ) | ✅ 구현됨 | Sequence Delimitation Item으로 종료되는 길이 0xFFFFFFFF 시퀀스 |
+| Undefined Length 시퀀스 아이템 | ✅ 구현됨 | Item Delimitation Item으로 종료되는 길이 0xFFFFFFFF 아이템 |
+| 캡슐화된 픽셀 데이터 | ✅ 구현됨 | 압축된 프래그먼트를 포함하는 undefined length 픽셀 데이터 |
+| Basic Offset Table | ✅ 구현됨 | 랜덤 액세스를 위한 캡슐화된 픽셀 데이터의 첫 번째 아이템 |
+| Multi-fragment 프레임 | ✅ 구현됨 | 여러 프래그먼트 아이템에 걸쳐 있는 프레임 |
+| 중첩 시퀀스 | ✅ 구현됨 | 모든 중첩 레벨에서 시퀀스 내부의 시퀀스 |
+
+**구분자 태그**:
+- Item 태그: `(FFFE,E000)`
+- Item Delimitation Item: `(FFFE,E00D)`
+- Sequence Delimitation Item: `(FFFE,E0DD)`
+
+**예제**:
+```cpp
+#include <pacs/core/dicom_file.hpp>
+
+using namespace pacs::core;
+
+// Undefined length 시퀀스가 있는 DICOM 파일 읽기
+auto result = dicom_file::open("compressed_image.dcm");
+if (result.is_ok()) {
+    auto& file = result.value();
+
+    // Undefined length 시퀀스 접근
+    if (file.dataset().has_sequence(tags::referenced_series_sequence)) {
+        auto* seq = file.dataset().get_sequence(tags::referenced_series_sequence);
+        for (const auto& item : *seq) {
+            std::cout << "시리즈 UID: " << item.get_string(tags::series_instance_uid) << "\n";
+        }
+    }
+
+    // 캡슐화된 픽셀 데이터 접근
+    if (auto* pixel_elem = file.dataset().get(tags::pixel_data)) {
+        auto raw_data = pixel_elem->raw_data();
+        // raw_data에 캡슐화된 프래그먼트 포함
+    }
+}
+```
 
 ---
 

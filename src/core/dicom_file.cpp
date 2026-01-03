@@ -536,10 +536,65 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
             header_size = 8;
         }
 
-        // Handle undefined length (0xFFFFFFFF) - skip for now
-        if (length == 0xFFFFFFFF) {
-            // TODO: Handle sequences with undefined length in Phase 2
-            break;
+        // Handle undefined length (0xFFFFFFFF)
+        if (length == kUndefinedLength) {
+            if (vr == encoding::vr_type::SQ) {
+                // Parse undefined length sequence
+                size_t seq_bytes_read = 0;
+                auto seq_result = parse_undefined_length_sequence(
+                    data.subspan(offset + header_size),
+                    seq_bytes_read, true, false);
+
+                if (seq_result.is_ok()) {
+                    // Create sequence element with parsed items
+                    dicom_element seq_elem{tag, vr};
+                    for (auto& item : seq_result.value()) {
+                        seq_elem.add_sequence_item(std::move(item));
+                    }
+                    dataset.insert(std::move(seq_elem));
+                }
+                offset += header_size + seq_bytes_read;
+                continue;
+            }
+            else if (tag == tags::pixel_data) {
+                // Encapsulated pixel data - find sequence delimitation and store raw
+                size_t pixel_start = offset + header_size;
+                size_t scan_offset = pixel_start;
+
+                // Scan for Sequence Delimitation Item
+                while (scan_offset + 8 <= data.size()) {
+                    uint16_t g = read_uint16_le(data.subspan(scan_offset, 2));
+                    uint16_t e = read_uint16_le(data.subspan(scan_offset + 2, 2));
+
+                    if (g == kItemTagGroup && e == kSequenceDelimitationElement) {
+                        scan_offset += 8;  // Include delimitation item
+                        break;
+                    }
+
+                    // Skip item tag and length
+                    if (g == kItemTagGroup && e == kItemTagElement) {
+                        scan_offset += 4;
+                        if (scan_offset + 4 > data.size()) break;
+                        uint32_t frag_len = read_uint32_le(data.subspan(scan_offset, 4));
+                        scan_offset += 4 + frag_len;
+                    } else {
+                        break;  // Unexpected tag
+                    }
+                }
+
+                // Store encapsulated data (OB VR for compressed pixel data)
+                size_t encap_length = scan_offset - pixel_start;
+                auto pixel_span = data.subspan(pixel_start, encap_length);
+                dicom_element pixel_elem{tag, encoding::vr_type::OB, pixel_span};
+                dataset.insert(std::move(pixel_elem));
+
+                offset = scan_offset;
+                continue;
+            }
+            else {
+                // Unknown undefined length element - try to find delimiter
+                break;
+            }
         }
 
         // Validate value bounds
@@ -601,18 +656,61 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
 
         // Handle undefined length
         if (length == kUndefinedLength) {
-            // For sequences or pixel data with undefined length
             if (vr == encoding::vr_type::SQ) {
+                // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
                 auto seq_result = parse_undefined_length_sequence(
                     data.subspan(offset + kImplicitHeaderSize),
                     seq_bytes_read, false, false);
-                // Skip sequence for now (TODO: proper sequence support)
+
+                if (seq_result.is_ok()) {
+                    // Create sequence element with parsed items
+                    dicom_element seq_elem{tag, vr};
+                    for (auto& item : seq_result.value()) {
+                        seq_elem.add_sequence_item(std::move(item));
+                    }
+                    dataset.insert(std::move(seq_elem));
+                }
                 offset += kImplicitHeaderSize + seq_bytes_read;
                 continue;
             }
-            // Skip to next item for undefined length pixel data
-            break;
+            else if (tag == tags::pixel_data) {
+                // Encapsulated pixel data - find sequence delimitation and store raw
+                size_t pixel_start = offset + kImplicitHeaderSize;
+                size_t scan_offset = pixel_start;
+
+                // Scan for Sequence Delimitation Item
+                while (scan_offset + 8 <= data.size()) {
+                    uint16_t g = read_uint16_le(data.subspan(scan_offset, 2));
+                    uint16_t e = read_uint16_le(data.subspan(scan_offset + 2, 2));
+
+                    if (g == kItemTagGroup && e == kSequenceDelimitationElement) {
+                        scan_offset += 8;
+                        break;
+                    }
+
+                    if (g == kItemTagGroup && e == kItemTagElement) {
+                        scan_offset += 4;
+                        if (scan_offset + 4 > data.size()) break;
+                        uint32_t frag_len = read_uint32_le(data.subspan(scan_offset, 4));
+                        scan_offset += 4 + frag_len;
+                    } else {
+                        break;
+                    }
+                }
+
+                size_t encap_length = scan_offset - pixel_start;
+                auto pixel_span = data.subspan(pixel_start, encap_length);
+                dicom_element pixel_elem{tag, encoding::vr_type::OB, pixel_span};
+                dataset.insert(std::move(pixel_elem));
+
+                offset = scan_offset;
+                continue;
+            }
+            else {
+                // Unknown undefined length element
+                break;
+            }
         }
 
         // Validate value bounds
@@ -687,14 +785,58 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
         // Handle undefined length
         if (length == kUndefinedLength) {
             if (vr == encoding::vr_type::SQ) {
+                // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
                 auto seq_result = parse_undefined_length_sequence(
                     data.subspan(offset + header_size),
                     seq_bytes_read, true, true);
+
+                if (seq_result.is_ok()) {
+                    // Create sequence element with parsed items
+                    dicom_element seq_elem{tag, vr};
+                    for (auto& item : seq_result.value()) {
+                        seq_elem.add_sequence_item(std::move(item));
+                    }
+                    dataset.insert(std::move(seq_elem));
+                }
                 offset += header_size + seq_bytes_read;
                 continue;
             }
-            break;
+            else if (tag == tags::pixel_data) {
+                // Encapsulated pixel data (rare for big endian but handle it)
+                size_t pixel_start = offset + header_size;
+                size_t scan_offset = pixel_start;
+
+                while (scan_offset + 8 <= data.size()) {
+                    uint16_t g = read_uint16_be(data.subspan(scan_offset, 2));
+                    uint16_t e = read_uint16_be(data.subspan(scan_offset + 2, 2));
+
+                    if (g == kItemTagGroup && e == kSequenceDelimitationElement) {
+                        scan_offset += 8;
+                        break;
+                    }
+
+                    if (g == kItemTagGroup && e == kItemTagElement) {
+                        scan_offset += 4;
+                        if (scan_offset + 4 > data.size()) break;
+                        uint32_t frag_len = read_uint32_be(data.subspan(scan_offset, 4));
+                        scan_offset += 4 + frag_len;
+                    } else {
+                        break;
+                    }
+                }
+
+                size_t encap_length = scan_offset - pixel_start;
+                auto pixel_span = data.subspan(pixel_start, encap_length);
+                dicom_element pixel_elem{tag, encoding::vr_type::OB, pixel_span};
+                dataset.insert(std::move(pixel_elem));
+
+                offset = scan_offset;
+                continue;
+            }
+            else {
+                break;
+            }
         }
 
         // Validate value bounds

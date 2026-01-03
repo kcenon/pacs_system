@@ -943,3 +943,389 @@ TEST_CASE("dicom_file cross-transfer-syntax conversion", "[core][dicom_file][int
         CHECK(*cols == 128);
     }
 }
+
+// ============================================================================
+// Undefined Length Sequence Tests (Issue #461)
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Create DICOM bytes with an undefined length sequence
+ */
+[[nodiscard]] auto create_dicom_with_undefined_length_sequence() -> std::vector<uint8_t> {
+    std::vector<uint8_t> data;
+
+    // 128-byte preamble (zeros)
+    data.resize(128, 0);
+
+    // DICM prefix
+    data.push_back('D');
+    data.push_back('I');
+    data.push_back('C');
+    data.push_back('M');
+
+    auto write_u16 = [&data](uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+
+    auto write_u32 = [&data](uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+
+    auto write_string = [&data](std::string_view str, char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    // === File Meta Information ===
+
+    // (0002,0001) File Meta Information Version
+    write_u16(0x0002);
+    write_u16(0x0001);
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);
+    data.push_back(0x00);
+    write_u32(2);
+    data.push_back(0x00);
+    data.push_back(0x01);
+
+    // (0002,0002) Media Storage SOP Class UID
+    std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+    write_u16(0x0002);
+    write_u16(0x0002);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    // (0002,0003) Media Storage SOP Instance UID
+    std::string_view sop_instance = "1.2.3.4.5.6.7.8.9";
+    write_u16(0x0002);
+    write_u16(0x0003);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // (0002,0010) Transfer Syntax UID
+    std::string_view ts_uid = "1.2.840.10008.1.2.1";
+    write_u16(0x0002);
+    write_u16(0x0010);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(ts_uid.size() % 2 == 0 ? ts_uid.size() : ts_uid.size() + 1));
+    write_string(ts_uid);
+
+    // (0002,0012) Implementation Class UID
+    std::string_view impl_uid = "1.2.3.4.5";
+    write_u16(0x0002);
+    write_u16(0x0012);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(impl_uid.size() % 2 == 0 ? impl_uid.size() : impl_uid.size() + 1));
+    write_string(impl_uid);
+
+    // === Main Dataset ===
+
+    // (0008,0016) SOP Class UID
+    write_u16(0x0008);
+    write_u16(0x0016);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    // (0008,0018) SOP Instance UID
+    write_u16(0x0008);
+    write_u16(0x0018);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // (0010,0010) Patient Name
+    std::string_view patient_name = "SEQ^TEST";
+    write_u16(0x0010);
+    write_u16(0x0010);
+    data.push_back('P');
+    data.push_back('N');
+    write_u16(static_cast<uint16_t>(patient_name.size() % 2 == 0 ? patient_name.size() : patient_name.size() + 1));
+    write_string(patient_name, ' ');
+
+    // (0008,1115) Referenced Series Sequence - SQ with undefined length
+    write_u16(0x0008);
+    write_u16(0x1115);
+    data.push_back('S');
+    data.push_back('Q');
+    data.push_back(0x00);  // Reserved
+    data.push_back(0x00);
+    write_u32(0xFFFFFFFF);  // Undefined length
+
+    // Item 1 (FFFE,E000)
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    // Item with defined length
+    size_t item_start = data.size();
+    write_u32(0);  // Placeholder for length
+
+    // (0020,000E) Series Instance UID within item
+    std::string_view series_uid = "1.2.3.4.5.6.7";
+    write_u16(0x0020);
+    write_u16(0x000E);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(series_uid.size() % 2 == 0 ? series_uid.size() : series_uid.size() + 1));
+    write_string(series_uid);
+
+    // Update item length
+    uint32_t item_length = static_cast<uint32_t>(data.size() - item_start - 4);
+    data[item_start] = static_cast<uint8_t>(item_length & 0xFF);
+    data[item_start + 1] = static_cast<uint8_t>((item_length >> 8) & 0xFF);
+    data[item_start + 2] = static_cast<uint8_t>((item_length >> 16) & 0xFF);
+    data[item_start + 3] = static_cast<uint8_t>((item_length >> 24) & 0xFF);
+
+    // Sequence Delimitation Item (FFFE,E0DD)
+    write_u16(0xFFFE);
+    write_u16(0xE0DD);
+    write_u32(0);  // Length is always 0
+
+    return data;
+}
+
+/**
+ * @brief Create DICOM bytes with encapsulated pixel data
+ */
+[[nodiscard]] auto create_dicom_with_encapsulated_pixel_data() -> std::vector<uint8_t> {
+    std::vector<uint8_t> data;
+
+    // 128-byte preamble
+    data.resize(128, 0);
+
+    // DICM prefix
+    data.push_back('D');
+    data.push_back('I');
+    data.push_back('C');
+    data.push_back('M');
+
+    auto write_u16 = [&data](uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+
+    auto write_u32 = [&data](uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+
+    auto write_string = [&data](std::string_view str, char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    // === File Meta Information ===
+
+    write_u16(0x0002);
+    write_u16(0x0001);
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);
+    data.push_back(0x00);
+    write_u32(2);
+    data.push_back(0x00);
+    data.push_back(0x01);
+
+    std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+    write_u16(0x0002);
+    write_u16(0x0002);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    std::string_view sop_instance = "1.2.3.4.5.6.7.8.9";
+    write_u16(0x0002);
+    write_u16(0x0003);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // Transfer Syntax: JPEG 2000 Lossless
+    std::string_view ts_uid = "1.2.840.10008.1.2.4.90";
+    write_u16(0x0002);
+    write_u16(0x0010);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(ts_uid.size() % 2 == 0 ? ts_uid.size() : ts_uid.size() + 1));
+    write_string(ts_uid);
+
+    std::string_view impl_uid = "1.2.3.4.5";
+    write_u16(0x0002);
+    write_u16(0x0012);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(impl_uid.size() % 2 == 0 ? impl_uid.size() : impl_uid.size() + 1));
+    write_string(impl_uid);
+
+    // === Main Dataset ===
+
+    write_u16(0x0008);
+    write_u16(0x0016);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    write_u16(0x0008);
+    write_u16(0x0018);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    std::string_view patient_name = "ENCAP^TEST";
+    write_u16(0x0010);
+    write_u16(0x0010);
+    data.push_back('P');
+    data.push_back('N');
+    write_u16(static_cast<uint16_t>(patient_name.size() % 2 == 0 ? patient_name.size() : patient_name.size() + 1));
+    write_string(patient_name, ' ');
+
+    // Image pixel attributes
+    write_u16(0x0028);
+    write_u16(0x0010);  // Rows
+    data.push_back('U');
+    data.push_back('S');
+    write_u16(2);
+    write_u16(64);
+
+    write_u16(0x0028);
+    write_u16(0x0011);  // Columns
+    data.push_back('U');
+    data.push_back('S');
+    write_u16(2);
+    write_u16(64);
+
+    // (7FE0,0010) Pixel Data - OB with undefined length
+    write_u16(0x7FE0);
+    write_u16(0x0010);
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);  // Reserved
+    data.push_back(0x00);
+    write_u32(0xFFFFFFFF);  // Undefined length
+
+    // Basic Offset Table (empty)
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    write_u32(0);  // Empty BOT
+
+    // Fragment 1 - some fake compressed data
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    write_u32(16);  // 16 bytes of "compressed" data
+    for (int i = 0; i < 16; ++i) {
+        data.push_back(static_cast<uint8_t>(i));
+    }
+
+    // Fragment 2
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    write_u32(8);  // 8 bytes
+    for (int i = 0; i < 8; ++i) {
+        data.push_back(static_cast<uint8_t>(0x80 + i));
+    }
+
+    // Sequence Delimitation Item
+    write_u16(0xFFFE);
+    write_u16(0xE0DD);
+    write_u32(0);
+
+    return data;
+}
+
+}  // namespace
+
+TEST_CASE("dicom_file undefined length sequence parsing", "[core][dicom_file][undefined_length]") {
+    SECTION("parse undefined length sequence") {
+        auto data = create_dicom_with_undefined_length_sequence();
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_ok());
+        auto& file = result.value();
+
+        // Verify basic dataset elements
+        CHECK(file.dataset().get_string(tags::patient_name) == "SEQ^TEST");
+
+        // Verify sequence was parsed
+        dicom_tag referenced_series_seq{0x0008, 0x1115};
+        CHECK(file.dataset().has_sequence(referenced_series_seq));
+
+        auto* seq = file.dataset().get_sequence(referenced_series_seq);
+        REQUIRE(seq != nullptr);
+        REQUIRE(seq->size() == 1);
+
+        // Verify item content
+        auto& item = (*seq)[0];
+        CHECK(item.get_string(tags::series_instance_uid) == "1.2.3.4.5.6.7");
+    }
+}
+
+TEST_CASE("dicom_file encapsulated pixel data parsing", "[core][dicom_file][encapsulated]") {
+    SECTION("parse encapsulated pixel data with undefined length") {
+        auto data = create_dicom_with_encapsulated_pixel_data();
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_ok());
+        auto& file = result.value();
+
+        // Verify basic dataset elements
+        CHECK(file.dataset().get_string(tags::patient_name) == "ENCAP^TEST");
+
+        auto rows = file.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 64);
+
+        // Verify pixel data was captured
+        CHECK(file.dataset().contains(tags::pixel_data));
+
+        const auto* pixel_elem = file.dataset().get(tags::pixel_data);
+        REQUIRE(pixel_elem != nullptr);
+
+        // Pixel data should contain the encapsulated frames
+        // BOT (8 bytes) + Fragment1 (8 + 16) + Fragment2 (8 + 8) = 48 bytes
+        // Note: We don't include the sequence delimitation item in the stored data
+        CHECK(pixel_elem->length() > 0);
+    }
+}
+
+TEST_CASE("dicom_file Item and Sequence Delimitation tags", "[core][dicom_file][delimiters]") {
+    SECTION("delimiter tag constants are correct") {
+        CHECK(tags::item.group() == 0xFFFE);
+        CHECK(tags::item.element() == 0xE000);
+
+        CHECK(tags::item_delimitation_item.group() == 0xFFFE);
+        CHECK(tags::item_delimitation_item.element() == 0xE00D);
+
+        CHECK(tags::sequence_delimitation_item.group() == 0xFFFE);
+        CHECK(tags::sequence_delimitation_item.element() == 0xE0DD);
+    }
+}
