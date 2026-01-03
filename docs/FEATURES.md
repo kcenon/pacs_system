@@ -188,6 +188,51 @@ if (write_result.is_err()) {
 | JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | ✅ Implemented |
 | JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | ✅ Implemented |
 
+### Undefined Length Support
+
+**Implementation**: Full support for undefined length data elements as specified in DICOM PS3.5.
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Undefined Length Sequences (SQ) | ✅ Implemented | Sequences with length 0xFFFFFFFF, terminated by Sequence Delimitation Item |
+| Undefined Length Sequence Items | ✅ Implemented | Items with length 0xFFFFFFFF, terminated by Item Delimitation Item |
+| Encapsulated Pixel Data | ✅ Implemented | Pixel data with undefined length containing compressed fragments |
+| Basic Offset Table | ✅ Implemented | First item in encapsulated pixel data for random access |
+| Multi-fragment Frames | ✅ Implemented | Frames spread across multiple fragment items |
+| Nested Sequences | ✅ Implemented | Sequences containing sequences at any nesting level |
+
+**Delimiter Tags**:
+- Item Tag: `(FFFE,E000)`
+- Item Delimitation Item: `(FFFE,E00D)`
+- Sequence Delimitation Item: `(FFFE,E0DD)`
+
+**Example**:
+```cpp
+#include <pacs/core/dicom_file.hpp>
+
+using namespace pacs::core;
+
+// Read DICOM file with undefined length sequences
+auto result = dicom_file::open("compressed_image.dcm");
+if (result.is_ok()) {
+    auto& file = result.value();
+
+    // Access sequence with undefined length
+    if (file.dataset().has_sequence(tags::referenced_series_sequence)) {
+        auto* seq = file.dataset().get_sequence(tags::referenced_series_sequence);
+        for (const auto& item : *seq) {
+            std::cout << "Series UID: " << item.get_string(tags::series_instance_uid) << "\n";
+        }
+    }
+
+    // Access encapsulated pixel data
+    if (auto* pixel_elem = file.dataset().get(tags::pixel_data)) {
+        auto raw_data = pixel_elem->raw_data();
+        // raw_data contains the encapsulated fragments
+    }
+}
+```
+
 ---
 
 ## Network Protocol Features
