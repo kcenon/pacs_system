@@ -1,7 +1,7 @@
 # 소프트웨어 설계 명세서 (SDS) - PACS 시스템
 
-> **버전:** 0.1.2.0
-> **최종 수정일:** 2025-12-07
+> **버전:** 0.1.3.0
+> **최종 수정일:** 2026-01-04
 > **언어:** [English](SDS.md) | **한국어**
 > **상태:** 완료
 
@@ -33,11 +33,13 @@
 | 파일 | 설명 |
 |------|------|
 | **SDS_KO.md** (본 문서) | 개요, 설계 원칙, 모듈 요약 |
-| [SDS_COMPONENTS.md](SDS_COMPONENTS.md) | 상세 컴포넌트 설계 |
-| [SDS_INTERFACES.md](SDS_INTERFACES.md) | 인터페이스 명세 |
-| [SDS_DATABASE.md](SDS_DATABASE.md) | 데이터베이스 스키마 설계 |
-| [SDS_SEQUENCES.md](SDS_SEQUENCES.md) | 시퀀스 다이어그램 |
-| [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | 요구사항 추적성 매트릭스 |
+| [SDS_COMPONENTS.md](SDS_COMPONENTS_KO.md) | 상세 컴포넌트 설계 |
+| [SDS_INTERFACES.md](SDS_INTERFACES_KO.md) | 인터페이스 명세 |
+| [SDS_DATABASE.md](SDS_DATABASE_KO.md) | 데이터베이스 스키마 설계 |
+| [SDS_SEQUENCES.md](SDS_SEQUENCES_KO.md) | 시퀀스 다이어그램 |
+| [SDS_TRACEABILITY.md](SDS_TRACEABILITY_KO.md) | 요구사항 추적성 매트릭스 |
+| [SDS_SECURITY.md](SDS_SECURITY.md) | 보안 모듈 설계 (RBAC, 익명화, 디지털 서명) |
+| [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | 클라우드 스토리지 백엔드 (S3, Azure, HSM) |
 
 ---
 

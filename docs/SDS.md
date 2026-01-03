@@ -1,7 +1,7 @@
 # Software Design Specification (SDS) - PACS System
 
-> **Version:** 0.1.2.0
-> **Last Updated:** 2025-12-07
+> **Version:** 0.1.3.0
+> **Last Updated:** 2026-01-04
 > **Language:** **English** | [한국어](SDS_KO.md)
 > **Status:** Complete
 
@@ -39,6 +39,7 @@ This SDS is organized into multiple files for maintainability:
 | [SDS_SEQUENCES.md](SDS_SEQUENCES.md) | Sequence diagrams |
 | [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | Requirements traceability matrix |
 | [SDS_SECURITY.md](SDS_SECURITY.md) | Security module design (RBAC, Anonymization, Digital Signatures) |
+| [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | Cloud storage backends (S3, Azure, HSM) |
 
 ---
 
