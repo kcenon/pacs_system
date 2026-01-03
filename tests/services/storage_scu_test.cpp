@@ -499,3 +499,69 @@ TEST_CASE("store_file with non-existent file", "[services][storage_scu]") {
     CHECK(result.error().find("File not found") != std::string::npos);
 #endif
 }
+
+// =============================================================================
+// store_files Tests
+// =============================================================================
+
+TEST_CASE("store_files with empty vector", "[services][storage_scu]") {
+    storage_scu scu;
+    association assoc;
+
+    std::vector<std::filesystem::path> empty_paths;
+    auto results = scu.store_files(assoc, empty_paths);
+
+    CHECK(results.empty());
+}
+
+TEST_CASE("store_files with non-existent files", "[services][storage_scu]") {
+    storage_scu scu;
+    association assoc;
+
+    std::vector<std::filesystem::path> paths = {
+        "/non/existent/file1.dcm",
+        "/non/existent/file2.dcm",
+        "/non/existent/file3.dcm"
+    };
+
+    auto results = scu.store_files(assoc, paths);
+
+    // All should fail with file not found
+    REQUIRE(results.size() == 3);
+    for (const auto& result : results) {
+        CHECK(result.is_error());
+    }
+}
+
+TEST_CASE("store_files progress callback", "[services][storage_scu]") {
+    storage_scu scu;
+    association assoc;
+
+    std::vector<std::filesystem::path> paths = {
+        "/non/existent/file1.dcm",
+        "/non/existent/file2.dcm"
+    };
+
+    std::vector<std::pair<size_t, size_t>> progress_log;
+    auto results = scu.store_files(assoc, paths,
+        [&progress_log](size_t completed, size_t total) {
+            progress_log.emplace_back(completed, total);
+        });
+
+    // Progress callback should be called for each file
+    REQUIRE(progress_log.size() == 2);
+    CHECK(progress_log[0] == std::make_pair(size_t{1}, size_t{2}));
+    CHECK(progress_log[1] == std::make_pair(size_t{2}, size_t{2}));
+}
+
+TEST_CASE("store_files with null progress callback", "[services][storage_scu]") {
+    storage_scu scu;
+    association assoc;
+
+    std::vector<std::filesystem::path> paths = {"/non/existent/file.dcm"};
+
+    // Should not crash with null callback
+    auto results = scu.store_files(assoc, paths, nullptr);
+
+    REQUIRE(results.size() == 1);
+}

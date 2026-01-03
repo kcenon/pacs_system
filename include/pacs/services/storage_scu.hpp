@@ -244,6 +244,23 @@ public:
         const std::filesystem::path& file_path);
 
     /**
+     * @brief Store multiple DICOM files
+     *
+     * Reads and parses multiple DICOM files, then sends them via C-STORE.
+     * If continue_on_error is true (default), continues with remaining
+     * files after failures.
+     *
+     * @param assoc The established association to use
+     * @param file_paths Vector of paths to DICOM files
+     * @param progress_callback Optional callback for progress updates
+     * @return Vector of store_result for each file
+     */
+    [[nodiscard]] std::vector<store_result> store_files(
+        network::association& assoc,
+        const std::vector<std::filesystem::path>& file_paths,
+        store_progress_callback progress_callback = nullptr);
+
+    /**
      * @brief Store all DICOM files in a directory
      *
      * Scans a directory for DICOM files and stores them via C-STORE.
