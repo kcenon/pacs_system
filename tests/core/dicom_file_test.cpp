@@ -685,3 +685,261 @@ TEST_CASE("dicom_file transfer syntax conversion", "[core][dicom_file][conversio
         CHECK(converted.dataset().get_string(tags::patient_name) == "BIGENDIAN^TEST");
     }
 }
+
+// ============================================================================
+// Implicit VR Little Endian Tests (Issue #460)
+// ============================================================================
+
+TEST_CASE("dicom_file Implicit VR LE round-trip", "[core][dicom_file][implicit_vr]") {
+    SECTION("create and reload Implicit VR LE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "IMPLICIT^VR^LE^TEST");
+        ds.set_string(tags::patient_id, vr_type::LO, "IMPL001");
+        ds.set_string(tags::modality, vr_type::CS, "CT");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 256);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 256);
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Verify transfer syntax
+        CHECK(file.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+
+        // Convert to bytes and back
+        auto bytes = file.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        // Verify data preserved
+        CHECK(restored.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(restored.dataset().get_string(tags::patient_name) == "IMPLICIT^VR^LE^TEST");
+        CHECK(restored.dataset().get_string(tags::patient_id) == "IMPL001");
+        CHECK(restored.dataset().get_string(tags::modality) == "CT");
+
+        auto rows = restored.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 256);
+    }
+
+    SECTION("save and open Implicit VR LE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "9.8.7.6.5.4.3.2.1");
+        ds.set_string(tags::patient_name, vr_type::PN, "IMPLICIT^FILE^TEST");
+        ds.set_string(tags::study_description, vr_type::LO, "Test Study Implicit VR");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_implicit_vr_le.dcm");
+        auto save_result = file.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        CHECK(loaded.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "IMPLICIT^FILE^TEST");
+        CHECK(loaded.dataset().get_string(tags::study_description) == "Test Study Implicit VR");
+
+        std::filesystem::remove(temp_path);
+    }
+}
+
+// ============================================================================
+// Explicit VR Big Endian Tests (Issue #460)
+// ============================================================================
+
+TEST_CASE("dicom_file Explicit VR BE round-trip", "[core][dicom_file][big_endian]") {
+    SECTION("create and reload Explicit VR BE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "2.2.2.2.2.2.2.2.2");
+        ds.set_string(tags::patient_name, vr_type::PN, "BIGENDIAN^VR^TEST");
+        ds.set_string(tags::patient_id, vr_type::LO, "BE001");
+        ds.set_string(tags::modality, vr_type::CS, "MR");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 512);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 512);
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        // Verify transfer syntax
+        CHECK(file.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+
+        // Convert to bytes and back
+        auto bytes = file.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        // Verify data preserved
+        CHECK(restored.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+        CHECK(restored.dataset().get_string(tags::patient_name) == "BIGENDIAN^VR^TEST");
+        CHECK(restored.dataset().get_string(tags::patient_id) == "BE001");
+        CHECK(restored.dataset().get_string(tags::modality) == "MR");
+
+        auto rows = restored.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 512);
+    }
+
+    SECTION("save and open Explicit VR BE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "3.3.3.3.3.3.3.3.3");
+        ds.set_string(tags::patient_name, vr_type::PN, "BIGENDIAN^FILE^TEST");
+        ds.set_string(tags::study_description, vr_type::LO, "Test Study Big Endian");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_explicit_vr_be.dcm");
+        auto save_result = file.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        CHECK(loaded.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "BIGENDIAN^FILE^TEST");
+        CHECK(loaded.dataset().get_string(tags::study_description) == "Test Study Big Endian");
+
+        std::filesystem::remove(temp_path);
+    }
+
+    SECTION("numeric values preserved correctly in Big Endian") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "4.4.4.4.4");
+        ds.set_string(tags::patient_name, vr_type::PN, "NUMERIC^TEST");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 1024);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 768);
+        ds.set_numeric<uint16_t>(tags::bits_allocated, vr_type::US, 16);
+        ds.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 12);
+        ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US, 11);
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        auto bytes = file.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        auto rows = restored.dataset().get_numeric<uint16_t>(tags::rows);
+        auto cols = restored.dataset().get_numeric<uint16_t>(tags::columns);
+        auto bits_alloc = restored.dataset().get_numeric<uint16_t>(tags::bits_allocated);
+        auto bits_stored = restored.dataset().get_numeric<uint16_t>(tags::bits_stored);
+        auto high_bit = restored.dataset().get_numeric<uint16_t>(tags::high_bit);
+
+        REQUIRE(rows.has_value());
+        REQUIRE(cols.has_value());
+        REQUIRE(bits_alloc.has_value());
+        REQUIRE(bits_stored.has_value());
+        REQUIRE(high_bit.has_value());
+
+        CHECK(*rows == 1024);
+        CHECK(*cols == 768);
+        CHECK(*bits_alloc == 16);
+        CHECK(*bits_stored == 12);
+        CHECK(*high_bit == 11);
+    }
+}
+
+// ============================================================================
+// Transfer Syntax Interoperability Tests (Issue #460)
+// ============================================================================
+
+TEST_CASE("dicom_file cross-transfer-syntax conversion", "[core][dicom_file][interop]") {
+    SECTION("Explicit VR LE -> Implicit VR LE -> Explicit VR LE") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "5.5.5.5.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "CROSS^CONVERSION^TEST");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 256);
+
+        // Start with Explicit VR LE
+        auto explicit_le = dicom_file::create(ds, transfer_syntax::explicit_vr_little_endian);
+        auto explicit_le_bytes = explicit_le.to_bytes();
+
+        // Convert to Implicit VR LE
+        auto implicit_le = dicom_file::create(
+            explicit_le.dataset(), transfer_syntax::implicit_vr_little_endian);
+        auto implicit_le_bytes = implicit_le.to_bytes();
+
+        // Load Implicit VR LE
+        auto loaded_implicit = dicom_file::from_bytes(implicit_le_bytes);
+        REQUIRE(loaded_implicit.is_ok());
+
+        // Convert back to Explicit VR LE
+        auto back_to_explicit = dicom_file::create(
+            loaded_implicit.value().dataset(), transfer_syntax::explicit_vr_little_endian);
+        auto final_bytes = back_to_explicit.to_bytes();
+
+        // Load final version
+        auto final_result = dicom_file::from_bytes(final_bytes);
+        REQUIRE(final_result.is_ok());
+
+        CHECK(final_result.value().dataset().get_string(tags::patient_name) ==
+              "CROSS^CONVERSION^TEST");
+        auto rows = final_result.value().dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 256);
+    }
+
+    SECTION("Explicit VR LE -> Explicit VR BE -> Explicit VR LE") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "6.6.6.6.6");
+        ds.set_string(tags::patient_name, vr_type::PN, "ENDIAN^SWAP^TEST");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 128);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 128);
+
+        // Start with Explicit VR LE
+        auto explicit_le = dicom_file::create(ds, transfer_syntax::explicit_vr_little_endian);
+
+        // Convert to Explicit VR BE
+        auto explicit_be = dicom_file::create(
+            explicit_le.dataset(), transfer_syntax::explicit_vr_big_endian);
+        auto be_bytes = explicit_be.to_bytes();
+
+        // Load BE version
+        auto loaded_be = dicom_file::from_bytes(be_bytes);
+        REQUIRE(loaded_be.is_ok());
+        CHECK(loaded_be.value().transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+
+        // Convert back to LE
+        auto back_to_le = dicom_file::create(
+            loaded_be.value().dataset(), transfer_syntax::explicit_vr_little_endian);
+        auto final_bytes = back_to_le.to_bytes();
+
+        auto final_result = dicom_file::from_bytes(final_bytes);
+        REQUIRE(final_result.is_ok());
+
+        CHECK(final_result.value().dataset().get_string(tags::patient_name) == "ENDIAN^SWAP^TEST");
+        auto rows = final_result.value().dataset().get_numeric<uint16_t>(tags::rows);
+        auto cols = final_result.value().dataset().get_numeric<uint16_t>(tags::columns);
+        REQUIRE(rows.has_value());
+        REQUIRE(cols.has_value());
+        CHECK(*rows == 128);
+        CHECK(*cols == 128);
+    }
+}
