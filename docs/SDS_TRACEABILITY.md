@@ -1,6 +1,6 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 2.1.0
+> **Version:** 2.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-03
 
@@ -438,6 +438,8 @@ This section maps design elements to their corresponding source code files.
 | - | `result` | `include/pacs/core/result.hpp` | (header-only) |
 
 ### 5.2 Encoding Module Implementation
+
+> **Reference:** [SDS_COMPRESSION.md](SDS_COMPRESSION.md) - Complete Compression Codecs Module Design Specification
 
 | SDS ID | Design Element | Header File | Source File |
 |--------|---------------|-------------|-------------|
@@ -1214,9 +1216,10 @@ When a requirement changes, use this checklist:
 | 1.4.0 | 2025-12-01 | kcenon@naver.com | Added DES-SVC-008 (sop_class_registry), DES-SVC-009 (XA Storage), DES-SVC-010 (xa_iod_validator) |
 | 2.0.0 | 2026-01-03 | kcenon@naver.com | Major update: Added 7 missing modules (Security, Web, Workflow, AI, DI, Monitoring, Compat); Updated file counts from 81 to 257; Added 76 new DES-xxx IDs; Updated test traceability for all 13 modules |
 | 2.1.0 | 2026-01-03 | kcenon@naver.com | Web module refactored: DES-WEB-001 to DES-WEB-012; Added rest_config and rest_types as separate design elements; Added reference to SDS_WEB_API.md |
+| 2.2.0 | 2026-01-03 | kcenon@naver.com | Added reference to SDS_COMPRESSION.md for complete Compression Codecs Module Design Specification |
 
 ---
 
-*Document Version: 2.1.0*
+*Document Version: 2.2.0*
 *Last Updated: 2026-01-03*
 *Author: kcenon@naver.com*
