@@ -5,6 +5,7 @@
 
 #include "pacs/services/storage_scu.hpp"
 #include "pacs/services/storage_scp.hpp"
+#include "pacs/core/dicom_file.hpp"
 #include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
@@ -215,7 +216,7 @@ std::vector<store_result> storage_scu::store_batch(
 // =============================================================================
 
 network::Result<store_result> storage_scu::store_file(
-    network::association& /* assoc */,
+    network::association& assoc,
     const std::filesystem::path& file_path) {
 
     // Check if file exists
@@ -232,32 +233,36 @@ network::Result<store_result> storage_scu::store_file(
             "Not a regular file: " + file_path.string());
     }
 
-    // TODO: Implement DICOM file parsing
-    // For now, return an error indicating file parsing is not yet implemented
-    // This would require the core module's file parser
-    return pacs::pacs_error<store_result>(
-        pacs::error_codes::file_parsing_not_implemented,
-        "DICOM file parsing not yet implemented");
+    // Parse the DICOM file
+    auto file_result = core::dicom_file::open(file_path);
+    if (file_result.is_err()) {
+        const auto error_msg = "Failed to parse DICOM file: " +
+                               file_path.string() + ": " +
+                               file_result.error().message;
+        logger_->error(error_msg);
+        return pacs::pacs_error<store_result>(
+            pacs::error_codes::file_parse_failed, error_msg);
+    }
+
+    // Get the dataset from the parsed file
+    const auto& dataset = file_result.value().dataset();
+
+    // Store the dataset using the existing store method
+    return store(assoc, dataset);
 }
 
-std::vector<store_result> storage_scu::store_directory(
+std::vector<store_result> storage_scu::store_files(
     network::association& assoc,
-    const std::filesystem::path& directory,
-    bool recursive,
+    const std::vector<std::filesystem::path>& file_paths,
     store_progress_callback progress_callback) {
 
     std::vector<store_result> results;
+    results.reserve(file_paths.size());
 
-    // Collect all DICOM files
-    auto files = collect_dicom_files(directory, recursive);
-    if (files.empty()) {
-        return results;
-    }
-
-    const size_t total = files.size();
+    const size_t total = file_paths.size();
     size_t completed = 0;
 
-    for (const auto& file_path : files) {
+    for (const auto& file_path : file_paths) {
         auto result = store_file(assoc, file_path);
 
         if (result.is_ok()) {
@@ -285,6 +290,19 @@ std::vector<store_result> storage_scu::store_directory(
     }
 
     return results;
+}
+
+std::vector<store_result> storage_scu::store_directory(
+    network::association& assoc,
+    const std::filesystem::path& directory,
+    bool recursive,
+    store_progress_callback progress_callback) {
+
+    // Collect all DICOM files from the directory
+    auto files = collect_dicom_files(directory, recursive);
+
+    // Delegate to store_files for the actual processing
+    return store_files(assoc, files, progress_callback);
 }
 
 std::vector<std::filesystem::path> storage_scu::collect_dicom_files(
