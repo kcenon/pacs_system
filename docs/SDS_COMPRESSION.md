@@ -63,13 +63,14 @@ This document specifies the design of the Compression Codecs module for the PACS
 
 | Component | Files | Design IDs |
 |-----------|-------|------------|
-| Codec Interface | 2 headers | DES-ENC-006, DES-ENC-013 |
-| JPEG Codecs | 2 headers, 2 sources | DES-ENC-007, DES-ENC-008 |
-| JPEG 2000 Codec | 1 header, 1 source | DES-ENC-009 |
-| JPEG-LS Codec | 1 header, 1 source | DES-ENC-010 |
-| RLE Codec | 1 header, 1 source | DES-ENC-011 |
-| Codec Factory | 1 header, 1 source | DES-ENC-012 |
-| Big Endian Codec | 1 header, 1 source | DES-ENC-014 |
+| Big Endian Codec | 1 header, 1 source | DES-ENC-006 |
+| Codec Factory | 1 header, 1 source | DES-ENC-007 |
+| Codec Interface | 2 headers | DES-ENC-008 |
+| JPEG Baseline Codec | 1 header, 1 source | DES-ENC-009 |
+| JPEG Lossless Codec | 1 header, 1 source | DES-ENC-010 |
+| JPEG-LS Codec | 1 header, 1 source | DES-ENC-011 |
+| JPEG 2000 Codec | 1 header, 1 source | DES-ENC-012 |
+| RLE Codec | 1 header, 1 source | DES-ENC-013 |
 
 ### 1.3 Design Identifier Convention
 
@@ -79,7 +80,7 @@ DES-ENC-<NUMBER>
 Where:
 - DES: Design Specification prefix
 - ENC: Encoding module identifier
-- NUMBER: 3-digit sequential number (006-014)
+- NUMBER: 3-digit sequential number (006-013)
 ```
 
 ### 1.4 External Library Dependencies
@@ -95,7 +96,7 @@ Where:
 
 ## 2. Codec Interface
 
-### 2.1 DES-ENC-006: Compression Codec Base Class
+### 2.1 DES-ENC-008: Compression Codec Base Class
 
 **Traces to:** SRS-CODEC-001 (Image Compression), NFR-1 (Performance)
 
@@ -158,7 +159,7 @@ protected:
 
 ---
 
-### 2.2 DES-ENC-013: Image Parameters
+### 2.2 Image Parameters
 
 **Traces to:** SRS-CODEC-001 (Image Compression)
 
@@ -222,7 +223,7 @@ struct image_params {
 
 ## 3. JPEG Codecs
 
-### 3.1 DES-ENC-007: JPEG Baseline Codec
+### 3.1 DES-ENC-009: JPEG Baseline Codec
 
 **Traces to:** SRS-CODEC-001 (Image Compression), NFR-1 (Performance)
 
@@ -285,7 +286,7 @@ private:
 
 ---
 
-### 3.2 DES-ENC-008: JPEG Lossless Codec
+### 3.2 DES-ENC-010: JPEG Lossless Codec
 
 **Traces to:** SRS-CODEC-001 (Image Compression), SRS-CODEC-002 (Lossless Compression)
 
@@ -365,7 +366,7 @@ private:
 
 ## 4. JPEG 2000 Codec
 
-### 4.1 DES-ENC-009: JPEG 2000 Codec
+### 4.1 DES-ENC-012: JPEG 2000 Codec
 
 **Traces to:** SRS-CODEC-001 (Image Compression), SRS-CODEC-002 (Lossless Compression)
 
@@ -448,7 +449,7 @@ private:
 
 ## 5. JPEG-LS Codec
 
-### 5.1 DES-ENC-010: JPEG-LS Codec
+### 5.1 DES-ENC-011: JPEG-LS Codec
 
 **Traces to:** SRS-CODEC-001 (Image Compression), SRS-CODEC-002 (Lossless Compression)
 
@@ -531,7 +532,7 @@ private:
 
 ## 6. RLE Lossless Codec
 
-### 6.1 DES-ENC-011: RLE Codec
+### 6.1 DES-ENC-013: RLE Codec
 
 **Traces to:** SRS-CODEC-002 (Lossless Compression)
 
@@ -620,7 +621,7 @@ private:
 
 ## 7. Codec Factory
 
-### 7.1 DES-ENC-012: Codec Factory
+### 7.1 DES-ENC-007: Codec Factory
 
 **Traces to:** SRS-CODEC-001 (Image Compression)
 
@@ -684,7 +685,7 @@ if (codec) {
 
 ## 8. Big Endian Codec
 
-### 8.1 DES-ENC-014: Explicit VR Big Endian Codec
+### 8.1 DES-ENC-006: Explicit VR Big Endian Codec
 
 **Traces to:** SRS-CODEC-003 (Transfer Syntax Support)
 
@@ -757,7 +758,7 @@ private:
 ├───────────────────────────────────────────────────────────────────────────────┤
 │                                                                                │
 │  ┌─────────────────────────────────────────────────────────────────────────┐  │
-│  │                    compression_codec (DES-ENC-006)                       │  │
+│  │                    compression_codec (DES-ENC-008)                       │  │
 │  │                          <<abstract>>                                    │  │
 │  ├─────────────────────────────────────────────────────────────────────────┤  │
 │  │ +transfer_syntax_uid() -> string_view                                   │  │
@@ -779,7 +780,7 @@ private:
 │  │ jpeg_   │ │ jpeg_     │ │ jpeg2000_  │ │ jpeg_ls_ │ │ rle_    │          │
 │  │baseline │ │lossless_  │ │ codec      │ │ codec    │ │ codec   │          │
 │  │ _codec  │ │ codec     │ │            │ │          │ │         │          │
-│  │(007)    │ │(008)      │ │(009)       │ │(010)     │ │(011)    │          │
+│  │(009)    │ │(010)      │ │(012)       │ │(011)     │ │(013)    │          │
 │  ├─────────┤ ├───────────┤ ├────────────┤ ├──────────┤ ├─────────┤          │
 │  │Transfer │ │Transfer   │ │Transfer    │ │Transfer  │ │Transfer │          │
 │  │Syntax:  │ │Syntax:    │ │Syntax:     │ │Syntax:   │ │Syntax:  │          │
@@ -795,7 +796,7 @@ private:
 │                                                                               │
 │                                                                               │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                      codec_factory (DES-ENC-012)                         │ │
+│  │                      codec_factory (DES-ENC-007)                         │ │
 │  │                          <<static class>>                                │ │
 │  ├─────────────────────────────────────────────────────────────────────────┤ │
 │  │ +create(transfer_syntax_uid) -> unique_ptr<compression_codec>           │ │
@@ -816,7 +817,7 @@ private:
 │                                                                                │
 │  ┌─────────────────────────────────┐    ┌─────────────────────────────────┐   │
 │  │       image_params              │    │     compression_options         │   │
-│  │       (DES-ENC-013)             │    │       (DES-ENC-006)             │   │
+│  │                                 │    │       (DES-ENC-008)             │   │
 │  ├─────────────────────────────────┤    ├─────────────────────────────────┤   │
 │  │ - width: uint16                 │    │ - quality: int (1-100)          │   │
 │  │ - height: uint16                │    │ - lossless: bool                │   │
@@ -827,7 +828,7 @@ private:
 │  │ - planar_configuration: uint16  │                                         │
 │  │ - pixel_representation: uint16  │    ┌─────────────────────────────────┐   │
 │  │ - photometric: enum             │    │     compression_result          │   │
-│  │ - number_of_frames: uint32      │    │       (DES-ENC-006)             │   │
+│  │ - number_of_frames: uint32      │    │       (DES-ENC-008)             │   │
 │  ├─────────────────────────────────┤    ├─────────────────────────────────┤   │
 │  │ +frame_size_bytes() -> size_t   │    │ - data: vector<uint8_t>         │   │
 │  │ +is_grayscale() -> bool         │    │ - output_params: image_params   │   │
@@ -972,33 +973,33 @@ private:
 
 | SRS ID | SRS Description | SDS ID(s) | Design Element |
 |--------|-----------------|-----------|----------------|
-| **SRS-CODEC-001** | Image Compression | DES-ENC-006, DES-ENC-007, DES-ENC-008, DES-ENC-009, DES-ENC-010, DES-ENC-011, DES-ENC-012, DES-ENC-013 | compression_codec, jpeg codecs, codec_factory, image_params |
-| **SRS-CODEC-002** | Lossless Compression | DES-ENC-008, DES-ENC-009, DES-ENC-010, DES-ENC-011 | jpeg_lossless_codec, jpeg2000_codec (lossless), jpeg_ls_codec, rle_codec |
-| **SRS-CODEC-003** | Transfer Syntax Support | DES-ENC-012, DES-ENC-014 | codec_factory, explicit_vr_big_endian_codec |
+| **SRS-CODEC-001** | Image Compression | DES-ENC-007, DES-ENC-008, DES-ENC-009, DES-ENC-010, DES-ENC-011, DES-ENC-012, DES-ENC-013 | compression_codec, jpeg codecs, codec_factory, image_params |
+| **SRS-CODEC-002** | Lossless Compression | DES-ENC-010, DES-ENC-011, DES-ENC-012, DES-ENC-013 | jpeg_lossless_codec, jpeg_ls_codec, jpeg2000_codec (lossless), rle_codec |
+| **SRS-CODEC-003** | Transfer Syntax Support | DES-ENC-006, DES-ENC-007 | explicit_vr_big_endian_codec, codec_factory |
 
 ### 11.2 SDS to Implementation Traceability
 
 | SDS ID | Design Element | Header File | Source File |
 |--------|----------------|-------------|-------------|
-| DES-ENC-006 | compression_codec, compression_options, compression_result | `include/pacs/encoding/compression/compression_codec.hpp` | - |
-| DES-ENC-007 | jpeg_baseline_codec | `include/pacs/encoding/compression/jpeg_baseline_codec.hpp` | `src/encoding/compression/jpeg_baseline_codec.cpp` |
-| DES-ENC-008 | jpeg_lossless_codec | `include/pacs/encoding/compression/jpeg_lossless_codec.hpp` | `src/encoding/compression/jpeg_lossless_codec.cpp` |
-| DES-ENC-009 | jpeg2000_codec | `include/pacs/encoding/compression/jpeg2000_codec.hpp` | `src/encoding/compression/jpeg2000_codec.cpp` |
-| DES-ENC-010 | jpeg_ls_codec | `include/pacs/encoding/compression/jpeg_ls_codec.hpp` | `src/encoding/compression/jpeg_ls_codec.cpp` |
-| DES-ENC-011 | rle_codec | `include/pacs/encoding/compression/rle_codec.hpp` | `src/encoding/compression/rle_codec.cpp` |
-| DES-ENC-012 | codec_factory | `include/pacs/encoding/compression/codec_factory.hpp` | `src/encoding/compression/codec_factory.cpp` |
-| DES-ENC-013 | image_params, photometric_interpretation | `include/pacs/encoding/compression/image_params.hpp` | - |
-| DES-ENC-014 | explicit_vr_big_endian_codec | `include/pacs/encoding/explicit_vr_big_endian_codec.hpp` | `src/encoding/explicit_vr_big_endian_codec.cpp` |
+| DES-ENC-006 | explicit_vr_big_endian_codec | `include/pacs/encoding/explicit_vr_big_endian_codec.hpp` | `src/encoding/explicit_vr_big_endian_codec.cpp` |
+| DES-ENC-007 | codec_factory | `include/pacs/encoding/compression/codec_factory.hpp` | `src/encoding/compression/codec_factory.cpp` |
+| DES-ENC-008 | compression_codec, compression_options, compression_result | `include/pacs/encoding/compression/compression_codec.hpp` | - |
+| DES-ENC-009 | jpeg_baseline_codec | `include/pacs/encoding/compression/jpeg_baseline_codec.hpp` | `src/encoding/compression/jpeg_baseline_codec.cpp` |
+| DES-ENC-010 | jpeg_lossless_codec | `include/pacs/encoding/compression/jpeg_lossless_codec.hpp` | `src/encoding/compression/jpeg_lossless_codec.cpp` |
+| DES-ENC-011 | jpeg_ls_codec | `include/pacs/encoding/compression/jpeg_ls_codec.hpp` | `src/encoding/compression/jpeg_ls_codec.cpp` |
+| DES-ENC-012 | jpeg2000_codec | `include/pacs/encoding/compression/jpeg2000_codec.hpp` | `src/encoding/compression/jpeg2000_codec.cpp` |
+| DES-ENC-013 | rle_codec | `include/pacs/encoding/compression/rle_codec.hpp` | `src/encoding/compression/rle_codec.cpp` |
+| - | image_params, photometric_interpretation | `include/pacs/encoding/compression/image_params.hpp` | - |
 
 ### 11.3 SDS to Test Traceability
 
 | SDS ID | Design Element | Test File |
 |--------|----------------|-----------|
-| DES-ENC-007 | jpeg_baseline_codec | `tests/encoding/compression/jpeg_baseline_codec_test.cpp` |
-| DES-ENC-009 | jpeg2000_codec | `tests/encoding/compression/jpeg2000_codec_test.cpp` |
-| DES-ENC-010 | jpeg_ls_codec | `tests/encoding/compression/jpeg_ls_codec_test.cpp` |
-| DES-ENC-011 | rle_codec | `tests/encoding/compression/rle_codec_test.cpp` |
-| DES-ENC-014 | explicit_vr_big_endian_codec | `tests/encoding/explicit_vr_big_endian_codec_test.cpp` |
+| DES-ENC-006 | explicit_vr_big_endian_codec | `tests/encoding/explicit_vr_big_endian_codec_test.cpp` |
+| DES-ENC-009 | jpeg_baseline_codec | `tests/encoding/compression/jpeg_baseline_codec_test.cpp` |
+| DES-ENC-011 | jpeg_ls_codec | `tests/encoding/compression/jpeg_ls_codec_test.cpp` |
+| DES-ENC-012 | jpeg2000_codec | `tests/encoding/compression/jpeg2000_codec_test.cpp` |
+| DES-ENC-013 | rle_codec | `tests/encoding/compression/rle_codec_test.cpp` |
 
 ---
 
