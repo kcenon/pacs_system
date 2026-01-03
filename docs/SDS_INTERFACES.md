@@ -15,6 +15,7 @@
 - [5. Ecosystem Integration Interfaces](#5-ecosystem-integration-interfaces)
 - [6. Error Handling Interface](#6-error-handling-interface)
 - [7. Security Interfaces](#7-security-interfaces)
+- [8. Web/REST API Interfaces](#8-webrest-api-interfaces)
 
 ---
 
@@ -1303,7 +1304,235 @@ protected:
 
 ---
 
-*Document Version: 0.1.1.0*
+## 8. Web/REST API Interfaces
+
+> **Reference:** [SDS_WEB_API.md](SDS_WEB_API.md) - Complete Web/REST API Module Design Specification
+
+### INT-WEB-001: rest_server Interface
+
+**Traces to:** DES-WEB-001, SRS-WEB-001
+
+```cpp
+namespace pacs::web {
+
+/**
+ * @brief REST API server using Crow framework
+ *
+ * Provides HTTP/HTTPS endpoints for DICOMweb and management APIs.
+ *
+ * @usage
+ * @code
+ * rest_config config;
+ * config.port = 8080;
+ * config.cors_allowed_origins = "*";
+ *
+ * rest_server server(config);
+ * server.set_database(database);
+ * server.set_storage(storage);
+ * server.start();
+ * server.wait_for_shutdown();
+ * @endcode
+ */
+class rest_server {
+public:
+    // ═══════════════════════════════════════════════════════════════
+    // Construction
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Construct REST server with configuration
+     * @param config Server configuration (port, TLS, CORS settings)
+     */
+    explicit rest_server(const rest_config& config);
+
+    // ═══════════════════════════════════════════════════════════════
+    // Dependency Injection
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Set index database for query operations
+     */
+    void set_database(std::shared_ptr<storage::index_database> db);
+
+    /**
+     * @brief Set file storage for DICOM file operations
+     */
+    void set_storage(std::shared_ptr<storage::storage_interface> storage);
+
+    /**
+     * @brief Set security manager for access control
+     */
+    void set_security_manager(
+        std::shared_ptr<security::access_control_manager> manager);
+
+    // ═══════════════════════════════════════════════════════════════
+    // Lifecycle
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Start HTTP server (non-blocking)
+     * @return Result indicating success or failure
+     */
+    [[nodiscard]] core::result<void> start();
+
+    /**
+     * @brief Stop server and close all connections
+     */
+    void stop();
+
+    /**
+     * @brief Block until server shutdown
+     */
+    void wait_for_shutdown();
+
+    // ═══════════════════════════════════════════════════════════════
+    // Status
+    // ═══════════════════════════════════════════════════════════════
+
+    [[nodiscard]] bool is_running() const noexcept;
+    [[nodiscard]] uint16_t port() const noexcept;
+};
+
+} // namespace pacs::web
+```
+
+### INT-WEB-002: DICOMweb Services Interface
+
+**Traces to:** DES-WEB-007, PS3.18
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DICOMweb Services Interface                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Base URL: /dicomweb                                                         │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ WADO-RS (Retrieve)                                                       ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  GET  /studies/{study}                       → Retrieve study           ││
+│  │  GET  /studies/{study}/metadata              → Study metadata (JSON)    ││
+│  │  GET  /studies/{study}/series/{series}       → Retrieve series          ││
+│  │  GET  /studies/{study}/series/{series}/instances/{instance}             ││
+│  │       → Retrieve instance                                                ││
+│  │  GET  /studies/{study}/series/{series}/instances/{instance}/frames/{n}  ││
+│  │       → Retrieve specific frames                                         ││
+│  │  GET  /studies/{study}/series/{series}/instances/{instance}/rendered    ││
+│  │       → Rendered image (JPEG/PNG)                                        ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ STOW-RS (Store)                                                          ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  POST /studies                               → Store (any study)        ││
+│  │  POST /studies/{study}                       → Store to specific study  ││
+│  │                                                                          ││
+│  │  Content-Type: multipart/related; type="application/dicom"              ││
+│  │  Response: DICOM JSON with stored instance references                   ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ QIDO-RS (Query)                                                          ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  GET  /studies                               → Search studies           ││
+│  │  GET  /series                                → Search all series        ││
+│  │  GET  /instances                             → Search all instances     ││
+│  │  GET  /studies/{study}/series                → Search series in study   ││
+│  │  GET  /studies/{study}/instances             → Search instances in study││
+│  │  GET  /studies/{study}/series/{series}/instances                        ││
+│  │       → Search instances in series                                       ││
+│  │                                                                          ││
+│  │  Query Parameters:                                                       ││
+│  │    - PatientID, PatientName, StudyDate, ModalitiesInStudy, etc.         ││
+│  │    - limit, offset for pagination                                        ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### INT-WEB-003: Management API Interface
+
+**Traces to:** DES-WEB-004 to DES-WEB-012
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        Management API Interface                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Base URL: /api/v1                                                           │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ Patient/Study/Series Management                                          ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  GET    /patients           → List patients (paginated)                 ││
+│  │  GET    /patients/{id}      → Get patient by ID                         ││
+│  │  DELETE /patients/{id}      → Delete patient and studies                ││
+│  │  GET    /patients/{id}/studies → List patient's studies                 ││
+│  │                                                                          ││
+│  │  GET    /studies            → List studies (paginated)                  ││
+│  │  GET    /studies/{uid}      → Get study by UID                          ││
+│  │  DELETE /studies/{uid}      → Delete study                              ││
+│  │  GET    /studies/{uid}/series → List study's series                     ││
+│  │                                                                          ││
+│  │  GET    /series/{uid}       → Get series details                        ││
+│  │  GET    /series/{uid}/instances → List series' instances                ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ Worklist Management                                                      ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  GET    /worklist           → List scheduled procedures                 ││
+│  │  POST   /worklist           → Create worklist item                      ││
+│  │  GET    /worklist/{id}      → Get item by PK                            ││
+│  │  PUT    /worklist/{id}      → Update status                             ││
+│  │  DELETE /worklist/{id}      → Delete item                               ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ Audit & Security                                                         ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  GET  /audit/logs           → List audit entries                        ││
+│  │  GET  /audit/logs/{id}      → Get audit entry                           ││
+│  │  GET  /audit/export         → Export logs (JSON/CSV)                    ││
+│  │                                                                          ││
+│  │  POST /security/users       → Create user                               ││
+│  │  POST /security/users/{id}/roles → Assign role                          ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ System & Associations                                                    ││
+│  ├─────────────────────────────────────────────────────────────────────────┤│
+│  │                                                                          ││
+│  │  GET  /system/health        → Health check                              ││
+│  │  GET  /system/info          → System information                        ││
+│  │  GET  /system/config        → Current configuration                     ││
+│  │  GET  /system/metrics       → Performance metrics                       ││
+│  │  GET  /system/storage       → Storage statistics                        ││
+│  │                                                                          ││
+│  │  GET    /associations/active → List active DICOM associations           ││
+│  │  GET    /associations/{id}  → Get association details                   ││
+│  │  DELETE /associations/{id}  → Terminate association                     ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+*Document Version: 0.1.2.0*
 *Created: 2025-11-30*
 *Updated: 2026-01-03*
 *Author: kcenon@naver.com*
