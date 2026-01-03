@@ -1,6 +1,6 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 2.0.0
+> **Version:** 2.1.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-03
 
@@ -603,20 +603,22 @@ This section maps design elements to their corresponding source code files.
 
 ### 5.8 Web Module Implementation
 
+> **Reference:** [SDS_WEB_API.md](SDS_WEB_API.md) - Complete Web/REST API Module Design Specification
+
 | SDS ID | Design Element | Header File | Source File |
 |--------|---------------|-------------|-------------|
 | DES-WEB-001 | `rest_server` | `include/pacs/web/rest_server.hpp` | `src/web/rest_server.cpp` |
-| DES-WEB-002 | `patient_endpoints` | `include/pacs/web/endpoints/patient_endpoints.hpp` | `src/web/endpoints/patient_endpoints.cpp` |
-| DES-WEB-003 | `study_endpoints` | `include/pacs/web/endpoints/study_endpoints.hpp` | `src/web/endpoints/study_endpoints.cpp` |
-| DES-WEB-004 | `series_endpoints` | `include/pacs/web/endpoints/series_endpoints.hpp` | `src/web/endpoints/series_endpoints.cpp` |
-| DES-WEB-005 | `dicomweb_endpoints` | `include/pacs/web/endpoints/dicomweb_endpoints.hpp` | `src/web/endpoints/dicomweb_endpoints.cpp` |
-| DES-WEB-006 | `association_endpoints` | `include/pacs/web/endpoints/association_endpoints.hpp` | `src/web/endpoints/association_endpoints.cpp` |
-| DES-WEB-007 | `worklist_endpoints` | `include/pacs/web/endpoints/worklist_endpoints.hpp` | `src/web/endpoints/worklist_endpoints.cpp` |
-| DES-WEB-008 | `system_endpoints` | `include/pacs/web/endpoints/system_endpoints.hpp` | `src/web/endpoints/system_endpoints.cpp` |
-| DES-WEB-009 | `security_endpoints` | `include/pacs/web/endpoints/security_endpoints.hpp` | `src/web/endpoints/security_endpoints.cpp` |
-| DES-WEB-010 | `audit_endpoints` | `include/pacs/web/endpoints/audit_endpoints.hpp` | `src/web/endpoints/audit_endpoints.cpp` |
-| - | `rest_config` | `include/pacs/web/rest_config.hpp` | (header-only) |
-| - | `rest_types` | `include/pacs/web/rest_types.hpp` | (header-only) |
+| DES-WEB-002 | `rest_config` | `include/pacs/web/rest_config.hpp` | (header-only) |
+| DES-WEB-003 | `rest_types` | `include/pacs/web/rest_types.hpp` | (header-only) |
+| DES-WEB-004 | `patient_endpoints` | `include/pacs/web/endpoints/patient_endpoints.hpp` | `src/web/endpoints/patient_endpoints.cpp` |
+| DES-WEB-005 | `study_endpoints` | `include/pacs/web/endpoints/study_endpoints.hpp` | `src/web/endpoints/study_endpoints.cpp` |
+| DES-WEB-006 | `series_endpoints` | `include/pacs/web/endpoints/series_endpoints.hpp` | `src/web/endpoints/series_endpoints.cpp` |
+| DES-WEB-007 | `dicomweb_endpoints` | `include/pacs/web/endpoints/dicomweb_endpoints.hpp` | `src/web/endpoints/dicomweb_endpoints.cpp` |
+| DES-WEB-008 | `worklist_endpoints` | `include/pacs/web/endpoints/worklist_endpoints.hpp` | `src/web/endpoints/worklist_endpoints.cpp` |
+| DES-WEB-009 | `audit_endpoints` | `include/pacs/web/endpoints/audit_endpoints.hpp` | `src/web/endpoints/audit_endpoints.cpp` |
+| DES-WEB-010 | `security_endpoints` | `include/pacs/web/endpoints/security_endpoints.hpp` | `src/web/endpoints/security_endpoints.cpp` |
+| DES-WEB-011 | `system_endpoints` | `include/pacs/web/endpoints/system_endpoints.hpp` | `src/web/endpoints/system_endpoints.cpp` |
+| DES-WEB-012 | `association_endpoints` | `include/pacs/web/endpoints/association_endpoints.hpp` | `src/web/endpoints/association_endpoints.cpp` |
 
 ### 5.9 Workflow Module Implementation
 
@@ -932,13 +934,13 @@ This section maps design elements to their corresponding test files for **Verifi
 | Storage | 9 | 18 | 9 | 9 | 100% |
 | Integration | 8 | 9 | 8 | 12 | 100% |
 | Security | 6 | 13 | 6 | 5 | 100% |
-| Web | 10 | 12 | 10 | 5 | 100% |
+| Web | 12 | 12 | 10 | 5 | 100% |
 | Workflow | 3 | 5 | 3 | 3 | 100% |
 | AI | 2 | 2 | 2 | 2 | 100% |
 | DI | 4 | 4 | 0 | 2 | 100% |
 | Monitoring | 6 | 8 | 2 | 5 | 100% |
 | Compat | 2 | 2 | 0 | 0 | 100% |
-| **Total** | **110** | **158** | **99** | **101** | **100%** |
+| **Total** | **112** | **158** | **99** | **101** | **100%** |
 
 ### 7.4 Orphan Analysis
 
@@ -1139,15 +1141,17 @@ When a requirement changes, use this checklist:
 | ID | Element |
 |----|---------|
 | DES-WEB-001 | rest_server |
-| DES-WEB-002 | patient_endpoints |
-| DES-WEB-003 | study_endpoints |
-| DES-WEB-004 | series_endpoints |
-| DES-WEB-005 | dicomweb_endpoints |
-| DES-WEB-006 | association_endpoints |
-| DES-WEB-007 | worklist_endpoints |
-| DES-WEB-008 | system_endpoints |
-| DES-WEB-009 | security_endpoints |
-| DES-WEB-010 | audit_endpoints |
+| DES-WEB-002 | rest_config |
+| DES-WEB-003 | rest_types |
+| DES-WEB-004 | patient_endpoints |
+| DES-WEB-005 | study_endpoints |
+| DES-WEB-006 | series_endpoints |
+| DES-WEB-007 | dicomweb_endpoints |
+| DES-WEB-008 | worklist_endpoints |
+| DES-WEB-009 | audit_endpoints |
+| DES-WEB-010 | security_endpoints |
+| DES-WEB-011 | system_endpoints |
+| DES-WEB-012 | association_endpoints |
 
 #### Workflow Module (DES-WF-xxx)
 | ID | Element |
@@ -1209,9 +1213,10 @@ When a requirement changes, use this checklist:
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | Scoped to Verification only; Validation moved to separate VALIDATION_REPORT.md |
 | 1.4.0 | 2025-12-01 | kcenon@naver.com | Added DES-SVC-008 (sop_class_registry), DES-SVC-009 (XA Storage), DES-SVC-010 (xa_iod_validator) |
 | 2.0.0 | 2026-01-03 | kcenon@naver.com | Major update: Added 7 missing modules (Security, Web, Workflow, AI, DI, Monitoring, Compat); Updated file counts from 81 to 257; Added 76 new DES-xxx IDs; Updated test traceability for all 13 modules |
+| 2.1.0 | 2026-01-03 | kcenon@naver.com | Web module refactored: DES-WEB-001 to DES-WEB-012; Added rest_config and rest_types as separate design elements; Added reference to SDS_WEB_API.md |
 
 ---
 
-*Document Version: 2.0.0*
+*Document Version: 2.1.0*
 *Last Updated: 2026-01-03*
 *Author: kcenon@naver.com*
