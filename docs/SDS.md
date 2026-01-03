@@ -38,6 +38,7 @@ This SDS is organized into multiple files for maintainability:
 | [SDS_DATABASE.md](SDS_DATABASE.md) | Database schema design |
 | [SDS_SEQUENCES.md](SDS_SEQUENCES.md) | Sequence diagrams |
 | [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | Requirements traceability matrix |
+| [SDS_SECURITY.md](SDS_SECURITY.md) | Security module design (RBAC, Anonymization, Digital Signatures) |
 
 ---
 
@@ -96,7 +97,7 @@ DES-<MODULE>-<NUMBER>
 
 Where:
 - DES: Design Specification prefix
-- MODULE: Module identifier (CORE, ENC, NET, SVC, STOR, INT, DB)
+- MODULE: Module identifier (CORE, ENC, NET, SVC, STOR, INT, DB, SEC)
 - NUMBER: 3-digit sequential number
 ```
 
@@ -111,6 +112,7 @@ Where:
 | STOR | Storage Module | Storage backend |
 | INT | Interface Module | Ecosystem integration |
 | DB | Database Module | Index database design |
+| SEC | Security Module | RBAC, anonymization, digital signatures |
 
 ---
 

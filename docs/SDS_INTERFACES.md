@@ -14,6 +14,7 @@
 - [4. External System Interfaces](#4-external-system-interfaces)
 - [5. Ecosystem Integration Interfaces](#5-ecosystem-integration-interfaces)
 - [6. Error Handling Interface](#6-error-handling-interface)
+- [7. Security Interfaces](#7-security-interfaces)
 
 ---
 
@@ -906,6 +907,403 @@ constexpr int INVALID_QUERY_KEY = -885;
 
 ---
 
-*Document Version: 0.1.0.0*
+## 7. Security Interfaces
+
+> **Reference:** [SDS_SECURITY.md](SDS_SECURITY.md) - Complete Security Module Design
+
+### INT-SEC-001: Access Control Manager Interface
+
+**Traces to:** DES-SEC-005, SRS-SEC-002
+
+```cpp
+namespace pacs::security {
+
+/**
+ * @brief Access Control Manager interface for DICOM operations
+ *
+ * Provides RBAC-based authorization for DICOM network operations.
+ *
+ * @usage
+ * @code
+ * access_control_manager acm;
+ *
+ * // Register AE Title to user mapping
+ * acm.register_ae_title("MODALITY1", "tech_user_001");
+ *
+ * // Get user context for incoming connection
+ * auto ctx = acm.get_context_for_ae("MODALITY1", session_id);
+ *
+ * // Check if operation is allowed
+ * auto result = acm.check_dicom_operation(ctx, DicomOperation::CStore);
+ * if (result.allowed) {
+ *     // Proceed with C-STORE
+ * } else {
+ *     // Reject: result.reason contains denial reason
+ * }
+ * @endcode
+ */
+class access_control_manager {
+public:
+    // ═══════════════════════════════════════════════════════════════
+    // Permission Checks
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Check DICOM operation authorization
+     * @param ctx User context for the session
+     * @param op DICOM operation to authorize
+     * @return AccessCheckResult with allowed status and reason
+     */
+    [[nodiscard]] AccessCheckResult check_dicom_operation(
+        const user_context& ctx, DicomOperation op) const;
+
+    /**
+     * @brief Get user context for AE Title
+     * @param ae_title Source AE Title
+     * @param session_id Session identifier
+     * @return User context (anonymous if AE not registered)
+     */
+    [[nodiscard]] user_context get_context_for_ae(
+        std::string_view ae_title,
+        const std::string& session_id) const;
+
+    // ═══════════════════════════════════════════════════════════════
+    // AE Title Management
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Register AE Title to user mapping
+     * @param ae_title The AE Title
+     * @param user_id The user ID to associate
+     */
+    void register_ae_title(std::string_view ae_title, std::string_view user_id);
+
+    /**
+     * @brief Unregister AE Title
+     * @param ae_title The AE Title to remove
+     */
+    void unregister_ae_title(std::string_view ae_title);
+
+    // ═══════════════════════════════════════════════════════════════
+    // Audit Integration
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Set audit callback for access attempts
+     * @param callback Function called on each access check
+     */
+    void set_audit_callback(AccessAuditCallback callback);
+};
+
+} // namespace pacs::security
+```
+
+---
+
+### INT-SEC-002: Anonymizer Interface
+
+**Traces to:** DES-SEC-009, SRS-SEC-001
+
+```cpp
+namespace pacs::security {
+
+/**
+ * @brief DICOM Anonymizer interface for de-identification
+ *
+ * Implements PS3.15 Annex E anonymization profiles.
+ *
+ * @usage
+ * @code
+ * // Basic anonymization
+ * anonymizer anon(anonymization_profile::hipaa_safe_harbor);
+ * auto result = anon.anonymize(dataset);
+ *
+ * // Longitudinal study with consistent UIDs
+ * uid_mapping mapping;
+ * anonymizer anon(anonymization_profile::retain_longitudinal);
+ * anon.set_date_offset(std::chrono::days{-100});
+ *
+ * for (auto& ds : study_datasets) {
+ *     anon.anonymize_with_mapping(ds, mapping);
+ * }
+ *
+ * // Save mapping for future use
+ * std::string json = mapping.to_json();
+ * @endcode
+ */
+class anonymizer {
+public:
+    // ═══════════════════════════════════════════════════════════════
+    // Construction
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Construct with anonymization profile
+     * @param profile The de-identification profile to use
+     */
+    explicit anonymizer(
+        anonymization_profile profile = anonymization_profile::basic);
+
+    // ═══════════════════════════════════════════════════════════════
+    // Anonymization Operations
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Anonymize a dataset
+     * @param dataset Dataset to anonymize (modified in place)
+     * @return Result with anonymization report
+     */
+    [[nodiscard]] auto anonymize(core::dicom_dataset& dataset)
+        -> kcenon::common::Result<anonymization_report>;
+
+    /**
+     * @brief Anonymize with consistent UID mapping
+     * @param dataset Dataset to anonymize
+     * @param mapping UID mapping for consistent transformation
+     * @return Result with anonymization report
+     */
+    [[nodiscard]] auto anonymize_with_mapping(
+        core::dicom_dataset& dataset,
+        uid_mapping& mapping)
+        -> kcenon::common::Result<anonymization_report>;
+
+    // ═══════════════════════════════════════════════════════════════
+    // Configuration
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Add custom tag action
+     * @param tag DICOM tag
+     * @param config Action configuration
+     */
+    void add_tag_action(core::dicom_tag tag, tag_action_config config);
+
+    /**
+     * @brief Set date offset for longitudinal consistency
+     * @param offset Number of days to shift dates
+     */
+    void set_date_offset(std::chrono::days offset);
+
+    /**
+     * @brief Set hash salt for hash operations
+     * @param salt Salt value
+     */
+    void set_hash_salt(std::string salt);
+};
+
+} // namespace pacs::security
+```
+
+---
+
+### INT-SEC-003: Digital Signature Interface
+
+**Traces to:** DES-SEC-012, SRS-SEC-001
+
+```cpp
+namespace pacs::security {
+
+/**
+ * @brief DICOM Digital Signature interface
+ *
+ * Static methods for signing and verifying DICOM datasets
+ * per PS3.15 Section C.
+ *
+ * @usage
+ * @code
+ * // Sign a dataset
+ * auto cert = certificate::load_from_pem("signer.pem").value();
+ * auto key = private_key::load_from_pem("signer_key.pem").value();
+ *
+ * auto result = digital_signature::sign(dataset, cert, key);
+ * if (result.is_ok()) {
+ *     // Dataset now contains Digital Signature Sequence
+ * }
+ *
+ * // Verify signature
+ * auto status = digital_signature::verify(dataset);
+ * switch (status.value()) {
+ *     case signature_status::valid:
+ *         // Signature verified
+ *         break;
+ *     case signature_status::invalid:
+ *         // Data tampered
+ *         break;
+ *     case signature_status::expired:
+ *         // Certificate expired
+ *         break;
+ * }
+ * @endcode
+ */
+class digital_signature {
+public:
+    // ═══════════════════════════════════════════════════════════════
+    // Signature Creation
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Sign a DICOM dataset
+     * @param dataset Dataset to sign (modified in place)
+     * @param cert Signer's X.509 certificate
+     * @param key Signer's private key
+     * @param algo Signature algorithm (default: RSA-SHA256)
+     * @return Result indicating success or failure
+     */
+    [[nodiscard]] static auto sign(
+        core::dicom_dataset& dataset,
+        const certificate& cert,
+        const private_key& key,
+        signature_algorithm algo = signature_algorithm::rsa_sha256
+    ) -> kcenon::common::VoidResult;
+
+    // ═══════════════════════════════════════════════════════════════
+    // Signature Verification
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Verify digital signatures in dataset
+     * @param dataset Dataset to verify
+     * @return Result with signature status
+     */
+    [[nodiscard]] static auto verify(const core::dicom_dataset& dataset)
+        -> kcenon::common::Result<signature_status>;
+
+    /**
+     * @brief Verify with trusted certificate store
+     * @param dataset Dataset to verify
+     * @param trusted_certs Trusted certificates
+     * @return Result with signature status
+     */
+    [[nodiscard]] static auto verify_with_trust(
+        const core::dicom_dataset& dataset,
+        const std::vector<certificate>& trusted_certs
+    ) -> kcenon::common::Result<signature_status>;
+
+    // ═══════════════════════════════════════════════════════════════
+    // Signature Information
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Check if dataset has digital signature
+     * @param dataset Dataset to check
+     * @return true if signature present
+     */
+    [[nodiscard]] static bool has_signature(
+        const core::dicom_dataset& dataset);
+
+    /**
+     * @brief Get signature information
+     * @param dataset Dataset to inspect
+     * @return Optional signature info
+     */
+    [[nodiscard]] static auto get_signature_info(
+        const core::dicom_dataset& dataset
+    ) -> std::optional<signature_info>;
+};
+
+} // namespace pacs::security
+```
+
+---
+
+### INT-SEC-004: Security Storage Interface
+
+**Traces to:** DES-SEC-013, SRS-SEC-002
+
+```cpp
+namespace pacs::security {
+
+/**
+ * @brief Abstract interface for security data persistence
+ *
+ * Provides storage operations for RBAC entities (Users, Roles).
+ *
+ * @usage
+ * @code
+ * // Create SQLite implementation
+ * auto storage = std::make_shared<sqlite_security_storage>("security.db");
+ *
+ * // Inject into access control manager
+ * access_control_manager acm;
+ * acm.set_storage(storage);
+ *
+ * // User operations now persist to database
+ * User user{"user1", "technologist", {Role::Technologist}, true};
+ * acm.create_user(user);
+ * @endcode
+ */
+class security_storage_interface {
+public:
+    virtual ~security_storage_interface() = default;
+
+    // ═══════════════════════════════════════════════════════════════
+    // User Management
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Create a new user
+     * @param user User to create
+     * @return Result indicating success or error
+     */
+    [[nodiscard]] virtual auto create_user(const User& user)
+        -> kcenon::common::VoidResult = 0;
+
+    /**
+     * @brief Get user by ID
+     * @param id User ID
+     * @return Result containing user or error
+     */
+    [[nodiscard]] virtual auto get_user(std::string_view id)
+        -> kcenon::common::Result<User> = 0;
+
+    /**
+     * @brief Get user by username
+     * @param username Username
+     * @return Result containing user or error
+     */
+    [[nodiscard]] virtual auto get_user_by_username(std::string_view username)
+        -> kcenon::common::Result<User> = 0;
+
+    /**
+     * @brief Update existing user
+     * @param user Updated user data
+     * @return Result indicating success or error
+     */
+    [[nodiscard]] virtual auto update_user(const User& user)
+        -> kcenon::common::VoidResult = 0;
+
+    /**
+     * @brief Delete user
+     * @param id User ID to delete
+     * @return Result indicating success or error
+     */
+    [[nodiscard]] virtual auto delete_user(std::string_view id)
+        -> kcenon::common::VoidResult = 0;
+
+    // ═══════════════════════════════════════════════════════════════
+    // Role Queries
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * @brief Get all users with specific role
+     * @param role Role to filter by
+     * @return Result containing user list
+     */
+    [[nodiscard]] virtual auto get_users_by_role(Role role)
+        -> kcenon::common::Result<std::vector<User>> = 0;
+
+protected:
+    security_storage_interface() = default;
+    security_storage_interface(const security_storage_interface&) = delete;
+    security_storage_interface& operator=(const security_storage_interface&) = delete;
+};
+
+} // namespace pacs::security
+```
+
+---
+
+*Document Version: 0.1.1.0*
 *Created: 2025-11-30*
+*Updated: 2026-01-03*
 *Author: kcenon@naver.com*

@@ -195,6 +195,23 @@ Legend:
 | SRS-SVC-007 | MPPS Status | SEQ-010, SEQ-011 | MPPS flows |
 | SRS-REL-003 | Error Recovery | SEQ-012, SEQ-013, SEQ-014 | Error handling |
 
+### 3.7 Security Module Requirements
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-SEC-001** | Data Protection (Anonymization) | DES-SEC-006, DES-SEC-007, DES-SEC-008, DES-SEC-009 | `anonymization_profile`, `tag_action`, `uid_mapping`, `anonymizer` |
+| **SRS-SEC-002** | Access Control (RBAC) | DES-SEC-001 to DES-SEC-005, DES-SEC-013 | `User`, `Role`, `Permission`, `user_context`, `access_control_manager`, `security_storage_interface` |
+| **SRS-SEC-003** | Audit Trail | DES-SEC-004, DES-SEC-005 | `user_context` (source info), `access_control_manager` (audit callback) |
+
+### 3.8 Security Sequence Diagram Mapping
+
+| SRS ID | Scenario | SEQ ID(s) | Diagram Name |
+|--------|----------|-----------|--------------|
+| SRS-SEC-002 | DICOM Operation Authorization | SEQ-SEC-001 | Authorization flow |
+| SRS-SEC-001 | DICOM Anonymization | SEQ-SEC-002 | Anonymization flow |
+| SRS-SEC-001 | Digital Signature Creation | SEQ-SEC-003 | Signature creation |
+| SRS-SEC-001 | Digital Signature Verification | SEQ-SEC-004 | Signature verification |
+
 ---
 
 ## 4. Complete Traceability Chain
@@ -366,6 +383,39 @@ Legend:
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
+### 4.7 Security Module
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Security Module Trace                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  PRD                  SRS                    SDS                            │
+│  ───────────────────────────────────────────────────────────────            │
+│                                                                              │
+│  NFR-3 ───────────► SRS-SEC-001 ─────────► DES-SEC-006 (anon_profile)      │
+│  (Security)         (Data Protection)        DES-SEC-007 (tag_action)       │
+│                                      ─────────► DES-SEC-008 (uid_mapping)   │
+│                                      ─────────► DES-SEC-009 (anonymizer)    │
+│                                      ─────────► DES-SEC-010 (certificate)   │
+│                                      ─────────► DES-SEC-011 (sig_types)     │
+│                                      ─────────► DES-SEC-012 (digital_sig)   │
+│                                      ─────────► SEQ-SEC-002 to SEQ-SEC-004  │
+│                                                                              │
+│                     SRS-SEC-002 ─────────► DES-SEC-001 (User)               │
+│                     (Access Control)        DES-SEC-002 (Role)              │
+│                                      ─────────► DES-SEC-003 (Permission)    │
+│                                      ─────────► DES-SEC-004 (user_context)  │
+│                                      ─────────► DES-SEC-005 (access_ctrl)   │
+│                                      ─────────► DES-SEC-013 (sec_storage)   │
+│                                      ─────────► SEQ-SEC-001                 │
+│                                                                              │
+│                     SRS-SEC-003 ─────────► DES-SEC-004 (user_context)       │
+│                     (Audit Trail)    ─────────► DES-SEC-005 (access_ctrl)   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## 5. SDS to Implementation Traceability
@@ -516,21 +566,40 @@ This section maps design elements to their corresponding source code files.
 
 ### 5.7 Security Module Implementation
 
+> **Reference:** [SDS_SECURITY.md](SDS_SECURITY.md) - Complete Security Module Design Specification
+
+#### RBAC Access Control (DES-SEC-001 to DES-SEC-005)
+
 | SDS ID | Design Element | Header File | Source File |
 |--------|---------------|-------------|-------------|
-| DES-SEC-001 | `access_control_manager` | `include/pacs/security/access_control_manager.hpp` | `src/security/access_control_manager.cpp` |
-| DES-SEC-002 | `anonymizer` | `include/pacs/security/anonymizer.hpp` | `src/security/anonymizer.cpp` |
-| DES-SEC-003 | `digital_signature` | `include/pacs/security/digital_signature.hpp` | `src/security/digital_signature.cpp` |
-| DES-SEC-004 | `certificate` | `include/pacs/security/certificate.hpp` | `src/security/certificate.cpp` |
-| DES-SEC-005 | `tag_action` | `include/pacs/security/tag_action.hpp` | `src/security/tag_action.cpp` |
-| DES-SEC-006 | `uid_mapping` | `include/pacs/security/uid_mapping.hpp` | `src/security/uid_mapping.cpp` |
-| - | `anonymization_profile` | `include/pacs/security/anonymization_profile.hpp` | (header-only) |
-| - | `permission` | `include/pacs/security/permission.hpp` | (header-only) |
-| - | `role` | `include/pacs/security/role.hpp` | (header-only) |
-| - | `security_storage_interface` | `include/pacs/security/security_storage_interface.hpp` | (header-only, interface) |
-| - | `signature_types` | `include/pacs/security/signature_types.hpp` | (header-only) |
-| - | `user` | `include/pacs/security/user.hpp` | (header-only) |
-| - | `user_context` | `include/pacs/security/user_context.hpp` | (header-only) |
+| DES-SEC-001 | `User` | `include/pacs/security/user.hpp` | (header-only) |
+| DES-SEC-002 | `Role` | `include/pacs/security/role.hpp` | (header-only) |
+| DES-SEC-003 | `Permission` | `include/pacs/security/permission.hpp` | (header-only) |
+| DES-SEC-004 | `user_context` | `include/pacs/security/user_context.hpp` | (header-only) |
+| DES-SEC-005 | `access_control_manager` | `include/pacs/security/access_control_manager.hpp` | `src/security/access_control_manager.cpp` |
+
+#### DICOM Anonymization (DES-SEC-006 to DES-SEC-009)
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-SEC-006 | `anonymization_profile` | `include/pacs/security/anonymization_profile.hpp` | (header-only) |
+| DES-SEC-007 | `tag_action` | `include/pacs/security/tag_action.hpp` | `src/security/tag_action.cpp` |
+| DES-SEC-008 | `uid_mapping` | `include/pacs/security/uid_mapping.hpp` | `src/security/uid_mapping.cpp` |
+| DES-SEC-009 | `anonymizer` | `include/pacs/security/anonymizer.hpp` | `src/security/anonymizer.cpp` |
+
+#### Digital Signatures (DES-SEC-010 to DES-SEC-012)
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-SEC-010 | `certificate`, `private_key`, `certificate_chain` | `include/pacs/security/certificate.hpp` | `src/security/certificate.cpp` |
+| DES-SEC-011 | `signature_algorithm`, `signature_status`, `signature_info` | `include/pacs/security/signature_types.hpp` | (header-only) |
+| DES-SEC-012 | `digital_signature` | `include/pacs/security/digital_signature.hpp` | `src/security/digital_signature.cpp` |
+
+#### Security Storage (DES-SEC-013)
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-SEC-013 | `security_storage_interface` | `include/pacs/security/security_storage_interface.hpp` | (header-only, interface) |
 
 ### 5.8 Web Module Implementation
 
