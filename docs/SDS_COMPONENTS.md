@@ -1557,6 +1557,101 @@ public:
 
 ---
 
+### DES-INT-003: itk_adapter
+
+**Traces to:** Issue #463 (ITK/VTK Integration Adapter)
+
+**Purpose:** Convert pacs_system DICOM data structures to ITK image types for dicom_viewer integration.
+
+**Design:**
+
+```cpp
+namespace pacs::integration::itk {
+
+// ─────────────────────────────────────────────────────
+// Type Aliases
+// ─────────────────────────────────────────────────────
+using ct_image_type = ::itk::Image<int16_t, 3>;
+using mr_image_type = ::itk::Image<uint16_t, 3>;
+using grayscale_2d_type = ::itk::Image<uint16_t, 2>;
+using grayscale_3d_type = ::itk::Image<uint16_t, 3>;
+using signed_grayscale_3d_type = ::itk::Image<int16_t, 3>;
+using rgb_pixel_type = ::itk::RGBPixel<uint8_t>;
+using rgb_2d_type = ::itk::Image<rgb_pixel_type, 2>;
+
+// ─────────────────────────────────────────────────────
+// Image Metadata
+// ─────────────────────────────────────────────────────
+struct image_metadata {
+    std::array<double, 3> origin{0.0, 0.0, 0.0};
+    std::array<double, 3> spacing{1.0, 1.0, 1.0};
+    std::array<double, 6> orientation{1.0, 0.0, 0.0, 0.0, 1.0, 0.0};
+    std::array<size_t, 3> dimensions{0, 0, 1};
+    double rescale_slope{1.0};
+    double rescale_intercept{0.0};
+    uint16_t bits_allocated{16};
+    uint16_t bits_stored{16};
+    uint16_t high_bit{15};
+    uint16_t pixel_representation{0};
+    uint16_t samples_per_pixel{1};
+    std::string photometric_interpretation{"MONOCHROME2"};
+};
+
+// ─────────────────────────────────────────────────────
+// Core Functions
+// ─────────────────────────────────────────────────────
+[[nodiscard]] auto extract_metadata(const core::dicom_dataset& dataset)
+    -> image_metadata;
+
+[[nodiscard]] auto sort_slices(const std::vector<std::filesystem::path>& files)
+    -> std::vector<slice_info>;
+
+template <typename TPixel, unsigned int VDimension>
+[[nodiscard]] auto dataset_to_image(const core::dicom_dataset& dataset)
+    -> pacs::Result<typename ::itk::Image<TPixel, VDimension>::Pointer>;
+
+template <typename TPixel>
+[[nodiscard]] auto series_to_image(const std::vector<std::filesystem::path>& files)
+    -> pacs::Result<typename ::itk::Image<TPixel, 3>::Pointer>;
+
+// ─────────────────────────────────────────────────────
+// Convenience Functions
+// ─────────────────────────────────────────────────────
+[[nodiscard]] auto load_ct_series(const std::filesystem::path& directory)
+    -> pacs::Result<ct_image_type::Pointer>;
+
+[[nodiscard]] auto load_mr_series(const std::filesystem::path& directory)
+    -> pacs::Result<mr_image_type::Pointer>;
+
+[[nodiscard]] auto scan_dicom_directory(const std::filesystem::path& directory)
+    -> std::vector<std::filesystem::path>;
+
+[[nodiscard]] auto group_by_series(const std::vector<std::filesystem::path>& files)
+    -> std::map<std::string, std::vector<std::filesystem::path>>;
+
+} // namespace pacs::integration::itk
+```
+
+**DICOM to ITK Mapping:**
+
+| DICOM Tag | ITK Property |
+|-----------|--------------|
+| Image Position Patient (0020,0032) | Image Origin |
+| Pixel Spacing (0028,0030) | Image Spacing [0], [1] |
+| Slice Thickness (0018,0050) | Image Spacing [2] |
+| Image Orientation Patient (0020,0037) | Direction Cosines |
+| Columns (0028,0011), Rows (0028,0010) | Image Size |
+| Rescale Slope/Intercept (0028,1053/1052) | Hounsfield Unit conversion |
+
+**Conditional Compilation:**
+
+The ITK adapter is optional and requires:
+- CMake option: `PACS_BUILD_ITK_ADAPTER=ON`
+- ITK 5.x development headers
+- Compiler definition: `PACS_WITH_ITK`
+
+---
+
 ## 7. Network V2 Module Components
 
 > **NEW in v1.2.0** - Optional network_system-based DICOM server implementation

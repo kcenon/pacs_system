@@ -892,6 +892,41 @@ private:
 
 ---
 
+### DES-INT-003: itk_adapter
+
+**추적:** Issue #463 (ITK/VTK 통합 어댑터)
+
+**목적:** dicom_viewer 통합을 위해 pacs_system DICOM 데이터 구조를 ITK 이미지 타입으로 변환합니다.
+
+**주요 기능:**
+
+| 함수 | 설명 |
+|------|------|
+| `extract_metadata()` | DICOM 데이터셋에서 이미지 메타데이터 추출 |
+| `dataset_to_image<>()` | 단일 데이터셋을 ITK 이미지로 변환 |
+| `series_to_image<>()` | DICOM 시리즈를 3D ITK 볼륨으로 변환 |
+| `load_ct_series()` | CT 시리즈를 HU 변환과 함께 로드 |
+| `load_mr_series()` | MR 시리즈 로드 |
+| `scan_dicom_directory()` | 디렉토리에서 DICOM 파일 검색 |
+| `group_by_series()` | Series Instance UID로 파일 그룹화 |
+
+**DICOM-ITK 매핑:**
+
+| DICOM 태그 | ITK 속성 |
+|-----------|---------|
+| Image Position Patient (0020,0032) | 이미지 원점 |
+| Pixel Spacing (0028,0030) | 이미지 간격 [0], [1] |
+| Slice Thickness (0018,0050) | 이미지 간격 [2] |
+| Image Orientation Patient (0020,0037) | 방향 코사인 |
+
+**조건부 컴파일:**
+
+- CMake 옵션: `PACS_BUILD_ITK_ADAPTER=ON`
+- ITK 5.x 개발 헤더 필요
+- 컴파일러 정의: `PACS_WITH_ITK`
+
+---
+
 *문서 버전: 0.1.0.0*
 *작성일: 2025-11-30*
 *작성자: kcenon@naver.com*
