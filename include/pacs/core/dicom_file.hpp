@@ -249,6 +249,90 @@ private:
         std::span<const uint8_t> data, size_t& bytes_read)
         -> pacs::Result<dicom_dataset>;
 
+    /**
+     * @brief Decode a dataset from Implicit VR Little Endian format
+     * @param data The raw byte data
+     * @param bytes_read Output parameter for bytes consumed
+     * @return Result containing the decoded dataset or error
+     *
+     * Uses dicom_dictionary for VR lookup since VR is not encoded in data.
+     */
+    [[nodiscard]] static auto decode_implicit_vr_le(
+        std::span<const uint8_t> data, size_t& bytes_read)
+        -> pacs::Result<dicom_dataset>;
+
+    /**
+     * @brief Decode a dataset from Explicit VR Big Endian format
+     * @param data The raw byte data
+     * @param bytes_read Output parameter for bytes consumed
+     * @return Result containing the decoded dataset or error
+     */
+    [[nodiscard]] static auto decode_explicit_vr_be(
+        std::span<const uint8_t> data, size_t& bytes_read)
+        -> pacs::Result<dicom_dataset>;
+
+    /**
+     * @brief Encode a dataset using Implicit VR Little Endian
+     * @param dataset The dataset to encode
+     * @return Encoded byte data
+     */
+    [[nodiscard]] static auto encode_implicit_vr_le(const dicom_dataset& dataset)
+        -> std::vector<uint8_t>;
+
+    /**
+     * @brief Encode a dataset using Explicit VR Big Endian
+     * @param dataset The dataset to encode
+     * @return Encoded byte data
+     */
+    [[nodiscard]] static auto encode_explicit_vr_be(const dicom_dataset& dataset)
+        -> std::vector<uint8_t>;
+
+    /**
+     * @brief Decode a dataset based on its Transfer Syntax
+     * @param data The raw byte data
+     * @param ts The Transfer Syntax to use for decoding
+     * @param bytes_read Output parameter for bytes consumed
+     * @return Result containing the decoded dataset or error
+     */
+    [[nodiscard]] static auto decode_dataset(
+        std::span<const uint8_t> data,
+        const encoding::transfer_syntax& ts,
+        size_t& bytes_read)
+        -> pacs::Result<dicom_dataset>;
+
+    /**
+     * @brief Encode a dataset based on its Transfer Syntax
+     * @param dataset The dataset to encode
+     * @param ts The Transfer Syntax to use for encoding
+     * @return Encoded byte data
+     */
+    [[nodiscard]] static auto encode_dataset(
+        const dicom_dataset& dataset,
+        const encoding::transfer_syntax& ts)
+        -> std::vector<uint8_t>;
+
+    /**
+     * @brief Parse a sequence with undefined length
+     * @param data The raw byte data starting at sequence value
+     * @param bytes_read Output parameter for bytes consumed
+     * @param explicit_vr Whether to use explicit VR parsing
+     * @param big_endian Whether data is big endian
+     * @return Result containing the sequence items or error
+     */
+    [[nodiscard]] static auto parse_undefined_length_sequence(
+        std::span<const uint8_t> data, size_t& bytes_read,
+        bool explicit_vr, bool big_endian)
+        -> pacs::Result<std::vector<dicom_dataset>>;
+
+    /**
+     * @brief Parse encapsulated pixel data frames
+     * @param data The raw encapsulated pixel data
+     * @return Vector of frame data
+     */
+    [[nodiscard]] static auto parse_encapsulated_frames(
+        std::span<const uint8_t> data)
+        -> std::vector<std::vector<uint8_t>>;
+
     /// File Meta Information (Group 0002)
     dicom_dataset meta_info_;
 
