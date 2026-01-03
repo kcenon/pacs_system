@@ -176,6 +176,7 @@ namespace error_codes {
     constexpr int file_not_found_service = service_base - 91;
     constexpr int not_a_regular_file = service_base - 92;
     constexpr int file_parsing_not_implemented = service_base - 93;
+    constexpr int file_parse_failed = service_base - 94;
 } // namespace error_codes
 
 // Re-export common utility functions
