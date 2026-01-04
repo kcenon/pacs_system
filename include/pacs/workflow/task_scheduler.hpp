@@ -31,6 +31,10 @@ namespace kcenon::thread {
 class thread_pool;
 }  // namespace kcenon::thread
 
+namespace kcenon::common::interfaces {
+class IExecutor;
+}  // namespace kcenon::common::interfaces
+
 // Forward declarations for PACS modules
 namespace pacs::storage {
 class index_database;
@@ -177,6 +181,26 @@ public:
         storage::index_database& database,
         storage::file_storage& file_storage,
         std::shared_ptr<kcenon::thread::thread_pool> thread_pool,
+        const task_scheduler_config& config = {});
+
+    /**
+     * @brief Construct task scheduler with IExecutor (recommended)
+     *
+     * This constructor accepts the standardized IExecutor interface from
+     * common_system, enabling better testability and decoupling from
+     * specific thread pool implementations.
+     *
+     * @param database Reference to the PACS index database
+     * @param file_storage Reference to file storage for cleanup/archive
+     * @param executor IExecutor for task execution (from common_system)
+     * @param config Service configuration
+     *
+     * @see Issue #487 - IExecutor integration
+     */
+    task_scheduler(
+        storage::index_database& database,
+        storage::file_storage& file_storage,
+        std::shared_ptr<kcenon::common::interfaces::IExecutor> executor,
         const task_scheduler_config& config = {});
 
     /**
@@ -637,8 +661,11 @@ private:
     /// Optional reference to file storage
     storage::file_storage* file_storage_{nullptr};
 
-    /// Thread pool for parallel task execution
+    /// Thread pool for parallel task execution (legacy)
     std::shared_ptr<kcenon::thread::thread_pool> thread_pool_;
+
+    /// IExecutor for task execution (recommended, Issue #487)
+    std::shared_ptr<kcenon::common::interfaces::IExecutor> executor_;
 
     /// Service configuration
     task_scheduler_config config_;

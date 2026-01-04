@@ -37,6 +37,10 @@ namespace kcenon::logger {
 class logger;
 }  // namespace kcenon::logger
 
+namespace kcenon::common::interfaces {
+class IExecutor;
+}  // namespace kcenon::common::interfaces
+
 // Forward declarations for PACS modules
 namespace pacs::network {
 class association;
@@ -217,6 +221,24 @@ public:
     auto_prefetch_service(
         storage::index_database& database,
         std::shared_ptr<kcenon::thread::thread_pool> thread_pool,
+        const prefetch_service_config& config = {});
+
+    /**
+     * @brief Construct auto prefetch service with IExecutor (recommended)
+     *
+     * This constructor accepts the standardized IExecutor interface from
+     * common_system, enabling better testability and decoupling from
+     * specific thread pool implementations.
+     *
+     * @param database Reference to the PACS index database
+     * @param executor IExecutor for task execution (from common_system)
+     * @param config Service configuration
+     *
+     * @see Issue #487 - IExecutor integration
+     */
+    auto_prefetch_service(
+        storage::index_database& database,
+        std::shared_ptr<kcenon::common::interfaces::IExecutor> executor,
         const prefetch_service_config& config = {});
 
     /**
@@ -535,8 +557,11 @@ private:
     /// Reference to PACS index database
     storage::index_database& database_;
 
-    /// Thread pool for parallel prefetches (optional)
+    /// Thread pool for parallel prefetches (optional, legacy)
     std::shared_ptr<kcenon::thread::thread_pool> thread_pool_;
+
+    /// IExecutor for task execution (recommended, Issue #487)
+    std::shared_ptr<kcenon::common::interfaces::IExecutor> executor_;
 
     /// Service configuration
     prefetch_service_config config_;

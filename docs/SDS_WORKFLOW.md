@@ -81,7 +81,33 @@ Where:
 | thread_system | Thread pool for parallel prefetch and task execution |
 | logger_system | Audit logging for workflow operations |
 | monitoring_system | Metrics for prefetch success/failure rates |
-| common_system | Result<T> for error handling |
+| common_system | Result<T> for error handling, IExecutor interface (Issue #487) |
+
+#### 1.4.1 IExecutor Integration (Issue #487)
+
+Both `auto_prefetch_service` and `task_scheduler` support the standardized `IExecutor` interface from `common_system`, enabling:
+
+- **Dependency Injection**: Executor can be injected through constructors
+- **Testability**: Mock executors can be used in unit tests
+- **Flexibility**: Different executor implementations can be swapped
+
+**Available Constructors:**
+
+```cpp
+// Legacy thread_pool constructor
+task_scheduler(database, file_storage, thread_pool, config);
+auto_prefetch_service(database, thread_pool, config);
+
+// IExecutor constructor (recommended)
+task_scheduler(database, file_storage, executor, config);
+auto_prefetch_service(database, executor, config);
+```
+
+**Adapter Classes:**
+
+- `thread_pool_executor_adapter`: Wraps `thread_pool` with `IExecutor` interface
+- `lambda_job`: Wraps callables as `IJob` for executor submission
+- `make_executor()`: Factory function to create executors from pool interfaces
 
 ---
 
