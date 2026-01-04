@@ -777,7 +777,14 @@ The C++ `process_launcher` class handles platform differences:
 
 ### Timeouts
 
-All operations have configurable timeouts to prevent hanging tests. The test framework automatically detects CI environments (GitHub Actions, GitLab CI, Jenkins, etc.) and adjusts timeouts accordingly:
+All operations have configurable timeouts to prevent hanging tests. The test framework automatically detects CI environments (GitHub Actions, GitLab CI, Jenkins, etc.) and adjusts timeouts accordingly.
+
+#### Cross-Platform Timeout Command
+
+The shell scripts use `run_with_timeout` from `common.sh` for cross-platform timeout support:
+- **Linux**: Uses native `timeout` command
+- **macOS**: Uses `gtimeout` from coreutils (`brew install coreutils`)
+- **Fallback**: Runs without timeout if neither is available (with warning)
 
 | Timeout Type | Local | CI Environment |
 |--------------|-------|----------------|
