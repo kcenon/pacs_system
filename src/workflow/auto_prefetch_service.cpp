@@ -8,6 +8,9 @@
 #include "pacs/integration/logger_adapter.hpp"
 #include "pacs/integration/monitoring_adapter.hpp"
 #include "pacs/integration/thread_adapter.hpp"
+#include "pacs/integration/executor_adapter.hpp"
+
+#include <kcenon/common/interfaces/executor_interface.h>
 
 #include <algorithm>
 #include <chrono>
@@ -35,6 +38,18 @@ auto_prefetch_service::auto_prefetch_service(
     const prefetch_service_config& config)
     : database_(database)
     , thread_pool_(std::move(thread_pool))
+    , config_(config) {
+    if (config_.auto_start && config_.enabled) {
+        start();
+    }
+}
+
+auto_prefetch_service::auto_prefetch_service(
+    storage::index_database& database,
+    std::shared_ptr<kcenon::common::interfaces::IExecutor> executor,
+    const prefetch_service_config& config)
+    : database_(database)
+    , executor_(std::move(executor))
     , config_(config) {
     if (config_.auto_start && config_.enabled) {
         start();
