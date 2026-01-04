@@ -9,6 +9,9 @@
 #include "pacs/integration/logger_adapter.hpp"
 #include "pacs/integration/monitoring_adapter.hpp"
 #include "pacs/integration/thread_adapter.hpp"
+#include "pacs/integration/executor_adapter.hpp"
+
+#include <kcenon/common/interfaces/executor_interface.h>
 
 #include <algorithm>
 #include <chrono>
@@ -88,6 +91,37 @@ task_scheduler::task_scheduler(
     : database_(database)
     , file_storage_(&file_storage)
     , thread_pool_(std::move(thread_pool))
+    , config_(config) {
+
+    // Load persisted tasks if configured
+    if (config_.restore_on_startup && !config_.persistence_path.empty()) {
+        load_tasks();
+    }
+
+    // Schedule built-in tasks from config
+    if (config_.cleanup) {
+        schedule_cleanup(*config_.cleanup);
+    }
+    if (config_.archive) {
+        schedule_archive(*config_.archive);
+    }
+    if (config_.verification) {
+        schedule_verification(*config_.verification);
+    }
+
+    if (config_.auto_start && config_.enabled) {
+        start();
+    }
+}
+
+task_scheduler::task_scheduler(
+    storage::index_database& database,
+    storage::file_storage& file_storage,
+    std::shared_ptr<kcenon::common::interfaces::IExecutor> executor,
+    const task_scheduler_config& config)
+    : database_(database)
+    , file_storage_(&file_storage)
+    , executor_(std::move(executor))
     , config_(config) {
 
     // Load persisted tasks if configured
