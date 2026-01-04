@@ -1,7 +1,7 @@
 # Software Requirements Specification - PACS System
 
-> **Version:** 0.1.2.0
-> **Last Updated:** 2025-12-07
+> **Version:** 0.1.3.0
+> **Last Updated:** 2026-01-04
 > **Language:** **English** | [한국어](SRS_KO.md)
 > **Standard:** IEEE 830-1998 based
 
@@ -1232,6 +1232,534 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 ---
 
+#### SRS-INT-007: ITK/VTK Integration
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-INT-007 |
+| **Title** | ITK/VTK Medical Imaging Integration |
+| **Description** | The system shall integrate with ITK/VTK libraries for advanced image processing operations. |
+| **Priority** | Could Have |
+| **Phase** | 5 |
+| **Traces To** | IR-6 |
+
+**Acceptance Criteria:**
+1. DICOM to ITK image adapter
+2. Image format conversion support
+3. 3D reconstruction capabilities
+
+---
+
+#### SRS-INT-008: Crow REST Framework Integration
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-INT-008 |
+| **Title** | Crow HTTP Framework Integration |
+| **Description** | The system shall use the Crow framework for REST API implementation. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | IR-7 |
+| **Status** | ✅ Implemented |
+
+**Acceptance Criteria:**
+1. HTTP/1.1 server support ✅
+2. CORS middleware ✅
+3. Route registration for all endpoints ✅
+4. JSON request/response handling ✅
+
+---
+
+#### SRS-INT-009: AWS SDK Integration
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-INT-009 |
+| **Title** | AWS SDK for C++ Integration |
+| **Description** | The system shall integrate with AWS SDK for S3 storage backend operations. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | IR-8 |
+
+**Acceptance Criteria:**
+1. S3 bucket operations (put, get, delete)
+2. Multipart upload for large files
+3. Server-side encryption support
+4. Configurable credentials handling
+
+---
+
+#### SRS-INT-010: Azure SDK Integration
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-INT-010 |
+| **Title** | Azure SDK for C++ Integration |
+| **Description** | The system shall integrate with Azure SDK for Blob Storage backend operations. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | IR-9 |
+
+**Acceptance Criteria:**
+1. Blob container operations (put, get, delete)
+2. Block blob support for large files
+3. Azure AD authentication
+4. Configurable storage tiers
+
+---
+
+### 3.6 Security Feature Requirements
+
+#### SRS-SEC-010: DICOM Anonymization Service
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SEC-010 |
+| **Title** | DICOM Dataset Anonymization |
+| **Description** | The system shall support de-identification of DICOM datasets according to DICOM PS3.15 Annex E profiles for PHI protection. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-5.1 |
+
+**Acceptance Criteria:**
+1. Basic Profile implementation per PS3.15 Annex E
+2. Clean Pixel Data option support
+3. UID regeneration capability
+4. Configurable tag action profiles (D, Z, X, K, C, U)
+
+**Anonymization Actions:**
+
+| Action | Code | Description |
+|--------|------|-------------|
+| Delete | D | Remove the attribute |
+| Replace with Zero | Z | Replace with zero-length value |
+| Remove | X | Remove entirely (same as D) |
+| Keep | K | Retain original value |
+| Clean | C | Replace with cleaned value |
+| Replace with UID | U | Replace with new UID |
+
+---
+
+#### SRS-SEC-011: Digital Signature Support
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SEC-011 |
+| **Title** | DICOM Digital Signature |
+| **Description** | The system shall support creation and verification of digital signatures for DICOM datasets per PS3.15 Section C. |
+| **Priority** | Could Have |
+| **Phase** | 5 |
+| **Traces To** | FR-5.2 |
+
+**Acceptance Criteria:**
+1. RSA 2048/4096 and ECDSA P-256 signature algorithms
+2. X.509 certificate-based signing
+3. Signature verification workflow
+4. Timestamp support
+
+**Signature Flow:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Digital Signature Flow                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────┐     ┌──────────────┐     ┌─────────────────┐      │
+│  │ Dataset  │────►│ Hash (SHA-256)│────►│ Sign with       │      │
+│  │          │     │              │     │ Private Key     │      │
+│  └──────────┘     └──────────────┘     └────────┬────────┘      │
+│                                                  │               │
+│                                                  ▼               │
+│                                        ┌─────────────────┐      │
+│                                        │ Digital         │      │
+│                                        │ Signature SQ    │      │
+│                                        │ (FFFA,FFFA)     │      │
+│                                        └─────────────────┘      │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### SRS-SEC-012: RBAC Access Control
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SEC-012 |
+| **Title** | Role-Based Access Control |
+| **Description** | The system shall implement role-based access control for authorization of DICOM operations and management functions. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-5.3 |
+
+**Acceptance Criteria:**
+1. Predefined roles (Viewer, Technologist, Radiologist, Administrator, System)
+2. Fine-grained permissions (Read, Write, Delete, Export, Execute)
+3. Resource-based authorization (Study, Series, Image, Metadata)
+4. Role hierarchy with permission inheritance
+
+**Role Definitions:**
+
+| Role | Study | Metadata | System | User |
+|------|-------|----------|--------|------|
+| Viewer | R | R | - | - |
+| Technologist | RW | RW | - | - |
+| Radiologist | RWDE | RW | R | - |
+| Administrator | RWDE | RWDE | RWE | RWD |
+| System | All | All | All | All |
+
+*Legend: R=Read, W=Write, D=Delete, E=Export*
+
+---
+
+#### SRS-SEC-013: X.509 Certificate Management
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-SEC-013 |
+| **Title** | Certificate Management |
+| **Description** | The system shall support X.509 certificate handling for TLS, digital signatures, and authentication. |
+| **Priority** | Could Have |
+| **Phase** | 5 |
+| **Traces To** | FR-5.4 |
+
+**Acceptance Criteria:**
+1. PEM and DER certificate loading
+2. Certificate chain validation
+3. CRL/OCSP revocation checking
+4. Private key secure storage
+
+---
+
+### 3.7 Web/REST API Requirements
+
+#### SRS-WEB-001: REST API Management Interface
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-WEB-001 |
+| **Title** | REST API Server |
+| **Description** | The system shall provide a REST API server for management operations and system monitoring. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-6.1 |
+| **Status** | ✅ Implemented |
+
+**Acceptance Criteria:**
+1. HTTP/1.1 server with configurable port ✅
+2. JSON request/response format ✅
+3. CORS support for browser clients ✅
+4. Authentication middleware ✅
+
+**Endpoint Categories:**
+
+| Category | Base Path | Description |
+|----------|-----------|-------------|
+| Patients | /api/v1/patients | Patient CRUD operations |
+| Studies | /api/v1/studies | Study management |
+| Series | /api/v1/series | Series management |
+| Worklist | /api/v1/worklist | MWL management |
+| System | /api/v1/system | Health and metrics |
+| Security | /api/v1/security | User/role management |
+
+---
+
+#### SRS-WEB-002: DICOMweb WADO-RS
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-WEB-002 |
+| **Title** | Web Access to DICOM Objects - RESTful Services |
+| **Description** | The system shall support WADO-RS for retrieving DICOM objects via HTTP per PS3.18. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-6.2 |
+| **Status** | ✅ Implemented |
+
+**Acceptance Criteria:**
+1. Retrieve Study/Series/Instance endpoints ✅
+2. Multipart/related response format ✅
+3. Rendered and thumbnail image support ✅
+4. Bulk data retrieval ✅
+
+**WADO-RS Endpoints:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /studies/{studyUID} | Retrieve all instances in study |
+| GET | /studies/{studyUID}/series/{seriesUID} | Retrieve all instances in series |
+| GET | /studies/{studyUID}/series/{seriesUID}/instances/{instanceUID} | Retrieve instance |
+| GET | /studies/{studyUID}/rendered | Retrieve rendered image |
+
+---
+
+#### SRS-WEB-003: DICOMweb STOW-RS
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-WEB-003 |
+| **Title** | Store Over the Web - RESTful Services |
+| **Description** | The system shall support STOW-RS for storing DICOM objects via HTTP per PS3.18. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-6.3 |
+| **Status** | ✅ Implemented |
+
+**Acceptance Criteria:**
+1. POST multipart/related DICOM objects ✅
+2. Validation of received datasets ✅
+3. Storage confirmation response ✅
+4. Conflict detection (duplicate handling) ✅
+
+**STOW-RS Endpoints:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /studies | Store instances to new study |
+| POST | /studies/{studyUID} | Store instances to existing study |
+
+---
+
+#### SRS-WEB-004: DICOMweb QIDO-RS
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-WEB-004 |
+| **Title** | Query based on ID for DICOM Objects - RESTful Services |
+| **Description** | The system shall support QIDO-RS for querying DICOM objects via HTTP per PS3.18. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-6.4 |
+| **Status** | ✅ Implemented |
+
+**Acceptance Criteria:**
+1. Query at Study/Series/Instance levels ✅
+2. Fuzzy matching and wildcard support ✅
+3. Pagination with limit/offset ✅
+4. JSON and XML response formats ✅
+
+**QIDO-RS Endpoints:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /studies | Search for studies |
+| GET | /studies/{studyUID}/series | Search for series in study |
+| GET | /studies/{studyUID}/series/{seriesUID}/instances | Search for instances |
+
+---
+
+### 3.8 Workflow Requirements
+
+#### SRS-WKF-001: Automatic Prior Study Prefetch
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-WKF-001 |
+| **Title** | Auto Prefetch Service |
+| **Description** | The system shall automatically prefetch prior patient studies from remote PACS when patients appear in the modality worklist. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-7.1 |
+
+**Acceptance Criteria:**
+1. Trigger prefetch on MWL query events
+2. Configurable lookback period (default 365 days)
+3. Modality-based filtering (same/related modality)
+4. Duplicate study detection (skip local studies)
+5. Rate limiting and concurrent request control
+
+**Prefetch Workflow:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Auto Prefetch Workflow                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────┐                                               │
+│  │  MWL Query   │                                               │
+│  │  (Patient)   │                                               │
+│  └───────┬──────┘                                               │
+│          │                                                       │
+│          ▼                                                       │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │             Check if prior studies exist locally          │   │
+│  └───────────────────────────┬──────────────────────────────┘   │
+│                              │                                   │
+│              ┌───────────────┴───────────────┐                  │
+│              │ Missing?                       │                  │
+│              ▼                               ▼                  │
+│       ┌──────────┐                    ┌──────────┐              │
+│       │   Yes    │                    │    No    │              │
+│       └────┬─────┘                    └────┬─────┘              │
+│            │                               │                     │
+│            ▼                               ▼                     │
+│  ┌──────────────────┐               ┌──────────────┐            │
+│  │ Queue C-MOVE     │               │  Skip        │            │
+│  │ from Remote PACS │               │              │            │
+│  └──────────────────┘               └──────────────┘            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### SRS-WKF-002: Background Task Scheduling
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-WKF-002 |
+| **Title** | Task Scheduler Service |
+| **Description** | The system shall provide background task scheduling for recurring maintenance operations. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-7.2 |
+
+**Acceptance Criteria:**
+1. Cron-style schedule configuration
+2. Task types: cleanup, verification, statistics
+3. Configurable execution windows
+4. Task history and result logging
+5. Manual trigger capability
+
+**Scheduled Task Types:**
+
+| Task Type | Default Schedule | Description |
+|-----------|------------------|-------------|
+| Cleanup | Daily 2:00 AM | Remove orphaned files, temp data |
+| Verification | Weekly Sunday | Verify file integrity checksums |
+| Statistics | Hourly | Update storage statistics cache |
+| Index Optimize | Weekly | Database index optimization |
+
+---
+
+### 3.9 Cloud Storage Requirements
+
+#### SRS-CSTOR-001: AWS S3 Storage Backend
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-CSTOR-001 |
+| **Title** | AWS S3 Storage Backend |
+| **Description** | The system shall support AWS S3 as a storage backend for DICOM files. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-8.1 |
+
+**Acceptance Criteria:**
+1. S3-compatible API operations (put, get, delete)
+2. Hierarchical object key structure (Study/Series/Instance)
+3. Multipart upload for files > 100MB
+4. Server-side encryption (SSE-S3, SSE-KMS)
+5. Configurable storage class (STANDARD, IA, GLACIER)
+
+**S3 Object Key Structure:**
+```
+{bucket}/
+  └── {StudyInstanceUID}/
+      └── {SeriesInstanceUID}/
+          └── {SOPInstanceUID}.dcm
+```
+
+---
+
+#### SRS-CSTOR-002: Azure Blob Storage Backend
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-CSTOR-002 |
+| **Title** | Azure Blob Storage Backend |
+| **Description** | The system shall support Azure Blob Storage as a storage backend for DICOM files. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Traces To** | FR-8.2 |
+
+**Acceptance Criteria:**
+1. Block blob operations (put, get, delete)
+2. Container and virtual directory structure
+3. Large file support with block upload
+4. Azure AD and connection string authentication
+5. Access tier support (Hot, Cool, Archive)
+
+---
+
+#### SRS-CSTOR-003: Hierarchical Storage Management
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-CSTOR-003 |
+| **Title** | HSM Storage Management |
+| **Description** | The system shall support hierarchical storage management with automatic tier migration based on access patterns. |
+| **Priority** | Could Have |
+| **Phase** | 5 |
+| **Traces To** | FR-8.3 |
+
+**Acceptance Criteria:**
+1. Multi-tier storage configuration (fast, standard, archive)
+2. Age-based migration policies
+3. Access frequency tracking
+4. Background migration service
+5. Transparent retrieval from any tier
+
+**HSM Tier Structure:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  Hierarchical Storage Management                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  Tier 0: Fast (SSD/Local)                                 │   │
+│  │  - Recently accessed studies (< 30 days)                  │   │
+│  │  - Fastest retrieval                                      │   │
+│  └───────────────────────────┬──────────────────────────────┘   │
+│                              │ Age > 30 days                     │
+│                              ▼                                   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  Tier 1: Standard (S3/Azure Blob)                         │   │
+│  │  - Active studies (30-365 days)                           │   │
+│  │  - Standard retrieval                                     │   │
+│  └───────────────────────────┬──────────────────────────────┘   │
+│                              │ Age > 365 days                    │
+│                              ▼                                   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  Tier 2: Archive (S3 Glacier/Azure Archive)               │   │
+│  │  - Historical studies (> 1 year)                          │   │
+│  │  - Delayed retrieval (hours)                              │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 3.10 AI Service Requirements
+
+#### SRS-AI-001: AI Service Integration
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-AI-001 |
+| **Title** | AI Service Connector |
+| **Description** | The system shall support integration with external AI services for medical image analysis. |
+| **Priority** | Could Have |
+| **Phase** | 5 |
+| **Traces To** | FR-9.1 |
+
+**Acceptance Criteria:**
+1. REST API client for AI inference services
+2. Configurable AI endpoint registration
+3. Async request/response handling
+4. Result storage as DICOM SR or SC objects
+5. DICOM Secondary Capture output support
+
+**AI Integration Workflow:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AI Service Integration                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     │
+│  │   DICOM      │     │   PACS       │     │   AI         │     │
+│  │   Image      │────►│   System     │────►│   Service    │     │
+│  └──────────────┘     └──────────────┘     └───────┬──────┘     │
+│                                                     │            │
+│                                                     ▼            │
+│                                            ┌──────────────┐     │
+│                                            │  Inference   │     │
+│                                            │  Results     │     │
+│                                            └───────┬──────┘     │
+│                                                     │            │
+│                              ┌──────────────────────┘            │
+│                              ▼                                   │
+│                       ┌──────────────┐                          │
+│                       │ Store as     │                          │
+│                       │ DICOM SR/SC  │                          │
+│                       └──────────────┘                          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 4. External Interface Requirements
 
 ### 4.1 User Interfaces
@@ -1455,11 +1983,29 @@ The PACS System provides no direct user interface. All interaction is through:
 | FR-3.5.1-FR-3.5.4 | SRS-SVC-007 | Specified |
 | FR-4.1.1-FR-4.1.4 | SRS-STOR-001 | Specified |
 | FR-4.2.1-FR-4.2.4 | SRS-STOR-002 | Specified |
+| FR-5.1 | SRS-SEC-010 | Specified |
+| FR-5.2 | SRS-SEC-011 | Specified |
+| FR-5.3 | SRS-SEC-012 | Specified |
+| FR-5.4 | SRS-SEC-013 | Specified |
+| FR-6.1 | SRS-WEB-001 | Specified |
+| FR-6.2 | SRS-WEB-002 | Specified |
+| FR-6.3 | SRS-WEB-003 | Specified |
+| FR-6.4 | SRS-WEB-004 | Specified |
+| FR-7.1 | SRS-WKF-001 | Specified |
+| FR-7.2 | SRS-WKF-002 | Specified |
+| FR-8.1 | SRS-CSTOR-001 | Specified |
+| FR-8.2 | SRS-CSTOR-002 | Specified |
+| FR-8.3 | SRS-CSTOR-003 | Specified |
+| FR-9.1 | SRS-AI-001 | Specified |
 | NFR-1.1-NFR-1.6 | SRS-PERF-001 - SRS-PERF-006 | Specified |
 | NFR-2.1-NFR-2.5 | SRS-REL-001 - SRS-REL-005 | Specified |
 | NFR-4.1-NFR-4.5 | SRS-SEC-001 - SRS-SEC-005 | Specified |
 | NFR-5.1-NFR-5.5 | SRS-MAINT-001 - SRS-MAINT-005 | Specified |
 | IR-1 | SRS-INT-001 - SRS-INT-006 | Specified |
+| IR-6 | SRS-INT-007 | Specified |
+| IR-7 | SRS-INT-008 | Specified |
+| IR-8 | SRS-INT-009 | Specified |
+| IR-9 | SRS-INT-010 | Specified |
 
 ### 7.2 SRS to Test Case Traceability (Template)
 
@@ -1487,6 +2033,24 @@ The PACS System provides no direct user interface. All interaction is through:
 | SRS-SVC-007 | TC-SVC-007 | Conformance | Planned |
 | SRS-STOR-001 | TC-STOR-001 | Integration | Planned |
 | SRS-STOR-002 | TC-STOR-002 | Integration | Planned |
+| SRS-INT-007 | TC-INT-007 | Integration | Planned |
+| SRS-INT-008 | TC-INT-008 | Integration | Planned |
+| SRS-INT-009 | TC-INT-009 | Integration | Planned |
+| SRS-INT-010 | TC-INT-010 | Integration | Planned |
+| SRS-SEC-010 | TC-SEC-010 | Unit | Planned |
+| SRS-SEC-011 | TC-SEC-011 | Integration | Planned |
+| SRS-SEC-012 | TC-SEC-012 | Integration | Planned |
+| SRS-SEC-013 | TC-SEC-013 | Integration | Planned |
+| SRS-WEB-001 | TC-WEB-001 | Integration | Planned |
+| SRS-WEB-002 | TC-WEB-002 | Conformance | Planned |
+| SRS-WEB-003 | TC-WEB-003 | Conformance | Planned |
+| SRS-WEB-004 | TC-WEB-004 | Conformance | Planned |
+| SRS-WKF-001 | TC-WKF-001 | Integration | Planned |
+| SRS-WKF-002 | TC-WKF-002 | Integration | Planned |
+| SRS-CSTOR-001 | TC-CSTOR-001 | Integration | Planned |
+| SRS-CSTOR-002 | TC-CSTOR-002 | Integration | Planned |
+| SRS-CSTOR-003 | TC-CSTOR-003 | Integration | Planned |
+| SRS-AI-001 | TC-AI-001 | Integration | Planned |
 
 ### 7.3 Cross-Reference Summary
 
@@ -1509,6 +2073,21 @@ The PACS System provides no direct user interface. All interaction is through:
 │                                                                          │
 │   FR-4.x  ────────────►  SRS-STOR-xxx  ────────►  TC-STOR-xxx          │
 │   (Storage)              (Storage Module)         (Integration)         │
+│                                                                          │
+│   FR-5.x  ────────────►  SRS-SEC-0xx   ────────►  TC-SEC-xxx           │
+│   (Security)             (Security Module)        (Unit/Integration)    │
+│                                                                          │
+│   FR-6.x  ────────────►  SRS-WEB-xxx   ────────►  TC-WEB-xxx           │
+│   (Web/REST API)         (Web Module)             (Conformance)         │
+│                                                                          │
+│   FR-7.x  ────────────►  SRS-WKF-xxx   ────────►  TC-WKF-xxx           │
+│   (Workflow)             (Workflow Module)        (Integration)         │
+│                                                                          │
+│   FR-8.x  ────────────►  SRS-CSTOR-xxx ────────►  TC-CSTOR-xxx         │
+│   (Cloud Storage)        (Cloud Storage)          (Integration)         │
+│                                                                          │
+│   FR-9.x  ────────────►  SRS-AI-xxx    ────────►  TC-AI-xxx            │
+│   (AI Services)          (AI Module)              (Integration)         │
 │                                                                          │
 │   NFR-x   ────────────►  SRS-PERF-xxx  ────────►  TC-PERF-xxx          │
 │   (Performance)          SRS-REL-xxx              (Performance)         │
@@ -1534,9 +2113,13 @@ The PACS System provides no direct user interface. All interaction is through:
 | SRS-SVC-xxx | DICOM services | SRS-SVC-001 |
 | SRS-STOR-xxx | Storage backend | SRS-STOR-001 |
 | SRS-INT-xxx | Integration | SRS-INT-001 |
+| SRS-SEC-xxx | Security features | SRS-SEC-010 |
+| SRS-WEB-xxx | Web/REST API | SRS-WEB-001 |
+| SRS-WKF-xxx | Workflow automation | SRS-WKF-001 |
+| SRS-CSTOR-xxx | Cloud storage | SRS-CSTOR-001 |
+| SRS-AI-xxx | AI services | SRS-AI-001 |
 | SRS-PERF-xxx | Performance | SRS-PERF-001 |
 | SRS-REL-xxx | Reliability | SRS-REL-001 |
-| SRS-SEC-xxx | Security | SRS-SEC-001 |
 | SRS-MAINT-xxx | Maintainability | SRS-MAINT-001 |
 
 ### Appendix B: Revision History
@@ -1546,6 +2129,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | 1.0.0 | 2025-11-30 | kcenon | Initial version |
 | 1.1.0 | 2025-12-04 | kcenon | Updated integration requirements |
 | 1.2.0 | 2025-12-07 | kcenon | Added: SRS-SVC-008 (DIMSE-N), SRS-SVC-009 (Ultrasound), SRS-SVC-010 (XA); Updated: SRS-CORE-007 (Explicit VR BE), SRS-INT-003 (network_system V2), SRS-INT-004 (thread_system migration) |
+| 1.3.0 | 2026-01-04 | kcenon | Added: FR-5.x Security (SRS-SEC-010 to SRS-SEC-013), FR-6.x Web/REST API (SRS-WEB-001 to SRS-WEB-004), FR-7.x Workflow (SRS-WKF-001, SRS-WKF-002), FR-8.x Cloud Storage (SRS-CSTOR-001 to SRS-CSTOR-003), FR-9.x AI (SRS-AI-001); Updated: Integration requirements (SRS-INT-007 to SRS-INT-010) |
 
 ### Appendix C: Glossary
 
@@ -1561,7 +2145,7 @@ The PACS System provides no direct user interface. All interaction is through:
 
 ---
 
-*Document Version: 0.1.2.0*
+*Document Version: 0.1.3.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2026-01-04*
 *Author: kcenon@naver.com*
