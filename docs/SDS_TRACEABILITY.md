@@ -218,7 +218,8 @@ Legend:
 | **SRS-INT-003** | thread_system adapter | DES-INT-003 | `thread_adapter` |
 | **SRS-INT-004** | logger_system adapter | DES-INT-004 | `logger_adapter` |
 | **SRS-INT-005** | monitoring_system adapter | DES-INT-005 | `monitoring_adapter` |
-| **SRS-INT-007** | ITK/VTK Integration | DES-INT-007 | `itk_adapter` |
+| **SRS-INT-006** | common_system IExecutor adapter | DES-INT-009 | `executor_adapter` |
+| **SRS-INT-007** | ITK/VTK Integration | DES-INT-008 | `itk_adapter` |
 | **SRS-INT-008** | Crow REST Framework | DES-WEB-001 | `rest_server` |
 | **SRS-INT-009** | AWS SDK Integration | DES-STOR-005 | `s3_storage` |
 | **SRS-INT-010** | Azure SDK Integration | DES-STOR-006 | `azure_blob_storage` |
@@ -727,6 +728,7 @@ This section maps design elements to their corresponding source code files.
 | DES-INT-006 | `dicom_session` | `include/pacs/integration/dicom_session.hpp` | `src/integration/dicom_session.cpp` |
 | DES-INT-007 | `thread_pool_adapter` | `include/pacs/integration/thread_pool_adapter.hpp` | `src/integration/thread_pool_adapter.cpp` |
 | DES-INT-008 | `itk_adapter` | `include/pacs/integration/itk_adapter.hpp` | `src/integration/itk_adapter.cpp` |
+| DES-INT-009 | `executor_adapter` | `include/pacs/integration/executor_adapter.hpp` | `src/integration/executor_adapter.cpp` |
 | - | `thread_pool_interface` | `include/pacs/integration/thread_pool_interface.hpp` | (header-only, interface) |
 
 ### 5.7 Security Module Implementation
