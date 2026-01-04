@@ -182,6 +182,20 @@ Legend:
 | **SRS-SVC-005** | Retrieve SCP (C-MOVE/C-GET) | DES-SVC-005 | `retrieve_scp` class |
 | **SRS-SVC-006** | Worklist SCP | DES-SVC-006 | `worklist_scp` class |
 | **SRS-SVC-007** | MPPS SCP | DES-SVC-007 | `mpps_scp` class |
+| **SRS-SVC-011** | DX Storage SOP Class | DES-SVC-011 | `dx_storage` class |
+| **SRS-SVC-012** | MG Storage SOP Class | DES-SVC-012 | `mg_storage` class |
+| **SRS-SVC-013** | NM Storage SOP Class | DES-SVC-013 | `nm_storage` class |
+| **SRS-SVC-014** | PET Storage SOP Class | DES-SVC-014 | `pet_storage` class |
+| **SRS-SVC-015** | RT Storage SOP Class | DES-SVC-015 | `rt_storage` class |
+| **SRS-SVC-016** | SEG Storage SOP Class | DES-SVC-016 | `seg_storage` class |
+| **SRS-SVC-017** | SR Storage SOP Class | DES-SVC-017 | `sr_storage` class |
+| **SRS-SVC-018** | DX IOD Validator | DES-SVC-018 | `dx_iod_validator` class |
+| **SRS-SVC-019** | MG IOD Validator | DES-SVC-019 | `mg_iod_validator` class |
+| **SRS-SVC-020** | NM IOD Validator | DES-SVC-020 | `nm_iod_validator` class |
+| **SRS-SVC-021** | PET IOD Validator | DES-SVC-021 | `pet_iod_validator` class |
+| **SRS-SVC-022** | RT IOD Validator | DES-SVC-022 | `rt_iod_validator` class |
+| **SRS-SVC-023** | SEG IOD Validator | DES-SVC-023 | `seg_iod_validator` class |
+| **SRS-SVC-024** | SR IOD Validator | DES-SVC-024 | `sr_iod_validator` class |
 
 ### 3.4 Storage Module Requirements
 
