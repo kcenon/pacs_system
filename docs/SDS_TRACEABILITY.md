@@ -1,8 +1,8 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 2.2.0
+> **Version:** 2.3.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2026-01-03
+> **Last Updated:** 2026-01-04
 
 ---
 
@@ -171,7 +171,11 @@ Legend:
 |--------|-----------------|-----------|----------------|
 | **SRS-STOR-001** | Storage interface | DES-STOR-001 | `storage_interface` |
 | **SRS-STOR-002** | File storage implementation | DES-STOR-002 | `file_storage` class |
-| **SRS-STOR-003** | Index database | DES-STOR-003, DES-DB-001 to DES-DB-007 | `index_database`, tables |
+| **SRS-STOR-003** | S3 Cloud Storage Backend | DES-STOR-005 | `s3_storage` class |
+| **SRS-STOR-004** | Azure Cloud Storage Backend | DES-STOR-006 | `azure_blob_storage` class |
+| **SRS-STOR-005** | Index database | DES-STOR-003, DES-DB-001 to DES-DB-007 | `index_database`, tables |
+| **SRS-STOR-010** | Hierarchical Storage Management | DES-STOR-007 | `hsm_storage` class |
+| **SRS-STOR-011** | HSM Migration Service | DES-STOR-008 | `hsm_migration_service` class |
 
 ### 3.5 Integration Module Requirements
 
@@ -530,6 +534,8 @@ This section maps design elements to their corresponding source code files.
 | - | `simple_lru_cache` | `include/pacs/services/cache/simple_lru_cache.hpp` | (header-only, template) |
 
 ### 5.5 Storage Module Implementation
+
+> **Reference:** [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) - Cloud Storage Backends Design Specification
 
 | SDS ID | Design Element | Header File | Source File |
 |--------|---------------|-------------|-------------|
@@ -1217,9 +1223,10 @@ When a requirement changes, use this checklist:
 | 2.0.0 | 2026-01-03 | kcenon@naver.com | Major update: Added 7 missing modules (Security, Web, Workflow, AI, DI, Monitoring, Compat); Updated file counts from 81 to 257; Added 76 new DES-xxx IDs; Updated test traceability for all 13 modules |
 | 2.1.0 | 2026-01-03 | kcenon@naver.com | Web module refactored: DES-WEB-001 to DES-WEB-012; Added rest_config and rest_types as separate design elements; Added reference to SDS_WEB_API.md |
 | 2.2.0 | 2026-01-03 | kcenon@naver.com | Added reference to SDS_COMPRESSION.md for complete Compression Codecs Module Design Specification |
+| 2.3.0 | 2026-01-04 | kcenon@naver.com | Added Cloud Storage module: SRS-STOR-003/004/010/011 traceability; Added reference to SDS_CLOUD_STORAGE.md (S3, Azure, HSM backends) |
 
 ---
 
-*Document Version: 2.2.0*
-*Last Updated: 2026-01-03*
+*Document Version: 2.3.0*
+*Last Updated: 2026-01-04*
 *Author: kcenon@naver.com*
