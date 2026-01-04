@@ -1,6 +1,6 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 2.3.0
+> **Version:** 2.4.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-04
 
@@ -246,9 +246,57 @@ Legend:
 
 ### 3.5.3 AI Module Requirements
 
+> **Reference:** [SDS_AI.md](SDS_AI.md) - Complete AI Service Module Design Specification
+
 | SRS ID | SRS Description | SDS ID(s) | Design Element |
 |--------|-----------------|-----------|----------------|
-| **SRS-AI-001** | AI Service Integration | DES-AI-001 | `ai_service_connector` class |
+| **SRS-AI-001** | AI Service Connector | DES-AI-001 | `ai_service_connector` class |
+| **SRS-AI-001** | AI Result Handler | DES-AI-002 | `ai_result_handler` class |
+
+### 3.5.4 Cache Module Requirements
+
+> **Reference:** [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md) - Complete Services Cache Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-PERF-003** | Query Cache | DES-CACHE-001 | `query_cache` class |
+| **SRS-PERF-005** | LRU Cache | DES-CACHE-002 | `simple_lru_cache` template |
+| **SRS-SVC-004** | Streaming Query Handler | DES-CACHE-003 | `streaming_query_handler` class |
+| **SRS-PERF-002** | Parallel Query Executor | DES-CACHE-004 | `parallel_query_executor` class |
+| **SRS-STOR-002** | Database Cursor | DES-CACHE-005 | `database_cursor` class |
+| **SRS-SVC-004** | Query Result Stream | DES-CACHE-006 | `query_result_stream` class |
+
+### 3.5.5 DI Module Requirements
+
+> **Reference:** [SDS_DI.md](SDS_DI.md) - Complete Dependency Injection Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-MAINT-005** | Service Interfaces | DES-DI-001 | `service_interfaces` header |
+| **SRS-MAINT-005** | Service Registration | DES-DI-002 | `service_registry` class |
+| **SRS-INT-005** | Logger Interface | DES-DI-003 | `ilogger` class |
+| **SRS-MAINT-001** | Test Support | DES-DI-004 | `test_support` utilities |
+
+### 3.5.6 Monitoring Module Requirements
+
+> **Reference:** [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) - Complete Monitoring Collectors Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-INT-006** | Association Collector | DES-MON-001 | `dicom_association_collector` class |
+| **SRS-INT-006** | Storage Collector | DES-MON-002 | `dicom_storage_collector` class |
+| **SRS-INT-006** | Service Collector | DES-MON-003 | `dicom_service_collector` class |
+
+### 3.5.7 Network V2 Module Requirements
+
+> **Reference:** [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) - Complete Network V2 Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-INT-003** | DICOM Server V2 | DES-NET-006 | `dicom_server_v2` class |
+| **SRS-NET-002** | Association Handler V2 | DES-NET-007 | `dicom_association_handler` class |
+| **SRS-INT-004** | Accept Worker | DES-NET-008 | `accept_worker` class |
+| **SRS-PERF-005** | PDU Buffer Pool | DES-NET-009 | `pdu_buffer_pool` class |
 
 ### 3.6 Sequence Diagram Mapping
 
