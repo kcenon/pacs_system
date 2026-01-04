@@ -1532,7 +1532,332 @@ public:
 
 ---
 
-*Document Version: 0.1.2.0*
+## 8. Additional SOP Class Interfaces
+
+### 8.1 Storage SOP Classes
+
+#### DES-SVC-011: DX Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/dx_storage.hpp`, `src/services/dx_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| Digital X-Ray Image Storage - For Presentation | 1.2.840.10008.5.1.4.1.1.1.1 | DX images for display |
+| Digital X-Ray Image Storage - For Processing | 1.2.840.10008.5.1.4.1.1.1.1.1 | DX images for processing |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| Patient Study | C.7.2.2 | U |
+| General Series | C.7.3.1 | M |
+| DX Series | C.8.11.1 | M |
+| Frame of Reference | C.7.4.1 | U |
+| General Equipment | C.7.5.1 | M |
+| General Image | C.7.6.1 | M |
+| Image Pixel | C.7.6.3 | M |
+| DX Anatomy Imaged | C.8.11.2 | M |
+| DX Image | C.8.11.3 | M |
+
+---
+
+#### DES-SVC-012: MG Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/mg_storage.hpp`, `src/services/mg_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| Digital Mammography X-Ray Image Storage - For Presentation | 1.2.840.10008.5.1.4.1.1.1.2 | MG for display |
+| Digital Mammography X-Ray Image Storage - For Processing | 1.2.840.10008.5.1.4.1.1.1.2.1 | MG for processing |
+| Breast Tomosynthesis Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.3 | DBT images |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| General Series | C.7.3.1 | M |
+| Mammography Series | C.8.11.6 | M |
+| General Equipment | C.7.5.1 | M |
+| General Image | C.7.6.1 | M |
+| Image Pixel | C.7.6.3 | M |
+| Mammography Image | C.8.11.7 | M |
+
+---
+
+#### DES-SVC-013: NM Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/nm_storage.hpp`, `src/services/nm_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| Nuclear Medicine Image Storage | 1.2.840.10008.5.1.4.1.1.20 | NM images |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| General Series | C.7.3.1 | M |
+| NM/PET Patient Orientation | C.8.4.6 | M |
+| NM Image Pixel | C.8.4.7 | M |
+| NM Multi-frame | C.8.4.8 | M |
+| NM Isotope | C.8.4.9 | M |
+| NM Detector | C.8.4.10 | M |
+| NM Image | C.8.4.11 | M |
+
+---
+
+#### DES-SVC-014: PET Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/pet_storage.hpp`, `src/services/pet_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| Positron Emission Tomography Image Storage | 1.2.840.10008.5.1.4.1.1.128 | PET images |
+| Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.130 | Enhanced PET |
+| Legacy Converted Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.128.1 | Legacy PET |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| General Series | C.7.3.1 | M |
+| PET Series | C.8.9.1 | M |
+| PET Isotope | C.8.9.2 | M |
+| PET Image | C.8.9.4 | M |
+| Image Pixel | C.7.6.3 | M |
+
+---
+
+#### DES-SVC-015: RT Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/rt_storage.hpp`, `src/services/rt_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| RT Image Storage | 1.2.840.10008.5.1.4.1.1.481.1 | RT images |
+| RT Dose Storage | 1.2.840.10008.5.1.4.1.1.481.2 | RT dose data |
+| RT Structure Set Storage | 1.2.840.10008.5.1.4.1.1.481.3 | RT structures |
+| RT Beams Treatment Record Storage | 1.2.840.10008.5.1.4.1.1.481.4 | Treatment records |
+| RT Plan Storage | 1.2.840.10008.5.1.4.1.1.481.5 | RT plans |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| RT Series | C.8.8.1 | M |
+| Frame of Reference | C.7.4.1 | M |
+| General Equipment | C.7.5.1 | M |
+| RT General Plan | C.8.8.9 | M (RT Plan) |
+| RT Dose | C.8.8.3 | M (RT Dose) |
+
+---
+
+#### DES-SVC-016: SEG Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/seg_storage.hpp`, `src/services/seg_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.4 | Segmentation objects |
+| Surface Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.5 | Surface segmentations |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| General Series | C.7.3.1 | M |
+| Segmentation Series | C.8.20.1 | M |
+| Frame of Reference | C.7.4.1 | M |
+| General Equipment | C.7.5.1 | M |
+| Enhanced General Equipment | C.7.5.2 | M |
+| Segmentation Image | C.8.20.2 | M |
+| Multi-frame Functional Groups | C.7.6.16 | M |
+
+---
+
+#### DES-SVC-017: SR Storage Service
+
+**Traces to:** SRS-SVC-002, FR-3.2
+
+**File:** `include/pacs/services/sr_storage.hpp`, `src/services/sr_storage.cpp`
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Description |
+|-----------|-----|-------------|
+| Basic Text SR Storage | 1.2.840.10008.5.1.4.1.1.88.11 | Text reports |
+| Enhanced SR Storage | 1.2.840.10008.5.1.4.1.1.88.22 | Enhanced reports |
+| Comprehensive SR Storage | 1.2.840.10008.5.1.4.1.1.88.33 | Comprehensive reports |
+| Key Object Selection Document Storage | 1.2.840.10008.5.1.4.1.1.88.59 | Key object selection |
+| Comprehensive 3D SR Storage | 1.2.840.10008.5.1.4.1.1.88.34 | 3D reports |
+
+**Mandatory IOD Modules:**
+
+| Module | Reference | Usage |
+|--------|-----------|-------|
+| Patient | C.7.1.1 | M |
+| General Study | C.7.2.1 | M |
+| SR Document Series | C.17.1 | M |
+| General Equipment | C.7.5.1 | M |
+| SR Document General | C.17.2 | M |
+| SR Document Content | C.17.3 | M |
+
+---
+
+### 8.2 IOD Validators
+
+#### DES-SVC-018: DX IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/dx_iod_validator.hpp`, `src/services/dx_iod_validator.cpp`
+
+```cpp
+namespace pacs::services {
+
+class dx_iod_validator {
+public:
+    /**
+     * @brief Validate DX dataset against IOD requirements
+     * @param dataset DICOM dataset to validate
+     * @return Validation result with errors/warnings
+     */
+    [[nodiscard]] auto validate(const core::dicom_dataset& dataset)
+        -> validation_result;
+
+private:
+    // Mandatory attribute checks
+    [[nodiscard]] auto validate_patient_module(const core::dicom_dataset& ds)
+        -> std::vector<validation_error>;
+    [[nodiscard]] auto validate_dx_series_module(const core::dicom_dataset& ds)
+        -> std::vector<validation_error>;
+    [[nodiscard]] auto validate_dx_image_module(const core::dicom_dataset& ds)
+        -> std::vector<validation_error>;
+};
+
+} // namespace pacs::services
+```
+
+---
+
+#### DES-SVC-019: MG IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/mg_iod_validator.hpp`, `src/services/mg_iod_validator.cpp`
+
+**Validation Rules:**
+- Validate mammography-specific attributes (Laterality, View)
+- Check image pixel requirements for mammography
+- Validate breast anatomy metadata
+
+---
+
+#### DES-SVC-020: NM IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/nm_iod_validator.hpp`, `src/services/nm_iod_validator.cpp`
+
+**Validation Rules:**
+- Validate isotope information (Radiopharmaceutical, Half Life)
+- Check detector configuration
+- Validate multi-frame structure
+
+---
+
+#### DES-SVC-021: PET IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/pet_iod_validator.hpp`, `src/services/pet_iod_validator.cpp`
+
+**Validation Rules:**
+- Validate PET isotope information
+- Check SUV calculation parameters
+- Validate decay correction metadata
+
+---
+
+#### DES-SVC-022: RT IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/rt_iod_validator.hpp`, `src/services/rt_iod_validator.cpp`
+
+**Validation Rules:**
+- Validate frame of reference consistency
+- Check structure set geometry
+- Validate dose grid parameters
+- Verify plan-structure-dose relationships
+
+---
+
+#### DES-SVC-023: SEG IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/seg_iod_validator.hpp`, `src/services/seg_iod_validator.cpp`
+
+**Validation Rules:**
+- Validate segmentation type (BINARY, FRACTIONAL)
+- Check segment sequence consistency
+- Validate referenced series UIDs
+- Verify frame-segment mapping
+
+---
+
+#### DES-SVC-024: SR IOD Validator
+
+**Traces to:** SRS-SVC-002
+
+**File:** `include/pacs/services/sr_iod_validator.hpp`, `src/services/sr_iod_validator.cpp`
+
+**Validation Rules:**
+- Validate content tree structure
+- Check template constraints
+- Validate reference integrity (IMAGE, COMPOSITE, etc.)
+- Verify coded entry sequences
+
+---
+
+*Document Version: 0.1.3.0*
 *Created: 2025-11-30*
-*Updated: 2026-01-03*
+*Updated: 2026-01-04*
 *Author: kcenon@naver.com*

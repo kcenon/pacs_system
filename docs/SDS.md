@@ -1,6 +1,6 @@
 # Software Design Specification (SDS) - PACS System
 
-> **Version:** 0.1.3.0
+> **Version:** 0.1.4.0
 > **Last Updated:** 2026-01-04
 > **Language:** **English** | [한국어](SDS_KO.md)
 > **Status:** Complete
@@ -41,6 +41,11 @@ This SDS is organized into multiple files for maintainability:
 | [SDS_SECURITY.md](SDS_SECURITY.md) | Security module design (RBAC, Anonymization, Digital Signatures) |
 | [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | Cloud storage backends (S3, Azure, HSM) |
 | [SDS_WORKFLOW.md](SDS_WORKFLOW.md) | Workflow module (Auto Prefetch, Task Scheduler, Study Lock) |
+| [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md) | Query caching, LRU, streaming queries |
+| [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) | Network V2 with messaging_server integration |
+| [SDS_DI.md](SDS_DI.md) | Dependency Injection module |
+| [SDS_AI.md](SDS_AI.md) | AI Service integration module |
+| [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) | Monitoring collectors plugin architecture |
 
 ---
 
@@ -115,6 +120,10 @@ Where:
 | INT | Interface Module | Ecosystem integration |
 | DB | Database Module | Index database design |
 | SEC | Security Module | RBAC, anonymization, digital signatures |
+| CACHE | Cache Module | Query caching and streaming |
+| AI | AI Module | AI service integration |
+| DI | DI Module | Dependency injection |
+| MON | Monitoring Module | Metrics collectors |
 
 ---
 
@@ -452,6 +461,65 @@ The PACS System follows a layered architecture:
 | `task_scheduler_config` | DES-WKF-004 | Scheduler configuration | SRS-WKF-002 | ✅ |
 | `study_lock_manager` | DES-WKF-005 | Concurrent access control | SRS-WKF-003 | ✅ |
 
+### 4.9 Services Cache Module (pacs_services_cache)
+
+**Purpose:** Query caching and streaming for performance optimization
+
+**Reference:** [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `query_cache` | DES-CACHE-001 | Result caching with TTL | SRS-PERF-003 | ✅ |
+| `simple_lru_cache` | DES-CACHE-002 | LRU eviction policy | SRS-PERF-005 | ✅ |
+| `streaming_query_handler` | DES-CACHE-003 | Memory-efficient query processing | SRS-SVC-004 | ✅ |
+| `parallel_query_executor` | DES-CACHE-004 | Multi-threaded query execution | SRS-PERF-002 | ✅ |
+| `database_cursor` | DES-CACHE-005 | Database cursor abstraction | SRS-STOR-002 | ✅ |
+| `query_result_stream` | DES-CACHE-006 | Iterator-based result streaming | SRS-SVC-004 | ✅ |
+
+### 4.10 AI Service Module (pacs_ai)
+
+**Purpose:** External AI/ML service integration
+
+**Reference:** [SDS_AI.md](SDS_AI.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `ai_service_connector` | DES-AI-001 | REST client for AI services | SRS-AI-001 | ✅ |
+| `ai_result_handler` | DES-AI-002 | DICOM SR/SC/SEG output | SRS-AI-001 | ✅ |
+
+### 4.11 Dependency Injection Module (pacs_di)
+
+**Purpose:** Service abstraction and test support
+
+**Reference:** [SDS_DI.md](SDS_DI.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `service_interfaces` | DES-DI-001 | Abstract service interfaces | SRS-MAINT-005 | ✅ |
+| `service_registration` | DES-DI-002 | Service factory and registry | SRS-MAINT-005 | ✅ |
+| `ilogger` | DES-DI-003 | Logger interface abstraction | SRS-INT-005 | ✅ |
+| `test_support` | DES-DI-004 | Mock injection utilities | SRS-MAINT-001 | ✅ |
+
+### 4.12 Monitoring Collectors Module (pacs_monitoring)
+
+**Purpose:** PACS-specific metrics collection for monitoring_system
+
+**Reference:** [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `dicom_association_collector` | DES-MON-001 | Connection and state metrics | SRS-INT-006 | ✅ |
+| `dicom_storage_collector` | DES-MON-002 | File system and database stats | SRS-INT-006 | ✅ |
+| `dicom_service_collector` | DES-MON-003 | DIMSE operation counters | SRS-INT-006 | ✅ |
+
 ---
 
 ## 5. Design Constraints
@@ -567,10 +635,11 @@ The PACS System follows a layered architecture:
 | 1.1.0 | 2025-12-04 | kcenon | Updated component status, added transfer syntax details |
 | 1.2.0 | 2025-12-07 | kcenon | Added: DES-SVC-008~010 (DIMSE-N, Ultrasound, XA), DES-INT-003a (accept_worker), DES-NET-006~007 (Network V2); Updated thread_adapter design for thread_system migration |
 | 1.3.0 | 2026-01-02 | kcenon | Updated accept_worker: Implemented TCP socket bind/listen/accept replacing placeholder implementation |
+| 1.4.0 | 2026-01-04 | kcenon | Added: Cache Module (DES-CACHE-001~006), AI Module (DES-AI-001~002), DI Module (DES-DI-001~004), Monitoring Module (DES-MON-001~003); Added module IDs: CACHE, AI, DI, MON |
 
 ---
 
-*Document Version: 0.1.3.0*
+*Document Version: 0.1.4.0*
 *Created: 2025-11-30*
-*Updated: 2026-01-02*
+*Updated: 2026-01-04*
 *Author: kcenon@naver.com*
