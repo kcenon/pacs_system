@@ -75,7 +75,7 @@ run_echoscu() {
 
     log_info "Running C-ECHO: ${calling_ae} -> ${called_ae}@${host}:${port}"
 
-    timeout "${timeout}" echoscu \
+    run_with_timeout "${timeout}" echoscu \
         -aec "${called_ae}" \
         -aet "${calling_ae}" \
         "${host}" "${port}" 2>&1
@@ -95,7 +95,7 @@ run_storescu() {
 
     log_info "Running C-STORE: ${file} -> ${called_ae}@${host}:${port}"
 
-    timeout "${timeout}" storescu \
+    run_with_timeout "${timeout}" storescu \
         -aec "${called_ae}" \
         -aet "${calling_ae}" \
         "${host}" "${port}" "${file}" 2>&1
@@ -135,7 +135,7 @@ run_storescu_multi() {
 
     log_info "Running C-STORE: ${#files[@]} files -> ${called_ae}@${host}:${port}"
 
-    timeout "${timeout}" storescu \
+    run_with_timeout "${timeout}" storescu \
         -aec "${called_ae}" \
         -aet "${calling_ae}" \
         "${host}" "${port}" "${files[@]}" 2>&1
@@ -161,7 +161,7 @@ run_findscu() {
 
     log_info "Running C-FIND (${level}): ${called_ae}@${host}:${port}"
 
-    timeout 30 findscu \
+    run_with_timeout 30 findscu \
         -aec "${called_ae}" \
         -aet "FINDSCU" \
         -W \
@@ -189,7 +189,7 @@ run_movescu() {
 
     log_info "Running C-MOVE (${level}): ${dest_ae} <- ${called_ae}@${host}:${port}"
 
-    timeout 120 movescu \
+    run_with_timeout 120 movescu \
         -aec "${called_ae}" \
         -aet "MOVESCU" \
         -aem "${dest_ae}" \

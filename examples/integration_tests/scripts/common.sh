@@ -41,6 +41,32 @@ log_warn() {
     echo -e "${YELLOW}[WARN]${NC} $*"
 }
 
+# Cross-platform timeout command wrapper
+# Usage: run_with_timeout <seconds> <command> [args...]
+# Returns: command exit code, or 124 on timeout
+# Works on macOS (gtimeout from coreutils), Linux (timeout), and fallback
+run_with_timeout() {
+    local timeout_seconds="$1"
+    shift
+
+    # Try GNU timeout (Linux native, macOS with coreutils in PATH)
+    if command -v timeout &>/dev/null; then
+        timeout "${timeout_seconds}" "$@"
+        return $?
+    fi
+
+    # Try gtimeout (macOS with coreutils installed via Homebrew)
+    if command -v gtimeout &>/dev/null; then
+        gtimeout "${timeout_seconds}" "$@"
+        return $?
+    fi
+
+    # Fallback: run without timeout and warn
+    log_warn "No timeout command available, running without timeout"
+    "$@"
+    return $?
+}
+
 # Check if port is listening (cross-platform)
 # Works on macOS, Linux, and other Unix-like systems
 is_port_listening() {
