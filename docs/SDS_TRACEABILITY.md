@@ -107,6 +107,20 @@ Legend:
 | **FR-3.4** | MPPS Service (N-CREATE, N-SET) | SRS-SVC-007 | Full |
 | **FR-4.1** | Hierarchical File Storage | SRS-STOR-002 | Full |
 | **FR-4.2** | Index Database | SRS-STOR-003 | Full |
+| **FR-5.1** | DICOM Anonymization | SRS-SEC-010 | Full |
+| **FR-5.2** | Digital Signature Support | SRS-SEC-011 | Full |
+| **FR-5.3** | RBAC Access Control | SRS-SEC-012 | Full |
+| **FR-5.4** | X.509 Certificate Handling | SRS-SEC-013 | Full |
+| **FR-6.1** | REST API Management Interface | SRS-WEB-001 | Full |
+| **FR-6.2** | DICOMweb WADO-RS | SRS-WEB-002 | Full |
+| **FR-6.3** | DICOMweb STOW-RS | SRS-WEB-003 | Full |
+| **FR-6.4** | DICOMweb QIDO-RS | SRS-WEB-004 | Full |
+| **FR-7.1** | Automatic Prior Study Prefetch | SRS-WKF-001 | Full |
+| **FR-7.2** | Background Task Scheduling | SRS-WKF-002 | Full |
+| **FR-8.1** | AWS S3 Storage Backend | SRS-CSTOR-001 | Full |
+| **FR-8.2** | Azure Blob Storage Backend | SRS-CSTOR-002 | Full |
+| **FR-8.3** | Hierarchical Storage Management | SRS-CSTOR-003 | Full |
+| **FR-9.1** | AI Service Integration | SRS-AI-001 | Full |
 
 ### 2.2 Non-Functional Requirements
 
@@ -126,6 +140,10 @@ Legend:
 | **IR-3** | thread_system Integration | SRS-INT-003 | Full |
 | **IR-4** | logger_system Integration | SRS-INT-004 | Full |
 | **IR-5** | monitoring_system Integration | SRS-INT-005 | Full |
+| **IR-6** | ITK/VTK Integration | SRS-INT-007 | Full |
+| **IR-7** | Crow REST Framework Integration | SRS-INT-008 | Full |
+| **IR-8** | AWS SDK Integration | SRS-INT-009 | Full |
+| **IR-9** | Azure SDK Integration | SRS-INT-010 | Full |
 
 ---
 
@@ -186,6 +204,37 @@ Legend:
 | **SRS-INT-003** | thread_system adapter | DES-INT-003 | `thread_adapter` |
 | **SRS-INT-004** | logger_system adapter | DES-INT-004 | `logger_adapter` |
 | **SRS-INT-005** | monitoring_system adapter | DES-INT-005 | `monitoring_adapter` |
+| **SRS-INT-007** | ITK/VTK Integration | DES-INT-007 | `itk_adapter` |
+| **SRS-INT-008** | Crow REST Framework | DES-WEB-001 | `rest_server` |
+| **SRS-INT-009** | AWS SDK Integration | DES-STOR-005 | `s3_storage` |
+| **SRS-INT-010** | Azure SDK Integration | DES-STOR-006 | `azure_blob_storage` |
+
+### 3.5.1 Web/REST API Module Requirements
+
+> **Reference:** [SDS_WEB_API.md](SDS_WEB_API.md) - Complete Web/REST API Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-WEB-001** | REST API Server | DES-WEB-001, DES-WEB-002, DES-WEB-003 | `rest_server`, `rest_config`, `rest_types` |
+| **SRS-WEB-002** | DICOMweb WADO-RS | DES-WEB-007 | `dicomweb_endpoints` (WADO-RS) |
+| **SRS-WEB-003** | DICOMweb STOW-RS | DES-WEB-007 | `dicomweb_endpoints` (STOW-RS) |
+| **SRS-WEB-004** | DICOMweb QIDO-RS | DES-WEB-007 | `dicomweb_endpoints` (QIDO-RS) |
+
+### 3.5.2 Cloud Storage Module Requirements
+
+> **Reference:** [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) - Complete Cloud Storage Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-CSTOR-001** | AWS S3 Storage Backend | DES-STOR-005 | `s3_storage` class |
+| **SRS-CSTOR-002** | Azure Blob Storage Backend | DES-STOR-006 | `azure_blob_storage` class |
+| **SRS-CSTOR-003** | Hierarchical Storage Management | DES-STOR-007, DES-STOR-008 | `hsm_storage`, `hsm_migration_service` |
+
+### 3.5.3 AI Module Requirements
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-AI-001** | AI Service Integration | DES-AI-001 | `ai_service_connector` class |
 
 ### 3.6 Sequence Diagram Mapping
 
@@ -206,6 +255,10 @@ Legend:
 | **SRS-SEC-001** | Data Protection (Anonymization) | DES-SEC-006, DES-SEC-007, DES-SEC-008, DES-SEC-009 | `anonymization_profile`, `tag_action`, `uid_mapping`, `anonymizer` |
 | **SRS-SEC-002** | Access Control (RBAC) | DES-SEC-001 to DES-SEC-005, DES-SEC-013 | `User`, `Role`, `Permission`, `user_context`, `access_control_manager`, `security_storage_interface` |
 | **SRS-SEC-003** | Audit Trail | DES-SEC-004, DES-SEC-005 | `user_context` (source info), `access_control_manager` (audit callback) |
+| **SRS-SEC-010** | DICOM Dataset Anonymization | DES-SEC-006 to DES-SEC-009 | `anonymizer`, `anonymization_profile`, `tag_action`, `uid_mapping` |
+| **SRS-SEC-011** | Digital Signature Support | DES-SEC-010 to DES-SEC-012 | `signature`, `signature_creator`, `signature_verifier` |
+| **SRS-SEC-012** | RBAC Access Control | DES-SEC-001 to DES-SEC-005 | `User`, `Role`, `Permission`, `user_context`, `access_control_manager` |
+| **SRS-SEC-013** | X.509 Certificate Management | DES-SEC-011 | `certificate` class |
 
 ### 3.8 Security Sequence Diagram Mapping
 
