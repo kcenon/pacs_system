@@ -61,7 +61,7 @@ This document specifies the design of the Services Cache module for the PACS Sys
 
 **Traces to:** SRS-PERF-003 (Query Response Time)
 
-**File:** `include/pacs/services/query_cache.hpp`, `src/services/query_cache.cpp`
+**File:** `include/pacs/services/cache/query_cache.hpp`, `src/services/cache/query_cache.cpp`
 
 ```cpp
 namespace pacs::services {
@@ -117,7 +117,7 @@ private:
 
 **Traces to:** SRS-PERF-005 (Memory Usage)
 
-**File:** `include/pacs/services/simple_lru_cache.hpp`
+**File:** `include/pacs/services/cache/simple_lru_cache.hpp`
 
 ```cpp
 namespace pacs::services {
@@ -162,7 +162,7 @@ private:
 
 **Traces to:** SRS-SVC-004 (Query Service)
 
-**File:** `include/pacs/services/streaming_query_handler.hpp`, `src/services/streaming_query_handler.cpp`
+**File:** `include/pacs/services/cache/streaming_query_handler.hpp`, `src/services/cache/streaming_query_handler.cpp`
 
 ```cpp
 namespace pacs::services {
@@ -206,7 +206,7 @@ private:
 
 **Traces to:** SRS-PERF-002 (Concurrent Associations)
 
-**File:** `include/pacs/services/parallel_query_executor.hpp`, `src/services/parallel_query_executor.cpp`
+**File:** `include/pacs/services/cache/parallel_query_executor.hpp`, `src/services/cache/parallel_query_executor.cpp`
 
 ```cpp
 namespace pacs::services {
@@ -248,7 +248,7 @@ private:
 
 **Traces to:** SRS-STOR-002 (Index Database)
 
-**File:** `include/pacs/services/database_cursor.hpp`, `src/services/database_cursor.cpp`
+**File:** `include/pacs/services/cache/database_cursor.hpp`, `src/services/cache/database_cursor.cpp`
 
 ```cpp
 namespace pacs::services {
@@ -293,7 +293,7 @@ private:
 
 **Traces to:** SRS-SVC-004 (Query Service)
 
-**File:** `include/pacs/services/query_result_stream.hpp`, `src/services/query_result_stream.cpp`
+**File:** `include/pacs/services/cache/query_result_stream.hpp`, `src/services/cache/query_result_stream.cpp`
 
 ```cpp
 namespace pacs::services {
