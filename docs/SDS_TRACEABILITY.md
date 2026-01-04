@@ -216,6 +216,24 @@ Legend:
 | SRS-SEC-001 | Digital Signature Creation | SEQ-SEC-003 | Signature creation |
 | SRS-SEC-001 | Digital Signature Verification | SEQ-SEC-004 | Signature verification |
 
+### 3.9 Workflow Module Requirements
+
+> **Reference:** [SDS_WORKFLOW.md](SDS_WORKFLOW.md) - Complete Workflow Module Design Specification
+
+| SRS ID | SRS Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **SRS-WKF-001** | Auto Prefetch Service | DES-WKF-001, DES-WKF-002 | `auto_prefetch_service`, `prefetch_config` |
+| **SRS-WKF-002** | Task Scheduler Service | DES-WKF-003, DES-WKF-004 | `task_scheduler`, `task_scheduler_config` |
+| **SRS-WKF-003** | Study Lock Manager | DES-WKF-005 | `study_lock_manager` |
+
+### 3.10 Workflow Sequence Diagram Mapping
+
+| SRS ID | Scenario | SEQ ID(s) | Diagram Name |
+|--------|----------|-----------|--------------|
+| SRS-WKF-001 | Auto Prefetch Workflow | SEQ-WKF-001 | Prior study prefetch flow |
+| SRS-WKF-002 | Task Scheduler Execution | SEQ-WKF-002 | Scheduled task execution |
+| SRS-WKF-003 | Study Lock Acquisition | SEQ-WKF-003 | Concurrent access control |
+
 ---
 
 ## 4. Complete Traceability Chain
@@ -416,6 +434,30 @@ Legend:
 │                                                                              │
 │                     SRS-SEC-003 ─────────► DES-SEC-004 (user_context)       │
 │                     (Audit Trail)    ─────────► DES-SEC-005 (access_ctrl)   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 4.8 Workflow Automation
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       Workflow Automation Trace                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  PRD                  SRS                    SDS                            │
+│  ───────────────────────────────────────────────────────────────            │
+│                                                                              │
+│  FR-4.6 ───────────► SRS-WKF-001 ────────► DES-WKF-001 (auto_prefetch_svc) │
+│  (Auto Prefetch)                   ────────► DES-WKF-002 (prefetch_config)  │
+│                                    ────────► SEQ-WKF-001 (Prefetch flow)    │
+│                                                                              │
+│  FR-4.7 ───────────► SRS-WKF-002 ────────► DES-WKF-003 (task_scheduler)    │
+│  (Maintenance Tasks)               ────────► DES-WKF-004 (scheduler_config) │
+│                                    ────────► SEQ-WKF-002 (Task execution)   │
+│                                                                              │
+│  FR-4.8 ───────────► SRS-WKF-003 ────────► DES-WKF-005 (study_lock_mgr)    │
+│  (Modification Ctrl)               ────────► SEQ-WKF-003 (Lock acquisition) │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -630,13 +672,15 @@ This section maps design elements to their corresponding source code files.
 
 ### 5.9 Workflow Module Implementation
 
+> **Reference:** [SDS_WORKFLOW.md](SDS_WORKFLOW.md) - Complete Workflow Module Design Specification
+
 | SDS ID | Design Element | Header File | Source File |
 |--------|---------------|-------------|-------------|
-| DES-WF-001 | `auto_prefetch_service` | `include/pacs/workflow/auto_prefetch_service.hpp` | `src/workflow/auto_prefetch_service.cpp` |
-| DES-WF-002 | `task_scheduler` | `include/pacs/workflow/task_scheduler.hpp` | `src/workflow/task_scheduler.cpp` |
-| DES-WF-003 | `study_lock_manager` | `include/pacs/workflow/study_lock_manager.hpp` | `src/workflow/study_lock_manager.cpp` |
-| - | `prefetch_config` | `include/pacs/workflow/prefetch_config.hpp` | (header-only) |
-| - | `task_scheduler_config` | `include/pacs/workflow/task_scheduler_config.hpp` | (header-only) |
+| DES-WKF-001 | `auto_prefetch_service` | `include/pacs/workflow/auto_prefetch_service.hpp` | `src/workflow/auto_prefetch_service.cpp` |
+| DES-WKF-002 | `prefetch_config` | `include/pacs/workflow/prefetch_config.hpp` | (header-only) |
+| DES-WKF-003 | `task_scheduler` | `include/pacs/workflow/task_scheduler.hpp` | `src/workflow/task_scheduler.cpp` |
+| DES-WKF-004 | `task_scheduler_config` | `include/pacs/workflow/task_scheduler_config.hpp` | (header-only) |
+| DES-WKF-005 | `study_lock_manager` | `include/pacs/workflow/study_lock_manager.hpp` | `src/workflow/study_lock_manager.cpp` |
 
 ### 5.10 AI Module Implementation
 
@@ -840,9 +884,9 @@ This section maps design elements to their corresponding test files for **Verifi
 
 | SDS ID | Design Element | Test File | Test Count |
 |--------|---------------|-----------|------------|
-| DES-WF-001 | `auto_prefetch_service` | `tests/workflow/auto_prefetch_service_test.cpp` | - |
-| DES-WF-002 | `task_scheduler` | `tests/workflow/task_scheduler_test.cpp` | - |
-| DES-WF-003 | `study_lock_manager` | `tests/workflow/study_lock_manager_test.cpp` | - |
+| DES-WKF-001 | `auto_prefetch_service` | `tests/workflow/auto_prefetch_service_test.cpp` | - |
+| DES-WKF-003 | `task_scheduler` | `tests/workflow/task_scheduler_test.cpp` | - |
+| DES-WKF-005 | `study_lock_manager` | `tests/workflow/study_lock_manager_test.cpp` | - |
 
 ### 6.10 AI Module Tests
 

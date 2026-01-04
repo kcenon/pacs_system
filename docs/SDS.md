@@ -40,6 +40,7 @@ This SDS is organized into multiple files for maintainability:
 | [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | Requirements traceability matrix |
 | [SDS_SECURITY.md](SDS_SECURITY.md) | Security module design (RBAC, Anonymization, Digital Signatures) |
 | [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | Cloud storage backends (S3, Azure, HSM) |
+| [SDS_WORKFLOW.md](SDS_WORKFLOW.md) | Workflow module (Auto Prefetch, Task Scheduler, Study Lock) |
 
 ---
 
@@ -435,7 +436,21 @@ The PACS System follows a layered architecture:
 | `dicom_server_v2` | DES-NET-006 | messaging_server-based DICOM server | SRS-INT-003 | ✅ |
 | `dicom_association_handler` | DES-NET-007 | Per-session PDU framing and dispatching | SRS-INT-003 | ✅ |
 
-**Compile Flag:** `PACS_WITH_NETWORK_SYSTEM`
+### 4.8 Workflow Module (pacs_workflow)
+
+**Purpose:** Workflow automation services
+
+**Reference:** [SDS_WORKFLOW.md](SDS_WORKFLOW.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `auto_prefetch_service` | DES-WKF-001 | Automatic prior study prefetching | SRS-WKF-001 | ✅ |
+| `prefetch_config` | DES-WKF-002 | Prefetch configuration | SRS-WKF-001 | ✅ |
+| `task_scheduler` | DES-WKF-003 | Scheduled task execution | SRS-WKF-002 | ✅ |
+| `task_scheduler_config` | DES-WKF-004 | Scheduler configuration | SRS-WKF-002 | ✅ |
+| `study_lock_manager` | DES-WKF-005 | Concurrent access control | SRS-WKF-003 | ✅ |
 
 ---
 
