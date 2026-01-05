@@ -179,12 +179,13 @@ auto get_optional_int(const database::core::database_row& row,
 
 }  // namespace
 
-void database_cursor::apply_dicom_condition(database::sql_query_builder& builder,
+void database_cursor::apply_dicom_condition(database::query_builder& builder,
                                             const std::string& field,
                                             const std::string& value) {
     if (contains_dicom_wildcards(value)) {
         // Use LIKE with DICOM-to-SQL wildcard conversion
-        builder.where_raw(field + " LIKE '" + to_like_pattern(value) + "' ESCAPE '\\'");
+        builder.where(database::query_condition(
+            field + " LIKE '" + to_like_pattern(value) + "' ESCAPE '\\'"));
     } else {
         // Exact match
         builder.where(field, "=", value);
@@ -278,7 +279,7 @@ auto database_cursor::parse_instance_row(const database::core::database_row& row
 auto database_cursor::create_patient_cursor(
     std::shared_ptr<database::database_manager> db,
     const storage::patient_query& query) -> Result<std::unique_ptr<database_cursor>> {
-    database::sql_query_builder builder;
+    database::query_builder builder(database::database_types::sqlite);
 
     builder.select(std::vector<std::string>{
                "patient_pk", "patient_id", "patient_name", "birth_date", "sex",
@@ -306,7 +307,7 @@ auto database_cursor::create_patient_cursor(
         builder.where("sex", "=", *query.sex);
     }
 
-    auto sql = builder.build_for_database(database::database_types::sqlite);
+    auto sql = builder.build();
     auto result = db->select_query_result(sql);
 
     if (result.is_err()) {
@@ -327,7 +328,7 @@ auto database_cursor::create_patient_cursor(
 auto database_cursor::create_study_cursor(
     std::shared_ptr<database::database_manager> db,
     const storage::study_query& query) -> Result<std::unique_ptr<database_cursor>> {
-    database::sql_query_builder builder;
+    database::query_builder builder(database::database_types::sqlite);
 
     builder.select(std::vector<std::string>{
                "s.study_pk", "s.patient_pk", "s.study_uid", "s.study_id",
@@ -337,7 +338,8 @@ auto database_cursor::create_study_cursor(
                "s.created_at", "s.updated_at"})
         .from("studies s")
         .join("patients p", "s.patient_pk = p.patient_pk")
-        .order_by_raw("s.study_date DESC, s.study_time DESC");
+        .order_by("s.study_date", database::sort_order::desc)
+        .order_by("s.study_time", database::sort_order::desc);
 
     // Apply DICOM wildcard conditions
     if (query.patient_id.has_value()) {
@@ -365,7 +367,8 @@ auto database_cursor::create_study_cursor(
         apply_dicom_condition(builder, "s.accession_number", *query.accession_number);
     }
     if (query.modality.has_value()) {
-        builder.where_raw("s.modalities_in_study LIKE '%" + *query.modality + "%'");
+        builder.where(database::query_condition(
+            "s.modalities_in_study LIKE '%" + *query.modality + "%'"));
     }
     if (query.referring_physician.has_value()) {
         apply_dicom_condition(builder, "s.referring_physician",
@@ -375,7 +378,7 @@ auto database_cursor::create_study_cursor(
         apply_dicom_condition(builder, "s.study_description", *query.study_description);
     }
 
-    auto sql = builder.build_for_database(database::database_types::sqlite);
+    auto sql = builder.build();
     auto result = db->select_query_result(sql);
 
     if (result.is_err()) {
@@ -396,7 +399,7 @@ auto database_cursor::create_study_cursor(
 auto database_cursor::create_series_cursor(
     std::shared_ptr<database::database_manager> db,
     const storage::series_query& query) -> Result<std::unique_ptr<database_cursor>> {
-    database::sql_query_builder builder;
+    database::query_builder builder(database::database_types::sqlite);
 
     builder.select(std::vector<std::string>{
                "se.series_pk", "se.study_pk", "se.series_uid", "se.modality",
@@ -423,7 +426,7 @@ auto database_cursor::create_series_cursor(
         apply_dicom_condition(builder, "se.series_description", *query.series_description);
     }
 
-    auto sql = builder.build_for_database(database::database_types::sqlite);
+    auto sql = builder.build();
     auto result = db->select_query_result(sql);
 
     if (result.is_err()) {
@@ -444,7 +447,7 @@ auto database_cursor::create_series_cursor(
 auto database_cursor::create_instance_cursor(
     std::shared_ptr<database::database_manager> db,
     const storage::instance_query& query) -> Result<std::unique_ptr<database_cursor>> {
-    database::sql_query_builder builder;
+    database::query_builder builder(database::database_types::sqlite);
 
     builder.select(std::vector<std::string>{
                "i.instance_pk", "i.series_pk", "i.sop_uid", "i.sop_class_uid",
@@ -469,7 +472,7 @@ auto database_cursor::create_instance_cursor(
                       static_cast<int64_t>(*query.instance_number));
     }
 
-    auto sql = builder.build_for_database(database::database_types::sqlite);
+    auto sql = builder.build();
     auto result = db->select_query_result(sql);
 
     if (result.is_err()) {

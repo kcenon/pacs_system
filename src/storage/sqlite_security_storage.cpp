@@ -98,14 +98,14 @@ auto sqlite_security_storage::create_user(const User &user) -> VoidResult {
                                       "sqlite_security_storage");
   }
 
-  // Use sql_query_builder for SQL injection protection
-  database::sql_query_builder builder;
+  // Use query_builder for SQL injection protection
+  database::query_builder builder(database::database_types::sqlite);
   auto insert_sql = builder
                         .insert_into("users")
                         .values({{"id", user.id},
                                  {"username", user.username},
                                  {"active", user.active ? 1 : 0}})
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
   auto result = db_manager_->insert_query_result(insert_sql);
   if (result.is_err()) {
@@ -114,14 +114,14 @@ auto sqlite_security_storage::create_user(const User &user) -> VoidResult {
         "sqlite_security_storage");
   }
 
-  // Insert roles using sql_query_builder
+  // Insert roles using query_builder
   for (const auto &role : user.roles) {
-    database::sql_query_builder role_builder;
+    database::query_builder role_builder(database::database_types::sqlite);
     auto role_sql = role_builder
                         .insert_into("user_roles")
                         .values({{"user_id", user.id},
                                  {"role", std::string(to_string(role))}})
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
     auto role_result = db_manager_->insert_query_result(role_sql);
     if (role_result.is_err()) {
@@ -141,13 +141,13 @@ auto sqlite_security_storage::get_user(std::string_view id) -> Result<User> {
   User user;
   user.id = std::string(id);
 
-  // Use sql_query_builder for SQL injection protection
-  database::sql_query_builder builder;
+  // Use query_builder for SQL injection protection
+  database::query_builder builder(database::database_types::sqlite);
   auto select_sql =
       builder.select(std::vector<std::string>{"username", "active"})
           .from("users")
           .where("id", "=", std::string(id))
-          .build_for_database(database::database_types::sqlite);
+          .build();
 
   auto result = db_manager_->select_query_result(select_sql);
   if (result.is_err()) {
@@ -176,11 +176,11 @@ auto sqlite_security_storage::get_user(std::string_view id) -> Result<User> {
   }
 
   // Get roles using sql_query_builder
-  database::sql_query_builder role_builder;
+  database::query_builder role_builder(database::database_types::sqlite);
   auto role_sql = role_builder.select(std::vector<std::string>{"role"})
                       .from("user_roles")
                       .where("user_id", "=", std::string(id))
-                      .build_for_database(database::database_types::sqlite);
+                      .build();
 
   auto role_result = db_manager_->select_query_result(role_sql);
   if (role_result.is_ok()) {
@@ -206,12 +206,12 @@ auto sqlite_security_storage::get_user_by_username(std::string_view username)
   }
 
   // Use sql_query_builder for SQL injection protection
-  database::sql_query_builder builder;
+  database::query_builder builder(database::database_types::sqlite);
   auto select_sql =
       builder.select(std::vector<std::string>{"id", "username", "active"})
           .from("users")
           .where("username", "=", std::string(username))
-          .build_for_database(database::database_types::sqlite);
+          .build();
 
   auto result = db_manager_->select_query_result(select_sql);
   if (result.is_err()) {
@@ -246,11 +246,11 @@ auto sqlite_security_storage::get_user_by_username(std::string_view username)
   }
 
   // Get roles using sql_query_builder
-  database::sql_query_builder role_builder;
+  database::query_builder role_builder(database::database_types::sqlite);
   auto role_sql = role_builder.select(std::vector<std::string>{"role"})
                       .from("user_roles")
                       .where("user_id", "=", user.id)
-                      .build_for_database(database::database_types::sqlite);
+                      .build();
 
   auto role_result = db_manager_->select_query_result(role_sql);
   if (role_result.is_ok()) {
@@ -285,11 +285,11 @@ auto sqlite_security_storage::update_user(const User &user) -> VoidResult {
   }
 
   // Update user using sql_query_builder
-  database::sql_query_builder update_builder;
+  database::query_builder update_builder(database::database_types::sqlite);
   auto update_sql = update_builder.update("users")
                         .set({{"active", user.active ? 1 : 0}})
                         .where("id", "=", user.id)
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
   auto update_result = db_manager_->update_query_result(update_sql);
   if (update_result.is_err()) {
@@ -300,10 +300,10 @@ auto sqlite_security_storage::update_user(const User &user) -> VoidResult {
   }
 
   // Delete existing roles using sql_query_builder
-  database::sql_query_builder delete_builder;
+  database::query_builder delete_builder(database::database_types::sqlite);
   auto delete_sql = delete_builder.delete_from("user_roles")
                         .where("user_id", "=", user.id)
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
   auto delete_result = db_manager_->delete_query_result(delete_sql);
   if (delete_result.is_err()) {
@@ -316,12 +316,12 @@ auto sqlite_security_storage::update_user(const User &user) -> VoidResult {
 
   // Insert new roles using sql_query_builder
   for (const auto &role : user.roles) {
-    database::sql_query_builder role_builder;
+    database::query_builder role_builder(database::database_types::sqlite);
     auto role_sql =
         role_builder.insert_into("user_roles")
             .values(
                 {{"user_id", user.id}, {"role", std::string(to_string(role))}})
-            .build_for_database(database::database_types::sqlite);
+            .build();
 
     auto role_result = db_manager_->insert_query_result(role_sql);
     if (role_result.is_err()) {
@@ -353,10 +353,10 @@ auto sqlite_security_storage::delete_user(std::string_view id) -> VoidResult {
   }
 
   // Use sql_query_builder for SQL injection protection
-  database::sql_query_builder builder;
+  database::query_builder builder(database::database_types::sqlite);
   auto delete_sql = builder.delete_from("users")
                         .where("id", "=", std::string(id))
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
   auto result = db_manager_->delete_query_result(delete_sql);
   if (result.is_err()) {
@@ -377,14 +377,14 @@ auto sqlite_security_storage::get_users_by_role(Role role)
   }
 
   // Use sql_query_builder for SQL injection protection
-  database::sql_query_builder builder;
+  database::query_builder builder(database::database_types::sqlite);
   auto select_sql =
       builder
           .select(std::vector<std::string>{"u.id", "u.username", "u.active"})
           .from("users u")
           .join("user_roles ur", "u.id = ur.user_id")
           .where("ur.role", "=", std::string(to_string(role)))
-          .build_for_database(database::database_types::sqlite);
+          .build();
 
   auto result = db_manager_->select_query_result(select_sql);
   if (result.is_err()) {
@@ -413,12 +413,12 @@ auto sqlite_security_storage::get_users_by_role(Role role)
     }
 
     // Fetch all roles for this user using sql_query_builder
-    database::sql_query_builder role_builder;
+    database::query_builder role_builder(database::database_types::sqlite);
     auto role_sql =
         role_builder.select(std::vector<std::string>{"role"})
             .from("user_roles")
             .where("user_id", "=", user.id)
-            .build_for_database(database::database_types::sqlite);
+            .build();
 
     auto role_result = db_manager_->select_query_result(role_sql);
     if (role_result.is_ok()) {
