@@ -320,7 +320,7 @@ private:
     /**
      * @brief Apply DICOM wildcard conditions to query builder
      */
-    static void apply_dicom_condition(database::sql_query_builder& builder,
+    static void apply_dicom_condition(database::query_builder& builder,
                                       const std::string& field,
                                       const std::string& value);
 
