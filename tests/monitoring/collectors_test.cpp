@@ -10,6 +10,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "pacs/monitoring/collectors/dicom_association_collector.hpp"
+#include "pacs/monitoring/collectors/dicom_metrics_collector.hpp"
 #include "pacs/monitoring/collectors/dicom_service_collector.hpp"
 #include "pacs/monitoring/collectors/dicom_storage_collector.hpp"
 #include "pacs/monitoring/pacs_monitor.hpp"
@@ -558,5 +559,261 @@ TEST_CASE("pacs_monitor collector access", "[monitoring][pacs_monitor]") {
         auto& collector = monitor.storage_collector();
         CHECK(collector.is_healthy());
         CHECK(collector.get_name() == "dicom_storage_collector");
+    }
+
+    SECTION("Access unified CRTP-based collector") {
+        auto& collector = monitor.unified_collector();
+        CHECK(collector.is_healthy());
+        CHECK(collector.get_name() == "dicom_metrics_collector");
+    }
+}
+
+// =============================================================================
+// dicom_metrics_collector tests (CRTP-based)
+// Issue #490 - Implement CRTP-based DICOM metrics collector
+// =============================================================================
+
+TEST_CASE("dicom_metrics_collector initialization", "[monitoring][collectors][crtp]") {
+    dicom_metrics_collector collector("TEST_AE");
+
+    SECTION("Initialize with default config") {
+        config_map config;
+        config["ae_title"] = "TEST_AE";
+
+        auto result = collector.initialize(config);
+        CHECK(result == true);
+        CHECK(collector.is_healthy());
+        CHECK(collector.is_available());
+    }
+
+    SECTION("Get name returns correct value") {
+        CHECK(collector.get_name() == "dicom_metrics_collector");
+    }
+
+    SECTION("Initialize with custom collection flags") {
+        config_map config;
+        config["collect_associations"] = "true";
+        config["collect_transfers"] = "false";
+        config["collect_storage"] = "true";
+        config["collect_queries"] = "false";
+        config["collect_pools"] = "true";
+
+        auto result = collector.initialize(config);
+        CHECK(result == true);
+    }
+}
+
+TEST_CASE("dicom_metrics_collector metrics collection", "[monitoring][collectors][crtp]") {
+    dicom_metrics_collector collector("TEST_AE");
+    config_map config;
+    config["ae_title"] = "TEST_AE";
+    (void)collector.initialize(config);
+
+    // Reset metrics before test
+    pacs_metrics::global_metrics().reset();
+
+    SECTION("Collect returns comprehensive metrics") {
+        auto metrics = collector.collect();
+        CHECK_FALSE(metrics.empty());
+
+        // Should have association metrics
+        bool found_associations = false;
+        bool found_transfer = false;
+        bool found_pool = false;
+
+        for (const auto& m : metrics) {
+            if (m.name.find("dicom_associations") != std::string::npos) {
+                found_associations = true;
+            }
+            if (m.name.find("dicom_bytes") != std::string::npos ||
+                m.name.find("dicom_images") != std::string::npos) {
+                found_transfer = true;
+            }
+            if (m.name.find("pool") != std::string::npos) {
+                found_pool = true;
+            }
+        }
+
+        CHECK(found_associations);
+        CHECK(found_transfer);
+        CHECK(found_pool);
+    }
+
+    SECTION("Metrics include correct tags") {
+        auto metrics = collector.collect();
+
+        for (const auto& m : metrics) {
+            // All metrics should have collector tag
+            CHECK(m.tags.find("collector") != m.tags.end());
+            CHECK(m.tags.at("collector") == "dicom_metrics_collector");
+
+            // All metrics should have ae_title tag
+            CHECK(m.tags.find("ae_title") != m.tags.end());
+            CHECK(m.tags.at("ae_title") == "TEST_AE");
+        }
+    }
+
+    SECTION("Collect reflects recorded operations") {
+        auto& pacs = pacs_metrics::global_metrics();
+
+        // Record some operations
+        pacs.record_echo(true, 100us);
+        pacs.record_store(true, 500us, 1024);
+        pacs.record_association_established();
+
+        auto metrics = collector.collect();
+
+        // Check that metrics reflect the recorded data
+        for (const auto& m : metrics) {
+            if (m.name == "dicom_c_echo_total") {
+                CHECK(m.value == 1.0);
+            }
+            if (m.name == "dicom_c_store_total") {
+                CHECK(m.value == 1.0);
+            }
+            if (m.name == "dicom_associations_active") {
+                CHECK(m.value == 1.0);
+            }
+        }
+    }
+}
+
+TEST_CASE("dicom_metrics_collector snapshot", "[monitoring][collectors][crtp]") {
+    dicom_metrics_collector collector("SNAPSHOT_AE");
+    config_map config;
+    (void)collector.initialize(config);
+
+    // Reset metrics before test
+    pacs_metrics::global_metrics().reset();
+
+    SECTION("Get snapshot returns current state") {
+        auto& pacs = pacs_metrics::global_metrics();
+
+        // Record some data
+        pacs.record_association_established();
+        pacs.record_association_established();
+        pacs.record_store(true, 1000us, 2048);
+        pacs.record_query(true, 500us, 10);
+
+        auto snapshot = collector.get_snapshot();
+
+        CHECK(snapshot.active_associations == 2);
+        CHECK(snapshot.total_associations == 2);
+        CHECK(snapshot.store_operations == 1);
+        CHECK(snapshot.successful_stores == 1);
+        CHECK(snapshot.query_operations == 1);
+        CHECK(snapshot.successful_queries == 1);
+    }
+
+    SECTION("Snapshot has timestamp") {
+        auto snapshot = collector.get_snapshot();
+        auto now = std::chrono::system_clock::now();
+
+        // Snapshot timestamp should be recent (within 1 second)
+        auto diff = std::chrono::duration_cast<std::chrono::seconds>(
+            now - snapshot.timestamp).count();
+        CHECK(diff <= 1);
+    }
+}
+
+TEST_CASE("dicom_metrics_collector configuration", "[monitoring][collectors][crtp]") {
+    dicom_metrics_collector collector;
+    config_map config;
+    (void)collector.initialize(config);
+
+    pacs_metrics::global_metrics().reset();
+
+    SECTION("Set and get AE title") {
+        collector.set_ae_title("UPDATED_AE");
+        CHECK(collector.get_ae_title() == "UPDATED_AE");
+    }
+
+    SECTION("Disable specific metric collections") {
+        collector.set_collect_associations(false);
+
+        auto metrics = collector.collect();
+
+        // Should not contain association metrics
+        for (const auto& m : metrics) {
+            CHECK(m.name.find("dicom_associations") == std::string::npos);
+        }
+    }
+
+    SECTION("Statistics tracking") {
+        // Collect several times
+        (void)collector.collect();
+        (void)collector.collect();
+        (void)collector.collect();
+
+        auto stats = collector.get_statistics();
+        CHECK(stats["collection_count"] == 3.0);
+        CHECK(stats["enabled"] == 1.0);
+    }
+}
+
+TEST_CASE("dicom_metrics_collector CRTP inheritance", "[monitoring][collectors][crtp]") {
+    SECTION("Collector base methods work correctly") {
+        dicom_metrics_collector collector("CRTP_AE");
+        config_map config;
+        config["enabled"] = "false";
+        (void)collector.initialize(config);
+
+        // When disabled, collect should return empty
+        auto metrics = collector.collect();
+        CHECK(metrics.empty());
+
+        // But is_healthy should still return true (disabled is healthy)
+        CHECK(collector.is_healthy());
+    }
+
+    SECTION("Get metric types returns expected list") {
+        dicom_metrics_collector collector;
+        auto types = collector.get_metric_types();
+
+        CHECK_FALSE(types.empty());
+
+        // Should include various metric types
+        bool has_association = false;
+        bool has_transfer = false;
+        bool has_dimse = false;
+
+        for (const auto& t : types) {
+            if (t.find("associations") != std::string::npos) has_association = true;
+            if (t.find("bytes") != std::string::npos) has_transfer = true;
+            if (t.find("c_store") != std::string::npos || t.find("c_echo") != std::string::npos) has_dimse = true;
+        }
+
+        CHECK(has_association);
+        CHECK(has_transfer);
+        CHECK(has_dimse);
+    }
+}
+
+TEST_CASE("pacs_monitor unified collector integration", "[monitoring][pacs_monitor][crtp]") {
+    pacs_monitor_config config;
+    config.enable_unified_collector = true;
+    pacs_monitor monitor(config);
+
+    pacs_metrics::global_metrics().reset();
+
+    SECTION("Unified collector is accessible") {
+        auto& collector = monitor.unified_collector();
+        CHECK(collector.is_healthy());
+    }
+
+    SECTION("Get unified snapshot") {
+        auto& pacs = pacs_metrics::global_metrics();
+        pacs.record_association_established();
+        pacs.record_store(true, 100us, 1024);
+
+        auto snapshot = monitor.get_unified_snapshot();
+        CHECK(snapshot.active_associations == 1);
+        CHECK(snapshot.store_operations == 1);
+    }
+
+    SECTION("Unified collector appears in health check") {
+        auto health = monitor.check_health();
+        CHECK(health.is_healthy());
+        // unified_collector should be checked
     }
 }

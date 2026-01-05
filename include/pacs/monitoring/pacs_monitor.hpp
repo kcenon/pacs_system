@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "collectors/dicom_association_collector.hpp"
+#include "collectors/dicom_metrics_collector.hpp"
 #include "collectors/dicom_service_collector.hpp"
 #include "collectors/dicom_storage_collector.hpp"
 #include "health_checker.hpp"
@@ -164,6 +165,9 @@ struct pacs_monitor_config {
 
     /// Enable object pool metrics
     bool enable_pool_metrics{true};
+
+    /// Enable unified CRTP-based metrics collector
+    bool enable_unified_collector{true};
 
     /// Metric name prefix for Prometheus export
     std::string metric_prefix{"pacs"};
@@ -354,6 +358,19 @@ public:
      */
     [[nodiscard]] dicom_storage_collector& storage_collector();
 
+    /**
+     * @brief Get the unified CRTP-based metrics collector
+     * @return Reference to the unified metrics collector
+     * @see Issue #490 - CRTP-based DICOM metrics collector
+     */
+    [[nodiscard]] dicom_metrics_collector& unified_collector();
+
+    /**
+     * @brief Get a snapshot from the unified collector
+     * @return Metrics snapshot with all DICOM metrics
+     */
+    [[nodiscard]] dicom_metrics_snapshot get_unified_snapshot() const;
+
 private:
     // Configuration
     pacs_monitor_config config_;
@@ -363,6 +380,7 @@ private:
     std::unique_ptr<dicom_association_collector> association_collector_;
     std::unique_ptr<dicom_service_collector> service_collector_;
     std::unique_ptr<dicom_storage_collector> storage_collector_;
+    std::unique_ptr<dicom_metrics_collector> unified_collector_;
 
     // Custom metrics
     mutable std::mutex custom_metrics_mutex_;
@@ -390,6 +408,7 @@ inline void pacs_monitor::initialize_collectors() {
     association_collector_ = std::make_unique<dicom_association_collector>(config_.ae_title);
     service_collector_ = std::make_unique<dicom_service_collector>(config_.ae_title);
     storage_collector_ = std::make_unique<dicom_storage_collector>(config_.ae_title);
+    unified_collector_ = std::make_unique<dicom_metrics_collector>(config_.ae_title);
 
     // Initialize all collectors
     std::unordered_map<std::string, std::string> collector_config;
@@ -399,6 +418,16 @@ inline void pacs_monitor::initialize_collectors() {
     (void)service_collector_->initialize(collector_config);
     (void)storage_collector_->initialize(collector_config);
     storage_collector_->set_pool_metrics_enabled(config_.enable_pool_metrics);
+
+    // Initialize unified CRTP-based collector
+    config_map unified_config;
+    unified_config["ae_title"] = config_.ae_title;
+    unified_config["collect_associations"] = config_.enable_association_metrics ? "true" : "false";
+    unified_config["collect_transfers"] = config_.enable_storage_metrics ? "true" : "false";
+    unified_config["collect_storage"] = config_.enable_storage_metrics ? "true" : "false";
+    unified_config["collect_queries"] = config_.enable_service_metrics ? "true" : "false";
+    unified_config["collect_pools"] = config_.enable_pool_metrics ? "true" : "false";
+    (void)unified_collector_->initialize(unified_config);
 }
 
 inline void pacs_monitor::record_metric(std::string_view name, double value) {
@@ -500,6 +529,10 @@ inline health_check_result pacs_monitor::check_health() {
         all_healthy = false;
         result.metadata["storage_collector"] = "unhealthy";
     }
+    if (unified_collector_ && !unified_collector_->is_healthy()) {
+        all_healthy = false;
+        result.metadata["unified_collector"] = "unhealthy";
+    }
 
     if (any_check_failed) {
         result.status = monitor_health_status::unhealthy;
@@ -570,6 +603,14 @@ inline void pacs_monitor::update_config(const pacs_monitor_config& config) {
         storage_collector_->set_ae_title(config_.ae_title);
         storage_collector_->set_pool_metrics_enabled(config_.enable_pool_metrics);
     }
+    if (unified_collector_) {
+        unified_collector_->set_ae_title(config_.ae_title);
+        unified_collector_->set_collect_associations(config_.enable_association_metrics);
+        unified_collector_->set_collect_transfers(config_.enable_storage_metrics);
+        unified_collector_->set_collect_storage(config_.enable_storage_metrics);
+        unified_collector_->set_collect_queries(config_.enable_service_metrics);
+        unified_collector_->set_collect_pools(config_.enable_pool_metrics);
+    }
 }
 
 inline dicom_association_collector& pacs_monitor::association_collector() {
@@ -582,6 +623,17 @@ inline dicom_service_collector& pacs_monitor::service_collector() {
 
 inline dicom_storage_collector& pacs_monitor::storage_collector() {
     return *storage_collector_;
+}
+
+inline dicom_metrics_collector& pacs_monitor::unified_collector() {
+    return *unified_collector_;
+}
+
+inline dicom_metrics_snapshot pacs_monitor::get_unified_snapshot() const {
+    if (unified_collector_) {
+        return unified_collector_->get_snapshot();
+    }
+    return dicom_metrics_snapshot{};
 }
 
 }  // namespace pacs::monitoring
