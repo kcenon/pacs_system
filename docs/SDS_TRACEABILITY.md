@@ -273,10 +273,10 @@ Legend:
 
 | SRS ID | SRS Description | SDS ID(s) | Design Element |
 |--------|-----------------|-----------|----------------|
-| **SRS-MAINT-005** | Service Interfaces | DES-DI-001 | `service_interfaces` header |
-| **SRS-MAINT-005** | Service Registration | DES-DI-002 | `service_registry` class |
-| **SRS-INT-005** | Logger Interface | DES-DI-003 | `ilogger` class |
-| **SRS-MAINT-001** | Test Support | DES-DI-004 | `test_support` utilities |
+| **SRS-MAINT-005** | Service Interfaces | DES-DI-001 | `IDicomStorage`, `IDicomCodec`, `IDicomNetwork`, `DicomNetworkService` |
+| **SRS-MAINT-005** | Service Registration | DES-DI-002 | `registration_config`, `register_services()`, `create_container()` |
+| **SRS-INT-005** | Logger Interface | DES-DI-003 | `ILogger`, `NullLogger`, `LoggerService` |
+| **SRS-MAINT-001** | Test Support | DES-DI-004 | `MockStorage`, `MockNetwork`, `TestContainerBuilder` |
 
 ### 3.5.6 Monitoring Module Requirements
 
@@ -810,9 +810,9 @@ This section maps design elements to their corresponding source code files.
 
 | SDS ID | Design Element | Header File | Source File |
 |--------|---------------|-------------|-------------|
-| DES-DI-001 | `service_registration` | `include/pacs/di/service_registration.hpp` | (header-only) |
-| DES-DI-002 | `service_interfaces` | `include/pacs/di/service_interfaces.hpp` | (header-only, interface) |
-| DES-DI-003 | `ilogger` | `include/pacs/di/ilogger.hpp` | (header-only, interface) |
+| DES-DI-001 | `service_interfaces` | `include/pacs/di/service_interfaces.hpp` | (header-only) |
+| DES-DI-002 | `service_registration` | `include/pacs/di/service_registration.hpp` | (header-only) |
+| DES-DI-003 | `ilogger` | `include/pacs/di/ilogger.hpp` | (header-only) |
 | DES-DI-004 | `test_support` | `include/pacs/di/test_support.hpp` | (header-only) |
 
 ### 5.12 Monitoring Module Implementation
@@ -1016,8 +1016,10 @@ This section maps design elements to their corresponding test files for **Verifi
 
 | SDS ID | Design Element | Test File | Test Count |
 |--------|---------------|-----------|------------|
-| DES-DI-001 | `service_registration` | `tests/di/service_registration_test.cpp` | - |
+| DES-DI-001 | `service_interfaces` | (tested via integration tests) | - |
+| DES-DI-002 | `service_registration` | `tests/di/service_registration_test.cpp` | - |
 | DES-DI-003 | `ilogger` | `tests/di/ilogger_test.cpp` | - |
+| DES-DI-004 | `test_support` | (tested via usage in other tests) | - |
 
 ### 6.12 Monitoring Module Tests
 
@@ -1338,8 +1340,8 @@ When a requirement changes, use this checklist:
 #### DI Module (DES-DI-xxx)
 | ID | Element |
 |----|---------|
-| DES-DI-001 | service_registration |
-| DES-DI-002 | service_interfaces |
+| DES-DI-001 | service_interfaces |
+| DES-DI-002 | service_registration |
 | DES-DI-003 | ilogger |
 | DES-DI-004 | test_support |
 
