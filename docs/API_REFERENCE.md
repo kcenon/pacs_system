@@ -5234,6 +5234,77 @@ int main() {
 }
 ```
 
+### Partition Details
+
+#### :encoding Partition
+
+The encoding partition provides DICOM encoding types, compression codecs, and SIMD utilities:
+
+```cpp
+import kcenon.pacs:encoding;
+
+// VR and Transfer Syntax
+pacs::encoding::vr_type vr = pacs::encoding::vr_type::PN;
+auto ts = pacs::encoding::transfer_syntax::jpeg_baseline;
+
+// Compression Codecs
+pacs::encoding::compression::jpeg_baseline_codec jpeg;
+auto result = jpeg.encode(pixel_data, params);
+
+// SIMD Detection
+if (pacs::encoding::simd::has_avx2()) {
+    // Use optimized path
+}
+```
+
+Exported namespaces:
+- `pacs::encoding` - Core encoding types
+- `pacs::encoding::compression` - Compression codecs (JPEG, JPEG-LS, JPEG 2000, RLE)
+- `pacs::encoding::simd` - CPU feature detection and vectorized operations
+
+#### :storage Partition
+
+The storage partition provides storage backends, cloud storage, and HSM:
+
+```cpp
+import kcenon.pacs:storage;
+
+// File storage
+pacs::storage::file_storage fs("/data/dicom");
+
+// Cloud storage (S3)
+pacs::storage::cloud_storage_config s3_cfg;
+s3_cfg.bucket_name = "dicom-archive";
+pacs::storage::s3_storage s3(s3_cfg);
+
+// HSM with automatic migration
+pacs::storage::hsm_storage_config hsm_cfg;
+hsm_cfg.policy.hot_to_warm = std::chrono::days{30};
+pacs::storage::hsm_storage hsm(hot_storage, warm_storage, cold_storage);
+```
+
+Exported types:
+- Storage interfaces: `storage_interface`, `file_storage`
+- Cloud storage: `s3_storage`, `azure_blob_storage`
+- HSM: `hsm_storage`, `hsm_migration_service`, `storage_tier`, `tier_policy`
+- Records: `patient_record`, `study_record`, `series_record`, `instance_record`
+
+#### :security Partition
+
+The security partition provides RBAC, encryption, and anonymization:
+
+```cpp
+import kcenon.pacs:security;
+
+// Access control
+pacs::security::access_control_manager acm;
+auto check = acm.check_access(user, DicomOperation::store);
+
+// Anonymization
+pacs::security::anonymizer anon;
+auto result = anon.anonymize(dataset, profile);
+```
+
 ### CMake Integration
 
 ```cmake
