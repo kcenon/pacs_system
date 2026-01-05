@@ -17,6 +17,7 @@
 #include <pacs/network/dicom_server.hpp>
 #include <pacs/di/ilogger.hpp>
 
+#include <chrono>
 #include <memory>
 #include <string>
 
