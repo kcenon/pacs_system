@@ -818,6 +818,79 @@ auto& file = result.value();
 
 ---
 
+## C++20 Module Architecture
+
+The PACS System supports C++20 modules for improved compilation times and better encapsulation.
+
+### Module Structure
+
+```
+kcenon.pacs                    # Primary module
+├── :core                      # DICOM core types (Tier 1)
+├── :encoding                  # Transfer syntax & codecs (Tier 2)
+├── :storage                   # Database backends (Tier 2)
+├── :security                  # RBAC & encryption (Tier 2)
+├── :network                   # DICOM network (Tier 3)
+├── :services                  # SCP services (Tier 4)
+├── :workflow                  # Task scheduling (Tier 5)
+├── :web                       # REST API (Tier 5)
+├── :integration               # External adapters (Tier 5)
+├── :ai                        # AI/ML services (Tier 6)
+├── :monitoring                # Health checks (Tier 6)
+└── :di                        # Dependency injection (Utility)
+```
+
+### Module Tier Hierarchy
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Tier 6: Optional                          │
+│                    (ai, monitoring, di)                          │
+├─────────────────────────────────────────────────────────────────┤
+│                        Tier 5: Application                       │
+│                  (workflow, web, integration)                    │
+├─────────────────────────────────────────────────────────────────┤
+│                        Tier 4: Services                          │
+│                         (services)                               │
+├─────────────────────────────────────────────────────────────────┤
+│                        Tier 3: Protocol                          │
+│                         (network)                                │
+├─────────────────────────────────────────────────────────────────┤
+│                       Tier 2: Infrastructure                     │
+│                (encoding, storage, security)                     │
+├─────────────────────────────────────────────────────────────────┤
+│                        Tier 1: Foundation                        │
+│                          (core)                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Usage
+
+**Building with Modules:**
+```bash
+cmake -DPACS_BUILD_MODULES=ON ..
+cmake --build .
+```
+
+**Using in Application Code:**
+```cpp
+import kcenon.pacs;
+
+int main() {
+    pacs::core::dicom_dataset ds;
+    auto ts = pacs::encoding::transfer_syntax::implicit_vr_little_endian();
+    // ...
+}
+```
+
+### Requirements
+
+- CMake 3.28 or later
+- Clang 16+, GCC 14+, or MSVC 2022 17.4+
+- C++20 standard enabled
+
+---
+
 ## Document History
 
 | Version | Date | Author | Changes |
@@ -825,6 +898,7 @@ auto& file = result.value();
 | 1.0.0 | 2025-11-30 | kcenon | Initial release |
 | 1.1.0 | 2025-12-04 | kcenon | Updated Thread Model with thread_system migration details |
 | 1.2.0 | 2025-12-07 | kcenon | Updated version, confirmed Thread Model reflects migration (Epic #153) |
+| 1.3.0 | 2026-01-06 | kcenon | Added C++20 Module Architecture section (Issue #507) |
 
 ---
 

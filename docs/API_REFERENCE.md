@@ -5365,6 +5365,34 @@ cfg.max_entries = 1000;
 pacs::services::cache::query_cache cache(cfg);
 ```
 
+### Testing and Examples
+
+**Module Tests:**
+
+Run module import tests to verify module functionality:
+
+```bash
+# Build with tests and modules
+cmake -DPACS_BUILD_MODULES=ON -DPACS_BUILD_TESTS=ON ..
+cmake --build .
+
+# Run module tests
+ctest -L modules
+```
+
+**Module Example:**
+
+The `module_example` demonstrates C++20 module usage:
+
+```bash
+# Build with examples and modules
+cmake -DPACS_BUILD_MODULES=ON -DPACS_BUILD_EXAMPLES=ON ..
+cmake --build .
+
+# Run example
+./bin/module_example [optional_dicom_file]
+```
+
 ### CMake Integration
 
 ```cmake
@@ -5384,7 +5412,7 @@ target_link_libraries(my_app PRIVATE
 
 ---
 
-*Document Version: 0.2.0.0*
+*Document Version: 0.2.1.0*
 *Created: 2025-11-30*
-*Last Updated: 2026-01-05*
+*Last Updated: 2026-01-06*
 *Author: kcenon@naver.com*
