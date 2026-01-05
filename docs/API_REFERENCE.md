@@ -5305,6 +5305,66 @@ pacs::security::anonymizer anon;
 auto result = anon.anonymize(dataset, profile);
 ```
 
+#### :network Partition
+
+The network partition provides DICOM network protocol implementation:
+
+```cpp
+import kcenon.pacs:network;
+
+// Association management
+pacs::network::association assoc;
+auto state = assoc.state();
+
+// Server configuration
+pacs::network::server_config config;
+config.ae_title = "PACS_SCP";
+config.port = 11112;
+
+// DICOM server (v2 with network_system integration)
+pacs::network::v2::dicom_server_v2 server(config);
+server.start();
+```
+
+Sub-partitions:
+- `:network_dimse` - Full DIMSE message types and factory functions
+
+#### :services Partition
+
+The services partition provides DICOM SCP service implementations:
+
+```cpp
+import kcenon.pacs:services;
+
+// Storage SCP
+pacs::services::storage_scp_config cfg;
+cfg.storage_path = "/data/dicom";
+pacs::services::storage_scp scp(cfg);
+
+// Query SCP
+pacs::services::query_scp query(database);
+```
+
+Sub-partitions:
+- `:services_validation` - IOD validators for all modalities (DX, MG, NM, PET, RT, SEG, SR, US, XA)
+- `:services_cache` - Query caching with LRU, parallel execution, streaming
+
+```cpp
+// Using validation sub-partition
+import kcenon.pacs:services_validation;
+
+pacs::services::validation::dx_validation_options opts;
+pacs::services::validation::dx_iod_validator validator;
+auto result = validator.validate(dataset, opts);
+
+// Using cache sub-partition
+import kcenon.pacs:services_cache;
+
+pacs::services::cache::query_cache_config cfg;
+cfg.max_entries = 1000;
+pacs::services::cache::query_cache cache(cfg);
+```
+
 ### CMake Integration
 
 ```cmake
