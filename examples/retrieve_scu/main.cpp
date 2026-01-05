@@ -778,7 +778,14 @@ int perform_c_get(const options& opts) {
         } else if (cmd == command_field::c_store_rq) {
             // Incoming C-STORE sub-operation
             if (msg.has_dataset()) {
-                const auto& dataset = msg.dataset();
+                auto dataset_result = msg.dataset();
+                if (dataset_result.is_err()) {
+                    if (opts.verbose) {
+                        std::cerr << "\nWarning: Failed to get dataset\n";
+                    }
+                    continue;
+                }
+                const auto& dataset = dataset_result.value().get();
 
                 // Generate file path
                 auto file_path = generate_file_path(opts, dataset);
