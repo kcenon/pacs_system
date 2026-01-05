@@ -319,13 +319,13 @@ auto index_database::upsert_patient(const patient_record& record)
     if (db_manager_) {
         // Check if patient exists using db_manager_
         // If table doesn't exist (e.g., WAL mode timing), fall through to SQLite
-        database::sql_query_builder check_builder;
+        database::query_builder check_builder(database::database_types::sqlite);
         auto check_sql =
             check_builder
                 .select(std::vector<std::string>{"patient_pk"})
                 .from("patients")
                 .where("patient_id", "=", record.patient_id)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto check_result = db_manager_->select_query_result(check_sql);
 
@@ -335,7 +335,7 @@ auto index_database::upsert_patient(const patient_record& record)
                 // Patient exists - update
                 auto existing = find_patient(record.patient_id);
                 if (existing.has_value()) {
-                    database::sql_query_builder update_builder;
+                    database::query_builder update_builder(database::database_types::sqlite);
                     auto update_sql =
                         update_builder.update("patients")
                             .set({{"patient_name", record.patient_name},
@@ -346,7 +346,7 @@ auto index_database::upsert_patient(const patient_record& record)
                                   {"comments", record.comments},
                                   {"updated_at", "datetime('now')"}})
                             .where("patient_id", "=", record.patient_id)
-                            .build_for_database(database::database_types::sqlite);
+                            .build();
 
                     auto update_result = db_manager_->update_query_result(update_sql);
                     if (update_result.is_ok()) {
@@ -356,7 +356,7 @@ auto index_database::upsert_patient(const patient_record& record)
                 }
             } else {
                 // Patient doesn't exist - insert
-                database::sql_query_builder insert_builder;
+                database::query_builder insert_builder(database::database_types::sqlite);
                 auto insert_sql =
                     insert_builder.insert_into("patients")
                         .values({{"patient_id", record.patient_id},
@@ -366,7 +366,7 @@ auto index_database::upsert_patient(const patient_record& record)
                                  {"other_ids", record.other_ids},
                                  {"ethnic_group", record.ethnic_group},
                                  {"comments", record.comments}})
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
                 auto insert_result = db_manager_->insert_query_result(insert_sql);
                 if (insert_result.is_ok()) {
@@ -440,7 +440,7 @@ auto index_database::find_patient(std::string_view patient_id) const
     -> std::optional<patient_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -449,7 +449,7 @@ auto index_database::find_patient(std::string_view patient_id) const
                     "created_at", "updated_at"})
                 .from("patients")
                 .where("patient_id", "=", std::string(patient_id))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -493,7 +493,7 @@ auto index_database::find_patient_by_pk(int64_t pk) const
     -> std::optional<patient_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -502,7 +502,7 @@ auto index_database::find_patient_by_pk(int64_t pk) const
                     "created_at", "updated_at"})
                 .from("patients")
                 .where("patient_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -545,7 +545,7 @@ auto index_database::search_patients(const patient_query& query) const
     -> Result<std::vector<patient_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "patient_pk", "patient_id", "patient_name", "birth_date",
             "sex", "other_ids", "ethnic_group", "comments",
@@ -587,7 +587,7 @@ auto index_database::search_patients(const patient_query& query) const
             builder.offset(static_cast<int>(query.offset));
         }
 
-        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto select_sql = builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<patient_record>>(
@@ -680,10 +680,10 @@ auto index_database::search_patients(const patient_query& query) const
 auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("patients")
                               .where("patient_id", "=", std::string(patient_id))
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_err()) {
@@ -727,10 +727,10 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 auto index_database::patient_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
                              .from("patients")
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -881,13 +881,13 @@ auto index_database::upsert_study(const study_record& record)
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
         // Check if study exists
-        database::sql_query_builder check_builder;
+        database::query_builder check_builder(database::database_types::sqlite);
         auto check_sql =
             check_builder
                 .select(std::vector<std::string>{"study_pk"})
                 .from("studies")
                 .where("study_uid", "=", record.study_uid)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto check_result = db_manager_->select_query_result(check_sql);
 
@@ -896,7 +896,7 @@ auto index_database::upsert_study(const study_record& record)
                 // Study exists - update
                 auto existing = find_study(record.study_uid);
                 if (existing.has_value()) {
-                    database::sql_query_builder update_builder;
+                    database::query_builder update_builder(database::database_types::sqlite);
                     auto update_sql =
                         update_builder.update("studies")
                             .set({{"patient_pk", std::to_string(record.patient_pk)},
@@ -908,7 +908,7 @@ auto index_database::upsert_study(const study_record& record)
                                   {"study_description", record.study_description},
                                   {"updated_at", "datetime('now')"}})
                             .where("study_uid", "=", record.study_uid)
-                            .build_for_database(database::database_types::sqlite);
+                            .build();
 
                     auto update_result = db_manager_->update_query_result(update_sql);
                     if (update_result.is_ok()) {
@@ -918,7 +918,7 @@ auto index_database::upsert_study(const study_record& record)
                 }
             } else {
                 // Study doesn't exist - insert
-                database::sql_query_builder insert_builder;
+                database::query_builder insert_builder(database::database_types::sqlite);
                 auto insert_sql =
                     insert_builder.insert_into("studies")
                         .values({{"patient_pk", std::to_string(record.patient_pk)},
@@ -929,7 +929,7 @@ auto index_database::upsert_study(const study_record& record)
                                  {"accession_number", record.accession_number},
                                  {"referring_physician", record.referring_physician},
                                  {"study_description", record.study_description}})
-                        .build_for_database(database::database_types::sqlite);
+                        .build();
 
                 auto insert_result = db_manager_->insert_query_result(insert_sql);
                 if (insert_result.is_ok()) {
@@ -1006,7 +1006,7 @@ auto index_database::find_study(std::string_view study_uid) const
     -> std::optional<study_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -1017,7 +1017,7 @@ auto index_database::find_study(std::string_view study_uid) const
                     "created_at", "updated_at"})
                 .from("studies")
                 .where("study_uid", "=", std::string(study_uid))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -1063,7 +1063,7 @@ auto index_database::find_study_by_pk(int64_t pk) const
     -> std::optional<study_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -1074,7 +1074,7 @@ auto index_database::find_study_by_pk(int64_t pk) const
                     "created_at", "updated_at"})
                 .from("studies")
                 .where("study_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -1125,7 +1125,7 @@ auto index_database::list_studies(std::string_view patient_id) const
             return ok(std::vector<study_record>{});  // No patient, no studies
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "study_pk", "patient_pk", "study_uid", "study_id", "study_date",
             "study_time", "accession_number", "referring_physician",
@@ -1136,7 +1136,7 @@ auto index_database::list_studies(std::string_view patient_id) const
         builder.order_by("study_date", database::sort_order::desc);
         builder.order_by("study_time", database::sort_order::desc);
 
-        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto select_sql = builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<study_record>>(
@@ -1192,7 +1192,7 @@ auto index_database::search_studies(const study_query& query) const
     // (patient filters require JOIN with patients table)
     if (db_manager_ && !query.patient_id.has_value() &&
         !query.patient_name.has_value()) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "study_pk", "patient_pk", "study_uid", "study_id", "study_date",
             "study_time", "accession_number", "referring_physician",
@@ -1250,7 +1250,7 @@ auto index_database::search_studies(const study_query& query) const
         }
 
         auto select_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_ok()) {
             std::vector<study_record> results;
@@ -1385,10 +1385,10 @@ auto index_database::search_studies(const study_query& query) const
 auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("studies")
                               .where("study_uid", "=", std::string(study_uid))
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_err()) {
@@ -1432,10 +1432,10 @@ auto index_database::delete_study(std::string_view study_uid) -> VoidResult {
 auto index_database::study_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
                              .from("studies")
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -1490,11 +1490,11 @@ auto index_database::study_count(std::string_view patient_id) const -> Result<si
             return ok(static_cast<size_t>(0));  // No patient, no studies
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
                              .from("studies")
                              .where("patient_pk", "=", patient->pk)
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -1552,13 +1552,13 @@ auto index_database::update_modalities_in_study(int64_t study_pk)
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
         // Step 1: Get distinct modalities from series table
-        database::sql_query_builder select_builder;
+        database::query_builder select_builder(database::database_types::sqlite);
         auto select_sql =
             select_builder
                 .select(std::vector<std::string>{"DISTINCT modality"})
                 .from("series")
                 .where("study_pk", "=", study_pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto select_result = db_manager_->select_query_result(select_sql);
         if (select_result.is_ok()) {
@@ -1584,13 +1584,13 @@ auto index_database::update_modalities_in_study(int64_t study_pk)
             }
 
             // Step 3: Update studies table
-            database::sql_query_builder update_builder;
+            database::query_builder update_builder(database::database_types::sqlite);
             auto update_sql =
                 update_builder.update("studies")
                     .set({{"modalities_in_study", modalities_str},
                           {"updated_at", "datetime('now')"}})
                     .where("study_pk", "=", study_pk)
-                    .build_for_database(database::database_types::sqlite);
+                    .build();
 
             auto update_result = db_manager_->update_query_result(update_sql);
             if (update_result.is_ok()) {
@@ -1713,13 +1713,13 @@ auto index_database::upsert_series(const series_record& record)
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
         // Check if series exists
-        database::sql_query_builder check_builder;
+        database::query_builder check_builder(database::database_types::sqlite);
         auto check_sql =
             check_builder
                 .select(std::vector<std::string>{"series_pk"})
                 .from("series")
                 .where("series_uid", "=", record.series_uid)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto check_result = db_manager_->select_query_result(check_sql);
 
@@ -1728,7 +1728,7 @@ auto index_database::upsert_series(const series_record& record)
                 // Series exists - update
                 auto existing = find_series(record.series_uid);
                 if (existing.has_value()) {
-                    database::sql_query_builder update_builder;
+                    database::query_builder update_builder(database::database_types::sqlite);
                     update_builder.update("series")
                         .set({{"study_pk", std::to_string(record.study_pk)},
                               {"modality", record.modality},
@@ -1744,7 +1744,7 @@ auto index_database::upsert_series(const series_record& record)
 
                     auto update_sql =
                         update_builder.where("series_uid", "=", record.series_uid)
-                            .build_for_database(database::database_types::sqlite);
+                            .build();
 
                     auto update_result = db_manager_->update_query_result(update_sql);
                     if (update_result.is_ok()) {
@@ -1756,7 +1756,7 @@ auto index_database::upsert_series(const series_record& record)
                 }
             } else {
                 // Series doesn't exist - insert
-                database::sql_query_builder insert_builder;
+                database::query_builder insert_builder(database::database_types::sqlite);
                 insert_builder.insert_into("series")
                     .values({{"study_pk", std::to_string(record.study_pk)},
                              {"series_uid", record.series_uid},
@@ -1771,7 +1771,7 @@ auto index_database::upsert_series(const series_record& record)
                 }
 
                 auto insert_sql =
-                    insert_builder.build_for_database(database::database_types::sqlite);
+                    insert_builder.build();
 
                 auto insert_result = db_manager_->insert_query_result(insert_sql);
                 if (insert_result.is_ok()) {
@@ -1856,7 +1856,7 @@ auto index_database::find_series(std::string_view series_uid) const
     -> std::optional<series_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -1865,7 +1865,7 @@ auto index_database::find_series(std::string_view series_uid) const
                     "station_name", "num_instances", "created_at", "updated_at"})
                 .from("series")
                 .where("series_uid", "=", std::string(series_uid))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -1910,7 +1910,7 @@ auto index_database::find_series_by_pk(int64_t pk) const
     -> std::optional<series_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -1919,7 +1919,7 @@ auto index_database::find_series_by_pk(int64_t pk) const
                     "station_name", "num_instances", "created_at", "updated_at"})
                 .from("series")
                 .where("series_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -1969,7 +1969,7 @@ auto index_database::list_series(std::string_view study_uid) const
             return ok(std::vector<series_record>{});
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -1980,7 +1980,7 @@ auto index_database::list_series(std::string_view study_uid) const
                 .where("study_pk", "=", study->pk)
                 .order_by("series_number")
                 .order_by("series_uid")
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
@@ -2033,7 +2033,7 @@ auto index_database::search_series(const series_query& query) const
     -> Result<std::vector<series_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "series_pk", "study_pk", "series_uid", "modality",
             "series_number", "series_description", "body_part_examined",
@@ -2081,7 +2081,7 @@ auto index_database::search_series(const series_query& query) const
             builder.offset(static_cast<int>(query.offset));
         }
 
-        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto select_sql = builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<series_record>>(
@@ -2192,10 +2192,10 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("series")
                               .where("series_uid", "=", std::string(series_uid))
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_err()) {
@@ -2249,10 +2249,10 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
 auto index_database::series_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
                              .from("series")
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -2307,11 +2307,11 @@ auto index_database::series_count(std::string_view study_uid) const -> Result<si
             return ok(static_cast<size_t>(0));
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
                              .from("series")
                              .where("study_pk", "=", study->pk)
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -2542,7 +2542,7 @@ auto index_database::find_instance(std::string_view sop_uid) const
     -> std::optional<instance_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -2553,7 +2553,7 @@ auto index_database::find_instance(std::string_view sop_uid) const
                     "created_at"})
                 .from("instances")
                 .where("sop_uid", "=", std::string(sop_uid))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -2599,7 +2599,7 @@ auto index_database::find_instance_by_pk(int64_t pk) const
     -> std::optional<instance_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -2610,7 +2610,7 @@ auto index_database::find_instance_by_pk(int64_t pk) const
                     "created_at"})
                 .from("instances")
                 .where("instance_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -2661,7 +2661,7 @@ auto index_database::list_instances(std::string_view series_uid) const
             return ok(std::vector<instance_record>{});
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
             "instance_number", "transfer_syntax", "content_date",
@@ -2673,7 +2673,7 @@ auto index_database::list_instances(std::string_view series_uid) const
         builder.order_by("instance_number");
         builder.order_by("sop_uid");
 
-        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto select_sql = builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<instance_record>>(
@@ -2727,7 +2727,7 @@ auto index_database::search_instances(const instance_query& query) const
     -> Result<std::vector<instance_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
             "instance_number", "transfer_syntax", "content_date",
@@ -2780,7 +2780,7 @@ auto index_database::search_instances(const instance_query& query) const
             builder.offset(static_cast<int>(query.offset));
         }
 
-        auto select_sql = builder.build_for_database(database::database_types::sqlite);
+        auto select_sql = builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<instance_record>>(
@@ -2888,10 +2888,10 @@ auto index_database::search_instances(const instance_query& query) const
 auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("instances")
                               .where("sop_uid", "=", std::string(sop_uid))
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_err()) {
@@ -2935,10 +2935,10 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
 auto index_database::instance_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
                              .from("instances")
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -2992,11 +2992,11 @@ auto index_database::instance_count(std::string_view series_uid) const
             return ok(size_t{0});
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
                              .from("instances")
                              .where("series_pk", "=", series->pk)
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -3101,11 +3101,11 @@ auto index_database::get_file_path(std::string_view sop_instance_uid) const
     -> Result<std::optional<std::string>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql = builder.select(std::vector<std::string>{"file_path"})
                               .from("instances")
                               .where("sop_uid", "=", std::string(sop_instance_uid))
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -3155,12 +3155,12 @@ auto index_database::get_study_files(std::string_view study_instance_uid) const
         }
 
         // Get all series PKs for this study
-        database::sql_query_builder series_builder;
+        database::query_builder series_builder(database::database_types::sqlite);
         auto series_sql = series_builder.select(std::vector<std::string>{"series_pk"})
                               .from("series")
                               .where("study_pk", "=", study->pk)
                               .order_by("series_number")
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto series_result = db_manager_->select_query_result(series_sql);
         if (series_result.is_err() || series_result.value().empty()) {
@@ -3171,12 +3171,12 @@ auto index_database::get_study_files(std::string_view study_instance_uid) const
         for (const auto& series_row : series_result.value()) {
             auto series_pk = get_int64_value(series_row, "series_pk");
 
-            database::sql_query_builder inst_builder;
+            database::query_builder inst_builder(database::database_types::sqlite);
             auto inst_sql = inst_builder.select(std::vector<std::string>{"file_path"})
                                 .from("instances")
                                 .where("series_pk", "=", series_pk)
                                 .order_by("instance_number")
-                                .build_for_database(database::database_types::sqlite);
+                                .build();
 
             auto inst_result = db_manager_->select_query_result(inst_sql);
             if (inst_result.is_ok()) {
@@ -3230,12 +3230,12 @@ auto index_database::get_series_files(std::string_view series_instance_uid)
             return ok(std::vector<std::string>{});
         }
 
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql = builder.select(std::vector<std::string>{"file_path"})
                               .from("instances")
                               .where("series_pk", "=", series->pk)
                               .order_by("instance_number")
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
@@ -3455,7 +3455,7 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto insert_sql =
             builder.insert_into("mpps")
                 .values({{"mpps_uid", record.mpps_uid},
@@ -3469,7 +3469,7 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
                          {"scheduled_step_id", record.scheduled_step_id},
                          {"requested_proc_id", record.requested_proc_id},
                          {"performed_series", record.performed_series}})
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto insert_result = db_manager_->insert_query_result(insert_sql);
         if (insert_result.is_ok()) {
@@ -3567,7 +3567,7 @@ auto index_database::update_mpps(std::string_view mpps_uid,
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.update("mpps");
         builder.set({{"status", std::string(new_status)}});
 
@@ -3584,7 +3584,7 @@ auto index_database::update_mpps(std::string_view mpps_uid,
         builder.where("mpps_uid", "=", std::string(mpps_uid));
 
         auto update_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->update_query_result(update_sql);
         if (result.is_ok()) {
             return ok();
@@ -3653,7 +3653,7 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
     -> std::optional<mpps_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -3664,7 +3664,7 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
                     "updated_at"})
                 .from("mpps")
                 .where("mpps_uid", "=", std::string(mpps_uid))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -3710,7 +3710,7 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
     -> std::optional<mpps_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -3721,7 +3721,7 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
                     "updated_at"})
                 .from("mpps")
                 .where("mpps_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -3766,7 +3766,7 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
     -> Result<std::vector<mpps_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
             "station_ae", "station_name", "modality", "study_uid",
@@ -3778,7 +3778,7 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
         builder.order_by("start_datetime", database::sort_order::desc);
 
         auto select_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<mpps_record>>(
@@ -3831,7 +3831,7 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
     -> Result<std::vector<mpps_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
             "station_ae", "station_name", "modality", "study_uid",
@@ -3842,7 +3842,7 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
         builder.order_by("start_datetime", database::sort_order::desc);
 
         auto select_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<mpps_record>>(
@@ -3895,7 +3895,7 @@ auto index_database::search_mpps(const mpps_query& query) const
     -> Result<std::vector<mpps_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
             "station_ae", "station_name", "modality", "study_uid",
@@ -3928,14 +3928,14 @@ auto index_database::search_mpps(const mpps_query& query) const
         }
 
         if (query.start_date_from.has_value()) {
-            builder.where_raw(
+            builder.where(database::query_condition(
                 pacs::compat::format("substr(start_datetime, 1, 8) >= '{}'",
-                                     *query.start_date_from));
+                                     *query.start_date_from)));
         }
 
         if (query.start_date_to.has_value()) {
-            builder.where_raw(pacs::compat::format(
-                "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to));
+            builder.where(database::query_condition(pacs::compat::format(
+                "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to)));
         }
 
         builder.order_by("start_datetime", database::sort_order::desc);
@@ -3949,7 +3949,7 @@ auto index_database::search_mpps(const mpps_query& query) const
         }
 
         auto select_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<mpps_record>>(
@@ -4055,10 +4055,10 @@ auto index_database::search_mpps(const mpps_query& query) const
 auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("mpps")
                               .where("mpps_uid", "=", std::string(mpps_uid))
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_err()) {
@@ -4102,10 +4102,10 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
 auto index_database::mpps_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
                              .from("mpps")
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -4154,11 +4154,11 @@ auto index_database::mpps_count() const -> Result<size_t> {
 auto index_database::mpps_count(std::string_view status) const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
                              .from("mpps")
                              .where("status", "=", std::string(status))
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -4346,7 +4346,7 @@ auto index_database::add_worklist_item(const worklist_item& item)
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto insert_sql =
             builder.insert_into("worklist")
                 .values({{"step_id", item.step_id},
@@ -4366,7 +4366,7 @@ auto index_database::add_worklist_item(const worklist_item& item)
                          {"protocol_code", item.protocol_code},
                          {"referring_phys", item.referring_phys},
                          {"referring_phys_id", item.referring_phys_id}})
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto insert_result = db_manager_->insert_query_result(insert_sql);
         if (insert_result.is_ok()) {
@@ -4454,14 +4454,14 @@ auto index_database::update_worklist_status(std::string_view step_id,
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.update("worklist");
         builder.set({{"step_status", std::string(new_status)}});
         builder.where("step_id", "=", std::string(step_id));
         builder.where("accession_no", "=", std::string(accession_no));
 
         auto update_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->update_query_result(update_sql);
         if (result.is_ok()) {
             return ok();
@@ -4512,7 +4512,7 @@ auto index_database::query_worklist(const worklist_query& query) const
     -> Result<std::vector<worklist_item>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "worklist_pk", "step_id", "step_status", "patient_id",
             "patient_name", "birth_date", "sex", "accession_no",
@@ -4536,15 +4536,15 @@ auto index_database::query_worklist(const worklist_query& query) const
         }
 
         if (query.scheduled_date_from.has_value()) {
-            builder.where_raw(
+            builder.where(database::query_condition(
                 pacs::compat::format("substr(scheduled_datetime, 1, 8) >= '{}'",
-                                     *query.scheduled_date_from));
+                                     *query.scheduled_date_from)));
         }
 
         if (query.scheduled_date_to.has_value()) {
-            builder.where_raw(
+            builder.where(database::query_condition(
                 pacs::compat::format("substr(scheduled_datetime, 1, 8) <= '{}'",
-                                     *query.scheduled_date_to));
+                                     *query.scheduled_date_to)));
         }
 
         if (query.patient_id.has_value()) {
@@ -4575,7 +4575,7 @@ auto index_database::query_worklist(const worklist_query& query) const
         }
 
         auto select_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<worklist_item>>(
@@ -4689,7 +4689,7 @@ auto index_database::find_worklist_item(std::string_view step_id,
     -> std::optional<worklist_item> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -4702,7 +4702,7 @@ auto index_database::find_worklist_item(std::string_view step_id,
                 .from("worklist")
                 .where("step_id", "=", std::string(step_id))
                 .where("accession_no", "=", std::string(accession_no))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -4751,7 +4751,7 @@ auto index_database::find_worklist_by_pk(int64_t pk) const
     -> std::optional<worklist_item> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -4763,7 +4763,7 @@ auto index_database::find_worklist_by_pk(int64_t pk) const
                     "created_at", "updated_at"})
                 .from("worklist")
                 .where("worklist_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -4810,13 +4810,13 @@ auto index_database::delete_worklist_item(std::string_view step_id,
     -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("worklist");
         builder.where("step_id", "=", std::string(step_id));
         builder.where("accession_no", "=", std::string(accession_no));
 
         auto delete_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok();
@@ -4873,14 +4873,14 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("worklist");
         builder.where("step_status", "!=", std::string("SCHEDULED"));
-        builder.where_raw(
-            pacs::compat::format("created_at < '{}'", cutoff_str));
+        builder.where(database::query_condition(
+            pacs::compat::format("created_at < '{}'", cutoff_str)));
 
         auto delete_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
@@ -4937,14 +4937,14 @@ auto index_database::cleanup_worklist_items_before(
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("worklist");
         builder.where("step_status", "!=", std::string("SCHEDULED"));
-        builder.where_raw(
-            pacs::compat::format("scheduled_datetime < '{}'", before_str));
+        builder.where(database::query_condition(
+            pacs::compat::format("scheduled_datetime < '{}'", before_str)));
 
         auto delete_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
@@ -4989,10 +4989,10 @@ auto index_database::cleanup_worklist_items_before(
 auto index_database::worklist_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
                               .from("worklist")
-                              .build_for_database(database::database_types::sqlite);
+                              .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_ok() && !result.value().empty()) {
@@ -5030,12 +5030,12 @@ auto index_database::worklist_count() const -> Result<size_t> {
 auto index_database::worklist_count(std::string_view status) const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder.select(std::vector<std::string>{"COUNT(*)"})
                 .from("worklist")
                 .where("step_status", "=", std::string(status))
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_ok() && !result.value().empty()) {
@@ -5113,7 +5113,7 @@ auto index_database::add_audit_log(const audit_record& record)
     -> Result<int64_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto insert_sql =
             builder.insert_into("audit_log")
                 .values({{"event_type", record.event_type},
@@ -5126,7 +5126,7 @@ auto index_database::add_audit_log(const audit_record& record)
                          {"study_uid", record.study_uid},
                          {"message", record.message},
                          {"details", record.details}})
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->insert_query_result(insert_sql);
         if (result.is_err()) {
@@ -5187,7 +5187,7 @@ auto index_database::query_audit_log(const audit_query& query) const
     -> Result<std::vector<audit_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
             "audit_pk", "event_type", "outcome", "timestamp", "user_id",
             "source_ae", "target_ae", "source_ip", "patient_id", "study_uid",
@@ -5219,15 +5219,15 @@ auto index_database::query_audit_log(const audit_query& query) const
         }
 
         if (query.date_from.has_value()) {
-            builder.where_raw(
+            builder.where(database::query_condition(
                 pacs::compat::format("date(timestamp) >= date('{}')",
-                                     *query.date_from));
+                                     *query.date_from)));
         }
 
         if (query.date_to.has_value()) {
-            builder.where_raw(
+            builder.where(database::query_condition(
                 pacs::compat::format("date(timestamp) <= date('{}')",
-                                     *query.date_to));
+                                     *query.date_to)));
         }
 
         builder.order_by("timestamp", database::sort_order::desc);
@@ -5241,7 +5241,7 @@ auto index_database::query_audit_log(const audit_query& query) const
         }
 
         auto select_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<audit_record>>(
@@ -5345,7 +5345,7 @@ auto index_database::find_audit_by_pk(int64_t pk) const
     -> std::optional<audit_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
             builder
                 .select(std::vector<std::string>{
@@ -5354,7 +5354,7 @@ auto index_database::find_audit_by_pk(int64_t pk) const
                     "study_uid", "message", "details"})
                 .from("audit_log")
                 .where("audit_pk", "=", pk)
-                .build_for_database(database::database_types::sqlite);
+                .build();
 
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err() || result.value().empty()) {
@@ -5391,10 +5391,10 @@ auto index_database::find_audit_by_pk(int64_t pk) const
 auto index_database::audit_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
                              .from("audit_log")
-                             .build_for_database(database::database_types::sqlite);
+                             .build();
 
         auto result = db_manager_->select_query_result(count_sql);
         if (result.is_err()) {
@@ -5442,12 +5442,12 @@ auto index_database::cleanup_old_audit_logs(std::chrono::hours age)
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     if (db_manager_) {
-        database::sql_query_builder builder;
+        database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("audit_log");
-        builder.where_raw(pacs::compat::format("timestamp < '{}'", cutoff_str));
+        builder.where(database::query_condition(pacs::compat::format("timestamp < '{}'", cutoff_str)));
 
         auto delete_sql =
-            builder.build_for_database(database::database_types::sqlite);
+            builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
