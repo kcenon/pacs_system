@@ -14,7 +14,7 @@
 | Document ID | PACS-SDS-MON-001 |
 | Project | PACS System |
 | Author | kcenon@naver.com |
-| Related Issues | [#481](https://github.com/kcenon/pacs_system/issues/481), [#468](https://github.com/kcenon/pacs_system/issues/468), [#310](https://github.com/kcenon/pacs_system/issues/310) |
+| Related Issues | [#490](https://github.com/kcenon/pacs_system/issues/490), [#481](https://github.com/kcenon/pacs_system/issues/481), [#468](https://github.com/kcenon/pacs_system/issues/468), [#310](https://github.com/kcenon/pacs_system/issues/310) |
 
 ---
 
@@ -25,10 +25,11 @@
 - [3. Association Collector (DES-MON-004)](#3-association-collector-des-mon-004)
 - [4. Service Collector (DES-MON-005)](#4-service-collector-des-mon-005)
 - [5. Storage Collector (DES-MON-006)](#5-storage-collector-des-mon-006)
-- [6. Metrics Catalog](#6-metrics-catalog)
-- [7. Integration with pacs_metrics](#7-integration-with-pacs_metrics)
-- [8. Usage Examples](#8-usage-examples)
-- [9. Traceability](#9-traceability)
+- [6. CRTP-Based Unified Collector (DES-MON-007)](#6-crtp-based-unified-collector-des-mon-007)
+- [7. Metrics Catalog](#7-metrics-catalog)
+- [8. Integration with pacs_metrics](#8-integration-with-pacs_metrics)
+- [9. Usage Examples](#9-usage-examples)
+- [10. Traceability](#10-traceability)
 
 ---
 
@@ -52,6 +53,8 @@ The module provides:
 | Association Collector | `collectors/dicom_association_collector.hpp` | DES-MON-004 |
 | Service Collector | `collectors/dicom_service_collector.hpp` | DES-MON-005 |
 | Storage Collector | `collectors/dicom_storage_collector.hpp` | DES-MON-006 |
+| CRTP Collector Base | `collectors/dicom_collector_base.hpp` | DES-MON-007a |
+| Unified Metrics Collector | `collectors/dicom_metrics_collector.hpp` | DES-MON-007b |
 
 ### 1.3 Architecture
 
@@ -85,6 +88,16 @@ The module provides:
 │  │  │ • total/rejected │  │ • success/fail   │  │ • pool metrics   │  │ │
 │  │  │ • success rate   │  │ • 11 operations  │  │ • throughput     │  │ │
 │  │  └──────────────────┘  └──────────────────┘  └──────────────────┘  │ │
+│  │                                                                    │ │
+│  │  ┌──────────────────────────────────────────────────────────────┐  │ │
+│  │  │                 Unified CRTP Collector                        │  │ │
+│  │  │                    DES-MON-007                                │  │ │
+│  │  │                                                                │  │ │
+│  │  │  • CRTP base template (zero-overhead polymorphism)            │  │ │
+│  │  │  • All metrics in single collection pass                      │  │ │
+│  │  │  • Configurable metric categories                             │  │ │
+│  │  │  • Snapshot support for efficient access                      │  │ │
+│  │  └──────────────────────────────────────────────────────────────┘  │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -560,9 +573,178 @@ public:
 
 ---
 
-## 6. Metrics Catalog
+## 6. CRTP-Based Unified Collector (DES-MON-007)
 
-### 6.1 Complete Metrics Reference
+### 6.1 Overview
+
+**Design ID:** DES-MON-007
+
+**Traces to:** SRS-INT-006 (monitoring_system Integration), Issue #490
+
+**Files:**
+- `include/pacs/monitoring/collectors/dicom_collector_base.hpp` (DES-MON-007a)
+- `include/pacs/monitoring/collectors/dicom_metrics_collector.hpp` (DES-MON-007b)
+
+The CRTP-based unified collector provides:
+- **Zero-overhead polymorphism** using Curiously Recurring Template Pattern (CRTP)
+- **Single-pass collection** of all DICOM metrics for efficiency
+- **Configurable categories** to enable/disable specific metric types
+- **Snapshot support** for efficient point-in-time metric access
+
+### 6.2 CRTP Base Class
+
+```cpp
+namespace pacs::monitoring {
+
+template <typename Derived>
+class dicom_collector_base {
+public:
+    // Collector Plugin Interface
+    bool initialize(const config_map& config);
+    std::vector<dicom_metric> collect();
+    std::string get_name() const;
+    std::vector<std::string> get_metric_types() const;
+    bool is_healthy() const;
+    stats_map get_statistics() const;
+
+    // Configuration
+    bool is_enabled() const;
+    std::size_t get_collection_count() const;
+    std::size_t get_collection_errors() const;
+    std::string get_ae_title() const;
+    void set_ae_title(std::string ae_title);
+
+protected:
+    // Create metric with standard tags
+    dicom_metric create_base_metric(
+        const std::string& name,
+        double value,
+        const std::string& type,
+        const std::unordered_map<std::string, std::string>& extra_tags = {}) const;
+
+    // Derived class must implement:
+    // - static constexpr const char* collector_name
+    // - bool do_initialize(const config_map& config)
+    // - std::vector<dicom_metric> do_collect()
+    // - bool is_available() const
+    // - std::vector<std::string> do_get_metric_types() const
+    // - void do_add_statistics(stats_map& stats) const
+};
+
+} // namespace pacs::monitoring
+```
+
+### 6.3 Unified Metrics Collector
+
+```cpp
+namespace pacs::monitoring {
+
+struct dicom_metrics_snapshot {
+    // Association metrics
+    std::uint64_t total_associations;
+    std::uint64_t active_associations;
+    std::uint64_t failed_associations;
+    std::uint64_t peak_active_associations;
+
+    // Transfer metrics
+    std::uint64_t images_sent;
+    std::uint64_t images_received;
+    std::uint64_t bytes_sent;
+    std::uint64_t bytes_received;
+
+    // Storage metrics
+    std::uint64_t store_operations;
+    std::uint64_t successful_stores;
+    std::uint64_t failed_stores;
+    double avg_store_latency_ms;
+
+    // Query metrics
+    std::uint64_t query_operations;
+    std::uint64_t successful_queries;
+    std::uint64_t failed_queries;
+    double avg_query_latency_ms;
+
+    // Timestamp
+    std::chrono::system_clock::time_point timestamp;
+};
+
+class dicom_metrics_collector
+    : public dicom_collector_base<dicom_metrics_collector> {
+public:
+    static constexpr const char* collector_name = "dicom_metrics_collector";
+
+    explicit dicom_metrics_collector(std::string ae_title = "PACS_SCP");
+
+    // CRTP Interface Implementation
+    bool do_initialize(const config_map& config);
+    std::vector<dicom_metric> do_collect();
+    bool is_available() const;
+    std::vector<std::string> do_get_metric_types() const;
+    void do_add_statistics(stats_map& stats) const;
+
+    // Snapshot access
+    dicom_metrics_snapshot get_snapshot() const;
+    dicom_metrics_snapshot get_last_snapshot() const;
+
+    // Configuration
+    void set_collect_associations(bool enabled);
+    void set_collect_transfers(bool enabled);
+    void set_collect_storage(bool enabled);
+    void set_collect_queries(bool enabled);
+    void set_collect_pools(bool enabled);
+};
+
+} // namespace pacs::monitoring
+```
+
+### 6.4 Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | bool | true | Enable/disable collector |
+| `ae_title` | string | "PACS_SCP" | Application Entity title for labels |
+| `collect_associations` | bool | true | Collect association metrics |
+| `collect_transfers` | bool | true | Collect transfer metrics |
+| `collect_storage` | bool | true | Collect storage metrics |
+| `collect_queries` | bool | true | Collect query metrics |
+| `collect_pools` | bool | true | Collect pool metrics |
+
+### 6.5 Benefits
+
+| Aspect | Traditional Collectors | CRTP Collector |
+|--------|----------------------|----------------|
+| Virtual function overhead | Present | Eliminated |
+| Collection passes | Multiple (3) | Single |
+| Metric deduplication | Manual | Automatic |
+| Snapshot support | No | Yes |
+| Compile-time optimization | Limited | Full inlining |
+
+### 6.6 Performance Targets
+
+Based on monitoring_system benchmarks:
+- **Metric collection:** < 100ns per operation
+- **Memory overhead:** < 1MB for counters
+- **CPU overhead:** < 1% at 1000 ops/sec
+
+### 6.7 Integration with pacs_monitor
+
+```cpp
+// Access via pacs_monitor
+auto& collector = pacs_monitor::global_monitor().unified_collector();
+
+// Get metrics
+auto metrics = collector.collect();
+
+// Get snapshot for quick access
+auto snapshot = pacs_monitor::global_monitor().get_unified_snapshot();
+std::cout << "Active associations: " << snapshot.active_associations << "\n";
+```
+
+---
+
+## 7. Metrics Catalog
+
+### 7.1 Complete Metrics Reference
 
 ```yaml
 # PACS Monitoring Collectors Metrics Catalog
@@ -732,7 +914,7 @@ public:
   labels: [ae]
 ```
 
-### 6.2 Metrics Summary
+### 7.2 Metrics Summary
 
 | Category | Count | Collector |
 |----------|-------|-----------|
@@ -740,13 +922,14 @@ public:
 | Service Metrics | 77 (7 per operation × 11 operations) | DES-MON-005 |
 | Transfer Metrics | 6 | DES-MON-006 |
 | Pool Metrics | 9 | DES-MON-006 |
-| **Total** | **98** | |
+| CRTP Unified Metrics | All above + snapshots | DES-MON-007 |
+| **Total** | **98+** | |
 
 ---
 
-## 7. Integration with pacs_metrics
+## 8. Integration with pacs_metrics
 
-### 7.1 Central Metrics Repository
+### 8.1 Central Metrics Repository
 
 All collectors read from the centralized `pacs_metrics` singleton:
 
@@ -769,7 +952,7 @@ const auto& dataset_pool = metrics.dataset_pool();
 const auto& pdu_pool = metrics.pdu_buffer_pool();
 ```
 
-### 7.2 Collector Registration
+### 8.2 Collector Registration
 
 Collectors can be registered with monitoring_system:
 
@@ -801,9 +984,9 @@ void register_pacs_collectors(const std::string& ae_title) {
 
 ---
 
-## 8. Usage Examples
+## 9. Usage Examples
 
-### 8.1 Basic Collection
+### 9.1 Basic Collection
 
 ```cpp
 #include <pacs/monitoring/collectors/dicom_association_collector.hpp>
@@ -827,7 +1010,7 @@ int main() {
 }
 ```
 
-### 8.2 Prometheus Export Format
+### 9.2 Prometheus Export Format
 
 ```cpp
 std::string export_prometheus_format(
@@ -855,7 +1038,7 @@ std::string export_prometheus_format(
 }
 ```
 
-### 8.3 Grafana Dashboard Queries
+### 9.3 Grafana Dashboard Queries
 
 ```promql
 # Active Associations
@@ -879,25 +1062,28 @@ dicom_element_pool_hit_ratio{ae="PACS_SCP"}
 
 ---
 
-## 9. Traceability
+## 10. Traceability
 
-### 9.1 Requirements to Design
+### 10.1 Requirements to Design
 
 | SRS ID | Design ID | Component | Implementation |
 |--------|-----------|-----------|----------------|
 | SRS-INT-006 | DES-MON-004 | Association Collector | `dicom_association_collector` class |
 | SRS-INT-006 | DES-MON-005 | Service Collector | `dicom_service_collector` class |
 | SRS-INT-006 | DES-MON-006 | Storage Collector | `dicom_storage_collector` class |
+| SRS-INT-006 | DES-MON-007 | CRTP Unified Collector | `dicom_metrics_collector` class |
 
-### 9.2 Design to Implementation
+### 10.2 Design to Implementation
 
 | Design ID | Component | Header File | Source |
 |-----------|-----------|-------------|--------|
 | DES-MON-004 | `dicom_association_collector` | `include/pacs/monitoring/collectors/dicom_association_collector.hpp` | (header-only) |
 | DES-MON-005 | `dicom_service_collector` | `include/pacs/monitoring/collectors/dicom_service_collector.hpp` | (header-only) |
 | DES-MON-006 | `dicom_storage_collector` | `include/pacs/monitoring/collectors/dicom_storage_collector.hpp` | (header-only) |
+| DES-MON-007a | `dicom_collector_base` | `include/pacs/monitoring/collectors/dicom_collector_base.hpp` | (header-only) |
+| DES-MON-007b | `dicom_metrics_collector` | `include/pacs/monitoring/collectors/dicom_metrics_collector.hpp` | (header-only) |
 
-### 9.3 Related Design Elements
+### 10.3 Related Design Elements
 
 | Design ID | Component | Relationship |
 |-----------|-----------|--------------|
@@ -907,7 +1093,8 @@ dicom_element_pool_hit_ratio{ae="PACS_SCP"}
 
 ---
 
-*Document Version: 2.0.0*
+*Document Version: 2.1.0*
 *Created: 2026-01-04*
 *Updated: 2026-01-05*
 *Author: kcenon@naver.com*
+*Change Log: Added CRTP-based unified collector (DES-MON-007) - Issue #490*
