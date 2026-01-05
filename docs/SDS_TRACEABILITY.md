@@ -844,7 +844,7 @@ This section maps design elements to their corresponding source code files.
 | Network | 19 | 9 | 10 | 28 |
 | Services | 34 | 31 | 3 | 65 |
 | Storage | 18 | 9 | 9 | 27 |
-| Integration | 9 | 8 | 1 | 17 |
+| Integration | 10 | 8 | 2 | 18 |
 | Security | 13 | 6 | 7 | 19 |
 | Web | 12 | 10 | 2 | 22 |
 | Workflow | 5 | 3 | 2 | 8 |
@@ -852,7 +852,7 @@ This section maps design elements to their corresponding source code files.
 | DI | 4 | 0 | 4 | 4 |
 | Monitoring | 8 | 2 | 6 | 10 |
 | Compat | 2 | 0 | 2 | 2 |
-| **Total** | **158** | **99** | **60** | **257** |
+| **Total** | **159** | **99** | **61** | **258** |
 
 ---
 
@@ -1103,7 +1103,7 @@ This section maps design elements to their corresponding test files for **Verifi
 | Network | 9 | 19 | 9 | 14 | 100% |
 | Services | 31 | 34 | 31 | 24 | 100% |
 | Storage | 9 | 18 | 9 | 9 | 100% |
-| Integration | 8 | 9 | 8 | 12 | 100% |
+| Integration | 9 | 10 | 8 | 12 | 100% |
 | Security | 6 | 13 | 6 | 5 | 100% |
 | Web | 12 | 12 | 10 | 5 | 100% |
 | Workflow | 3 | 5 | 3 | 3 | 100% |
@@ -1111,7 +1111,7 @@ This section maps design elements to their corresponding test files for **Verifi
 | DI | 4 | 4 | 0 | 2 | 100% |
 | Monitoring | 6 | 8 | 2 | 5 | 100% |
 | Compat | 2 | 2 | 0 | 0 | 100% |
-| **Total** | **112** | **158** | **99** | **101** | **100%** |
+| **Total** | **113** | **159** | **99** | **101** | **100%** |
 
 ### 7.4 Orphan Analysis
 
