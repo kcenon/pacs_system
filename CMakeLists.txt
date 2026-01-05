@@ -1885,6 +1885,34 @@ if(PACS_BUILD_TESTS)
             PROPERTIES LABELS "integration"
         )
     endif()
+
+    ##################################################
+    # C++20 Module Tests (Issue #507)
+    # Tests module import functionality when PACS_BUILD_MODULES=ON
+    ##################################################
+    if(PACS_BUILD_MODULES AND TARGET pacs_system_modules)
+        file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/modules)
+        add_executable(module_tests
+            tests/modules/module_import_test.cpp
+        )
+        target_link_libraries(module_tests
+            PRIVATE
+                pacs_system_modules
+                Catch2::Catch2WithMain
+        )
+
+        # Enable module scanning for test target
+        set_target_properties(module_tests PROPERTIES
+            CXX_SCAN_FOR_MODULES ON
+        )
+
+        # Register module tests with CTest
+        catch_discover_tests(module_tests
+            TEST_PREFIX "modules::"
+            PROPERTIES LABELS "modules"
+        )
+        message(STATUS "  [OK] module_tests: C++20 module import tests")
+    endif()
 endif()
 
 ##################################################
@@ -2080,6 +2108,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [OK] pacs_integration_e2e: End-to-end workflow tests")
     else()
         message(STATUS "  [--] pacs_integration_e2e: OFF (requires pacs_storage, pacs_integration, and Catch2)")
+    endif()
+
+    # C++20 Module Example (Issue #507)
+    add_subdirectory(examples/module_example)
+    if(PACS_BUILD_MODULES AND TARGET pacs_system_modules)
+        message(STATUS "  [OK] module_example: C++20 module usage demonstration")
+    else()
+        message(STATUS "  [OK] module_example: C++20 module demo (fallback to headers)")
     endif()
 endif()
 
