@@ -20,6 +20,7 @@
 - [DI Module](#di-module)
 - [Web Module](#web-module)
 - [Common Module](#common-module)
+- [C++20 Module Support](#c20-module-support)
 
 ---
 
@@ -5159,7 +5160,100 @@ EXPECT_EQ(mock_storage->store_count(), 1);
 
 ---
 
-*Document Version: 0.1.9.0*
+## C++20 Module Support
+
+> **Status:** Experimental
+> **Requirements:** CMake 3.28+, Clang 16+/GCC 14+/MSVC 2022 17.4+
+
+### Overview
+
+pacs_system provides C++20 module support as an alternative to the traditional header-based approach. Modules offer:
+- Faster compilation times (estimated 25-40% reduction)
+- Better encapsulation of internal APIs
+- Cleaner dependency graph
+- Improved IDE responsiveness
+
+### Module Structure
+
+```
+kcenon.pacs
+├── :core           # DICOM core types (dicom_tag, dicom_dataset, etc.)
+├── :encoding       # Transfer syntax and compression codecs
+├── :storage        # Storage backends and database adapters
+├── :security       # RBAC, encryption, anonymization
+├── :network        # DICOM network protocol (PDU, Association, DIMSE)
+├── :services       # SCP service implementations
+├── :workflow       # Task scheduling and prefetching
+├── :web            # REST API and DICOMweb endpoints
+├── :integration    # External system adapters
+├── :ai             # AI/ML service integration (optional)
+├── :monitoring     # Health checks and metrics
+└── :di             # Dependency injection utilities
+```
+
+### Building with Modules
+
+```bash
+cmake -DPACS_BUILD_MODULES=ON ..
+cmake --build .
+```
+
+### Usage
+
+```cpp
+// Import entire pacs module
+import kcenon.pacs;
+
+int main() {
+    // Use core types
+    pacs::core::dicom_dataset ds;
+    ds.set_string(pacs::core::tags::patient_name,
+                  pacs::encoding::vr_type::PN, "DOE^JOHN");
+
+    // Use Result pattern
+    auto result = pacs::ok(42);
+    if (result.is_ok()) {
+        std::cout << result.value() << std::endl;
+    }
+
+    return 0;
+}
+```
+
+### Import Specific Partitions
+
+```cpp
+// Import only what you need
+import kcenon.pacs:core;
+import kcenon.pacs:encoding;
+
+int main() {
+    pacs::core::dicom_tag tag{0x0010, 0x0010};  // Patient Name
+    pacs::encoding::vr_type vr = pacs::encoding::vr_type::PN;
+    return 0;
+}
+```
+
+### CMake Integration
+
+```cmake
+# Find pacs_system with module support
+find_package(pacs_system REQUIRED)
+
+# Link to module target
+target_link_libraries(my_app PRIVATE kcenon::pacs_modules)
+
+# Or link specific components
+target_link_libraries(my_app PRIVATE
+    pacs_core
+    pacs_encoding
+    pacs_network
+)
+```
+
+---
+
+*Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Last Updated: 2025-12-18*
+*Last Updated: 2026-01-05*
 *Author: kcenon@naver.com*
