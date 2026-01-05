@@ -187,7 +187,7 @@ TEST_CASE("explicit_vr_codec element decoding", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        auto& elem = pacs::get_value(result);
+        auto& elem = result.value();
 
         CHECK(elem.tag() == tags::patient_name);
         CHECK(elem.vr() == vr_type::PN);  // VR should come from stream
@@ -210,7 +210,7 @@ TEST_CASE("explicit_vr_codec element decoding", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        auto& elem = pacs::get_value(result);
+        auto& elem = result.value();
 
         CHECK(elem.tag() == tags::pixel_data);
         CHECK(elem.vr() == vr_type::OW);
@@ -232,7 +232,7 @@ TEST_CASE("explicit_vr_codec element decoding", "[encoding][explicit]") {
 
         REQUIRE(result.is_ok());
         // VR should be SH as read from stream
-        CHECK(pacs::get_value(result).vr() == vr_type::SH);
+        CHECK(result.value().vr() == vr_type::SH);
     }
 }
 
@@ -252,7 +252,7 @@ TEST_CASE("explicit_vr_codec dataset round-trip", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode(encoded);
 
         REQUIRE(result.is_ok());
-        auto& decoded = pacs::get_value(result);
+        auto& decoded = result.value();
 
         // Verify VRs are preserved
         auto* name_elem = decoded.get(tags::patient_name);
@@ -283,7 +283,7 @@ TEST_CASE("explicit_vr_codec dataset round-trip", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode(encoded);
 
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).size() == original.size());
+        CHECK(result.value().size() == original.size());
     }
 
     SECTION("mixed 16-bit and 32-bit length VRs") {
@@ -299,9 +299,9 @@ TEST_CASE("explicit_vr_codec dataset round-trip", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode(encoded);
 
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).size() == 2);
+        CHECK(result.value().size() == 2);
 
-        auto* pixel_elem = pacs::get_value(result).get(tags::pixel_data);
+        auto* pixel_elem = result.value().get(tags::pixel_data);
         REQUIRE(pixel_elem != nullptr);
         CHECK(pixel_elem->length() == 100);
     }
@@ -332,10 +332,10 @@ TEST_CASE("explicit_vr_codec sequence handling", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).is_sequence());
-        REQUIRE(pacs::get_value(result).sequence_items().size() == 1);
+        CHECK(result.value().is_sequence());
+        REQUIRE(result.value().sequence_items().size() == 1);
 
-        auto& decoded_item = pacs::get_value(result).sequence_items()[0];
+        auto& decoded_item = result.value().sequence_items()[0];
         auto* modality_elem = decoded_item.get(tags::modality);
         REQUIRE(modality_elem != nullptr);
         CHECK(modality_elem->vr() == vr_type::CS);
@@ -362,7 +362,7 @@ TEST_CASE("explicit_vr_codec sequence handling", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).is_sequence());
+        CHECK(result.value().is_sequence());
     }
 }
 
@@ -384,7 +384,7 @@ TEST_CASE("explicit_vr_codec error handling", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(pacs::get_error(result).code == pacs::error_codes::unknown_vr);
+        CHECK(result.error().code == pacs::error_codes::unknown_vr);
     }
 
     SECTION("insufficient data for header") {
@@ -394,7 +394,7 @@ TEST_CASE("explicit_vr_codec error handling", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == pacs::error_codes::insufficient_data);
     }
 
     SECTION("insufficient data for 32-bit length header") {
@@ -409,7 +409,7 @@ TEST_CASE("explicit_vr_codec error handling", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == pacs::error_codes::insufficient_data);
     }
 
     SECTION("truncated value data") {
@@ -425,7 +425,7 @@ TEST_CASE("explicit_vr_codec error handling", "[encoding][explicit]") {
         auto result = explicit_vr_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == pacs::error_codes::insufficient_data);
     }
 }
 

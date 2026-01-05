@@ -89,7 +89,7 @@ network::Result<std::monostate> worklist_scp::handle_message(
     }
 
     // Get the query keys from the request
-    const auto& query_keys = request.dataset();
+    const auto& query_keys = request.dataset().value().get();
 
     // Get calling AE for logging and access control
     std::string calling_ae{assoc.calling_ae()};

@@ -353,32 +353,32 @@ TEST_CASE("jpeg_ls_codec 8-bit grayscale lossless round-trip", "[encoding][compr
         auto encode_result = codec.encode(original, params);
 
         REQUIRE(encode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(encode_result).data.size() > 0);
+        REQUIRE(encode_result.value().data.size() > 0);
     }
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
+        REQUIRE(decode_result.value().data.size() == original.size());
 
         // Lossless verification - must be exactly identical
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 
     SECTION("output params are set correctly") {
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).output_params.width == width);
-        REQUIRE(pacs::get_value(decode_result).output_params.height == height);
-        REQUIRE(pacs::get_value(decode_result).output_params.samples_per_pixel == 1);
-        REQUIRE(pacs::get_value(decode_result).output_params.bits_allocated == 8);
-        REQUIRE(pacs::get_value(decode_result).output_params.bits_stored == 8);
+        REQUIRE(decode_result.value().output_params.width == width);
+        REQUIRE(decode_result.value().output_params.height == height);
+        REQUIRE(decode_result.value().output_params.samples_per_pixel == 1);
+        REQUIRE(decode_result.value().output_params.bits_allocated == 8);
+        REQUIRE(decode_result.value().output_params.bits_stored == 8);
     }
 }
 
@@ -402,29 +402,29 @@ TEST_CASE("jpeg_ls_codec 12-bit grayscale lossless round-trip", "[encoding][comp
         auto encode_result = codec.encode(original, params);
 
         REQUIRE(encode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(encode_result).data.size() > 0);
+        REQUIRE(encode_result.value().data.size() > 0);
     }
 
     SECTION("round-trip is perfectly lossless") {
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
+        REQUIRE(decode_result.value().data.size() == original.size());
 
         // Lossless verification
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 
     SECTION("output params reflect 12-bit precision") {
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).output_params.bits_allocated == 16);
-        REQUIRE(pacs::get_value(decode_result).output_params.bits_stored == 12);
+        REQUIRE(decode_result.value().output_params.bits_allocated == 16);
+        REQUIRE(decode_result.value().output_params.bits_stored == 12);
     }
 }
 
@@ -448,12 +448,12 @@ TEST_CASE("jpeg_ls_codec 16-bit grayscale lossless round-trip", "[encoding][comp
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
+        REQUIRE(decode_result.value().data.size() == original.size());
 
         // Lossless verification
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 }
 
@@ -478,12 +478,12 @@ TEST_CASE("jpeg_ls_codec 8-bit color lossless round-trip", "[encoding][compressi
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
+        REQUIRE(decode_result.value().data.size() == original.size());
 
         // Lossless verification
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 }
 
@@ -514,8 +514,8 @@ TEST_CASE("jpeg_ls_codec near-lossless compression", "[encoding][compression][jp
         REQUIRE(lossless_result.is_ok() == true);
 
         // Near-lossless should produce smaller or equal output
-        INFO("Near-lossless size: " << pacs::get_value(lossy_result).data.size()
-             << ", Lossless size: " << pacs::get_value(lossless_result).data.size());
+        INFO("Near-lossless size: " << lossy_result.value().data.size()
+             << ", Lossless size: " << lossless_result.value().data.size());
 
         // Note: for simple gradient images, compression might be similar
     }
@@ -524,11 +524,11 @@ TEST_CASE("jpeg_ls_codec near-lossless compression", "[encoding][compression][jp
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
 
         // Maximum error should be bounded by NEAR value
-        int max_error = compute_max_error(original, pacs::get_value(decode_result).data);
+        int max_error = compute_max_error(original, decode_result.value().data);
         INFO("Max error: " << max_error << ", NEAR value: " << near_value);
         REQUIRE(max_error <= near_value);
     }
@@ -537,11 +537,11 @@ TEST_CASE("jpeg_ls_codec near-lossless compression", "[encoding][compression][jp
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
 
         // PSNR should be high for near-lossless
-        double psnr = compute_psnr(original, pacs::get_value(decode_result).data);
+        double psnr = compute_psnr(original, decode_result.value().data);
         INFO("PSNR: " << psnr << " dB");
         REQUIRE(psnr > 40.0);  // High quality threshold
     }
@@ -568,11 +568,11 @@ TEST_CASE("jpeg_ls_codec quality option affects NEAR", "[encoding][compression][
         auto encode_result = codec.encode(original, params, options);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
 
         // Quality 100 should be lossless
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 
     SECTION("lower quality produces smaller files") {
@@ -588,8 +588,8 @@ TEST_CASE("jpeg_ls_codec quality option affects NEAR", "[encoding][compression][
         REQUIRE(high_result.is_ok() == true);
         REQUIRE(low_result.is_ok() == true);
 
-        INFO("High quality size: " << pacs::get_value(high_result).data.size()
-             << ", Low quality size: " << pacs::get_value(low_result).data.size());
+        INFO("High quality size: " << high_result.value().data.size()
+             << ", Low quality size: " << low_result.value().data.size());
     }
 }
 
@@ -613,11 +613,11 @@ TEST_CASE("jpeg_ls_codec with random noise", "[encoding][compression][jpegls]") 
         auto encode_result = codec.encode(original, params);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
 
         // Even high-entropy data must be perfectly reconstructed
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 }
 
@@ -636,7 +636,7 @@ TEST_CASE("jpeg_ls_codec error handling", "[encoding][compression][jpegls]") {
         auto result = codec.encode(empty_data, params);
 
         REQUIRE(result.is_ok() == false);
-        REQUIRE_FALSE(pacs::get_error(result).message.empty());
+        REQUIRE_FALSE(result.error().message.empty());
     }
 
     SECTION("invalid dimensions returns error") {
@@ -698,11 +698,11 @@ TEST_CASE("jpeg_ls_codec compression options", "[encoding][compression][jpegls]"
         auto encode_result = lossy_codec.encode(original, params, options);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = lossy_codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = lossy_codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
 
         // Should be lossless even though codec was created as near-lossless
-        REQUIRE(images_identical(original, pacs::get_value(decode_result).data));
+        REQUIRE(images_identical(original, decode_result.value().data));
     }
 }
 
@@ -726,7 +726,7 @@ TEST_CASE("jpeg_ls_codec without CharLS returns error", "[encoding][compression]
         auto result = codec.encode(original, params);
 
         REQUIRE(result.is_ok() == false);
-        REQUIRE_THAT(pacs::get_error(result).message,
+        REQUIRE_THAT(result.error().message,
                      Catch::Matchers::ContainsSubstring("not available"));
     }
 
@@ -735,7 +735,7 @@ TEST_CASE("jpeg_ls_codec without CharLS returns error", "[encoding][compression]
         auto result = codec.decode(dummy_data, params);
 
         REQUIRE(result.is_ok() == false);
-        REQUIRE_THAT(pacs::get_error(result).message,
+        REQUIRE_THAT(result.error().message,
                      Catch::Matchers::ContainsSubstring("not available"));
     }
 }

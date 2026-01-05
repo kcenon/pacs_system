@@ -244,11 +244,10 @@ public:
 
     /**
      * @brief Get the underlying association object.
-     * @return Reference to the association
-     * @throws std::runtime_error if association not established
+     * @return Result containing reference to the association or error if not established
      */
-    [[nodiscard]] association& get_association();
-    [[nodiscard]] const association& get_association() const;
+    [[nodiscard]] Result<std::reference_wrapper<association>> get_association();
+    [[nodiscard]] Result<std::reference_wrapper<const association>> get_association() const;
 
     /**
      * @brief Get time of last activity.

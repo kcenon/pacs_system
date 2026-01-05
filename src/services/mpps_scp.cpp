@@ -134,7 +134,7 @@ network::Result<std::monostate> mpps_scp::handle_n_create(
             sop_instance_uid, status_error_cannot_understand);
     }
 
-    const auto& dataset = request.dataset();
+    const auto& dataset = request.dataset().value().get();
 
     // Build MPPS instance from request data
     mpps_instance instance;
@@ -232,7 +232,7 @@ network::Result<std::monostate> mpps_scp::handle_n_set(
             sop_instance_uid, status_error_cannot_understand);
     }
 
-    const auto& dataset = request.dataset();
+    const auto& dataset = request.dataset().value().get();
 
     // Extract and validate the new status
     if (!dataset.contains(mpps_tags::performed_procedure_step_status)) {

@@ -108,7 +108,7 @@ network::Result<std::monostate> query_scp::handle_message(
     }
 
     // Extract query level
-    const auto& query_keys = request.dataset();
+    const auto& query_keys = request.dataset().value().get();
     auto level = extract_query_level(query_keys);
 
     if (!level.has_value()) {

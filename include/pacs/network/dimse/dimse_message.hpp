@@ -22,6 +22,7 @@
 #include <pacs/encoding/transfer_syntax.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <span>
 #include <string>
@@ -275,17 +276,15 @@ public:
 
     /**
      * @brief Get mutable reference to the data set
-     * @return Reference to the data set
-     * @throws std::runtime_error if no data set is present
+     * @return Result containing reference to the data set or error if not present
      */
-    [[nodiscard]] auto dataset() -> core::dicom_dataset&;
+    [[nodiscard]] auto dataset() -> pacs::Result<std::reference_wrapper<core::dicom_dataset>>;
 
     /**
      * @brief Get const reference to the data set
-     * @return Const reference to the data set
-     * @throws std::runtime_error if no data set is present
+     * @return Result containing reference to the data set or error if not present
      */
-    [[nodiscard]] auto dataset() const -> const core::dicom_dataset&;
+    [[nodiscard]] auto dataset() const -> pacs::Result<std::reference_wrapper<const core::dicom_dataset>>;
 
     /**
      * @brief Set the data set for this message

@@ -100,7 +100,7 @@ TEST_CASE("N-CREATE request message", "[dimse][message][n-create]") {
         msg.set_dataset(std::move(attributes));
 
         CHECK(msg.has_dataset());
-        CHECK(msg.dataset().get_string(tags::patient_name) == "DOE^JOHN");
+        CHECK(msg.dataset().value().get().get_string(tags::patient_name) == "DOE^JOHN");
     }
 }
 
@@ -154,7 +154,7 @@ TEST_CASE("N-CREATE encode/decode", "[dimse][message][n-create][codec]") {
     CHECK(decoded.value().message_id() == 42);
     CHECK(decoded.value().affected_sop_class_uid() == mpps_class);
     CHECK(decoded.value().has_dataset());
-    CHECK(decoded.value().dataset().get_string(tags::patient_name) == "TEST^PATIENT");
+    CHECK(decoded.value().dataset().value().get().get_string(tags::patient_name) == "TEST^PATIENT");
 }
 
 // ============================================================================
@@ -184,7 +184,7 @@ TEST_CASE("N-SET request message", "[dimse][message][n-set]") {
         msg.set_dataset(std::move(modifications));
 
         CHECK(msg.has_dataset());
-        CHECK(msg.dataset().get_string(tags::patient_name) == "DOE^JANE");
+        CHECK(msg.dataset().value().get().get_string(tags::patient_name) == "DOE^JANE");
     }
 }
 
@@ -284,7 +284,7 @@ TEST_CASE("N-GET response message", "[dimse][message][n-get]") {
         CHECK(msg.is_response());
         CHECK(msg.status() == status_success);
         CHECK(msg.has_dataset());
-        CHECK(msg.dataset().get_string(tags::patient_name) == "DOE^JOHN");
+        CHECK(msg.dataset().value().get().get_string(tags::patient_name) == "DOE^JOHN");
     }
 
     SECTION("Failed N-GET response - invalid instance") {

@@ -157,20 +157,22 @@ std::string dicom_association_handler::called_ae() const {
     return std::string(association_.called_ae());
 }
 
-association& dicom_association_handler::get_association() {
+Result<std::reference_wrapper<association>> dicom_association_handler::get_association() {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!is_established()) {
-        throw std::runtime_error("Association not established");
+        return pacs::error_info{pacs::error_codes::invalid_association_state,
+            "Association not established", "network"};
     }
-    return association_;
+    return std::ref(association_);
 }
 
-const association& dicom_association_handler::get_association() const {
+Result<std::reference_wrapper<const association>> dicom_association_handler::get_association() const {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!is_established()) {
-        throw std::runtime_error("Association not established");
+        return pacs::error_info{pacs::error_codes::invalid_association_state,
+            "Association not established", "network"};
     }
-    return association_;
+    return std::cref(association_);
 }
 
 dicom_association_handler::time_point dicom_association_handler::last_activity() const noexcept {
@@ -536,11 +538,19 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
             // For command-only messages (like C-ECHO), dataset is empty
             std::vector<uint8_t> empty_dataset;
 
+            // Get transfer syntax for the context
+            auto ts_result = association_.context_transfer_syntax(pdv.context_id);
+            if (ts_result.is_err()) {
+                report_error("Invalid presentation context: " +
+                             ts_result.error().message);
+                continue;
+            }
+
             // Decode DIMSE command
             auto dimse_result = dimse::dimse_message::decode(
                 std::span<const uint8_t>(pdv.data),
                 std::span<const uint8_t>(empty_dataset),
-                association_.context_transfer_syntax(pdv.context_id));
+                ts_result.value());
 
             if (dimse_result.is_err()) {
                 report_error("Failed to decode DIMSE message: " +

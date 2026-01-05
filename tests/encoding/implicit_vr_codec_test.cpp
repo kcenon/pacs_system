@@ -126,7 +126,7 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        auto& elem = pacs::get_value(result);
+        auto& elem = result.value();
 
         CHECK(elem.tag() == tags::patient_name);
         CHECK(elem.length() == 8);
@@ -148,7 +148,7 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        auto& elem = pacs::get_value(result);
+        auto& elem = result.value();
 
         CHECK(elem.tag() == tags::rows);
         auto num_result = elem.as_numeric<uint16_t>();
@@ -162,8 +162,8 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(!pacs::is_ok(result));
-        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
+        REQUIRE(!result.is_ok());
+        CHECK(result.error().code == pacs::error_codes::insufficient_data);
     }
 }
 
@@ -183,7 +183,7 @@ TEST_CASE("implicit_vr_codec dataset round-trip", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode(encoded);
 
         REQUIRE(result.is_ok());
-        auto& decoded = pacs::get_value(result);
+        auto& decoded = result.value();
 
         // Verify string values (may have trailing padding)
         auto patient_name = decoded.get_string(tags::patient_name);
@@ -208,7 +208,7 @@ TEST_CASE("implicit_vr_codec dataset round-trip", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode(encoded);
 
         REQUIRE(result.is_ok());
-        auto& decoded = pacs::get_value(result);
+        auto& decoded = result.value();
 
         CHECK(decoded.get_string(tags::study_date).find("20250101") == 0);
         CHECK(decoded.get_string(tags::study_time).find("120000") == 0);
@@ -223,7 +223,7 @@ TEST_CASE("implicit_vr_codec dataset round-trip", "[encoding][implicit]") {
 
         auto result = implicit_vr_codec::decode(encoded);
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).empty());
+        CHECK(result.value().empty());
     }
 }
 
@@ -261,7 +261,7 @@ TEST_CASE("implicit_vr_codec sequence handling", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        auto& decoded = pacs::get_value(result);
+        auto& decoded = result.value();
 
         CHECK(decoded.is_sequence());
         REQUIRE(decoded.sequence_items().size() == 1);
@@ -287,7 +287,7 @@ TEST_CASE("implicit_vr_codec sequence handling", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).sequence_items().size() == 3);
+        CHECK(result.value().sequence_items().size() == 3);
     }
 
     SECTION("empty sequence") {
@@ -299,8 +299,8 @@ TEST_CASE("implicit_vr_codec sequence handling", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(result.is_ok());
-        CHECK(pacs::get_value(result).is_sequence());
-        CHECK(pacs::get_value(result).sequence_items().empty());
+        CHECK(result.value().is_sequence());
+        CHECK(result.value().sequence_items().empty());
     }
 }
 
@@ -320,8 +320,8 @@ TEST_CASE("implicit_vr_codec error handling", "[encoding][implicit]") {
         std::span<const uint8_t> data(bytes);
         auto result = implicit_vr_codec::decode_element(data);
 
-        REQUIRE(!pacs::is_ok(result));
-        CHECK(pacs::get_error(result).code == pacs::error_codes::insufficient_data);
+        REQUIRE(!result.is_ok());
+        CHECK(result.error().code == pacs::error_codes::insufficient_data);
     }
 
     SECTION("error codes are properly defined") {

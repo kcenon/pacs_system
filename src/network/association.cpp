@@ -339,14 +339,15 @@ std::optional<uint8_t> association::accepted_context_id(
     return std::nullopt;
 }
 
-const encoding::transfer_syntax& association::context_transfer_syntax(
+Result<encoding::transfer_syntax> association::context_transfer_syntax(
     uint8_t pc_id) const {
 
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = context_to_transfer_syntax_.find(pc_id);
     if (it == context_to_transfer_syntax_.end()) {
-        throw std::out_of_range(
-            "Presentation context ID not found: " + std::to_string(pc_id));
+        return error_info{no_acceptable_context,
+            "Presentation context ID not found: " + std::to_string(pc_id),
+            "network"};
     }
     return it->second;
 }

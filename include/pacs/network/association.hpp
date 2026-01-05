@@ -421,10 +421,9 @@ public:
     /**
      * @brief Get the transfer syntax for an accepted context.
      * @param pc_id Presentation Context ID
-     * @return Transfer syntax for the context
-     * @throws std::out_of_range if context not found
+     * @return Result containing the transfer syntax or error if context not found
      */
-    [[nodiscard]] const encoding::transfer_syntax& context_transfer_syntax(
+    [[nodiscard]] Result<encoding::transfer_syntax> context_transfer_syntax(
         uint8_t pc_id) const;
 
     /**
@@ -630,7 +629,7 @@ private:
 
     /// Incoming message queue for in-memory testing (thread-safe)
     using message_type = std::pair<uint8_t, dimse::dimse_message>;
-    using message_queue_type = kcenon::thread::concurrent_queue<message_type>;
+    using message_queue_type = kcenon::thread::detail::concurrent_queue<message_type>;
     mutable std::unique_ptr<message_queue_type> incoming_queue_{
         std::make_unique<message_queue_type>()};
 };

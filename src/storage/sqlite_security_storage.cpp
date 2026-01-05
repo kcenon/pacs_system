@@ -29,7 +29,7 @@ using kcenon::common::ok;
 namespace {
 constexpr int kSqliteError = 1;
 constexpr int kUserNotFound = 2;
-constexpr int kDatabaseNotConnected = 4;
+[[maybe_unused]] constexpr int kDatabaseNotConnected = 4;
 } // namespace
 
 #ifdef PACS_WITH_DATABASE_SYSTEM

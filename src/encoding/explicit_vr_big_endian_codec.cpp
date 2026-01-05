@@ -273,11 +273,11 @@ explicit_vr_big_endian_codec::decode(std::span<const uint8_t> data) {
         auto result = decode_element(data);
         if (!result.is_ok()) {
             return pacs::pacs_error<core::dicom_dataset>(
-                pacs::get_error(result).code,
-                pacs::get_error(result).message);
+                result.error().code,
+                result.error().message);
         }
 
-        dataset.insert(std::move(pacs::get_value(result)));
+        dataset.insert(std::move(result.value()));
     }
 
     return dataset;
@@ -401,11 +401,11 @@ explicit_vr_big_endian_codec::decode_undefined_length(
             auto item_result = decode_sequence_item(data);
             if (!item_result.is_ok()) {
                 return make_codec_error<core::dicom_element>(
-                    pacs::get_error(item_result).code,
-                    pacs::get_error(item_result).message);
+                    item_result.error().code,
+                    item_result.error().message);
             }
 
-            seq_element.sequence_items().push_back(std::move(pacs::get_value(item_result)));
+            seq_element.sequence_items().push_back(std::move(item_result.value()));
         }
 
         return seq_element;
@@ -502,11 +502,11 @@ explicit_vr_big_endian_codec::decode_sequence_item(
             auto elem_result = decode_element(data);
             if (!elem_result.is_ok()) {
                 return make_codec_error<core::dicom_dataset>(
-                    pacs::get_error(elem_result).code,
-                    pacs::get_error(elem_result).message);
+                    elem_result.error().code,
+                    elem_result.error().message);
             }
 
-            item.insert(std::move(pacs::get_value(elem_result)));
+            item.insert(std::move(elem_result.value()));
         }
 
         return item;
