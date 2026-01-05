@@ -1277,6 +1277,13 @@ public:
         status_code status
     );
 
+    // Data Set Accessors (Issue #488 - Result<T> pattern)
+    [[nodiscard]] bool has_dataset() const noexcept;
+    [[nodiscard]] pacs::Result<std::reference_wrapper<core::dicom_dataset>> dataset();
+    [[nodiscard]] pacs::Result<std::reference_wrapper<const core::dicom_dataset>> dataset() const;
+    void set_dataset(core::dicom_dataset ds);
+    void clear_dataset() noexcept;
+
     // DIMSE-N Specific Accessors
     std::string requested_sop_class_uid() const;
     void set_requested_sop_class_uid(std::string_view uid);
@@ -1299,19 +1306,19 @@ using namespace pacs::network::dimse;
 
 // N-CREATE: Create MPPS instance
 auto create_rq = make_n_create_rq(1, mpps_sop_class_uid, generated_instance_uid);
-create_rq.set_data_set(mpps_dataset);
+create_rq.set_dataset(mpps_dataset);
 
 // N-SET: Update MPPS status
 auto set_rq = make_n_set_rq(2, mpps_sop_class_uid, mpps_instance_uid);
-set_rq.set_data_set(status_update_dataset);
+set_rq.set_dataset(status_update_dataset);
 
 // N-EVENT-REPORT: Storage commitment notification
 auto event_rq = make_n_event_report_rq(3, storage_commitment_sop_class, instance_uid, 1);
-event_rq.set_data_set(commitment_result);
+event_rq.set_dataset(commitment_result);
 
 // N-ACTION: Request storage commitment
 auto action_rq = make_n_action_rq(4, storage_commitment_sop_class, instance_uid, 1);
-action_rq.set_data_set(commitment_request);
+action_rq.set_dataset(commitment_request);
 
 // N-GET: Retrieve specific attributes
 std::vector<core::dicom_tag> attrs = {tags::PatientName, tags::PatientID};
