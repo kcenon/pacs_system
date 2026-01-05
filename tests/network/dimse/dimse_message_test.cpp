@@ -214,8 +214,10 @@ TEST_CASE("dimse_message C-FIND with dataset", "[dimse][message][c-find]") {
     msg.set_dataset(std::move(query));
 
     CHECK(msg.has_dataset());
-    CHECK(msg.dataset().get_string(tags::patient_name) == "DOE^JOHN");
-    CHECK(msg.dataset().get_string(tags::patient_id) == "12345");
+    auto ds_result = msg.dataset();
+    REQUIRE(ds_result.is_ok());
+    CHECK(ds_result.value().get().get_string(tags::patient_name) == "DOE^JOHN");
+    CHECK(ds_result.value().get().get_string(tags::patient_id) == "12345");
 }
 
 TEST_CASE("dimse_message dataset management", "[dimse][message]") {
@@ -223,7 +225,7 @@ TEST_CASE("dimse_message dataset management", "[dimse][message]") {
 
     SECTION("Initially no dataset") {
         CHECK_FALSE(msg.has_dataset());
-        CHECK_THROWS(msg.dataset());
+        CHECK(msg.dataset().is_err());
     }
 
     SECTION("Add dataset") {
@@ -232,7 +234,9 @@ TEST_CASE("dimse_message dataset management", "[dimse][message]") {
         msg.set_dataset(std::move(ds));
 
         CHECK(msg.has_dataset());
-        CHECK(msg.dataset().get_string(tags::patient_name) == "TEST^PATIENT");
+        auto ds_result = msg.dataset();
+        REQUIRE(ds_result.is_ok());
+        CHECK(ds_result.value().get().get_string(tags::patient_name) == "TEST^PATIENT");
     }
 
     SECTION("Clear dataset") {
@@ -301,7 +305,9 @@ TEST_CASE("dimse_message C-STORE with dataset encode/decode",
     CHECK(decoded.value().affected_sop_class_uid() == sop_class);
     CHECK(decoded.value().affected_sop_instance_uid() == sop_instance);
     CHECK(decoded.value().has_dataset());
-    CHECK(decoded.value().dataset().get_string(tags::patient_name) == "DOE^JOHN");
+    auto ds_result = decoded.value().dataset();
+    REQUIRE(ds_result.is_ok());
+    CHECK(ds_result.value().get().get_string(tags::patient_name) == "DOE^JOHN");
 }
 
 TEST_CASE("dimse_message response with status encode/decode",
