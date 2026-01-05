@@ -19,15 +19,18 @@
 module;
 
 // Standard library imports
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 // PACS monitoring headers
@@ -36,6 +39,13 @@ module;
 #include <pacs/monitoring/health_status.hpp>
 #include <pacs/monitoring/health_json.hpp>
 #include <pacs/monitoring/pacs_metrics.hpp>
+
+// PACS metric collectors (CRTP-based)
+#include <pacs/monitoring/collectors/dicom_collector_base.hpp>
+#include <pacs/monitoring/collectors/dicom_metrics_collector.hpp>
+#include <pacs/monitoring/collectors/dicom_association_collector.hpp>
+#include <pacs/monitoring/collectors/dicom_service_collector.hpp>
+#include <pacs/monitoring/collectors/dicom_storage_collector.hpp>
 
 export module kcenon.pacs:monitoring;
 
@@ -53,7 +63,33 @@ using pacs::monitoring::metric_type;
 using pacs::monitoring::health_checker;
 using pacs::monitoring::health_status;
 
-// Metrics
+// Metrics core
 using pacs::monitoring::pacs_metrics;
+using pacs::monitoring::association_counters;
+using pacs::monitoring::transfer_counters;
+using pacs::monitoring::pool_counters;
+using pacs::monitoring::operation_counter;
+using pacs::monitoring::dimse_operation;
+using pacs::monitoring::to_string;
+
+// CRTP collector base
+using pacs::monitoring::dicom_collector_base;
+using pacs::monitoring::dicom_metric;
+using pacs::monitoring::config_map;
+using pacs::monitoring::stats_map;
+
+// Unified DICOM metrics collector
+using pacs::monitoring::dicom_metrics_collector;
+using pacs::monitoring::dicom_metrics_snapshot;
+
+// Specialized collectors
+using pacs::monitoring::dicom_association_collector;
+using pacs::monitoring::association_metric;
+
+using pacs::monitoring::dicom_service_collector;
+using pacs::monitoring::service_metric;
+
+using pacs::monitoring::dicom_storage_collector;
+using pacs::monitoring::storage_metric;
 
 } // namespace pacs::monitoring
