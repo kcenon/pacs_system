@@ -172,7 +172,7 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
     std::string calling_ae{assoc.calling_ae()};
 
     // Retrieve matching files
-    const auto& query_keys = request.dataset();
+    const auto& query_keys = request.dataset().value().get();
     auto files = retrieve_handler_(query_keys);
     auto start_time = std::chrono::steady_clock::now();
 
@@ -300,7 +300,7 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
     std::string calling_ae{assoc.calling_ae()};
 
     // Retrieve matching files
-    const auto& query_keys = request.dataset();
+    const auto& query_keys = request.dataset().value().get();
     auto files = retrieve_handler_(query_keys);
     auto start_time = std::chrono::steady_clock::now();
 
