@@ -162,8 +162,8 @@ TEST_CASE("jpeg_baseline_codec grayscale round-trip", "[encoding][compression]")
         auto encode_result = codec.encode(original, params, options);
 
         REQUIRE(encode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(encode_result).data.size() > 0);
-        REQUIRE(pacs::get_value(encode_result).data.size() < original.size());  // Should compress
+        REQUIRE(encode_result.value().data.size() > 0);
+        REQUIRE(encode_result.value().data.size() < original.size());  // Should compress
     }
 
     SECTION("round-trip maintains quality") {
@@ -173,12 +173,12 @@ TEST_CASE("jpeg_baseline_codec grayscale round-trip", "[encoding][compression]")
         auto encode_result = codec.encode(original, params, options);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
+        REQUIRE(decode_result.value().data.size() == original.size());
 
         // Calculate PSNR - should be high for quality 95
-        double psnr = calculate_psnr(original, pacs::get_value(decode_result).data);
+        double psnr = calculate_psnr(original, decode_result.value().data);
         REQUIRE(psnr > 30.0);  // 30 dB is generally considered good quality
     }
 
@@ -187,12 +187,12 @@ TEST_CASE("jpeg_baseline_codec grayscale round-trip", "[encoding][compression]")
         auto encode_result = codec.encode(original, params, options);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).output_params.width == width);
-        REQUIRE(pacs::get_value(decode_result).output_params.height == height);
-        REQUIRE(pacs::get_value(decode_result).output_params.samples_per_pixel == 1);
-        REQUIRE(pacs::get_value(decode_result).output_params.bits_allocated == 8);
+        REQUIRE(decode_result.value().output_params.width == width);
+        REQUIRE(decode_result.value().output_params.height == height);
+        REQUIRE(decode_result.value().output_params.samples_per_pixel == 1);
+        REQUIRE(decode_result.value().output_params.bits_allocated == 8);
     }
 }
 
@@ -219,7 +219,7 @@ TEST_CASE("jpeg_baseline_codec color round-trip", "[encoding][compression]") {
         auto encode_result = codec.encode(original, params, options);
 
         REQUIRE(encode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(encode_result).data.size() > 0);
+        REQUIRE(encode_result.value().data.size() > 0);
     }
 
     SECTION("round-trip maintains quality") {
@@ -230,11 +230,11 @@ TEST_CASE("jpeg_baseline_codec color round-trip", "[encoding][compression]") {
         auto encode_result = codec.encode(original, params, options);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).data.size() == original.size());
+        REQUIRE(decode_result.value().data.size() == original.size());
 
-        double psnr = calculate_psnr(original, pacs::get_value(decode_result).data);
+        double psnr = calculate_psnr(original, decode_result.value().data);
         REQUIRE(psnr > 25.0);  // Color compression typically has lower PSNR
     }
 
@@ -243,10 +243,10 @@ TEST_CASE("jpeg_baseline_codec color round-trip", "[encoding][compression]") {
         auto encode_result = codec.encode(original, params, options);
         REQUIRE(encode_result.is_ok() == true);
 
-        auto decode_result = codec.decode(pacs::get_value(encode_result).data, params);
+        auto decode_result = codec.decode(encode_result.value().data, params);
         REQUIRE(decode_result.is_ok() == true);
-        REQUIRE(pacs::get_value(decode_result).output_params.samples_per_pixel == 3);
-        REQUIRE(pacs::get_value(decode_result).output_params.photometric == photometric_interpretation::rgb);
+        REQUIRE(decode_result.value().output_params.samples_per_pixel == 3);
+        REQUIRE(decode_result.value().output_params.photometric == photometric_interpretation::rgb);
     }
 }
 
@@ -277,7 +277,7 @@ TEST_CASE("jpeg_baseline_codec quality settings", "[encoding][compression]") {
 
         REQUIRE(high_result.is_ok() == true);
         REQUIRE(low_result.is_ok() == true);
-        REQUIRE(pacs::get_value(low_result).data.size() < pacs::get_value(high_result).data.size());
+        REQUIRE(low_result.value().data.size() < high_result.value().data.size());
     }
 
     SECTION("quality is clamped to valid range") {
@@ -304,7 +304,7 @@ TEST_CASE("jpeg_baseline_codec error handling", "[encoding][compression]") {
         auto result = codec.encode(empty_data, params);
 
         REQUIRE(result.is_ok() == false);
-        REQUIRE_FALSE(pacs::get_error(result).message.empty());
+        REQUIRE_FALSE(result.error().message.empty());
     }
 
     SECTION("size mismatch returns error") {
@@ -319,7 +319,7 @@ TEST_CASE("jpeg_baseline_codec error handling", "[encoding][compression]") {
         auto result = codec.encode(wrong_size, params);
 
         REQUIRE(result.is_ok() == false);
-        REQUIRE_THAT(pacs::get_error(result).message,
+        REQUIRE_THAT(result.error().message,
                      Catch::Matchers::ContainsSubstring("mismatch"));
     }
 

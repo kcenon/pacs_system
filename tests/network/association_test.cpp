@@ -7,6 +7,7 @@
 
 #include "pacs/network/association.hpp"
 #include "pacs/network/pdu_types.hpp"
+#include "pacs/core/result.hpp"
 
 using namespace pacs::network;
 
@@ -215,8 +216,9 @@ TEST_CASE("association SCP accept", "[association][scp]") {
         REQUIRE(pc_id.has_value());
         CHECK(*pc_id == 1);
 
-        auto& ts = assoc.context_transfer_syntax(1);
-        CHECK(ts.uid() == EXPLICIT_VR_LE);
+        auto ts_result = assoc.context_transfer_syntax(1);
+        REQUIRE(ts_result.is_ok());
+        CHECK(ts_result.value().uid() == EXPLICIT_VR_LE);
     }
 
     SECTION("builds valid A-ASSOCIATE-AC") {
@@ -506,9 +508,11 @@ TEST_CASE("accepted_presentation_context", "[association][presentation_context]"
     }
 }
 
-TEST_CASE("context_transfer_syntax throws for invalid ID", "[association][presentation_context]") {
+TEST_CASE("context_transfer_syntax returns error for invalid ID", "[association][presentation_context]") {
     association assoc;
-    CHECK_THROWS_AS(assoc.context_transfer_syntax(99), std::out_of_range);
+    auto result = assoc.context_transfer_syntax(99);
+    CHECK(result.is_err());
+    CHECK(result.error().code == pacs::error_codes::no_acceptable_context);
 }
 
 // =============================================================================

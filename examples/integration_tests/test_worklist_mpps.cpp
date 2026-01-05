@@ -353,7 +353,10 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
             auto& [recv_ctx, rsp] = recv_result.value();
             if (rsp.status() == status_success) break;
             if (rsp.status() == status_pending && rsp.has_dataset()) {
-                results.push_back(rsp.dataset());
+                auto ds_result = rsp.dataset();
+                if (ds_result.is_ok()) {
+                    results.push_back(ds_result.value().get());
+                }
             }
         }
 
@@ -398,7 +401,10 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
             auto& [recv_ctx, rsp] = recv_result.value();
             if (rsp.status() == status_success) break;
             if (rsp.status() == status_pending && rsp.has_dataset()) {
-                results.push_back(rsp.dataset());
+                auto ds_result = rsp.dataset();
+                if (ds_result.is_ok()) {
+                    results.push_back(ds_result.value().get());
+                }
             }
         }
 
@@ -461,7 +467,10 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
         auto& [ctx, rsp] = recv.value();
         if (rsp.status() == status_success) break;
         if (rsp.status() == status_pending && rsp.has_dataset()) {
-            wl_results.push_back(rsp.dataset());
+            auto ds_result = rsp.dataset();
+            if (ds_result.is_ok()) {
+                wl_results.push_back(ds_result.value().get());
+            }
         }
     }
 

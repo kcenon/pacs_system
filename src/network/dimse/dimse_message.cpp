@@ -65,18 +65,18 @@ auto dimse_message::has_dataset() const noexcept -> bool {
     return dataset_.has_value();
 }
 
-auto dimse_message::dataset() -> core::dicom_dataset& {
+auto dimse_message::dataset() -> pacs::Result<std::reference_wrapper<core::dicom_dataset>> {
     if (!dataset_) {
-        throw std::runtime_error("DIMSE message has no dataset");
+        return make_dimse_error(dimse_error::invalid_data_format, "DIMSE message has no dataset");
     }
-    return *dataset_;
+    return std::ref(*dataset_);
 }
 
-auto dimse_message::dataset() const -> const core::dicom_dataset& {
+auto dimse_message::dataset() const -> pacs::Result<std::reference_wrapper<const core::dicom_dataset>> {
     if (!dataset_) {
-        throw std::runtime_error("DIMSE message has no dataset");
+        return make_dimse_error(dimse_error::invalid_data_format, "DIMSE message has no dataset");
     }
-    return *dataset_;
+    return std::cref(*dataset_);
 }
 
 void dimse_message::set_dataset(core::dicom_dataset ds) {
@@ -272,10 +272,14 @@ auto dimse_message::encode(const dimse_message& msg,
     // Encode dataset if present
     std::vector<uint8_t> dataset_bytes;
     if (copy.has_dataset()) {
+        auto ds_result = copy.dataset();
+        if (ds_result.is_err()) {
+            return ds_result.error();
+        }
         if (dataset_ts.vr_type() == encoding::vr_encoding::implicit) {
-            dataset_bytes = encoding::implicit_vr_codec::encode(copy.dataset());
+            dataset_bytes = encoding::implicit_vr_codec::encode(ds_result.value().get());
         } else {
-            dataset_bytes = encoding::explicit_vr_codec::encode(copy.dataset());
+            dataset_bytes = encoding::explicit_vr_codec::encode(ds_result.value().get());
         }
     }
 
@@ -292,7 +296,7 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
         return make_dimse_error(dimse_error::decoding_error, "Failed to decode command set");
     }
 
-    auto command_set = std::move(pacs::get_value(cmd_result));
+    auto command_set = std::move(cmd_result.value());
 
     // Extract command field
     auto cmd_value = command_set.get_numeric<uint16_t>(tag_command_field);
@@ -322,7 +326,7 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
         if (ds_result.is_err()) {
             return make_dimse_error(dimse_error::decoding_error, "Failed to decode dataset");
         }
-        msg.dataset_ = std::move(pacs::get_value(ds_result));
+        msg.dataset_ = std::move(ds_result.value());
     }
 
     return msg;

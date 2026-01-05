@@ -490,7 +490,10 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
                 break;  // Final response
             } else if (rsp.status() == status_pending) {
                 if (rsp.has_dataset()) {
-                    results.push_back(rsp.dataset());
+                    auto ds_result = rsp.dataset();
+                    if (ds_result.is_ok()) {
+                        results.push_back(ds_result.value().get());
+                    }
                 }
             } else {
                 FAIL("Unexpected C-FIND response status");
@@ -530,7 +533,10 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
             auto& [recv_ctx, rsp] = recv_result.value();
             if (rsp.status() == status_success) break;
             if (rsp.status() == status_pending && rsp.has_dataset()) {
-                results.push_back(rsp.dataset());
+                auto ds_result = rsp.dataset();
+                if (ds_result.is_ok()) {
+                    results.push_back(ds_result.value().get());
+                }
             }
         }
 
@@ -567,7 +573,10 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
             auto& [recv_ctx, rsp] = recv_result.value();
             if (rsp.status() == status_success) break;
             if (rsp.status() == status_pending && rsp.has_dataset()) {
-                results.push_back(rsp.dataset());
+                auto ds_result = rsp.dataset();
+                if (ds_result.is_ok()) {
+                    results.push_back(ds_result.value().get());
+                }
             }
         }
 

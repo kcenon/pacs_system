@@ -82,8 +82,11 @@ network::Result<std::monostate> storage_scp::handle_message(
         return assoc.send_dimse(context_id, response);
     }
 
+    // Get dataset reference (already validated above)
+    const auto& dataset = request.dataset().value().get();
+
     // Pre-store validation
-    if (pre_store_handler_ && !pre_store_handler_(request.dataset())) {
+    if (pre_store_handler_ && !pre_store_handler_(dataset)) {
         auto response = make_c_store_rsp(
             request.message_id(),
             sop_class_uid,
@@ -99,7 +102,7 @@ network::Result<std::monostate> storage_scp::handle_message(
     if (handler_) {
         // Call the registered storage handler
         status = handler_(
-            request.dataset(),
+            dataset,
             std::string(assoc.calling_ae()),
             sop_class_uid,
             sop_instance_uid
@@ -112,12 +115,11 @@ network::Result<std::monostate> storage_scp::handle_message(
         // Estimate dataset size - use element count as approximation
         // In production, this would use actual serialized size
         bytes_received_.fetch_add(
-            request.dataset().size() * sizeof(uint32_t),
+            dataset.size() * sizeof(uint32_t),
             std::memory_order_relaxed
         );
 
         // Call post-store handler for cache invalidation and notifications
-        const auto& dataset = request.dataset();
         auto patient_id = dataset.get_string(core::tags::patient_id);
         auto study_uid = dataset.get_string(core::tags::study_instance_uid);
         auto series_uid = dataset.get_string(core::tags::series_instance_uid);
@@ -146,7 +148,6 @@ network::Result<std::monostate> storage_scp::handle_message(
         );
     } else {
         // Storage failed - publish failure event
-        const auto& dataset = request.dataset();
         auto patient_id = dataset.get_string(core::tags::patient_id);
 
         kcenon::common::get_event_bus().publish(

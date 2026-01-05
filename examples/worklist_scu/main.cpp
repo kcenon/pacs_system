@@ -522,7 +522,10 @@ int perform_query(const options& opts) {
             if (find_rsp.has_dataset()) {
                 // Check max results limit
                 if (opts.max_results == 0 || results.size() < opts.max_results) {
-                    results.push_back(find_rsp.dataset());
+                    auto dataset_result = find_rsp.dataset();
+                    if (dataset_result.is_ok()) {
+                        results.push_back(dataset_result.value().get());
+                    }
                 }
             }
 
