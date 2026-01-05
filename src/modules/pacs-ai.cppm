@@ -27,22 +27,41 @@ module;
 #include <string_view>
 #include <vector>
 
-// PACS AI headers
+// PACS AI headers (feature-gated)
+#ifdef KCENON_WITH_AI
 #include <pacs/ai/ai_service_connector.hpp>
 #include <pacs/ai/ai_result_handler.hpp>
+#endif
 
 export module kcenon.pacs:ai;
 
 // ============================================================================
-// Re-export pacs::ai namespace
+// Re-export pacs::ai namespace (feature-gated)
 // ============================================================================
+
+#ifdef KCENON_WITH_AI
 
 export namespace pacs::ai {
 
-// AI service
+// Configuration structures
+using pacs::ai::ai_service_config;
+using pacs::ai::inference_request;
+using pacs::ai::inference_status;
+using pacs::ai::model_info;
+
+// Enumerations
+using pacs::ai::inference_status_code;
+using pacs::ai::authentication_type;
+
+// AI service connector
 using pacs::ai::ai_service_connector;
 
 // Result handling
 using pacs::ai::ai_result_handler;
 
+// Helper functions
+using pacs::ai::to_string;
+
 } // namespace pacs::ai
+
+#endif // KCENON_WITH_AI
