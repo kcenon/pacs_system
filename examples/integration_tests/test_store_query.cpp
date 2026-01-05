@@ -366,7 +366,10 @@ TEST_CASE("Store single DICOM file and query", "[store_query][basic]") {
                 break;  // Final response
             } else if (rsp.status() == status_pending) {
                 if (rsp.has_dataset()) {
-                    query_results.push_back(rsp.dataset());
+                    auto ds_result = rsp.dataset();
+                    if (ds_result.is_ok()) {
+                        query_results.push_back(ds_result.value().get());
+                    }
                 }
             } else {
                 FAIL("Unexpected query status");
@@ -469,7 +472,10 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
         auto& [recv_ctx, rsp] = recv_result.value();
         if (rsp.status() == status_success) break;
         if (rsp.status() == status_pending && rsp.has_dataset()) {
-            results.push_back(rsp.dataset());
+            auto ds_result = rsp.dataset();
+            if (ds_result.is_ok()) {
+                results.push_back(ds_result.value().get());
+            }
         }
     }
 
@@ -567,7 +573,10 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
         auto& [recv_ctx, rsp] = recv_result.value();
         if (rsp.status() == status_success) break;
         if (rsp.status() == status_pending && rsp.has_dataset()) {
-            ct_results.push_back(rsp.dataset());
+            auto ds_result = rsp.dataset();
+            if (ds_result.is_ok()) {
+                ct_results.push_back(ds_result.value().get());
+            }
         }
     }
 
@@ -656,7 +665,10 @@ TEST_CASE("Query with wildcards", "[store_query][wildcard]") {
         auto& [recv_ctx, rsp] = recv_result.value();
         if (rsp.status() == status_success) break;
         if (rsp.status() == status_pending && rsp.has_dataset()) {
-            results.push_back(rsp.dataset());
+            auto ds_result = rsp.dataset();
+            if (ds_result.is_ok()) {
+                results.push_back(ds_result.value().get());
+            }
         }
     }
 
