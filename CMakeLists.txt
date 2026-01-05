@@ -52,6 +52,7 @@ option(PACS_WITH_NETWORK_SYSTEM "Enable network_system integration (REQUIRED)" O
 option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
 option(PACS_BUILD_ITK_ADAPTER "Build ITK integration adapter (requires ITK 5.x)" OFF)
 option(PACS_WARNINGS_AS_ERRORS "Treat warnings as errors (disable in CI if dependency warnings occur)" ON)
+option(PACS_BUILD_MODULES "Build C++20 module version of pacs_system" OFF)
 
 ##################################################
 # Compiler Warnings (Target-Scoped)
@@ -1357,6 +1358,113 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 else()
     message(STATUS "  [--] pacs_integration: OFF (requires container_system and network_system)")
+endif()
+
+##################################################
+# C++20 Module Support
+##################################################
+# Enable C++20 modules with CMake 3.28+ when building with module-capable compilers.
+# This provides an alternative to the header-based interface.
+#
+# Usage:
+#   cmake -DPACS_BUILD_MODULES=ON ..
+#
+# Requirements:
+#   - CMake 3.28 or later
+#   - Clang 16+, GCC 14+, or MSVC 2022 17.4+
+##################################################
+
+if(PACS_BUILD_MODULES)
+    # Check CMake version
+    if(CMAKE_VERSION VERSION_LESS "3.28")
+        message(WARNING "C++20 modules require CMake 3.28+. Disabling module build.")
+        set(PACS_BUILD_MODULES OFF)
+    else()
+        message(STATUS "")
+        message(STATUS "=== C++20 Module Build ===")
+
+        # Create module library target
+        add_library(pacs_system_modules)
+        add_library(kcenon::pacs_modules ALIAS pacs_system_modules)
+
+        # Set C++20 standard for module target
+        target_compile_features(pacs_system_modules PUBLIC cxx_std_20)
+
+        # Enable module scanning
+        set_target_properties(pacs_system_modules PROPERTIES
+            CXX_SCAN_FOR_MODULES ON
+        )
+
+        # Add module source files
+        target_sources(pacs_system_modules
+            PUBLIC FILE_SET CXX_MODULES
+            FILES
+                # Primary module
+                src/modules/pacs.cppm
+                # Tier 1: Core partition
+                src/modules/pacs-core.cppm
+                # Tier 2: Infrastructure partitions
+                src/modules/pacs-encoding.cppm
+                src/modules/pacs-storage.cppm
+                src/modules/pacs-security.cppm
+                # Tier 3: Protocol partition
+                src/modules/pacs-network.cppm
+                # Tier 4: Services partition
+                src/modules/pacs-services.cppm
+                # Tier 5: Application partitions
+                src/modules/pacs-workflow.cppm
+                src/modules/pacs-web.cppm
+                src/modules/pacs-integration.cppm
+                # Tier 6: Optional partitions
+                src/modules/pacs-ai.cppm
+                src/modules/pacs-monitoring.cppm
+                src/modules/pacs-di.cppm
+        )
+
+        # Include directories for module target
+        target_include_directories(pacs_system_modules PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+        )
+
+        # Link required libraries
+        target_link_libraries(pacs_system_modules PUBLIC
+            pacs_core
+            pacs_encoding
+            pacs_network
+            pacs_services
+            pacs_security
+        )
+
+        # Conditionally link optional libraries
+        if(TARGET pacs_storage)
+            target_link_libraries(pacs_system_modules PUBLIC pacs_storage)
+        endif()
+        if(TARGET pacs_workflow)
+            target_link_libraries(pacs_system_modules PUBLIC pacs_workflow)
+        endif()
+        if(TARGET pacs_web)
+            target_link_libraries(pacs_system_modules PUBLIC pacs_web)
+        endif()
+        if(TARGET pacs_integration)
+            target_link_libraries(pacs_system_modules PUBLIC pacs_integration)
+        endif()
+        if(TARGET pacs_ai)
+            target_link_libraries(pacs_system_modules PUBLIC pacs_ai)
+        endif()
+        if(TARGET pacs_monitoring)
+            target_link_libraries(pacs_system_modules PUBLIC pacs_monitoring)
+        endif()
+
+        # Compile definitions
+        target_compile_definitions(pacs_system_modules PUBLIC
+            KCENON_USE_MODULES=1
+        )
+
+        message(STATUS "  C++20 module target: pacs_system_modules")
+        message(STATUS "  Module partitions: 12")
+        message(STATUS "==============================")
+    endif()
 endif()
 
 # Testing
