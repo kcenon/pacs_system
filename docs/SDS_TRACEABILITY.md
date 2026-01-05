@@ -284,9 +284,9 @@ Legend:
 
 | SRS ID | SRS Description | SDS ID(s) | Design Element |
 |--------|-----------------|-----------|----------------|
-| **SRS-INT-006** | Association Collector | DES-MON-001 | `dicom_association_collector` class |
-| **SRS-INT-006** | Storage Collector | DES-MON-002 | `dicom_storage_collector` class |
-| **SRS-INT-006** | Service Collector | DES-MON-003 | `dicom_service_collector` class |
+| **SRS-INT-006** | Association Collector | DES-MON-004 | `dicom_association_collector` class |
+| **SRS-INT-006** | Service Collector | DES-MON-005 | `dicom_service_collector` class |
+| **SRS-INT-006** | Storage Collector | DES-MON-006 | `dicom_storage_collector` class |
 
 ### 3.5.7 Network V2 Module Requirements
 
