@@ -1,7 +1,7 @@
 # Architecture Documentation - PACS System
 
-> **Version:** 0.1.2.0
-> **Last Updated:** 2025-12-07
+> **Version:** 0.1.3.0
+> **Last Updated:** 2026-01-08
 > **Language:** **English** | [한국어](ARCHITECTURE_KO.md)
 
 ---
@@ -499,6 +499,63 @@ The network module implements DICOM Upper Layer Protocol:
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+### Pipeline Architecture (Issue #517)
+
+The 6-stage I/O pipeline provides high-throughput DICOM operation processing:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Pipeline Coordinator                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Stage 1: Network I/O (Receive)     ← 4 workers (low latency)   │
+│           │ [Queue 1: PDU Bytes]                                 │
+│           ▼                                                      │
+│  Stage 2: PDU Decode                ← 2 workers                  │
+│           │ [Queue 2: Decoded PDU]                               │
+│           ▼                                                      │
+│  Stage 3: DIMSE Processing          ← 2 workers                  │
+│           │ [Queue 3: Service Request]                           │
+│           ▼                                                      │
+│  Stage 4: Storage/Query Execution   ← 8 workers (blocking OK)    │
+│           │ [Queue 4: Service Result]                            │
+│           ▼                                                      │
+│  Stage 5: Response Encoding         ← 2 workers                  │
+│           │ [Queue 5: Encoded PDU]                               │
+│           ▼                                                      │
+│  Stage 6: Network I/O (Send)        ← 4 workers (low latency)   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Pipeline Components:**
+
+| Component | File | Description |
+|-----------|------|-------------|
+| `pipeline_coordinator` | `pipeline_coordinator.hpp` | Manages stage thread pools and job routing |
+| `pipeline_metrics` | `metrics/pipeline_metrics.hpp` | Atomic metrics for throughput monitoring |
+| `pipeline_adapter` | `pipeline_adapter.hpp` | Bridges pipeline with existing components |
+
+**Job Types:**
+
+| Stage | Job Class | Purpose |
+|-------|-----------|---------|
+| 1 | `receive_network_io_job` | Receive PDU bytes from network |
+| 2 | `pdu_decode_job` | Decode PDU into structured data |
+| 3 | `dimse_process_job` | Route DIMSE messages to handlers |
+| 4 | `storage_query_exec_job` | Execute C-STORE/C-FIND/C-GET/C-MOVE |
+| 5 | `response_encode_job` | Encode responses into PDU format |
+| 6 | `send_network_io_job` | Send PDU bytes over network |
+
+**Performance Targets:**
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| C-ECHO throughput | 89,964 msg/s | 150,000+ msg/s |
+| C-STORE throughput | 31,759 store/s | 50,000+ store/s |
+| Concurrent connections | 100+ | 500+ |
+| P99 latency (C-ECHO) | - | <= 5ms |
 
 ---
 
