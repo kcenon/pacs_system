@@ -774,6 +774,17 @@ add_library(pacs_network
     src/network/detail/accept_worker.cpp
     src/network/v2/dicom_association_handler.cpp
     src/network/v2/dicom_server_v2.cpp
+    # Pipeline infrastructure (Issue #517)
+    src/network/pipeline/pipeline_coordinator.cpp
+    # Pipeline jobs (Issue #517, #519-#522)
+    src/network/pipeline/jobs/receive_network_io_job.cpp
+    src/network/pipeline/jobs/send_network_io_job.cpp
+    src/network/pipeline/jobs/pdu_decode_job.cpp
+    src/network/pipeline/jobs/dimse_process_job.cpp
+    src/network/pipeline/jobs/storage_query_exec_job.cpp
+    src/network/pipeline/jobs/response_encode_job.cpp
+    # Pipeline adapter (Issue #523)
+    src/network/pipeline/pipeline_adapter.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
