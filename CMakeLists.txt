@@ -774,6 +774,8 @@ add_library(pacs_network
     src/network/detail/accept_worker.cpp
     src/network/v2/dicom_association_handler.cpp
     src/network/v2/dicom_server_v2.cpp
+    # Pipeline infrastructure (Issue #517)
+    src/network/pipeline/pipeline_coordinator.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
