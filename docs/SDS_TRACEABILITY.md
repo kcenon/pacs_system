@@ -916,6 +916,9 @@ This section maps design elements to their corresponding test files for **Verifi
 | - | Service Dispatching | `tests/network/v2/service_dispatching_test.cpp` | - |
 | - | State Machine | `tests/network/v2/state_machine_test.cpp` | - |
 | - | Stress Test | `tests/network/v2/stress_test.cpp` | - |
+| DES-NET-010 | `pipeline_job_types` | `tests/network/pipeline/pipeline_job_types_test.cpp` | 8 |
+| DES-NET-011 | `pipeline_coordinator` | `tests/network/pipeline/pipeline_coordinator_test.cpp` | 11 |
+| DES-NET-012 | Pipeline Integration | `tests/network/pipeline/pipeline_integration_test.cpp` | 5 |
 
 ### 6.4 Services Module Tests
 

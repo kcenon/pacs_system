@@ -131,7 +131,10 @@ auto pipeline_coordinator::submit_to_stage(pipeline_stage stage,
         return pacs_void_error(error_codes::invalid_argument,
                                "Cannot submit null job");
     }
-    return submit_to_stage(stage, std::move(job), job->get_context());
+    // Extract context before moving job to avoid undefined behavior
+    // (evaluation order of function arguments is unspecified in C++)
+    auto ctx = job->get_context();
+    return submit_to_stage(stage, std::move(job), ctx);
 }
 
 auto pipeline_coordinator::submit_to_stage(pipeline_stage stage,

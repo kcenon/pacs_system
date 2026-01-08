@@ -1567,6 +1567,10 @@ if(PACS_BUILD_TESTS)
         tests/network/v2/service_dispatching_test.cpp
         tests/network/v2/network_system_integration_test.cpp
         tests/network/v2/stress_test.cpp
+        # Pipeline tests (Issue #524)
+        tests/network/pipeline/pipeline_job_types_test.cpp
+        tests/network/pipeline/pipeline_coordinator_test.cpp
+        tests/network/pipeline/pipeline_integration_test.cpp
     )
     target_link_libraries(network_tests
         PRIVATE
