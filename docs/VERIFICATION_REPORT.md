@@ -110,9 +110,10 @@ The verification was conducted through static code analysis, documentation revie
 | Concurrent associations | SRS-NET-005 | `dicom_server.hpp/cpp` (445 lines) | ✅ Complete |
 
 **Verification Evidence:**
-- 15 unit tests passing for network module
+- 38 unit tests passing for network module (including 23 pipeline tests)
 - All 7 PDU types implemented (A-ASSOCIATE-RQ/AC/RJ, P-DATA-TF, A-RELEASE-RQ/RP, A-ABORT)
 - 8-state association state machine per PS3.8
+- 6-stage I/O pipeline with unit and integration tests (Issue #524)
 
 #### 2.1.3 DICOM Services Module (FR-3.x)
 
@@ -197,7 +198,7 @@ The verification was conducted through static code analysis, documentation revie
 
 | Requirement | Target | Status |
 |-------------|--------|--------|
-| Code coverage | ≥80% | ✅ 113+ tests |
+| Code coverage | ≥80% | ✅ 136+ tests |
 | Documentation | Complete | ✅ 26 markdown files |
 | CI/CD pipeline | Green | ✅ GitHub Actions |
 | Thread safety | Verified | ✅ ThreadSanitizer |
@@ -439,7 +440,7 @@ tests/
 The PACS System has successfully completed Phase 2 development with all planned features implemented and verified:
 
 - **100% of functional requirements** from SRS are implemented
-- **113+ unit tests** passing across 34 test files
+- **136+ unit tests** passing across 37 test files
 - **11 example applications** demonstrating all features
 - **Full DICOM PS3.5/PS3.7/PS3.8 compliance** for supported services
 - **Zero external DICOM library dependencies** - pure ecosystem implementation
