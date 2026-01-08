@@ -262,6 +262,88 @@ cmake --build build-tsan --target concurrency_tests
 | Shutdown responsiveness | < 100ms after signal | ✅ PASS |
 | High-throughput verified | > 100k ops in 2s | ✅ PASS |
 
+## Pipeline Performance Targets (Issue #517)
+
+**Related Issue:** #517 - Implement typed_thread_pool-based I/O Pipeline for DICOM Operations
+
+### Overview
+
+The 6-stage I/O pipeline architecture is designed to achieve significant throughput improvements by parallelizing DICOM operation processing. See [PIPELINE_DESIGN.md](PIPELINE_DESIGN.md) for detailed architecture documentation.
+
+### Performance Targets
+
+| Metric | Current Baseline | Pipeline Target | Expected Improvement |
+|--------|-----------------|-----------------|---------------------|
+| C-ECHO throughput | 89,964 msg/s | 150,000+ msg/s | 1.7x |
+| C-STORE throughput | 31,759 store/s | 50,000+ store/s | 1.6x |
+| Concurrent associations | 100+ | 500+ | 5x |
+| P99 latency (C-ECHO) | Not measured | <= 5ms | New metric |
+| Graceful shutdown | 110ms | < 500ms | Maintained |
+| Memory overhead | N/A | < 2MB | New constraint |
+
+### Theoretical Analysis
+
+The pipeline architecture provides throughput improvements by eliminating head-of-line blocking:
+
+```
+Single-threaded (Sequential Processing):
+  Total latency = Network(1ms) + Decode(2ms) + Process(1ms) +
+                  DB I/O(10ms) + Encode(2ms) + Send(1ms) = 17ms
+  Throughput = 1000ms / 17ms ≈ 59 operations/second
+
+Pipeline (8 execution workers):
+  Bottleneck stage = Stage 4 (Storage/Query Execution) = 10ms
+  Throughput = 8 workers × (1000ms / 10ms) = 800 operations/second
+
+Theoretical improvement = 800 / 59 ≈ 13.5x
+```
+
+**Note:** Actual improvement depends on workload characteristics and system resources.
+
+### Pipeline Stage Breakdown
+
+| Stage | Operation | Expected Latency | Worker Count |
+|-------|-----------|-----------------|--------------|
+| 1 | Network Receive | < 1ms | 4 |
+| 2 | PDU Decode | < 100μs | 2 |
+| 3 | DIMSE Processing | < 100μs | 2 |
+| 4 | Storage/Query Execution | 1-10ms (blocking) | 8 |
+| 5 | Response Encoding | < 100μs | 2 |
+| 6 | Network Send | < 1ms | 4 |
+
+### Benchmark Plan
+
+When pipeline benchmarks are run, the following metrics will be collected:
+
+1. **Throughput benchmarks**
+   - C-ECHO operations per second (single and multi-client)
+   - C-STORE operations per second (varying image sizes)
+   - C-FIND queries per second
+
+2. **Latency benchmarks**
+   - P50, P95, P99 latency for each operation type
+   - Per-stage latency breakdown
+
+3. **Scalability benchmarks**
+   - Throughput vs. concurrent connections
+   - Throughput vs. worker count
+   - Memory usage vs. queue depth
+
+### Configuration for Benchmarks
+
+```cpp
+// Recommended benchmark configuration
+pipeline_config config;
+config.net_io_workers = 4;
+config.protocol_workers = 2;
+config.execution_workers = 8;
+config.encode_workers = 2;
+config.max_queue_depth = 10000;
+config.enable_metrics = true;
+```
+
+---
+
 ## Related Issues
 
 - #153 - Epic: Migrate from std::thread to thread_system/network_system
@@ -273,6 +355,7 @@ cmake --build build-tsan --target concurrency_tests
 - #159 - Integrate cancellation_token for graceful shutdown
 - #314 - Apply Lock-free Structures
 - #337 - Add lock-free structure stress tests
+- #517 - Implement typed_thread_pool-based I/O Pipeline (Pipeline Epic)
 
 ## Version History
 
@@ -281,3 +364,4 @@ cmake --build build-tsan --target concurrency_tests
 | 1.0.0 | 2024-12-05 | Initial performance results after thread migration |
 | 1.0.1 | 2024-12-07 | Updated acceptance criteria to match Issue #160 requirements |
 | 1.1.0 | 2024-12-18 | Added lock-free structure stress tests (#337) |
+| 1.2.0 | 2025-01-08 | Added pipeline performance targets (#517) |
