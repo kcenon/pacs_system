@@ -783,6 +783,8 @@ add_library(pacs_network
     src/network/pipeline/jobs/dimse_process_job.cpp
     src/network/pipeline/jobs/storage_query_exec_job.cpp
     src/network/pipeline/jobs/response_encode_job.cpp
+    # Pipeline adapter (Issue #523)
+    src/network/pipeline/pipeline_adapter.cpp
 )
 target_include_directories(pacs_network
     PUBLIC
