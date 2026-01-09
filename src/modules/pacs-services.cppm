@@ -39,6 +39,7 @@ module;
 #include <pacs/services/mpps_scp.hpp>
 #include <pacs/services/worklist_scp.hpp>
 #include <pacs/services/storage_scu.hpp>
+#include <pacs/services/query_scu.hpp>
 #include <pacs/services/sop_class_registry.hpp>
 #include <pacs/services/storage_status.hpp>
 
@@ -65,6 +66,14 @@ using pacs::services::worklist_scp;
 
 // SCU implementations
 using pacs::services::storage_scu;
+using pacs::services::query_scu;
+using pacs::services::query_scu_config;
+using pacs::services::query_model;
+using pacs::services::query_result;
+using pacs::services::patient_query_keys;
+using pacs::services::study_query_keys;
+using pacs::services::series_query_keys;
+using pacs::services::instance_query_keys;
 
 // Registry
 using pacs::services::sop_class_registry;
