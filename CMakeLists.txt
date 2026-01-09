@@ -864,6 +864,7 @@ add_library(pacs_services
     src/services/verification_scp.cpp
     src/services/storage_scp.cpp
     src/services/storage_scu.cpp
+    src/services/query_scu.cpp
     src/services/query_scp.cpp
     src/services/retrieve_scp.cpp
     src/services/worklist_scp.cpp
