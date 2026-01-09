@@ -1766,6 +1766,158 @@ public:
 
 ---
 
+### `pacs::services::query_scu`
+
+Query SCU (C-FIND sender) for querying remote PACS servers.
+
+```cpp
+#include <pacs/services/query_scu.hpp>
+
+namespace pacs::services {
+
+// Query information model
+enum class query_model {
+    patient_root,  // Patient Root Q/R Information Model
+    study_root     // Study Root Q/R Information Model
+};
+
+// Query result structure
+struct query_result {
+    std::vector<core::dicom_dataset> matches;
+    uint16_t status;
+    std::chrono::milliseconds elapsed;
+    size_t total_pending;
+
+    [[nodiscard]] bool is_success() const noexcept;
+    [[nodiscard]] bool is_cancelled() const noexcept;
+};
+
+// Typed query key structures
+struct patient_query_keys {
+    std::string patient_name;
+    std::string patient_id;
+    std::string birth_date;
+    std::string sex;
+};
+
+struct study_query_keys {
+    std::string patient_id;
+    std::string study_uid;
+    std::string study_date;      // YYYYMMDD or range
+    std::string accession_number;
+    std::string modality;
+    std::string study_description;
+};
+
+struct series_query_keys {
+    std::string study_uid;       // Required
+    std::string series_uid;
+    std::string modality;
+    std::string series_number;
+};
+
+struct instance_query_keys {
+    std::string series_uid;      // Required
+    std::string sop_instance_uid;
+    std::string instance_number;
+};
+
+// Configuration
+struct query_scu_config {
+    query_model model{query_model::study_root};
+    query_level level{query_level::study};
+    std::chrono::milliseconds timeout{30000};
+    size_t max_results{0};       // 0 = unlimited
+    bool cancel_on_max{true};
+};
+
+class query_scu {
+public:
+    explicit query_scu(std::shared_ptr<di::ILogger> logger = nullptr);
+    explicit query_scu(const query_scu_config& config,
+                       std::shared_ptr<di::ILogger> logger = nullptr);
+
+    // Generic query with raw dataset
+    [[nodiscard]] network::Result<query_result> find(
+        network::association& assoc,
+        const core::dicom_dataset& query_keys);
+
+    // Typed convenience methods
+    [[nodiscard]] network::Result<query_result> find_patients(
+        network::association& assoc,
+        const patient_query_keys& keys);
+
+    [[nodiscard]] network::Result<query_result> find_studies(
+        network::association& assoc,
+        const study_query_keys& keys);
+
+    [[nodiscard]] network::Result<query_result> find_series(
+        network::association& assoc,
+        const series_query_keys& keys);
+
+    [[nodiscard]] network::Result<query_result> find_instances(
+        network::association& assoc,
+        const instance_query_keys& keys);
+
+    // Streaming callback for large result sets
+    [[nodiscard]] network::Result<size_t> find_streaming(
+        network::association& assoc,
+        const core::dicom_dataset& query_keys,
+        std::function<bool(const core::dicom_dataset&)> callback);
+
+    // Cancel ongoing query
+    network::Result<std::monostate> cancel(
+        network::association& assoc,
+        uint16_t message_id);
+
+    // Configuration
+    void set_config(const query_scu_config& config);
+    [[nodiscard]] const query_scu_config& config() const noexcept;
+
+    // Statistics
+    [[nodiscard]] size_t queries_performed() const noexcept;
+    [[nodiscard]] size_t total_matches() const noexcept;
+    void reset_statistics() noexcept;
+};
+
+} // namespace pacs::services
+```
+
+**Usage Example:**
+
+```cpp
+// Establish association
+association_config config;
+config.calling_ae_title = "MY_SCU";
+config.called_ae_title = "PACS_SCP";
+config.proposed_contexts.push_back({
+    1,
+    std::string(study_root_find_sop_class_uid),
+    {"1.2.840.10008.1.2.1"}
+});
+
+auto assoc_result = association::connect("pacs.example.com", 104, config);
+auto& assoc = assoc_result.value();
+
+// Query for studies
+query_scu scu;
+study_query_keys keys;
+keys.patient_id = "12345";
+keys.study_date = "20240101-20241231";
+
+auto result = scu.find_studies(assoc, keys);
+if (result.is_ok() && result.value().is_success()) {
+    for (const auto& ds : result.value().matches) {
+        auto study_uid = ds.get_string(tags::study_instance_uid);
+        // Process study...
+    }
+}
+
+assoc.release();
+```
+
+---
+
 ### `pacs::services::sop_classes` - XA/XRF Storage
 
 X-Ray Angiographic and Radiofluoroscopic Storage SOP Classes.
