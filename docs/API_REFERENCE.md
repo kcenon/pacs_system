@@ -1918,6 +1918,161 @@ assoc.release();
 
 ---
 
+### `pacs::services::retrieve_scu`
+
+Retrieve SCU (C-MOVE/C-GET sender) for retrieving images from remote PACS servers.
+
+```cpp
+#include <pacs/services/retrieve_scu.hpp>
+
+namespace pacs::services {
+
+// Retrieve mode
+enum class retrieve_mode {
+    c_move,  // Request SCP to send to specified destination
+    c_get    // Receive directly on same association
+};
+
+// Progress information
+struct retrieve_progress {
+    uint16_t remaining;
+    uint16_t completed;
+    uint16_t failed;
+    uint16_t warning;
+    std::chrono::steady_clock::time_point start_time;
+
+    [[nodiscard]] uint16_t total() const noexcept;
+    [[nodiscard]] float percent() const noexcept;
+    [[nodiscard]] std::chrono::milliseconds elapsed() const noexcept;
+};
+
+// Retrieve result
+struct retrieve_result {
+    uint16_t completed;
+    uint16_t failed;
+    uint16_t warning;
+    uint16_t final_status;
+    std::chrono::milliseconds elapsed;
+    std::vector<core::dicom_dataset> received_instances;  // C-GET only
+
+    [[nodiscard]] bool is_success() const noexcept;
+    [[nodiscard]] bool is_cancelled() const noexcept;
+    [[nodiscard]] bool has_failures() const noexcept;
+    [[nodiscard]] bool has_warnings() const noexcept;
+};
+
+// Configuration
+struct retrieve_scu_config {
+    retrieve_mode mode{retrieve_mode::c_move};
+    query_model model{query_model::study_root};
+    query_level level{query_level::study};
+    std::string move_destination;     // Required for C-MOVE
+    std::chrono::milliseconds timeout{120000};
+    uint16_t priority{0};
+};
+
+class retrieve_scu {
+public:
+    explicit retrieve_scu(std::shared_ptr<di::ILogger> logger = nullptr);
+    explicit retrieve_scu(const retrieve_scu_config& config,
+                          std::shared_ptr<di::ILogger> logger = nullptr);
+
+    // C-MOVE operation
+    [[nodiscard]] network::Result<retrieve_result> move(
+        network::association& assoc,
+        const core::dicom_dataset& query_keys,
+        std::string_view destination_ae,
+        std::function<void(const retrieve_progress&)> progress = nullptr);
+
+    // C-GET operation
+    [[nodiscard]] network::Result<retrieve_result> get(
+        network::association& assoc,
+        const core::dicom_dataset& query_keys,
+        std::function<void(const retrieve_progress&)> progress = nullptr);
+
+    // Convenience methods (use mode from config)
+    [[nodiscard]] network::Result<retrieve_result> retrieve_study(
+        network::association& assoc,
+        std::string_view study_uid,
+        std::function<void(const retrieve_progress&)> progress = nullptr);
+
+    [[nodiscard]] network::Result<retrieve_result> retrieve_series(
+        network::association& assoc,
+        std::string_view series_uid,
+        std::function<void(const retrieve_progress&)> progress = nullptr);
+
+    [[nodiscard]] network::Result<retrieve_result> retrieve_instance(
+        network::association& assoc,
+        std::string_view sop_instance_uid,
+        std::function<void(const retrieve_progress&)> progress = nullptr);
+
+    // Cancel ongoing retrieve
+    [[nodiscard]] network::Result<std::monostate> cancel(
+        network::association& assoc,
+        uint16_t message_id);
+
+    // Configuration
+    void set_config(const retrieve_scu_config& config);
+    void set_move_destination(std::string_view ae_title);
+    [[nodiscard]] const retrieve_scu_config& config() const noexcept;
+
+    // Statistics
+    [[nodiscard]] size_t retrieves_performed() const noexcept;
+    [[nodiscard]] size_t instances_retrieved() const noexcept;
+    [[nodiscard]] size_t bytes_retrieved() const noexcept;
+    void reset_statistics() noexcept;
+};
+
+} // namespace pacs::services
+```
+
+**C-MOVE Usage Example:**
+
+```cpp
+// Establish association
+association_config config;
+config.calling_ae_title = "MY_SCU";
+config.called_ae_title = "PACS_SCP";
+config.proposed_contexts.push_back({
+    1,
+    std::string(study_root_move_sop_class_uid),
+    {"1.2.840.10008.1.2.1"}
+});
+
+auto assoc_result = association::connect("pacs.example.com", 104, config);
+auto& assoc = assoc_result.value();
+
+// Move a study to workstation
+retrieve_scu scu;
+auto result = scu.move(assoc, query_ds, "WORKSTATION",
+    [](const retrieve_progress& p) {
+        std::cout << "Progress: " << p.percent() << "%\n";
+    });
+
+if (result.is_ok() && result.value().is_success()) {
+    std::cout << "Retrieved " << result.value().completed << " images\n";
+}
+
+assoc.release();
+```
+
+**C-GET Usage Example:**
+
+```cpp
+retrieve_scu_config cfg;
+cfg.mode = retrieve_mode::c_get;
+retrieve_scu scu(cfg);
+
+auto result = scu.retrieve_series(assoc, "1.2.3.4.5.6.7");
+if (result.is_ok()) {
+    for (const auto& ds : result.value().received_instances) {
+        // Process received dataset
+    }
+}
+```
+
+---
+
 ### `pacs::services::sop_classes` - XA/XRF Storage
 
 X-Ray Angiographic and Radiofluoroscopic Storage SOP Classes.
