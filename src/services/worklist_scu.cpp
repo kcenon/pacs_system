@@ -6,6 +6,7 @@
  */
 
 #include "pacs/services/worklist_scu.hpp"
+#include "pacs/services/worklist_scp.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/core/result.hpp"
 #include "pacs/encoding/vr_type.hpp"

@@ -15,10 +15,8 @@
 #ifndef PACS_SERVICES_WORKLIST_SCU_HPP
 #define PACS_SERVICES_WORKLIST_SCU_HPP
 
-#include "worklist_scp.hpp"
 #include "pacs/core/dicom_dataset.hpp"
 #include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
 #include "pacs/di/ilogger.hpp"
 
 #include <atomic>
