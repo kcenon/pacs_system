@@ -869,6 +869,7 @@ add_library(pacs_services
     src/services/query_scp.cpp
     src/services/retrieve_scp.cpp
     src/services/worklist_scp.cpp
+    src/services/worklist_scu.cpp
     src/services/mpps_scp.cpp
     src/services/sop_class_registry.cpp
     src/services/sop_classes/us_storage.cpp
