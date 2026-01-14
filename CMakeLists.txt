@@ -1595,6 +1595,7 @@ if(PACS_BUILD_TESTS)
         tests/services/query_scp_test.cpp
         tests/services/retrieve_scp_test.cpp
         tests/services/worklist_scp_test.cpp
+        tests/services/worklist_scu_test.cpp
         tests/services/mpps_scp_test.cpp
         tests/services/us_storage_test.cpp
         tests/services/dx_storage_test.cpp
