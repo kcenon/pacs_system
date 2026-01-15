@@ -100,14 +100,14 @@ network_adapter::connect(const connection_config& config) {
         // Wait for connection with timeout
         auto status = connect_future.wait_for(config.timeout);
         if (status == std::future_status::timeout) {
-            client->stop_client();
+            [[maybe_unused]] auto stop_result = client->stop_client();
             return Result<session_ptr>(error_info("Connection failed: timeout"));
         }
 
         // Check connection result
         auto ec = connect_future.get();
         if (ec) {
-            client->stop_client();
+            [[maybe_unused]] auto stop_result = client->stop_client();
             return Result<session_ptr>(error_info("Connection failed: " + ec.message()));
         }
 
