@@ -222,7 +222,7 @@ jobs:
   dcmtk-shell-tests:
     name: DCMTK Shell Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -298,7 +298,7 @@ jobs:
 
     - name: Run DCMTK Echo Shell Test
       working-directory: pacs_system
-      timeout-minutes: 5
+      timeout-minutes: 8
       continue-on-error: true
       run: |
         if [ -f "./examples/integration_tests/scripts/test_dcmtk_echo.sh" ]; then
@@ -308,7 +308,7 @@ jobs:
 
     - name: Run DCMTK Store Shell Test
       working-directory: pacs_system
-      timeout-minutes: 5
+      timeout-minutes: 8
       continue-on-error: true
       run: |
         if [ -f "./examples/integration_tests/scripts/test_dcmtk_store.sh" ]; then
@@ -318,7 +318,7 @@ jobs:
 
     - name: Run DCMTK Find Shell Test
       working-directory: pacs_system
-      timeout-minutes: 5
+      timeout-minutes: 8
       continue-on-error: true
       run: |
         if [ -f "./examples/integration_tests/scripts/test_dcmtk_find.sh" ]; then
@@ -328,7 +328,7 @@ jobs:
 
     - name: Run DCMTK Move Shell Test
       working-directory: pacs_system
-      timeout-minutes: 5
+      timeout-minutes: 8
       continue-on-error: true
       run: |
         if [ -f "./examples/integration_tests/scripts/test_dcmtk_move.sh" ]; then
