@@ -106,8 +106,8 @@ TEST_CASE("migration_runner initial state", "[migration][version]") {
         CHECK(runner.needs_migration(db.get()));
     }
 
-    SECTION("latest version is 3") {
-        CHECK(runner.get_latest_version() == 3);
+    SECTION("latest version is 4") {
+        CHECK(runner.get_latest_version() == 4);
     }
 
     SECTION("empty database has no history") {
@@ -128,7 +128,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result = runner.run_migrations(db.get());
         REQUIRE(result.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 3);
+        CHECK(runner.get_current_version(db.get()) == 4);
         CHECK_FALSE(runner.needs_migration(db.get()));
     }
 
@@ -139,7 +139,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result2 = runner.run_migrations(db.get());
         REQUIRE(result2.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 3);
+        CHECK(runner.get_current_version(db.get()) == 4);
     }
 
     SECTION("migration creates schema_version table") {
@@ -154,7 +154,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         REQUIRE(result.is_ok());
 
         auto history = runner.get_history(db.get());
-        REQUIRE(history.size() == 3);
+        REQUIRE(history.size() == 4);
         CHECK(history[0].version == 1);
         CHECK(history[0].description == "Initial schema creation");
         CHECK_FALSE(history[0].applied_at.empty());
@@ -164,6 +164,9 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         CHECK(history[2].version == 3);
         CHECK(history[2].description == "Add remote_nodes table for PACS client");
         CHECK_FALSE(history[2].applied_at.empty());
+        CHECK(history[3].version == 4);
+        CHECK(history[3].description == "Add jobs table for async DICOM operations");
+        CHECK_FALSE(history[3].applied_at.empty());
     }
 }
 
@@ -416,4 +419,26 @@ TEST_CASE("migration_runner v3 creates remote_nodes table", "[migration][v3][tab
     CHECK(db.index_exists("idx_remote_nodes_ae_title"));
     CHECK(db.index_exists("idx_remote_nodes_host"));
     CHECK(db.index_exists("idx_remote_nodes_status"));
+}
+
+// ============================================================================
+// Schema Validation Tests (V4)
+// ============================================================================
+
+TEST_CASE("migration_runner v4 creates jobs table", "[migration][v4][tables]") {
+    test_database db;
+    migration_runner runner;
+
+    auto result = runner.run_migrations(db.get());
+    REQUIRE(result.is_ok());
+
+    CHECK(db.table_exists("jobs"));
+    CHECK(db.index_exists("idx_jobs_status"));
+    CHECK(db.index_exists("idx_jobs_type"));
+    CHECK(db.index_exists("idx_jobs_priority"));
+    CHECK(db.index_exists("idx_jobs_created_at"));
+    CHECK(db.index_exists("idx_jobs_source_node"));
+    CHECK(db.index_exists("idx_jobs_destination_node"));
+    CHECK(db.index_exists("idx_jobs_study"));
+    CHECK(db.index_exists("idx_jobs_patient"));
 }
