@@ -26,6 +26,10 @@ namespace pacs::storage {
 class index_database;
 } // namespace pacs::storage
 
+namespace pacs::client {
+class remote_node_manager;
+} // namespace pacs::client
+
 namespace pacs::web {
 
 struct rest_server_config;
@@ -49,6 +53,9 @@ struct rest_server_context {
 
   /// Index database for patient/study/series data access
   std::shared_ptr<storage::index_database> database;
+
+  /// Remote node manager for remote PACS node management
+  std::shared_ptr<client::remote_node_manager> node_manager;
 };
 
 namespace endpoints {
