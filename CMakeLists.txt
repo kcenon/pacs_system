@@ -1013,6 +1013,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/migration_runner.cpp
         src/storage/index_database.cpp
         src/storage/node_repository.cpp
+        src/storage/job_repository.cpp
     )
     target_include_directories(pacs_storage
         PUBLIC

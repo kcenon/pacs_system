@@ -30,6 +30,7 @@ migration_runner::migration_runner() {
     migrations_.push_back({1, [this](sqlite3* db) { return migrate_v1(db); }});
     migrations_.push_back({2, [this](sqlite3* db) { return migrate_v2(db); }});
     migrations_.push_back({3, [this](sqlite3* db) { return migrate_v3(db); }});
+    migrations_.push_back({4, [this](sqlite3* db) { return migrate_v4(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (database_system version)
@@ -44,6 +45,10 @@ migration_runner::migration_runner() {
     db_system_migrations_.push_back(
         {3, [this](std::shared_ptr<database::database_manager> db) {
             return migrate_v3(db);
+        }});
+    db_system_migrations_.push_back(
+        {4, [this](std::shared_ptr<database::database_manager> db) {
+            return migrate_v4(db);
         }});
 #endif
 }
@@ -580,6 +585,65 @@ auto migration_runner::migrate_v3(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 3, "Add remote_nodes table for PACS client");
+}
+
+auto migration_runner::migrate_v4(sqlite3* db) -> VoidResult {
+    // V4: Add jobs table for async DICOM operations
+    const char* sql = R"(
+        -- =====================================================================
+        -- JOBS TABLE (for async DICOM operations - Job Manager)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS jobs (
+            pk                          INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id                      TEXT NOT NULL UNIQUE,
+            type                        TEXT NOT NULL,
+            status                      TEXT NOT NULL DEFAULT 'pending',
+            priority                    INTEGER NOT NULL DEFAULT 1,
+            source_node_id              TEXT,
+            destination_node_id         TEXT,
+            patient_id                  TEXT,
+            study_uid                   TEXT,
+            series_uid                  TEXT,
+            sop_instance_uid            TEXT,
+            instance_uids_json          TEXT DEFAULT '[]',
+            total_items                 INTEGER DEFAULT 0,
+            completed_items             INTEGER DEFAULT 0,
+            failed_items                INTEGER DEFAULT 0,
+            skipped_items               INTEGER DEFAULT 0,
+            bytes_transferred           INTEGER DEFAULT 0,
+            current_item                TEXT,
+            current_item_description    TEXT,
+            error_message               TEXT,
+            error_details               TEXT,
+            retry_count                 INTEGER DEFAULT 0,
+            max_retries                 INTEGER DEFAULT 3,
+            created_by                  TEXT,
+            metadata_json               TEXT DEFAULT '{}',
+            created_at                  TEXT NOT NULL DEFAULT (datetime('now')),
+            queued_at                   TEXT,
+            started_at                  TEXT,
+            completed_at                TEXT,
+            CHECK (type IN ('query', 'retrieve', 'store', 'export', 'import', 'prefetch', 'sync')),
+            CHECK (status IN ('pending', 'queued', 'running', 'completed', 'failed', 'cancelled', 'paused')),
+            CHECK (priority >= 0 AND priority <= 3)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+        CREATE INDEX IF NOT EXISTS idx_jobs_type ON jobs(type);
+        CREATE INDEX IF NOT EXISTS idx_jobs_priority ON jobs(priority DESC);
+        CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_jobs_source_node ON jobs(source_node_id);
+        CREATE INDEX IF NOT EXISTS idx_jobs_destination_node ON jobs(destination_node_id);
+        CREATE INDEX IF NOT EXISTS idx_jobs_study ON jobs(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_jobs_patient ON jobs(patient_id);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 4, "Add jobs table for async DICOM operations");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1144,6 +1208,66 @@ auto migration_runner::migrate_v3(
     }
 
     return record_migration(db_manager, 3, "Add remote_nodes table for PACS client");
+}
+
+auto migration_runner::migrate_v4(
+    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+    // V4: Add jobs table for async DICOM operations
+    const std::string sql = R"(
+        -- =====================================================================
+        -- JOBS TABLE (for async DICOM operations - Job Manager)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS jobs (
+            pk                          INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id                      TEXT NOT NULL UNIQUE,
+            type                        TEXT NOT NULL,
+            status                      TEXT NOT NULL DEFAULT 'pending',
+            priority                    INTEGER NOT NULL DEFAULT 1,
+            source_node_id              TEXT,
+            destination_node_id         TEXT,
+            patient_id                  TEXT,
+            study_uid                   TEXT,
+            series_uid                  TEXT,
+            sop_instance_uid            TEXT,
+            instance_uids_json          TEXT DEFAULT '[]',
+            total_items                 INTEGER DEFAULT 0,
+            completed_items             INTEGER DEFAULT 0,
+            failed_items                INTEGER DEFAULT 0,
+            skipped_items               INTEGER DEFAULT 0,
+            bytes_transferred           INTEGER DEFAULT 0,
+            current_item                TEXT,
+            current_item_description    TEXT,
+            error_message               TEXT,
+            error_details               TEXT,
+            retry_count                 INTEGER DEFAULT 0,
+            max_retries                 INTEGER DEFAULT 3,
+            created_by                  TEXT,
+            metadata_json               TEXT DEFAULT '{}',
+            created_at                  TEXT NOT NULL DEFAULT (datetime('now')),
+            queued_at                   TEXT,
+            started_at                  TEXT,
+            completed_at                TEXT,
+            CHECK (type IN ('query', 'retrieve', 'store', 'export', 'import', 'prefetch', 'sync')),
+            CHECK (status IN ('pending', 'queued', 'running', 'completed', 'failed', 'cancelled', 'paused')),
+            CHECK (priority >= 0 AND priority <= 3)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+        CREATE INDEX IF NOT EXISTS idx_jobs_type ON jobs(type);
+        CREATE INDEX IF NOT EXISTS idx_jobs_priority ON jobs(priority DESC);
+        CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_jobs_source_node ON jobs(source_node_id);
+        CREATE INDEX IF NOT EXISTS idx_jobs_destination_node ON jobs(destination_node_id);
+        CREATE INDEX IF NOT EXISTS idx_jobs_study ON jobs(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_jobs_patient ON jobs(patient_id);
+    )";
+
+    auto result = execute_sql(db_manager, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db_manager, 4, "Add jobs table for async DICOM operations");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
