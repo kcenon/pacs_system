@@ -29,6 +29,7 @@ migration_runner::migration_runner() {
     // Register all migrations (SQLite version)
     migrations_.push_back({1, [this](sqlite3* db) { return migrate_v1(db); }});
     migrations_.push_back({2, [this](sqlite3* db) { return migrate_v2(db); }});
+    migrations_.push_back({3, [this](sqlite3* db) { return migrate_v3(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (database_system version)
@@ -39,6 +40,10 @@ migration_runner::migration_runner() {
     db_system_migrations_.push_back(
         {2, [this](std::shared_ptr<database::database_manager> db) {
             return migrate_v2(db);
+        }});
+    db_system_migrations_.push_back(
+        {3, [this](std::shared_ptr<database::database_manager> db) {
+            return migrate_v3(db);
         }});
 #endif
 }
@@ -531,6 +536,50 @@ auto migration_runner::migrate_v2(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 2, "Add audit_log table");
+}
+
+auto migration_runner::migrate_v3(sqlite3* db) -> VoidResult {
+    // V3: Add remote_nodes table for PACS client remote node management
+    const char* sql = R"(
+        -- =====================================================================
+        -- REMOTE_NODES TABLE (for PACS client SCU operations)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS remote_nodes (
+            pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            node_id                 TEXT NOT NULL UNIQUE,
+            name                    TEXT,
+            ae_title                TEXT NOT NULL,
+            host                    TEXT NOT NULL,
+            port                    INTEGER NOT NULL DEFAULT 104,
+            supports_find           INTEGER NOT NULL DEFAULT 1,
+            supports_move           INTEGER NOT NULL DEFAULT 1,
+            supports_get            INTEGER NOT NULL DEFAULT 0,
+            supports_store          INTEGER NOT NULL DEFAULT 1,
+            supports_worklist       INTEGER NOT NULL DEFAULT 0,
+            connection_timeout_sec  INTEGER NOT NULL DEFAULT 30,
+            dimse_timeout_sec       INTEGER NOT NULL DEFAULT 60,
+            max_associations        INTEGER NOT NULL DEFAULT 4,
+            status                  TEXT NOT NULL DEFAULT 'unknown',
+            last_verified           TEXT,
+            last_error              TEXT,
+            last_error_message      TEXT,
+            created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (port > 0 AND port <= 65535),
+            CHECK (status IN ('unknown', 'online', 'offline', 'error', 'verifying'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_remote_nodes_ae_title ON remote_nodes(ae_title);
+        CREATE INDEX IF NOT EXISTS idx_remote_nodes_host ON remote_nodes(host);
+        CREATE INDEX IF NOT EXISTS idx_remote_nodes_status ON remote_nodes(status);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 3, "Add remote_nodes table for PACS client");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1050,6 +1099,51 @@ auto migration_runner::migrate_v2(
     }
 
     return record_migration(db_manager, 2, "Add audit_log table");
+}
+
+auto migration_runner::migrate_v3(
+    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+    // V3: Add remote_nodes table for PACS client remote node management
+    const std::string sql = R"(
+        -- =====================================================================
+        -- REMOTE_NODES TABLE (for PACS client SCU operations)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS remote_nodes (
+            pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            node_id                 TEXT NOT NULL UNIQUE,
+            name                    TEXT,
+            ae_title                TEXT NOT NULL,
+            host                    TEXT NOT NULL,
+            port                    INTEGER NOT NULL DEFAULT 104,
+            supports_find           INTEGER NOT NULL DEFAULT 1,
+            supports_move           INTEGER NOT NULL DEFAULT 1,
+            supports_get            INTEGER NOT NULL DEFAULT 0,
+            supports_store          INTEGER NOT NULL DEFAULT 1,
+            supports_worklist       INTEGER NOT NULL DEFAULT 0,
+            connection_timeout_sec  INTEGER NOT NULL DEFAULT 30,
+            dimse_timeout_sec       INTEGER NOT NULL DEFAULT 60,
+            max_associations        INTEGER NOT NULL DEFAULT 4,
+            status                  TEXT NOT NULL DEFAULT 'unknown',
+            last_verified           TEXT,
+            last_error              TEXT,
+            last_error_message      TEXT,
+            created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (port > 0 AND port <= 65535),
+            CHECK (status IN ('unknown', 'online', 'offline', 'error', 'verifying'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_remote_nodes_ae_title ON remote_nodes(ae_title);
+        CREATE INDEX IF NOT EXISTS idx_remote_nodes_host ON remote_nodes(host);
+        CREATE INDEX IF NOT EXISTS idx_remote_nodes_status ON remote_nodes(status);
+    )";
+
+    auto result = execute_sql(db_manager, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db_manager, 3, "Add remote_nodes table for PACS client");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
