@@ -11,6 +11,12 @@
 // declaration conflicts
 #include "crow.h"
 
+// Workaround for Windows: DELETE is defined as a macro in <winnt.h>
+// which conflicts with crow::HTTPMethod::DELETE
+#ifdef DELETE
+#undef DELETE
+#endif
+
 #include "pacs/client/remote_node.hpp"
 #include "pacs/client/remote_node_manager.hpp"
 #include "pacs/web/endpoints/remote_nodes_endpoints.hpp"
@@ -44,7 +50,11 @@ std::string format_timestamp(std::chrono::system_clock::time_point tp) {
     }
     auto time_t_val = std::chrono::system_clock::to_time_t(tp);
     std::tm tm_val{};
+#ifdef _WIN32
+    gmtime_s(&tm_val, &time_t_val);
+#else
     gmtime_r(&time_t_val, &tm_val);
+#endif
     char buf[32];
     std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm_val);
     return buf;
