@@ -31,6 +31,10 @@ namespace pacs::storage {
 class index_database;
 } // namespace pacs::storage
 
+namespace pacs::client {
+class remote_node_manager;
+} // namespace pacs::client
+
 namespace pacs::web {
 
 /**
@@ -133,6 +137,12 @@ public:
    * @param database Index database instance
    */
   void set_database(std::shared_ptr<storage::index_database> database);
+
+  /**
+   * @brief Set remote node manager for remote PACS node management
+   * @param manager Remote node manager instance
+   */
+  void set_node_manager(std::shared_ptr<client::remote_node_manager> manager);
 
   // =========================================================================
   // Lifecycle

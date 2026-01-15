@@ -1168,6 +1168,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/audit_endpoints.cpp
         src/web/endpoints/association_endpoints.cpp
         src/web/endpoints/dicomweb_endpoints.cpp
+        src/web/endpoints/remote_nodes_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1175,7 +1176,7 @@ if(TARGET Crow::Crow)
             $<INSTALL_INTERFACE:include>
     )
     target_link_libraries(pacs_web
-        PUBLIC pacs_core pacs_storage Crow::Crow
+        PUBLIC pacs_core pacs_storage pacs_client Crow::Crow
     )
 
     # Link pacs_monitoring if available
