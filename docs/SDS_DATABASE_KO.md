@@ -675,6 +675,45 @@ VALUES (2, 'instances 테이블에 file_hash 컬럼 추가');
 COMMIT;
 ```
 
+```sql
+-- 마이그레이션 v2 → v3: PACS 클라이언트 SCU 운영을 위한 remote_nodes 테이블 추가
+BEGIN TRANSACTION;
+
+CREATE TABLE IF NOT EXISTS remote_nodes (
+    pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_id                 TEXT NOT NULL UNIQUE,
+    name                    TEXT,
+    ae_title                TEXT NOT NULL,
+    host                    TEXT NOT NULL,
+    port                    INTEGER NOT NULL DEFAULT 104,
+    supports_find           INTEGER NOT NULL DEFAULT 1,
+    supports_move           INTEGER NOT NULL DEFAULT 1,
+    supports_get            INTEGER NOT NULL DEFAULT 0,
+    supports_store          INTEGER NOT NULL DEFAULT 1,
+    supports_worklist       INTEGER NOT NULL DEFAULT 0,
+    connection_timeout_sec  INTEGER NOT NULL DEFAULT 30,
+    dimse_timeout_sec       INTEGER NOT NULL DEFAULT 60,
+    max_associations        INTEGER NOT NULL DEFAULT 4,
+    status                  TEXT NOT NULL DEFAULT 'unknown',
+    last_verified           TEXT,
+    last_error              TEXT,
+    last_error_message      TEXT,
+    created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+    CHECK (port > 0 AND port <= 65535),
+    CHECK (status IN ('unknown', 'online', 'offline', 'error', 'verifying'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_remote_nodes_ae_title ON remote_nodes(ae_title);
+CREATE INDEX IF NOT EXISTS idx_remote_nodes_host ON remote_nodes(host);
+CREATE INDEX IF NOT EXISTS idx_remote_nodes_status ON remote_nodes(status);
+
+INSERT INTO schema_version (version, description)
+VALUES (3, 'PACS 클라이언트용 remote_nodes 테이블 추가');
+
+COMMIT;
+```
+
 ### 6.2 마이그레이션 전략
 
 ```cpp
@@ -696,7 +735,7 @@ public:
     }
 
 private:
-    static constexpr int LATEST_VERSION = 2;
+    static constexpr int LATEST_VERSION = 3;
 
     int get_current_version(sqlite3* db);
     common::Result<void> apply_migration(sqlite3* db, int version);
