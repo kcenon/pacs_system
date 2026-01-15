@@ -305,6 +305,7 @@ private:
     // Migration implementations (SQLite)
     [[nodiscard]] auto migrate_v1(sqlite3* db) -> VoidResult;
     [[nodiscard]] auto migrate_v2(sqlite3* db) -> VoidResult;
+    [[nodiscard]] auto migrate_v3(sqlite3* db) -> VoidResult;
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // ========================================================================
@@ -360,13 +361,15 @@ private:
         std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
     [[nodiscard]] auto migrate_v2(
         std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
+    [[nodiscard]] auto migrate_v3(
+        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
 
     /// Migration function registry (database_system)
     std::vector<std::pair<int, db_system_migration_function>> db_system_migrations_;
 #endif
 
     /// Latest schema version (increment when adding migrations)
-    static constexpr int LATEST_VERSION = 2;
+    static constexpr int LATEST_VERSION = 3;
 
     /// Migration function registry
     std::vector<std::pair<int, migration_function>> migrations_;

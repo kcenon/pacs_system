@@ -106,8 +106,8 @@ TEST_CASE("migration_runner initial state", "[migration][version]") {
         CHECK(runner.needs_migration(db.get()));
     }
 
-    SECTION("latest version is 2") {
-        CHECK(runner.get_latest_version() == 2);
+    SECTION("latest version is 3") {
+        CHECK(runner.get_latest_version() == 3);
     }
 
     SECTION("empty database has no history") {
@@ -128,7 +128,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result = runner.run_migrations(db.get());
         REQUIRE(result.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 2);
+        CHECK(runner.get_current_version(db.get()) == 3);
         CHECK_FALSE(runner.needs_migration(db.get()));
     }
 
@@ -139,7 +139,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result2 = runner.run_migrations(db.get());
         REQUIRE(result2.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 2);
+        CHECK(runner.get_current_version(db.get()) == 3);
     }
 
     SECTION("migration creates schema_version table") {
@@ -154,13 +154,16 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         REQUIRE(result.is_ok());
 
         auto history = runner.get_history(db.get());
-        REQUIRE(history.size() == 2);
+        REQUIRE(history.size() == 3);
         CHECK(history[0].version == 1);
         CHECK(history[0].description == "Initial schema creation");
         CHECK_FALSE(history[0].applied_at.empty());
         CHECK(history[1].version == 2);
         CHECK(history[1].description == "Add audit_log table");
         CHECK_FALSE(history[1].applied_at.empty());
+        CHECK(history[2].version == 3);
+        CHECK(history[2].description == "Add remote_nodes table for PACS client");
+        CHECK_FALSE(history[2].applied_at.empty());
     }
 }
 
@@ -375,4 +378,42 @@ TEST_CASE("migration_runner triggers update counts", "[migration][triggers]") {
         sqlite3_finalize(stmt);
         CHECK(series_count == 0);
     }
+}
+
+// ============================================================================
+// Schema Validation Tests (V2)
+// ============================================================================
+
+TEST_CASE("migration_runner v2 creates audit_log table", "[migration][v2][tables]") {
+    test_database db;
+    migration_runner runner;
+
+    auto result = runner.run_migrations(db.get());
+    REQUIRE(result.is_ok());
+
+    CHECK(db.table_exists("audit_log"));
+    CHECK(db.index_exists("idx_audit_event_type"));
+    CHECK(db.index_exists("idx_audit_timestamp"));
+    CHECK(db.index_exists("idx_audit_user"));
+    CHECK(db.index_exists("idx_audit_source_ae"));
+    CHECK(db.index_exists("idx_audit_patient"));
+    CHECK(db.index_exists("idx_audit_study"));
+    CHECK(db.index_exists("idx_audit_outcome"));
+}
+
+// ============================================================================
+// Schema Validation Tests (V3)
+// ============================================================================
+
+TEST_CASE("migration_runner v3 creates remote_nodes table", "[migration][v3][tables]") {
+    test_database db;
+    migration_runner runner;
+
+    auto result = runner.run_migrations(db.get());
+    REQUIRE(result.is_ok());
+
+    CHECK(db.table_exists("remote_nodes"));
+    CHECK(db.index_exists("idx_remote_nodes_ae_title"));
+    CHECK(db.index_exists("idx_remote_nodes_host"));
+    CHECK(db.index_exists("idx_remote_nodes_status"));
 }

@@ -859,6 +859,31 @@ if(PACS_COMMON_SYSTEM_FOUND)
     target_compile_definitions(pacs_network PUBLIC KCENON_HAS_COMMON_EXECUTOR=1)
 endif()
 
+# Client library (remote node management for SCU operations)
+add_library(pacs_client
+    src/client/remote_node_manager.cpp
+)
+target_include_directories(pacs_client
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(pacs_client
+    PUBLIC pacs_network
+)
+if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
+    target_link_libraries(pacs_client PUBLIC pacs_storage)
+endif()
+
+# Link common_system (Tier 0)
+if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+    target_include_directories(pacs_client PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    target_compile_definitions(pacs_client PUBLIC
+        KCENON_HAS_COMMON_SYSTEM=1
+        PACS_WITH_COMMON_SYSTEM=1
+    )
+endif()
+
 # Services library
 add_library(pacs_services
     src/services/verification_scp.cpp
@@ -987,6 +1012,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/sqlite_security_storage.cpp
         src/storage/migration_runner.cpp
         src/storage/index_database.cpp
+        src/storage/node_repository.cpp
     )
     target_include_directories(pacs_storage
         PUBLIC
@@ -2195,6 +2221,10 @@ endif()
 # Optional PACS libraries
 if(TARGET pacs_storage)
     pacs_apply_warnings(pacs_storage)
+endif()
+
+if(TARGET pacs_client)
+    pacs_apply_warnings(pacs_client)
 endif()
 
 if(TARGET pacs_ai)

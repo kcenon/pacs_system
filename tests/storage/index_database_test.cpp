@@ -40,7 +40,7 @@ TEST_CASE("index_database: create in-memory database", "[storage][database]") {
     auto db = std::move(result.value());
 
     CHECK(db->is_open());
-    CHECK(db->schema_version() == 2);
+    CHECK(db->schema_version() == 3);
     CHECK(db->path() == ":memory:");
 }
 
@@ -58,7 +58,7 @@ TEST_CASE("index_database: create file-based database",
         auto db = std::move(result.value());
 
         CHECK(db->is_open());
-        CHECK(db->schema_version() == 2);
+        CHECK(db->schema_version() == 3);
     }
 
     // Verify file was created
