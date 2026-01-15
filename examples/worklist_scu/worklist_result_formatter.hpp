@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace worklist_scu {
+namespace worklist_cli {
 
 /**
  * @brief Output format enumeration
@@ -447,6 +447,6 @@ private:
     output_format format_;
 };
 
-}  // namespace worklist_scu
+}  // namespace worklist_cli
 
 #endif  // WORKLIST_SCU_WORKLIST_RESULT_FORMATTER_HPP

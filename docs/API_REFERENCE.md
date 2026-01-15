@@ -1918,6 +1918,170 @@ assoc.release();
 
 ---
 
+### `pacs::services::worklist_scu`
+
+Worklist SCU (MWL C-FIND sender) for querying Modality Worklist from RIS/HIS systems.
+
+```cpp
+#include <pacs/services/worklist_scu.hpp>
+
+namespace pacs::services {
+
+// Query keys for worklist queries
+struct worklist_query_keys {
+    // Scheduled Procedure Step Attributes
+    std::string scheduled_station_ae;      // (0040,0001)
+    std::string modality;                  // (0008,0060)
+    std::string scheduled_date;            // (0040,0002) YYYYMMDD or range
+    std::string scheduled_time;            // (0040,0003)
+    std::string scheduled_physician;       // (0040,0006)
+    std::string scheduled_procedure_step_id;  // (0040,0009)
+
+    // Requested Procedure Attributes
+    std::string requested_procedure_id;
+    std::string requested_procedure_description;
+
+    // Patient Attributes
+    std::string patient_name;              // Supports wildcards
+    std::string patient_id;
+    std::string patient_birth_date;
+    std::string patient_sex;
+
+    // Visit Attributes
+    std::string accession_number;
+    std::string referring_physician;
+    std::string institution;
+};
+
+// Parsed worklist item from query response
+struct worklist_item {
+    std::string patient_name;
+    std::string patient_id;
+    std::string patient_birth_date;
+    std::string patient_sex;
+    std::string scheduled_station_ae;
+    std::string modality;
+    std::string scheduled_date;
+    std::string scheduled_time;
+    std::string scheduled_procedure_step_id;
+    std::string scheduled_procedure_step_description;
+    std::string study_instance_uid;
+    std::string accession_number;
+    std::string requested_procedure_id;
+    std::string referring_physician;
+    std::string institution;
+    core::dicom_dataset dataset;           // Original dataset
+};
+
+// Query result
+struct worklist_result {
+    std::vector<worklist_item> items;
+    uint16_t status;
+    std::chrono::milliseconds elapsed;
+    size_t total_pending;
+
+    [[nodiscard]] bool is_success() const noexcept;
+    [[nodiscard]] bool is_cancelled() const noexcept;
+};
+
+// Configuration
+struct worklist_scu_config {
+    std::chrono::milliseconds timeout{30000};
+    size_t max_results{0};       // 0 = unlimited
+    bool cancel_on_max{true};
+};
+
+class worklist_scu {
+public:
+    explicit worklist_scu(std::shared_ptr<di::ILogger> logger = nullptr);
+    explicit worklist_scu(const worklist_scu_config& config,
+                          std::shared_ptr<di::ILogger> logger = nullptr);
+
+    // Query with typed keys
+    [[nodiscard]] network::Result<worklist_result> query(
+        network::association& assoc,
+        const worklist_query_keys& keys);
+
+    // Query with raw dataset
+    [[nodiscard]] network::Result<worklist_result> query(
+        network::association& assoc,
+        const core::dicom_dataset& query_keys);
+
+    // Convenience methods
+    [[nodiscard]] network::Result<worklist_result> query_today(
+        network::association& assoc,
+        std::string_view station_ae,
+        std::string_view modality = "");
+
+    [[nodiscard]] network::Result<worklist_result> query_date_range(
+        network::association& assoc,
+        std::string_view start_date,
+        std::string_view end_date,
+        std::string_view modality = "");
+
+    [[nodiscard]] network::Result<worklist_result> query_patient(
+        network::association& assoc,
+        std::string_view patient_id);
+
+    // Streaming for large worklists
+    [[nodiscard]] network::Result<size_t> query_streaming(
+        network::association& assoc,
+        const worklist_query_keys& keys,
+        std::function<bool(const worklist_item&)> callback);
+
+    // Cancel ongoing query
+    network::Result<std::monostate> cancel(
+        network::association& assoc,
+        uint16_t message_id);
+
+    // Configuration
+    void set_config(const worklist_scu_config& config);
+    [[nodiscard]] const worklist_scu_config& config() const noexcept;
+
+    // Statistics
+    [[nodiscard]] size_t queries_performed() const noexcept;
+    [[nodiscard]] size_t total_items() const noexcept;
+    void reset_statistics() noexcept;
+};
+
+} // namespace pacs::services
+```
+
+**Usage Example:**
+
+```cpp
+// Establish association with MWL SOP Class
+association_config config;
+config.calling_ae_title = "CT_SCANNER_01";
+config.called_ae_title = "RIS_SCP";
+config.proposed_contexts.push_back({
+    1,
+    std::string(worklist_find_sop_class_uid),
+    {"1.2.840.10008.1.2.1"}
+});
+
+auto assoc_result = association::connect("ris.example.com", 104, config);
+auto& assoc = assoc_result.value();
+
+// Query today's worklist for CT modality
+worklist_scu scu;
+auto result = scu.query_today(assoc, "CT_SCANNER_01", "CT");
+
+if (result.is_ok() && result.value().is_success()) {
+    for (const auto& item : result.value().items) {
+        std::cout << "Patient: " << item.patient_name
+                  << " (" << item.patient_id << ")\n";
+        std::cout << "Scheduled: " << item.scheduled_date
+                  << " " << item.scheduled_time << "\n";
+        std::cout << "Accession: " << item.accession_number << "\n\n";
+    }
+}
+
+assoc.release();
+```
+
+---
+
 ### `pacs::services::retrieve_scu`
 
 Retrieve SCU (C-MOVE/C-GET sender) for retrieving images from remote PACS servers.
