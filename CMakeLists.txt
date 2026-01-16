@@ -1171,6 +1171,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/association_endpoints.cpp
         src/web/endpoints/dicomweb_endpoints.cpp
         src/web/endpoints/remote_nodes_endpoints.cpp
+        src/web/endpoints/jobs_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1762,6 +1763,7 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(web_tests
             PRIVATE
                 pacs_web
+                pacs_services
                 Catch2::Catch2WithMain
         )
     endif()
