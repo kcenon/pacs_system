@@ -13,6 +13,7 @@
 #include "pacs/web/endpoints/association_endpoints.hpp"
 #include "pacs/web/endpoints/audit_endpoints.hpp"
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
+#include "pacs/web/endpoints/jobs_endpoints.hpp"
 #include "pacs/web/endpoints/patient_endpoints.hpp"
 #include "pacs/web/endpoints/remote_nodes_endpoints.hpp"
 #include "pacs/web/endpoints/security_endpoints.hpp"
@@ -57,6 +58,8 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp &app,
                                       std::shared_ptr<rest_server_context> ctx);
 void register_remote_nodes_endpoints_impl(crow::SimpleApp &app,
                                           std::shared_ptr<rest_server_context> ctx);
+void register_jobs_endpoints_impl(crow::SimpleApp &app,
+                                  std::shared_ptr<rest_server_context> ctx);
 } // namespace endpoints
 
 /**
@@ -129,6 +132,12 @@ void rest_server::set_node_manager(
   impl_->context->node_manager = std::move(manager);
 }
 
+void rest_server::set_job_manager(
+    std::shared_ptr<client::job_manager> manager) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->job_manager = std::move(manager);
+}
+
 void rest_server::start() {
   if (impl_->running.exchange(true)) {
     return; // Already running
@@ -187,6 +196,7 @@ void rest_server::start_async() {
     endpoints::register_association_endpoints_impl(app, impl_->context);
     endpoints::register_dicomweb_endpoints_impl(app, impl_->context);
     endpoints::register_remote_nodes_endpoints_impl(app, impl_->context);
+    endpoints::register_jobs_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {
