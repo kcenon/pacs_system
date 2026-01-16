@@ -954,6 +954,10 @@ endif()
 
 message(STATUS "  [OK] pacs_services: ON")
 
+# Link pacs_services to pacs_client (job_manager uses SCU classes)
+# This must be done after pacs_services is defined
+target_link_libraries(pacs_client PUBLIC pacs_services)
+
 # Security library
 # Base security sources (always included)
 set(PACS_SECURITY_SOURCES
@@ -1171,6 +1175,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/association_endpoints.cpp
         src/web/endpoints/dicomweb_endpoints.cpp
         src/web/endpoints/remote_nodes_endpoints.cpp
+        src/web/endpoints/jobs_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1762,6 +1767,7 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(web_tests
             PRIVATE
                 pacs_web
+                pacs_services
                 Catch2::Catch2WithMain
         )
     endif()

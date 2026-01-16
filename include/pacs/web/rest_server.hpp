@@ -33,6 +33,7 @@ class index_database;
 
 namespace pacs::client {
 class remote_node_manager;
+class job_manager;
 } // namespace pacs::client
 
 namespace pacs::web {
@@ -143,6 +144,12 @@ public:
    * @param manager Remote node manager instance
    */
   void set_node_manager(std::shared_ptr<client::remote_node_manager> manager);
+
+  /**
+   * @brief Set job manager for async DICOM operations
+   * @param manager Job manager instance
+   */
+  void set_job_manager(std::shared_ptr<client::job_manager> manager);
 
   // =========================================================================
   // Lifecycle
