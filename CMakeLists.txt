@@ -862,6 +862,7 @@ endif()
 # Client library (remote node management for SCU operations)
 add_library(pacs_client
     src/client/remote_node_manager.cpp
+    src/client/job_manager.cpp
 )
 target_include_directories(pacs_client
     PUBLIC
