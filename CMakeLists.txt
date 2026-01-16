@@ -1821,6 +1821,31 @@ if(PACS_BUILD_TESTS)
         endif()
     endif()
 
+    # Client tests (Issue #554 - Job Manager Implementation)
+    if(TARGET pacs_client AND TARGET pacs_storage)
+        add_executable(client_tests
+            tests/client/job_manager_test.cpp
+        )
+        target_link_libraries(client_tests
+            PRIVATE
+                pacs_client
+                pacs_core
+                pacs_storage
+                pacs_network
+                pacs_services
+                Catch2::Catch2WithMain
+        )
+        if(TARGET pacs_integration)
+            target_link_libraries(client_tests PRIVATE pacs_integration)
+        endif()
+        if(TARGET thread_system_lib)
+            target_link_libraries(client_tests PRIVATE thread_system_lib)
+        endif()
+        if(TARGET common_system_lib)
+            target_link_libraries(client_tests PRIVATE common_system_lib)
+        endif()
+    endif()
+
     # Concurrency tests (Issue #337 - Lock-free structure stress tests)
     if(TARGET thread_base OR TARGET ThreadSystem)
         add_executable(concurrency_tests
@@ -1911,6 +1936,12 @@ if(PACS_BUILD_TESTS)
 
     if(TARGET di_tests)
         catch_discover_tests(di_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+
+    if(TARGET client_tests)
+        catch_discover_tests(client_tests
             PROPERTIES LABELS "unit"
         )
     endif()
