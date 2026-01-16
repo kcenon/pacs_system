@@ -954,6 +954,10 @@ endif()
 
 message(STATUS "  [OK] pacs_services: ON")
 
+# Link pacs_services to pacs_client (job_manager uses SCU classes)
+# This must be done after pacs_services is defined
+target_link_libraries(pacs_client PUBLIC pacs_services)
+
 # Security library
 # Base security sources (always included)
 set(PACS_SECURITY_SOURCES
