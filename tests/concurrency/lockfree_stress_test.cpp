@@ -648,7 +648,7 @@ TEST_CASE("lockfree_queue vs mutex_queue benchmark", "[concurrency][benchmark]")
         for (int i = 0; i < items; ++i) {
             queue.enqueue(i);
         }
-        return queue.size();
+        (void)queue.size();
     };
 
     BENCHMARK("mutex_queue single-threaded enqueue") {
@@ -656,7 +656,7 @@ TEST_CASE("lockfree_queue vs mutex_queue benchmark", "[concurrency][benchmark]")
         for (int i = 0; i < items; ++i) {
             queue.enqueue(i);
         }
-        return queue.size();
+        (void)queue.size();
     };
 
     BENCHMARK("lockfree_queue single-threaded enqueue+dequeue") {
@@ -668,7 +668,7 @@ TEST_CASE("lockfree_queue vs mutex_queue benchmark", "[concurrency][benchmark]")
         while (queue.try_dequeue()) {
             count++;
         }
-        return count;
+        (void)count;
     };
 
     BENCHMARK("mutex_queue single-threaded enqueue+dequeue") {
@@ -680,7 +680,7 @@ TEST_CASE("lockfree_queue vs mutex_queue benchmark", "[concurrency][benchmark]")
         while (queue.try_dequeue()) {
             count++;
         }
-        return count;
+        (void)count;
     };
 }
 
@@ -707,7 +707,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
             p.join();
         }
 
-        return queue.size();
+        (void)queue.size();
     };
 
     BENCHMARK("mutex_queue multi-producer") {
@@ -729,7 +729,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
             p.join();
         }
 
-        return queue.size();
+        (void)queue.size();
     };
 
     BENCHMARK("lockfree_queue MPMC") {
@@ -766,7 +766,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
             c.join();
         }
 
-        return consumed.load();
+        (void)consumed.load();
     };
 
     BENCHMARK("mutex_queue MPMC") {
@@ -803,7 +803,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
             c.join();
         }
 
-        return consumed.load();
+        (void)consumed.load();
     };
 }
 
