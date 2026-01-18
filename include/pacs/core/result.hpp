@@ -182,10 +182,6 @@ namespace error_codes {
 // Re-export common utility functions
 using kcenon::common::ok;
 using kcenon::common::make_error;
-using kcenon::common::is_ok;
-using kcenon::common::is_error;
-using kcenon::common::get_value;
-using kcenon::common::get_error;
 using kcenon::common::try_catch;
 using kcenon::common::try_catch_void;
 
