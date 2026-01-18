@@ -4,6 +4,7 @@
  *
  * @see Issue #538 - Implement Job REST API & WebSocket Progress Streaming
  * @see Issue #558 - Part 1: Jobs REST API Endpoints (CRUD)
+ * @see Issue #559 - Part 2: Jobs REST API Control Endpoints
  * @copyright Copyright (c) 2025
  * @license MIT
  */
@@ -586,6 +587,230 @@ void register_jobs_endpoints_impl(crow::SimpleApp& app,
 
                 res.code = 200;
                 res.body = progress_to_json(progress);
+                return res;
+            });
+
+    // =========================================================================
+    // Job Control Endpoints (Issue #559)
+    // =========================================================================
+
+    // POST /api/v1/jobs/<jobId>/start - Start a pending job
+    CROW_ROUTE(app, "/api/v1/jobs/<string>/start")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& /*req*/, const std::string& job_id) {
+                crow::response res;
+                res.add_header("Content-Type", "application/json");
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->job_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Job manager not configured");
+                    return res;
+                }
+
+                // Check if job exists
+                auto job = ctx->job_manager->get_job(job_id);
+                if (!job) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Job not found");
+                    return res;
+                }
+
+                auto result = ctx->job_manager->start_job(job_id);
+                if (!result.is_ok()) {
+                    res.code = 409;
+                    res.body = make_error_json("INVALID_STATE_TRANSITION",
+                                               result.error().message);
+                    return res;
+                }
+
+                // Return updated job
+                auto updated_job = ctx->job_manager->get_job(job_id);
+                if (updated_job) {
+                    res.code = 200;
+                    res.body = job_to_json(*updated_job);
+                } else {
+                    res.code = 200;
+                    res.body = R"({"job_id":")" + json_escape(job_id) +
+                               R"(","message":"Job started"})";
+                }
+                return res;
+            });
+
+    // POST /api/v1/jobs/<jobId>/pause - Pause a running job
+    CROW_ROUTE(app, "/api/v1/jobs/<string>/pause")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& /*req*/, const std::string& job_id) {
+                crow::response res;
+                res.add_header("Content-Type", "application/json");
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->job_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Job manager not configured");
+                    return res;
+                }
+
+                // Check if job exists
+                auto job = ctx->job_manager->get_job(job_id);
+                if (!job) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Job not found");
+                    return res;
+                }
+
+                auto result = ctx->job_manager->pause_job(job_id);
+                if (!result.is_ok()) {
+                    res.code = 409;
+                    res.body = make_error_json("INVALID_STATE_TRANSITION",
+                                               result.error().message);
+                    return res;
+                }
+
+                // Return updated job
+                auto updated_job = ctx->job_manager->get_job(job_id);
+                if (updated_job) {
+                    res.code = 200;
+                    res.body = job_to_json(*updated_job);
+                } else {
+                    res.code = 200;
+                    res.body = R"({"job_id":")" + json_escape(job_id) +
+                               R"(","message":"Job paused"})";
+                }
+                return res;
+            });
+
+    // POST /api/v1/jobs/<jobId>/resume - Resume a paused job
+    CROW_ROUTE(app, "/api/v1/jobs/<string>/resume")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& /*req*/, const std::string& job_id) {
+                crow::response res;
+                res.add_header("Content-Type", "application/json");
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->job_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Job manager not configured");
+                    return res;
+                }
+
+                // Check if job exists
+                auto job = ctx->job_manager->get_job(job_id);
+                if (!job) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Job not found");
+                    return res;
+                }
+
+                auto result = ctx->job_manager->resume_job(job_id);
+                if (!result.is_ok()) {
+                    res.code = 409;
+                    res.body = make_error_json("INVALID_STATE_TRANSITION",
+                                               result.error().message);
+                    return res;
+                }
+
+                // Return updated job
+                auto updated_job = ctx->job_manager->get_job(job_id);
+                if (updated_job) {
+                    res.code = 200;
+                    res.body = job_to_json(*updated_job);
+                } else {
+                    res.code = 200;
+                    res.body = R"({"job_id":")" + json_escape(job_id) +
+                               R"(","message":"Job resumed"})";
+                }
+                return res;
+            });
+
+    // POST /api/v1/jobs/<jobId>/cancel - Cancel a job
+    CROW_ROUTE(app, "/api/v1/jobs/<string>/cancel")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& /*req*/, const std::string& job_id) {
+                crow::response res;
+                res.add_header("Content-Type", "application/json");
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->job_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Job manager not configured");
+                    return res;
+                }
+
+                // Check if job exists
+                auto job = ctx->job_manager->get_job(job_id);
+                if (!job) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Job not found");
+                    return res;
+                }
+
+                auto result = ctx->job_manager->cancel_job(job_id);
+                if (!result.is_ok()) {
+                    res.code = 409;
+                    res.body = make_error_json("INVALID_STATE_TRANSITION",
+                                               result.error().message);
+                    return res;
+                }
+
+                // Return updated job
+                auto updated_job = ctx->job_manager->get_job(job_id);
+                if (updated_job) {
+                    res.code = 200;
+                    res.body = job_to_json(*updated_job);
+                } else {
+                    res.code = 200;
+                    res.body = R"({"job_id":")" + json_escape(job_id) +
+                               R"(","message":"Job cancelled"})";
+                }
+                return res;
+            });
+
+    // POST /api/v1/jobs/<jobId>/retry - Retry a failed job
+    CROW_ROUTE(app, "/api/v1/jobs/<string>/retry")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& /*req*/, const std::string& job_id) {
+                crow::response res;
+                res.add_header("Content-Type", "application/json");
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->job_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Job manager not configured");
+                    return res;
+                }
+
+                // Check if job exists
+                auto job = ctx->job_manager->get_job(job_id);
+                if (!job) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Job not found");
+                    return res;
+                }
+
+                auto result = ctx->job_manager->retry_job(job_id);
+                if (!result.is_ok()) {
+                    res.code = 409;
+                    res.body = make_error_json("INVALID_STATE_TRANSITION",
+                                               result.error().message);
+                    return res;
+                }
+
+                // Return updated job
+                auto updated_job = ctx->job_manager->get_job(job_id);
+                if (updated_job) {
+                    res.code = 200;
+                    res.body = job_to_json(*updated_job);
+                } else {
+                    res.code = 200;
+                    res.body = R"({"job_id":")" + json_escape(job_id) +
+                               R"(","message":"Job retry queued"})";
+                }
                 return res;
             });
 }
