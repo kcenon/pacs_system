@@ -53,7 +53,7 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
 
         // Submit a simple task
         std::atomic<bool> executed{false};
-        auto submit_result = pool->submit_task([&executed]() { executed = true; });
+        auto submit_result = pool->submit([&executed]() { executed = true; });
         REQUIRE(submit_result);
 
         // Wait for execution
@@ -110,7 +110,7 @@ TEST_CASE("manual worker batch enqueue - thread_adapter pattern",
 
         // Submit task
         std::atomic<bool> task_executed{false};
-        auto submit_result = pool->submit_task([&task_executed]() { task_executed = true; });
+        auto submit_result = pool->submit([&task_executed]() { task_executed = true; });
         REQUIRE(submit_result);
 
         // Wait for execution
@@ -153,7 +153,7 @@ TEST_CASE("individual worker enqueue", "[thread_system][manual][individual][!may
         // Submit task
         std::atomic<int> counter{0};
         for (int i = 0; i < 10; ++i) {
-            pool->submit_task([&counter]() { counter++; });
+            pool->submit([&counter]() { counter++; });
         }
 
         // Wait for all tasks
@@ -198,7 +198,7 @@ TEST_CASE("repeated pool lifecycle", "[thread_system][lifecycle][stress][!mayfai
 
             // Submit a task
             std::atomic<bool> done{false};
-            pool->submit_task([&done]() { done = true; });
+            pool->submit([&done]() { done = true; });
 
             // Wait
             auto start_time = std::chrono::steady_clock::now();
