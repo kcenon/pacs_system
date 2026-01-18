@@ -18,7 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>
 
-#include <kcenon/thread/lockfree/lockfree_queue.h>
+#include <kcenon/thread/concurrent/concurrent_queue.h>
 
 #include <array>
 #include <atomic>
@@ -117,7 +117,7 @@ private:
 
 TEST_CASE("lockfree_queue ThreadSanitizer verification", "[concurrency][tsan]") {
     SECTION("concurrent enqueue operations") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int threads = DEFAULT_THREAD_COUNT;
         constexpr int items_per_thread = 1000;
 
@@ -143,7 +143,7 @@ TEST_CASE("lockfree_queue ThreadSanitizer verification", "[concurrency][tsan]") 
     }
 
     SECTION("concurrent dequeue operations") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int total_items = 10000;
 
         // Pre-fill the queue
@@ -176,7 +176,7 @@ TEST_CASE("lockfree_queue ThreadSanitizer verification", "[concurrency][tsan]") 
     }
 
     SECTION("mixed producer-consumer operations") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int producers = 4;
         constexpr int consumers = 4;
         constexpr int items_per_producer = 2500;
@@ -234,7 +234,7 @@ TEST_CASE("lockfree_queue ThreadSanitizer verification", "[concurrency][tsan]") 
     }
 
     SECTION("rapid size queries during modifications") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int threads = DEFAULT_THREAD_COUNT;
         constexpr int iterations = 5000;
 
@@ -293,7 +293,7 @@ TEST_CASE("lockfree_queue ThreadSanitizer verification", "[concurrency][tsan]") 
 TEST_CASE("lockfree_queue high-contention stress", "[concurrency][stress]") {
     SECTION("high-throughput PDU processing simulation") {
         // Simulates multiple producers sending PDUs, single consumer processing
-        kcenon::thread::lockfree_queue<test_payload> queue;
+        kcenon::thread::detail::concurrent_queue<test_payload> queue;
 
         constexpr int producer_count = HIGH_THREAD_COUNT;
         constexpr int items_per_producer = HIGH_CONTENTION_ITERATIONS / producer_count;
@@ -344,7 +344,7 @@ TEST_CASE("lockfree_queue high-contention stress", "[concurrency][stress]") {
     }
 
     SECTION("saturated queue operations") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int threads = HIGH_THREAD_COUNT;
 
         std::atomic<bool> running{true};
@@ -387,7 +387,7 @@ TEST_CASE("lockfree_queue high-contention stress", "[concurrency][stress]") {
     }
 
     SECTION("wait_dequeue under contention") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int producers = 4;
         constexpr int consumers = 4;
         constexpr int items_per_producer = 5000;
@@ -449,7 +449,7 @@ TEST_CASE("lockfree_queue high-contention stress", "[concurrency][stress]") {
     }
 
     SECTION("shutdown under load") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int threads = DEFAULT_THREAD_COUNT;
 
         std::atomic<bool> running{true};
@@ -489,7 +489,7 @@ TEST_CASE("lockfree_queue high-contention stress", "[concurrency][stress]") {
 
 TEST_CASE("lockfree_queue MPMC correctness", "[concurrency][mpmc]") {
     SECTION("all items are processed exactly once") {
-        kcenon::thread::lockfree_queue<uint64_t> queue;
+        kcenon::thread::detail::concurrent_queue<uint64_t> queue;
         constexpr int producers = 4;
         constexpr int consumers = 4;
         constexpr int items_per_producer = 10000;
@@ -570,7 +570,7 @@ TEST_CASE("lockfree_queue MPMC correctness", "[concurrency][mpmc]") {
     }
 
     SECTION("ordering within single producer is preserved") {
-        kcenon::thread::lockfree_queue<std::pair<int, int>> queue;
+        kcenon::thread::detail::concurrent_queue<std::pair<int, int>> queue;
         constexpr int producers = 4;
         constexpr int items_per_producer = 5000;
 
@@ -644,7 +644,7 @@ TEST_CASE("lockfree_queue vs mutex_queue benchmark", "[concurrency][benchmark]")
     constexpr int items = 100000;
 
     BENCHMARK("lockfree_queue single-threaded enqueue") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         for (int i = 0; i < items; ++i) {
             queue.enqueue(i);
         }
@@ -660,7 +660,7 @@ TEST_CASE("lockfree_queue vs mutex_queue benchmark", "[concurrency][benchmark]")
     };
 
     BENCHMARK("lockfree_queue single-threaded enqueue+dequeue") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         for (int i = 0; i < items; ++i) {
             queue.enqueue(i);
         }
@@ -689,7 +689,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
     constexpr int items_per_thread = 25000;
 
     BENCHMARK("lockfree_queue multi-producer") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         std::vector<std::thread> producers;
         std::latch start_latch(1);
 
@@ -733,7 +733,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
     };
 
     BENCHMARK("lockfree_queue MPMC") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         std::atomic<int> consumed{0};
         std::atomic<bool> done{false};
         std::latch start_latch(1);
@@ -814,7 +814,7 @@ TEST_CASE("concurrent benchmark comparison", "[concurrency][benchmark]") {
 TEST_CASE("lockfree_queue memory safety", "[concurrency][memory]") {
     SECTION("no leaks on destruction") {
         for (int cycle = 0; cycle < 10; ++cycle) {
-            auto queue = std::make_unique<kcenon::thread::lockfree_queue<test_payload>>();
+            auto queue = std::make_unique<kcenon::thread::detail::concurrent_queue<test_payload>>();
 
             std::vector<std::thread> producers;
             for (int t = 0; t < 4; ++t) {
@@ -837,7 +837,7 @@ TEST_CASE("lockfree_queue memory safety", "[concurrency][memory]") {
     }
 
     SECTION("no use-after-free during concurrent operations") {
-        kcenon::thread::lockfree_queue<std::shared_ptr<int>> queue;
+        kcenon::thread::detail::concurrent_queue<std::shared_ptr<int>> queue;
         std::atomic<bool> running{true};
         std::atomic<int> total_ops{0};
 
@@ -881,7 +881,7 @@ TEST_CASE("lockfree_queue memory safety", "[concurrency][memory]") {
 
 TEST_CASE("lockfree_queue edge cases", "[concurrency][edge]") {
     SECTION("empty queue dequeue") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
 
         std::vector<std::thread> dequeuers;
         std::atomic<int> null_results{0};
@@ -904,7 +904,7 @@ TEST_CASE("lockfree_queue edge cases", "[concurrency][edge]") {
     }
 
     SECTION("single item rapid enqueue-dequeue") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
         constexpr int iterations = 100000;
 
         std::atomic<int> successes{0};
@@ -931,7 +931,7 @@ TEST_CASE("lockfree_queue edge cases", "[concurrency][edge]") {
     }
 
     SECTION("wait_dequeue timeout behavior") {
-        kcenon::thread::lockfree_queue<int> queue;
+        kcenon::thread::detail::concurrent_queue<int> queue;
 
         auto start = std::chrono::steady_clock::now();
         auto result = queue.wait_dequeue(100ms);
