@@ -107,7 +107,7 @@ public:
             return;
         }
 
-        logger_->log(convert_log_level(level), message);
+        (void)logger_->log(convert_to_common_log_level(level), message);
     }
 
 
@@ -166,26 +166,6 @@ public:
     }
 
 private:
-    [[nodiscard]] static auto convert_log_level(log_level level) -> kcenon::logger::log_level {
-        switch (level) {
-            case log_level::trace:
-                return kcenon::logger::log_level::trace;
-            case log_level::debug:
-                return kcenon::logger::log_level::debug;
-            case log_level::info:
-                return kcenon::logger::log_level::info;
-            case log_level::warn:
-                return kcenon::logger::log_level::warn;
-            case log_level::error:
-                return kcenon::logger::log_level::error;
-            case log_level::fatal:
-                return kcenon::logger::log_level::fatal;
-            case log_level::off:
-            default:
-                return kcenon::logger::log_level::off;
-        }
-    }
-
     [[nodiscard]] static auto convert_to_common_log_level(log_level level) -> kcenon::common::interfaces::log_level {
         switch (level) {
             case log_level::trace:
