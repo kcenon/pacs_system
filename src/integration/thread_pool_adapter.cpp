@@ -181,7 +181,9 @@ void thread_pool_adapter::submit_internal(
 
 auto thread_pool_adapter::get_thread_count() const -> std::size_t {
     std::lock_guard<std::mutex> lock(mutex_);
-    return pool_ ? pool_->get_active_worker_count() : 0;
+    // Return configured thread count if pool is initialized
+    // This reflects the expected worker count rather than transient active state
+    return initialized_ ? config_.min_threads : 0;
 }
 
 auto thread_pool_adapter::get_pending_task_count() const -> std::size_t {

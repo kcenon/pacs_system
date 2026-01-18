@@ -324,15 +324,20 @@ auto container_adapter::deserialize_dataset(
 auto container_adapter::to_binary(const core::dicom_dataset& dataset)
     -> std::vector<uint8_t> {
     auto container = serialize_dataset(dataset);
-    return container->serialize_array();
+    auto result = container->serialize(
+        container_module::value_container::serialization_format::binary);
+    if (result.is_err()) {
+        return {};
+    }
+    return result.value();
 }
 
 auto container_adapter::from_binary(std::span<const uint8_t> data)
     -> Result<core::dicom_dataset> {
     container_module::value_container container;
 
-    std::vector<uint8_t> data_vec(data.begin(), data.end());
-    if (!container.deserialize(data_vec, false)) {
+    auto deserialize_result = container.deserialize(data);
+    if (deserialize_result.is_err()) {
         return Result<core::dicom_dataset>::err(
             kcenon::common::error_info{
                 "Failed to deserialize binary data to container"
