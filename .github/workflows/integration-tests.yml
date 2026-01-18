@@ -88,12 +88,10 @@ jobs:
         repository: kcenon/monitoring_system
         path: monitoring_system
 
-    # Use fix branch until network_system PR #493 is merged
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-thread-pool-api
         path: network_system
 
     - name: Install dependencies (Ubuntu)
@@ -300,12 +298,10 @@ jobs:
         repository: kcenon/monitoring_system
         path: monitoring_system
 
-    # Use fix branch until network_system PR #493 is merged
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-thread-pool-api
         path: network_system
 
     - name: Install dependencies (Ubuntu)
@@ -653,12 +649,10 @@ jobs:
         repository: kcenon/monitoring_system
         path: monitoring_system
 
-    # Use fix branch until network_system PR #493 is merged
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-thread-pool-api
         path: network_system
 
     - name: Install dependencies (Ubuntu)
@@ -896,12 +890,10 @@ jobs:
         repository: kcenon/monitoring_system
         path: monitoring_system
 
-    # Use fix branch until network_system PR #493 is merged
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-thread-pool-api
         path: network_system
 
     - name: Install dependencies
@@ -1060,12 +1052,10 @@ jobs:
         repository: kcenon/monitoring_system
         path: monitoring_system
 
-    # Use fix branch until network_system PR #493 is merged
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-thread-pool-api
         path: network_system
 
     - name: Install dependencies
