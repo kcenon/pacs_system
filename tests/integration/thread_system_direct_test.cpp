@@ -53,8 +53,8 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
 
         // Submit a simple task
         std::atomic<bool> executed{false};
-        auto submit_result = pool->submit([&executed]() { executed = true; });
-        REQUIRE(submit_result);
+        auto submit_future = pool->submit([&executed]() { executed = true; });
+        REQUIRE(submit_future.valid());
 
         // Wait for execution
         auto start_time = std::chrono::steady_clock::now();
@@ -110,8 +110,8 @@ TEST_CASE("manual worker batch enqueue - thread_adapter pattern",
 
         // Submit task
         std::atomic<bool> task_executed{false};
-        auto submit_result = pool->submit([&task_executed]() { task_executed = true; });
-        REQUIRE(submit_result);
+        auto submit_future = pool->submit([&task_executed]() { task_executed = true; });
+        REQUIRE(submit_future.valid());
 
         // Wait for execution
         auto start_time = std::chrono::steady_clock::now();
