@@ -267,7 +267,7 @@ make_executor(std::shared_ptr<thread_pool_interface> pool_interface) {
         }
 
         std::size_t worker_count() const override {
-            return pool_ ? pool_->get_active_worker_count() : 0;
+            return pool_ ? pool_->get_thread_count() : 0;
         }
 
         bool is_running() const override {
