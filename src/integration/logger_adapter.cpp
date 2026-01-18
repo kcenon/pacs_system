@@ -186,23 +186,23 @@ private:
         }
     }
 
-    [[nodiscard]] static auto convert_to_common_log_level(log_level level) -> common::interfaces::log_level {
+    [[nodiscard]] static auto convert_to_common_log_level(log_level level) -> kcenon::common::interfaces::log_level {
         switch (level) {
             case log_level::trace:
-                return common::interfaces::log_level::trace;
+                return kcenon::common::interfaces::log_level::trace;
             case log_level::debug:
-                return common::interfaces::log_level::debug;
+                return kcenon::common::interfaces::log_level::debug;
             case log_level::info:
-                return common::interfaces::log_level::info;
+                return kcenon::common::interfaces::log_level::info;
             case log_level::warn:
-                return common::interfaces::log_level::warning;
+                return kcenon::common::interfaces::log_level::warning;
             case log_level::error:
-                return common::interfaces::log_level::error;
+                return kcenon::common::interfaces::log_level::error;
             case log_level::fatal:
-                return common::interfaces::log_level::critical;
+                return kcenon::common::interfaces::log_level::critical;
             case log_level::off:
             default:
-                return common::interfaces::log_level::off;
+                return kcenon::common::interfaces::log_level::off;
         }
     }
 

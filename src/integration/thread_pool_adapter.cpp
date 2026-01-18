@@ -167,7 +167,9 @@ void thread_pool_adapter::submit_internal(
         // Note: Priority is not currently used as the base thread_pool
         // doesn't support it. For future implementation, consider using
         // typed_thread_pool or a priority queue wrapper.
-        if (!pool_->submit_task(std::move(task))) {
+        try {
+            (void)pool_->submit(std::move(task));
+        } catch (const std::exception&) {
             throw std::runtime_error("Failed to submit task to thread pool");
         }
     }
@@ -179,7 +181,7 @@ void thread_pool_adapter::submit_internal(
 
 auto thread_pool_adapter::get_thread_count() const -> std::size_t {
     std::lock_guard<std::mutex> lock(mutex_);
-    return pool_ ? pool_->get_thread_count() : 0;
+    return pool_ ? pool_->get_active_worker_count() : 0;
 }
 
 auto thread_pool_adapter::get_pending_task_count() const -> std::size_t {
