@@ -1763,11 +1763,13 @@ if(PACS_BUILD_TESTS)
             tests/web/patient_study_endpoints_test.cpp
             tests/web/worklist_audit_endpoints_test.cpp
             tests/web/dicomweb_endpoints_test.cpp
+            tests/web/jobs_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
                 pacs_web
                 pacs_services
+                pacs_client
                 Catch2::Catch2WithMain
         )
     endif()
