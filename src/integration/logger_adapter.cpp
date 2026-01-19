@@ -5,6 +5,7 @@
 
 #include <pacs/integration/logger_adapter.hpp>
 
+#include <kcenon/common/interfaces/logger_interface.h>
 #include <kcenon/logger/core/logger.h>
 #include <kcenon/logger/interfaces/logger_types.h>
 #include <kcenon/logger/writers/console_writer.h>
@@ -48,8 +49,8 @@ public:
         logger_ = std::make_unique<kcenon::logger::logger>(
             config.async_mode, config.buffer_size);
 
-        // Set minimum log level
-        logger_->set_min_level(convert_log_level(config.min_level));
+        // Set minimum log level (ignore result for initialization)
+        (void)logger_->set_level(convert_to_common_log_level(config.min_level));
 
         // Add console writer if enabled
         if (config.enable_console) {
@@ -106,7 +107,7 @@ public:
             return;
         }
 
-        logger_->log(convert_log_level(level), message);
+        (void)logger_->log(convert_to_common_log_level(level), message);
     }
 
 
@@ -123,7 +124,7 @@ public:
     void set_min_level(log_level level) {
         min_level_.store(level);
         if (logger_) {
-            logger_->set_min_level(convert_log_level(level));
+            (void)logger_->set_level(convert_to_common_log_level(level));
         }
     }
 
@@ -165,23 +166,23 @@ public:
     }
 
 private:
-    [[nodiscard]] static auto convert_log_level(log_level level) -> kcenon::logger::log_level {
+    [[nodiscard]] static auto convert_to_common_log_level(log_level level) -> kcenon::common::interfaces::log_level {
         switch (level) {
             case log_level::trace:
-                return kcenon::logger::log_level::trace;
+                return kcenon::common::interfaces::log_level::trace;
             case log_level::debug:
-                return kcenon::logger::log_level::debug;
+                return kcenon::common::interfaces::log_level::debug;
             case log_level::info:
-                return kcenon::logger::log_level::info;
+                return kcenon::common::interfaces::log_level::info;
             case log_level::warn:
-                return kcenon::logger::log_level::warn;
+                return kcenon::common::interfaces::log_level::warning;
             case log_level::error:
-                return kcenon::logger::log_level::error;
+                return kcenon::common::interfaces::log_level::error;
             case log_level::fatal:
-                return kcenon::logger::log_level::fatal;
+                return kcenon::common::interfaces::log_level::critical;
             case log_level::off:
             default:
-                return kcenon::logger::log_level::off;
+                return kcenon::common::interfaces::log_level::off;
         }
     }
 

@@ -7,6 +7,7 @@
  *
  * @see Issue #538 - Implement Job REST API & WebSocket Progress Streaming
  * @see Issue #558 - Part 1: Jobs REST API Endpoints (CRUD)
+ * @see Issue #559 - Part 2: Jobs REST API Control Endpoints
  * @copyright Copyright (c) 2025
  * @license MIT
  */
