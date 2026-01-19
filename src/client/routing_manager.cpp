@@ -63,7 +63,7 @@ routing_manager::routing_manager(
     load_rules();
 
     if (logger_) {
-        logger_->info("routing_manager", "Initialized with {} rules", rules_.size());
+        logger_->info_fmt("routing_manager: Initialized with {} rules", rules_.size());
     }
 }
 
@@ -81,8 +81,8 @@ routing_manager::routing_manager(
     load_rules();
 
     if (logger_) {
-        logger_->info("routing_manager", "Initialized with {} rules (enabled={})",
-                     rules_.size(), enabled_.load());
+        logger_->info_fmt("routing_manager: Initialized with {} rules (enabled={})",
+                         rules_.size(), enabled_.load());
     }
 }
 
@@ -126,7 +126,7 @@ pacs::VoidResult routing_manager::add_rule(const routing_rule& rule) {
     }
 
     if (logger_) {
-        logger_->info("routing_manager", "Added rule: {} ({})", rule.rule_id, rule.name);
+        logger_->info_fmt("routing_manager: Added rule: {} ({})", rule.rule_id, rule.name);
     }
 
     return pacs::ok();
@@ -160,7 +160,7 @@ pacs::VoidResult routing_manager::update_rule(const routing_rule& rule) {
     }
 
     if (logger_) {
-        logger_->info("routing_manager", "Updated rule: {} ({})", rule.rule_id, rule.name);
+        logger_->info_fmt("routing_manager: Updated rule: {} ({})", rule.rule_id, rule.name);
     }
 
     return pacs::ok();
@@ -185,7 +185,7 @@ pacs::VoidResult routing_manager::remove_rule(std::string_view rule_id) {
     }
 
     if (logger_) {
-        logger_->info("routing_manager", "Removed rule: {}", rule_id);
+        logger_->info_fmt("routing_manager: Removed rule: {}", rule_id);
     }
 
     return pacs::ok();
@@ -368,7 +368,7 @@ void routing_manager::route(const core::dicom_dataset& dataset) {
     auto sop_instance_uid = dataset.get_string(core::tags::sop_instance_uid);
     if (sop_instance_uid.empty()) {
         if (logger_) {
-            logger_->warning("routing_manager", "Cannot route dataset without SOP Instance UID");
+            logger_->warn("routing_manager: Cannot route dataset without SOP Instance UID");
         }
         return;
     }
@@ -379,8 +379,8 @@ void routing_manager::route(const core::dicom_dataset& dataset) {
         // Update statistics
         auto stat_result = repo_->increment_triggered(rule_id);
         if (!stat_result.is_ok() && logger_) {
-            logger_->warning("routing_manager",
-                           "Failed to update statistics for rule: {}", rule_id);
+            logger_->warn_fmt("routing_manager: Failed to update statistics for rule: {}",
+                             rule_id);
         }
 
         // Notify callback
@@ -401,9 +401,8 @@ void routing_manager::route(std::string_view sop_instance_uid) {
     // Note: This would require loading the dataset from storage
     // For now, log a warning as this requires additional infrastructure
     if (logger_) {
-        logger_->warning("routing_manager",
-                        "route(sop_instance_uid) not fully implemented - "
-                        "use route(dataset) instead. UID: {}", sop_instance_uid);
+        logger_->warn_fmt("routing_manager: route(sop_instance_uid) not fully implemented - "
+                         "use route(dataset) instead. UID: {}", sop_instance_uid);
     }
 }
 
@@ -414,14 +413,14 @@ void routing_manager::route(std::string_view sop_instance_uid) {
 void routing_manager::enable() {
     enabled_.store(true);
     if (logger_) {
-        logger_->info("routing_manager", "Routing enabled");
+        logger_->info("routing_manager: Routing enabled");
     }
 }
 
 void routing_manager::disable() {
     enabled_.store(false);
     if (logger_) {
-        logger_->info("routing_manager", "Routing disabled");
+        logger_->info("routing_manager: Routing disabled");
     }
 }
 
@@ -449,7 +448,7 @@ void routing_manager::attach_to_storage_scp(services::storage_scp& scp) {
         });
 
     if (logger_) {
-        logger_->info("routing_manager", "Attached to Storage SCP");
+        logger_->info("routing_manager: Attached to Storage SCP");
     }
 }
 
@@ -459,7 +458,7 @@ void routing_manager::detach_from_storage_scp() {
         attached_scp_ = nullptr;
 
         if (logger_) {
-            logger_->info("routing_manager", "Detached from Storage SCP");
+            logger_->info("routing_manager: Detached from Storage SCP");
         }
     }
 }
@@ -543,8 +542,8 @@ void routing_manager::reset_statistics() {
     for (const auto& rule : rules_) {
         auto result = repo_->reset_statistics(rule.rule_id);
         if (!result.is_ok() && logger_) {
-            logger_->warning("routing_manager",
-                           "Failed to reset statistics for rule: {}", rule.rule_id);
+            logger_->warn_fmt("routing_manager: Failed to reset statistics for rule: {}",
+                             rule.rule_id);
         }
     }
 }
@@ -656,9 +655,8 @@ void routing_manager::execute_actions(const std::string& sop_instance_uid,
     for (const auto& action : actions) {
         if (action.destination_node_id.empty()) {
             if (logger_) {
-                logger_->warning("routing_manager",
-                               "Skipping action with empty destination for UID: {}",
-                               sop_instance_uid);
+                logger_->warn_fmt("routing_manager: Skipping action with empty destination for UID: {}",
+                                 sop_instance_uid);
             }
             continue;
         }
@@ -674,17 +672,15 @@ void routing_manager::execute_actions(const std::string& sop_instance_uid,
         ++total_forwarded_;
 
         if (logger_) {
-            logger_->info("routing_manager",
-                        "Created forward job {} for UID {} -> {}",
-                        job_id, sop_instance_uid, action.destination_node_id);
+            logger_->info_fmt("routing_manager: Created forward job {} for UID {} -> {}",
+                             job_id, sop_instance_uid, action.destination_node_id);
         }
 
         // Note: Delayed forwarding would require a scheduler/timer
         // For now, jobs are created immediately
         if (action.delay.count() > 0 && logger_) {
-            logger_->debug("routing_manager",
-                          "Delayed forwarding ({} min) not yet implemented",
-                          action.delay.count());
+            logger_->debug_fmt("routing_manager: Delayed forwarding ({} min) not yet implemented",
+                              action.delay.count());
         }
     }
 }
