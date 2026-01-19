@@ -455,7 +455,7 @@ int perform_mpps_set(const options& opts) {
     }
 
     // Perform N-SET using convenience methods
-    network::Result<mpps_result> set_result = [&]() {
+    auto set_result = [&]() {
         if (opts.status == cli_status_type::completed) {
             // Build performed series info if provided
             std::vector<performed_series_info> performed_series;
