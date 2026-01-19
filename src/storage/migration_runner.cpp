@@ -31,6 +31,7 @@ migration_runner::migration_runner() {
     migrations_.push_back({2, [this](sqlite3* db) { return migrate_v2(db); }});
     migrations_.push_back({3, [this](sqlite3* db) { return migrate_v3(db); }});
     migrations_.push_back({4, [this](sqlite3* db) { return migrate_v4(db); }});
+    migrations_.push_back({5, [this](sqlite3* db) { return migrate_v5(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (database_system version)
@@ -49,6 +50,10 @@ migration_runner::migration_runner() {
     db_system_migrations_.push_back(
         {4, [this](std::shared_ptr<database::database_manager> db) {
             return migrate_v4(db);
+        }});
+    db_system_migrations_.push_back(
+        {5, [this](std::shared_ptr<database::database_manager> db) {
+            return migrate_v5(db);
         }});
 #endif
 }
@@ -644,6 +649,44 @@ auto migration_runner::migrate_v4(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 4, "Add jobs table for async DICOM operations");
+}
+
+auto migration_runner::migrate_v5(sqlite3* db) -> VoidResult {
+    // V5: Add routing_rules table for auto-forwarding
+    const char* sql = R"(
+        -- =====================================================================
+        -- ROUTING_RULES TABLE (for auto-forwarding - Routing Manager)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS routing_rules (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            rule_id             TEXT NOT NULL UNIQUE,
+            name                TEXT NOT NULL,
+            description         TEXT,
+            enabled             INTEGER NOT NULL DEFAULT 1,
+            priority            INTEGER NOT NULL DEFAULT 0,
+            conditions_json     TEXT NOT NULL DEFAULT '[]',
+            actions_json        TEXT NOT NULL DEFAULT '[]',
+            schedule_cron       TEXT,
+            effective_from      TEXT,
+            effective_until     TEXT,
+            triggered_count     INTEGER DEFAULT 0,
+            success_count       INTEGER DEFAULT 0,
+            failure_count       INTEGER DEFAULT 0,
+            last_triggered      TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_routing_rules_enabled ON routing_rules(enabled);
+        CREATE INDEX IF NOT EXISTS idx_routing_rules_priority ON routing_rules(priority DESC);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 5, "Add routing_rules table for auto-forwarding");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1268,6 +1311,45 @@ auto migration_runner::migrate_v4(
     }
 
     return record_migration(db_manager, 4, "Add jobs table for async DICOM operations");
+}
+
+auto migration_runner::migrate_v5(
+    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+    // V5: Add routing_rules table for auto-forwarding
+    const std::string sql = R"(
+        -- =====================================================================
+        -- ROUTING_RULES TABLE (for auto-forwarding - Routing Manager)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS routing_rules (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            rule_id             TEXT NOT NULL UNIQUE,
+            name                TEXT NOT NULL,
+            description         TEXT,
+            enabled             INTEGER NOT NULL DEFAULT 1,
+            priority            INTEGER NOT NULL DEFAULT 0,
+            conditions_json     TEXT NOT NULL DEFAULT '[]',
+            actions_json        TEXT NOT NULL DEFAULT '[]',
+            schedule_cron       TEXT,
+            effective_from      TEXT,
+            effective_until     TEXT,
+            triggered_count     INTEGER DEFAULT 0,
+            success_count       INTEGER DEFAULT 0,
+            failure_count       INTEGER DEFAULT 0,
+            last_triggered      TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_routing_rules_enabled ON routing_rules(enabled);
+        CREATE INDEX IF NOT EXISTS idx_routing_rules_priority ON routing_rules(priority DESC);
+    )";
+
+    auto result = execute_sql(db_manager, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db_manager, 5, "Add routing_rules table for auto-forwarding");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
