@@ -29,6 +29,7 @@ class index_database;
 namespace pacs::client {
 class remote_node_manager;
 class job_manager;
+class routing_manager;
 } // namespace pacs::client
 
 namespace pacs::web {
@@ -60,6 +61,9 @@ struct rest_server_context {
 
   /// Job manager for async DICOM operations
   std::shared_ptr<client::job_manager> job_manager;
+
+  /// Routing manager for auto-forwarding rules
+  std::shared_ptr<client::routing_manager> routing_manager;
 };
 
 namespace endpoints {
