@@ -1,10 +1,11 @@
 /**
  * @file jobs_endpoints.cpp
- * @brief Job management REST API endpoints implementation
+ * @brief Job management REST API and WebSocket endpoints implementation
  *
  * @see Issue #538 - Implement Job REST API & WebSocket Progress Streaming
  * @see Issue #558 - Part 1: Jobs REST API Endpoints (CRUD)
  * @see Issue #559 - Part 2: Jobs REST API Control Endpoints
+ * @see Issue #560 - Part 3: Jobs WebSocket Progress Streaming
  * @copyright Copyright (c) 2025
  * @license MIT
  */
@@ -27,11 +28,178 @@
 #include "pacs/web/rest_types.hpp"
 
 #include <chrono>
+#include <mutex>
+#include <shared_mutex>
 #include <sstream>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace pacs::web::endpoints {
 
 namespace {
+
+// =============================================================================
+// WebSocket Subscriber Management (Issue #560)
+// =============================================================================
+
+/**
+ * @brief Global state for WebSocket subscribers
+ *
+ * Manages connections for job progress streaming.
+ * Thread-safe via shared_mutex for concurrent read access.
+ */
+struct ws_subscriber_state {
+    /// Connections subscribed to specific job progress
+    std::unordered_map<std::string, std::unordered_set<crow::websocket::connection*>>
+        job_subscribers;
+
+    /// Connections subscribed to all job updates
+    std::unordered_set<crow::websocket::connection*> all_jobs_subscribers;
+
+    /// Mutex for thread-safe access
+    mutable std::shared_mutex mutex;
+
+    /// Singleton instance
+    static ws_subscriber_state& instance() {
+        static ws_subscriber_state state;
+        return state;
+    }
+
+    /**
+     * @brief Add subscriber for specific job
+     */
+    void add_job_subscriber(const std::string& job_id,
+                            crow::websocket::connection* conn) {
+        std::unique_lock lock(mutex);
+        job_subscribers[job_id].insert(conn);
+    }
+
+    /**
+     * @brief Remove subscriber for specific job
+     */
+    void remove_job_subscriber(const std::string& job_id,
+                               crow::websocket::connection* conn) {
+        std::unique_lock lock(mutex);
+        auto it = job_subscribers.find(job_id);
+        if (it != job_subscribers.end()) {
+            it->second.erase(conn);
+            if (it->second.empty()) {
+                job_subscribers.erase(it);
+            }
+        }
+    }
+
+    /**
+     * @brief Add subscriber for all jobs
+     */
+    void add_all_jobs_subscriber(crow::websocket::connection* conn) {
+        std::unique_lock lock(mutex);
+        all_jobs_subscribers.insert(conn);
+    }
+
+    /**
+     * @brief Remove subscriber for all jobs
+     */
+    void remove_all_jobs_subscriber(crow::websocket::connection* conn) {
+        std::unique_lock lock(mutex);
+        all_jobs_subscribers.erase(conn);
+    }
+
+    /**
+     * @brief Remove connection from all subscriptions
+     */
+    void remove_connection(crow::websocket::connection* conn) {
+        std::unique_lock lock(mutex);
+        all_jobs_subscribers.erase(conn);
+        for (auto& [job_id, subscribers] : job_subscribers) {
+            subscribers.erase(conn);
+        }
+    }
+
+    /**
+     * @brief Broadcast progress update to job subscribers
+     */
+    void broadcast_progress(const std::string& job_id, const std::string& message) {
+        std::shared_lock lock(mutex);
+
+        // Send to specific job subscribers
+        auto it = job_subscribers.find(job_id);
+        if (it != job_subscribers.end()) {
+            for (auto* conn : it->second) {
+                conn->send_text(message);
+            }
+        }
+
+        // Send to all-jobs subscribers
+        for (auto* conn : all_jobs_subscribers) {
+            conn->send_text(message);
+        }
+    }
+};
+
+/**
+ * @brief Format progress update as WebSocket message JSON
+ */
+std::string make_progress_message(const std::string& job_id,
+                                  const client::job_progress& progress) {
+    std::ostringstream oss;
+    oss << R"({"type":"progress","job_id":")" << json_escape(job_id)
+        << R"(","progress":{)"
+        << R"("total_items":)" << progress.total_items
+        << R"(,"completed_items":)" << progress.completed_items
+        << R"(,"failed_items":)" << progress.failed_items
+        << R"(,"skipped_items":)" << progress.skipped_items
+        << R"(,"bytes_transferred":)" << progress.bytes_transferred
+        << R"(,"percent_complete":)" << progress.percent_complete;
+
+    if (!progress.current_item.empty()) {
+        oss << R"(,"current_item":")" << json_escape(progress.current_item) << '"';
+    }
+
+    if (!progress.current_item_description.empty()) {
+        oss << R"(,"current_item_description":")"
+            << json_escape(progress.current_item_description) << '"';
+    }
+
+    oss << R"(,"elapsed_ms":)" << progress.elapsed.count()
+        << R"(,"estimated_remaining_ms":)" << progress.estimated_remaining.count()
+        << R"(}})";
+    return oss.str();
+}
+
+/**
+ * @brief Format status change as WebSocket message JSON
+ */
+std::string make_status_message(const std::string& job_id,
+                                client::job_status old_status,
+                                client::job_status new_status) {
+    std::ostringstream oss;
+    oss << R"({"type":"status_change","job_id":")" << json_escape(job_id)
+        << R"(","old_status":")" << client::to_string(old_status)
+        << R"(","new_status":")" << client::to_string(new_status)
+        << R"("})";
+    return oss.str();
+}
+
+/**
+ * @brief Format job completion as WebSocket message JSON
+ */
+std::string make_completion_message(const std::string& job_id,
+                                    const client::job_record& record) {
+    std::ostringstream oss;
+    oss << R"({"type":"completed","job_id":")" << json_escape(job_id)
+        << R"(","status":")" << client::to_string(record.status)
+        << R"(","progress":{)"
+        << R"("total_items":)" << record.progress.total_items
+        << R"(,"completed_items":)" << record.progress.completed_items
+        << R"(,"failed_items":)" << record.progress.failed_items
+        << R"(,"percent_complete":)" << record.progress.percent_complete
+        << R"(}})";
+    return oss.str();
+}
+
+// Flag to track if callbacks are registered
+static std::atomic<bool> g_callbacks_registered{false};
 
 /**
  * @brief Add CORS headers to response
@@ -813,6 +981,122 @@ void register_jobs_endpoints_impl(crow::SimpleApp& app,
                 }
                 return res;
             });
+
+    // =========================================================================
+    // WebSocket Endpoints (Issue #560)
+    // =========================================================================
+
+    // Register job_manager callbacks for broadcasting (only once)
+    if (ctx->job_manager && !g_callbacks_registered.exchange(true)) {
+        // Progress callback - broadcasts to all subscribers
+        ctx->job_manager->set_progress_callback(
+            [](const std::string& job_id, const client::job_progress& progress) {
+                auto message = make_progress_message(job_id, progress);
+                ws_subscriber_state::instance().broadcast_progress(job_id, message);
+            });
+
+        // Completion callback - broadcasts final status
+        ctx->job_manager->set_completion_callback(
+            [](const std::string& job_id, const client::job_record& record) {
+                auto message = make_completion_message(job_id, record);
+                ws_subscriber_state::instance().broadcast_progress(job_id, message);
+            });
+    }
+
+    // WS /api/v1/jobs/<jobId>/progress/stream - Stream progress for specific job
+    // Note: URL parameters in WebSocket routes require using onaccept to extract
+    // the job_id from the request URL and store it in userdata
+    CROW_WEBSOCKET_ROUTE(app, "/api/v1/jobs/<string>/progress/stream")
+        .onaccept([ctx](const crow::request& req, void** userdata) -> bool {
+            // Extract job_id from URL: /api/v1/jobs/{job_id}/progress/stream
+            std::string url = req.url;
+            // Find the job_id between /jobs/ and /progress
+            const std::string prefix = "/api/v1/jobs/";
+            const std::string suffix = "/progress/stream";
+
+            if (url.find(prefix) != 0) {
+                return false;
+            }
+
+            auto suffix_pos = url.rfind(suffix);
+            if (suffix_pos == std::string::npos) {
+                return false;
+            }
+
+            std::string job_id = url.substr(prefix.length(),
+                                            suffix_pos - prefix.length());
+
+            if (job_id.empty()) {
+                return false;
+            }
+
+            // Verify job manager is available
+            if (!ctx->job_manager) {
+                return false;
+            }
+
+            // Verify job exists
+            auto job = ctx->job_manager->get_job(job_id);
+            if (!job) {
+                return false;
+            }
+
+            // Store job_id in userdata (allocate on heap)
+            *userdata = new std::string(job_id);
+            return true;
+        })
+        .onopen([ctx](crow::websocket::connection& conn) {
+            auto* job_id_ptr = static_cast<std::string*>(conn.userdata());
+            if (!job_id_ptr || !ctx->job_manager) {
+                conn.send_text(R"({"error":"Invalid connection state"})");
+                conn.close("Invalid state");
+                return;
+            }
+
+            const std::string& job_id = *job_id_ptr;
+
+            // Subscribe to job updates
+            ws_subscriber_state::instance().add_job_subscriber(job_id, &conn);
+
+            // Send initial progress
+            auto progress = ctx->job_manager->get_progress(job_id);
+            conn.send_text(make_progress_message(job_id, progress));
+        })
+        .onclose([](crow::websocket::connection& conn,
+                    const std::string& /*reason*/, uint16_t /*code*/) {
+            auto* job_id_ptr = static_cast<std::string*>(conn.userdata());
+            if (job_id_ptr) {
+                ws_subscriber_state::instance().remove_job_subscriber(*job_id_ptr, &conn);
+                delete job_id_ptr;
+                conn.userdata(nullptr);
+            }
+        })
+        .onmessage([](crow::websocket::connection& /*conn*/,
+                      const std::string& /*data*/, bool /*is_binary*/) {
+            // Client messages not expected, but handle gracefully
+        });
+
+    // WS /api/v1/jobs/stream - Stream all job updates
+    CROW_WEBSOCKET_ROUTE(app, "/api/v1/jobs/stream")
+        .onaccept([ctx](const crow::request& /*req*/, void** /*userdata*/) -> bool {
+            // Only accept if job_manager is available
+            return ctx->job_manager != nullptr;
+        })
+        .onopen([](crow::websocket::connection& conn) {
+            // Subscribe to all job updates
+            ws_subscriber_state::instance().add_all_jobs_subscriber(&conn);
+
+            // Send initial connected message
+            conn.send_text(R"({"type":"connected","message":"Subscribed to all job updates"})");
+        })
+        .onclose([](crow::websocket::connection& conn,
+                    const std::string& /*reason*/, uint16_t /*code*/) {
+            ws_subscriber_state::instance().remove_all_jobs_subscriber(&conn);
+        })
+        .onmessage([](crow::websocket::connection& /*conn*/,
+                      const std::string& /*data*/, bool /*is_binary*/) {
+            // Client messages not expected, but handle gracefully
+        });
 }
 
 } // namespace pacs::web::endpoints
