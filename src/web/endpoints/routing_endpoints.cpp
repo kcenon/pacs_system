@@ -713,6 +713,83 @@ void register_routing_endpoints_impl(crow::SimpleApp& app,
             res.body = R"({"status":"success"})";
             return res;
         });
+
+    // POST /api/v1/routing/enable - Enable routing globally
+    CROW_ROUTE(app, "/api/v1/routing/enable")
+        .methods(crow::HTTPMethod::POST)([ctx](const crow::request& /*req*/) {
+            crow::response res;
+            res.add_header("Content-Type", "application/json");
+            add_cors_headers(res, *ctx);
+
+            if (!ctx->routing_manager) {
+                res.code = 503;
+                res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                           "Routing manager not configured");
+                return res;
+            }
+
+            ctx->routing_manager->enable();
+
+            res.code = 200;
+            res.body = R"({"enabled":true})";
+            return res;
+        });
+
+    // POST /api/v1/routing/disable - Disable routing globally
+    CROW_ROUTE(app, "/api/v1/routing/disable")
+        .methods(crow::HTTPMethod::POST)([ctx](const crow::request& /*req*/) {
+            crow::response res;
+            res.add_header("Content-Type", "application/json");
+            add_cors_headers(res, *ctx);
+
+            if (!ctx->routing_manager) {
+                res.code = 503;
+                res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                           "Routing manager not configured");
+                return res;
+            }
+
+            ctx->routing_manager->disable();
+
+            res.code = 200;
+            res.body = R"({"enabled":false})";
+            return res;
+        });
+
+    // GET /api/v1/routing/status - Get routing status and statistics
+    CROW_ROUTE(app, "/api/v1/routing/status")
+        .methods(crow::HTTPMethod::GET)([ctx](const crow::request& /*req*/) {
+            crow::response res;
+            res.add_header("Content-Type", "application/json");
+            add_cors_headers(res, *ctx);
+
+            if (!ctx->routing_manager) {
+                res.code = 503;
+                res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                           "Routing manager not configured");
+                return res;
+            }
+
+            bool enabled = ctx->routing_manager->is_enabled();
+            auto all_rules = ctx->routing_manager->list_rules();
+            auto enabled_rules = ctx->routing_manager->list_enabled_rules();
+            auto stats = ctx->routing_manager->get_statistics();
+
+            std::ostringstream oss;
+            oss << R"({"enabled":)" << (enabled ? "true" : "false")
+                << R"(,"rules_count":)" << all_rules.size()
+                << R"(,"enabled_rules_count":)" << enabled_rules.size()
+                << R"(,"statistics":{)"
+                << R"("total_evaluated":)" << stats.total_evaluated
+                << R"(,"total_matched":)" << stats.total_matched
+                << R"(,"total_forwarded":)" << stats.total_forwarded
+                << R"(,"total_failed":)" << stats.total_failed
+                << R"(}})";
+
+            res.code = 200;
+            res.body = oss.str();
+            return res;
+        });
 }
 
 } // namespace pacs::web::endpoints
