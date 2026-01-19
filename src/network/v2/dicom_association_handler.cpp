@@ -6,7 +6,6 @@
 #include "pacs/network/v2/dicom_association_handler.hpp"
 #include "pacs/network/pdu_encoder.hpp"
 #include "pacs/network/pdu_decoder.hpp"
-#include "pacs/integration/thread_adapter.hpp"
 
 #include <span>
 #include <sstream>

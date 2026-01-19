@@ -7,7 +7,6 @@
 #include "pacs/storage/index_database.hpp"
 #include "pacs/integration/logger_adapter.hpp"
 #include "pacs/integration/monitoring_adapter.hpp"
-#include "pacs/integration/thread_adapter.hpp"
 #include "pacs/integration/executor_adapter.hpp"
 
 #include <kcenon/common/interfaces/executor_interface.h>
