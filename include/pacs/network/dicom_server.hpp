@@ -30,6 +30,10 @@
 #include <unordered_map>
 #include <vector>
 
+namespace pacs::integration {
+class thread_pool_interface;
+}  // namespace pacs::integration
+
 namespace pacs::network {
 
 // =============================================================================
@@ -106,9 +110,24 @@ public:
 
     /**
      * @brief Construct server with configuration
+     *
+     * Creates a default thread pool adapter internally.
+     *
      * @param config Server configuration
      */
     explicit dicom_server(const server_config& config);
+
+    /**
+     * @brief Construct server with configuration and injected thread pool
+     *
+     * Allows dependency injection of the thread pool for testability.
+     *
+     * @param config Server configuration
+     * @param thread_pool Thread pool interface for task submission
+     */
+    dicom_server(
+        const server_config& config,
+        std::shared_ptr<integration::thread_pool_interface> thread_pool);
 
     /**
      * @brief Destructor (stops server if running)
@@ -301,6 +320,9 @@ private:
     // =========================================================================
     // Member Variables
     // =========================================================================
+
+    /// Thread pool for asynchronous task execution
+    std::shared_ptr<integration::thread_pool_interface> thread_pool_;
 
     /// Server configuration
     server_config config_;

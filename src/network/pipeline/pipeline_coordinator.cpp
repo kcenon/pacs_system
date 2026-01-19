@@ -7,7 +7,6 @@
 
 #include <pacs/network/pipeline/pipeline_coordinator.hpp>
 #include <pacs/integration/thread_pool_adapter.hpp>
-#include <pacs/integration/thread_adapter.hpp>
 
 #include <chrono>
 

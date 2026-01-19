@@ -6,7 +6,7 @@
 #include "pacs/network/dicom_server.hpp"
 #include "pacs/network/pdu_encoder.hpp"
 #include "pacs/network/pdu_decoder.hpp"
-#include "pacs/integration/thread_adapter.hpp"
+#include "pacs/integration/thread_pool_adapter.hpp"
 #include "pacs/core/events.hpp"
 
 #include <kcenon/common/patterns/event_bus.h>
@@ -34,9 +34,24 @@ static std::map<uint16_t, dicom_server*> server_registry_;
 // =============================================================================
 
 dicom_server::dicom_server(const server_config& config)
-    : config_(config) {
+    : dicom_server(
+          config,
+          std::make_shared<integration::thread_pool_adapter>(
+              integration::thread_pool_config{})) {
+}
+
+dicom_server::dicom_server(
+    const server_config& config,
+    std::shared_ptr<integration::thread_pool_interface> thread_pool)
+    : thread_pool_(std::move(thread_pool))
+    , config_(config) {
     stats_.start_time = clock::now();
     stats_.last_activity = stats_.start_time;
+
+    // Ensure thread pool is started
+    if (thread_pool_ && !thread_pool_->is_running()) {
+        static_cast<void>(thread_pool_->start());
+    }
 }
 
 dicom_server::~dicom_server() {
@@ -616,19 +631,11 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
             info_ptr->processing = true;
 
             // Submit with high priority - association message handling is important
-            // TODO(#412): Migrate to thread_pool_adapter with DI
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
-            integration::thread_adapter::submit_fire_and_forget(
+            thread_pool_->submit_fire_and_forget(
                 [this, info_ptr]() {
                     message_loop(*info_ptr);
                 }
             );
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
         }
     }
 
