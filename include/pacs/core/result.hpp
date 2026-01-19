@@ -166,6 +166,9 @@ namespace error_codes {
     constexpr int mpps_handler_not_set = service_base - 70;
     constexpr int mpps_invalid_state = service_base - 71;
     constexpr int mpps_unexpected_command = service_base - 72;
+    constexpr int mpps_context_not_accepted = service_base - 73;
+    constexpr int mpps_missing_uid = service_base - 74;
+    constexpr int mpps_invalid_status_transition = service_base - 75;
 
     // Worklist service errors (-880 to -889)
     constexpr int worklist_handler_not_set = service_base - 80;

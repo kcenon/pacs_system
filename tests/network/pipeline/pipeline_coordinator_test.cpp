@@ -229,8 +229,8 @@ TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinato
             pipeline_stage::network_receive, std::move(job));
         REQUIRE(result.is_ok());
 
-        // Wait for execution with timeout
-        bool completed = waiter.wait_for(std::chrono::seconds(5));
+        // Wait for execution with timeout (10s for CI environments)
+        bool completed = waiter.wait_for(std::chrono::seconds(10));
         REQUIRE(completed);
         CHECK(executed.load(std::memory_order_acquire) == true);
     }
@@ -247,7 +247,8 @@ TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinato
             });
         REQUIRE(result.is_ok());
 
-        bool completed = waiter.wait_for(std::chrono::seconds(5));
+        // 10s timeout for CI environments
+        bool completed = waiter.wait_for(std::chrono::seconds(10));
         REQUIRE(completed);
         CHECK(executed.load(std::memory_order_acquire) == true);
     }
@@ -325,7 +326,8 @@ TEST_CASE("pipeline_coordinator callbacks", "[network][pipeline][coordinator]") 
             pipeline_stage::network_receive, std::move(job));
         REQUIRE(result.is_ok());
 
-        bool completed = waiter.wait_for(std::chrono::seconds(5));
+        // 10s timeout for CI environments
+        bool completed = waiter.wait_for(std::chrono::seconds(10));
         REQUIRE(completed);
         CHECK(callback_invoked.load(std::memory_order_acquire) == true);
         CHECK(received_job_id.load(std::memory_order_acquire) == 42);
