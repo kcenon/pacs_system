@@ -1179,6 +1179,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/dicomweb_endpoints.cpp
         src/web/endpoints/remote_nodes_endpoints.cpp
         src/web/endpoints/jobs_endpoints.cpp
+        src/web/endpoints/routing_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC

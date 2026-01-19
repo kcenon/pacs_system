@@ -34,6 +34,7 @@ class index_database;
 namespace pacs::client {
 class remote_node_manager;
 class job_manager;
+class routing_manager;
 } // namespace pacs::client
 
 namespace pacs::web {
@@ -150,6 +151,12 @@ public:
    * @param manager Job manager instance
    */
   void set_job_manager(std::shared_ptr<client::job_manager> manager);
+
+  /**
+   * @brief Set routing manager for auto-forwarding rules
+   * @param manager Routing manager instance
+   */
+  void set_routing_manager(std::shared_ptr<client::routing_manager> manager);
 
   // =========================================================================
   // Lifecycle
