@@ -78,23 +78,23 @@ kcenon::common::Result<std::future<void>> thread_pool_executor_adapter::execute(
 
     ++pending_count_;
 
-    bool submitted = pool_->submit_task(
-        [this, shared_job, promise]() mutable {
-            try {
-                auto result = shared_job->execute();
-                if (result.is_ok()) {
-                    promise->set_value();
-                } else {
-                    promise->set_exception(std::make_exception_ptr(
-                        std::runtime_error(result.error().message)));
+    try {
+        (void)pool_->submit(
+            [this, shared_job, promise]() mutable {
+                try {
+                    auto result = shared_job->execute();
+                    if (result.is_ok()) {
+                        promise->set_value();
+                    } else {
+                        promise->set_exception(std::make_exception_ptr(
+                            std::runtime_error(result.error().message)));
+                    }
+                } catch (...) {
+                    promise->set_exception(std::current_exception());
                 }
-            } catch (...) {
-                promise->set_exception(std::current_exception());
-            }
-            --pending_count_;
-        });
-
-    if (!submitted) {
+                --pending_count_;
+            });
+    } catch (const std::exception&) {
         --pending_count_;
         return kcenon::common::Result<std::future<void>>(
             kcenon::common::error_info{-3, "Failed to submit task to thread pool", "executor"});
@@ -172,7 +172,11 @@ kcenon::common::Result<std::future<void>> thread_pool_executor_adapter::execute_
                 }
 
                 if (task && pool_ && pool_->is_running()) {
-                    pool_->submit_task(std::move(task));
+                    try {
+                        (void)pool_->submit(std::move(task));
+                    } catch (...) {
+                        // Ignore submit failures in delayed task scheduler
+                    }
                 }
             }
         });
@@ -184,7 +188,7 @@ kcenon::common::Result<std::future<void>> thread_pool_executor_adapter::execute_
 }
 
 std::size_t thread_pool_executor_adapter::worker_count() const {
-    return pool_ ? pool_->get_thread_count() : 0;
+    return pool_ ? pool_->get_active_worker_count() : 0;
 }
 
 bool thread_pool_executor_adapter::is_running() const {

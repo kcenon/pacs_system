@@ -132,12 +132,14 @@ void thread_adapter::submit_job_internal(std::function<void()> task,
         }
     }
 
-    // Use the simplified submit_task API
+    // Use the unified submit API (fire-and-forget for void tasks)
     // Note: Priority is not currently used as the base thread_pool doesn't support it.
     // For future implementation, consider using typed_thread_pool or a priority queue wrapper.
     std::lock_guard<std::mutex> lock(mutex_);
     if (pool_) {
-        if (!pool_->submit_task(std::move(task))) {
+        try {
+            (void)pool_->submit(std::move(task));
+        } catch (const std::exception&) {
             throw std::runtime_error("Failed to submit task to thread pool");
         }
     }
@@ -150,7 +152,7 @@ void thread_adapter::submit_job_internal(std::function<void()> task,
 auto thread_adapter::get_thread_count() -> std::size_t {
     std::lock_guard<std::mutex> lock(mutex_);
     if (pool_) {
-        return pool_->get_thread_count();
+        return pool_->get_active_worker_count();
     }
     return 0;
 }
