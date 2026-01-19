@@ -1,5 +1,13 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
-import type { ApiError, WorklistItemInput } from '../types/api';
+import type {
+  ApiError,
+  WorklistItemInput,
+  Job,
+  JobListResponse,
+  JobProgress,
+  JobQuery,
+  CreateJobRequest,
+} from '../types/api';
 
 const API_BASE_URL = '/api/v1';
 
@@ -216,6 +224,56 @@ class ApiClient {
     const response = await this.client.get('/audit/logs', {
       params: { limit, offset: 0 },
     });
+    return response.data;
+  }
+
+  // Job endpoints
+  async getJobs(params?: JobQuery): Promise<JobListResponse> {
+    const response = await this.client.get('/jobs', { params });
+    return response.data;
+  }
+
+  async getJob(jobId: string): Promise<Job> {
+    const response = await this.client.get(`/jobs/${encodeURIComponent(jobId)}`);
+    return response.data;
+  }
+
+  async createJob(job: CreateJobRequest): Promise<Job> {
+    const response = await this.client.post('/jobs', job);
+    return response.data;
+  }
+
+  async deleteJob(jobId: string): Promise<void> {
+    await this.client.delete(`/jobs/${encodeURIComponent(jobId)}`);
+  }
+
+  async getJobProgress(jobId: string): Promise<JobProgress> {
+    const response = await this.client.get(`/jobs/${encodeURIComponent(jobId)}/progress`);
+    return response.data;
+  }
+
+  async startJob(jobId: string): Promise<Job> {
+    const response = await this.client.post(`/jobs/${encodeURIComponent(jobId)}/start`);
+    return response.data;
+  }
+
+  async pauseJob(jobId: string): Promise<Job> {
+    const response = await this.client.post(`/jobs/${encodeURIComponent(jobId)}/pause`);
+    return response.data;
+  }
+
+  async resumeJob(jobId: string): Promise<Job> {
+    const response = await this.client.post(`/jobs/${encodeURIComponent(jobId)}/resume`);
+    return response.data;
+  }
+
+  async cancelJob(jobId: string): Promise<Job> {
+    const response = await this.client.post(`/jobs/${encodeURIComponent(jobId)}/cancel`);
+    return response.data;
+  }
+
+  async retryJob(jobId: string): Promise<Job> {
+    const response = await this.client.post(`/jobs/${encodeURIComponent(jobId)}/retry`);
     return response.data;
   }
 }
