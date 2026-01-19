@@ -295,3 +295,69 @@ export interface ApiError {
     message: string;
   };
 }
+
+// Job types - aligned with backend pacs::client::job_types
+export type JobType = 'query' | 'retrieve' | 'store' | 'export' | 'import' | 'prefetch' | 'sync';
+export type JobStatus = 'pending' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'paused';
+export type JobPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export interface JobProgress {
+  total_items: number;
+  completed_items: number;
+  failed_items: number;
+  skipped_items: number;
+  bytes_transferred: number;
+  percent_complete: number;
+  current_item?: string;
+  current_item_description?: string;
+  elapsed_ms: number;
+  estimated_remaining_ms: number;
+}
+
+export interface Job {
+  job_id: string;
+  type: JobType;
+  status: JobStatus;
+  priority: JobPriority;
+  source_node_id?: string;
+  destination_node_id?: string;
+  patient_id?: string;
+  study_uid?: string;
+  series_uid?: string;
+  progress: JobProgress;
+  error_message?: string;
+  error_details?: string;
+  retry_count: number;
+  max_retries: number;
+  created_at?: string;
+  queued_at?: string;
+  started_at?: string;
+  completed_at?: string;
+  created_by?: string;
+}
+
+export interface JobQuery {
+  status?: JobStatus;
+  type?: JobType;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateJobRequest {
+  type: JobType;
+  source_node_id?: string;
+  destination_node_id?: string;
+  study_uid?: string;
+  series_uid?: string;
+  instance_uids?: string[];
+  patient_id?: string;
+  patient_name?: string;
+  node_id?: string;
+  query_level?: string;
+  priority?: JobPriority;
+}
+
+export interface JobListResponse {
+  jobs: Job[];
+  total: number;
+}
