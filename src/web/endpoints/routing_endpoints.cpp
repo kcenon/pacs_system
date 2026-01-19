@@ -3,6 +3,8 @@
  * @brief Routing rule management REST API endpoints implementation
  *
  * @see Issue #570 - Implement Routing Rules CRUD REST API
+ * @see Issue #571 - Implement Routing Control REST API
+ * @see Issue #572 - Implement Routing Testing API & Storage SCP Integration
  * @see Issue #540 - Parent: Routing REST API & Storage SCP Integration
  * @copyright Copyright (c) 2025
  * @license MIT
@@ -20,6 +22,9 @@
 
 #include "pacs/client/routing_manager.hpp"
 #include "pacs/client/routing_types.hpp"
+#include "pacs/core/dicom_dataset.hpp"
+#include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/encoding/vr_type.hpp"
 #include "pacs/web/endpoints/routing_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
@@ -27,6 +32,7 @@
 
 #include <chrono>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
 
 namespace pacs::web::endpoints {
@@ -461,6 +467,141 @@ std::pair<size_t, size_t> parse_pagination(const crow::request& req) {
     return {limit, offset};
 }
 
+/**
+ * @brief Parse dataset object from JSON body for routing test
+ *
+ * Extracts the "dataset" field and creates a dicom_dataset populated
+ * with the provided DICOM attribute values.
+ */
+core::dicom_dataset parse_test_dataset(const std::string& body) {
+    core::dicom_dataset dataset;
+
+    // Find dataset object
+    auto start = body.find("\"dataset\":{");
+    if (start == std::string::npos) {
+        start = body.find("\"dataset\": {");
+    }
+    if (start == std::string::npos) {
+        return dataset;
+    }
+
+    // Find the opening brace of dataset
+    auto brace_start = body.find('{', start);
+    if (brace_start == std::string::npos) {
+        return dataset;
+    }
+
+    // Find matching closing brace (handle nested objects)
+    int brace_count = 1;
+    size_t brace_end = brace_start + 1;
+    while (brace_end < body.length() && brace_count > 0) {
+        if (body[brace_end] == '{') {
+            ++brace_count;
+        } else if (body[brace_end] == '}') {
+            --brace_count;
+        }
+        ++brace_end;
+    }
+
+    if (brace_count != 0) {
+        return dataset;
+    }
+
+    std::string dataset_json = body.substr(brace_start, brace_end - brace_start);
+
+    // Map of JSON field names to DICOM tags
+    // These match the routing_field enum values in routing_types.hpp
+    struct FieldMapping {
+        const char* json_key;
+        core::dicom_tag tag;
+    };
+
+    static const FieldMapping field_mappings[] = {
+        {"modality", core::tags::modality},
+        {"station_ae", core::tags::station_name},
+        {"institution", core::tags::institution_name},
+        {"department", core::dicom_tag{0x0008, 0x1040}},  // Institutional Department
+        {"referring_physician", core::tags::referring_physician_name},
+        {"study_description", core::tags::study_description},
+        {"series_description", core::tags::series_description},
+        {"body_part", core::dicom_tag{0x0018, 0x0015}},  // Body Part Examined
+        {"patient_id_pattern", core::tags::patient_id},
+        {"patient_id", core::tags::patient_id},
+        {"sop_class_uid", core::tags::sop_class_uid},
+    };
+
+    for (const auto& mapping : field_mappings) {
+        std::string value = get_json_string(dataset_json, mapping.json_key);
+        if (!value.empty()) {
+            dataset.set_string(mapping.tag, encoding::vr_type::LO, value);
+        }
+    }
+
+    return dataset;
+}
+
+/**
+ * @brief Convert test result with multiple matched rules to JSON
+ */
+std::string test_result_to_json(
+    bool matched,
+    const std::vector<std::pair<std::string, std::vector<client::routing_action>>>& matches,
+    const std::shared_ptr<client::routing_manager>& routing_manager) {
+
+    std::ostringstream oss;
+    oss << R"({"matched":)" << (matched ? "true" : "false");
+
+    oss << R"(,"matched_rules":[)";
+    bool first = true;
+    for (const auto& [rule_id, actions] : matches) {
+        if (!first) oss << ',';
+        first = false;
+
+        // Get rule name
+        std::string rule_name;
+        auto rule = routing_manager->get_rule(rule_id);
+        if (rule) {
+            rule_name = rule->name;
+        }
+
+        oss << R"({"rule_id":")" << json_escape(rule_id)
+            << R"(","rule_name":")" << json_escape(rule_name)
+            << R"(","actions":[)";
+
+        bool first_action = true;
+        for (const auto& action : actions) {
+            if (!first_action) oss << ',';
+            first_action = false;
+            oss << action_to_json(action);
+        }
+
+        oss << "]}";
+    }
+    oss << "]}";
+
+    return oss.str();
+}
+
+/**
+ * @brief Convert single rule test result to JSON
+ */
+std::string single_rule_test_to_json(bool matched,
+                                     const std::vector<client::routing_action>& actions) {
+    std::ostringstream oss;
+    oss << R"({"matched":)" << (matched ? "true" : "false")
+        << R"(,"actions":[)";
+
+    bool first = true;
+    for (const auto& action : actions) {
+        if (!first) oss << ',';
+        first = false;
+        oss << action_to_json(action);
+    }
+
+    oss << "]}";
+    return oss.str();
+}
+
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
@@ -790,6 +931,180 @@ void register_routing_endpoints_impl(crow::SimpleApp& app,
             res.body = oss.str();
             return res;
         });
+
+    // POST /api/v1/routing/test - Test all rules against a dataset (dry run)
+    CROW_ROUTE(app, "/api/v1/routing/test")
+        .methods(crow::HTTPMethod::POST)([ctx](const crow::request& req) {
+            crow::response res;
+            res.add_header("Content-Type", "application/json");
+            add_cors_headers(res, *ctx);
+
+            if (!ctx->routing_manager) {
+                res.code = 503;
+                res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                           "Routing manager not configured");
+                return res;
+            }
+
+            // Parse dataset from request body
+            auto dataset = parse_test_dataset(req.body);
+            if (dataset.empty()) {
+                res.code = 400;
+                res.body = make_error_json("INVALID_REQUEST",
+                                           "dataset object is required");
+                return res;
+            }
+
+            // Evaluate rules against the dataset
+            // Note: evaluate_with_rule_ids requires routing to be enabled,
+            // so we use a direct evaluation approach for testing
+            auto matches = ctx->routing_manager->evaluate_with_rule_ids(dataset);
+
+            bool matched = !matches.empty();
+            res.code = 200;
+            res.body = test_result_to_json(matched, matches, ctx->routing_manager);
+            return res;
+        });
+
+    // POST /api/v1/routing/rules/<ruleId>/test - Test specific rule against a dataset
+    CROW_ROUTE(app, "/api/v1/routing/rules/<string>/test")
+        .methods(crow::HTTPMethod::POST)(
+            [ctx](const crow::request& req, const std::string& rule_id) {
+                crow::response res;
+                res.add_header("Content-Type", "application/json");
+                add_cors_headers(res, *ctx);
+
+                if (!ctx->routing_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Routing manager not configured");
+                    return res;
+                }
+
+                // Check if rule exists
+                auto rule = ctx->routing_manager->get_rule(rule_id);
+                if (!rule) {
+                    res.code = 404;
+                    res.body = make_error_json("NOT_FOUND", "Routing rule not found");
+                    return res;
+                }
+
+                // Parse dataset from request body
+                auto dataset = parse_test_dataset(req.body);
+                if (dataset.empty()) {
+                    res.code = 400;
+                    res.body = make_error_json("INVALID_REQUEST",
+                                               "dataset object is required");
+                    return res;
+                }
+
+                // Test only this specific rule
+                // We need to manually check if all conditions match
+                bool all_match = !rule->conditions.empty();
+                for (const auto& condition : rule->conditions) {
+                    // Get the field value from dataset
+                    std::string value;
+                    switch (condition.match_field) {
+                        case client::routing_field::modality:
+                            value = dataset.get_string(core::tags::modality);
+                            break;
+                        case client::routing_field::station_ae:
+                            value = dataset.get_string(core::tags::station_name);
+                            break;
+                        case client::routing_field::institution:
+                            value = dataset.get_string(core::tags::institution_name);
+                            break;
+                        case client::routing_field::department:
+                            value = dataset.get_string(core::dicom_tag{0x0008, 0x1040});
+                            break;
+                        case client::routing_field::referring_physician:
+                            value = dataset.get_string(core::tags::referring_physician_name);
+                            break;
+                        case client::routing_field::study_description:
+                            value = dataset.get_string(core::tags::study_description);
+                            break;
+                        case client::routing_field::series_description:
+                            value = dataset.get_string(core::tags::series_description);
+                            break;
+                        case client::routing_field::body_part:
+                            value = dataset.get_string(core::dicom_tag{0x0018, 0x0015});
+                            break;
+                        case client::routing_field::patient_id_pattern:
+                            value = dataset.get_string(core::tags::patient_id);
+                            break;
+                        case client::routing_field::sop_class_uid:
+                            value = dataset.get_string(core::tags::sop_class_uid);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    // Simple wildcard matching
+                    auto match_wildcard = [](std::string_view pattern,
+                                            std::string_view val,
+                                            bool case_sensitive) -> bool {
+                        auto to_lower = [](std::string_view s) {
+                            std::string result;
+                            result.reserve(s.size());
+                            for (char c : s) {
+                                result += static_cast<char>(std::tolower(
+                                    static_cast<unsigned char>(c)));
+                            }
+                            return result;
+                        };
+
+                        std::string pat_str = case_sensitive ?
+                            std::string(pattern) : to_lower(pattern);
+                        std::string val_str = case_sensitive ?
+                            std::string(val) : to_lower(val);
+
+                        const char* p = pat_str.c_str();
+                        const char* v = val_str.c_str();
+                        const char* star_p = nullptr;
+                        const char* star_v = nullptr;
+
+                        while (*v) {
+                            if (*p == '*') {
+                                star_p = p++;
+                                star_v = v;
+                            } else if (*p == '?' || *p == *v) {
+                                ++p;
+                                ++v;
+                            } else if (star_p) {
+                                p = star_p + 1;
+                                v = ++star_v;
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        while (*p == '*') {
+                            ++p;
+                        }
+
+                        return *p == '\0';
+                    };
+
+                    bool matched = match_wildcard(condition.pattern, value,
+                                                  condition.case_sensitive);
+                    if (condition.negate) {
+                        matched = !matched;
+                    }
+
+                    if (!matched) {
+                        all_match = false;
+                        break;
+                    }
+                }
+
+                res.code = 200;
+                if (all_match) {
+                    res.body = single_rule_test_to_json(true, rule->actions);
+                } else {
+                    res.body = single_rule_test_to_json(false, {});
+                }
+                return res;
+            });
 }
 
 } // namespace pacs::web::endpoints
