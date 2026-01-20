@@ -327,7 +327,10 @@ std::unordered_map<std::string, std::string> metadata_service::read_dicom_tags(
         // Get element value
         const auto* elem = dataset.get(tag);
         if (elem != nullptr) {
-            result[tag_hex] = elem->as_string();
+            auto str_result = elem->as_string();
+            if (str_result.is_ok()) {
+                result[tag_hex] = str_result.value();
+            }
         }
     }
 
@@ -600,7 +603,10 @@ voi_lut_info metadata_service::get_voi_lut(std::string_view sop_instance_uid) {
     const auto* we_elem =
         ds.get(pacs::core::dicom_tag{0x0028, 0x1055});
     if (we_elem != nullptr) {
-        info.window_explanations = parse_string_list(we_elem->as_string());
+        auto we_result = we_elem->as_string();
+        if (we_result.is_ok()) {
+            info.window_explanations = parse_string_list(we_result.value());
+        }
     }
 
     // Rescale Slope
@@ -655,22 +661,28 @@ frame_info metadata_service::get_frame_info(std::string_view sop_instance_uid) {
     // Number of Frames (0028,0008)
     const auto* nf_elem = ds.get(pacs::core::dicom_tag{0x0028, 0x0008});
     if (nf_elem != nullptr) {
-        try {
-            info.total_frames = static_cast<uint32_t>(std::stoul(nf_elem->as_string()));
-        } catch (...) {
-            info.total_frames = 1;
+        auto nf_result = nf_elem->as_string();
+        if (nf_result.is_ok()) {
+            try {
+                info.total_frames = static_cast<uint32_t>(std::stoul(nf_result.value()));
+            } catch (...) {
+                info.total_frames = 1;
+            }
         }
     }
 
     // Frame Time (0018,1063) - in milliseconds
     const auto* ft_elem = ds.get(pacs::core::dicom_tag{0x0018, 0x1063});
     if (ft_elem != nullptr) {
-        try {
-            info.frame_time = std::stod(ft_elem->as_string());
-            if (info.frame_time.has_value() && info.frame_time.value() > 0) {
-                info.frame_rate = 1000.0 / info.frame_time.value();
+        auto ft_result = ft_elem->as_string();
+        if (ft_result.is_ok()) {
+            try {
+                info.frame_time = std::stod(ft_result.value());
+                if (info.frame_time.has_value() && info.frame_time.value() > 0) {
+                    info.frame_rate = 1000.0 / info.frame_time.value();
+                }
+            } catch (...) {
             }
-        } catch (...) {
         }
     }
 
