@@ -21,6 +21,7 @@
 #include "pacs/web/endpoints/series_endpoints.hpp"
 #include "pacs/web/endpoints/study_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
+#include "pacs/web/endpoints/thumbnail_endpoints.hpp"
 #include "pacs/web/endpoints/worklist_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_server.hpp"
@@ -63,6 +64,8 @@ void register_jobs_endpoints_impl(crow::SimpleApp &app,
                                   std::shared_ptr<rest_server_context> ctx);
 void register_routing_endpoints_impl(crow::SimpleApp &app,
                                      std::shared_ptr<rest_server_context> ctx);
+void register_thumbnail_endpoints_impl(crow::SimpleApp &app,
+                                       std::shared_ptr<rest_server_context> ctx);
 } // namespace endpoints
 
 /**
@@ -207,6 +210,7 @@ void rest_server::start_async() {
     endpoints::register_remote_nodes_endpoints_impl(app, impl_->context);
     endpoints::register_jobs_endpoints_impl(app, impl_->context);
     endpoints::register_routing_endpoints_impl(app, impl_->context);
+    endpoints::register_thumbnail_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {
