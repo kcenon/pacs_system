@@ -128,13 +128,11 @@ public:
     /// Destructor
     ~thumbnail_service();
 
-    /// Non-copyable
+    /// Non-copyable, non-movable (due to shared_mutex member)
     thumbnail_service(const thumbnail_service&) = delete;
     thumbnail_service& operator=(const thumbnail_service&) = delete;
-
-    /// Movable
-    thumbnail_service(thumbnail_service&&) noexcept;
-    thumbnail_service& operator=(thumbnail_service&&) noexcept;
+    thumbnail_service(thumbnail_service&&) = delete;
+    thumbnail_service& operator=(thumbnail_service&&) = delete;
 
     // =========================================================================
     // Thumbnail Generation

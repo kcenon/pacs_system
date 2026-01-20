@@ -40,10 +40,6 @@ thumbnail_service::thumbnail_service(
 
 thumbnail_service::~thumbnail_service() = default;
 
-thumbnail_service::thumbnail_service(thumbnail_service&&) noexcept = default;
-thumbnail_service& thumbnail_service::operator=(thumbnail_service&&) noexcept =
-    default;
-
 // =============================================================================
 // Thumbnail Generation
 // =============================================================================
