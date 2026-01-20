@@ -92,7 +92,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-submit-api-for-thread-system-501
+        ref: main
         path: network_system
 
     - name: Install dependencies (Ubuntu)
@@ -303,7 +303,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-submit-api-for-thread-system-501
+        ref: main
         path: network_system
 
     - name: Install dependencies (Ubuntu)
@@ -655,7 +655,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-submit-api-for-thread-system-501
+        ref: main
         path: network_system
 
     - name: Install dependencies (Ubuntu)
@@ -897,7 +897,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-submit-api-for-thread-system-501
+        ref: main
         path: network_system
 
     - name: Install dependencies
@@ -1060,7 +1060,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/network_system
-        ref: fix/update-submit-api-for-thread-system-501
+        ref: main
         path: network_system
 
     - name: Install dependencies
