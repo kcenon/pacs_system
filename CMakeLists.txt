@@ -865,6 +865,7 @@ add_library(pacs_client
     src/client/job_manager.cpp
     src/client/routing_manager.cpp
     src/client/prefetch_manager.cpp
+    src/client/sync_manager.cpp
 )
 target_include_directories(pacs_client
     PUBLIC
@@ -1024,6 +1025,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/job_repository.cpp
         src/storage/routing_repository.cpp
         src/storage/prefetch_repository.cpp
+        src/storage/sync_repository.cpp
     )
     target_include_directories(pacs_storage
         PUBLIC
@@ -1836,12 +1838,13 @@ if(PACS_BUILD_TESTS)
         endif()
     endif()
 
-    # Client tests (Issue #554 - Job Manager Implementation, Issue #539 - Routing Manager, Issue #541 - Prefetch Manager)
+    # Client tests (Issue #554 - Job Manager, Issue #539 - Routing Manager, Issue #541 - Prefetch Manager, Issue #542 - Sync Manager)
     if(TARGET pacs_client AND TARGET pacs_storage)
         add_executable(client_tests
             tests/client/job_manager_test.cpp
             tests/client/routing_manager_test.cpp
             tests/client/prefetch_manager_test.cpp
+            tests/client/sync_manager_test.cpp
         )
         target_link_libraries(client_tests
             PRIVATE

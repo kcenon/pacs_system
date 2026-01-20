@@ -32,6 +32,7 @@ migration_runner::migration_runner() {
     migrations_.push_back({3, [this](sqlite3* db) { return migrate_v3(db); }});
     migrations_.push_back({4, [this](sqlite3* db) { return migrate_v4(db); }});
     migrations_.push_back({5, [this](sqlite3* db) { return migrate_v5(db); }});
+    migrations_.push_back({6, [this](sqlite3* db) { return migrate_v6(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (database_system version)
@@ -54,6 +55,10 @@ migration_runner::migration_runner() {
     db_system_migrations_.push_back(
         {5, [this](std::shared_ptr<database::database_manager> db) {
             return migrate_v5(db);
+        }});
+    db_system_migrations_.push_back(
+        {6, [this](std::shared_ptr<database::database_manager> db) {
+            return migrate_v6(db);
         }});
 #endif
 }
@@ -687,6 +692,92 @@ auto migration_runner::migrate_v5(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 5, "Add routing_rules table for auto-forwarding");
+}
+
+auto migration_runner::migrate_v6(sqlite3* db) -> VoidResult {
+    // V6: Add sync tables for bidirectional synchronization
+    const char* sql = R"(
+        -- =====================================================================
+        -- SYNC_CONFIGS TABLE (for Sync Manager)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS sync_configs (
+            pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            config_id               TEXT NOT NULL UNIQUE,
+            source_node_id          TEXT NOT NULL,
+            name                    TEXT NOT NULL,
+            enabled                 INTEGER NOT NULL DEFAULT 1,
+            lookback_hours          INTEGER NOT NULL DEFAULT 24,
+            modalities_json         TEXT DEFAULT '[]',
+            patient_patterns_json   TEXT DEFAULT '[]',
+            sync_direction          TEXT NOT NULL DEFAULT 'pull',
+            delete_missing          INTEGER NOT NULL DEFAULT 0,
+            overwrite_existing      INTEGER NOT NULL DEFAULT 0,
+            sync_metadata_only      INTEGER NOT NULL DEFAULT 0,
+            schedule_cron           TEXT,
+            last_sync               TEXT,
+            last_successful_sync    TEXT,
+            total_syncs             INTEGER DEFAULT 0,
+            studies_synced          INTEGER DEFAULT 0,
+            created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (sync_direction IN ('pull', 'push', 'bidirectional'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_sync_configs_enabled ON sync_configs(enabled);
+        CREATE INDEX IF NOT EXISTS idx_sync_configs_source ON sync_configs(source_node_id);
+
+        -- =====================================================================
+        -- SYNC_CONFLICTS TABLE (for conflict tracking)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS sync_conflicts (
+            pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            config_id               TEXT NOT NULL,
+            study_uid               TEXT NOT NULL,
+            patient_id              TEXT,
+            conflict_type           TEXT NOT NULL,
+            local_modified          TEXT,
+            remote_modified         TEXT,
+            local_instance_count    INTEGER DEFAULT 0,
+            remote_instance_count   INTEGER DEFAULT 0,
+            resolved                INTEGER NOT NULL DEFAULT 0,
+            resolution              TEXT,
+            detected_at             TEXT NOT NULL DEFAULT (datetime('now')),
+            resolved_at             TEXT,
+            UNIQUE (config_id, study_uid),
+            CHECK (conflict_type IN ('missing_local', 'missing_remote', 'modified', 'count_mismatch')),
+            CHECK (resolution IS NULL OR resolution IN ('prefer_local', 'prefer_remote', 'prefer_newer'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_sync_conflicts_config ON sync_conflicts(config_id);
+        CREATE INDEX IF NOT EXISTS idx_sync_conflicts_resolved ON sync_conflicts(resolved);
+        CREATE INDEX IF NOT EXISTS idx_sync_conflicts_study ON sync_conflicts(study_uid);
+
+        -- =====================================================================
+        -- SYNC_HISTORY TABLE (for sync operation history)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS sync_history (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            config_id           TEXT NOT NULL,
+            job_id              TEXT NOT NULL,
+            success             INTEGER NOT NULL DEFAULT 0,
+            studies_checked     INTEGER DEFAULT 0,
+            studies_synced      INTEGER DEFAULT 0,
+            conflicts_found     INTEGER DEFAULT 0,
+            errors_json         TEXT DEFAULT '[]',
+            started_at          TEXT NOT NULL,
+            completed_at        TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_sync_history_config ON sync_history(config_id);
+        CREATE INDEX IF NOT EXISTS idx_sync_history_started ON sync_history(started_at DESC);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 6, "Add sync tables for bidirectional synchronization");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1350,6 +1441,93 @@ auto migration_runner::migrate_v5(
     }
 
     return record_migration(db_manager, 5, "Add routing_rules table for auto-forwarding");
+}
+
+auto migration_runner::migrate_v6(
+    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+    // V6: Add sync tables for bidirectional synchronization
+    const std::string sql = R"(
+        -- =====================================================================
+        -- SYNC_CONFIGS TABLE (for Sync Manager)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS sync_configs (
+            pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            config_id               TEXT NOT NULL UNIQUE,
+            source_node_id          TEXT NOT NULL,
+            name                    TEXT NOT NULL,
+            enabled                 INTEGER NOT NULL DEFAULT 1,
+            lookback_hours          INTEGER NOT NULL DEFAULT 24,
+            modalities_json         TEXT DEFAULT '[]',
+            patient_patterns_json   TEXT DEFAULT '[]',
+            sync_direction          TEXT NOT NULL DEFAULT 'pull',
+            delete_missing          INTEGER NOT NULL DEFAULT 0,
+            overwrite_existing      INTEGER NOT NULL DEFAULT 0,
+            sync_metadata_only      INTEGER NOT NULL DEFAULT 0,
+            schedule_cron           TEXT,
+            last_sync               TEXT,
+            last_successful_sync    TEXT,
+            total_syncs             INTEGER DEFAULT 0,
+            studies_synced          INTEGER DEFAULT 0,
+            created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (sync_direction IN ('pull', 'push', 'bidirectional'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_sync_configs_enabled ON sync_configs(enabled);
+        CREATE INDEX IF NOT EXISTS idx_sync_configs_source ON sync_configs(source_node_id);
+
+        -- =====================================================================
+        -- SYNC_CONFLICTS TABLE (for conflict tracking)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS sync_conflicts (
+            pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            config_id               TEXT NOT NULL,
+            study_uid               TEXT NOT NULL,
+            patient_id              TEXT,
+            conflict_type           TEXT NOT NULL,
+            local_modified          TEXT,
+            remote_modified         TEXT,
+            local_instance_count    INTEGER DEFAULT 0,
+            remote_instance_count   INTEGER DEFAULT 0,
+            resolved                INTEGER NOT NULL DEFAULT 0,
+            resolution              TEXT,
+            detected_at             TEXT NOT NULL DEFAULT (datetime('now')),
+            resolved_at             TEXT,
+            UNIQUE (config_id, study_uid),
+            CHECK (conflict_type IN ('missing_local', 'missing_remote', 'modified', 'count_mismatch')),
+            CHECK (resolution IS NULL OR resolution IN ('prefer_local', 'prefer_remote', 'prefer_newer'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_sync_conflicts_config ON sync_conflicts(config_id);
+        CREATE INDEX IF NOT EXISTS idx_sync_conflicts_resolved ON sync_conflicts(resolved);
+        CREATE INDEX IF NOT EXISTS idx_sync_conflicts_study ON sync_conflicts(study_uid);
+
+        -- =====================================================================
+        -- SYNC_HISTORY TABLE (for sync operation history)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS sync_history (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            config_id           TEXT NOT NULL,
+            job_id              TEXT NOT NULL,
+            success             INTEGER NOT NULL DEFAULT 0,
+            studies_checked     INTEGER DEFAULT 0,
+            studies_synced      INTEGER DEFAULT 0,
+            conflicts_found     INTEGER DEFAULT 0,
+            errors_json         TEXT DEFAULT '[]',
+            started_at          TEXT NOT NULL,
+            completed_at        TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_sync_history_config ON sync_history(config_id);
+        CREATE INDEX IF NOT EXISTS idx_sync_history_started ON sync_history(started_at DESC);
+    )";
+
+    auto result = execute_sql(db_manager, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db_manager, 6, "Add sync tables for bidirectional synchronization");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
