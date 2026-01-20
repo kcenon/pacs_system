@@ -1172,6 +1172,7 @@ endif()
 if(TARGET Crow::Crow)
     add_library(pacs_web
         src/web/rest_server.cpp
+        src/web/thumbnail_service.cpp
         src/web/endpoints/system_endpoints.cpp
         src/web/endpoints/security_endpoints.cpp
         src/web/endpoints/patient_endpoints.cpp
@@ -1184,6 +1185,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/remote_nodes_endpoints.cpp
         src/web/endpoints/jobs_endpoints.cpp
         src/web/endpoints/routing_endpoints.cpp
+        src/web/endpoints/thumbnail_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1773,6 +1775,7 @@ if(PACS_BUILD_TESTS)
             tests/web/worklist_audit_endpoints_test.cpp
             tests/web/dicomweb_endpoints_test.cpp
             tests/web/jobs_endpoints_test.cpp
+            tests/web/thumbnail_service_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
