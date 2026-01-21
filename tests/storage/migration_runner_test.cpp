@@ -106,8 +106,8 @@ TEST_CASE("migration_runner initial state", "[migration][version]") {
         CHECK(runner.needs_migration(db.get()));
     }
 
-    SECTION("latest version is 6") {
-        CHECK(runner.get_latest_version() == 6);
+    SECTION("latest version is 7") {
+        CHECK(runner.get_latest_version() == 7);
     }
 
     SECTION("empty database has no history") {
@@ -128,7 +128,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result = runner.run_migrations(db.get());
         REQUIRE(result.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 6);
+        CHECK(runner.get_current_version(db.get()) == 7);
         CHECK_FALSE(runner.needs_migration(db.get()));
     }
 
@@ -139,7 +139,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result2 = runner.run_migrations(db.get());
         REQUIRE(result2.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 6);
+        CHECK(runner.get_current_version(db.get()) == 7);
     }
 
     SECTION("migration creates schema_version table") {
@@ -154,7 +154,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         REQUIRE(result.is_ok());
 
         auto history = runner.get_history(db.get());
-        REQUIRE(history.size() == 6);
+        REQUIRE(history.size() == 7);
         CHECK(history[0].version == 1);
         CHECK(history[0].description == "Initial schema creation");
         CHECK_FALSE(history[0].applied_at.empty());
@@ -173,6 +173,9 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         CHECK(history[5].version == 6);
         CHECK(history[5].description == "Add sync tables for bidirectional synchronization");
         CHECK_FALSE(history[5].applied_at.empty());
+        CHECK(history[6].version == 7);
+        CHECK(history[6].description == "Add annotation and measurement tables");
+        CHECK_FALSE(history[6].applied_at.empty());
     }
 }
 
