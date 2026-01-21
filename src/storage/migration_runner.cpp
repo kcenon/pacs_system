@@ -33,6 +33,7 @@ migration_runner::migration_runner() {
     migrations_.push_back({4, [this](sqlite3* db) { return migrate_v4(db); }});
     migrations_.push_back({5, [this](sqlite3* db) { return migrate_v5(db); }});
     migrations_.push_back({6, [this](sqlite3* db) { return migrate_v6(db); }});
+    migrations_.push_back({7, [this](sqlite3* db) { return migrate_v7(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (database_system version)
@@ -59,6 +60,10 @@ migration_runner::migration_runner() {
     db_system_migrations_.push_back(
         {6, [this](std::shared_ptr<database::database_manager> db) {
             return migrate_v6(db);
+        }});
+    db_system_migrations_.push_back(
+        {7, [this](std::shared_ptr<database::database_manager> db) {
+            return migrate_v7(db);
         }});
 #endif
 }
@@ -778,6 +783,109 @@ auto migration_runner::migrate_v6(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 6, "Add sync tables for bidirectional synchronization");
+}
+
+auto migration_runner::migrate_v7(sqlite3* db) -> VoidResult {
+    // V7: Add annotation and measurement tables for viewer functionality
+    const char* sql = R"(
+        -- =====================================================================
+        -- ANNOTATIONS TABLE (for image annotations)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS annotations (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            annotation_id       TEXT NOT NULL UNIQUE,
+            study_uid           TEXT NOT NULL,
+            series_uid          TEXT,
+            sop_instance_uid    TEXT,
+            frame_number        INTEGER,
+            user_id             TEXT NOT NULL,
+            annotation_type     TEXT NOT NULL,
+            geometry_json       TEXT NOT NULL,
+            text                TEXT,
+            style_json          TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (annotation_type IN ('arrow', 'line', 'rectangle', 'ellipse', 'polygon', 'freehand', 'text', 'angle', 'roi'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_annotations_study ON annotations(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_annotations_instance ON annotations(sop_instance_uid);
+        CREATE INDEX IF NOT EXISTS idx_annotations_user ON annotations(user_id);
+
+        -- =====================================================================
+        -- MEASUREMENTS TABLE (for image measurements)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS measurements (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            measurement_id      TEXT NOT NULL UNIQUE,
+            sop_instance_uid    TEXT NOT NULL,
+            frame_number        INTEGER,
+            user_id             TEXT NOT NULL,
+            measurement_type    TEXT NOT NULL,
+            geometry_json       TEXT NOT NULL,
+            value               REAL NOT NULL,
+            unit                TEXT NOT NULL,
+            label               TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (measurement_type IN ('length', 'area', 'angle', 'hounsfield', 'suv', 'ellipse_area', 'polygon_area'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_measurements_instance ON measurements(sop_instance_uid);
+        CREATE INDEX IF NOT EXISTS idx_measurements_user ON measurements(user_id);
+
+        -- =====================================================================
+        -- KEY_IMAGES TABLE (for key image markers)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS key_images (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_image_id        TEXT NOT NULL UNIQUE,
+            study_uid           TEXT NOT NULL,
+            sop_instance_uid    TEXT NOT NULL,
+            frame_number        INTEGER,
+            user_id             TEXT NOT NULL,
+            reason              TEXT,
+            document_title      TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_key_images_study ON key_images(study_uid);
+
+        -- =====================================================================
+        -- VIEWER_STATES TABLE (for saved viewer configurations)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS viewer_states (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            state_id            TEXT NOT NULL UNIQUE,
+            study_uid           TEXT NOT NULL,
+            user_id             TEXT NOT NULL,
+            state_json          TEXT NOT NULL,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_viewer_states_study ON viewer_states(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_viewer_states_user ON viewer_states(user_id);
+
+        -- =====================================================================
+        -- RECENT_STUDIES TABLE (for tracking user study access)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS recent_studies (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id             TEXT NOT NULL,
+            study_uid           TEXT NOT NULL,
+            accessed_at         TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE (user_id, study_uid)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_recent_studies_user ON recent_studies(user_id, accessed_at DESC);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 7, "Add annotation and measurement tables");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1528,6 +1636,110 @@ auto migration_runner::migrate_v6(
     }
 
     return record_migration(db_manager, 6, "Add sync tables for bidirectional synchronization");
+}
+
+auto migration_runner::migrate_v7(
+    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+    // V7: Add annotation and measurement tables for viewer functionality
+    const std::string sql = R"(
+        -- =====================================================================
+        -- ANNOTATIONS TABLE (for image annotations)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS annotations (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            annotation_id       TEXT NOT NULL UNIQUE,
+            study_uid           TEXT NOT NULL,
+            series_uid          TEXT,
+            sop_instance_uid    TEXT,
+            frame_number        INTEGER,
+            user_id             TEXT NOT NULL,
+            annotation_type     TEXT NOT NULL,
+            geometry_json       TEXT NOT NULL,
+            text                TEXT,
+            style_json          TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (annotation_type IN ('arrow', 'line', 'rectangle', 'ellipse', 'polygon', 'freehand', 'text', 'angle', 'roi'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_annotations_study ON annotations(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_annotations_instance ON annotations(sop_instance_uid);
+        CREATE INDEX IF NOT EXISTS idx_annotations_user ON annotations(user_id);
+
+        -- =====================================================================
+        -- MEASUREMENTS TABLE (for image measurements)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS measurements (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            measurement_id      TEXT NOT NULL UNIQUE,
+            sop_instance_uid    TEXT NOT NULL,
+            frame_number        INTEGER,
+            user_id             TEXT NOT NULL,
+            measurement_type    TEXT NOT NULL,
+            geometry_json       TEXT NOT NULL,
+            value               REAL NOT NULL,
+            unit                TEXT NOT NULL,
+            label               TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (measurement_type IN ('length', 'area', 'angle', 'hounsfield', 'suv', 'ellipse_area', 'polygon_area'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_measurements_instance ON measurements(sop_instance_uid);
+        CREATE INDEX IF NOT EXISTS idx_measurements_user ON measurements(user_id);
+
+        -- =====================================================================
+        -- KEY_IMAGES TABLE (for key image markers)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS key_images (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_image_id        TEXT NOT NULL UNIQUE,
+            study_uid           TEXT NOT NULL,
+            sop_instance_uid    TEXT NOT NULL,
+            frame_number        INTEGER,
+            user_id             TEXT NOT NULL,
+            reason              TEXT,
+            document_title      TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_key_images_study ON key_images(study_uid);
+
+        -- =====================================================================
+        -- VIEWER_STATES TABLE (for saved viewer configurations)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS viewer_states (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            state_id            TEXT NOT NULL UNIQUE,
+            study_uid           TEXT NOT NULL,
+            user_id             TEXT NOT NULL,
+            state_json          TEXT NOT NULL,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_viewer_states_study ON viewer_states(study_uid);
+        CREATE INDEX IF NOT EXISTS idx_viewer_states_user ON viewer_states(user_id);
+
+        -- =====================================================================
+        -- RECENT_STUDIES TABLE (for tracking user study access)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS recent_studies (
+            pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id             TEXT NOT NULL,
+            study_uid           TEXT NOT NULL,
+            accessed_at         TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE (user_id, study_uid)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_recent_studies_user ON recent_studies(user_id, accessed_at DESC);
+    )";
+
+    auto result = execute_sql(db_manager, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db_manager, 7, "Add annotation and measurement tables");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
