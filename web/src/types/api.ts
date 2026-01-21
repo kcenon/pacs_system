@@ -361,3 +361,66 @@ export interface JobListResponse {
   jobs: Job[];
   total: number;
 }
+
+// Metadata types (Issue #544)
+export type MetadataPreset = 'image_display' | 'window_level' | 'patient_info' | 'acquisition' | 'positioning' | 'multiframe';
+
+export interface MetadataRequest {
+  tags?: string[];
+  preset?: MetadataPreset;
+  include_private?: boolean;
+}
+
+export interface MetadataResponse {
+  tags: Record<string, string | number | number[]>;
+}
+
+export interface SortedInstance {
+  sop_instance_uid: string;
+  instance_number?: number;
+  slice_location?: number;
+  image_position_patient?: number[];
+  acquisition_time?: string;
+}
+
+export type SortOrder = 'position' | 'instance_number' | 'acquisition_time';
+
+export interface SortedInstancesResponse {
+  instances: SortedInstance[];
+  total: number;
+}
+
+export interface NavigationInfo {
+  previous?: string;
+  next?: string;
+  index: number;
+  total: number;
+  first: string;
+  last: string;
+}
+
+export interface WindowLevelPreset {
+  name: string;
+  center: number;
+  width: number;
+}
+
+export interface WindowLevelPresetsResponse {
+  presets: WindowLevelPreset[];
+}
+
+export interface VOILUTInfo {
+  window_center: number[];
+  window_width: number[];
+  window_explanations?: string[];
+  rescale_slope: number;
+  rescale_intercept: number;
+}
+
+export interface FrameInfo {
+  total_frames: number;
+  frame_time?: number;
+  frame_rate?: number;
+  rows: number;
+  columns: number;
+}
