@@ -1787,6 +1787,8 @@ if(PACS_BUILD_TESTS)
             tests/web/metadata_service_test.cpp
             tests/web/annotation_endpoints_test.cpp
             tests/web/measurement_endpoints_test.cpp
+            tests/web/key_image_endpoints_test.cpp
+            tests/web/viewer_state_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
