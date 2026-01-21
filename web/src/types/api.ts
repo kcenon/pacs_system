@@ -424,3 +424,238 @@ export interface FrameInfo {
   rows: number;
   columns: number;
 }
+
+// Annotation types (Issue #545, #584)
+export type AnnotationType =
+  | 'arrow'
+  | 'line'
+  | 'rectangle'
+  | 'ellipse'
+  | 'polygon'
+  | 'freehand'
+  | 'text'
+  | 'angle'
+  | 'roi';
+
+export interface AnnotationStyle {
+  color: string;
+  line_width: number;
+  fill_color?: string;
+  fill_opacity?: number;
+  font_family?: string;
+  font_size?: number;
+}
+
+export interface Annotation {
+  annotation_id: string;
+  study_uid: string;
+  series_uid?: string;
+  sop_instance_uid?: string;
+  frame_number?: number | null;
+  user_id: string;
+  annotation_type: AnnotationType;
+  geometry: Record<string, unknown>;
+  text?: string;
+  style: AnnotationStyle;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AnnotationCreateRequest {
+  study_uid: string;
+  series_uid?: string;
+  sop_instance_uid?: string;
+  frame_number?: number;
+  user_id: string;
+  annotation_type: AnnotationType;
+  geometry: Record<string, unknown>;
+  text?: string;
+  style?: Partial<AnnotationStyle>;
+}
+
+export interface AnnotationUpdateRequest {
+  geometry?: Record<string, unknown>;
+  text?: string;
+  style?: Partial<AnnotationStyle>;
+}
+
+export interface AnnotationQuery {
+  study_uid?: string;
+  series_uid?: string;
+  sop_instance_uid?: string;
+  user_id?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AnnotationCreateResponse {
+  annotation_id: string;
+  created_at: string;
+}
+
+export interface AnnotationUpdateResponse {
+  annotation_id: string;
+  updated_at: string;
+}
+
+// Measurement types (Issue #545, #584)
+export type MeasurementType =
+  | 'length'
+  | 'area'
+  | 'angle'
+  | 'hounsfield'
+  | 'suv'
+  | 'ellipse_area'
+  | 'polygon_area';
+
+export interface Measurement {
+  measurement_id: string;
+  sop_instance_uid: string;
+  frame_number?: number | null;
+  user_id: string;
+  measurement_type: MeasurementType;
+  geometry: Record<string, unknown>;
+  value: number;
+  unit: string;
+  label?: string;
+  created_at: string;
+}
+
+export interface MeasurementCreateRequest {
+  sop_instance_uid: string;
+  frame_number?: number;
+  user_id: string;
+  measurement_type: MeasurementType;
+  geometry: Record<string, unknown>;
+  value: number;
+  unit: string;
+  label?: string;
+}
+
+export interface MeasurementQuery {
+  sop_instance_uid?: string;
+  study_uid?: string;
+  user_id?: string;
+  measurement_type?: MeasurementType;
+  limit?: number;
+  offset?: number;
+}
+
+export interface MeasurementCreateResponse {
+  measurement_id: string;
+  value: number;
+  unit: string;
+}
+
+// Key Image types (Issue #545, #584)
+export interface KeyImage {
+  key_image_id: string;
+  study_uid: string;
+  sop_instance_uid: string;
+  frame_number?: number | null;
+  user_id: string;
+  reason?: string;
+  document_title?: string;
+  created_at: string;
+}
+
+export interface KeyImageCreateRequest {
+  sop_instance_uid: string;
+  frame_number?: number;
+  user_id: string;
+  reason?: string;
+  document_title?: string;
+}
+
+export interface KeyImageCreateResponse {
+  key_image_id: string;
+  created_at: string;
+}
+
+export interface KeyImageListResponse {
+  data: KeyImage[];
+}
+
+export interface KeyObjectSelectionDocument {
+  document_type: string;
+  study_uid: string;
+  document_title: string;
+  referenced_instances: Array<{
+    sop_instance_uid: string;
+    frame_number?: number | null;
+    reason?: string;
+  }>;
+  created_at: string;
+}
+
+// Viewer State types (Issue #545, #584)
+export interface ViewerLayout {
+  rows?: number;
+  columns?: number;
+  type?: string;
+}
+
+export interface ViewportState {
+  viewport_id?: string;
+  series_uid?: string;
+  sop_instance_uid?: string;
+  frame_number?: number;
+  window_center?: number;
+  window_width?: number;
+  zoom?: number;
+  pan?: { x: number; y: number };
+  rotation?: number;
+  flip_horizontal?: boolean;
+  flip_vertical?: boolean;
+  invert?: boolean;
+}
+
+export interface ViewerStateContent {
+  layout?: ViewerLayout;
+  viewports?: ViewportState[];
+  active_viewport?: string;
+}
+
+export interface ViewerState {
+  state_id: string;
+  study_uid: string;
+  user_id: string;
+  state: ViewerStateContent;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ViewerStateCreateRequest {
+  study_uid: string;
+  user_id: string;
+  layout?: ViewerLayout;
+  viewports?: ViewportState[];
+  active_viewport?: string;
+}
+
+export interface ViewerStateQuery {
+  study_uid?: string;
+  user_id?: string;
+  limit?: number;
+}
+
+export interface ViewerStateCreateResponse {
+  state_id: string;
+  created_at: string;
+}
+
+export interface ViewerStateListResponse {
+  data: ViewerState[];
+}
+
+// Recent Studies types (Issue #545, #584)
+export interface RecentStudy {
+  user_id: string;
+  study_uid: string;
+  accessed_at: string;
+}
+
+export interface RecentStudiesResponse {
+  data: RecentStudy[];
+  total: number;
+}

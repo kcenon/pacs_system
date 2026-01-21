@@ -15,6 +15,27 @@ import type {
   WindowLevelPresetsResponse,
   VOILUTInfo,
   FrameInfo,
+  Annotation,
+  AnnotationCreateRequest,
+  AnnotationUpdateRequest,
+  AnnotationQuery,
+  AnnotationCreateResponse,
+  AnnotationUpdateResponse,
+  PaginatedResponse,
+  Measurement,
+  MeasurementCreateRequest,
+  MeasurementQuery,
+  MeasurementCreateResponse,
+  KeyImageCreateRequest,
+  KeyImageCreateResponse,
+  KeyImageListResponse,
+  KeyObjectSelectionDocument,
+  ViewerState,
+  ViewerStateCreateRequest,
+  ViewerStateQuery,
+  ViewerStateCreateResponse,
+  ViewerStateListResponse,
+  RecentStudiesResponse,
 } from '../types/api';
 
 const API_BASE_URL = '/api/v1';
@@ -345,6 +366,169 @@ class ApiClient {
   async getInstanceFrameInfo(sopInstanceUid: string): Promise<FrameInfo> {
     const response = await this.client.get(
       `/instances/${encodeURIComponent(sopInstanceUid)}/frame-info`
+    );
+    return response.data;
+  }
+
+  // Annotation endpoints (Issue #545, #584)
+  async createAnnotation(
+    request: AnnotationCreateRequest
+  ): Promise<AnnotationCreateResponse> {
+    const response = await this.client.post('/annotations', request);
+    return response.data;
+  }
+
+  async getAnnotations(
+    query?: AnnotationQuery
+  ): Promise<PaginatedResponse<Annotation>> {
+    const response = await this.client.get('/annotations', { params: query });
+    return response.data;
+  }
+
+  async getAnnotation(annotationId: string): Promise<Annotation> {
+    const response = await this.client.get(
+      `/annotations/${encodeURIComponent(annotationId)}`
+    );
+    return response.data;
+  }
+
+  async updateAnnotation(
+    annotationId: string,
+    request: AnnotationUpdateRequest
+  ): Promise<AnnotationUpdateResponse> {
+    const response = await this.client.put(
+      `/annotations/${encodeURIComponent(annotationId)}`,
+      request
+    );
+    return response.data;
+  }
+
+  async deleteAnnotation(annotationId: string): Promise<void> {
+    await this.client.delete(
+      `/annotations/${encodeURIComponent(annotationId)}`
+    );
+  }
+
+  async getInstanceAnnotations(
+    sopInstanceUid: string
+  ): Promise<{ data: Annotation[] }> {
+    const response = await this.client.get(
+      `/instances/${encodeURIComponent(sopInstanceUid)}/annotations`
+    );
+    return response.data;
+  }
+
+  // Measurement endpoints (Issue #545, #584)
+  async createMeasurement(
+    request: MeasurementCreateRequest
+  ): Promise<MeasurementCreateResponse> {
+    const response = await this.client.post('/measurements', request);
+    return response.data;
+  }
+
+  async getMeasurements(
+    query?: MeasurementQuery
+  ): Promise<PaginatedResponse<Measurement>> {
+    const response = await this.client.get('/measurements', { params: query });
+    return response.data;
+  }
+
+  async getMeasurement(measurementId: string): Promise<Measurement> {
+    const response = await this.client.get(
+      `/measurements/${encodeURIComponent(measurementId)}`
+    );
+    return response.data;
+  }
+
+  async deleteMeasurement(measurementId: string): Promise<void> {
+    await this.client.delete(
+      `/measurements/${encodeURIComponent(measurementId)}`
+    );
+  }
+
+  async getInstanceMeasurements(
+    sopInstanceUid: string
+  ): Promise<{ data: Measurement[] }> {
+    const response = await this.client.get(
+      `/instances/${encodeURIComponent(sopInstanceUid)}/measurements`
+    );
+    return response.data;
+  }
+
+  // Key Image endpoints (Issue #545, #584)
+  async createKeyImage(
+    studyUid: string,
+    request: KeyImageCreateRequest
+  ): Promise<KeyImageCreateResponse> {
+    const response = await this.client.post(
+      `/studies/${encodeURIComponent(studyUid)}/key-images`,
+      request
+    );
+    return response.data;
+  }
+
+  async getStudyKeyImages(studyUid: string): Promise<KeyImageListResponse> {
+    const response = await this.client.get(
+      `/studies/${encodeURIComponent(studyUid)}/key-images`
+    );
+    return response.data;
+  }
+
+  async deleteKeyImage(keyImageId: string): Promise<void> {
+    await this.client.delete(
+      `/key-images/${encodeURIComponent(keyImageId)}`
+    );
+  }
+
+  async exportKeyImagesAsSR(
+    studyUid: string
+  ): Promise<KeyObjectSelectionDocument> {
+    const response = await this.client.post(
+      `/studies/${encodeURIComponent(studyUid)}/key-images/export-sr`
+    );
+    return response.data;
+  }
+
+  // Viewer State endpoints (Issue #545, #584)
+  async createViewerState(
+    request: ViewerStateCreateRequest
+  ): Promise<ViewerStateCreateResponse> {
+    const response = await this.client.post('/viewer-states', request);
+    return response.data;
+  }
+
+  async getViewerStates(
+    query?: ViewerStateQuery
+  ): Promise<ViewerStateListResponse> {
+    const response = await this.client.get('/viewer-states', { params: query });
+    return response.data;
+  }
+
+  async getViewerState(stateId: string): Promise<ViewerState> {
+    const response = await this.client.get(
+      `/viewer-states/${encodeURIComponent(stateId)}`
+    );
+    return response.data;
+  }
+
+  async deleteViewerState(stateId: string): Promise<void> {
+    await this.client.delete(
+      `/viewer-states/${encodeURIComponent(stateId)}`
+    );
+  }
+
+  // Recent Studies endpoints (Issue #545, #584)
+  async getUserRecentStudies(
+    userId: string,
+    limit?: number
+  ): Promise<RecentStudiesResponse> {
+    const params: Record<string, number> = {};
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+    const response = await this.client.get(
+      `/users/${encodeURIComponent(userId)}/recent-studies`,
+      { params }
     );
     return response.data;
   }

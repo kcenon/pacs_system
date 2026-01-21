@@ -1715,6 +1715,9 @@ if(PACS_BUILD_TESTS)
             tests/storage/index_database_test.cpp
             tests/storage/mpps_test.cpp
             tests/storage/worklist_test.cpp
+            # Annotation & Measurement API integration tests (Issue #545, #584)
+            tests/integration/annotation_api_test.cpp
+            tests/integration/measurement_api_test.cpp
         )
         target_link_libraries(storage_tests
             PRIVATE
