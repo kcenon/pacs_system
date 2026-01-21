@@ -10,6 +10,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include "pacs/storage/index_database.hpp"
 #include "pacs/storage/measurement_record.hpp"
