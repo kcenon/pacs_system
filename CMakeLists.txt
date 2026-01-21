@@ -1194,6 +1194,8 @@ if(TARGET Crow::Crow)
         src/web/endpoints/metadata_endpoints.cpp
         src/web/endpoints/annotation_endpoints.cpp
         src/web/endpoints/measurement_endpoints.cpp
+        src/web/endpoints/key_image_endpoints.cpp
+        src/web/endpoints/viewer_state_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1787,6 +1789,8 @@ if(PACS_BUILD_TESTS)
             tests/web/metadata_service_test.cpp
             tests/web/annotation_endpoints_test.cpp
             tests/web/measurement_endpoints_test.cpp
+            tests/web/key_image_endpoints_test.cpp
+            tests/web/viewer_state_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE

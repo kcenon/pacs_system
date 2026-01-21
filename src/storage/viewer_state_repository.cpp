@@ -11,6 +11,7 @@
 #include <sqlite3.h>
 
 #include <chrono>
+#include <cstdio>
 #include <sstream>
 
 namespace pacs::storage {
@@ -29,9 +30,17 @@ namespace {
 #else
     gmtime_r(&time, &tm);
 #endif
+    // Calculate milliseconds
+    auto since_epoch = tp.time_since_epoch();
+    auto secs = std::chrono::duration_cast<std::chrono::seconds>(since_epoch);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch - secs);
+
     char buf[32];
     std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
-    return buf;
+    // Append milliseconds
+    char result[40];
+    std::snprintf(result, sizeof(result), "%s.%03d", buf, static_cast<int>(ms.count()));
+    return result;
 }
 
 [[nodiscard]] std::chrono::system_clock::time_point from_timestamp_string(
@@ -40,9 +49,11 @@ namespace {
         return {};
     }
     std::tm tm{};
-    if (std::sscanf(str, "%d-%d-%d %d:%d:%d",
+    int ms = 0;
+    // Try parsing with milliseconds first, then without
+    if (std::sscanf(str, "%d-%d-%d %d:%d:%d.%d",
                     &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
-                    &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+                    &tm.tm_hour, &tm.tm_min, &tm.tm_sec, &ms) < 6) {
         return {};
     }
     tm.tm_year -= 1900;
@@ -52,7 +63,8 @@ namespace {
 #else
     auto time = timegm(&tm);
 #endif
-    return std::chrono::system_clock::from_time_t(time);
+    auto tp = std::chrono::system_clock::from_time_t(time);
+    return tp + std::chrono::milliseconds(ms);
 }
 
 [[nodiscard]] std::string get_text_column(sqlite3_stmt* stmt, int col) {
@@ -312,7 +324,7 @@ std::vector<recent_study_record> viewer_state_repository::get_recent_studies(
         SELECT pk, user_id, study_uid, accessed_at
         FROM recent_studies
         WHERE user_id = ?
-        ORDER BY accessed_at DESC
+        ORDER BY accessed_at DESC, pk DESC
         LIMIT ?
     )";
 

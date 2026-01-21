@@ -15,6 +15,7 @@
 #include "pacs/web/endpoints/audit_endpoints.hpp"
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
 #include "pacs/web/endpoints/jobs_endpoints.hpp"
+#include "pacs/web/endpoints/key_image_endpoints.hpp"
 #include "pacs/web/endpoints/measurement_endpoints.hpp"
 #include "pacs/web/endpoints/metadata_endpoints.hpp"
 #include "pacs/web/endpoints/routing_endpoints.hpp"
@@ -25,6 +26,7 @@
 #include "pacs/web/endpoints/study_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/endpoints/thumbnail_endpoints.hpp"
+#include "pacs/web/endpoints/viewer_state_endpoints.hpp"
 #include "pacs/web/endpoints/worklist_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_server.hpp"
@@ -75,6 +77,10 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
                                         std::shared_ptr<rest_server_context> ctx);
 void register_measurement_endpoints_impl(crow::SimpleApp &app,
                                          std::shared_ptr<rest_server_context> ctx);
+void register_key_image_endpoints_impl(crow::SimpleApp &app,
+                                       std::shared_ptr<rest_server_context> ctx);
+void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
+                                          std::shared_ptr<rest_server_context> ctx);
 } // namespace endpoints
 
 /**
@@ -223,6 +229,8 @@ void rest_server::start_async() {
     endpoints::register_metadata_endpoints_impl(app, impl_->context);
     endpoints::register_annotation_endpoints_impl(app, impl_->context);
     endpoints::register_measurement_endpoints_impl(app, impl_->context);
+    endpoints::register_key_image_endpoints_impl(app, impl_->context);
+    endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {
