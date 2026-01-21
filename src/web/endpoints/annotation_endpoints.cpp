@@ -13,6 +13,12 @@
 // declaration conflicts
 #include "crow.h"
 
+// Workaround for Windows: DELETE is defined as a macro in <winnt.h>
+// which conflicts with crow::HTTPMethod::DELETE
+#ifdef DELETE
+#undef DELETE
+#endif
+
 #include "pacs/storage/annotation_record.hpp"
 #include "pacs/storage/annotation_repository.hpp"
 #include "pacs/storage/index_database.hpp"
