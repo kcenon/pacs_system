@@ -22,6 +22,7 @@
 #include <cmath>
 #include <filesystem>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -348,6 +349,7 @@ TEST_CASE("Measurement concurrent access", "[integration][measurement]") {
     SECTION("handles concurrent creates") {
         std::vector<std::thread> threads;
         std::atomic<int> success_count{0};
+        std::mutex repo_mutex;
 
         for (int t = 0; t < thread_count; ++t) {
             threads.emplace_back([&, t]() {
@@ -355,6 +357,7 @@ TEST_CASE("Measurement concurrent access", "[integration][measurement]") {
                     auto meas = make_test_measurement(sop_uid, "user" + std::to_string(t));
                     meas.measurement_id = "concurrent-" + std::to_string(t) + "-" + std::to_string(i);
                     meas.value = t * 100.0 + i;
+                    std::lock_guard<std::mutex> lock(repo_mutex);
                     if (repo.save(meas).is_ok()) {
                         ++success_count;
                     }

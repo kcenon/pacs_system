@@ -22,6 +22,7 @@
 #include <chrono>
 #include <filesystem>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -357,12 +358,14 @@ TEST_CASE("Annotation concurrent access", "[integration][annotation]") {
     SECTION("handles concurrent creates") {
         std::vector<std::thread> threads;
         std::atomic<int> success_count{0};
+        std::mutex repo_mutex;
 
         for (int t = 0; t < thread_count; ++t) {
             threads.emplace_back([&, t]() {
                 for (int i = 0; i < ops_per_thread; ++i) {
                     auto ann = make_test_annotation(study_uid, "user" + std::to_string(t));
                     ann.annotation_id = "concurrent-" + std::to_string(t) + "-" + std::to_string(i);
+                    std::lock_guard<std::mutex> lock(repo_mutex);
                     if (repo.save(ann).is_ok()) {
                         ++success_count;
                     }
