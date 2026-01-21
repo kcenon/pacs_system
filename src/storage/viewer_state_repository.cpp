@@ -312,7 +312,7 @@ std::vector<recent_study_record> viewer_state_repository::get_recent_studies(
         SELECT pk, user_id, study_uid, accessed_at
         FROM recent_studies
         WHERE user_id = ?
-        ORDER BY accessed_at DESC
+        ORDER BY accessed_at DESC, pk DESC
         LIMIT ?
     )";
 
