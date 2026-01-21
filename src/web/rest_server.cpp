@@ -10,10 +10,12 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "pacs/web/endpoints/annotation_endpoints.hpp"
 #include "pacs/web/endpoints/association_endpoints.hpp"
 #include "pacs/web/endpoints/audit_endpoints.hpp"
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
 #include "pacs/web/endpoints/jobs_endpoints.hpp"
+#include "pacs/web/endpoints/measurement_endpoints.hpp"
 #include "pacs/web/endpoints/metadata_endpoints.hpp"
 #include "pacs/web/endpoints/routing_endpoints.hpp"
 #include "pacs/web/endpoints/patient_endpoints.hpp"
@@ -69,6 +71,10 @@ void register_thumbnail_endpoints_impl(crow::SimpleApp &app,
                                        std::shared_ptr<rest_server_context> ctx);
 void register_metadata_endpoints_impl(crow::SimpleApp &app,
                                       std::shared_ptr<rest_server_context> ctx);
+void register_annotation_endpoints_impl(crow::SimpleApp &app,
+                                        std::shared_ptr<rest_server_context> ctx);
+void register_measurement_endpoints_impl(crow::SimpleApp &app,
+                                         std::shared_ptr<rest_server_context> ctx);
 } // namespace endpoints
 
 /**
@@ -215,6 +221,8 @@ void rest_server::start_async() {
     endpoints::register_routing_endpoints_impl(app, impl_->context);
     endpoints::register_thumbnail_endpoints_impl(app, impl_->context);
     endpoints::register_metadata_endpoints_impl(app, impl_->context);
+    endpoints::register_annotation_endpoints_impl(app, impl_->context);
+    endpoints::register_measurement_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {
