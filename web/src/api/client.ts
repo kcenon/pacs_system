@@ -7,6 +7,14 @@ import type {
   JobProgress,
   JobQuery,
   CreateJobRequest,
+  MetadataRequest,
+  MetadataResponse,
+  SortedInstancesResponse,
+  SortOrder,
+  NavigationInfo,
+  WindowLevelPresetsResponse,
+  VOILUTInfo,
+  FrameInfo,
 } from '../types/api';
 
 const API_BASE_URL = '/api/v1';
@@ -274,6 +282,70 @@ class ApiClient {
 
   async retryJob(jobId: string): Promise<Job> {
     const response = await this.client.post(`/jobs/${encodeURIComponent(jobId)}/retry`);
+    return response.data;
+  }
+
+  // Metadata endpoints (Issue #544)
+  async getInstanceMetadata(
+    sopInstanceUid: string,
+    request?: MetadataRequest
+  ): Promise<MetadataResponse> {
+    const params: Record<string, string> = {};
+    if (request?.tags?.length) {
+      params.tags = request.tags.join(',');
+    }
+    if (request?.preset) {
+      params.preset = request.preset;
+    }
+    if (request?.include_private) {
+      params.include_private = 'true';
+    }
+    const response = await this.client.get(
+      `/instances/${encodeURIComponent(sopInstanceUid)}/metadata`,
+      { params }
+    );
+    return response.data;
+  }
+
+  async getSortedInstances(
+    seriesUid: string,
+    sortBy: SortOrder = 'position',
+    direction: 'asc' | 'desc' = 'asc'
+  ): Promise<SortedInstancesResponse> {
+    const response = await this.client.get(
+      `/series/${encodeURIComponent(seriesUid)}/instances/sorted`,
+      { params: { sort_by: sortBy, direction } }
+    );
+    return response.data;
+  }
+
+  async getInstanceNavigation(sopInstanceUid: string): Promise<NavigationInfo> {
+    const response = await this.client.get(
+      `/instances/${encodeURIComponent(sopInstanceUid)}/navigation`
+    );
+    return response.data;
+  }
+
+  async getWindowLevelPresets(modality?: string): Promise<WindowLevelPresetsResponse> {
+    const params: Record<string, string> = {};
+    if (modality) {
+      params.modality = modality;
+    }
+    const response = await this.client.get('/presets/window-level', { params });
+    return response.data;
+  }
+
+  async getInstanceVOILUT(sopInstanceUid: string): Promise<VOILUTInfo> {
+    const response = await this.client.get(
+      `/instances/${encodeURIComponent(sopInstanceUid)}/voi-lut`
+    );
+    return response.data;
+  }
+
+  async getInstanceFrameInfo(sopInstanceUid: string): Promise<FrameInfo> {
+    const response = await this.client.get(
+      `/instances/${encodeURIComponent(sopInstanceUid)}/frame-info`
+    );
     return response.data;
   }
 }
