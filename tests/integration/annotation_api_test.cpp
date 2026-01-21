@@ -42,7 +42,7 @@ struct test_database_guard {
         std::filesystem::remove(db_path);
         auto result = index_database::open(db_path.string());
         if (result.is_err()) {
-            throw std::runtime_error("Failed to open test database: " + result.error().message());
+            throw std::runtime_error("Failed to open test database: " + result.error().message);
         }
         db = std::move(result.value());
     }
