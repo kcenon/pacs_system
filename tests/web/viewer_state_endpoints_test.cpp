@@ -16,6 +16,9 @@
 #include "pacs/storage/viewer_state_repository.hpp"
 #include "pacs/web/rest_types.hpp"
 
+#include <chrono>
+#include <thread>
+
 using namespace pacs::storage;
 using namespace pacs::web;
 
@@ -233,8 +236,11 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   }
 
   SECTION("recent studies ordered by access time") {
+    // Small sleeps ensure distinct timestamps across all platforms
     repo.record_study_access("user1", "1.2.840.study1");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     repo.record_study_access("user1", "1.2.840.study2");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     repo.record_study_access("user1", "1.2.840.study3");
 
     auto recent = repo.get_recent_studies("user1", 10);
@@ -247,7 +253,9 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
 
   SECTION("re-access updates timestamp") {
     repo.record_study_access("user1", "1.2.840.study1");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     repo.record_study_access("user1", "1.2.840.study2");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
     repo.record_study_access("user1", "1.2.840.study1"); // Re-access
 
     auto recent = repo.get_recent_studies("user1", 10);
