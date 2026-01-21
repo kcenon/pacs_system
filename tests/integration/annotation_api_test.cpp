@@ -40,8 +40,11 @@ struct test_database_guard {
     explicit test_database_guard(const std::string& name) {
         db_path = std::filesystem::temp_directory_path() / (name + "_test.db");
         std::filesystem::remove(db_path);
-        db = std::make_unique<index_database>(db_path.string());
-        db->initialize();
+        auto result = index_database::open(db_path.string());
+        if (result.is_err()) {
+            throw std::runtime_error("Failed to open test database: " + result.error().message());
+        }
+        db = std::move(result.value());
     }
 
     ~test_database_guard() {
@@ -147,7 +150,7 @@ TEST_CASE("Annotation read operations", "[integration][annotation]") {
             "user" + std::to_string(i % 3),
             static_cast<annotation_type>(i % 9));
         ann.annotation_id = "read-uuid-" + std::to_string(i);
-        repo.save(ann);
+        (void)repo.save(ann);  // Ignore result in test setup
         annotation_ids.push_back(ann.annotation_id);
     }
 
@@ -210,7 +213,7 @@ TEST_CASE("Annotation update operation", "[integration][annotation]") {
     annotation_repository repo(guard.native_handle());
 
     auto ann = make_test_annotation("1.2.840.study.update", "user1");
-    repo.save(ann);
+    (void)repo.save(ann);  // Ignore result in test setup
 
     SECTION("updates geometry") {
         ann.geometry_json = R"({"x1":150,"y1":150,"x2":250,"y2":250})";
@@ -257,7 +260,7 @@ TEST_CASE("Annotation delete operation", "[integration][annotation]") {
 
     SECTION("deletes existing annotation") {
         auto ann = make_test_annotation("1.2.840.study.delete", "user1");
-        repo.save(ann);
+        (void)repo.save(ann);  // Ignore result in test setup
 
         REQUIRE(repo.exists(ann.annotation_id));
 
@@ -290,14 +293,14 @@ TEST_CASE("Annotation instance queries", "[integration][annotation]") {
         auto ann = make_test_annotation(study_uid, "user1");
         ann.annotation_id = "instance-uuid-" + std::to_string(i);
         ann.sop_instance_uid = sop_uid;
-        repo.save(ann);
+        (void)repo.save(ann);  // Ignore result in test setup
     }
 
     // Create annotation for different instance
     auto other_ann = make_test_annotation(study_uid, "user1");
     other_ann.annotation_id = "other-instance-uuid";
     other_ann.sop_instance_uid = "1.2.840.instance.456";
-    repo.save(other_ann);
+    (void)repo.save(other_ann);  // Ignore result in test setup
 
     SECTION("finds annotations by instance UID") {
         auto results = repo.find_by_instance(sop_uid);

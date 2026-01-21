@@ -40,8 +40,11 @@ struct test_database_guard {
     explicit test_database_guard(const std::string& name) {
         db_path = std::filesystem::temp_directory_path() / (name + "_test.db");
         std::filesystem::remove(db_path);
-        db = std::make_unique<index_database>(db_path.string());
-        db->initialize();
+        auto result = index_database::open(db_path.string());
+        if (result.is_err()) {
+            throw std::runtime_error("Failed to open test database: " + result.error().message());
+        }
+        db = std::move(result.value());
     }
 
     ~test_database_guard() {
@@ -156,7 +159,7 @@ TEST_CASE("Measurement read operations", "[integration][measurement]") {
             static_cast<measurement_type>(i % 7));
         meas.measurement_id = "read-meas-" + std::to_string(i);
         meas.value = 50.0 + i * 5.0;
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
         measurement_ids.push_back(meas.measurement_id);
     }
 
@@ -224,7 +227,7 @@ TEST_CASE("Measurement delete operation", "[integration][measurement]") {
 
     SECTION("deletes existing measurement") {
         auto meas = make_test_measurement("1.2.840.instance.delete", "user1");
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
 
         REQUIRE(repo.exists(meas.measurement_id));
 
@@ -254,13 +257,13 @@ TEST_CASE("Measurement instance queries", "[integration][measurement]") {
     for (int i = 0; i < 3; ++i) {
         auto meas = make_test_measurement(sop_uid, "user1");
         meas.measurement_id = "instance-meas-" + std::to_string(i);
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
     }
 
     // Create measurement for different instance
     auto other_meas = make_test_measurement("1.2.840.instance.other", "user1");
     other_meas.measurement_id = "other-meas";
-    repo.save(other_meas);
+    (void)repo.save(other_meas);  // Ignore result in test setup
 
     SECTION("finds measurements by instance UID") {
         auto results = repo.find_by_instance(sop_uid);
@@ -289,7 +292,7 @@ TEST_CASE("Measurement value precision", "[integration][measurement]") {
         auto meas = make_test_measurement("1.2.840.instance.precision", "user1");
         meas.measurement_id = "precision-meas";
         meas.value = 123.456789;
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
 
         auto retrieved = repo.find_by_id(meas.measurement_id);
         REQUIRE(retrieved.has_value());
@@ -300,7 +303,7 @@ TEST_CASE("Measurement value precision", "[integration][measurement]") {
         auto meas = make_test_measurement("1.2.840.instance.zero", "user1");
         meas.measurement_id = "zero-meas";
         meas.value = 0.0;
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
 
         auto retrieved = repo.find_by_id(meas.measurement_id);
         REQUIRE(retrieved.has_value());
@@ -311,7 +314,7 @@ TEST_CASE("Measurement value precision", "[integration][measurement]") {
         auto meas = make_test_measurement("1.2.840.instance.negative", "user1");
         meas.measurement_id = "negative-meas";
         meas.value = -42.5;  // e.g., relative position
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
 
         auto retrieved = repo.find_by_id(meas.measurement_id);
         REQUIRE(retrieved.has_value());
@@ -322,7 +325,7 @@ TEST_CASE("Measurement value precision", "[integration][measurement]") {
         auto meas = make_test_measurement("1.2.840.instance.large", "user1");
         meas.measurement_id = "large-meas";
         meas.value = 999999.999;
-        repo.save(meas);
+        (void)repo.save(meas);  // Ignore result in test setup
 
         auto retrieved = repo.find_by_id(meas.measurement_id);
         REQUIRE(retrieved.has_value());
