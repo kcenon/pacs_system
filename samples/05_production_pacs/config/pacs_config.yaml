@@ -1,0 +1,65 @@
+# Production PACS Configuration
+# =============================
+# This file configures the Production PACS server for development/testing.
+# For production use, copy this file and adjust settings appropriately.
+
+# DICOM Server Configuration
+server:
+  ae_title: "PROD_PACS"
+  port: 11112
+  max_associations: 100
+  idle_timeout_seconds: 300
+
+  # TLS Configuration (disabled for development)
+  tls:
+    enabled: false
+    # Uncomment for production:
+    # certificate: "/etc/pacs/server.pem"
+    # private_key: "/etc/pacs/server.key"
+    # ca_certificate: "/etc/pacs/ca.pem"
+    # require_client_cert: false
+    # min_version: "1.2"
+
+# Storage Configuration
+storage:
+  root_path: "./pacs_data"
+  naming_scheme: "uid_hierarchical"
+  duplicate_policy: "replace"
+
+  database:
+    path: "./pacs_data/index.db"
+
+# Security Configuration
+security:
+  access_control:
+    enabled: true
+    default_role: "viewer"
+
+  # Allowed AE Titles (supports wildcards with *)
+  allowed_ae_titles:
+    - "CT_SCANNER_*"
+    - "MR_SCANNER_*"
+    - "WORKSTATION_*"
+    - "STORESCU"
+    - "FINDSCU"
+    - "MOVESCU"
+
+  anonymization:
+    auto_anonymize: false
+    profile: "basic"
+
+# REST API Configuration
+rest_api:
+  enabled: true
+  port: 8080
+  cors_enabled: true
+
+# Monitoring Configuration
+monitoring:
+  health_check_interval_seconds: 30
+  metrics_enabled: true
+
+# Logging Configuration
+logging:
+  level: "info"
+  # audit_log_path: "/var/log/pacs/audit.log"
