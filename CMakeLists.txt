@@ -44,6 +44,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 option(PACS_BUILD_TESTS "Build unit tests" ON)
 option(PACS_BUILD_EXAMPLES "Build examples" OFF)
 option(PACS_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(PACS_BUILD_SAMPLES "Build developer samples" OFF)
 
 # Dependency integration options
 option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
@@ -2364,6 +2365,18 @@ endif()
 message(STATUS "")
 
 ##################################################
+# Developer Samples
+##################################################
+
+if(PACS_BUILD_SAMPLES)
+    message(STATUS "")
+    message(STATUS "=== Building Developer Samples ===")
+    add_subdirectory(samples)
+    pacs_apply_warnings(pacs_samples_common)
+    message(STATUS "Developer samples: ON")
+endif()
+
+##################################################
 # Build Summary
 ##################################################
 
@@ -2401,6 +2414,7 @@ else()
     message(STATUS "  Examples: ${PACS_BUILD_EXAMPLES}")
 endif()
 message(STATUS "  Benchmarks: ${PACS_BUILD_BENCHMARKS}")
+message(STATUS "  Samples: ${PACS_BUILD_SAMPLES}")
 message(STATUS "  Services: ON")
 if(TARGET pacs_storage)
     message(STATUS "  Storage: ON (SQLite3)")
