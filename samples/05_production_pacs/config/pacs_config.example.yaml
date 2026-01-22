@@ -1,0 +1,126 @@
+# Production PACS Configuration Example
+# ======================================
+# This is an example configuration file with all available options documented.
+# Copy this file to pacs_config.yaml and adjust settings for your environment.
+
+# DICOM Server Configuration
+# --------------------------
+server:
+  # Application Entity Title (max 16 characters)
+  ae_title: "PROD_PACS"
+
+  # TCP port for DICOM connections
+  port: 11112
+
+  # Maximum concurrent associations
+  max_associations: 100
+
+  # Idle timeout for associations (seconds)
+  idle_timeout_seconds: 300
+
+  # TLS Configuration for secure DICOM
+  tls:
+    # Enable TLS encryption
+    enabled: true
+
+    # Server certificate (PEM format)
+    certificate: "/etc/pacs/server.pem"
+
+    # Private key file (PEM format)
+    private_key: "/etc/pacs/server.key"
+
+    # CA certificate for verifying clients (PEM format)
+    ca_certificate: "/etc/pacs/ca.pem"
+
+    # Require client certificate (mutual TLS)
+    require_client_cert: false
+
+    # Minimum TLS version: "1.2" or "1.3"
+    min_version: "1.2"
+
+# Storage Configuration
+# ---------------------
+storage:
+  # Root path for DICOM file storage
+  root_path: "/data/dicom"
+
+  # Naming scheme for stored files:
+  # - "uid_flat": Files stored flat by SOP Instance UID
+  # - "uid_hierarchical": Patient/Study/Series/Instance hierarchy
+  # - "date_based": Organized by study date
+  naming_scheme: "uid_hierarchical"
+
+  # Duplicate handling:
+  # - "reject": Reject duplicate instances
+  # - "replace": Replace existing instances
+  # - "rename": Store with different filename
+  duplicate_policy: "replace"
+
+  # Index database configuration
+  database:
+    path: "/data/dicom/index.db"
+
+# Security Configuration
+# ----------------------
+security:
+  # Access Control Settings
+  access_control:
+    # Enable RBAC enforcement
+    enabled: true
+
+    # Default role for unknown AE Titles:
+    # - "viewer": Read-only access
+    # - "technologist": Can store images
+    # - "administrator": Full access
+    default_role: "viewer"
+
+  # AE Title whitelist (supports wildcards with *)
+  allowed_ae_titles:
+    - "CT_SCANNER_1"
+    - "CT_SCANNER_2"
+    - "MR_SCANNER_*"
+    - "WORKSTATION_*"
+    - "DIAGNOSTIC_*"
+
+  # Anonymization Settings
+  anonymization:
+    # Automatically anonymize incoming images
+    auto_anonymize: false
+
+    # Anonymization profile:
+    # - "basic": Remove identifying information
+    # - "hipaa_safe_harbor": HIPAA Safe Harbor compliance
+    # - "retain_longitudinal": Keep UIDs for longitudinal studies
+    # - "retain_device_identity": Keep device information
+    # - "gdpr": GDPR compliant de-identification
+    profile: "hipaa_safe_harbor"
+
+# REST API Configuration
+# ----------------------
+rest_api:
+  # Enable REST API server
+  enabled: true
+
+  # HTTP port for REST API
+  port: 8080
+
+  # Enable CORS headers for web clients
+  cors_enabled: true
+
+# Monitoring Configuration
+# ------------------------
+monitoring:
+  # Interval between health checks (seconds)
+  health_check_interval_seconds: 30
+
+  # Enable Prometheus-style metrics endpoint
+  metrics_enabled: true
+
+# Logging Configuration
+# ---------------------
+logging:
+  # Log level: "debug", "info", "warn", "error"
+  level: "info"
+
+  # Path to audit log file (optional)
+  audit_log_path: "/var/log/pacs/audit.log"
