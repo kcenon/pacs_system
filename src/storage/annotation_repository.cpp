@@ -60,7 +60,7 @@ namespace {
     return text ? text : "";
 }
 
-[[nodiscard]] int get_int_column(sqlite3_stmt* stmt, int col, int default_val = 0) {
+[[nodiscard]] [[maybe_unused]] int get_int_column(sqlite3_stmt* stmt, int col, int default_val = 0) {
     if (sqlite3_column_type(stmt, col) == SQLITE_NULL) {
         return default_val;
     }
