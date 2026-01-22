@@ -63,7 +63,7 @@ namespace {
 }
 
 /// Convert optional time_point to timestamp string
-[[nodiscard]] std::string to_optional_timestamp(
+[[nodiscard]] [[maybe_unused]] std::string to_optional_timestamp(
     const std::optional<std::chrono::system_clock::time_point>& tp) {
     if (!tp.has_value()) {
         return "";
