@@ -639,7 +639,12 @@ void prefetch_manager::stop_scheduler() {
     }
 
     impl_->scheduler_running.store(false);
-    impl_->scheduler_cv.notify_all();
+
+    // Notify with lock held to ensure thread sees the flag change
+    {
+        std::lock_guard<std::mutex> lock(impl_->scheduler_mutex);
+        impl_->scheduler_cv.notify_all();
+    }
 
     if (impl_->scheduler_thread.joinable()) {
         impl_->scheduler_thread.join();
@@ -676,7 +681,12 @@ void prefetch_manager::stop_worklist_monitor() {
     }
 
     impl_->worklist_monitor_running.store(false);
-    impl_->worklist_cv.notify_all();
+
+    // Notify with lock held to ensure thread sees the flag change
+    {
+        std::lock_guard<std::mutex> lock(impl_->worklist_mutex);
+        impl_->worklist_cv.notify_all();
+    }
 
     if (impl_->worklist_monitor_thread.joinable()) {
         impl_->worklist_monitor_thread.join();
