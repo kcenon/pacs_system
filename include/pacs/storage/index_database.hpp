@@ -38,6 +38,8 @@
 #include <database/core/database_backend.h>
 #include <database/core/database_context.h>
 #include <database/database_manager.h>
+
+#include "pacs_database_adapter.hpp"
 #endif
 
 // Forward declaration of SQLite handle
@@ -1073,6 +1075,10 @@ private:
     /// Marked mutable to allow use in const member functions (queries are read-only)
     mutable std::shared_ptr<database::database_manager> db_manager_;
 
+    /// PACS database adapter for unified database operations
+    /// Provides simplified API through pacs_database_adapter (Issue #606)
+    mutable std::unique_ptr<pacs_database_adapter> db_adapter_;
+
     /**
      * @brief Initialize database_system connection
      */
@@ -1126,6 +1132,28 @@ private:
     [[nodiscard]] auto parse_audit_from_row(
         const std::map<std::string, database::core::database_value>& row) const
         -> audit_record;
+
+    /**
+     * @brief Initialize pacs_database_adapter connection
+     *
+     * Creates and connects the pacs_database_adapter for unified database access.
+     * Called during database initialization.
+     *
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto initialize_database_adapter() -> VoidResult;
+
+    /**
+     * @brief Parse patient record from pacs_database_adapter result row
+     */
+    [[nodiscard]] auto parse_patient_from_adapter_row(
+        const database_row& row) const -> patient_record;
+
+    /**
+     * @brief Parse study record from pacs_database_adapter result row
+     */
+    [[nodiscard]] auto parse_study_from_adapter_row(
+        const database_row& row) const -> study_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)

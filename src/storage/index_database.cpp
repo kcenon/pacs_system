@@ -218,6 +218,10 @@ index_database::index_database(sqlite3* db, std::string path)
 
 index_database::~index_database() {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (db_adapter_) {
+        (void)db_adapter_->disconnect();
+        db_adapter_.reset();
+    }
     if (db_manager_) {
         (void)db_manager_->disconnect_result();
     }
@@ -247,7 +251,132 @@ auto index_database::initialize_database_system() -> VoidResult {
             "storage");
     }
 
+    // Initialize pacs_database_adapter as well
+    auto adapter_result = initialize_database_adapter();
+    if (adapter_result.is_err()) {
+        // Log warning but continue - can fallback to database_manager
+    }
+
     return ok();
+}
+
+auto index_database::initialize_database_adapter() -> VoidResult {
+    db_adapter_ = std::make_unique<pacs_database_adapter>(
+        std::filesystem::path(path_));
+
+    auto connect_result = db_adapter_->connect();
+    if (connect_result.is_err()) {
+        db_adapter_.reset();
+        return make_error<std::monostate>(
+            database_connection_error,
+            pacs::compat::format("Failed to connect adapter: {}",
+                                 connect_result.error().message),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto index_database::parse_patient_from_adapter_row(const database_row& row) const
+    -> patient_record {
+    patient_record record;
+
+    auto get_str = [&row](const std::string& key) -> std::string {
+        auto it = row.find(key);
+        return (it != row.end()) ? it->second : std::string{};
+    };
+
+    auto get_int64 = [&row](const std::string& key) -> int64_t {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoll(it->second);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+
+    record.pk = get_int64("patient_pk");
+    record.patient_id = get_str("patient_id");
+    record.patient_name = get_str("patient_name");
+    record.birth_date = get_str("birth_date");
+    record.sex = get_str("sex");
+    record.other_ids = get_str("other_ids");
+    record.ethnic_group = get_str("ethnic_group");
+    record.comments = get_str("comments");
+
+    auto created_at_str = get_str("created_at");
+    if (!created_at_str.empty()) {
+        record.created_at = parse_datetime(created_at_str.c_str());
+    }
+
+    auto updated_at_str = get_str("updated_at");
+    if (!updated_at_str.empty()) {
+        record.updated_at = parse_datetime(updated_at_str.c_str());
+    }
+
+    return record;
+}
+
+auto index_database::parse_study_from_adapter_row(const database_row& row) const
+    -> study_record {
+    study_record record;
+
+    auto get_str = [&row](const std::string& key) -> std::string {
+        auto it = row.find(key);
+        return (it != row.end()) ? it->second : std::string{};
+    };
+
+    auto get_int64 = [&row](const std::string& key) -> int64_t {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoll(it->second);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+
+    auto get_optional_int = [&row](const std::string& key) -> std::optional<int> {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoi(it->second);
+            } catch (...) {
+                return std::nullopt;
+            }
+        }
+        return std::nullopt;
+    };
+
+    record.pk = get_int64("study_pk");
+    record.patient_pk = get_int64("patient_pk");
+    record.study_uid = get_str("study_uid");
+    record.study_id = get_str("study_id");
+    record.study_date = get_str("study_date");
+    record.study_time = get_str("study_time");
+    record.accession_number = get_str("accession_number");
+    record.referring_physician = get_str("referring_physician");
+    record.study_description = get_str("study_description");
+    record.modalities_in_study = get_str("modalities_in_study");
+    record.num_instances = get_optional_int("num_instances").value_or(0);
+    record.num_series = get_optional_int("num_series").value_or(0);
+
+    auto created_at_str = get_str("created_at");
+    if (!created_at_str.empty()) {
+        record.created_at = parse_datetime(created_at_str.c_str());
+    }
+
+    auto updated_at_str = get_str("updated_at");
+    if (!updated_at_str.empty()) {
+        record.updated_at = parse_datetime(updated_at_str.c_str());
+    }
+
+    return record;
 }
 #endif
 
@@ -256,6 +385,7 @@ index_database::index_database(index_database&& other) noexcept
 #ifdef PACS_WITH_DATABASE_SYSTEM
     db_context_ = std::move(other.db_context_);
     db_manager_ = std::move(other.db_manager_);
+    db_adapter_ = std::move(other.db_adapter_);
 #endif
     other.db_ = nullptr;
 }
@@ -264,11 +394,15 @@ auto index_database::operator=(index_database&& other) noexcept
     -> index_database& {
     if (this != &other) {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (db_adapter_) {
+            (void)db_adapter_->disconnect();
+        }
         if (db_manager_) {
             (void)db_manager_->disconnect_result();
         }
         db_context_ = std::move(other.db_context_);
         db_manager_ = std::move(other.db_manager_);
+        db_adapter_ = std::move(other.db_adapter_);
 #endif
         if (db_) {
             sqlite3_close(db_);
@@ -316,20 +450,17 @@ auto index_database::upsert_patient(const patient_record& record)
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    if (db_manager_) {
-        // Check if patient exists using db_manager_
-        // If table doesn't exist (e.g., WAL mode timing), fall through to SQLite
-        database::query_builder check_builder(database::database_types::sqlite);
-        auto check_sql =
-            check_builder
-                .select(std::vector<std::string>{"patient_pk"})
-                .from("patients")
-                .where("patient_id", "=", record.patient_id)
-                .build();
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
 
-        auto check_result = db_manager_->select_query_result(check_sql);
+        // Check if patient exists
+        auto check_sql = builder.select(std::vector<std::string>{"patient_pk"})
+                             .from("patients")
+                             .where("patient_id", "=", record.patient_id)
+                             .build();
 
-        // If query failed (e.g., table doesn't exist), fall through to SQLite
+        auto check_result = db_adapter_->select(check_sql);
         if (check_result.is_ok()) {
             if (!check_result.value().empty()) {
                 // Patient exists - update
@@ -348,7 +479,7 @@ auto index_database::upsert_patient(const patient_record& record)
                             .where("patient_id", "=", record.patient_id)
                             .build();
 
-                    auto update_result = db_manager_->update_query_result(update_sql);
+                    auto update_result = db_adapter_->update(update_sql);
                     if (update_result.is_ok()) {
                         return existing->pk;
                     }
@@ -368,7 +499,7 @@ auto index_database::upsert_patient(const patient_record& record)
                                  {"comments", record.comments}})
                         .build();
 
-                auto insert_result = db_manager_->insert_query_result(insert_sql);
+                auto insert_result = db_adapter_->insert(insert_sql);
                 if (insert_result.is_ok()) {
                     // Retrieve the inserted patient to get pk
                     auto inserted = find_patient(record.patient_id);
@@ -379,8 +510,65 @@ auto index_database::upsert_patient(const patient_record& record)
                 // Insert failed, fall through to SQLite
             }
         }
-        // Query failed (table may not exist in db_manager_ connection)
-        // Fall through to direct SQLite
+        // Query failed, fall through to direct SQLite
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
+    if (db_manager_) {
+        database::query_builder check_builder(database::database_types::sqlite);
+        auto check_sql =
+            check_builder
+                .select(std::vector<std::string>{"patient_pk"})
+                .from("patients")
+                .where("patient_id", "=", record.patient_id)
+                .build();
+
+        auto check_result = db_manager_->select_query_result(check_sql);
+
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                auto existing = find_patient(record.patient_id);
+                if (existing.has_value()) {
+                    database::query_builder update_builder(database::database_types::sqlite);
+                    auto update_sql =
+                        update_builder.update("patients")
+                            .set({{"patient_name", record.patient_name},
+                                  {"birth_date", record.birth_date},
+                                  {"sex", record.sex},
+                                  {"other_ids", record.other_ids},
+                                  {"ethnic_group", record.ethnic_group},
+                                  {"comments", record.comments},
+                                  {"updated_at", "datetime('now')"}})
+                            .where("patient_id", "=", record.patient_id)
+                            .build();
+
+                    auto update_result = db_manager_->update_query_result(update_sql);
+                    if (update_result.is_ok()) {
+                        return existing->pk;
+                    }
+                }
+            } else {
+                database::query_builder insert_builder(database::database_types::sqlite);
+                auto insert_sql =
+                    insert_builder.insert_into("patients")
+                        .values({{"patient_id", record.patient_id},
+                                 {"patient_name", record.patient_name},
+                                 {"birth_date", record.birth_date},
+                                 {"sex", record.sex},
+                                 {"other_ids", record.other_ids},
+                                 {"ethnic_group", record.ethnic_group},
+                                 {"comments", record.comments}})
+                        .build();
+
+                auto insert_result = db_manager_->insert_query_result(insert_sql);
+                if (insert_result.is_ok()) {
+                    auto inserted = find_patient(record.patient_id);
+                    if (inserted.has_value()) {
+                        return inserted->pk;
+                    }
+                }
+            }
+        }
     }
 #endif
 
@@ -439,6 +627,27 @@ auto index_database::upsert_patient(const patient_record& record)
 auto index_database::find_patient(std::string_view patient_id) const
     -> std::optional<patient_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "patient_pk", "patient_id", "patient_name", "birth_date",
+                    "sex", "other_ids", "ethnic_group", "comments",
+                    "created_at", "updated_at"})
+                .from("patients")
+                .where("patient_id", "=", std::string(patient_id))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_patient_from_adapter_row(result.value()[0]);
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -492,6 +701,26 @@ auto index_database::find_patient(std::string_view patient_id) const
 auto index_database::find_patient_by_pk(int64_t pk) const
     -> std::optional<patient_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "patient_pk", "patient_id", "patient_name", "birth_date",
+                    "sex", "other_ids", "ethnic_group", "comments",
+                    "created_at", "updated_at"})
+                .from("patients")
+                .where("patient_pk", "=", pk)
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_patient_from_adapter_row(result.value()[0]);
+        }
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -544,6 +773,63 @@ auto index_database::find_patient_by_pk(int64_t pk) const
 auto index_database::search_patients(const patient_query& query) const
     -> Result<std::vector<patient_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "patient_pk", "patient_id", "patient_name", "birth_date",
+            "sex", "other_ids", "ethnic_group", "comments",
+            "created_at", "updated_at"});
+        builder.from("patients");
+
+        if (query.patient_id.has_value()) {
+            builder.where("patient_id", "LIKE", to_like_pattern(*query.patient_id));
+        }
+
+        if (query.patient_name.has_value()) {
+            builder.where("patient_name", "LIKE", to_like_pattern(*query.patient_name));
+        }
+
+        if (query.birth_date.has_value()) {
+            builder.where("birth_date", "=", *query.birth_date);
+        }
+
+        if (query.birth_date_from.has_value()) {
+            builder.where("birth_date", ">=", *query.birth_date_from);
+        }
+
+        if (query.birth_date_to.has_value()) {
+            builder.where("birth_date", "<=", *query.birth_date_to);
+        }
+
+        if (query.sex.has_value()) {
+            builder.where("sex", "=", *query.sex);
+        }
+
+        builder.order_by("patient_name");
+        builder.order_by("patient_id");
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<patient_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_patient_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through on error
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -679,6 +965,21 @@ auto index_database::search_patients(const patient_query& query) const
 
 auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto delete_sql = builder.delete_from("patients")
+                              .where("patient_id", "=", std::string(patient_id))
+                              .build();
+
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Fall through on error
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("patients")
@@ -726,6 +1027,30 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 
 auto index_database::patient_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("patients")
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    return ok(static_cast<size_t>(0));
+                }
+            }
+            return ok(static_cast<size_t>(0));
+        }
+        // Fall through on error
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
@@ -879,8 +1204,70 @@ auto index_database::upsert_study(const study_record& record)
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    if (db_manager_) {
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+
         // Check if study exists
+        auto check_sql = builder.select(std::vector<std::string>{"study_pk"})
+                             .from("studies")
+                             .where("study_uid", "=", record.study_uid)
+                             .build();
+
+        auto check_result = db_adapter_->select(check_sql);
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                // Study exists - update
+                auto existing = find_study(record.study_uid);
+                if (existing.has_value()) {
+                    database::query_builder update_builder(database::database_types::sqlite);
+                    auto update_sql =
+                        update_builder.update("studies")
+                            .set({{"patient_pk", std::to_string(record.patient_pk)},
+                                  {"study_id", record.study_id},
+                                  {"study_date", record.study_date},
+                                  {"study_time", record.study_time},
+                                  {"accession_number", record.accession_number},
+                                  {"referring_physician", record.referring_physician},
+                                  {"study_description", record.study_description},
+                                  {"updated_at", "datetime('now')"}})
+                            .where("study_uid", "=", record.study_uid)
+                            .build();
+
+                    auto update_result = db_adapter_->update(update_sql);
+                    if (update_result.is_ok()) {
+                        return existing->pk;
+                    }
+                }
+            } else {
+                // Study doesn't exist - insert
+                database::query_builder insert_builder(database::database_types::sqlite);
+                auto insert_sql =
+                    insert_builder.insert_into("studies")
+                        .values({{"patient_pk", std::to_string(record.patient_pk)},
+                                 {"study_uid", record.study_uid},
+                                 {"study_id", record.study_id},
+                                 {"study_date", record.study_date},
+                                 {"study_time", record.study_time},
+                                 {"accession_number", record.accession_number},
+                                 {"referring_physician", record.referring_physician},
+                                 {"study_description", record.study_description}})
+                        .build();
+
+                auto insert_result = db_adapter_->insert(insert_sql);
+                if (insert_result.is_ok()) {
+                    auto inserted = find_study(record.study_uid);
+                    if (inserted.has_value()) {
+                        return inserted->pk;
+                    }
+                }
+            }
+        }
+        // Fall through on error
+    }
+
+    // Legacy fallback: database_manager
+    if (db_manager_) {
         database::query_builder check_builder(database::database_types::sqlite);
         auto check_sql =
             check_builder
@@ -893,7 +1280,6 @@ auto index_database::upsert_study(const study_record& record)
 
         if (check_result.is_ok()) {
             if (!check_result.value().empty()) {
-                // Study exists - update
                 auto existing = find_study(record.study_uid);
                 if (existing.has_value()) {
                     database::query_builder update_builder(database::database_types::sqlite);
@@ -914,10 +1300,8 @@ auto index_database::upsert_study(const study_record& record)
                     if (update_result.is_ok()) {
                         return existing->pk;
                     }
-                    // Update failed, fall through to SQLite
                 }
             } else {
-                // Study doesn't exist - insert
                 database::query_builder insert_builder(database::database_types::sqlite);
                 auto insert_sql =
                     insert_builder.insert_into("studies")
@@ -933,16 +1317,13 @@ auto index_database::upsert_study(const study_record& record)
 
                 auto insert_result = db_manager_->insert_query_result(insert_sql);
                 if (insert_result.is_ok()) {
-                    // Retrieve the inserted study to get pk
                     auto inserted = find_study(record.study_uid);
                     if (inserted.has_value()) {
                         return inserted->pk;
                     }
                 }
-                // Insert failed, fall through to SQLite
             }
         }
-        // Query failed (table may not exist), fall through to SQLite
     }
 #endif
 
@@ -1005,6 +1386,28 @@ auto index_database::upsert_study(const study_record& record)
 auto index_database::find_study(std::string_view study_uid) const
     -> std::optional<study_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "study_pk", "patient_pk", "study_uid", "study_id",
+                    "study_date", "study_time", "accession_number",
+                    "referring_physician", "study_description",
+                    "modalities_in_study", "num_series", "num_instances",
+                    "created_at", "updated_at"})
+                .from("studies")
+                .where("study_uid", "=", std::string(study_uid))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_study_from_adapter_row(result.value()[0]);
+        }
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -1062,6 +1465,28 @@ auto index_database::find_study(std::string_view study_uid) const
 auto index_database::find_study_by_pk(int64_t pk) const
     -> std::optional<study_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #613)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "study_pk", "patient_pk", "study_uid", "study_id",
+                    "study_date", "study_time", "accession_number",
+                    "referring_physician", "study_description",
+                    "modalities_in_study", "num_series", "num_instances",
+                    "created_at", "updated_at"})
+                .from("studies")
+                .where("study_pk", "=", pk)
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_study_from_adapter_row(result.value()[0]);
+        }
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
