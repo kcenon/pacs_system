@@ -378,6 +378,119 @@ auto index_database::parse_study_from_adapter_row(const database_row& row) const
 
     return record;
 }
+
+auto index_database::parse_series_from_adapter_row(const database_row& row) const
+    -> series_record {
+    series_record record;
+
+    auto get_str = [&row](const std::string& key) -> std::string {
+        auto it = row.find(key);
+        return (it != row.end()) ? it->second : std::string{};
+    };
+
+    auto get_int64 = [&row](const std::string& key) -> int64_t {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoll(it->second);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+
+    auto get_optional_int = [&row](const std::string& key) -> std::optional<int> {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoi(it->second);
+            } catch (...) {
+                return std::nullopt;
+            }
+        }
+        return std::nullopt;
+    };
+
+    record.pk = get_int64("series_pk");
+    record.study_pk = get_int64("study_pk");
+    record.series_uid = get_str("series_uid");
+    record.modality = get_str("modality");
+    record.series_number = get_optional_int("series_number");
+    record.series_description = get_str("series_description");
+    record.body_part_examined = get_str("body_part_examined");
+    record.station_name = get_str("station_name");
+    record.num_instances = get_optional_int("num_instances").value_or(0);
+
+    auto created_at_str = get_str("created_at");
+    if (!created_at_str.empty()) {
+        record.created_at = parse_datetime(created_at_str.c_str());
+    }
+
+    auto updated_at_str = get_str("updated_at");
+    if (!updated_at_str.empty()) {
+        record.updated_at = parse_datetime(updated_at_str.c_str());
+    }
+
+    return record;
+}
+
+auto index_database::parse_instance_from_adapter_row(const database_row& row) const
+    -> instance_record {
+    instance_record record;
+
+    auto get_str = [&row](const std::string& key) -> std::string {
+        auto it = row.find(key);
+        return (it != row.end()) ? it->second : std::string{};
+    };
+
+    auto get_int64 = [&row](const std::string& key) -> int64_t {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoll(it->second);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+
+    auto get_optional_int = [&row](const std::string& key) -> std::optional<int> {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoi(it->second);
+            } catch (...) {
+                return std::nullopt;
+            }
+        }
+        return std::nullopt;
+    };
+
+    record.pk = get_int64("instance_pk");
+    record.series_pk = get_int64("series_pk");
+    record.sop_uid = get_str("sop_uid");
+    record.sop_class_uid = get_str("sop_class_uid");
+    record.instance_number = get_optional_int("instance_number");
+    record.transfer_syntax = get_str("transfer_syntax");
+    record.content_date = get_str("content_date");
+    record.content_time = get_str("content_time");
+    record.rows = get_optional_int("rows");
+    record.columns = get_optional_int("columns");
+    record.bits_allocated = get_optional_int("bits_allocated");
+    record.number_of_frames = get_optional_int("number_of_frames");
+    record.file_path = get_str("file_path");
+    record.file_size = get_int64("file_size");
+    record.file_hash = get_str("file_hash");
+
+    auto created_at_str = get_str("created_at");
+    if (!created_at_str.empty()) {
+        record.created_at = parse_datetime(created_at_str.c_str());
+    }
+
+    return record;
+}
 #endif
 
 index_database::index_database(index_database&& other) noexcept
@@ -2136,6 +2249,82 @@ auto index_database::upsert_series(const series_record& record)
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+
+        // Check if series exists
+        auto check_sql = builder.select(std::vector<std::string>{"series_pk"})
+                             .from("series")
+                             .where("series_uid", "=", record.series_uid)
+                             .build();
+
+        auto check_result = db_adapter_->select(check_sql);
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                // Series exists - update
+                auto existing = find_series(record.series_uid);
+                if (existing.has_value()) {
+                    database::query_builder update_builder(database::database_types::sqlite);
+                    update_builder.update("series")
+                        .set({{"study_pk", std::to_string(record.study_pk)},
+                              {"modality", record.modality},
+                              {"series_description", record.series_description},
+                              {"body_part_examined", record.body_part_examined},
+                              {"station_name", record.station_name},
+                              {"updated_at", "datetime('now')"}});
+
+                    if (record.series_number.has_value()) {
+                        update_builder.set({{"series_number",
+                                             std::to_string(*record.series_number)}});
+                    }
+
+                    auto update_sql =
+                        update_builder.where("series_uid", "=", record.series_uid)
+                            .build();
+
+                    auto update_result = db_adapter_->update(update_sql);
+                    if (update_result.is_ok()) {
+                        // Update modalities in study
+                        (void)update_modalities_in_study(record.study_pk);
+                        return existing->pk;
+                    }
+                    // Update failed, fall through to SQLite
+                }
+            } else {
+                // Series doesn't exist - insert
+                database::query_builder insert_builder(database::database_types::sqlite);
+                insert_builder.insert_into("series")
+                    .values({{"study_pk", std::to_string(record.study_pk)},
+                             {"series_uid", record.series_uid},
+                             {"modality", record.modality},
+                             {"series_description", record.series_description},
+                             {"body_part_examined", record.body_part_examined},
+                             {"station_name", record.station_name}});
+
+                if (record.series_number.has_value()) {
+                    insert_builder.values(
+                        {{"series_number", std::to_string(*record.series_number)}});
+                }
+
+                auto insert_sql = insert_builder.build();
+
+                auto insert_result = db_adapter_->insert(insert_sql);
+                if (insert_result.is_ok()) {
+                    // Retrieve the inserted series to get pk
+                    auto inserted = find_series(record.series_uid);
+                    if (inserted.has_value()) {
+                        // Update modalities in study
+                        (void)update_modalities_in_study(record.study_pk);
+                        return inserted->pk;
+                    }
+                }
+            }
+        }
+        // Query failed, fall through to direct SQLite
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         // Check if series exists
         database::query_builder check_builder(database::database_types::sqlite);
@@ -2280,6 +2469,27 @@ auto index_database::upsert_series(const series_record& record)
 auto index_database::find_series(std::string_view series_uid) const
     -> std::optional<series_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "series_pk", "study_pk", "series_uid", "modality",
+                    "series_number", "series_description", "body_part_examined",
+                    "station_name", "num_instances", "created_at", "updated_at"})
+                .from("series")
+                .where("series_uid", "=", std::string(series_uid))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_series_from_adapter_row(result.value()[0]);
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -2334,6 +2544,27 @@ auto index_database::find_series(std::string_view series_uid) const
 auto index_database::find_series_by_pk(int64_t pk) const
     -> std::optional<series_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "series_pk", "study_pk", "series_uid", "modality",
+                    "series_number", "series_description", "body_part_examined",
+                    "station_name", "num_instances", "created_at", "updated_at"})
+                .from("series")
+                .where("series_pk", "=", pk)
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_series_from_adapter_row(result.value()[0]);
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -2387,6 +2618,39 @@ auto index_database::find_series_by_pk(int64_t pk) const
 auto index_database::list_series(std::string_view study_uid) const
     -> Result<std::vector<series_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        // First get study_pk from study_uid
+        auto study = find_study(study_uid);
+        if (!study.has_value()) {
+            return ok(std::vector<series_record>{});
+        }
+
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "series_pk", "study_pk", "series_uid", "modality",
+                    "series_number", "series_description", "body_part_examined",
+                    "station_name", "num_instances", "created_at", "updated_at"})
+                .from("series")
+                .where("study_pk", "=", study->pk)
+                .order_by("series_number")
+                .order_by("series_uid")
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<series_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_series_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         // First get study_pk from study_uid
         auto study = find_study(study_uid);
@@ -2457,6 +2721,69 @@ auto index_database::list_series(std::string_view study_uid) const
 auto index_database::search_series(const series_query& query) const
     -> Result<std::vector<series_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "series_pk", "study_pk", "series_uid", "modality",
+            "series_number", "series_description", "body_part_examined",
+            "station_name", "num_instances", "created_at", "updated_at"});
+        builder.from("series");
+
+        // If study_uid filter is specified, get study_pk first
+        if (query.study_uid.has_value()) {
+            auto study = find_study(*query.study_uid);
+            if (!study.has_value()) {
+                return ok(std::vector<series_record>{});
+            }
+            builder.where("study_pk", "=", study->pk);
+        }
+
+        if (query.series_uid.has_value()) {
+            builder.where("series_uid", "=", *query.series_uid);
+        }
+
+        if (query.modality.has_value()) {
+            builder.where("modality", "=", *query.modality);
+        }
+
+        if (query.series_description.has_value()) {
+            builder.where("series_description", "LIKE",
+                          to_like_pattern(*query.series_description));
+        }
+
+        if (query.body_part_examined.has_value()) {
+            builder.where("body_part_examined", "=", *query.body_part_examined);
+        }
+
+        if (query.series_number.has_value()) {
+            builder.where("series_number", "=", *query.series_number);
+        }
+
+        builder.order_by("series_number");
+        builder.order_by("series_uid");
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<series_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_series_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -2616,6 +2943,25 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     int64_t study_pk = series ? series->study_pk : 0;
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto delete_sql = builder.delete_from("series")
+                              .where("series_uid", "=", std::string(series_uid))
+                              .build();
+
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            // Update modalities in study
+            if (study_pk > 0) {
+                (void)update_modalities_in_study(study_pk);
+            }
+            return ok();
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("series")
@@ -2673,6 +3019,29 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
 
 auto index_database::series_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("series")
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    return ok(static_cast<size_t>(0));
+                }
+            }
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
@@ -2725,6 +3094,36 @@ auto index_database::series_count() const -> Result<size_t> {
 
 auto index_database::series_count(std::string_view study_uid) const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        // First get study_pk from study_uid
+        auto study = find_study(study_uid);
+        if (!study.has_value()) {
+            return ok(static_cast<size_t>(0));
+        }
+
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("series")
+                             .where("study_pk", "=", study->pk)
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    return ok(static_cast<size_t>(0));
+                }
+            }
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         // First get study_pk from study_uid
         auto study = find_study(study_uid);
@@ -2867,7 +3266,117 @@ auto index_database::upsert_instance(const instance_record& record)
                                    "storage");
     }
 
-    // Use INSERT OR REPLACE for upsert behavior
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+
+        // Check if instance exists
+        auto check_sql = builder.select(std::vector<std::string>{"instance_pk"})
+                             .from("instances")
+                             .where("sop_uid", "=", record.sop_uid)
+                             .build();
+
+        auto check_result = db_adapter_->select(check_sql);
+        if (check_result.is_ok()) {
+            if (!check_result.value().empty()) {
+                // Instance exists - update
+                auto existing = find_instance(record.sop_uid);
+                if (existing.has_value()) {
+                    database::query_builder update_builder(database::database_types::sqlite);
+                    update_builder.update("instances")
+                        .set({{"series_pk", std::to_string(record.series_pk)},
+                              {"sop_class_uid", record.sop_class_uid},
+                              {"transfer_syntax", record.transfer_syntax},
+                              {"content_date", record.content_date},
+                              {"content_time", record.content_time},
+                              {"file_path", record.file_path},
+                              {"file_size", std::to_string(record.file_size)},
+                              {"file_hash", record.file_hash}});
+
+                    if (record.instance_number.has_value()) {
+                        update_builder.set({{"instance_number",
+                                             std::to_string(*record.instance_number)}});
+                    }
+                    if (record.rows.has_value()) {
+                        update_builder.set({{"rows",
+                                             std::to_string(*record.rows)}});
+                    }
+                    if (record.columns.has_value()) {
+                        update_builder.set({{"columns",
+                                             std::to_string(*record.columns)}});
+                    }
+                    if (record.bits_allocated.has_value()) {
+                        update_builder.set({{"bits_allocated",
+                                             std::to_string(*record.bits_allocated)}});
+                    }
+                    if (record.number_of_frames.has_value()) {
+                        update_builder.set({{"number_of_frames",
+                                             std::to_string(*record.number_of_frames)}});
+                    }
+
+                    auto update_sql =
+                        update_builder.where("sop_uid", "=", record.sop_uid)
+                            .build();
+
+                    auto update_result = db_adapter_->update(update_sql);
+                    if (update_result.is_ok()) {
+                        return existing->pk;
+                    }
+                    // Update failed, fall through to SQLite
+                }
+            } else {
+                // Instance doesn't exist - insert
+                database::query_builder insert_builder(database::database_types::sqlite);
+                insert_builder.insert_into("instances")
+                    .values({{"series_pk", std::to_string(record.series_pk)},
+                             {"sop_uid", record.sop_uid},
+                             {"sop_class_uid", record.sop_class_uid},
+                             {"transfer_syntax", record.transfer_syntax},
+                             {"content_date", record.content_date},
+                             {"content_time", record.content_time},
+                             {"file_path", record.file_path},
+                             {"file_size", std::to_string(record.file_size)},
+                             {"file_hash", record.file_hash}});
+
+                if (record.instance_number.has_value()) {
+                    insert_builder.values(
+                        {{"instance_number", std::to_string(*record.instance_number)}});
+                }
+                if (record.rows.has_value()) {
+                    insert_builder.values(
+                        {{"rows", std::to_string(*record.rows)}});
+                }
+                if (record.columns.has_value()) {
+                    insert_builder.values(
+                        {{"columns", std::to_string(*record.columns)}});
+                }
+                if (record.bits_allocated.has_value()) {
+                    insert_builder.values(
+                        {{"bits_allocated", std::to_string(*record.bits_allocated)}});
+                }
+                if (record.number_of_frames.has_value()) {
+                    insert_builder.values(
+                        {{"number_of_frames", std::to_string(*record.number_of_frames)}});
+                }
+
+                auto insert_sql = insert_builder.build();
+
+                auto insert_result = db_adapter_->insert(insert_sql);
+                if (insert_result.is_ok()) {
+                    // Retrieve the inserted instance to get pk
+                    auto inserted = find_instance(record.sop_uid);
+                    if (inserted.has_value()) {
+                        return inserted->pk;
+                    }
+                }
+            }
+        }
+        // Query failed, fall through to direct SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite: Use INSERT OR REPLACE for upsert behavior
     const char* sql = R"(
         INSERT INTO instances (
             series_pk, sop_uid, sop_class_uid, instance_number,
@@ -2966,6 +3475,29 @@ auto index_database::upsert_instance(const instance_record& record)
 auto index_database::find_instance(std::string_view sop_uid) const
     -> std::optional<instance_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+                    "instance_number", "transfer_syntax", "content_date",
+                    "content_time", "rows", "columns", "bits_allocated",
+                    "number_of_frames", "file_path", "file_size", "file_hash",
+                    "created_at"})
+                .from("instances")
+                .where("sop_uid", "=", std::string(sop_uid))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_instance_from_adapter_row(result.value()[0]);
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -3023,6 +3555,29 @@ auto index_database::find_instance(std::string_view sop_uid) const
 auto index_database::find_instance_by_pk(int64_t pk) const
     -> std::optional<instance_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+                    "instance_number", "transfer_syntax", "content_date",
+                    "content_time", "rows", "columns", "bits_allocated",
+                    "number_of_frames", "file_path", "file_size", "file_hash",
+                    "created_at"})
+                .from("instances")
+                .where("instance_pk", "=", pk)
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_instance_from_adapter_row(result.value()[0]);
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -3079,6 +3634,39 @@ auto index_database::find_instance_by_pk(int64_t pk) const
 auto index_database::list_instances(std::string_view series_uid) const
     -> Result<std::vector<instance_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        // First get series_pk from series_uid
+        auto series = find_series(series_uid);
+        if (!series.has_value()) {
+            return ok(std::vector<instance_record>{});
+        }
+
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+            "instance_number", "transfer_syntax", "content_date",
+            "content_time", "rows", "columns", "bits_allocated",
+            "number_of_frames", "file_path", "file_size", "file_hash",
+            "created_at"});
+        builder.from("instances");
+        builder.where("series_pk", "=", series->pk);
+        builder.order_by("instance_number");
+        builder.order_by("sop_uid");
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<instance_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_instance_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         // First get series_pk from series_uid
         auto series = find_series(series_uid);
@@ -3151,6 +3739,74 @@ auto index_database::list_instances(std::string_view series_uid) const
 auto index_database::search_instances(const instance_query& query) const
     -> Result<std::vector<instance_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+            "instance_number", "transfer_syntax", "content_date",
+            "content_time", "rows", "columns", "bits_allocated",
+            "number_of_frames", "file_path", "file_size", "file_hash",
+            "created_at"});
+        builder.from("instances");
+
+        // Handle series_uid filter by getting series_pk first
+        if (query.series_uid.has_value()) {
+            auto series = find_series(*query.series_uid);
+            if (!series.has_value()) {
+                return ok(std::vector<instance_record>{});
+            }
+            builder.where("series_pk", "=", series->pk);
+        }
+
+        if (query.sop_uid.has_value()) {
+            builder.where("sop_uid", "=", *query.sop_uid);
+        }
+
+        if (query.sop_class_uid.has_value()) {
+            builder.where("sop_class_uid", "=", *query.sop_class_uid);
+        }
+
+        if (query.content_date.has_value()) {
+            builder.where("content_date", "=", *query.content_date);
+        }
+
+        if (query.content_date_from.has_value()) {
+            builder.where("content_date", ">=", *query.content_date_from);
+        }
+
+        if (query.content_date_to.has_value()) {
+            builder.where("content_date", "<=", *query.content_date_to);
+        }
+
+        if (query.instance_number.has_value()) {
+            builder.where("instance_number", "=", *query.instance_number);
+        }
+
+        builder.order_by("instance_number");
+        builder.order_by("sop_uid");
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<instance_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_instance_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -3312,6 +3968,21 @@ auto index_database::search_instances(const instance_query& query) const
 
 auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto delete_sql = builder.delete_from("instances")
+                              .where("sop_uid", "=", std::string(sop_uid))
+                              .build();
+
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Fall through to db_manager_ or SQLite on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("instances")
@@ -3359,6 +4030,29 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
 
 auto index_database::instance_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("instances")
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    // Fall through to db_manager_
+                }
+            }
+        }
+        // Fall through to db_manager_ on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
@@ -3410,6 +4104,36 @@ auto index_database::instance_count() const -> Result<size_t> {
 auto index_database::instance_count(std::string_view series_uid) const
     -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        // First get series_pk from series_uid
+        auto series = find_series(series_uid);
+        if (!series.has_value()) {
+            return ok(size_t{0});
+        }
+
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                             .from("instances")
+                             .where("series_pk", "=", series->pk)
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("cnt");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    // Fall through to db_manager_
+                }
+            }
+        }
+        // Fall through to db_manager_ on failure
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_) {
         // First get series_pk from series_uid
         auto series = find_series(series_uid);
