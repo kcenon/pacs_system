@@ -1166,6 +1166,18 @@ private:
      */
     [[nodiscard]] auto parse_instance_from_adapter_row(
         const database_row& row) const -> instance_record;
+
+    /**
+     * @brief Parse MPPS record from pacs_database_adapter result row
+     */
+    [[nodiscard]] auto parse_mpps_from_adapter_row(
+        const database_row& row) const -> mpps_record;
+
+    /**
+     * @brief Parse worklist record from pacs_database_adapter result row
+     */
+    [[nodiscard]] auto parse_worklist_from_adapter_row(
+        const database_row& row) const -> worklist_item;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
