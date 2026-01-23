@@ -491,6 +491,107 @@ auto index_database::parse_instance_from_adapter_row(const database_row& row) co
 
     return record;
 }
+
+auto index_database::parse_mpps_from_adapter_row(const database_row& row) const
+    -> mpps_record {
+    mpps_record record;
+
+    auto get_str = [&row](const std::string& key) -> std::string {
+        auto it = row.find(key);
+        return (it != row.end()) ? it->second : std::string{};
+    };
+
+    auto get_int64 = [&row](const std::string& key) -> int64_t {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoll(it->second);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+
+    record.pk = get_int64("mpps_pk");
+    record.mpps_uid = get_str("mpps_uid");
+    record.status = get_str("status");
+    record.start_datetime = get_str("start_datetime");
+    record.end_datetime = get_str("end_datetime");
+    record.station_ae = get_str("station_ae");
+    record.station_name = get_str("station_name");
+    record.modality = get_str("modality");
+    record.study_uid = get_str("study_uid");
+    record.accession_no = get_str("accession_no");
+    record.scheduled_step_id = get_str("scheduled_step_id");
+    record.requested_proc_id = get_str("requested_proc_id");
+    record.performed_series = get_str("performed_series");
+
+    auto created_at_str = get_str("created_at");
+    if (!created_at_str.empty()) {
+        record.created_at = parse_datetime(created_at_str.c_str());
+    }
+
+    auto updated_at_str = get_str("updated_at");
+    if (!updated_at_str.empty()) {
+        record.updated_at = parse_datetime(updated_at_str.c_str());
+    }
+
+    return record;
+}
+
+auto index_database::parse_worklist_from_adapter_row(const database_row& row) const
+    -> worklist_item {
+    worklist_item item;
+
+    auto get_str = [&row](const std::string& key) -> std::string {
+        auto it = row.find(key);
+        return (it != row.end()) ? it->second : std::string{};
+    };
+
+    auto get_int64 = [&row](const std::string& key) -> int64_t {
+        auto it = row.find(key);
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return std::stoll(it->second);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+
+    item.pk = get_int64("worklist_pk");
+    item.step_id = get_str("step_id");
+    item.step_status = get_str("step_status");
+    item.patient_id = get_str("patient_id");
+    item.patient_name = get_str("patient_name");
+    item.birth_date = get_str("birth_date");
+    item.sex = get_str("sex");
+    item.accession_no = get_str("accession_no");
+    item.requested_proc_id = get_str("requested_proc_id");
+    item.study_uid = get_str("study_uid");
+    item.scheduled_datetime = get_str("scheduled_datetime");
+    item.station_ae = get_str("station_ae");
+    item.station_name = get_str("station_name");
+    item.modality = get_str("modality");
+    item.procedure_desc = get_str("procedure_desc");
+    item.protocol_code = get_str("protocol_code");
+    item.referring_phys = get_str("referring_phys");
+    item.referring_phys_id = get_str("referring_phys_id");
+
+    auto created_at_str = get_str("created_at");
+    if (!created_at_str.empty()) {
+        item.created_at = parse_datetime(created_at_str.c_str());
+    }
+
+    auto updated_at_str = get_str("updated_at");
+    if (!updated_at_str.empty()) {
+        item.updated_at = parse_datetime(updated_at_str.c_str());
+    }
+
+    return item;
+}
 #endif
 
 index_database::index_database(index_database&& other) noexcept
@@ -4603,6 +4704,36 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto insert_sql =
+            builder.insert_into("mpps")
+                .values({{"mpps_uid", record.mpps_uid},
+                         {"status", std::string("IN PROGRESS")},
+                         {"start_datetime", record.start_datetime},
+                         {"station_ae", record.station_ae},
+                         {"station_name", record.station_name},
+                         {"modality", record.modality},
+                         {"study_uid", record.study_uid},
+                         {"accession_no", record.accession_no},
+                         {"scheduled_step_id", record.scheduled_step_id},
+                         {"requested_proc_id", record.requested_proc_id},
+                         {"performed_series", record.performed_series}})
+                .build();
+
+        auto insert_result = db_adapter_->insert(insert_sql);
+        if (insert_result.is_ok()) {
+            // Retrieve the inserted MPPS to get pk
+            auto inserted = find_mpps(record.mpps_uid);
+            if (inserted.has_value()) {
+                return inserted->pk;
+            }
+        }
+        // Fall through if insert failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto insert_sql =
@@ -4715,6 +4846,33 @@ auto index_database::update_mpps(std::string_view mpps_uid,
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.update("mpps");
+        builder.set({{"status", std::string(new_status)}});
+
+        // Only update end_datetime if not empty
+        if (!end_datetime.empty()) {
+            builder.set({{"end_datetime", std::string(end_datetime)}});
+        }
+
+        // Only update performed_series if not empty
+        if (!performed_series.empty()) {
+            builder.set({{"performed_series", std::string(performed_series)}});
+        }
+
+        builder.where("mpps_uid", "=", std::string(mpps_uid));
+
+        auto update_sql = builder.build();
+        auto result = db_adapter_->update(update_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Fall through if update failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.update("mpps");
@@ -4801,6 +4959,29 @@ auto index_database::update_mpps(const mpps_record& record) -> VoidResult {
 auto index_database::find_mpps(std::string_view mpps_uid) const
     -> std::optional<mpps_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "mpps_pk", "mpps_uid", "status", "start_datetime",
+                    "end_datetime", "station_ae", "station_name", "modality",
+                    "study_uid", "accession_no", "scheduled_step_id",
+                    "requested_proc_id", "performed_series", "created_at",
+                    "updated_at"})
+                .from("mpps")
+                .where("mpps_uid", "=", std::string(mpps_uid))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_mpps_from_adapter_row(result.value()[0]);
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -4858,6 +5039,29 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
 auto index_database::find_mpps_by_pk(int64_t pk) const
     -> std::optional<mpps_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "mpps_pk", "mpps_uid", "status", "start_datetime",
+                    "end_datetime", "station_ae", "station_name", "modality",
+                    "study_uid", "accession_no", "scheduled_step_id",
+                    "requested_proc_id", "performed_series", "created_at",
+                    "updated_at"})
+                .from("mpps")
+                .where("mpps_pk", "=", pk)
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_mpps_from_adapter_row(result.value()[0]);
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -4914,6 +5118,32 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
 auto index_database::list_active_mpps(std::string_view station_ae) const
     -> Result<std::vector<mpps_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
+            "station_ae", "station_name", "modality", "study_uid",
+            "accession_no", "scheduled_step_id", "requested_proc_id",
+            "performed_series", "created_at", "updated_at"});
+        builder.from("mpps");
+        builder.where("status", "=", std::string("IN PROGRESS"));
+        builder.where("station_ae", "=", std::string(station_ae));
+        builder.order_by("start_datetime", database::sort_order::desc);
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<mpps_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_mpps_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -4979,6 +5209,31 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
 auto index_database::find_mpps_by_study(std::string_view study_uid) const
     -> Result<std::vector<mpps_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
+            "station_ae", "station_name", "modality", "study_uid",
+            "accession_no", "scheduled_step_id", "requested_proc_id",
+            "performed_series", "created_at", "updated_at"});
+        builder.from("mpps");
+        builder.where("study_uid", "=", std::string(study_uid));
+        builder.order_by("start_datetime", database::sort_order::desc);
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<mpps_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_mpps_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -5043,6 +5298,74 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
 auto index_database::search_mpps(const mpps_query& query) const
     -> Result<std::vector<mpps_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
+            "station_ae", "station_name", "modality", "study_uid",
+            "accession_no", "scheduled_step_id", "requested_proc_id",
+            "performed_series", "created_at", "updated_at"});
+        builder.from("mpps");
+
+        if (query.mpps_uid.has_value()) {
+            builder.where("mpps_uid", "=", *query.mpps_uid);
+        }
+
+        if (query.status.has_value()) {
+            builder.where("status", "=", *query.status);
+        }
+
+        if (query.station_ae.has_value()) {
+            builder.where("station_ae", "=", *query.station_ae);
+        }
+
+        if (query.modality.has_value()) {
+            builder.where("modality", "=", *query.modality);
+        }
+
+        if (query.study_uid.has_value()) {
+            builder.where("study_uid", "=", *query.study_uid);
+        }
+
+        if (query.accession_no.has_value()) {
+            builder.where("accession_no", "=", *query.accession_no);
+        }
+
+        if (query.start_date_from.has_value()) {
+            builder.where(database::query_condition(
+                pacs::compat::format("substr(start_datetime, 1, 8) >= '{}'",
+                                     *query.start_date_from)));
+        }
+
+        if (query.start_date_to.has_value()) {
+            builder.where(database::query_condition(pacs::compat::format(
+                "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to)));
+        }
+
+        builder.order_by("start_datetime", database::sort_order::desc);
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<mpps_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_mpps_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -5203,6 +5526,21 @@ auto index_database::search_mpps(const mpps_query& query) const
 
 auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto delete_sql = builder.delete_from("mpps")
+                              .where("mpps_uid", "=", std::string(mpps_uid))
+                              .build();
+
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Fall through if delete failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto delete_sql = builder.delete_from("mpps")
@@ -5250,6 +5588,29 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
 
 auto index_database::mpps_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("mpps")
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    return ok(size_t{0});
+                }
+            }
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
@@ -5302,6 +5663,30 @@ auto index_database::mpps_count() const -> Result<size_t> {
 
 auto index_database::mpps_count(std::string_view status) const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                             .from("mpps")
+                             .where("status", "=", std::string(status))
+                             .build();
+
+        auto result = db_adapter_->select(count_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end() && !it->second.empty()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    return ok(size_t{0});
+                }
+            }
+        }
+        // Fall through if query failed
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
@@ -5494,6 +5879,42 @@ auto index_database::add_worklist_item(const worklist_item& item)
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto insert_sql =
+            builder.insert_into("worklist")
+                .values({{"step_id", item.step_id},
+                         {"step_status", std::string("SCHEDULED")},
+                         {"patient_id", item.patient_id},
+                         {"patient_name", item.patient_name},
+                         {"birth_date", item.birth_date},
+                         {"sex", item.sex},
+                         {"accession_no", item.accession_no},
+                         {"requested_proc_id", item.requested_proc_id},
+                         {"study_uid", item.study_uid},
+                         {"scheduled_datetime", item.scheduled_datetime},
+                         {"station_ae", item.station_ae},
+                         {"station_name", item.station_name},
+                         {"modality", item.modality},
+                         {"procedure_desc", item.procedure_desc},
+                         {"protocol_code", item.protocol_code},
+                         {"referring_phys", item.referring_phys},
+                         {"referring_phys_id", item.referring_phys_id}})
+                .build();
+
+        auto insert_result = db_adapter_->insert(insert_sql);
+        if (insert_result.is_ok()) {
+            // Retrieve the inserted worklist item to get pk
+            auto inserted = find_worklist_item(item.step_id, item.accession_no);
+            if (inserted.has_value()) {
+                return inserted->pk;
+            }
+        }
+        // Insert failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto insert_sql =
@@ -5602,6 +6023,23 @@ auto index_database::update_worklist_status(std::string_view step_id,
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.update("worklist");
+        builder.set({{"step_status", std::string(new_status)}});
+        builder.where("step_id", "=", std::string(step_id));
+        builder.where("accession_no", "=", std::string(accession_no));
+
+        auto update_sql = builder.build();
+        auto result = db_adapter_->update(update_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Update failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.update("worklist");
@@ -5609,8 +6047,7 @@ auto index_database::update_worklist_status(std::string_view step_id,
         builder.where("step_id", "=", std::string(step_id));
         builder.where("accession_no", "=", std::string(accession_no));
 
-        auto update_sql =
-            builder.build();
+        auto update_sql = builder.build();
         auto result = db_manager_->update_query_result(update_sql);
         if (result.is_ok()) {
             return ok();
@@ -5660,6 +6097,83 @@ auto index_database::update_worklist_status(std::string_view step_id,
 auto index_database::query_worklist(const worklist_query& query) const
     -> Result<std::vector<worklist_item>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.select(std::vector<std::string>{
+            "worklist_pk", "step_id", "step_status", "patient_id",
+            "patient_name", "birth_date", "sex", "accession_no",
+            "requested_proc_id", "study_uid", "scheduled_datetime",
+            "station_ae", "station_name", "modality", "procedure_desc",
+            "protocol_code", "referring_phys", "referring_phys_id",
+            "created_at", "updated_at"});
+        builder.from("worklist");
+
+        // Default: only return SCHEDULED items unless include_all_status is set
+        if (!query.include_all_status) {
+            builder.where("step_status", "=", std::string("SCHEDULED"));
+        }
+
+        if (query.station_ae.has_value()) {
+            builder.where("station_ae", "=", *query.station_ae);
+        }
+
+        if (query.modality.has_value()) {
+            builder.where("modality", "=", *query.modality);
+        }
+
+        if (query.scheduled_date_from.has_value()) {
+            builder.where(database::query_condition(
+                pacs::compat::format("substr(scheduled_datetime, 1, 8) >= '{}'",
+                                     *query.scheduled_date_from)));
+        }
+
+        if (query.scheduled_date_to.has_value()) {
+            builder.where(database::query_condition(
+                pacs::compat::format("substr(scheduled_datetime, 1, 8) <= '{}'",
+                                     *query.scheduled_date_to)));
+        }
+
+        if (query.patient_id.has_value()) {
+            builder.where("patient_id", "LIKE", to_like_pattern(*query.patient_id));
+        }
+
+        if (query.patient_name.has_value()) {
+            builder.where("patient_name", "LIKE",
+                          to_like_pattern(*query.patient_name));
+        }
+
+        if (query.accession_no.has_value()) {
+            builder.where("accession_no", "=", *query.accession_no);
+        }
+
+        if (query.step_id.has_value()) {
+            builder.where("step_id", "=", *query.step_id);
+        }
+
+        builder.order_by("scheduled_datetime", database::sort_order::asc);
+
+        if (query.limit > 0) {
+            builder.limit(static_cast<int>(query.limit));
+        }
+
+        if (query.offset > 0) {
+            builder.offset(static_cast<int>(query.offset));
+        }
+
+        auto select_sql = builder.build();
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok()) {
+            std::vector<worklist_item> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_worklist_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Query failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.select(std::vector<std::string>{
@@ -5723,8 +6237,7 @@ auto index_database::query_worklist(const worklist_query& query) const
             builder.offset(static_cast<int>(query.offset));
         }
 
-        auto select_sql =
-            builder.build();
+        auto select_sql = builder.build();
         auto result = db_manager_->select_query_result(select_sql);
         if (result.is_err()) {
             return pacs_error<std::vector<worklist_item>>(
@@ -5837,6 +6350,31 @@ auto index_database::find_worklist_item(std::string_view step_id,
                                         std::string_view accession_no) const
     -> std::optional<worklist_item> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "worklist_pk", "step_id", "step_status", "patient_id",
+                    "patient_name", "birth_date", "sex", "accession_no",
+                    "requested_proc_id", "study_uid", "scheduled_datetime",
+                    "station_ae", "station_name", "modality", "procedure_desc",
+                    "protocol_code", "referring_phys", "referring_phys_id",
+                    "created_at", "updated_at"})
+                .from("worklist")
+                .where("step_id", "=", std::string(step_id))
+                .where("accession_no", "=", std::string(accession_no))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_worklist_from_adapter_row(result.value()[0]);
+        }
+        // Query failed or empty, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -5899,6 +6437,30 @@ auto index_database::find_worklist_item(std::string_view step_id,
 auto index_database::find_worklist_by_pk(int64_t pk) const
     -> std::optional<worklist_item> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder
+                .select(std::vector<std::string>{
+                    "worklist_pk", "step_id", "step_status", "patient_id",
+                    "patient_name", "birth_date", "sex", "accession_no",
+                    "requested_proc_id", "study_uid", "scheduled_datetime",
+                    "station_ae", "station_name", "modality", "procedure_desc",
+                    "protocol_code", "referring_phys", "referring_phys_id",
+                    "created_at", "updated_at"})
+                .from("worklist")
+                .where("worklist_pk", "=", pk)
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            return parse_worklist_from_adapter_row(result.value()[0]);
+        }
+        // Query failed or empty, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
@@ -5958,14 +6520,29 @@ auto index_database::delete_worklist_item(std::string_view step_id,
                                           std::string_view accession_no)
     -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.delete_from("worklist");
+        builder.where("step_id", "=", std::string(step_id));
+        builder.where("accession_no", "=", std::string(accession_no));
+
+        auto delete_sql = builder.build();
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            return ok();
+        }
+        // Delete failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("worklist");
         builder.where("step_id", "=", std::string(step_id));
         builder.where("accession_no", "=", std::string(accession_no));
 
-        auto delete_sql =
-            builder.build();
+        auto delete_sql = builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok();
@@ -6021,6 +6598,23 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     auto cutoff_str = oss.str();
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.delete_from("worklist");
+        builder.where("step_status", "!=", std::string("SCHEDULED"));
+        builder.where(database::query_condition(
+            pacs::compat::format("created_at < '{}'", cutoff_str)));
+
+        auto delete_sql = builder.build();
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            return ok(static_cast<size_t>(result.value()));
+        }
+        // Delete failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("worklist");
@@ -6028,8 +6622,7 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
         builder.where(database::query_condition(
             pacs::compat::format("created_at < '{}'", cutoff_str)));
 
-        auto delete_sql =
-            builder.build();
+        auto delete_sql = builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
@@ -6085,6 +6678,23 @@ auto index_database::cleanup_worklist_items_before(
     auto before_str = oss.str();
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        builder.delete_from("worklist");
+        builder.where("step_status", "!=", std::string("SCHEDULED"));
+        builder.where(database::query_condition(
+            pacs::compat::format("scheduled_datetime < '{}'", before_str)));
+
+        auto delete_sql = builder.build();
+        auto result = db_adapter_->remove(delete_sql);
+        if (result.is_ok()) {
+            return ok(static_cast<size_t>(result.value()));
+        }
+        // Delete failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         builder.delete_from("worklist");
@@ -6092,8 +6702,7 @@ auto index_database::cleanup_worklist_items_before(
         builder.where(database::query_condition(
             pacs::compat::format("scheduled_datetime < '{}'", before_str)));
 
-        auto delete_sql =
-            builder.build();
+        auto delete_sql = builder.build();
         auto result = db_manager_->delete_query_result(delete_sql);
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
@@ -6137,6 +6746,29 @@ auto index_database::cleanup_worklist_items_before(
 
 auto index_database::worklist_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
+                              .from("worklist")
+                              .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    // Parse failed, fall through
+                }
+            }
+        }
+        // Query failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
@@ -6178,6 +6810,31 @@ auto index_database::worklist_count() const -> Result<size_t> {
 
 auto index_database::worklist_count(std::string_view status) const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter (Issue #615)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto builder = db_adapter_->create_query_builder();
+        auto select_sql =
+            builder.select(std::vector<std::string>{"COUNT(*)"})
+                .from("worklist")
+                .where("step_status", "=", std::string(status))
+                .build();
+
+        auto result = db_adapter_->select(select_sql);
+        if (result.is_ok() && !result.value().empty()) {
+            const auto& row = result.value()[0];
+            auto it = row.find("COUNT(*)");
+            if (it != row.end()) {
+                try {
+                    return ok(static_cast<size_t>(std::stoll(it->second)));
+                } catch (...) {
+                    // Parse failed, fall through
+                }
+            }
+        }
+        // Query failed, fall through to legacy
+    }
+
+    // Legacy fallback: database_manager
     if (db_manager_) {
         database::query_builder builder(database::database_types::sqlite);
         auto select_sql =
