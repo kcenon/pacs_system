@@ -1031,6 +1031,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/measurement_repository.cpp
         src/storage/key_image_repository.cpp
         src/storage/viewer_state_repository.cpp
+        src/storage/pacs_database_adapter.cpp
     )
     target_include_directories(pacs_storage
         PUBLIC
@@ -1062,6 +1063,10 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     # Link database_system for secure query building (SQL injection prevention)
     if(TARGET database)
         target_link_libraries(pacs_storage PUBLIC database)
+        # Link integrated_database for unified_database_system (Issue #606)
+        if(TARGET integrated_database)
+            target_link_libraries(pacs_storage PUBLIC integrated_database)
+        endif()
         target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
         target_compile_definitions(pacs_storage PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
         # Suppress deprecated warnings from database_system (database_base is deprecated)
@@ -1716,6 +1721,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/index_database_test.cpp
             tests/storage/mpps_test.cpp
             tests/storage/worklist_test.cpp
+            tests/storage/pacs_database_adapter_test.cpp
             # Annotation & Measurement API integration tests (Issue #545, #584)
             tests/integration/annotation_api_test.cpp
             tests/integration/measurement_api_test.cpp
@@ -1725,6 +1731,7 @@ if(PACS_BUILD_TESTS)
                 pacs_storage
                 Catch2::Catch2WithMain
                 $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
+                $<$<TARGET_EXISTS:database>:database>
         )
     endif()
 
