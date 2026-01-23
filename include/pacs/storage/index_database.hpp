@@ -1154,6 +1154,18 @@ private:
      */
     [[nodiscard]] auto parse_study_from_adapter_row(
         const database_row& row) const -> study_record;
+
+    /**
+     * @brief Parse series record from pacs_database_adapter result row
+     */
+    [[nodiscard]] auto parse_series_from_adapter_row(
+        const database_row& row) const -> series_record;
+
+    /**
+     * @brief Parse instance record from pacs_database_adapter result row
+     */
+    [[nodiscard]] auto parse_instance_from_adapter_row(
+        const database_row& row) const -> instance_record;
 #endif
 
     /// SQLite database handle (used for migrations and fallback)
