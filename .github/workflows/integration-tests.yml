@@ -366,6 +366,8 @@ jobs:
         brew list fmt &>/dev/null || brew install fmt
         brew list jpeg-turbo &>/dev/null || brew install jpeg-turbo
         brew list ccache &>/dev/null || brew install ccache
+        # Link ccache if not already linked
+        brew link ccache &>/dev/null || echo "ccache already linked or link failed"
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
