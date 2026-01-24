@@ -863,48 +863,30 @@ auto index_database::find_patient(std::string_view patient_id) const
 auto index_database::find_patient_by_pk(int64_t pk) const
     -> std::optional<patient_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter (Issue #613)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "patient_pk", "patient_id", "patient_name", "birth_date",
-                    "sex", "other_ids", "ethnic_group", "comments",
-                    "created_at", "updated_at"})
-                .from("patients")
-                .where("patient_pk", "=", pk)
-                .build();
-
-        auto result = db_adapter_->select(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            return parse_patient_from_adapter_row(result.value()[0]);
-        }
+    // Use pacs_database_adapter for unified database operations (Issue #608, #622)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return std::nullopt;
     }
 
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "patient_pk", "patient_id", "patient_name", "birth_date",
-                    "sex", "other_ids", "ethnic_group", "comments",
-                    "created_at", "updated_at"})
-                .from("patients")
-                .where("patient_pk", "=", pk)
-                .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql =
+        builder
+            .select(std::vector<std::string>{
+                "patient_pk", "patient_id", "patient_name", "birth_date",
+                "sex", "other_ids", "ethnic_group", "comments",
+                "created_at", "updated_at"})
+            .from("patients")
+            .where("patient_pk", "=", pk)
+            .build();
 
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_patient_from_row(result.value()[0]);
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
     }
-#endif
 
-    // Fallback to direct SQLite
+    return parse_patient_from_adapter_row(result.value()[0]);
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT patient_pk, patient_id, patient_name, birth_date, sex,
                other_ids, ethnic_group, comments, created_at, updated_at
@@ -930,6 +912,7 @@ auto index_database::find_patient_by_pk(int64_t pk) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::search_patients(const patient_query& query) const
@@ -1127,40 +1110,28 @@ auto index_database::search_patients(const patient_query& query) const
 
 auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter (Issue #613)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto delete_sql = builder.delete_from("patients")
-                              .where("patient_id", "=", std::string(patient_id))
-                              .build();
-
-        auto result = db_adapter_->remove(delete_sql);
-        if (result.is_ok()) {
-            return ok();
-        }
-        // Fall through on error
+    // Use pacs_database_adapter for unified database operations (Issue #608, #622)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return make_error<std::monostate>(
+            -1, "Database adapter not available or not connected", "storage");
     }
 
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto delete_sql = builder.delete_from("patients")
-                              .where("patient_id", "=", std::string(patient_id))
-                              .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto delete_sql = builder.delete_from("patients")
+                          .where("patient_id", "=", std::string(patient_id))
+                          .build();
 
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_err()) {
-            return make_error<std::monostate>(
-                error_codes::database_query_error,
-                pacs::compat::format("Failed to delete patient: {}",
-                                     result.error().message),
-                "storage");
-        }
-        return ok();
+    auto result = db_adapter_->remove(delete_sql);
+    if (result.is_err()) {
+        return make_error<std::monostate>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to delete patient: {}",
+                                 result.error().message),
+            "storage");
     }
-#endif
-
-    // Fallback to direct SQLite
+    return ok();
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "DELETE FROM patients WHERE patient_id = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -1185,65 +1156,43 @@ auto index_database::delete_patient(std::string_view patient_id) -> VoidResult {
     }
 
     return ok();
+#endif
 }
 
 auto index_database::patient_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter (Issue #613)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("patients")
-                             .build();
-
-        auto result = db_adapter_->select(count_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end() && !it->second.empty()) {
-                try {
-                    return ok(static_cast<size_t>(std::stoll(it->second)));
-                } catch (...) {
-                    return ok(static_cast<size_t>(0));
-                }
-            }
-            return ok(static_cast<size_t>(0));
-        }
-        // Fall through on error
+    // Use pacs_database_adapter for unified database operations (Issue #608, #622)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return pacs_error<size_t>(
+            -1, "Database adapter not available or not connected");
     }
 
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("patients")
-                             .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                         .from("patients")
+                         .build();
 
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
+    auto result = db_adapter_->select(count_sql);
+    if (result.is_err()) {
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Query failed: {}", result.error().message));
+    }
 
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                }
-                if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(
-                        std::stoll(std::get<std::string>(it->second))));
-                }
+    if (!result.value().empty()) {
+        const auto& row = result.value()[0];
+        auto it = row.find("cnt");
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return ok(static_cast<size_t>(std::stoll(it->second)));
+            } catch (...) {
+                return ok(static_cast<size_t>(0));
             }
         }
-        return ok(static_cast<size_t>(0));
     }
-#endif
-
-    // Fallback to direct SQLite
+    return ok(static_cast<size_t>(0));
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "SELECT COUNT(*) FROM patients;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -1261,6 +1210,7 @@ auto index_database::patient_count() const -> Result<size_t> {
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 // ============================================================================
