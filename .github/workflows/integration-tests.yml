@@ -358,8 +358,11 @@ jobs:
         brew list cmake &>/dev/null || brew install cmake
         brew list fmt &>/dev/null || brew install fmt
         brew list jpeg-turbo &>/dev/null || brew install jpeg-turbo
+        # Install blake3 (required by ccache)
+        brew list blake3 &>/dev/null || brew install blake3
         brew list ccache &>/dev/null || brew install ccache
-        # Link ccache if not already linked
+        # Link packages if not already linked
+        brew link blake3 &>/dev/null || echo "blake3 already linked or link failed"
         brew link ccache &>/dev/null || echo "ccache already linked or link failed"
 
     # Setup ccache for faster C++ compilation
