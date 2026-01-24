@@ -4538,6 +4538,13 @@ auto index_database::get_series_files(std::string_view series_instance_uid)
 // ============================================================================
 
 auto index_database::vacuum() -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #616)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        return db_adapter_->execute("VACUUM;");
+    }
+#endif
+
     auto rc = sqlite3_exec(db_, "VACUUM;", nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
@@ -4548,6 +4555,13 @@ auto index_database::vacuum() -> VoidResult {
 }
 
 auto index_database::analyze() -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #616)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        return db_adapter_->execute("ANALYZE;");
+    }
+#endif
+
     auto rc = sqlite3_exec(db_, "ANALYZE;", nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
@@ -4558,6 +4572,27 @@ auto index_database::analyze() -> VoidResult {
 }
 
 auto index_database::verify_integrity() const -> VoidResult {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #616)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto result = db_adapter_->select("PRAGMA integrity_check;");
+        if (result.is_err()) {
+            return make_error<std::monostate>(
+                result.error().code, result.error().message, "storage");
+        }
+
+        for (const auto& row : result.value()) {
+            auto it = row.find("integrity_check");
+            if (it != row.end() && it->second != "ok") {
+                return make_error<std::monostate>(
+                    -1, pacs::compat::format("Integrity check failed: {}", it->second),
+                    "storage");
+            }
+        }
+        return ok();
+    }
+#endif
+
     const char* sql = "PRAGMA integrity_check;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -4589,6 +4624,13 @@ auto index_database::checkpoint(bool truncate) -> VoidResult {
     const char* sql =
         truncate ? "PRAGMA wal_checkpoint(TRUNCATE);"
                  : "PRAGMA wal_checkpoint(PASSIVE);";
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #616)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        return db_adapter_->execute(sql);
+    }
+#endif
 
     auto rc = sqlite3_exec(db_, sql, nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
@@ -4642,19 +4684,44 @@ auto index_database::get_storage_stats() const -> Result<storage_stats> {
     stats.total_instances = instance_count_result.value();
 
     // Get total file size
-    const char* file_size_sql = "SELECT COALESCE(SUM(file_size), 0) FROM instances;";
-    sqlite3_stmt* stmt = nullptr;
-    auto rc = sqlite3_prepare_v2(db_, file_size_sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return pacs_error<storage_stats>(
-            error_codes::database_query_error,
-            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)));
-    }
+    const char* file_size_sql =
+        "SELECT COALESCE(SUM(file_size), 0) AS total_size FROM instances;";
 
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        stats.total_file_size = sqlite3_column_int64(stmt, 0);
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    // Prefer pacs_database_adapter for unified database operations (Issue #616)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        auto result = db_adapter_->select(file_size_sql);
+        if (result.is_err()) {
+            return Result<storage_stats>::err(result.error());
+        }
+        if (!result.value().empty()) {
+            auto it = result.value()[0].find("total_size");
+            if (it != result.value()[0].end()) {
+                try {
+                    stats.total_file_size = std::stoll(it->second);
+                } catch (const std::exception&) {
+                    stats.total_file_size = 0;
+                }
+            }
+        }
+    } else {
+#endif
+        sqlite3_stmt* stmt = nullptr;
+        auto rc = sqlite3_prepare_v2(db_, file_size_sql, -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            return pacs_error<storage_stats>(
+                error_codes::database_query_error,
+                pacs::compat::format("Failed to prepare query: {}",
+                                     sqlite3_errmsg(db_)));
+        }
+
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            stats.total_file_size = sqlite3_column_int64(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+#ifdef PACS_WITH_DATABASE_SYSTEM
     }
-    sqlite3_finalize(stmt);
+#endif
 
     // Get database file size
     if (path_ != ":memory:") {
