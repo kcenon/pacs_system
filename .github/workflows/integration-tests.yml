@@ -334,13 +334,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-brew-
 
-    # Setup ccache for faster C++ compilation
-    - name: Setup ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ matrix.os }}-${{ matrix.build_type }}
-        max-size: 500M
-
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
       run: |
@@ -368,6 +361,14 @@ jobs:
         brew list ccache &>/dev/null || brew install ccache
         # Link ccache if not already linked
         brew link ccache &>/dev/null || echo "ccache already linked or link failed"
+
+    # Setup ccache for faster C++ compilation
+    # Must run after Install dependencies (macOS) to ensure ccache is linked
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-${{ matrix.build_type }}
+        max-size: 500M
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
