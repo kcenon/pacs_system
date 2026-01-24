@@ -664,129 +664,94 @@ auto index_database::upsert_patient(const patient_record& record)
     }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #613)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-
-        // Check if patient exists
-        auto check_sql = builder.select(std::vector<std::string>{"patient_pk"})
-                             .from("patients")
-                             .where("patient_id", "=", record.patient_id)
-                             .build();
-
-        auto check_result = db_adapter_->select(check_sql);
-        if (check_result.is_ok()) {
-            if (!check_result.value().empty()) {
-                // Patient exists - update
-                auto existing = find_patient(record.patient_id);
-                if (existing.has_value()) {
-                    database::query_builder update_builder(database::database_types::sqlite);
-                    auto update_sql =
-                        update_builder.update("patients")
-                            .set({{"patient_name", record.patient_name},
-                                  {"birth_date", record.birth_date},
-                                  {"sex", record.sex},
-                                  {"other_ids", record.other_ids},
-                                  {"ethnic_group", record.ethnic_group},
-                                  {"comments", record.comments},
-                                  {"updated_at", "datetime('now')"}})
-                            .where("patient_id", "=", record.patient_id)
-                            .build();
-
-                    auto update_result = db_adapter_->update(update_sql);
-                    if (update_result.is_ok()) {
-                        return existing->pk;
-                    }
-                    // Update failed, fall through to SQLite
-                }
-            } else {
-                // Patient doesn't exist - insert
-                database::query_builder insert_builder(database::database_types::sqlite);
-                auto insert_sql =
-                    insert_builder.insert_into("patients")
-                        .values({{"patient_id", record.patient_id},
-                                 {"patient_name", record.patient_name},
-                                 {"birth_date", record.birth_date},
-                                 {"sex", record.sex},
-                                 {"other_ids", record.other_ids},
-                                 {"ethnic_group", record.ethnic_group},
-                                 {"comments", record.comments}})
-                        .build();
-
-                auto insert_result = db_adapter_->insert(insert_sql);
-                if (insert_result.is_ok()) {
-                    // Retrieve the inserted patient to get pk
-                    auto inserted = find_patient(record.patient_id);
-                    if (inserted.has_value()) {
-                        return inserted->pk;
-                    }
-                }
-                // Insert failed, fall through to SQLite
-            }
-        }
-        // Query failed, fall through to direct SQLite
+    // Use pacs_database_adapter for unified database operations (Issue #606, #608, #621)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return make_error<int64_t>(
+            -1, "Database adapter not available or not connected", "storage");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder check_builder(database::database_types::sqlite);
-        auto check_sql =
-            check_builder
-                .select(std::vector<std::string>{"patient_pk"})
-                .from("patients")
+    auto builder = db_adapter_->create_query_builder();
+
+    // Check if patient exists
+    auto check_sql = builder.select(std::vector<std::string>{"patient_pk"})
+                         .from("patients")
+                         .where("patient_id", "=", record.patient_id)
+                         .build();
+
+    auto check_result = db_adapter_->select(check_sql);
+    if (check_result.is_err()) {
+        return make_error<int64_t>(
+            -1,
+            pacs::compat::format("Failed to check patient existence: {}",
+                                check_result.error().message),
+            "storage");
+    }
+
+    if (!check_result.value().empty()) {
+        // Patient exists - update
+        auto existing = find_patient(record.patient_id);
+        if (!existing.has_value()) {
+            return make_error<int64_t>(
+                -1, "Patient exists but could not retrieve record", "storage");
+        }
+
+        database::query_builder update_builder(database::database_types::sqlite);
+        auto update_sql =
+            update_builder.update("patients")
+                .set({{"patient_name", record.patient_name},
+                      {"birth_date", record.birth_date},
+                      {"sex", record.sex},
+                      {"other_ids", record.other_ids},
+                      {"ethnic_group", record.ethnic_group},
+                      {"comments", record.comments},
+                      {"updated_at", "datetime('now')"}})
                 .where("patient_id", "=", record.patient_id)
                 .build();
 
-        auto check_result = db_manager_->select_query_result(check_sql);
-
-        if (check_result.is_ok()) {
-            if (!check_result.value().empty()) {
-                auto existing = find_patient(record.patient_id);
-                if (existing.has_value()) {
-                    database::query_builder update_builder(database::database_types::sqlite);
-                    auto update_sql =
-                        update_builder.update("patients")
-                            .set({{"patient_name", record.patient_name},
-                                  {"birth_date", record.birth_date},
-                                  {"sex", record.sex},
-                                  {"other_ids", record.other_ids},
-                                  {"ethnic_group", record.ethnic_group},
-                                  {"comments", record.comments},
-                                  {"updated_at", "datetime('now')"}})
-                            .where("patient_id", "=", record.patient_id)
-                            .build();
-
-                    auto update_result = db_manager_->update_query_result(update_sql);
-                    if (update_result.is_ok()) {
-                        return existing->pk;
-                    }
-                }
-            } else {
-                database::query_builder insert_builder(database::database_types::sqlite);
-                auto insert_sql =
-                    insert_builder.insert_into("patients")
-                        .values({{"patient_id", record.patient_id},
-                                 {"patient_name", record.patient_name},
-                                 {"birth_date", record.birth_date},
-                                 {"sex", record.sex},
-                                 {"other_ids", record.other_ids},
-                                 {"ethnic_group", record.ethnic_group},
-                                 {"comments", record.comments}})
-                        .build();
-
-                auto insert_result = db_manager_->insert_query_result(insert_sql);
-                if (insert_result.is_ok()) {
-                    auto inserted = find_patient(record.patient_id);
-                    if (inserted.has_value()) {
-                        return inserted->pk;
-                    }
-                }
-            }
+        auto update_result = db_adapter_->update(update_sql);
+        if (update_result.is_err()) {
+            return make_error<int64_t>(
+                -1,
+                pacs::compat::format("Failed to update patient: {}",
+                                    update_result.error().message),
+                "storage");
         }
-    }
-#endif
 
-    // Fallback to direct SQLite with UPSERT
+        return existing->pk;
+    } else {
+        // Patient doesn't exist - insert
+        database::query_builder insert_builder(database::database_types::sqlite);
+        auto insert_sql =
+            insert_builder.insert_into("patients")
+                .values({{"patient_id", record.patient_id},
+                         {"patient_name", record.patient_name},
+                         {"birth_date", record.birth_date},
+                         {"sex", record.sex},
+                         {"other_ids", record.other_ids},
+                         {"ethnic_group", record.ethnic_group},
+                         {"comments", record.comments}})
+                .build();
+
+        auto insert_result = db_adapter_->insert(insert_sql);
+        if (insert_result.is_err()) {
+            return make_error<int64_t>(
+                -1,
+                pacs::compat::format("Failed to insert patient: {}",
+                                    insert_result.error().message),
+                "storage");
+        }
+
+        // Retrieve the inserted patient to get pk
+        auto inserted = find_patient(record.patient_id);
+        if (!inserted.has_value()) {
+            return make_error<int64_t>(
+                -1, "Patient inserted but could not retrieve record", "storage");
+        }
+
+        return inserted->pk;
+    }
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         INSERT INTO patients (
             patient_id, patient_name, birth_date, sex,
@@ -836,54 +801,36 @@ auto index_database::upsert_patient(const patient_record& record)
     sqlite3_finalize(stmt);
 
     return pk;
+#endif
 }
 
 auto index_database::find_patient(std::string_view patient_id) const
     -> std::optional<patient_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter (Issue #613)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "patient_pk", "patient_id", "patient_name", "birth_date",
-                    "sex", "other_ids", "ethnic_group", "comments",
-                    "created_at", "updated_at"})
-                .from("patients")
-                .where("patient_id", "=", std::string(patient_id))
-                .build();
-
-        auto result = db_adapter_->select(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            return parse_patient_from_adapter_row(result.value()[0]);
-        }
-        // Fall through if query failed
+    // Use pacs_database_adapter for unified database operations (Issue #608, #621)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return std::nullopt;
     }
 
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "patient_pk", "patient_id", "patient_name", "birth_date",
-                    "sex", "other_ids", "ethnic_group", "comments",
-                    "created_at", "updated_at"})
-                .from("patients")
-                .where("patient_id", "=", std::string(patient_id))
-                .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql =
+        builder
+            .select(std::vector<std::string>{
+                "patient_pk", "patient_id", "patient_name", "birth_date",
+                "sex", "other_ids", "ethnic_group", "comments",
+                "created_at", "updated_at"})
+            .from("patients")
+            .where("patient_id", "=", std::string(patient_id))
+            .build();
 
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_patient_from_row(result.value()[0]);
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
     }
-#endif
 
-    // Fallback to direct SQLite
+    return parse_patient_from_adapter_row(result.value()[0]);
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT patient_pk, patient_id, patient_name, birth_date, sex,
                other_ids, ethnic_group, comments, created_at, updated_at
@@ -910,6 +857,7 @@ auto index_database::find_patient(std::string_view patient_id) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::find_patient_by_pk(int64_t pk) const
