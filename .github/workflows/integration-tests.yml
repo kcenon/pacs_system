@@ -356,14 +356,17 @@ jobs:
         brew list openssl@3 &>/dev/null || brew install openssl@3
         brew list ninja &>/dev/null || brew install ninja
         brew list cmake &>/dev/null || brew install cmake
-        brew list fmt &>/dev/null || brew install fmt
+        # Reinstall fmt to ensure latest version and fix symlinks
+        brew reinstall fmt
         brew list jpeg-turbo &>/dev/null || brew install jpeg-turbo
         # Install blake3 (required by ccache)
         brew list blake3 &>/dev/null || brew install blake3
-        brew list ccache &>/dev/null || brew install ccache
+        # Reinstall ccache to ensure dependencies are correctly linked
+        brew reinstall ccache
         # Link packages if not already linked
-        brew link blake3 &>/dev/null || echo "blake3 already linked or link failed"
-        brew link ccache &>/dev/null || echo "ccache already linked or link failed"
+        brew link --overwrite blake3 &>/dev/null || echo "blake3 already linked or link failed"
+        brew link --overwrite ccache &>/dev/null || echo "ccache already linked or link failed"
+        brew link --overwrite fmt &>/dev/null || echo "fmt already linked or link failed"
 
     # Setup ccache for faster C++ compilation
     # Must run after Install dependencies (macOS) to ensure ccache is linked
