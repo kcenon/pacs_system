@@ -105,12 +105,13 @@ jobs:
           libfmt-dev \
           libjpeg-turbo8-dev \
           ninja-build \
-          cmake
+          cmake \
+          ccache
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -724,12 +725,13 @@ jobs:
           libfmt-dev \
           libjpeg-turbo8-dev \
           ninja-build \
-          cmake
+          cmake \
+          ccache
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
