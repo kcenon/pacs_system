@@ -1361,7 +1361,7 @@ auto index_database::upsert_study(const study_record& record)
                 .where("study_uid", "=", record.study_uid)
                 .build();
 
-        auto update_result = db_adapter_->modify(update_sql);
+        auto update_result = db_adapter_->update(update_sql);
         if (update_result.is_err()) {
             return make_error<int64_t>(
                 -1,
@@ -2074,7 +2074,7 @@ auto index_database::update_modalities_in_study(int64_t study_pk)
             .where("study_pk", "=", study_pk)
             .build();
 
-    auto update_result = db_adapter_->modify(update_sql);
+    auto update_result = db_adapter_->update(update_sql);
     if (update_result.is_err()) {
         return make_error<std::monostate>(
             error_codes::database_query_error,
