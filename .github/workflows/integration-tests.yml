@@ -116,6 +116,18 @@ jobs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
 
+    # Cache vcpkg packages (Windows) - significant speedup
+    - name: Cache vcpkg packages (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: |
+          C:\vcpkg\installed
+          C:\vcpkg\packages
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
     - name: Setup vcpkg (Windows)
       if: runner.os == 'Windows'
       uses: lukka/run-vcpkg@v11
@@ -195,6 +207,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
@@ -306,6 +320,26 @@ jobs:
         ref: main
         path: network_system
 
+    # Cache Homebrew packages (macOS) - significant speedup
+    - name: Cache Homebrew packages (macOS)
+      if: runner.os == 'macOS'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          /usr/local/Cellar
+          /opt/homebrew/Cellar
+        key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-brew-
+
+    # Setup ccache for faster C++ compilation
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-${{ matrix.build_type }}
+        max-size: 500M
+
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
       run: |
@@ -317,16 +351,36 @@ jobs:
           libjpeg-turbo8-dev \
           ninja-build \
           cmake \
+          ccache \
           netcat-openbsd
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo
+        # Skip if packages are already installed (from cache)
+        brew list sqlite3 &>/dev/null || brew install sqlite3
+        brew list openssl@3 &>/dev/null || brew install openssl@3
+        brew list ninja &>/dev/null || brew install ninja
+        brew list cmake &>/dev/null || brew install cmake
+        brew list fmt &>/dev/null || brew install fmt
+        brew list jpeg-turbo &>/dev/null || brew install jpeg-turbo
+        brew list ccache &>/dev/null || brew install ccache
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
+
+    # Cache vcpkg packages (Windows) - significant speedup
+    - name: Cache vcpkg packages (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: |
+          C:\vcpkg\installed
+          C:\vcpkg\packages
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
 
     - name: Setup vcpkg (Windows)
       if: runner.os == 'Windows'
@@ -407,6 +461,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
@@ -679,6 +735,18 @@ jobs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
 
+    # Cache vcpkg packages (Windows) - significant speedup
+    - name: Cache vcpkg packages (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: |
+          C:\vcpkg\installed
+          C:\vcpkg\packages
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
     - name: Setup vcpkg (Windows)
       if: runner.os == 'Windows'
       uses: lukka/run-vcpkg@v11
@@ -758,6 +826,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
           -DPACS_WARNINGS_AS_ERRORS=OFF \
           -DPACS_BUILD_TESTS=ON \
