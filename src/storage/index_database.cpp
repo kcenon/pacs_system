@@ -1654,8 +1654,144 @@ auto index_database::list_studies(std::string_view patient_id) const
 auto index_database::search_studies(const study_query& query) const
     -> Result<std::vector<study_record>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Use Query Builder when no patient-related filters are present
-    // (patient filters require JOIN with patients table)
+    // Prefer pacs_database_adapter for unified database operations (Issue #627)
+    if (db_adapter_ && db_adapter_->is_connected()) {
+        // Build SQL query with JOIN if patient filters are present
+        std::string sql;
+        std::vector<std::string> where_clauses;
+
+        if (query.patient_id.has_value() || query.patient_name.has_value()) {
+            // Need JOIN with patients table
+            sql = R"(
+                SELECT s.study_pk, s.patient_pk, s.study_uid, s.study_id, s.study_date,
+                       s.study_time, s.accession_number, s.referring_physician,
+                       s.study_description, s.modalities_in_study, s.num_series,
+                       s.num_instances, s.created_at, s.updated_at
+                FROM studies s
+                JOIN patients p ON s.patient_pk = p.patient_pk
+            )";
+
+            if (query.patient_id.has_value()) {
+                where_clauses.push_back(
+                    pacs::compat::format("p.patient_id LIKE '{}'",
+                                       to_like_pattern(*query.patient_id)));
+            }
+
+            if (query.patient_name.has_value()) {
+                where_clauses.push_back(
+                    pacs::compat::format("p.patient_name LIKE '{}'",
+                                       to_like_pattern(*query.patient_name)));
+            }
+        } else {
+            // Simple query without JOIN
+            sql = R"(
+                SELECT study_pk, patient_pk, study_uid, study_id, study_date,
+                       study_time, accession_number, referring_physician,
+                       study_description, modalities_in_study, num_series,
+                       num_instances, created_at, updated_at
+                FROM studies
+            )";
+        }
+
+        // Add study-specific filters
+        if (query.study_uid.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}study_uid = '{}'", prefix, *query.study_uid));
+        }
+
+        if (query.study_id.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}study_id LIKE '{}'", prefix,
+                                   to_like_pattern(*query.study_id)));
+        }
+
+        if (query.study_date.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}study_date = '{}'", prefix, *query.study_date));
+        }
+
+        if (query.study_date_from.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}study_date >= '{}'", prefix, *query.study_date_from));
+        }
+
+        if (query.study_date_to.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}study_date <= '{}'", prefix, *query.study_date_to));
+        }
+
+        if (query.accession_number.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}accession_number LIKE '{}'", prefix,
+                                   to_like_pattern(*query.accession_number)));
+        }
+
+        if (query.referring_physician.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}referring_physician LIKE '{}'", prefix,
+                                   to_like_pattern(*query.referring_physician)));
+        }
+
+        if (query.study_description.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            where_clauses.push_back(
+                pacs::compat::format("{}study_description LIKE '{}'", prefix,
+                                   to_like_pattern(*query.study_description)));
+        }
+
+        if (query.modality.has_value()) {
+            std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+            // modalities_in_study contains backslash-separated list
+            const auto& mod = *query.modality;
+            where_clauses.push_back(pacs::compat::format(
+                "({}modalities_in_study = '{}' OR "
+                "{}modalities_in_study LIKE '{}\\%' OR "
+                "{}modalities_in_study LIKE '%\\{}' OR "
+                "{}modalities_in_study LIKE '%\\{}\\%')",
+                prefix, mod, prefix, mod, prefix, mod, prefix, mod));
+        }
+
+        // Build WHERE clause
+        if (!where_clauses.empty()) {
+            sql += " WHERE " + where_clauses[0];
+            for (size_t i = 1; i < where_clauses.size(); ++i) {
+                sql += " AND " + where_clauses[i];
+            }
+        }
+
+        // Add ORDER BY
+        std::string prefix = (query.patient_id.has_value() || query.patient_name.has_value()) ? "s." : "";
+        sql += pacs::compat::format(" ORDER BY {}study_date DESC, {}study_time DESC",
+                                   prefix, prefix);
+
+        // Add LIMIT and OFFSET
+        if (query.limit > 0) {
+            sql += pacs::compat::format(" LIMIT {}", query.limit);
+        }
+
+        if (query.offset > 0) {
+            sql += pacs::compat::format(" OFFSET {}", query.offset);
+        }
+
+        auto result = db_adapter_->select(sql);
+        if (result.is_ok()) {
+            std::vector<study_record> results;
+            for (const auto& row : result.value()) {
+                results.push_back(parse_study_from_adapter_row(row));
+            }
+            return ok(std::move(results));
+        }
+        // Fall through on error
+    }
+
+    // Legacy fallback: use database_manager if adapter not available
     if (db_manager_ && !query.patient_id.has_value() &&
         !query.patient_name.has_value()) {
         database::query_builder builder(database::database_types::sqlite);
