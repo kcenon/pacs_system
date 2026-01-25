@@ -2468,6 +2468,7 @@ auto index_database::find_series(std::string_view series_uid) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::find_series_by_pk(int64_t pk) const
@@ -2523,6 +2524,7 @@ auto index_database::find_series_by_pk(int64_t pk) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::list_series(std::string_view study_uid) const
@@ -2911,6 +2913,7 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     }
 
     return ok();
+#endif
 }
 
 auto index_database::series_count() const -> Result<size_t> {
@@ -2965,6 +2968,7 @@ auto index_database::series_count() const -> Result<size_t> {
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::series_count(std::string_view study_uid) const -> Result<size_t> {
@@ -3033,6 +3037,7 @@ auto index_database::series_count(std::string_view study_uid) const -> Result<si
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::parse_series_row(void* stmt_ptr) const -> series_record {
@@ -3376,6 +3381,7 @@ auto index_database::find_instance(std::string_view sop_uid) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::find_instance_by_pk(int64_t pk) const
@@ -3434,6 +3440,7 @@ auto index_database::find_instance_by_pk(int64_t pk) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::list_instances(std::string_view series_uid) const
@@ -3821,6 +3828,7 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
     }
 
     return ok();
+#endif
 }
 
 auto index_database::instance_count() const -> Result<size_t> {
@@ -3875,6 +3883,7 @@ auto index_database::instance_count() const -> Result<size_t> {
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::instance_count(std::string_view series_uid) const
@@ -3944,6 +3953,7 @@ auto index_database::instance_count(std::string_view series_uid) const
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::parse_instance_row(void* stmt_ptr) const
@@ -4047,6 +4057,7 @@ auto index_database::get_file_path(std::string_view sop_instance_uid) const
     sqlite3_finalize(stmt);
 
     return ok(std::optional<std::string>(path));
+#endif
 }
 
 auto index_database::get_study_files(std::string_view study_instance_uid) const
