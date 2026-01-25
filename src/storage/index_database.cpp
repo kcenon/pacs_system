@@ -200,13 +200,11 @@ auto index_database::open(std::string_view db_path, const index_config& config)
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Initialize database_system for query building
-    // Note: Skip for in-memory databases as each connection sees a separate DB
-    if (db_path != ":memory:") {
-        auto db_init_result = instance->initialize_database_system();
-        if (db_init_result.is_err()) {
-            // Log warning but continue - fallback to direct SQLite
-            // This allows graceful degradation if database_system fails
-        }
+    // Support in-memory databases for testing (Issue #625)
+    auto db_init_result = instance->initialize_database_system();
+    if (db_init_result.is_err()) {
+        // Log warning but continue - fallback to direct SQLite
+        // This allows graceful degradation if database_system fails
     }
 #endif
 
@@ -255,6 +253,8 @@ auto index_database::initialize_database_system() -> VoidResult {
     auto adapter_result = initialize_database_adapter();
     if (adapter_result.is_err()) {
         // Log warning but continue - can fallback to database_manager
+        // Note: For now, in-memory databases may not work with unified_database_system
+        // TODO: Investigate unified_database_system in-memory support (Issue #625)
     }
 
     return ok();
@@ -665,10 +665,8 @@ auto index_database::upsert_patient(const patient_record& record)
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Use pacs_database_adapter for unified database operations (Issue #606, #608, #621)
-    if (!db_adapter_ || !db_adapter_->is_connected()) {
-        return make_error<int64_t>(
-            -1, "Database adapter not available or not connected", "storage");
-    }
+    // Fallback to direct SQLite if adapter not available (e.g., in-memory databases)
+    if (db_adapter_ && db_adapter_->is_connected()) {
 
     auto builder = db_adapter_->create_query_builder();
 
@@ -750,8 +748,11 @@ auto index_database::upsert_patient(const patient_record& record)
 
         return inserted->pk;
     }
-#else
-    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
+    } else {
+        // Fallback to direct SQLite when adapter unavailable (e.g., in-memory DB)
+        // Issue #625 - unified_database_system doesn't support in-memory databases yet
+#endif
+    // Direct SQLite implementation
     const char* sql = R"(
         INSERT INTO patients (
             patient_id, patient_name, birth_date, sex,
@@ -801,6 +802,8 @@ auto index_database::upsert_patient(const patient_record& record)
     sqlite3_finalize(stmt);
 
     return pk;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    }
 #endif
 }
 
