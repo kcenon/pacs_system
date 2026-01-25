@@ -4675,57 +4675,12 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
         }
         // Insert failed, fall through to SQLite
     }
+
+    // database_system is required
+    return make_error<int64_t>(-1,
+                               "database_system is not initialized for MPPS creation",
+                               "storage");
 #endif
-
-    // Fallback to direct SQLite
-    const char* sql = R"(
-        INSERT INTO mpps (
-            mpps_uid, status, start_datetime, station_ae, station_name,
-            modality, study_uid, accession_no, scheduled_step_id,
-            requested_proc_id, performed_series, updated_at
-        ) VALUES (?, 'IN PROGRESS', ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-        RETURNING mpps_pk;
-    )";
-
-    sqlite3_stmt* stmt = nullptr;
-    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        return make_error<int64_t>(
-            rc,
-            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
-            "storage");
-    }
-
-    // Bind parameters
-    sqlite3_bind_text(stmt, 1, record.mpps_uid.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, record.start_datetime.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 3, record.station_ae.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 4, record.station_name.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 5, record.modality.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 6, record.study_uid.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 7, record.accession_no.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 8, record.scheduled_step_id.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 9, record.requested_proc_id.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 10, record.performed_series.c_str(), -1,
-                      SQLITE_TRANSIENT);
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_ROW) {
-        auto error_msg = sqlite3_errmsg(db_);
-        sqlite3_finalize(stmt);
-        return make_error<int64_t>(
-            rc, pacs::compat::format("Failed to create MPPS: {}", error_msg), "storage");
-    }
-
-    auto pk = sqlite3_column_int64(stmt, 0);
-    sqlite3_finalize(stmt);
-
-    return pk;
 }
 
 auto index_database::update_mpps(std::string_view mpps_uid,
