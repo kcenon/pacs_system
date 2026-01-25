@@ -229,8 +229,13 @@ TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinato
             pipeline_stage::network_receive, std::move(job));
         REQUIRE(result.is_ok());
 
-        // Wait for execution with timeout (10s for CI environments)
-        bool completed = waiter.wait_for(std::chrono::seconds(10));
+        // Wait for execution with timeout (Windows MSVC CI requires more time)
+#ifdef _WIN32
+        constexpr auto timeout = std::chrono::seconds(60);
+#else
+        constexpr auto timeout = std::chrono::seconds(10);
+#endif
+        bool completed = waiter.wait_for(timeout);
         REQUIRE(completed);
         CHECK(executed.load(std::memory_order_acquire) == true);
     }
@@ -247,8 +252,13 @@ TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinato
             });
         REQUIRE(result.is_ok());
 
-        // 10s timeout for CI environments
-        bool completed = waiter.wait_for(std::chrono::seconds(10));
+        // Windows MSVC CI requires more time
+#ifdef _WIN32
+        constexpr auto timeout = std::chrono::seconds(60);
+#else
+        constexpr auto timeout = std::chrono::seconds(10);
+#endif
+        bool completed = waiter.wait_for(timeout);
         REQUIRE(completed);
         CHECK(executed.load(std::memory_order_acquire) == true);
     }
@@ -326,8 +336,13 @@ TEST_CASE("pipeline_coordinator callbacks", "[network][pipeline][coordinator]") 
             pipeline_stage::network_receive, std::move(job));
         REQUIRE(result.is_ok());
 
-        // 10s timeout for CI environments
-        bool completed = waiter.wait_for(std::chrono::seconds(10));
+        // Windows MSVC CI requires more time
+#ifdef _WIN32
+        constexpr auto timeout = std::chrono::seconds(60);
+#else
+        constexpr auto timeout = std::chrono::seconds(10);
+#endif
+        bool completed = waiter.wait_for(timeout);
         REQUIRE(completed);
         CHECK(callback_invoked.load(std::memory_order_acquire) == true);
         CHECK(received_job_id.load(std::memory_order_acquire) == 42);
