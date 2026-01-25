@@ -4680,6 +4680,11 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
     return make_error<int64_t>(-1,
                                "database_system is not initialized for MPPS creation",
                                "storage");
+#else
+    (void)record;
+    return make_error<int64_t>(-1,
+                               "database_system is not compiled",
+                               "storage");
 #endif
 }
 
@@ -4772,6 +4777,14 @@ auto index_database::update_mpps(std::string_view mpps_uid,
     return make_error<std::monostate>(-1,
                                       "database_system is not initialized for MPPS update",
                                       "storage");
+#else
+    (void)mpps_uid;
+    (void)new_status;
+    (void)end_datetime;
+    (void)performed_series;
+    return make_error<std::monostate>(-1,
+                                      "database_system is not compiled",
+                                      "storage");
 #endif
 }
 
@@ -4835,6 +4848,9 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
 
     // database_system is required
     return std::nullopt;
+#else
+    (void)mpps_uid;
+    return std::nullopt;
 #endif
 }
 
@@ -4887,6 +4903,9 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
     }
 
     // database_system is required
+    return std::nullopt;
+#else
+    (void)pk;
     return std::nullopt;
 #endif
 }
@@ -4951,6 +4970,10 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
     // database_system is required
     return make_error<std::vector<mpps_record>>(
         -1, "database_system is not initialized for MPPS query", "storage");
+#else
+    (void)station_ae;
+    return make_error<std::vector<mpps_record>>(
+        -1, "database_system is not compiled", "storage");
 #endif
 }
 
@@ -5012,6 +5035,10 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
     // database_system is required
     return make_error<std::vector<mpps_record>>(
         -1, "database_system is not initialized for MPPS query", "storage");
+#else
+    (void)study_uid;
+    return make_error<std::vector<mpps_record>>(
+        -1, "database_system is not compiled", "storage");
 #endif
 }
 
@@ -5160,6 +5187,11 @@ auto index_database::search_mpps(const mpps_query& query) const
     return pacs_error<std::vector<mpps_record>>(
         error_codes::database_query_error,
         "database_system is not initialized for MPPS search");
+#else
+    (void)query;
+    return pacs_error<std::vector<mpps_record>>(
+        error_codes::database_query_error,
+        "database_system is not compiled");
 #endif
 }
 
@@ -5201,6 +5233,12 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
     return make_error<std::monostate>(
         database_query_error,
         "database_system is not initialized for MPPS deletion",
+        "storage");
+#else
+    (void)mpps_uid;
+    return make_error<std::monostate>(
+        database_query_error,
+        "database_system is not compiled",
         "storage");
 #endif
 }
@@ -5262,6 +5300,10 @@ auto index_database::mpps_count() const -> Result<size_t> {
     return pacs_error<size_t>(
         error_codes::database_query_error,
         "database_system is not initialized for MPPS count");
+#else
+    return pacs_error<size_t>(
+        error_codes::database_query_error,
+        "database_system is not compiled");
 #endif
 }
 
@@ -5324,6 +5366,11 @@ auto index_database::mpps_count(std::string_view status) const -> Result<size_t>
     return pacs_error<size_t>(
         error_codes::database_query_error,
         "database_system is not initialized for MPPS count");
+#else
+    (void)status;
+    return pacs_error<size_t>(
+        error_codes::database_query_error,
+        "database_system is not compiled");
 #endif
 }
 
@@ -5539,6 +5586,11 @@ auto index_database::add_worklist_item(const worklist_item& item)
     return make_error<int64_t>(-1,
                                "database_system is not initialized for worklist creation",
                                "storage");
+#else
+    (void)item;
+    return make_error<int64_t>(-1,
+                               "database_system is not compiled",
+                               "storage");
 #endif
 }
 
@@ -5590,6 +5642,14 @@ auto index_database::update_worklist_status(std::string_view step_id,
     return make_error<std::monostate>(
         database_query_error,
         "database_system is not initialized for worklist update",
+        "storage");
+#else
+    (void)step_id;
+    (void)accession_no;
+    (void)new_status;
+    return make_error<std::monostate>(
+        database_query_error,
+        "database_system is not compiled",
         "storage");
 #endif
 }
@@ -5756,6 +5816,11 @@ auto index_database::query_worklist(const worklist_query& query) const
     return pacs_error<std::vector<worklist_item>>(
         error_codes::database_query_error,
         "database_system is not initialized for worklist query");
+#else
+    (void)query;
+    return pacs_error<std::vector<worklist_item>>(
+        error_codes::database_query_error,
+        "database_system is not compiled");
 #endif
 }
 
@@ -5814,6 +5879,10 @@ auto index_database::find_worklist_item(std::string_view step_id,
 
     // database_system is required
     return std::nullopt;
+#else
+    (void)step_id;
+    (void)accession_no;
+    return std::nullopt;
 #endif
 }
 
@@ -5869,6 +5938,9 @@ auto index_database::find_worklist_by_pk(int64_t pk) const
 
     // database_system is required
     return std::nullopt;
+#else
+    (void)pk;
+    return std::nullopt;
 #endif
 }
 
@@ -5909,6 +5981,13 @@ auto index_database::delete_worklist_item(std::string_view step_id,
     return make_error<std::monostate>(
         database_query_error,
         "database_system is not initialized for worklist deletion",
+        "storage");
+#else
+    (void)step_id;
+    (void)accession_no;
+    return make_error<std::monostate>(
+        database_query_error,
+        "database_system is not compiled",
         "storage");
 #endif
 }
@@ -5963,6 +6042,11 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
     return pacs_error<size_t>(
         error_codes::database_query_error,
         "database_system is not initialized for worklist cleanup");
+#else
+    (void)age;
+    return pacs_error<size_t>(
+        error_codes::database_query_error,
+        "database_system is not compiled");
 #endif
 }
 
@@ -6015,6 +6099,11 @@ auto index_database::cleanup_worklist_items_before(
     return pacs_error<size_t>(
         error_codes::database_query_error,
         "database_system is not initialized for worklist cleanup");
+#else
+    (void)before;
+    return pacs_error<size_t>(
+        error_codes::database_query_error,
+        "database_system is not compiled");
 #endif
 }
 
