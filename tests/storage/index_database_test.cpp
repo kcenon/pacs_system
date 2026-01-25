@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <iostream>
 #include <memory>
 
 using namespace pacs::storage;
@@ -78,6 +79,9 @@ TEST_CASE("index_database: insert patient with basic info",
 
     auto result = db->upsert_patient("12345", "Doe^John", "19800115", "M");
 
+    if (result.is_err()) {
+        std::cerr << "ERROR: " << result.error().message << std::endl;
+    }
     REQUIRE(result.is_ok());
     CHECK(result.value() > 0);
 
