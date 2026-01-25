@@ -2417,49 +2417,30 @@ auto index_database::upsert_series(const series_record& record)
 auto index_database::find_series(std::string_view series_uid) const
     -> std::optional<series_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "series_pk", "study_pk", "series_uid", "modality",
-                    "series_number", "series_description", "body_part_examined",
-                    "station_name", "num_instances", "created_at", "updated_at"})
-                .from("series")
-                .where("series_uid", "=", std::string(series_uid))
-                .build();
-
-        auto result = db_adapter_->select(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            return parse_series_from_adapter_row(result.value()[0]);
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return std::nullopt;
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "series_pk", "study_pk", "series_uid", "modality",
-                    "series_number", "series_description", "body_part_examined",
-                    "station_name", "num_instances", "created_at", "updated_at"})
-                .from("series")
-                .where("series_uid", "=", std::string(series_uid))
-                .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql =
+        builder
+            .select(std::vector<std::string>{
+                "series_pk", "study_pk", "series_uid", "modality",
+                "series_number", "series_description", "body_part_examined",
+                "station_name", "num_instances", "created_at", "updated_at"})
+            .from("series")
+            .where("series_uid", "=", std::string(series_uid))
+            .build();
 
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_series_from_row(result.value()[0]);
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
     }
-#endif
 
-    // Fallback to direct SQLite
+    return parse_series_from_adapter_row(result.value()[0]);
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT series_pk, study_pk, series_uid, modality, series_number,
                series_description, body_part_examined, station_name,
@@ -2487,54 +2468,36 @@ auto index_database::find_series(std::string_view series_uid) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::find_series_by_pk(int64_t pk) const
     -> std::optional<series_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "series_pk", "study_pk", "series_uid", "modality",
-                    "series_number", "series_description", "body_part_examined",
-                    "station_name", "num_instances", "created_at", "updated_at"})
-                .from("series")
-                .where("series_pk", "=", pk)
-                .build();
-
-        auto result = db_adapter_->select(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            return parse_series_from_adapter_row(result.value()[0]);
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return std::nullopt;
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "series_pk", "study_pk", "series_uid", "modality",
-                    "series_number", "series_description", "body_part_examined",
-                    "station_name", "num_instances", "created_at", "updated_at"})
-                .from("series")
-                .where("series_pk", "=", pk)
-                .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql =
+        builder
+            .select(std::vector<std::string>{
+                "series_pk", "study_pk", "series_uid", "modality",
+                "series_number", "series_description", "body_part_examined",
+                "station_name", "num_instances", "created_at", "updated_at"})
+            .from("series")
+            .where("series_pk", "=", pk)
+            .build();
 
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_series_from_row(result.value()[0]);
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
     }
-#endif
 
-    // Fallback to direct SQLite
+    return parse_series_from_adapter_row(result.value()[0]);
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT series_pk, study_pk, series_uid, modality, series_number,
                series_description, body_part_examined, station_name,
@@ -2561,6 +2524,7 @@ auto index_database::find_series_by_pk(int64_t pk) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::list_series(std::string_view study_uid) const
@@ -2891,49 +2855,35 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     int64_t study_pk = series ? series->study_pk : 0;
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto delete_sql = builder.delete_from("series")
-                              .where("series_uid", "=", std::string(series_uid))
-                              .build();
-
-        auto result = db_adapter_->remove(delete_sql);
-        if (result.is_ok()) {
-            // Update modalities in study
-            if (study_pk > 0) {
-                (void)update_modalities_in_study(study_pk);
-            }
-            return ok();
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return make_error<std::monostate>(
+            error_codes::database_connection_error,
+            "Database adapter not available",
+            "storage");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto delete_sql = builder.delete_from("series")
-                              .where("series_uid", "=", std::string(series_uid))
-                              .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto delete_sql = builder.delete_from("series")
+                          .where("series_uid", "=", std::string(series_uid))
+                          .build();
 
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_err()) {
-            return make_error<std::monostate>(
-                error_codes::database_query_error,
-                pacs::compat::format("Failed to delete series: {}",
-                                     result.error().message),
-                "storage");
-        }
-
-        // Update modalities in study
-        if (study_pk > 0) {
-            (void)update_modalities_in_study(study_pk);
-        }
-        return ok();
+    auto result = db_adapter_->remove(delete_sql);
+    if (result.is_err()) {
+        return make_error<std::monostate>(
+            error_codes::database_query_error,
+            pacs::compat::format("Failed to delete series: {}",
+                                 result.error().message),
+            "storage");
     }
-#endif
 
-    // Fallback to direct SQLite
+    // Update modalities in study
+    if (study_pk > 0) {
+        (void)update_modalities_in_study(study_pk);
+    }
+    return ok();
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "DELETE FROM series WHERE series_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -2963,64 +2913,44 @@ auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
     }
 
     return ok();
+#endif
 }
 
 auto index_database::series_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("series")
-                             .build();
-
-        auto result = db_adapter_->select(count_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end() && !it->second.empty()) {
-                try {
-                    return ok(static_cast<size_t>(std::stoll(it->second)));
-                } catch (...) {
-                    return ok(static_cast<size_t>(0));
-                }
-            }
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return pacs_error<size_t>(
+            error_codes::database_connection_error,
+            "Database adapter not available");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("series")
-                             .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                         .from("series")
+                         .build();
 
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
+    auto result = db_adapter_->select(count_sql);
+    if (result.is_err()) {
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Query failed: {}", result.error().message));
+    }
 
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                }
-                if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(
-                        std::stoll(std::get<std::string>(it->second))));
-                }
+    if (!result.value().empty()) {
+        const auto& row = result.value()[0];
+        auto it = row.find("cnt");
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return ok(static_cast<size_t>(std::stoll(it->second)));
+            } catch (...) {
+                return ok(static_cast<size_t>(0));
             }
         }
-        return ok(static_cast<size_t>(0));
     }
-#endif
-
-    // Fallback to direct SQLite
+    return ok(static_cast<size_t>(0));
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "SELECT COUNT(*) FROM series;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -3038,78 +2968,51 @@ auto index_database::series_count() const -> Result<size_t> {
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::series_count(std::string_view study_uid) const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        // First get study_pk from study_uid
-        auto study = find_study(study_uid);
-        if (!study.has_value()) {
-            return ok(static_cast<size_t>(0));
-        }
-
-        auto builder = db_adapter_->create_query_builder();
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("series")
-                             .where("study_pk", "=", study->pk)
-                             .build();
-
-        auto result = db_adapter_->select(count_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end() && !it->second.empty()) {
-                try {
-                    return ok(static_cast<size_t>(std::stoll(it->second)));
-                } catch (...) {
-                    return ok(static_cast<size_t>(0));
-                }
-            }
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return pacs_error<size_t>(
+            error_codes::database_connection_error,
+            "Database adapter not available");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        // First get study_pk from study_uid
-        auto study = find_study(study_uid);
-        if (!study.has_value()) {
-            return ok(static_cast<size_t>(0));
-        }
-
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("series")
-                             .where("study_pk", "=", study->pk)
-                             .build();
-
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                }
-                if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(
-                        std::stoll(std::get<std::string>(it->second))));
-                }
-            }
-        }
+    // First get study_pk from study_uid
+    auto study = find_study(study_uid);
+    if (!study.has_value()) {
         return ok(static_cast<size_t>(0));
     }
-#endif
 
-    // Fallback to direct SQLite
+    auto builder = db_adapter_->create_query_builder();
+    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                         .from("series")
+                         .where("study_pk", "=", study->pk)
+                         .build();
+
+    auto result = db_adapter_->select(count_sql);
+    if (result.is_err()) {
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Query failed: {}", result.error().message));
+    }
+
+    if (!result.value().empty()) {
+        const auto& row = result.value()[0];
+        auto it = row.find("cnt");
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return ok(static_cast<size_t>(std::stoll(it->second)));
+            } catch (...) {
+                return ok(static_cast<size_t>(0));
+            }
+        }
+    }
+    return ok(static_cast<size_t>(0));
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT COUNT(*) FROM series se
         JOIN studies st ON se.study_pk = st.study_pk
@@ -3134,6 +3037,7 @@ auto index_database::series_count(std::string_view study_uid) const -> Result<si
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::parse_series_row(void* stmt_ptr) const -> series_record {
@@ -3423,53 +3327,32 @@ auto index_database::upsert_instance(const instance_record& record)
 auto index_database::find_instance(std::string_view sop_uid) const
     -> std::optional<instance_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
-                    "instance_number", "transfer_syntax", "content_date",
-                    "content_time", "rows", "columns", "bits_allocated",
-                    "number_of_frames", "file_path", "file_size", "file_hash",
-                    "created_at"})
-                .from("instances")
-                .where("sop_uid", "=", std::string(sop_uid))
-                .build();
-
-        auto result = db_adapter_->select(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            return parse_instance_from_adapter_row(result.value()[0]);
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return std::nullopt;
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
-                    "instance_number", "transfer_syntax", "content_date",
-                    "content_time", "rows", "columns", "bits_allocated",
-                    "number_of_frames", "file_path", "file_size", "file_hash",
-                    "created_at"})
-                .from("instances")
-                .where("sop_uid", "=", std::string(sop_uid))
-                .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql =
+        builder
+            .select(std::vector<std::string>{
+                "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+                "instance_number", "transfer_syntax", "content_date",
+                "content_time", "rows", "columns", "bits_allocated",
+                "number_of_frames", "file_path", "file_size", "file_hash",
+                "created_at"})
+            .from("instances")
+            .where("sop_uid", "=", std::string(sop_uid))
+            .build();
 
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_instance_from_row(result.value()[0]);
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
     }
-#endif
 
-    // Fallback to direct SQLite
+    return parse_instance_from_adapter_row(result.value()[0]);
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT instance_pk, series_pk, sop_uid, sop_class_uid, instance_number,
                transfer_syntax, content_date, content_time,
@@ -3498,58 +3381,38 @@ auto index_database::find_instance(std::string_view sop_uid) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::find_instance_by_pk(int64_t pk) const
     -> std::optional<instance_record> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
-                    "instance_number", "transfer_syntax", "content_date",
-                    "content_time", "rows", "columns", "bits_allocated",
-                    "number_of_frames", "file_path", "file_size", "file_hash",
-                    "created_at"})
-                .from("instances")
-                .where("instance_pk", "=", pk)
-                .build();
-
-        auto result = db_adapter_->select(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            return parse_instance_from_adapter_row(result.value()[0]);
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return std::nullopt;
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
-                    "instance_number", "transfer_syntax", "content_date",
-                    "content_time", "rows", "columns", "bits_allocated",
-                    "number_of_frames", "file_path", "file_size", "file_hash",
-                    "created_at"})
-                .from("instances")
-                .where("instance_pk", "=", pk)
-                .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql =
+        builder
+            .select(std::vector<std::string>{
+                "instance_pk", "series_pk", "sop_uid", "sop_class_uid",
+                "instance_number", "transfer_syntax", "content_date",
+                "content_time", "rows", "columns", "bits_allocated",
+                "number_of_frames", "file_path", "file_size", "file_hash",
+                "created_at"})
+            .from("instances")
+            .where("instance_pk", "=", pk)
+            .build();
 
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_instance_from_row(result.value()[0]);
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
     }
-#endif
 
-    // Fallback to direct SQLite
+    return parse_instance_from_adapter_row(result.value()[0]);
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT instance_pk, series_pk, sop_uid, sop_class_uid, instance_number,
                transfer_syntax, content_date, content_time,
@@ -3577,6 +3440,7 @@ auto index_database::find_instance_by_pk(int64_t pk) const
     sqlite3_finalize(stmt);
 
     return record;
+#endif
 }
 
 auto index_database::list_instances(std::string_view series_uid) const
@@ -3916,39 +3780,29 @@ auto index_database::search_instances(const instance_query& query) const
 
 auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto delete_sql = builder.delete_from("instances")
-                              .where("sop_uid", "=", std::string(sop_uid))
-                              .build();
-
-        auto result = db_adapter_->remove(delete_sql);
-        if (result.is_ok()) {
-            return ok();
-        }
-        // Fall through to db_manager_ or SQLite on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return make_error<std::monostate>(
+            error_codes::database_connection_error,
+            "Database adapter not available",
+            "storage");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto delete_sql = builder.delete_from("instances")
-                              .where("sop_uid", "=", std::string(sop_uid))
-                              .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto delete_sql = builder.delete_from("instances")
+                          .where("sop_uid", "=", std::string(sop_uid))
+                          .build();
 
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_err()) {
-            return make_error<std::monostate>(
-                database_query_error,
-                pacs::compat::format("Delete failed: {}", result.error().message),
-                "storage");
-        }
-        return ok();
+    auto result = db_adapter_->remove(delete_sql);
+    if (result.is_err()) {
+        return make_error<std::monostate>(
+            error_codes::database_query_error,
+            pacs::compat::format("Delete failed: {}", result.error().message),
+            "storage");
     }
-#endif
-
-    // Fallback to direct SQLite
+    return ok();
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "DELETE FROM instances WHERE sop_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -3974,62 +3828,44 @@ auto index_database::delete_instance(std::string_view sop_uid) -> VoidResult {
     }
 
     return ok();
+#endif
 }
 
 auto index_database::instance_count() const -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        auto builder = db_adapter_->create_query_builder();
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("instances")
-                             .build();
-
-        auto result = db_adapter_->select(count_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end() && !it->second.empty()) {
-                try {
-                    return ok(static_cast<size_t>(std::stoll(it->second)));
-                } catch (...) {
-                    // Fall through to db_manager_
-                }
-            }
-        }
-        // Fall through to db_manager_ on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return pacs_error<size_t>(
+            error_codes::database_connection_error,
+            "Database adapter not available");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
-                             .from("instances")
-                             .build();
+    auto builder = db_adapter_->create_query_builder();
+    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                         .from("instances")
+                         .build();
 
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Count query failed: {}", result.error().message));
-        }
+    auto result = db_adapter_->select(count_sql);
+    if (result.is_err()) {
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Count query failed: {}", result.error().message));
+    }
 
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("COUNT(*)");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                } else if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(std::stoll(std::get<std::string>(it->second))));
-                }
+    if (!result.value().empty()) {
+        const auto& row = result.value()[0];
+        auto it = row.find("cnt");
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return ok(static_cast<size_t>(std::stoll(it->second)));
+            } catch (...) {
+                return ok(static_cast<size_t>(0));
             }
         }
-        return ok(size_t{0});
     }
-#endif
-
-    // Fallback to direct SQLite
+    return ok(static_cast<size_t>(0));
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "SELECT COUNT(*) FROM instances;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -4047,77 +3883,52 @@ auto index_database::instance_count() const -> Result<size_t> {
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::instance_count(std::string_view series_uid) const
     -> Result<size_t> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Prefer pacs_database_adapter for unified database operations (Issue #606, #614)
-    if (db_adapter_ && db_adapter_->is_connected()) {
-        // First get series_pk from series_uid
-        auto series = find_series(series_uid);
-        if (!series.has_value()) {
-            return ok(size_t{0});
-        }
-
-        auto builder = db_adapter_->create_query_builder();
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                             .from("instances")
-                             .where("series_pk", "=", series->pk)
-                             .build();
-
-        auto result = db_adapter_->select(count_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("cnt");
-            if (it != row.end() && !it->second.empty()) {
-                try {
-                    return ok(static_cast<size_t>(std::stoll(it->second)));
-                } catch (...) {
-                    // Fall through to db_manager_
-                }
-            }
-        }
-        // Fall through to db_manager_ on failure
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return pacs_error<size_t>(
+            error_codes::database_connection_error,
+            "Database adapter not available");
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_) {
-        // First get series_pk from series_uid
-        auto series = find_series(series_uid);
-        if (!series.has_value()) {
-            return ok(size_t{0});
-        }
-
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
-                             .from("instances")
-                             .where("series_pk", "=", series->pk)
-                             .build();
-
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Count query failed: {}", result.error().message));
-        }
-
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("COUNT(*)");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                } else if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(std::stoll(std::get<std::string>(it->second))));
-                }
-            }
-        }
+    // First get series_pk from series_uid
+    auto series = find_series(series_uid);
+    if (!series.has_value()) {
         return ok(size_t{0});
     }
-#endif
 
-    // Fallback to direct SQLite
+    auto builder = db_adapter_->create_query_builder();
+    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
+                         .from("instances")
+                         .where("series_pk", "=", series->pk)
+                         .build();
+
+    auto result = db_adapter_->select(count_sql);
+    if (result.is_err()) {
+        return pacs_error<size_t>(
+            error_codes::database_query_error,
+            pacs::compat::format("Count query failed: {}", result.error().message));
+    }
+
+    if (!result.value().empty()) {
+        const auto& row = result.value()[0];
+        auto it = row.find("cnt");
+        if (it != row.end() && !it->second.empty()) {
+            try {
+                return ok(static_cast<size_t>(std::stoll(it->second)));
+            } catch (...) {
+                return ok(static_cast<size_t>(0));
+            }
+        }
+    }
+    return ok(static_cast<size_t>(0));
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = R"(
         SELECT COUNT(*) FROM instances i
         JOIN series s ON i.series_pk = s.series_pk
@@ -4142,6 +3953,7 @@ auto index_database::instance_count(std::string_view series_uid) const
 
     sqlite3_finalize(stmt);
     return ok(count);
+#endif
 }
 
 auto index_database::parse_instance_row(void* stmt_ptr) const
@@ -4197,24 +4009,30 @@ auto index_database::parse_instance_row(void* stmt_ptr) const
 auto index_database::get_file_path(std::string_view sop_instance_uid) const
     -> Result<std::optional<std::string>> {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql = builder.select(std::vector<std::string>{"file_path"})
-                              .from("instances")
-                              .where("sop_uid", "=", std::string(sop_instance_uid))
-                              .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return ok(std::optional<std::string>(std::nullopt));
-        }
-
-        auto path = get_string_value(result.value()[0], "file_path");
-        return ok(std::optional<std::string>(path));
+    // Use pacs_database_adapter for unified database operations (Issue #608, #626)
+    if (!db_adapter_ || !db_adapter_->is_connected()) {
+        return ok(std::optional<std::string>(std::nullopt));
     }
-#endif
 
-    // Fallback to direct SQLite
+    auto builder = db_adapter_->create_query_builder();
+    auto select_sql = builder.select(std::vector<std::string>{"file_path"})
+                          .from("instances")
+                          .where("sop_uid", "=", std::string(sop_instance_uid))
+                          .build();
+
+    auto result = db_adapter_->select(select_sql);
+    if (result.is_err() || result.value().empty()) {
+        return ok(std::optional<std::string>(std::nullopt));
+    }
+
+    const auto& row = result.value()[0];
+    auto it = row.find("file_path");
+    if (it != row.end() && !it->second.empty()) {
+        return ok(std::optional<std::string>(it->second));
+    }
+    return ok(std::optional<std::string>(std::nullopt));
+#else
+    // PACS_WITH_DATABASE_SYSTEM not defined - use direct SQLite
     const char* sql = "SELECT file_path FROM instances WHERE sop_uid = ?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -4239,6 +4057,7 @@ auto index_database::get_file_path(std::string_view sop_instance_uid) const
     sqlite3_finalize(stmt);
 
     return ok(std::optional<std::string>(path));
+#endif
 }
 
 auto index_database::get_study_files(std::string_view study_instance_uid) const
