@@ -4675,17 +4675,57 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
         }
         // Insert failed, fall through to SQLite
     }
-
-    // database_system is required
-    return make_error<int64_t>(-1,
-                               "database_system is not initialized for MPPS creation",
-                               "storage");
-#else
-    (void)record;
-    return make_error<int64_t>(-1,
-                               "database_system is not compiled",
-                               "storage");
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        INSERT INTO mpps (
+            mpps_uid, status, start_datetime, station_ae, station_name,
+            modality, study_uid, accession_no, scheduled_step_id,
+            requested_proc_id, performed_series, updated_at
+        ) VALUES (?, 'IN PROGRESS', ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        RETURNING mpps_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_text(stmt, 1, record.mpps_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, record.start_datetime.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, record.station_ae.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, record.station_name.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, record.modality.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, record.study_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, record.accession_no.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, record.scheduled_step_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 9, record.requested_proc_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 10, record.performed_series.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, pacs::compat::format("Failed to create MPPS: {}", error_msg), "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return pk;
 }
 
 auto index_database::update_mpps(std::string_view mpps_uid,
@@ -4770,22 +4810,54 @@ auto index_database::update_mpps(std::string_view mpps_uid,
         if (result.is_ok()) {
             return ok();
         }
-        // Update failed
+        // Update failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        UPDATE mpps
+        SET status = ?,
+            end_datetime = CASE WHEN ? != '' THEN ? ELSE end_datetime END,
+            performed_series = CASE WHEN ? != '' THEN ? ELSE performed_series END,
+            updated_at = datetime('now')
+        WHERE mpps_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
-    // database_system is required
-    return make_error<std::monostate>(-1,
-                                      "database_system is not initialized for MPPS update",
-                                      "storage");
-#else
-    (void)mpps_uid;
-    (void)new_status;
-    (void)end_datetime;
-    (void)performed_series;
-    return make_error<std::monostate>(-1,
-                                      "database_system is not compiled",
-                                      "storage");
-#endif
+    sqlite3_bind_text(stmt, 1, new_status.data(),
+                      static_cast<int>(new_status.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, end_datetime.data(),
+                      static_cast<int>(end_datetime.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, end_datetime.data(),
+                      static_cast<int>(end_datetime.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, performed_series.data(),
+                      static_cast<int>(performed_series.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, performed_series.data(),
+                      static_cast<int>(performed_series.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, mpps_uid.data(),
+                      static_cast<int>(mpps_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc, pacs::compat::format("Failed to update MPPS: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
 }
 
 auto index_database::update_mpps(const mpps_record& record) -> VoidResult {
@@ -4845,13 +4917,37 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
 
         return parse_mpps_from_row(result.value()[0]);
     }
-
-    // database_system is required
-    return std::nullopt;
-#else
-    (void)mpps_uid;
-    return std::nullopt;
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE mpps_uid = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, mpps_uid.data(),
+                      static_cast<int>(mpps_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_mpps_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
 }
 
 auto index_database::find_mpps_by_pk(int64_t pk) const
@@ -4901,13 +4997,36 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
 
         return parse_mpps_from_row(result.value()[0]);
     }
-
-    // database_system is required
-    return std::nullopt;
-#else
-    (void)pk;
-    return std::nullopt;
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE mpps_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_mpps_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
 }
 
 auto index_database::list_active_mpps(std::string_view station_ae) const
@@ -4966,15 +5085,39 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
         }
         return ok(std::move(results));
     }
-
-    // database_system is required
-    return make_error<std::vector<mpps_record>>(
-        -1, "database_system is not initialized for MPPS query", "storage");
-#else
-    (void)station_ae;
-    return make_error<std::vector<mpps_record>>(
-        -1, "database_system is not compiled", "storage");
 #endif
+
+    // Fallback to direct SQLite
+    std::vector<mpps_record> results;
+
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE status = 'IN PROGRESS' AND station_ae = ?
+        ORDER BY start_datetime DESC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::vector<mpps_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, station_ae.data(),
+                      static_cast<int>(station_ae.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_mpps_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return ok(std::move(results));
 }
 
 auto index_database::find_mpps_by_study(std::string_view study_uid) const
@@ -5031,15 +5174,39 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
         }
         return ok(std::move(results));
     }
-
-    // database_system is required
-    return make_error<std::vector<mpps_record>>(
-        -1, "database_system is not initialized for MPPS query", "storage");
-#else
-    (void)study_uid;
-    return make_error<std::vector<mpps_record>>(
-        -1, "database_system is not compiled", "storage");
 #endif
+
+    // Fallback to direct SQLite
+    std::vector<mpps_record> results;
+
+    const char* sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE study_uid = ?
+        ORDER BY start_datetime DESC;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::vector<mpps_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, study_uid.data(),
+                      static_cast<int>(study_uid.size()), SQLITE_TRANSIENT);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_mpps_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return ok(std::move(results));
 }
 
 auto index_database::search_mpps(const mpps_query& query) const
@@ -5182,17 +5349,93 @@ auto index_database::search_mpps(const mpps_query& query) const
         }
         return ok(std::move(results));
     }
-
-    // database_system is required
-    return pacs_error<std::vector<mpps_record>>(
-        error_codes::database_query_error,
-        "database_system is not initialized for MPPS search");
-#else
-    (void)query;
-    return pacs_error<std::vector<mpps_record>>(
-        error_codes::database_query_error,
-        "database_system is not compiled");
 #endif
+
+    // Fallback to direct SQLite
+    std::vector<mpps_record> results;
+
+    std::string sql = R"(
+        SELECT mpps_pk, mpps_uid, status, start_datetime, end_datetime,
+               station_ae, station_name, modality, study_uid, accession_no,
+               scheduled_step_id, requested_proc_id, performed_series,
+               created_at, updated_at
+        FROM mpps
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    if (query.mpps_uid.has_value()) {
+        sql += " AND mpps_uid = ?";
+        params.push_back(*query.mpps_uid);
+    }
+
+    if (query.status.has_value()) {
+        sql += " AND status = ?";
+        params.push_back(*query.status);
+    }
+
+    if (query.station_ae.has_value()) {
+        sql += " AND station_ae = ?";
+        params.push_back(*query.station_ae);
+    }
+
+    if (query.modality.has_value()) {
+        sql += " AND modality = ?";
+        params.push_back(*query.modality);
+    }
+
+    if (query.study_uid.has_value()) {
+        sql += " AND study_uid = ?";
+        params.push_back(*query.study_uid);
+    }
+
+    if (query.accession_no.has_value()) {
+        sql += " AND accession_no = ?";
+        params.push_back(*query.accession_no);
+    }
+
+    if (query.start_date_from.has_value()) {
+        sql += " AND substr(start_datetime, 1, 8) >= ?";
+        params.push_back(*query.start_date_from);
+    }
+
+    if (query.start_date_to.has_value()) {
+        sql += " AND substr(start_datetime, 1, 8) <= ?";
+        params.push_back(*query.start_date_to);
+    }
+
+    sql += " ORDER BY start_datetime DESC";
+
+    if (query.limit > 0) {
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::vector<mpps_record>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_mpps_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return ok(std::move(results));
 }
 
 auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
@@ -5228,19 +5471,33 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
         }
         return ok();
     }
-
-    // database_system is required
-    return make_error<std::monostate>(
-        database_query_error,
-        "database_system is not initialized for MPPS deletion",
-        "storage");
-#else
-    (void)mpps_uid;
-    return make_error<std::monostate>(
-        database_query_error,
-        "database_system is not compiled",
-        "storage");
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = "DELETE FROM mpps WHERE mpps_uid = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, mpps_uid.data(),
+                      static_cast<int>(mpps_uid.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc, pacs::compat::format("Failed to delete MPPS: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
 }
 
 auto index_database::mpps_count() const -> Result<size_t> {
@@ -5295,16 +5552,27 @@ auto index_database::mpps_count() const -> Result<size_t> {
         }
         return ok(size_t{0});
     }
-
-    // database_system is required
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not initialized for MPPS count");
-#else
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not compiled");
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = "SELECT COUNT(*) FROM mpps;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return ok(count);
 }
 
 auto index_database::mpps_count(std::string_view status) const -> Result<size_t> {
@@ -5361,17 +5629,30 @@ auto index_database::mpps_count(std::string_view status) const -> Result<size_t>
         }
         return ok(size_t{0});
     }
-
-    // database_system is required
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not initialized for MPPS count");
-#else
-    (void)status;
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not compiled");
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = "SELECT COUNT(*) FROM mpps WHERE status = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    sqlite3_bind_text(stmt, 1, status.data(), static_cast<int>(status.size()),
+                      SQLITE_TRANSIENT);
+
+    size_t count = 0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        count = static_cast<size_t>(sqlite3_column_int64(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return ok(count);
 }
 
 auto index_database::parse_mpps_row(void* stmt_ptr) const -> mpps_record {
@@ -5581,17 +5862,66 @@ auto index_database::add_worklist_item(const worklist_item& item)
         }
         // Insert failed, fall through to SQLite
     }
-
-    // database_system is required
-    return make_error<int64_t>(-1,
-                               "database_system is not initialized for worklist creation",
-                               "storage");
-#else
-    (void)item;
-    return make_error<int64_t>(-1,
-                               "database_system is not compiled",
-                               "storage");
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        INSERT INTO worklist (
+            step_id, step_status, patient_id, patient_name, birth_date, sex,
+            accession_no, requested_proc_id, study_uid, scheduled_datetime,
+            station_ae, station_name, modality, procedure_desc, protocol_code,
+            referring_phys, referring_phys_id, updated_at
+        ) VALUES (?, 'SCHEDULED', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                  datetime('now'))
+        RETURNING worklist_pk;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<int64_t>(
+            rc,
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    sqlite3_bind_text(stmt, 1, item.step_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, item.patient_id.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, item.patient_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, item.birth_date.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, item.sex.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, item.accession_no.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, item.requested_proc_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, item.study_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 9, item.scheduled_datetime.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 10, item.station_ae.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 11, item.station_name.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 12, item.modality.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 13, item.procedure_desc.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 14, item.protocol_code.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 15, item.referring_phys.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 16, item.referring_phys_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        auto error_msg = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return make_error<int64_t>(
+            rc, pacs::compat::format("Failed to add worklist item: {}", error_msg),
+            "storage");
+    }
+
+    auto pk = sqlite3_column_int64(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    return pk;
 }
 
 auto index_database::update_worklist_status(std::string_view step_id,
@@ -5636,22 +5966,46 @@ auto index_database::update_worklist_status(std::string_view step_id,
         if (result.is_ok()) {
             return ok();
         }
+        // Update failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        UPDATE worklist
+        SET step_status = ?,
+            updated_at = datetime('now')
+        WHERE step_id = ? AND accession_no = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
-    // database_system is required
-    return make_error<std::monostate>(
-        database_query_error,
-        "database_system is not initialized for worklist update",
-        "storage");
-#else
-    (void)step_id;
-    (void)accession_no;
-    (void)new_status;
-    return make_error<std::monostate>(
-        database_query_error,
-        "database_system is not compiled",
-        "storage");
-#endif
+    sqlite3_bind_text(stmt, 1, new_status.data(),
+                      static_cast<int>(new_status.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, step_id.data(), static_cast<int>(step_id.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, accession_no.data(),
+                      static_cast<int>(accession_no.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            pacs::compat::format("Failed to update worklist status: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
 }
 
 auto index_database::query_worklist(const worklist_query& query) const
@@ -5811,17 +6165,99 @@ auto index_database::query_worklist(const worklist_query& query) const
         }
         return ok(std::move(results));
     }
-
-    // database_system is required
-    return pacs_error<std::vector<worklist_item>>(
-        error_codes::database_query_error,
-        "database_system is not initialized for worklist query");
-#else
-    (void)query;
-    return pacs_error<std::vector<worklist_item>>(
-        error_codes::database_query_error,
-        "database_system is not compiled");
 #endif
+
+    // Fallback to direct SQLite
+    std::vector<worklist_item> results;
+
+    std::string sql = R"(
+        SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
+               birth_date, sex, accession_no, requested_proc_id, study_uid,
+               scheduled_datetime, station_ae, station_name, modality,
+               procedure_desc, protocol_code, referring_phys, referring_phys_id,
+               created_at, updated_at
+        FROM worklist
+        WHERE 1=1
+    )";
+
+    std::vector<std::string> params;
+
+    // Default: only return SCHEDULED items unless include_all_status is set
+    if (!query.include_all_status) {
+        sql += " AND step_status = 'SCHEDULED'";
+    }
+
+    if (query.station_ae.has_value()) {
+        sql += " AND station_ae = ?";
+        params.push_back(*query.station_ae);
+    }
+
+    if (query.modality.has_value()) {
+        sql += " AND modality = ?";
+        params.push_back(*query.modality);
+    }
+
+    if (query.scheduled_date_from.has_value()) {
+        sql += " AND substr(scheduled_datetime, 1, 8) >= ?";
+        params.push_back(*query.scheduled_date_from);
+    }
+
+    if (query.scheduled_date_to.has_value()) {
+        sql += " AND substr(scheduled_datetime, 1, 8) <= ?";
+        params.push_back(*query.scheduled_date_to);
+    }
+
+    if (query.patient_id.has_value()) {
+        sql += " AND patient_id LIKE ?";
+        params.push_back(to_like_pattern(*query.patient_id));
+    }
+
+    if (query.patient_name.has_value()) {
+        sql += " AND patient_name LIKE ?";
+        params.push_back(to_like_pattern(*query.patient_name));
+    }
+
+    if (query.accession_no.has_value()) {
+        sql += " AND accession_no = ?";
+        params.push_back(*query.accession_no);
+    }
+
+    if (query.step_id.has_value()) {
+        sql += " AND step_id = ?";
+        params.push_back(*query.step_id);
+    }
+
+    sql += " ORDER BY scheduled_datetime ASC";
+
+    if (query.limit > 0) {
+        sql += pacs::compat::format(" LIMIT {}", query.limit);
+    }
+
+    if (query.offset > 0) {
+        sql += pacs::compat::format(" OFFSET {}", query.offset);
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::vector<worklist_item>>(
+            rc,
+            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    // Bind parameters
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1,
+                          SQLITE_TRANSIENT);
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        results.push_back(parse_worklist_row(stmt));
+    }
+
+    sqlite3_finalize(stmt);
+    return ok(std::move(results));
 }
 
 auto index_database::find_worklist_item(std::string_view step_id,
@@ -5876,14 +6312,40 @@ auto index_database::find_worklist_item(std::string_view step_id,
 
         return parse_worklist_from_row(result.value()[0]);
     }
-
-    // database_system is required
-    return std::nullopt;
-#else
-    (void)step_id;
-    (void)accession_no;
-    return std::nullopt;
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
+               birth_date, sex, accession_no, requested_proc_id, study_uid,
+               scheduled_datetime, station_ae, station_name, modality,
+               procedure_desc, protocol_code, referring_phys, referring_phys_id,
+               created_at, updated_at
+        FROM worklist
+        WHERE step_id = ? AND accession_no = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_text(stmt, 1, step_id.data(), static_cast<int>(step_id.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, accession_no.data(),
+                      static_cast<int>(accession_no.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_worklist_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
 }
 
 auto index_database::find_worklist_by_pk(int64_t pk) const
@@ -5935,13 +6397,37 @@ auto index_database::find_worklist_by_pk(int64_t pk) const
 
         return parse_worklist_from_row(result.value()[0]);
     }
-
-    // database_system is required
-    return std::nullopt;
-#else
-    (void)pk;
-    return std::nullopt;
 #endif
+
+    // Fallback to direct SQLite
+    const char* sql = R"(
+        SELECT worklist_pk, step_id, step_status, patient_id, patient_name,
+               birth_date, sex, accession_no, requested_proc_id, study_uid,
+               scheduled_datetime, station_ae, station_name, modality,
+               procedure_desc, protocol_code, referring_phys, referring_phys_id,
+               created_at, updated_at
+        FROM worklist
+        WHERE worklist_pk = ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return std::nullopt;
+    }
+
+    sqlite3_bind_int64(stmt, 1, pk);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+        return std::nullopt;
+    }
+
+    auto record = parse_worklist_row(stmt);
+    sqlite3_finalize(stmt);
+
+    return record;
 }
 
 auto index_database::delete_worklist_item(std::string_view step_id,
@@ -5975,21 +6461,40 @@ auto index_database::delete_worklist_item(std::string_view step_id,
         if (result.is_ok()) {
             return ok();
         }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
+    const char* sql =
+        "DELETE FROM worklist WHERE step_id = ? AND accession_no = ?;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
-    // database_system is required
-    return make_error<std::monostate>(
-        database_query_error,
-        "database_system is not initialized for worklist deletion",
-        "storage");
-#else
-    (void)step_id;
-    (void)accession_no;
-    return make_error<std::monostate>(
-        database_query_error,
-        "database_system is not compiled",
-        "storage");
-#endif
+    sqlite3_bind_text(stmt, 1, step_id.data(), static_cast<int>(step_id.size()),
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, accession_no.data(),
+                      static_cast<int>(accession_no.size()), SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            pacs::compat::format("Failed to delete worklist item: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return ok();
 }
 
 auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
@@ -6036,18 +6541,41 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
         }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
+    // Delete old items that are not SCHEDULED
+    const char* sql = R"(
+        DELETE FROM worklist
+        WHERE step_status != 'SCHEDULED'
+          AND created_at < ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare cleanup: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
-    // database_system is required
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not initialized for worklist cleanup");
-#else
-    (void)age;
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not compiled");
-#endif
+    sqlite3_bind_text(stmt, 1, cutoff_str.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to cleanup old worklist items: {}",
+                       sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return static_cast<size_t>(sqlite3_changes(db_));
 }
 
 auto index_database::cleanup_worklist_items_before(
@@ -6093,18 +6621,41 @@ auto index_database::cleanup_worklist_items_before(
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
         }
+        // Delete failed, fall through to SQLite
+    }
+#endif
+
+    // Fallback to direct SQLite
+    // Delete items scheduled before the specified time that are not SCHEDULED
+    const char* sql = R"(
+        DELETE FROM worklist
+        WHERE step_status != 'SCHEDULED'
+          AND scheduled_datetime < ?;
+    )";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to prepare cleanup: {}", sqlite3_errmsg(db_)),
+            "storage");
     }
 
-    // database_system is required
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not initialized for worklist cleanup");
-#else
-    (void)before;
-    return pacs_error<size_t>(
-        error_codes::database_query_error,
-        "database_system is not compiled");
-#endif
+    sqlite3_bind_text(stmt, 1, before_str.c_str(), -1, SQLITE_TRANSIENT);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        return make_error<size_t>(
+            rc,
+            pacs::compat::format("Failed to cleanup worklist items before {}: {}",
+                       before_str, sqlite3_errmsg(db_)),
+            "storage");
+    }
+
+    return static_cast<size_t>(sqlite3_changes(db_));
 }
 
 auto index_database::worklist_count() const -> Result<size_t> {
