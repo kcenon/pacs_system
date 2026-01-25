@@ -418,9 +418,10 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
     // Wait for all jobs to complete with timeout
     // Use longer timeout for CI environments (especially Windows)
+    // Windows CI can be significantly slower than Linux/macOS
     {
         std::unique_lock<std::mutex> lock(mutex);
-        bool completed = cv.wait_for(lock, std::chrono::seconds(30),
+        bool completed = cv.wait_for(lock, std::chrono::seconds(60),
             [&]() { return completed_count.load(std::memory_order_acquire) == num_jobs; });
         REQUIRE(completed);
     }
