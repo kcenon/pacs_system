@@ -115,7 +115,7 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state1.state_json = "{}";
     state1.created_at = std::chrono::system_clock::now();
     state1.updated_at = state1.created_at;
-    repo.save_state(state1);
+    (void)repo.save_state(state1);
 
     viewer_state_record state2;
     state2.state_id = "state-2";
@@ -124,7 +124,7 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state2.state_json = "{}";
     state2.created_at = std::chrono::system_clock::now();
     state2.updated_at = state2.created_at;
-    repo.save_state(state2);
+    (void)repo.save_state(state2);
 
     viewer_state_record state3;
     state3.state_id = "state-3";
@@ -133,7 +133,7 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state3.state_json = "{}";
     state3.created_at = std::chrono::system_clock::now();
     state3.updated_at = state3.created_at;
-    repo.save_state(state3);
+    (void)repo.save_state(state3);
 
     auto states = repo.find_states_by_study("1.2.840.study");
     REQUIRE(states.size() == 2);
@@ -148,7 +148,7 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
       state.state_json = "{}";
       state.created_at = std::chrono::system_clock::now();
       state.updated_at = state.created_at;
-      repo.save_state(state);
+      (void)repo.save_state(state);
     }
 
     viewer_state_query query;
@@ -171,7 +171,7 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state.state_json = "{}";
     state.created_at = std::chrono::system_clock::now();
     state.updated_at = state.created_at;
-    repo.save_state(state);
+    (void)repo.save_state(state);
 
     auto found = repo.find_state_by_id("delete-test");
     REQUIRE(found.has_value());
@@ -192,7 +192,7 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state.state_json = "{}";
     state.created_at = std::chrono::system_clock::now();
     state.updated_at = state.created_at;
-    repo.save_state(state);
+    (void)repo.save_state(state);
 
     REQUIRE(repo.count_states() == 1);
   }
@@ -215,9 +215,9 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   }
 
   SECTION("multiple study accesses") {
-    repo.record_study_access("user1", "1.2.840.study1");
-    repo.record_study_access("user1", "1.2.840.study2");
-    repo.record_study_access("user1", "1.2.840.study3");
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user1", "1.2.840.study3");
 
     auto recent = repo.get_recent_studies("user1", 10);
     REQUIRE(recent.size() == 3);
@@ -225,7 +225,7 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
 
   SECTION("recent studies with limit") {
     for (int i = 1; i <= 25; ++i) {
-      repo.record_study_access("user1", "1.2.840.study" + std::to_string(i));
+      (void)repo.record_study_access("user1", "1.2.840.study" + std::to_string(i));
     }
 
     auto recent_20 = repo.get_recent_studies("user1", 20);
@@ -237,11 +237,11 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
 
   SECTION("recent studies ordered by access time") {
     // Small sleeps ensure distinct timestamps across all platforms
-    repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study1");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    repo.record_study_access("user1", "1.2.840.study3");
+    (void)repo.record_study_access("user1", "1.2.840.study3");
 
     auto recent = repo.get_recent_studies("user1", 10);
     REQUIRE(recent.size() == 3);
@@ -252,11 +252,11 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   }
 
   SECTION("re-access updates timestamp") {
-    repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study1");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    repo.record_study_access("user1", "1.2.840.study1"); // Re-access
+    (void)repo.record_study_access("user1", "1.2.840.study1"); // Re-access
 
     auto recent = repo.get_recent_studies("user1", 10);
     REQUIRE(recent.size() == 2);
@@ -266,9 +266,9 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   }
 
   SECTION("clear recent studies") {
-    repo.record_study_access("user1", "1.2.840.study1");
-    repo.record_study_access("user1", "1.2.840.study2");
-    repo.record_study_access("user2", "1.2.840.study3");
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user2", "1.2.840.study3");
 
     REQUIRE(repo.count_recent_studies("user1") == 2);
     REQUIRE(repo.count_recent_studies("user2") == 1);
@@ -283,15 +283,15 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   SECTION("count recent studies") {
     REQUIRE(repo.count_recent_studies("user1") == 0);
 
-    repo.record_study_access("user1", "1.2.840.study1");
-    repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
 
     REQUIRE(repo.count_recent_studies("user1") == 2);
   }
 
   SECTION("user isolation") {
-    repo.record_study_access("user1", "1.2.840.study1");
-    repo.record_study_access("user2", "1.2.840.study2");
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user2", "1.2.840.study2");
 
     auto user1_recent = repo.get_recent_studies("user1", 10);
     REQUIRE(user1_recent.size() == 1);

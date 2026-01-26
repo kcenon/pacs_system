@@ -164,9 +164,9 @@ TEST_CASE("Index database patient operations", "[web][patient][database]") {
   }
 
   SECTION("search patients with wildcard") {
-    db->upsert_patient("P001", "Doe^John", "19800115", "M");
-    db->upsert_patient("P002", "Doe^Jane", "19850220", "F");
-    db->upsert_patient("P003", "Smith^Bob", "19900305", "M");
+    (void)db->upsert_patient("P001", "Doe^John", "19800115", "M");
+    (void)db->upsert_patient("P002", "Doe^Jane", "19850220", "F");
+    (void)db->upsert_patient("P003", "Smith^Bob", "19900305", "M");
 
     patient_query query;
     query.patient_name = "Doe*";
@@ -177,7 +177,7 @@ TEST_CASE("Index database patient operations", "[web][patient][database]") {
 
   SECTION("search patients with pagination") {
     for (int i = 1; i <= 10; ++i) {
-      db->upsert_patient("P" + std::to_string(i), "Patient" + std::to_string(i),
+      (void)db->upsert_patient("P" + std::to_string(i), "Patient" + std::to_string(i),
                          "", "");
     }
 
@@ -218,9 +218,9 @@ TEST_CASE("Index database study operations", "[web][study][database]") {
   }
 
   SECTION("list studies for patient") {
-    db->upsert_study(patient_pk.value(), "1.2.840.1", "S001", "20231001", "",
+    (void)db->upsert_study(patient_pk.value(), "1.2.840.1", "S001", "20231001", "",
                      "ACC001", "", "Study 1");
-    db->upsert_study(patient_pk.value(), "1.2.840.2", "S002", "20231002", "",
+    (void)db->upsert_study(patient_pk.value(), "1.2.840.2", "S002", "20231002", "",
                      "ACC002", "", "Study 2");
 
     auto studies_result = db->list_studies("P001");
@@ -229,7 +229,7 @@ TEST_CASE("Index database study operations", "[web][study][database]") {
   }
 
   SECTION("delete study") {
-    db->upsert_study(patient_pk.value(), "1.2.840.delete", "S001", "", "", "",
+    (void)db->upsert_study(patient_pk.value(), "1.2.840.delete", "S001", "", "", "",
                      "", "");
 
     auto result = db->delete_study("1.2.840.delete");
@@ -267,8 +267,8 @@ TEST_CASE("Index database series operations", "[web][series][database]") {
   }
 
   SECTION("list series for study") {
-    db->upsert_series(study_pk.value(), "1.2.840.series1", "CT", 1, "", "", "");
-    db->upsert_series(study_pk.value(), "1.2.840.series2", "CT", 2, "", "", "");
+    (void)db->upsert_series(study_pk.value(), "1.2.840.series1", "CT", 1, "", "", "");
+    (void)db->upsert_series(study_pk.value(), "1.2.840.series2", "CT", 2, "", "", "");
 
     auto series_list_result = db->list_series("1.2.840.study");
     REQUIRE(series_list_result.is_ok());

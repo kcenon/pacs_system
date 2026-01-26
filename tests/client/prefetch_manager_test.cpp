@@ -219,7 +219,7 @@ TEST_CASE("prefetch_manager rule management without repository", "[prefetch_mana
         rule.name = "Original Name";
         rule.trigger = prefetch_trigger::prior_studies;
 
-        manager->add_rule(rule);
+        (void)manager->add_rule(rule);
 
         rule.name = "Updated Name";
         auto result = manager->update_rule(rule);
@@ -244,7 +244,7 @@ TEST_CASE("prefetch_manager rule management without repository", "[prefetch_mana
         rule.name = "To Remove";
         rule.trigger = prefetch_trigger::manual;
 
-        manager->add_rule(rule);
+        (void)manager->add_rule(rule);
         CHECK(manager->list_rules().size() == 1);
 
         auto result = manager->remove_rule("rule-to-remove");
@@ -355,7 +355,7 @@ TEST_CASE("prefetch_manager statistics", "[prefetch_manager]") {
         rule.triggered_count = 10;
         rule.studies_prefetched = 50;
 
-        manager->add_rule(rule);
+        (void)manager->add_rule(rule);
 
         auto stats = manager->get_rule_statistics("stats-rule");
         CHECK(stats.triggered_count == 10);

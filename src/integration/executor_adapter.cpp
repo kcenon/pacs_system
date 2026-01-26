@@ -11,6 +11,7 @@
 
 #include <kcenon/thread/core/thread_pool.h>
 #include <kcenon/thread/core/thread_worker.h>
+#include <kcenon/thread/core/job_builder.h>
 #include <kcenon/thread/interfaces/thread_context.h>
 
 #include <algorithm>
@@ -79,8 +80,9 @@ kcenon::common::Result<std::future<void>> thread_pool_executor_adapter::execute(
     ++pending_count_;
 
     try {
-        (void)pool_->submit(
-            [this, shared_job, promise]() mutable {
+        auto job_obj = kcenon::thread::job_builder()
+            .name("executor_task")
+            .work([this, shared_job, promise]() -> kcenon::common::VoidResult {
                 try {
                     auto result = shared_job->execute();
                     if (result.is_ok()) {
@@ -93,11 +95,20 @@ kcenon::common::Result<std::future<void>> thread_pool_executor_adapter::execute(
                     promise->set_exception(std::current_exception());
                 }
                 --pending_count_;
-            });
+                return kcenon::common::ok();
+            })
+            .build();
+
+        auto enqueue_result = pool_->enqueue(std::move(job_obj));
+        if (enqueue_result.is_err()) {
+            --pending_count_;
+            return kcenon::common::Result<std::future<void>>(
+                kcenon::common::error_info{-3, "Failed to enqueue task to thread pool", "executor"});
+        }
     } catch (const std::exception&) {
         --pending_count_;
         return kcenon::common::Result<std::future<void>>(
-            kcenon::common::error_info{-3, "Failed to submit task to thread pool", "executor"});
+            kcenon::common::error_info{-3, "Failed to enqueue task to thread pool", "executor"});
     }
 
     return kcenon::common::Result<std::future<void>>::ok(std::move(future));
@@ -173,9 +184,17 @@ kcenon::common::Result<std::future<void>> thread_pool_executor_adapter::execute_
 
                 if (task && pool_ && pool_->is_running()) {
                     try {
-                        (void)pool_->submit(std::move(task));
+                        auto job_obj = kcenon::thread::job_builder()
+                            .name("delayed_task")
+                            .work([task = std::move(task)]() -> kcenon::common::VoidResult {
+                                task();
+                                return kcenon::common::ok();
+                            })
+                            .build();
+
+                        (void)pool_->enqueue(std::move(job_obj));
                     } catch (...) {
-                        // Ignore submit failures in delayed task scheduler
+                        // Ignore enqueue failures in delayed task scheduler
                     }
                 }
             }

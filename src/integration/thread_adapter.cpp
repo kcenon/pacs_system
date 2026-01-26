@@ -7,6 +7,7 @@
 
 #include <kcenon/thread/core/thread_pool.h>
 #include <kcenon/thread/core/thread_worker.h>
+#include <kcenon/thread/core/job_builder.h>
 #include <kcenon/thread/interfaces/thread_context.h>
 
 #include <stdexcept>
@@ -132,15 +133,26 @@ void thread_adapter::submit_job_internal(std::function<void()> task,
         }
     }
 
-    // Use the unified submit API (fire-and-forget for void tasks)
+    // Use job_builder for modern API (replaces deprecated future_job)
     // Note: Priority is not currently used as the base thread_pool doesn't support it.
     // For future implementation, consider using typed_thread_pool or a priority queue wrapper.
     std::lock_guard<std::mutex> lock(mutex_);
     if (pool_) {
         try {
-            (void)pool_->submit(std::move(task));
+            auto job = kcenon::thread::job_builder()
+                .name("pacs_async_task")
+                .work([task = std::move(task)]() -> kcenon::common::VoidResult {
+                    task();
+                    return kcenon::common::ok();
+                })
+                .build();
+
+            auto result = pool_->enqueue(std::move(job));
+            if (result.is_err()) {
+                throw std::runtime_error("Failed to enqueue task to thread pool");
+            }
         } catch (const std::exception&) {
-            throw std::runtime_error("Failed to submit task to thread pool");
+            throw std::runtime_error("Failed to enqueue task to thread pool");
         }
     }
 }

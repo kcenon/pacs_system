@@ -491,6 +491,7 @@ struct sync_manager::impl {
         const sync_config& cfg,
         const std::vector<std::string>& remote_study_uids,
         sync_result& result) {
+        (void)result;  // Reserved for future result aggregation
 
         std::vector<sync_conflict> comparison_conflicts;
 
