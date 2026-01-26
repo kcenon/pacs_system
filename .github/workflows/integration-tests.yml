@@ -34,6 +34,7 @@ env:
   THREAD_SYSTEM_ROOT: ${{ github.workspace }}/thread_system
   LOGGER_SYSTEM_ROOT: ${{ github.workspace }}/logger_system
   MONITORING_SYSTEM_ROOT: ${{ github.workspace }}/monitoring_system
+  DATABASE_SYSTEM_ROOT: ${{ github.workspace }}/database_system
   NETWORK_SYSTEM_ROOT: ${{ github.workspace }}/network_system
 
 jobs:
@@ -87,6 +88,12 @@ jobs:
       with:
         repository: kcenon/monitoring_system
         path: monitoring_system
+
+    - name: Checkout database_system (Tier 3)
+      uses: actions/checkout@v4
+      with:
+        repository: kcenon/database_system
+        path: database_system
 
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
@@ -716,6 +723,12 @@ jobs:
       with:
         repository: kcenon/monitoring_system
         path: monitoring_system
+
+    - name: Checkout database_system (Tier 3)
+      uses: actions/checkout@v4
+      with:
+        repository: kcenon/database_system
+        path: database_system
 
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
