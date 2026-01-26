@@ -8,6 +8,9 @@
 
 #include "pacs/storage/viewer_state_repository.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include <sqlite3.h>
 
 #include <chrono>
@@ -446,3 +449,5 @@ recent_study_record viewer_state_repository::parse_recent_study_row(void* stmt_p
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

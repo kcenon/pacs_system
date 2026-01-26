@@ -8,6 +8,9 @@
 
 #include "pacs/storage/annotation_repository.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include <sqlite3.h>
 
 #include <chrono>
@@ -567,3 +570,5 @@ annotation_record annotation_repository::parse_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

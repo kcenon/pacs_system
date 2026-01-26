@@ -8,6 +8,9 @@
 
 #include "pacs/storage/key_image_repository.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include <sqlite3.h>
 
 #include <chrono>
@@ -369,3 +372,5 @@ key_image_record key_image_repository::parse_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

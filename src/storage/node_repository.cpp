@@ -5,6 +5,9 @@
 
 #include "pacs/storage/node_repository.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include <sqlite3.h>
 
 #include <chrono>
@@ -510,3 +513,5 @@ client::remote_node node_repository::parse_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

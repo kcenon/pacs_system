@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include "pacs/client/sync_types.hpp"
 
 #include <kcenon/common/patterns/result.h>
@@ -319,3 +322,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

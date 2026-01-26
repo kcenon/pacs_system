@@ -12,6 +12,8 @@
 
 #pragma once
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include "pacs/storage/pacs_database_adapter.hpp"
 
 #include <kcenon/common/patterns/result.h>
@@ -24,10 +26,8 @@
 #include <type_traits>
 #include <vector>
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
 #include <database/database_types.h>
 #include <database/query_builder.h>
-#endif
 
 namespace pacs::storage {
 
@@ -701,3 +701,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

@@ -8,6 +8,9 @@
 
 #include "pacs/storage/sync_repository.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include <sqlite3.h>
 
 #include <chrono>
@@ -903,3 +906,5 @@ client::sync_history sync_repository::parse_history_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

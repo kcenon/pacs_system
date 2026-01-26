@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+
 #include "pacs/storage/viewer_state_record.hpp"
 
 #include <kcenon/common/patterns/result.h>
@@ -184,3 +187,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
