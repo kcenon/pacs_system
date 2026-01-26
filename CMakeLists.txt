@@ -878,6 +878,7 @@ target_link_libraries(pacs_client
 )
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     target_link_libraries(pacs_client PUBLIC pacs_storage)
+    target_compile_definitions(pacs_client PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
 endif()
 
 # Link common_system (Tier 0)
