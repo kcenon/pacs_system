@@ -1032,6 +1032,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/key_image_repository.cpp
         src/storage/viewer_state_repository.cpp
         src/storage/pacs_database_adapter.cpp
+        src/storage/repository_factory.cpp
     )
     target_include_directories(pacs_storage
         PUBLIC
@@ -1722,6 +1723,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/mpps_test.cpp
             tests/storage/worklist_test.cpp
             tests/storage/pacs_database_adapter_test.cpp
+            tests/storage/base_repository_test.cpp
             # Annotation & Measurement API integration tests (Issue #545, #584)
             tests/integration/annotation_api_test.cpp
             tests/integration/measurement_api_test.cpp
