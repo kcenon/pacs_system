@@ -147,7 +147,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas1.value = 10.0;
     meas1.unit = "mm";
     meas1.created_at = std::chrono::system_clock::now();
-    repo.save(meas1);
+    (void)repo.save(meas1);
 
     measurement_record meas2;
     meas2.measurement_id = "meas-2";
@@ -156,7 +156,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas2.value = 25.0;
     meas2.unit = "mm2";
     meas2.created_at = std::chrono::system_clock::now();
-    repo.save(meas2);
+    (void)repo.save(meas2);
 
     measurement_record meas3;
     meas3.measurement_id = "meas-3";
@@ -165,7 +165,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas3.value = 90.0;
     meas3.unit = "degrees";
     meas3.created_at = std::chrono::system_clock::now();
-    repo.save(meas3);
+    (void)repo.save(meas3);
 
     auto measurements = repo.find_by_instance("1.2.840.instance");
     REQUIRE(measurements.size() == 2);
@@ -180,7 +180,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
       meas.value = static_cast<double>(i) * 10.0;
       meas.unit = "mm";
       meas.created_at = std::chrono::system_clock::now();
-      repo.save(meas);
+      (void)repo.save(meas);
     }
 
     measurement_query query;
@@ -204,7 +204,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas1.value = 10.0;
     meas1.unit = "mm";
     meas1.created_at = std::chrono::system_clock::now();
-    repo.save(meas1);
+    (void)repo.save(meas1);
 
     measurement_record meas2;
     meas2.measurement_id = "meas-area";
@@ -213,7 +213,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas2.value = 25.0;
     meas2.unit = "mm2";
     meas2.created_at = std::chrono::system_clock::now();
-    repo.save(meas2);
+    (void)repo.save(meas2);
 
     measurement_query query;
     query.type = measurement_type::length;
@@ -231,7 +231,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.value = 10.0;
     meas.unit = "mm";
     meas.created_at = std::chrono::system_clock::now();
-    repo.save(meas);
+    (void)repo.save(meas);
 
     REQUIRE(repo.exists("delete-test"));
 
@@ -251,7 +251,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.value = 10.0;
     meas.unit = "mm";
     meas.created_at = std::chrono::system_clock::now();
-    repo.save(meas);
+    (void)repo.save(meas);
 
     REQUIRE(repo.count() == 1);
   }
@@ -264,7 +264,7 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.value = 123.456789;
     meas.unit = "mm";
     meas.created_at = std::chrono::system_clock::now();
-    repo.save(meas);
+    (void)repo.save(meas);
 
     auto found = repo.find_by_id("precision-test");
     REQUIRE(found.has_value());

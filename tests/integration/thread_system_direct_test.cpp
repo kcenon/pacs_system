@@ -153,7 +153,7 @@ TEST_CASE("individual worker enqueue", "[thread_system][manual][individual][!may
         // Submit task
         std::atomic<int> counter{0};
         for (int i = 0; i < 10; ++i) {
-            pool->submit([&counter]() { counter++; });
+            (void)pool->submit([&counter]() { counter++; });
         }
 
         // Wait for all tasks
@@ -198,7 +198,7 @@ TEST_CASE("repeated pool lifecycle", "[thread_system][lifecycle][stress][!mayfai
 
             // Submit a task
             std::atomic<bool> done{false};
-            pool->submit([&done]() { done = true; });
+            (void)pool->submit([&done]() { done = true; });
 
             // Wait
             auto start_time = std::chrono::steady_clock::now();

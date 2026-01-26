@@ -603,6 +603,7 @@ std::string prefetch_manager::prefetch_patient(
     std::string_view source_node_id,
     std::string_view patient_id,
     std::chrono::hours lookback) {
+    (void)lookback;  // Reserved for future time-based filtering
     // Create prefetch job for the patient
     if (impl_->job_mgr) {
         auto job_id = impl_->job_mgr->create_prefetch_job(

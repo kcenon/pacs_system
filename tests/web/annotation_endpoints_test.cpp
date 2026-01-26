@@ -151,7 +151,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
     ann1.type = annotation_type::text;
     ann1.created_at = std::chrono::system_clock::now();
     ann1.updated_at = ann1.created_at;
-    repo.save(ann1);
+    (void)repo.save(ann1);
 
     annotation_record ann2;
     ann2.annotation_id = "ann-2";
@@ -160,7 +160,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
     ann2.type = annotation_type::arrow;
     ann2.created_at = std::chrono::system_clock::now();
     ann2.updated_at = ann2.created_at;
-    repo.save(ann2);
+    (void)repo.save(ann2);
 
     annotation_record ann3;
     ann3.annotation_id = "ann-3";
@@ -169,7 +169,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
     ann3.type = annotation_type::line;
     ann3.created_at = std::chrono::system_clock::now();
     ann3.updated_at = ann3.created_at;
-    repo.save(ann3);
+    (void)repo.save(ann3);
 
     auto annotations = repo.find_by_instance("1.2.840.instance");
     REQUIRE(annotations.size() == 2);
@@ -183,7 +183,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
       ann.type = annotation_type::text;
       ann.created_at = std::chrono::system_clock::now();
       ann.updated_at = ann.created_at;
-      repo.save(ann);
+      (void)repo.save(ann);
     }
 
     annotation_query query;
@@ -207,7 +207,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
     ann.type = annotation_type::text;
     ann.created_at = std::chrono::system_clock::now();
     ann.updated_at = ann.created_at;
-    repo.save(ann);
+    (void)repo.save(ann);
 
     ann.text = "Updated text";
     ann.updated_at = std::chrono::system_clock::now();
@@ -226,7 +226,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
     ann.type = annotation_type::text;
     ann.created_at = std::chrono::system_clock::now();
     ann.updated_at = ann.created_at;
-    repo.save(ann);
+    (void)repo.save(ann);
 
     REQUIRE(repo.exists("delete-test"));
 
@@ -245,7 +245,7 @@ TEST_CASE("Annotation repository operations", "[web][annotation][database]") {
     ann.type = annotation_type::text;
     ann.created_at = std::chrono::system_clock::now();
     ann.updated_at = ann.created_at;
-    repo.save(ann);
+    (void)repo.save(ann);
 
     REQUIRE(repo.count() == 1);
   }

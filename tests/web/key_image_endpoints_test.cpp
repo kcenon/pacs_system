@@ -106,21 +106,21 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki1.study_uid = "1.2.840.study";
     ki1.sop_instance_uid = "1.2.840.instance1";
     ki1.created_at = std::chrono::system_clock::now();
-    repo.save(ki1);
+    (void)repo.save(ki1);
 
     key_image_record ki2;
     ki2.key_image_id = "ki-2";
     ki2.study_uid = "1.2.840.study";
     ki2.sop_instance_uid = "1.2.840.instance2";
     ki2.created_at = std::chrono::system_clock::now();
-    repo.save(ki2);
+    (void)repo.save(ki2);
 
     key_image_record ki3;
     ki3.key_image_id = "ki-3";
     ki3.study_uid = "1.2.840.other_study";
     ki3.sop_instance_uid = "1.2.840.instance3";
     ki3.created_at = std::chrono::system_clock::now();
-    repo.save(ki3);
+    (void)repo.save(ki3);
 
     auto key_images = repo.find_by_study("1.2.840.study");
     REQUIRE(key_images.size() == 2);
@@ -133,7 +133,7 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
       ki.study_uid = "1.2.840.study";
       ki.sop_instance_uid = "1.2.840.instance." + std::to_string(i);
       ki.created_at = std::chrono::system_clock::now();
-      repo.save(ki);
+      (void)repo.save(ki);
     }
 
     key_image_query query;
@@ -155,7 +155,7 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki.study_uid = "1.2.840.study";
     ki.sop_instance_uid = "1.2.840.instance";
     ki.created_at = std::chrono::system_clock::now();
-    repo.save(ki);
+    (void)repo.save(ki);
 
     REQUIRE(repo.exists("delete-test"));
 
@@ -173,7 +173,7 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki.study_uid = "1.2.840.study";
     ki.sop_instance_uid = "1.2.840.instance";
     ki.created_at = std::chrono::system_clock::now();
-    repo.save(ki);
+    (void)repo.save(ki);
 
     REQUIRE(repo.count() == 1);
   }
@@ -184,21 +184,21 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki1.study_uid = "1.2.840.study1";
     ki1.sop_instance_uid = "1.2.840.instance1";
     ki1.created_at = std::chrono::system_clock::now();
-    repo.save(ki1);
+    (void)repo.save(ki1);
 
     key_image_record ki2;
     ki2.key_image_id = "ki-2";
     ki2.study_uid = "1.2.840.study1";
     ki2.sop_instance_uid = "1.2.840.instance2";
     ki2.created_at = std::chrono::system_clock::now();
-    repo.save(ki2);
+    (void)repo.save(ki2);
 
     key_image_record ki3;
     ki3.key_image_id = "ki-3";
     ki3.study_uid = "1.2.840.study2";
     ki3.sop_instance_uid = "1.2.840.instance3";
     ki3.created_at = std::chrono::system_clock::now();
-    repo.save(ki3);
+    (void)repo.save(ki3);
 
     REQUIRE(repo.count_by_study("1.2.840.study1") == 2);
     REQUIRE(repo.count_by_study("1.2.840.study2") == 1);
@@ -212,14 +212,14 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki_with_frame.sop_instance_uid = "1.2.840.instance";
     ki_with_frame.frame_number = 5;
     ki_with_frame.created_at = std::chrono::system_clock::now();
-    repo.save(ki_with_frame);
+    (void)repo.save(ki_with_frame);
 
     key_image_record ki_no_frame;
     ki_no_frame.key_image_id = "ki-no-frame";
     ki_no_frame.study_uid = "1.2.840.study";
     ki_no_frame.sop_instance_uid = "1.2.840.instance2";
     ki_no_frame.created_at = std::chrono::system_clock::now();
-    repo.save(ki_no_frame);
+    (void)repo.save(ki_no_frame);
 
     auto found_with = repo.find_by_id("ki-with-frame");
     REQUIRE(found_with.has_value());
