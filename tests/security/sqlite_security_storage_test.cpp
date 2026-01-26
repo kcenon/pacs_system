@@ -66,3 +66,111 @@ TEST_CASE("SQLiteSecurityStorage: CRUD Operations", "[security][storage]") {
     REQUIRE(res.is_err()); // User not found
   }
 }
+
+TEST_CASE("SQLiteSecurityStorage: SQL Injection Protection",
+          "[security][storage][injection]") {
+  std::string db_path = ":memory:";
+  sqlite_security_storage storage(db_path);
+
+  // Create a legitimate user first
+  User legitimate_user;
+  legitimate_user.id = "admin";
+  legitimate_user.username = "administrator";
+  legitimate_user.active = true;
+  legitimate_user.roles.push_back(Role::Administrator);
+  REQUIRE(storage.create_user(legitimate_user).is_ok());
+
+  SECTION("SQL injection via user ID should not execute") {
+    // Common SQL injection payloads
+    std::vector<std::string> injection_payloads = {
+        "'; DROP TABLE users; --",
+        "admin'--",
+        "1' OR '1'='1",
+        "'; INSERT INTO users VALUES('hacker', 'hacker', 1); --",
+        "Robert'); DROP TABLE users;--",
+        "1; UPDATE users SET active=0 WHERE username='admin",
+        "' OR 1=1 --",
+        "admin' OR 'x'='x",
+    };
+
+    for (const auto &payload : injection_payloads) {
+      INFO("Testing injection payload: " << payload);
+
+      // Should return "user not found", NOT execute injection
+      auto result = storage.get_user(payload);
+      REQUIRE(result.is_err());
+
+      // Verify legitimate user still exists (tables not dropped)
+      auto admin_result = storage.get_user("admin");
+      REQUIRE(admin_result.is_ok());
+      REQUIRE(admin_result.unwrap().username == "administrator");
+    }
+  }
+
+  SECTION("SQL injection via username should not execute") {
+    std::vector<std::string> username_injections = {
+        "admin'; DROP TABLE users; --",
+        "' OR '1'='1",
+        "administrator'--",
+        "'; DELETE FROM users WHERE '1'='1",
+    };
+
+    for (const auto &payload : username_injections) {
+      INFO("Testing username injection: " << payload);
+
+      auto result = storage.get_user_by_username(payload);
+      REQUIRE(result.is_err());
+
+      // Verify tables intact
+      auto admin_result = storage.get_user("admin");
+      REQUIRE(admin_result.is_ok());
+    }
+  }
+
+  SECTION("SQL injection via create_user should not execute") {
+    User malicious_user;
+    malicious_user.id = "'; DROP TABLE users; --";
+    malicious_user.username = "hacker'; DELETE FROM users WHERE '1'='1";
+    malicious_user.active = true;
+
+    // Should either fail or safely store the string literal
+    auto create_result = storage.create_user(malicious_user);
+
+    // Regardless of success, verify original user still exists
+    auto admin_result = storage.get_user("admin");
+    REQUIRE(admin_result.is_ok());
+    REQUIRE(admin_result.unwrap().username == "administrator");
+  }
+
+  SECTION("Special characters in legitimate data should work") {
+    User special_user;
+    special_user.id = "user_123";
+    special_user.username = "O'Brien"; // Legitimate apostrophe
+    special_user.active = true;
+    special_user.roles.push_back(Role::Radiologist);
+
+    REQUIRE(storage.create_user(special_user).is_ok());
+
+    auto result = storage.get_user_by_username("O'Brien");
+    REQUIRE(result.is_ok());
+    REQUIRE(result.unwrap().username == "O'Brien");
+
+    // Verify no side effects
+    auto admin_result = storage.get_user("admin");
+    REQUIRE(admin_result.is_ok());
+  }
+
+  SECTION("Null bytes and special characters should be handled safely") {
+    User special_user;
+    special_user.id = "null_test";
+    special_user.username = std::string("test\0user", 9); // Contains null byte
+    special_user.active = true;
+
+    // Should handle safely (either store truncated or reject)
+    auto create_result = storage.create_user(special_user);
+
+    // Original user should still exist
+    auto admin_result = storage.get_user("admin");
+    REQUIRE(admin_result.is_ok());
+  }
+}
