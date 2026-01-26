@@ -12,6 +12,8 @@
 
 #pragma once
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include "pacs/storage/pacs_database_adapter.hpp"
 
 #include <memory>
@@ -207,3 +209,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

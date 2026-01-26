@@ -8,6 +8,8 @@
 
 #include "pacs/storage/repository_factory.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include "pacs/storage/annotation_repository.hpp"
 #include "pacs/storage/job_repository.hpp"
 #include "pacs/storage/key_image_repository.hpp"
@@ -122,3 +124,5 @@ auto repository_factory::database() -> std::shared_ptr<pacs_database_adapter> {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
