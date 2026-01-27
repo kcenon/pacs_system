@@ -1844,6 +1844,16 @@ if(PACS_BUILD_TESTS)
                 pacs_client
                 Catch2::Catch2WithMain
         )
+        # Explicitly link database dependencies for static library link order (Issue #642)
+        if(TARGET integrated_database)
+            target_link_libraries(web_tests PRIVATE integrated_database)
+        endif()
+        if(TARGET database)
+            target_link_libraries(web_tests PRIVATE database)
+        endif()
+        if(TARGET monitoring_system)
+            target_link_libraries(web_tests PRIVATE monitoring_system)
+        endif()
     endif()
 
     # Integration tests
