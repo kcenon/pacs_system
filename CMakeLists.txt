@@ -1010,6 +1010,51 @@ else()
     message(STATUS "  [OK] pacs_security: ON (without digital signatures)")
 endif()
 
+# ============================================================================
+# Early monitoring_system setup (Issue #642)
+# Required before pacs_storage because integrated_database depends on it
+# ============================================================================
+set(_PACS_EARLY_MONITORING_PATHS
+    "$ENV{MONITORING_SYSTEM_ROOT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
+    "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
+)
+set(PACS_EARLY_MONITORING_FOUND FALSE)
+foreach(_path ${_PACS_EARLY_MONITORING_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
+        set(PACS_MONITORING_SYSTEM_DIR "${_path}")
+        set(PACS_MONITORING_SYSTEM_INCLUDE_DIR "${_path}/include")
+        set(PACS_EARLY_MONITORING_FOUND TRUE)
+        break()
+    endif()
+endforeach()
+
+if(PACS_EARLY_MONITORING_FOUND AND NOT TARGET monitoring_system)
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(MONITORING_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(MONITORING_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+    set(MONITORING_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+    # Workaround for monitoring_system alias mismatch:
+    # monitoring_system expects kcenon::common_system but common_system provides kcenon::common
+    if(NOT TARGET kcenon::common_system)
+        if(TARGET common_system)
+            add_library(kcenon::common_system ALIAS common_system)
+            message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
+        elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+            add_library(kcenon_common_system_shim INTERFACE)
+            target_include_directories(kcenon_common_system_shim INTERFACE ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+            add_library(kcenon::common_system ALIAS kcenon_common_system_shim)
+            message(STATUS "Created kcenon::common_system shim for monitoring_system compatibility")
+        endif()
+    endif()
+
+    add_subdirectory("${PACS_MONITORING_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/monitoring_system_build")
+    message(STATUS "  [OK] monitoring_system: built early for integrated_database support")
+endif()
+
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
@@ -1348,47 +1393,8 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 
     # Link monitoring_system (REQUIRED for monitoring_adapter)
-    set(_PACS_MONITORING_PATHS
-        "$ENV{MONITORING_SYSTEM_ROOT}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
-        "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
-    )
-    set(MONITORING_SYSTEM_FOUND FALSE)
-    foreach(_path ${_PACS_MONITORING_PATHS})
-        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
-            set(PACS_MONITORING_SYSTEM_DIR "${_path}")
-            set(PACS_MONITORING_SYSTEM_INCLUDE_DIR "${_path}/include")
-            set(MONITORING_SYSTEM_FOUND TRUE)
-            break()
-        endif()
-    endforeach()
-
-    if(MONITORING_SYSTEM_FOUND AND NOT TARGET monitoring_system)
-        set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-        set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-        set(MONITORING_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(MONITORING_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
-        set(MONITORING_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-        # Workaround for monitoring_system alias mismatch:
-        # monitoring_system expects kcenon::common_system but common_system provides kcenon::common
-        # Create the missing alias if common_system target exists
-        if(NOT TARGET kcenon::common_system)
-            if(TARGET common_system)
-                add_library(kcenon::common_system ALIAS common_system)
-                message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
-            elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-                add_library(kcenon_common_system_shim INTERFACE)
-                target_include_directories(kcenon_common_system_shim INTERFACE ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-                add_library(kcenon::common_system ALIAS kcenon_common_system_shim)
-                message(STATUS "Created kcenon::common_system shim for monitoring_system compatibility")
-            endif()
-        endif()
-
-        add_subdirectory("${PACS_MONITORING_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/monitoring_system_build")
-    endif()
-
+    # Note: monitoring_system is now built early (before pacs_storage) to support
+    # integrated_database dependencies. See "Early monitoring_system setup" section.
     if(TARGET monitoring_system)
         target_link_libraries(pacs_integration PUBLIC monitoring_system)
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_MONITORING_SYSTEM)
