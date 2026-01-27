@@ -1699,6 +1699,16 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_integration)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
+    # Explicitly link database dependencies for static library link order (Issue #642)
+    if(TARGET integrated_database)
+        target_link_libraries(services_tests PRIVATE integrated_database)
+    endif()
+    if(TARGET database)
+        target_link_libraries(services_tests PRIVATE database)
+    endif()
+    if(TARGET monitoring_system)
+        target_link_libraries(services_tests PRIVATE monitoring_system)
+    endif()
 
     # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures, Issue #192 - Anonymization)
     set(SECURITY_TEST_SOURCES
@@ -1746,8 +1756,17 @@ if(PACS_BUILD_TESTS)
                 pacs_storage
                 Catch2::Catch2WithMain
                 $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
-                $<$<TARGET_EXISTS:database>:database>
         )
+        # Explicitly link database dependencies for static library link order (Issue #642)
+        if(TARGET integrated_database)
+            target_link_libraries(storage_tests PRIVATE integrated_database)
+        endif()
+        if(TARGET database)
+            target_link_libraries(storage_tests PRIVATE database)
+        endif()
+        if(TARGET monitoring_system)
+            target_link_libraries(storage_tests PRIVATE monitoring_system)
+        endif()
     endif()
 
     # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects,
