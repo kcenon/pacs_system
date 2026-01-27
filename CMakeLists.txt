@@ -1067,6 +1067,10 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         # Link integrated_database for unified_database_system (Issue #606)
         if(TARGET integrated_database)
             target_link_libraries(pacs_storage PUBLIC integrated_database)
+            # Link monitoring_system required by integrated_database (Issue #642)
+            if(TARGET monitoring_system)
+                target_link_libraries(pacs_storage PUBLIC monitoring_system)
+            endif()
         endif()
         target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
         target_compile_definitions(pacs_storage PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
@@ -1686,10 +1690,6 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_integration)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
-    # Link monitoring_system required by integrated_database (Issue #642)
-    if(TARGET monitoring_system)
-        target_link_libraries(services_tests PRIVATE monitoring_system)
-    endif()
 
     # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures, Issue #192 - Anonymization)
     set(SECURITY_TEST_SOURCES
@@ -1739,10 +1739,6 @@ if(PACS_BUILD_TESTS)
                 $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
                 $<$<TARGET_EXISTS:database>:database>
         )
-        # Link monitoring_system required by integrated_database (Issue #642)
-        if(TARGET monitoring_system)
-            target_link_libraries(storage_tests PRIVATE monitoring_system)
-        endif()
     endif()
 
     # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects,
