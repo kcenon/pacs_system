@@ -6,12 +6,10 @@
  * database query results. Instead of loading all results into memory,
  * the cursor allows fetching results one batch at a time.
  *
- * When compiled with PACS_WITH_DATABASE_SYSTEM, it uses database_system's
- * query builder for type-safe query construction. Otherwise, it uses
- * direct SQLite prepared statements.
+ * Uses database_system's query builder for type-safe query construction.
  *
  * @see SRS-SVC-006, FR-5.3
- * @see Issue #188 - Streaming query results with pagination
+ * @see Issue #642 - Unified implementation using database_system
  * @see Issue #420 - Migrate database_cursor to database_system
  */
 
@@ -31,7 +29,6 @@
 #include <variant>
 #include <vector>
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
 // Suppress deprecated warnings from database_system headers
 // database_base is deprecated in favor of database_backend
 #if defined(__clang__)
@@ -49,11 +46,6 @@
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif
-#else
-// Forward declaration of SQLite handle
-struct sqlite3;
-struct sqlite3_stmt;
 #endif
 
 namespace pacs::services {
@@ -129,7 +121,6 @@ public:
     // Factory Methods
     // =========================================================================
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
     /**
      * @brief Create a cursor for patient queries using database_system
      *
@@ -173,51 +164,6 @@ public:
     [[nodiscard]] static auto create_instance_cursor(
         std::shared_ptr<database::database_manager> db,
         const storage::instance_query& query) -> Result<std::unique_ptr<database_cursor>>;
-#else
-    /**
-     * @brief Create a cursor for patient queries
-     *
-     * @param db SQLite database handle
-     * @param query Query parameters for patient search
-     * @return Result containing the cursor or error
-     */
-    [[nodiscard]] static auto create_patient_cursor(sqlite3* db,
-                                                    const storage::patient_query& query)
-        -> Result<std::unique_ptr<database_cursor>>;
-
-    /**
-     * @brief Create a cursor for study queries
-     *
-     * @param db SQLite database handle
-     * @param query Query parameters for study search
-     * @return Result containing the cursor or error
-     */
-    [[nodiscard]] static auto create_study_cursor(sqlite3* db,
-                                                  const storage::study_query& query)
-        -> Result<std::unique_ptr<database_cursor>>;
-
-    /**
-     * @brief Create a cursor for series queries
-     *
-     * @param db SQLite database handle
-     * @param query Query parameters for series search
-     * @return Result containing the cursor or error
-     */
-    [[nodiscard]] static auto create_series_cursor(sqlite3* db,
-                                                   const storage::series_query& query)
-        -> Result<std::unique_ptr<database_cursor>>;
-
-    /**
-     * @brief Create a cursor for instance queries
-     *
-     * @param db SQLite database handle
-     * @param query Query parameters for instance search
-     * @return Result containing the cursor or error
-     */
-    [[nodiscard]] static auto create_instance_cursor(sqlite3* db,
-                                                     const storage::instance_query& query)
-        -> Result<std::unique_ptr<database_cursor>>;
-#endif
 
     // =========================================================================
     // Cursor Operations
@@ -287,9 +233,8 @@ public:
     [[nodiscard]] auto serialize() const -> std::string;
 
 private:
-#ifdef PACS_WITH_DATABASE_SYSTEM
     /**
-     * @brief Private constructor for database_system - use factory methods
+     * @brief Private constructor - use factory methods
      */
     database_cursor(std::vector<query_record> results, record_type type);
 
@@ -326,59 +271,6 @@ private:
 
     /// Cached results from database query
     std::vector<query_record> results_;
-#else
-    /**
-     * @brief Private constructor - use factory methods
-     */
-    database_cursor(sqlite3_stmt* stmt, record_type type);
-
-    /**
-     * @brief Parse a patient record from current statement row
-     */
-    [[nodiscard]] auto parse_patient_row() const -> storage::patient_record;
-
-    /**
-     * @brief Parse a study record from current statement row
-     */
-    [[nodiscard]] auto parse_study_row() const -> storage::study_record;
-
-    /**
-     * @brief Parse a series record from current statement row
-     */
-    [[nodiscard]] auto parse_series_row() const -> storage::series_record;
-
-    /**
-     * @brief Parse an instance record from current statement row
-     */
-    [[nodiscard]] auto parse_instance_row() const -> storage::instance_record;
-
-    /**
-     * @brief Build WHERE clause from patient query
-     */
-    [[nodiscard]] static auto build_patient_where(const storage::patient_query& query)
-        -> std::pair<std::string, std::vector<std::string>>;
-
-    /**
-     * @brief Build WHERE clause from study query
-     */
-    [[nodiscard]] static auto build_study_where(const storage::study_query& query)
-        -> std::pair<std::string, std::vector<std::string>>;
-
-    /**
-     * @brief Build WHERE clause from series query
-     */
-    [[nodiscard]] static auto build_series_where(const storage::series_query& query)
-        -> std::pair<std::string, std::vector<std::string>>;
-
-    /**
-     * @brief Build WHERE clause from instance query
-     */
-    [[nodiscard]] static auto build_instance_where(const storage::instance_query& query)
-        -> std::pair<std::string, std::vector<std::string>>;
-
-    /// SQLite prepared statement handle
-    sqlite3_stmt* stmt_{nullptr};
-#endif
 
     /**
      * @brief Convert DICOM wildcard pattern to SQL LIKE pattern
