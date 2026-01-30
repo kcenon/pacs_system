@@ -58,8 +58,8 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Pin container_system to 80e9728 (commit before breaking change)
-        git clone https://github.com/kcenon/container_system.git
-        cd container_system && git checkout 80e97289965fb73562f3ee65ca9f4da076896065 && cd ..
+        git clone --single-branch --branch main https://github.com/kcenon/container_system.git
+        cd container_system && git fetch --depth 10 && git checkout 80e97289965fb73562f3ee65ca9f4da076896065 && cd ..
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
         git clone --depth 1 https://github.com/kcenon/database_system.git
@@ -243,8 +243,8 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Pin container_system to 80e9728 (commit before breaking change)
-        git clone https://github.com/kcenon/container_system.git
-        cd container_system && git checkout 80e97289965fb73562f3ee65ca9f4da076896065 && cd ..
+        git clone --single-branch --branch main https://github.com/kcenon/container_system.git
+        cd container_system && git fetch --depth 10 && git checkout 80e97289965fb73562f3ee65ca9f4da076896065 && cd ..
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
         git clone --depth 1 https://github.com/kcenon/database_system.git
