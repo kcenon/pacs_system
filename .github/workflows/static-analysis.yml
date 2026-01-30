@@ -36,7 +36,7 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Pin container_system to 80e9728 (commit before breaking change)
-        git clone --depth 5 https://github.com/kcenon/container_system.git
+        git clone --depth 20 https://github.com/kcenon/container_system.git
         cd container_system && git checkout 0241e19ff9dfcad6be447ca7b1d96e508e1fba2d && cd ..
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
