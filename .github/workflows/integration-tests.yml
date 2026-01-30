@@ -34,6 +34,7 @@ env:
   THREAD_SYSTEM_ROOT: ${{ github.workspace }}/thread_system
   LOGGER_SYSTEM_ROOT: ${{ github.workspace }}/logger_system
   MONITORING_SYSTEM_ROOT: ${{ github.workspace }}/monitoring_system
+  DATABASE_SYSTEM_ROOT: ${{ github.workspace }}/database_system
   NETWORK_SYSTEM_ROOT: ${{ github.workspace }}/network_system
 
 jobs:
@@ -68,6 +69,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 0241e19ff9dfcad6be447ca7b1d96e508e1fba2d
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -87,6 +89,12 @@ jobs:
       with:
         repository: kcenon/monitoring_system
         path: monitoring_system
+
+    - name: Checkout database_system (Tier 3)
+      uses: actions/checkout@v4
+      with:
+        repository: kcenon/database_system
+        path: database_system
 
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
@@ -140,6 +148,30 @@ jobs:
       shell: pwsh
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
+
+    - name: Fix duplicated container directory (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
+          }
+        } else {
+          Write-Host "No container_system\core found"
+        }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -294,6 +326,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 0241e19ff9dfcad6be447ca7b1d96e508e1fba2d
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -403,6 +436,30 @@ jobs:
       shell: pwsh
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
+
+    - name: Fix duplicated container directory (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
+          }
+        } else {
+          Write-Host "No container_system\core found"
+        }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -697,6 +754,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 0241e19ff9dfcad6be447ca7b1d96e508e1fba2d
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -716,6 +774,12 @@ jobs:
       with:
         repository: kcenon/monitoring_system
         path: monitoring_system
+
+    - name: Checkout database_system (Tier 3)
+      uses: actions/checkout@v4
+      with:
+        repository: kcenon/database_system
+        path: database_system
 
     - name: Checkout network_system (Tier 4)
       uses: actions/checkout@v4
@@ -769,6 +833,30 @@ jobs:
       shell: pwsh
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
+
+    - name: Fix duplicated container directory (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
+          }
+        } else {
+          Write-Host "No container_system\core found"
+        }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -954,6 +1042,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 0241e19ff9dfcad6be447ca7b1d96e508e1fba2d
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -1117,6 +1206,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 0241e19ff9dfcad6be447ca7b1d96e508e1fba2d
         path: container_system
 
     - name: Checkout thread_system (Tier 1)

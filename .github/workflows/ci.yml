@@ -59,9 +59,11 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/common_system.git
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
+        # Use main branch (PR #344 merged with value_types enum fix)
         git clone --depth 1 https://github.com/kcenon/container_system.git
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
+        git clone --depth 1 https://github.com/kcenon/database_system.git
 
     - name: Checkout dependencies (Windows)
       if: runner.os == 'Windows'
@@ -69,12 +71,36 @@ jobs:
       run: |
         # Clone dependencies as siblings to pacs_system in $env:GITHUB_WORKSPACE
         # CMake expects: ../common_system relative to pacs_system
+
         git clone --depth 1 https://github.com/kcenon/common_system.git
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
+        # Use main branch (PR #344 merged with value_types enum fix)
         git clone --depth 1 https://github.com/kcenon/container_system.git
+
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
+          }
+        } else {
+          Write-Host "No container_system\core found"
+        }
+
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
+        git clone --depth 1 https://github.com/kcenon/database_system.git
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -114,7 +140,7 @@ jobs:
       if: runner.os != 'Windows'
       working-directory: ${{ github.workspace }}
       run: |
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
+        for repo in common_system container_system thread_system logger_system monitoring_system network_system database_system; do
           if [ -d "$repo" ]; then
             echo "=== Patching $repo ==="
             find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
@@ -131,7 +157,7 @@ jobs:
       shell: pwsh
       run: |
         # Remove -Werror and /WX from CMake files for Windows build
-        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
+        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system', 'database_system')
         foreach ($repo in $repos) {
           if (Test-Path $repo) {
             Write-Host "=== Patching $repo ==="

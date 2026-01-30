@@ -1010,6 +1010,51 @@ else()
     message(STATUS "  [OK] pacs_security: ON (without digital signatures)")
 endif()
 
+# ============================================================================
+# Early monitoring_system setup (Issue #642)
+# Required before pacs_storage because integrated_database depends on it
+# ============================================================================
+set(_PACS_EARLY_MONITORING_PATHS
+    "$ENV{MONITORING_SYSTEM_ROOT}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
+    "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
+)
+set(PACS_EARLY_MONITORING_FOUND FALSE)
+foreach(_path ${_PACS_EARLY_MONITORING_PATHS})
+    if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
+        set(PACS_MONITORING_SYSTEM_DIR "${_path}")
+        set(PACS_MONITORING_SYSTEM_INCLUDE_DIR "${_path}/include")
+        set(PACS_EARLY_MONITORING_FOUND TRUE)
+        break()
+    endif()
+endforeach()
+
+if(PACS_EARLY_MONITORING_FOUND AND NOT TARGET monitoring_system)
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(MONITORING_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(MONITORING_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
+    set(MONITORING_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+    # Workaround for monitoring_system alias mismatch:
+    # monitoring_system expects kcenon::common_system but common_system provides kcenon::common
+    if(NOT TARGET kcenon::common_system)
+        if(TARGET common_system)
+            add_library(kcenon::common_system ALIAS common_system)
+            message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
+        elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+            add_library(kcenon_common_system_shim INTERFACE)
+            target_include_directories(kcenon_common_system_shim INTERFACE ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+            add_library(kcenon::common_system ALIAS kcenon_common_system_shim)
+            message(STATUS "Created kcenon::common_system shim for monitoring_system compatibility")
+        endif()
+    endif()
+
+    add_subdirectory("${PACS_MONITORING_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/monitoring_system_build")
+    message(STATUS "  [OK] monitoring_system: built early for integrated_database support")
+endif()
+
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
@@ -1063,10 +1108,30 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
 
     # Link database_system for secure query building (SQL injection prevention)
     if(TARGET database)
-        target_link_libraries(pacs_storage PUBLIC database)
         # Link integrated_database for unified_database_system (Issue #606)
         if(TARGET integrated_database)
-            target_link_libraries(pacs_storage PUBLIC integrated_database)
+            # Circular dependency between integrated_database and database requires group linking
+            # integrated_database uses postgres_manager (from database)
+            # database might use unified_database_system (from integrated_database)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+                # Use --start-group/--end-group for GNU ld to resolve circular dependencies
+                target_link_libraries(pacs_storage PUBLIC
+                    -Wl,--start-group
+                    integrated_database
+                    database
+                    -Wl,--end-group
+                )
+            else()
+                # For MSVC/Apple ld, link in dependency order: integrated_database first, then database
+                target_link_libraries(pacs_storage PUBLIC integrated_database database)
+            endif()
+            # Link monitoring_system required by integrated_database (Issue #642)
+            if(TARGET monitoring_system)
+                target_link_libraries(pacs_storage PUBLIC monitoring_system)
+            endif()
+        else()
+            # If integrated_database doesn't exist, just link database normally
+            target_link_libraries(pacs_storage PUBLIC database)
         endif()
         target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
         target_compile_definitions(pacs_storage PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
@@ -1344,47 +1409,8 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 
     # Link monitoring_system (REQUIRED for monitoring_adapter)
-    set(_PACS_MONITORING_PATHS
-        "$ENV{MONITORING_SYSTEM_ROOT}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
-        "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
-    )
-    set(MONITORING_SYSTEM_FOUND FALSE)
-    foreach(_path ${_PACS_MONITORING_PATHS})
-        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
-            set(PACS_MONITORING_SYSTEM_DIR "${_path}")
-            set(PACS_MONITORING_SYSTEM_INCLUDE_DIR "${_path}/include")
-            set(MONITORING_SYSTEM_FOUND TRUE)
-            break()
-        endif()
-    endforeach()
-
-    if(MONITORING_SYSTEM_FOUND AND NOT TARGET monitoring_system)
-        set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-        set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-        set(MONITORING_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(MONITORING_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)
-        set(MONITORING_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-        # Workaround for monitoring_system alias mismatch:
-        # monitoring_system expects kcenon::common_system but common_system provides kcenon::common
-        # Create the missing alias if common_system target exists
-        if(NOT TARGET kcenon::common_system)
-            if(TARGET common_system)
-                add_library(kcenon::common_system ALIAS common_system)
-                message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
-            elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-                add_library(kcenon_common_system_shim INTERFACE)
-                target_include_directories(kcenon_common_system_shim INTERFACE ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
-                add_library(kcenon::common_system ALIAS kcenon_common_system_shim)
-                message(STATUS "Created kcenon::common_system shim for monitoring_system compatibility")
-            endif()
-        endif()
-
-        add_subdirectory("${PACS_MONITORING_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/monitoring_system_build")
-    endif()
-
+    # Note: monitoring_system is now built early (before pacs_storage) to support
+    # integrated_database dependencies. See "Early monitoring_system setup" section.
     if(TARGET monitoring_system)
         target_link_libraries(pacs_integration PUBLIC monitoring_system)
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_MONITORING_SYSTEM)
@@ -1686,6 +1712,21 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_integration)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
+    # Explicitly link database dependencies for static library link order (Issue #642)
+    if(TARGET integrated_database AND TARGET database)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+            target_link_libraries(services_tests PRIVATE
+                -Wl,--start-group integrated_database database -Wl,--end-group
+            )
+        else()
+            target_link_libraries(services_tests PRIVATE integrated_database database)
+        endif()
+    elseif(TARGET database)
+        target_link_libraries(services_tests PRIVATE database)
+    endif()
+    if(TARGET monitoring_system)
+        target_link_libraries(services_tests PRIVATE monitoring_system)
+    endif()
 
     # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures, Issue #192 - Anonymization)
     set(SECURITY_TEST_SOURCES
@@ -1733,8 +1774,22 @@ if(PACS_BUILD_TESTS)
                 pacs_storage
                 Catch2::Catch2WithMain
                 $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
-                $<$<TARGET_EXISTS:database>:database>
         )
+        # Explicitly link database dependencies for static library link order (Issue #642)
+        if(TARGET integrated_database AND TARGET database)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+                target_link_libraries(storage_tests PRIVATE
+                    -Wl,--start-group integrated_database database -Wl,--end-group
+                )
+            else()
+                target_link_libraries(storage_tests PRIVATE integrated_database database)
+            endif()
+        elseif(TARGET database)
+            target_link_libraries(storage_tests PRIVATE database)
+        endif()
+        if(TARGET monitoring_system)
+            target_link_libraries(storage_tests PRIVATE monitoring_system)
+        endif()
     endif()
 
     # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects,
@@ -1812,6 +1867,21 @@ if(PACS_BUILD_TESTS)
                 pacs_client
                 Catch2::Catch2WithMain
         )
+        # Explicitly link database dependencies for static library link order (Issue #642)
+        if(TARGET integrated_database AND TARGET database)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+                target_link_libraries(web_tests PRIVATE
+                    -Wl,--start-group integrated_database database -Wl,--end-group
+                )
+            else()
+                target_link_libraries(web_tests PRIVATE integrated_database database)
+            endif()
+        elseif(TARGET database)
+            target_link_libraries(web_tests PRIVATE database)
+        endif()
+        if(TARGET monitoring_system)
+            target_link_libraries(web_tests PRIVATE monitoring_system)
+        endif()
     endif()
 
     # Integration tests
