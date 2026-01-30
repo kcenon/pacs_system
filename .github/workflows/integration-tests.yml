@@ -69,6 +69,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 80e97289965fb73562f3ee65ca9f4da076896065
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -301,6 +302,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 80e97289965fb73562f3ee65ca9f4da076896065
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -704,6 +706,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 80e97289965fb73562f3ee65ca9f4da076896065
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -967,6 +970,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 80e97289965fb73562f3ee65ca9f4da076896065
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
@@ -1130,6 +1134,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: kcenon/container_system
+        ref: 80e97289965fb73562f3ee65ca9f4da076896065
         path: container_system
 
     - name: Checkout thread_system (Tier 1)
