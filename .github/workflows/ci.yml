@@ -82,7 +82,16 @@ jobs:
         # This preserves container/internal/ files that are needed by CMake
         if (Test-Path "container_system\container\core") {
           Write-Host "Removing duplicated core/ directory from symlink: container_system\container\core"
-          Remove-Item "container_system\container\core" -Force -Recurse -ErrorAction SilentlyContinue
+          # Use cmd.exe for more reliable directory removal on Windows
+          cmd /c "rd /s /q container_system\container\core" 2>$null
+          # Verify removal
+          if (Test-Path "container_system\container\core") {
+            Write-Error "Failed to remove duplicated core/ directory"
+            exit 1
+          }
+          Write-Host "Successfully removed duplicated core/ directory"
+        } else {
+          Write-Host "No duplicated core/ directory found (expected behavior)"
         }
 
         git clone --depth 1 https://github.com/kcenon/network_system.git
