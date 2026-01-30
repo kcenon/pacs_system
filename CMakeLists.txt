@@ -1108,16 +1108,29 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
 
     # Link database_system for secure query building (SQL injection prevention)
     if(TARGET database)
-        target_link_libraries(pacs_storage PUBLIC database)
         # Link integrated_database for unified_database_system (Issue #606)
         if(TARGET integrated_database)
-            target_link_libraries(pacs_storage PUBLIC integrated_database)
+            # Circular dependency between integrated_database and database requires group linking
+            # integrated_database uses postgres_manager (from database)
+            # database might use unified_database_system (from integrated_database)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+                # Use --start-group/--end-group for GNU ld to resolve circular dependencies
+                target_link_libraries(pacs_storage PUBLIC
+                    "-Wl,--start-group"
+                    integrated_database
+                    database
+                    "-Wl,--end-group"
+                )
+            else()
+                # For MSVC/Apple ld, link in dependency order: integrated_database first, then database
+                target_link_libraries(pacs_storage PUBLIC integrated_database database)
+            endif()
             # Link monitoring_system required by integrated_database (Issue #642)
             if(TARGET monitoring_system)
                 target_link_libraries(pacs_storage PUBLIC monitoring_system)
             endif()
-            # Re-link database after integrated_database to resolve postgres_manager symbols
-            # (integrated_database's unified_database_system.cpp uses postgres_manager)
+        else()
+            # If integrated_database doesn't exist, just link database normally
             target_link_libraries(pacs_storage PUBLIC database)
         endif()
         target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
@@ -1700,10 +1713,15 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
     # Explicitly link database dependencies for static library link order (Issue #642)
-    if(TARGET integrated_database)
-        target_link_libraries(services_tests PRIVATE integrated_database)
-    endif()
-    if(TARGET database)
+    if(TARGET integrated_database AND TARGET database)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+            target_link_libraries(services_tests PRIVATE
+                "-Wl,--start-group" integrated_database database "-Wl,--end-group"
+            )
+        else()
+            target_link_libraries(services_tests PRIVATE integrated_database database)
+        endif()
+    elseif(TARGET database)
         target_link_libraries(services_tests PRIVATE database)
     endif()
     if(TARGET monitoring_system)
@@ -1758,10 +1776,15 @@ if(PACS_BUILD_TESTS)
                 $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
         )
         # Explicitly link database dependencies for static library link order (Issue #642)
-        if(TARGET integrated_database)
-            target_link_libraries(storage_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET database)
+        if(TARGET integrated_database AND TARGET database)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+                target_link_libraries(storage_tests PRIVATE
+                    "-Wl,--start-group" integrated_database database "-Wl,--end-group"
+                )
+            else()
+                target_link_libraries(storage_tests PRIVATE integrated_database database)
+            endif()
+        elseif(TARGET database)
             target_link_libraries(storage_tests PRIVATE database)
         endif()
         if(TARGET monitoring_system)
@@ -1845,10 +1868,15 @@ if(PACS_BUILD_TESTS)
                 Catch2::Catch2WithMain
         )
         # Explicitly link database dependencies for static library link order (Issue #642)
-        if(TARGET integrated_database)
-            target_link_libraries(web_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET database)
+        if(TARGET integrated_database AND TARGET database)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
+                target_link_libraries(web_tests PRIVATE
+                    "-Wl,--start-group" integrated_database database "-Wl,--end-group"
+                )
+            else()
+                target_link_libraries(web_tests PRIVATE integrated_database database)
+            endif()
+        elseif(TARGET database)
             target_link_libraries(web_tests PRIVATE database)
         endif()
         if(TARGET monitoring_system)
