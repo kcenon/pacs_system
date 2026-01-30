@@ -153,6 +153,20 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
+        # Debug: Check container_system structure before fix
+        Write-Host "=== Debugging container_system structure ==="
+        Write-Host "container_system/core exists: $(Test-Path 'container_system\core')"
+        Write-Host "container_system/container exists: $(Test-Path 'container_system\container')"
+        Write-Host "container_system/container/core exists: $(Test-Path 'container_system\container\core')"
+        if (Test-Path "container_system\core") {
+          Write-Host "Files in container_system/core:"
+          Get-ChildItem "container_system\core" -Name | Select-Object -First 10
+        }
+        if (Test-Path "container_system\container") {
+          Write-Host "Files in container_system/container:"
+          Get-ChildItem "container_system\container" -Name | Select-Object -First 10
+        }
+
         # Fix: Remove only the duplicated core/ directory from the expanded symlink
         # This preserves container/internal/ files that are needed by CMake
         if (Test-Path "container_system\container\core") {
@@ -168,6 +182,11 @@ jobs:
         } else {
           Write-Host "No duplicated core/ directory found (expected behavior)"
         }
+
+        # Debug: Verify structure after fix
+        Write-Host "=== After fix ==="
+        Write-Host "container_system/core exists: $(Test-Path 'container_system\core')"
+        Write-Host "container_system/container/core exists: $(Test-Path 'container_system\container\core')"
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -437,6 +456,20 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
+        # Debug: Check container_system structure before fix
+        Write-Host "=== Debugging container_system structure ==="
+        Write-Host "container_system/core exists: $(Test-Path 'container_system\core')"
+        Write-Host "container_system/container exists: $(Test-Path 'container_system\container')"
+        Write-Host "container_system/container/core exists: $(Test-Path 'container_system\container\core')"
+        if (Test-Path "container_system\core") {
+          Write-Host "Files in container_system/core:"
+          Get-ChildItem "container_system\core" -Name | Select-Object -First 10
+        }
+        if (Test-Path "container_system\container") {
+          Write-Host "Files in container_system/container:"
+          Get-ChildItem "container_system\container" -Name | Select-Object -First 10
+        }
+
         # Fix: Remove only the duplicated core/ directory from the expanded symlink
         # This preserves container/internal/ files that are needed by CMake
         if (Test-Path "container_system\container\core") {
@@ -452,6 +485,11 @@ jobs:
         } else {
           Write-Host "No duplicated core/ directory found (expected behavior)"
         }
+
+        # Debug: Verify structure after fix
+        Write-Host "=== After fix ==="
+        Write-Host "container_system/core exists: $(Test-Path 'container_system\core')"
+        Write-Host "container_system/container/core exists: $(Test-Path 'container_system\container\core')"
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
@@ -830,6 +868,20 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
+        # Debug: Check container_system structure before fix
+        Write-Host "=== Debugging container_system structure ==="
+        Write-Host "container_system/core exists: $(Test-Path 'container_system\core')"
+        Write-Host "container_system/container exists: $(Test-Path 'container_system\container')"
+        Write-Host "container_system/container/core exists: $(Test-Path 'container_system\container\core')"
+        if (Test-Path "container_system\core") {
+          Write-Host "Files in container_system/core:"
+          Get-ChildItem "container_system\core" -Name | Select-Object -First 10
+        }
+        if (Test-Path "container_system\container") {
+          Write-Host "Files in container_system/container:"
+          Get-ChildItem "container_system\container" -Name | Select-Object -First 10
+        }
+
         # Fix: Remove only the duplicated core/ directory from the expanded symlink
         # This preserves container/internal/ files that are needed by CMake
         if (Test-Path "container_system\container\core") {
@@ -845,6 +897,11 @@ jobs:
         } else {
           Write-Host "No duplicated core/ directory found (expected behavior)"
         }
+
+        # Debug: Verify structure after fix
+        Write-Host "=== After fix ==="
+        Write-Host "container_system/core exists: $(Test-Path 'container_system\core')"
+        Write-Host "container_system/container/core exists: $(Test-Path 'container_system\container\core')"
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
       if: runner.os != 'Windows'
