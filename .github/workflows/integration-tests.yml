@@ -153,22 +153,24 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Remove the entire duplicated container_system copy
-        # container_system/container/ is a full copy of the repository
-        # container_system/core/ is a symlink to container_system/container/core/
-        # We need to remove container_system/container/ and keep the real core/ directory
-        if (Test-Path "container_system\container") {
-          Write-Host "Removing duplicated container_system repository: container_system\container"
-          # Use cmd.exe for more reliable directory removal on Windows
-          cmd /c "rd /s /q container_system\container" 2>$null
-          # Verify removal
-          if (Test-Path "container_system\container") {
-            Write-Error "Failed to remove duplicated container_system\container directory"
-            exit 1
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
           }
-          Write-Host "Successfully removed duplicated container/ directory"
         } else {
-          Write-Host "No duplicated container/ directory found (expected behavior)"
+          Write-Host "No container_system\core found"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
@@ -439,22 +441,24 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Remove the entire duplicated container_system copy
-        # container_system/container/ is a full copy of the repository
-        # container_system/core/ is a symlink to container_system/container/core/
-        # We need to remove container_system/container/ and keep the real core/ directory
-        if (Test-Path "container_system\container") {
-          Write-Host "Removing duplicated container_system repository: container_system\container"
-          # Use cmd.exe for more reliable directory removal on Windows
-          cmd /c "rd /s /q container_system\container" 2>$null
-          # Verify removal
-          if (Test-Path "container_system\container") {
-            Write-Error "Failed to remove duplicated container_system\container directory"
-            exit 1
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
           }
-          Write-Host "Successfully removed duplicated container/ directory"
         } else {
-          Write-Host "No duplicated container/ directory found (expected behavior)"
+          Write-Host "No container_system\core found"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
@@ -834,22 +838,24 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Remove the entire duplicated container_system copy
-        # container_system/container/ is a full copy of the repository
-        # container_system/core/ is a symlink to container_system/container/core/
-        # We need to remove container_system/container/ and keep the real core/ directory
-        if (Test-Path "container_system\container") {
-          Write-Host "Removing duplicated container_system repository: container_system\container"
-          # Use cmd.exe for more reliable directory removal on Windows
-          cmd /c "rd /s /q container_system\container" 2>$null
-          # Verify removal
-          if (Test-Path "container_system\container") {
-            Write-Error "Failed to remove duplicated container_system\container directory"
-            exit 1
+        # Fix: Remove core symlink and keep container/ directory
+        # container_system/core/ is a symlink/junction to container_system/container/core/
+        # container_system/container/ has all the real files (core/, internal/, etc.)
+        # CMake expects container_system/core/ and container_system/container/internal/
+        #
+        # Solution: Remove the core symlink to avoid duplicate header errors
+        if (Test-Path "container_system\core") {
+          # Check if it's a junction/symlink
+          $item = Get-Item "container_system\core" -Force
+          if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-Host "Removing core symlink: container_system\core"
+            cmd /c "rmdir container_system\core" 2>$null
+            Write-Host "Successfully removed core symlink"
+          } else {
+            Write-Host "container_system\core is not a symlink, keeping as-is"
           }
-          Write-Host "Successfully removed duplicated container/ directory"
         } else {
-          Write-Host "No duplicated container/ directory found (expected behavior)"
+          Write-Host "No container_system\core found"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
