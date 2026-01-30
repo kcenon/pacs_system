@@ -1116,10 +1116,10 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
             if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
                 # Use --start-group/--end-group for GNU ld to resolve circular dependencies
                 target_link_libraries(pacs_storage PUBLIC
-                    "-Wl,--start-group"
+                    -Wl,--start-group
                     integrated_database
                     database
-                    "-Wl,--end-group"
+                    -Wl,--end-group
                 )
             else()
                 # For MSVC/Apple ld, link in dependency order: integrated_database first, then database
@@ -1716,7 +1716,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET integrated_database AND TARGET database)
         if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
             target_link_libraries(services_tests PRIVATE
-                "-Wl,--start-group" integrated_database database "-Wl,--end-group"
+                -Wl,--start-group integrated_database database -Wl,--end-group
             )
         else()
             target_link_libraries(services_tests PRIVATE integrated_database database)
@@ -1779,7 +1779,7 @@ if(PACS_BUILD_TESTS)
         if(TARGET integrated_database AND TARGET database)
             if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
                 target_link_libraries(storage_tests PRIVATE
-                    "-Wl,--start-group" integrated_database database "-Wl,--end-group"
+                    -Wl,--start-group integrated_database database -Wl,--end-group
                 )
             else()
                 target_link_libraries(storage_tests PRIVATE integrated_database database)
@@ -1871,7 +1871,7 @@ if(PACS_BUILD_TESTS)
         if(TARGET integrated_database AND TARGET database)
             if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT APPLE)
                 target_link_libraries(web_tests PRIVATE
-                    "-Wl,--start-group" integrated_database database "-Wl,--end-group"
+                    -Wl,--start-group integrated_database database -Wl,--end-group
                 )
             else()
                 target_link_libraries(web_tests PRIVATE integrated_database database)
