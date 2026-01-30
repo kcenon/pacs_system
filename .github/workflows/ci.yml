@@ -71,23 +71,18 @@ jobs:
       run: |
         # Clone dependencies as siblings to pacs_system in $env:GITHUB_WORKSPACE
         # CMake expects: ../common_system relative to pacs_system
+
         git clone --depth 1 https://github.com/kcenon/common_system.git
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Use main branch (PR #344 merged with value_types enum fix)
         git clone --depth 1 https://github.com/kcenon/container_system.git
 
-        # Debug: Check what files exist after clone
-        Write-Host "=== Checking container_system structure ==="
-        Write-Host "core/value_types.h exists: $(Test-Path 'container_system\core\value_types.h')"
-        Write-Host "container directory exists: $(Test-Path 'container_system\container')"
-        Write-Host "container/core exists: $(Test-Path 'container_system\container\core')"
-        Write-Host "container/core/value_types.h exists: $(Test-Path 'container_system\container\core\value_types.h')"
-
-        # List value_types.h locations
-        Write-Host "=== Finding all value_types.h files ==="
-        Get-ChildItem -Path "container_system" -Recurse -Filter "value_types.h" -ErrorAction SilentlyContinue | ForEach-Object {
-          Write-Host "Found: $($_.FullName)"
+        # Fix: Remove only the duplicated core/ directory from the expanded symlink
+        # This preserves container/internal/ files that are needed by CMake
+        if (Test-Path "container_system\container\core") {
+          Write-Host "Removing duplicated core/ directory from symlink: container_system\container\core"
+          Remove-Item "container_system\container\core" -Force -Recurse -ErrorAction SilentlyContinue
         }
 
         git clone --depth 1 https://github.com/kcenon/network_system.git
