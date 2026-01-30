@@ -76,6 +76,11 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Use main branch (PR #344 merged with value_types enum fix)
         git clone --depth 1 https://github.com/kcenon/container_system.git
+        # Fix symlink issue: remove duplicated header to prevent C2011 error
+        if (Test-Path "container_system\container\core\value_types.h") {
+          Write-Host "Removing duplicated value_types.h from symlink directory"
+          Remove-Item "container_system\container\core\value_types.h" -Force
+        }
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
         git clone --depth 1 https://github.com/kcenon/database_system.git
