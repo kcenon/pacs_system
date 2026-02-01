@@ -78,24 +78,31 @@ jobs:
         # Use main branch (PR #344 merged with value_types enum fix)
         git clone --depth 1 https://github.com/kcenon/container_system.git
 
-        # Fix: Remove core symlink and keep container/ directory
-        # container_system/core/ is a symlink/junction to container_system/container/core/
-        # container_system/container/ has all the real files (core/, internal/, etc.)
-        # CMake expects container_system/core/ and container_system/container/internal/
+        # Fix: Remove container symlink to avoid duplicate header errors
+        # container_system/container is a symlink pointing to "." (root directory)
+        # This causes duplicate includes on Windows:
+        #   - container_system/core/value_types.h (direct)
+        #   - container_system/container/core/value_types.h (via symlink)
+        # Windows may convert the symlink to a text file or junction, breaking include guards
         #
-        # Solution: Remove the core symlink to avoid duplicate header errors
-        if (Test-Path "container_system\core") {
-          # Check if it's a junction/symlink
-          $item = Get-Item "container_system\core" -Force
+        # Solution: Remove the container symlink; CMake uses core/ directly
+        if (Test-Path "container_system\container") {
+          # Check if it's a junction/symlink or a text file (Git symlink fallback)
+          $item = Get-Item "container_system\container" -Force
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Removing core symlink: container_system\core"
-            cmd /c "rmdir container_system\core" 2>$null
-            Write-Host "Successfully removed core symlink"
+            Write-Host "Removing container symlink (junction): container_system\container"
+            cmd /c "rmdir container_system\container" 2>$null
+            Write-Host "Successfully removed container symlink"
+          } elseif (-not $item.PSIsContainer) {
+            # Git may create a text file containing the symlink target on Windows
+            Write-Host "Removing container symlink (text file): container_system\container"
+            Remove-Item "container_system\container" -Force
+            Write-Host "Successfully removed container symlink file"
           } else {
-            Write-Host "container_system\core is not a symlink, keeping as-is"
+            Write-Host "container_system\container is a directory, keeping as-is"
           }
         } else {
-          Write-Host "No container_system\core found"
+          Write-Host "No container_system\container found"
         }
 
         git clone --depth 1 https://github.com/kcenon/network_system.git
