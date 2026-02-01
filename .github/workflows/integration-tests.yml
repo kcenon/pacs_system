@@ -149,35 +149,45 @@ jobs:
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
-    - name: Fix duplicated container directory (Windows)
+    - name: Fix container symlink for Windows (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Remove container symlink to avoid duplicate header errors
-        # container_system/container is a symlink pointing to "." (root directory)
-        # This causes duplicate includes on Windows:
-        #   - container_system/core/value_types.h (direct)
-        #   - container_system/container/core/value_types.h (via symlink)
-        # Windows may convert the symlink to a text file or junction, breaking include guards
+        # Fix: Handle container_system's `container -> .` symlink on Windows
+        # The symlink points to the root directory, creating self-referential paths.
+        # Git on Windows may create a text file instead of a proper junction.
         #
-        # Solution: Remove the container symlink; CMake uses core/ directly
+        # Strategy: If it's a text file, convert to proper Windows junction.
+        # If it's already a junction, leave it as-is (it works correctly).
+        Write-Host "=== Checking container_system\container symlink ==="
+
         if (Test-Path "container_system\container") {
-          # Check if it's a junction/symlink or a text file (Git symlink fallback)
           $item = Get-Item "container_system\container" -Force
+          Write-Host "Type: $($item.GetType().Name)"
+          Write-Host "Attributes: $($item.Attributes)"
+
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Removing container symlink (junction): container_system\container"
-            cmd /c "rmdir container_system\container" 2>$null
-            Write-Host "Successfully removed container symlink"
+            Write-Host "Status: Already a junction/symlink - keeping as-is"
           } elseif (-not $item.PSIsContainer) {
-            # Git may create a text file containing the symlink target on Windows
-            Write-Host "Removing container symlink (text file): container_system\container"
+            # Git created a text file containing the symlink target
+            Write-Host "Status: Text file (Git symlink fallback)"
+            $target = Get-Content "container_system\container" -Raw
+            Write-Host "Target content: $target"
+
+            # Remove the text file and create a proper Windows junction
             Remove-Item "container_system\container" -Force
-            Write-Host "Successfully removed container symlink file"
+            $containerPath = (Resolve-Path "container_system").Path
+            cmd /c "mklink /J `"$containerPath\container`" `"$containerPath`"" 2>$null
+            if (Test-Path "container_system\container") {
+              Write-Host "Successfully created junction: container_system\container -> container_system"
+            } else {
+              Write-Host "WARNING: Failed to create junction"
+            }
           } else {
-            Write-Host "container_system\container is a directory, keeping as-is"
+            Write-Host "Status: Regular directory - keeping as-is"
           }
         } else {
-          Write-Host "No container_system\container found"
+          Write-Host "Status: Not found - nothing to fix"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
@@ -444,35 +454,45 @@ jobs:
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
-    - name: Fix duplicated container directory (Windows)
+    - name: Fix container symlink for Windows (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Remove container symlink to avoid duplicate header errors
-        # container_system/container is a symlink pointing to "." (root directory)
-        # This causes duplicate includes on Windows:
-        #   - container_system/core/value_types.h (direct)
-        #   - container_system/container/core/value_types.h (via symlink)
-        # Windows may convert the symlink to a text file or junction, breaking include guards
+        # Fix: Handle container_system's `container -> .` symlink on Windows
+        # The symlink points to the root directory, creating self-referential paths.
+        # Git on Windows may create a text file instead of a proper junction.
         #
-        # Solution: Remove the container symlink; CMake uses core/ directly
+        # Strategy: If it's a text file, convert to proper Windows junction.
+        # If it's already a junction, leave it as-is (it works correctly).
+        Write-Host "=== Checking container_system\container symlink ==="
+
         if (Test-Path "container_system\container") {
-          # Check if it's a junction/symlink or a text file (Git symlink fallback)
           $item = Get-Item "container_system\container" -Force
+          Write-Host "Type: $($item.GetType().Name)"
+          Write-Host "Attributes: $($item.Attributes)"
+
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Removing container symlink (junction): container_system\container"
-            cmd /c "rmdir container_system\container" 2>$null
-            Write-Host "Successfully removed container symlink"
+            Write-Host "Status: Already a junction/symlink - keeping as-is"
           } elseif (-not $item.PSIsContainer) {
-            # Git may create a text file containing the symlink target on Windows
-            Write-Host "Removing container symlink (text file): container_system\container"
+            # Git created a text file containing the symlink target
+            Write-Host "Status: Text file (Git symlink fallback)"
+            $target = Get-Content "container_system\container" -Raw
+            Write-Host "Target content: $target"
+
+            # Remove the text file and create a proper Windows junction
             Remove-Item "container_system\container" -Force
-            Write-Host "Successfully removed container symlink file"
+            $containerPath = (Resolve-Path "container_system").Path
+            cmd /c "mklink /J `"$containerPath\container`" `"$containerPath`"" 2>$null
+            if (Test-Path "container_system\container") {
+              Write-Host "Successfully created junction: container_system\container -> container_system"
+            } else {
+              Write-Host "WARNING: Failed to create junction"
+            }
           } else {
-            Write-Host "container_system\container is a directory, keeping as-is"
+            Write-Host "Status: Regular directory - keeping as-is"
           }
         } else {
-          Write-Host "No container_system\container found"
+          Write-Host "Status: Not found - nothing to fix"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
@@ -848,35 +868,45 @@ jobs:
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
 
-    - name: Fix duplicated container directory (Windows)
+    - name: Fix container symlink for Windows (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Remove container symlink to avoid duplicate header errors
-        # container_system/container is a symlink pointing to "." (root directory)
-        # This causes duplicate includes on Windows:
-        #   - container_system/core/value_types.h (direct)
-        #   - container_system/container/core/value_types.h (via symlink)
-        # Windows may convert the symlink to a text file or junction, breaking include guards
+        # Fix: Handle container_system's `container -> .` symlink on Windows
+        # The symlink points to the root directory, creating self-referential paths.
+        # Git on Windows may create a text file instead of a proper junction.
         #
-        # Solution: Remove the container symlink; CMake uses core/ directly
+        # Strategy: If it's a text file, convert to proper Windows junction.
+        # If it's already a junction, leave it as-is (it works correctly).
+        Write-Host "=== Checking container_system\container symlink ==="
+
         if (Test-Path "container_system\container") {
-          # Check if it's a junction/symlink or a text file (Git symlink fallback)
           $item = Get-Item "container_system\container" -Force
+          Write-Host "Type: $($item.GetType().Name)"
+          Write-Host "Attributes: $($item.Attributes)"
+
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Removing container symlink (junction): container_system\container"
-            cmd /c "rmdir container_system\container" 2>$null
-            Write-Host "Successfully removed container symlink"
+            Write-Host "Status: Already a junction/symlink - keeping as-is"
           } elseif (-not $item.PSIsContainer) {
-            # Git may create a text file containing the symlink target on Windows
-            Write-Host "Removing container symlink (text file): container_system\container"
+            # Git created a text file containing the symlink target
+            Write-Host "Status: Text file (Git symlink fallback)"
+            $target = Get-Content "container_system\container" -Raw
+            Write-Host "Target content: $target"
+
+            # Remove the text file and create a proper Windows junction
             Remove-Item "container_system\container" -Force
-            Write-Host "Successfully removed container symlink file"
+            $containerPath = (Resolve-Path "container_system").Path
+            cmd /c "mklink /J `"$containerPath\container`" `"$containerPath`"" 2>$null
+            if (Test-Path "container_system\container") {
+              Write-Host "Successfully created junction: container_system\container -> container_system"
+            } else {
+              Write-Host "WARNING: Failed to create junction"
+            }
           } else {
-            Write-Host "container_system\container is a directory, keeping as-is"
+            Write-Host "Status: Regular directory - keeping as-is"
           }
         } else {
-          Write-Host "No container_system\container found"
+          Write-Host "Status: Not found - nothing to fix"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)

@@ -76,33 +76,28 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Use main branch (PR #344 merged with value_types enum fix)
-        git clone --depth 1 https://github.com/kcenon/container_system.git
+        # Enable symlinks support to properly handle container_system's `container -> .` symlink
+        # Without this, Windows Git creates text files instead of symlinks, causing duplicate
+        # header inclusions that break include guards
+        git clone -c core.symlinks=true --depth 1 https://github.com/kcenon/container_system.git
 
-        # Fix: Remove container symlink to avoid duplicate header errors
-        # container_system/container is a symlink pointing to "." (root directory)
-        # This causes duplicate includes on Windows:
-        #   - container_system/core/value_types.h (direct)
-        #   - container_system/container/core/value_types.h (via symlink)
-        # Windows may convert the symlink to a text file or junction, breaking include guards
-        #
-        # Solution: Remove the container symlink; CMake uses core/ directly
+        # Debug: Show container symlink status
+        Write-Host "=== Container symlink status ==="
         if (Test-Path "container_system\container") {
-          # Check if it's a junction/symlink or a text file (Git symlink fallback)
           $item = Get-Item "container_system\container" -Force
+          Write-Host "Type: $($item.GetType().Name)"
+          Write-Host "Attributes: $($item.Attributes)"
+          Write-Host "IsContainer: $($item.PSIsContainer)"
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Removing container symlink (junction): container_system\container"
-            cmd /c "rmdir container_system\container" 2>$null
-            Write-Host "Successfully removed container symlink"
+            Write-Host "Status: Junction/Symlink (OK - will work correctly)"
           } elseif (-not $item.PSIsContainer) {
-            # Git may create a text file containing the symlink target on Windows
-            Write-Host "Removing container symlink (text file): container_system\container"
-            Remove-Item "container_system\container" -Force
-            Write-Host "Successfully removed container symlink file"
+            Write-Host "Status: Text file (symlink fallback) - this may cause build issues"
+            Write-Host "Content: $(Get-Content 'container_system\container' -Raw)"
           } else {
-            Write-Host "container_system\container is a directory, keeping as-is"
+            Write-Host "Status: Regular directory"
           }
         } else {
-          Write-Host "No container_system\container found"
+          Write-Host "Status: Not found"
         }
 
         git clone --depth 1 https://github.com/kcenon/network_system.git
