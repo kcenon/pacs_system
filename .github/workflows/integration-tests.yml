@@ -153,41 +153,33 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Handle container_system's `container -> .` symlink on Windows
-        # The symlink points to the root directory, creating self-referential paths.
-        # Git on Windows may create a text file instead of a proper junction.
-        #
-        # Strategy: If it's a text file, convert to proper Windows junction.
-        # If it's already a junction, leave it as-is (it works correctly).
-        Write-Host "=== Checking container_system\container symlink ==="
+        # Fix: Remove container symlink and patch CMakeLists.txt for Windows
+        # The `container -> .` symlink causes duplicate header inclusions on Windows
+        # because junctions/symlinks don't affect include guard path comparisons.
+        # Solution: Remove the symlink and fix paths in CMakeLists.txt
+        Write-Host "=== Fixing container_system for Windows ==="
 
+        # Step 1: Remove the container symlink (junction or text file)
         if (Test-Path "container_system\container") {
           $item = Get-Item "container_system\container" -Force
-          Write-Host "Type: $($item.GetType().Name)"
-          Write-Host "Attributes: $($item.Attributes)"
-
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Status: Already a junction/symlink - keeping as-is"
+            Write-Host "Removing junction: container_system\container"
+            cmd /c "rmdir container_system\container" 2>$null
           } elseif (-not $item.PSIsContainer) {
-            # Git created a text file containing the symlink target
-            Write-Host "Status: Text file (Git symlink fallback)"
-            $target = Get-Content "container_system\container" -Raw
-            Write-Host "Target content: $target"
-
-            # Remove the text file and create a proper Windows junction
+            Write-Host "Removing text file symlink: container_system\container"
             Remove-Item "container_system\container" -Force
-            $containerPath = (Resolve-Path "container_system").Path
-            cmd /c "mklink /J `"$containerPath\container`" `"$containerPath`"" 2>$null
-            if (Test-Path "container_system\container") {
-              Write-Host "Successfully created junction: container_system\container -> container_system"
-            } else {
-              Write-Host "WARNING: Failed to create junction"
-            }
-          } else {
-            Write-Host "Status: Regular directory - keeping as-is"
           }
-        } else {
-          Write-Host "Status: Not found - nothing to fix"
+        }
+
+        # Step 2: Patch CMakeLists.txt to fix container/internal paths
+        Write-Host "Patching container_system\CMakeLists.txt..."
+        $cmakePath = "container_system\CMakeLists.txt"
+        if (Test-Path $cmakePath) {
+          $content = Get-Content $cmakePath -Raw
+          # Replace container/internal/ with internal/ (the symlink pointed to .)
+          $content = $content -replace 'container/internal/', 'internal/'
+          Set-Content $cmakePath -Value $content
+          Write-Host "Patched CMakeLists.txt - replaced container/internal/ with internal/"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
@@ -458,41 +450,33 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Handle container_system's `container -> .` symlink on Windows
-        # The symlink points to the root directory, creating self-referential paths.
-        # Git on Windows may create a text file instead of a proper junction.
-        #
-        # Strategy: If it's a text file, convert to proper Windows junction.
-        # If it's already a junction, leave it as-is (it works correctly).
-        Write-Host "=== Checking container_system\container symlink ==="
+        # Fix: Remove container symlink and patch CMakeLists.txt for Windows
+        # The `container -> .` symlink causes duplicate header inclusions on Windows
+        # because junctions/symlinks don't affect include guard path comparisons.
+        # Solution: Remove the symlink and fix paths in CMakeLists.txt
+        Write-Host "=== Fixing container_system for Windows ==="
 
+        # Step 1: Remove the container symlink (junction or text file)
         if (Test-Path "container_system\container") {
           $item = Get-Item "container_system\container" -Force
-          Write-Host "Type: $($item.GetType().Name)"
-          Write-Host "Attributes: $($item.Attributes)"
-
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Status: Already a junction/symlink - keeping as-is"
+            Write-Host "Removing junction: container_system\container"
+            cmd /c "rmdir container_system\container" 2>$null
           } elseif (-not $item.PSIsContainer) {
-            # Git created a text file containing the symlink target
-            Write-Host "Status: Text file (Git symlink fallback)"
-            $target = Get-Content "container_system\container" -Raw
-            Write-Host "Target content: $target"
-
-            # Remove the text file and create a proper Windows junction
+            Write-Host "Removing text file symlink: container_system\container"
             Remove-Item "container_system\container" -Force
-            $containerPath = (Resolve-Path "container_system").Path
-            cmd /c "mklink /J `"$containerPath\container`" `"$containerPath`"" 2>$null
-            if (Test-Path "container_system\container") {
-              Write-Host "Successfully created junction: container_system\container -> container_system"
-            } else {
-              Write-Host "WARNING: Failed to create junction"
-            }
-          } else {
-            Write-Host "Status: Regular directory - keeping as-is"
           }
-        } else {
-          Write-Host "Status: Not found - nothing to fix"
+        }
+
+        # Step 2: Patch CMakeLists.txt to fix container/internal paths
+        Write-Host "Patching container_system\CMakeLists.txt..."
+        $cmakePath = "container_system\CMakeLists.txt"
+        if (Test-Path $cmakePath) {
+          $content = Get-Content $cmakePath -Raw
+          # Replace container/internal/ with internal/ (the symlink pointed to .)
+          $content = $content -replace 'container/internal/', 'internal/'
+          Set-Content $cmakePath -Value $content
+          Write-Host "Patched CMakeLists.txt - replaced container/internal/ with internal/"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)
@@ -872,41 +856,33 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Fix: Handle container_system's `container -> .` symlink on Windows
-        # The symlink points to the root directory, creating self-referential paths.
-        # Git on Windows may create a text file instead of a proper junction.
-        #
-        # Strategy: If it's a text file, convert to proper Windows junction.
-        # If it's already a junction, leave it as-is (it works correctly).
-        Write-Host "=== Checking container_system\container symlink ==="
+        # Fix: Remove container symlink and patch CMakeLists.txt for Windows
+        # The `container -> .` symlink causes duplicate header inclusions on Windows
+        # because junctions/symlinks don't affect include guard path comparisons.
+        # Solution: Remove the symlink and fix paths in CMakeLists.txt
+        Write-Host "=== Fixing container_system for Windows ==="
 
+        # Step 1: Remove the container symlink (junction or text file)
         if (Test-Path "container_system\container") {
           $item = Get-Item "container_system\container" -Force
-          Write-Host "Type: $($item.GetType().Name)"
-          Write-Host "Attributes: $($item.Attributes)"
-
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Status: Already a junction/symlink - keeping as-is"
+            Write-Host "Removing junction: container_system\container"
+            cmd /c "rmdir container_system\container" 2>$null
           } elseif (-not $item.PSIsContainer) {
-            # Git created a text file containing the symlink target
-            Write-Host "Status: Text file (Git symlink fallback)"
-            $target = Get-Content "container_system\container" -Raw
-            Write-Host "Target content: $target"
-
-            # Remove the text file and create a proper Windows junction
+            Write-Host "Removing text file symlink: container_system\container"
             Remove-Item "container_system\container" -Force
-            $containerPath = (Resolve-Path "container_system").Path
-            cmd /c "mklink /J `"$containerPath\container`" `"$containerPath`"" 2>$null
-            if (Test-Path "container_system\container") {
-              Write-Host "Successfully created junction: container_system\container -> container_system"
-            } else {
-              Write-Host "WARNING: Failed to create junction"
-            }
-          } else {
-            Write-Host "Status: Regular directory - keeping as-is"
           }
-        } else {
-          Write-Host "Status: Not found - nothing to fix"
+        }
+
+        # Step 2: Patch CMakeLists.txt to fix container/internal paths
+        Write-Host "Patching container_system\CMakeLists.txt..."
+        $cmakePath = "container_system\CMakeLists.txt"
+        if (Test-Path $cmakePath) {
+          $content = Get-Content $cmakePath -Raw
+          # Replace container/internal/ with internal/ (the symlink pointed to .)
+          $content = $content -replace 'container/internal/', 'internal/'
+          Set-Content $cmakePath -Value $content
+          Write-Host "Patched CMakeLists.txt - replaced container/internal/ with internal/"
         }
 
     - name: Patch dependency CMake files to remove -Werror (Unix)

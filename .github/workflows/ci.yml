@@ -76,28 +76,35 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/thread_system.git
         git clone --depth 1 https://github.com/kcenon/logger_system.git
         # Use main branch (PR #344 merged with value_types enum fix)
-        # Enable symlinks support to properly handle container_system's `container -> .` symlink
-        # Without this, Windows Git creates text files instead of symlinks, causing duplicate
-        # header inclusions that break include guards
-        git clone -c core.symlinks=true --depth 1 https://github.com/kcenon/container_system.git
+        git clone --depth 1 https://github.com/kcenon/container_system.git
 
-        # Debug: Show container symlink status
-        Write-Host "=== Container symlink status ==="
+        # Fix: Remove container symlink and patch CMakeLists.txt for Windows
+        # The `container -> .` symlink causes duplicate header inclusions on Windows
+        # because junctions/symlinks don't affect include guard path comparisons.
+        # Solution: Remove the symlink and fix paths in CMakeLists.txt
+        Write-Host "=== Fixing container_system for Windows ==="
+
+        # Step 1: Remove the container symlink (junction or text file)
         if (Test-Path "container_system\container") {
           $item = Get-Item "container_system\container" -Force
-          Write-Host "Type: $($item.GetType().Name)"
-          Write-Host "Attributes: $($item.Attributes)"
-          Write-Host "IsContainer: $($item.PSIsContainer)"
           if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            Write-Host "Status: Junction/Symlink (OK - will work correctly)"
+            Write-Host "Removing junction: container_system\container"
+            cmd /c "rmdir container_system\container" 2>$null
           } elseif (-not $item.PSIsContainer) {
-            Write-Host "Status: Text file (symlink fallback) - this may cause build issues"
-            Write-Host "Content: $(Get-Content 'container_system\container' -Raw)"
-          } else {
-            Write-Host "Status: Regular directory"
+            Write-Host "Removing text file symlink: container_system\container"
+            Remove-Item "container_system\container" -Force
           }
-        } else {
-          Write-Host "Status: Not found"
+        }
+
+        # Step 2: Patch CMakeLists.txt to fix container/internal paths
+        Write-Host "Patching container_system\CMakeLists.txt..."
+        $cmakePath = "container_system\CMakeLists.txt"
+        if (Test-Path $cmakePath) {
+          $content = Get-Content $cmakePath -Raw
+          # Replace container/internal/ with internal/ (the symlink pointed to .)
+          $content = $content -replace 'container/internal/', 'internal/'
+          Set-Content $cmakePath -Value $content
+          Write-Host "Patched CMakeLists.txt - replaced container/internal/ with internal/"
         }
 
         git clone --depth 1 https://github.com/kcenon/network_system.git
