@@ -2,11 +2,16 @@
  * @file streaming_query_test.cpp
  * @brief Unit tests for streaming query functionality
  *
- * @note When compiled with PACS_WITH_DATABASE_SYSTEM, uses database_system's
- *       database_manager for cursor creation. Otherwise, uses native SQLite handles.
+ * @note These tests require PACS_WITH_DATABASE_SYSTEM to be defined.
+ *       The streaming query functionality depends on the unified database
+ *       adapter API from database_system.
  */
 
 #include <pacs/services/cache/database_cursor.hpp>
+
+// Only compile tests when PACS_WITH_DATABASE_SYSTEM is defined
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include <pacs/services/cache/query_result_stream.hpp>
 #include <pacs/services/cache/streaming_query_handler.hpp>
 #include <pacs/services/query_scp.hpp>
@@ -25,12 +30,8 @@ using namespace pacs::storage;
 using namespace pacs::core;
 using namespace pacs::encoding;
 
-// Helper macro to get cursor handle based on build configuration
-#ifdef PACS_WITH_DATABASE_SYSTEM
+// Helper macro to get cursor handle (always uses db_adapter since we're inside PACS_WITH_DATABASE_SYSTEM)
 #define GET_CURSOR_HANDLE(db) (db)->db_adapter()
-#else
-#define GET_CURSOR_HANDLE(db) (db)->native_handle()
-#endif
 
 // ============================================================================
 // Test Fixtures
@@ -553,3 +554,5 @@ TEST_CASE("streaming query end-to-end", "[services][streaming][integration]") {
         CHECK(count == 2);
     }
 }
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
