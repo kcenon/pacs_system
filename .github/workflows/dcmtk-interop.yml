@@ -60,6 +60,7 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/container_system.git
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
+        git clone --depth 1 https://github.com/kcenon/database_system.git
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -242,6 +243,7 @@ jobs:
         git clone --depth 1 https://github.com/kcenon/container_system.git
         git clone --depth 1 https://github.com/kcenon/network_system.git
         git clone --depth 1 https://github.com/kcenon/monitoring_system.git
+        git clone --depth 1 https://github.com/kcenon/database_system.git
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
