@@ -1065,7 +1065,20 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     if(TARGET database)
         target_link_libraries(pacs_storage PUBLIC database)
         # Link integrated_database for unified_database_system (Issue #606)
-        if(TARGET integrated_database)
+        # integrated_database depends on monitoring_system, so both must be linked together.
+        # On Linux, use --start-group/--end-group to resolve circular dependencies.
+        if(TARGET integrated_database AND TARGET monitoring_system)
+            if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+                target_link_libraries(pacs_storage PUBLIC
+                    -Wl,--start-group
+                    integrated_database
+                    monitoring_system
+                    -Wl,--end-group
+                )
+            else()
+                target_link_libraries(pacs_storage PUBLIC integrated_database monitoring_system)
+            endif()
+        elseif(TARGET integrated_database)
             target_link_libraries(pacs_storage PUBLIC integrated_database)
         endif()
         target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
