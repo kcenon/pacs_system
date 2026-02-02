@@ -15,8 +15,11 @@
 
 #pragma once
 
-#include <pacs/storage/instance_record.hpp>
 #include <pacs/storage/pacs_database_adapter.hpp>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include <pacs/storage/instance_record.hpp>
 #include <pacs/storage/patient_record.hpp>
 #include <pacs/storage/series_record.hpp>
 #include <pacs/storage/study_record.hpp>
@@ -285,3 +288,5 @@ private:
 };
 
 }  // namespace pacs::services
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

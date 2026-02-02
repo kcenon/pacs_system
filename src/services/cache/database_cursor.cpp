@@ -9,7 +9,7 @@
 
 #include "pacs/services/cache/database_cursor.hpp"
 
-#include <database/query_builder.h>
+#ifdef PACS_WITH_DATABASE_SYSTEM
 
 #include <iomanip>
 #include <sstream>
@@ -553,3 +553,5 @@ auto database_cursor::reset() -> VoidResult {
 }
 
 }  // namespace pacs::services
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
