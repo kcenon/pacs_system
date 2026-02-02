@@ -1,11 +1,16 @@
 /**
  * @file sqlite_security_storage_test.cpp
  * @brief Unit tests for SQLite Security Storage
+ *
+ * @note These tests require PACS_WITH_DATABASE_SYSTEM to be defined.
  */
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "pacs/storage/sqlite_security_storage.hpp"
+
+// Only compile tests when PACS_WITH_DATABASE_SYSTEM is defined
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include <catch2/catch_test_macros.hpp>
 
 using namespace pacs::storage;
 using namespace pacs::security;
@@ -174,3 +179,5 @@ TEST_CASE("SQLiteSecurityStorage: SQL Injection Protection",
     REQUIRE(admin_result.is_ok());
   }
 }
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
