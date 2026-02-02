@@ -7,6 +7,8 @@
 
 #include <pacs/services/cache/parallel_query_executor.hpp>
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include <pacs/storage/index_database.hpp>
 
 #include <kcenon/common/patterns/result.h>
@@ -417,3 +419,5 @@ auto parallel_query_executor::create_stream(const query_request& query)
 }
 
 }  // namespace pacs::services
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

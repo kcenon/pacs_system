@@ -5,6 +5,8 @@
 
 #include "pacs/services/cache/streaming_query_handler.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include "pacs/storage/index_database.hpp"
 
 namespace pacs::services {
@@ -108,3 +110,5 @@ auto streaming_query_handler::as_query_handler() -> query_handler {
 }
 
 }  // namespace pacs::services
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

@@ -6,6 +6,9 @@
  * queries concurrently using the thread pool. Supports batch execution,
  * timeout handling, and query prioritization.
  *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses query_result_stream
+ * for unified database access.
+ *
  * @see SRS-SVC-006, FR-5.3
  * @see Issue #190 - Parallel query executor
  * @see DICOM PS3.4 Section C - Query/Retrieve Service Class
@@ -42,6 +45,8 @@ using Result = kcenon::common::Result<T>;
 
 /// Result type alias for void operations
 using VoidResult = kcenon::common::VoidResult;
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
 
 /**
  * @brief Query request for parallel execution
@@ -385,5 +390,7 @@ private:
     /// Mutex for thread-safe operations
     mutable std::mutex mutex_;
 };
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
 
 }  // namespace pacs::services
