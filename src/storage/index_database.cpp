@@ -970,66 +970,7 @@ auto index_database::search_patients(const patient_query& query) const
             }
             return ok(std::move(results));
         }
-        // Fall through on error
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.select(std::vector<std::string>{
-            "patient_pk", "patient_id", "patient_name", "birth_date",
-            "sex", "other_ids", "ethnic_group", "comments",
-            "created_at", "updated_at"});
-        builder.from("patients");
-
-        if (query.patient_id.has_value()) {
-            builder.where("patient_id", "LIKE", to_like_pattern(*query.patient_id));
-        }
-
-        if (query.patient_name.has_value()) {
-            builder.where("patient_name", "LIKE", to_like_pattern(*query.patient_name));
-        }
-
-        if (query.birth_date.has_value()) {
-            builder.where("birth_date", "=", *query.birth_date);
-        }
-
-        if (query.birth_date_from.has_value()) {
-            builder.where("birth_date", ">=", *query.birth_date_from);
-        }
-
-        if (query.birth_date_to.has_value()) {
-            builder.where("birth_date", "<=", *query.birth_date_to);
-        }
-
-        if (query.sex.has_value()) {
-            builder.where("sex", "=", *query.sex);
-        }
-
-        builder.order_by("patient_name");
-        builder.order_by("patient_id");
-
-        if (query.limit > 0) {
-            builder.limit(static_cast<int>(query.limit));
-        }
-
-        if (query.offset > 0) {
-            builder.offset(static_cast<int>(query.offset));
-        }
-
-        auto select_sql = builder.build();
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err()) {
-            return pacs_error<std::vector<patient_record>>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        std::vector<patient_record> results;
-        for (const auto& row : result.value()) {
-            results.push_back(parse_patient_from_row(row));
-        }
-        return ok(std::move(results));
+        // Fall through on error to direct SQLite
     }
 #endif
 
@@ -4542,36 +4483,7 @@ auto index_database::create_mpps(const mpps_record& record) -> Result<int64_t> {
                 return inserted->pk;
             }
         }
-        // Fall through if insert failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto insert_sql =
-            builder.insert_into("mpps")
-                .values({{"mpps_uid", record.mpps_uid},
-                         {"status", std::string("IN PROGRESS")},
-                         {"start_datetime", record.start_datetime},
-                         {"station_ae", record.station_ae},
-                         {"station_name", record.station_name},
-                         {"modality", record.modality},
-                         {"study_uid", record.study_uid},
-                         {"accession_no", record.accession_no},
-                         {"scheduled_step_id", record.scheduled_step_id},
-                         {"requested_proc_id", record.requested_proc_id},
-                         {"performed_series", record.performed_series}})
-                .build();
-
-        auto insert_result = db_manager_->insert_query_result(insert_sql);
-        if (insert_result.is_ok()) {
-            // Retrieve the inserted MPPS to get pk
-            auto inserted = find_mpps(record.mpps_uid);
-            if (inserted.has_value()) {
-                return inserted->pk;
-            }
-        }
-        // Insert failed, fall through to SQLite
+        // Fall through if insert failed to direct SQLite
     }
 #endif
 
@@ -4681,34 +4593,7 @@ auto index_database::update_mpps(std::string_view mpps_uid,
         if (result.is_ok()) {
             return ok();
         }
-        // Fall through if update failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.update("mpps");
-        builder.set({{"status", std::string(new_status)}});
-
-        // Only update end_datetime if not empty
-        if (!end_datetime.empty()) {
-            builder.set({{"end_datetime", std::string(end_datetime)}});
-        }
-
-        // Only update performed_series if not empty
-        if (!performed_series.empty()) {
-            builder.set({{"performed_series", std::string(performed_series)}});
-        }
-
-        builder.where("mpps_uid", "=", std::string(mpps_uid));
-
-        auto update_sql =
-            builder.build();
-        auto result = db_manager_->update_query_result(update_sql);
-        if (result.is_ok()) {
-            return ok();
-        }
-        // Update failed, fall through to SQLite
+        // Fall through if update failed to direct SQLite
     }
 #endif
 
@@ -4790,30 +4675,7 @@ auto index_database::find_mpps(std::string_view mpps_uid) const
         if (result.is_ok() && !result.value().empty()) {
             return parse_mpps_from_adapter_row(result.value()[0]);
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "mpps_pk", "mpps_uid", "status", "start_datetime",
-                    "end_datetime", "station_ae", "station_name", "modality",
-                    "study_uid", "accession_no", "scheduled_step_id",
-                    "requested_proc_id", "performed_series", "created_at",
-                    "updated_at"})
-                .from("mpps")
-                .where("mpps_uid", "=", std::string(mpps_uid))
-                .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_mpps_from_row(result.value()[0]);
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -4870,30 +4732,7 @@ auto index_database::find_mpps_by_pk(int64_t pk) const
         if (result.is_ok() && !result.value().empty()) {
             return parse_mpps_from_adapter_row(result.value()[0]);
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "mpps_pk", "mpps_uid", "status", "start_datetime",
-                    "end_datetime", "station_ae", "station_name", "modality",
-                    "study_uid", "accession_no", "scheduled_step_id",
-                    "requested_proc_id", "performed_series", "created_at",
-                    "updated_at"})
-                .from("mpps")
-                .where("mpps_pk", "=", pk)
-                .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_mpps_from_row(result.value()[0]);
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -4952,36 +4791,7 @@ auto index_database::list_active_mpps(std::string_view station_ae) const
             }
             return ok(std::move(results));
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.select(std::vector<std::string>{
-            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
-            "station_ae", "station_name", "modality", "study_uid",
-            "accession_no", "scheduled_step_id", "requested_proc_id",
-            "performed_series", "created_at", "updated_at"});
-        builder.from("mpps");
-        builder.where("status", "=", std::string("IN PROGRESS"));
-        builder.where("station_ae", "=", std::string(station_ae));
-        builder.order_by("start_datetime", database::sort_order::desc);
-
-        auto select_sql =
-            builder.build();
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err()) {
-            return pacs_error<std::vector<mpps_record>>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        std::vector<mpps_record> results;
-        for (const auto& row : result.value()) {
-            results.push_back(parse_mpps_from_row(row));
-        }
-        return ok(std::move(results));
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -5042,35 +4852,7 @@ auto index_database::find_mpps_by_study(std::string_view study_uid) const
             }
             return ok(std::move(results));
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.select(std::vector<std::string>{
-            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
-            "station_ae", "station_name", "modality", "study_uid",
-            "accession_no", "scheduled_step_id", "requested_proc_id",
-            "performed_series", "created_at", "updated_at"});
-        builder.from("mpps");
-        builder.where("study_uid", "=", std::string(study_uid));
-        builder.order_by("start_datetime", database::sort_order::desc);
-
-        auto select_sql =
-            builder.build();
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err()) {
-            return pacs_error<std::vector<mpps_record>>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        std::vector<mpps_record> results;
-        for (const auto& row : result.value()) {
-            results.push_back(parse_mpps_from_row(row));
-        }
-        return ok(std::move(results));
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -5174,78 +4956,7 @@ auto index_database::search_mpps(const mpps_query& query) const
             }
             return ok(std::move(results));
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.select(std::vector<std::string>{
-            "mpps_pk", "mpps_uid", "status", "start_datetime", "end_datetime",
-            "station_ae", "station_name", "modality", "study_uid",
-            "accession_no", "scheduled_step_id", "requested_proc_id",
-            "performed_series", "created_at", "updated_at"});
-        builder.from("mpps");
-
-        if (query.mpps_uid.has_value()) {
-            builder.where("mpps_uid", "=", *query.mpps_uid);
-        }
-
-        if (query.status.has_value()) {
-            builder.where("status", "=", *query.status);
-        }
-
-        if (query.station_ae.has_value()) {
-            builder.where("station_ae", "=", *query.station_ae);
-        }
-
-        if (query.modality.has_value()) {
-            builder.where("modality", "=", *query.modality);
-        }
-
-        if (query.study_uid.has_value()) {
-            builder.where("study_uid", "=", *query.study_uid);
-        }
-
-        if (query.accession_no.has_value()) {
-            builder.where("accession_no", "=", *query.accession_no);
-        }
-
-        if (query.start_date_from.has_value()) {
-            builder.where(database::query_condition(
-                pacs::compat::format("substr(start_datetime, 1, 8) >= '{}'",
-                                     *query.start_date_from)));
-        }
-
-        if (query.start_date_to.has_value()) {
-            builder.where(database::query_condition(pacs::compat::format(
-                "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to)));
-        }
-
-        builder.order_by("start_datetime", database::sort_order::desc);
-
-        if (query.limit > 0) {
-            builder.limit(static_cast<int>(query.limit));
-        }
-
-        if (query.offset > 0) {
-            builder.offset(static_cast<int>(query.offset));
-        }
-
-        auto select_sql =
-            builder.build();
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err()) {
-            return pacs_error<std::vector<mpps_record>>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        std::vector<mpps_record> results;
-        for (const auto& row : result.value()) {
-            results.push_back(parse_mpps_from_row(row));
-        }
-        return ok(std::move(results));
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -5349,25 +5060,7 @@ auto index_database::delete_mpps(std::string_view mpps_uid) -> VoidResult {
         if (result.is_ok()) {
             return ok();
         }
-        // Fall through if delete failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto delete_sql = builder.delete_from("mpps")
-                              .where("mpps_uid", "=", std::string(mpps_uid))
-                              .build();
-
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_err()) {
-            return make_error<std::monostate>(
-                database_query_error,
-                pacs::compat::format("Failed to delete MPPS: {}",
-                                     result.error().message),
-                "storage");
-        }
-        return ok();
+        // Fall through if delete failed to direct SQLite
     }
 #endif
 
@@ -5419,36 +5112,7 @@ auto index_database::mpps_count() const -> Result<size_t> {
                 }
             }
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
-                             .from("mpps")
-                             .build();
-
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("COUNT(*)");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                } else if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(
-                        std::stoll(std::get<std::string>(it->second))));
-                }
-            }
-        }
-        return ok(size_t{0});
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -5495,37 +5159,7 @@ auto index_database::mpps_count(std::string_view status) const -> Result<size_t>
                 }
             }
         }
-        // Fall through if query failed
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto count_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
-                             .from("mpps")
-                             .where("status", "=", std::string(status))
-                             .build();
-
-        auto result = db_manager_->select_query_result(count_sql);
-        if (result.is_err()) {
-            return pacs_error<size_t>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        if (!result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("COUNT(*)");
-            if (it != row.end()) {
-                if (std::holds_alternative<int64_t>(it->second)) {
-                    return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-                } else if (std::holds_alternative<std::string>(it->second)) {
-                    return ok(static_cast<size_t>(
-                        std::stoll(std::get<std::string>(it->second))));
-                }
-            }
-        }
-        return ok(size_t{0});
+        // Fall through if query failed to direct SQLite
     }
 #endif
 
@@ -5723,42 +5357,7 @@ auto index_database::add_worklist_item(const worklist_item& item)
                 return inserted->pk;
             }
         }
-        // Insert failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto insert_sql =
-            builder.insert_into("worklist")
-                .values({{"step_id", item.step_id},
-                         {"step_status", std::string("SCHEDULED")},
-                         {"patient_id", item.patient_id},
-                         {"patient_name", item.patient_name},
-                         {"birth_date", item.birth_date},
-                         {"sex", item.sex},
-                         {"accession_no", item.accession_no},
-                         {"requested_proc_id", item.requested_proc_id},
-                         {"study_uid", item.study_uid},
-                         {"scheduled_datetime", item.scheduled_datetime},
-                         {"station_ae", item.station_ae},
-                         {"station_name", item.station_name},
-                         {"modality", item.modality},
-                         {"procedure_desc", item.procedure_desc},
-                         {"protocol_code", item.protocol_code},
-                         {"referring_phys", item.referring_phys},
-                         {"referring_phys_id", item.referring_phys_id}})
-                .build();
-
-        auto insert_result = db_manager_->insert_query_result(insert_sql);
-        if (insert_result.is_ok()) {
-            // Retrieve the inserted worklist item to get pk
-            auto inserted = find_worklist_item(item.step_id, item.accession_no);
-            if (inserted.has_value()) {
-                return inserted->pk;
-            }
-        }
-        // Insert failed, fall through to SQLite
+        // Insert failed, fall through to direct SQLite
     }
 #endif
 
@@ -5848,23 +5447,7 @@ auto index_database::update_worklist_status(std::string_view step_id,
         if (result.is_ok()) {
             return ok();
         }
-        // Update failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.update("worklist");
-        builder.set({{"step_status", std::string(new_status)}});
-        builder.where("step_id", "=", std::string(step_id));
-        builder.where("accession_no", "=", std::string(accession_no));
-
-        auto update_sql = builder.build();
-        auto result = db_manager_->update_query_result(update_sql);
-        if (result.is_ok()) {
-            return ok();
-        }
-        // Update failed, fall through to SQLite
+        // Update failed, fall through to direct SQLite
     }
 #endif
 
@@ -5982,86 +5565,7 @@ auto index_database::query_worklist(const worklist_query& query) const
             }
             return ok(std::move(results));
         }
-        // Query failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.select(std::vector<std::string>{
-            "worklist_pk", "step_id", "step_status", "patient_id",
-            "patient_name", "birth_date", "sex", "accession_no",
-            "requested_proc_id", "study_uid", "scheduled_datetime",
-            "station_ae", "station_name", "modality", "procedure_desc",
-            "protocol_code", "referring_phys", "referring_phys_id",
-            "created_at", "updated_at"});
-        builder.from("worklist");
-
-        // Default: only return SCHEDULED items unless include_all_status is set
-        if (!query.include_all_status) {
-            builder.where("step_status", "=", std::string("SCHEDULED"));
-        }
-
-        if (query.station_ae.has_value()) {
-            builder.where("station_ae", "=", *query.station_ae);
-        }
-
-        if (query.modality.has_value()) {
-            builder.where("modality", "=", *query.modality);
-        }
-
-        if (query.scheduled_date_from.has_value()) {
-            builder.where(database::query_condition(
-                pacs::compat::format("substr(scheduled_datetime, 1, 8) >= '{}'",
-                                     *query.scheduled_date_from)));
-        }
-
-        if (query.scheduled_date_to.has_value()) {
-            builder.where(database::query_condition(
-                pacs::compat::format("substr(scheduled_datetime, 1, 8) <= '{}'",
-                                     *query.scheduled_date_to)));
-        }
-
-        if (query.patient_id.has_value()) {
-            builder.where("patient_id", "LIKE", to_like_pattern(*query.patient_id));
-        }
-
-        if (query.patient_name.has_value()) {
-            builder.where("patient_name", "LIKE",
-                          to_like_pattern(*query.patient_name));
-        }
-
-        if (query.accession_no.has_value()) {
-            builder.where("accession_no", "=", *query.accession_no);
-        }
-
-        if (query.step_id.has_value()) {
-            builder.where("step_id", "=", *query.step_id);
-        }
-
-        builder.order_by("scheduled_datetime", database::sort_order::asc);
-
-        if (query.limit > 0) {
-            builder.limit(static_cast<int>(query.limit));
-        }
-
-        if (query.offset > 0) {
-            builder.offset(static_cast<int>(query.offset));
-        }
-
-        auto select_sql = builder.build();
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err()) {
-            return pacs_error<std::vector<worklist_item>>(
-                error_codes::database_query_error,
-                pacs::compat::format("Query failed: {}", result.error().message));
-        }
-
-        std::vector<worklist_item> results;
-        for (const auto& row : result.value()) {
-            results.push_back(parse_worklist_from_row(row));
-        }
-        return ok(std::move(results));
+        // Query failed, fall through to direct SQLite
     }
 #endif
 
@@ -6183,32 +5687,7 @@ auto index_database::find_worklist_item(std::string_view step_id,
         if (result.is_ok() && !result.value().empty()) {
             return parse_worklist_from_adapter_row(result.value()[0]);
         }
-        // Query failed or empty, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "worklist_pk", "step_id", "step_status", "patient_id",
-                    "patient_name", "birth_date", "sex", "accession_no",
-                    "requested_proc_id", "study_uid", "scheduled_datetime",
-                    "station_ae", "station_name", "modality", "procedure_desc",
-                    "protocol_code", "referring_phys", "referring_phys_id",
-                    "created_at", "updated_at"})
-                .from("worklist")
-                .where("step_id", "=", std::string(step_id))
-                .where("accession_no", "=", std::string(accession_no))
-                .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_worklist_from_row(result.value()[0]);
+        // Query failed or empty, fall through to direct SQLite
     }
 #endif
 
@@ -6269,31 +5748,7 @@ auto index_database::find_worklist_by_pk(int64_t pk) const
         if (result.is_ok() && !result.value().empty()) {
             return parse_worklist_from_adapter_row(result.value()[0]);
         }
-        // Query failed or empty, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder
-                .select(std::vector<std::string>{
-                    "worklist_pk", "step_id", "step_status", "patient_id",
-                    "patient_name", "birth_date", "sex", "accession_no",
-                    "requested_proc_id", "study_uid", "scheduled_datetime",
-                    "station_ae", "station_name", "modality", "procedure_desc",
-                    "protocol_code", "referring_phys", "referring_phys_id",
-                    "created_at", "updated_at"})
-                .from("worklist")
-                .where("worklist_pk", "=", pk)
-                .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_err() || result.value().empty()) {
-            return std::nullopt;
-        }
-
-        return parse_worklist_from_row(result.value()[0]);
+        // Query failed or empty, fall through to direct SQLite
     }
 #endif
 
@@ -6344,22 +5799,7 @@ auto index_database::delete_worklist_item(std::string_view step_id,
         if (result.is_ok()) {
             return ok();
         }
-        // Delete failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.delete_from("worklist");
-        builder.where("step_id", "=", std::string(step_id));
-        builder.where("accession_no", "=", std::string(accession_no));
-
-        auto delete_sql = builder.build();
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_ok()) {
-            return ok();
-        }
-        // Delete failed, fall through to SQLite
+        // Delete failed, fall through to direct SQLite
     }
 #endif
 
@@ -6423,23 +5863,7 @@ auto index_database::cleanup_old_worklist_items(std::chrono::hours age)
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
         }
-        // Delete failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.delete_from("worklist");
-        builder.where("step_status", "!=", std::string("SCHEDULED"));
-        builder.where(database::query_condition(
-            pacs::compat::format("created_at < '{}'", cutoff_str)));
-
-        auto delete_sql = builder.build();
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_ok()) {
-            return ok(static_cast<size_t>(result.value()));
-        }
-        // Delete failed, fall through to SQLite
+        // Delete failed, fall through to direct SQLite
     }
 #endif
 
@@ -6503,23 +5927,7 @@ auto index_database::cleanup_worklist_items_before(
         if (result.is_ok()) {
             return ok(static_cast<size_t>(result.value()));
         }
-        // Delete failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.delete_from("worklist");
-        builder.where("step_status", "!=", std::string("SCHEDULED"));
-        builder.where(database::query_condition(
-            pacs::compat::format("scheduled_datetime < '{}'", before_str)));
-
-        auto delete_sql = builder.build();
-        auto result = db_manager_->delete_query_result(delete_sql);
-        if (result.is_ok()) {
-            return ok(static_cast<size_t>(result.value()));
-        }
-        // Delete failed, fall through to SQLite
+        // Delete failed, fall through to direct SQLite
     }
 #endif
 
@@ -6577,25 +5985,7 @@ auto index_database::worklist_count() const -> Result<size_t> {
                 }
             }
         }
-        // Query failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql = builder.select(std::vector<std::string>{"COUNT(*)"})
-                              .from("worklist")
-                              .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("COUNT(*)");
-            if (it != row.end()) {
-                return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-            }
-        }
-        // Query failed, fall through to SQLite
+        // Query failed, fall through to direct SQLite
     }
 #endif
 
@@ -6643,27 +6033,7 @@ auto index_database::worklist_count(std::string_view status) const -> Result<siz
                 }
             }
         }
-        // Query failed, fall through to legacy
-    }
-
-    // Legacy fallback: database_manager
-    if (db_manager_) {
-        database::query_builder builder(database::database_types::sqlite);
-        auto select_sql =
-            builder.select(std::vector<std::string>{"COUNT(*)"})
-                .from("worklist")
-                .where("step_status", "=", std::string(status))
-                .build();
-
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_ok() && !result.value().empty()) {
-            const auto& row = result.value()[0];
-            auto it = row.find("COUNT(*)");
-            if (it != row.end()) {
-                return ok(static_cast<size_t>(std::get<int64_t>(it->second)));
-            }
-        }
-        // Query failed, fall through to SQLite
+        // Query failed, fall through to direct SQLite
     }
 #endif
 
