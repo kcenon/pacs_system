@@ -6,6 +6,9 @@
  * query_result_stream with the query_scp service for paginated C-FIND
  * responses without loading all results into memory.
  *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses query_result_stream
+ * for unified database access.
+ *
  * @see SRS-SVC-006, FR-5.3
  * @see Issue #188 - Streaming query results with pagination
  */
@@ -26,6 +29,8 @@ class index_database;
 }  // namespace pacs::storage
 
 namespace pacs::services {
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
 
 /**
  * @brief Streaming query handler for memory-efficient C-FIND responses
@@ -165,5 +170,7 @@ private:
     /// Maximum results (0 = unlimited)
     size_t max_results_{0};
 };
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
 
 }  // namespace pacs::services

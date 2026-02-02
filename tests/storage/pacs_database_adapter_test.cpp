@@ -136,7 +136,8 @@ TEST_CASE("pacs_database_adapter: transaction state when not connected",
 TEST_CASE("pacs_database_adapter: connect with SQLite path",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;
@@ -152,7 +153,8 @@ TEST_CASE("pacs_database_adapter: connect with SQLite path",
 TEST_CASE("pacs_database_adapter: connect with database type",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;
@@ -167,7 +169,8 @@ TEST_CASE("pacs_database_adapter: connect with database type",
 TEST_CASE("pacs_database_adapter: disconnect",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;
@@ -183,7 +186,8 @@ TEST_CASE("pacs_database_adapter: disconnect",
 TEST_CASE("pacs_database_adapter: execute DDL",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -209,7 +213,8 @@ TEST_CASE("pacs_database_adapter: execute DDL",
 TEST_CASE("pacs_database_adapter: INSERT operation",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -236,7 +241,8 @@ TEST_CASE("pacs_database_adapter: INSERT operation",
 TEST_CASE("pacs_database_adapter: SELECT operation",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -263,7 +269,8 @@ TEST_CASE("pacs_database_adapter: SELECT operation",
 TEST_CASE("pacs_database_adapter: UPDATE operation",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -289,7 +296,8 @@ TEST_CASE("pacs_database_adapter: UPDATE operation",
 TEST_CASE("pacs_database_adapter: DELETE operation",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -321,7 +329,8 @@ TEST_CASE("pacs_database_adapter: DELETE operation",
 TEST_CASE("pacs_database_adapter: transaction commit",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -351,7 +360,8 @@ TEST_CASE("pacs_database_adapter: transaction commit",
 TEST_CASE("pacs_database_adapter: transaction rollback",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -379,7 +389,8 @@ TEST_CASE("pacs_database_adapter: transaction rollback",
 TEST_CASE("pacs_database_adapter: nested transaction rejected",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -396,7 +407,8 @@ TEST_CASE("pacs_database_adapter: nested transaction rejected",
 TEST_CASE("pacs_database_adapter: transaction template function",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -438,7 +450,8 @@ TEST_CASE("pacs_database_adapter: transaction template function",
 TEST_CASE("scoped_transaction: auto rollback on destruction",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -468,7 +481,8 @@ TEST_CASE("scoped_transaction: auto rollback on destruction",
 TEST_CASE("scoped_transaction: explicit commit",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -499,7 +513,8 @@ TEST_CASE("scoped_transaction: explicit commit",
 TEST_CASE("scoped_transaction: explicit rollback",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -533,7 +548,8 @@ TEST_CASE("scoped_transaction: explicit rollback",
 TEST_CASE("pacs_database_adapter: query builder integration",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -574,7 +590,8 @@ TEST_CASE("pacs_database_adapter: query builder integration",
 TEST_CASE("pacs_database_adapter: last_error reports failure",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");
@@ -589,7 +606,8 @@ TEST_CASE("pacs_database_adapter: last_error reports failure",
 TEST_CASE("pacs_database_adapter: database_result iteration",
           "[storage][adapter][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     pacs_database_adapter db(":memory:");

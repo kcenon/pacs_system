@@ -6,6 +6,9 @@
  * results. It wraps the database cursor and converts database records
  * to DICOM datasets suitable for C-FIND responses.
  *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for unified database access.
+ *
  * @see SRS-SVC-006, FR-5.3
  * @see Issue #188 - Streaming query results with pagination
  * @see DICOM PS3.4 Section C - Query/Retrieve Service Class
@@ -13,10 +16,12 @@
 
 #pragma once
 
-#include "database_cursor.hpp"
-
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/services/query_scp.hpp>
+#include <pacs/storage/instance_record.hpp>
+#include <pacs/storage/patient_record.hpp>
+#include <pacs/storage/series_record.hpp>
+#include <pacs/storage/study_record.hpp>
 
 #include <kcenon/common/patterns/result.h>
 
@@ -24,10 +29,14 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
-// Forward declaration
-struct sqlite3;
+// Include database_cursor only when PACS_WITH_DATABASE_SYSTEM is defined
+// IMPORTANT: Must be outside namespace to avoid polluting pacs::services with std
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include "database_cursor.hpp"
+#endif
 
 namespace pacs::storage {
 class index_database;
@@ -52,6 +61,8 @@ struct stream_config {
     /// Whether to include total count (may be expensive for large datasets)
     bool include_total_count = false;
 };
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
 
 /**
  * @brief Streaming query results with pagination support
@@ -274,5 +285,7 @@ private:
     /// Cached total count (if computed)
     mutable std::optional<size_t> total_count_;
 };
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
 
 }  // namespace pacs::services

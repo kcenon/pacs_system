@@ -980,6 +980,15 @@ public:
      */
     [[nodiscard]] auto db_manager() const noexcept
         -> std::shared_ptr<database::database_manager>;
+
+    /**
+     * @brief Get the database adapter for unified database access
+     *
+     * @return Shared pointer to the pacs_database_adapter
+     * @see Issue #642 - Migrate database_cursor to unified implementation
+     */
+    [[nodiscard]] auto db_adapter() const noexcept
+        -> std::shared_ptr<pacs_database_adapter>;
 #endif
 
     /**
