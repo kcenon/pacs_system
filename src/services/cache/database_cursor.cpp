@@ -274,6 +274,11 @@ auto database_cursor::parse_instance_row(const storage::database_row& row)
 auto database_cursor::create_patient_cursor(
     std::shared_ptr<storage::pacs_database_adapter> db,
     const storage::patient_query& query) -> Result<std::unique_ptr<database_cursor>> {
+    if (!db || !db->is_connected()) {
+        return kcenon::common::error_info(
+            "Database adapter not available or not connected");
+    }
+
     auto builder = db->create_query_builder();
 
     builder.select(std::vector<std::string>{
@@ -325,6 +330,11 @@ auto database_cursor::create_patient_cursor(
 auto database_cursor::create_study_cursor(
     std::shared_ptr<storage::pacs_database_adapter> db,
     const storage::study_query& query) -> Result<std::unique_ptr<database_cursor>> {
+    if (!db || !db->is_connected()) {
+        return kcenon::common::error_info(
+            "Database adapter not available or not connected");
+    }
+
     auto builder = db->create_query_builder();
 
     builder.select(std::vector<std::string>{
@@ -401,6 +411,11 @@ auto database_cursor::create_study_cursor(
 auto database_cursor::create_series_cursor(
     std::shared_ptr<storage::pacs_database_adapter> db,
     const storage::series_query& query) -> Result<std::unique_ptr<database_cursor>> {
+    if (!db || !db->is_connected()) {
+        return kcenon::common::error_info(
+            "Database adapter not available or not connected");
+    }
+
     auto builder = db->create_query_builder();
 
     builder.select(std::vector<std::string>{
@@ -450,6 +465,11 @@ auto database_cursor::create_series_cursor(
 auto database_cursor::create_instance_cursor(
     std::shared_ptr<storage::pacs_database_adapter> db,
     const storage::instance_query& query) -> Result<std::unique_ptr<database_cursor>> {
+    if (!db || !db->is_connected()) {
+        return kcenon::common::error_info(
+            "Database adapter not available or not connected");
+    }
+
     auto builder = db->create_query_builder();
 
     builder.select(std::vector<std::string>{
