@@ -2,6 +2,9 @@
  * @file key_image_endpoints_test.cpp
  * @brief Unit tests for key image API endpoints
  *
+ * @note Tests in this file use the legacy SQLite interface (sqlite3*) and are
+ *       only compiled when PACS_WITH_DATABASE_SYSTEM is NOT defined.
+ *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #583 - Part 3: Key Image & Viewer State REST Endpoints
  *
@@ -9,11 +12,15 @@
  * @license MIT
  */
 
+#include "pacs/storage/key_image_record.hpp"
+#include "pacs/storage/key_image_repository.hpp"
+
+// Only compile legacy SQLite tests when PACS_WITH_DATABASE_SYSTEM is NOT defined
+#ifndef PACS_WITH_DATABASE_SYSTEM
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "pacs/storage/index_database.hpp"
-#include "pacs/storage/key_image_record.hpp"
-#include "pacs/storage/key_image_repository.hpp"
 #include "pacs/web/rest_types.hpp"
 
 using namespace pacs::storage;
@@ -231,3 +238,5 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     REQUIRE_FALSE(found_without->frame_number.has_value());
   }
 }
+
+#endif  // !PACS_WITH_DATABASE_SYSTEM
