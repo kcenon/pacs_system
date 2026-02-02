@@ -6,32 +6,28 @@
  * injection vulnerabilities. All user inputs are properly escaped through
  * parameterized queries.
  *
+ * @see Issue #609 - Phase 3-2: Cursor & Security Storage Migration
  * @copyright Copyright (c) 2025
  */
 
 #pragma once
 
 #include <pacs/security/security_storage_interface.hpp>
+
+#include <database/core/database_context.h>
+#include <database/database_manager.h>
+
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-
-#ifdef PACS_WITH_DATABASE_SYSTEM
-#include <database/database_manager.h>
-#include <database/core/database_context.h>
-#endif
-
-// Forward declaration for SQLite3 (fallback when database_system unavailable)
-struct sqlite3;
 
 namespace pacs::storage {
 
 /**
  * @brief SQLite backend for security storage with SQL injection protection
  *
- * Uses database_system's query builder for parameterized queries when available.
- * Falls back to direct SQLite with manual escaping when database_system is not
- * linked (compile-time conditional).
+ * Uses database_system's query builder for parameterized queries.
+ * All user inputs are properly escaped to prevent SQL injection.
  */
 class sqlite_security_storage : public security::security_storage_interface {
 public:
@@ -59,20 +55,10 @@ public:
 
 private:
   std::string db_path_;
-
-#ifdef PACS_WITH_DATABASE_SYSTEM
   std::shared_ptr<database::database_context> db_context_;
   std::shared_ptr<database::database_manager> db_manager_;
 
-  [[nodiscard]] auto initialize_with_database_system() -> VoidResult;
-#else
-  sqlite3 *db_{nullptr};
-
-  [[nodiscard]] auto open_db() -> VoidResult;
-  void close_db();
-  [[nodiscard]] auto initialize_tables() -> VoidResult;
-  [[nodiscard]] static auto escape_string(std::string_view input) -> std::string;
-#endif
+  [[nodiscard]] auto initialize_database() -> VoidResult;
 };
 
 } // namespace pacs::storage

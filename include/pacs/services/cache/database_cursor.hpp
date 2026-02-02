@@ -6,18 +6,17 @@
  * database query results. Instead of loading all results into memory,
  * the cursor allows fetching results one batch at a time.
  *
- * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
- * for unified database access. This eliminates the previous dual implementation
- * pattern by requiring the database_system dependency.
+ * Uses pacs_database_adapter for unified database access.
  *
  * @see SRS-SVC-006, FR-5.3
  * @see Issue #188 - Streaming query results with pagination
- * @see Issue #642 - Migrate database_cursor to unified implementation
+ * @see Issue #609 - Phase 3-2: Cursor & Security Storage Migration
  */
 
 #pragma once
 
 #include <pacs/storage/instance_record.hpp>
+#include <pacs/storage/pacs_database_adapter.hpp>
 #include <pacs/storage/patient_record.hpp>
 #include <pacs/storage/series_record.hpp>
 #include <pacs/storage/study_record.hpp>
@@ -30,10 +29,6 @@
 #include <string>
 #include <variant>
 #include <vector>
-
-#ifdef PACS_WITH_DATABASE_SYSTEM
-
-#include <pacs/storage/pacs_database_adapter.hpp>
 
 namespace pacs::services {
 
@@ -290,5 +285,3 @@ private:
 };
 
 }  // namespace pacs::services
-
-#endif  // PACS_WITH_DATABASE_SYSTEM

@@ -2,15 +2,12 @@
  * @file database_cursor.cpp
  * @brief Implementation of database cursor for streaming query results
  *
- * Uses pacs_database_adapter for unified database access, eliminating
- * the previous dual implementation pattern.
+ * Uses pacs_database_adapter for unified database access.
  *
- * @see Issue #642 - Migrate database_cursor to unified implementation
+ * @see Issue #609 - Phase 3-2: Cursor & Security Storage Migration
  */
 
 #include "pacs/services/cache/database_cursor.hpp"
-
-#ifdef PACS_WITH_DATABASE_SYSTEM
 
 #include <database/query_builder.h>
 
@@ -556,5 +553,3 @@ auto database_cursor::reset() -> VoidResult {
 }
 
 }  // namespace pacs::services
-
-#endif  // PACS_WITH_DATABASE_SYSTEM
