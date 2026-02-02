@@ -214,8 +214,8 @@ TEST_CASE("Anonymizer: UID Mapping Consistency", "[security][anonymization]") {
     auto dataset1 = create_test_dataset();
     auto dataset2 = create_test_dataset();
 
-    anon.anonymize_with_mapping(dataset1, mapping);
-    anon.anonymize_with_mapping(dataset2, mapping);
+    (void)anon.anonymize_with_mapping(dataset1, mapping);
+    (void)anon.anonymize_with_mapping(dataset2, mapping);
 
     SECTION("Same UIDs map to same anonymized values") {
         REQUIRE(dataset1.get_string(tags::study_instance_uid) ==
@@ -236,7 +236,7 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
         anon.add_tag_action(tags::institution_name, tag_action_config::make_keep());
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         REQUIRE(dataset.get_string(tags::institution_name) == "General Hospital");
     }
@@ -246,7 +246,7 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
                            tag_action_config::make_replace("REDACTED^PATIENT"));
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         REQUIRE(dataset.get_string(tags::patient_name) == "REDACTED^PATIENT");
     }
@@ -255,7 +255,7 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
         anon.add_tag_action(tags::patient_id, tag_action_config::make_hash());
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         auto id = dataset.get_string(tags::patient_id);
         REQUIRE_FALSE(id.empty());
@@ -267,7 +267,7 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
         anon.remove_tag_action(tags::institution_name);
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         // Should be emptied per basic profile
         REQUIRE(dataset.get_string(tags::institution_name).empty());
@@ -279,7 +279,7 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
         anon.clear_custom_actions();
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         REQUIRE(dataset.get_string(tags::patient_name) != "DOE^JOHN");
     }
@@ -293,7 +293,7 @@ TEST_CASE("Anonymizer: Date Shifting", "[security][anonymization]") {
 
         auto dataset = create_test_dataset();
         // Study date: 20240115
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         auto shifted = dataset.get_string(tags::study_date);
         REQUIRE(shifted == "20240214");  // +30 days
@@ -303,7 +303,7 @@ TEST_CASE("Anonymizer: Date Shifting", "[security][anonymization]") {
         anon.set_date_offset(std::chrono::days{-15});
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         auto shifted = dataset.get_string(tags::study_date);
         REQUIRE(shifted == "20231231");  // -15 days from 2024-01-15
@@ -314,7 +314,7 @@ TEST_CASE("Anonymizer: Date Shifting", "[security][anonymization]") {
         anon.clear_date_offset();
 
         auto dataset = create_test_dataset();
-        anon.anonymize(dataset);
+        (void)anon.anonymize(dataset);
 
         REQUIRE(dataset.get_string(tags::study_date).empty());
     }
@@ -358,12 +358,12 @@ TEST_CASE("Anonymizer: Hash Configuration", "[security][anonymization]") {
     SECTION("Hash salt affects output") {
         anon.set_hash_salt("secret_salt_1");
         auto dataset1 = create_test_dataset();
-        anon.anonymize(dataset1);
+        (void)anon.anonymize(dataset1);
         auto hash1 = dataset1.get_string(tags::patient_id);
 
         anon.set_hash_salt("secret_salt_2");
         auto dataset2 = create_test_dataset();
-        anon.anonymize(dataset2);
+        (void)anon.anonymize(dataset2);
         auto hash2 = dataset2.get_string(tags::patient_id);
 
         REQUIRE(hash1 != hash2);
@@ -375,8 +375,8 @@ TEST_CASE("Anonymizer: Hash Configuration", "[security][anonymization]") {
         auto dataset1 = create_test_dataset();
         auto dataset2 = create_test_dataset();
 
-        anon.anonymize(dataset1);
-        anon.anonymize(dataset2);
+        (void)anon.anonymize(dataset1);
+        (void)anon.anonymize(dataset2);
 
         REQUIRE(dataset1.get_string(tags::patient_id) ==
                 dataset2.get_string(tags::patient_id));
