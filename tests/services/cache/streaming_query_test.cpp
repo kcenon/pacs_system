@@ -27,7 +27,7 @@ using namespace pacs::encoding;
 
 // Helper macro to get cursor handle based on build configuration
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#define GET_CURSOR_HANDLE(db) (db)->db_manager()
+#define GET_CURSOR_HANDLE(db) (db)->db_adapter()
 #else
 #define GET_CURSOR_HANDLE(db) (db)->native_handle()
 #endif
