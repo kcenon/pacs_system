@@ -2,10 +2,17 @@
  * @file parallel_query_executor_test.cpp
  * @brief Unit tests for parallel_query_executor class
  *
+ * @note These tests require PACS_WITH_DATABASE_SYSTEM to be defined.
+ *       The parallel_query_executor depends on query_result_stream which
+ *       is only available when using the unified database adapter.
+ *
  * @see Issue #190 - Parallel query executor
  */
 
 #include <pacs/services/cache/parallel_query_executor.hpp>
+
+// Only compile tests when PACS_WITH_DATABASE_SYSTEM is defined
+#ifdef PACS_WITH_DATABASE_SYSTEM
 
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/storage/index_database.hpp>
@@ -508,3 +515,5 @@ TEST_CASE("parallel_query_executor error handling", "[parallel][query][error]") 
         REQUIRE_THAT(result.error().message, Catch::Matchers::ContainsSubstring("Database"));
     }
 }
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
