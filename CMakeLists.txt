@@ -1555,6 +1555,31 @@ if(PACS_BUILD_TESTS)
     )
     FetchContent_MakeAvailable(Catch2)
 
+    # Helper function to link database dependencies with proper ordering for Linux
+    # On Linux, static library link order matters - using --start-group/--end-group
+    # resolves circular dependencies between integrated_database and monitoring_system.
+    function(pacs_link_database_deps TARGET_NAME)
+        if(TARGET integrated_database AND TARGET monitoring_system)
+            if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+                target_link_libraries(${TARGET_NAME} PRIVATE
+                    -Wl,--start-group
+                    integrated_database
+                    monitoring_system
+                    -Wl,--end-group
+                )
+            else()
+                target_link_libraries(${TARGET_NAME} PRIVATE
+                    integrated_database
+                    monitoring_system
+                )
+            endif()
+        elseif(TARGET integrated_database)
+            target_link_libraries(${TARGET_NAME} PRIVATE integrated_database)
+        elseif(TARGET monitoring_system)
+            target_link_libraries(${TARGET_NAME} PRIVATE monitoring_system)
+        endif()
+    endfunction()
+
     # Create tests directory if it doesn't exist
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/core)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/encoding)
@@ -1687,14 +1712,7 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
     # Link integrated_database and monitoring_system for database_cursor tests (Issue #642)
-    # Order matters on Linux: integrated_database depends on monitoring_system,
-    # so monitoring_system must come AFTER integrated_database in the link line.
-    if(TARGET integrated_database)
-        target_link_libraries(services_tests PRIVATE integrated_database)
-    endif()
-    if(TARGET monitoring_system)
-        target_link_libraries(services_tests PRIVATE monitoring_system)
-    endif()
+    pacs_link_database_deps(services_tests)
 
     # Security tests (Issue #193 - RBAC, Issue #191 - Digital Signatures, Issue #192 - Anonymization)
     set(SECURITY_TEST_SOURCES
@@ -1719,12 +1737,7 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
     # Link integrated_database and monitoring_system for database dependencies (Issue #642)
-    if(TARGET integrated_database)
-        target_link_libraries(security_tests PRIVATE integrated_database)
-    endif()
-    if(TARGET monitoring_system)
-        target_link_libraries(security_tests PRIVATE monitoring_system)
-    endif()
+    pacs_link_database_deps(security_tests)
 
     # Storage tests
     if(TARGET pacs_storage)
@@ -1752,14 +1765,7 @@ if(PACS_BUILD_TESTS)
                 $<$<TARGET_EXISTS:database>:database>
         )
         # Link integrated_database and monitoring_system for database adapter tests (Issue #642)
-        # Order matters on Linux: integrated_database depends on monitoring_system,
-        # so monitoring_system must come AFTER integrated_database in the link line.
-        if(TARGET integrated_database)
-            target_link_libraries(storage_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET monitoring_system)
-            target_link_libraries(storage_tests PRIVATE monitoring_system)
-        endif()
+        pacs_link_database_deps(storage_tests)
     endif()
 
     # AI tests (Issue #204 - AI result handler for SR/SEG/PR objects,
@@ -1838,14 +1844,7 @@ if(PACS_BUILD_TESTS)
                 Catch2::Catch2WithMain
         )
         # Link integrated_database and monitoring_system for database dependencies (Issue #642)
-        # Order matters on Linux: integrated_database depends on monitoring_system,
-        # so monitoring_system must come AFTER integrated_database in the link line.
-        if(TARGET integrated_database)
-            target_link_libraries(web_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET monitoring_system)
-            target_link_libraries(web_tests PRIVATE monitoring_system)
-        endif()
+        pacs_link_database_deps(web_tests)
     endif()
 
     # Integration tests
@@ -1877,12 +1876,7 @@ if(PACS_BUILD_TESTS)
             target_link_libraries(pacs_integration_tests PRIVATE ${ITK_LIBRARIES})
         endif()
         # Link integrated_database and monitoring_system for database dependencies (Issue #642)
-        if(TARGET integrated_database)
-            target_link_libraries(pacs_integration_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET monitoring_system)
-            target_link_libraries(pacs_integration_tests PRIVATE monitoring_system)
-        endif()
+        pacs_link_database_deps(pacs_integration_tests)
     endif()
 
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
@@ -1909,12 +1903,7 @@ if(PACS_BUILD_TESTS)
             target_link_libraries(di_tests PRIVATE common_system_lib)
         endif()
         # Link integrated_database and monitoring_system for database dependencies (Issue #642)
-        if(TARGET integrated_database)
-            target_link_libraries(di_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET monitoring_system)
-            target_link_libraries(di_tests PRIVATE monitoring_system)
-        endif()
+        pacs_link_database_deps(di_tests)
     endif()
 
     # Client tests (Issue #554 - Job Manager, Issue #539 - Routing Manager, Issue #541 - Prefetch Manager, Issue #542 - Sync Manager)
@@ -1944,12 +1933,7 @@ if(PACS_BUILD_TESTS)
             target_link_libraries(client_tests PRIVATE common_system_lib)
         endif()
         # Link integrated_database and monitoring_system for database dependencies (Issue #642)
-        if(TARGET integrated_database)
-            target_link_libraries(client_tests PRIVATE integrated_database)
-        endif()
-        if(TARGET monitoring_system)
-            target_link_libraries(client_tests PRIVATE monitoring_system)
-        endif()
+        pacs_link_database_deps(client_tests)
     endif()
 
     # Concurrency tests (Issue #337 - Lock-free structure stress tests)
