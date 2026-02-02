@@ -11,6 +11,8 @@
 
 #include <pacs/storage/sqlite_security_storage.hpp>
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include <database/query_builder.h>
 
 #include <variant>
@@ -430,3 +432,5 @@ auto sqlite_security_storage::get_users_by_role(Role role)
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

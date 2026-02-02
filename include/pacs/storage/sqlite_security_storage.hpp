@@ -12,6 +12,15 @@
 
 #pragma once
 
+// Check for database_system availability
+// This header requires database_system for database_context and database_manager
+#ifndef PACS_WITH_DATABASE_SYSTEM
+// Forward declare empty class when database_system is not available
+namespace pacs::storage {
+class sqlite_security_storage;
+}  // namespace pacs::storage
+#else  // PACS_WITH_DATABASE_SYSTEM
+
 #include <pacs/security/security_storage_interface.hpp>
 
 #include <database/core/database_context.h>
@@ -61,4 +70,6 @@ private:
   [[nodiscard]] auto initialize_database() -> VoidResult;
 };
 
-} // namespace pacs::storage
+}  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
