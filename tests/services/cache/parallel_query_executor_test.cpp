@@ -36,16 +36,26 @@ using namespace std::chrono_literals;
 namespace {
 
 /**
- * @brief Check if pacs_database_adapter is available and connected
+ * @brief Check if pacs_database_adapter is available for the test database
  *
- * unified_database_system may not support in-memory databases,
- * as each connection creates a separate in-memory database instance.
- * This helper checks if the adapter is actually usable.
+ * IMPORTANT: For in-memory databases (":memory:"), the adapter is NEVER
+ * usable because unified_database_system creates a SEPARATE connection
+ * which doesn't share the in-memory database schema/data.
+ *
+ * On some platforms (Windows), the adapter may successfully connect,
+ * but it connects to a different in-memory database instance that
+ * has no tables or data.
+ *
+ * Since this test fixture always uses ":memory:", we always return false
+ * to skip tests that depend on the adapter.
+ *
+ * @see Issue #625 - unified_database_system in-memory support
  */
-bool is_adapter_available(const index_database* db) {
-    if (!db) return false;
-    auto adapter = db->db_adapter();
-    return adapter && adapter->is_connected();
+bool is_adapter_available([[maybe_unused]] const index_database* db) {
+    // Always return false for in-memory test databases
+    // The adapter creates a separate connection that doesn't share
+    // the in-memory database schema/data
+    return false;
 }
 
 /**
