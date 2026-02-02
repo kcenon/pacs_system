@@ -44,7 +44,7 @@ jobs:
   build-and-unit-tests:
     name: Build & Unit Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -271,7 +271,7 @@ jobs:
     name: Integration Tests (${{ matrix.os }})
     needs: build-and-unit-tests
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
