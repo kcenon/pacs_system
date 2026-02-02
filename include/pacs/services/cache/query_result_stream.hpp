@@ -32,6 +32,12 @@
 #include <variant>
 #include <vector>
 
+// Include database_cursor only when PACS_WITH_DATABASE_SYSTEM is defined
+// IMPORTANT: Must be outside namespace to avoid polluting pacs::services with std
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include "database_cursor.hpp"
+#endif
+
 namespace pacs::storage {
 class index_database;
 }  // namespace pacs::storage
@@ -57,9 +63,6 @@ struct stream_config {
 };
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-
-// Include database_cursor only when PACS_WITH_DATABASE_SYSTEM is defined
-#include "database_cursor.hpp"
 
 /**
  * @brief Streaming query results with pagination support
