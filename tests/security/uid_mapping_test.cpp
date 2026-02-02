@@ -103,13 +103,13 @@ TEST_CASE("UidMapping: Manual Mapping", "[security][anonymization]") {
     }
 
     SECTION("add_mapping fails for conflicting mapping") {
-        mapping.add_mapping("original.uid", "anon.uid.1");
+        (void)mapping.add_mapping("original.uid", "anon.uid.1");
         auto result = mapping.add_mapping("original.uid", "anon.uid.2");
         REQUIRE_FALSE(result.is_ok());
     }
 
     SECTION("add_mapping succeeds for same mapping") {
-        mapping.add_mapping("original.uid", "anon.uid");
+        (void)mapping.add_mapping("original.uid", "anon.uid");
         auto result = mapping.add_mapping("original.uid", "anon.uid");
         REQUIRE(result.is_ok());
     }
@@ -117,9 +117,9 @@ TEST_CASE("UidMapping: Manual Mapping", "[security][anonymization]") {
 
 TEST_CASE("UidMapping: Clear and Remove", "[security][anonymization]") {
     uid_mapping mapping;
-    mapping.get_or_create("uid.1");
-    mapping.get_or_create("uid.2");
-    mapping.get_or_create("uid.3");
+    (void)mapping.get_or_create("uid.1");
+    (void)mapping.get_or_create("uid.2");
+    (void)mapping.get_or_create("uid.3");
 
     SECTION("remove deletes specific mapping") {
         REQUIRE(mapping.size() == 3);
@@ -168,11 +168,11 @@ TEST_CASE("UidMapping: Merge Operation", "[security][anonymization]") {
     uid_mapping mapping1;
     uid_mapping mapping2;
 
-    mapping1.add_mapping("uid.1", "anon.1");
-    mapping1.add_mapping("uid.2", "anon.2");
+    (void)mapping1.add_mapping("uid.1", "anon.1");
+    (void)mapping1.add_mapping("uid.2", "anon.2");
 
-    mapping2.add_mapping("uid.3", "anon.3");
-    mapping2.add_mapping("uid.4", "anon.4");
+    (void)mapping2.add_mapping("uid.3", "anon.3");
+    (void)mapping2.add_mapping("uid.4", "anon.4");
 
     SECTION("merge adds non-conflicting mappings") {
         auto added = mapping1.merge(mapping2);
@@ -183,7 +183,7 @@ TEST_CASE("UidMapping: Merge Operation", "[security][anonymization]") {
     }
 
     SECTION("merge skips conflicting mappings") {
-        mapping2.add_mapping("uid.1", "different.anon");
+        (void)mapping2.add_mapping("uid.1", "different.anon");
         auto added = mapping1.merge(mapping2);
         REQUIRE(added == 2);  // uid.3 and uid.4 added
         REQUIRE(mapping1.get_anonymized("uid.1").value() == "anon.1");  // Original preserved
@@ -192,8 +192,8 @@ TEST_CASE("UidMapping: Merge Operation", "[security][anonymization]") {
 
 TEST_CASE("UidMapping: Copy and Move", "[security][anonymization]") {
     uid_mapping original;
-    original.add_mapping("uid.1", "anon.1");
-    original.add_mapping("uid.2", "anon.2");
+    (void)original.add_mapping("uid.1", "anon.1");
+    (void)original.add_mapping("uid.2", "anon.2");
 
     SECTION("Copy constructor creates independent copy") {
         uid_mapping copy(original);
@@ -201,7 +201,7 @@ TEST_CASE("UidMapping: Copy and Move", "[security][anonymization]") {
         REQUIRE(copy.get_anonymized("uid.1").value() == "anon.1");
 
         // Modifying copy doesn't affect original
-        copy.add_mapping("uid.3", "anon.3");
+        (void)copy.add_mapping("uid.3", "anon.3");
         REQUIRE(copy.size() == 3);
         REQUIRE(original.size() == 2);
     }
@@ -223,8 +223,8 @@ TEST_CASE("UidMapping: Copy and Move", "[security][anonymization]") {
 
 TEST_CASE("UidMapping: JSON Export", "[security][anonymization]") {
     uid_mapping mapping;
-    mapping.add_mapping("uid.1", "anon.1");
-    mapping.add_mapping("uid.2", "anon.2");
+    (void)mapping.add_mapping("uid.1", "anon.1");
+    (void)mapping.add_mapping("uid.2", "anon.2");
 
     auto json = mapping.to_json();
 

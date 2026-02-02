@@ -294,14 +294,14 @@ TEST_CASE("AccessControlManager: Audit Callback", "[security]") {
   auto ctx = user_context(viewer, "session1");
 
   SECTION("Audit callback is called for allowed operations") {
-    acm.check_dicom_operation(ctx, DicomOperation::CFind);
+    (void)acm.check_dicom_operation(ctx, DicomOperation::CFind);
     REQUIRE(audit_log.size() == 1);
     REQUIRE(audit_log[0].first == DicomOperation::CFind);
     REQUIRE(audit_log[0].second == true);
   }
 
   SECTION("Audit callback is called for denied operations") {
-    acm.check_dicom_operation(ctx, DicomOperation::CStore);
+    (void)acm.check_dicom_operation(ctx, DicomOperation::CStore);
     REQUIRE(audit_log.size() == 1);
     REQUIRE(audit_log[0].first == DicomOperation::CStore);
     REQUIRE(audit_log[0].second == false);

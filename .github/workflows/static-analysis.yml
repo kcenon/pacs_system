@@ -21,7 +21,7 @@ jobs:
   clang-tidy:
     name: Clang-Tidy Analysis
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     continue-on-error: true  # Allow baseline collection without failing CI
 
     steps:
@@ -99,7 +99,7 @@ jobs:
   cppcheck:
     name: Cppcheck Analysis
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     continue-on-error: true  # Allow baseline collection without failing CI
 
     steps:
