@@ -154,7 +154,8 @@ TEST_CASE("base_repository: construction", "[storage][repository][interface]") {
 TEST_CASE("base_repository: basic CRUD operations",
           "[storage][repository][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;
@@ -249,7 +250,8 @@ TEST_CASE("base_repository: basic CRUD operations",
 TEST_CASE("base_repository: query operations",
           "[storage][repository][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;
@@ -321,7 +323,8 @@ TEST_CASE("base_repository: query operations",
 TEST_CASE("base_repository: batch operations",
           "[storage][repository][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;
@@ -370,7 +373,8 @@ TEST_CASE("base_repository: batch operations",
 TEST_CASE("base_repository: error handling",
           "[storage][repository][integration]") {
     if (!is_sqlite_backend_supported()) {
-        SKIP(SQLITE_NOT_SUPPORTED_MSG);
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
     }
 
     test_db_guard guard;

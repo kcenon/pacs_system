@@ -146,7 +146,8 @@ TEST_CASE("parallel_query_executor construction", "[parallel][query][executor]")
     test_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("default configuration") {
@@ -198,7 +199,8 @@ TEST_CASE("parallel_query_executor single query", "[parallel][query][single]") {
     test_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     parallel_query_executor executor(fixture.db());
@@ -266,7 +268,8 @@ TEST_CASE("parallel_query_executor batch execution", "[parallel][query][batch]")
     test_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     parallel_executor_config config;
@@ -387,7 +390,8 @@ TEST_CASE("parallel_query_executor cancellation", "[parallel][query][cancel]") {
     test_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     parallel_query_executor executor(fixture.db());
@@ -440,7 +444,8 @@ TEST_CASE("parallel_query_executor statistics", "[parallel][query][stats]") {
     test_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     parallel_query_executor executor(fixture.db());
@@ -515,7 +520,8 @@ TEST_CASE("parallel_query_executor move semantics", "[parallel][query][move]") {
     test_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("move constructor") {

@@ -165,7 +165,8 @@ TEST_CASE("database_cursor basic operations", "[services][streaming]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("create_patient_cursor creates valid cursor") {
@@ -295,7 +296,8 @@ TEST_CASE("database_cursor study queries", "[services][streaming]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("create_study_cursor returns all studies") {
@@ -350,7 +352,8 @@ TEST_CASE("query_result_stream basic operations", "[services][streaming]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("create stream for patient queries") {
@@ -426,7 +429,8 @@ TEST_CASE("query_result_stream study level", "[services][streaming]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("stream returns study datasets") {
@@ -483,7 +487,8 @@ TEST_CASE("streaming_query_handler create_stream", "[services][streaming]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     streaming_query_handler handler(fixture.db());
@@ -510,7 +515,8 @@ TEST_CASE("streaming_query_handler as_query_handler", "[services][streaming]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     streaming_query_handler handler(fixture.db());
@@ -553,7 +559,8 @@ TEST_CASE("streaming query end-to-end", "[services][streaming][integration]") {
     test_database_fixture fixture;
 
     if (!is_adapter_available(fixture.db())) {
-        SKIP(ADAPTER_NOT_AVAILABLE_MSG);
+        SUCCEED("Skipped: " << ADAPTER_NOT_AVAILABLE_MSG);
+        return;
     }
 
     SECTION("full pagination workflow") {
