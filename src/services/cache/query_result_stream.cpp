@@ -2,18 +2,19 @@
  * @file query_result_stream.cpp
  * @brief Implementation of streaming query results with pagination
  *
- * @see Issue #420 - Migrate database_cursor to database_system
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for unified database access.
+ *
+ * @see Issue #642 - Migrate database_cursor to unified implementation
  */
 
 #include "pacs/services/cache/query_result_stream.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/encoding/vr_type.hpp"
 #include "pacs/storage/index_database.hpp"
-
-#ifndef PACS_WITH_DATABASE_SYSTEM
-#include <sqlite3.h>
-#endif
 
 #include <sstream>
 
@@ -52,16 +53,14 @@ auto query_result_stream::extract_patient_query(const core::dicom_dataset& keys)
 
     auto birth_date = keys.get_string(core::tags::patient_birth_date);
     if (!birth_date.empty()) {
-        // Check for date range (YYYYMMDD-YYYYMMDD)
-        auto dash_pos = birth_date.find('-');
-        if (dash_pos != std::string::npos) {
-            auto from = birth_date.substr(0, dash_pos);
-            auto to = birth_date.substr(dash_pos + 1);
-            if (!from.empty()) {
-                query.birth_date_from = std::string(from);
+        // Handle date range (YYYYMMDD-YYYYMMDD)
+        if (birth_date.find('-') != std::string::npos) {
+            auto pos = birth_date.find('-');
+            if (pos > 0) {
+                query.birth_date_from = std::string(birth_date.substr(0, pos));
             }
-            if (!to.empty()) {
-                query.birth_date_to = std::string(to);
+            if (pos + 1 < birth_date.length()) {
+                query.birth_date_to = std::string(birth_date.substr(pos + 1));
             }
         } else {
             query.birth_date = std::string(birth_date);
@@ -102,16 +101,14 @@ auto query_result_stream::extract_study_query(const core::dicom_dataset& keys)
 
     auto study_date = keys.get_string(core::tags::study_date);
     if (!study_date.empty()) {
-        // Check for date range (YYYYMMDD-YYYYMMDD)
-        auto dash_pos = study_date.find('-');
-        if (dash_pos != std::string::npos) {
-            auto from = study_date.substr(0, dash_pos);
-            auto to = study_date.substr(dash_pos + 1);
-            if (!from.empty()) {
-                query.study_date_from = std::string(from);
+        // Handle date range (YYYYMMDD-YYYYMMDD)
+        if (study_date.find('-') != std::string::npos) {
+            auto pos = study_date.find('-');
+            if (pos > 0) {
+                query.study_date_from = std::string(study_date.substr(0, pos));
             }
-            if (!to.empty()) {
-                query.study_date_to = std::string(to);
+            if (pos + 1 < study_date.length()) {
+                query.study_date_to = std::string(study_date.substr(pos + 1));
             }
         } else {
             query.study_date = std::string(study_date);
@@ -123,7 +120,7 @@ auto query_result_stream::extract_study_query(const core::dicom_dataset& keys)
         query.accession_number = std::string(accession);
     }
 
-    auto modality = keys.get_string(core::tags::modalities_in_study);
+    auto modality = keys.get_string(core::tags::modality);
     if (!modality.empty()) {
         query.modality = std::string(modality);
     }
@@ -224,65 +221,34 @@ auto query_result_stream::create(storage::index_database* db, query_level level,
     Result<std::unique_ptr<database_cursor>> cursor_result = kcenon::common::error_info(
         std::string("Unknown query level"));
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
-    // Use database_system's database_manager for SQL injection safe queries
-    auto db_mgr = db->db_manager();
-    if (!db_mgr) {
-        return kcenon::common::error_info(std::string("Invalid database manager"));
+    // Use database_system's pacs_database_adapter for SQL injection safe queries
+    auto db_adapter = db->db_adapter();
+    if (!db_adapter) {
+        return kcenon::common::error_info(std::string("Invalid database adapter"));
     }
 
     switch (level) {
         case query_level::patient: {
             auto query = extract_patient_query(query_keys);
-            cursor_result = database_cursor::create_patient_cursor(db_mgr, query);
+            cursor_result = database_cursor::create_patient_cursor(db_adapter, query);
             break;
         }
         case query_level::study: {
             auto query = extract_study_query(query_keys);
-            cursor_result = database_cursor::create_study_cursor(db_mgr, query);
+            cursor_result = database_cursor::create_study_cursor(db_adapter, query);
             break;
         }
         case query_level::series: {
             auto query = extract_series_query(query_keys);
-            cursor_result = database_cursor::create_series_cursor(db_mgr, query);
+            cursor_result = database_cursor::create_series_cursor(db_adapter, query);
             break;
         }
         case query_level::image: {
             auto query = extract_instance_query(query_keys);
-            cursor_result = database_cursor::create_instance_cursor(db_mgr, query);
+            cursor_result = database_cursor::create_instance_cursor(db_adapter, query);
             break;
         }
     }
-#else
-    // Fallback to direct SQLite access
-    sqlite3* sqlite_db = db->native_handle();
-    if (!sqlite_db) {
-        return kcenon::common::error_info(std::string("Invalid database handle"));
-    }
-
-    switch (level) {
-        case query_level::patient: {
-            auto query = extract_patient_query(query_keys);
-            cursor_result = database_cursor::create_patient_cursor(sqlite_db, query);
-            break;
-        }
-        case query_level::study: {
-            auto query = extract_study_query(query_keys);
-            cursor_result = database_cursor::create_study_cursor(sqlite_db, query);
-            break;
-        }
-        case query_level::series: {
-            auto query = extract_series_query(query_keys);
-            cursor_result = database_cursor::create_series_cursor(sqlite_db, query);
-            break;
-        }
-        case query_level::image: {
-            auto query = extract_instance_query(query_keys);
-            cursor_result = database_cursor::create_instance_cursor(sqlite_db, query);
-            break;
-        }
-    }
-#endif
 
     if (cursor_result.is_err()) {
         return kcenon::common::error_info(
@@ -493,3 +459,5 @@ auto query_result_stream::instance_to_dataset(const storage::instance_record& re
 }
 
 }  // namespace pacs::services
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

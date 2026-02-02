@@ -4452,6 +4452,14 @@ auto index_database::db_manager() const noexcept
     -> std::shared_ptr<database::database_manager> {
     return db_manager_;
 }
+
+auto index_database::db_adapter() const noexcept
+    -> std::shared_ptr<pacs_database_adapter> {
+    // Return a shared_ptr wrapper around the unique_ptr
+    // Note: This requires the caller to not outlive the index_database
+    return std::shared_ptr<pacs_database_adapter>(
+        std::shared_ptr<pacs_database_adapter>{}, db_adapter_.get());
+}
 #endif
 
 // ============================================================================
