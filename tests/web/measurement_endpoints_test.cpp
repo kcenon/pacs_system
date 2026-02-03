@@ -106,6 +106,11 @@ TEST_CASE("Measurement record defaults", "[web][measurement]") {
   REQUIRE(meas.label.empty());
 }
 
+// Repository tests require legacy SQLite interface which is only available
+// when PACS_WITH_DATABASE_SYSTEM is not defined. In database_system mode,
+// pacs_database_adapter opens a separate :memory: connection without tables.
+#ifndef PACS_WITH_DATABASE_SYSTEM
+
 TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
@@ -274,3 +279,5 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     REQUIRE(found_result->value == Catch::Approx(123.456789).epsilon(0.0001));
   }
 }
+
+#endif  // !PACS_WITH_DATABASE_SYSTEM

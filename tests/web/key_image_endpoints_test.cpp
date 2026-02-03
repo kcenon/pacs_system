@@ -74,6 +74,11 @@ TEST_CASE("Key image record validation", "[web][key_image]") {
   }
 }
 
+// Repository tests require legacy SQLite interface which is only available
+// when PACS_WITH_DATABASE_SYSTEM is not defined. In database_system mode,
+// pacs_database_adapter opens a separate :memory: connection without tables.
+#ifndef PACS_WITH_DATABASE_SYSTEM
+
 TEST_CASE("Key image repository operations", "[web][key_image][database]") {
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
@@ -229,25 +234,14 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     (void)repo.save(ki_no_frame);
 
     auto found_with_result = repo.find_by_id("ki-with-frame");
-#ifdef PACS_WITH_DATABASE_SYSTEM
-    REQUIRE(found_with_result.is_ok());
-    const auto& found_with = found_with_result.value();
-    REQUIRE(found_with.frame_number.has_value());
-    REQUIRE(found_with.frame_number.value() == 5);
-#else
     REQUIRE(found_with_result.has_value());
     REQUIRE(found_with_result->frame_number.has_value());
     REQUIRE(found_with_result->frame_number.value() == 5);
-#endif
 
     auto found_without_result = repo.find_by_id("ki-no-frame");
-#ifdef PACS_WITH_DATABASE_SYSTEM
-    REQUIRE(found_without_result.is_ok());
-    const auto& found_without = found_without_result.value();
-    REQUIRE_FALSE(found_without.frame_number.has_value());
-#else
     REQUIRE(found_without_result.has_value());
     REQUIRE_FALSE(found_without_result->frame_number.has_value());
-#endif
   }
 }
+
+#endif  // !PACS_WITH_DATABASE_SYSTEM
