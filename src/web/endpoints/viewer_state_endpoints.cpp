@@ -270,7 +270,11 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
           return res;
         }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        storage::viewer_state_repository repo(ctx->database->db_adapter());
+#else
         storage::viewer_state_repository repo(ctx->database->native_handle());
+#endif
         auto save_result = repo.save_state(state);
         if (!save_result.is_ok()) {
           res.code = 500;
@@ -329,7 +333,11 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
           }
         }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        storage::viewer_state_repository repo(ctx->database->db_adapter());
+#else
         storage::viewer_state_repository repo(ctx->database->native_handle());
+#endif
         auto states = repo.search_states(query);
 
         res.code = 200;
@@ -352,7 +360,11 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+            storage::viewer_state_repository repo(ctx->database->db_adapter());
+#else
             storage::viewer_state_repository repo(ctx->database->native_handle());
+#endif
             auto state = repo.find_state_by_id(state_id);
             if (!state.has_value()) {
               res.code = 404;
@@ -380,7 +392,11 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+            storage::viewer_state_repository repo(ctx->database->db_adapter());
+#else
             storage::viewer_state_repository repo(ctx->database->native_handle());
+#endif
             auto existing = repo.find_state_by_id(state_id);
             if (!existing.has_value()) {
               res.code = 404;
@@ -430,7 +446,11 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
               }
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+            storage::viewer_state_repository repo(ctx->database->db_adapter());
+#else
             storage::viewer_state_repository repo(ctx->database->native_handle());
+#endif
             auto records = repo.get_recent_studies(user_id, limit);
             size_t total = repo.count_recent_studies(user_id);
 
