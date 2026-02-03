@@ -2,11 +2,11 @@
  * @file migration_runner.cpp
  * @brief Implementation of database schema migration runner
  *
- * When compiled with PACS_WITH_DATABASE_SYSTEM, uses database_system's
- * database_manager for consistent database abstraction. Otherwise, uses
- * direct SQLite prepared statements.
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for consistent database abstraction. Otherwise, uses direct SQLite
+ * prepared statements.
  *
- * @see Issue #422 - Migrate migration_runner.cpp to database_system
+ * @see Issue #643 - Update migration_runner to use pacs_database_adapter
  */
 
 #include <pacs/storage/migration_runner.hpp>
@@ -14,6 +14,10 @@
 #include <sqlite3.h>
 
 #include <pacs/compat/format.hpp>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include <pacs/storage/pacs_database_adapter.hpp>
+#endif
 
 namespace pacs::storage {
 
@@ -36,35 +40,21 @@ migration_runner::migration_runner() {
     migrations_.push_back({7, [this](sqlite3* db) { return migrate_v7(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    // Register all migrations (database_system version)
-    db_system_migrations_.push_back(
-        {1, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v1(db);
-        }});
-    db_system_migrations_.push_back(
-        {2, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v2(db);
-        }});
-    db_system_migrations_.push_back(
-        {3, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v3(db);
-        }});
-    db_system_migrations_.push_back(
-        {4, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v4(db);
-        }});
-    db_system_migrations_.push_back(
-        {5, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v5(db);
-        }});
-    db_system_migrations_.push_back(
-        {6, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v6(db);
-        }});
-    db_system_migrations_.push_back(
-        {7, [this](std::shared_ptr<database::database_manager> db) {
-            return migrate_v7(db);
-        }});
+    // Register all migrations (pacs_database_adapter version)
+    adapter_migrations_.push_back(
+        {1, [this](pacs_database_adapter& db) { return migrate_v1(db); }});
+    adapter_migrations_.push_back(
+        {2, [this](pacs_database_adapter& db) { return migrate_v2(db); }});
+    adapter_migrations_.push_back(
+        {3, [this](pacs_database_adapter& db) { return migrate_v3(db); }});
+    adapter_migrations_.push_back(
+        {4, [this](pacs_database_adapter& db) { return migrate_v4(db); }});
+    adapter_migrations_.push_back(
+        {5, [this](pacs_database_adapter& db) { return migrate_v5(db); }});
+    adapter_migrations_.push_back(
+        {6, [this](pacs_database_adapter& db) { return migrate_v6(db); }});
+    adapter_migrations_.push_back(
+        {7, [this](pacs_database_adapter& db) { return migrate_v7(db); }});
 #endif
 }
 
@@ -890,20 +880,18 @@ auto migration_runner::migrate_v7(sqlite3* db) -> VoidResult {
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 // ============================================================================
-// Migration Operations (database_system)
+// Migration Operations (pacs_database_adapter)
 // ============================================================================
 
-auto migration_runner::run_migrations(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
-    return run_migrations_to(db_manager, LATEST_VERSION);
+auto migration_runner::run_migrations(pacs_database_adapter& db) -> VoidResult {
+    return run_migrations_to(db, LATEST_VERSION);
 }
 
-auto migration_runner::run_migrations_to(
-    std::shared_ptr<database::database_manager> db_manager,
-    int target_version) -> VoidResult {
-    if (!db_manager) {
+auto migration_runner::run_migrations_to(pacs_database_adapter& db,
+                                         int target_version) -> VoidResult {
+    if (!db.is_connected()) {
         return make_error<std::monostate>(
-            -1, "Database manager is null", "storage");
+            -1, "Database adapter is not connected", "storage");
     }
 
     if (target_version > LATEST_VERSION) {
@@ -915,12 +903,12 @@ auto migration_runner::run_migrations_to(
     }
 
     // Ensure schema_version table exists
-    auto ensure_result = ensure_schema_version_table(db_manager);
+    auto ensure_result = ensure_schema_version_table(db);
     if (ensure_result.is_err()) {
         return ensure_result;
     }
 
-    auto current_version = get_current_version(db_manager);
+    auto current_version = get_current_version(db);
 
     // Nothing to do if already at or past target
     if (current_version >= target_version) {
@@ -932,32 +920,24 @@ auto migration_runner::run_migrations_to(
         auto next_version = current_version + 1;
 
         // Begin transaction
-        auto begin_result = db_manager->begin_transaction();
+        auto begin_result = db.begin_transaction();
         if (begin_result.is_err()) {
-            return make_error<std::monostate>(
-                begin_result.error().code,
-                pacs::compat::format("Failed to begin transaction: {}",
-                                     begin_result.error().message),
-                "storage");
+            return begin_result;
         }
 
         // Apply migration
-        auto migration_result = apply_migration(db_manager, next_version);
+        auto migration_result = apply_migration(db, next_version);
         if (migration_result.is_err()) {
             // Rollback on failure
-            (void)db_manager->rollback_transaction();
+            (void)db.rollback();
             return migration_result;
         }
 
         // Commit transaction
-        auto commit_result = db_manager->commit_transaction();
+        auto commit_result = db.commit();
         if (commit_result.is_err()) {
-            (void)db_manager->rollback_transaction();
-            return make_error<std::monostate>(
-                commit_result.error().code,
-                pacs::compat::format("Failed to commit transaction: {}",
-                                     commit_result.error().message),
-                "storage");
+            (void)db.rollback();
+            return commit_result;
         }
 
         current_version = next_version;
@@ -967,28 +947,30 @@ auto migration_runner::run_migrations_to(
 }
 
 // ============================================================================
-// Version Information (database_system)
+// Version Information (pacs_database_adapter)
 // ============================================================================
 
-auto migration_runner::get_current_version(
-    std::shared_ptr<database::database_manager> db_manager) const -> int {
-    if (!db_manager) {
+auto migration_runner::get_current_version(pacs_database_adapter& db) const
+    -> int {
+    if (!db.is_connected()) {
         return 0;
     }
 
     // Check if schema_version table exists by querying sqlite_master
     const std::string check_sql =
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='schema_version';";
+        "SELECT name FROM sqlite_master WHERE type='table' AND "
+        "name='schema_version';";
 
-    auto check_result = db_manager->select_query_result(check_sql);
+    auto check_result = db.select(check_sql);
     if (check_result.is_err() || check_result.value().empty()) {
         // Table doesn't exist
         return 0;
     }
 
     // Get max version from table
-    const std::string version_sql = "SELECT MAX(version) AS max_ver FROM schema_version;";
-    auto version_result = db_manager->select_query_result(version_sql);
+    const std::string version_sql =
+        "SELECT MAX(version) AS max_ver FROM schema_version;";
+    auto version_result = db.select(version_sql);
     if (version_result.is_err() || version_result.value().empty()) {
         return 0;
     }
@@ -1004,36 +986,38 @@ auto migration_runner::get_current_version(
     }
 
     if (it != row.end()) {
-        if (std::holds_alternative<int64_t>(it->second)) {
-            return static_cast<int>(std::get<int64_t>(it->second));
+        try {
+            return std::stoi(it->second);
+        } catch (...) {
+            return 0;
         }
     }
 
     return 0;
 }
 
-auto migration_runner::needs_migration(
-    std::shared_ptr<database::database_manager> db_manager) const -> bool {
-    return get_current_version(db_manager) < LATEST_VERSION;
+auto migration_runner::needs_migration(pacs_database_adapter& db) const
+    -> bool {
+    return get_current_version(db) < LATEST_VERSION;
 }
 
 // ============================================================================
-// Migration History (database_system)
+// Migration History (pacs_database_adapter)
 // ============================================================================
 
-auto migration_runner::get_history(
-    std::shared_ptr<database::database_manager> db_manager) const
+auto migration_runner::get_history(pacs_database_adapter& db) const
     -> std::vector<migration_record> {
     std::vector<migration_record> history;
 
-    if (!db_manager) {
+    if (!db.is_connected()) {
         return history;
     }
 
     const std::string sql =
-        "SELECT version, description, applied_at FROM schema_version ORDER BY version;";
+        "SELECT version, description, applied_at FROM schema_version ORDER BY "
+        "version;";
 
-    auto result = db_manager->select_query_result(sql);
+    auto result = db.select(sql);
     if (result.is_err()) {
         return history;
     }
@@ -1043,23 +1027,21 @@ auto migration_runner::get_history(
 
         // Get version
         if (auto it = row.find("version"); it != row.end()) {
-            if (std::holds_alternative<int64_t>(it->second)) {
-                record.version = static_cast<int>(std::get<int64_t>(it->second));
+            try {
+                record.version = std::stoi(it->second);
+            } catch (...) {
+                record.version = 0;
             }
         }
 
         // Get description
         if (auto it = row.find("description"); it != row.end()) {
-            if (std::holds_alternative<std::string>(it->second)) {
-                record.description = std::get<std::string>(it->second);
-            }
+            record.description = it->second;
         }
 
         // Get applied_at
         if (auto it = row.find("applied_at"); it != row.end()) {
-            if (std::holds_alternative<std::string>(it->second)) {
-                record.applied_at = std::get<std::string>(it->second);
-            }
+            record.applied_at = it->second;
         }
 
         history.push_back(std::move(record));
@@ -1069,11 +1051,11 @@ auto migration_runner::get_history(
 }
 
 // ============================================================================
-// Internal Implementation (database_system)
+// Internal Implementation (pacs_database_adapter)
 // ============================================================================
 
-auto migration_runner::ensure_schema_version_table(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::ensure_schema_version_table(pacs_database_adapter& db)
+    -> VoidResult {
     const std::string sql = R"(
         CREATE TABLE IF NOT EXISTS schema_version (
             version     INTEGER PRIMARY KEY,
@@ -1082,16 +1064,15 @@ auto migration_runner::ensure_schema_version_table(
         );
     )";
 
-    return execute_sql(db_manager, sql);
+    return execute_sql(db, sql);
 }
 
-auto migration_runner::apply_migration(
-    std::shared_ptr<database::database_manager> db_manager,
-    int version) -> VoidResult {
+auto migration_runner::apply_migration(pacs_database_adapter& db, int version)
+    -> VoidResult {
     // Find the migration function
-    for (const auto& [ver, func] : db_system_migrations_) {
+    for (const auto& [ver, func] : adapter_migrations_) {
         if (ver == version) {
-            return func(db_manager);
+            return func(db);
         }
     }
 
@@ -1101,17 +1082,16 @@ auto migration_runner::apply_migration(
         "storage");
 }
 
-auto migration_runner::record_migration(
-    std::shared_ptr<database::database_manager> db_manager,
-    int version,
-    std::string_view description) -> VoidResult {
+auto migration_runner::record_migration(pacs_database_adapter& db, int version,
+                                        std::string_view description)
+    -> VoidResult {
     // Use raw SQL for INSERT (simpler and more reliable for migrations)
     // Note: description is sanitized by the caller and controlled internally
     const std::string sql = pacs::compat::format(
         "INSERT INTO schema_version (version, description) VALUES ({}, '{}');",
         version, description);
 
-    auto result = db_manager->insert_query_result(sql);
+    auto result = db.insert(sql);
     if (result.is_err()) {
         return make_error<std::monostate>(
             result.error().code,
@@ -1123,30 +1103,25 @@ auto migration_runner::record_migration(
     return ok();
 }
 
-auto migration_runner::execute_sql(
-    std::shared_ptr<database::database_manager> db_manager,
-    std::string_view sql) -> VoidResult {
-    auto result = db_manager->execute_query_result(std::string(sql));
+auto migration_runner::execute_sql(pacs_database_adapter& db,
+                                   std::string_view sql) -> VoidResult {
+    auto result = db.execute(std::string(sql));
 
     if (result.is_err()) {
-        return make_error<std::monostate>(
-            result.error().code,
-            pacs::compat::format("SQL execution failed: {}",
-                                 result.error().message),
-            "storage");
+        return result;
     }
 
     return ok();
 }
 
 // ============================================================================
-// Migration Implementations (database_system)
+// Migration Implementations (pacs_database_adapter)
 // ============================================================================
 
-auto migration_runner::migrate_v1(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v1(pacs_database_adapter& db) -> VoidResult {
     // V1: Initial schema - Create all base tables
-    // Note: Same DDL as SQLite version since database_system supports raw SQL
+    // Note: Same DDL as SQLite version since pacs_database_adapter supports raw
+    // SQL
     const std::string sql = R"(
         -- =====================================================================
         -- PATIENTS TABLE
@@ -1359,16 +1334,15 @@ auto migration_runner::migrate_v1(
         END;
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 1, "Initial schema creation");
+    return record_migration(db, 1, "Initial schema creation");
 }
 
-auto migration_runner::migrate_v2(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v2(pacs_database_adapter& db) -> VoidResult {
     // V2: Add audit_log table for REST API audit endpoints
     const std::string sql = R"(
         -- =====================================================================
@@ -1399,16 +1373,15 @@ auto migration_runner::migrate_v2(
         CREATE INDEX IF NOT EXISTS idx_audit_outcome ON audit_log(outcome);
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 2, "Add audit_log table");
+    return record_migration(db, 2, "Add audit_log table");
 }
 
-auto migration_runner::migrate_v3(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v3(pacs_database_adapter& db) -> VoidResult {
     // V3: Add remote_nodes table for PACS client remote node management
     const std::string sql = R"(
         -- =====================================================================
@@ -1444,16 +1417,15 @@ auto migration_runner::migrate_v3(
         CREATE INDEX IF NOT EXISTS idx_remote_nodes_status ON remote_nodes(status);
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 3, "Add remote_nodes table for PACS client");
+    return record_migration(db, 3, "Add remote_nodes table for PACS client");
 }
 
-auto migration_runner::migrate_v4(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v4(pacs_database_adapter& db) -> VoidResult {
     // V4: Add jobs table for async DICOM operations
     const std::string sql = R"(
         -- =====================================================================
@@ -1504,16 +1476,15 @@ auto migration_runner::migrate_v4(
         CREATE INDEX IF NOT EXISTS idx_jobs_patient ON jobs(patient_id);
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 4, "Add jobs table for async DICOM operations");
+    return record_migration(db, 4, "Add jobs table for async DICOM operations");
 }
 
-auto migration_runner::migrate_v5(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v5(pacs_database_adapter& db) -> VoidResult {
     // V5: Add routing_rules table for auto-forwarding
     const std::string sql = R"(
         -- =====================================================================
@@ -1543,16 +1514,15 @@ auto migration_runner::migrate_v5(
         CREATE INDEX IF NOT EXISTS idx_routing_rules_priority ON routing_rules(priority DESC);
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 5, "Add routing_rules table for auto-forwarding");
+    return record_migration(db, 5, "Add routing_rules table for auto-forwarding");
 }
 
-auto migration_runner::migrate_v6(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v6(pacs_database_adapter& db) -> VoidResult {
     // V6: Add sync tables for bidirectional synchronization
     const std::string sql = R"(
         -- =====================================================================
@@ -1630,16 +1600,15 @@ auto migration_runner::migrate_v6(
         CREATE INDEX IF NOT EXISTS idx_sync_history_started ON sync_history(started_at DESC);
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 6, "Add sync tables for bidirectional synchronization");
+    return record_migration(db, 6, "Add sync tables for bidirectional synchronization");
 }
 
-auto migration_runner::migrate_v7(
-    std::shared_ptr<database::database_manager> db_manager) -> VoidResult {
+auto migration_runner::migrate_v7(pacs_database_adapter& db) -> VoidResult {
     // V7: Add annotation and measurement tables for viewer functionality
     const std::string sql = R"(
         -- =====================================================================
@@ -1734,12 +1703,12 @@ auto migration_runner::migrate_v7(
         CREATE INDEX IF NOT EXISTS idx_recent_studies_user ON recent_studies(user_id, accessed_at DESC);
     )";
 
-    auto result = execute_sql(db_manager, sql);
+    auto result = execute_sql(db, sql);
     if (result.is_err()) {
         return result;
     }
 
-    return record_migration(db_manager, 7, "Add annotation and measurement tables");
+    return record_migration(db, 7, "Add annotation and measurement tables");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

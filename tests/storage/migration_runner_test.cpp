@@ -467,3 +467,270 @@ TEST_CASE("migration_runner v5 creates routing_rules table", "[migration][v5][ta
     CHECK(db.index_exists("idx_routing_rules_enabled"));
     CHECK(db.index_exists("idx_routing_rules_priority"));
 }
+
+// ============================================================================
+// pacs_database_adapter Tests
+// ============================================================================
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include <pacs/storage/pacs_database_adapter.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <filesystem>
+
+namespace {
+
+/// Generate unique temporary database path
+auto get_unique_test_db_path() -> std::filesystem::path {
+    static std::atomic<int> counter{0};
+    auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+    auto id = counter.fetch_add(1);
+    auto filename = "migration_runner_adapter_test_" + std::to_string(now) + "_" +
+                    std::to_string(id) + ".db";
+    return std::filesystem::temp_directory_path() / filename;
+}
+
+/**
+ * @brief Check if SQLite backend is supported by unified_database_system
+ *
+ * unified_database_system may not support SQLite on all platforms.
+ * This helper attempts a test connection and returns true if successful.
+ */
+auto is_sqlite_backend_supported() -> bool {
+    auto test_path = get_unique_test_db_path();
+
+    // Clean up any existing file
+    std::filesystem::remove(test_path);
+
+    pacs_database_adapter db(test_path);
+    auto result = db.connect();
+    bool supported = result.is_ok();
+
+    // Clean up
+    (void)db.disconnect();
+    std::filesystem::remove(test_path);
+    std::filesystem::remove(std::filesystem::path(test_path.string() + "-wal"));
+    std::filesystem::remove(std::filesystem::path(test_path.string() + "-shm"));
+
+    return supported;
+}
+
+/**
+ * @brief Skip message for unsupported SQLite backend
+ */
+constexpr const char* SQLITE_NOT_SUPPORTED_MSG =
+    "SQLite backend not yet supported by unified_database_system on this platform.";
+
+/// RAII wrapper for pacs_database_adapter with temporary file database
+class test_adapter_database {
+public:
+    test_adapter_database()
+        : db_path_(get_unique_test_db_path()),
+          adapter_(db_path_) {
+        // Clean up any existing file
+        std::filesystem::remove(db_path_);
+        cleanup_wal_files();
+
+        auto result = adapter_.connect();
+        if (result.is_err()) {
+            throw std::runtime_error("Failed to connect to test database: " +
+                                     db_path_.string());
+        }
+    }
+
+    ~test_adapter_database() {
+        // Disconnect before cleanup
+        (void)adapter_.disconnect();
+
+        // Clean up database files
+        std::filesystem::remove(db_path_);
+        cleanup_wal_files();
+    }
+
+    test_adapter_database(const test_adapter_database&) = delete;
+    auto operator=(const test_adapter_database&) -> test_adapter_database& = delete;
+    test_adapter_database(test_adapter_database&&) = delete;
+    auto operator=(test_adapter_database&&) -> test_adapter_database& = delete;
+
+    [[nodiscard]] auto get() noexcept -> pacs_database_adapter& { return adapter_; }
+
+    [[nodiscard]] auto table_exists(const char* table_name) -> bool {
+        const std::string sql =
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='" +
+            std::string(table_name) + "';";
+        auto result = adapter_.select(sql);
+        return result.is_ok() && !result.value().empty();
+    }
+
+    [[nodiscard]] auto index_exists(const char* index_name) -> bool {
+        const std::string sql =
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='" +
+            std::string(index_name) + "';";
+        auto result = adapter_.select(sql);
+        return result.is_ok() && !result.value().empty();
+    }
+
+private:
+    void cleanup_wal_files() {
+        std::filesystem::remove(
+            std::filesystem::path(db_path_.string() + "-wal"));
+        std::filesystem::remove(
+            std::filesystem::path(db_path_.string() + "-shm"));
+    }
+
+    std::filesystem::path db_path_;
+    pacs_database_adapter adapter_;
+};
+
+}  // namespace
+
+// ============================================================================
+// pacs_database_adapter Migration Tests
+// ============================================================================
+
+TEST_CASE("migration_runner with pacs_database_adapter initial state",
+          "[migration][adapter][version]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
+    }
+
+    test_adapter_database db;
+    migration_runner runner;
+
+    SECTION("empty database has version 0") {
+        CHECK(runner.get_current_version(db.get()) == 0);
+    }
+
+    SECTION("empty database needs migration") {
+        CHECK(runner.needs_migration(db.get()));
+    }
+
+    SECTION("empty database has no history") {
+        auto history = runner.get_history(db.get());
+        CHECK(history.empty());
+    }
+}
+
+TEST_CASE("migration_runner with pacs_database_adapter run_migrations",
+          "[migration][adapter][execute]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
+    }
+
+    test_adapter_database db;
+    migration_runner runner;
+
+    SECTION("successful initial migration") {
+        auto result = runner.run_migrations(db.get());
+        REQUIRE(result.is_ok());
+
+        CHECK(runner.get_current_version(db.get()) == 7);
+        CHECK_FALSE(runner.needs_migration(db.get()));
+    }
+
+    SECTION("migration is idempotent") {
+        auto result1 = runner.run_migrations(db.get());
+        REQUIRE(result1.is_ok());
+
+        auto result2 = runner.run_migrations(db.get());
+        REQUIRE(result2.is_ok());
+
+        CHECK(runner.get_current_version(db.get()) == 7);
+    }
+
+    SECTION("migration creates schema_version table") {
+        auto result = runner.run_migrations(db.get());
+        REQUIRE(result.is_ok());
+
+        CHECK(db.table_exists("schema_version"));
+    }
+
+    SECTION("migration records history") {
+        auto result = runner.run_migrations(db.get());
+        REQUIRE(result.is_ok());
+
+        auto history = runner.get_history(db.get());
+        REQUIRE(history.size() == 7);
+        CHECK(history[0].version == 1);
+        CHECK(history[0].description == "Initial schema creation");
+    }
+}
+
+TEST_CASE("migration_runner with pacs_database_adapter creates all tables",
+          "[migration][adapter][tables]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
+    }
+
+    test_adapter_database db;
+    migration_runner runner;
+
+    auto result = runner.run_migrations(db.get());
+    REQUIRE(result.is_ok());
+
+    // V1 tables
+    CHECK(db.table_exists("patients"));
+    CHECK(db.table_exists("studies"));
+    CHECK(db.table_exists("series"));
+    CHECK(db.table_exists("instances"));
+    CHECK(db.table_exists("mpps"));
+    CHECK(db.table_exists("worklist"));
+
+    // V2 tables
+    CHECK(db.table_exists("audit_log"));
+
+    // V3 tables
+    CHECK(db.table_exists("remote_nodes"));
+
+    // V4 tables
+    CHECK(db.table_exists("jobs"));
+
+    // V5 tables
+    CHECK(db.table_exists("routing_rules"));
+
+    // V6 tables
+    CHECK(db.table_exists("sync_configs"));
+    CHECK(db.table_exists("sync_conflicts"));
+    CHECK(db.table_exists("sync_history"));
+
+    // V7 tables
+    CHECK(db.table_exists("annotations"));
+    CHECK(db.table_exists("measurements"));
+    CHECK(db.table_exists("key_images"));
+    CHECK(db.table_exists("viewer_states"));
+    CHECK(db.table_exists("recent_studies"));
+}
+
+TEST_CASE("migration_runner with pacs_database_adapter run_migrations_to",
+          "[migration][adapter][targeted]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
+    }
+
+    test_adapter_database db;
+    migration_runner runner;
+
+    SECTION("migrate to version 1") {
+        auto result = runner.run_migrations_to(db.get(), 1);
+        REQUIRE(result.is_ok());
+        CHECK(runner.get_current_version(db.get()) == 1);
+    }
+
+    SECTION("migrate to version 0 is no-op") {
+        auto result = runner.run_migrations_to(db.get(), 0);
+        REQUIRE(result.is_ok());
+        CHECK(runner.get_current_version(db.get()) == 0);
+    }
+
+    SECTION("migrate to invalid version fails") {
+        auto result = runner.run_migrations_to(db.get(), 999);
+        CHECK(result.is_err());
+    }
+}
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
