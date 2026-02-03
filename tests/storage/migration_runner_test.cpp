@@ -475,20 +475,47 @@ TEST_CASE("migration_runner v5 creates routing_rules table", "[migration][v5][ta
 #ifdef PACS_WITH_DATABASE_SYSTEM
 #include <pacs/storage/pacs_database_adapter.hpp>
 
+#include <atomic>
+#include <chrono>
+#include <filesystem>
+
 namespace {
 
-/// RAII wrapper for pacs_database_adapter with in-memory database
+/// Generate unique temporary database path
+auto get_unique_test_db_path() -> std::filesystem::path {
+    static std::atomic<int> counter{0};
+    auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+    auto id = counter.fetch_add(1);
+    auto filename = "migration_runner_adapter_test_" + std::to_string(now) + "_" +
+                    std::to_string(id) + ".db";
+    return std::filesystem::temp_directory_path() / filename;
+}
+
+/// RAII wrapper for pacs_database_adapter with temporary file database
 class test_adapter_database {
 public:
     test_adapter_database()
-        : adapter_(database::database_types::sqlite, ":memory:") {
+        : db_path_(get_unique_test_db_path()),
+          adapter_(db_path_) {
+        // Clean up any existing file
+        std::filesystem::remove(db_path_);
+        cleanup_wal_files();
+
         auto result = adapter_.connect();
         if (result.is_err()) {
-            throw std::runtime_error("Failed to connect to in-memory database");
+            throw std::runtime_error("Failed to connect to test database: " +
+                                     db_path_.string());
         }
     }
 
-    ~test_adapter_database() = default;
+    ~test_adapter_database() {
+        // Disconnect before cleanup
+        (void)adapter_.disconnect();
+
+        // Clean up database files
+        std::filesystem::remove(db_path_);
+        cleanup_wal_files();
+    }
 
     test_adapter_database(const test_adapter_database&) = delete;
     auto operator=(const test_adapter_database&) -> test_adapter_database& = delete;
@@ -514,6 +541,14 @@ public:
     }
 
 private:
+    void cleanup_wal_files() {
+        std::filesystem::remove(
+            std::filesystem::path(db_path_.string() + "-wal"));
+        std::filesystem::remove(
+            std::filesystem::path(db_path_.string() + "-shm"));
+    }
+
+    std::filesystem::path db_path_;
     pacs_database_adapter adapter_;
 };
 
