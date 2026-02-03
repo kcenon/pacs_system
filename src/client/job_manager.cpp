@@ -1437,7 +1437,7 @@ pacs::VoidResult job_manager::delete_job(std::string_view job_id) {
 
     // Remove from repository
     if (impl_->repo) {
-        [[maybe_unused]] auto result = impl_->repo->remove(job_id);
+        [[maybe_unused]] auto result = impl_->repo->remove(std::string(job_id));
     }
 
     impl_->logger->info_fmt("Deleted job {}", job_id);
@@ -1464,7 +1464,15 @@ std::vector<job_record> job_manager::list_jobs(
         options.type = type;
         options.limit = limit;
         options.offset = offset;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto result = impl_->repo->find_jobs(options);
+        if (result.is_ok()) {
+            return result.value();
+        }
+        return {};
+#else
         return impl_->repo->find_jobs(options);
+#endif
     }
 
     // Fallback to cache
@@ -1485,7 +1493,15 @@ std::vector<job_record> job_manager::list_jobs(
 
 std::vector<job_record> job_manager::list_jobs_by_node(std::string_view node_id) const {
     if (impl_->repo) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto result = impl_->repo->find_by_node(node_id);
+        if (result.is_ok()) {
+            return result.value();
+        }
+        return {};
+#else
         return impl_->repo->find_by_node(node_id);
+#endif
     }
 
     // Fallback to cache
@@ -1605,14 +1621,30 @@ size_t job_manager::pending_jobs() const {
 
 size_t job_manager::completed_jobs_today() const {
     if (impl_->repo) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto result = impl_->repo->count_completed_today();
+        if (result.is_ok()) {
+            return result.value();
+        }
+        return 0;
+#else
         return impl_->repo->count_completed_today();
+#endif
     }
     return 0;
 }
 
 size_t job_manager::failed_jobs_today() const {
     if (impl_->repo) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto result = impl_->repo->count_failed_today();
+        if (result.is_ok()) {
+            return result.value();
+        }
+        return 0;
+#else
         return impl_->repo->count_failed_today();
+#endif
     }
     return 0;
 }
