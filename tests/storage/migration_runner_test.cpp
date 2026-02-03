@@ -474,7 +474,6 @@ TEST_CASE("migration_runner v5 creates routing_rules table", "[migration][v5][ta
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 #include <pacs/storage/pacs_database_adapter.hpp>
-#include <filesystem>
 
 namespace {
 
@@ -482,7 +481,7 @@ namespace {
 class test_adapter_database {
 public:
     test_adapter_database()
-        : adapter_(std::filesystem::path(":memory:")) {
+        : adapter_(database::database_types::sqlite, ":memory:") {
         auto result = adapter_.connect();
         if (result.is_err()) {
             throw std::runtime_error("Failed to connect to in-memory database");
