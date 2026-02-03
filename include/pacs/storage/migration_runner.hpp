@@ -5,12 +5,12 @@
  * This file provides the migration_runner class for managing database
  * schema evolution through versioned migrations.
  *
- * When compiled with PACS_WITH_DATABASE_SYSTEM, uses database_system's
- * database_manager for consistent database abstraction. Otherwise, uses
- * direct SQLite prepared statements.
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for consistent database abstraction. Otherwise, uses direct SQLite
+ * prepared statements.
  *
  * @see SRS-STOR-003
- * @see Issue #422 - Migrate migration_runner.cpp to database_system
+ * @see Issue #643 - Update migration_runner to use pacs_database_adapter
  */
 
 #pragma once
@@ -25,24 +25,11 @@
 #include <string_view>
 #include <vector>
 
+// Forward declaration for pacs_database_adapter
 #ifdef PACS_WITH_DATABASE_SYSTEM
-// Suppress deprecated warnings from database_system headers
-// database_base is deprecated in favor of database_backend
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
-#include <database/database_manager.h>
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+namespace pacs::storage {
+class pacs_database_adapter;
+}
 #endif
 
 // Forward declaration of SQLite handle
@@ -66,16 +53,16 @@ using migration_function = std::function<VoidResult(sqlite3* db)>;
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 /**
- * @brief Function type for migration implementations (database_system)
+ * @brief Function type for migration implementations (pacs_database_adapter)
  *
- * Each migration function receives a database manager and should execute
+ * Each migration function receives a database adapter and should execute
  * the necessary SQL to upgrade the schema to its target version.
  *
- * @param db The database_system manager
+ * @param db The pacs_database_adapter instance
  * @return VoidResult Success or error information
  */
-using db_system_migration_function =
-    std::function<VoidResult(std::shared_ptr<database::database_manager>)>;
+using adapter_migration_function =
+    std::function<VoidResult(pacs_database_adapter&)>;
 #endif
 
 /**
@@ -155,61 +142,57 @@ public:
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // ========================================================================
-    // Migration Operations (database_system)
+    // Migration Operations (pacs_database_adapter)
     // ========================================================================
 
     /**
-     * @brief Run all pending migrations using database_system
+     * @brief Run all pending migrations using pacs_database_adapter
      *
      * Executes all migrations from the current version up to LATEST_VERSION.
      * Each migration is run within a transaction for atomicity.
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @return VoidResult Success or error information
      *
      * @note If any migration fails, the database will be rolled back to its
      *       state before that migration started.
      */
-    [[nodiscard]] auto run_migrations(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
+    [[nodiscard]] auto run_migrations(pacs_database_adapter& db) -> VoidResult;
 
     /**
-     * @brief Run migrations up to a specific version using database_system
+     * @brief Run migrations up to a specific version using pacs_database_adapter
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @param target_version The version to migrate to
      * @return VoidResult Success or error information
      */
-    [[nodiscard]] auto run_migrations_to(
-        std::shared_ptr<database::database_manager> db_manager,
-        int target_version) -> VoidResult;
+    [[nodiscard]] auto run_migrations_to(pacs_database_adapter& db,
+                                         int target_version) -> VoidResult;
 
     /**
-     * @brief Get the current schema version using database_system
+     * @brief Get the current schema version using pacs_database_adapter
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @return Current schema version number
      */
-    [[nodiscard]] auto get_current_version(
-        std::shared_ptr<database::database_manager> db_manager) const -> int;
+    [[nodiscard]] auto get_current_version(pacs_database_adapter& db) const
+        -> int;
 
     /**
-     * @brief Check if migration is needed using database_system
+     * @brief Check if migration is needed using pacs_database_adapter
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @return true if current version is less than LATEST_VERSION
      */
-    [[nodiscard]] auto needs_migration(
-        std::shared_ptr<database::database_manager> db_manager) const -> bool;
+    [[nodiscard]] auto needs_migration(pacs_database_adapter& db) const -> bool;
 
     /**
-     * @brief Get the migration history using database_system
+     * @brief Get the migration history using pacs_database_adapter
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @return Vector of migration records
      */
-    [[nodiscard]] auto get_history(
-        std::shared_ptr<database::database_manager> db_manager) const
+    [[nodiscard]] auto get_history(pacs_database_adapter& db) const
         -> std::vector<migration_record>;
 #endif
 
@@ -313,71 +296,61 @@ private:
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // ========================================================================
-    // Internal Implementation (database_system)
+    // Internal Implementation (pacs_database_adapter)
     // ========================================================================
 
     /**
      * @brief Create the schema_version table if it doesn't exist
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @return VoidResult Success or error information
      */
-    [[nodiscard]] auto ensure_schema_version_table(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
+    [[nodiscard]] auto ensure_schema_version_table(pacs_database_adapter& db)
+        -> VoidResult;
 
     /**
-     * @brief Apply a single migration using database_system
+     * @brief Apply a single migration using pacs_database_adapter
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @param version The migration version to apply
      * @return VoidResult Success or error information
      */
-    [[nodiscard]] auto apply_migration(
-        std::shared_ptr<database::database_manager> db_manager,
-        int version) -> VoidResult;
+    [[nodiscard]] auto apply_migration(pacs_database_adapter& db, int version)
+        -> VoidResult;
 
     /**
      * @brief Record a migration in the schema_version table
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @param version The version that was applied
      * @param description Description of the migration
      * @return VoidResult Success or error information
      */
-    [[nodiscard]] auto record_migration(
-        std::shared_ptr<database::database_manager> db_manager,
-        int version,
-        std::string_view description) -> VoidResult;
+    [[nodiscard]] auto record_migration(pacs_database_adapter& db, int version,
+                                        std::string_view description)
+        -> VoidResult;
 
     /**
-     * @brief Execute SQL statement using database_system
+     * @brief Execute SQL statement using pacs_database_adapter
      *
-     * @param db_manager The database_system manager
+     * @param db The pacs_database_adapter instance
      * @param sql The SQL statement to execute
      * @return VoidResult Success or error information
      */
-    [[nodiscard]] auto execute_sql(
-        std::shared_ptr<database::database_manager> db_manager,
-        std::string_view sql) -> VoidResult;
+    [[nodiscard]] auto execute_sql(pacs_database_adapter& db,
+                                   std::string_view sql) -> VoidResult;
 
-    // Migration implementations (database_system)
-    [[nodiscard]] auto migrate_v1(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
-    [[nodiscard]] auto migrate_v2(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
-    [[nodiscard]] auto migrate_v3(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
-    [[nodiscard]] auto migrate_v4(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
-    [[nodiscard]] auto migrate_v5(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
-    [[nodiscard]] auto migrate_v6(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
-    [[nodiscard]] auto migrate_v7(
-        std::shared_ptr<database::database_manager> db_manager) -> VoidResult;
+    // Migration implementations (pacs_database_adapter)
+    [[nodiscard]] auto migrate_v1(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v2(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v3(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v4(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v5(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v6(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v7(pacs_database_adapter& db) -> VoidResult;
 
-    /// Migration function registry (database_system)
-    std::vector<std::pair<int, db_system_migration_function>> db_system_migrations_;
+    /// Migration function registry (pacs_database_adapter)
+    std::vector<std::pair<int, adapter_migration_function>> adapter_migrations_;
 #endif
 
     /// Latest schema version (increment when adding migrations)
