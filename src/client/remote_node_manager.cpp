@@ -259,6 +259,7 @@ struct remote_node_manager::impl {
     void load_nodes_from_repo() {
         if (!repo) return;
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
         auto nodes_result = repo->find_all();
         if (nodes_result.is_err()) return;
 
@@ -266,6 +267,13 @@ struct remote_node_manager::impl {
         for (auto& node : nodes_result.value()) {
             node_cache[node.node_id] = std::move(node);
         }
+#else
+        auto nodes = repo->find_all();
+        std::lock_guard<std::mutex> lock(cache_mutex);
+        for (auto& node : nodes) {
+            node_cache[node.node_id] = std::move(node);
+        }
+#endif
     }
 };
 
@@ -337,12 +345,21 @@ pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
 
     // Persist to repository
     if (impl_->repo) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
         auto result = impl_->repo->save(node);
         if (result.is_err()) {
             return pacs::pacs_void_error(
                 result.error().code,
                 "Failed to persist node: " + result.error().message);
         }
+#else
+        auto result = impl_->repo->upsert(node);
+        if (result.is_err()) {
+            return pacs::pacs_void_error(
+                result.error().code,
+                "Failed to persist node: " + result.error().message);
+        }
+#endif
     }
 
     // Add to cache
@@ -370,12 +387,21 @@ pacs::VoidResult remote_node_manager::update_node(const remote_node& node) {
 
     // Update repository
     if (impl_->repo) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
         auto result = impl_->repo->save(node);
         if (result.is_err()) {
             return pacs::pacs_void_error(
                 result.error().code,
                 "Failed to update node: " + result.error().message);
         }
+#else
+        auto result = impl_->repo->upsert(node);
+        if (result.is_err()) {
+            return pacs::pacs_void_error(
+                result.error().code,
+                "Failed to update node: " + result.error().message);
+        }
+#endif
     }
 
     // Update cache
