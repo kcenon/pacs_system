@@ -36,6 +36,119 @@ namespace pacs::web::endpoints {
 
 namespace {
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+/**
+ * @brief Create annotation_repository from index_database
+ * @note Uses database_adapter() for base_repository pattern
+ */
+inline auto make_annotation_repo(storage::index_database* db) {
+    return storage::annotation_repository(db->db_adapter());
+}
+
+/**
+ * @brief Search annotations (database_system version)
+ */
+inline std::vector<storage::annotation_record> search_annotations(
+    storage::annotation_repository& repo,
+    const storage::annotation_query& query) {
+    auto result = repo.search(query);
+    return result.is_ok() ? std::move(result.value()) : std::vector<storage::annotation_record>{};
+}
+
+/**
+ * @brief Count annotations (database_system version)
+ */
+inline size_t count_annotations(
+    storage::annotation_repository& repo,
+    const storage::annotation_query& query) {
+    auto result = repo.count_matching(query);
+    return result.is_ok() ? result.value() : 0;
+}
+
+/**
+ * @brief Find annotation by ID (database_system version)
+ */
+inline std::optional<storage::annotation_record> find_annotation(
+    storage::annotation_repository& repo,
+    const std::string& annotation_id) {
+    auto result = repo.find_by_id(annotation_id);
+    return result.is_ok() ? std::make_optional(std::move(result.value())) : std::nullopt;
+}
+
+/**
+ * @brief Check if annotation exists (database_system version)
+ */
+inline bool annotation_exists(
+    storage::annotation_repository& repo,
+    const std::string& annotation_id) {
+    auto result = repo.exists(annotation_id);
+    return result.is_ok() && result.value();
+}
+
+/**
+ * @brief Find annotations by instance (database_system version)
+ */
+inline std::vector<storage::annotation_record> find_by_instance(
+    storage::annotation_repository& repo,
+    const std::string& sop_instance_uid) {
+    auto result = repo.find_by_instance(sop_instance_uid);
+    return result.is_ok() ? std::move(result.value()) : std::vector<storage::annotation_record>{};
+}
+#else
+/**
+ * @brief Create annotation_repository from index_database
+ * @note Uses native_handle() for legacy SQLite interface
+ */
+inline auto make_annotation_repo(storage::index_database* db) {
+    return storage::annotation_repository(db->native_handle());
+}
+
+/**
+ * @brief Search annotations (legacy version)
+ */
+inline std::vector<storage::annotation_record> search_annotations(
+    storage::annotation_repository& repo,
+    const storage::annotation_query& query) {
+    return repo.search(query);
+}
+
+/**
+ * @brief Count annotations (legacy version)
+ */
+inline size_t count_annotations(
+    storage::annotation_repository& repo,
+    const storage::annotation_query& query) {
+    return repo.count(query);
+}
+
+/**
+ * @brief Find annotation by ID (legacy version)
+ */
+inline std::optional<storage::annotation_record> find_annotation(
+    storage::annotation_repository& repo,
+    const std::string& annotation_id) {
+    return repo.find_by_id(annotation_id);
+}
+
+/**
+ * @brief Check if annotation exists (legacy version)
+ */
+inline bool annotation_exists(
+    storage::annotation_repository& repo,
+    const std::string& annotation_id) {
+    return repo.exists(annotation_id);
+}
+
+/**
+ * @brief Find annotations by instance (legacy version)
+ */
+inline std::vector<storage::annotation_record> find_by_instance(
+    storage::annotation_repository& repo,
+    const std::string& sop_instance_uid) {
+    return repo.find_by_instance(sop_instance_uid);
+}
+#endif
+
 /**
  * @brief Add CORS headers to response
  */
@@ -335,7 +448,7 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
           return res;
         }
 
-        storage::annotation_repository repo(ctx->database->native_handle());
+        auto repo = make_annotation_repo(ctx->database.get());
         auto save_result = repo.save(ann);
         if (!save_result.is_ok()) {
           res.code = 500;
@@ -390,14 +503,14 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
           query.user_id = user_id;
         }
 
-        storage::annotation_repository repo(ctx->database->native_handle());
+        auto repo = make_annotation_repo(ctx->database.get());
 
         storage::annotation_query count_query = query;
         count_query.limit = 0;
         count_query.offset = 0;
-        size_t total_count = repo.count(count_query);
+        size_t total_count = count_annotations(repo, count_query);
 
-        auto annotations = repo.search(query);
+        auto annotations = search_annotations(repo, query);
 
         res.code = 200;
         res.body = annotations_to_json(annotations, total_count);
@@ -419,8 +532,8 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            storage::annotation_repository repo(ctx->database->native_handle());
-            auto ann = repo.find_by_id(annotation_id);
+            auto repo = make_annotation_repo(ctx->database.get());
+            auto ann = find_annotation(repo, annotation_id);
             if (!ann.has_value()) {
               res.code = 404;
               res.body = make_error_json("NOT_FOUND", "Annotation not found");
@@ -447,8 +560,8 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            storage::annotation_repository repo(ctx->database->native_handle());
-            auto existing = repo.find_by_id(annotation_id);
+            auto repo = make_annotation_repo(ctx->database.get());
+            auto existing = find_annotation(repo, annotation_id);
             if (!existing.has_value()) {
               res.code = 404;
               res.body = make_error_json("NOT_FOUND", "Annotation not found");
@@ -510,8 +623,8 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            storage::annotation_repository repo(ctx->database->native_handle());
-            if (!repo.exists(annotation_id)) {
+            auto repo = make_annotation_repo(ctx->database.get());
+            if (!annotation_exists(repo, annotation_id)) {
               res.code = 404;
               res.add_header("Content-Type", "application/json");
               res.body = make_error_json("NOT_FOUND", "Annotation not found");
@@ -547,8 +660,8 @@ void register_annotation_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
-            storage::annotation_repository repo(ctx->database->native_handle());
-            auto annotations = repo.find_by_instance(sop_instance_uid);
+            auto repo = make_annotation_repo(ctx->database.get());
+            auto annotations = find_by_instance(repo, sop_instance_uid);
 
             std::ostringstream oss;
             oss << R"({"data":[)";

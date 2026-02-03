@@ -1,12 +1,13 @@
 /**
  * @file node_repository.hpp
- * @brief Repository for remote PACS node persistence
+ * @brief Repository for remote PACS node persistence using base_repository pattern
  *
  * This file provides the node_repository class for persisting remote node
- * configurations in the SQLite database. Supports CRUD operations and
- * status updates.
+ * configurations. Supports CRUD operations and status updates.
  *
  * @see Issue #535 - Implement Remote Node Manager
+ * @see Issue #610 - Phase 4: Repository Migrations
+ * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
  */
 
 #pragma once
@@ -21,23 +22,18 @@
 #include <string_view>
 #include <vector>
 
-// Forward declaration
-struct sqlite3;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "pacs/storage/base_repository.hpp"
 
 namespace pacs::storage {
 
-/// Result type alias
-template <typename T>
-using Result = kcenon::common::Result<T>;
-
-/// Void result type alias
-using VoidResult = kcenon::common::VoidResult;
-
 /**
- * @brief Repository for remote node persistence
+ * @brief Repository for remote node persistence using base_repository pattern
  *
+ * Extends base_repository to inherit standard CRUD operations.
  * Provides database operations for storing and retrieving remote PACS node
- * configurations. Uses SQLite for persistence.
+ * configurations.
  *
  * Thread Safety:
  * - This class is NOT thread-safe. External synchronization is required
@@ -45,117 +41,57 @@ using VoidResult = kcenon::common::VoidResult;
  *
  * @example
  * @code
- * auto repo = std::make_shared<node_repository>(db_handle);
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = node_repository(db);
  *
- * // Add a node
  * client::remote_node node;
  * node.node_id = "external-pacs";
  * node.ae_title = "EXT_PACS";
  * node.host = "192.168.1.100";
- * repo->upsert(node);
+ * repo.save(node);
  *
- * // Find a node
- * auto found = repo->find_by_id("external-pacs");
- * if (found) {
- *     std::cout << "Found: " << found->name << std::endl;
- * }
+ * auto found = repo.find_by_id(node.node_id);
  * @endcode
  */
-class node_repository {
+class node_repository
+    : public base_repository<client::remote_node, std::string> {
 public:
-    // =========================================================================
-    // Construction / Destruction
-    // =========================================================================
+    explicit node_repository(std::shared_ptr<pacs_database_adapter> db);
+    ~node_repository() override = default;
 
-    /**
-     * @brief Construct repository with SQLite handle
-     *
-     * @param db SQLite database handle (must remain valid for repository lifetime)
-     */
-    explicit node_repository(sqlite3* db);
-
-    /**
-     * @brief Destructor
-     */
-    ~node_repository();
-
-    // Non-copyable, movable
     node_repository(const node_repository&) = delete;
     auto operator=(const node_repository&) -> node_repository& = delete;
-    node_repository(node_repository&&) noexcept;
-    auto operator=(node_repository&&) noexcept -> node_repository&;
+    node_repository(node_repository&&) noexcept = default;
+    auto operator=(node_repository&&) noexcept -> node_repository& = default;
 
     // =========================================================================
-    // CRUD Operations
+    // Domain-Specific Operations
     // =========================================================================
 
     /**
-     * @brief Insert or update a remote node
+     * @brief Find a node by primary key (integer pk)
      *
-     * If a node with the same node_id exists, updates it.
-     * Otherwise, inserts a new record.
-     *
-     * @param node The node to upsert
-     * @return Result containing the primary key or error
+     * @param pk The primary key (integer)
+     * @return Result containing the node if found, or error
      */
-    [[nodiscard]] auto upsert(const client::remote_node& node) -> Result<int64_t>;
-
-    /**
-     * @brief Find a node by its unique ID
-     *
-     * @param node_id The node ID to search for
-     * @return Optional containing the node if found
-     */
-    [[nodiscard]] auto find_by_id(std::string_view node_id) const
-        -> std::optional<client::remote_node>;
-
-    /**
-     * @brief Find a node by primary key
-     *
-     * @param pk The primary key
-     * @return Optional containing the node if found
-     */
-    [[nodiscard]] auto find_by_pk(int64_t pk) const
-        -> std::optional<client::remote_node>;
+    [[nodiscard]] auto find_by_pk(int64_t pk) -> result_type;
 
     /**
      * @brief Get all nodes
      *
-     * @return Vector of all stored nodes
+     * @return Result containing vector of all stored nodes
      */
-    [[nodiscard]] auto find_all() const -> std::vector<client::remote_node>;
+    [[nodiscard]] auto find_all_nodes() -> list_result_type;
 
     /**
      * @brief Get nodes by status
      *
      * @param status The status to filter by
-     * @return Vector of nodes with the specified status
+     * @return Result containing vector of nodes with the specified status
      */
-    [[nodiscard]] auto find_by_status(client::node_status status) const
-        -> std::vector<client::remote_node>;
-
-    /**
-     * @brief Delete a node by ID
-     *
-     * @param node_id The node ID to delete
-     * @return VoidResult indicating success or error
-     */
-    [[nodiscard]] auto remove(std::string_view node_id) -> VoidResult;
-
-    /**
-     * @brief Check if a node exists
-     *
-     * @param node_id The node ID to check
-     * @return true if the node exists
-     */
-    [[nodiscard]] auto exists(std::string_view node_id) const -> bool;
-
-    /**
-     * @brief Get the count of all nodes
-     *
-     * @return Number of nodes in the repository
-     */
-    [[nodiscard]] auto count() const -> size_t;
+    [[nodiscard]] auto find_by_status(client::node_status status)
+        -> list_result_type;
 
     // =========================================================================
     // Status Updates
@@ -183,29 +119,92 @@ public:
     [[nodiscard]] auto update_last_verified(std::string_view node_id)
         -> VoidResult;
 
+protected:
     // =========================================================================
-    // Database Information
+    // base_repository overrides
     // =========================================================================
 
-    /**
-     * @brief Check if the database connection is valid
-     *
-     * @return true if the database handle is valid
-     */
+    [[nodiscard]] auto map_row_to_entity(const database_row& row) const
+        -> client::remote_node override;
+
+    [[nodiscard]] auto entity_to_row(const client::remote_node& entity) const
+        -> std::map<std::string, database_value> override;
+
+    [[nodiscard]] auto get_pk(const client::remote_node& entity) const
+        -> std::string override;
+
+    [[nodiscard]] auto has_pk(const client::remote_node& entity) const
+        -> bool override;
+
+    [[nodiscard]] auto select_columns() const
+        -> std::vector<std::string> override;
+
+private:
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+};
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// Legacy interface for builds without database_system
+struct sqlite3;
+
+namespace pacs::storage {
+
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Repository for remote node persistence (legacy SQLite interface)
+ *
+ * This is the legacy interface maintained for builds without database_system.
+ * New code should use the base_repository version when PACS_WITH_DATABASE_SYSTEM
+ * is defined.
+ */
+class node_repository {
+public:
+    explicit node_repository(sqlite3* db);
+    ~node_repository();
+
+    node_repository(const node_repository&) = delete;
+    auto operator=(const node_repository&) -> node_repository& = delete;
+    node_repository(node_repository&&) noexcept;
+    auto operator=(node_repository&&) noexcept -> node_repository&;
+
+    [[nodiscard]] auto upsert(const client::remote_node& node) -> Result<int64_t>;
+    [[nodiscard]] auto find_by_id(std::string_view node_id) const
+        -> std::optional<client::remote_node>;
+    [[nodiscard]] auto find_by_pk(int64_t pk) const
+        -> std::optional<client::remote_node>;
+    [[nodiscard]] auto find_all() const -> std::vector<client::remote_node>;
+    [[nodiscard]] auto find_by_status(client::node_status status) const
+        -> std::vector<client::remote_node>;
+    [[nodiscard]] auto remove(std::string_view node_id) -> VoidResult;
+    [[nodiscard]] auto exists(std::string_view node_id) const -> bool;
+    [[nodiscard]] auto count() const -> size_t;
+
+    [[nodiscard]] auto update_status(
+        std::string_view node_id,
+        client::node_status status,
+        std::string_view error_message = "") -> VoidResult;
+    [[nodiscard]] auto update_last_verified(std::string_view node_id)
+        -> VoidResult;
+
     [[nodiscard]] auto is_valid() const noexcept -> bool;
 
 private:
-    // =========================================================================
-    // Private Implementation
-    // =========================================================================
-
-    /**
-     * @brief Parse a node from a prepared statement
-     */
     [[nodiscard]] auto parse_row(void* stmt) const -> client::remote_node;
 
-    /// SQLite database handle
     sqlite3* db_{nullptr};
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

@@ -4,14 +4,471 @@
  *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #581 - Part 1: Data Models and Repositories
+ * @see Issue #610 - Phase 4: Repository Migrations
+ * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
  */
 
 #include "pacs/storage/annotation_repository.hpp"
 
-#include <sqlite3.h>
-
 #include <chrono>
 #include <sstream>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+namespace pacs::storage {
+
+// =============================================================================
+// Constructor
+// =============================================================================
+
+annotation_repository::annotation_repository(
+    std::shared_ptr<pacs_database_adapter> db)
+    : base_repository(std::move(db), "annotations", "annotation_id") {}
+
+// =============================================================================
+// JSON Serialization
+// =============================================================================
+
+std::string annotation_repository::serialize_style(const annotation_style& style) {
+    std::ostringstream oss;
+    oss << "{"
+        << R"("color":")" << style.color << "\","
+        << R"("line_width":)" << style.line_width << ","
+        << R"("fill_color":")" << style.fill_color << "\","
+        << R"("fill_opacity":)" << style.fill_opacity << ","
+        << R"("font_family":")" << style.font_family << "\","
+        << R"("font_size":)" << style.font_size
+        << "}";
+    return oss.str();
+}
+
+annotation_style annotation_repository::deserialize_style(std::string_view json) {
+    annotation_style style;
+    if (json.empty() || json == "{}") return style;
+
+    auto find_string_value = [&](const char* key) -> std::string {
+        std::string search = std::string("\"") + key + "\":\"";
+        auto pos = json.find(search);
+        if (pos == std::string_view::npos) return "";
+        pos += search.size();
+        auto end = json.find('"', pos);
+        if (end == std::string_view::npos) return "";
+        return std::string(json.substr(pos, end - pos));
+    };
+
+    auto find_int_value = [&](const char* key) -> int {
+        std::string search = std::string("\"") + key + "\":";
+        auto pos = json.find(search);
+        if (pos == std::string_view::npos) return 0;
+        pos += search.size();
+        return std::atoi(json.data() + pos);
+    };
+
+    auto find_float_value = [&](const char* key) -> float {
+        std::string search = std::string("\"") + key + "\":";
+        auto pos = json.find(search);
+        if (pos == std::string_view::npos) return 0.0f;
+        pos += search.size();
+        return static_cast<float>(std::atof(json.data() + pos));
+    };
+
+    auto color = find_string_value("color");
+    if (!color.empty()) style.color = color;
+
+    style.line_width = find_int_value("line_width");
+    if (style.line_width == 0) style.line_width = 2;
+
+    style.fill_color = find_string_value("fill_color");
+    style.fill_opacity = find_float_value("fill_opacity");
+
+    auto font_family = find_string_value("font_family");
+    if (!font_family.empty()) style.font_family = font_family;
+
+    style.font_size = find_int_value("font_size");
+    if (style.font_size == 0) style.font_size = 14;
+
+    return style;
+}
+
+// =============================================================================
+// Timestamp Helpers
+// =============================================================================
+
+auto annotation_repository::parse_timestamp(const std::string& str) const
+    -> std::chrono::system_clock::time_point {
+    if (str.empty()) {
+        return {};
+    }
+
+    std::tm tm{};
+    if (std::sscanf(str.c_str(), "%d-%d-%d %d:%d:%d", &tm.tm_year, &tm.tm_mon,
+                    &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+        return {};
+    }
+
+    tm.tm_year -= 1900;
+    tm.tm_mon -= 1;
+
+#ifdef _WIN32
+    auto time = _mkgmtime(&tm);
+#else
+    auto time = timegm(&tm);
+#endif
+
+    return std::chrono::system_clock::from_time_t(time);
+}
+
+auto annotation_repository::format_timestamp(
+    std::chrono::system_clock::time_point tp) const -> std::string {
+    if (tp == std::chrono::system_clock::time_point{}) {
+        return "";
+    }
+
+    auto time = std::chrono::system_clock::to_time_t(tp);
+    std::tm tm{};
+#ifdef _WIN32
+    gmtime_s(&tm, &time);
+#else
+    gmtime_r(&time, &tm);
+#endif
+
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return buf;
+}
+
+// =============================================================================
+// Domain-Specific Operations
+// =============================================================================
+
+auto annotation_repository::find_by_pk(int64_t pk) -> result_type {
+    if (!db() || !db()->is_connected()) {
+        return result_type(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns())
+        .from(table_name())
+        .where("pk", "=", pk)
+        .limit(1);
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return result_type(result.error());
+    }
+
+    if (result.value().empty()) {
+        return result_type(kcenon::common::error_info{
+            -1, "Annotation not found with pk=" + std::to_string(pk), "storage"});
+    }
+
+    return result_type(map_row_to_entity(result.value()[0]));
+}
+
+auto annotation_repository::find_by_instance(std::string_view sop_instance_uid)
+    -> list_result_type {
+    return find_where("sop_instance_uid", "=", std::string(sop_instance_uid));
+}
+
+auto annotation_repository::find_by_study(std::string_view study_uid)
+    -> list_result_type {
+    return find_where("study_uid", "=", std::string(study_uid));
+}
+
+auto annotation_repository::search(const annotation_query& query)
+    -> list_result_type {
+    if (!db() || !db()->is_connected()) {
+        return list_result_type(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns()).from(table_name());
+
+    std::optional<database::query_condition> condition;
+
+    if (query.study_uid.has_value()) {
+        auto cond = database::query_condition(
+            "study_uid", "=", query.study_uid.value());
+        condition = cond;
+    }
+
+    if (query.series_uid.has_value()) {
+        auto cond = database::query_condition(
+            "series_uid", "=", query.series_uid.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.sop_instance_uid.has_value()) {
+        auto cond = database::query_condition(
+            "sop_instance_uid", "=", query.sop_instance_uid.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.user_id.has_value()) {
+        auto cond = database::query_condition(
+            "user_id", "=", query.user_id.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.type.has_value()) {
+        auto cond = database::query_condition(
+            "annotation_type", "=", to_string(query.type.value()));
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (condition.has_value()) {
+        builder.where(condition.value());
+    }
+
+    builder.order_by("created_at", database::sort_order::desc);
+
+    if (query.limit > 0) {
+        builder.limit(query.limit);
+        if (query.offset > 0) {
+            builder.offset(query.offset);
+        }
+    }
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return list_result_type(result.error());
+    }
+
+    std::vector<annotation_record> records;
+    records.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        records.push_back(map_row_to_entity(row));
+    }
+
+    return list_result_type(std::move(records));
+}
+
+auto annotation_repository::update_annotation(const annotation_record& record)
+    -> VoidResult {
+    if (!db() || !db()->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto now_str = format_timestamp(std::chrono::system_clock::now());
+    auto style_json = serialize_style(record.style);
+
+    auto builder = query_builder();
+    builder.update(table_name())
+        .set("geometry_json", record.geometry_json)
+        .set("text", record.text)
+        .set("style_json", style_json)
+        .set("updated_at", now_str)
+        .where("annotation_id", "=", record.annotation_id);
+
+    auto result = db()->execute(builder.build());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+auto annotation_repository::count_matching(const annotation_query& query)
+    -> Result<size_t> {
+    if (!db() || !db()->is_connected()) {
+        return Result<size_t>(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select({"COUNT(*) as count"}).from(table_name());
+
+    std::optional<database::query_condition> condition;
+
+    if (query.study_uid.has_value()) {
+        auto cond = database::query_condition(
+            "study_uid", "=", query.study_uid.value());
+        condition = cond;
+    }
+
+    if (query.series_uid.has_value()) {
+        auto cond = database::query_condition(
+            "series_uid", "=", query.series_uid.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.sop_instance_uid.has_value()) {
+        auto cond = database::query_condition(
+            "sop_instance_uid", "=", query.sop_instance_uid.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.user_id.has_value()) {
+        auto cond = database::query_condition(
+            "user_id", "=", query.user_id.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.type.has_value()) {
+        auto cond = database::query_condition(
+            "annotation_type", "=", to_string(query.type.value()));
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (condition.has_value()) {
+        builder.where(condition.value());
+    }
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return Result<size_t>(result.error());
+    }
+
+    if (result.value().empty()) {
+        return Result<size_t>(static_cast<size_t>(0));
+    }
+
+    return Result<size_t>(std::stoull(result.value()[0].at("count")));
+}
+
+// =============================================================================
+// base_repository Overrides
+// =============================================================================
+
+auto annotation_repository::map_row_to_entity(const database_row& row) const
+    -> annotation_record {
+    annotation_record record;
+
+    record.pk = std::stoll(row.at("pk"));
+    record.annotation_id = row.at("annotation_id");
+    record.study_uid = row.at("study_uid");
+    record.series_uid = row.at("series_uid");
+    record.sop_instance_uid = row.at("sop_instance_uid");
+
+    auto frame_it = row.find("frame_number");
+    if (frame_it != row.end() && !frame_it->second.empty()) {
+        record.frame_number = std::stoi(frame_it->second);
+    }
+
+    record.user_id = row.at("user_id");
+
+    auto type_str = row.at("annotation_type");
+    record.type = annotation_type_from_string(type_str).value_or(annotation_type::text);
+
+    record.geometry_json = row.at("geometry_json");
+    record.text = row.at("text");
+
+    auto style_it = row.find("style_json");
+    if (style_it != row.end() && !style_it->second.empty()) {
+        record.style = deserialize_style(style_it->second);
+    }
+
+    auto created_it = row.find("created_at");
+    if (created_it != row.end() && !created_it->second.empty()) {
+        record.created_at = parse_timestamp(created_it->second);
+    }
+
+    auto updated_it = row.find("updated_at");
+    if (updated_it != row.end() && !updated_it->second.empty()) {
+        record.updated_at = parse_timestamp(updated_it->second);
+    }
+
+    return record;
+}
+
+auto annotation_repository::entity_to_row(const annotation_record& entity) const
+    -> std::map<std::string, database_value> {
+    std::map<std::string, database_value> row;
+
+    row["annotation_id"] = entity.annotation_id;
+    row["study_uid"] = entity.study_uid;
+    row["series_uid"] = entity.series_uid;
+    row["sop_instance_uid"] = entity.sop_instance_uid;
+
+    if (entity.frame_number.has_value()) {
+        row["frame_number"] = static_cast<int64_t>(entity.frame_number.value());
+    } else {
+        row["frame_number"] = static_cast<int64_t>(0);
+    }
+
+    row["user_id"] = entity.user_id;
+    row["annotation_type"] = to_string(entity.type);
+    row["geometry_json"] = entity.geometry_json;
+    row["text"] = entity.text;
+    row["style_json"] = serialize_style(entity.style);
+
+    auto now = std::chrono::system_clock::now();
+    if (entity.created_at != std::chrono::system_clock::time_point{}) {
+        row["created_at"] = format_timestamp(entity.created_at);
+    } else {
+        row["created_at"] = format_timestamp(now);
+    }
+
+    if (entity.updated_at != std::chrono::system_clock::time_point{}) {
+        row["updated_at"] = format_timestamp(entity.updated_at);
+    } else {
+        row["updated_at"] = format_timestamp(now);
+    }
+
+    return row;
+}
+
+auto annotation_repository::get_pk(const annotation_record& entity) const
+    -> std::string {
+    return entity.annotation_id;
+}
+
+auto annotation_repository::has_pk(const annotation_record& entity) const
+    -> bool {
+    return !entity.annotation_id.empty();
+}
+
+auto annotation_repository::select_columns() const -> std::vector<std::string> {
+    return {"pk",          "annotation_id", "study_uid",      "series_uid",
+            "sop_instance_uid", "frame_number", "user_id",
+            "annotation_type", "geometry_json", "text",
+            "style_json",  "created_at",    "updated_at"};
+}
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Implementation
+// =============================================================================
+
+#include <sqlite3.h>
 
 namespace pacs::storage {
 
@@ -567,3 +1024,5 @@ annotation_record annotation_repository::parse_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

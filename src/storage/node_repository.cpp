@@ -1,14 +1,370 @@
 /**
  * @file node_repository.cpp
  * @brief Implementation of the node repository for remote node persistence
+ *
+ * @see Issue #535 - Implement Remote Node Manager
+ * @see Issue #610 - Phase 4: Repository Migrations
+ * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
  */
 
 #include "pacs/storage/node_repository.hpp"
 
-#include <sqlite3.h>
-
 #include <chrono>
 #include <cstring>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+namespace pacs::storage {
+
+// =============================================================================
+// Constructor
+// =============================================================================
+
+node_repository::node_repository(std::shared_ptr<pacs_database_adapter> db)
+    : base_repository(std::move(db), "remote_nodes", "node_id") {}
+
+// =============================================================================
+// Timestamp Helpers
+// =============================================================================
+
+auto node_repository::parse_timestamp(const std::string& str) const
+    -> std::chrono::system_clock::time_point {
+    if (str.empty()) {
+        return {};
+    }
+
+    std::tm tm{};
+    if (std::sscanf(str.c_str(), "%d-%d-%d %d:%d:%d", &tm.tm_year, &tm.tm_mon,
+                    &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+        return {};
+    }
+
+    tm.tm_year -= 1900;
+    tm.tm_mon -= 1;
+
+#ifdef _WIN32
+    auto time = _mkgmtime(&tm);
+#else
+    auto time = timegm(&tm);
+#endif
+
+    return std::chrono::system_clock::from_time_t(time);
+}
+
+auto node_repository::format_timestamp(
+    std::chrono::system_clock::time_point tp) const -> std::string {
+    if (tp == std::chrono::system_clock::time_point{}) {
+        return "";
+    }
+
+    auto time = std::chrono::system_clock::to_time_t(tp);
+    std::tm tm{};
+#ifdef _WIN32
+    gmtime_s(&tm, &time);
+#else
+    gmtime_r(&time, &tm);
+#endif
+
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return buf;
+}
+
+// =============================================================================
+// Domain-Specific Operations
+// =============================================================================
+
+auto node_repository::find_by_pk(int64_t pk) -> result_type {
+    if (!db() || !db()->is_connected()) {
+        return result_type(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns())
+        .from(table_name())
+        .where("pk", "=", pk)
+        .limit(1);
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return result_type(result.error());
+    }
+
+    if (result.value().empty()) {
+        return result_type(kcenon::common::error_info{
+            -1, "Node not found with pk=" + std::to_string(pk), "storage"});
+    }
+
+    return result_type(map_row_to_entity(result.value()[0]));
+}
+
+auto node_repository::find_all_nodes() -> list_result_type {
+    if (!db() || !db()->is_connected()) {
+        return list_result_type(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns())
+        .from(table_name())
+        .order_by("name", database::sort_order::asc);
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return list_result_type(result.error());
+    }
+
+    std::vector<client::remote_node> nodes;
+    nodes.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        nodes.push_back(map_row_to_entity(row));
+    }
+
+    return list_result_type(std::move(nodes));
+}
+
+auto node_repository::find_by_status(client::node_status status)
+    -> list_result_type {
+    if (!db() || !db()->is_connected()) {
+        return list_result_type(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns())
+        .from(table_name())
+        .where("status", "=", std::string(client::to_string(status)))
+        .order_by("name", database::sort_order::asc);
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return list_result_type(result.error());
+    }
+
+    std::vector<client::remote_node> nodes;
+    nodes.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        nodes.push_back(map_row_to_entity(row));
+    }
+
+    return list_result_type(std::move(nodes));
+}
+
+// =============================================================================
+// Status Updates
+// =============================================================================
+
+auto node_repository::update_status(
+    std::string_view node_id,
+    client::node_status status,
+    std::string_view error_message) -> VoidResult {
+    if (!db() || !db()->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    if (status == client::node_status::error ||
+        status == client::node_status::offline) {
+        // Use raw SQL for CURRENT_TIMESTAMP
+        auto sql = "UPDATE " + table_name() +
+                   " SET status = '" + std::string(client::to_string(status)) +
+                   "', last_error = CURRENT_TIMESTAMP, "
+                   "last_error_message = '" + std::string(error_message) +
+                   "', updated_at = CURRENT_TIMESTAMP "
+                   "WHERE node_id = '" + std::string(node_id) + "'";
+        auto result = db()->execute(sql);
+        if (result.is_err()) {
+            return VoidResult(result.error());
+        }
+    } else {
+        auto builder = query_builder();
+        builder.update(table_name())
+            .set("status", std::string(client::to_string(status)))
+            .where("node_id", "=", std::string(node_id));
+
+        auto result = db()->execute(builder.build());
+        if (result.is_err()) {
+            return VoidResult(result.error());
+        }
+    }
+
+    return kcenon::common::ok();
+}
+
+auto node_repository::update_last_verified(std::string_view node_id)
+    -> VoidResult {
+    if (!db() || !db()->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "storage"});
+    }
+
+    auto sql = "UPDATE " + table_name() +
+               " SET last_verified = CURRENT_TIMESTAMP, "
+               "updated_at = CURRENT_TIMESTAMP WHERE node_id = '" +
+               std::string(node_id) + "'";
+
+    auto result = db()->execute(sql);
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+// =============================================================================
+// base_repository overrides
+// =============================================================================
+
+auto node_repository::map_row_to_entity(const database_row& row) const
+    -> client::remote_node {
+    client::remote_node node;
+
+    // Parse pk if present
+    auto pk_it = row.find("pk");
+    if (pk_it != row.end() && !pk_it->second.empty()) {
+        node.pk = std::stoll(pk_it->second);
+    }
+
+    node.node_id = row.at("node_id");
+    node.name = row.at("name");
+    node.ae_title = row.at("ae_title");
+    node.host = row.at("host");
+
+    auto port_it = row.find("port");
+    if (port_it != row.end() && !port_it->second.empty()) {
+        node.port = static_cast<uint16_t>(std::stoi(port_it->second));
+    }
+
+    auto find_it = row.find("supports_find");
+    if (find_it != row.end() && !find_it->second.empty()) {
+        node.supports_find = (std::stoi(find_it->second) != 0);
+    }
+
+    auto move_it = row.find("supports_move");
+    if (move_it != row.end() && !move_it->second.empty()) {
+        node.supports_move = (std::stoi(move_it->second) != 0);
+    }
+
+    auto get_it = row.find("supports_get");
+    if (get_it != row.end() && !get_it->second.empty()) {
+        node.supports_get = (std::stoi(get_it->second) != 0);
+    }
+
+    auto store_it = row.find("supports_store");
+    if (store_it != row.end() && !store_it->second.empty()) {
+        node.supports_store = (std::stoi(store_it->second) != 0);
+    }
+
+    auto worklist_it = row.find("supports_worklist");
+    if (worklist_it != row.end() && !worklist_it->second.empty()) {
+        node.supports_worklist = (std::stoi(worklist_it->second) != 0);
+    }
+
+    auto conn_timeout_it = row.find("connection_timeout_sec");
+    if (conn_timeout_it != row.end() && !conn_timeout_it->second.empty()) {
+        node.connection_timeout = std::chrono::seconds(std::stoi(conn_timeout_it->second));
+    }
+
+    auto dimse_timeout_it = row.find("dimse_timeout_sec");
+    if (dimse_timeout_it != row.end() && !dimse_timeout_it->second.empty()) {
+        node.dimse_timeout = std::chrono::seconds(std::stoi(dimse_timeout_it->second));
+    }
+
+    auto max_assoc_it = row.find("max_associations");
+    if (max_assoc_it != row.end() && !max_assoc_it->second.empty()) {
+        node.max_associations = static_cast<size_t>(std::stoll(max_assoc_it->second));
+    }
+
+    auto status_it = row.find("status");
+    if (status_it != row.end() && !status_it->second.empty()) {
+        node.status = client::node_status_from_string(status_it->second);
+    }
+
+    auto last_verified_it = row.find("last_verified");
+    if (last_verified_it != row.end() && !last_verified_it->second.empty()) {
+        node.last_verified = parse_timestamp(last_verified_it->second);
+    }
+
+    auto last_error_it = row.find("last_error");
+    if (last_error_it != row.end() && !last_error_it->second.empty()) {
+        node.last_error = parse_timestamp(last_error_it->second);
+    }
+
+    auto last_error_msg_it = row.find("last_error_message");
+    if (last_error_msg_it != row.end()) {
+        node.last_error_message = last_error_msg_it->second;
+    }
+
+    auto created_it = row.find("created_at");
+    if (created_it != row.end() && !created_it->second.empty()) {
+        node.created_at = parse_timestamp(created_it->second);
+    }
+
+    auto updated_it = row.find("updated_at");
+    if (updated_it != row.end() && !updated_it->second.empty()) {
+        node.updated_at = parse_timestamp(updated_it->second);
+    }
+
+    return node;
+}
+
+auto node_repository::entity_to_row(const client::remote_node& entity) const
+    -> std::map<std::string, database_value> {
+    std::map<std::string, database_value> row;
+
+    row["node_id"] = entity.node_id;
+    row["name"] = entity.name;
+    row["ae_title"] = entity.ae_title;
+    row["host"] = entity.host;
+    row["port"] = static_cast<int64_t>(entity.port);
+    row["supports_find"] = static_cast<int64_t>(entity.supports_find ? 1 : 0);
+    row["supports_move"] = static_cast<int64_t>(entity.supports_move ? 1 : 0);
+    row["supports_get"] = static_cast<int64_t>(entity.supports_get ? 1 : 0);
+    row["supports_store"] = static_cast<int64_t>(entity.supports_store ? 1 : 0);
+    row["supports_worklist"] = static_cast<int64_t>(entity.supports_worklist ? 1 : 0);
+    row["connection_timeout_sec"] = static_cast<int64_t>(entity.connection_timeout.count());
+    row["dimse_timeout_sec"] = static_cast<int64_t>(entity.dimse_timeout.count());
+    row["max_associations"] = static_cast<int64_t>(entity.max_associations);
+    row["status"] = std::string(client::to_string(entity.status));
+    row["last_verified"] = format_timestamp(entity.last_verified);
+    row["last_error"] = format_timestamp(entity.last_error);
+    row["last_error_message"] = entity.last_error_message;
+    row["created_at"] = format_timestamp(entity.created_at);
+    row["updated_at"] = format_timestamp(entity.updated_at);
+
+    return row;
+}
+
+auto node_repository::get_pk(const client::remote_node& entity) const
+    -> std::string {
+    return entity.node_id;
+}
+
+auto node_repository::has_pk(const client::remote_node& entity) const -> bool {
+    return !entity.node_id.empty();
+}
+
+auto node_repository::select_columns() const -> std::vector<std::string> {
+    return {
+        "pk", "node_id", "name", "ae_title", "host", "port",
+        "supports_find", "supports_move", "supports_get",
+        "supports_store", "supports_worklist",
+        "connection_timeout_sec", "dimse_timeout_sec", "max_associations",
+        "status", "last_verified", "last_error", "last_error_message",
+        "created_at", "updated_at"
+    };
+}
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Implementation
+// =============================================================================
+
+#include <sqlite3.h>
 
 namespace pacs::storage {
 
@@ -43,7 +399,6 @@ namespace {
         return {};
     }
     std::tm tm{};
-    // Parse "YYYY-MM-DD HH:MM:SS" format
     if (std::sscanf(str, "%d-%d-%d %d:%d:%d",
                     &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
                     &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
@@ -510,3 +865,5 @@ client::remote_node node_repository::parse_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
