@@ -85,11 +85,11 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
-  viewer_state_repository repo(db->db_adapter());
-#else
+  // Always use native_handle() for in-memory databases
+  // pacs_database_adapter creates a separate connection which doesn't share
+  // the same in-memory database, causing tests to fail (tables not visible).
+  // For file-based databases in production, db_adapter() works correctly.
   viewer_state_repository repo(db->native_handle());
-#endif
 
   SECTION("save and find viewer state") {
     viewer_state_record state;
@@ -207,11 +207,9 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
-  viewer_state_repository repo(db->db_adapter());
-#else
+  // Always use native_handle() for in-memory databases
+  // See comment in "Viewer state repository operations" test case above
   viewer_state_repository repo(db->native_handle());
-#endif
 
   SECTION("record study access") {
     auto result = repo.record_study_access("user1", "1.2.840.study1");
