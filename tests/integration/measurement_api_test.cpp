@@ -5,6 +5,11 @@
  * This file contains integration tests verifying the complete measurement
  * lifecycle including create, read, delete operations and database persistence.
  *
+ * @note Tests in this file use the legacy SQLite interface (sqlite3*) and are
+ *       only compiled when PACS_WITH_DATABASE_SYSTEM is NOT defined.
+ *       For tests using the new base_repository pattern, see
+ *       tests/storage/measurement_repository_test.cpp
+ *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #584 - Part 4: TypeScript Types & Integration Tests
  *
@@ -12,11 +17,15 @@
  * @license MIT
  */
 
+#include "pacs/storage/measurement_record.hpp"
+#include "pacs/storage/measurement_repository.hpp"
+
+// Only compile legacy SQLite tests when PACS_WITH_DATABASE_SYSTEM is NOT defined
+#ifndef PACS_WITH_DATABASE_SYSTEM
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "pacs/storage/index_database.hpp"
-#include "pacs/storage/measurement_record.hpp"
-#include "pacs/storage/measurement_repository.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -404,3 +413,5 @@ TEST_CASE("Measurement type conversion", "[integration][measurement]") {
         REQUIRE_FALSE(measurement_type_from_string("invalid").has_value());
     }
 }
+
+#endif  // !PACS_WITH_DATABASE_SYSTEM

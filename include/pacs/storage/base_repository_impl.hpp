@@ -80,8 +80,14 @@ auto base_repository<Entity, PrimaryKey>::find_by_id(PrimaryKey id)
 
     const auto& db_result = result.value();
     if (db_result.empty()) {
+        std::string id_str;
+        if constexpr (std::is_same_v<PrimaryKey, std::string>) {
+            id_str = id;
+        } else {
+            id_str = std::to_string(id);
+        }
         return Result<Entity>(kcenon::common::error_info{
-            -1, "Entity not found with id=" + std::to_string(id), "storage"});
+            -1, "Entity not found with id=" + id_str, "storage"});
     }
 
     try {

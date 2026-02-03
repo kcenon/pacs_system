@@ -106,11 +106,19 @@ TEST_CASE("Measurement record defaults", "[web][measurement]") {
   REQUIRE(meas.label.empty());
 }
 
+// Repository tests require legacy SQLite interface which is only available
+// when PACS_WITH_DATABASE_SYSTEM is not defined. In database_system mode,
+// pacs_database_adapter opens a separate :memory: connection without tables.
+#ifndef PACS_WITH_DATABASE_SYSTEM
+
 TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
+  // Note: For in-memory databases, db_adapter() may be nullptr because the
+  // database_system's pacs_database_adapter opens a separate :memory: connection.
+  // Always use native_handle() for in-memory databases in tests.
   measurement_repository repo(db->native_handle());
 
   SECTION("save and find measurement") {
@@ -129,14 +137,14 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     auto save_result = repo.save(meas);
     REQUIRE(save_result.is_ok());
 
-    auto found = repo.find_by_id("test-uuid-123");
-    REQUIRE(found.has_value());
-    REQUIRE(found->measurement_id == "test-uuid-123");
-    REQUIRE(found->sop_instance_uid == "1.2.840.instance");
-    REQUIRE(found->type == measurement_type::length);
-    REQUIRE(found->value == 45.5);
-    REQUIRE(found->unit == "mm");
-    REQUIRE(found->label == "Tumor length");
+    auto found_result = repo.find_by_id("test-uuid-123");
+    REQUIRE(found_result.has_value());
+    REQUIRE(found_result->measurement_id == "test-uuid-123");
+    REQUIRE(found_result->sop_instance_uid == "1.2.840.instance");
+    REQUIRE(found_result->type == measurement_type::length);
+    REQUIRE(found_result->value == 45.5);
+    REQUIRE(found_result->unit == "mm");
+    REQUIRE(found_result->label == "Tumor length");
   }
 
   SECTION("find by instance") {
@@ -167,8 +175,8 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas3.created_at = std::chrono::system_clock::now();
     (void)repo.save(meas3);
 
-    auto measurements = repo.find_by_instance("1.2.840.instance");
-    REQUIRE(measurements.size() == 2);
+    auto measurements_result = repo.find_by_instance("1.2.840.instance");
+    REQUIRE(measurements_result.size() == 2);
   }
 
   SECTION("search with pagination") {
@@ -188,12 +196,12 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     query.limit = 5;
     query.offset = 0;
 
-    auto page1 = repo.search(query);
-    REQUIRE(page1.size() == 5);
+    auto page1_result = repo.search(query);
+    REQUIRE(page1_result.size() == 5);
 
     query.offset = 5;
-    auto page2 = repo.search(query);
-    REQUIRE(page2.size() == 5);
+    auto page2_result = repo.search(query);
+    REQUIRE(page2_result.size() == 5);
   }
 
   SECTION("search by type") {
@@ -266,8 +274,10 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.created_at = std::chrono::system_clock::now();
     (void)repo.save(meas);
 
-    auto found = repo.find_by_id("precision-test");
-    REQUIRE(found.has_value());
-    REQUIRE(found->value == Catch::Approx(123.456789).epsilon(0.0001));
+    auto found_result = repo.find_by_id("precision-test");
+    REQUIRE(found_result.has_value());
+    REQUIRE(found_result->value == Catch::Approx(123.456789).epsilon(0.0001));
   }
 }
+
+#endif  // !PACS_WITH_DATABASE_SYSTEM
