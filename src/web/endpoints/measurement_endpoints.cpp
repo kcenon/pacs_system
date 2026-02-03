@@ -303,7 +303,11 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
           return res;
         }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
         storage::measurement_repository repo(ctx->database->db_adapter());
+#else
+        storage::measurement_repository repo(ctx->database->native_handle());
+#endif
         auto save_result = repo.save(meas);
         if (!save_result.is_ok()) {
           res.code = 500;
@@ -361,6 +365,7 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
           }
         }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
         storage::measurement_repository repo(ctx->database->db_adapter());
 
         storage::measurement_query count_query = query;
@@ -380,9 +385,20 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
           res.body = make_error_json("QUERY_ERROR", measurements_result.error().message);
           return res;
         }
-
         res.code = 200;
         res.body = measurements_to_json(measurements_result.value(), total_count);
+#else
+        storage::measurement_repository repo(ctx->database->native_handle());
+
+        storage::measurement_query count_query = query;
+        count_query.limit = 0;
+        count_query.offset = 0;
+        size_t total_count = repo.count(count_query);
+
+        auto measurements = repo.search(query);
+        res.code = 200;
+        res.body = measurements_to_json(measurements, total_count);
+#endif
         return res;
       });
 
@@ -401,6 +417,7 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::measurement_repository repo(ctx->database->db_adapter());
             auto meas_result = repo.find_by_id(measurement_id);
             if (!meas_result.is_ok()) {
@@ -415,9 +432,19 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
               }
               return res;
             }
-
             res.code = 200;
             res.body = measurement_to_json(meas_result.value());
+#else
+            storage::measurement_repository repo(ctx->database->native_handle());
+            auto meas_result = repo.find_by_id(measurement_id);
+            if (!meas_result.has_value()) {
+              res.code = 404;
+              res.body = make_error_json("NOT_FOUND", "Measurement not found");
+              return res;
+            }
+            res.code = 200;
+            res.body = measurement_to_json(meas_result.value());
+#endif
             return res;
           });
 
@@ -436,6 +463,7 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::measurement_repository repo(ctx->database->db_adapter());
             auto exists_result = repo.exists(measurement_id);
             if (!exists_result.is_ok()) {
@@ -450,6 +478,15 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
               res.body = make_error_json("NOT_FOUND", "Measurement not found");
               return res;
             }
+#else
+            storage::measurement_repository repo(ctx->database->native_handle());
+            if (!repo.exists(measurement_id)) {
+              res.code = 404;
+              res.add_header("Content-Type", "application/json");
+              res.body = make_error_json("NOT_FOUND", "Measurement not found");
+              return res;
+            }
+#endif
 
             auto remove_result = repo.remove(measurement_id);
             if (!remove_result.is_ok()) {
@@ -480,6 +517,7 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::measurement_repository repo(ctx->database->db_adapter());
             auto measurements_result = repo.find_by_instance(sop_instance_uid);
             if (!measurements_result.is_ok()) {
@@ -487,8 +525,12 @@ void register_measurement_endpoints_impl(crow::SimpleApp &app,
               res.body = make_error_json("QUERY_ERROR", measurements_result.error().message);
               return res;
             }
-
             const auto& measurements = measurements_result.value();
+#else
+            storage::measurement_repository repo(ctx->database->native_handle());
+            auto measurements = repo.find_by_instance(sop_instance_uid);
+#endif
+
             std::ostringstream oss;
             oss << R"({"data":[)";
             for (size_t i = 0; i < measurements.size(); ++i) {

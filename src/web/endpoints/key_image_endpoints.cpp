@@ -202,7 +202,11 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::key_image_repository repo(ctx->database->db_adapter());
+#else
+            storage::key_image_repository repo(ctx->database->native_handle());
+#endif
             auto save_result = repo.save(ki);
             if (!save_result.is_ok()) {
               res.code = 500;
@@ -235,6 +239,7 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::key_image_repository repo(ctx->database->db_adapter());
             auto key_images_result = repo.find_by_study(study_uid);
             if (!key_images_result.is_ok()) {
@@ -242,9 +247,14 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               res.body = make_error_json("QUERY_ERROR", key_images_result.error().message);
               return res;
             }
-
             res.code = 200;
             res.body = key_images_to_json(key_images_result.value());
+#else
+            storage::key_image_repository repo(ctx->database->native_handle());
+            auto key_images = repo.find_by_study(study_uid);
+            res.code = 200;
+            res.body = key_images_to_json(key_images);
+#endif
             return res;
           });
 
@@ -263,6 +273,7 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::key_image_repository repo(ctx->database->db_adapter());
             auto exists_result = repo.exists(key_image_id);
             if (!exists_result.is_ok()) {
@@ -277,6 +288,15 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               res.body = make_error_json("NOT_FOUND", "Key image not found");
               return res;
             }
+#else
+            storage::key_image_repository repo(ctx->database->native_handle());
+            if (!repo.exists(key_image_id)) {
+              res.code = 404;
+              res.add_header("Content-Type", "application/json");
+              res.body = make_error_json("NOT_FOUND", "Key image not found");
+              return res;
+            }
+#endif
 
             auto remove_result = repo.remove(key_image_id);
             if (!remove_result.is_ok()) {
@@ -306,6 +326,7 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               return res;
             }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
             storage::key_image_repository repo(ctx->database->db_adapter());
             auto key_images_result = repo.find_by_study(study_uid);
             if (!key_images_result.is_ok()) {
@@ -314,8 +335,11 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
               res.body = make_error_json("QUERY_ERROR", key_images_result.error().message);
               return res;
             }
-
             const auto& key_images = key_images_result.value();
+#else
+            storage::key_image_repository repo(ctx->database->native_handle());
+            auto key_images = repo.find_by_study(study_uid);
+#endif
             if (key_images.empty()) {
               res.code = 404;
               res.add_header("Content-Type", "application/json");
