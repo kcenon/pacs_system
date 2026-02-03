@@ -109,8 +109,10 @@ pacs::VoidResult routing_manager::add_rule(const routing_rule& rule) {
 
     // Save to repository
     auto result = repo_->save(rule);
-    if (!result.is_ok()) {
-        return result;
+    if (result.is_err()) {
+        return pacs::pacs_void_error(
+            result.error().code,
+            "Failed to save rule: " + result.error().message);
     }
 
     // Update cache
@@ -135,8 +137,10 @@ pacs::VoidResult routing_manager::add_rule(const routing_rule& rule) {
 pacs::VoidResult routing_manager::update_rule(const routing_rule& rule) {
     // Save to repository
     auto result = repo_->save(rule);
-    if (!result.is_ok()) {
-        return result;
+    if (result.is_err()) {
+        return pacs::pacs_void_error(
+            result.error().code,
+            "Failed to update rule: " + result.error().message);
     }
 
     // Update cache
@@ -168,7 +172,7 @@ pacs::VoidResult routing_manager::update_rule(const routing_rule& rule) {
 
 pacs::VoidResult routing_manager::remove_rule(std::string_view rule_id) {
     // Remove from repository
-    auto result = repo_->remove(rule_id);
+    auto result = repo_->remove(std::string(rule_id));
     if (!result.is_ok()) {
         return result;
     }
@@ -520,6 +524,16 @@ routing_statistics routing_manager::get_statistics() const {
 routing_statistics routing_manager::get_rule_statistics(std::string_view rule_id) const {
     routing_statistics stats;
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto rule_result = repo_->find_by_id(std::string(rule_id));
+    if (rule_result.is_ok()) {
+        const auto& rule = rule_result.value();
+        stats.total_evaluated = 0;  // Not tracked per-rule
+        stats.total_matched = rule.triggered_count;
+        stats.total_forwarded = rule.success_count;
+        stats.total_failed = rule.failure_count;
+    }
+#else
     auto rule = repo_->find_by_id(rule_id);
     if (rule) {
         stats.total_evaluated = 0;  // Not tracked per-rule
@@ -527,6 +541,7 @@ routing_statistics routing_manager::get_rule_statistics(std::string_view rule_id
         stats.total_forwarded = rule->success_count;
         stats.total_failed = rule->failure_count;
     }
+#endif
 
     return stats;
 }
@@ -686,10 +701,24 @@ void routing_manager::execute_actions(const std::string& sop_instance_uid,
 }
 
 void routing_manager::load_rules() {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto loaded_result = repo_->find_enabled_rules();
+    if (loaded_result.is_err()) {
+        if (logger_) {
+            logger_->warn_fmt("routing_manager: Failed to load rules: {}",
+                             loaded_result.error().message);
+        }
+        return;
+    }
+
+    std::unique_lock lock(rules_mutex_);
+    rules_ = std::move(loaded_result.value());
+#else
     auto loaded = repo_->find_enabled_rules();
 
     std::unique_lock lock(rules_mutex_);
     rules_ = std::move(loaded);
+#endif
 
     // Sort by priority (descending)
     std::sort(rules_.begin(), rules_.end(),
