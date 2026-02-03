@@ -16,13 +16,13 @@
 #include "pacs/storage/pacs_database_adapter.hpp"
 
 // Migrated repositories (Issue #610)
+#include "pacs/storage/job_repository.hpp"
 #include "pacs/storage/key_image_repository.hpp"
 #include "pacs/storage/measurement_repository.hpp"
 
 // TODO(Issue #610): Uncomment these includes when remaining repositories are
 // migrated
 // #include "pacs/storage/annotation_repository.hpp"
-// #include "pacs/storage/job_repository.hpp"
 // #include "pacs/storage/node_repository.hpp"
 // #include "pacs/storage/prefetch_repository.hpp"
 // #include "pacs/storage/routing_repository.hpp"
@@ -40,8 +40,10 @@ repository_factory::repository_factory(
 // to accept std::shared_ptr<pacs_database_adapter> in their constructors.
 
 auto repository_factory::jobs() -> std::shared_ptr<job_repository> {
-    // TODO: Implement after job_repository migration
-    return nullptr;
+    if (!jobs_) {
+        jobs_ = std::make_shared<job_repository>(db_);
+    }
+    return jobs_;
 }
 
 auto repository_factory::annotations()
