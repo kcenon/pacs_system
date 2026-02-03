@@ -7,9 +7,10 @@
 #include <pacs/integration/dicom_session.hpp>
 #include <pacs/network/dicom_server.hpp>
 
-#include <kcenon/network/core/messaging_server.h>
-#include <kcenon/network/core/messaging_client.h>
-#include <kcenon/network/core/secure_messaging_server.h>
+// network_system#651: these headers moved from include/ to src/internal/
+#include "internal/core/messaging_server.h"
+#include "internal/core/messaging_client.h"
+#include "internal/core/secure_messaging_server.h"
 #include <kcenon/network/session/messaging_session.h>
 #include <kcenon/network/session/secure_session.h>
 
