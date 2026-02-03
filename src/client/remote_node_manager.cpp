@@ -259,9 +259,11 @@ struct remote_node_manager::impl {
     void load_nodes_from_repo() {
         if (!repo) return;
 
-        auto nodes = repo->find_all();
+        auto nodes_result = repo->find_all();
+        if (nodes_result.is_err()) return;
+
         std::lock_guard<std::mutex> lock(cache_mutex);
-        for (auto& node : nodes) {
+        for (auto& node : nodes_result.value()) {
             node_cache[node.node_id] = std::move(node);
         }
     }
@@ -335,7 +337,7 @@ pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
 
     // Persist to repository
     if (impl_->repo) {
-        auto result = impl_->repo->upsert(node);
+        auto result = impl_->repo->save(node);
         if (result.is_err()) {
             return pacs::pacs_void_error(
                 result.error().code,
@@ -368,7 +370,7 @@ pacs::VoidResult remote_node_manager::update_node(const remote_node& node) {
 
     // Update repository
     if (impl_->repo) {
-        auto result = impl_->repo->upsert(node);
+        auto result = impl_->repo->save(node);
         if (result.is_err()) {
             return pacs::pacs_void_error(
                 result.error().code,
@@ -402,7 +404,7 @@ pacs::VoidResult remote_node_manager::remove_node(std::string_view node_id) {
 
     // Remove from repository
     if (impl_->repo) {
-        auto result = impl_->repo->remove(node_id);
+        auto result = impl_->repo->remove(std::string(node_id));
         if (result.is_err()) {
             return result;
         }
