@@ -17,6 +17,7 @@
 #include "pacs/web/rest_types.hpp"
 
 #include <chrono>
+#include <filesystem>
 #include <thread>
 
 using namespace pacs::storage;
@@ -81,15 +82,23 @@ TEST_CASE("Recent study record validation", "[web][viewer_state]") {
 }
 
 TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]") {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  // Use temporary file database when database_system is enabled
+  // pacs_database_adapter creates a separate connection, which doesn't work
+  // with in-memory databases (tables not visible across connections)
+  auto test_db_path =
+      (std::filesystem::temp_directory_path() / "viewer_state_test.db").string();
+  std::filesystem::remove(test_db_path);
+  auto db_result = index_database::open(test_db_path);
+#else
   auto db_result = index_database::open(":memory:");
+#endif
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-  // Use db_adapter() when database_system is enabled
   viewer_state_repository repo(db->db_adapter());
 #else
-  // Use native_handle() for legacy SQLite-only builds
   viewer_state_repository repo(db->native_handle());
 #endif
 
@@ -205,15 +214,22 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
 }
 
 TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]") {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  // Use temporary file database when database_system is enabled
+  // See comment in "Viewer state repository operations" above
+  auto test_db_path =
+      (std::filesystem::temp_directory_path() / "recent_studies_test.db").string();
+  std::filesystem::remove(test_db_path);
+  auto db_result = index_database::open(test_db_path);
+#else
   auto db_result = index_database::open(":memory:");
+#endif
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-  // Use db_adapter() when database_system is enabled
   viewer_state_repository repo(db->db_adapter());
 #else
-  // Use native_handle() for legacy SQLite-only builds
   viewer_state_repository repo(db->native_handle());
 #endif
 
