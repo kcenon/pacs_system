@@ -111,7 +111,11 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  measurement_repository repo(db->db_adapter());
+#else
   measurement_repository repo(db->native_handle());
+#endif
 
   SECTION("save and find measurement") {
     measurement_record meas;
@@ -129,14 +133,25 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     auto save_result = repo.save(meas);
     REQUIRE(save_result.is_ok());
 
-    auto found = repo.find_by_id("test-uuid-123");
-    REQUIRE(found.has_value());
-    REQUIRE(found->measurement_id == "test-uuid-123");
-    REQUIRE(found->sop_instance_uid == "1.2.840.instance");
-    REQUIRE(found->type == measurement_type::length);
-    REQUIRE(found->value == 45.5);
-    REQUIRE(found->unit == "mm");
-    REQUIRE(found->label == "Tumor length");
+    auto found_result = repo.find_by_id("test-uuid-123");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(found_result.is_ok());
+    const auto& found = found_result.value();
+    REQUIRE(found.measurement_id == "test-uuid-123");
+    REQUIRE(found.sop_instance_uid == "1.2.840.instance");
+    REQUIRE(found.type == measurement_type::length);
+    REQUIRE(found.value == 45.5);
+    REQUIRE(found.unit == "mm");
+    REQUIRE(found.label == "Tumor length");
+#else
+    REQUIRE(found_result.has_value());
+    REQUIRE(found_result->measurement_id == "test-uuid-123");
+    REQUIRE(found_result->sop_instance_uid == "1.2.840.instance");
+    REQUIRE(found_result->type == measurement_type::length);
+    REQUIRE(found_result->value == 45.5);
+    REQUIRE(found_result->unit == "mm");
+    REQUIRE(found_result->label == "Tumor length");
+#endif
   }
 
   SECTION("find by instance") {
@@ -167,8 +182,13 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas3.created_at = std::chrono::system_clock::now();
     (void)repo.save(meas3);
 
-    auto measurements = repo.find_by_instance("1.2.840.instance");
-    REQUIRE(measurements.size() == 2);
+    auto measurements_result = repo.find_by_instance("1.2.840.instance");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(measurements_result.is_ok());
+    REQUIRE(measurements_result.value().size() == 2);
+#else
+    REQUIRE(measurements_result.size() == 2);
+#endif
   }
 
   SECTION("search with pagination") {
@@ -188,12 +208,22 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     query.limit = 5;
     query.offset = 0;
 
-    auto page1 = repo.search(query);
-    REQUIRE(page1.size() == 5);
+    auto page1_result = repo.search(query);
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(page1_result.is_ok());
+    REQUIRE(page1_result.value().size() == 5);
+#else
+    REQUIRE(page1_result.size() == 5);
+#endif
 
     query.offset = 5;
-    auto page2 = repo.search(query);
-    REQUIRE(page2.size() == 5);
+    auto page2_result = repo.search(query);
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(page2_result.is_ok());
+    REQUIRE(page2_result.value().size() == 5);
+#else
+    REQUIRE(page2_result.size() == 5);
+#endif
   }
 
   SECTION("search by type") {
@@ -219,8 +249,14 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     query.type = measurement_type::length;
 
     auto results = repo.search(query);
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(results.is_ok());
+    REQUIRE(results.value().size() == 1);
+    REQUIRE(results.value()[0].type == measurement_type::length);
+#else
     REQUIRE(results.size() == 1);
     REQUIRE(results[0].type == measurement_type::length);
+#endif
   }
 
   SECTION("delete measurement") {
@@ -233,16 +269,34 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.created_at = std::chrono::system_clock::now();
     (void)repo.save(meas);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto exists_result = repo.exists("delete-test");
+    REQUIRE(exists_result.is_ok());
+    REQUIRE(exists_result.value());
+#else
     REQUIRE(repo.exists("delete-test"));
+#endif
 
     auto remove_result = repo.remove("delete-test");
     REQUIRE(remove_result.is_ok());
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto not_exists_result = repo.exists("delete-test");
+    REQUIRE(not_exists_result.is_ok());
+    REQUIRE_FALSE(not_exists_result.value());
+#else
     REQUIRE_FALSE(repo.exists("delete-test"));
+#endif
   }
 
   SECTION("count measurements") {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto count_result = repo.count();
+    REQUIRE(count_result.is_ok());
+    REQUIRE(count_result.value() == 0);
+#else
     REQUIRE(repo.count() == 0);
+#endif
 
     measurement_record meas;
     meas.measurement_id = "count-test";
@@ -253,7 +307,13 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.created_at = std::chrono::system_clock::now();
     (void)repo.save(meas);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto count_result2 = repo.count();
+    REQUIRE(count_result2.is_ok());
+    REQUIRE(count_result2.value() == 1);
+#else
     REQUIRE(repo.count() == 1);
+#endif
   }
 
   SECTION("measurement values are accurate") {
@@ -266,8 +326,13 @@ TEST_CASE("Measurement repository operations", "[web][measurement][database]") {
     meas.created_at = std::chrono::system_clock::now();
     (void)repo.save(meas);
 
-    auto found = repo.find_by_id("precision-test");
-    REQUIRE(found.has_value());
-    REQUIRE(found->value == Catch::Approx(123.456789).epsilon(0.0001));
+    auto found_result = repo.find_by_id("precision-test");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(found_result.is_ok());
+    REQUIRE(found_result.value().value == Catch::Approx(123.456789).epsilon(0.0001));
+#else
+    REQUIRE(found_result.has_value());
+    REQUIRE(found_result->value == Catch::Approx(123.456789).epsilon(0.0001));
+#endif
   }
 }

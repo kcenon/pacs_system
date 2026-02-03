@@ -2,8 +2,8 @@
  * @file key_image_endpoints_test.cpp
  * @brief Unit tests for key image API endpoints
  *
- * @note Tests in this file use the legacy SQLite interface (sqlite3*) and are
- *       only compiled when PACS_WITH_DATABASE_SYSTEM is NOT defined.
+ * Tests work with both legacy SQLite interface (sqlite3*) and new
+ * base_repository pattern (PACS_WITH_DATABASE_SYSTEM).
  *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #583 - Part 3: Key Image & Viewer State REST Endpoints
@@ -14,9 +14,6 @@
 
 #include "pacs/storage/key_image_record.hpp"
 #include "pacs/storage/key_image_repository.hpp"
-
-// Only compile legacy SQLite tests when PACS_WITH_DATABASE_SYSTEM is NOT defined
-#ifndef PACS_WITH_DATABASE_SYSTEM
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -82,7 +79,11 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  key_image_repository repo(db->db_adapter());
+#else
   key_image_repository repo(db->native_handle());
+#endif
 
   SECTION("save and find key image") {
     key_image_record ki;
@@ -98,13 +99,23 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     auto save_result = repo.save(ki);
     REQUIRE(save_result.is_ok());
 
-    auto found = repo.find_by_id("ki-uuid-123");
-    REQUIRE(found.has_value());
-    REQUIRE(found->key_image_id == "ki-uuid-123");
-    REQUIRE(found->study_uid == "1.2.840.study");
-    REQUIRE(found->sop_instance_uid == "1.2.840.instance");
-    REQUIRE(found->frame_number == 1);
-    REQUIRE(found->reason == "Significant finding");
+    auto found_result = repo.find_by_id("ki-uuid-123");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(found_result.is_ok());
+    const auto& found = found_result.value();
+    REQUIRE(found.key_image_id == "ki-uuid-123");
+    REQUIRE(found.study_uid == "1.2.840.study");
+    REQUIRE(found.sop_instance_uid == "1.2.840.instance");
+    REQUIRE(found.frame_number == 1);
+    REQUIRE(found.reason == "Significant finding");
+#else
+    REQUIRE(found_result.has_value());
+    REQUIRE(found_result->key_image_id == "ki-uuid-123");
+    REQUIRE(found_result->study_uid == "1.2.840.study");
+    REQUIRE(found_result->sop_instance_uid == "1.2.840.instance");
+    REQUIRE(found_result->frame_number == 1);
+    REQUIRE(found_result->reason == "Significant finding");
+#endif
   }
 
   SECTION("find by study") {
@@ -129,8 +140,13 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki3.created_at = std::chrono::system_clock::now();
     (void)repo.save(ki3);
 
-    auto key_images = repo.find_by_study("1.2.840.study");
-    REQUIRE(key_images.size() == 2);
+    auto key_images_result = repo.find_by_study("1.2.840.study");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(key_images_result.is_ok());
+    REQUIRE(key_images_result.value().size() == 2);
+#else
+    REQUIRE(key_images_result.size() == 2);
+#endif
   }
 
   SECTION("search with pagination") {
@@ -148,12 +164,22 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     query.limit = 5;
     query.offset = 0;
 
-    auto page1 = repo.search(query);
-    REQUIRE(page1.size() == 5);
+    auto page1_result = repo.search(query);
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(page1_result.is_ok());
+    REQUIRE(page1_result.value().size() == 5);
+#else
+    REQUIRE(page1_result.size() == 5);
+#endif
 
     query.offset = 5;
-    auto page2 = repo.search(query);
-    REQUIRE(page2.size() == 5);
+    auto page2_result = repo.search(query);
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(page2_result.is_ok());
+    REQUIRE(page2_result.value().size() == 5);
+#else
+    REQUIRE(page2_result.size() == 5);
+#endif
   }
 
   SECTION("delete key image") {
@@ -164,16 +190,34 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki.created_at = std::chrono::system_clock::now();
     (void)repo.save(ki);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto exists_result = repo.exists("delete-test");
+    REQUIRE(exists_result.is_ok());
+    REQUIRE(exists_result.value());
+#else
     REQUIRE(repo.exists("delete-test"));
+#endif
 
     auto remove_result = repo.remove("delete-test");
     REQUIRE(remove_result.is_ok());
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto not_exists_result = repo.exists("delete-test");
+    REQUIRE(not_exists_result.is_ok());
+    REQUIRE_FALSE(not_exists_result.value());
+#else
     REQUIRE_FALSE(repo.exists("delete-test"));
+#endif
   }
 
   SECTION("count key images") {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto count_result = repo.count();
+    REQUIRE(count_result.is_ok());
+    REQUIRE(count_result.value() == 0);
+#else
     REQUIRE(repo.count() == 0);
+#endif
 
     key_image_record ki;
     ki.key_image_id = "count-test";
@@ -182,7 +226,13 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki.created_at = std::chrono::system_clock::now();
     (void)repo.save(ki);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto count_result2 = repo.count();
+    REQUIRE(count_result2.is_ok());
+    REQUIRE(count_result2.value() == 1);
+#else
     REQUIRE(repo.count() == 1);
+#endif
   }
 
   SECTION("count by study") {
@@ -207,9 +257,21 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki3.created_at = std::chrono::system_clock::now();
     (void)repo.save(ki3);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto count1 = repo.count_by_study("1.2.840.study1");
+    REQUIRE(count1.is_ok());
+    REQUIRE(count1.value() == 2);
+    auto count2 = repo.count_by_study("1.2.840.study2");
+    REQUIRE(count2.is_ok());
+    REQUIRE(count2.value() == 1);
+    auto count3 = repo.count_by_study("1.2.840.nonexistent");
+    REQUIRE(count3.is_ok());
+    REQUIRE(count3.value() == 0);
+#else
     REQUIRE(repo.count_by_study("1.2.840.study1") == 2);
     REQUIRE(repo.count_by_study("1.2.840.study2") == 1);
     REQUIRE(repo.count_by_study("1.2.840.nonexistent") == 0);
+#endif
   }
 
   SECTION("optional frame number") {
@@ -228,15 +290,26 @@ TEST_CASE("Key image repository operations", "[web][key_image][database]") {
     ki_no_frame.created_at = std::chrono::system_clock::now();
     (void)repo.save(ki_no_frame);
 
-    auto found_with = repo.find_by_id("ki-with-frame");
-    REQUIRE(found_with.has_value());
-    REQUIRE(found_with->frame_number.has_value());
-    REQUIRE(found_with->frame_number.value() == 5);
+    auto found_with_result = repo.find_by_id("ki-with-frame");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(found_with_result.is_ok());
+    const auto& found_with = found_with_result.value();
+    REQUIRE(found_with.frame_number.has_value());
+    REQUIRE(found_with.frame_number.value() == 5);
+#else
+    REQUIRE(found_with_result.has_value());
+    REQUIRE(found_with_result->frame_number.has_value());
+    REQUIRE(found_with_result->frame_number.value() == 5);
+#endif
 
-    auto found_without = repo.find_by_id("ki-no-frame");
-    REQUIRE(found_without.has_value());
-    REQUIRE_FALSE(found_without->frame_number.has_value());
+    auto found_without_result = repo.find_by_id("ki-no-frame");
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    REQUIRE(found_without_result.is_ok());
+    const auto& found_without = found_without_result.value();
+    REQUIRE_FALSE(found_without.frame_number.has_value());
+#else
+    REQUIRE(found_without_result.has_value());
+    REQUIRE_FALSE(found_without_result->frame_number.has_value());
+#endif
   }
 }
-
-#endif  // !PACS_WITH_DATABASE_SYSTEM
