@@ -1095,7 +1095,13 @@ struct job_manager::impl {
     void load_pending_jobs_from_repo() {
         if (!repo) return;
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto pending_result = repo->find_pending_jobs(config.max_queue_size);
+        if (pending_result.is_err()) return;
+        auto& pending = pending_result.value();
+#else
         auto pending = repo->find_pending_jobs(config.max_queue_size);
+#endif
         for (auto& job : pending) {
             // Add to cache
             {
