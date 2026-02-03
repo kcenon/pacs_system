@@ -1,12 +1,13 @@
 /**
  * @file measurement_repository.hpp
- * @brief Repository for measurement persistence
+ * @brief Repository for measurement persistence using base_repository pattern
  *
  * This file provides the measurement_repository class for persisting measurement
- * records in the SQLite database. Supports CRUD operations and search.
+ * records using the base_repository pattern. Supports CRUD operations and search.
  *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #581 - Part 1: Data Models and Repositories
+ * @see Issue #610 - Phase 4: Repository Migrations
  */
 
 #pragma once
@@ -20,20 +21,17 @@
 #include <string_view>
 #include <vector>
 
-struct sqlite3;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "pacs/storage/base_repository.hpp"
 
 namespace pacs::storage {
 
-template <typename T>
-using Result = kcenon::common::Result<T>;
-
-using VoidResult = kcenon::common::VoidResult;
-
 /**
- * @brief Repository for measurement persistence
+ * @brief Repository for measurement persistence using base_repository pattern
  *
  * Provides database operations for storing and retrieving measurement records.
- * Uses SQLite for persistence.
+ * Extends base_repository to inherit standard CRUD operations.
  *
  * Thread Safety:
  * - This class is NOT thread-safe. External synchronization is required
@@ -41,7 +39,9 @@ using VoidResult = kcenon::common::VoidResult;
  *
  * @example
  * @code
- * auto repo = measurement_repository(db_handle);
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = measurement_repository(db);
  *
  * measurement_record meas;
  * meas.measurement_id = generate_uuid();
@@ -54,99 +54,134 @@ using VoidResult = kcenon::common::VoidResult;
  * auto found = repo.find_by_id(meas.measurement_id);
  * @endcode
  */
+class measurement_repository
+    : public base_repository<measurement_record, std::string> {
+public:
+    explicit measurement_repository(std::shared_ptr<pacs_database_adapter> db);
+    ~measurement_repository() override = default;
+
+    measurement_repository(const measurement_repository&) = delete;
+    auto operator=(const measurement_repository&)
+        -> measurement_repository& = delete;
+    measurement_repository(measurement_repository&&) noexcept = default;
+    auto operator=(measurement_repository&&) noexcept
+        -> measurement_repository& = default;
+
+    // Bring base class count() into scope
+    using base_repository::count;
+
+    // ========================================================================
+    // Domain-Specific Operations
+    // ========================================================================
+
+    /**
+     * @brief Find a measurement by primary key (integer pk)
+     *
+     * @param pk The primary key (integer)
+     * @return Result containing the measurement if found, or error
+     */
+    [[nodiscard]] auto find_by_pk(int64_t pk) -> result_type;
+
+    /**
+     * @brief Find measurements by SOP Instance UID
+     *
+     * @param sop_instance_uid The SOP Instance UID to filter by
+     * @return Result containing vector of measurements on the specified instance
+     */
+    [[nodiscard]] auto find_by_instance(std::string_view sop_instance_uid)
+        -> list_result_type;
+
+    /**
+     * @brief Search measurements with query options
+     *
+     * @param query Query options for filtering and pagination
+     * @return Result containing vector of matching measurements or error
+     */
+    [[nodiscard]] auto search(const measurement_query& query)
+        -> list_result_type;
+
+    /**
+     * @brief Count measurements matching a query
+     *
+     * @param query Query options for filtering
+     * @return Result containing number of matching measurements or error
+     */
+    [[nodiscard]] auto count(const measurement_query& query) -> Result<size_t>;
+
+protected:
+    // ========================================================================
+    // base_repository overrides
+    // ========================================================================
+
+    [[nodiscard]] auto map_row_to_entity(const database_row& row) const
+        -> measurement_record override;
+
+    [[nodiscard]] auto entity_to_row(const measurement_record& entity) const
+        -> std::map<std::string, database_value> override;
+
+    [[nodiscard]] auto get_pk(const measurement_record& entity) const
+        -> std::string override;
+
+    [[nodiscard]] auto has_pk(const measurement_record& entity) const
+        -> bool override;
+
+    [[nodiscard]] auto select_columns() const
+        -> std::vector<std::string> override;
+
+private:
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+};
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// Legacy interface for builds without database_system
+struct sqlite3;
+
+namespace pacs::storage {
+
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Repository for measurement persistence (legacy SQLite interface)
+ *
+ * This is the legacy interface maintained for builds without database_system.
+ * New code should use the base_repository version when PACS_WITH_DATABASE_SYSTEM
+ * is defined.
+ */
 class measurement_repository {
 public:
     explicit measurement_repository(sqlite3* db);
     ~measurement_repository();
 
     measurement_repository(const measurement_repository&) = delete;
-    auto operator=(const measurement_repository&) -> measurement_repository& = delete;
+    auto operator=(const measurement_repository&)
+        -> measurement_repository& = delete;
     measurement_repository(measurement_repository&&) noexcept;
-    auto operator=(measurement_repository&&) noexcept -> measurement_repository&;
+    auto operator=(measurement_repository&&) noexcept
+        -> measurement_repository&;
 
-    /**
-     * @brief Save a measurement record
-     *
-     * If the measurement already exists (by measurement_id), updates it.
-     * Otherwise, inserts a new record.
-     *
-     * @param record The measurement record to save
-     * @return VoidResult indicating success or error
-     */
     [[nodiscard]] auto save(const measurement_record& record) -> VoidResult;
-
-    /**
-     * @brief Find a measurement by its unique ID
-     *
-     * @param measurement_id The measurement ID to search for
-     * @return Optional containing the measurement if found
-     */
     [[nodiscard]] auto find_by_id(std::string_view measurement_id) const
         -> std::optional<measurement_record>;
-
-    /**
-     * @brief Find a measurement by primary key
-     *
-     * @param pk The primary key
-     * @return Optional containing the measurement if found
-     */
     [[nodiscard]] auto find_by_pk(int64_t pk) const
         -> std::optional<measurement_record>;
-
-    /**
-     * @brief Find measurements by SOP Instance UID
-     *
-     * @param sop_instance_uid The SOP Instance UID to filter by
-     * @return Vector of measurements on the specified instance
-     */
     [[nodiscard]] auto find_by_instance(std::string_view sop_instance_uid) const
         -> std::vector<measurement_record>;
-
-    /**
-     * @brief Search measurements with query options
-     *
-     * @param query Query options for filtering and pagination
-     * @return Vector of matching measurements
-     */
     [[nodiscard]] auto search(const measurement_query& query) const
         -> std::vector<measurement_record>;
-
-    /**
-     * @brief Delete a measurement by ID
-     *
-     * @param measurement_id The measurement ID to delete
-     * @return VoidResult indicating success or error
-     */
     [[nodiscard]] auto remove(std::string_view measurement_id) -> VoidResult;
-
-    /**
-     * @brief Check if a measurement exists
-     *
-     * @param measurement_id The measurement ID to check
-     * @return true if the measurement exists
-     */
     [[nodiscard]] auto exists(std::string_view measurement_id) const -> bool;
-
-    /**
-     * @brief Get total measurement count
-     *
-     * @return Number of measurements in the repository
-     */
     [[nodiscard]] auto count() const -> size_t;
-
-    /**
-     * @brief Count measurements matching a query
-     *
-     * @param query Query options for filtering
-     * @return Number of matching measurements
-     */
     [[nodiscard]] auto count(const measurement_query& query) const -> size_t;
-
-    /**
-     * @brief Check if the database connection is valid
-     *
-     * @return true if the database handle is valid
-     */
     [[nodiscard]] auto is_valid() const noexcept -> bool;
 
 private:
@@ -156,3 +191,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

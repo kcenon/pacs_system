@@ -1,12 +1,13 @@
 /**
  * @file key_image_repository.hpp
- * @brief Repository for key image persistence
+ * @brief Repository for key image persistence using base_repository pattern
  *
  * This file provides the key_image_repository class for persisting key image
- * records in the SQLite database. Supports CRUD operations and search.
+ * records using the base_repository pattern. Supports CRUD operations and search.
  *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #581 - Part 1: Data Models and Repositories
+ * @see Issue #610 - Phase 4: Repository Migrations
  */
 
 #pragma once
@@ -20,20 +21,17 @@
 #include <string_view>
 #include <vector>
 
-struct sqlite3;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "pacs/storage/base_repository.hpp"
 
 namespace pacs::storage {
 
-template <typename T>
-using Result = kcenon::common::Result<T>;
-
-using VoidResult = kcenon::common::VoidResult;
-
 /**
- * @brief Repository for key image persistence
+ * @brief Repository for key image persistence using base_repository pattern
  *
  * Provides database operations for storing and retrieving key image records.
- * Uses SQLite for persistence.
+ * Extends base_repository to inherit standard CRUD operations.
  *
  * Thread Safety:
  * - This class is NOT thread-safe. External synchronization is required
@@ -41,7 +39,9 @@ using VoidResult = kcenon::common::VoidResult;
  *
  * @example
  * @code
- * auto repo = key_image_repository(db_handle);
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = key_image_repository(db);
  *
  * key_image_record ki;
  * ki.key_image_id = generate_uuid();
@@ -53,99 +53,131 @@ using VoidResult = kcenon::common::VoidResult;
  * auto images = repo.find_by_study("1.2.3.4.5");
  * @endcode
  */
+class key_image_repository
+    : public base_repository<key_image_record, std::string> {
+public:
+    explicit key_image_repository(std::shared_ptr<pacs_database_adapter> db);
+    ~key_image_repository() override = default;
+
+    key_image_repository(const key_image_repository&) = delete;
+    auto operator=(const key_image_repository&)
+        -> key_image_repository& = delete;
+    key_image_repository(key_image_repository&&) noexcept = default;
+    auto operator=(key_image_repository&&) noexcept
+        -> key_image_repository& = default;
+
+    // ========================================================================
+    // Domain-Specific Operations
+    // ========================================================================
+
+    /**
+     * @brief Find a key image by primary key (integer pk)
+     *
+     * @param pk The primary key (integer)
+     * @return Result containing the key image if found, or error
+     */
+    [[nodiscard]] auto find_by_pk(int64_t pk) -> result_type;
+
+    /**
+     * @brief Find key images by Study UID
+     *
+     * @param study_uid The Study UID to filter by
+     * @return Result containing vector of key images in the specified study
+     */
+    [[nodiscard]] auto find_by_study(std::string_view study_uid)
+        -> list_result_type;
+
+    /**
+     * @brief Search key images with query options
+     *
+     * @param query Query options for filtering and pagination
+     * @return Result containing vector of matching key images or error
+     */
+    [[nodiscard]] auto search(const key_image_query& query) -> list_result_type;
+
+    /**
+     * @brief Count key images in a study
+     *
+     * @param study_uid The Study UID to count key images for
+     * @return Result containing number of key images in the study or error
+     */
+    [[nodiscard]] auto count_by_study(std::string_view study_uid)
+        -> Result<size_t>;
+
+protected:
+    // ========================================================================
+    // base_repository overrides
+    // ========================================================================
+
+    [[nodiscard]] auto map_row_to_entity(const database_row& row) const
+        -> key_image_record override;
+
+    [[nodiscard]] auto entity_to_row(const key_image_record& entity) const
+        -> std::map<std::string, database_value> override;
+
+    [[nodiscard]] auto get_pk(const key_image_record& entity) const
+        -> std::string override;
+
+    [[nodiscard]] auto has_pk(const key_image_record& entity) const
+        -> bool override;
+
+    [[nodiscard]] auto select_columns() const
+        -> std::vector<std::string> override;
+
+private:
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+};
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// Legacy interface for builds without database_system
+struct sqlite3;
+
+namespace pacs::storage {
+
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Repository for key image persistence (legacy SQLite interface)
+ *
+ * This is the legacy interface maintained for builds without database_system.
+ * New code should use the base_repository version when PACS_WITH_DATABASE_SYSTEM
+ * is defined.
+ */
 class key_image_repository {
 public:
     explicit key_image_repository(sqlite3* db);
     ~key_image_repository();
 
     key_image_repository(const key_image_repository&) = delete;
-    auto operator=(const key_image_repository&) -> key_image_repository& = delete;
+    auto operator=(const key_image_repository&)
+        -> key_image_repository& = delete;
     key_image_repository(key_image_repository&&) noexcept;
     auto operator=(key_image_repository&&) noexcept -> key_image_repository&;
 
-    /**
-     * @brief Save a key image record
-     *
-     * If the key image already exists (by key_image_id), updates it.
-     * Otherwise, inserts a new record.
-     *
-     * @param record The key image record to save
-     * @return VoidResult indicating success or error
-     */
     [[nodiscard]] auto save(const key_image_record& record) -> VoidResult;
-
-    /**
-     * @brief Find a key image by its unique ID
-     *
-     * @param key_image_id The key image ID to search for
-     * @return Optional containing the key image if found
-     */
     [[nodiscard]] auto find_by_id(std::string_view key_image_id) const
         -> std::optional<key_image_record>;
-
-    /**
-     * @brief Find a key image by primary key
-     *
-     * @param pk The primary key
-     * @return Optional containing the key image if found
-     */
     [[nodiscard]] auto find_by_pk(int64_t pk) const
         -> std::optional<key_image_record>;
-
-    /**
-     * @brief Find key images by Study UID
-     *
-     * @param study_uid The Study UID to filter by
-     * @return Vector of key images in the specified study
-     */
     [[nodiscard]] auto find_by_study(std::string_view study_uid) const
         -> std::vector<key_image_record>;
-
-    /**
-     * @brief Search key images with query options
-     *
-     * @param query Query options for filtering and pagination
-     * @return Vector of matching key images
-     */
     [[nodiscard]] auto search(const key_image_query& query) const
         -> std::vector<key_image_record>;
-
-    /**
-     * @brief Delete a key image by ID
-     *
-     * @param key_image_id The key image ID to delete
-     * @return VoidResult indicating success or error
-     */
     [[nodiscard]] auto remove(std::string_view key_image_id) -> VoidResult;
-
-    /**
-     * @brief Check if a key image exists
-     *
-     * @param key_image_id The key image ID to check
-     * @return true if the key image exists
-     */
     [[nodiscard]] auto exists(std::string_view key_image_id) const -> bool;
-
-    /**
-     * @brief Get total key image count
-     *
-     * @return Number of key images in the repository
-     */
     [[nodiscard]] auto count() const -> size_t;
-
-    /**
-     * @brief Count key images in a study
-     *
-     * @param study_uid The Study UID to count key images for
-     * @return Number of key images in the study
-     */
-    [[nodiscard]] auto count_by_study(std::string_view study_uid) const -> size_t;
-
-    /**
-     * @brief Check if the database connection is valid
-     *
-     * @return true if the database handle is valid
-     */
+    [[nodiscard]] auto count_by_study(std::string_view study_uid) const
+        -> size_t;
     [[nodiscard]] auto is_valid() const noexcept -> bool;
 
 private:
@@ -155,3 +187,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

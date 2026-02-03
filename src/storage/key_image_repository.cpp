@@ -4,14 +4,284 @@
  *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #581 - Part 1: Data Models and Repositories
+ * @see Issue #610 - Phase 4: Repository Migrations
  */
 
 #include "pacs/storage/key_image_repository.hpp"
 
-#include <sqlite3.h>
-
 #include <chrono>
 #include <sstream>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+namespace pacs::storage {
+
+// =============================================================================
+// Constructor
+// =============================================================================
+
+key_image_repository::key_image_repository(
+    std::shared_ptr<pacs_database_adapter> db)
+    : base_repository(std::move(db), "key_images", "key_image_id") {}
+
+// =============================================================================
+// Domain-Specific Operations
+// =============================================================================
+
+auto key_image_repository::find_by_pk(int64_t pk) -> result_type {
+    if (!db() || !db()->is_connected()) {
+        return result_type(
+            kcenon::common::error_info{-1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns())
+        .from(table_name())
+        .where("pk", "=", pk)
+        .limit(1);
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return result_type(result.error());
+    }
+
+    if (result.value().empty()) {
+        return result_type(kcenon::common::error_info{
+            -1, "Key image not found with pk=" + std::to_string(pk), "storage"});
+    }
+
+    return result_type(map_row_to_entity(result.value()[0]));
+}
+
+auto key_image_repository::find_by_study(std::string_view study_uid)
+    -> list_result_type {
+    return find_where("study_uid", "=", std::string(study_uid));
+}
+
+auto key_image_repository::search(const key_image_query& query)
+    -> list_result_type {
+    if (!db() || !db()->is_connected()) {
+        return list_result_type(
+            kcenon::common::error_info{-1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select(select_columns()).from(table_name());
+
+    // Build compound condition
+    std::optional<database::query_condition> condition;
+
+    if (query.study_uid.has_value()) {
+        auto cond = database::query_condition(
+            "study_uid", "=", query.study_uid.value());
+        condition = cond;
+    }
+
+    if (query.sop_instance_uid.has_value()) {
+        auto cond = database::query_condition(
+            "sop_instance_uid", "=", query.sop_instance_uid.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (query.user_id.has_value()) {
+        auto cond =
+            database::query_condition("user_id", "=", query.user_id.value());
+        if (condition.has_value()) {
+            condition = condition.value() && cond;
+        } else {
+            condition = cond;
+        }
+    }
+
+    if (condition.has_value()) {
+        builder.where(condition.value());
+    }
+
+    // Apply ordering
+    builder.order_by("created_at", database::sort_order::desc);
+
+    // Apply pagination
+    if (query.limit > 0) {
+        builder.limit(query.limit);
+        if (query.offset > 0) {
+            builder.offset(query.offset);
+        }
+    }
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return list_result_type(result.error());
+    }
+
+    std::vector<key_image_record> records;
+    records.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        records.push_back(map_row_to_entity(row));
+    }
+
+    return list_result_type(std::move(records));
+}
+
+auto key_image_repository::count_by_study(std::string_view study_uid)
+    -> Result<size_t> {
+    if (!db() || !db()->is_connected()) {
+        return Result<size_t>(
+            kcenon::common::error_info{-1, "Database not connected", "storage"});
+    }
+
+    auto builder = query_builder();
+    builder.select({"COUNT(*) as count"})
+        .from(table_name())
+        .where("study_uid", "=", std::string(study_uid));
+
+    auto result = db()->select(builder.build());
+    if (result.is_err()) {
+        return Result<size_t>(result.error());
+    }
+
+    if (result.value().empty()) {
+        return Result<size_t>(static_cast<size_t>(0));
+    }
+
+    return Result<size_t>(std::stoull(result.value()[0].at("count")));
+}
+
+// =============================================================================
+// base_repository Overrides
+// =============================================================================
+
+auto key_image_repository::map_row_to_entity(const database_row& row) const
+    -> key_image_record {
+    key_image_record record;
+
+    record.pk = std::stoll(row.at("pk"));
+    record.key_image_id = row.at("key_image_id");
+    record.study_uid = row.at("study_uid");
+    record.sop_instance_uid = row.at("sop_instance_uid");
+
+    // Handle optional frame_number
+    auto frame_it = row.find("frame_number");
+    if (frame_it != row.end() && !frame_it->second.empty()) {
+        record.frame_number = std::stoi(frame_it->second);
+    }
+
+    record.user_id = row.at("user_id");
+    record.reason = row.at("reason");
+    record.document_title = row.at("document_title");
+
+    // Parse created_at timestamp
+    auto created_it = row.find("created_at");
+    if (created_it != row.end() && !created_it->second.empty()) {
+        record.created_at = parse_timestamp(created_it->second);
+    }
+
+    return record;
+}
+
+auto key_image_repository::entity_to_row(const key_image_record& entity) const
+    -> std::map<std::string, database_value> {
+    std::map<std::string, database_value> row;
+
+    row["key_image_id"] = entity.key_image_id;
+    row["study_uid"] = entity.study_uid;
+    row["sop_instance_uid"] = entity.sop_instance_uid;
+
+    if (entity.frame_number.has_value()) {
+        row["frame_number"] = static_cast<int64_t>(entity.frame_number.value());
+    } else {
+        row["frame_number"] = nullptr;
+    }
+
+    row["user_id"] = entity.user_id;
+    row["reason"] = entity.reason;
+    row["document_title"] = entity.document_title;
+
+    // Format timestamp for storage
+    if (entity.created_at != std::chrono::system_clock::time_point{}) {
+        row["created_at"] = format_timestamp(entity.created_at);
+    } else {
+        row["created_at"] = format_timestamp(std::chrono::system_clock::now());
+    }
+
+    return row;
+}
+
+auto key_image_repository::get_pk(const key_image_record& entity) const
+    -> std::string {
+    return entity.key_image_id;
+}
+
+auto key_image_repository::has_pk(const key_image_record& entity) const
+    -> bool {
+    return !entity.key_image_id.empty();
+}
+
+auto key_image_repository::select_columns() const -> std::vector<std::string> {
+    return {"pk",         "key_image_id",   "study_uid",   "sop_instance_uid",
+            "frame_number", "user_id",      "reason",      "document_title",
+            "created_at"};
+}
+
+// =============================================================================
+// Private Helpers
+// =============================================================================
+
+auto key_image_repository::parse_timestamp(const std::string& str) const
+    -> std::chrono::system_clock::time_point {
+    if (str.empty()) {
+        return {};
+    }
+
+    std::tm tm{};
+    if (std::sscanf(str.c_str(), "%d-%d-%d %d:%d:%d", &tm.tm_year, &tm.tm_mon,
+                    &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+        return {};
+    }
+
+    tm.tm_year -= 1900;
+    tm.tm_mon -= 1;
+
+#ifdef _WIN32
+    auto time = _mkgmtime(&tm);
+#else
+    auto time = timegm(&tm);
+#endif
+
+    return std::chrono::system_clock::from_time_t(time);
+}
+
+auto key_image_repository::format_timestamp(
+    std::chrono::system_clock::time_point tp) const -> std::string {
+    if (tp == std::chrono::system_clock::time_point{}) {
+        return "";
+    }
+
+    auto time = std::chrono::system_clock::to_time_t(tp);
+    std::tm tm{};
+#ifdef _WIN32
+    gmtime_s(&tm, &time);
+#else
+    gmtime_r(&time, &tm);
+#endif
+
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return buf;
+}
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Implementation
+// =============================================================================
+
+#include <sqlite3.h>
 
 namespace pacs::storage {
 
@@ -40,9 +310,8 @@ namespace {
         return {};
     }
     std::tm tm{};
-    if (std::sscanf(str, "%d-%d-%d %d:%d:%d",
-                    &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
-                    &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+    if (std::sscanf(str, "%d-%d-%d %d:%d:%d", &tm.tm_year, &tm.tm_mon,
+                    &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
         return {};
     }
     tm.tm_year -= 1900;
@@ -60,7 +329,8 @@ namespace {
     return text ? text : "";
 }
 
-[[nodiscard]] int64_t get_int64_column(sqlite3_stmt* stmt, int col, int64_t default_val = 0) {
+[[nodiscard]] int64_t get_int64_column(sqlite3_stmt* stmt, int col,
+                                       int64_t default_val = 0) {
     if (sqlite3_column_type(stmt, col) == SQLITE_NULL) {
         return default_val;
     }
@@ -74,7 +344,8 @@ namespace {
     return sqlite3_column_int(stmt, col);
 }
 
-void bind_optional_int(sqlite3_stmt* stmt, int idx, const std::optional<int>& value) {
+void bind_optional_int(sqlite3_stmt* stmt, int idx,
+                       const std::optional<int>& value) {
     if (value.has_value()) {
         sqlite3_bind_int(stmt, idx, value.value());
     } else {
@@ -88,7 +359,8 @@ key_image_repository::key_image_repository(sqlite3* db) : db_(db) {}
 
 key_image_repository::~key_image_repository() = default;
 
-key_image_repository::key_image_repository(key_image_repository&&) noexcept = default;
+key_image_repository::key_image_repository(key_image_repository&&) noexcept =
+    default;
 
 auto key_image_repository::operator=(key_image_repository&&) noexcept
     -> key_image_repository& = default;
@@ -112,20 +384,25 @@ VoidResult key_image_repository::save(const key_image_record& record) {
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         return VoidResult(kcenon::common::error_info{
-            -1, "Failed to prepare statement: " + std::string(sqlite3_errmsg(db_)),
+            -1,
+            "Failed to prepare statement: " + std::string(sqlite3_errmsg(db_)),
             "key_image_repository"});
     }
 
     auto now_str = to_timestamp_string(std::chrono::system_clock::now());
 
     int idx = 1;
-    sqlite3_bind_text(stmt, idx++, record.key_image_id.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, idx++, record.study_uid.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, idx++, record.sop_instance_uid.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, idx++, record.key_image_id.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, idx++, record.study_uid.c_str(), -1,
+                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, idx++, record.sop_instance_uid.c_str(), -1,
+                      SQLITE_TRANSIENT);
     bind_optional_int(stmt, idx++, record.frame_number);
     sqlite3_bind_text(stmt, idx++, record.user_id.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, idx++, record.reason.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, idx++, record.document_title.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, idx++, record.document_title.c_str(), -1,
+                      SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, idx++, now_str.c_str(), -1, SQLITE_TRANSIENT);
 
     auto rc = sqlite3_step(stmt);
@@ -133,7 +410,8 @@ VoidResult key_image_repository::save(const key_image_record& record) {
 
     if (rc != SQLITE_DONE) {
         return VoidResult(kcenon::common::error_info{
-            -1, "Failed to save key image: " + std::string(sqlite3_errmsg(db_)),
+            -1,
+            "Failed to save key image: " + std::string(sqlite3_errmsg(db_)),
             "key_image_repository"});
     }
 
@@ -167,7 +445,8 @@ std::optional<key_image_record> key_image_repository::find_by_id(
     return result;
 }
 
-std::optional<key_image_record> key_image_repository::find_by_pk(int64_t pk) const {
+std::optional<key_image_record> key_image_repository::find_by_pk(
+    int64_t pk) const {
     if (!db_) return std::nullopt;
 
     static constexpr const char* sql = R"(
@@ -237,7 +516,8 @@ std::vector<key_image_record> key_image_repository::search(
 
     sqlite3_stmt* stmt = nullptr;
     auto sql_str = sql.str();
-    if (sqlite3_prepare_v2(db_, sql_str.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db_, sql_str.c_str(), -1, &stmt, nullptr) !=
+        SQLITE_OK) {
         return result;
     }
 
@@ -259,12 +539,14 @@ VoidResult key_image_repository::remove(std::string_view key_image_id) {
             -1, "Database not initialized", "key_image_repository"});
     }
 
-    static constexpr const char* sql = "DELETE FROM key_images WHERE key_image_id = ?";
+    static constexpr const char* sql =
+        "DELETE FROM key_images WHERE key_image_id = ?";
 
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         return VoidResult(kcenon::common::error_info{
-            -1, "Failed to prepare statement: " + std::string(sqlite3_errmsg(db_)),
+            -1,
+            "Failed to prepare statement: " + std::string(sqlite3_errmsg(db_)),
             "key_image_repository"});
     }
 
@@ -276,7 +558,8 @@ VoidResult key_image_repository::remove(std::string_view key_image_id) {
 
     if (rc != SQLITE_DONE) {
         return VoidResult(kcenon::common::error_info{
-            -1, "Failed to delete key image: " + std::string(sqlite3_errmsg(db_)),
+            -1,
+            "Failed to delete key image: " + std::string(sqlite3_errmsg(db_)),
             "key_image_repository"});
     }
 
@@ -344,9 +627,7 @@ size_t key_image_repository::count_by_study(std::string_view study_uid) const {
     return result;
 }
 
-bool key_image_repository::is_valid() const noexcept {
-    return db_ != nullptr;
-}
+bool key_image_repository::is_valid() const noexcept { return db_ != nullptr; }
 
 key_image_record key_image_repository::parse_row(void* stmt_ptr) const {
     auto* stmt = static_cast<sqlite3_stmt*>(stmt_ptr);
@@ -369,3 +650,5 @@ key_image_record key_image_repository::parse_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
