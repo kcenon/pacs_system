@@ -986,8 +986,15 @@ add_library(pacs_services
     src/services/cache/query_result_stream.cpp
     src/services/cache/streaming_query_handler.cpp
     src/services/cache/parallel_query_executor.cpp
-    src/services/monitoring/database_metrics_service.cpp
 )
+
+# Add monitoring sources conditionally
+if(PACS_WITH_DATABASE_SYSTEM)
+    target_sources(pacs_services PRIVATE
+        src/services/monitoring/database_metrics_service.cpp
+    )
+endif()
+
 target_include_directories(pacs_services
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -1286,8 +1293,15 @@ if(TARGET Crow::Crow)
         src/web/endpoints/measurement_endpoints.cpp
         src/web/endpoints/key_image_endpoints.cpp
         src/web/endpoints/viewer_state_endpoints.cpp
-        src/web/endpoints/metrics_endpoints.cpp
     )
+
+    # Add metrics endpoints conditionally
+    if(PACS_WITH_DATABASE_SYSTEM)
+        target_sources(pacs_web PRIVATE
+            src/web/endpoints/metrics_endpoints.cpp
+        )
+    endif()
+
     target_include_directories(pacs_web
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -1749,8 +1763,15 @@ if(PACS_BUILD_TESTS)
         tests/services/cache/query_cache_test.cpp
         tests/services/cache/streaming_query_test.cpp
         tests/services/cache/parallel_query_executor_test.cpp
-        tests/services/monitoring/database_metrics_service_test.cpp
     )
+
+    # Add monitoring tests conditionally
+    if(PACS_WITH_DATABASE_SYSTEM)
+        target_sources(services_tests PRIVATE
+            tests/services/monitoring/database_metrics_service_test.cpp
+        )
+    endif()
+
     target_link_libraries(services_tests
         PRIVATE
             pacs_services

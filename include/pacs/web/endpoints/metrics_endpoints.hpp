@@ -18,6 +18,8 @@
 
 #include "pacs/services/monitoring/database_metrics_service.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include "crow.h"
 
 #include <memory>
@@ -47,3 +49,5 @@ void register_metrics_endpoints_impl(
     std::shared_ptr<rest_server_context> ctx);
 
 }  // namespace pacs::web::endpoints
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

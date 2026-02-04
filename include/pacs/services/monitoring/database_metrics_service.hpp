@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 namespace pacs::services::monitoring {
 
 /**
@@ -272,3 +274,5 @@ private:
     -> std::string;
 
 }  // namespace pacs::services::monitoring
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

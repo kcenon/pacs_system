@@ -8,6 +8,8 @@
 
 #include "pacs/services/monitoring/database_metrics_service.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include <algorithm>
 #include <iomanip>
 #include <mutex>
@@ -291,3 +293,5 @@ auto health_status_to_string(database_health::status status) -> std::string {
 }
 
 }  // namespace pacs::services::monitoring
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

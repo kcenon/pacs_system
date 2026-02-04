@@ -16,6 +16,8 @@
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_types.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include <sstream>
 
 namespace pacs::web::endpoints {
@@ -234,3 +236,5 @@ void register_metrics_endpoints_impl(
 }
 
 }  // namespace pacs::web::endpoints
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

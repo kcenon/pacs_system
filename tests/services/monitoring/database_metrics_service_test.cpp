@@ -9,6 +9,8 @@
 #include "pacs/services/monitoring/database_metrics_service.hpp"
 #include "pacs/storage/pacs_database_adapter.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
@@ -197,3 +199,5 @@ TEST_CASE_METHOD(DatabaseMetricsServiceTestFixture,
     REQUIRE(metrics1.successful_queries == metrics2.successful_queries);
     REQUIRE(metrics1.failed_queries == metrics2.failed_queries);
 }
+
+#endif  // PACS_WITH_DATABASE_SYSTEM
