@@ -31,8 +31,11 @@ TEST_CASE("value_formatter escapes SQL injection attempts",
         auto escaped = formatter.escape_string(input);
 
         // Single quotes should be doubled in SQLite
-        REQUIRE(escaped.find("'; DROP TABLE") == std::string::npos);
+        // The escaped string should be "test''; DROP TABLE patients; --"
+        // Note: The substring "'; DROP" is still present but starts at the
+        // second quote, making the SQL injection harmless when properly quoted
         REQUIRE(escaped.find("''") != std::string::npos);
+        REQUIRE(escaped == "test''; DROP TABLE patients; --");
     }
 
     SECTION("Escapes double single quotes") {
@@ -55,12 +58,14 @@ TEST_CASE("value_formatter escapes SQL injection attempts",
         REQUIRE(escaped == "John Doe");
     }
 
-    SECTION("Escapes backslashes") {
+    SECTION("Preserves backslashes in SQLite") {
+        // SQLite does not require backslash escaping unlike MySQL/PostgreSQL
+        // Only single quotes need to be doubled in SQLite
         auto input = "test\\path";
         auto escaped = formatter.escape_string(input);
 
-        // Backslashes should be escaped
-        REQUIRE(escaped.find("\\\\") != std::string::npos);
+        // Backslashes are preserved as-is in SQLite
+        REQUIRE(escaped == "test\\path");
     }
 
     SECTION("Handles DICOM patient names") {
@@ -91,12 +96,16 @@ TEST_CASE("value_formatter escapes SQL injection attempts",
         REQUIRE(escaped == "김철수");
     }
 
-    SECTION("Prevents UNION injection") {
+    SECTION("Escapes UNION injection attempt") {
         auto input = "test' UNION SELECT * FROM users --";
         auto escaped = formatter.escape_string(input);
 
-        // The UNION attempt should be neutralized
-        REQUIRE(escaped.find("' UNION") == std::string::npos);
+        // The single quote should be doubled, neutralizing the injection
+        // The escaped string becomes: "test'' UNION SELECT * FROM users --"
+        // When used in a properly quoted SQL string, the doubled quote is
+        // treated as a literal quote character, not a string terminator
+        REQUIRE(escaped.find("''") != std::string::npos);
+        REQUIRE(escaped == "test'' UNION SELECT * FROM users --");
     }
 
     SECTION("Prevents comment injection") {
@@ -121,14 +130,15 @@ TEST_CASE("value_formatter handles LIKE pattern escaping",
         REQUIRE(escaped == "50%");
     }
 
-    SECTION("Prevents injection through LIKE pattern") {
+    SECTION("Escapes injection through LIKE pattern") {
         // Attempt to inject through LIKE
         auto input = "%'; DELETE FROM patients; --";
         auto escaped = formatter.escape_string(input);
 
-        // Single quote should be escaped
+        // Single quote should be doubled, neutralizing the injection
+        // The escaped string becomes: "%''; DELETE FROM patients; --"
         REQUIRE(escaped.find("''") != std::string::npos);
-        REQUIRE(escaped.find("'; DELETE") == std::string::npos);
+        REQUIRE(escaped == "%''; DELETE FROM patients; --");
     }
 }
 
@@ -163,8 +173,10 @@ TEST_CASE("SQL injection edge cases", "[security][sql-injection][edge-cases]") {
         input += "'; DROP TABLE patients; --";
         auto escaped = formatter.escape_string(input);
 
-        // Should still escape properly
-        REQUIRE(escaped.find("'; DROP") == std::string::npos);
+        // Should still escape properly - single quote is doubled
+        REQUIRE(escaped.find("''") != std::string::npos);
+        // Escaped string should have the single quote doubled
+        REQUIRE(escaped.length() == input.length() + 1);  // One extra char for doubled quote
     }
 }
 
