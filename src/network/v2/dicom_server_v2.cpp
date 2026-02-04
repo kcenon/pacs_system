@@ -17,7 +17,20 @@
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
 // network_system#651: messaging_server.h moved from include/ to src/internal/
+// TODO(#656): Migrate to tcp_facade.h when API stabilizes
+// Suppress deprecation warnings temporarily
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-W#warnings"
+#endif
+
 #include "internal/core/messaging_server.h"
+
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 #include <kcenon/network/session/messaging_session.h>
 #endif
 

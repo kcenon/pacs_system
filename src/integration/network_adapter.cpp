@@ -8,9 +8,21 @@
 #include <pacs/network/dicom_server.hpp>
 
 // network_system#651: these headers moved from include/ to src/internal/
+// TODO(#656): Migrate to tcp_facade.h when API stabilizes
+// Suppress deprecation warnings temporarily
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-W#warnings"
+#endif
+
 #include "internal/core/messaging_server.h"
 #include "internal/core/messaging_client.h"
 #include "internal/core/secure_messaging_server.h"
+
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #include <kcenon/network/session/messaging_session.h>
 #include <kcenon/network/session/secure_session.h>
 
