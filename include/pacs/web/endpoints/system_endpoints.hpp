@@ -18,6 +18,10 @@ class health_checker;
 class pacs_metrics;
 } // namespace pacs::monitoring
 
+namespace pacs::services::monitoring {
+class database_metrics_service;
+} // namespace pacs::services::monitoring
+
 namespace pacs::security {
 class access_control_manager;
 } // namespace pacs::security
@@ -64,6 +68,9 @@ struct rest_server_context {
 
   /// Routing manager for auto-forwarding rules
   std::shared_ptr<client::routing_manager> routing_manager;
+
+  /// Database metrics service for monitoring
+  std::shared_ptr<services::monitoring::database_metrics_service> database_metrics;
 };
 
 namespace endpoints {
