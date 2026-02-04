@@ -3,11 +3,15 @@
  * @brief Repository for prefetch rule and history persistence
  *
  * This file provides the prefetch_repository class for persisting prefetch rules
- * and history records in the SQLite database. Supports CRUD operations and
+ * and history records in the database. Supports CRUD operations and
  * statistics tracking.
+ *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for database operations. Otherwise, uses direct SQLite access.
  *
  * @see Issue #541 - Implement Prefetch Manager for Proactive Data Loading
  * @see Issue #530 - PACS Client System Support (Parent Epic)
+ * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
  */
 
 #pragma once
@@ -22,8 +26,9 @@
 #include <string_view>
 #include <vector>
 
-// Forward declaration
-struct sqlite3;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "pacs/storage/pacs_database_adapter.hpp"
 
 namespace pacs::storage {
 
@@ -56,10 +61,10 @@ struct prefetch_history_query_options {
 };
 
 /**
- * @brief Repository for prefetch persistence
+ * @brief Repository for prefetch persistence using pacs_database_adapter
  *
  * Provides database operations for storing and retrieving prefetch rules
- * and history records. Uses SQLite for persistence.
+ * and history records. Uses pacs_database_adapter for database operations.
  *
  * Thread Safety:
  * - This class is NOT thread-safe. External synchronization is required
@@ -67,7 +72,9 @@ struct prefetch_history_query_options {
  *
  * @example
  * @code
- * auto repo = std::make_shared<prefetch_repository>(db_handle);
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = prefetch_repository(db);
  *
  * // Save a rule
  * client::prefetch_rule rule;
@@ -75,10 +82,10 @@ struct prefetch_history_query_options {
  * rule.name = "CT Prior Studies";
  * rule.trigger = client::prefetch_trigger::prior_studies;
  * rule.source_node_ids = {"archive-pacs"};
- * repo->save_rule(rule);
+ * repo.save_rule(rule);
  *
  * // Find a rule
- * auto found = repo->find_rule_by_id(rule.rule_id);
+ * auto found = repo.find_rule_by_id(rule.rule_id);
  * if (found) {
  *     std::cout << "Name: " << found->name << std::endl;
  * }
@@ -89,7 +96,7 @@ struct prefetch_history_query_options {
  * history.study_uid = "1.2.3.4.5";
  * history.source_node_id = "archive-pacs";
  * history.status = "completed";
- * repo->save_history(history);
+ * repo.save_history(history);
  * @endcode
  */
 class prefetch_repository {
@@ -99,11 +106,11 @@ public:
     // =========================================================================
 
     /**
-     * @brief Construct repository with SQLite handle
+     * @brief Construct repository with pacs_database_adapter
      *
-     * @param db SQLite database handle (must remain valid for repository lifetime)
+     * @param db Shared pointer to database adapter (must be connected)
      */
-    explicit prefetch_repository(sqlite3* db);
+    explicit prefetch_repository(std::shared_ptr<pacs_database_adapter> db);
 
     /**
      * @brief Destructor
@@ -335,42 +342,135 @@ private:
     // Private Implementation
     // =========================================================================
 
-    /**
-     * @brief Parse a prefetch rule from a prepared statement
-     */
-    [[nodiscard]] auto parse_rule_row(void* stmt) const -> client::prefetch_rule;
-
-    /**
-     * @brief Parse a prefetch history from a prepared statement
-     */
-    [[nodiscard]] auto parse_history_row(void* stmt) const -> client::prefetch_history;
-
-    /**
-     * @brief Serialize modalities vector to JSON
-     */
+    [[nodiscard]] auto map_row_to_rule(const database_row& row) const
+        -> client::prefetch_rule;
+    [[nodiscard]] auto map_row_to_history(const database_row& row) const
+        -> client::prefetch_history;
     [[nodiscard]] static auto serialize_modalities(
         const std::vector<std::string>& modalities) -> std::string;
-
-    /**
-     * @brief Deserialize modalities from JSON
-     */
     [[nodiscard]] static auto deserialize_modalities(
         std::string_view json) -> std::vector<std::string>;
-
-    /**
-     * @brief Serialize node IDs vector to JSON
-     */
     [[nodiscard]] static auto serialize_node_ids(
         const std::vector<std::string>& node_ids) -> std::string;
+    [[nodiscard]] static auto deserialize_node_ids(
+        std::string_view json) -> std::vector<std::string>;
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
 
-    /**
-     * @brief Deserialize node IDs from JSON
-     */
+    std::shared_ptr<pacs_database_adapter> db_;
+};
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Interface
+// =============================================================================
+
+struct sqlite3;
+
+namespace pacs::storage {
+
+/// Result type alias
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+/// Void result type alias
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Query options for listing prefetch rules
+ */
+struct prefetch_rule_query_options {
+    std::optional<bool> enabled_only;
+    std::optional<client::prefetch_trigger> trigger;
+    size_t limit{100};
+    size_t offset{0};
+};
+
+/**
+ * @brief Query options for listing prefetch history
+ */
+struct prefetch_history_query_options {
+    std::optional<std::string> patient_id;
+    std::optional<std::string> rule_id;
+    std::optional<std::string> status;
+    size_t limit{100};
+    size_t offset{0};
+};
+
+/**
+ * @brief Repository for prefetch persistence (legacy SQLite interface)
+ */
+class prefetch_repository {
+public:
+    explicit prefetch_repository(sqlite3* db);
+    ~prefetch_repository();
+
+    prefetch_repository(const prefetch_repository&) = delete;
+    auto operator=(const prefetch_repository&) -> prefetch_repository& = delete;
+    prefetch_repository(prefetch_repository&&) noexcept;
+    auto operator=(prefetch_repository&&) noexcept -> prefetch_repository&;
+
+    // Rule Operations
+    [[nodiscard]] auto save_rule(const client::prefetch_rule& rule) -> VoidResult;
+    [[nodiscard]] auto find_rule_by_id(std::string_view rule_id) const
+        -> std::optional<client::prefetch_rule>;
+    [[nodiscard]] auto find_rule_by_pk(int64_t pk) const
+        -> std::optional<client::prefetch_rule>;
+    [[nodiscard]] auto find_rules(const prefetch_rule_query_options& options = {}) const
+        -> std::vector<client::prefetch_rule>;
+    [[nodiscard]] auto find_enabled_rules() const
+        -> std::vector<client::prefetch_rule>;
+    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> VoidResult;
+    [[nodiscard]] auto rule_exists(std::string_view rule_id) const -> bool;
+
+    // Rule Statistics
+    [[nodiscard]] auto increment_triggered(std::string_view rule_id) -> VoidResult;
+    [[nodiscard]] auto increment_studies_prefetched(
+        std::string_view rule_id, size_t count = 1) -> VoidResult;
+    [[nodiscard]] auto enable_rule(std::string_view rule_id) -> VoidResult;
+    [[nodiscard]] auto disable_rule(std::string_view rule_id) -> VoidResult;
+
+    // History Operations
+    [[nodiscard]] auto save_history(const client::prefetch_history& history) -> VoidResult;
+    [[nodiscard]] auto find_history(const prefetch_history_query_options& options = {}) const
+        -> std::vector<client::prefetch_history>;
+    [[nodiscard]] auto is_study_prefetched(std::string_view study_uid) const -> bool;
+    [[nodiscard]] auto count_completed_today() const -> size_t;
+    [[nodiscard]] auto count_failed_today() const -> size_t;
+    [[nodiscard]] auto update_history_status(
+        std::string_view study_uid, std::string_view status) -> VoidResult;
+    [[nodiscard]] auto cleanup_old_history(std::chrono::hours max_age)
+        -> Result<size_t>;
+
+    // Statistics
+    [[nodiscard]] auto rule_count() const -> size_t;
+    [[nodiscard]] auto enabled_rule_count() const -> size_t;
+    [[nodiscard]] auto history_count() const -> size_t;
+
+    // Database Information
+    [[nodiscard]] auto is_valid() const noexcept -> bool;
+    [[nodiscard]] auto initialize_tables() -> VoidResult;
+
+private:
+    [[nodiscard]] auto parse_rule_row(void* stmt) const -> client::prefetch_rule;
+    [[nodiscard]] auto parse_history_row(void* stmt) const -> client::prefetch_history;
+    [[nodiscard]] static auto serialize_modalities(
+        const std::vector<std::string>& modalities) -> std::string;
+    [[nodiscard]] static auto deserialize_modalities(
+        std::string_view json) -> std::vector<std::string>;
+    [[nodiscard]] static auto serialize_node_ids(
+        const std::vector<std::string>& node_ids) -> std::string;
     [[nodiscard]] static auto deserialize_node_ids(
         std::string_view json) -> std::vector<std::string>;
 
-    /// SQLite database handle
     sqlite3* db_{nullptr};
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

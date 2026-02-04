@@ -12,11 +12,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "pacs/storage/index_database.hpp"
+#include "pacs/storage/migration_runner.hpp"
 #include "pacs/storage/viewer_state_record.hpp"
 #include "pacs/storage/viewer_state_repository.hpp"
 #include "pacs/web/rest_types.hpp"
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include "pacs/storage/pacs_database_adapter.hpp"
+#endif
+
 #include <chrono>
+#include <filesystem>
 #include <thread>
 
 using namespace pacs::storage;
@@ -80,12 +86,47 @@ TEST_CASE("Recent study record validation", "[web][viewer_state]") {
   }
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+namespace {
+/**
+ * @brief Check if SQLite backend is supported by unified_database_system
+ *
+ * Creates a test adapter to verify SQLite connectivity works.
+ */
+bool is_sqlite_backend_supported() {
+  pacs_database_adapter db(":memory:");
+  auto result = db.connect();
+  return result.is_ok();
+}
+}  // namespace
+#endif
+
 TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]") {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  // Check if SQLite backend is supported
+  if (!is_sqlite_backend_supported()) {
+    SUCCEED("Skipped: SQLite backend not yet supported by unified_database_system");
+    return;
+  }
+
+  // Create a separate pacs_database_adapter for the repository
+  // This follows the same pattern as annotation_endpoints_test
+  auto db_adapter = std::make_shared<pacs_database_adapter>(":memory:");
+  REQUIRE(db_adapter->connect().is_ok());
+
+  // Run migrations to create required tables
+  migration_runner runner;
+  auto migration_result = runner.run_migrations(*db_adapter);
+  REQUIRE(migration_result.is_ok());
+
+  viewer_state_repository repo(db_adapter);
+#else
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
-
   viewer_state_repository repo(db->native_handle());
+#endif
+  REQUIRE(repo.is_valid());
 
   SECTION("save and find viewer state") {
     viewer_state_record state;
@@ -199,11 +240,31 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
 }
 
 TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]") {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  // Check if SQLite backend is supported
+  if (!is_sqlite_backend_supported()) {
+    SUCCEED("Skipped: SQLite backend not yet supported by unified_database_system");
+    return;
+  }
+
+  // Create a separate pacs_database_adapter for the repository
+  // This follows the same pattern as annotation_endpoints_test
+  auto db_adapter = std::make_shared<pacs_database_adapter>(":memory:");
+  REQUIRE(db_adapter->connect().is_ok());
+
+  // Run migrations to create required tables
+  migration_runner runner;
+  auto migration_result = runner.run_migrations(*db_adapter);
+  REQUIRE(migration_result.is_ok());
+
+  viewer_state_repository repo(db_adapter);
+#else
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
-
   viewer_state_repository repo(db->native_handle());
+#endif
+  REQUIRE(repo.is_valid());
 
   SECTION("record study access") {
     auto result = repo.record_study_access("user1", "1.2.840.study1");
