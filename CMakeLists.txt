@@ -986,6 +986,7 @@ add_library(pacs_services
     src/services/cache/query_result_stream.cpp
     src/services/cache/streaming_query_handler.cpp
     src/services/cache/parallel_query_executor.cpp
+    src/services/monitoring/database_metrics_service.cpp
 )
 target_include_directories(pacs_services
     PUBLIC
@@ -1285,6 +1286,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/measurement_endpoints.cpp
         src/web/endpoints/key_image_endpoints.cpp
         src/web/endpoints/viewer_state_endpoints.cpp
+        src/web/endpoints/metrics_endpoints.cpp
     )
     target_include_directories(pacs_web
         PUBLIC
@@ -1747,6 +1749,7 @@ if(PACS_BUILD_TESTS)
         tests/services/cache/query_cache_test.cpp
         tests/services/cache/streaming_query_test.cpp
         tests/services/cache/parallel_query_executor_test.cpp
+        tests/services/monitoring/database_metrics_service_test.cpp
     )
     target_link_libraries(services_tests
         PRIVATE

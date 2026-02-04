@@ -81,6 +81,8 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
                                        std::shared_ptr<rest_server_context> ctx);
 void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
                                           std::shared_ptr<rest_server_context> ctx);
+void register_metrics_endpoints_impl(crow::SimpleApp &app,
+                                     std::shared_ptr<rest_server_context> ctx);
 } // namespace endpoints
 
 /**
@@ -231,6 +233,7 @@ void rest_server::start_async() {
     endpoints::register_measurement_endpoints_impl(app, impl_->context);
     endpoints::register_key_image_endpoints_impl(app, impl_->context);
     endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
+    endpoints::register_metrics_endpoints_impl(app, impl_->context);
 
     // Add CORS preflight handler
     if (impl_->config.enable_cors) {
