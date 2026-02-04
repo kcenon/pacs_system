@@ -1095,6 +1095,11 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/viewer_state_repository.cpp
         src/storage/viewer_state_record_repository.cpp
         src/storage/recent_study_repository.cpp
+        src/storage/sync_config_repository.cpp
+        src/storage/sync_conflict_repository.cpp
+        src/storage/sync_history_repository.cpp
+        src/storage/prefetch_rule_repository.cpp
+        src/storage/prefetch_history_repository.cpp
         src/storage/pacs_database_adapter.cpp
         src/storage/repository_factory.cpp
     )
