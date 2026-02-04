@@ -11,6 +11,8 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
+#include <database/query_builder/value_formatter.h>
+
 #include <iomanip>
 #include <sstream>
 
@@ -175,12 +177,19 @@ auto get_optional_int(const storage::database_row& row,
 auto database_cursor::build_dicom_condition(
     const std::string& field,
     const std::string& value) -> std::string {
+    // Use value_formatter for SQL injection protection
+    // This properly escapes single quotes and other special characters
+    database::query::value_formatter formatter(database::database_types::sqlite);
+
     if (contains_dicom_wildcards(value)) {
         // Use LIKE with DICOM-to-SQL wildcard conversion
-        return field + " LIKE '" + to_like_pattern(value) + "' ESCAPE '\\'";
+        auto pattern = to_like_pattern(value);
+        auto escaped_pattern = formatter.escape_string(pattern);
+        return field + " LIKE '" + escaped_pattern + "' ESCAPE '\\'";
     } else {
-        // Exact match
-        return field + " = '" + value + "'";
+        // Exact match with properly escaped value
+        auto escaped_value = formatter.escape_string(value);
+        return field + " = '" + escaped_value + "'";
     }
 }
 
@@ -375,8 +384,11 @@ auto database_cursor::create_study_cursor(
         builder.where(database::query_condition(condition));
     }
     if (query.modality.has_value()) {
+        // Escape modality value to prevent SQL injection
+        database::query::value_formatter formatter(database::database_types::sqlite);
+        auto escaped_modality = formatter.escape_string(*query.modality);
         builder.where(database::query_condition(
-            "s.modalities_in_study LIKE '%" + *query.modality + "%'"));
+            "s.modalities_in_study LIKE '%" + escaped_modality + "%'"));
     }
     if (query.referring_physician.has_value()) {
         auto condition = build_dicom_condition("s.referring_physician", *query.referring_physician);

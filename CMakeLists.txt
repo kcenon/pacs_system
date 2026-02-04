@@ -1769,6 +1769,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET database)
         target_sources(services_tests PRIVATE
             tests/services/monitoring/database_metrics_service_test.cpp
+            tests/services/cache/sql_injection_prevention_test.cpp
         )
     endif()
 
