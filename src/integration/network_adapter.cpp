@@ -23,8 +23,7 @@
 #if defined(__clang__) || defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
-#include <kcenon/network/session/messaging_session.h>
-#include <kcenon/network/session/secure_session.h>
+#include <kcenon/network/session/session.h>
 
 #include <filesystem>
 #include <future>
