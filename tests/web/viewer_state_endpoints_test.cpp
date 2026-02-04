@@ -97,10 +97,14 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
   auto &db = db_result.value();
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-  viewer_state_repository repo(db->db_adapter());
+  auto adapter = db->db_adapter();
+  REQUIRE(adapter);
+  REQUIRE(adapter->is_connected());
+  viewer_state_repository repo(adapter);
 #else
   viewer_state_repository repo(db->native_handle());
 #endif
+  REQUIRE(repo.is_valid());
 
   SECTION("save and find viewer state") {
     viewer_state_record state;
@@ -228,10 +232,14 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   auto &db = db_result.value();
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-  viewer_state_repository repo(db->db_adapter());
+  auto adapter = db->db_adapter();
+  REQUIRE(adapter);
+  REQUIRE(adapter->is_connected());
+  viewer_state_repository repo(adapter);
 #else
   viewer_state_repository repo(db->native_handle());
 #endif
+  REQUIRE(repo.is_valid());
 
   SECTION("record study access") {
     auto result = repo.record_study_access("user1", "1.2.840.study1");
