@@ -988,8 +988,8 @@ add_library(pacs_services
     src/services/cache/parallel_query_executor.cpp
 )
 
-# Add monitoring sources conditionally
-if(PACS_WITH_DATABASE_SYSTEM)
+# Add monitoring sources conditionally (use TARGET check, not CMake variable)
+if(TARGET database)
     target_sources(pacs_services PRIVATE
         src/services/monitoring/database_metrics_service.cpp
     )
@@ -1295,8 +1295,8 @@ if(TARGET Crow::Crow)
         src/web/endpoints/viewer_state_endpoints.cpp
     )
 
-    # Add metrics endpoints conditionally
-    if(PACS_WITH_DATABASE_SYSTEM)
+    # Add metrics endpoints conditionally (use TARGET check, not CMake variable)
+    if(TARGET database)
         target_sources(pacs_web PRIVATE
             src/web/endpoints/metrics_endpoints.cpp
         )
@@ -1765,8 +1765,8 @@ if(PACS_BUILD_TESTS)
         tests/services/cache/parallel_query_executor_test.cpp
     )
 
-    # Add monitoring tests conditionally
-    if(PACS_WITH_DATABASE_SYSTEM)
+    # Add monitoring tests conditionally (use TARGET check, not CMake variable)
+    if(TARGET database)
         target_sources(services_tests PRIVATE
             tests/services/monitoring/database_metrics_service_test.cpp
         )
