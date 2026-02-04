@@ -3,10 +3,14 @@
  * @brief Repository for viewer state persistence
  *
  * This file provides the viewer_state_repository class for persisting viewer state
- * and recent study records in the SQLite database.
+ * and recent study records in the database.
+ *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for database operations. Otherwise, uses direct SQLite access.
  *
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #581 - Part 1: Data Models and Repositories
+ * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
  */
 
 #pragma once
@@ -15,12 +19,15 @@
 
 #include <kcenon/common/patterns/result.h>
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
 
-struct sqlite3;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "pacs/storage/pacs_database_adapter.hpp"
 
 namespace pacs::storage {
 
@@ -30,10 +37,10 @@ using Result = kcenon::common::Result<T>;
 using VoidResult = kcenon::common::VoidResult;
 
 /**
- * @brief Repository for viewer state and recent studies persistence
+ * @brief Repository for viewer state and recent studies persistence using pacs_database_adapter
  *
  * Provides database operations for storing and retrieving viewer state records
- * and recent study access history. Uses SQLite for persistence.
+ * and recent study access history. Uses pacs_database_adapter for database operations.
  *
  * Thread Safety:
  * - This class is NOT thread-safe. External synchronization is required
@@ -41,7 +48,9 @@ using VoidResult = kcenon::common::VoidResult;
  *
  * @example
  * @code
- * auto repo = viewer_state_repository(db_handle);
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = viewer_state_repository(db);
  *
  * viewer_state_record state;
  * state.state_id = generate_uuid();
@@ -55,7 +64,7 @@ using VoidResult = kcenon::common::VoidResult;
  */
 class viewer_state_repository {
 public:
-    explicit viewer_state_repository(sqlite3* db);
+    explicit viewer_state_repository(std::shared_ptr<pacs_database_adapter> db);
     ~viewer_state_repository();
 
     viewer_state_repository(const viewer_state_repository&) = delete;
@@ -177,6 +186,74 @@ public:
     [[nodiscard]] auto is_valid() const noexcept -> bool;
 
 private:
+    [[nodiscard]] auto map_row_to_state(const database_row& row) const
+        -> viewer_state_record;
+    [[nodiscard]] auto map_row_to_recent_study(const database_row& row) const
+        -> recent_study_record;
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+
+    std::shared_ptr<pacs_database_adapter> db_;
+};
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Interface
+// =============================================================================
+
+struct sqlite3;
+
+namespace pacs::storage {
+
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Repository for viewer state persistence (legacy SQLite interface)
+ *
+ * This is the legacy interface maintained for builds without database_system.
+ */
+class viewer_state_repository {
+public:
+    explicit viewer_state_repository(sqlite3* db);
+    ~viewer_state_repository();
+
+    viewer_state_repository(const viewer_state_repository&) = delete;
+    auto operator=(const viewer_state_repository&) -> viewer_state_repository& = delete;
+    viewer_state_repository(viewer_state_repository&&) noexcept;
+    auto operator=(viewer_state_repository&&) noexcept -> viewer_state_repository&;
+
+    // Viewer State Operations
+    [[nodiscard]] auto save_state(const viewer_state_record& record) -> VoidResult;
+    [[nodiscard]] auto find_state_by_id(std::string_view state_id) const
+        -> std::optional<viewer_state_record>;
+    [[nodiscard]] auto find_states_by_study(std::string_view study_uid) const
+        -> std::vector<viewer_state_record>;
+    [[nodiscard]] auto search_states(const viewer_state_query& query) const
+        -> std::vector<viewer_state_record>;
+    [[nodiscard]] auto remove_state(std::string_view state_id) -> VoidResult;
+    [[nodiscard]] auto count_states() const -> size_t;
+
+    // Recent Studies Operations
+    [[nodiscard]] auto record_study_access(
+        std::string_view user_id, std::string_view study_uid) -> VoidResult;
+    [[nodiscard]] auto get_recent_studies(
+        std::string_view user_id, size_t limit = 20) const
+        -> std::vector<recent_study_record>;
+    [[nodiscard]] auto clear_recent_studies(std::string_view user_id) -> VoidResult;
+    [[nodiscard]] auto count_recent_studies(std::string_view user_id) const -> size_t;
+
+    // Database Information
+    [[nodiscard]] auto is_valid() const noexcept -> bool;
+
+private:
     [[nodiscard]] auto parse_state_row(void* stmt) const -> viewer_state_record;
     [[nodiscard]] auto parse_recent_study_row(void* stmt) const -> recent_study_record;
 
@@ -184,3 +261,5 @@ private:
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

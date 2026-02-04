@@ -4,15 +4,735 @@
  *
  * @see Issue #542 - Implement Sync Manager for Bidirectional Synchronization
  * @see Issue #530 - PACS Client System Support (Parent Epic)
+ * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
  */
 
 #include "pacs/storage/sync_repository.hpp"
 
-#include <sqlite3.h>
-
 #include <chrono>
 #include <cstring>
 #include <sstream>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// pacs_database_adapter Implementation
+// =============================================================================
+
+namespace pacs::storage {
+
+namespace {
+
+/// Convert time_point to ISO8601 string
+[[nodiscard]] std::string to_timestamp_string(
+    std::chrono::system_clock::time_point tp) {
+    if (tp == std::chrono::system_clock::time_point{}) {
+        return "";
+    }
+    auto time = std::chrono::system_clock::to_time_t(tp);
+    std::tm tm{};
+#ifdef _WIN32
+    gmtime_s(&tm, &time);
+#else
+    gmtime_r(&time, &tm);
+#endif
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return buf;
+}
+
+/// Parse ISO8601 string to time_point
+[[nodiscard]] std::chrono::system_clock::time_point from_timestamp_string(
+    const std::string& str) {
+    if (str.empty()) {
+        return {};
+    }
+    std::tm tm{};
+    if (std::sscanf(str.c_str(), "%d-%d-%d %d:%d:%d",
+                    &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+                    &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+        return {};
+    }
+    tm.tm_year -= 1900;
+    tm.tm_mon -= 1;
+#ifdef _WIN32
+    auto time = _mkgmtime(&tm);
+#else
+    auto time = timegm(&tm);
+#endif
+    return std::chrono::system_clock::from_time_t(time);
+}
+
+}  // namespace
+
+// =============================================================================
+// JSON Serialization
+// =============================================================================
+
+std::string sync_repository::serialize_vector(const std::vector<std::string>& vec) {
+    if (vec.empty()) return "[]";
+
+    std::ostringstream oss;
+    oss << "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i > 0) oss << ",";
+        oss << "\"";
+        for (char c : vec[i]) {
+            if (c == '"') oss << "\\\"";
+            else if (c == '\\') oss << "\\\\";
+            else oss << c;
+        }
+        oss << "\"";
+    }
+    oss << "]";
+    return oss.str();
+}
+
+std::vector<std::string> sync_repository::deserialize_vector(std::string_view json) {
+    std::vector<std::string> result;
+    if (json.empty() || json == "[]") return result;
+
+    size_t pos = 0;
+    while (pos < json.size()) {
+        auto start = json.find('"', pos);
+        if (start == std::string_view::npos) break;
+
+        size_t end = start + 1;
+        while (end < json.size()) {
+            if (json[end] == '\\' && end + 1 < json.size()) {
+                end += 2;
+            } else if (json[end] == '"') {
+                break;
+            } else {
+                ++end;
+            }
+        }
+
+        if (end < json.size()) {
+            std::string value{json.substr(start + 1, end - start - 1)};
+            std::string unescaped;
+            for (size_t i = 0; i < value.size(); ++i) {
+                if (value[i] == '\\' && i + 1 < value.size()) {
+                    unescaped += value[++i];
+                } else {
+                    unescaped += value[i];
+                }
+            }
+            result.push_back(std::move(unescaped));
+        }
+
+        pos = end + 1;
+    }
+
+    return result;
+}
+
+// =============================================================================
+// Construction / Destruction
+// =============================================================================
+
+sync_repository::sync_repository(std::shared_ptr<pacs_database_adapter> db)
+    : db_(std::move(db)) {}
+
+sync_repository::~sync_repository() = default;
+
+sync_repository::sync_repository(sync_repository&&) noexcept = default;
+auto sync_repository::operator=(sync_repository&&) noexcept -> sync_repository& = default;
+
+// =============================================================================
+// Timestamp Helpers
+// =============================================================================
+
+auto sync_repository::parse_timestamp(const std::string& str) const
+    -> std::chrono::system_clock::time_point {
+    return from_timestamp_string(str);
+}
+
+auto sync_repository::format_timestamp(
+    std::chrono::system_clock::time_point tp) const -> std::string {
+    return to_timestamp_string(tp);
+}
+
+// =============================================================================
+// Config Operations
+// =============================================================================
+
+VoidResult sync_repository::save_config(const client::sync_config& config) {
+    if (!db_ || !db_->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "sync_repository"});
+    }
+
+    auto builder = db_->create_query_builder();
+    std::ostringstream sql;
+    sql << R"(
+        INSERT INTO sync_configs (
+            config_id, source_node_id, name, enabled,
+            lookback_hours, modalities_json, patient_patterns_json,
+            sync_direction, delete_missing, overwrite_existing, sync_metadata_only,
+            schedule_cron, last_sync, last_successful_sync,
+            total_syncs, studies_synced
+        ) VALUES (
+            ')" << config.config_id << "', "
+        << "'" << config.source_node_id << "', "
+        << "'" << config.name << "', "
+        << (config.enabled ? 1 : 0) << ", "
+        << config.lookback.count() << ", "
+        << "'" << serialize_vector(config.modalities) << "', "
+        << "'" << serialize_vector(config.patient_id_patterns) << "', "
+        << "'" << to_string(config.direction) << "', "
+        << (config.delete_missing ? 1 : 0) << ", "
+        << (config.overwrite_existing ? 1 : 0) << ", "
+        << (config.sync_metadata_only ? 1 : 0) << ", "
+        << "'" << config.schedule_cron << "', "
+        << "'" << format_timestamp(config.last_sync) << "', "
+        << "'" << format_timestamp(config.last_successful_sync) << "', "
+        << config.total_syncs << ", "
+        << config.studies_synced << R"()
+        ON CONFLICT(config_id) DO UPDATE SET
+            source_node_id = excluded.source_node_id,
+            name = excluded.name,
+            enabled = excluded.enabled,
+            lookback_hours = excluded.lookback_hours,
+            modalities_json = excluded.modalities_json,
+            patient_patterns_json = excluded.patient_patterns_json,
+            sync_direction = excluded.sync_direction,
+            delete_missing = excluded.delete_missing,
+            overwrite_existing = excluded.overwrite_existing,
+            sync_metadata_only = excluded.sync_metadata_only,
+            schedule_cron = excluded.schedule_cron,
+            last_sync = excluded.last_sync,
+            last_successful_sync = excluded.last_successful_sync,
+            total_syncs = excluded.total_syncs,
+            studies_synced = excluded.studies_synced,
+            updated_at = datetime('now')
+    )";
+
+    auto result = db_->insert(sql.str());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+std::optional<client::sync_config> sync_repository::find_config(
+    std::string_view config_id) const {
+    if (!db_ || !db_->is_connected()) return std::nullopt;
+
+    std::ostringstream sql;
+    sql << R"(
+        SELECT pk, config_id, source_node_id, name, enabled,
+               lookback_hours, modalities_json, patient_patterns_json,
+               sync_direction, delete_missing, overwrite_existing, sync_metadata_only,
+               schedule_cron, last_sync, last_successful_sync,
+               total_syncs, studies_synced
+        FROM sync_configs WHERE config_id = ')" << config_id << "'";
+
+    auto result = db_->select(sql.str());
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
+    }
+
+    return map_row_to_config(result.value()[0]);
+}
+
+std::vector<client::sync_config> sync_repository::list_configs() const {
+    std::vector<client::sync_config> configs;
+    if (!db_ || !db_->is_connected()) return configs;
+
+    const char* sql = R"(
+        SELECT pk, config_id, source_node_id, name, enabled,
+               lookback_hours, modalities_json, patient_patterns_json,
+               sync_direction, delete_missing, overwrite_existing, sync_metadata_only,
+               schedule_cron, last_sync, last_successful_sync,
+               total_syncs, studies_synced
+        FROM sync_configs ORDER BY name
+    )";
+
+    auto result = db_->select(sql);
+    if (result.is_err()) return configs;
+
+    configs.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        configs.push_back(map_row_to_config(row));
+    }
+
+    return configs;
+}
+
+std::vector<client::sync_config> sync_repository::list_enabled_configs() const {
+    std::vector<client::sync_config> configs;
+    if (!db_ || !db_->is_connected()) return configs;
+
+    const char* sql = R"(
+        SELECT pk, config_id, source_node_id, name, enabled,
+               lookback_hours, modalities_json, patient_patterns_json,
+               sync_direction, delete_missing, overwrite_existing, sync_metadata_only,
+               schedule_cron, last_sync, last_successful_sync,
+               total_syncs, studies_synced
+        FROM sync_configs WHERE enabled = 1 ORDER BY name
+    )";
+
+    auto result = db_->select(sql);
+    if (result.is_err()) return configs;
+
+    configs.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        configs.push_back(map_row_to_config(row));
+    }
+
+    return configs;
+}
+
+VoidResult sync_repository::remove_config(std::string_view config_id) {
+    if (!db_ || !db_->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "sync_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << "DELETE FROM sync_configs WHERE config_id = '" << config_id << "'";
+
+    auto result = db_->remove(sql.str());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+VoidResult sync_repository::update_config_stats(
+    std::string_view config_id,
+    bool success,
+    size_t studies_synced) {
+    if (!db_ || !db_->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "sync_repository"});
+    }
+
+    std::ostringstream sql;
+    if (success) {
+        sql << R"(
+            UPDATE sync_configs SET
+                total_syncs = total_syncs + 1,
+                studies_synced = studies_synced + )" << studies_synced << R"(,
+                last_sync = datetime('now'),
+                last_successful_sync = datetime('now'),
+                updated_at = datetime('now')
+            WHERE config_id = ')" << config_id << "'";
+    } else {
+        sql << R"(
+            UPDATE sync_configs SET
+                total_syncs = total_syncs + 1,
+                last_sync = datetime('now'),
+                updated_at = datetime('now')
+            WHERE config_id = ')" << config_id << "'";
+    }
+
+    auto result = db_->update(sql.str());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+// =============================================================================
+// Conflict Operations
+// =============================================================================
+
+VoidResult sync_repository::save_conflict(const client::sync_conflict& conflict) {
+    if (!db_ || !db_->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "sync_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << R"(
+        INSERT INTO sync_conflicts (
+            config_id, study_uid, patient_id, conflict_type,
+            local_modified, remote_modified,
+            local_instance_count, remote_instance_count,
+            resolved, resolution, detected_at, resolved_at
+        ) VALUES (
+            ')" << conflict.config_id << "', "
+        << "'" << conflict.study_uid << "', "
+        << "'" << conflict.patient_id << "', "
+        << "'" << to_string(conflict.conflict_type) << "', "
+        << "'" << format_timestamp(conflict.local_modified) << "', "
+        << "'" << format_timestamp(conflict.remote_modified) << "', "
+        << conflict.local_instance_count << ", "
+        << conflict.remote_instance_count << ", "
+        << (conflict.resolved ? 1 : 0) << ", "
+        << "'" << (conflict.resolved ? to_string(conflict.resolution_used) : "") << "', "
+        << "'" << format_timestamp(conflict.detected_at) << "', ";
+
+    if (conflict.resolved_at.has_value()) {
+        sql << "'" << format_timestamp(conflict.resolved_at.value()) << "'";
+    } else {
+        sql << "NULL";
+    }
+
+    sql << R"()
+        ON CONFLICT(config_id, study_uid) DO UPDATE SET
+            patient_id = excluded.patient_id,
+            conflict_type = excluded.conflict_type,
+            local_modified = excluded.local_modified,
+            remote_modified = excluded.remote_modified,
+            local_instance_count = excluded.local_instance_count,
+            remote_instance_count = excluded.remote_instance_count,
+            resolved = excluded.resolved,
+            resolution = excluded.resolution,
+            detected_at = excluded.detected_at,
+            resolved_at = excluded.resolved_at
+    )";
+
+    auto result = db_->insert(sql.str());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+std::optional<client::sync_conflict> sync_repository::find_conflict(
+    std::string_view study_uid) const {
+    if (!db_ || !db_->is_connected()) return std::nullopt;
+
+    std::ostringstream sql;
+    sql << R"(
+        SELECT pk, config_id, study_uid, patient_id, conflict_type,
+               local_modified, remote_modified,
+               local_instance_count, remote_instance_count,
+               resolved, resolution, detected_at, resolved_at
+        FROM sync_conflicts WHERE study_uid = ')" << study_uid << "'";
+
+    auto result = db_->select(sql.str());
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
+    }
+
+    return map_row_to_conflict(result.value()[0]);
+}
+
+std::vector<client::sync_conflict> sync_repository::list_conflicts(
+    std::string_view config_id) const {
+    std::vector<client::sync_conflict> conflicts;
+    if (!db_ || !db_->is_connected()) return conflicts;
+
+    std::ostringstream sql;
+    sql << R"(
+        SELECT pk, config_id, study_uid, patient_id, conflict_type,
+               local_modified, remote_modified,
+               local_instance_count, remote_instance_count,
+               resolved, resolution, detected_at, resolved_at
+        FROM sync_conflicts WHERE config_id = ')" << config_id << R"(' ORDER BY detected_at DESC)";
+
+    auto result = db_->select(sql.str());
+    if (result.is_err()) return conflicts;
+
+    conflicts.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        conflicts.push_back(map_row_to_conflict(row));
+    }
+
+    return conflicts;
+}
+
+std::vector<client::sync_conflict> sync_repository::list_unresolved_conflicts() const {
+    std::vector<client::sync_conflict> conflicts;
+    if (!db_ || !db_->is_connected()) return conflicts;
+
+    const char* sql = R"(
+        SELECT pk, config_id, study_uid, patient_id, conflict_type,
+               local_modified, remote_modified,
+               local_instance_count, remote_instance_count,
+               resolved, resolution, detected_at, resolved_at
+        FROM sync_conflicts WHERE resolved = 0 ORDER BY detected_at DESC
+    )";
+
+    auto result = db_->select(sql);
+    if (result.is_err()) return conflicts;
+
+    conflicts.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        conflicts.push_back(map_row_to_conflict(row));
+    }
+
+    return conflicts;
+}
+
+VoidResult sync_repository::resolve_conflict(
+    std::string_view study_uid,
+    client::conflict_resolution resolution) {
+    if (!db_ || !db_->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "sync_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << R"(
+        UPDATE sync_conflicts SET
+            resolved = 1,
+            resolution = ')" << to_string(resolution) << R"(',
+            resolved_at = datetime('now')
+        WHERE study_uid = ')" << study_uid << "' AND resolved = 0";
+
+    auto result = db_->update(sql.str());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+Result<size_t> sync_repository::cleanup_old_conflicts(std::chrono::hours max_age) {
+    if (!db_ || !db_->is_connected()) {
+        return kcenon::common::make_error<size_t>(-1,
+            "Database not connected", "sync_repository");
+    }
+
+    auto cutoff = std::chrono::system_clock::now() - max_age;
+    auto cutoff_str = format_timestamp(cutoff);
+
+    std::ostringstream sql;
+    sql << "DELETE FROM sync_conflicts WHERE resolved = 1 AND resolved_at < '"
+        << cutoff_str << "'";
+
+    auto result = db_->remove(sql.str());
+    if (result.is_err()) {
+        return Result<size_t>(result.error());
+    }
+
+    return static_cast<size_t>(result.value());
+}
+
+// =============================================================================
+// History Operations
+// =============================================================================
+
+VoidResult sync_repository::save_history(const client::sync_history& history) {
+    if (!db_ || !db_->is_connected()) {
+        return VoidResult(kcenon::common::error_info{
+            -1, "Database not connected", "sync_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << R"(
+        INSERT INTO sync_history (
+            config_id, job_id, success,
+            studies_checked, studies_synced, conflicts_found,
+            errors_json, started_at, completed_at
+        ) VALUES (
+            ')" << history.config_id << "', "
+        << "'" << history.job_id << "', "
+        << (history.success ? 1 : 0) << ", "
+        << history.studies_checked << ", "
+        << history.studies_synced << ", "
+        << history.conflicts_found << ", "
+        << "'" << serialize_vector(history.errors) << "', "
+        << "'" << format_timestamp(history.started_at) << "', "
+        << "'" << format_timestamp(history.completed_at) << "')";
+
+    auto result = db_->insert(sql.str());
+    if (result.is_err()) {
+        return VoidResult(result.error());
+    }
+
+    return kcenon::common::ok();
+}
+
+std::vector<client::sync_history> sync_repository::list_history(
+    std::string_view config_id, size_t limit) const {
+    std::vector<client::sync_history> histories;
+    if (!db_ || !db_->is_connected()) return histories;
+
+    std::ostringstream sql;
+    sql << R"(
+        SELECT pk, config_id, job_id, success,
+               studies_checked, studies_synced, conflicts_found,
+               errors_json, started_at, completed_at
+        FROM sync_history WHERE config_id = ')" << config_id
+        << "' ORDER BY started_at DESC LIMIT " << limit;
+
+    auto result = db_->select(sql.str());
+    if (result.is_err()) return histories;
+
+    histories.reserve(result.value().size());
+    for (const auto& row : result.value()) {
+        histories.push_back(map_row_to_history(row));
+    }
+
+    return histories;
+}
+
+std::optional<client::sync_history> sync_repository::get_last_history(
+    std::string_view config_id) const {
+    if (!db_ || !db_->is_connected()) return std::nullopt;
+
+    std::ostringstream sql;
+    sql << R"(
+        SELECT pk, config_id, job_id, success,
+               studies_checked, studies_synced, conflicts_found,
+               errors_json, started_at, completed_at
+        FROM sync_history WHERE config_id = ')" << config_id
+        << "' ORDER BY started_at DESC LIMIT 1";
+
+    auto result = db_->select(sql.str());
+    if (result.is_err() || result.value().empty()) {
+        return std::nullopt;
+    }
+
+    return map_row_to_history(result.value()[0]);
+}
+
+Result<size_t> sync_repository::cleanup_old_history(std::chrono::hours max_age) {
+    if (!db_ || !db_->is_connected()) {
+        return kcenon::common::make_error<size_t>(-1,
+            "Database not connected", "sync_repository");
+    }
+
+    auto cutoff = std::chrono::system_clock::now() - max_age;
+    auto cutoff_str = format_timestamp(cutoff);
+
+    std::ostringstream sql;
+    sql << "DELETE FROM sync_history WHERE completed_at < '" << cutoff_str << "'";
+
+    auto result = db_->remove(sql.str());
+    if (result.is_err()) {
+        return Result<size_t>(result.error());
+    }
+
+    return static_cast<size_t>(result.value());
+}
+
+// =============================================================================
+// Statistics
+// =============================================================================
+
+size_t sync_repository::count_configs() const {
+    if (!db_ || !db_->is_connected()) return 0;
+
+    auto result = db_->select("SELECT COUNT(*) as count FROM sync_configs");
+    if (result.is_err() || result.value().empty()) return 0;
+
+    return std::stoull(result.value()[0].at("count"));
+}
+
+size_t sync_repository::count_unresolved_conflicts() const {
+    if (!db_ || !db_->is_connected()) return 0;
+
+    auto result = db_->select(
+        "SELECT COUNT(*) as count FROM sync_conflicts WHERE resolved = 0");
+    if (result.is_err() || result.value().empty()) return 0;
+
+    return std::stoull(result.value()[0].at("count"));
+}
+
+size_t sync_repository::count_syncs_today() const {
+    if (!db_ || !db_->is_connected()) return 0;
+
+    auto result = db_->select(R"(
+        SELECT COUNT(*) as count FROM sync_history
+        WHERE date(completed_at) = date('now')
+    )");
+    if (result.is_err() || result.value().empty()) return 0;
+
+    return std::stoull(result.value()[0].at("count"));
+}
+
+// =============================================================================
+// Database Information
+// =============================================================================
+
+bool sync_repository::is_valid() const noexcept {
+    return db_ && db_->is_connected();
+}
+
+// =============================================================================
+// Row Mapping
+// =============================================================================
+
+client::sync_config sync_repository::map_row_to_config(
+    const database_row& row) const {
+    client::sync_config config;
+
+    config.pk = std::stoll(row.at("pk"));
+    config.config_id = row.at("config_id");
+    config.source_node_id = row.at("source_node_id");
+    config.name = row.at("name");
+    config.enabled = (row.at("enabled") == "1");
+    config.lookback = std::chrono::hours(std::stoi(row.at("lookback_hours")));
+    config.modalities = deserialize_vector(row.at("modalities_json"));
+    config.patient_id_patterns = deserialize_vector(row.at("patient_patterns_json"));
+    config.direction = client::sync_direction_from_string(row.at("sync_direction"));
+    config.delete_missing = (row.at("delete_missing") == "1");
+    config.overwrite_existing = (row.at("overwrite_existing") == "1");
+    config.sync_metadata_only = (row.at("sync_metadata_only") == "1");
+    config.schedule_cron = row.at("schedule_cron");
+    config.last_sync = parse_timestamp(row.at("last_sync"));
+    config.last_successful_sync = parse_timestamp(row.at("last_successful_sync"));
+    config.total_syncs = std::stoull(row.at("total_syncs"));
+    config.studies_synced = std::stoull(row.at("studies_synced"));
+
+    return config;
+}
+
+client::sync_conflict sync_repository::map_row_to_conflict(
+    const database_row& row) const {
+    client::sync_conflict conflict;
+
+    conflict.pk = std::stoll(row.at("pk"));
+    conflict.config_id = row.at("config_id");
+    conflict.study_uid = row.at("study_uid");
+    conflict.patient_id = row.at("patient_id");
+    conflict.conflict_type = client::sync_conflict_type_from_string(
+        row.at("conflict_type"));
+    conflict.local_modified = parse_timestamp(row.at("local_modified"));
+    conflict.remote_modified = parse_timestamp(row.at("remote_modified"));
+    conflict.local_instance_count = std::stoull(row.at("local_instance_count"));
+    conflict.remote_instance_count = std::stoull(row.at("remote_instance_count"));
+    conflict.resolved = (row.at("resolved") == "1");
+    conflict.resolution_used = client::conflict_resolution_from_string(
+        row.at("resolution"));
+    conflict.detected_at = parse_timestamp(row.at("detected_at"));
+
+    auto resolved_at_it = row.find("resolved_at");
+    if (resolved_at_it != row.end() && !resolved_at_it->second.empty()) {
+        conflict.resolved_at = parse_timestamp(resolved_at_it->second);
+    }
+
+    return conflict;
+}
+
+client::sync_history sync_repository::map_row_to_history(
+    const database_row& row) const {
+    client::sync_history history;
+
+    history.pk = std::stoll(row.at("pk"));
+    history.config_id = row.at("config_id");
+    history.job_id = row.at("job_id");
+    history.success = (row.at("success") == "1");
+    history.studies_checked = std::stoull(row.at("studies_checked"));
+    history.studies_synced = std::stoull(row.at("studies_synced"));
+    history.conflicts_found = std::stoull(row.at("conflicts_found"));
+    history.errors = deserialize_vector(row.at("errors_json"));
+    history.started_at = parse_timestamp(row.at("started_at"));
+    history.completed_at = parse_timestamp(row.at("completed_at"));
+
+    return history;
+}
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Implementation
+// =============================================================================
+
+#include <sqlite3.h>
 
 namespace pacs::storage {
 
@@ -903,3 +1623,5 @@ client::sync_history sync_repository::parse_history_row(void* stmt_ptr) const {
 }
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

@@ -16,7 +16,8 @@
 #endif
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-#include <kcenon/network/core/messaging_server.h>
+// network_system#651: messaging_server.h moved from include/ to src/internal/
+#include "internal/core/messaging_server.h"
 #include <kcenon/network/session/messaging_session.h>
 #endif
 

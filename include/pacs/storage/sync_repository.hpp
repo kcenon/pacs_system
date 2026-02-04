@@ -3,10 +3,14 @@
  * @brief Repository for sync persistence
  *
  * This file provides the sync_repository class for persisting sync
- * configurations, conflicts, and history in the SQLite database.
+ * configurations, conflicts, and history in the database.
+ *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for database operations. Otherwise, uses direct SQLite access.
  *
  * @see Issue #542 - Implement Sync Manager for Bidirectional Synchronization
  * @see Issue #530 - PACS Client System Support (Parent Epic)
+ * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
  */
 
 #pragma once
@@ -21,8 +25,9 @@
 #include <string_view>
 #include <vector>
 
-// Forward declaration
-struct sqlite3;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "pacs/storage/pacs_database_adapter.hpp"
 
 namespace pacs::storage {
 
@@ -34,10 +39,10 @@ using Result = kcenon::common::Result<T>;
 using VoidResult = kcenon::common::VoidResult;
 
 /**
- * @brief Repository for sync persistence
+ * @brief Repository for sync persistence using pacs_database_adapter
  *
  * Provides database operations for storing and retrieving sync configurations,
- * conflicts, and history. Uses SQLite for persistence.
+ * conflicts, and history. Uses pacs_database_adapter for database operations.
  *
  * Thread Safety:
  * - This class is NOT thread-safe. External synchronization is required
@@ -45,22 +50,24 @@ using VoidResult = kcenon::common::VoidResult;
  *
  * @example
  * @code
- * auto repo = std::make_shared<sync_repository>(db_handle);
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = sync_repository(db);
  *
  * // Save a config
  * client::sync_config config;
  * config.config_id = "daily-sync";
  * config.source_node_id = "archive-server";
- * repo->save_config(config);
+ * repo.save_config(config);
  *
  * // List configs
- * auto configs = repo->list_configs();
+ * auto configs = repo.list_configs();
  *
  * // Save a conflict
  * client::sync_conflict conflict;
  * conflict.study_uid = "1.2.3.4.5";
  * conflict.conflict_type = client::sync_conflict_type::missing_local;
- * repo->save_conflict(conflict);
+ * repo.save_conflict(conflict);
  * @endcode
  */
 class sync_repository {
@@ -70,11 +77,11 @@ public:
     // =========================================================================
 
     /**
-     * @brief Construct repository with SQLite handle
+     * @brief Construct repository with pacs_database_adapter
      *
-     * @param db SQLite database handle (must remain valid for repository lifetime)
+     * @param db Shared pointer to database adapter (must be connected)
      */
-    explicit sync_repository(sqlite3* db);
+    explicit sync_repository(std::shared_ptr<pacs_database_adapter> db);
 
     /**
      * @brief Destructor
@@ -288,19 +295,22 @@ private:
     // =========================================================================
 
     /**
-     * @brief Parse a config from a prepared statement
+     * @brief Map database row to sync_config
      */
-    [[nodiscard]] auto parse_config_row(void* stmt) const -> client::sync_config;
+    [[nodiscard]] auto map_row_to_config(const database_row& row) const
+        -> client::sync_config;
 
     /**
-     * @brief Parse a conflict from a prepared statement
+     * @brief Map database row to sync_conflict
      */
-    [[nodiscard]] auto parse_conflict_row(void* stmt) const -> client::sync_conflict;
+    [[nodiscard]] auto map_row_to_conflict(const database_row& row) const
+        -> client::sync_conflict;
 
     /**
-     * @brief Parse a history record from a prepared statement
+     * @brief Map database row to sync_history
      */
-    [[nodiscard]] auto parse_history_row(void* stmt) const -> client::sync_history;
+    [[nodiscard]] auto map_row_to_history(const database_row& row) const
+        -> client::sync_history;
 
     /**
      * @brief Serialize vector to JSON
@@ -314,8 +324,110 @@ private:
     [[nodiscard]] static auto deserialize_vector(
         std::string_view json) -> std::vector<std::string>;
 
-    /// SQLite database handle
+    /**
+     * @brief Parse timestamp string to time_point
+     */
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+
+    /**
+     * @brief Format time_point to timestamp string
+     */
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+
+    /// Database adapter
+    std::shared_ptr<pacs_database_adapter> db_;
+};
+
+}  // namespace pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Interface
+// =============================================================================
+
+struct sqlite3;
+
+namespace pacs::storage {
+
+/// Result type alias
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+/// Void result type alias
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Repository for sync persistence (legacy SQLite interface)
+ *
+ * This is the legacy interface maintained for builds without database_system.
+ * New code should use the pacs_database_adapter version when
+ * PACS_WITH_DATABASE_SYSTEM is defined.
+ */
+class sync_repository {
+public:
+    explicit sync_repository(sqlite3* db);
+    ~sync_repository();
+
+    sync_repository(const sync_repository&) = delete;
+    auto operator=(const sync_repository&) -> sync_repository& = delete;
+    sync_repository(sync_repository&&) noexcept;
+    auto operator=(sync_repository&&) noexcept -> sync_repository&;
+
+    // Config Operations
+    [[nodiscard]] auto save_config(const client::sync_config& config) -> VoidResult;
+    [[nodiscard]] auto find_config(std::string_view config_id) const
+        -> std::optional<client::sync_config>;
+    [[nodiscard]] auto list_configs() const -> std::vector<client::sync_config>;
+    [[nodiscard]] auto list_enabled_configs() const -> std::vector<client::sync_config>;
+    [[nodiscard]] auto remove_config(std::string_view config_id) -> VoidResult;
+    [[nodiscard]] auto update_config_stats(
+        std::string_view config_id, bool success, size_t studies_synced) -> VoidResult;
+
+    // Conflict Operations
+    [[nodiscard]] auto save_conflict(const client::sync_conflict& conflict) -> VoidResult;
+    [[nodiscard]] auto find_conflict(std::string_view study_uid) const
+        -> std::optional<client::sync_conflict>;
+    [[nodiscard]] auto list_conflicts(std::string_view config_id) const
+        -> std::vector<client::sync_conflict>;
+    [[nodiscard]] auto list_unresolved_conflicts() const
+        -> std::vector<client::sync_conflict>;
+    [[nodiscard]] auto resolve_conflict(
+        std::string_view study_uid, client::conflict_resolution resolution) -> VoidResult;
+    [[nodiscard]] auto cleanup_old_conflicts(std::chrono::hours max_age)
+        -> Result<size_t>;
+
+    // History Operations
+    [[nodiscard]] auto save_history(const client::sync_history& history) -> VoidResult;
+    [[nodiscard]] auto list_history(std::string_view config_id, size_t limit = 100) const
+        -> std::vector<client::sync_history>;
+    [[nodiscard]] auto get_last_history(std::string_view config_id) const
+        -> std::optional<client::sync_history>;
+    [[nodiscard]] auto cleanup_old_history(std::chrono::hours max_age)
+        -> Result<size_t>;
+
+    // Statistics
+    [[nodiscard]] auto count_configs() const -> size_t;
+    [[nodiscard]] auto count_unresolved_conflicts() const -> size_t;
+    [[nodiscard]] auto count_syncs_today() const -> size_t;
+
+    // Database Information
+    [[nodiscard]] auto is_valid() const noexcept -> bool;
+
+private:
+    [[nodiscard]] auto parse_config_row(void* stmt) const -> client::sync_config;
+    [[nodiscard]] auto parse_conflict_row(void* stmt) const -> client::sync_conflict;
+    [[nodiscard]] auto parse_history_row(void* stmt) const -> client::sync_history;
+    [[nodiscard]] static auto serialize_vector(
+        const std::vector<std::string>& vec) -> std::string;
+    [[nodiscard]] static auto deserialize_vector(
+        std::string_view json) -> std::vector<std::string>;
+
     sqlite3* db_{nullptr};
 };
 
 }  // namespace pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

@@ -126,7 +126,20 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     -> Result<std::unique_ptr<index_database>> {
     sqlite3* db = nullptr;
 
-    auto rc = sqlite3_open(std::string(db_path).c_str(), &db);
+    // Convert :memory: to shared cache URI for consistent connections
+    // This allows pacs_database_adapter to share the same in-memory database
+    std::string effective_path;
+    if (db_path == ":memory:") {
+        // Use shared cache mode so all connections share the same in-memory DB
+        effective_path = "file:pacs_shared_memory?mode=memory&cache=shared";
+    } else {
+        effective_path = std::string(db_path);
+    }
+
+    // Use sqlite3_open_v2 with URI support for shared cache mode
+    auto rc = sqlite3_open_v2(effective_path.c_str(), &db,
+                              SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
+                              nullptr);
     if (rc != SQLITE_OK) {
         std::string error_msg =
             db ? sqlite3_errmsg(db) : "Failed to allocate memory";
@@ -185,8 +198,9 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     }
 
     // Create database instance
+    // Use effective_path to ensure pacs_database_adapter connects to same DB
     auto instance = std::unique_ptr<index_database>(
-        new index_database(db, std::string(db_path)));
+        new index_database(db, effective_path));
 
     // Run migrations
     auto migration_result = instance->migration_runner_.run_migrations(db);

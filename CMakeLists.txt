@@ -849,6 +849,10 @@ target_include_directories(pacs_network
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+    PRIVATE
+        # network_system internal headers for messaging_server/client (see network_system#651)
+        # These headers were moved from include/ to src/internal/ in network_system
+        $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
 )
 # Suppress deprecated warnings from common_system/logger_system headers (logger_interface is deprecated)
 target_compile_options(pacs_network PRIVATE
@@ -1343,6 +1347,10 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
+        PRIVATE
+            # network_system internal headers for messaging_server/client (see network_system#651)
+            # These headers were moved from include/ to src/internal/ in network_system
+            $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
     )
     # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
     target_compile_options(pacs_integration PRIVATE

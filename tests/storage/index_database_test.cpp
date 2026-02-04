@@ -42,7 +42,9 @@ TEST_CASE("index_database: create in-memory database", "[storage][database]") {
 
     CHECK(db->is_open());
     CHECK(db->schema_version() == 7);
-    CHECK(db->path() == ":memory:");
+    // In-memory databases use shared cache URI format for connection sharing
+    // Path will be "file:pacs_shared_memory?mode=memory&cache=shared"
+    CHECK(db->path().find("memory") != std::string::npos);
 }
 
 TEST_CASE("index_database: create file-based database",
