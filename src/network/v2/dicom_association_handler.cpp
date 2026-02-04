@@ -17,7 +17,7 @@
 #endif
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-#include <kcenon/network/session/messaging_session.h>
+#include <kcenon/network/session/session.h>
 #endif
 
 #if KCENON_HAS_COMMON_SYSTEM

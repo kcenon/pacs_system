@@ -31,7 +31,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include <kcenon/network/session/messaging_session.h>
+#include <kcenon/network/session/session.h>
 #endif
 
 #if KCENON_HAS_COMMON_SYSTEM
