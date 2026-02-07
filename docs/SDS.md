@@ -21,10 +21,10 @@
 
 | Document | ID | Version |
 |----------|-----|---------|
-| Product Requirements Document | [PRD](PRD.md) | 1.0.0 |
-| Software Requirements Specification | [SRS](SRS.md) | 1.0.0 |
-| Architecture Documentation | [ARCHITECTURE](ARCHITECTURE.md) | 1.0.0 |
-| API Reference | [API_REFERENCE](API_REFERENCE.md) | 1.0.0 |
+| Product Requirements Document | [PRD](PRD.md) | 0.1.1.0 |
+| Software Requirements Specification | [SRS](SRS.md) | 0.1.1.0 |
+| Architecture Documentation | [ARCHITECTURE](ARCHITECTURE.md) | 0.1.3.0 |
+| API Reference | [API_REFERENCE](API_REFERENCE.md) | 0.1.1.0 |
 
 ### Document Structure
 
@@ -212,7 +212,7 @@ The PACS System follows a layered architecture:
 │                    Layer 1: Encoding                             │
 │            (VR Types, Transfer Syntax, Codecs)                   │
 │                                                                  │
-│  Traces to: FR-1.2 (VR Types), FR-1.4 (Transfer Syntax)         │
+│  Traces to: FR-1.2 (VR Types), FR-1.3 (Transfer Syntax)         │
 └────────────────────────────────┬────────────────────────────────┘
                                  │
 ┌────────────────────────────────▼────────────────────────────────┐
@@ -355,10 +355,10 @@ The PACS System follows a layered architecture:
 | Component | Design ID | Description | Traces to |
 |-----------|-----------|-------------|-----------|
 | `dicom_tag` | DES-CORE-001 | Tag representation (Group, Element) | SRS-CORE-001 |
-| `dicom_element` | DES-CORE-002 | Data Element (Tag, VR, Value) | SRS-CORE-002 |
-| `dicom_dataset` | DES-CORE-003 | Ordered element collection | SRS-CORE-003 |
-| `dicom_file` | DES-CORE-004 | Part 10 file handling | SRS-CORE-004 |
-| `dicom_dictionary` | DES-CORE-005 | Tag metadata lookup | SRS-CORE-005 |
+| `dicom_element` | DES-CORE-002 | Data Element (Tag, VR, Value) | SRS-CORE-003 |
+| `dicom_dataset` | DES-CORE-003 | Ordered element collection | SRS-CORE-005 |
+| `dicom_file` | DES-CORE-004 | Part 10 file handling | SRS-CORE-006 |
+| `dicom_dictionary` | DES-CORE-005 | Tag metadata lookup | SRS-CORE-008 |
 
 ### 4.2 Encoding Module (pacs_encoding)
 
@@ -368,11 +368,11 @@ The PACS System follows a layered architecture:
 
 | Component | Design ID | Description | Traces to |
 |-----------|-----------|-------------|-----------|
-| `vr_type` | DES-ENC-001 | 27 VR type enumeration | SRS-CORE-006 |
-| `vr_info` | DES-ENC-002 | VR metadata utilities | SRS-CORE-006 |
+| `vr_type` | DES-ENC-001 | 31 VR type enumeration | SRS-CORE-002 |
+| `vr_info` | DES-ENC-002 | VR metadata utilities | SRS-CORE-002 |
 | `transfer_syntax` | DES-ENC-003 | Transfer Syntax handling | SRS-CORE-007 |
-| `implicit_vr_codec` | DES-ENC-004 | Implicit VR encoder/decoder | SRS-CORE-008 |
-| `explicit_vr_codec` | DES-ENC-005 | Explicit VR encoder/decoder | SRS-CORE-008 |
+| `implicit_vr_codec` | DES-ENC-004 | Implicit VR encoder/decoder | SRS-CORE-007 |
+| `explicit_vr_codec` | DES-ENC-005 | Explicit VR encoder/decoder | SRS-CORE-007 |
 
 ### 4.3 Network Module (pacs_network)
 
@@ -587,7 +587,7 @@ The PACS System follows a layered architecture:
 |--------|--------|-----------------|-----------|
 | C-STORE throughput | ≥50 images/sec | Async I/O, thread pool | NFR-1.1 |
 | C-FIND latency | <100ms (1000 studies) | Indexed queries | NFR-1.2 |
-| Concurrent associations | ≥20 | Async multiplexing | NFR-1.3 |
+| Concurrent associations | ≥100 | Async multiplexing | NFR-1.3 |
 | Memory per association | <10MB | Streaming, pooling | NFR-1.4 |
 
 ### 7.2 Reliability Targets
@@ -598,21 +598,30 @@ The PACS System follows a layered architecture:
 | Data integrity | Zero loss | Atomic transactions | NFR-2.2 |
 | Error recovery | Automatic | Retry mechanisms | NFR-2.3 |
 
-### 7.3 Security Targets
+### 7.3 Scalability Targets
 
 | Metric | Target | Design Solution | Traces to |
 |--------|--------|-----------------|-----------|
-| Transport | TLS 1.2/1.3 | network_system TLS | NFR-3.1 |
-| Access control | AE whitelist | Configuration-based | NFR-3.2 |
-| Audit logging | Complete | logger_system | NFR-3.3 |
+| Horizontal scaling | Supported | Multiple instances | NFR-3.1 |
+| Image capacity | ≥1M studies | Hierarchical storage | NFR-3.2 |
+| Throughput scaling | ≥80% efficiency | Thread pool scaling | NFR-3.3 |
+| Queue capacity | ≥10K jobs | Async job queue | NFR-3.4 |
 
-### 7.4 Maintainability Targets
+### 7.4 Security Targets
 
 | Metric | Target | Design Solution | Traces to |
 |--------|--------|-----------------|-----------|
-| Test coverage | ≥80% | Comprehensive test suite | NFR-4.1 |
-| Documentation | Complete | Doxygen + guides | NFR-4.2 |
-| Static analysis | Clean | clang-tidy integration | NFR-4.3 |
+| Transport | TLS 1.2/1.3 | network_system TLS | NFR-4.1 |
+| Access control | AE whitelist | Configuration-based | NFR-4.2 |
+| Audit logging | Complete | logger_system | NFR-4.3 |
+
+### 7.5 Maintainability Targets
+
+| Metric | Target | Design Solution | Traces to |
+|--------|--------|-----------------|-----------|
+| Test coverage | ≥80% | Comprehensive test suite | NFR-5.1 |
+| Documentation | Complete | Doxygen + guides | NFR-5.2 |
+| Static analysis | Clean | clang-tidy integration | NFR-5.3 |
 
 ---
 

@@ -3,7 +3,7 @@
 > **Version:** 2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-05
-> **Status:** Complete
+> **Status:** Framework Complete (HTTP Transport Pending)
 
 ---
 
