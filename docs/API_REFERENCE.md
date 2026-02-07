@@ -4353,46 +4353,51 @@ for (const auto& h : health) {
 ### Error Codes
 
 ```cpp
-#include <pacs/common/error_codes.h>
+#include <pacs/core/result.hpp>
 
 namespace pacs::error_codes {
 
-// DICOM Parsing Errors (-800 to -819)
-constexpr int INVALID_DICOM_FILE = -800;
-constexpr int INVALID_VR = -801;
-constexpr int MISSING_REQUIRED_TAG = -802;
-constexpr int INVALID_TRANSFER_SYNTAX = -803;
-constexpr int INVALID_DATA_ELEMENT = -804;
-constexpr int SEQUENCE_ENCODING_ERROR = -805;
+// ================================================================
+// PACS-specific error codes (-700 to -799)
+// ================================================================
+constexpr int pacs_base = -700;
 
-// Association Errors (-820 to -839)
-constexpr int ASSOCIATION_REJECTED = -820;
-constexpr int ASSOCIATION_ABORTED = -821;
-constexpr int NO_PRESENTATION_CONTEXT = -822;
-constexpr int INVALID_PDU = -823;
-constexpr int PDU_TOO_LARGE = -824;
-constexpr int ASSOCIATION_TIMEOUT = -825;
+// DICOM File Errors (-700 to -719)
+constexpr int file_not_found = pacs_base - 0;              // -700
+constexpr int file_read_error = pacs_base - 1;             // -701
+constexpr int file_write_error = pacs_base - 2;            // -702
+constexpr int invalid_dicom_file = pacs_base - 3;          // -703
+constexpr int missing_dicm_prefix = pacs_base - 4;         // -704
 
-// DIMSE Errors (-840 to -859)
-constexpr int DIMSE_FAILURE = -840;
-constexpr int DIMSE_TIMEOUT = -841;
-constexpr int DIMSE_INVALID_RESPONSE = -842;
-constexpr int DIMSE_CANCELLED = -843;
-constexpr int DIMSE_STATUS_ERROR = -844;
+// DICOM Element Errors (-720 to -739)
+constexpr int element_not_found = pacs_base - 20;          // -720
+constexpr int value_conversion_error = pacs_base - 21;     // -721
+constexpr int invalid_vr = pacs_base - 22;                 // -722
 
-// Storage Errors (-860 to -879)
-constexpr int STORAGE_FAILED = -860;
-constexpr int DUPLICATE_SOP_INSTANCE = -861;
-constexpr int INVALID_SOP_CLASS = -862;
-constexpr int STORAGE_FULL = -863;
-constexpr int FILE_WRITE_ERROR = -864;
+// Encoding/Decoding Errors (-740 to -759)
+constexpr int decode_error = pacs_base - 40;               // -740
+constexpr int encode_error = pacs_base - 41;               // -741
+constexpr int compression_error = pacs_base - 42;          // -742
 
-// Query Errors (-880 to -899)
-constexpr int QUERY_FAILED = -880;
-constexpr int NO_MATCHES_FOUND = -881;
-constexpr int TOO_MANY_MATCHES = -882;
-constexpr int INVALID_QUERY_LEVEL = -883;
-constexpr int DATABASE_ERROR = -884;
+// Network/Association Errors (-760 to -779)
+constexpr int association_rejected = pacs_base - 60;       // -760
+constexpr int association_aborted = pacs_base - 61;        // -761
+constexpr int connection_failed = pacs_base - 64;          // -764
+
+// Storage Errors (-780 to -799)
+constexpr int storage_failed = pacs_base - 80;             // -780
+constexpr int database_open_error = pacs_base - 83;        // -783
+constexpr int bucket_not_found = pacs_base - 90;           // -790
+
+// ================================================================
+// Service-specific error codes (-800 to -899)
+// ================================================================
+constexpr int service_base = -800;
+
+// C-STORE Service Errors (-800 to -819)
+constexpr int store_handler_not_set = service_base - 0;    // -800
+
+// See include/pacs/core/result.hpp for the complete error code list.
 
 } // namespace pacs::error_codes
 ```

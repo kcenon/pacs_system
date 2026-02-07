@@ -136,7 +136,7 @@ This **Validation Report** confirms that the PACS (Picture Archiving and Communi
 
 | # | Criterion | Result | Evidence |
 |---|-----------|--------|----------|
-| 1 | All 27 VR types implemented | ✅ PASS | `vr_type.hpp` enum with 27 values |
+| 1 | All 34 VR types implemented | ✅ PASS | `vr_type.hpp` enum with 34 values |
 | 2 | VR validation for content | ✅ PASS | `vr_info.cpp` validation functions |
 | 3 | VR-specific length constraints | ✅ PASS | Max length enforced per VR |
 
@@ -148,7 +148,7 @@ This **Validation Report** confirms that the PACS (Picture Archiving and Communi
 | Numeric VRs | FL, FD, SL, SS, UL, US | ✅ 6/6 |
 | Binary VRs | OB, OD, OF, OL, OW, UN | ✅ 6/6 |
 | Special VRs | AT, SQ | ✅ 2/2 |
-| **Total** | **27 VR types** | **✅ 27/27** |
+| **Total** | **34 VR types** | **✅ 34/34** |
 
 **Status:** ✅ **VALIDATED**
 
