@@ -315,7 +315,7 @@ pacs_system/
 
 | Challenge | Solution |
 |-----------|----------|
-| Various VR types (27 types) | container_system value types extension |
+| Various VR types (34 types) | container_system value types extension |
 | Nested sequences (SQ) | Recursive container structure utilization |
 | Transfer Syntax conversion | Separate codec module |
 | Large images (several GB) | Streaming processing, memory mapping |

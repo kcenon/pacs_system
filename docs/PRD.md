@@ -116,7 +116,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | ID | Requirement | Priority | Phase |
 |----|-------------|----------|-------|
 | FR-1.1.1 | Parse DICOM Data Elements (Tag, VR, Length, Value) | Must Have | 1 |
-| FR-1.1.2 | Support all 31 VR types as per PS3.5 | Must Have | 1 |
+| FR-1.1.2 | Support all 34 VR types as per PS3.5 (including DICOM 2019b) | Must Have | 1 |
 | FR-1.1.3 | Handle nested Sequence (SQ) elements recursively | Must Have | 1 |
 | FR-1.1.4 | Support private tags and private creator elements | Should Have | 2 |
 | FR-1.1.5 | Validate data element consistency | Should Have | 2 |
@@ -769,6 +769,9 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | UR | Universal Resource Identifier | string | unlimited |
 | US | Unsigned Short | uint16 | 2 |
 | UT | Unlimited Text | string | unlimited |
+| OV | Other 64-bit Very Long | bytes | variable |
+| SV | Signed 64-bit Very Long | int64 | 8 |
+| UV | Unsigned 64-bit Very Long | uint64 | 8 |
 
 ### Appendix B: Error Code Registry
 

@@ -27,11 +27,11 @@ This document provides comprehensive details on all features available in the PA
 
 ### Data Element Processing
 
-**Implementation**: Complete DICOM Data Element parser and encoder supporting all 27 Value Representations (VR).
+**Implementation**: Complete DICOM Data Element parser and encoder supporting all 34 Value Representations (VR).
 
 **Features**:
 - Parse and encode DICOM Data Elements (Tag, VR, Length, Value)
-- Support for all 27 standard VR types (PS3.5)
+- Support for all 34 standard VR types (PS3.5, including DICOM 2019b additions)
 - Automatic VR determination from Data Dictionary
 - Little Endian and Big Endian byte ordering
 - Explicit and Implicit VR encoding support
@@ -63,14 +63,14 @@ auto value = patient_name.as_string();   // "Doe^John"
 
 ### Value Representation Types
 
-All 27 DICOM VR types are supported with appropriate container_system mappings:
+All 34 DICOM VR types are supported with appropriate container_system mappings:
 
 | Category | VR Types | Description |
 |----------|----------|-------------|
-| **String** | AE, AS, CS, DA, DS, DT, IS, LO, LT, PN, SH, ST, TM, UI, UT | Text-based values |
+| **String** | AE, AS, CS, DA, DS, DT, IS, LO, LT, PN, SH, ST, TM, UC, UI, UR, UT | Text-based values |
 | **Numeric** | FL, FD, SL, SS, UL, US | Numeric values |
-| **Binary** | OB, OD, OF, OL, OW, UN | Binary data |
-| **Structured** | AT, SQ | Tags and Sequences |
+| **Binary** | OB, OD, OF, OL, OV, OW, UN | Binary data |
+| **Special** | AT, SQ, SV, UV | Tags, Sequences, and 64-bit integers |
 
 **VR Features**:
 - Automatic padding for fixed-length VRs

@@ -255,7 +255,7 @@ PACS 시스템은 계층 아키텍처를 따릅니다:
 
 | 컴포넌트 | 설계 ID | 설명 | 추적 |
 |----------|---------|------|------|
-| `vr_type` | DES-ENC-001 | 27개 VR 타입 열거형 | SRS-CORE-006 |
+| `vr_type` | DES-ENC-001 | 34개 VR 타입 열거형 | SRS-CORE-006 |
 | `vr_info` | DES-ENC-002 | VR 메타데이터 유틸리티 | SRS-CORE-006 |
 | `transfer_syntax` | DES-ENC-003 | Transfer Syntax 처리 | SRS-CORE-007 |
 | `implicit_vr_codec` | DES-ENC-004 | Implicit VR 인코더/디코더 | SRS-CORE-008 |
