@@ -417,7 +417,7 @@ The PACS System follows a layered architecture:
 |-----------|-----------|-------------|-----------|
 | `storage_interface` | DES-STOR-001 | Abstract storage API | SRS-STOR-001 |
 | `file_storage` | DES-STOR-002 | Filesystem implementation | SRS-STOR-002 |
-| `index_database` | DES-STOR-003 | SQLite index | SRS-STOR-003 |
+| `index_database` | DES-STOR-003 | SQLite index | SRS-STOR-002 |
 
 ### 4.6 Integration Module (pacs_integration)
 
@@ -459,7 +459,7 @@ The PACS System follows a layered architecture:
 | `prefetch_config` | DES-WKF-002 | Prefetch configuration | SRS-WKF-001 | ✅ |
 | `task_scheduler` | DES-WKF-003 | Scheduled task execution | SRS-WKF-002 | ✅ |
 | `task_scheduler_config` | DES-WKF-004 | Scheduler configuration | SRS-WKF-002 | ✅ |
-| `study_lock_manager` | DES-WKF-005 | Concurrent access control | SRS-WKF-003 | ✅ |
+| `study_lock_manager` | DES-WKF-005 | Concurrent access control | SRS-WKF-001 | ✅ |
 
 ### 4.9 Services Cache Module (pacs_services_cache)
 
@@ -597,6 +597,8 @@ The PACS System follows a layered architecture:
 | Uptime | 99.9% | Graceful degradation | NFR-2.1 |
 | Data integrity | Zero loss | Atomic transactions | NFR-2.2 |
 | Error recovery | Automatic | Retry mechanisms | NFR-2.3 |
+| Connection recovery | Automatic | Association re-establishment | NFR-2.4 |
+| Transaction safety | ACID | Atomic file write (temp + rename) | NFR-2.5 |
 
 ### 7.3 Scalability Targets
 
@@ -614,6 +616,8 @@ The PACS System follows a layered architecture:
 | Transport | TLS 1.2/1.3 | network_system TLS | NFR-4.1 |
 | Access control | AE whitelist | Configuration-based | NFR-4.2 |
 | Audit logging | Complete | logger_system | NFR-4.3 |
+| Input validation | 100% | PDU/DIMSE validation layer | NFR-4.4 |
+| Memory safety | Zero leaks | RAII, AddressSanitizer CI | NFR-4.5 |
 
 ### 7.5 Maintainability Targets
 
@@ -622,6 +626,8 @@ The PACS System follows a layered architecture:
 | Test coverage | ≥80% | Comprehensive test suite | NFR-5.1 |
 | Documentation | Complete | Doxygen + guides | NFR-5.2 |
 | Static analysis | Clean | clang-tidy integration | NFR-5.3 |
+| Thread safety | Verified | shared_mutex, ThreadSanitizer CI | NFR-5.4 |
+| Modular design | Low coupling | Interface-driven DI (pacs_di) | NFR-5.5 |
 
 ---
 
