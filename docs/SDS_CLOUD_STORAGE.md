@@ -3,7 +3,7 @@
 > **Version:** 1.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-04
-> **Status:** Initial
+> **Status:** Initial (Mock Client - In-Memory Implementation)
 
 ---
 

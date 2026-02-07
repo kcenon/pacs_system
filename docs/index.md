@@ -72,7 +72,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | Worklist/MPPS | ✅ Complete |
 | Advanced Compression | 🔜 Phase 3 |
 
-**Test Coverage**: 143+ tests passing across 42 test files
+**Test Coverage**: 1,837+ tests passing across 128 test files
 
 ## Getting Started
 

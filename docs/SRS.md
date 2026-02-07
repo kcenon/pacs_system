@@ -14,7 +14,7 @@
 | **Document ID** | PACS-SRS-001 |
 | **Project** | PACS System |
 | **Author** | kcenon@naver.com |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Related Documents** | [PRD](PRD.md), [ARCHITECTURE](ARCHITECTURE.md), [API_REFERENCE](API_REFERENCE.md) |
 
 ---
@@ -1924,7 +1924,16 @@ The PACS System provides no direct user interface. All interaction is through:
 | SRS-REL-004 | Error recovery | Automatic | NFR-2.4 |
 | SRS-REL-005 | Transaction safety | ACID | NFR-2.5 |
 
-### 6.3 Security Requirements
+### 6.3 Scalability Requirements
+
+| ID | Requirement | Target | Traces To |
+|----|-------------|--------|-----------|
+| SRS-SCAL-001 | Horizontal scaling | Multiple instances supported | NFR-3.1 |
+| SRS-SCAL-002 | Image capacity | ≥1M studies per instance | NFR-3.2 |
+| SRS-SCAL-003 | Linear throughput scaling | ≥80% efficiency with additional workers | NFR-3.3 |
+| SRS-SCAL-004 | Queue capacity | ≥10K pending jobs | NFR-3.4 |
+
+### 6.4 Security Requirements
 
 | ID | Requirement | Target | Traces To |
 |----|-------------|--------|-----------|
@@ -1934,7 +1943,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | SRS-SEC-004 | Input validation | 100% | NFR-4.4 |
 | SRS-SEC-005 | Memory safety | Zero leaks | NFR-4.5 |
 
-### 6.4 Maintainability Requirements
+### 6.5 Maintainability Requirements
 
 | ID | Requirement | Target | Traces To |
 |----|-------------|--------|-----------|
@@ -1999,6 +2008,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | FR-9.1 | SRS-AI-001 | Specified |
 | NFR-1.1-NFR-1.6 | SRS-PERF-001 - SRS-PERF-006 | Specified |
 | NFR-2.1-NFR-2.5 | SRS-REL-001 - SRS-REL-005 | Specified |
+| NFR-3.1-NFR-3.4 | SRS-SCAL-001 - SRS-SCAL-004 | Specified |
 | NFR-4.1-NFR-4.5 | SRS-SEC-001 - SRS-SEC-005 | Specified |
 | NFR-5.1-NFR-5.5 | SRS-MAINT-001 - SRS-MAINT-005 | Specified |
 | IR-1 | SRS-INT-001 - SRS-INT-006 | Specified |

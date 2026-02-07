@@ -175,7 +175,7 @@ Memory and thread safety enforced through modern C++ idioms:
 │  │  ┌────────────────┐  ┌────────────────┐  ┌──────────────────────────┐  │ │
 │  │  │  State Machine │  │  Presentation  │  │   PDU Encoder/Decoder   │  │ │
 │  │  │                │  │    Context     │  │                          │  │ │
-│  │  │  8-state FSM   │  │   Negotiation  │  │  • A-ASSOCIATE-RQ/AC/RJ │  │ │
+│  │  │  13-state FSM  │  │   Negotiation  │  │  • A-ASSOCIATE-RQ/AC/RJ │  │ │
 │  │  │  per PS3.8     │  │                │  │  • P-DATA-TF             │  │ │
 │  │  │                │  │                │  │  • A-RELEASE-RQ/RP       │  │ │
 │  │  │                │  │                │  │  • A-ABORT               │  │ │
@@ -396,10 +396,12 @@ The network module implements DICOM Upper Layer Protocol:
 │  │  ┌──────────────────────────────────────────────────────────┐││
 │  │  │                  association                              │││
 │  │  │                                                           │││
-│  │  │  State Machine (8 states per PS3.8):                     │││
+│  │  │  State Machine (13 states per PS3.8 Sta1-Sta13):          │││
 │  │  │                                                           │││
-│  │  │  Sta1 ─► Sta2 ─► Sta3 ─► Sta5 ─► Sta6 ─► Sta7 ─► Sta1   │││
-│  │  │  (Idle)  (TCP)  (Await)  (Await) (Est.)  (Await) (Idle)  │││
+│  │  │  Sta1 ─► Sta4 ─► Sta5 ─► Sta6 ─► Sta7 ─► Sta1           │││
+│  │  │  (Idle) (Await) (Await)  (Est.)  (Await)  (Idle)          │││
+│  │  │  Sta2,Sta3: Transport open / A-ASSOC wait                 │││
+│  │  │  Sta8-Sta13: Release collision / error states              │││
 │  │  │                                                           │││
 │  │  │  Methods:                                                 │││
 │  │  │  • connect()      - Initiate association (SCU)           │││
@@ -952,14 +954,14 @@ int main() {
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0.0 | 2025-11-30 | kcenon | Initial release |
-| 1.1.0 | 2025-12-04 | kcenon | Updated Thread Model with thread_system migration details |
-| 1.2.0 | 2025-12-07 | kcenon | Updated version, confirmed Thread Model reflects migration (Epic #153) |
-| 1.3.0 | 2026-01-06 | kcenon | Added C++20 Module Architecture section (Issue #507) |
+| 0.1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 0.1.1.0 | 2025-12-04 | kcenon | Updated Thread Model with thread_system migration details |
+| 0.1.2.0 | 2025-12-07 | kcenon | Updated version, confirmed Thread Model reflects migration (Epic #153) |
+| 0.1.3.0 | 2026-01-06 | kcenon | Added C++20 Module Architecture section (Issue #507) |
 
 ---
 
-*Document Version: 0.1.2.0*
+*Document Version: 0.1.3.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2026-01-08*
 *Author: kcenon@naver.com*

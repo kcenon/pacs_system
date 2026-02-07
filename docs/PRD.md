@@ -116,7 +116,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | ID | Requirement | Priority | Phase |
 |----|-------------|----------|-------|
 | FR-1.1.1 | Parse DICOM Data Elements (Tag, VR, Length, Value) | Must Have | 1 |
-| FR-1.1.2 | Support all 27 VR types as per PS3.5 | Must Have | 1 |
+| FR-1.1.2 | Support all 31 VR types as per PS3.5 | Must Have | 1 |
 | FR-1.1.3 | Handle nested Sequence (SQ) elements recursively | Must Have | 1 |
 | FR-1.1.4 | Support private tags and private creator elements | Should Have | 2 |
 | FR-1.1.5 | Validate data element consistency | Should Have | 2 |
@@ -158,7 +158,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 #### FR-2.2: Association Management
 | ID | Requirement | Priority | Phase |
 |----|-------------|----------|-------|
-| FR-2.2.1 | Manage association state machine (8 states) | Must Have | 2 |
+| FR-2.2.1 | Manage association state machine (13 states per PS3.8 Sta1-Sta13) | Must Have | 2 |
 | FR-2.2.2 | Negotiate presentation contexts | Must Have | 2 |
 | FR-2.2.3 | Support multiple simultaneous associations | Must Have | 2 |
 | FR-2.2.4 | Implement association timeout handling | Must Have | 2 |
@@ -251,6 +251,53 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | FR-4.2.3 | Maintain referential integrity | Must Have | 3 |
 | FR-4.2.4 | Support concurrent read operations | Must Have | 3 |
 | FR-4.2.5 | Implement database recovery mechanisms | Should Have | 4 |
+
+### FR-5: Security Services
+
+| ID | Requirement | Priority | Phase |
+|----|-------------|----------|-------|
+| FR-5.1 | Implement DICOM dataset anonymization per PS3.15 Annex E | Should Have | 4 |
+| FR-5.2 | Support digital signatures for DICOM datasets per PS3.15 | Could Have | 5 |
+| FR-5.3 | Implement role-based access control (RBAC) for DICOM operations | Should Have | 4 |
+| FR-5.4 | Support X.509 certificate management for TLS and signing | Could Have | 5 |
+
+---
+
+### FR-6: Web/REST API Services
+
+| ID | Requirement | Priority | Phase |
+|----|-------------|----------|-------|
+| FR-6.1 | Provide REST API server for system management and monitoring | Should Have | 4 |
+| FR-6.2 | Implement DICOMweb WADO-RS for web image retrieval per PS3.18 | Should Have | 4 |
+| FR-6.3 | Implement DICOMweb STOW-RS for web image storage per PS3.18 | Should Have | 4 |
+| FR-6.4 | Implement DICOMweb QIDO-RS for web image query per PS3.18 | Should Have | 4 |
+
+---
+
+### FR-7: Workflow Services
+
+| ID | Requirement | Priority | Phase |
+|----|-------------|----------|-------|
+| FR-7.1 | Implement automatic prior study prefetch from remote PACS | Should Have | 4 |
+| FR-7.2 | Provide background task scheduling for maintenance operations | Should Have | 4 |
+
+---
+
+### FR-8: Cloud Storage
+
+| ID | Requirement | Priority | Phase |
+|----|-------------|----------|-------|
+| FR-8.1 | Support AWS S3 as storage backend for DICOM files | Should Have | 4 |
+| FR-8.2 | Support Azure Blob Storage as storage backend | Should Have | 4 |
+| FR-8.3 | Implement hierarchical storage management (HSM) with tier migration | Could Have | 5 |
+
+---
+
+### FR-9: AI Integration
+
+| ID | Requirement | Priority | Phase |
+|----|-------------|----------|-------|
+| FR-9.1 | Integrate with external AI services for medical image analysis | Could Have | 5 |
 
 ---
 
@@ -389,7 +436,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 |-----------|-----|------|
 | Verification | 1.2.840.10008.1.1 | SCP/SCU |
 
-#### Phase 2 - Storage
+#### Phase 3 - Storage
 | SOP Class | UID | Role | Status |
 |-----------|-----|------|--------|
 | CT Image Storage | 1.2.840.10008.5.1.4.1.1.2 | SCP/SCU | ✅ Implemented |
@@ -398,9 +445,23 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | Digital X-Ray | 1.2.840.10008.5.1.4.1.1.1.1 | SCP/SCU | ✅ Implemented |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | SCP/SCU | ✅ Implemented |
 | Ultrasound Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | SCP/SCU | ✅ Implemented |
-| Ultrasound Multi-frame | 1.2.840.10008.5.1.4.1.1.3.1 | SCP/SCU | ✅ Implemented |
+| Ultrasound Multi-frame | 1.2.840.10008.5.1.4.1.1.6.2 | SCP/SCU | ✅ Implemented |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | SCP/SCU | ✅ Implemented |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | SCP/SCU | ✅ Implemented |
+| XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | SCP/SCU | ✅ Implemented |
+| NM Image Storage | 1.2.840.10008.5.1.4.1.1.20 | SCP/SCU | ✅ Implemented |
+| PET Image Storage | 1.2.840.10008.5.1.4.1.1.128 | SCP/SCU | ✅ Implemented |
+| Enhanced PET Image Storage | 1.2.840.10008.5.1.4.1.1.130 | SCP/SCU | ✅ Implemented |
+| RT Plan Storage | 1.2.840.10008.5.1.4.1.1.481.5 | SCP/SCU | ✅ Implemented |
+| RT Dose Storage | 1.2.840.10008.5.1.4.1.1.481.2 | SCP/SCU | ✅ Implemented |
+| RT Structure Set Storage | 1.2.840.10008.5.1.4.1.1.481.3 | SCP/SCU | ✅ Implemented |
+| RT Image Storage | 1.2.840.10008.5.1.4.1.1.481.1 | SCP/SCU | ✅ Implemented |
+| Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.4 | SCP/SCU | ✅ Implemented |
+| Basic Text SR Storage | 1.2.840.10008.5.1.4.1.1.88.11 | SCP/SCU | ✅ Implemented |
+| Enhanced SR Storage | 1.2.840.10008.5.1.4.1.1.88.22 | SCP/SCU | ✅ Implemented |
+| Comprehensive SR Storage | 1.2.840.10008.5.1.4.1.1.88.33 | SCP/SCU | ✅ Implemented |
+| Key Object Selection Document | 1.2.840.10008.5.1.4.1.1.88.59 | SCP/SCU | ✅ Implemented |
+| Mammography CAD SR Storage | 1.2.840.10008.5.1.4.1.1.88.50 | SCP/SCU | ✅ Implemented |
 
 #### Phase 3 - Query/Retrieve
 | SOP Class | UID | Role |
@@ -425,11 +486,13 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | Implicit VR Little Endian | 1.2.840.10008.1.2 | Required | ✅ Implemented |
 | Explicit VR Little Endian | 1.2.840.10008.1.2.1 | Required | ✅ Implemented |
 | Explicit VR Big Endian | 1.2.840.10008.1.2.2 | Optional | ✅ Implemented |
-| JPEG Baseline | 1.2.840.10008.1.2.4.50 | Future | 🔮 Planned |
-| JPEG Lossless | 1.2.840.10008.1.2.4.70 | Future | 🔮 Planned |
-| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | Future | 🔮 Planned |
-| JPEG 2000 | 1.2.840.10008.1.2.4.91 | Future | 🔮 Planned |
-| RLE Lossless | 1.2.840.10008.1.2.5 | Future | 🔮 Planned |
+| JPEG Baseline | 1.2.840.10008.1.2.4.50 | Optional | ✅ Implemented |
+| JPEG Lossless | 1.2.840.10008.1.2.4.70 | Optional | ✅ Implemented |
+| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | Optional | ✅ Implemented |
+| JPEG 2000 | 1.2.840.10008.1.2.4.91 | Optional | ✅ Implemented |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | Optional | ✅ Implemented |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | Optional | ✅ Implemented |
+| RLE Lossless | 1.2.840.10008.1.2.5 | Optional | ✅ Implemented |
 
 ---
 
@@ -474,6 +537,30 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | HIS/RIS | HL7 FHIR | Patient demographics |
 | WADO | HTTP | Web image access |
 | Viewer | DICOMweb | Image retrieval |
+
+### IR-6: ITK/VTK Integration
+
+| System | Integration Type | Purpose | Phase |
+|--------|-----------------|---------|-------|
+| **ITK/VTK** | Image Processing | Advanced medical image processing and 3D reconstruction | 5 |
+
+### IR-7: Crow REST Framework Integration
+
+| System | Integration Type | Purpose | Phase | Status |
+|--------|-----------------|---------|-------|--------|
+| **Crow** | HTTP Framework | REST API server implementation | 4 | ✅ Implemented |
+
+### IR-8: AWS SDK Integration
+
+| System | Integration Type | Purpose | Phase |
+|--------|-----------------|---------|-------|
+| **AWS SDK for C++** | Cloud Storage | S3 storage backend operations | 4 |
+
+### IR-9: Azure SDK Integration
+
+| System | Integration Type | Purpose | Phase |
+|--------|-----------------|---------|-------|
+| **Azure SDK for C++** | Cloud Storage | Blob Storage backend operations | 4 |
 
 ---
 
@@ -675,53 +762,70 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | SS | Signed Short | int16 | 2 |
 | ST | Short Text | string | 1024 max |
 | TM | Time | string | 14 max |
+| UC | Unlimited Characters | string | unlimited |
 | UI | Unique Identifier | string | 64 max |
 | UL | Unsigned Long | uint32 | 4 |
 | UN | Unknown | bytes | variable |
+| UR | Universal Resource Identifier | string | unlimited |
 | US | Unsigned Short | uint16 | 2 |
 | UT | Unlimited Text | string | unlimited |
 
 ### Appendix B: Error Code Registry
 
 ```
-pacs_system error codes: -800 to -899
+pacs_system error codes: -700 to -899
 
-DICOM Parsing Errors (-800 to -819):
-  -800: INVALID_DICOM_FILE
-  -801: INVALID_VR
-  -802: MISSING_REQUIRED_TAG
-  -803: INVALID_TRANSFER_SYNTAX
-  -804: INVALID_DATA_ELEMENT
-  -805: SEQUENCE_ENCODING_ERROR
+DICOM File Errors (-700 to -719):
+  -700: INVALID_DICOM_FILE
+  -701: MISSING_DICM_PREFIX
+  -702: INVALID_META_INFO
+  -703: FILE_READ_ERROR
+  -704: FILE_WRITE_ERROR
 
-Association Errors (-820 to -839):
-  -820: ASSOCIATION_REJECTED
-  -821: ASSOCIATION_ABORTED
-  -822: NO_PRESENTATION_CONTEXT
-  -823: INVALID_PDU
-  -824: PDU_TOO_LARGE
-  -825: ASSOCIATION_TIMEOUT
+DICOM Element Errors (-720 to -739):
+  -720: INVALID_DATA_ELEMENT
+  -721: ELEMENT_NOT_FOUND
+  -722: INVALID_VALUE_CONVERSION
+  -723: MISSING_REQUIRED_TAG
 
-DIMSE Errors (-840 to -859):
-  -840: DIMSE_FAILURE
-  -841: DIMSE_TIMEOUT
-  -842: DIMSE_INVALID_RESPONSE
-  -843: DIMSE_CANCELLED
-  -844: DIMSE_STATUS_ERROR
+Encoding Errors (-740 to -759):
+  -740: INVALID_VR
+  -741: INVALID_TRANSFER_SYNTAX
+  -742: SEQUENCE_ENCODING_ERROR
+  -743: COMPRESSION_ERROR
+  -744: DECOMPRESSION_ERROR
 
-Storage Errors (-860 to -879):
-  -860: STORAGE_FAILED
-  -861: DUPLICATE_SOP_INSTANCE
-  -862: INVALID_SOP_CLASS
-  -863: STORAGE_FULL
-  -864: FILE_WRITE_ERROR
+Network Errors (-760 to -779):
+  -760: ASSOCIATION_REJECTED
+  -761: ASSOCIATION_ABORTED
+  -762: NO_PRESENTATION_CONTEXT
+  -763: INVALID_PDU
+  -764: PDU_TOO_LARGE
+  -765: ASSOCIATION_TIMEOUT
+  -766: DIMSE_FAILURE
+  -767: DIMSE_TIMEOUT
+  -768: DIMSE_INVALID_RESPONSE
+  -769: DIMSE_CANCELLED
 
-Query Errors (-880 to -899):
-  -880: QUERY_FAILED
-  -881: NO_MATCHES_FOUND
-  -882: TOO_MANY_MATCHES
-  -883: INVALID_QUERY_LEVEL
-  -884: DATABASE_ERROR
+Storage Errors (-780 to -799):
+  -780: STORAGE_FAILED
+  -781: DUPLICATE_SOP_INSTANCE
+  -782: INVALID_SOP_CLASS
+  -783: STORAGE_FULL
+  -784: QUERY_FAILED
+  -785: NO_MATCHES_FOUND
+  -786: TOO_MANY_MATCHES
+  -787: INVALID_QUERY_LEVEL
+  -788: DATABASE_ERROR
+
+Service Errors (-800 to -899):
+  -800: C-STORE service errors (-800 to -819)
+  -820: C-FIND service errors (-820 to -839)
+  -840: C-MOVE/C-GET service errors (-840 to -859)
+  -860: Verification service errors (-860 to -869)
+  -870: MPPS service errors (-870 to -879)
+  -880: Worklist service errors (-880 to -889)
+  -890: General service errors (-890 to -899)
 ```
 
 ### Appendix C: References
