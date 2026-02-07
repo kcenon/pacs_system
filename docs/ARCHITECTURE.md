@@ -805,12 +805,18 @@ The DICOM server uses a multi-tiered threading model that leverages the ecosyste
 All errors are propagated using the Result<T> pattern from common_system:
 
 ```cpp
-// Error code registration (-800 to -899)
+// PACS error codes (-700 to -799), Service codes (-800 to -899)
 namespace pacs::error_codes {
-    // DICOM Parsing Errors (-800 to -819)
-    constexpr int INVALID_DICOM_FILE = -800;
-    constexpr int INVALID_VR = -801;
-    // ... (see PRD for complete list)
+    constexpr int pacs_base = -700;
+
+    // DICOM File Errors (-700 to -719)
+    constexpr int file_not_found = pacs_base - 0;       // -700
+    constexpr int invalid_dicom_file = pacs_base - 3;   // -703
+    // ... (see result.hpp for complete list)
+
+    constexpr int service_base = -800;
+    // C-STORE service errors (-800 to -819)
+    constexpr int store_handler_not_set = service_base - 0; // -800
 }
 
 // Error handling example
@@ -827,13 +833,25 @@ auto& file = result.value();
 
 ### Error Categories
 
+**PACS-specific error codes (-700 to -799):**
+
 | Category | Code Range | Description |
 |----------|-----------|-------------|
-| Parsing | -800 to -819 | DICOM data parsing errors |
-| Association | -820 to -839 | Network association errors |
-| DIMSE | -840 to -859 | Message exchange errors |
-| Storage | -860 to -879 | File/database storage errors |
-| Query | -880 to -899 | Query processing errors |
+| File I/O | -700 to -719 | DICOM file read/write errors |
+| Element | -720 to -739 | Data element parsing errors |
+| Encoding | -740 to -759 | VR encoding/decoding errors |
+| Network | -760 to -779 | Association and PDU errors |
+| Storage | -780 to -799 | Database, cloud, and HSM errors |
+
+**Service-specific error codes (-800 to -899):**
+
+| Category | Code Range | Description |
+|----------|-----------|-------------|
+| C-STORE | -800 to -819 | Storage service errors |
+| C-FIND | -820 to -839 | Query service errors |
+| C-MOVE | -840 to -859 | Retrieve service errors |
+| Worklist | -860 to -879 | MWL service errors |
+| MPPS | -880 to -899 | MPPS service errors |
 
 ---
 

@@ -71,7 +71,7 @@
 | 요구사항 | SRS ID | 구현 | 상태 |
 |----------|--------|------|------|
 | DICOM Tag 표현 | SRS-CORE-001 | `dicom_tag.hpp/cpp` | ✅ 완료 |
-| 27개 VR 타입 구현 | SRS-CORE-002 | `vr_type.hpp`, `vr_info.hpp/cpp` | ✅ 완료 |
+| 34개 VR 타입 구현 | SRS-CORE-002 | `vr_type.hpp`, `vr_info.hpp/cpp` | ✅ 완료 |
 | Data Element 구조 | SRS-CORE-003 | `dicom_element.hpp/cpp` | ✅ 완료 |
 | Sequence 요소 처리 | SRS-CORE-004 | `dicom_element.hpp/cpp` | ✅ 완료 |
 | Data Set 컨테이너 | SRS-CORE-005 | `dicom_dataset.hpp/cpp` | ✅ 완료 |

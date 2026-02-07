@@ -218,13 +218,13 @@ struct dicom_tag {
 |-----------|-------|
 | **ID** | SRS-CORE-002 |
 | **Title** | VR Type System |
-| **Description** | The system shall implement all 27 DICOM Value Representation types as defined in PS3.5. |
+| **Description** | The system shall implement all 34 DICOM Value Representation types as defined in PS3.5 (including DICOM 2019b additions: OV, SV, UV). |
 | **Priority** | Must Have |
 | **Phase** | 1 |
 | **Traces To** | FR-1.1.2 |
 
 **Acceptance Criteria:**
-1. All 27 VR types implemented
+1. All 34 VR types implemented
 2. VR validation for value content
 3. VR-specific length constraints enforced
 

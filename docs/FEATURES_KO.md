@@ -27,11 +27,11 @@
 
 ### 데이터 요소 처리
 
-**구현**: 27개의 모든 Value Representation(VR)을 지원하는 완전한 DICOM Data Element 파서 및 인코더.
+**구현**: 34개의 모든 Value Representation(VR)을 지원하는 완전한 DICOM Data Element 파서 및 인코더.
 
 **기능**:
 - DICOM 데이터 요소 파싱 및 인코딩 (태그, VR, 길이, 값)
-- 27개 표준 VR 타입 모두 지원 (PS3.5)
+- 34개 표준 VR 타입 모두 지원 (PS3.5, DICOM 2019b 포함)
 - 데이터 딕셔너리에서 자동 VR 결정
 - Little Endian 및 Big Endian 바이트 순서
 - Explicit 및 Implicit VR 인코딩 지원
@@ -63,14 +63,14 @@ auto value = patient_name.as_string();   // "Doe^John"
 
 ### Value Representation 타입
 
-container_system과의 적절한 매핑으로 27개의 모든 DICOM VR 타입이 지원됩니다:
+container_system과의 적절한 매핑으로 34개의 모든 DICOM VR 타입이 지원됩니다:
 
 | 카테고리 | VR 타입 | 설명 |
 |----------|---------|------|
-| **문자열** | AE, AS, CS, DA, DS, DT, IS, LO, LT, PN, SH, ST, TM, UI, UT | 텍스트 기반 값 |
+| **문자열** | AE, AS, CS, DA, DS, DT, IS, LO, LT, PN, SH, ST, TM, UC, UI, UR, UT | 텍스트 기반 값 |
 | **숫자** | FL, FD, SL, SS, UL, US | 숫자 값 |
-| **바이너리** | OB, OD, OF, OL, OW, UN | 바이너리 데이터 |
-| **구조화** | AT, SQ | 태그 및 시퀀스 |
+| **바이너리** | OB, OD, OF, OL, OV, OW, UN | 바이너리 데이터 |
+| **특수** | AT, SQ, SV, UV | 태그, 시퀀스 및 64비트 정수 |
 
 **VR 기능**:
 - 고정 길이 VR에 대한 자동 패딩

@@ -368,7 +368,7 @@ The PACS System follows a layered architecture:
 
 | Component | Design ID | Description | Traces to |
 |-----------|-----------|-------------|-----------|
-| `vr_type` | DES-ENC-001 | 31 VR type enumeration | SRS-CORE-002 |
+| `vr_type` | DES-ENC-001 | 34 VR type enumeration | SRS-CORE-002 |
 | `vr_info` | DES-ENC-002 | VR metadata utilities | SRS-CORE-002 |
 | `transfer_syntax` | DES-ENC-003 | Transfer Syntax handling | SRS-CORE-007 |
 | `implicit_vr_codec` | DES-ENC-004 | Implicit VR encoder/decoder | SRS-CORE-007 |

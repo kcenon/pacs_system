@@ -348,7 +348,7 @@ Value Representation 인코딩을 처리합니다:
 
 | 파일 | 설명 |
 |------|------|
-| `vr_type.hpp` | 27개 VR 타입 정의 |
+| `vr_type.hpp` | 34개 VR 타입 정의 |
 | `transfer_syntax.hpp` | Transfer Syntax 관리 |
 | `implicit_vr_codec.hpp` | Implicit VR 인코딩 |
 | `explicit_vr_codec.hpp` | Explicit VR 인코딩 |

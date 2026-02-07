@@ -351,7 +351,7 @@ Handles Value Representation encoding:
 
 | File | Description |
 |------|-------------|
-| `vr_types.h` | 27 VR type definitions |
+| `vr_types.h` | 34 VR type definitions |
 | `transfer_syntax.h` | Transfer Syntax management |
 | `implicit_vr_codec.h` | Implicit VR encoding |
 | `explicit_vr_codec.h` | Explicit VR encoding |

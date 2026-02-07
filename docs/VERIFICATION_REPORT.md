@@ -86,7 +86,7 @@ The verification was conducted through static code analysis, documentation revie
 | Requirement | SRS ID | Implementation | Status |
 |-------------|--------|----------------|--------|
 | DICOM Tag representation | SRS-CORE-001 | `dicom_tag.hpp/cpp` | ✅ Complete |
-| 27 VR types implementation | SRS-CORE-002 | `vr_type.hpp`, `vr_info.hpp/cpp` | ✅ Complete |
+| 34 VR types implementation | SRS-CORE-002 | `vr_type.hpp`, `vr_info.hpp/cpp` | ✅ Complete |
 | Data Element structure | SRS-CORE-003 | `dicom_element.hpp/cpp` | ✅ Complete |
 | Sequence element handling | SRS-CORE-004 | `dicom_element.hpp/cpp` | ✅ Complete |
 | Data Set container | SRS-CORE-005 | `dicom_dataset.hpp/cpp` | ✅ Complete |

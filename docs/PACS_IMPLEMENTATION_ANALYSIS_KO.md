@@ -315,7 +315,7 @@ pacs_system/
 
 | 도전 과제 | 해결 방안 |
 |-----------|----------|
-| 다양한 VR 타입 (27종) | container_system value types 확장 |
+| 다양한 VR 타입 (34종) | container_system value types 확장 |
 | 중첩 시퀀스 (SQ) | 재귀적 container 구조 활용 |
 | Transfer Syntax 변환 | 코덱 모듈 분리 |
 | 대용량 이미지 (수 GB) | 스트리밍 처리, 메모리 매핑 |
