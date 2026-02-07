@@ -1,8 +1,8 @@
 # SDS - 요구사항 추적성 매트릭스
 
-> **버전:** 0.1.2.0
+> **버전:** 0.1.3.0
 > **상위 문서:** [SDS_KO.md](SDS_KO.md)
-> **최종 수정일:** 2025-12-07
+> **최종 수정일:** 2026-02-07
 
 ---
 
@@ -94,7 +94,7 @@
 | PRD ID | PRD 설명 | SRS ID(s) | 커버리지 |
 |--------|---------|-----------|----------|
 | **FR-1.1** | DICOM 데이터 엘리먼트 (Tag, VR, Length, Value) | SRS-CORE-001, SRS-CORE-002 | 완전 |
-| **FR-1.2** | PS3.5 기준 27가지 VR 타입 | SRS-CORE-006 | 완전 |
+| **FR-1.2** | PS3.5 기준 34가지 VR 타입 | SRS-CORE-006 | 완전 |
 | **FR-1.3** | DICOM Part 10 파일 형식 | SRS-CORE-004 | 완전 |
 | **FR-1.4** | 전송 구문 지원 | SRS-CORE-007, SRS-CORE-008 | 완전 |
 | **FR-1.5** | 데이터 사전 (PS3.6) | SRS-CORE-005 | 완전 |
@@ -121,11 +121,11 @@
 
 | PRD ID | PRD 설명 | SRS ID(s) | 커버리지 |
 |--------|---------|-----------|----------|
-| **IR-1** | container_system 통합 | SRS-INT-001 | 완전 |
-| **IR-2** | network_system 통합 | SRS-INT-002 | 완전 |
-| **IR-3** | thread_system 통합 | SRS-INT-003 | 완전 |
-| **IR-4** | logger_system 통합 | SRS-INT-004 | 완전 |
-| **IR-5** | monitoring_system 통합 | SRS-INT-005 | 완전 |
+| **IR-1** | container_system 통합 | SRS-INT-002 | 완전 |
+| **IR-2** | network_system 통합 | SRS-INT-003 | 완전 |
+| **IR-3** | thread_system 통합 | SRS-INT-004 | 완전 |
+| **IR-4** | logger_system 통합 | SRS-INT-005 | 완전 |
+| **IR-5** | monitoring_system 통합 | SRS-INT-006 | 완전 |
 
 ---
 
@@ -177,11 +177,12 @@
 
 | SRS ID | SRS 설명 | SDS ID(s) | 설계 요소 |
 |--------|---------|-----------|----------|
-| **SRS-INT-001** | container_system 어댑터 | DES-INT-001 | `container_adapter` |
-| **SRS-INT-002** | network_system 어댑터 | DES-INT-002 | `network_adapter` |
-| **SRS-INT-003** | thread_system 어댑터 | DES-INT-003 | `thread_adapter` |
-| **SRS-INT-004** | logger_system 어댑터 | DES-INT-004 | `logger_adapter` |
-| **SRS-INT-005** | monitoring_system 어댑터 | DES-INT-005 | `monitoring_adapter` |
+| **SRS-INT-001** | common_system IExecutor 어댑터 | DES-INT-009 | `executor_adapter` |
+| **SRS-INT-002** | container_system 어댑터 | DES-INT-001 | `container_adapter` |
+| **SRS-INT-003** | network_system 어댑터 | DES-INT-002 | `network_adapter` |
+| **SRS-INT-004** | thread_system 어댑터 | DES-INT-003 | `thread_adapter` |
+| **SRS-INT-005** | logger_system 어댑터 | DES-INT-004 | `logger_adapter` |
+| **SRS-INT-006** | monitoring_system 어댑터 | DES-INT-005 | `monitoring_adapter` |
 
 ### 3.6 시퀀스 다이어그램 매핑
 
@@ -318,19 +319,22 @@
 │  PRD                  SRS                    SDS                            │
 │  ───────────────────────────────────────────────────────────────            │
 │                                                                              │
-│  IR-1 ────────────► SRS-INT-001 ─────────► DES-INT-001 (container_adapter) │
-│  (container_system)              VR ↔ value 매핑                            │
+│  (PRD IR 없음) ──► SRS-INT-001 ─────────► DES-INT-009 (executor_adapter)   │
+│  (common_system)                 IExecutor, value mapping                   │
 │                                                                              │
-│  IR-2 ────────────► SRS-INT-002 ─────────► DES-INT-002 (network_adapter)   │
+│  IR-1 ────────────► SRS-INT-002 ─────────► DES-INT-001 (container_adapter) │
+│  (container_system)              의존성 주입                                │
+│                                                                              │
+│  IR-2 ────────────► SRS-INT-003 ─────────► DES-INT-002 (network_adapter)   │
 │  (network_system)                TCP/TLS 처리                               │
 │                                                                              │
-│  IR-3 ────────────► SRS-INT-003 ─────────► DES-INT-003 (thread_adapter)    │
+│  IR-3 ────────────► SRS-INT-004 ─────────► DES-INT-003 (thread_adapter)    │
 │  (thread_system)                 작업 큐, 스레드 풀                         │
 │                                                                              │
-│  IR-4 ────────────► SRS-INT-004 ─────────► DES-INT-004 (logger_adapter)    │
+│  IR-4 ────────────► SRS-INT-005 ─────────► DES-INT-004 (logger_adapter)    │
 │  (logger_system)                 감사 로깅                                  │
 │                                                                              │
-│  IR-5 ────────────► SRS-INT-005 ─────────► DES-INT-005 (monitoring_adapter)│
+│  IR-5 ────────────► SRS-INT-006 ─────────► DES-INT-005 (monitoring_adapter)│
 │  (monitoring_system)             성능 메트릭                                │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘

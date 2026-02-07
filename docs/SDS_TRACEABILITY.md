@@ -1,8 +1,8 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 2.4.0
+> **Version:** 2.5.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2026-01-04
+> **Last Updated:** 2026-02-07
 
 ---
 
@@ -94,7 +94,7 @@ Legend:
 | PRD ID | PRD Description | SRS ID(s) | Coverage |
 |--------|-----------------|-----------|----------|
 | **FR-1.1** | DICOM Data Element (Tag, VR, Length, Value) | SRS-CORE-001, SRS-CORE-002 | Full |
-| **FR-1.2** | 27 VR Types per PS3.5 | SRS-CORE-006 | Full |
+| **FR-1.2** | 34 VR Types per PS3.5 | SRS-CORE-006 | Full |
 | **FR-1.3** | DICOM Part 10 File Format | SRS-CORE-004 | Full |
 | **FR-1.4** | Transfer Syntax Support | SRS-CORE-007, SRS-CORE-008 | Full |
 | **FR-1.5** | Data Dictionary (PS3.6) | SRS-CORE-005 | Full |
@@ -128,18 +128,18 @@ Legend:
 |--------|-----------------|-----------|----------|
 | **NFR-1** | Performance (throughput, latency) | SRS-PERF-001 to SRS-PERF-004 | Full |
 | **NFR-2** | Reliability (uptime, data integrity) | SRS-REL-001 to SRS-REL-003 | Full |
-| **NFR-3** | Security (TLS, access control, audit) | SRS-SEC-001 to SRS-SEC-003 | Full |
+| **NFR-3** | Security (TLS, access control, audit) | SRS-SEC-001 to SRS-SEC-005 | Full |
 | **NFR-4** | Maintainability (test coverage, docs) | SRS-MAINT-001 to SRS-MAINT-003 | Full |
 
 ### 2.3 Integration Requirements
 
 | PRD ID | PRD Description | SRS ID(s) | Coverage |
 |--------|-----------------|-----------|----------|
-| **IR-1** | container_system Integration | SRS-INT-001 | Full |
-| **IR-2** | network_system Integration | SRS-INT-002 | Full |
-| **IR-3** | thread_system Integration | SRS-INT-003 | Full |
-| **IR-4** | logger_system Integration | SRS-INT-004 | Full |
-| **IR-5** | monitoring_system Integration | SRS-INT-005 | Full |
+| **IR-1** | container_system Integration | SRS-INT-002 | Full |
+| **IR-2** | network_system Integration | SRS-INT-003 | Full |
+| **IR-3** | thread_system Integration | SRS-INT-004 | Full |
+| **IR-4** | logger_system Integration | SRS-INT-005 | Full |
+| **IR-5** | monitoring_system Integration | SRS-INT-006 | Full |
 | **IR-6** | ITK/VTK Integration | SRS-INT-007 | Full |
 | **IR-7** | Crow REST Framework Integration | SRS-INT-008 | Full |
 | **IR-8** | AWS SDK Integration | SRS-INT-009 | Full |
@@ -213,12 +213,12 @@ Legend:
 
 | SRS ID | SRS Description | SDS ID(s) | Design Element |
 |--------|-----------------|-----------|----------------|
-| **SRS-INT-001** | container_system adapter | DES-INT-001 | `container_adapter` |
-| **SRS-INT-002** | network_system adapter | DES-INT-002 | `network_adapter` |
-| **SRS-INT-003** | thread_system adapter | DES-INT-003 | `thread_adapter` |
-| **SRS-INT-004** | logger_system adapter | DES-INT-004 | `logger_adapter` |
-| **SRS-INT-005** | monitoring_system adapter | DES-INT-005 | `monitoring_adapter` |
-| **SRS-INT-006** | common_system IExecutor adapter | DES-INT-009 | `executor_adapter` |
+| **SRS-INT-001** | common_system IExecutor adapter | DES-INT-009 | `executor_adapter` |
+| **SRS-INT-002** | container_system adapter | DES-INT-001 | `container_adapter` |
+| **SRS-INT-003** | network_system adapter | DES-INT-002 | `network_adapter` |
+| **SRS-INT-004** | thread_system adapter | DES-INT-003 | `thread_adapter` |
+| **SRS-INT-005** | logger_system adapter | DES-INT-004 | `logger_adapter` |
+| **SRS-INT-006** | monitoring_system adapter | DES-INT-005 | `monitoring_adapter` |
 | **SRS-INT-007** | ITK/VTK Integration | DES-INT-008 | `itk_adapter` |
 | **SRS-INT-008** | Crow REST Framework | DES-WEB-001 | `rest_server` |
 | **SRS-INT-009** | AWS SDK Integration | DES-STOR-005 | `s3_storage` |
@@ -315,9 +315,11 @@ Legend:
 
 | SRS ID | SRS Description | SDS ID(s) | Design Element |
 |--------|-----------------|-----------|----------------|
-| **SRS-SEC-001** | Data Protection (Anonymization) | DES-SEC-006, DES-SEC-007, DES-SEC-008, DES-SEC-009 | `anonymization_profile`, `tag_action`, `uid_mapping`, `anonymizer` |
-| **SRS-SEC-002** | Access Control (RBAC) | DES-SEC-001 to DES-SEC-005, DES-SEC-013 | `User`, `Role`, `Permission`, `user_context`, `access_control_manager`, `security_storage_interface` |
-| **SRS-SEC-003** | Audit Trail | DES-SEC-004, DES-SEC-005 | `user_context` (source info), `access_control_manager` (audit callback) |
+| **SRS-SEC-001** | TLS Support (NFR) | DES-INT-002 | `network_adapter` (TLS 1.2/1.3 handling) |
+| **SRS-SEC-002** | Access Logging (NFR) | DES-SEC-005 | `access_control_manager` (operation logging) |
+| **SRS-SEC-003** | Audit Trail (NFR) | DES-SEC-004, DES-SEC-005 | `user_context` (source info), `access_control_manager` (audit callback) |
+| **SRS-SEC-004** | Input Validation (NFR) | — | Cross-cutting: validated in all input parsers |
+| **SRS-SEC-005** | Memory Safety (NFR) | — | Cross-cutting: RAII and smart pointer patterns |
 | **SRS-SEC-010** | DICOM Dataset Anonymization | DES-SEC-006 to DES-SEC-009 | `anonymizer`, `anonymization_profile`, `tag_action`, `uid_mapping` |
 | **SRS-SEC-011** | Digital Signature Support | DES-SEC-010 to DES-SEC-012 | `signature`, `signature_creator`, `signature_verifier` |
 | **SRS-SEC-012** | RBAC Access Control | DES-SEC-001 to DES-SEC-005 | `User`, `Role`, `Permission`, `user_context`, `access_control_manager` |
@@ -327,10 +329,10 @@ Legend:
 
 | SRS ID | Scenario | SEQ ID(s) | Diagram Name |
 |--------|----------|-----------|--------------|
-| SRS-SEC-002 | DICOM Operation Authorization | SEQ-SEC-001 | Authorization flow |
-| SRS-SEC-001 | DICOM Anonymization | SEQ-SEC-002 | Anonymization flow |
-| SRS-SEC-001 | Digital Signature Creation | SEQ-SEC-003 | Signature creation |
-| SRS-SEC-001 | Digital Signature Verification | SEQ-SEC-004 | Signature verification |
+| SRS-SEC-012 | DICOM Operation Authorization | SEQ-SEC-001 | Authorization flow |
+| SRS-SEC-010 | DICOM Anonymization | SEQ-SEC-002 | Anonymization flow |
+| SRS-SEC-011 | Digital Signature Creation | SEQ-SEC-003 | Signature creation |
+| SRS-SEC-011 | Digital Signature Verification | SEQ-SEC-004 | Signature verification |
 
 ### 3.9 Workflow Module Requirements
 
@@ -473,19 +475,22 @@ Legend:
 │  PRD                  SRS                    SDS                            │
 │  ───────────────────────────────────────────────────────────────            │
 │                                                                              │
-│  IR-1 ────────────► SRS-INT-001 ─────────► DES-INT-001 (container_adapter) │
-│  (container_system)              VR ↔ value mapping                         │
+│  (no PRD IR) ────► SRS-INT-001 ─────────► DES-INT-009 (executor_adapter)   │
+│  (common_system)                 IExecutor, value mapping                   │
 │                                                                              │
-│  IR-2 ────────────► SRS-INT-002 ─────────► DES-INT-002 (network_adapter)   │
+│  IR-1 ────────────► SRS-INT-002 ─────────► DES-INT-001 (container_adapter) │
+│  (container_system)              Dependency injection                       │
+│                                                                              │
+│  IR-2 ────────────► SRS-INT-003 ─────────► DES-INT-002 (network_adapter)   │
 │  (network_system)                TCP/TLS handling                           │
 │                                                                              │
-│  IR-3 ────────────► SRS-INT-003 ─────────► DES-INT-003 (thread_adapter)    │
+│  IR-3 ────────────► SRS-INT-004 ─────────► DES-INT-003 (thread_adapter)    │
 │  (thread_system)                 Job queue, thread pool                     │
 │                                                                              │
-│  IR-4 ────────────► SRS-INT-004 ─────────► DES-INT-004 (logger_adapter)    │
+│  IR-4 ────────────► SRS-INT-005 ─────────► DES-INT-004 (logger_adapter)    │
 │  (logger_system)                 Audit logging                              │
 │                                                                              │
-│  IR-5 ────────────► SRS-INT-005 ─────────► DES-INT-005 (monitoring_adapter)│
+│  IR-5 ────────────► SRS-INT-006 ─────────► DES-INT-005 (monitoring_adapter)│
 │  (monitoring_system)             Performance metrics                        │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -511,8 +516,10 @@ Legend:
 │                     SRS-REL-003 ─────────► SEQ-012 to SEQ-014 (Error)      │
 │                                                                              │
 │  NFR-3 ───────────► SRS-SEC-001 ─────────► TLS in network_adapter          │
-│  (Security)         SRS-SEC-002 ─────────► AE Title whitelist              │
-│                     SRS-SEC-003 ─────────► logger_adapter audit            │
+│  (Security)         SRS-SEC-002 ─────────► Access logging                  │
+│                     SRS-SEC-003 ─────────► Audit trail (HIPAA)             │
+│                     SRS-SEC-004 ─────────► Input validation                │
+│                     SRS-SEC-005 ─────────► Memory safety (RAII)            │
 │                                                                              │
 │  NFR-4 ───────────► SRS-MAINT-001 ───────► Test coverage targets           │
 │  (Maintainability)  SRS-MAINT-002 ───────► API documentation               │
@@ -531,25 +538,36 @@ Legend:
 │  PRD                  SRS                    SDS                            │
 │  ───────────────────────────────────────────────────────────────            │
 │                                                                              │
-│  NFR-3 ───────────► SRS-SEC-001 ─────────► DES-SEC-006 (anon_profile)      │
-│  (Security)         (Data Protection)        DES-SEC-007 (tag_action)       │
+│  NFR-3 ───────────► SRS-SEC-001 ─────────► DES-INT-002 (network_adapter)   │
+│  (Security)         (TLS Support)            TLS 1.2/1.3 handling          │
+│                                                                              │
+│                     SRS-SEC-002 ─────────► DES-SEC-005 (access_ctrl_mgr)   │
+│                     (Access Logging)         Operation logging              │
+│                                                                              │
+│                     SRS-SEC-003 ─────────► DES-SEC-004 (user_context)       │
+│                     (Audit Trail)    ─────────► DES-SEC-005 (access_ctrl)   │
+│                                                                              │
+│  FR-5.1 ──────────► SRS-SEC-010 ────────► DES-SEC-006 (anon_profile)      │
+│  (Anonymization)    (DICOM Anon)            DES-SEC-007 (tag_action)       │
 │                                      ─────────► DES-SEC-008 (uid_mapping)   │
 │                                      ─────────► DES-SEC-009 (anonymizer)    │
-│                                      ─────────► DES-SEC-010 (certificate)   │
-│                                      ─────────► DES-SEC-011 (sig_types)     │
-│                                      ─────────► DES-SEC-012 (digital_sig)   │
-│                                      ─────────► SEQ-SEC-002 to SEQ-SEC-004  │
+│                                      ─────────► SEQ-SEC-002                 │
 │                                                                              │
-│                     SRS-SEC-002 ─────────► DES-SEC-001 (User)               │
-│                     (Access Control)        DES-SEC-002 (Role)              │
+│  FR-5.2 ──────────► SRS-SEC-011 ────────► DES-SEC-010 (certificate)       │
+│  (Digital Sig)      (Signatures)            DES-SEC-011 (sig_types)        │
+│                                      ─────────► DES-SEC-012 (digital_sig)   │
+│                                      ─────────► SEQ-SEC-003, SEQ-SEC-004   │
+│                                                                              │
+│  FR-5.3 ──────────► SRS-SEC-012 ────────► DES-SEC-001 (User)              │
+│  (RBAC)             (Access Control)        DES-SEC-002 (Role)             │
 │                                      ─────────► DES-SEC-003 (Permission)    │
 │                                      ─────────► DES-SEC-004 (user_context)  │
 │                                      ─────────► DES-SEC-005 (access_ctrl)   │
 │                                      ─────────► DES-SEC-013 (sec_storage)   │
 │                                      ─────────► SEQ-SEC-001                 │
 │                                                                              │
-│                     SRS-SEC-003 ─────────► DES-SEC-004 (user_context)       │
-│                     (Audit Trail)    ─────────► DES-SEC-005 (access_ctrl)   │
+│  FR-5.4 ──────────► SRS-SEC-013 ────────► DES-SEC-011 (certificate)       │
+│  (X.509 Certs)      (Cert Mgmt)                                            │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
