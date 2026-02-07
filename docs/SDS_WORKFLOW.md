@@ -3,7 +3,7 @@
 > **Version:** 1.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-04
-> **Status:** Initial
+> **Status:** Initial (Network Operations Pending - C-FIND/C-MOVE TODO)
 
 ---
 

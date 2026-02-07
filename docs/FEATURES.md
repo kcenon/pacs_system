@@ -265,7 +265,7 @@ if (result.is_ok()) {
 **Implementation**: Full association state machine with presentation context negotiation.
 
 **Features**:
-- 8-state association state machine (PS3.8 Figure 9-1)
+- 13-state association state machine (PS3.8 Sta1-Sta13)
 - Presentation context negotiation
 - Abstract Syntax and Transfer Syntax matching
 - Maximum PDU size negotiation
@@ -276,24 +276,23 @@ if (result.is_ok()) {
 **Association States**:
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                  Association State Machine                │
+│            Association State Machine (PS3.8 Sta1-Sta13)   │
 ├──────────────────────────────────────────────────────────┤
-│  Sta1 (Idle) ─────────────────────────────────────────►  │
-│       │                                                  │
-│       ▼                                                  │
-│  Sta2 (Transport Connection Open) ────────────────────►  │
-│       │                                                  │
-│       ▼                                                  │
-│  Sta3 (Awaiting Local A-ASSOCIATE Response) ──────────►  │
-│       │                                                  │
-│       ▼                                                  │
-│  Sta6 (Association Established) ◄─────────────────────►  │
-│       │                                                  │
-│       ▼                                                  │
-│  Sta7 (Awaiting A-RELEASE Response) ──────────────────►  │
-│       │                                                  │
-│       ▼                                                  │
-│  Sta1 (Idle) ◄────────────────────────────────────────── │
+│  Sta1  (Idle)                                            │
+│  Sta2  (Transport Connection Open - Initiator)           │
+│  Sta3  (Awaiting Local A-ASSOCIATE Response)             │
+│  Sta4  (Awaiting Transport Connection Open - Acceptor)   │
+│  Sta5  (Awaiting A-ASSOCIATE-AC/RJ)                      │
+│  Sta6  (Association Established)                         │
+│  Sta7  (Awaiting A-RELEASE-RP)                           │
+│  Sta8  (Awaiting A-RELEASE-RP - Release Collision)       │
+│  Sta9  (Release Collision Requestor Side)                │
+│  Sta10 (Release Collision Acceptor Side)                  │
+│  Sta11 (Release Collision Requestor - Awaiting RP)       │
+│  Sta12 (Release Collision Acceptor - Awaiting RP)        │
+│  Sta13 (Awaiting Transport Connection Close - Error)     │
+│                                                          │
+│  Primary flow: Sta1 → Sta4 → Sta5 → Sta6 → Sta7 → Sta1 │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -583,7 +582,9 @@ CREATE TABLE study (
     study_time TEXT,
     accession_number TEXT,
     study_description TEXT,
-    modalities_in_study TEXT
+    modalities_in_study TEXT,
+    num_series INTEGER DEFAULT 0,
+    num_instances INTEGER DEFAULT 0
 );
 
 -- Series table
@@ -592,7 +593,8 @@ CREATE TABLE series (
     study_instance_uid TEXT REFERENCES study(study_instance_uid),
     series_number INTEGER,
     modality TEXT,
-    series_description TEXT
+    series_description TEXT,
+    num_instances INTEGER DEFAULT 0
 );
 
 -- Instance table
@@ -601,7 +603,9 @@ CREATE TABLE instance (
     series_instance_uid TEXT REFERENCES series(series_instance_uid),
     sop_class_uid TEXT,
     instance_number INTEGER,
-    file_path TEXT
+    file_path TEXT,
+    file_size INTEGER,
+    transfer_syntax TEXT
 );
 ```
 
