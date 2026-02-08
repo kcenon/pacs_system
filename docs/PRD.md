@@ -1,7 +1,7 @@
 # Product Requirements Document - PACS System
 
-> **Version:** 0.1.1.0
-> **Last Updated:** 2025-12-07
+> **Version:** 0.2.0.0
+> **Last Updated:** 2026-02-08
 > **Language:** **English** | [한국어](PRD_KO.md)
 
 ---
@@ -35,9 +35,13 @@ A modern C++20 PACS implementation built entirely on the kcenon ecosystem withou
 
 ### Key Differentiators
 - **Zero External DICOM Dependencies**: Pure implementation using kcenon ecosystem
-- **High Performance**: SIMD acceleration, lock-free queues, async I/O
+- **High Performance**: SIMD acceleration, lock-free queues, async I/O, object pool memory management
 - **Full Ecosystem Integration**: Native integration with 6 existing systems
 - **Production Grade**: Comprehensive CI/CD, sanitizers, quality metrics
+- **Complete DICOMweb Support**: WADO-RS, STOW-RS, QIDO-RS per PS3.18
+- **19-Endpoint REST API**: Full web administration and monitoring via Crow framework
+- **AI-Ready**: External AI service integration for medical image analysis
+- **Multi-Node Federation**: Client module with routing, sync, prefetch, and remote node management
 
 ---
 
@@ -215,20 +219,23 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | FR-3.3.8 | Implement C-GET for image retrieval | Should Have | 3 |
 
 #### FR-3.4: Modality Worklist Service
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-3.4.1 | Implement MWL SCP for scheduled procedures | Should Have | 4 |
-| FR-3.4.2 | Support scheduled procedure step matching | Should Have | 4 |
-| FR-3.4.3 | Support patient demographic queries | Should Have | 4 |
-| FR-3.4.4 | Integrate with HIS/RIS systems (interface) | Could Have | 4 |
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-3.4.1 | Implement MWL SCP for scheduled procedures | Should Have | 4 | ✅ Implemented |
+| FR-3.4.2 | Support scheduled procedure step matching | Should Have | 4 | ✅ Implemented |
+| FR-3.4.3 | Support patient demographic queries | Should Have | 4 | ✅ Implemented |
+| FR-3.4.4 | Implement MWL SCU for worklist query initiation | Should Have | 4 | ✅ Implemented |
+| FR-3.4.5 | Provide REST API for worklist management (CRUD) | Should Have | 4 | ✅ Implemented |
+| FR-3.4.6 | Integrate with HIS/RIS systems (interface) | Could Have | 5 | |
 
 #### FR-3.5: MPPS Service
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-3.5.1 | Implement MPPS SCP for procedure tracking | Should Have | 4 |
-| FR-3.5.2 | Support N-CREATE for MPPS creation | Should Have | 4 |
-| FR-3.5.3 | Support N-SET for MPPS modification | Should Have | 4 |
-| FR-3.5.4 | Track procedure status (IN PROGRESS, COMPLETED, DISCONTINUED) | Should Have | 4 |
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-3.5.1 | Implement MPPS SCP for procedure tracking | Should Have | 4 | ✅ Implemented |
+| FR-3.5.2 | Support N-CREATE for MPPS creation | Should Have | 4 | ✅ Implemented |
+| FR-3.5.3 | Support N-SET for MPPS modification | Should Have | 4 | ✅ Implemented |
+| FR-3.5.4 | Track procedure status (IN PROGRESS, COMPLETED, DISCONTINUED) | Should Have | 4 | ✅ Implemented |
+| FR-3.5.5 | Implement MPPS SCU for procedure status reporting | Should Have | 4 | ✅ Implemented |
 
 ---
 
@@ -254,50 +261,220 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 
 ### FR-5: Security Services
 
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-5.1 | Implement DICOM dataset anonymization per PS3.15 Annex E | Should Have | 4 |
-| FR-5.2 | Support digital signatures for DICOM datasets per PS3.15 | Could Have | 5 |
-| FR-5.3 | Implement role-based access control (RBAC) for DICOM operations | Should Have | 4 |
-| FR-5.4 | Support X.509 certificate management for TLS and signing | Could Have | 5 |
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-5.1 | Implement DICOM dataset anonymization per PS3.15 Annex E | Should Have | 4 | ✅ Implemented |
+| FR-5.2 | Support digital signatures for DICOM datasets per PS3.15 | Could Have | 4 | ✅ Implemented |
+| FR-5.3 | Implement role-based access control (RBAC) for DICOM operations | Should Have | 4 | ✅ Implemented |
+| FR-5.4 | Support X.509 certificate management for TLS and signing | Could Have | 4 | ✅ Implemented |
+| FR-5.5 | Implement tag-level security actions for selective anonymization | Should Have | 4 | ✅ Implemented |
+| FR-5.6 | Provide UID mapping for privacy-preserving re-identification | Should Have | 4 | ✅ Implemented |
+| FR-5.7 | Implement SQLite-based persistent security storage | Should Have | 4 | ✅ Implemented |
+| FR-5.8 | Provide REST API endpoints for security configuration | Should Have | 4 | ✅ Implemented |
 
 ---
 
 ### FR-6: Web/REST API Services
 
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-6.1 | Provide REST API server for system management and monitoring | Should Have | 4 |
-| FR-6.2 | Implement DICOMweb WADO-RS for web image retrieval per PS3.18 | Should Have | 4 |
-| FR-6.3 | Implement DICOMweb STOW-RS for web image storage per PS3.18 | Should Have | 4 |
-| FR-6.4 | Implement DICOMweb QIDO-RS for web image query per PS3.18 | Should Have | 4 |
+#### FR-6.1: REST API Server
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-6.1.1 | Provide REST API server using Crow web framework | Should Have | 4 | ✅ Implemented |
+| FR-6.1.2 | Support CORS for web browser access | Should Have | 4 | ✅ Implemented |
+| FR-6.1.3 | Implement async/sync server modes | Should Have | 4 | ✅ Implemented |
+
+#### FR-6.2: DICOMweb Services
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-6.2.1 | Implement DICOMweb WADO-RS for web image retrieval per PS3.18 | Should Have | 4 | ✅ Implemented |
+| FR-6.2.2 | Implement DICOMweb STOW-RS for web image storage per PS3.18 | Should Have | 4 | ✅ Implemented |
+| FR-6.2.3 | Implement DICOMweb QIDO-RS for web image query per PS3.18 | Should Have | 4 | ✅ Implemented |
+
+#### FR-6.3: REST API Endpoints (19 Modules)
+| ID | Endpoint Module | Description | Status |
+|----|----------------|-------------|--------|
+| FR-6.3.1 | System endpoints | System configuration, health, version | ✅ Implemented |
+| FR-6.3.2 | Metrics endpoints | Performance metrics and monitoring | ✅ Implemented |
+| FR-6.3.3 | Study endpoints | Study-level CRUD operations | ✅ Implemented |
+| FR-6.3.4 | Series endpoints | Series-level operations | ✅ Implemented |
+| FR-6.3.5 | Patient endpoints | Patient information management | ✅ Implemented |
+| FR-6.3.6 | Metadata endpoints | DICOM metadata queries | ✅ Implemented |
+| FR-6.3.7 | DICOMweb endpoints | WADO-RS, STOW-RS, QIDO-RS | ✅ Implemented |
+| FR-6.3.8 | Jobs endpoints | Async job management and tracking | ✅ Implemented |
+| FR-6.3.9 | Routing endpoints | Message routing configuration | ✅ Implemented |
+| FR-6.3.10 | Remote nodes endpoints | Remote PACS node management | ✅ Implemented |
+| FR-6.3.11 | Worklist endpoints | Worklist management | ✅ Implemented |
+| FR-6.3.12 | Annotation endpoints | Annotation CRUD operations | ✅ Implemented |
+| FR-6.3.13 | Viewer state endpoints | Viewer state persistence | ✅ Implemented |
+| FR-6.3.14 | Measurement endpoints | Measurement data management | ✅ Implemented |
+| FR-6.3.15 | Key image endpoints | Key image selection management | ✅ Implemented |
+| FR-6.3.16 | Thumbnail endpoints | Image thumbnail generation | ✅ Implemented |
+| FR-6.3.17 | Audit endpoints | Audit log access | ✅ Implemented |
+| FR-6.3.18 | Security endpoints | Security configuration | ✅ Implemented |
+| FR-6.3.19 | Association endpoints | DICOM association management | ✅ Implemented |
 
 ---
 
 ### FR-7: Workflow Services
 
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-7.1 | Implement automatic prior study prefetch from remote PACS | Should Have | 4 |
-| FR-7.2 | Provide background task scheduling for maintenance operations | Should Have | 4 |
+#### FR-7.1: Auto Prefetch Service
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-7.1.1 | Implement worklist-triggered prior study prefetch from remote PACS | Should Have | 4 | ✅ Implemented |
+| FR-7.1.2 | Support configurable prefetch criteria (modality, body part, lookback period) | Should Have | 4 | ✅ Implemented |
+| FR-7.1.3 | Support multi-source prefetch from multiple remote PACS servers | Should Have | 4 | ✅ Implemented |
+| FR-7.1.4 | Implement rate limiting and deduplication for prefetch requests | Should Have | 4 | ✅ Implemented |
+| FR-7.1.5 | Provide retry logic for failed prefetch operations | Should Have | 4 | ✅ Implemented |
+
+#### FR-7.2: Task Scheduler Service
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-7.2.1 | Implement interval-based, cron-like, and one-time task scheduling | Should Have | 4 | ✅ Implemented |
+| FR-7.2.2 | Provide built-in task types: cleanup, archive, verification | Should Have | 4 | ✅ Implemented |
+| FR-7.2.3 | Support task lifecycle management (pause, resume, cancel, trigger) | Should Have | 4 | ✅ Implemented |
+| FR-7.2.4 | Track execution history with configurable retention | Should Have | 4 | ✅ Implemented |
+| FR-7.2.5 | Implement retry mechanism with configurable attempts and delay | Should Have | 4 | ✅ Implemented |
+| FR-7.2.6 | Support per-task execution timeout with async execution | Should Have | 4 | ✅ Implemented |
+
+#### FR-7.3: Study Lock Manager
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-7.3.1 | Implement thread-safe exclusive and shared locks for study access control | Should Have | 4 | ✅ Implemented |
+| FR-7.3.2 | Support migration locks with highest priority for HSM operations | Should Have | 4 | ✅ Implemented |
+| FR-7.3.3 | Implement automatic lock expiration and token-based release | Should Have | 4 | ✅ Implemented |
+| FR-7.3.4 | Provide force unlock capability for admin operations | Should Have | 4 | ✅ Implemented |
 
 ---
 
 ### FR-8: Cloud Storage
 
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-8.1 | Support AWS S3 as storage backend for DICOM files | Should Have | 4 |
-| FR-8.2 | Support Azure Blob Storage as storage backend | Should Have | 4 |
-| FR-8.3 | Implement hierarchical storage management (HSM) with tier migration | Could Have | 5 |
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-8.1 | Support AWS S3 as storage backend for DICOM files | Should Have | 4 | ✅ Implemented (Mock) |
+| FR-8.2 | Support Azure Blob Storage as storage backend | Should Have | 4 | ✅ Implemented (Mock) |
+| FR-8.3 | Implement hierarchical storage management (HSM) with three-tier storage | Should Have | 4 | ✅ Implemented |
+| FR-8.4 | Implement automatic age-based migration between storage tiers | Should Have | 4 | ✅ Implemented |
+| FR-8.5 | Provide transparent data retrieval across all storage tiers | Should Have | 4 | ✅ Implemented |
+| FR-8.6 | Support progress callbacks for upload/download monitoring | Should Have | 4 | ✅ Implemented |
+| FR-8.7 | Integrate full AWS SDK for production S3 operations | Could Have | 5 | |
+| FR-8.8 | Integrate full Azure SDK for production Blob Storage operations | Could Have | 5 | |
+
+*Note: FR-8.1 and FR-8.2 are currently mock implementations for API validation and testing. Full SDK integrations (FR-8.7, FR-8.8) are planned for Phase 5.*
 
 ---
 
 ### FR-9: AI Integration
 
-| ID | Requirement | Priority | Phase |
-|----|-------------|----------|-------|
-| FR-9.1 | Integrate with external AI services for medical image analysis | Could Have | 5 |
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-9.1 | Implement AI service connector for external inference endpoints | Should Have | 4 | ✅ Implemented |
+| FR-9.2 | Implement AI result handler for processing inference outputs | Should Have | 4 | ✅ Implemented |
+| FR-9.3 | Support Segmentation (SEG) SOP class for AI/CAD outputs | Should Have | 4 | ✅ Implemented |
+| FR-9.4 | Support Structured Report (SR) SOP classes for AI/CAD results | Should Have | 4 | ✅ Implemented |
+| FR-9.5 | Provide IOD validation for AI-generated DICOM objects | Should Have | 4 | ✅ Implemented |
+
+---
+
+### FR-10: Client Module
+
+#### FR-10.1: Job Manager
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-10.1.1 | Implement client-side job management for async DICOM operations | Should Have | 4 | ✅ Implemented |
+| FR-10.1.2 | Track job status, progress, and completion | Should Have | 4 | ✅ Implemented |
+| FR-10.1.3 | Provide REST API for job querying and management | Should Have | 4 | ✅ Implemented |
+
+#### FR-10.2: Routing Manager
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-10.2.1 | Implement configurable routing rules for DICOM data distribution | Should Have | 4 | ✅ Implemented |
+| FR-10.2.2 | Support rule-based routing by modality, body part, and AE Title | Should Have | 4 | ✅ Implemented |
+| FR-10.2.3 | Provide REST API for routing rule management | Should Have | 4 | ✅ Implemented |
+
+#### FR-10.3: Sync Manager
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-10.3.1 | Implement data synchronization across PACS nodes | Should Have | 4 | ✅ Implemented |
+| FR-10.3.2 | Support sync configuration, history tracking, and conflict resolution | Should Have | 4 | ✅ Implemented |
+
+#### FR-10.4: Remote Node Manager
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-10.4.1 | Implement remote PACS node discovery and management | Should Have | 4 | ✅ Implemented |
+| FR-10.4.2 | Provide REST API for remote node registration and status monitoring | Should Have | 4 | ✅ Implemented |
+
+#### FR-10.5: Prefetch Manager
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-10.5.1 | Implement intelligent prior study prefetch strategy management | Should Have | 4 | ✅ Implemented |
+| FR-10.5.2 | Support prefetch rule configuration and history tracking | Should Have | 4 | ✅ Implemented |
+
+---
+
+### FR-11: Annotation, Viewer State, and Clinical Data
+
+#### FR-11.1: Annotation Support
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-11.1.1 | Implement annotation repository for DICOM image annotations | Should Have | 4 | ✅ Implemented |
+| FR-11.1.2 | Provide REST API for annotation CRUD operations | Should Have | 4 | ✅ Implemented |
+
+#### FR-11.2: Viewer State Management
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-11.2.1 | Implement viewer state persistence for user display preferences | Should Have | 4 | ✅ Implemented |
+| FR-11.2.2 | Support viewer state records for per-session state tracking | Should Have | 4 | ✅ Implemented |
+| FR-11.2.3 | Provide REST API for viewer state management | Should Have | 4 | ✅ Implemented |
+
+#### FR-11.3: Key Image Management
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-11.3.1 | Implement key image selection repository for significant findings | Should Have | 4 | ✅ Implemented |
+| FR-11.3.2 | Provide REST API for key image selection management | Should Have | 4 | ✅ Implemented |
+
+#### FR-11.4: Measurement Data
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-11.4.1 | Implement measurement repository for clinical measurements | Should Have | 4 | ✅ Implemented |
+| FR-11.4.2 | Provide REST API for measurement data management | Should Have | 4 | ✅ Implemented |
+
+---
+
+### FR-12: Monitoring and Observability
+
+#### FR-12.1: Database Monitoring
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-12.1.1 | Implement database metrics service for performance monitoring | Should Have | 4 | ✅ Implemented |
+| FR-12.1.2 | Provide REST API for database metrics access | Should Have | 4 | ✅ Implemented |
+
+#### FR-12.2: DICOM Metric Collectors
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-12.2.1 | Implement association lifecycle metric collector | Should Have | 4 | ✅ Implemented |
+| FR-12.2.2 | Implement DIMSE operation metric collector | Should Have | 4 | ✅ Implemented |
+| FR-12.2.3 | Implement storage and transfer metric collector | Should Have | 4 | ✅ Implemented |
+| FR-12.2.4 | Support Prometheus text exposition format | Should Have | 4 | ✅ Implemented |
+| FR-12.2.5 | Support JSON export for REST API integration | Should Have | 4 | ✅ Implemented |
+
+#### FR-12.3: Object Pool Memory Management
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-12.3.1 | Implement object pooling for dicom_element, dicom_dataset, and PDU buffers | Should Have | 4 | ✅ Implemented |
+| FR-12.3.2 | Provide RAII-based automatic pool return | Should Have | 4 | ✅ Implemented |
+| FR-12.3.3 | Support pool hit ratio monitoring and statistics | Should Have | 4 | ✅ Implemented |
+
+#### FR-12.4: Health Checks
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-12.4.1 | Implement health, readiness, and liveness probe endpoints | Should Have | 4 | ✅ Implemented |
+| FR-12.4.2 | Support custom health check registration | Should Have | 4 | ✅ Implemented |
+
+#### FR-12.5: Thumbnail and Metadata Services
+| ID | Requirement | Priority | Phase | Status |
+|----|-------------|----------|-------|--------|
+| FR-12.5.1 | Implement image thumbnail generation service | Should Have | 4 | ✅ Implemented |
+| FR-12.5.2 | Implement metadata query service for efficient DICOM attribute access | Should Have | 4 | ✅ Implemented |
 
 ---
 
@@ -360,33 +537,47 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 ### SAR-1: Module Dependencies
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        pacs_system                               │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
-│  │   services   │  │   network    │  │       storage          │ │
-│  │              │  │              │  │                        │ │
-│  │ Storage SCP  │  │ PDU Layer    │  │ File Storage           │ │
-│  │ Q/R SCP      │◄─│ DIMSE Layer  │◄─│ Index Database         │ │
-│  │ MWL SCP      │  │ Association  │  │                        │ │
-│  │ MPPS SCP     │  │              │  │                        │ │
-│  └──────┬───────┘  └──────┬───────┘  └───────────┬────────────┘ │
-│         │                 │                      │              │
-│  ┌──────▼─────────────────▼──────────────────────▼────────────┐ │
-│  │                         core                                │ │
-│  │  dicom_element | dicom_dataset | dicom_file | dictionary   │ │
-│  └─────────────────────────┬───────────────────────────────────┘ │
-│                            │                                     │
-│  ┌─────────────────────────▼───────────────────────────────────┐ │
-│  │                      encoding                                │ │
-│  │     vr_types | transfer_syntax | implicit_vr | explicit_vr  │ │
-│  └─────────────────────────┬───────────────────────────────────┘ │
-│                            │                                     │
-│  ┌─────────────────────────▼───────────────────────────────────┐ │
-│  │                     integration                              │ │
-│  │  container_adapter | network_adapter | thread_adapter       │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                              pacs_system                                  │
+├──────────────────────────────────────────────────────────────────────────┤
+│  ┌───────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌────────┐ │
+│  │    web    │  │  client  │  │    ai    │  │  workflow  │  │security│ │
+│  │           │  │          │  │          │  │            │  │        │ │
+│  │ REST API  │  │ Job Mgr  │  │ AI Svc   │  │ Prefetch   │  │ RBAC   │ │
+│  │ DICOMweb  │  │ Routing  │  │ AI Rslt  │  │ Scheduler  │  │ Anonym │ │
+│  │ 19 Endpts │  │ Sync Mgr │  │ Handler  │  │ Study Lock │  │ DigSig │ │
+│  │           │  │ Prefetch │  │          │  │            │  │        │ │
+│  │           │  │ RemoteNd │  │          │  │            │  │        │ │
+│  └─────┬─────┘  └────┬─────┘  └────┬─────┘  └─────┬──────┘  └───┬────┘ │
+│        │              │             │              │             │      │
+│  ┌─────▼──────────────▼─────────────▼──────────────▼─────────────▼────┐ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐    │ │
+│  │  │   services   │  │   network    │  │       storage          │    │ │
+│  │  │              │  │              │  │                        │    │ │
+│  │  │ Storage SCP  │  │ PDU Layer    │  │ File Storage           │    │ │
+│  │  │ Q/R SCP      │◄─│ DIMSE Layer  │◄─│ Index Database         │    │ │
+│  │  │ MWL SCP      │  │ Association  │  │ Cloud Storage (S3/Az)  │    │ │
+│  │  │ MPPS SCP     │  │ Server V2    │  │ HSM Storage            │    │ │
+│  │  │ Monitoring   │  │              │  │ Annotation/Viewer/Key  │    │ │
+│  │  └──────┬───────┘  └──────┬───────┘  └───────────┬────────────┘    │ │
+│  └─────────┼─────────────────┼──────────────────────┼─────────────────┘ │
+│  ┌─────────▼─────────────────▼──────────────────────▼─────────────────┐ │
+│  │                         core                                        │ │
+│  │  dicom_element | dicom_dataset | dicom_file | dictionary | pool_mgr│ │
+│  └─────────────────────────┬───────────────────────────────────────────┘ │
+│                            │                                             │
+│  ┌─────────────────────────▼───────────────────────────────────────────┐ │
+│  │                      encoding                                        │ │
+│  │  vr_types | transfer_syntax | implicit_vr | explicit_vr | SIMD      │ │
+│  │  JPEG | JPEG2K | JPEG-LS | RLE | compression codecs                 │ │
+│  └─────────────────────────┬───────────────────────────────────────────┘ │
+│                            │                                             │
+│  ┌─────────────────────────▼───────────────────────────────────────────┐ │
+│  │                     integration                                      │ │
+│  │  container_adapter | network_adapter | thread_adapter | itk_adapter │ │
+│  │  logger_adapter | monitoring_adapter | executor_adapter              │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
                                 │
         ┌───────────────────────┼───────────────────────┐
         │                       │                       │
@@ -530,13 +721,13 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | `dicom_association_handler` | PDU framing, state machine, service dispatching |
 | Compile Flag | `PACS_WITH_NETWORK_SYSTEM` |
 
-### IR-2: External System Integration (Future)
+### IR-2: External System Integration
 
-| System | Protocol | Purpose |
-|--------|----------|---------|
-| HIS/RIS | HL7 FHIR | Patient demographics |
-| WADO | HTTP | Web image access |
-| Viewer | DICOMweb | Image retrieval |
+| System | Protocol | Purpose | Status |
+|--------|----------|---------|--------|
+| DICOMweb | WADO-RS/STOW-RS/QIDO-RS | Web image access (PS3.18) | ✅ Implemented |
+| AI Services | REST/HTTP | External AI inference endpoints | ✅ Implemented |
+| HIS/RIS | HL7 FHIR | Patient demographics | Future |
 
 ### IR-6: ITK/VTK Integration
 
@@ -656,17 +847,40 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 **Dependencies**: All systems
 
-### Phase 4: Advanced Services (Weeks 17-20)
+### Phase 4: Advanced Services & Production Hardening (Weeks 17-24)
 
-**Objective**: Add workflow services and production hardening
+**Objective**: Add workflow services, web API, AI integration, client module, and production hardening
+
+| Deliverable | Description | Acceptance Criteria | Status |
+|-------------|-------------|---------------------|--------|
+| Worklist SCP/SCU | MWL service | Query scheduled procedures | ✅ Complete |
+| MPPS SCP/SCU | Procedure tracking | Track procedure status | ✅ Complete |
+| C-GET | Alternative retrieve | Support C-GET model | ✅ Complete |
+| TLS | Secure communication | DICOM TLS conformant | ✅ Complete |
+| REST API Server | Crow-based web server | 19 endpoint modules | ✅ Complete |
+| DICOMweb | WADO-RS, STOW-RS, QIDO-RS | PS3.18 conformant | ✅ Complete |
+| AI Integration | AI service connector + result handler | External AI inference | ✅ Complete |
+| Client Module | Job, Routing, Sync, Prefetch, Remote Node | Multi-node federation | ✅ Complete |
+| Cloud Storage | S3 + Azure Blob (mock) + HSM | Three-tier storage | ✅ Complete |
+| Security | RBAC, Anonymization, Digital Signatures | PS3.15 conformant | ✅ Complete |
+| Workflow | Auto Prefetch, Task Scheduler, Study Lock | Automated operations | ✅ Complete |
+| Monitoring | DICOM metrics, Object Pool, Health Checks | Production observability | ✅ Complete |
+| Annotation/Viewer | Annotation, Viewer State, Key Image, Measurement | Clinical data management | ✅ Complete |
+
+**Dependencies**: All systems
+
+### Phase 5: Enterprise Features (Future)
+
+**Objective**: Production cloud integration, advanced interoperability, and enterprise features
 
 | Deliverable | Description | Acceptance Criteria |
 |-------------|-------------|---------------------|
-| Worklist SCP | MWL service | Query scheduled procedures |
-| MPPS SCP | Procedure tracking | Track procedure status |
-| C-GET | Alternative retrieve | Support C-GET model |
-| TLS | Secure communication | DICOM TLS conformant |
-| Production | Hardening | Performance targets met |
+| Full AWS S3 SDK | Production S3 integration | Replace mock implementation |
+| Full Azure SDK | Production Azure Blob integration | Replace mock implementation |
+| ITK/VTK Integration | Advanced image processing and 3D reconstruction | Image analysis pipeline |
+| FHIR Integration | HL7 FHIR interoperability | Healthcare data exchange |
+| Clustering | Multi-node PACS deployment | Horizontal scaling |
+| Connection Pooling | Reuse DICOM associations | Reduced latency |
 
 **Dependencies**: All systems
 
@@ -848,10 +1062,11 @@ Service Errors (-800 to -899):
 |---------|------|--------|---------|
 | 1.0.0 | 2025-11-30 | kcenon@naver.com | Initial PRD release |
 | 1.1.0 | 2025-12-07 | kcenon@naver.com | Updated for completed features: Thread system migration (Epic #153), DIMSE-N services (#127), Ultrasound/XA storage (#128, #129), Explicit VR Big Endian (#126), Performance results |
+| 2.0.0 | 2026-02-08 | raphaelshin | Major update: Added 15+ implemented features to PRD. New sections: FR-10 (Client Module), FR-11 (Annotation/Viewer State/Clinical Data), FR-12 (Monitoring/Observability). Updated status for FR-3.4 (Worklist), FR-3.5 (MPPS), FR-5 (Security), FR-6 (Web API - 19 endpoints), FR-7 (Workflow - 3 services), FR-8 (Cloud Storage + HSM), FR-9 (AI Integration). Updated architecture diagram and development phases. Reclassified Phase 5 items that are already implemented to Phase 4. |
 
 ---
 
-*Document Version: 0.1.1.0*
+*Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2026-02-08*
 *Author: kcenon@naver.com*
