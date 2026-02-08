@@ -1,8 +1,8 @@
 # SDS - Requirements Traceability Matrix
 
-> **Version:** 2.5.0
+> **Version:** 3.0.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2026-02-07
+> **Last Updated:** 2026-02-08
 
 ---
 
@@ -298,6 +298,60 @@ Legend:
 | **SRS-NET-002** | Association Handler V2 | DES-NET-007 | `dicom_association_handler` class |
 | **SRS-INT-004** | Accept Worker | DES-NET-008 | `accept_worker` class |
 | **SRS-PERF-005** | PDU Buffer Pool | DES-NET-009 | `pdu_buffer_pool` class |
+
+### 3.5.8 Client Module Requirements
+
+> **Reference:** [SDS_CLIENT.md](SDS_CLIENT.md) - Complete Client Module Design Specification
+> **Note:** SRS-CLI-xxx IDs are pending formal SRS update. PRD references (FR-10.x) are used until propagation.
+
+| PRD ID | PRD Description | SDS ID(s) | Design Element |
+|--------|-----------------|-----------|----------------|
+| **FR-10.1** | Job Management | DES-CLI-001 | `job_manager` class |
+| **FR-10.2** | Routing Manager | DES-CLI-002 | `routing_manager` class |
+| **FR-10.3** | Sync Manager | DES-CLI-003 | `sync_manager` class |
+| **FR-10.4** | Remote Node Manager | DES-CLI-005 | `remote_node_manager` class |
+| **FR-10.5** | Prefetch Manager | DES-CLI-004 | `prefetch_manager` class |
+
+### 3.5.9 Web Endpoints (Extended)
+
+> **Reference:** [SDS_WEB_API.md](SDS_WEB_API.md) - Updated Web/REST API Module Design Specification (v2.0.0)
+
+| PRD/SRS ID | Description | SDS ID(s) | Design Element |
+|------------|-------------|-----------|----------------|
+| **FR-11.1** | Annotation Endpoints | DES-WEB-013 | `annotation_endpoints` |
+| **FR-10.1** | Jobs Endpoints | DES-WEB-014 | `jobs_endpoints` |
+| **FR-11.3** | Key Image Endpoints | DES-WEB-015 | `key_image_endpoints` |
+| **FR-11.4** | Measurement Endpoints | DES-WEB-016 | `measurement_endpoints` |
+| **SRS-WEB-002** | Metadata Endpoints | DES-WEB-017 | `metadata_endpoints` |
+| **FR-12.1** | Metrics Endpoints | DES-WEB-018 | `metrics_endpoints` |
+| **FR-10.4** | Remote Nodes Endpoints | DES-WEB-019 | `remote_nodes_endpoints` |
+| **FR-10.2** | Routing Endpoints | DES-WEB-020 | `routing_endpoints` |
+| **SRS-WEB-002** | Thumbnail Endpoints | DES-WEB-021 | `thumbnail_endpoints` |
+| **FR-11.2** | Viewer State Endpoints | DES-WEB-022 | `viewer_state_endpoints` |
+
+### 3.5.10 Storage Repository Requirements (Extended)
+
+| PRD ID | Description | SDS ID(s) | Design Element |
+|--------|-------------|-----------|----------------|
+| **FR-11.1** | Annotation Repository | DES-STOR-010 | `annotation_repository` class |
+| **FR-11.2** | Viewer State Repository | DES-STOR-011 | `viewer_state_repository` class |
+| **FR-10.1** | Job Repository | DES-STOR-012 | `job_repository` class |
+| **FR-10.4** | Node Repository | DES-STOR-013 | `node_repository` class |
+| **FR-10.2** | Routing Repository | DES-STOR-014 | `routing_repository` class |
+| **FR-10.5** | Prefetch Repository | DES-STOR-015 | `prefetch_repository` class |
+| **FR-10.3** | Sync Repository | DES-STOR-016 | `sync_repository` class |
+| **FR-11.3** | Key Image Repository | DES-STOR-017 | `key_image_repository` class |
+| **FR-11.4** | Measurement Repository | DES-STOR-018 | `measurement_repository` class |
+| **FR-10.x** | Repository Factory | DES-STOR-019 | `repository_factory` class |
+| **FR-10.x** | Database Adapter | DES-STOR-020 | `pacs_database_adapter` class |
+
+### 3.5.11 Database Monitoring Requirements (Extended)
+
+> **Reference:** [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md)
+
+| PRD ID | Description | SDS ID(s) | Design Element |
+|--------|-------------|-----------|----------------|
+| **FR-12.1** | Database Metrics Service | DES-MON-007 | `database_metrics_service` class |
 
 ### 3.6 Sequence Diagram Mapping
 
@@ -596,6 +650,54 @@ Legend:
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
+### 4.9 Client Module
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Client Module Trace                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  PRD                  SRS (Pending)          SDS                            │
+│  ───────────────────────────────────────────────────────────────            │
+│                                                                              │
+│  FR-10.1 ──────────► (SRS-CLI-001) ────────► DES-CLI-001 (job_manager)     │
+│  (Job Management)                   ────────► DES-STOR-012 (job_repo)      │
+│                                     ────────► DES-WEB-014 (jobs_endpoints) │
+│                                                                              │
+│  FR-10.2 ──────────► (SRS-CLI-002) ────────► DES-CLI-002 (routing_mgr)    │
+│  (Routing Manager)                  ────────► DES-STOR-014 (routing_repo)  │
+│                                     ────────► DES-WEB-020 (routing_endpts) │
+│                                                                              │
+│  FR-10.3 ──────────► (SRS-CLI-003) ────────► DES-CLI-003 (sync_manager)   │
+│  (Sync Manager)                     ────────► DES-STOR-016 (sync_repo)    │
+│                                                                              │
+│  FR-10.4 ──────────► (SRS-CLI-005) ────────► DES-CLI-005 (remote_node_mgr)│
+│  (Remote Node Mgr)                 ────────► DES-STOR-013 (node_repo)     │
+│                                     ────────► DES-WEB-019 (nodes_endpts)  │
+│                                                                              │
+│  FR-10.5 ──────────► (SRS-CLI-004) ────────► DES-CLI-004 (prefetch_mgr)   │
+│  (Prefetch Manager)                ────────► DES-STOR-015 (prefetch_repo)  │
+│                                                                              │
+│  FR-11.1 ──────────►               ────────► DES-STOR-010 (annotation_repo)│
+│  (Annotations)                      ────────► DES-WEB-013 (annot_endpts)  │
+│                                                                              │
+│  FR-11.2 ──────────►               ────────► DES-STOR-011 (vstate_repo)   │
+│  (Viewer State)                     ────────► DES-WEB-022 (vstate_endpts) │
+│                                                                              │
+│  FR-11.3 ──────────►               ────────► DES-STOR-017 (keyimg_repo)   │
+│  (Key Images)                       ────────► DES-WEB-015 (keyimg_endpts) │
+│                                                                              │
+│  FR-11.4 ──────────►               ────────► DES-STOR-018 (meas_repo)     │
+│  (Measurements)                     ────────► DES-WEB-016 (meas_endpts)   │
+│                                                                              │
+│  FR-12.1 ──────────►               ────────► DES-MON-007 (db_metrics_svc) │
+│  (DB Monitoring)                    ────────► DES-WEB-018 (metrics_endpts) │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Note: SRS IDs in parentheses are pending formal SRS update.
+```
+
 ---
 
 ## 5. SDS to Implementation Traceability
@@ -786,6 +888,18 @@ This section maps design elements to their corresponding source code files.
 |--------|---------------|-------------|-------------|
 | DES-SEC-013 | `security_storage_interface` | `include/pacs/security/security_storage_interface.hpp` | (header-only, interface) |
 
+### 5.7.1 Client Module Implementation
+
+> **Reference:** [SDS_CLIENT.md](SDS_CLIENT.md) - Complete Client Module Design Specification
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-CLI-001 | `job_manager` | `include/pacs/client/job_manager.hpp` | `src/client/job_manager.cpp` |
+| DES-CLI-002 | `routing_manager` | `include/pacs/client/routing_manager.hpp` | `src/client/routing_manager.cpp` |
+| DES-CLI-003 | `sync_manager` | `include/pacs/client/sync_manager.hpp` | `src/client/sync_manager.cpp` |
+| DES-CLI-004 | `prefetch_manager` | `include/pacs/client/prefetch_manager.hpp` | `src/client/prefetch_manager.cpp` |
+| DES-CLI-005 | `remote_node_manager` | `include/pacs/client/remote_node_manager.hpp` | `src/client/remote_node_manager.cpp` |
+
 ### 5.8 Web Module Implementation
 
 > **Reference:** [SDS_WEB_API.md](SDS_WEB_API.md) - Complete Web/REST API Module Design Specification
@@ -804,6 +918,32 @@ This section maps design elements to their corresponding source code files.
 | DES-WEB-010 | `security_endpoints` | `include/pacs/web/endpoints/security_endpoints.hpp` | `src/web/endpoints/security_endpoints.cpp` |
 | DES-WEB-011 | `system_endpoints` | `include/pacs/web/endpoints/system_endpoints.hpp` | `src/web/endpoints/system_endpoints.cpp` |
 | DES-WEB-012 | `association_endpoints` | `include/pacs/web/endpoints/association_endpoints.hpp` | `src/web/endpoints/association_endpoints.cpp` |
+| DES-WEB-013 | `annotation_endpoints` | `include/pacs/web/endpoints/annotation_endpoints.hpp` | `src/web/endpoints/annotation_endpoints.cpp` |
+| DES-WEB-014 | `jobs_endpoints` | `include/pacs/web/endpoints/jobs_endpoints.hpp` | `src/web/endpoints/jobs_endpoints.cpp` |
+| DES-WEB-015 | `key_image_endpoints` | `include/pacs/web/endpoints/key_image_endpoints.hpp` | `src/web/endpoints/key_image_endpoints.cpp` |
+| DES-WEB-016 | `measurement_endpoints` | `include/pacs/web/endpoints/measurement_endpoints.hpp` | `src/web/endpoints/measurement_endpoints.cpp` |
+| DES-WEB-017 | `metadata_endpoints` | `include/pacs/web/endpoints/metadata_endpoints.hpp` | `src/web/endpoints/metadata_endpoints.cpp` |
+| DES-WEB-018 | `metrics_endpoints` | `include/pacs/web/endpoints/metrics_endpoints.hpp` | `src/web/endpoints/metrics_endpoints.cpp` |
+| DES-WEB-019 | `remote_nodes_endpoints` | `include/pacs/web/endpoints/remote_nodes_endpoints.hpp` | `src/web/endpoints/remote_nodes_endpoints.cpp` |
+| DES-WEB-020 | `routing_endpoints` | `include/pacs/web/endpoints/routing_endpoints.hpp` | `src/web/endpoints/routing_endpoints.cpp` |
+| DES-WEB-021 | `thumbnail_endpoints` | `include/pacs/web/endpoints/thumbnail_endpoints.hpp` | `src/web/endpoints/thumbnail_endpoints.cpp` |
+| DES-WEB-022 | `viewer_state_endpoints` | `include/pacs/web/endpoints/viewer_state_endpoints.hpp` | `src/web/endpoints/viewer_state_endpoints.cpp` |
+
+### 5.8.1 Storage Repository Implementation (Extended)
+
+| SDS ID | Design Element | Header File | Source File |
+|--------|---------------|-------------|-------------|
+| DES-STOR-010 | `annotation_repository` | `include/pacs/storage/annotation_repository.hpp` | `src/storage/annotation_repository.cpp` |
+| DES-STOR-011 | `viewer_state_repository` | `include/pacs/storage/viewer_state_repository.hpp` | `src/storage/viewer_state_repository.cpp` |
+| DES-STOR-012 | `job_repository` | `include/pacs/storage/job_repository.hpp` | `src/storage/job_repository.cpp` |
+| DES-STOR-013 | `node_repository` | `include/pacs/storage/node_repository.hpp` | `src/storage/node_repository.cpp` |
+| DES-STOR-014 | `routing_repository` | `include/pacs/storage/routing_repository.hpp` | `src/storage/routing_repository.cpp` |
+| DES-STOR-015 | `prefetch_repository` | `include/pacs/storage/prefetch_repository.hpp` | `src/storage/prefetch_repository.cpp` |
+| DES-STOR-016 | `sync_repository` | `include/pacs/storage/sync_repository.hpp` | `src/storage/sync_repository.cpp` |
+| DES-STOR-017 | `key_image_repository` | `include/pacs/storage/key_image_repository.hpp` | `src/storage/key_image_repository.cpp` |
+| DES-STOR-018 | `measurement_repository` | `include/pacs/storage/measurement_repository.hpp` | `src/storage/measurement_repository.cpp` |
+| DES-STOR-019 | `repository_factory` | `include/pacs/storage/repository_factory.hpp` | `src/storage/repository_factory.cpp` |
+| DES-STOR-020 | `pacs_database_adapter` | `include/pacs/storage/pacs_database_adapter.hpp` | `src/storage/pacs_database_adapter.cpp` |
 
 ### 5.9 Workflow Module Implementation
 
@@ -843,6 +983,7 @@ This section maps design elements to their corresponding source code files.
 | DES-MON-004 | `dicom_association_collector` | `include/pacs/monitoring/collectors/dicom_association_collector.hpp` | (header-only) |
 | DES-MON-005 | `dicom_service_collector` | `include/pacs/monitoring/collectors/dicom_service_collector.hpp` | (header-only) |
 | DES-MON-006 | `dicom_storage_collector` | `include/pacs/monitoring/collectors/dicom_storage_collector.hpp` | (header-only) |
+| DES-MON-007 | `database_metrics_service` | `include/pacs/services/monitoring/database_metrics_service.hpp` | `src/services/monitoring/database_metrics_service.cpp` |
 | - | `health_status` | `include/pacs/monitoring/health_status.hpp` | (header-only) |
 | - | `health_json` | `include/pacs/monitoring/health_json.hpp` | (header-only) |
 
@@ -1089,10 +1230,13 @@ This section maps design elements to their corresponding test files for **Verifi
 
 | Category | Total PRD | Traced to SRS | Traced to SDS | Coverage |
 |----------|-----------|---------------|---------------|----------|
-| Functional (FR) | 14 | 14 | 14 | 100% |
+| Functional (FR-1 to FR-9) | 14 | 14 | 14 | 100% |
+| Functional (FR-10 to FR-12) | 11 | 0 (pending) | 11 | SDS Complete |
 | Non-Functional (NFR) | 4 | 4 | 4 | 100% |
 | Integration (IR) | 5 | 5 | 5 | 100% |
-| **Total** | **23** | **23** | **23** | **100%** |
+| **Total** | **34** | **23+11 pending** | **34** | **100% (SDS)** |
+
+> **Note:** FR-10.x (Client Module), FR-11.x (Viewer Features), and FR-12.x (Monitoring) have SDS design documentation but are pending SRS-level requirement propagation.
 
 ### 7.2 SRS to SDS Coverage
 
@@ -1102,14 +1246,15 @@ This section maps design elements to their corresponding test files for **Verifi
 | Encoding | 8 | 13 | - | - | 100% |
 | Network | 4 | 9 | 3 | - | 100% |
 | Services | 7 | 31 | 8 | 2 | 100% |
-| Storage | 3 | 9 | - | 7 | 100% |
+| Storage | 3 | 20 | - | 7 | 100% |
 | Integration | 5 | 8 | - | - | 100% |
 | Security | 3 | 6 | - | - | 100% |
-| Web | - | 10 | - | - | 100% |
+| Web | - | 22 | - | - | 100% |
+| Client | - | 5 | 2 | - | 100% |
 | Workflow | - | 3 | - | - | 100% |
 | AI | - | 2 | - | - | 100% |
 | DI | - | 4 | - | - | 100% |
-| Monitoring | - | 6 | - | - | 100% |
+| Monitoring | - | 7 | - | - | 100% |
 | Compat | - | 2 | - | - | 100% |
 | Performance | 4 | N/A | - | - | Addressed |
 | Reliability | 3 | N/A | 3 | - | Addressed |
@@ -1123,16 +1268,17 @@ This section maps design elements to their corresponding test files for **Verifi
 | Encoding | 13 | 22 | 11 | 13 | 100% |
 | Network | 9 | 19 | 9 | 14 | 100% |
 | Services | 31 | 34 | 31 | 24 | 100% |
-| Storage | 9 | 18 | 9 | 9 | 100% |
+| Storage | 20 | 29 | 20 | 9 | 100% |
 | Integration | 9 | 10 | 8 | 12 | 100% |
 | Security | 6 | 13 | 6 | 5 | 100% |
-| Web | 12 | 12 | 10 | 5 | 100% |
+| Web | 22 | 22 | 20 | 5 | 100% |
+| Client | 5 | 5 | 5 | 5 | 100% |
 | Workflow | 3 | 5 | 3 | 3 | 100% |
 | AI | 2 | 2 | 2 | 2 | 100% |
 | DI | 4 | 4 | 0 | 2 | 100% |
-| Monitoring | 6 | 8 | 2 | 5 | 100% |
+| Monitoring | 7 | 9 | 3 | 5 | 100% |
 | Compat | 2 | 2 | 0 | 0 | 100% |
-| **Total** | **113** | **159** | **99** | **101** | **100%** |
+| **Total** | **141** | **192** | **127** | **111** | **100%** |
 
 ### 7.4 Orphan Analysis
 
@@ -1206,6 +1352,16 @@ When a requirement changes, use this checklist:
 | FR-3.4 | MPPS Service |
 | FR-4.1 | File Storage |
 | FR-4.2 | Index Database |
+| FR-10.1 | Job Management |
+| FR-10.2 | Routing Manager |
+| FR-10.3 | Sync Manager |
+| FR-10.4 | Remote Node Manager |
+| FR-10.5 | Prefetch Manager |
+| FR-11.1 | Annotations |
+| FR-11.2 | Viewer State |
+| FR-11.3 | Key Images |
+| FR-11.4 | Measurements |
+| FR-12.1 | Database Monitoring |
 | NFR-1 | Performance |
 | NFR-2 | Reliability |
 | NFR-3 | Security |
@@ -1306,6 +1462,17 @@ When a requirement changes, use this checklist:
 | DES-STOR-007 | hsm_storage |
 | DES-STOR-008 | hsm_migration_service |
 | DES-STOR-009 | sqlite_security_storage |
+| DES-STOR-010 | annotation_repository |
+| DES-STOR-011 | viewer_state_repository |
+| DES-STOR-012 | job_repository |
+| DES-STOR-013 | node_repository |
+| DES-STOR-014 | routing_repository |
+| DES-STOR-015 | prefetch_repository |
+| DES-STOR-016 | sync_repository |
+| DES-STOR-017 | key_image_repository |
+| DES-STOR-018 | measurement_repository |
+| DES-STOR-019 | repository_factory |
+| DES-STOR-020 | pacs_database_adapter |
 
 #### Integration Module (DES-INT-xxx)
 | ID | Element |
@@ -1344,6 +1511,25 @@ When a requirement changes, use this checklist:
 | DES-WEB-010 | security_endpoints |
 | DES-WEB-011 | system_endpoints |
 | DES-WEB-012 | association_endpoints |
+| DES-WEB-013 | annotation_endpoints |
+| DES-WEB-014 | jobs_endpoints |
+| DES-WEB-015 | key_image_endpoints |
+| DES-WEB-016 | measurement_endpoints |
+| DES-WEB-017 | metadata_endpoints |
+| DES-WEB-018 | metrics_endpoints |
+| DES-WEB-019 | remote_nodes_endpoints |
+| DES-WEB-020 | routing_endpoints |
+| DES-WEB-021 | thumbnail_endpoints |
+| DES-WEB-022 | viewer_state_endpoints |
+
+#### Client Module (DES-CLI-xxx)
+| ID | Element |
+|----|---------|
+| DES-CLI-001 | job_manager |
+| DES-CLI-002 | routing_manager |
+| DES-CLI-003 | sync_manager |
+| DES-CLI-004 | prefetch_manager |
+| DES-CLI-005 | remote_node_manager |
 
 #### Workflow Module (DES-WF-xxx)
 | ID | Element |
@@ -1375,6 +1561,7 @@ When a requirement changes, use this checklist:
 | DES-MON-004 | dicom_association_collector |
 | DES-MON-005 | dicom_service_collector |
 | DES-MON-006 | dicom_storage_collector |
+| DES-MON-007 | database_metrics_service |
 
 #### Compat Module (DES-COMPAT-xxx)
 | ID | Element |
@@ -1408,9 +1595,10 @@ When a requirement changes, use this checklist:
 | 2.1.0 | 2026-01-03 | kcenon@naver.com | Web module refactored: DES-WEB-001 to DES-WEB-012; Added rest_config and rest_types as separate design elements; Added reference to SDS_WEB_API.md |
 | 2.2.0 | 2026-01-03 | kcenon@naver.com | Added reference to SDS_COMPRESSION.md for complete Compression Codecs Module Design Specification |
 | 2.3.0 | 2026-01-04 | kcenon@naver.com | Added Cloud Storage module: SRS-STOR-003/004/010/011 traceability; Added reference to SDS_CLOUD_STORAGE.md (S3, Azure, HSM backends) |
+| 3.0.0 | 2026-02-08 | kcenon@naver.com | Major update: Added Client Module (DES-CLI-001 to DES-CLI-005); Added 10 Web endpoints (DES-WEB-013 to DES-WEB-022); Added 11 Storage repositories (DES-STOR-010 to DES-STOR-020); Added DB monitoring (DES-MON-007); Added traceability for PRD FR-10, FR-11, FR-12; Updated coverage analysis |
 
 ---
 
-*Document Version: 2.3.0*
-*Last Updated: 2026-01-04*
+*Document Version: 3.0.0*
+*Last Updated: 2026-02-08*
 *Author: kcenon@naver.com*

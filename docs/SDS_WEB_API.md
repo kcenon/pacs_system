@@ -1,8 +1,8 @@
 # SDS - Web/REST API Module Design Specification
 
-> **Version:** 1.0.0
+> **Version:** 2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2026-01-03
+> **Last Updated:** 2026-02-08
 
 ---
 
@@ -23,6 +23,16 @@
   - [DES-WEB-010: security_endpoints](#des-web-010-security_endpoints)
   - [DES-WEB-011: system_endpoints](#des-web-011-system_endpoints)
   - [DES-WEB-012: association_endpoints](#des-web-012-association_endpoints)
+  - [DES-WEB-013: annotation_endpoints](#des-web-013-annotation_endpoints)
+  - [DES-WEB-014: jobs_endpoints](#des-web-014-jobs_endpoints)
+  - [DES-WEB-015: key_image_endpoints](#des-web-015-key_image_endpoints)
+  - [DES-WEB-016: measurement_endpoints](#des-web-016-measurement_endpoints)
+  - [DES-WEB-017: metadata_endpoints](#des-web-017-metadata_endpoints)
+  - [DES-WEB-018: metrics_endpoints](#des-web-018-metrics_endpoints)
+  - [DES-WEB-019: remote_nodes_endpoints](#des-web-019-remote_nodes_endpoints)
+  - [DES-WEB-020: routing_endpoints](#des-web-020-routing_endpoints)
+  - [DES-WEB-021: thumbnail_endpoints](#des-web-021-thumbnail_endpoints)
+  - [DES-WEB-022: viewer_state_endpoints](#des-web-022-viewer_state_endpoints)
 - [4. API Endpoint Reference](#4-api-endpoint-reference)
 - [5. DICOMweb Standards Compliance](#5-dicomweb-standards-compliance)
 - [6. Error Handling](#6-error-handling)
@@ -862,6 +872,421 @@ RESTful endpoints for monitoring and managing active DICOM associations.
 
 ---
 
+### DES-WEB-013: annotation_endpoints
+
+**Traces to:** FR-11.1 (Annotations)
+
+#### 3.13.1 Purpose
+
+REST API for creating, retrieving, updating, and deleting annotations on DICOM images. Supports query filtering by study, series, instance, and user.
+
+#### 3.13.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/v1/annotations` | Create annotation |
+| `GET` | `/api/v1/annotations` | List annotations (with filters and pagination) |
+| `GET` | `/api/v1/annotations/<id>` | Get annotation by ID |
+| `PUT` | `/api/v1/annotations/<id>` | Update annotation |
+| `DELETE` | `/api/v1/annotations/<id>` | Delete annotation |
+| `GET` | `/api/v1/instances/<uid>/annotations` | Get annotations for DICOM instance |
+
+#### 3.13.3 Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `study_uid` | string | Filter by Study Instance UID |
+| `series_uid` | string | Filter by Series Instance UID |
+| `sop_instance_uid` | string | Filter by SOP Instance UID |
+| `user_id` | string | Filter by user who created the annotation |
+| `limit` | integer | Pagination limit |
+| `offset` | integer | Pagination offset |
+
+#### 3.13.4 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `storage::annotation_repository` (DES-STOR-010) | Annotation persistence |
+| `storage::index_database` (DES-STOR-003) | Instance validation |
+
+#### 3.13.5 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/annotation_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/annotation_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-014: jobs_endpoints
+
+**Traces to:** FR-10.1 (Job Management)
+
+#### 3.14.1 Purpose
+
+Comprehensive job management REST API supporting CRUD operations, job lifecycle control, and real-time WebSocket progress updates. Handles multiple job types (retrieve, store, query, sync, prefetch).
+
+#### 3.14.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/v1/jobs` | List jobs (with status/type filters) |
+| `POST` | `/api/v1/jobs` | Create new job |
+| `GET` | `/api/v1/jobs/<id>` | Get job details |
+| `DELETE` | `/api/v1/jobs/<id>` | Delete job |
+| `GET` | `/api/v1/jobs/<id>/progress` | Get job progress |
+| `POST` | `/api/v1/jobs/<id>/start` | Start job |
+| `POST` | `/api/v1/jobs/<id>/pause` | Pause job |
+| `POST` | `/api/v1/jobs/<id>/resume` | Resume job |
+| `POST` | `/api/v1/jobs/<id>/cancel` | Cancel job |
+| `POST` | `/api/v1/jobs/<id>/retry` | Retry failed job |
+
+#### 3.14.3 Job Types
+
+| Type | Description | Parameters |
+|------|-------------|------------|
+| `retrieve` | C-MOVE/C-GET operation | `study_uid`, `node_id` |
+| `store` | C-STORE operation | `study_uid`, `destination_node_id` |
+| `query` | C-FIND operation | `query_level`, `filters`, `node_id` |
+| `sync` | Synchronization | `sync_config_id` |
+| `prefetch` | Prior study prefetch | `patient_id`, `modality` |
+
+#### 3.14.4 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `client::job_manager` (DES-CLI-001) | Job orchestration |
+| `client::job_types` | Job type definitions |
+
+#### 3.14.5 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/jobs_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/jobs_endpoints.cpp` | Route handlers and WebSocket support |
+
+---
+
+### DES-WEB-015: key_image_endpoints
+
+**Traces to:** FR-11.3 (Key Images)
+
+#### 3.15.1 Purpose
+
+Manage key images (clinically significant images marked by radiologists) on DICOM studies, including creation, retrieval, deletion, and export to DICOM SR format.
+
+#### 3.15.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/v1/studies/<uid>/key-images` | Create key image for study |
+| `GET` | `/api/v1/studies/<uid>/key-images` | List key images for study |
+| `DELETE` | `/api/v1/key-images/<id>` | Delete key image |
+| `POST` | `/api/v1/studies/<uid>/key-images/export-sr` | Export as DICOM Structured Report |
+
+#### 3.15.3 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `storage::key_image_repository` (DES-STOR-017) | Key image persistence |
+| `storage::index_database` (DES-STOR-003) | Study validation |
+
+#### 3.15.4 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/key_image_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/key_image_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-016: measurement_endpoints
+
+**Traces to:** FR-11.4 (Measurements)
+
+#### 3.16.1 Purpose
+
+REST API for managing image measurements (distances, areas, volumes) on DICOM instances. Supports different measurement types with geometry and value storage.
+
+#### 3.16.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/v1/measurements` | Create measurement |
+| `GET` | `/api/v1/measurements` | List measurements (with filters) |
+| `GET` | `/api/v1/measurements/<id>` | Get measurement by ID |
+| `DELETE` | `/api/v1/measurements/<id>` | Delete measurement |
+| `GET` | `/api/v1/instances/<uid>/measurements` | Get measurements for instance |
+
+#### 3.16.3 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `storage::measurement_repository` (DES-STOR-018) | Measurement persistence |
+| `storage::index_database` (DES-STOR-003) | Instance validation |
+
+#### 3.16.4 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/measurement_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/measurement_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-017: metadata_endpoints
+
+**Traces to:** SRS-WEB-002 (DICOMweb WADO-RS)
+
+#### 3.17.1 Purpose
+
+Selective metadata retrieval endpoints optimized for viewer performance. Provides series navigation, window/level presets, VOI LUT data, and multi-frame information.
+
+#### 3.17.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/v1/instances/<uid>/metadata` | Selective metadata for instance |
+| `GET` | `/api/v1/series/<uid>/instances/sorted` | Sorted instances in series |
+| `GET` | `/api/v1/instances/<uid>/navigation` | Navigation info (prev/next) |
+| `GET` | `/api/v1/presets/window-level` | Window/level presets by modality |
+| `GET` | `/api/v1/instances/<uid>/voi-lut` | VOI Lookup Table data |
+| `GET` | `/api/v1/instances/<uid>/frame-info` | Multi-frame information |
+
+#### 3.17.3 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `web::metadata_service` | Metadata extraction and formatting |
+| `storage::index_database` (DES-STOR-003) | Instance lookup |
+
+#### 3.17.4 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/metadata_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/metadata_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-018: metrics_endpoints
+
+**Traces to:** FR-12.1 (Database Monitoring)
+
+#### 3.18.1 Purpose
+
+Database monitoring and observability endpoints providing health status, performance metrics, slow query analysis, and Prometheus-compatible metrics export.
+
+#### 3.18.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/health/database` | Database health check |
+| `GET` | `/api/metrics/database` | Current database metrics (JSON) |
+| `GET` | `/api/metrics/database/slow-queries` | Slow query list |
+| `GET` | `/metrics` | Prometheus text exposition format |
+
+#### 3.18.3 Query Parameters
+
+| Parameter | Endpoint | Description |
+|-----------|----------|-------------|
+| `limit` | slow-queries | Maximum results (default: 10) |
+| `since_minutes` | slow-queries | Time window (default: 5) |
+
+#### 3.18.4 Prometheus Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `pacs_db_queries_total` | counter | Total query count |
+| `pacs_db_query_duration_microseconds` | summary | Query latency distribution |
+| `pacs_db_queries_per_second` | gauge | Current throughput |
+| `pacs_db_connections` | gauge | Active connections |
+| `pacs_db_connection_utilization` | gauge | Connection pool utilization |
+| `pacs_db_error_rate` | gauge | Error rate percentage |
+| `pacs_db_slow_queries` | counter | Slow query count |
+
+#### 3.18.5 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `services::monitoring::database_metrics_service` (DES-MON-007) | Metrics collection |
+
+#### 3.18.6 Conditional Compilation
+
+Requires `PACS_WITH_DATABASE_SYSTEM` preprocessor flag.
+
+#### 3.18.7 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/metrics_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/metrics_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-019: remote_nodes_endpoints
+
+**Traces to:** FR-10.4 (Remote Node Manager)
+
+#### 3.19.1 Purpose
+
+Complete remote PACS node management API supporting CRUD operations, connectivity verification, capability detection, and DICOM operations (C-FIND, C-MOVE).
+
+#### 3.19.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/v1/remote-nodes` | List remote nodes (with status filter) |
+| `POST` | `/api/v1/remote-nodes` | Create remote node |
+| `GET` | `/api/v1/remote-nodes/<id>` | Get node details |
+| `PUT` | `/api/v1/remote-nodes/<id>` | Update node configuration |
+| `DELETE` | `/api/v1/remote-nodes/<id>` | Delete node |
+| `POST` | `/api/v1/remote-nodes/<id>/verify` | Verify connectivity (C-ECHO) |
+| `GET` | `/api/v1/remote-nodes/<id>/status` | Get node status and capabilities |
+| `POST` | `/api/v1/remote-nodes/<id>/query` | Execute C-FIND query |
+| `POST` | `/api/v1/remote-nodes/<id>/retrieve` | Retrieve studies (C-MOVE) |
+
+#### 3.19.3 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `client::remote_node_manager` (DES-CLI-005) | Node management |
+| `client::remote_node` | Node data model |
+
+#### 3.19.4 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/remote_nodes_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/remote_nodes_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-020: routing_endpoints
+
+**Traces to:** FR-10.2 (Routing Manager)
+
+#### 3.20.1 Purpose
+
+Comprehensive routing rule management API supporting CRUD operations, rule reordering, global enable/disable, and dry-run testing for automatic DICOM image routing.
+
+#### 3.20.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/v1/routing/rules` | List routing rules (with pagination) |
+| `POST` | `/api/v1/routing/rules` | Create routing rule |
+| `GET` | `/api/v1/routing/rules/<id>` | Get rule details |
+| `PUT` | `/api/v1/routing/rules/<id>` | Update rule |
+| `DELETE` | `/api/v1/routing/rules/<id>` | Delete rule |
+| `POST` | `/api/v1/routing/rules/reorder` | Reorder rules |
+| `POST` | `/api/v1/routing/enable` | Enable routing globally |
+| `POST` | `/api/v1/routing/disable` | Disable routing globally |
+| `GET` | `/api/v1/routing/status` | Get routing status and statistics |
+| `POST` | `/api/v1/routing/test` | Test all rules (dry run) |
+| `POST` | `/api/v1/routing/rules/<id>/test` | Test specific rule (dry run) |
+
+#### 3.20.3 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `client::routing_manager` (DES-CLI-002) | Routing logic |
+| `client::routing_types` | Rule data models |
+
+#### 3.20.4 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/routing_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/routing_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-021: thumbnail_endpoints
+
+**Traces to:** SRS-WEB-002 (DICOMweb WADO-RS - Rendered/Thumbnail)
+
+#### 3.21.1 Purpose
+
+Thumbnail generation and management API for DICOM viewer optimization. Supports on-demand generation with configurable size, format, quality, and frame selection. Includes cache management.
+
+#### 3.21.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/v1/thumbnails/instances/<uid>` | Get instance thumbnail |
+| `GET` | `/api/v1/thumbnails/series/<uid>` | Get series thumbnail |
+| `GET` | `/api/v1/thumbnails/studies/<uid>` | Get study thumbnail |
+| `DELETE` | `/api/v1/thumbnails/cache` | Clear thumbnail cache |
+| `GET` | `/api/v1/thumbnails/cache/stats` | Get cache statistics |
+
+#### 3.21.3 Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `size` | integer | 128 | Thumbnail size (64/128/256/512) |
+| `format` | string | `jpeg` | Output format (jpeg/png) |
+| `quality` | integer | 80 | JPEG quality (1-100) |
+| `frame` | integer | 0 | Frame number for multi-frame |
+
+#### 3.21.4 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `web::thumbnail_service` | Image generation and caching |
+| `storage::index_database` (DES-STOR-003) | Instance lookup |
+
+#### 3.21.5 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/thumbnail_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/thumbnail_endpoints.cpp` | Route handlers |
+
+---
+
+### DES-WEB-022: viewer_state_endpoints
+
+**Traces to:** FR-11.2 (Viewer State)
+
+#### 3.22.1 Purpose
+
+Viewer state persistence API enabling save/restore of viewport state, window/level settings, and annotation references. Also tracks per-user study access patterns for recent studies.
+
+#### 3.22.2 Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/v1/viewer-states` | Save viewer state |
+| `GET` | `/api/v1/viewer-states` | List viewer states (with filters) |
+| `GET` | `/api/v1/viewer-states/<id>` | Get viewer state by ID |
+| `DELETE` | `/api/v1/viewer-states/<id>` | Delete viewer state |
+| `GET` | `/api/v1/users/<user_id>/recent-studies` | Get user's recent studies |
+
+#### 3.22.3 Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `study_uid` | string | Filter by Study Instance UID |
+| `user_id` | string | Filter by user ID |
+| `limit` | integer | Pagination limit (also used for recent studies) |
+
+#### 3.22.4 Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `storage::viewer_state_repository` (DES-STOR-011) | State persistence |
+| `storage::index_database` (DES-STOR-003) | Study validation |
+
+#### 3.22.5 Implementation Files
+
+| File | Description |
+|------|-------------|
+| `include/pacs/web/endpoints/viewer_state_endpoints.hpp` | Endpoint declarations |
+| `src/web/endpoints/viewer_state_endpoints.cpp` | Route handlers |
+
+---
+
 ## 4. API Endpoint Reference
 
 ### 4.1 Complete Endpoint Summary
@@ -1052,6 +1477,16 @@ config.cors_allowed_headers = "Content-Type, Authorization";
 | DES-WEB-010 | `include/pacs/web/endpoints/security_endpoints.hpp` | `src/web/endpoints/security_endpoints.cpp` | - |
 | DES-WEB-011 | `include/pacs/web/endpoints/system_endpoints.hpp` | `src/web/endpoints/system_endpoints.cpp` | `tests/web/system_endpoints_test.cpp` |
 | DES-WEB-012 | `include/pacs/web/endpoints/association_endpoints.hpp` | `src/web/endpoints/association_endpoints.cpp` | - |
+| DES-WEB-013 | `include/pacs/web/endpoints/annotation_endpoints.hpp` | `src/web/endpoints/annotation_endpoints.cpp` | - |
+| DES-WEB-014 | `include/pacs/web/endpoints/jobs_endpoints.hpp` | `src/web/endpoints/jobs_endpoints.cpp` | - |
+| DES-WEB-015 | `include/pacs/web/endpoints/key_image_endpoints.hpp` | `src/web/endpoints/key_image_endpoints.cpp` | - |
+| DES-WEB-016 | `include/pacs/web/endpoints/measurement_endpoints.hpp` | `src/web/endpoints/measurement_endpoints.cpp` | - |
+| DES-WEB-017 | `include/pacs/web/endpoints/metadata_endpoints.hpp` | `src/web/endpoints/metadata_endpoints.cpp` | - |
+| DES-WEB-018 | `include/pacs/web/endpoints/metrics_endpoints.hpp` | `src/web/endpoints/metrics_endpoints.cpp` | - |
+| DES-WEB-019 | `include/pacs/web/endpoints/remote_nodes_endpoints.hpp` | `src/web/endpoints/remote_nodes_endpoints.cpp` | - |
+| DES-WEB-020 | `include/pacs/web/endpoints/routing_endpoints.hpp` | `src/web/endpoints/routing_endpoints.cpp` | - |
+| DES-WEB-021 | `include/pacs/web/endpoints/thumbnail_endpoints.hpp` | `src/web/endpoints/thumbnail_endpoints.cpp` | - |
+| DES-WEB-022 | `include/pacs/web/endpoints/viewer_state_endpoints.hpp` | `src/web/endpoints/viewer_state_endpoints.cpp` | - |
 
 ---
 
@@ -1060,9 +1495,10 @@ config.cors_allowed_headers = "Content-Type, Authorization";
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2026-01-03 | kcenon@naver.com | Initial Web/REST API module SDS with DES-WEB-001 to DES-WEB-012 |
+| 2.0.0 | 2026-02-08 | kcenon@naver.com | Added DES-WEB-013 to DES-WEB-022: annotation, jobs, key image, measurement, metadata, metrics, remote nodes, routing, thumbnail, viewer state endpoints |
 
 ---
 
-*Document Version: 1.0.0*
-*Last Updated: 2026-01-03*
+*Document Version: 2.0.0*
+*Last Updated: 2026-02-08*
 *Author: kcenon@naver.com*

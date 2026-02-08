@@ -1,7 +1,7 @@
 # Software Design Specification (SDS) - PACS System
 
-> **Version:** 0.1.4.0
-> **Last Updated:** 2026-01-04
+> **Version:** 0.2.0.0
+> **Last Updated:** 2026-02-08
 > **Language:** **English** | [한국어](SDS_KO.md)
 > **Status:** Complete
 
@@ -45,6 +45,7 @@ This SDS is organized into multiple files for maintainability:
 | [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) | Network V2 with messaging_server integration |
 | [SDS_DI.md](SDS_DI.md) | Dependency Injection module |
 | [SDS_AI.md](SDS_AI.md) | AI Service integration module |
+| [SDS_CLIENT.md](SDS_CLIENT.md) | Client module (Job, Routing, Sync, Prefetch, Remote Node) |
 | [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) | Monitoring collectors plugin architecture |
 
 ---
@@ -122,6 +123,7 @@ Where:
 | SEC | Security Module | RBAC, anonymization, digital signatures |
 | CACHE | Cache Module | Query caching and streaming |
 | AI | AI Module | AI service integration |
+| CLI | Client Module | Client-side orchestration |
 | DI | DI Module | Dependency injection |
 | MON | Monitoring Module | Metrics collectors |
 
@@ -520,6 +522,22 @@ The PACS System follows a layered architecture:
 | `dicom_storage_collector` | DES-MON-002 | File system and database stats | SRS-INT-006 | ✅ |
 | `dicom_service_collector` | DES-MON-003 | DIMSE operation counters | SRS-INT-006 | ✅ |
 
+### 4.13 Client Module (pacs_client)
+
+**Purpose:** Client-side orchestration for distributed DICOM operations
+
+**Reference:** [SDS_CLIENT.md](SDS_CLIENT.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `job_manager` | DES-CLI-001 | Async job queue with priority and workers | FR-10.1 | ✅ |
+| `routing_manager` | DES-CLI-002 | Rule-based auto-forwarding | FR-10.2 | ✅ |
+| `sync_manager` | DES-CLI-003 | Bidirectional sync with conflict resolution | FR-10.3 | ✅ |
+| `prefetch_manager` | DES-CLI-004 | Proactive data loading (worklist, priors) | FR-10.5 | ✅ |
+| `remote_node_manager` | DES-CLI-005 | Connection pooling and health monitoring | FR-10.4 | ✅ |
+
 ---
 
 ## 5. Design Constraints
@@ -651,10 +669,11 @@ The PACS System follows a layered architecture:
 | 1.2.0 | 2025-12-07 | kcenon | Added: DES-SVC-008~010 (DIMSE-N, Ultrasound, XA), DES-INT-003a (accept_worker), DES-NET-006~007 (Network V2); Updated thread_adapter design for thread_system migration |
 | 1.3.0 | 2026-01-02 | kcenon | Updated accept_worker: Implemented TCP socket bind/listen/accept replacing placeholder implementation |
 | 1.4.0 | 2026-01-04 | kcenon | Added: Cache Module (DES-CACHE-001~006), AI Module (DES-AI-001~002), DI Module (DES-DI-001~004), Monitoring Module (DES-MON-001~003); Added module IDs: CACHE, AI, DI, MON |
+| 2.0.0 | 2026-02-08 | kcenon | Added: Client Module (DES-CLI-001~005) with SDS_CLIENT.md; Added CLI module ID; Updated SDS_WEB_API.md with 10 new endpoints (DES-WEB-013~022); Updated SDS_TRACEABILITY.md with 28 new DES entries; Added 11 storage repositories (DES-STOR-010~020); Added DB monitoring (DES-MON-007) |
 
 ---
 
-*Document Version: 0.1.4.0*
+*Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Updated: 2026-01-04*
+*Updated: 2026-02-08*
 *Author: kcenon@naver.com*
