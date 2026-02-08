@@ -1,8 +1,8 @@
 # SDS - Database Design
 
-> **Version:** 0.1.1.0
+> **Version:** 0.2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2025-12-04
+> **Last Updated:** 2026-02-08
 
 ---
 
@@ -72,8 +72,8 @@
 │   │ UK: study_uid    │              │                                        │
 │   │    study_date    │              │                                        │
 │   │    study_time    │              │                                        │
-│   │    accession_no  │              │                                        │
-│   │    study_desc    │              │                                        │
+│   │    accession_number│            │                                        │
+│   │    study_description│           │                                        │
 │   │    modalities    │              │                                        │
 │   │    num_series    │              │                                        │
 │   │    num_instances │              │                                        │
@@ -89,8 +89,8 @@
 │   │ UK: series_uid   │              │                                        │
 │   │    modality      │              │                                        │
 │   │    series_number │              │                                        │
-│   │    series_desc   │              │                                        │
-│   │    body_part     │              │                                        │
+│   │    series_description│          │                                        │
+│   │    body_part_examined│          │                                        │
 │   │    num_instances │              │                                        │
 │   └────────┬─────────┘              │                                        │
 │            │ 1                      │                                        │
@@ -150,15 +150,15 @@ CREATE TABLE patients (
     sex             TEXT,                  -- (0010,0040) Patient's Sex (M/F/O)
 
     -- Additional Attributes (for queries)
-    issuer_of_pid   TEXT,                  -- (0010,0021) Issuer of Patient ID
-    other_patient_ids TEXT,                -- (0010,1000) Other Patient IDs
+    other_ids       TEXT,                  -- (0010,1000) Other Patient IDs
+    ethnic_group    TEXT,                  -- (0010,2160) Ethnic Group
+    comments        TEXT,                  -- (0010,4000) Patient Comments
 
     -- Metadata
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
 
     -- Constraints
-    CHECK (sex IN ('M', 'F', 'O', NULL)),
     CHECK (length(patient_id) <= 64)
 );
 
@@ -176,6 +176,9 @@ CREATE INDEX idx_patients_birth ON patients(birth_date);
 | patient_name | (0010,0010) | TEXT | 324 | YES | PN format |
 | birth_date | (0010,0030) | TEXT | 8 | YES | YYYYMMDD |
 | sex | (0010,0040) | TEXT | 1 | YES | M/F/O |
+| other_ids | (0010,1000) | TEXT | - | YES | Other Patient IDs |
+| ethnic_group | (0010,2160) | TEXT | - | YES | Ethnic Group |
+| comments | (0010,4000) | TEXT | - | YES | Patient Comments |
 
 ---
 
@@ -196,12 +199,12 @@ CREATE TABLE studies (
     study_uid       TEXT NOT NULL UNIQUE,  -- (0020,000D) Study Instance UID
 
     -- Study Attributes
+    study_id        TEXT,                  -- (0020,0010) Study ID
     study_date      TEXT,                  -- (0008,0020) Study Date
     study_time      TEXT,                  -- (0008,0030) Study Time
-    accession_no    TEXT,                  -- (0008,0050) Accession Number
-    study_id        TEXT,                  -- (0020,0010) Study ID
-    study_desc      TEXT,                  -- (0008,1030) Study Description
-    referring_phys  TEXT,                  -- (0008,0090) Referring Physician's Name
+    accession_number TEXT,                 -- (0008,0050) Accession Number
+    referring_physician TEXT,              -- (0008,0090) Referring Physician's Name
+    study_description TEXT,                -- (0008,1030) Study Description
 
     -- Aggregated Info (denormalized for query performance)
     modalities_in_study TEXT,              -- (0008,0061) Modalities in Study
@@ -219,8 +222,7 @@ CREATE TABLE studies (
 -- Indexes
 CREATE INDEX idx_studies_patient ON studies(patient_pk);
 CREATE INDEX idx_studies_date ON studies(study_date);
-CREATE INDEX idx_studies_accession ON studies(accession_no);
-CREATE INDEX idx_studies_modalities ON studies(modalities_in_study);
+CREATE INDEX idx_studies_accession ON studies(accession_number);
 ```
 
 **Column Specifications:**
@@ -230,9 +232,12 @@ CREATE INDEX idx_studies_modalities ON studies(modalities_in_study);
 | study_pk | N/A | INTEGER | N/A | NO | Auto-increment |
 | patient_pk | N/A | INTEGER | N/A | NO | FK to patients |
 | study_uid | (0020,000D) | TEXT | 64 | NO | Unique, indexed |
+| study_id | (0020,0010) | TEXT | 16 | YES | Study ID |
 | study_date | (0008,0020) | TEXT | 8 | YES | YYYYMMDD |
 | study_time | (0008,0030) | TEXT | 14 | YES | HHMMSS.FFFFFF |
-| accession_no | (0008,0050) | TEXT | 16 | YES | Indexed |
+| accession_number | (0008,0050) | TEXT | 16 | YES | Indexed |
+| referring_physician | (0008,0090) | TEXT | 64 | YES | PN format |
+| study_description | (0008,1030) | TEXT | 64 | YES | Study Description |
 | modalities_in_study | (0008,0061) | TEXT | 256 | YES | e.g., "CT\\MR" |
 | num_series | N/A | INTEGER | N/A | NO | Denormalized count |
 | num_instances | N/A | INTEGER | N/A | NO | Denormalized count |
@@ -256,16 +261,11 @@ CREATE TABLE series (
     series_uid      TEXT NOT NULL UNIQUE,  -- (0020,000E) Series Instance UID
 
     -- Series Attributes
-    modality        TEXT,                  -- (0008,0060) Modality
-    series_number   INTEGER,               -- (0020,0011) Series Number
-    series_desc     TEXT,                  -- (0008,103E) Series Description
-    body_part       TEXT,                  -- (0018,0015) Body Part Examined
-    laterality      TEXT,                  -- (0020,0060) Laterality
-    series_date     TEXT,                  -- (0008,0021) Series Date
-    series_time     TEXT,                  -- (0008,0031) Series Time
-    protocol_name   TEXT,                  -- (0018,1030) Protocol Name
-    station_name    TEXT,                  -- (0008,1010) Station Name
-    institution     TEXT,                  -- (0008,0080) Institution Name
+    series_number       INTEGER,               -- (0020,0011) Series Number
+    modality            TEXT,                  -- (0008,0060) Modality
+    series_description  TEXT,                  -- (0008,103E) Series Description
+    body_part_examined  TEXT,                  -- (0018,0015) Body Part Examined
+    station_name        TEXT,                  -- (0008,1010) Station Name
 
     -- Aggregated Info
     num_instances   INTEGER DEFAULT 0,
@@ -282,8 +282,6 @@ CREATE TABLE series (
 -- Indexes
 CREATE INDEX idx_series_study ON series(study_pk);
 CREATE INDEX idx_series_modality ON series(modality);
-CREATE INDEX idx_series_number ON series(series_number);
-CREATE INDEX idx_series_date ON series(series_date);
 ```
 
 ---
@@ -474,7 +472,7 @@ VALUES (1, 'Initial schema creation');
 |--------------|--------|----------------|
 | Patient lookup by ID | patients | UNIQUE on patient_id |
 | Patient search by name | patients | B-tree on patient_name |
-| Study by accession | studies | B-tree on accession_no |
+| Study by accession | studies | B-tree on accession_number |
 | Study by date range | studies | B-tree on study_date |
 | Study by modality | studies | B-tree on modalities_in_study |
 | Series by modality | series | B-tree on modality |
@@ -542,9 +540,9 @@ SELECT
     s.study_uid,
     s.study_date,
     s.study_time,
-    s.accession_no,
-    s.study_desc,
-    s.referring_phys,
+    s.accession_number,
+    s.study_description,
+    s.referring_physician,
     s.modalities_in_study,
     s.num_series,
     s.num_instances
@@ -555,7 +553,7 @@ WHERE
     AND (? IS NULL OR p.patient_id = ?)
     AND (? IS NULL OR s.study_date >= ?)   -- Date range start
     AND (? IS NULL OR s.study_date <= ?)   -- Date range end
-    AND (? IS NULL OR s.accession_no = ?)
+    AND (? IS NULL OR s.accession_number = ?)
     AND (? IS NULL OR s.modalities_in_study LIKE ?)
 ORDER BY s.study_date DESC, s.study_time DESC
 LIMIT ?;
@@ -572,8 +570,8 @@ SELECT
     sr.series_uid,
     sr.modality,
     sr.series_number,
-    sr.series_desc,
-    sr.body_part,
+    sr.series_description,
+    sr.body_part_examined,
     sr.num_instances
 FROM series sr
 JOIN studies s ON sr.study_pk = s.study_pk
@@ -661,24 +659,26 @@ ORDER BY w.scheduled_datetime;
 ### 6.1 Migration Scripts
 
 ```sql
--- Migration v1 → v2: Add file_hash column
-BEGIN TRANSACTION;
-
-ALTER TABLE instances ADD COLUMN file_hash TEXT;
-
-UPDATE schema_version SET version = 2
-WHERE version = (SELECT MAX(version) FROM schema_version);
-
-INSERT INTO schema_version (version, description)
-VALUES (2, 'Add file_hash column to instances');
-
-COMMIT;
+-- Migration V2: Add audit_log table for REST API and HIPAA compliance
+CREATE TABLE IF NOT EXISTS audit_log (
+    audit_pk        INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type      TEXT NOT NULL,
+    outcome         TEXT DEFAULT 'SUCCESS',
+    timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+    user_id         TEXT,
+    source_ae       TEXT,
+    target_ae       TEXT,
+    source_ip       TEXT,
+    patient_id      TEXT,
+    study_uid       TEXT,
+    message         TEXT,
+    details         TEXT,
+    CHECK (outcome IN ('SUCCESS', 'FAILURE', 'WARNING'))
+);
 ```
 
 ```sql
--- Migration v2 → v3: Add remote_nodes table for PACS client SCU operations
-BEGIN TRANSACTION;
-
+-- Migration V3: Add remote_nodes table for PACS client SCU operations
 CREATE TABLE IF NOT EXISTS remote_nodes (
     pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
     node_id                 TEXT NOT NULL UNIQUE,
@@ -703,15 +703,177 @@ CREATE TABLE IF NOT EXISTS remote_nodes (
     CHECK (port > 0 AND port <= 65535),
     CHECK (status IN ('unknown', 'online', 'offline', 'error', 'verifying'))
 );
+```
 
-CREATE INDEX IF NOT EXISTS idx_remote_nodes_ae_title ON remote_nodes(ae_title);
-CREATE INDEX IF NOT EXISTS idx_remote_nodes_host ON remote_nodes(host);
-CREATE INDEX IF NOT EXISTS idx_remote_nodes_status ON remote_nodes(status);
+```sql
+-- Migration V4: Add jobs table for async DICOM operations (Job Manager)
+CREATE TABLE IF NOT EXISTS jobs (
+    pk                          INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id                      TEXT NOT NULL UNIQUE,
+    type                        TEXT NOT NULL,
+    status                      TEXT NOT NULL DEFAULT 'pending',
+    priority                    INTEGER NOT NULL DEFAULT 1,
+    source_node_id              TEXT,
+    destination_node_id         TEXT,
+    patient_id                  TEXT,
+    study_uid                   TEXT,
+    series_uid                  TEXT,
+    sop_instance_uid            TEXT,
+    instance_uids_json          TEXT DEFAULT '[]',
+    total_items                 INTEGER DEFAULT 0,
+    completed_items             INTEGER DEFAULT 0,
+    failed_items                INTEGER DEFAULT 0,
+    skipped_items               INTEGER DEFAULT 0,
+    bytes_transferred           INTEGER DEFAULT 0,
+    current_item                TEXT,
+    current_item_description    TEXT,
+    error_message               TEXT,
+    error_details               TEXT,
+    retry_count                 INTEGER DEFAULT 0,
+    max_retries                 INTEGER DEFAULT 3,
+    created_by                  TEXT,
+    metadata_json               TEXT DEFAULT '{}',
+    created_at                  TEXT NOT NULL DEFAULT (datetime('now')),
+    queued_at                   TEXT,
+    started_at                  TEXT,
+    completed_at                TEXT,
+    CHECK (type IN ('query', 'retrieve', 'store', 'export', 'import', 'prefetch', 'sync')),
+    CHECK (status IN ('pending', 'queued', 'running', 'completed', 'failed', 'cancelled', 'paused')),
+    CHECK (priority >= 0 AND priority <= 3)
+);
+```
 
-INSERT INTO schema_version (version, description)
-VALUES (3, 'Add remote_nodes table for PACS client');
+```sql
+-- Migration V5: Add routing_rules table for auto-forwarding (Routing Manager)
+CREATE TABLE IF NOT EXISTS routing_rules (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    rule_id             TEXT NOT NULL UNIQUE,
+    name                TEXT NOT NULL,
+    description         TEXT,
+    enabled             INTEGER NOT NULL DEFAULT 1,
+    priority            INTEGER NOT NULL DEFAULT 0,
+    conditions_json     TEXT NOT NULL DEFAULT '[]',
+    actions_json        TEXT NOT NULL DEFAULT '[]',
+    schedule_cron       TEXT,
+    effective_from      TEXT,
+    effective_until     TEXT,
+    triggered_count     INTEGER DEFAULT 0,
+    success_count       INTEGER DEFAULT 0,
+    failure_count       INTEGER DEFAULT 0,
+    last_triggered      TEXT,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+```
 
-COMMIT;
+```sql
+-- Migration V6: Add sync tables for bidirectional synchronization
+CREATE TABLE IF NOT EXISTS sync_configs (
+    pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    config_id               TEXT NOT NULL UNIQUE,
+    source_node_id          TEXT NOT NULL,
+    name                    TEXT NOT NULL,
+    enabled                 INTEGER NOT NULL DEFAULT 1,
+    lookback_hours          INTEGER NOT NULL DEFAULT 24,
+    modalities_json         TEXT DEFAULT '[]',
+    sync_direction          TEXT NOT NULL DEFAULT 'pull',
+    last_sync               TEXT,
+    total_syncs             INTEGER DEFAULT 0,
+    studies_synced          INTEGER DEFAULT 0,
+    created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+    CHECK (sync_direction IN ('pull', 'push', 'bidirectional'))
+);
+
+CREATE TABLE IF NOT EXISTS sync_conflicts (
+    pk                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    config_id               TEXT NOT NULL,
+    study_uid               TEXT NOT NULL,
+    patient_id              TEXT,
+    conflict_type           TEXT NOT NULL,
+    resolved                INTEGER NOT NULL DEFAULT 0,
+    resolution              TEXT,
+    detected_at             TEXT NOT NULL DEFAULT (datetime('now')),
+    resolved_at             TEXT,
+    UNIQUE (config_id, study_uid),
+    CHECK (conflict_type IN ('missing_local', 'missing_remote', 'modified', 'count_mismatch'))
+);
+
+CREATE TABLE IF NOT EXISTS sync_history (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    config_id           TEXT NOT NULL,
+    job_id              TEXT NOT NULL,
+    success             INTEGER NOT NULL DEFAULT 0,
+    studies_checked     INTEGER DEFAULT 0,
+    studies_synced      INTEGER DEFAULT 0,
+    conflicts_found     INTEGER DEFAULT 0,
+    errors_json         TEXT DEFAULT '[]',
+    started_at          TEXT NOT NULL,
+    completed_at        TEXT NOT NULL
+);
+```
+
+```sql
+-- Migration V7: Add annotation, measurement, and viewer tables
+CREATE TABLE IF NOT EXISTS annotations (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    annotation_id       TEXT NOT NULL UNIQUE,
+    study_uid           TEXT NOT NULL,
+    series_uid          TEXT,
+    sop_instance_uid    TEXT,
+    frame_number        INTEGER,
+    user_id             TEXT NOT NULL,
+    annotation_type     TEXT NOT NULL,
+    geometry_json       TEXT NOT NULL,
+    text                TEXT,
+    style_json          TEXT,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS measurements (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    measurement_id      TEXT NOT NULL UNIQUE,
+    sop_instance_uid    TEXT NOT NULL,
+    frame_number        INTEGER,
+    user_id             TEXT NOT NULL,
+    measurement_type    TEXT NOT NULL,
+    geometry_json       TEXT NOT NULL,
+    value               REAL NOT NULL,
+    unit                TEXT NOT NULL,
+    label               TEXT,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS key_images (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    key_image_id        TEXT NOT NULL UNIQUE,
+    study_uid           TEXT NOT NULL,
+    sop_instance_uid    TEXT NOT NULL,
+    frame_number        INTEGER,
+    user_id             TEXT NOT NULL,
+    reason              TEXT,
+    document_title      TEXT,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS viewer_states (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    state_id            TEXT NOT NULL UNIQUE,
+    study_uid           TEXT NOT NULL,
+    user_id             TEXT NOT NULL,
+    state_json          TEXT NOT NULL,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS recent_studies (
+    pk                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id             TEXT NOT NULL,
+    study_uid           TEXT NOT NULL,
+    accessed_at         TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, study_uid)
+);
 ```
 
 ### 6.2 Migration Strategy
@@ -735,12 +897,24 @@ public:
     }
 
 private:
-    static constexpr int LATEST_VERSION = 3;
+    static constexpr int LATEST_VERSION = 7;
 
     int get_current_version(sqlite3* db);
     common::Result<void> apply_migration(sqlite3* db, int version);
 };
 ```
+
+**Migration History:**
+
+| Version | Description | Tables Added/Modified |
+|---------|-------------|----------------------|
+| V1 | Initial schema | patients, studies, series, instances, mpps, worklist, schema_version |
+| V2 | Audit logging | audit_log |
+| V3 | Remote node management | remote_nodes |
+| V4 | Async job queue | jobs |
+| V5 | Auto-forwarding rules | routing_rules |
+| V6 | Bidirectional sync | sync_configs, sync_conflicts, sync_history |
+| V7 | Viewer features | annotations, measurements, key_images, viewer_states, recent_studies |
 
 ---
 
@@ -815,6 +989,7 @@ PRAGMA integrity_check;
 
 ---
 
-*Document Version: 0.1.0.0*
+*Document Version: 0.2.0.0*
 *Created: 2025-11-30*
+*Updated: 2026-02-08*
 *Author: kcenon@naver.com*

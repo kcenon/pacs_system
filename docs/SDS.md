@@ -583,6 +583,8 @@ The PACS System follows a layered architecture:
 | DD-004 | Result<T> for error handling | Ecosystem consistency | Exceptions (performance overhead) |
 | DD-005 | Async I/O via ASIO | Proven scalability | select/poll (less portable) |
 | DD-006 | Thread pool for DIMSE | Decouple I/O from processing | Per-association threads (resource heavy) |
+| DD-007 | Combined `uint32_t` for DicomTag | Single comparison, optimal hashing | Two `uint16_t` fields (extra comparison) |
+| DD-008 | Raw buffer (`vector<uint8_t>`) for DicomElement | Direct wire-format, zero-copy encoding | `std::variant` (type conversion overhead) |
 
 ### 6.2 Technology Choices
 

@@ -1,8 +1,8 @@
 # SDS - Component Design Specifications
 
-> **Version:** 0.1.2.0
+> **Version:** 0.2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
-> **Last Updated:** 2025-12-07
+> **Last Updated:** 2026-02-08
 
 ---
 
@@ -34,12 +34,6 @@ namespace pacs::core {
 class dicom_tag {
 public:
     // ─────────────────────────────────────────────────────
-    // Constants
-    // ─────────────────────────────────────────────────────
-    static constexpr uint16_t PRIVATE_GROUP_START = 0x0009;
-    static constexpr uint16_t PRIVATE_GROUP_END = 0xFFFF;
-
-    // ─────────────────────────────────────────────────────
     // Constructors
     // ─────────────────────────────────────────────────────
     constexpr dicom_tag() noexcept;
@@ -47,18 +41,24 @@ public:
     constexpr explicit dicom_tag(uint32_t combined) noexcept;
 
     // ─────────────────────────────────────────────────────
+    // Static Factory
+    // ─────────────────────────────────────────────────────
+    [[nodiscard]] static std::optional<dicom_tag>
+        from_string(std::string_view str);  // "(GGGG,EEEE)" or "GGGGEEEE"
+
+    // ─────────────────────────────────────────────────────
     // Accessors
     // ─────────────────────────────────────────────────────
     [[nodiscard]] constexpr uint16_t group() const noexcept;
     [[nodiscard]] constexpr uint16_t element() const noexcept;
-    [[nodiscard]] constexpr uint32_t value() const noexcept;
+    [[nodiscard]] constexpr uint32_t combined() const noexcept;
 
     // ─────────────────────────────────────────────────────
     // Classification
     // ─────────────────────────────────────────────────────
     [[nodiscard]] constexpr bool is_private() const noexcept;
     [[nodiscard]] constexpr bool is_group_length() const noexcept;
-    [[nodiscard]] constexpr bool is_meta_info() const noexcept;
+    [[nodiscard]] constexpr bool is_private_creator() const noexcept;
 
     // ─────────────────────────────────────────────────────
     // Comparison (for std::map ordering)
@@ -71,8 +71,7 @@ public:
     [[nodiscard]] std::string to_string() const;  // "(GGGG,EEEE)"
 
 private:
-    uint16_t group_{0};
-    uint16_t element_{0};
+    uint32_t combined_;  // (group << 16) | element
 };
 
 } // namespace pacs::core
@@ -84,18 +83,25 @@ private:
 |----------|-----------|
 | `constexpr` construction | Compile-time tag constants |
 | `operator<=>` | C++20 three-way comparison for ordering |
-| Separate group/element | Direct mapping to DICOM binary format |
+| Combined `uint32_t` storage | Single comparison per tag, optimal hashing |
+| `from_string()` factory | Parses `"(GGGG,EEEE)"` or `"GGGGEEEE"` formats |
 
 **Memory Layout:**
 
 ```
 ┌──────────────────────────────────────┐
 │           dicom_tag (4 bytes)        │
-├──────────────────┬───────────────────┤
-│  group_ (2 bytes)│ element_ (2 bytes)│
-│    0x0010        │      0x0010       │
-│   (Patient)      │   (PatientName)   │
-└──────────────────┴───────────────────┘
+├──────────────────────────────────────┤
+│  combined_ : uint32_t               │
+│  = (group << 16) | element          │
+│                                      │
+│  Example: PatientName (0010,0010)    │
+│  combined_ = 0x00100010              │
+│    ┌──────────┬──────────┐           │
+│    │ group()  │element() │           │
+│    │  0x0010  │  0x0010  │           │
+│    └──────────┴──────────┘           │
+└──────────────────────────────────────┘
 ```
 
 ---
@@ -114,103 +120,113 @@ namespace pacs::core {
 class dicom_element {
 public:
     // ─────────────────────────────────────────────────────
+    // Constructors
+    // ─────────────────────────────────────────────────────
+    dicom_element(dicom_tag tag, encoding::vr_type vr) noexcept;
+    dicom_element(dicom_tag tag, encoding::vr_type vr,
+                  std::span<const uint8_t> data);
+
+    // ─────────────────────────────────────────────────────
     // Factory Methods
     // ─────────────────────────────────────────────────────
-    static dicom_element create(dicom_tag tag, vr_type vr);
-    static dicom_element create(dicom_tag tag, vr_type vr,
-                                 std::string_view value);
-    static dicom_element create(dicom_tag tag, vr_type vr,
-                                 std::span<const uint8_t> bytes);
+    [[nodiscard]] static dicom_element from_string(
+        dicom_tag tag, encoding::vr_type vr, std::string_view value);
 
-    template<std::integral T>
-    static dicom_element create_numeric(dicom_tag tag, vr_type vr, T value);
+    template<typename T> requires std::is_arithmetic_v<T>
+    [[nodiscard]] static dicom_element from_numeric(
+        dicom_tag tag, encoding::vr_type vr, T value);
 
-    template<std::floating_point T>
-    static dicom_element create_numeric(dicom_tag tag, vr_type vr, T value);
-
-    static dicom_element create_sequence(dicom_tag tag);
+    template<typename T> requires std::is_arithmetic_v<T>
+    [[nodiscard]] static dicom_element from_numeric_list(
+        dicom_tag tag, encoding::vr_type vr, std::span<const T> values);
 
     // ─────────────────────────────────────────────────────
     // Accessors (const)
     // ─────────────────────────────────────────────────────
     [[nodiscard]] dicom_tag tag() const noexcept;
-    [[nodiscard]] vr_type vr() const noexcept;
-    [[nodiscard]] uint32_t length() const noexcept;
+    [[nodiscard]] encoding::vr_type vr() const noexcept;
+    [[nodiscard]] uint32_t length() const noexcept;  // data_.size()
+    [[nodiscard]] std::span<const uint8_t> raw_data() const noexcept;
     [[nodiscard]] bool is_empty() const noexcept;
 
     // ─────────────────────────────────────────────────────
-    // Value Access
+    // Value Access (Result<T> pattern)
     // ─────────────────────────────────────────────────────
-    [[nodiscard]] std::string as_string() const;
-    [[nodiscard]] std::vector<std::string> as_strings() const;
+    [[nodiscard]] pacs::Result<std::string> as_string() const;
+    [[nodiscard]] pacs::Result<std::vector<std::string>> as_string_list() const;
 
-    template<typename T>
-    [[nodiscard]] T as_numeric() const;
+    template<typename T> requires std::is_arithmetic_v<T>
+    [[nodiscard]] pacs::Result<T> as_numeric() const;
 
-    [[nodiscard]] std::span<const uint8_t> as_bytes() const;
+    template<typename T> requires std::is_arithmetic_v<T>
+    [[nodiscard]] pacs::Result<std::vector<T>> as_numeric_list() const;
 
     // ─────────────────────────────────────────────────────
     // Sequence Access
     // ─────────────────────────────────────────────────────
     [[nodiscard]] bool is_sequence() const noexcept;
-    [[nodiscard]] std::vector<dicom_dataset>& items();
-    [[nodiscard]] const std::vector<dicom_dataset>& items() const;
+    [[nodiscard]] std::size_t sequence_item_count() const noexcept;
+    [[nodiscard]] const dicom_dataset& sequence_item(std::size_t index) const;
+    [[nodiscard]] dicom_dataset& sequence_item(std::size_t index);
+    [[nodiscard]] std::vector<dicom_dataset>& sequence_items();
+    [[nodiscard]] const std::vector<dicom_dataset>& sequence_items() const;
+    void add_sequence_item(dicom_dataset item);
 
     // ─────────────────────────────────────────────────────
     // Value Modification
     // ─────────────────────────────────────────────────────
+    void set_value(std::span<const uint8_t> data);
     void set_string(std::string_view value);
-    void set_bytes(std::span<const uint8_t> bytes);
 
-    template<typename T>
+    template<typename T> requires std::is_arithmetic_v<T>
     void set_numeric(T value);
-
-    void add_item(dicom_dataset item);
-
-    // ─────────────────────────────────────────────────────
-    // Serialization
-    // ─────────────────────────────────────────────────────
-    [[nodiscard]] std::vector<uint8_t> serialize(
-        const transfer_syntax& ts) const;
-
-    static common::Result<dicom_element> deserialize(
-        std::span<const uint8_t> data,
-        const transfer_syntax& ts,
-        const dicom_dictionary& dict);
 
 private:
     dicom_tag tag_;
-    vr_type vr_;
-    std::variant<
-        std::string,                    // String VRs (AE, CS, LO, etc.)
-        std::vector<uint8_t>,           // Binary VRs (OB, OW, UN, etc.)
-        std::vector<dicom_dataset>      // Sequence VR (SQ)
-    > value_;
+    encoding::vr_type vr_;
+    std::vector<uint8_t> data_;              // Raw byte storage for all VRs
+    std::vector<dicom_dataset> sequence_items_;  // Used only when VR == SQ
 };
 
 } // namespace pacs::core
 ```
 
-**Value Storage Strategy:**
+**Value Storage Strategy (Raw Buffer Pattern):**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     dicom_element Value Storage                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  std::variant<                                                   │
-│      std::string,          ◄── String VRs: AE, AS, CS, DA, DS,  │
-│                                DT, IS, LO, LT, PN, SH, ST, TM,  │
-│                                UI, UT                            │
+│  data_: std::vector<uint8_t>  ◄── Unified raw byte storage      │
+│                                    for ALL non-sequence VRs:     │
 │                                                                  │
-│      std::vector<uint8_t>, ◄── Binary VRs: AT, FL, FD, OB, OD,  │
-│                                OF, OL, OW, SL, SS, UL, US, UN   │
+│    String VRs:  AE, AS, CS, DA, DS, DT, IS, LO, LT, PN, SH,   │
+│                 ST, TM, UI, UT → UTF-8 encoded bytes            │
 │                                                                  │
-│      std::vector<dicom_dataset>  ◄── Sequence VR: SQ            │
-│  >                                                               │
+│    Numeric VRs: SS, US, SL, UL, FL, FD, AT                      │
+│                 → Little-endian binary representation             │
+│                                                                  │
+│    Binary VRs:  OB, OD, OF, OL, OW, UN                          │
+│                 → Raw byte data (pass-through)                   │
+│                                                                  │
+│  sequence_items_: std::vector<dicom_dataset>                     │
+│                 ◄── Separate storage for SQ VR only              │
+│                                                                  │
+│  Note: Type-safe access via as_string(), as_numeric<T>(), etc.   │
+│        All value accessors return pacs::Result<T> for safety.    │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+**Design Rationale (Raw Buffer vs std::variant):**
+
+| Aspect | Raw Buffer (current) | std::variant (alternative) |
+|--------|---------------------|---------------------------|
+| Memory | Single allocation | Per-variant overhead |
+| Encoding/Decoding | Direct memcpy from/to wire format | Type conversion needed |
+| API safety | `Result<T>` prevents misuse | Variant visit or get_if |
+| Sequence handling | Separate vector (clear ownership) | Inside variant (complex) |
 
 **Serialization Format (Explicit VR Little Endian):**
 
@@ -1846,10 +1862,11 @@ std::thread worker_thread           thread_adapter pool
 | 1.0.0 | 2025-11-30 | kcenon | Initial release |
 | 1.1.0 | 2025-12-04 | kcenon | Updated component designs |
 | 1.2.0 | 2025-12-07 | kcenon | Added: DES-NET-006/007 (Network V2), DES-INT-003a (accept_worker); Thread migration architecture |
+| 2.0.0 | 2026-02-08 | kcenon | Fixed DicomTag: combined uint32_t storage, added from_string/is_private_creator; Fixed DicomElement: raw buffer pattern, Result<T> return types, correct factory/accessor names |
 
 ---
 
-*Document Version: 0.1.2.0*
+*Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-07*
+*Updated: 2026-02-08*
 *Author: kcenon@naver.com*
