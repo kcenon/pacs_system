@@ -162,7 +162,7 @@ PACS 시스템 (Picture Archiving and Communication System)
 #### FR-2.2: 연결 관리
 | ID | 요구사항 | 우선순위 | 단계 |
 |----|----------|----------|------|
-| FR-2.2.1 | 연결 상태 머신 관리 (8개 상태) | 필수 | 2 |
+| FR-2.2.1 | 연결 상태 머신 관리 (PS3.8 Sta1-Sta13 기준 13개 상태) | 필수 | 2 |
 | FR-2.2.2 | 프레젠테이션 컨텍스트 협상 | 필수 | 2 |
 | FR-2.2.3 | 다중 동시 연결 지원 | 필수 | 2 |
 | FR-2.2.4 | 연결 타임아웃 처리 구현 | 필수 | 2 |
@@ -954,53 +954,73 @@ PACS 시스템 (Picture Archiving and Communication System)
 | SS | Signed Short | int16 | 2 |
 | ST | Short Text | string | 최대 1024 |
 | TM | Time | string | 최대 14 |
+| UC | Unlimited Characters | string | 무제한 |
 | UI | Unique Identifier | string | 최대 64 |
 | UL | Unsigned Long | uint32 | 4 |
 | UN | Unknown | bytes | 가변 |
+| UR | Universal Resource Identifier | string | 무제한 |
 | US | Unsigned Short | uint16 | 2 |
 | UT | Unlimited Text | string | 무제한 |
+| OV | Other 64-bit Very Long | bytes | 가변 |
+| SV | Signed 64-bit Very Long | int64 | 8 |
+| UV | Unsigned 64-bit Very Long | uint64 | 8 |
 
 ### 부록 B: 오류 코드 레지스트리
 
 ```
-pacs_system 오류 코드: -800 ~ -899
+pacs_system 오류 코드: -700 ~ -899
 
-DICOM 파싱 오류 (-800 ~ -819):
-  -800: INVALID_DICOM_FILE
-  -801: INVALID_VR
-  -802: MISSING_REQUIRED_TAG
-  -803: INVALID_TRANSFER_SYNTAX
-  -804: INVALID_DATA_ELEMENT
-  -805: SEQUENCE_ENCODING_ERROR
+DICOM 파일 오류 (-700 ~ -719):
+  -700: INVALID_DICOM_FILE
+  -701: MISSING_DICM_PREFIX
+  -702: INVALID_META_INFO
+  -703: FILE_READ_ERROR
+  -704: FILE_WRITE_ERROR
 
-연결 오류 (-820 ~ -839):
-  -820: ASSOCIATION_REJECTED
-  -821: ASSOCIATION_ABORTED
-  -822: NO_PRESENTATION_CONTEXT
-  -823: INVALID_PDU
-  -824: PDU_TOO_LARGE
-  -825: ASSOCIATION_TIMEOUT
+DICOM 요소 오류 (-720 ~ -739):
+  -720: INVALID_DATA_ELEMENT
+  -721: ELEMENT_NOT_FOUND
+  -722: INVALID_VALUE_CONVERSION
+  -723: MISSING_REQUIRED_TAG
 
-DIMSE 오류 (-840 ~ -859):
-  -840: DIMSE_FAILURE
-  -841: DIMSE_TIMEOUT
-  -842: DIMSE_INVALID_RESPONSE
-  -843: DIMSE_CANCELLED
-  -844: DIMSE_STATUS_ERROR
+인코딩 오류 (-740 ~ -759):
+  -740: INVALID_VR
+  -741: INVALID_TRANSFER_SYNTAX
+  -742: SEQUENCE_ENCODING_ERROR
+  -743: COMPRESSION_ERROR
+  -744: DECOMPRESSION_ERROR
 
-저장 오류 (-860 ~ -879):
-  -860: STORAGE_FAILED
-  -861: DUPLICATE_SOP_INSTANCE
-  -862: INVALID_SOP_CLASS
-  -863: STORAGE_FULL
-  -864: FILE_WRITE_ERROR
+네트워크 오류 (-760 ~ -779):
+  -760: ASSOCIATION_REJECTED
+  -761: ASSOCIATION_ABORTED
+  -762: NO_PRESENTATION_CONTEXT
+  -763: INVALID_PDU
+  -764: PDU_TOO_LARGE
+  -765: ASSOCIATION_TIMEOUT
+  -766: DIMSE_FAILURE
+  -767: DIMSE_TIMEOUT
+  -768: DIMSE_INVALID_RESPONSE
+  -769: DIMSE_CANCELLED
 
-조회 오류 (-880 ~ -899):
-  -880: QUERY_FAILED
-  -881: NO_MATCHES_FOUND
-  -882: TOO_MANY_MATCHES
-  -883: INVALID_QUERY_LEVEL
-  -884: DATABASE_ERROR
+저장 오류 (-780 ~ -799):
+  -780: STORAGE_FAILED
+  -781: DUPLICATE_SOP_INSTANCE
+  -782: INVALID_SOP_CLASS
+  -783: STORAGE_FULL
+  -784: QUERY_FAILED
+  -785: NO_MATCHES_FOUND
+  -786: TOO_MANY_MATCHES
+  -787: INVALID_QUERY_LEVEL
+  -788: DATABASE_ERROR
+
+서비스 오류 (-800 ~ -899):
+  -800: C-STORE 서비스 오류 (-800 ~ -819)
+  -820: C-FIND 서비스 오류 (-820 ~ -839)
+  -840: C-MOVE/C-GET 서비스 오류 (-840 ~ -859)
+  -860: Verification 서비스 오류 (-860 ~ -869)
+  -870: MPPS 서비스 오류 (-870 ~ -879)
+  -880: Worklist 서비스 오류 (-880 ~ -889)
+  -890: 일반 서비스 오류 (-890 ~ -899)
 ```
 
 ### 부록 C: 참고 자료
