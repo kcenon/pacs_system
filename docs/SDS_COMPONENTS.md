@@ -34,12 +34,6 @@ namespace pacs::core {
 class dicom_tag {
 public:
     // ─────────────────────────────────────────────────────
-    // Constants
-    // ─────────────────────────────────────────────────────
-    static constexpr uint16_t PRIVATE_GROUP_START = 0x0009;
-    static constexpr uint16_t PRIVATE_GROUP_END = 0xFFFF;
-
-    // ─────────────────────────────────────────────────────
     // Constructors
     // ─────────────────────────────────────────────────────
     constexpr dicom_tag() noexcept;
