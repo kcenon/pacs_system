@@ -1,7 +1,7 @@
 # PACS System Validation Report
 
-> **Report Version:** 0.1.2.0
-> **Report Date:** 2025-12-07
+> **Report Version:** 0.1.3.0
+> **Report Date:** 2026-02-08
 > **Language:** **English** | [한국어](VALIDATION_REPORT_KO.md)
 > **Status:** Complete
 > **Related Document:** [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) (SDS 설계대로 구현 확인)
@@ -21,19 +21,24 @@ This **Validation Report** confirms that the PACS (Picture Archiving and Communi
 
 ### Overall Validation Status: **PASSED**
 
-| Category | Requirements | Validated | Status |
-|----------|--------------|-----------|--------|
-| **Core Module** | 8 | 8 | ✅ 100% |
-| **Network Protocol** | 5 | 5 | ✅ 100% |
-| **DICOM Services** | 10 | 10 | ✅ 100% |
-| **Storage Backend** | 2 | 2 | ✅ 100% |
-| **Integration** | 6 | 6 | ✅ 100% |
-| **Performance** | 6 | 6 | ✅ 100% |
-| **Reliability** | 5 | 5 | ✅ 100% |
-| **Security** | 5 | 5 | ✅ 100% |
-| **Maintainability** | 5 | 5 | ✅ 100% |
-| **Thread Migration** | 7 | 7 | ✅ 100% |
-| **Total** | **59** | **59** | **✅ 100%** |
+| Category | Requirements | Validated | Planned | Status |
+|----------|--------------|-----------|---------|--------|
+| **Core Module** | 8 | 8 | 0 | ✅ 100% |
+| **Network Protocol** | 5 | 5 | 0 | ✅ 100% |
+| **DICOM Services** | 10 | 10 | 0 | ✅ 100% |
+| **Storage Backend** | 2 | 2 | 0 | ✅ 100% |
+| **Integration** | 10 | 7 | 3 | ⏳ 70% |
+| **Security (FR)** | 4 | 0 | 4 | 🔜 Planned |
+| **Web/REST API** | 4 | 4 | 0 | ✅ 100% |
+| **Workflow** | 2 | 0 | 2 | 🔜 Planned |
+| **Cloud Storage** | 3 | 0 | 3 | 🔜 Planned |
+| **AI Services** | 1 | 0 | 1 | 🔜 Planned |
+| **Performance** | 6 | 6 | 0 | ✅ 100% |
+| **Reliability** | 5 | 5 | 0 | ✅ 100% |
+| **Scalability** | 4 | 0 | 4 | 🔜 Planned |
+| **Security (NFR)** | 5 | 5 | 0 | ✅ 100% |
+| **Maintainability** | 5 | 5 | 0 | ✅ 100% |
+| **Total** | **74** | **57** | **17** | **77%** |
 
 ### Recent Validation Updates (2025-12-07)
 
@@ -728,6 +733,82 @@ C-STORE Response: 0x0000 (Success)
 
 ---
 
+#### SRS-SVC-008: DIMSE-N Services (N-GET/N-ACTION/N-EVENT-REPORT/N-DELETE)
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Support all DIMSE-N message services for normalized operations |
+| **Priority** | Could Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-SVC-008 |
+
+**DIMSE-N Command Coverage:**
+
+| Command | Type | Encode | Decode | Status |
+|---------|------|--------|--------|--------|
+| N-GET-RQ | 0x0110 | ✅ | ✅ | ✅ VALIDATED |
+| N-GET-RSP | 0x8110 | ✅ | ✅ | ✅ VALIDATED |
+| N-ACTION-RQ | 0x0130 | ✅ | ✅ | ✅ VALIDATED |
+| N-ACTION-RSP | 0x8130 | ✅ | ✅ | ✅ VALIDATED |
+| N-EVENT-REPORT-RQ | 0x0100 | ✅ | ✅ | ✅ VALIDATED |
+| N-EVENT-REPORT-RSP | 0x8100 | ✅ | ✅ | ✅ VALIDATED |
+| N-DELETE-RQ | 0x0150 | ✅ | ✅ | ✅ VALIDATED |
+| N-DELETE-RSP | 0x8150 | ✅ | ✅ | ✅ VALIDATED |
+
+**Related Issue:** #127
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+#### SRS-SVC-009: Ultrasound Image Storage
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Support Ultrasound single-frame and multi-frame image storage |
+| **Priority** | Should Have |
+| **Validation Method** | Acceptance Test |
+| **Test ID** | VAL-SVC-009 |
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Status |
+|-----------|-----|--------|
+| Ultrasound Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ VALIDATED |
+| Ultrasound Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | ✅ VALIDATED |
+| Ultrasound Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.6 | ✅ VALIDATED |
+| Ultrasound Multi-frame Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.3 | ✅ VALIDATED |
+
+**Related Issue:** #128
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+#### SRS-SVC-010: XA Image Storage (X-Ray Angiographic)
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Support X-Ray Angiographic image storage including enhanced variants |
+| **Priority** | Should Have |
+| **Validation Method** | Acceptance Test |
+| **Test ID** | VAL-SVC-010 |
+
+**Supported SOP Classes:**
+
+| SOP Class | UID | Status |
+|-----------|-----|--------|
+| X-Ray Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | ✅ VALIDATED |
+| Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | ✅ VALIDATED |
+| X-Ray Radiofluoroscopic Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ VALIDATED |
+| Enhanced XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2.1 | ✅ VALIDATED |
+
+**Related Issue:** #129
+
+**Status:** ✅ **VALIDATED**
+
+---
+
 ### 2.4 Storage Backend Module (SRS-STOR)
 
 #### SRS-STOR-001: File System Storage
@@ -933,6 +1014,301 @@ storage_root/
 
 ---
 
+#### SRS-INT-007: ITK/VTK Integration
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Integrate with ITK/VTK for advanced image processing |
+| **Priority** | Could Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-INT-007 |
+
+**Status:** 🔜 **PLANNED** (Phase 5)
+
+---
+
+#### SRS-INT-008: Crow REST Framework Integration
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Use Crow framework for REST API implementation |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-INT-008 |
+
+**Acceptance Criteria:**
+
+| # | Criterion | Result | Evidence |
+|---|-----------|--------|----------|
+| 1 | HTTP/1.1 server support | ✅ PASS | Crow HTTP server |
+| 2 | CORS middleware | ✅ PASS | CORS headers configured |
+| 3 | Route registration for all endpoints | ✅ PASS | REST route mappings |
+| 4 | JSON request/response handling | ✅ PASS | JSON serialization |
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+#### SRS-INT-009: AWS SDK Integration
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Integrate with AWS SDK for S3 storage backend |
+| **Priority** | Should Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-INT-009 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+#### SRS-INT-010: Azure SDK Integration
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Integrate with Azure SDK for Blob Storage backend |
+| **Priority** | Should Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-INT-010 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+### 2.7 Security Feature Module (SRS-SEC-FR)
+
+#### SRS-SEC-010: DICOM Anonymization Service
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | De-identification per PS3.15 Annex E profiles |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-SEC-010 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+#### SRS-SEC-011: Digital Signature Support
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Digital signature creation/verification per PS3.15 Section C |
+| **Priority** | Could Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-SEC-011 |
+
+**Status:** 🔜 **PLANNED** (Phase 5)
+
+---
+
+#### SRS-SEC-012: RBAC Access Control
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Role-based access control for DICOM operations |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-SEC-012 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+#### SRS-SEC-013: X.509 Certificate Management
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | X.509 certificate handling for TLS and signatures |
+| **Priority** | Could Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-SEC-013 |
+
+**Status:** 🔜 **PLANNED** (Phase 5)
+
+---
+
+### 2.8 Web/REST API Module (SRS-WEB)
+
+#### SRS-WEB-001: REST API Management Interface
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | REST API server for management and monitoring |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-WEB-001 |
+
+**Acceptance Criteria:**
+
+| # | Criterion | Result | Evidence |
+|---|-----------|--------|----------|
+| 1 | HTTP/1.1 server with configurable port | ✅ PASS | Crow server integration |
+| 2 | JSON request/response format | ✅ PASS | JSON serialization |
+| 3 | CORS support for browser clients | ✅ PASS | CORS middleware |
+| 4 | Authentication middleware | ✅ PASS | Auth handler |
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+#### SRS-WEB-002: DICOMweb WADO-RS
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | WADO-RS for retrieving DICOM objects via HTTP per PS3.18 |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-WEB-002 |
+
+**Acceptance Criteria:**
+
+| # | Criterion | Result | Evidence |
+|---|-----------|--------|----------|
+| 1 | Retrieve Study/Series/Instance endpoints | ✅ PASS | Route handlers |
+| 2 | Multipart/related response format | ✅ PASS | DICOM multipart |
+| 3 | Rendered and thumbnail image support | ✅ PASS | Image rendering |
+| 4 | Bulk data retrieval | ✅ PASS | Bulk data endpoint |
+
+**Related Issue:** #201-203, #264, #265
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+#### SRS-WEB-003: DICOMweb STOW-RS
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | STOW-RS for storing DICOM objects via HTTP per PS3.18 |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-WEB-003 |
+
+**Acceptance Criteria:**
+
+| # | Criterion | Result | Evidence |
+|---|-----------|--------|----------|
+| 1 | POST multipart/related DICOM objects | ✅ PASS | Store handler |
+| 2 | Validation of received datasets | ✅ PASS | Dataset validation |
+| 3 | Storage confirmation response | ✅ PASS | XML response |
+| 4 | Conflict detection | ✅ PASS | Duplicate handling |
+
+**Related Issue:** #201-203, #264, #265
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+#### SRS-WEB-004: DICOMweb QIDO-RS
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | QIDO-RS for querying DICOM objects via HTTP per PS3.18 |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-WEB-004 |
+
+**Acceptance Criteria:**
+
+| # | Criterion | Result | Evidence |
+|---|-----------|--------|----------|
+| 1 | Query at Study/Series/Instance levels | ✅ PASS | Query handlers |
+| 2 | Fuzzy matching and wildcard support | ✅ PASS | Pattern matching |
+| 3 | Pagination with limit/offset | ✅ PASS | Paginated results |
+| 4 | JSON and XML response formats | ✅ PASS | Content negotiation |
+
+**Related Issue:** #201-203, #264, #265
+
+**Status:** ✅ **VALIDATED**
+
+---
+
+### 2.9 Workflow Module (SRS-WKF)
+
+#### SRS-WKF-001: Automatic Prior Study Prefetch
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Auto-prefetch prior studies from remote PACS on MWL events |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-WKF-001 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+#### SRS-WKF-002: Background Task Scheduling
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Background task scheduling for recurring maintenance |
+| **Priority** | Should Have |
+| **Validation Method** | System Test |
+| **Test ID** | VAL-WKF-002 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+### 2.10 Cloud Storage Module (SRS-CSTOR)
+
+#### SRS-CSTOR-001: AWS S3 Storage Backend
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | AWS S3 as storage backend for DICOM files |
+| **Priority** | Should Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-CSTOR-001 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+#### SRS-CSTOR-002: Azure Blob Storage Backend
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Azure Blob Storage as storage backend for DICOM files |
+| **Priority** | Should Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-CSTOR-002 |
+
+**Status:** 🔜 **PLANNED** (Phase 4)
+
+---
+
+#### SRS-CSTOR-003: Hierarchical Storage Management
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | HSM with automatic tier migration based on access patterns |
+| **Priority** | Could Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-CSTOR-003 |
+
+**Status:** 🔜 **PLANNED** (Phase 5)
+
+---
+
+### 2.11 AI Service Module (SRS-AI)
+
+#### SRS-AI-001: AI Service Integration
+
+| Attribute | Value |
+|-----------|-------|
+| **Requirement** | Integration with external AI services for image analysis |
+| **Priority** | Could Have |
+| **Validation Method** | Integration Test |
+| **Test ID** | VAL-AI-001 |
+
+**Status:** 🔜 **PLANNED** (Phase 5)
+
+---
+
 ## 3. Non-Functional Requirements Validation
 
 ### 3.1 Performance (SRS-PERF)
@@ -945,7 +1321,6 @@ storage_root/
 | SRS-PERF-004 | Association establishment | <50 ms | ~1 ms | ✅ PASS |
 | SRS-PERF-005 | Memory baseline | <500 MB | ~300 MB | ✅ PASS |
 | SRS-PERF-006 | Memory per association | <10 MB | ~5 MB | ✅ PASS |
-| SRS-PERF-007 | Graceful shutdown | <5,000 ms | 110 ms | ✅ PASS |
 
 **Thread System Migration Performance (2025-12-07):**
 
@@ -1030,6 +1405,19 @@ storage_root/
 
 ---
 
+### 3.5 Scalability (SRS-SCAL)
+
+| Req ID | Requirement | Target | Status |
+|--------|-------------|--------|--------|
+| SRS-SCAL-001 | Horizontal scaling | Multiple instances | 🔜 Planned |
+| SRS-SCAL-002 | Image capacity | ≥1M studies/instance | 🔜 Planned |
+| SRS-SCAL-003 | Linear throughput scaling | ≥80% efficiency | 🔜 Planned |
+| SRS-SCAL-004 | Queue capacity | ≥10K pending jobs | 🔜 Planned |
+
+**Status:** 🔜 **PLANNED** (Phase 4-5)
+
+---
+
 ## 4. Acceptance Test Summary
 
 ### 4.1 User Scenario Validation
@@ -1086,6 +1474,9 @@ storage_root/
 | SRS-SVC-005 | VAL-SVC-005 | Acceptance Test | ✅ |
 | SRS-SVC-006 | VAL-SVC-006 | Acceptance Test | ✅ |
 | SRS-SVC-007 | VAL-SVC-007 | System Test | ✅ |
+| SRS-SVC-008 | VAL-SVC-008 | System Test | ✅ |
+| SRS-SVC-009 | VAL-SVC-009 | Acceptance Test | ✅ |
+| SRS-SVC-010 | VAL-SVC-010 | Acceptance Test | ✅ |
 | SRS-STOR-001 | VAL-STOR-001 | System Test | ✅ |
 | SRS-STOR-002 | VAL-STOR-002 | Performance Test | ✅ |
 | SRS-INT-001 | VAL-INT-001 | Code Review | ✅ |
@@ -1094,10 +1485,29 @@ storage_root/
 | SRS-INT-004 | VAL-INT-004 | Performance Test | ✅ |
 | SRS-INT-005 | VAL-INT-005 | Audit | ✅ |
 | SRS-INT-006 | VAL-INT-006 | System Test | ✅ |
+| SRS-INT-007 | VAL-INT-007 | Integration Test | 🔜 |
+| SRS-INT-008 | VAL-INT-008 | System Test | ✅ |
+| SRS-INT-009 | VAL-INT-009 | Integration Test | 🔜 |
+| SRS-INT-010 | VAL-INT-010 | Integration Test | 🔜 |
 | SRS-PERF-001~006 | Performance Tests | Load Test | ✅ |
 | SRS-REL-001~005 | Reliability Tests | Stress Test | ✅ |
 | SRS-SEC-001~005 | Security Tests | Security Audit | ✅ |
 | SRS-MAINT-001~005 | Maintainability Review | Code Review | ✅ |
+| SRS-SEC-010 | VAL-SEC-010 | System Test | 🔜 |
+| SRS-SEC-011 | VAL-SEC-011 | System Test | 🔜 |
+| SRS-SEC-012 | VAL-SEC-012 | System Test | 🔜 |
+| SRS-SEC-013 | VAL-SEC-013 | System Test | 🔜 |
+| SRS-WEB-001 | VAL-WEB-001 | System Test | ✅ |
+| SRS-WEB-002 | VAL-WEB-002 | System Test | ✅ |
+| SRS-WEB-003 | VAL-WEB-003 | System Test | ✅ |
+| SRS-WEB-004 | VAL-WEB-004 | System Test | ✅ |
+| SRS-WKF-001 | VAL-WKF-001 | System Test | 🔜 |
+| SRS-WKF-002 | VAL-WKF-002 | System Test | 🔜 |
+| SRS-CSTOR-001 | VAL-CSTOR-001 | Integration Test | 🔜 |
+| SRS-CSTOR-002 | VAL-CSTOR-002 | Integration Test | 🔜 |
+| SRS-CSTOR-003 | VAL-CSTOR-003 | Integration Test | 🔜 |
+| SRS-AI-001 | VAL-AI-001 | Integration Test | 🔜 |
+| SRS-SCAL-001~004 | Scalability Tests | Load Test | 🔜 |
 
 ### 5.2 Coverage Summary
 
@@ -1111,15 +1521,21 @@ storage_root/
 │                                                                          │
 │   Core Module         8          8         100%  ████████████████████   │
 │   Network Protocol    5          5         100%  ████████████████████   │
-│   DICOM Services      7          7         100%  ████████████████████   │
+│   DICOM Services     10         10         100%  ████████████████████   │
 │   Storage Backend     2          2         100%  ████████████████████   │
-│   Integration         6          6         100%  ████████████████████   │
+│   Integration        10          7          70%  ██████████████         │
+│   Security (FR)       4          0           0%                         │
+│   Web/REST API        4          4         100%  ████████████████████   │
+│   Workflow            2          0           0%                         │
+│   Cloud Storage       3          0           0%                         │
+│   AI Services         1          0           0%                         │
 │   Performance         6          6         100%  ████████████████████   │
 │   Reliability         5          5         100%  ████████████████████   │
-│   Security            5          5         100%  ████████████████████   │
+│   Scalability         4          0           0%                         │
+│   Security (NFR)      5          5         100%  ████████████████████   │
 │   Maintainability     5          5         100%  ████████████████████   │
 │   ────────────────────────────────────────────────────────────────────  │
-│   TOTAL              49         49         100%  ████████████████████   │
+│   TOTAL              74         57          77%  ███████████████        │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -1130,13 +1546,14 @@ storage_root/
 
 ### 6.1 Validation Summary
 
-The PACS System has successfully passed validation against all 59 SRS requirements:
+The PACS System validation status against all 74 SRS requirements:
 
 | Aspect | Result |
 |--------|--------|
-| **Functional Requirements** | 100% validated (33/33) |
-| **Non-Functional Requirements** | 100% validated (19/19) |
-| **Thread Migration Requirements** | 100% validated (7/7) |
+| **Functional Requirements (Implemented)** | 100% validated (42/42) |
+| **Functional Requirements (Planned)** | 0% - 15 requirements in Phase 4-5 |
+| **Non-Functional Requirements (Implemented)** | 100% validated (21/21) |
+| **Non-Functional Requirements (Planned)** | 0% - 4 scalability requirements planned |
 | **User Scenarios** | 7/7 acceptance tests passed |
 | **Example Applications** | 15 applications validated |
 | **DICOM Conformance** | PS3.5, PS3.7, PS3.8 compliant |
@@ -1163,6 +1580,7 @@ This validation confirms that the PACS System:
 | 1.0.0 | 2025-12-01 | kcenon@naver.com | Initial validation report |
 | 1.1.0 | 2025-12-04 | kcenon@naver.com | Updated integration validation status |
 | 1.2.0 | 2025-12-07 | kcenon@naver.com | Added: Thread migration validation (#153), DIMSE-N (#127), Ultrasound (#128), XA (#129) validations; Updated performance metrics from PERFORMANCE_RESULTS.md |
+| 1.3.0 | 2026-02-08 | kcenon@naver.com | Added: 25 missing SRS requirements (SVC-008~010, INT-007~010, SEC-010~013, WEB-001~004, WKF-001~002, CSTOR-001~003, AI-001, SCAL-001~004); Removed phantom SRS-PERF-007 reference; Fixed summary count discrepancy |
 
 ---
 
@@ -1192,6 +1610,6 @@ This validation confirms that the PACS System:
 
 ---
 
-*Report Version: 0.1.2.0*
-*Generated: 2025-12-07*
+*Report Version: 0.1.3.0*
+*Generated: 2026-02-08*
 *Validated by: kcenon@naver.com*
