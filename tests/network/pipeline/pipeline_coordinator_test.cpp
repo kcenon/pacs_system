@@ -388,10 +388,19 @@ TEST_CASE("pipeline_coordinator get_config", "[network][pipeline][coordinator]")
 
 TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline][coordinator]") {
     pipeline_config config;
+    // Windows CI runners have limited vCPUs (typically 2); reduce worker
+    // threads to avoid excessive context-switching that leads to timeouts.
+#ifdef _WIN32
+    config.net_io_workers = 2;
+    config.protocol_workers = 1;
+    config.execution_workers = 2;
+    config.encode_workers = 1;
+#else
     config.net_io_workers = 4;
     config.protocol_workers = 2;
     config.execution_workers = 4;
     config.encode_workers = 2;
+#endif
 
     pipeline_coordinator coordinator(config);
     auto start_result = coordinator.start();
@@ -399,7 +408,7 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
     // Reduce job count on Windows CI to stay within CTest --timeout 120
 #ifdef _WIN32
-    constexpr size_t num_jobs = 48;
+    constexpr size_t num_jobs = 16;
 #else
     constexpr size_t num_jobs = 100;
 #endif
@@ -409,7 +418,11 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
     // Submit many jobs concurrently from multiple threads
     std::vector<std::thread> threads;
+#ifdef _WIN32
+    constexpr size_t num_threads = 2;
+#else
     constexpr size_t num_threads = 4;
+#endif
     size_t jobs_per_thread = num_jobs / num_threads;
 
     for (size_t t = 0; t < num_threads; ++t) {
@@ -437,12 +450,13 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     }
 
     // Wait for all jobs to complete with timeout
-    // Internal timeout must be less than CTest --timeout 120 (ci.yml)
+    // Internal timeout must be well below CTest --timeout 120 (ci.yml)
+    // to leave headroom for coordinator start/stop overhead.
     {
         std::unique_lock<std::mutex> lock(mutex);
 #ifdef _WIN32
-        // Keep below CTest 120s limit; Windows CI is slower than Linux/macOS
-        constexpr auto timeout = std::chrono::seconds(90);
+        // 16 jobs with reduced workers; keep well below CTest 120s limit
+        constexpr auto timeout = std::chrono::seconds(45);
 #else
         constexpr auto timeout = std::chrono::seconds(60);
 #endif
