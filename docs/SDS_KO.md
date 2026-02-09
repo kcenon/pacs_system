@@ -577,9 +577,13 @@ PACS 시스템은 계층 아키텍처를 따릅니다:
 | 기술 | 버전 | 용도 |
 |------|------|------|
 | C++ | 20 | 구현 언어 |
+| GCC | 13+ | Linux 컴파일러 (std::format 필요) |
+| Clang/Apple Clang | 15+ | macOS 컴파일러 |
+| MSVC | 2022+ (v17.x) | Windows 컴파일러 |
 | CMake | 3.20+ | 빌드 시스템 |
 | SQLite | 3.36+ | 인덱스 데이터베이스 |
 | ASIO | (network_system 경유) | 비동기 네트워킹 |
+| database_system | (선택 사항) | 쿼리 빌더를 통한 SQL 인젝션 보호 |
 | Google Test | 1.11+ | 단위 테스트 |
 | Google Benchmark | 1.6+ | 성능 테스트 |
 
@@ -658,10 +662,11 @@ PACS 시스템은 계층 아키텍처를 따릅니다:
 | 1.3.0 | 2026-01-02 | kcenon | accept_worker 업데이트: 플레이스홀더를 대체하는 TCP 소켓 bind/listen/accept 구현 |
 | 1.4.0 | 2026-01-04 | kcenon | 추가: 캐시 모듈 (DES-CACHE-001~006), AI 모듈 (DES-AI-001~002), DI 모듈 (DES-DI-001~004), 모니터링 모듈 (DES-MON-001~003); 모듈 ID 추가: CACHE, AI, DI, MON |
 | 2.0.0 | 2026-02-08 | kcenon | 추가: 클라이언트 모듈 (DES-CLI-001~005) SDS_CLIENT.md 포함; CLI 모듈 ID 추가; SDS_WEB_API.md에 10개 신규 엔드포인트 추가 (DES-WEB-013~022); SDS_TRACEABILITY.md에 28개 신규 DES 항목 추가; 11개 스토리지 리포지토리 추가 (DES-STOR-010~020); DB 모니터링 추가 (DES-MON-007) |
+| 2.1.0 | 2026-02-09 | raphaelshin | 추가: 기술 스택에 컴파일러 버전 및 database_system 추가, 이슈 #674. |
 
 ---
 
 *문서 버전: 0.2.0.0*
 *작성일: 2025-11-30*
-*최종 수정일: 2026-02-08*
+*최종 수정일: 2026-02-09*
 *작성자: kcenon@naver.com*

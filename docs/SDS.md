@@ -591,9 +591,13 @@ The PACS System follows a layered architecture:
 | Technology | Version | Purpose |
 |------------|---------|---------|
 | C++ | 20 | Implementation language |
+| GCC | 13+ | Linux compiler (std::format required) |
+| Clang/Apple Clang | 15+ | macOS compiler |
+| MSVC | 2022+ (v17.x) | Windows compiler |
 | CMake | 3.20+ | Build system |
 | SQLite | 3.36+ | Index database |
 | ASIO | (via network_system) | Async networking |
+| database_system | (optional) | SQL injection protection via query builder |
 | Google Test | 1.11+ | Unit testing |
 | Google Benchmark | 1.6+ | Performance testing |
 
@@ -672,10 +676,11 @@ The PACS System follows a layered architecture:
 | 1.3.0 | 2026-01-02 | kcenon | Updated accept_worker: Implemented TCP socket bind/listen/accept replacing placeholder implementation |
 | 1.4.0 | 2026-01-04 | kcenon | Added: Cache Module (DES-CACHE-001~006), AI Module (DES-AI-001~002), DI Module (DES-DI-001~004), Monitoring Module (DES-MON-001~003); Added module IDs: CACHE, AI, DI, MON |
 | 2.0.0 | 2026-02-08 | kcenon | Added: Client Module (DES-CLI-001~005) with SDS_CLIENT.md; Added CLI module ID; Updated SDS_WEB_API.md with 10 new endpoints (DES-WEB-013~022); Updated SDS_TRACEABILITY.md with 28 new DES entries; Added 11 storage repositories (DES-STOR-010~020); Added DB monitoring (DES-MON-007) |
+| 2.1.0 | 2026-02-09 | raphaelshin | Added: Compiler versions and database_system to technology stack for Issue #674. |
 
 ---
 
 *Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Updated: 2026-02-08*
+*Updated: 2026-02-09*
 *Author: kcenon@naver.com*

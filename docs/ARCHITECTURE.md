@@ -1,7 +1,7 @@
 # Architecture Documentation - PACS System
 
-> **Version:** 0.1.3.0
-> **Last Updated:** 2026-01-08
+> **Version:** 0.1.4.0
+> **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](ARCHITECTURE_KO.md)
 
 ---
@@ -710,14 +710,14 @@ The 6-stage I/O pipeline provides high-throughput DICOM operation processing:
 │  │  • IExecutor interface         • Event bus                            │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
 │                                                                              │
-│  ┌──────────────────────┐                         ┌──────────────────────┐  │
-│  │    logger_system     │                         │  monitoring_system   │  │
-│  │                      │                         │                      │  │
-│  │  • Async logging     │                         │  • Performance       │  │
-│  │  • Audit trail       │                         │    metrics           │  │
-│  │  • Multiple writers  │                         │  • Health checks     │  │
-│  │  • HIPAA compliance  │                         │  • Distributed trace │  │
-│  └──────────────────────┘                         └──────────────────────┘  │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │
+│  │    logger_system     │  │  monitoring_system   │  │  database_system    │  │
+│  │                      │  │                      │  │    (Optional)       │  │
+│  │  • Async logging     │  │  • Performance       │  │  • Query builder    │  │
+│  │  • Audit trail       │  │    metrics           │  │  • SQL injection    │  │
+│  │  • Multiple writers  │  │  • Health checks     │  │    protection       │  │
+│  │  • HIPAA compliance  │  │  • Distributed trace │  │  • Parameterized    │  │
+│  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -895,6 +895,28 @@ auto& file = result.value();
 
 ---
 
+## Build Requirements
+
+### Base Requirements
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| CMake | 3.20+ | Build system generator |
+| C++ Standard | C++20 | Required for concepts, ranges, std::format |
+| GCC | 13+ | Ubuntu 24.04+ provides GCC 13 with std::format (required by logger_system) |
+| Clang/Apple Clang | 15+ | macOS 14+ provides Apple Clang 15 |
+| MSVC | 2022+ (v17.x) | Visual Studio 2022 |
+
+### CI/CD Test Matrix
+
+| Platform | OS | Compiler |
+|----------|-----|----------|
+| Linux | Ubuntu 24.04 | GCC 13, Clang 18 |
+| macOS | macOS 14 | Apple Clang 15 |
+| Windows | Windows 2022 | MSVC 2022 |
+
+---
+
 ## C++20 Module Architecture
 
 The PACS System supports C++20 modules for improved compilation times and better encapsulation.
@@ -960,7 +982,9 @@ int main() {
 }
 ```
 
-### Requirements
+### Requirements (Module-Specific)
+
+> **Note**: These are additional requirements beyond the [base build requirements](#build-requirements) and apply only when building with C++20 modules enabled (`-DPACS_BUILD_MODULES=ON`).
 
 - CMake 3.28 or later
 - Clang 16+, GCC 14+, or MSVC 2022 17.4+
@@ -976,10 +1000,11 @@ int main() {
 | 0.1.1.0 | 2025-12-04 | kcenon | Updated Thread Model with thread_system migration details |
 | 0.1.2.0 | 2025-12-07 | kcenon | Updated version, confirmed Thread Model reflects migration (Epic #153) |
 | 0.1.3.0 | 2026-01-06 | kcenon | Added C++20 Module Architecture section (Issue #507) |
+| 0.1.4.0 | 2026-02-09 | raphaelshin | Added: Build Requirements section, database_system to ecosystem integration. Clarified: Module-specific vs base build requirements for Issue #674. |
 
 ---
 
-*Document Version: 0.1.3.0*
+*Document Version: 0.1.4.0*
 *Created: 2025-11-30*
-*Updated: 2026-01-08*
+*Updated: 2026-02-09*
 *Author: kcenon@naver.com*
