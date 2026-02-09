@@ -1,6 +1,6 @@
 # Software Requirements Specification - PACS System
 
-> **Version:** 0.1.3.1
+> **Version:** 0.1.3.2
 > **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](SRS_KO.md)
 > **Standard:** IEEE 830-1998 based
@@ -149,8 +149,8 @@ This document is organized as follows:
 
 | Component | Requirement |
 |-----------|-------------|
-| **Operating System** | Linux (Ubuntu 22.04+), macOS 14+, Windows 10/11 |
-| **Compiler** | C++20 (GCC 11+, Clang 14+, MSVC 2022+) |
+| **Operating System** | Linux (Ubuntu 24.04+), macOS 14+, Windows 10/11 |
+| **Compiler** | C++20 (GCC 13+, Clang 15+, MSVC 2022+) |
 | **Memory** | Minimum 4 GB, Recommended 16 GB |
 | **Storage** | Minimum 100 GB, Scalable |
 | **Network** | 1 Gbps Ethernet minimum |
@@ -179,6 +179,7 @@ This document is organized as follows:
 | **D4** | thread_system v1.0+ available |
 | **D5** | logger_system v1.0+ available |
 | **D6** | monitoring_system v1.0+ available |
+| **D7** | database_system v1.0+ available (optional, for SQL injection protection) |
 
 ---
 
@@ -1232,6 +1233,24 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 ---
 
+#### SRS-INT-011: database_system Integration
+| Attribute | Value |
+|-----------|-------|
+| **ID** | SRS-INT-011 |
+| **Title** | database_system Secure Query Building |
+| **Description** | The system shall optionally use database_system for SQL injection protection via parameterized query building in storage and service components. |
+| **Priority** | Should Have |
+| **Phase** | 4 |
+| **Status** | ✅ Implemented |
+| **Traces To** | IR-1 |
+
+**Acceptance Criteria:**
+1. Parameterized query building for all database operations
+2. SQL injection protection when database_system is available
+3. Graceful fallback when database_system is not present
+
+---
+
 #### SRS-INT-007: ITK/VTK Integration
 | Attribute | Value |
 |-----------|-------|
@@ -2012,7 +2031,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | NFR-3.1-NFR-3.4 | SRS-SCAL-001 - SRS-SCAL-004 | Specified |
 | NFR-4.1-NFR-4.5 | SRS-SEC-001 - SRS-SEC-005 | Specified |
 | NFR-5.1-NFR-5.5 | SRS-MAINT-001 - SRS-MAINT-005 | Specified |
-| IR-1 | SRS-INT-001 - SRS-INT-006 | Specified |
+| IR-1 | SRS-INT-001 - SRS-INT-006, SRS-INT-011 | Specified |
 | IR-6 | SRS-INT-007 | Specified |
 | IR-7 | SRS-INT-008 | Specified |
 | IR-8 | SRS-INT-009 | Specified |
@@ -2142,6 +2161,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | 1.2.0 | 2025-12-07 | kcenon | Added: SRS-SVC-008 (DIMSE-N), SRS-SVC-009 (Ultrasound), SRS-SVC-010 (XA); Updated: SRS-CORE-007 (Explicit VR BE), SRS-INT-003 (network_system V2), SRS-INT-004 (thread_system migration) |
 | 1.3.0 | 2026-01-04 | kcenon | Added: FR-5.x Security (SRS-SEC-010 to SRS-SEC-013), FR-6.x Web/REST API (SRS-WEB-001 to SRS-WEB-004), FR-7.x Workflow (SRS-WKF-001, SRS-WKF-002), FR-8.x Cloud Storage (SRS-CSTOR-001 to SRS-CSTOR-003), FR-9.x AI (SRS-AI-001); Updated: Integration requirements (SRS-INT-007 to SRS-INT-010) |
 | 1.3.1 | 2026-02-09 | raphaelshin | Fixed: SRS-AI-001 phase assignment (Phase 5 → Phase 4) to match PRD FR-9.1 implementation status for Issue #673 |
+| 1.3.2 | 2026-02-09 | raphaelshin | Fixed: Operating environment (Ubuntu 22.04+ → 24.04+, GCC 11+ → 13+, Clang 14+ → 15+) to match CI configuration; Added: SRS-INT-011 (database_system integration) for Issue #674 |
 
 ### Appendix C: Glossary
 
@@ -2157,7 +2177,7 @@ The PACS System provides no direct user interface. All interaction is through:
 
 ---
 
-*Document Version: 0.1.3.1*
+*Document Version: 0.1.3.2*
 *Created: 2025-11-30*
 *Updated: 2026-02-09*
 *Author: kcenon@naver.com*
