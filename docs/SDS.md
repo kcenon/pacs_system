@@ -21,8 +21,8 @@
 
 | Document | ID | Version |
 |----------|-----|---------|
-| Product Requirements Document | [PRD](PRD.md) | 0.1.1.0 |
-| Software Requirements Specification | [SRS](SRS.md) | 0.1.1.0 |
+| Product Requirements Document | [PRD](PRD.md) | 0.2.0.0 |
+| Software Requirements Specification | [SRS](SRS.md) | 0.1.3.0 |
 | Architecture Documentation | [ARCHITECTURE](ARCHITECTURE.md) | 0.1.3.0 |
 | API Reference | [API_REFERENCE](API_REFERENCE.md) | 0.1.1.0 |
 
