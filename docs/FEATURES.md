@@ -1,10 +1,17 @@
 # PACS System Features
 
-> **Version:** 0.1.9.0
-> **Last Updated:** 2025-12-17
+> **Version:** 0.2.0.0
+> **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](FEATURES_KO.md)
 
 This document provides comprehensive details on all features available in the PACS system.
+
+> **Phase Definitions**: See [PRD Development Phases](PRD.md#development-phases) for the authoritative phase definitions. Feature sections below correspond to phases as follows:
+> - **Phase 1** (Complete): DICOM Core Features
+> - **Phase 2** (Complete): Network Protocol Features, Compression Codecs
+> - **Phase 3** (Complete): DICOM Services, Storage Backend
+> - **Phase 4** (Complete): Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
+> - **Phase 5** (Planned): Enterprise Features (see [Planned Features](#planned-features))
 
 ---
 
@@ -1759,30 +1766,26 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 
 ## Planned Features
 
-### Short Term (Next Release)
+### Completed (Previously Planned)
+
+| Feature | Description | Completed Phase |
+|---------|-------------|-----------------|
+| ~~Additional SOP Classes (PET/NM)~~ | NM, PET support | Phase 4 ✅ |
+| ~~Additional SOP Classes (RT)~~ | RT Plan, RT Structure Set, etc. | Phase 4 ✅ |
+| ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb support per PS3.18 | Phase 4 ✅ |
+| ~~AI Integration~~ | External AI service connector + result handler | Phase 4 ✅ |
+
+### Phase 5: Enterprise Features (Future)
 
 | Feature | Description | Target |
 |---------|-------------|--------|
-| ~~Additional SOP Classes (PET/NM)~~ | ~~NM, PET support~~ | ✅ Complete |
-| ~~Additional SOP Classes (RT)~~ | ~~RT Plan, RT Structure Set, etc.~~ | ✅ Complete |
-| Connection Pooling | Reuse associations | Phase 3 |
-| Enhanced Metrics | Per-association timing | Phase 3 |
-
-### Medium Term
-
-| Feature | Description | Target |
-|---------|-------------|--------|
-| WADO-RS | DICOMweb support | Future |
-| Clustering | Multi-node PACS | Future |
-
-### Long Term
-
-| Feature | Description | Target |
-|---------|-------------|--------|
-| AI Integration | Inference pipeline | Future |
-| Cloud Storage (Full AWS SDK) | Production AWS S3 integration | Future |
-| Cloud Storage (Full Azure SDK) | Production Azure Blob Storage integration | Future |
-| FHIR Integration | Healthcare interop | Future |
+| Connection Pooling | Reuse associations | Phase 5 |
+| Enhanced Metrics | Per-association timing | Phase 5 |
+| Clustering | Multi-node PACS | Phase 5 |
+| Full AWS S3 SDK | Production AWS S3 integration (replace mock) | Phase 5 |
+| Full Azure SDK | Production Azure Blob Storage integration (replace mock) | Phase 5 |
+| ITK/VTK Integration | Advanced image processing and 3D reconstruction | Phase 5 |
+| FHIR Integration | Healthcare interop | Phase 5 |
 
 ---
 
@@ -1806,11 +1809,14 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | 2.3.0 | 2025-12-17 | raphaelshin | Added: Study Lock Manager for concurrent access control with exclusive/shared/migration locks for Issue #208 |
 | 2.4.0 | 2025-12-17 | raphaelshin | Added: SIMD optimization infrastructure for byte swap operations (SSE/AVX/NEON) for Issue #313 |
 | 2.5.0 | 2025-12-18 | raphaelshin | Added: Service-specific error codes (-800 to -899), unified Result<T> pattern for services module for Issue #325 |
+| 2.6.0 | 2026-02-09 | raphaelshin | Fixed: Resolved version conflicts (0.1.9.0 → 0.2.0.0), updated Planned Features to reflect completed items (DICOMweb, AI Integration), aligned phase targets with PRD for Issue #673 |
+
+*Note: The Document History table above tracks revisions to this document itself (document revision version). The product version is specified in the header.*
 
 ---
 
 *Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Updated: 2025-12-13*
+*Updated: 2026-02-09*
 *Author: kcenon@naver.com*
 

@@ -804,6 +804,20 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 ## Development Phases
 
+### Phase Summary
+
+The following table provides a unified overview of all development phases. This is the authoritative phase definition for the project; all other documents (SRS, SDS, FEATURES) reference these definitions.
+
+| Phase | Name | Scope | Status |
+|-------|------|-------|--------|
+| **1** | Foundation | DICOM Core: Data Elements, Data Sets, File I/O (Part 10), Tag Dictionary, Transfer Syntax | ✅ Complete |
+| **2** | Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C basics (C-ECHO, C-STORE), Compression Codecs | ✅ Complete |
+| **3** | Core Services | Storage SCP/SCU, File Storage Backend, Index Database, Query/Retrieve (C-FIND, C-MOVE, C-GET), Logging, Monitoring | ✅ Complete |
+| **4** | Advanced Services & Production Hardening | Worklist, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock), Security (RBAC, Anonymization, Digital Signatures), Workflow (Prefetch, Scheduler, Study Lock), Additional SOP Classes, Object Pools, SIMD, Annotation/Viewer | ✅ Complete |
+| **5** | Enterprise Features | Full AWS/Azure SDK, ITK/VTK, FHIR, Clustering, Connection Pooling | Planned |
+
+**Cross-Reference**: PRD phases map to SRS requirement phases (SRS-CORE-* → Phase 1, SRS-NET-*/SRS-ENC-* → Phase 2, SRS-SVC-* → Phase 3, SRS-WF-*/SRS-SEC-*/SRS-WEB-* → Phase 4, SRS-INT-007 → Phase 5).
+
 ### Phase 1: Foundation (Weeks 1-4)
 
 **Objective**: Establish core DICOM data handling
@@ -1045,7 +1059,49 @@ Service Errors (-800 to -899):
   -890: General service errors (-890 to -899)
 ```
 
-### Appendix C: References
+### Appendix C: Version Numbering Convention
+
+All project documents follow a consistent versioning scheme to avoid ambiguity.
+
+#### Product Version
+
+Format: `MAJOR.MINOR.PATCH.BUILD` (e.g., `0.2.0.0`)
+
+| Component | Meaning | Increment When |
+|-----------|---------|---------------|
+| MAJOR | Major release milestone | Breaking changes or production release (0 = pre-production) |
+| MINOR | Phase completion | A development phase is completed |
+| PATCH | Feature additions | New features or significant changes within a phase |
+| BUILD | Bug fixes / patches | Minor fixes, corrections, documentation patches |
+
+**Current Product Version**: `0.2.0.0` (Phase 1-4 complete, pre-production)
+
+#### Document Revision Version
+
+Each document tracks its own revision history independently of the product version using semantic versioning:
+
+Format: `MAJOR.MINOR.PATCH` (e.g., `2.6.0`)
+
+| Component | Meaning |
+|-----------|---------|
+| MAJOR | Structural reorganization or major rewrite |
+| MINOR | New sections, significant content additions |
+| PATCH | Minor corrections, typo fixes |
+
+**Important**: The document revision version (tracked in Document History tables) is separate from the product version (shown in document headers). For example, FEATURES.md may be at document revision `2.6.0` while tracking product version `0.2.0.0`.
+
+#### Cross-Document Version References
+
+When referencing other documents, always cite the specific version being referenced:
+
+| Document | Current Version | Authoritative For |
+|----------|----------------|------------------|
+| PRD | 0.2.0.0 | Phase definitions, functional requirements |
+| SRS | 0.1.3.1 | Detailed requirement specifications |
+| SDS | 0.2.0.0 | Software design, component architecture |
+| FEATURES | 0.2.0.0 | Feature documentation and examples |
+
+### Appendix D: References
 
 - DICOM Standard: https://www.dicomstandard.org/
 - PS3.5 - Data Structures and Encoding
@@ -1063,10 +1119,11 @@ Service Errors (-800 to -899):
 | 1.0.0 | 2025-11-30 | kcenon@naver.com | Initial PRD release |
 | 1.1.0 | 2025-12-07 | kcenon@naver.com | Updated for completed features: Thread system migration (Epic #153), DIMSE-N services (#127), Ultrasound/XA storage (#128, #129), Explicit VR Big Endian (#126), Performance results |
 | 2.0.0 | 2026-02-08 | raphaelshin | Major update: Added 15+ implemented features to PRD. New sections: FR-10 (Client Module), FR-11 (Annotation/Viewer State/Clinical Data), FR-12 (Monitoring/Observability). Updated status for FR-3.4 (Worklist), FR-3.5 (MPPS), FR-5 (Security), FR-6 (Web API - 19 endpoints), FR-7 (Workflow - 3 services), FR-8 (Cloud Storage + HSM), FR-9 (AI Integration). Updated architecture diagram and development phases. Reclassified Phase 5 items that are already implemented to Phase 4. |
+| 2.1.0 | 2026-02-09 | raphaelshin | Added: Phase Summary table, Version Numbering Convention (Appendix C). Fixed: Phase target alignment in cross-references for Issue #673. |
 
 ---
 
 *Document Version: 0.2.0.0*
 *Created: 2025-11-30*
-*Updated: 2026-02-08*
+*Updated: 2026-02-09*
 *Author: kcenon@naver.com*

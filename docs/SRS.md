@@ -1,7 +1,7 @@
 # Software Requirements Specification - PACS System
 
-> **Version:** 0.1.3.0
-> **Last Updated:** 2026-01-04
+> **Version:** 0.1.3.1
+> **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](SRS_KO.md)
 > **Standard:** IEEE 830-1998 based
 
@@ -1720,9 +1720,10 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | **ID** | SRS-AI-001 |
 | **Title** | AI Service Connector |
 | **Description** | The system shall support integration with external AI services for medical image analysis. |
-| **Priority** | Could Have |
-| **Phase** | 5 |
+| **Priority** | Should Have |
+| **Phase** | 4 |
 | **Traces To** | FR-9.1 |
+| **Status** | ✅ Implemented |
 
 **Acceptance Criteria:**
 1. REST API client for AI inference services
@@ -2140,6 +2141,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | 1.1.0 | 2025-12-04 | kcenon | Updated integration requirements |
 | 1.2.0 | 2025-12-07 | kcenon | Added: SRS-SVC-008 (DIMSE-N), SRS-SVC-009 (Ultrasound), SRS-SVC-010 (XA); Updated: SRS-CORE-007 (Explicit VR BE), SRS-INT-003 (network_system V2), SRS-INT-004 (thread_system migration) |
 | 1.3.0 | 2026-01-04 | kcenon | Added: FR-5.x Security (SRS-SEC-010 to SRS-SEC-013), FR-6.x Web/REST API (SRS-WEB-001 to SRS-WEB-004), FR-7.x Workflow (SRS-WKF-001, SRS-WKF-002), FR-8.x Cloud Storage (SRS-CSTOR-001 to SRS-CSTOR-003), FR-9.x AI (SRS-AI-001); Updated: Integration requirements (SRS-INT-007 to SRS-INT-010) |
+| 1.3.1 | 2026-02-09 | raphaelshin | Fixed: SRS-AI-001 phase assignment (Phase 5 → Phase 4) to match PRD FR-9.1 implementation status for Issue #673 |
 
 ### Appendix C: Glossary
 
@@ -2155,7 +2157,7 @@ The PACS System provides no direct user interface. All interaction is through:
 
 ---
 
-*Document Version: 0.1.3.0*
+*Document Version: 0.1.3.1*
 *Created: 2025-11-30*
-*Updated: 2026-01-04*
+*Updated: 2026-02-09*
 *Author: kcenon@naver.com*
