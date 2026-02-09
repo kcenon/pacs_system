@@ -36,7 +36,7 @@ A modern C++20 PACS implementation built entirely on the kcenon ecosystem withou
 ### Key Differentiators
 - **Zero External DICOM Dependencies**: Pure implementation using kcenon ecosystem
 - **High Performance**: SIMD acceleration, lock-free queues, async I/O, object pool memory management
-- **Full Ecosystem Integration**: Native integration with 6 existing systems
+- **Full Ecosystem Integration**: Native integration with 7 existing systems
 - **Production Grade**: Comprehensive CI/CD, sanitizers, quality metrics
 - **Complete DICOMweb Support**: WADO-RS, STOW-RS, QIDO-RS per PS3.18
 - **19-Endpoint REST API**: Full web administration and monitoring via Crow framework
@@ -699,6 +699,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | **logger_system** | Logging | Audit logs, diagnostics | ✅ Integrated |
 | **monitoring_system** | Observability | Metrics, health checks | ✅ Integrated |
 | **network_system** | Network | TCP/TLS, session management, messaging_server | ✅ V2 Implementation (Optional) |
+| **database_system** | Storage Security | SQL injection protection via parameterized query building | ✅ Integrated (Optional) |
 
 #### Thread System Migration (Completed 2025-12-07)
 
@@ -1120,6 +1121,7 @@ When referencing other documents, always cite the specific version being referen
 | 1.1.0 | 2025-12-07 | kcenon@naver.com | Updated for completed features: Thread system migration (Epic #153), DIMSE-N services (#127), Ultrasound/XA storage (#128, #129), Explicit VR Big Endian (#126), Performance results |
 | 2.0.0 | 2026-02-08 | raphaelshin | Major update: Added 15+ implemented features to PRD. New sections: FR-10 (Client Module), FR-11 (Annotation/Viewer State/Clinical Data), FR-12 (Monitoring/Observability). Updated status for FR-3.4 (Worklist), FR-3.5 (MPPS), FR-5 (Security), FR-6 (Web API - 19 endpoints), FR-7 (Workflow - 3 services), FR-8 (Cloud Storage + HSM), FR-9 (AI Integration). Updated architecture diagram and development phases. Reclassified Phase 5 items that are already implemented to Phase 4. |
 | 2.1.0 | 2026-02-09 | raphaelshin | Added: Phase Summary table, Version Numbering Convention (Appendix C). Fixed: Phase target alignment in cross-references for Issue #673. |
+| 2.2.0 | 2026-02-09 | raphaelshin | Added: database_system to IR-1 ecosystem integration table. Updated: ecosystem count from 6 to 7 systems for Issue #674. |
 
 ---
 

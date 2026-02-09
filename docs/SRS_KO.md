@@ -1,6 +1,6 @@
 # 소프트웨어 요구사항 명세서 - PACS System
 
-> **버전:** 0.1.3.1
+> **버전:** 0.1.3.2
 > **최종 수정:** 2026-02-09
 > **언어:** [English](SRS.md) | **한국어**
 > **표준:** IEEE 830-1998 기반
@@ -149,8 +149,8 @@ PACS System은 다음을 수행하는 의료 영상 저장 및 통신 플랫폼�
 
 | 구성요소 | 요구사항 |
 |----------|----------|
-| **운영체제** | Linux (Ubuntu 22.04+), macOS 14+, Windows 10/11 |
-| **컴파일러** | C++20 (GCC 11+, Clang 14+, MSVC 2022+) |
+| **운영체제** | Linux (Ubuntu 24.04+), macOS 14+, Windows 10/11 |
+| **컴파일러** | C++20 (GCC 13+, Clang 15+, MSVC 2022+) |
 | **메모리** | 최소 4 GB, 권장 16 GB |
 | **저장소** | 최소 100 GB, 확장 가능 |
 | **네트워크** | 최소 1 Gbps 이더넷 |
@@ -179,6 +179,7 @@ PACS System은 다음을 수행하는 의료 영상 저장 및 통신 플랫폼�
 | **D4** | thread_system v1.0+ 사용 가능 |
 | **D5** | logger_system v1.0+ 사용 가능 |
 | **D6** | monitoring_system v1.0+ 사용 가능 |
+| **D7** | database_system v1.0+ 사용 가능 (선택 사항, SQL 인젝션 보호) |
 
 ---
 
@@ -875,6 +876,23 @@ PACS System은 다음을 수행하는 의료 영상 저장 및 통신 플랫폼�
 1. DICOM 작업 메트릭(횟수, 지연시간, 처리량)
 2. 상태 확인 엔드포인트
 3. 저장소 사용량 메트릭
+
+---
+
+#### SRS-INT-011: database_system 통합
+| 속성 | 값 |
+|------|-----|
+| **ID** | SRS-INT-011 |
+| **제목** | database_system 보안 쿼리 빌딩 |
+| **설명** | 시스템은 선택적으로 database_system을 사용하여 스토리지 및 서비스 컴포넌트에서 매개변수화된 쿼리 빌딩을 통한 SQL 인젝션 보호를 제공해야 한다. |
+| **우선순위** | 있으면 좋음 |
+| **단계** | 4 |
+| **추적 대상** | IR-1 |
+
+**인수 조건:**
+1. 모든 데이터베이스 작업에 대한 매개변수화된 쿼리 빌딩
+2. database_system 사용 가능 시 SQL 인젝션 보호
+3. database_system 미설치 시 정상 폴백
 
 ---
 
@@ -1658,7 +1676,7 @@ PACS System은 직접적인 사용자 인터페이스를 제공하지 않습니�
 | NFR-3.1-NFR-3.4 | SRS-SCAL-001 - SRS-SCAL-004 | 명세됨 |
 | NFR-4.1-NFR-4.5 | SRS-SEC-001 - SRS-SEC-005 | 명세됨 |
 | NFR-5.1-NFR-5.5 | SRS-MAINT-001 - SRS-MAINT-005 | 명세됨 |
-| IR-1 | SRS-INT-001 - SRS-INT-006 | 명세됨 |
+| IR-1 | SRS-INT-001 - SRS-INT-006, SRS-INT-011 | 명세됨 |
 | IR-6 | SRS-INT-007 | 명세됨 |
 | IR-7 | SRS-INT-008 | 명세됨 |
 | IR-8 | SRS-INT-009 | 명세됨 |
@@ -1789,6 +1807,7 @@ PACS System은 직접적인 사용자 인터페이스를 제공하지 않습니�
 | 1.2.0 | 2025-12-07 | kcenon | 추가: SRS-SVC-008 (DIMSE-N), SRS-SVC-009 (초음파), SRS-SVC-010 (XA); 업데이트: SRS-CORE-007 (Explicit VR BE), SRS-INT-003 (network_system V2), SRS-INT-004 (thread_system 마이그레이션) |
 | 1.3.0 | 2026-01-04 | kcenon | 추가: FR-5.x 보안 (SRS-SEC-010~SRS-SEC-013), FR-6.x Web/REST API (SRS-WEB-001~SRS-WEB-004), FR-7.x 워크플로우 (SRS-WKF-001, SRS-WKF-002), FR-8.x 클라우드 저장소 (SRS-CSTOR-001~SRS-CSTOR-003), FR-9.x AI (SRS-AI-001); 업데이트: 통합 요구사항 (SRS-INT-007~SRS-INT-010) |
 | 1.3.1 | 2026-02-09 | raphaelshin | 수정: SRS-AI-001 단계 할당 (Phase 5 → Phase 4), PRD FR-9.1 구현 상태에 맞춤 (Issue #673) |
+| 1.3.2 | 2026-02-09 | raphaelshin | 수정: 운영 환경 (Ubuntu 22.04+ → 24.04+, GCC 11+ → 13+, Clang 14+ → 15+)을 CI 설정에 맞게 업데이트; 추가: SRS-INT-011 (database_system 통합), 이슈 #674 |
 
 ### 부록 C: 용어집
 
@@ -1804,7 +1823,7 @@ PACS System은 직접적인 사용자 인터페이스를 제공하지 않습니�
 
 ---
 
-*문서 버전: 0.1.3.1*
+*문서 버전: 0.1.3.2*
 *작성일: 2025-11-30*
 *최종 수정: 2026-02-09*
 *작성자: kcenon@naver.com*
