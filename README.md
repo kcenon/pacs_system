@@ -136,6 +136,12 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - Prometheus-compatible metrics export
 - DICOM metric collectors (association, DIMSE, storage metrics)
 
+**Annotation & Viewer**:
+- Annotation CRUD with measurement data management
+- Viewer state persistence across sessions
+- Key image selection management
+- Measurement data storage and retrieval
+
 ---
 
 ## Architecture

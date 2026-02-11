@@ -64,9 +64,9 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 |-------|-------|--------|
 | **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O, Transfer Syntax | ✅ Complete |
 | **Phase 2**: Network Protocol | PDU, Association State Machine, DIMSE-C, Compression Codecs | ✅ Complete |
-| **Phase 3**: Core Services | Storage SCP/SCU, Index Database, Query/Retrieve, Logging | ✅ Complete |
-| **Phase 4**: Advanced Services | REST API, DICOMweb, AI, Client Module, Cloud Storage, Security, Workflow | ✅ Complete |
-| **Phase 5**: Enterprise Features | Full AWS/Azure SDK, ITK/VTK, FHIR, Clustering | 🔜 Planned |
+| **Phase 3**: Core Services | Storage SCP/SCU, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
+| **Phase 4**: Advanced Services | REST API, DICOMweb, AI, Client Module, Cloud Storage, Security, Workflow, Annotation/Viewer | ✅ Complete |
+| **Phase 5**: Enterprise Features | Full AWS/Azure SDK, ITK/VTK, FHIR, Clustering, Connection Pooling | 🔜 Planned |
 
 **Test Coverage**: 1,837+ tests passing across 128 test files
 
