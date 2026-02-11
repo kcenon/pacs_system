@@ -23,22 +23,17 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ## Project Status
 
-**Current Phase**: ✅ Phase 2 Complete - Network & Services (100%)
+**Current Phase**: ✅ Phase 4 Complete - Advanced Services & Production Hardening
 
-| Milestone | Status | Target |
-|-----------|--------|--------|
-| Analysis & Documentation | ✅ Complete | Week 1 |
-| Core DICOM Structures | ✅ Complete | Week 2-5 |
-| Encoding Module | ✅ Complete | Week 2-5 |
-| Storage Backend | ✅ Complete | Week 6-9 |
-| Integration Adapters | ✅ Complete | Week 6-9 |
-| Network Protocol (PDU) | ✅ Complete | Week 6-9 |
-| DIMSE Services | ✅ Complete | Week 10-13 |
-| Query/Retrieve | ✅ Complete | Week 14-17 |
-| Worklist/MPPS | ✅ Complete | Week 18-20 |
-| Advanced Compression | 🔜 Planned | Phase 3 |
+| Phase | Scope | Status |
+|-------|-------|--------|
+| **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | ✅ Complete |
+| **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | ✅ Complete |
+| **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
+| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock), Security, Workflow, Annotation/Viewer | ✅ Complete |
+| **Phase 5**: Enterprise Features | Full AWS/Azure SDK, ITK/VTK, FHIR, Clustering, Connection Pooling | 🔜 Planned |
 
-**Test Coverage**: 120+ tests passing across 39 test files
+**Test Coverage**: 1,837+ tests passing across 128 test files
 
 ### Phase 1 Achievements (Complete)
 
@@ -73,55 +68,109 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ### Phase 2 Achievements (Complete)
 
-**Network Module** (15 tests):
+**Network Module**:
 - `pdu_types` - PDU type definitions (A-ASSOCIATE, P-DATA, etc.)
-- `pdu_encoder/decoder` - Binary PDU encoding/decoding (~1,500 lines)
-- `association` - Association state machine (~1,300 lines)
+- `pdu_encoder/decoder` - Binary PDU encoding/decoding
+- `association` - Association state machine (PS3.8 Sta1-Sta13)
 - `dicom_server` - TCP server for DICOM connections
-- `dimse_message` - DIMSE message handling (~600 lines)
+- `dimse_message` - DIMSE-C and DIMSE-N message handling
+- `dicom_server_v2` - network_system-based server with async I/O
 
-**Services Module** (7 test files):
+**Compression Codecs**:
+- JPEG Baseline (DCT) - via libjpeg-turbo
+- JPEG Lossless (Process 14)
+- JPEG 2000 (Lossless & Lossy) - via OpenJPEG
+- JPEG-LS (Lossless & Near-Lossless) - via CharLS
+- RLE Lossless - pure C++ implementation
+- SIMD-optimized RLE encoding
+
+### Phase 3 Achievements (Complete)
+
+**Services Module**:
 - `verification_scp` - C-ECHO service (ping/pong)
 - `storage_scp/scu` - C-STORE service (store/send)
-- `query_scp` - C-FIND service (search)
-- `retrieve_scp` - C-MOVE/C-GET service (retrieve)
-- `worklist_scp` - Modality Worklist service (MWL)
-- `mpps_scp` - Modality Performed Procedure Step
+- `query_scp/scu` - C-FIND service (search)
+- `retrieve_scp/scu` - C-MOVE/C-GET service (retrieve)
+- `worklist_scp/scu` - Modality Worklist service (MWL)
+- `mpps_scp/scu` - Modality Performed Procedure Step
+- `sop_class_registry` - 29+ Storage SOP Classes (CT, MR, US, XA, DX, NM, PET, RT, SR, SEG, etc.)
 - `parallel_query_executor` - Parallel batch query execution with timeout
+- IOD validators for modality-specific validation
+
+**Storage Module**:
+- `file_storage` - Hierarchical filesystem storage (Study/Series/Instance)
+- `index_database` - SQLite3-based metadata indexing with WAL mode
+- `migration_runner` - Database schema migrations
+- Patient/Study/Series/Instance/Worklist/MPPS record management
+
+### Phase 4 Achievements (Complete)
+
+**REST API & DICOMweb**:
+- REST API server (Crow-based) with 19 endpoint modules
+- DICOMweb: WADO-RS, STOW-RS, QIDO-RS (PS3.18 conformant)
+- React/TypeScript web frontend (Dashboard, Patients, Worklist, Audit, Config)
+
+**Security**:
+- RBAC access control (Viewer, Technologist, Radiologist, Admin roles)
+- DICOM anonymization engine (PS3.15: Basic, HIPAA Safe Harbor, GDPR profiles)
+- Digital signatures with OpenSSL (X.509 certificates)
+- TLS 1.2/1.3 with mutual authentication
+
+**Workflow & Client**:
+- Auto Prior Study Prefetch with configurable criteria
+- Task Scheduler (interval-based, cron-like, one-time scheduling)
+- Study Lock Manager (exclusive/shared/migration locks)
+- Client module: Job, Routing, Sync, Prefetch, Remote Node managers
+
+**AI Integration**:
+- AI service connector for external inference endpoints
+- AI result handler (SR, SEG, PR DICOM object processing)
+
+**Cloud Storage**:
+- S3 cloud storage (mock implementation for API validation)
+- Azure Blob storage (mock implementation for API validation)
+- Hierarchical Storage Management (HSM) with three-tier storage (Hot/Warm/Cold)
+
+**Monitoring**:
+- Health checks (/health, /ready, /live endpoints)
+- Prometheus-compatible metrics export
+- DICOM metric collectors (association, DIMSE, storage metrics)
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                       PACS System                            │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ Storage SCP │  │ Q/R SCP     │  │ Worklist/MPPS SCP   │  │
-│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘  │
-│         └────────────────┼────────────────────┘             │
-│  ┌───────────────────────▼───────────────────────────────┐  │
-│  │                  DIMSE Message Handler                 │  │
-│  └───────────────────────┬───────────────────────────────┘  │
-│  ┌───────────────────────▼───────────────────────────────┐  │
-│  │              PDU / Association Manager                 │  │
-│  └───────────────────────┬───────────────────────────────┘  │
-└──────────────────────────┼──────────────────────────────────┘
-                           │
-         ┌─────────────────┼─────────────────┐
-         │                 │                 │
-┌────────▼────────┐ ┌──────▼──────┐ ┌────────▼────────┐
-│ network_system  │ │thread_system│ │container_system │
-│    (TCP/TLS)    │ │(Thread Pool)│ │ (Serialization) │
-└─────────────────┘ └─────────────┘ └─────────────────┘
-         │                 │                 │
-         └─────────────────┼─────────────────┘
-                           │
-                  ┌────────▼────────┐
-                  │  common_system  │
-                  │  (Foundation)   │
-                  └─────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                            PACS System                               │
+├──────────────────────────────────────────────────────────────────────┤
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌───────────┐  │
+│  │ REST API │ │ DICOMweb │ │ Web UI  │ │ AI Svc   │ │ Workflow  │  │
+│  │ (Crow)   │ │ WADO/STOW│ │ (React) │ │Connector │ │ Scheduler │  │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
+│       └─────────────┼───────────┼───────────┼──────────────┘        │
+│  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
+│  │  Services (Storage/Query/Retrieve/Worklist/MPPS SCP/SCU)      │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Network (PDU/Association/DIMSE) + Security (RBAC/TLS/Anon)   │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Core (Tag/Element/Dataset/File) + Encoding (VR/Codecs/SIMD)  │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌─────────────┐  ┌─────────────┴──────────┐  ┌─────────────────┐  │
+│  │  Storage    │  │  Client Module         │  │  Monitoring     │  │
+│  │  (DB/File/  │  │  (Job/Route/Sync/      │  │  (Health/       │  │
+│  │   S3/Azure) │  │   Prefetch/RemoteNode) │  │   Metrics)      │  │
+│  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
+├─────────┼────────────────────────────────────────────────────────────┤
+│         │             Integration Adapters                           │
+│  container │ network │ thread │ logger │ monitoring │ ITK (opt)     │
+├─────────┼────────────────────────────────────────────────────────────┤
+│         │              kcenon Ecosystem                               │
+│  common_system │ container_system │ thread_system │ network_system   │
+│  logger_system │ monitoring_system │ database_system (opt)           │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -163,7 +212,15 @@ pacs_system/
 │   │   ├── transfer_syntax.hpp  # Transfer Syntax
 │   │   ├── byte_order.hpp       # Byte order handling
 │   │   ├── implicit_vr_codec.hpp # Implicit VR codec
-│   │   └── explicit_vr_codec.hpp # Explicit VR codec
+│   │   ├── explicit_vr_codec.hpp # Explicit VR codec
+│   │   ├── explicit_vr_big_endian_codec.hpp # Explicit VR BE codec
+│   │   └── compression/         # Compression codecs
+│   │       ├── jpeg_baseline_codec.hpp  # JPEG Baseline
+│   │       ├── jpeg_lossless_codec.hpp  # JPEG Lossless
+│   │       ├── jpeg2000_codec.hpp       # JPEG 2000
+│   │       ├── jpeg_ls_codec.hpp        # JPEG-LS
+│   │       ├── rle_codec.hpp            # RLE Lossless
+│   │       └── codec_factory.hpp        # Codec factory
 │   │
 │   ├── network/                 # Network Protocol (✅ Complete)
 │   │   ├── pdu_types.hpp        # PDU type definitions
@@ -225,35 +282,69 @@ pacs_system/
 │   │   ├── uid_mapping.hpp      # UID mapping for de-identification
 │   │   └── anonymizer.hpp       # DICOM anonymization engine
 │   │
+│   ├── ai/                      # AI Integration (✅ Complete)
+│   │   ├── ai_service_connector.hpp # External AI inference
+│   │   └── ai_result_handler.hpp    # AI result processing (SR, SEG)
+│   │
+│   ├── client/                  # Client Module (✅ Complete)
+│   │   ├── job_manager.hpp      # Async job management
+│   │   ├── routing_manager.hpp  # Rule-based routing
+│   │   ├── sync_manager.hpp     # Multi-node synchronization
+│   │   ├── prefetch_manager.hpp # Intelligent prior study prefetch
+│   │   └── remote_node_manager.hpp # Connection pooling & health
+│   │
+│   ├── workflow/                # Workflow Automation (✅ Complete)
+│   │   ├── auto_prefetch_service.hpp # Worklist-triggered prefetch
+│   │   ├── task_scheduler.hpp   # Interval/cron/one-time scheduling
+│   │   └── study_lock_manager.hpp   # Thread-safe study locking
+│   │
+│   ├── web/                     # REST API & DICOMweb (✅ Complete)
+│   │   ├── rest_server.hpp      # Crow-based HTTP server
+│   │   ├── endpoints/           # 19 endpoint modules
+│   │   ├── thumbnail_service.hpp # Image thumbnail generation
+│   │   └── metadata_service.hpp # DICOM metadata queries
+│   │
+│   ├── di/                      # Dependency Injection (✅ Complete)
+│   │
 │   └── integration/             # Ecosystem Adapters (✅ Complete)
 │       ├── container_adapter.hpp # container_system integration
 │       ├── network_adapter.hpp  # network_system integration
 │       ├── thread_adapter.hpp   # thread_system integration
 │       ├── logger_adapter.hpp   # logger_system integration
 │       ├── monitoring_adapter.hpp # monitoring_system integration
+│       ├── itk_adapter.hpp      # ITK integration (optional)
 │       └── dicom_session.hpp    # High-level session
 │
-├── src/                         # Source files (~48,500 lines)
-│   ├── core/                    # Core implementations (7 files)
-│   ├── encoding/                # Encoding implementations (4 files)
-│   ├── network/                 # Network implementations (8 files)
-│   ├── services/                # Service implementations (7 files)
-│   ├── storage/                 # Storage implementations (4 files)
-│   ├── security/                # Security implementations (6 files)
-│   ├── monitoring/              # Health check implementations (1 file)
-│   └── integration/             # Adapter implementations (6 files)
+├── src/                         # Source files (148 files)
+│   ├── core/                    # Core implementations
+│   ├── encoding/                # Encoding + compression codecs
+│   ├── network/                 # Network protocol + pipeline
+│   ├── services/                # DIMSE services + SOP classes + validation
+│   ├── storage/                 # File/DB/Cloud storage + repositories
+│   ├── security/                # RBAC, anonymization, digital signatures
+│   ├── monitoring/              # Health checks, metrics
+│   ├── web/                     # REST API endpoints + services
+│   ├── workflow/                # Auto prefetch, scheduler, locks
+│   ├── client/                  # Job/routing/sync/prefetch managers
+│   ├── ai/                      # AI service connector + result handler
+│   ├── di/                      # Dependency injection
+│   └── integration/             # Ecosystem adapter implementations
 │
-├── tests/                       # Test suites (102 files, 170+ tests)
-│   ├── core/                    # Core module tests (6 files)
-│   ├── encoding/                # Encoding module tests (5 files)
-│   ├── network/                 # Network module tests (5 files)
-│   ├── services/                # Service tests (7 files)
-│   ├── storage/                 # Storage tests (6 files)
-│   ├── security/                # Security tests (5 files, 44 tests)
-│   ├── monitoring/              # Health check tests (3 files, 50 tests)
-│   └── integration/             # Adapter tests (5 files)
+├── tests/                       # Test suites (128 files, 1,837+ tests)
+│   ├── core/                    # Core module tests
+│   ├── encoding/                # Encoding + codec tests
+│   ├── network/                 # Network + association tests
+│   ├── services/                # Service + SOP class tests
+│   ├── storage/                 # Storage + repository tests
+│   ├── security/                # Security feature tests
+│   ├── monitoring/              # Health check + metrics tests
+│   ├── web/                     # REST API endpoint tests
+│   ├── workflow/                # Workflow service tests
+│   ├── client/                  # Client module tests
+│   ├── ai/                      # AI integration tests
+│   └── integration/             # Adapter + cross-module tests
 │
-├── examples/                    # Example Applications (30 apps, ~35,600 lines)
+├── examples/                    # Example Applications (31 apps)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_info/                # DICOM file summary utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
@@ -329,13 +420,18 @@ pacs_system/
 
 ### Transfer Syntax Support
 
-| Transfer Syntax | UID | Priority |
-|----------------|-----|----------|
-| Implicit VR Little Endian | 1.2.840.10008.1.2 | Required |
-| Explicit VR Little Endian | 1.2.840.10008.1.2.1 | MVP |
-| Explicit VR Big Endian | 1.2.840.10008.1.2.2 | Optional |
-| JPEG Baseline | 1.2.840.10008.1.2.4.50 | Future |
-| JPEG 2000 | 1.2.840.10008.1.2.4.90 | Future |
+| Transfer Syntax | UID | Status |
+|----------------|-----|--------|
+| Implicit VR Little Endian | 1.2.840.10008.1.2 | ✅ Complete |
+| Explicit VR Little Endian | 1.2.840.10008.1.2.1 | ✅ Complete |
+| Explicit VR Big Endian | 1.2.840.10008.1.2.2 | ✅ Complete |
+| JPEG Baseline (Process 1) | 1.2.840.10008.1.2.4.50 | ✅ Complete |
+| JPEG Lossless (Process 14) | 1.2.840.10008.1.2.4.70 | ✅ Complete |
+| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | ✅ Complete |
+| JPEG 2000 Lossy | 1.2.840.10008.1.2.4.91 | ✅ Complete |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | ✅ Complete |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | ✅ Complete |
+| RLE Lossless | 1.2.840.10008.1.2.5 | ✅ Complete |
 
 ---
 
@@ -408,7 +504,7 @@ cd build
 ctest --output-on-failure
 ```
 
-**Test Results**: 170+ tests passing (Core: 57, Encoding: 41, Network: 15, Services: 7+, Storage/Integration: 20+, Monitoring: 50)
+**Test Results**: 1,837+ tests passing across 128 test files (Core, Encoding, Network, Services, Storage, Security, Web, Workflow, Client, AI, Monitoring, Integration)
 
 ### Build Options
 
@@ -1325,20 +1421,20 @@ cmake --build build --target run_full_benchmarks
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 210 files |
-| **Source Files** | 138 files |
-| **Header LOC** | ~59,000 lines |
-| **Source LOC** | ~79,400 lines |
+| **Header Files** | 222 files |
+| **Source Files** | 148 files |
+| **Header LOC** | ~61,500 lines |
+| **Source LOC** | ~85,100 lines |
 | **Example LOC** | ~34,800 lines |
-| **Test LOC** | ~59,800 lines |
-| **Total LOC** | ~232,900 lines |
-| **Test Files** | 125 files |
-| **Test Cases** | 1797+ tests |
+| **Test LOC** | ~62,200 lines |
+| **Total LOC** | ~251,200 lines |
+| **Test Files** | 128 files |
+| **Test Cases** | 1,837+ tests |
 | **Example Programs** | 31 apps |
 | **Documentation** | 55 markdown files |
 | **CI/CD Workflows** | 10 workflows |
-| **Version** | 0.1.0 |
-| **Last Updated** | 2026-01-23 |
+| **Version** | 0.2.0 |
+| **Last Updated** | 2026-02-11 |
 
 <!-- STATS_END -->
 
