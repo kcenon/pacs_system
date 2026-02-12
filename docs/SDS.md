@@ -1,6 +1,6 @@
 # Software Design Specification (SDS) - PACS System
 
-> **Version:** 0.2.0.0
+> **Version:** 0.2.0
 > **Last Updated:** 2026-02-08
 > **Language:** **English** | [한국어](SDS_KO.md)
 > **Status:** Complete
@@ -47,6 +47,39 @@ This SDS is organized into multiple files for maintainability:
 | [SDS_AI.md](SDS_AI.md) | AI Service integration module |
 | [SDS_CLIENT.md](SDS_CLIENT.md) | Client module (Job, Routing, Sync, Prefetch, Remote Node) |
 | [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) | Monitoring collectors plugin architecture |
+
+### Document Versioning Policy
+
+The SDS document family uses **independent versioning** with a compatibility matrix (Option B):
+
+- **Format**: All SDS documents use **3-digit semantic versioning** (`MAJOR.MINOR.PATCH`)
+  - `MAJOR`: Breaking structural changes or complete rewrites
+  - `MINOR`: New sections, significant content additions
+  - `PATCH`: Corrections, clarifications, minor updates
+- **Independence**: Each sub-document maintains its own version number, reflecting its individual revision history
+- **Compatibility**: The matrix below tracks which sub-document versions are compatible with this parent SDS version
+- **Cross-references**: When referencing another SDS document, always cite the specific version from the matrix
+
+### SDS Document Family Version Matrix
+
+| Sub-Document | Current Version | Last Updated | Status |
+|-------------|----------------|--------------|--------|
+| [SDS_COMPONENTS.md](SDS_COMPONENTS.md) | 0.2.0 | 2026-02-08 | Active |
+| [SDS_INTERFACES.md](SDS_INTERFACES.md) | 0.1.3 | 2025-12-07 | Active |
+| [SDS_DATABASE.md](SDS_DATABASE.md) | 0.2.0 | 2026-02-08 | Active |
+| [SDS_SEQUENCES.md](SDS_SEQUENCES.md) | 0.1.1 | 2025-12-04 | Active |
+| [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | 3.0.0 | 2026-02-08 | Active |
+| [SDS_SECURITY.md](SDS_SECURITY.md) | 1.0.0 | 2026-01-03 | Active |
+| [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | 1.0.0 | 2026-01-04 | Active |
+| [SDS_WORKFLOW.md](SDS_WORKFLOW.md) | 1.0.0 | 2026-01-04 | Active |
+| [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md) | 1.1.0 | 2026-01-05 | Active |
+| [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) | 2.0.0 | 2026-01-05 | Active |
+| [SDS_DI.md](SDS_DI.md) | 1.1.0 | 2026-01-05 | Active |
+| [SDS_AI.md](SDS_AI.md) | 2.0.0 | 2026-01-05 | Active |
+| [SDS_CLIENT.md](SDS_CLIENT.md) | 1.0.0 | 2026-02-08 | Active |
+| [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) | 2.1.0 | 2026-01-05 | Active |
+| [SDS_WEB_API.md](SDS_WEB_API.md) | 2.0.0 | 2026-02-08 | Active |
+| [SDS_COMPRESSION.md](SDS_COMPRESSION.md) | 1.0.0 | 2026-01-03 | Active |
 
 ---
 
@@ -678,10 +711,11 @@ The PACS System follows a layered architecture:
 | 2.0.0 | 2026-02-08 | kcenon | Added: Client Module (DES-CLI-001~005) with SDS_CLIENT.md; Added CLI module ID; Updated SDS_WEB_API.md with 10 new endpoints (DES-WEB-013~022); Updated SDS_TRACEABILITY.md with 28 new DES entries; Added 11 storage repositories (DES-STOR-010~020); Added DB monitoring (DES-MON-007) |
 | 2.1.0 | 2026-02-09 | raphaelshin | Added: Compiler versions and database_system to technology stack for Issue #674. |
 | 2.1.1 | 2026-02-12 | raphaelshin | Fixed: SRS version cross-reference 0.1.3.0 → 0.1.3.2; Added SRS-INT-011 traceability for Issue #688. |
+| 2.2.0 | 2026-02-12 | raphaelshin | Normalized SDS family versioning to 3-digit semver; Added versioning policy and compatibility matrix for Issue #689. |
 
 ---
 
-*Document Version: 0.2.0.0*
+*Document Version: 0.2.0*
 *Created: 2025-11-30*
 *Updated: 2026-02-12*
 *Author: kcenon@naver.com*
