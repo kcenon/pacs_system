@@ -744,15 +744,15 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 ### IR-8: AWS SDK Integration
 
-| System | Integration Type | Purpose | Phase |
-|--------|-----------------|---------|-------|
-| **AWS SDK for C++** | Cloud Storage | S3 storage backend operations | 4 |
+| System | Integration Type | Purpose | Phase | Status |
+|--------|-----------------|---------|-------|--------|
+| **AWS SDK for C++** | Cloud Storage | S3 storage backend operations | 5 | Mock implemented (Phase 4); Full SDK planned (Phase 5) |
 
 ### IR-9: Azure SDK Integration
 
-| System | Integration Type | Purpose | Phase |
-|--------|-----------------|---------|-------|
-| **Azure SDK for C++** | Cloud Storage | Blob Storage backend operations | 4 |
+| System | Integration Type | Purpose | Phase | Status |
+|--------|-----------------|---------|-------|--------|
+| **Azure SDK for C++** | Cloud Storage | Blob Storage backend operations | 5 | Mock implemented (Phase 4); Full SDK planned (Phase 5) |
 
 ---
 
