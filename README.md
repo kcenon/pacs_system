@@ -126,9 +126,9 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - AI service connector for external inference endpoints
 - AI result handler (SR, SEG, PR DICOM object processing)
 
-**Cloud Storage**:
-- S3 cloud storage (mock implementation for API validation)
-- Azure Blob storage (mock implementation for API validation)
+**Cloud Storage** *(Mock Implementation — Full SDK integration planned for Phase 5)*:
+- S3 cloud storage (mock in-memory client for API validation; no AWS SDK dependency)
+- Azure Blob storage (mock in-memory client for API validation; no Azure SDK dependency)
 - Hierarchical Storage Management (HSM) with three-tier storage (Hot/Warm/Cold)
 
 **Monitoring**:
