@@ -1857,7 +1857,7 @@ private:
 
 ---
 
-*Document Version: 0.1.3.0*
+*Document Version: 0.1.3.2*
 *Created: 2025-11-30*
-*Updated: 2026-01-04*
+*Updated: 2026-02-12*
 *Author: kcenon@naver.com*

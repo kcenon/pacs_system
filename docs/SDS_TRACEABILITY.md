@@ -144,6 +144,7 @@ Legend:
 | **IR-7** | Crow REST Framework Integration | SRS-INT-008 | Full |
 | **IR-8** | AWS SDK Integration | SRS-INT-009 | Full |
 | **IR-9** | Azure SDK Integration | SRS-INT-010 | Full |
+| **IR-10** | database_system Integration | SRS-INT-011 | Full |
 
 ---
 
@@ -223,6 +224,7 @@ Legend:
 | **SRS-INT-008** | Crow REST Framework | DES-WEB-001 | `rest_server` |
 | **SRS-INT-009** | AWS SDK Integration | DES-STOR-005 | `s3_storage` |
 | **SRS-INT-010** | Azure SDK Integration | DES-STOR-006 | `azure_blob_storage` |
+| **SRS-INT-011** | database_system Integration | DES-DB-001 | `database_system` (query builder, SQL injection protection) |
 
 ### 3.5.1 Web/REST API Module Requirements
 
