@@ -732,9 +732,10 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 ### IR-6: ITK/VTK Integration
 
-| System | Integration Type | Purpose | Phase |
-|--------|-----------------|---------|-------|
-| **ITK/VTK** | Image Processing | Advanced medical image processing and 3D reconstruction | 5 |
+| System | Integration Type | Purpose | Phase | Status |
+|--------|-----------------|---------|-------|--------|
+| **ITK** | Image Processing | DICOM-to-ITK image conversion, Hounsfield transform, series loading (conditional build via `PACS_WITH_ITK`) | 4 | ✅ Implemented |
+| **VTK** | 3D Visualization | Advanced 3D reconstruction and visualization pipelines | 5 | Planned |
 
 ### IR-7: Crow REST Framework Integration
 
@@ -814,8 +815,8 @@ The following table provides a unified overview of all development phases. This 
 | **1** | Foundation | DICOM Core: Data Elements, Data Sets, File I/O (Part 10), Tag Dictionary, Transfer Syntax | ✅ Complete |
 | **2** | Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C basics (C-ECHO, C-STORE), Compression Codecs | ✅ Complete |
 | **3** | Core Services | Storage SCP/SCU, File Storage Backend, Index Database, Query/Retrieve (C-FIND, C-MOVE, C-GET), Logging, Monitoring | ✅ Complete |
-| **4** | Advanced Services & Production Hardening | Worklist, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock), Security (RBAC, Anonymization, Digital Signatures), Workflow (Prefetch, Scheduler, Study Lock), Additional SOP Classes, Object Pools, SIMD, Annotation/Viewer | ✅ Complete |
-| **5** | Enterprise Features | Full AWS/Azure SDK, ITK/VTK, FHIR, Clustering, Connection Pooling | Planned |
+| **4** | Advanced Services & Production Hardening | Worklist, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock), Security (RBAC, Anonymization, Digital Signatures), Workflow (Prefetch, Scheduler, Study Lock), Additional SOP Classes, Object Pools, SIMD, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
+| **5** | Enterprise Features | Full AWS/Azure SDK, VTK Integration, FHIR, Clustering, Connection Pooling | Planned |
 
 **Cross-Reference**: PRD phases map to SRS requirement phases (SRS-CORE-* → Phase 1, SRS-NET-*/SRS-ENC-* → Phase 2, SRS-SVC-* → Phase 3, SRS-WF-*/SRS-SEC-*/SRS-WEB-* → Phase 4, SRS-INT-007 → Phase 5).
 
@@ -881,6 +882,7 @@ The following table provides a unified overview of all development phases. This 
 | Workflow | Auto Prefetch, Task Scheduler, Study Lock | Automated operations | ✅ Complete |
 | Monitoring | DICOM metrics, Object Pool, Health Checks | Production observability | ✅ Complete |
 | Annotation/Viewer | Annotation, Viewer State, Key Image, Measurement | Clinical data management | ✅ Complete |
+| ITK Adapter | DICOM-to-ITK image conversion (optional, `PACS_WITH_ITK`) | CT/MR series loading, Hounsfield conversion | ✅ Complete |
 
 **Dependencies**: All systems
 
@@ -892,7 +894,7 @@ The following table provides a unified overview of all development phases. This 
 |-------------|-------------|---------------------|
 | Full AWS S3 SDK | Production S3 integration | Replace mock implementation |
 | Full Azure SDK | Production Azure Blob integration | Replace mock implementation |
-| ITK/VTK Integration | Advanced image processing and 3D reconstruction | Image analysis pipeline |
+| VTK Integration | 3D reconstruction and advanced visualization pipelines (extends existing ITK adapter) | VTK rendering, volume rendering |
 | FHIR Integration | HL7 FHIR interoperability | Healthcare data exchange |
 | Clustering | Multi-node PACS deployment | Horizontal scaling |
 | Connection Pooling | Reuse DICOM associations | Reduced latency |
