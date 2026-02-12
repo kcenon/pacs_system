@@ -113,7 +113,7 @@ New DICOM services and SOP classes can be added without modifying existing code:
 - Service handlers implement a common interface
 - SOP classes registered in dictionary
 - Transfer syntaxes pluggable as codecs
-- Storage backends implement abstract interface
+- Storage backends implement abstract interface (File, DB, S3/Azure mock — full SDK Phase 5)
 
 ### Performance
 

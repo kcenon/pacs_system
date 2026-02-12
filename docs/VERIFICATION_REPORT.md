@@ -162,8 +162,8 @@ The verification was conducted through static code analysis, documentation revie
 | monitoring_system | SRS-INT-006 | `monitoring_adapter.hpp/cpp` (508 lines) | ✅ Complete |
 | ITK/VTK | SRS-INT-007 | - | 🔜 Planned (Phase 5) |
 | Crow REST Framework | SRS-INT-008 | `web_server.hpp/cpp`, Crow integration | ✅ Complete |
-| AWS SDK | SRS-INT-009 | - | 🔜 Planned (Phase 4) |
-| Azure SDK | SRS-INT-010 | - | 🔜 Planned (Phase 4) |
+| AWS SDK | SRS-INT-009 | `s3_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
+| Azure SDK | SRS-INT-010 | `azure_blob_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
 
 **Verification Evidence:**
 - `dicom_session.hpp/cpp` (404 lines) provides high-level session management
@@ -498,7 +498,7 @@ tests/
 |----------|----------------|
 | **High** | Add JPEG compression support (Transfer Syntax 1.2.840.10008.1.2.4.50) |
 | **Medium** | Implement connection pooling for SCU operations |
-| **Low** | Cloud storage backend (S3/Azure Blob) |
+| **Low** | Cloud storage full SDK integration (S3/Azure Blob) — mock implementations complete, production SDK planned Phase 5 |
 
 > **Note:** The following have been implemented:
 > - ✅ Explicit VR Big Endian transfer syntax (Issue #126)
