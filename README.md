@@ -1423,18 +1423,20 @@ cmake --build build --target run_full_benchmarks
 |--------|-------|
 | **Header Files** | 222 files |
 | **Source Files** | 148 files |
-| **Header LOC** | ~61,500 lines |
-| **Source LOC** | ~85,100 lines |
-| **Example LOC** | ~34,800 lines |
-| **Test LOC** | ~62,200 lines |
-| **Total LOC** | ~251,200 lines |
+| **Header LOC** | 61,462 lines |
+| **Source LOC** | 85,141 lines |
+| **Example LOC** | 34,752 lines |
+| **Test LOC** | 62,241 lines |
+| **Total LOC** | 251,242 lines |
 | **Test Files** | 128 files |
-| **Test Cases** | 1,837+ tests |
+| **Test Cases** | 1,837 tests |
 | **Example Programs** | 31 apps |
 | **Documentation** | 55 markdown files |
 | **CI/CD Workflows** | 10 workflows |
 | **Version** | 0.2.0 |
-| **Last Updated** | 2026-02-11 |
+| **Last Updated** | 2026-02-12 |
+
+> **Measurement date**: 2026-02-11 (commit `0bd5dc44`). LOC counted via `find <dir> -name "*.cpp" -exec cat {} + | wc -l`, excluding `build-ci/`.
 
 <!-- STATS_END -->
 
