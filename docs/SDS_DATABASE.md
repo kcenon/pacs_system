@@ -1,6 +1,6 @@
 # SDS - Database Design
 
-> **Version:** 0.2.0.0
+> **Version:** 0.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-02-08
 
@@ -989,7 +989,7 @@ PRAGMA integrity_check;
 
 ---
 
-*Document Version: 0.2.0.0*
+*Document Version: 0.2.0*
 *Created: 2025-11-30*
 *Updated: 2026-02-08*
 *Author: kcenon@naver.com*
