@@ -1,6 +1,6 @@
 # SDS - Interface Specifications
 
-> **Version:** 0.1.2.0
+> **Version:** 0.1.3
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2025-12-07
 
@@ -1857,7 +1857,7 @@ private:
 
 ---
 
-*Document Version: 0.1.3.2*
+*Document Version: 0.1.3*
 *Created: 2025-11-30*
 *Updated: 2026-02-12*
 *Author: kcenon@naver.com*

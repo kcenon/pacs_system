@@ -1,6 +1,6 @@
 # SDS - Component Design Specifications
 
-> **Version:** 0.2.0.0
+> **Version:** 0.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-02-08
 
@@ -1866,7 +1866,7 @@ std::thread worker_thread           thread_adapter pool
 
 ---
 
-*Document Version: 0.2.0.0*
+*Document Version: 0.2.0*
 *Created: 2025-11-30*
 *Updated: 2026-02-08*
 *Author: kcenon@naver.com*
