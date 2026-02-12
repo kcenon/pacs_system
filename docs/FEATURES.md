@@ -1083,6 +1083,20 @@ storage_scp scp_via_di(logger);
 - Storage throughput (MB/s)
 - Error rates
 
+### ITK Adapter (Optional)
+
+**Purpose**: DICOM-to-ITK image conversion for medical image analysis.
+
+**Build**: Conditional compilation via `PACS_BUILD_ITK_ADAPTER` CMake option (OFF by default, requires ITK installation).
+
+**Features**:
+- DICOM dataset to ITK image conversion (`dataset_to_image<>()` template)
+- DICOM series to 3D volume reconstruction (`series_to_image()`)
+- CT Hounsfield Unit conversion (`apply_hounsfield_conversion()`)
+- Metadata extraction (spatial information, orientation, position)
+- Type aliases for common medical images (`ct_image_type`, `mr_image_type`)
+- Convenience loaders: `load_ct_series()`, `load_mr_series()`
+
 ---
 
 ## Security Features
@@ -1784,7 +1798,7 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | Clustering | Multi-node PACS | Phase 5 |
 | Full AWS S3 SDK | Production AWS S3 integration (replace mock) | Phase 5 |
 | Full Azure SDK | Production Azure Blob Storage integration (replace mock) | Phase 5 |
-| ITK/VTK Integration | Advanced image processing and 3D reconstruction | Phase 5 |
+| VTK Integration | 3D visualization and advanced processing pipelines (extends existing ITK adapter) | Phase 5 |
 | FHIR Integration | Healthcare interop | Phase 5 |
 
 ---
