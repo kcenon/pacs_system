@@ -1,7 +1,7 @@
 # PACS System Verification Report
 
-> **Report Version:** 0.1.6.0
-> **Report Date:** 2026-02-08
+> **Report Version:** 0.1.6.1
+> **Report Date:** 2026-02-12
 > **Language:** **English** | [한국어](VERIFICATION_REPORT_KO.md)
 > **Status:** Complete
 > **Related Document:** [VALIDATION_REPORT.md](VALIDATION_REPORT.md) (SRS 요구사항 충족 확인)
@@ -21,11 +21,11 @@ This **Verification Report** confirms that the PACS (Picture Archiving and Commu
 
 The verification was conducted through static code analysis, documentation review, and structural assessment.
 
-### Overall Status: **Phase 4 Complete - Production Ready**
+### Overall Status: **Phase 4 Complete — 85% SRS Coverage**
 
 | Category | Status | Score |
 |----------|--------|-------|
-| **Requirements Coverage** | ⏳ In Progress | 77% (57/74) |
+| **Requirements Coverage** | ⏳ In Progress | 85% (64/75) |
 | **Code Implementation** | ✅ Complete | 100% |
 | **Documentation Accuracy** | ✅ Updated | 100% |
 | **Test Coverage** | ✅ Passing | 290+ tests |
@@ -196,22 +196,37 @@ The verification was conducted through static code analysis, documentation revie
 
 | Requirement | SRS ID | Implementation | Status |
 |-------------|--------|----------------|--------|
-| Auto Prior Study Prefetch | SRS-WKF-001 | - | 🔜 Planned (Phase 4) |
-| Background Task Scheduling | SRS-WKF-002 | - | 🔜 Planned (Phase 4) |
+| Auto Prior Study Prefetch | SRS-WKF-001 | `auto_prefetch_service.hpp/cpp` | ✅ Verified |
+| Background Task Scheduling | SRS-WKF-002 | `task_scheduler.hpp/cpp` | ✅ Verified |
+| Study Lock Manager | SRS-WKF-003 | `study_lock_manager.hpp/cpp` | ✅ Verified |
+
+**Verification Evidence:**
+- `auto_prefetch_service_test.cpp` — prefetch logic and configuration tests
+- `task_scheduler_test.cpp` — scheduling, priority, and lifecycle tests
+- `study_lock_manager_test.cpp` — lock acquisition, release, and conflict tests
 
 #### 2.1.9 Cloud Storage Module (FR-8.x)
 
 | Requirement | SRS ID | Implementation | Status |
 |-------------|--------|----------------|--------|
-| AWS S3 Storage Backend | SRS-CSTOR-001 | - | 🔜 Planned (Phase 4) |
-| Azure Blob Storage Backend | SRS-CSTOR-002 | - | 🔜 Planned (Phase 4) |
-| Hierarchical Storage Mgmt | SRS-CSTOR-003 | - | 🔜 Planned (Phase 5) |
+| AWS S3 Storage Backend | SRS-CSTOR-001 | `s3_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
+| Azure Blob Storage Backend | SRS-CSTOR-002 | `azure_blob_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
+| Hierarchical Storage Mgmt | SRS-CSTOR-003 | `hsm_storage.hpp/cpp` | ✅ Verified |
+
+**Verification Evidence:**
+- `s3_storage_test.cpp` — mock S3 upload/download/query tests
+- `azure_blob_storage_test.cpp` — mock Azure Blob upload/download/query tests
+- `hsm_storage_test.cpp` — tiered storage migration and lifecycle tests
 
 #### 2.1.10 AI Service Module (FR-9.x)
 
 | Requirement | SRS ID | Implementation | Status |
 |-------------|--------|----------------|--------|
-| AI Service Integration | SRS-AI-001 | - | 🔜 Planned (Phase 5) |
+| AI Service Integration | SRS-AI-001 | `ai_service_connector.hpp/cpp`, `ai_result_handler.hpp/cpp` | ✅ Verified (Interface) |
+
+**Verification Evidence:**
+- `ai_service_connector_test.cpp` — connector lifecycle and inference request tests
+- `ai_result_handler_test.cpp` — result processing and callback tests
 
 ### 2.2 Non-Functional Requirements Verification
 
@@ -496,9 +511,9 @@ tests/
 
 ### 9.1 Verification Summary
 
-The PACS System has successfully completed Phase 2 development with all planned features implemented and verified:
+The PACS System has successfully completed Phase 4 development with all planned features implemented and verified:
 
-- **77% of functional requirements** from SRS are implemented (57/74), remaining 17 planned for Phase 4-5
+- **85% of functional requirements** from SRS are implemented (64/75), remaining 11 planned for Phase 5+
 - **136+ unit tests** passing across 37 test files
 - **11 example applications** demonstrating all features
 - **Full DICOM PS3.5/PS3.7/PS3.8 compliance** for supported services
@@ -509,7 +524,7 @@ The PACS System has successfully completed Phase 2 development with all planned 
 
 This verification confirms that the PACS System:
 
-1. ✅ Meets all implemented functional requirements (57/74, 17 planned)
+1. ✅ Meets all implemented functional requirements (64/75, 11 planned)
 2. ✅ Complies with DICOM standards for implemented services
 3. ✅ Maintains production-grade code quality
 4. ✅ Has comprehensive test coverage
@@ -608,9 +623,10 @@ src/
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | Scoped to Verification only (SDS compliance); Validation moved to separate VALIDATION_REPORT.md |
 | 1.4.0 | 2025-12-05 | kcenon@naver.com | Added Network V2 tests for network_system migration (Issue #163) |
 | 1.5.0 | 2025-12-07 | kcenon@naver.com | Added: Thread migration verification (Epic #153), DIMSE-N (#127), Ultrasound (#128), XA (#129), Explicit VR BE (#126); Updated project metrics |
+| 1.6.0 | 2026-02-12 | kcenon@naver.com | Fixed status contradictions: updated header from "Production Ready" to "85% SRS Coverage"; corrected SRS-WKF-001/002/003, SRS-CSTOR-001/002/003, SRS-AI-001 from Planned to Verified/Mock Implemented; added verification evidence sections; recalculated coverage 57/74 → 64/75 (Issue #685) |
 
 ---
 
-*Report Version: 0.1.6.0*
-*Generated: 2026-02-08*
+*Report Version: 0.1.6.1*
+*Generated: 2026-02-12*
 *Verified by: kcenon@naver.com*
