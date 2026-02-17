@@ -170,6 +170,12 @@ namespace error_codes {
     constexpr int mpps_missing_uid = service_base - 74;
     constexpr int mpps_invalid_status_transition = service_base - 75;
 
+    // Storage Commitment service errors (-876 to -879)
+    constexpr int storage_commitment_unexpected_command = service_base - 76;
+    constexpr int storage_commitment_invalid_sop_class = service_base - 77;
+    constexpr int storage_commitment_missing_transaction_uid = service_base - 78;
+    constexpr int storage_commitment_missing_sequence = service_base - 79;
+
     // Worklist service errors (-880 to -889)
     constexpr int worklist_handler_not_set = service_base - 80;
     constexpr int worklist_unexpected_command = service_base - 81;
