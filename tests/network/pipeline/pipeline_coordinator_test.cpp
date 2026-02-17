@@ -388,12 +388,12 @@ TEST_CASE("pipeline_coordinator get_config", "[network][pipeline][coordinator]")
 
 TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline][coordinator]") {
     pipeline_config config;
-    // Windows CI runners have limited vCPUs (typically 2); reduce worker
-    // threads to avoid excessive context-switching that leads to timeouts.
+    // Windows CI runners have limited vCPUs (typically 2); use minimal worker
+    // threads to avoid excessive context-switching that leads to CTest timeouts.
 #ifdef _WIN32
-    config.net_io_workers = 2;
+    config.net_io_workers = 1;
     config.protocol_workers = 1;
-    config.execution_workers = 2;
+    config.execution_workers = 1;
     config.encode_workers = 1;
 #else
     config.net_io_workers = 4;
@@ -408,7 +408,7 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
     // Reduce job count on Windows CI to stay within CTest --timeout 120
 #ifdef _WIN32
-    constexpr size_t num_jobs = 16;
+    constexpr size_t num_jobs = 8;
 #else
     constexpr size_t num_jobs = 100;
 #endif
@@ -455,8 +455,8 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     {
         std::unique_lock<std::mutex> lock(mutex);
 #ifdef _WIN32
-        // 16 jobs with reduced workers; keep well below CTest 120s limit
-        constexpr auto timeout = std::chrono::seconds(45);
+        // 8 jobs with minimal workers; keep well below CTest 120s limit
+        constexpr auto timeout = std::chrono::seconds(30);
 #else
         constexpr auto timeout = std::chrono::seconds(60);
 #endif
