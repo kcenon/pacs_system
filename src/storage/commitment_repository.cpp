@@ -310,7 +310,11 @@ auto commitment_repository::format_timestamp(
     std::chrono::system_clock::time_point tp) const -> std::string {
     auto time_t = std::chrono::system_clock::to_time_t(tp);
     std::tm tm{};
+#ifdef _WIN32
+    gmtime_s(&tm, &time_t);
+#else
     gmtime_r(&time_t, &tm);
+#endif
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     return oss.str();
