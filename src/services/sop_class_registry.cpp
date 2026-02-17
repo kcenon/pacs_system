@@ -4,6 +4,7 @@
  */
 
 #include "pacs/services/sop_class_registry.hpp"
+#include "pacs/services/storage_commitment_types.hpp"
 #include "pacs/services/sop_classes/dx_storage.hpp"
 #include "pacs/services/sop_classes/nm_storage.hpp"
 #include "pacs/services/sop_classes/pet_storage.hpp"
@@ -805,6 +806,19 @@ void sop_class_registry::register_other_sop_classes() {
             "1.2.840.10008.1.1",
             "Verification SOP Class",
             sop_class_category::verification,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Storage Commitment Push Model SOP Class (PS3.4 Annex J)
+    registry_.emplace(
+        std::string(storage_commitment_push_model_sop_class_uid),
+        sop_class_info{
+            storage_commitment_push_model_sop_class_uid,
+            "Storage Commitment Push Model",
+            sop_class_category::storage_commitment,
             modality_type::other,
             false,
             false

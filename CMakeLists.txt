@@ -1758,6 +1758,7 @@ if(PACS_BUILD_TESTS)
         tests/services/worklist_scu_test.cpp
         tests/services/mpps_scp_test.cpp
         tests/services/mpps_scu_test.cpp
+        tests/services/storage_commitment_types_test.cpp
         tests/services/us_storage_test.cpp
         tests/services/dx_storage_test.cpp
         tests/services/mg_storage_test.cpp
