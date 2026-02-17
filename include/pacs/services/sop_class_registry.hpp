@@ -29,14 +29,15 @@ namespace pacs::services {
  * @brief Category of SOP Class
  */
 enum class sop_class_category {
-    storage,            ///< Storage Service Class
-    query_retrieve,     ///< Query/Retrieve Service Class
-    worklist,           ///< Modality Worklist Service Class
-    mpps,               ///< Modality Performed Procedure Step
-    verification,       ///< Verification Service Class
-    print,              ///< Print Management Service Class
-    media,              ///< Media Storage Service Class
-    other               ///< Other service classes
+    storage,              ///< Storage Service Class
+    query_retrieve,       ///< Query/Retrieve Service Class
+    worklist,             ///< Modality Worklist Service Class
+    mpps,                 ///< Modality Performed Procedure Step
+    storage_commitment,   ///< Storage Commitment Push Model Service Class
+    verification,         ///< Verification Service Class
+    print,                ///< Print Management Service Class
+    media,                ///< Media Storage Service Class
+    other                 ///< Other service classes
 };
 
 /**

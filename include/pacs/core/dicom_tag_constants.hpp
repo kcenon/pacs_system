@@ -209,6 +209,18 @@ inline constexpr dicom_tag referenced_sop_class_uid{0x0008, 0x1150};
 /// Referenced SOP Instance UID (in Sequence)
 inline constexpr dicom_tag referenced_sop_instance_uid{0x0008, 0x1155};
 
+/// Transaction UID — identifies a Storage Commitment transaction (PS3.4 J.3)
+inline constexpr dicom_tag transaction_uid{0x0008, 0x1195};
+
+/// Failure Reason — reason code for commitment failure (PS3.4 Table J.3-2)
+inline constexpr dicom_tag failure_reason{0x0008, 0x1197};
+
+/// Failed SOP Sequence — instances that failed commitment (PS3.4 J.3)
+inline constexpr dicom_tag failed_sop_sequence{0x0008, 0x1198};
+
+/// Referenced SOP Sequence — instances in commitment request/success (PS3.4 J.3)
+inline constexpr dicom_tag referenced_sop_sequence{0x0008, 0x1199};
+
 // ============================================================================
 // Patient Module (Group 0x0010)
 // ============================================================================
