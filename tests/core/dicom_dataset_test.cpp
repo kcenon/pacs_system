@@ -741,3 +741,86 @@ TEST_CASE("dicom_dataset edge cases", "[core][dicom_dataset]") {
         CHECK(ds.get_string(tags::patient_name) == "MODIFIED^NAME");
     }
 }
+
+// ============================================================================
+// Character Set Integration Tests
+// ============================================================================
+
+TEST_CASE("dicom_dataset get_decoded_string", "[core][dicom_dataset][charset]") {
+    SECTION("ASCII text without SpecificCharacterSet passes through") {
+        dicom_dataset ds;
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        auto result = ds.get_decoded_string(tags::patient_name);
+        CHECK(result == "DOE^JOHN");
+    }
+
+    SECTION("returns default for missing element") {
+        dicom_dataset ds;
+        auto result = ds.get_decoded_string(tags::patient_name, "UNKNOWN");
+        CHECK(result == "UNKNOWN");
+    }
+
+    SECTION("UTF-8 dataset passes through unchanged") {
+        dicom_dataset ds;
+        ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 192");
+        ds.set_string(tags::patient_name, vr_type::PN,
+                      "DOE^JOHN=\xED\x99\x8D\xEA\xB8\xB8\xEB\x8F\x99");
+
+        auto result = ds.get_decoded_string(tags::patient_name);
+        CHECK(result == "DOE^JOHN=\xED\x99\x8D\xEA\xB8\xB8\xEB\x8F\x99");
+    }
+
+    SECTION("Latin-1 dataset decodes to UTF-8") {
+        dicom_dataset ds;
+        ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 100");
+        ds.set_string(tags::institution_name, vr_type::LO, "H\xF4pital");
+
+        auto result = ds.get_decoded_string(tags::institution_name);
+        // Latin-1 ô (0xF4) → UTF-8 (0xC3 0xB4)
+        CHECK(result == "H\xC3\xB4pital");
+    }
+}
+
+TEST_CASE("dicom_dataset set_encoded_string", "[core][dicom_dataset][charset]") {
+    SECTION("ASCII text without SpecificCharacterSet stores as-is") {
+        dicom_dataset ds;
+        ds.set_encoded_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        CHECK(ds.get_string(tags::patient_name) == "DOE^JOHN");
+    }
+
+    SECTION("UTF-8 charset stores UTF-8 as-is") {
+        dicom_dataset ds;
+        ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 192");
+        ds.set_encoded_string(tags::patient_name, vr_type::PN,
+                              "DOE^JOHN=\xED\x99\x8D");
+
+        CHECK(ds.get_string(tags::patient_name) == "DOE^JOHN=\xED\x99\x8D");
+    }
+
+    SECTION("Latin-1 charset encodes from UTF-8") {
+        dicom_dataset ds;
+        ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 100");
+        // UTF-8 ô = 0xC3 0xB4
+        ds.set_encoded_string(tags::institution_name, vr_type::LO,
+                              "H\xC3\xB4pital");
+
+        // Stored bytes should be Latin-1: ô = 0xF4
+        auto raw = ds.get_string(tags::institution_name);
+        CHECK(raw == "H\xF4pital");
+    }
+}
+
+TEST_CASE("dicom_dataset charset round-trip", "[core][dicom_dataset][charset]") {
+    SECTION("Latin-1 encode then decode") {
+        dicom_dataset ds;
+        ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 100");
+
+        std::string utf8_input = "caf\xC3\xA9";  // café in UTF-8
+        ds.set_encoded_string(tags::institution_name, vr_type::LO, utf8_input);
+
+        auto decoded = ds.get_decoded_string(tags::institution_name);
+        CHECK(decoded == utf8_input);
+    }
+}

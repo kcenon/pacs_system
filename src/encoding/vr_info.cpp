@@ -113,8 +113,12 @@ bool is_dt_char(char c) {
 
 bool is_printable(char c) {
     auto uc = static_cast<unsigned char>(c);
-    // Allow printable ASCII (0x20-0x7E) plus CR, LF, FF, TAB for text VRs
+    // Allow printable ASCII (0x20-0x7E), CR, LF, FF, TAB for text VRs,
+    // ESC (0x1B) for ISO 2022 escape sequences, and high bytes (0x80+)
+    // for multi-byte CJK encodings (EUC-KR, GB2312, ISO-2022-JP, etc.)
     return (uc >= 0x20 && uc <= 0x7E) ||
+           uc >= 0x80 ||
+           uc == 0x1B ||
            c == '\r' || c == '\n' || c == '\f' || c == '\t';
 }
 

@@ -381,25 +381,31 @@ Group 0004 directory record tags are fully supported.
 
 ### 6.1 Supported Character Sets
 
-| Character Set | Defined Term | Support |
-|--------------|--------------|---------|
-| Default (ASCII) | ISO_IR 6 | Full |
-| Latin-1 | ISO_IR 100 | Full |
-| Unicode UTF-8 | ISO_IR 192 | Full |
+| Character Set | Defined Term | ISO-IR | Support |
+|--------------|--------------|--------|---------|
+| Default (ASCII) | ISO_IR 6 | IR 6 | Full |
+| Latin-1 (Western European) | ISO_IR 100 | IR 100 | Full |
+| Unicode UTF-8 | ISO_IR 192 | IR 192 | Full |
+| Korean (KS X 1001) | ISO 2022 IR 149 | IR 149 | Full |
+| Japanese Kanji (JIS X 0208) | ISO 2022 IR 87 | IR 87 | Full |
+| Japanese Katakana (JIS X 0201) | ISO 2022 IR 13 | IR 13 | Full |
+| Simplified Chinese (GB 2312) | ISO 2022 IR 58 | IR 58 | Full |
 
-### 6.2 Limitations
+### 6.2 ISO 2022 Code Extension Support
 
-The following character sets are **not currently supported**:
+The implementation supports ISO 2022 escape sequence-based code extensions
+as specified in DICOM PS3.5 Section 6.1. Multi-valued Specific Character Set
+(0008,0005) attributes are parsed, and text segments are decoded/encoded
+per their associated character set.
 
-| Character Set | Defined Term | Status |
-|--------------|--------------|--------|
-| Japanese (JIS X 0208) | ISO_IR 87 | Planned (Issue #700) |
-| Korean (KS X 1001) | ISO_IR 149 | Planned (Issue #700) |
-| Simplified Chinese (GB 2312) | ISO_IR 58 | Planned (Issue #700) |
-| ISO 2022 escape sequences | N/A | Planned (Issue #700) |
-
-See [Issue #700](https://github.com/kcenon/pacs_system/issues/700) for CJK
-character set extension plans.
+Features:
+- Automatic detection and splitting by ISO 2022 escape sequences
+- Per-segment encoding conversion using platform iconv (POSIX) or
+  MultiByteToWideChar/WideCharToMultiByte (Windows)
+- Person Name (PN) component group decoding (Alphabetic=Ideographic=Phonetic)
+- Round-trip encode/decode support for CJK character sets
+- Dataset-level `get_decoded_string()` / `set_encoded_string()` convenience
+  methods that auto-detect Specific Character Set from the dataset
 
 ---
 
@@ -552,7 +558,7 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 
 | Area | Limitation | Reference |
 |------|-----------|-----------|
-| Character Sets | CJK character sets (ISO_IR 87/149/58) not supported | Issue #700 |
+| Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
 | Storage Commitment | Service-level business logic not yet implemented | Issue #701 |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
 | Print Management | Not supported | N/A |

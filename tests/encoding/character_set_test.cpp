@@ -354,3 +354,90 @@ TEST_CASE("Escape sequence format verification", "[encoding][charset]") {
         CHECK(cs->escape_sequence[2] == '\x4A');  // J
     }
 }
+
+// =============================================================================
+// Encoding Tests (UTF-8 to target encoding)
+// =============================================================================
+
+TEST_CASE("convert_from_utf8 with ASCII", "[encoding][charset]") {
+    const auto& ascii = default_character_set();
+    auto result = convert_from_utf8("Hello", ascii);
+    CHECK(result == "Hello");
+}
+
+TEST_CASE("convert_from_utf8 with empty input", "[encoding][charset]") {
+    const auto& ascii = default_character_set();
+    auto result = convert_from_utf8("", ascii);
+    CHECK(result.empty());
+}
+
+TEST_CASE("convert_from_utf8 with Latin-1", "[encoding][charset]") {
+    const auto* cs = find_character_set("ISO_IR 100");
+    REQUIRE(cs != nullptr);
+
+    // UTF-8 e-acute (0xC3 0xA9) should convert to Latin-1 (0xE9)
+    auto result = convert_from_utf8("caf\xC3\xA9", *cs);
+    CHECK(result == "caf\xE9");
+}
+
+TEST_CASE("encode_from_utf8 with UTF-8 passthrough", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 192");
+    std::string utf8_text = "Hello \xED\x99\x8D";
+    auto result = encode_from_utf8(utf8_text, scs);
+    CHECK(result == utf8_text);
+}
+
+TEST_CASE("encode_from_utf8 with ASCII-only text", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 149");
+    auto result = encode_from_utf8("Hello World", scs);
+    CHECK(result == "Hello World");
+}
+
+TEST_CASE("encode_from_utf8 with empty input", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 149");
+    auto result = encode_from_utf8("", scs);
+    CHECK(result.empty());
+}
+
+TEST_CASE("Latin-1 round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 100");
+
+    // Original: Latin-1 bytes for "café"
+    std::string latin1_raw = "caf\xE9";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(latin1_raw, scs);
+    CHECK(utf8 == "caf\xC3\xA9");
+
+    // Encode back to Latin-1
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == latin1_raw);
+}
+
+TEST_CASE("Korean round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 149");
+
+    // Build raw DICOM string: "Hong" + ESC $ ) C + <EUC-KR for 홍> + ESC ( B + "GilDong"
+    std::string raw_input = "Hong";
+    raw_input += std::string("\x1B\x24\x29\x43", 4);  // ESC $ ) C
+    raw_input += "\xC8\xAB";  // 홍 in EUC-KR
+    raw_input += std::string("\x1B\x28\x42", 3);       // ESC ( B
+    raw_input += "GilDong";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(raw_input, scs);
+    // Should contain "Hong" + UTF-8(홍) + "GilDong"
+    CHECK(utf8.find("Hong") == 0);
+    CHECK(utf8.find("GilDong") != std::string::npos);
+
+    // Encode back: should produce escape-sequence-bracketed output
+    auto re_encoded = encode_from_utf8(utf8, scs);
+    // The re-encoded string should contain Korean escape sequence
+    CHECK(re_encoded.find("\x1B\x24\x29\x43") != std::string::npos);
+    // And ASCII return
+    CHECK(re_encoded.find("\x1B\x28\x42") != std::string::npos);
+
+    // Round-trip decode should match original UTF-8
+    auto round_trip_utf8 = decode_to_utf8(re_encoded, scs);
+    CHECK(round_trip_utf8 == utf8);
+}
