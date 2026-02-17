@@ -767,6 +767,7 @@ add_library(pacs_encoding
     src/encoding/explicit_vr_codec.cpp
     src/encoding/explicit_vr_big_endian_codec.cpp
     src/encoding/character_set.cpp
+    src/encoding/dataset_charset.cpp
     src/encoding/compression/jpeg_baseline_codec.cpp
     src/encoding/compression/jpeg_lossless_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp

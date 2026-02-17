@@ -270,6 +270,92 @@ std::string iconv_convert(std::string_view input,
 
 #endif
 
+#ifdef _WIN32
+
+std::string iconv_reverse_convert(std::string_view utf8_input,
+                                   const character_set_info& charset) {
+    if (charset.encoding_name == "ASCII" ||
+        charset.encoding_name == "UTF-8") {
+        return std::string(utf8_input);
+    }
+
+    UINT code_page = CP_ACP;
+    if (charset.encoding_name == "EUC-KR") {
+        code_page = 949;
+    } else if (charset.encoding_name == "ISO-2022-JP") {
+        code_page = 50220;
+    } else if (charset.encoding_name == "GB2312") {
+        code_page = 936;
+    } else if (charset.encoding_name == "ISO-8859-1") {
+        code_page = 28591;
+    } else if (charset.encoding_name == "JIS_X0201") {
+        code_page = 50222;
+    }
+
+    // UTF-8 to wide char
+    int wide_len = MultiByteToWideChar(
+        CP_UTF8, 0, utf8_input.data(), static_cast<int>(utf8_input.size()),
+        nullptr, 0);
+    if (wide_len <= 0) {
+        return std::string(utf8_input);
+    }
+
+    std::wstring wide(static_cast<size_t>(wide_len), L'\0');
+    MultiByteToWideChar(
+        CP_UTF8, 0, utf8_input.data(), static_cast<int>(utf8_input.size()),
+        wide.data(), wide_len);
+
+    // Wide char to target encoding
+    int target_len = WideCharToMultiByte(
+        code_page, 0, wide.data(), wide_len, nullptr, 0, nullptr, nullptr);
+    if (target_len <= 0) {
+        return std::string(utf8_input);
+    }
+
+    std::string result(static_cast<size_t>(target_len), '\0');
+    WideCharToMultiByte(
+        code_page, 0, wide.data(), wide_len,
+        result.data(), target_len, nullptr, nullptr);
+
+    return result;
+}
+
+#else
+
+std::string iconv_reverse_convert(std::string_view utf8_input,
+                                   const character_set_info& charset) {
+    if (charset.encoding_name == "ASCII" ||
+        charset.encoding_name == "UTF-8") {
+        return std::string(utf8_input);
+    }
+
+    iconv_t cd = iconv_open(charset.encoding_name.data(), "UTF-8");
+    if (cd == reinterpret_cast<iconv_t>(-1)) {
+        return std::string(utf8_input);
+    }
+
+    std::string input_copy(utf8_input);
+    char* in_ptr = input_copy.data();
+    size_t in_left = input_copy.size();
+
+    size_t out_size = utf8_input.size() * 4 + 4;
+    std::string output(out_size, '\0');
+    char* out_ptr = output.data();
+    size_t out_left = out_size;
+
+    size_t result = iconv(cd, &in_ptr, &in_left, &out_ptr, &out_left);
+    iconv_close(cd);
+
+    if (result == static_cast<size_t>(-1)) {
+        return std::string(utf8_input);
+    }
+
+    output.resize(out_size - out_left);
+    return output;
+}
+
+#endif
+
 }  // anonymous namespace
 
 // =============================================================================
@@ -529,6 +615,116 @@ std::string decode_person_name(
 
         // Decode each component group independently
         result += decode_to_utf8(group, scs);
+    }
+
+    return result;
+}
+
+// =============================================================================
+// String Encoding (UTF-8 to target encoding)
+// =============================================================================
+
+std::string convert_from_utf8(
+    std::string_view utf8_text,
+    const character_set_info& charset) {
+
+    if (utf8_text.empty()) {
+        return {};
+    }
+
+    if (charset.encoding_name == "ASCII" ||
+        charset.encoding_name == "UTF-8") {
+        return std::string(utf8_text);
+    }
+
+    return iconv_reverse_convert(utf8_text, charset);
+}
+
+std::string encode_from_utf8(
+    std::string_view utf8_text,
+    const specific_character_set& scs) {
+
+    if (utf8_text.empty()) {
+        return {};
+    }
+
+    // Fast path: UTF-8 passthrough
+    if (scs.is_utf8()) {
+        return std::string(utf8_text);
+    }
+
+    // No extensions: simple single-charset conversion
+    if (!scs.uses_extensions()) {
+        return convert_from_utf8(utf8_text, *scs.default_set);
+    }
+
+    // ISO 2022 with extensions: detect non-ASCII runs and wrap with
+    // escape sequences for the first available CJK extension charset.
+    // Strategy: scan UTF-8 text byte by byte. ASCII bytes (< 0x80) use
+    // the default charset. Non-ASCII byte runs are converted using the
+    // first multi-byte extension charset, bracketed by escape sequences.
+
+    const character_set_info* mb_charset = nullptr;
+    for (const auto* cs : scs.extension_sets) {
+        if (cs && cs->is_multi_byte) {
+            mb_charset = cs;
+            break;
+        }
+    }
+
+    if (!mb_charset) {
+        // No multi-byte extension available; convert with default
+        return convert_from_utf8(utf8_text, *scs.default_set);
+    }
+
+    std::string result;
+    result.reserve(utf8_text.size() * 2);
+
+    bool in_multibyte = false;
+    size_t run_start = 0;
+
+    for (size_t i = 0; i < utf8_text.size(); ) {
+        auto uc = static_cast<unsigned char>(utf8_text[i]);
+        bool is_ascii = (uc < 0x80);
+
+        if (is_ascii) {
+            if (in_multibyte) {
+                // Flush multi-byte run
+                auto mb_run = utf8_text.substr(run_start, i - run_start);
+                result.append(mb_charset->escape_sequence);
+                result += convert_from_utf8(mb_run, *mb_charset);
+                // Return to ASCII
+                result.append(esc_ir_6);
+                in_multibyte = false;
+            }
+            if (!in_multibyte && i == run_start) {
+                // Continue ASCII
+            }
+            run_start = i;
+            result += utf8_text[i];
+            ++i;
+            run_start = i;
+        } else {
+            if (!in_multibyte) {
+                in_multibyte = true;
+                run_start = i;
+            }
+            // Skip multi-byte UTF-8 sequence
+            if (uc < 0xC0) { ++i; }
+            else if (uc < 0xE0) { i += 2; }
+            else if (uc < 0xF0) { i += 3; }
+            else { i += 4; }
+            // Clamp to text size
+            if (i > utf8_text.size()) { i = utf8_text.size(); }
+        }
+    }
+
+    // Flush remaining multi-byte run
+    if (in_multibyte && run_start < utf8_text.size()) {
+        auto mb_run = utf8_text.substr(run_start);
+        result.append(mb_charset->escape_sequence);
+        result += convert_from_utf8(mb_run, *mb_charset);
+        result.append(esc_ir_6);
     }
 
     return result;

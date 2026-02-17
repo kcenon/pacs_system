@@ -210,6 +210,33 @@ struct text_segment {
     std::string_view pn_value,
     const specific_character_set& scs);
 
+/**
+ * @brief Encode a UTF-8 string to the target character set encoding.
+ * @param utf8_text The UTF-8 encoded source string
+ * @param scs The Specific Character Set configuration
+ * @return Encoded string with ISO 2022 escape sequences if needed
+ *
+ * This is the reverse of decode_to_utf8(). It converts a UTF-8 string
+ * to the encoding specified by the Specific Character Set, inserting
+ * ISO 2022 escape sequences as appropriate for CJK text.
+ *
+ * If the charset is UTF-8, the input is returned unchanged.
+ * If conversion fails, the raw UTF-8 bytes are returned as-is.
+ */
+[[nodiscard]] std::string encode_from_utf8(
+    std::string_view utf8_text,
+    const specific_character_set& scs);
+
+/**
+ * @brief Encode a single UTF-8 segment to a specific character set.
+ * @param utf8_text The UTF-8 encoded source string
+ * @param charset The target character set
+ * @return Encoded string in the target encoding
+ */
+[[nodiscard]] std::string convert_from_utf8(
+    std::string_view utf8_text,
+    const character_set_info& charset);
+
 /// @}
 
 }  // namespace pacs::encoding
