@@ -4,7 +4,6 @@
  */
 
 #include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
 
 namespace pacs::core {
 
@@ -44,36 +43,6 @@ auto dicom_dataset::get_string(dicom_tag tag,
         return std::string{default_value};
     }
     return elem->as_string().unwrap_or(std::string{default_value});
-}
-
-auto dicom_dataset::get_decoded_string(dicom_tag tag,
-                                       std::string_view default_value) const
-    -> std::string {
-    const auto* elem = get(tag);
-    if (elem == nullptr) {
-        return std::string{default_value};
-    }
-
-    auto raw = elem->as_string();
-    if (!raw.is_ok()) {
-        return std::string{default_value};
-    }
-
-    // Look up Specific Character Set (0008,0005)
-    auto scs_value = get_string(tags::specific_character_set);
-    auto scs = encoding::parse_specific_character_set(scs_value);
-
-    return encoding::decode_to_utf8(raw.value(), scs);
-}
-
-void dicom_dataset::set_encoded_string(dicom_tag tag, encoding::vr_type vr,
-                                       std::string_view utf8_value) {
-    // Look up Specific Character Set (0008,0005)
-    auto scs_value = get_string(tags::specific_character_set);
-    auto scs = encoding::parse_specific_character_set(scs_value);
-
-    auto encoded = encoding::encode_from_utf8(utf8_value, scs);
-    insert(dicom_element::from_string(tag, vr, encoded));
 }
 
 // ============================================================================

@@ -7,6 +7,7 @@
 
 #include <pacs/core/dicom_dataset.hpp>
 #include <pacs/core/dicom_tag_constants.hpp>
+#include <pacs/encoding/dataset_charset.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -751,13 +752,13 @@ TEST_CASE("dicom_dataset get_decoded_string", "[core][dicom_dataset][charset]") 
         dicom_dataset ds;
         ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
 
-        auto result = ds.get_decoded_string(tags::patient_name);
+        auto result = get_decoded_string(ds, tags::patient_name);
         CHECK(result == "DOE^JOHN");
     }
 
     SECTION("returns default for missing element") {
         dicom_dataset ds;
-        auto result = ds.get_decoded_string(tags::patient_name, "UNKNOWN");
+        auto result = get_decoded_string(ds, tags::patient_name, "UNKNOWN");
         CHECK(result == "UNKNOWN");
     }
 
@@ -767,7 +768,7 @@ TEST_CASE("dicom_dataset get_decoded_string", "[core][dicom_dataset][charset]") 
         ds.set_string(tags::patient_name, vr_type::PN,
                       "DOE^JOHN=\xED\x99\x8D\xEA\xB8\xB8\xEB\x8F\x99");
 
-        auto result = ds.get_decoded_string(tags::patient_name);
+        auto result = get_decoded_string(ds, tags::patient_name);
         CHECK(result == "DOE^JOHN=\xED\x99\x8D\xEA\xB8\xB8\xEB\x8F\x99");
     }
 
@@ -776,7 +777,7 @@ TEST_CASE("dicom_dataset get_decoded_string", "[core][dicom_dataset][charset]") 
         ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 100");
         ds.set_string(tags::institution_name, vr_type::LO, "H\xF4pital");
 
-        auto result = ds.get_decoded_string(tags::institution_name);
+        auto result = get_decoded_string(ds, tags::institution_name);
         // Latin-1 ô (0xF4) → UTF-8 (0xC3 0xB4)
         CHECK(result == "H\xC3\xB4pital");
     }
@@ -785,7 +786,7 @@ TEST_CASE("dicom_dataset get_decoded_string", "[core][dicom_dataset][charset]") 
 TEST_CASE("dicom_dataset set_encoded_string", "[core][dicom_dataset][charset]") {
     SECTION("ASCII text without SpecificCharacterSet stores as-is") {
         dicom_dataset ds;
-        ds.set_encoded_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+        set_encoded_string(ds, tags::patient_name, vr_type::PN, "DOE^JOHN");
 
         CHECK(ds.get_string(tags::patient_name) == "DOE^JOHN");
     }
@@ -793,8 +794,8 @@ TEST_CASE("dicom_dataset set_encoded_string", "[core][dicom_dataset][charset]") 
     SECTION("UTF-8 charset stores UTF-8 as-is") {
         dicom_dataset ds;
         ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 192");
-        ds.set_encoded_string(tags::patient_name, vr_type::PN,
-                              "DOE^JOHN=\xED\x99\x8D");
+        set_encoded_string(ds, tags::patient_name, vr_type::PN,
+                           "DOE^JOHN=\xED\x99\x8D");
 
         CHECK(ds.get_string(tags::patient_name) == "DOE^JOHN=\xED\x99\x8D");
     }
@@ -803,8 +804,8 @@ TEST_CASE("dicom_dataset set_encoded_string", "[core][dicom_dataset][charset]") 
         dicom_dataset ds;
         ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 100");
         // UTF-8 ô = 0xC3 0xB4
-        ds.set_encoded_string(tags::institution_name, vr_type::LO,
-                              "H\xC3\xB4pital");
+        set_encoded_string(ds, tags::institution_name, vr_type::LO,
+                           "H\xC3\xB4pital");
 
         // Stored bytes should be Latin-1: ô = 0xF4
         auto raw = ds.get_string(tags::institution_name);
@@ -818,9 +819,9 @@ TEST_CASE("dicom_dataset charset round-trip", "[core][dicom_dataset][charset]") 
         ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 100");
 
         std::string utf8_input = "caf\xC3\xA9";  // café in UTF-8
-        ds.set_encoded_string(tags::institution_name, vr_type::LO, utf8_input);
+        set_encoded_string(ds, tags::institution_name, vr_type::LO, utf8_input);
 
-        auto decoded = ds.get_decoded_string(tags::institution_name);
+        auto decoded = get_decoded_string(ds, tags::institution_name);
         CHECK(decoded == utf8_input);
     }
 }

@@ -13,7 +13,6 @@
 #include "dicom_element.hpp"
 #include "dicom_tag.hpp"
 
-#include <pacs/encoding/character_set.hpp>
 #include <pacs/encoding/vr_type.hpp>
 
 #include <initializer_list>
@@ -140,33 +139,6 @@ public:
     [[nodiscard]] auto get_string(dicom_tag tag,
                                   std::string_view default_value = "") const
         -> std::string;
-
-    /**
-     * @brief Get the string value decoded to UTF-8 using Specific Character Set
-     * @param tag The DICOM tag to look up
-     * @param default_value Value to return if element not found
-     * @return UTF-8 decoded string value, or default_value if not found
-     *
-     * Looks up Specific Character Set (0008,0005) in this dataset and uses it
-     * to decode the raw string bytes to UTF-8. If no Specific Character Set is
-     * present, ASCII decoding is assumed (raw passthrough).
-     */
-    [[nodiscard]] auto get_decoded_string(dicom_tag tag,
-                                          std::string_view default_value = "") const
-        -> std::string;
-
-    /**
-     * @brief Set a string value, encoding from UTF-8 using Specific Character Set
-     * @param tag The DICOM tag
-     * @param vr The value representation
-     * @param utf8_value The UTF-8 encoded string value
-     *
-     * Encodes the UTF-8 input to the encoding specified by Specific Character Set
-     * (0008,0005) in this dataset, then stores the result. If no Specific Character
-     * Set is present, the value is stored as-is (ASCII assumption).
-     */
-    void set_encoded_string(dicom_tag tag, encoding::vr_type vr,
-                            std::string_view utf8_value);
 
     /**
      * @brief Get the numeric value of an element
