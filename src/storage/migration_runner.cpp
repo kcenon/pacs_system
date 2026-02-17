@@ -38,6 +38,7 @@ migration_runner::migration_runner() {
     migrations_.push_back({5, [this](sqlite3* db) { return migrate_v5(db); }});
     migrations_.push_back({6, [this](sqlite3* db) { return migrate_v6(db); }});
     migrations_.push_back({7, [this](sqlite3* db) { return migrate_v7(db); }});
+    migrations_.push_back({8, [this](sqlite3* db) { return migrate_v8(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (pacs_database_adapter version)
@@ -55,6 +56,8 @@ migration_runner::migration_runner() {
         {6, [this](pacs_database_adapter& db) { return migrate_v6(db); }});
     adapter_migrations_.push_back(
         {7, [this](pacs_database_adapter& db) { return migrate_v7(db); }});
+    adapter_migrations_.push_back(
+        {8, [this](pacs_database_adapter& db) { return migrate_v8(db); }});
 #endif
 }
 
@@ -876,6 +879,56 @@ auto migration_runner::migrate_v7(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 7, "Add annotation and measurement tables");
+}
+
+auto migration_runner::migrate_v8(sqlite3* db) -> VoidResult {
+    // V8: Add Storage Commitment tracking tables
+    const char* sql = R"(
+        -- =====================================================================
+        -- STORAGE_COMMITMENT TABLE (transaction-level tracking)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS storage_commitment (
+            transaction_uid     TEXT PRIMARY KEY,
+            requesting_ae       TEXT NOT NULL,
+            request_time        TEXT NOT NULL,
+            completion_time     TEXT,
+            status              TEXT NOT NULL DEFAULT 'pending',
+            total_instances     INTEGER NOT NULL DEFAULT 0,
+            success_count       INTEGER NOT NULL DEFAULT 0,
+            failure_count       INTEGER NOT NULL DEFAULT 0,
+            CHECK (status IN ('pending', 'success', 'partial', 'failed'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_commitment_status
+            ON storage_commitment(status);
+        CREATE INDEX IF NOT EXISTS idx_commitment_request_time
+            ON storage_commitment(request_time);
+
+        -- =====================================================================
+        -- COMMITMENT_REFERENCES TABLE (per-instance tracking)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS commitment_references (
+            transaction_uid     TEXT NOT NULL
+                REFERENCES storage_commitment(transaction_uid)
+                ON DELETE CASCADE,
+            sop_class_uid       TEXT NOT NULL,
+            sop_instance_uid    TEXT NOT NULL,
+            status              TEXT NOT NULL DEFAULT 'pending',
+            failure_reason      INTEGER,
+            PRIMARY KEY (transaction_uid, sop_instance_uid),
+            CHECK (status IN ('pending', 'success', 'failed'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_commitment_ref_instance
+            ON commitment_references(sop_instance_uid);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 8, "Add Storage Commitment tracking tables");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1709,6 +1762,50 @@ auto migration_runner::migrate_v7(pacs_database_adapter& db) -> VoidResult {
     }
 
     return record_migration(db, 7, "Add annotation and measurement tables");
+}
+
+auto migration_runner::migrate_v8(pacs_database_adapter& db) -> VoidResult {
+    // V8: Add Storage Commitment tracking tables
+    const std::string sql = R"(
+        CREATE TABLE IF NOT EXISTS storage_commitment (
+            transaction_uid     TEXT PRIMARY KEY,
+            requesting_ae       TEXT NOT NULL,
+            request_time        TEXT NOT NULL,
+            completion_time     TEXT,
+            status              TEXT NOT NULL DEFAULT 'pending',
+            total_instances     INTEGER NOT NULL DEFAULT 0,
+            success_count       INTEGER NOT NULL DEFAULT 0,
+            failure_count       INTEGER NOT NULL DEFAULT 0,
+            CHECK (status IN ('pending', 'success', 'partial', 'failed'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_commitment_status
+            ON storage_commitment(status);
+        CREATE INDEX IF NOT EXISTS idx_commitment_request_time
+            ON storage_commitment(request_time);
+
+        CREATE TABLE IF NOT EXISTS commitment_references (
+            transaction_uid     TEXT NOT NULL
+                REFERENCES storage_commitment(transaction_uid)
+                ON DELETE CASCADE,
+            sop_class_uid       TEXT NOT NULL,
+            sop_instance_uid    TEXT NOT NULL,
+            status              TEXT NOT NULL DEFAULT 'pending',
+            failure_reason      INTEGER,
+            PRIMARY KEY (transaction_uid, sop_instance_uid),
+            CHECK (status IN ('pending', 'success', 'failed'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_commitment_ref_instance
+            ON commitment_references(sop_instance_uid);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 8, "Add Storage Commitment tracking tables");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
