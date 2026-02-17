@@ -201,9 +201,20 @@ std::string iconv_convert(std::string_view input,
         return std::string(input);
     }
 
+    // ISO-2022-JP is stateful: code page 50220 expects escape sequences.
+    // Re-wrap raw JIS bytes with ESC $ B ... ESC ( B for proper decoding.
+    std::string wrapped_input;
+    if (charset.encoding_name == "ISO-2022-JP") {
+        wrapped_input.append(charset.escape_sequence);
+        wrapped_input.append(input);
+        wrapped_input.append(esc_ir_6);
+    }
+    const auto& actual_data = (charset.encoding_name == "ISO-2022-JP")
+        ? std::string_view(wrapped_input) : input;
+
     // Convert to wide char
     int wide_len = MultiByteToWideChar(
-        code_page, 0, input.data(), static_cast<int>(input.size()),
+        code_page, 0, actual_data.data(), static_cast<int>(actual_data.size()),
         nullptr, 0);
     if (wide_len <= 0) {
         return std::string(input);  // fallback
@@ -211,7 +222,7 @@ std::string iconv_convert(std::string_view input,
 
     std::wstring wide(static_cast<size_t>(wide_len), L'\0');
     MultiByteToWideChar(
-        code_page, 0, input.data(), static_cast<int>(input.size()),
+        code_page, 0, actual_data.data(), static_cast<int>(actual_data.size()),
         wide.data(), wide_len);
 
     // Convert wide char to UTF-8
@@ -239,6 +250,19 @@ std::string iconv_convert(std::string_view input,
         return std::string(input);
     }
 
+    // ISO-2022-JP is a stateful encoding: iconv expects escape sequences
+    // in the input. Since split_by_escape_sequences strips them, we must
+    // re-wrap the raw JIS bytes before calling iconv.
+    std::string wrapped_input;
+    if (charset.encoding_name == "ISO-2022-JP") {
+        wrapped_input.append(charset.escape_sequence);
+        wrapped_input.append(input);
+        wrapped_input.append(esc_ir_6);
+    }
+    const auto& actual_input = (charset.encoding_name == "ISO-2022-JP")
+        ? std::string_view(wrapped_input)
+        : input;
+
     iconv_t cd = iconv_open("UTF-8", charset.encoding_name.data());
     if (cd == reinterpret_cast<iconv_t>(-1)) {
         // Encoding not supported on this platform, return raw bytes
@@ -246,12 +270,12 @@ std::string iconv_convert(std::string_view input,
     }
 
     // iconv requires non-const input pointer
-    std::string input_copy(input);
-    char* in_ptr = input_copy.data();
-    size_t in_left = input_copy.size();
+    std::string input_buf(actual_input);
+    char* in_ptr = input_buf.data();
+    size_t in_left = input_buf.size();
 
     // Allocate output buffer (UTF-8 can be up to 4x the input size)
-    size_t out_size = input.size() * 4 + 4;
+    size_t out_size = actual_input.size() * 4 + 4;
     std::string output(out_size, '\0');
     char* out_ptr = output.data();
     size_t out_left = out_size;
@@ -317,6 +341,23 @@ std::string iconv_reverse_convert(std::string_view utf8_input,
         code_page, 0, wide.data(), wide_len,
         result.data(), target_len, nullptr, nullptr);
 
+    // ISO-2022-JP: Windows code page 50220 includes escape sequences in output.
+    // Strip them since encode_from_utf8() adds its own.
+    if (charset.encoding_name == "ISO-2022-JP" && result.size() >= 6) {
+        auto esc_prefix = charset.escape_sequence;
+        auto esc_suffix = esc_ir_6;
+        bool has_prefix = (result.size() >= esc_prefix.size() &&
+            std::string_view(result).substr(0, esc_prefix.size()) == esc_prefix);
+        bool has_suffix = (result.size() >= esc_suffix.size() &&
+            std::string_view(result).substr(
+                result.size() - esc_suffix.size()) == esc_suffix);
+        if (has_prefix && has_suffix) {
+            result = result.substr(
+                esc_prefix.size(),
+                result.size() - esc_prefix.size() - esc_suffix.size());
+        }
+    }
+
     return result;
 }
 
@@ -351,6 +392,24 @@ std::string iconv_reverse_convert(std::string_view utf8_input,
     }
 
     output.resize(out_size - out_left);
+
+    // ISO-2022-JP is stateful: iconv output includes escape sequences
+    // (ESC $ B ... ESC ( B). Since encode_from_utf8() adds its own escape
+    // sequences, strip the iconv-generated ones to avoid duplication.
+    if (charset.encoding_name == "ISO-2022-JP" && output.size() >= 6) {
+        auto esc_prefix = charset.escape_sequence;
+        auto esc_suffix = esc_ir_6;
+        bool has_prefix = (output.size() >= esc_prefix.size() &&
+            output.substr(0, esc_prefix.size()) == esc_prefix);
+        bool has_suffix = (output.size() >= esc_suffix.size() &&
+            output.substr(output.size() - esc_suffix.size()) == esc_suffix);
+        if (has_prefix && has_suffix) {
+            output = output.substr(
+                esc_prefix.size(),
+                output.size() - esc_prefix.size() - esc_suffix.size());
+        }
+    }
+
     return output;
 }
 

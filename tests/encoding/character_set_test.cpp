@@ -414,6 +414,72 @@ TEST_CASE("Latin-1 round-trip encode/decode", "[encoding][charset]") {
     CHECK(encoded == latin1_raw);
 }
 
+TEST_CASE("Japanese Kanji decoding", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 87");
+
+    // Build raw DICOM string: "Yamada" + ESC $ B + JIS(山田) + ESC ( B + "Taro"
+    // 山 in JIS X 0208 = 0x3B 0x33, 田 = 0x45 0x44
+    std::string raw_input = "Yamada";
+    raw_input += std::string("\x1B\x24\x42", 3);  // ESC $ B
+    raw_input += "\x3B\x33\x45\x44";              // 山田 in JIS
+    raw_input += std::string("\x1B\x28\x42", 3);  // ESC ( B
+    raw_input += "Taro";
+
+    auto utf8 = decode_to_utf8(raw_input, scs);
+    // Should contain "Yamada" + UTF-8(山田) + "Taro"
+    CHECK(utf8.find("Yamada") == 0);
+    CHECK(utf8.find("Taro") != std::string::npos);
+    // UTF-8 for 山 = E5 B1 B1, 田 = E7 94 B0
+    CHECK(utf8.find("\xE5\xB1\xB1\xE7\x94\xB0") != std::string::npos);
+}
+
+TEST_CASE("Chinese GB2312 decoding", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 58");
+
+    // Build raw DICOM string: "Wang" + ESC $ ) A + GB2312(王五) + ESC ( B + "Wu"
+    // 王 in GB2312 = 0xCD 0xF5, 五 = 0xCE 0xE5
+    std::string raw_input = "Wang";
+    raw_input += std::string("\x1B\x24\x29\x41", 4);  // ESC $ ) A
+    raw_input += "\xCD\xF5\xCE\xE5";                  // 王五 in GB2312
+    raw_input += std::string("\x1B\x28\x42", 3);       // ESC ( B
+    raw_input += "Wu";
+
+    auto utf8 = decode_to_utf8(raw_input, scs);
+    // Should contain "Wang" + UTF-8(王五) + "Wu"
+    CHECK(utf8.find("Wang") == 0);
+    CHECK(utf8.find("Wu") != std::string::npos);
+    // UTF-8 for 王 = E7 8E 8B, 五 = E4 BA 94
+    CHECK(utf8.find("\xE7\x8E\x8B\xE4\xBA\x94") != std::string::npos);
+}
+
+TEST_CASE("Person Name with mixed character sets", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 149");
+
+    // Build PN: "Hong^GilDong" = alphabetic + ESC $ ) C + <EUC-KR 홍^길동> + ESC ( B
+    std::string alphabetic = "Hong^GilDong";
+
+    std::string ideographic;
+    ideographic += std::string("\x1B\x24\x29\x43", 4);  // ESC $ ) C
+    ideographic += "\xC8\xAB";                            // 홍 in EUC-KR
+    ideographic += "^";
+    ideographic += "\xB1\xE6\xB5\xBF";                   // 길동 in EUC-KR
+    ideographic += std::string("\x1B\x28\x42", 3);        // ESC ( B
+
+    std::string pn_raw = alphabetic + "=" + ideographic;
+
+    auto result = decode_person_name(pn_raw, scs);
+    // Alphabetic group should be unchanged
+    CHECK(result.find("Hong^GilDong") == 0);
+    // Should have = separator
+    CHECK(result.find('=') != std::string::npos);
+    // Ideographic group should contain UTF-8 Korean
+    // UTF-8 for 홍 = ED 99 8D
+    auto eq_pos = result.find('=');
+    REQUIRE(eq_pos != std::string::npos);
+    auto ideographic_utf8 = result.substr(eq_pos + 1);
+    CHECK_FALSE(ideographic_utf8.empty());
+}
+
 TEST_CASE("Korean round-trip encode/decode", "[encoding][charset]") {
     auto scs = parse_specific_character_set("\\ISO 2022 IR 149");
 
@@ -440,4 +506,45 @@ TEST_CASE("Korean round-trip encode/decode", "[encoding][charset]") {
     // Round-trip decode should match original UTF-8
     auto round_trip_utf8 = decode_to_utf8(re_encoded, scs);
     CHECK(round_trip_utf8 == utf8);
+}
+
+TEST_CASE("Japanese round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 87");
+
+    // UTF-8 text with mixed ASCII and Japanese
+    // 山田 in UTF-8: E5 B1 B1 E7 94 B0
+    std::string utf8_input = "Yamada\xE5\xB1\xB1\xE7\x94\xB0Taro";
+
+    // Encode to ISO 2022 with JIS escape sequences
+    auto encoded = encode_from_utf8(utf8_input, scs);
+    // Should contain Japanese Kanji escape sequence ESC $ B
+    CHECK(encoded.find("\x1B\x24\x42") != std::string::npos);
+    // And ASCII return ESC ( B
+    CHECK(encoded.find("\x1B\x28\x42") != std::string::npos);
+    // ASCII parts should be preserved
+    CHECK(encoded.find("Yamada") == 0);
+    CHECK(encoded.find("Taro") != std::string::npos);
+
+    // Decode back to UTF-8: round-trip must produce identical result
+    auto round_trip = decode_to_utf8(encoded, scs);
+    CHECK(round_trip == utf8_input);
+}
+
+TEST_CASE("Chinese round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("\\ISO 2022 IR 58");
+
+    // UTF-8 text with mixed ASCII and Chinese
+    // 王五 in UTF-8: E7 8E 8B E4 BA 94
+    std::string utf8_input = "Wang\xE7\x8E\x8B\xE4\xBA\x94Wu";
+
+    // Encode to ISO 2022 with GB2312 escape sequences
+    auto encoded = encode_from_utf8(utf8_input, scs);
+    // Should contain Chinese escape sequence ESC $ ) A
+    CHECK(encoded.find("\x1B\x24\x29\x41") != std::string::npos);
+    // And ASCII return ESC ( B
+    CHECK(encoded.find("\x1B\x28\x42") != std::string::npos);
+
+    // Decode back to UTF-8: round-trip must produce identical result
+    auto round_trip = decode_to_utf8(encoded, scs);
+    CHECK(round_trip == utf8_input);
 }
