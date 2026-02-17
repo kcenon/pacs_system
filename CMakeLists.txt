@@ -766,6 +766,7 @@ add_library(pacs_encoding
     src/encoding/implicit_vr_codec.cpp
     src/encoding/explicit_vr_codec.cpp
     src/encoding/explicit_vr_big_endian_codec.cpp
+    src/encoding/character_set.cpp
     src/encoding/compression/jpeg_baseline_codec.cpp
     src/encoding/compression/jpeg_lossless_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp
@@ -781,6 +782,14 @@ target_include_directories(pacs_encoding
 target_link_libraries(pacs_encoding
     PUBLIC pacs_core
 )
+
+# Link iconv for character set conversion (required on macOS, optional on Linux)
+if(NOT WIN32)
+    find_library(ICONV_LIBRARY iconv)
+    if(ICONV_LIBRARY)
+        target_link_libraries(pacs_encoding PUBLIC ${ICONV_LIBRARY})
+    endif()
+endif()
 
 # Link libjpeg-turbo for JPEG compression codecs
 if(PACS_JPEG_FOUND)
@@ -1696,6 +1705,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/compression/jpeg_ls_codec_test.cpp
         tests/encoding/compression/rle_codec_test.cpp
         tests/encoding/simd/simd_rle_test.cpp
+        tests/encoding/character_set_test.cpp
     )
     target_link_libraries(encoding_tests
         PRIVATE
