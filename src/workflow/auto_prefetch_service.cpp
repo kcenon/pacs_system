@@ -8,12 +8,17 @@
 #include "pacs/integration/logger_adapter.hpp"
 #include "pacs/integration/monitoring_adapter.hpp"
 #include "pacs/integration/executor_adapter.hpp"
+#include "pacs/network/association.hpp"
+#include "pacs/services/query_scu.hpp"
+#include "pacs/services/retrieve_scu.hpp"
+#include "pacs/core/dicom_tag_constants.hpp"
 
 #include <kcenon/common/interfaces/executor_interface.h>
 
 #include <algorithm>
 #include <chrono>
 #include <ranges>
+#include <sstream>
 
 namespace pacs::workflow {
 
@@ -480,66 +485,116 @@ auto auto_prefetch_service::query_prior_studies(
         from_date,
         to_date);
 
-    // TODO: Implement actual C-FIND query to remote PACS
-    // This would use network::association to connect and query
-    // For now, return empty results as the actual network implementation
-    // depends on the association and DIMSE message handling
-
-    /*
-    // Example of what the actual implementation would look like:
     try {
-        // Create association to remote PACS
-        network::association assoc;
-        auto connect_result = assoc.connect(
+        // Configure association for C-FIND
+        network::association_config assoc_config;
+        assoc_config.calling_ae_title = pacs_config.local_ae_title;
+        assoc_config.called_ae_title = pacs_config.ae_title;
+        assoc_config.proposed_contexts.push_back({
+            1,
+            std::string(services::study_root_find_sop_class_uid),
+            {"1.2.840.10008.1.2.1", "1.2.840.10008.1.2"}
+        });
+
+        // Connect to remote PACS
+        auto connect_result = network::association::connect(
             pacs_config.host,
             pacs_config.port,
-            pacs_config.local_ae_title,
-            pacs_config.ae_title);
+            assoc_config,
+            std::chrono::duration_cast<network::association::duration>(
+                pacs_config.connection_timeout));
 
-        if (!connect_result.is_ok()) {
+        if (connect_result.is_err()) {
             integration::logger_adapter::error(
-                "Failed to connect to remote PACS",
-                {{"remote_pacs", pacs_config.ae_title},
-                 {"error", connect_result.error()}});
+                "Failed to connect to remote PACS for C-FIND remote_pacs={} error={}",
+                pacs_config.ae_title,
+                connect_result.error().message);
             return results;
         }
 
-        // Build C-FIND query
-        core::dicom_dataset query_keys;
-        query_keys.set_string(tags::patient_id, patient_id);
-        query_keys.set_string(tags::study_date, from_date + "-" + to_date);
-        query_keys.set_string(tags::query_retrieve_level, "STUDY");
-        // Request return keys
-        query_keys.set_string(tags::study_instance_uid, "");
-        query_keys.set_string(tags::study_description, "");
-        query_keys.set_string(tags::modalities_in_study, "");
-        query_keys.set_string(tags::number_of_study_related_series, "");
-        query_keys.set_string(tags::number_of_study_related_instances, "");
+        auto assoc = std::move(connect_result.value());
 
-        // Send C-FIND and collect results
-        auto find_result = assoc.find(query_keys);
-        if (find_result.is_ok()) {
-            for (const auto& dataset : find_result.value()) {
+        // Build query keys
+        services::study_query_keys keys;
+        keys.patient_id = patient_id;
+        keys.study_date = from_date + "-" + to_date;
+
+        // Execute C-FIND query
+        services::query_scu_config query_config;
+        query_config.model = services::query_model::study_root;
+        query_config.level = services::query_level::study;
+        query_config.timeout = std::chrono::duration_cast<std::chrono::milliseconds>(
+            pacs_config.association_timeout);
+
+        services::query_scu scu(query_config);
+        auto find_result = scu.find_studies(assoc, keys);
+
+        if (find_result.is_ok() && find_result.value().is_success()) {
+            for (const auto& dataset : find_result.value().matches) {
                 prior_study_info info;
                 info.study_instance_uid =
-                    dataset.get_string(tags::study_instance_uid);
+                    dataset.get_string(core::tags::study_instance_uid);
                 info.patient_id = patient_id;
-                info.study_date = dataset.get_string(tags::study_date);
+                info.patient_name =
+                    dataset.get_string(core::tags::patient_name);
+                info.study_date =
+                    dataset.get_string(core::tags::study_date);
                 info.study_description =
-                    dataset.get_string(tags::study_description);
-                // Parse modalities in study
-                // ...
+                    dataset.get_string(core::tags::study_description);
+
+                // Parse modalities in study (backslash-separated)
+                auto modalities_str =
+                    dataset.get_string(core::tags::modalities_in_study);
+                if (!modalities_str.empty()) {
+                    std::istringstream ss(modalities_str);
+                    std::string mod;
+                    while (std::getline(ss, mod, '\\')) {
+                        if (!mod.empty()) {
+                            info.modalities.insert(mod);
+                        }
+                    }
+                }
+
+                // Parse numeric fields
+                auto num_series_str = dataset.get_string(
+                    core::tags::number_of_study_related_series);
+                if (!num_series_str.empty()) {
+                    try {
+                        info.number_of_series = std::stoull(num_series_str);
+                    } catch (...) {}
+                }
+
+                auto num_instances_str = dataset.get_string(
+                    core::tags::number_of_study_related_instances);
+                if (!num_instances_str.empty()) {
+                    try {
+                        info.number_of_instances = std::stoull(num_instances_str);
+                    } catch (...) {}
+                }
+
                 results.push_back(std::move(info));
             }
+
+            integration::logger_adapter::debug(
+                "C-FIND query returned matches={} remote_pacs={} patient_id={}",
+                results.size(),
+                pacs_config.ae_title,
+                patient_id);
+        } else if (find_result.is_err()) {
+            integration::logger_adapter::error(
+                "C-FIND query failed remote_pacs={} error={}",
+                pacs_config.ae_title,
+                find_result.error().message);
         }
 
-        assoc.release();
+        // Release association
+        (void)assoc.release();
     } catch (const std::exception& e) {
         integration::logger_adapter::error(
-            "Exception querying prior studies",
-            {{"error", e.what()}});
+            "Exception querying prior studies remote_pacs={} error={}",
+            pacs_config.ae_title,
+            e.what());
     }
-    */
 
     return results;
 }
@@ -649,61 +704,84 @@ auto auto_prefetch_service::prefetch_study(
         study.patient_id,
         pacs_config.ae_title);
 
-    // TODO: Implement actual C-MOVE to prefetch study
-    // This would use network::association to connect and send C-MOVE
-
-    /*
-    // Example of what the actual implementation would look like:
     try {
-        // Create association to remote PACS
-        network::association assoc;
-        auto connect_result = assoc.connect(
+        // Configure association for C-MOVE
+        network::association_config assoc_config;
+        assoc_config.calling_ae_title = pacs_config.local_ae_title;
+        assoc_config.called_ae_title = pacs_config.ae_title;
+        assoc_config.proposed_contexts.push_back({
+            1,
+            std::string(services::study_root_move_sop_class_uid),
+            {"1.2.840.10008.1.2.1", "1.2.840.10008.1.2"}
+        });
+
+        // Connect to remote PACS
+        auto connect_result = network::association::connect(
             pacs_config.host,
             pacs_config.port,
-            pacs_config.local_ae_title,
-            pacs_config.ae_title);
+            assoc_config,
+            std::chrono::duration_cast<network::association::duration>(
+                pacs_config.connection_timeout));
 
-        if (!connect_result.is_ok()) {
+        if (connect_result.is_err()) {
             integration::logger_adapter::error(
-                "Failed to connect for C-MOVE",
-                {{"remote_pacs", pacs_config.ae_title},
-                 {"error", connect_result.error()}});
+                "Failed to connect to remote PACS for C-MOVE remote_pacs={} error={}",
+                pacs_config.ae_title,
+                connect_result.error().message);
             return false;
         }
 
-        // Build C-MOVE query
-        core::dicom_dataset move_keys;
-        move_keys.set_string(tags::query_retrieve_level, "STUDY");
-        move_keys.set_string(tags::study_instance_uid, study.study_instance_uid);
+        auto assoc = std::move(connect_result.value());
 
-        // Send C-MOVE (destination is our storage SCP)
-        auto move_result = assoc.move(move_keys, our_storage_ae_title);
+        // Configure retrieve SCU with our local AE as move destination
+        services::retrieve_scu_config retrieve_config;
+        retrieve_config.mode = services::retrieve_mode::c_move;
+        retrieve_config.model = services::query_model::study_root;
+        retrieve_config.level = services::query_level::study;
+        retrieve_config.move_destination = pacs_config.local_ae_title;
+        retrieve_config.timeout = std::chrono::duration_cast<std::chrono::milliseconds>(
+            pacs_config.association_timeout);
 
-        assoc.release();
+        services::retrieve_scu scu(retrieve_config);
+        auto move_result = scu.retrieve_study(
+            assoc, study.study_instance_uid);
 
-        if (move_result.is_ok()) {
+        // Release association
+        (void)assoc.release();
+
+        if (move_result.is_ok() && move_result.value().is_success()) {
             integration::logger_adapter::info(
-                "Successfully prefetched study",
-                {{"study_uid", study.study_instance_uid}});
+                "Successfully prefetched study study_uid={} completed={} remote_pacs={}",
+                study.study_instance_uid,
+                move_result.value().completed,
+                pacs_config.ae_title);
             return true;
-        } else {
-            integration::logger_adapter::error(
-                "C-MOVE failed",
-                {{"study_uid", study.study_instance_uid},
-                 {"error", move_result.error()}});
-            return false;
         }
+
+        if (move_result.is_err()) {
+            integration::logger_adapter::error(
+                "C-MOVE failed study_uid={} remote_pacs={} error={}",
+                study.study_instance_uid,
+                pacs_config.ae_title,
+                move_result.error().message);
+        } else if (move_result.value().has_failures()) {
+            integration::logger_adapter::error(
+                "C-MOVE completed with failures study_uid={} completed={} failed={} remote_pacs={}",
+                study.study_instance_uid,
+                move_result.value().completed,
+                move_result.value().failed,
+                pacs_config.ae_title);
+        }
+
+        return false;
     } catch (const std::exception& e) {
         integration::logger_adapter::error(
-            "Exception during prefetch",
-            {{"study_uid", study.study_instance_uid},
-             {"error", e.what()}});
+            "Exception during prefetch study_uid={} remote_pacs={} error={}",
+            study.study_instance_uid,
+            pacs_config.ae_title,
+            e.what());
         return false;
     }
-    */
-
-    // For now, return false as actual implementation requires network module
-    return false;
 }
 
 void auto_prefetch_service::update_stats(const prefetch_result& result) {
