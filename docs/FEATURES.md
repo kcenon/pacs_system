@@ -400,7 +400,7 @@ if (result.is_ok()) {
 - Multiple storage SOP classes
 - Concurrent image reception
 - Duplicate detection
-- Storage commitment (planned)
+- Storage commitment (N-ACTION/N-EVENT-REPORT)
 
 **Supported SOP Classes**:
 
@@ -535,6 +535,78 @@ for (const auto& study : results) {
 - Link performed series to scheduled procedures
 
 **SOP Class**: Modality Performed Procedure Step (1.2.840.10008.3.1.2.3.3)
+
+### Storage Commitment Push Model Service
+
+**Implementation**: Storage Commitment Push Model SCP/SCU per DICOM PS3.4 Annex J.
+
+**Features**:
+- N-ACTION request handling for commitment requests
+- Instance existence verification against storage backend
+- N-EVENT-REPORT with per-instance success/failure status
+- Transaction UID tracking for commitment lifecycle
+- Persistent commitment records via `commitment_repository` (V8 database migration)
+- Statistics tracking (actions processed, instances committed/failed)
+
+**Protocol Flow**:
+```
+SCU (Modality)                      SCP (PACS)
+ |                                   |
+ |-- N-ACTION-RQ ------------------>|
+ |   Transaction UID                 |
+ |   Referenced SOP Sequence         |
+ |<-- N-ACTION-RSP (Success) -------|
+ |                                   |
+ |   ... SCP verifies storage ...    |
+ |                                   |
+ |<-- N-EVENT-REPORT-RQ ------------|
+ |   Transaction UID                 |
+ |   Success/Failed Sequences        |
+ |-- N-EVENT-REPORT-RSP ----------->|
+```
+
+**SOP Class**: Storage Commitment Push Model (1.2.840.10008.1.20.1)
+
+**Classes**:
+- `storage_commitment_scp` - SCP service handling N-ACTION requests
+- `storage_commitment_scu` - SCU client for sending commitment requests
+- `storage_commitment_types` - Data types (SOP references, failure reasons, transaction records)
+- `commitment_repository` - Database persistence for commitment tracking
+
+### Character Set Support
+
+**Implementation**: DICOM character set encoding/decoding per PS3.5 Section 6.1.
+
+**Features**:
+- DICOM Character Set Registry with all standard character sets
+- ISO 2022 escape sequence parser for multi-byte character sets
+- CJK (Chinese, Japanese, Korean) character set decoding
+- ISO-2022-JP stateful encoding/decoding via iconv
+- UTF-8 encoding support
+- Automatic character set detection from Specific Character Set (0008,0005)
+- Integration with dataset for transparent character set handling
+
+**Supported Character Sets**:
+
+| Character Set | ISO Registration | Description |
+|--------------|-----------------|-------------|
+| ISO-IR 100 | ISO 8859-1 | Latin Alphabet No. 1 |
+| ISO-IR 101 | ISO 8859-2 | Latin Alphabet No. 2 |
+| ISO-IR 109 | ISO 8859-3 | Latin Alphabet No. 3 |
+| ISO-IR 110 | ISO 8859-4 | Latin Alphabet No. 4 |
+| ISO-IR 144 | ISO 8859-5 | Cyrillic |
+| ISO-IR 127 | ISO 8859-6 | Arabic |
+| ISO-IR 126 | ISO 8859-7 | Greek |
+| ISO-IR 138 | ISO 8859-8 | Hebrew |
+| ISO-IR 148 | ISO 8859-9 | Latin Alphabet No. 5 |
+| ISO-IR 13 | JIS X 0201 | Japanese Katakana |
+| ISO-IR 166 | TIS 620-2533 | Thai |
+| ISO 2022 IR 87 | JIS X 0208 | Japanese Kanji |
+| ISO 2022 IR 149 | KS X 1001 | Korean |
+| ISO 2022 IR 58 | GB 2312 | Chinese Simplified |
+| ISO_IR 192 | UTF-8 | Unicode |
+| GB18030 | GB 18030 | Chinese (full) |
+| GBK | GBK | Chinese Extended |
 
 ---
 

@@ -93,15 +93,22 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - `retrieve_scp/scu` - C-MOVE/C-GET service (retrieve)
 - `worklist_scp/scu` - Modality Worklist service (MWL)
 - `mpps_scp/scu` - Modality Performed Procedure Step
-- `sop_class_registry` - 29+ Storage SOP Classes (CT, MR, US, XA, DX, NM, PET, RT, SR, SEG, etc.)
+- `storage_commitment_scp/scu` - Storage Commitment Push Model (N-ACTION/N-EVENT-REPORT, PS3.4 Annex J)
+- `sop_class_registry` - 47+ Storage SOP Classes (CT, MR, US, XA, DX, MG, NM, PET, RT, SR, SEG, CR, SC, etc.)
 - `parallel_query_executor` - Parallel batch query execution with timeout
 - IOD validators for modality-specific validation
 
 **Storage Module**:
 - `file_storage` - Hierarchical filesystem storage (Study/Series/Instance)
 - `index_database` - SQLite3-based metadata indexing with WAL mode
-- `migration_runner` - Database schema migrations
-- Patient/Study/Series/Instance/Worklist/MPPS record management
+- `migration_runner` - Database schema migrations (V1-V8)
+- `commitment_repository` - Storage Commitment tracking (V8 migration)
+- Patient/Study/Series/Instance/Worklist/MPPS/Commitment record management
+
+**Encoding Enhancements**:
+- DICOM Character Set Registry with ISO 2022 parser
+- CJK (Chinese/Japanese/Korean) character set decoding
+- ISO-2022-JP stateful encoding/decoding via iconv
 
 ### Phase 4 Achievements (Complete)
 
@@ -150,7 +157,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
 │       └─────────────┼───────────┼───────────┼──────────────┘        │
 │  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
-│  │  Services (Storage/Query/Retrieve/Worklist/MPPS SCP/SCU)      │  │
+│  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commitment)   │  │
 │  └──────────────────────────────┬────────────────────────────────┘  │
 │  ┌──────────────────────────────▼────────────────────────────────┐  │
 │  │  Network (PDU/Association/DIMSE) + Security (RBAC/TLS/Anon)   │  │
@@ -230,8 +237,14 @@ pacs_system/
 │   │   ├── dicom_server.hpp     # TCP server
 │   │   └── dimse/               # DIMSE protocol
 │   │       ├── dimse_message.hpp
-│   │       ├── command_field.hpp
-│   │       └── status_codes.hpp
+│   │       ├── command_field.hpp  # DIMSE-C and DIMSE-N commands
+│   │       ├── status_codes.hpp
+│   │       ├── n_action.hpp       # N-ACTION service
+│   │       ├── n_event_report.hpp # N-EVENT-REPORT service
+│   │       ├── n_create.hpp       # N-CREATE service
+│   │       ├── n_set.hpp          # N-SET service
+│   │       ├── n_get.hpp          # N-GET service
+│   │       └── n_delete.hpp       # N-DELETE service
 │   │
 │   ├── services/                # DICOM Services (✅ Complete)
 │   │   ├── scp_service.hpp      # Base SCP interface
@@ -242,14 +255,24 @@ pacs_system/
 │   │   ├── retrieve_scp.hpp     # C-MOVE/GET SCP
 │   │   ├── worklist_scp.hpp     # MWL SCP
 │   │   ├── mpps_scp.hpp         # MPPS SCP
-│   │   ├── sop_class_registry.hpp # SOP Class registry
+│   │   ├── storage_commitment_types.hpp # Storage Commitment data types
+│   │   ├── storage_commitment_scp.hpp # Storage Commitment SCP (N-ACTION)
+│   │   ├── storage_commitment_scu.hpp # Storage Commitment SCU
+│   │   ├── sop_class_registry.hpp # SOP Class registry (47+ classes)
 │   │   ├── cache/               # Query caching and parallel execution
 │   │   │   ├── query_cache.hpp  # LRU query result cache
 │   │   │   ├── query_result_stream.hpp # Paginated query streaming
 │   │   │   └── parallel_query_executor.hpp # Parallel batch queries
 │   │   ├── sop_classes/         # Modality-specific SOP classes
 │   │   │   ├── us_storage.hpp   # Ultrasound Storage
-│   │   │   └── xa_storage.hpp   # X-Ray Angiographic Storage
+│   │   │   ├── xa_storage.hpp   # X-Ray Angiographic Storage
+│   │   │   ├── dx_storage.hpp   # Digital Radiography Storage
+│   │   │   ├── mg_storage.hpp   # Mammography Storage
+│   │   │   ├── nm_storage.hpp   # Nuclear Medicine Storage
+│   │   │   ├── pet_storage.hpp  # PET Storage
+│   │   │   ├── rt_storage.hpp   # Radiation Therapy Storage
+│   │   │   ├── seg_storage.hpp  # Segmentation Storage
+│   │   │   └── sr_storage.hpp   # Structured Report Storage
 │   │   └── validation/          # IOD Validators
 │   │       ├── us_iod_validator.hpp # US IOD validation
 │   │       └── xa_iod_validator.hpp # XA IOD validation
@@ -258,6 +281,9 @@ pacs_system/
 │   │   ├── storage_interface.hpp # Abstract interface
 │   │   ├── file_storage.hpp     # Filesystem storage
 │   │   ├── index_database.hpp   # SQLite3 indexing
+│   │   ├── migration_runner.hpp # Schema migration (V1-V8)
+│   │   ├── base_repository.hpp  # Repository base class
+│   │   ├── commitment_repository.hpp # Storage Commitment tracking
 │   │   ├── patient_record.hpp   # Patient data model
 │   │   ├── study_record.hpp     # Study data model
 │   │   ├── series_record.hpp    # Series data model
@@ -417,6 +443,15 @@ pacs_system/
 | **Study Root Q/R** | 1.2.840.10008.5.1.4.1.2.2.x | ✅ Complete |
 | **Modality Worklist** | 1.2.840.10008.5.1.4.31 | ✅ Complete |
 | **MPPS** | 1.2.840.10008.3.1.2.3.3 | ✅ Complete |
+| **Storage Commitment** | 1.2.840.10008.1.20.1 | ✅ Complete |
+| **NM Storage** | 1.2.840.10008.5.1.4.1.1.20 | ✅ Complete |
+| **PET Storage** | 1.2.840.10008.5.1.4.1.1.128 | ✅ Complete |
+| **RT Storage** | 1.2.840.10008.5.1.4.1.1.481.x | ✅ Complete |
+| **SR Storage** | 1.2.840.10008.5.1.4.1.1.88.x | ✅ Complete |
+| **SEG Storage** | 1.2.840.10008.5.1.4.1.1.66.4 | ✅ Complete |
+| **MG Storage** | 1.2.840.10008.5.1.4.1.1.1.2.x | ✅ Complete |
+| **CR Storage** | 1.2.840.10008.5.1.4.1.1.1 | ✅ Complete |
+| **SC Storage** | 1.2.840.10008.5.1.4.1.1.7 | ✅ Complete |
 
 ### Transfer Syntax Support
 
@@ -1434,9 +1469,9 @@ cmake --build build --target run_full_benchmarks
 | **Documentation** | 55 markdown files |
 | **CI/CD Workflows** | 10 workflows |
 | **Version** | 0.2.0 |
-| **Last Updated** | 2026-02-12 |
+| **Last Updated** | 2026-02-18 |
 
-> **Measurement date**: 2026-02-11 (commit `0bd5dc44`). LOC counted via `find <dir> -name "*.cpp" -exec cat {} + | wc -l`, excluding `build-ci/`.
+> **Measurement date**: 2026-02-18. LOC counted via `find <dir> -name "*.cpp" -exec cat {} + | wc -l`, excluding `build-ci/`.
 
 <!-- STATS_END -->
 
