@@ -30,6 +30,7 @@ class key_image_repository;
 class measurement_repository;
 class viewer_state_repository;
 class prefetch_repository;
+class commitment_repository;
 
 /**
  * @brief Factory for creating repository instances with shared database
@@ -167,6 +168,14 @@ public:
         -> std::shared_ptr<prefetch_repository>;
 
     /**
+     * @brief Get or create commitment repository
+     *
+     * @return Shared pointer to commitment repository
+     */
+    [[nodiscard]] auto commitments()
+        -> std::shared_ptr<commitment_repository>;
+
+    /**
      * @brief Get the database adapter
      *
      * @return Shared pointer to database adapter
@@ -187,6 +196,7 @@ private:
     std::shared_ptr<measurement_repository> measurements_;
     std::shared_ptr<viewer_state_repository> viewer_states_;
     std::shared_ptr<prefetch_repository> prefetch_queue_;
+    std::shared_ptr<commitment_repository> commitments_;
 };
 
 }  // namespace pacs::storage

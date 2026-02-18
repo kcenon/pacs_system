@@ -106,8 +106,8 @@ TEST_CASE("migration_runner initial state", "[migration][version]") {
         CHECK(runner.needs_migration(db.get()));
     }
 
-    SECTION("latest version is 7") {
-        CHECK(runner.get_latest_version() == 7);
+    SECTION("latest version is 8") {
+        CHECK(runner.get_latest_version() == 8);
     }
 
     SECTION("empty database has no history") {
@@ -128,7 +128,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result = runner.run_migrations(db.get());
         REQUIRE(result.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 7);
+        CHECK(runner.get_current_version(db.get()) == 8);
         CHECK_FALSE(runner.needs_migration(db.get()));
     }
 
@@ -139,7 +139,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         auto result2 = runner.run_migrations(db.get());
         REQUIRE(result2.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 7);
+        CHECK(runner.get_current_version(db.get()) == 8);
     }
 
     SECTION("migration creates schema_version table") {
@@ -154,7 +154,7 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         REQUIRE(result.is_ok());
 
         auto history = runner.get_history(db.get());
-        REQUIRE(history.size() == 7);
+        REQUIRE(history.size() == 8);
         CHECK(history[0].version == 1);
         CHECK(history[0].description == "Initial schema creation");
         CHECK_FALSE(history[0].applied_at.empty());
@@ -176,6 +176,9 @@ TEST_CASE("migration_runner run_migrations", "[migration][execute]") {
         CHECK(history[6].version == 7);
         CHECK(history[6].description == "Add annotation and measurement tables");
         CHECK_FALSE(history[6].applied_at.empty());
+        CHECK(history[7].version == 8);
+        CHECK(history[7].description == "Add Storage Commitment tracking tables");
+        CHECK_FALSE(history[7].applied_at.empty());
     }
 }
 
@@ -627,7 +630,7 @@ TEST_CASE("migration_runner with pacs_database_adapter run_migrations",
         auto result = runner.run_migrations(db.get());
         REQUIRE(result.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 7);
+        CHECK(runner.get_current_version(db.get()) == 8);
         CHECK_FALSE(runner.needs_migration(db.get()));
     }
 
@@ -638,7 +641,7 @@ TEST_CASE("migration_runner with pacs_database_adapter run_migrations",
         auto result2 = runner.run_migrations(db.get());
         REQUIRE(result2.is_ok());
 
-        CHECK(runner.get_current_version(db.get()) == 7);
+        CHECK(runner.get_current_version(db.get()) == 8);
     }
 
     SECTION("migration creates schema_version table") {
@@ -653,7 +656,7 @@ TEST_CASE("migration_runner with pacs_database_adapter run_migrations",
         REQUIRE(result.is_ok());
 
         auto history = runner.get_history(db.get());
-        REQUIRE(history.size() == 7);
+        REQUIRE(history.size() == 8);
         CHECK(history[0].version == 1);
         CHECK(history[0].description == "Initial schema creation");
     }
@@ -703,6 +706,10 @@ TEST_CASE("migration_runner with pacs_database_adapter creates all tables",
     CHECK(db.table_exists("key_images"));
     CHECK(db.table_exists("viewer_states"));
     CHECK(db.table_exists("recent_studies"));
+
+    // V8 tables
+    CHECK(db.table_exists("storage_commitment"));
+    CHECK(db.table_exists("commitment_references"));
 }
 
 TEST_CASE("migration_runner with pacs_database_adapter run_migrations_to",
