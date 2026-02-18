@@ -29,6 +29,7 @@ class access_control_manager;
 
 namespace pacs::storage {
 class index_database;
+class file_storage;
 } // namespace pacs::storage
 
 namespace pacs::client {
@@ -139,6 +140,12 @@ public:
    * @param database Index database instance
    */
   void set_database(std::shared_ptr<storage::index_database> database);
+
+  /**
+   * @brief Set file storage for DICOM instance persistence (STOW-RS)
+   * @param storage File storage instance
+   */
+  void set_file_storage(std::shared_ptr<storage::file_storage> storage);
 
   /**
    * @brief Set remote node manager for remote PACS node management

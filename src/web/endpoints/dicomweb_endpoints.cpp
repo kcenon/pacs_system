@@ -21,7 +21,9 @@
 #include "pacs/core/dicom_file.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
+#include "pacs/encoding/transfer_syntax.hpp"
 #include "pacs/encoding/vr_type.hpp"
+#include "pacs/storage/file_storage.hpp"
 #include "pacs/storage/index_database.hpp"
 #include "pacs/storage/instance_record.hpp"
 #include "pacs/storage/patient_record.hpp"
@@ -1629,6 +1631,118 @@ crow::response build_metadata_response(
     return res;
 }
 
+/**
+ * @brief Store a DICOM instance via file_storage and index in database
+ *
+ * Performs the full storage pipeline:
+ * 1. Write instance to filesystem via file_storage
+ * 2. Upsert patient, study, series, and instance records in index_database
+ *
+ * @param ctx Server context containing file_storage and database
+ * @param dataset DICOM dataset to store
+ * @param result[out] Store result, populated on failure
+ * @return true on success, false on failure (result is populated with error)
+ */
+bool store_instance_to_storage(
+    const std::shared_ptr<rest_server_context>& ctx,
+    const core::dicom_dataset& dataset,
+    dicomweb::store_instance_result& result) {
+
+    auto sop_uid = dataset.get_string(core::tags::sop_instance_uid);
+
+    // Step 1: Store to filesystem
+    auto store_result = ctx->file_storage->store(dataset);
+    if (store_result.is_err()) {
+        result.success = false;
+        result.error_code = "STORAGE_ERROR";
+        result.error_message = store_result.error().message;
+        return false;
+    }
+
+    // Step 2: Get stored file path and size
+    auto file_path = ctx->file_storage->get_file_path(sop_uid);
+    std::error_code ec;
+    auto file_size = static_cast<int64_t>(
+        std::filesystem::file_size(file_path, ec));
+    if (ec) {
+        file_size = 0;
+    }
+
+    // Step 3: Upsert patient record
+    auto patient_id = dataset.get_string(core::tags::patient_id);
+    auto patient_name = dataset.get_string(core::tags::patient_name);
+    auto birth_date = dataset.get_string(core::tags::patient_birth_date);
+    auto sex = dataset.get_string(core::tags::patient_sex);
+
+    auto patient_pk_result = ctx->database->upsert_patient(
+        patient_id, patient_name, birth_date, sex);
+    if (!patient_pk_result.is_ok()) {
+        (void)ctx->file_storage->remove(sop_uid);
+        result.success = false;
+        result.error_code = "DATABASE_ERROR";
+        result.error_message = "Failed to upsert patient record";
+        return false;
+    }
+
+    // Step 4: Upsert study record
+    auto study_uid = dataset.get_string(core::tags::study_instance_uid);
+    auto study_id = dataset.get_string(core::tags::study_id);
+    auto study_date = dataset.get_string(core::tags::study_date);
+    auto study_time = dataset.get_string(core::tags::study_time);
+    auto accession = dataset.get_string(core::tags::accession_number);
+    auto referring = dataset.get_string(core::tags::referring_physician_name);
+    auto study_desc = dataset.get_string(core::tags::study_description);
+
+    auto study_pk_result = ctx->database->upsert_study(
+        patient_pk_result.value(), study_uid, study_id, study_date,
+        study_time, accession, referring, study_desc);
+    if (!study_pk_result.is_ok()) {
+        (void)ctx->file_storage->remove(sop_uid);
+        result.success = false;
+        result.error_code = "DATABASE_ERROR";
+        result.error_message = "Failed to upsert study record";
+        return false;
+    }
+
+    // Step 5: Upsert series record
+    auto series_uid = dataset.get_string(core::tags::series_instance_uid);
+    auto modality_str = dataset.get_string(core::tags::modality);
+    auto series_number = dataset.get_numeric<int>(core::tags::series_number);
+    auto series_desc = dataset.get_string(core::tags::series_description);
+    auto station = dataset.get_string(core::tags::station_name);
+
+    auto series_pk_result = ctx->database->upsert_series(
+        study_pk_result.value(), series_uid, modality_str, series_number,
+        series_desc, "", station);
+    if (!series_pk_result.is_ok()) {
+        (void)ctx->file_storage->remove(sop_uid);
+        result.success = false;
+        result.error_code = "DATABASE_ERROR";
+        result.error_message = "Failed to upsert series record";
+        return false;
+    }
+
+    // Step 6: Upsert instance record
+    auto sop_class_uid = dataset.get_string(core::tags::sop_class_uid);
+    auto transfer_syntax = std::string(
+        encoding::transfer_syntax::explicit_vr_little_endian.uid());
+    auto instance_number = dataset.get_numeric<int>(
+        core::tags::instance_number);
+
+    auto instance_pk_result = ctx->database->upsert_instance(
+        series_pk_result.value(), sop_uid, sop_class_uid,
+        file_path.string(), file_size, transfer_syntax, instance_number);
+    if (!instance_pk_result.is_ok()) {
+        (void)ctx->file_storage->remove(sop_uid);
+        result.success = false;
+        result.error_code = "DATABASE_ERROR";
+        result.error_message = "Failed to upsert instance record";
+        return false;
+    }
+
+    return true;
+}
+
 } // anonymous namespace
 
 void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
@@ -2228,11 +2342,13 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 crow::response res;
                 add_cors_headers(res, *ctx);
 
-                if (!ctx->database) {
+                if (!ctx->database || !ctx->file_storage) {
                     res.code = 503;
                     res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               !ctx->database
+                                                   ? "Database not configured"
+                                                   : "File storage not configured");
                     return res;
                 }
 
@@ -2341,14 +2457,13 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                         continue;
                     }
 
-                    // TODO: Implement full storage pipeline with file_storage
-                    // For now, just validate and report success
-                    // Full implementation requires:
-                    // 1. Generate file path
-                    // 2. Write file via file_storage
-                    // 3. Upsert patient/study/series/instance records
+                    // Store instance via file_storage and index in database
+                    if (!store_instance_to_storage(ctx, dataset, result)) {
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
 
-                    // Success (validation only for now)
                     result.success = true;
                     result.retrieve_url = "/dicomweb/studies/" + study_uid +
                                           "/series/" + series_uid +
@@ -2383,11 +2498,13 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 crow::response res;
                 add_cors_headers(res, *ctx);
 
-                if (!ctx->database) {
+                if (!ctx->database || !ctx->file_storage) {
                     res.code = 503;
                     res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               !ctx->database
+                                                   ? "Database not configured"
+                                                   : "File storage not configured");
                     return res;
                 }
 
@@ -2493,14 +2610,13 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                         continue;
                     }
 
-                    // TODO: Implement full storage pipeline with file_storage
-                    // For now, just validate and report success
-                    // Full implementation requires:
-                    // 1. Generate file path
-                    // 2. Write file via file_storage
-                    // 3. Upsert patient/study/series/instance records
+                    // Store instance via file_storage and index in database
+                    if (!store_instance_to_storage(ctx, dataset, result)) {
+                        store_response.failed_instances.push_back(
+                            std::move(result));
+                        continue;
+                    }
 
-                    // Success (validation only for now)
                     result.success = true;
                     result.retrieve_url = "/dicomweb/studies/" + target_study_uid +
                                           "/series/" + series_uid +
