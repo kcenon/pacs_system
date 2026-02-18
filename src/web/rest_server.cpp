@@ -151,6 +151,12 @@ void rest_server::set_database(
   impl_->context->database = std::move(database);
 }
 
+void rest_server::set_file_storage(
+    std::shared_ptr<storage::file_storage> storage) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->file_storage = std::move(storage);
+}
+
 void rest_server::set_node_manager(
     std::shared_ptr<client::remote_node_manager> manager) {
   std::lock_guard<std::mutex> lock(impl_->mutex);
