@@ -1843,6 +1843,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/pacs_database_adapter_test.cpp
             tests/storage/base_repository_test.cpp
             tests/storage/commitment_repository_test.cpp
+            tests/storage/repository_factory_test.cpp
             # Annotation & Measurement API integration tests (Issue #545, #584)
             tests/integration/annotation_api_test.cpp
             tests/integration/measurement_api_test.cpp

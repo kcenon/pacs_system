@@ -7,6 +7,7 @@
  * @see repository_factory.hpp
  * @see Issue #607 - Phase 2: Base Repository Pattern Implementation
  * @see Issue #610 - Phase 4: Repository Migrations (9 repositories)
+ * @see Issue #716 - Complete repository_factory migration for remaining 6
  */
 
 #include "pacs/storage/repository_factory.hpp"
@@ -15,30 +16,22 @@
 
 #include "pacs/storage/pacs_database_adapter.hpp"
 
-// Migrated repositories (Issue #610)
+#include "pacs/storage/annotation_repository.hpp"
+#include "pacs/storage/commitment_repository.hpp"
 #include "pacs/storage/job_repository.hpp"
 #include "pacs/storage/key_image_repository.hpp"
 #include "pacs/storage/measurement_repository.hpp"
-#include "pacs/storage/commitment_repository.hpp"
-
-// TODO(Issue #610): Uncomment these includes when remaining repositories are
-// migrated
-// #include "pacs/storage/annotation_repository.hpp"
-// #include "pacs/storage/node_repository.hpp"
-// #include "pacs/storage/prefetch_repository.hpp"
-// #include "pacs/storage/routing_repository.hpp"
-// #include "pacs/storage/sync_repository.hpp"
-// #include "pacs/storage/viewer_state_repository.hpp"
+#include "pacs/storage/node_repository.hpp"
+#include "pacs/storage/prefetch_repository.hpp"
+#include "pacs/storage/routing_repository.hpp"
+#include "pacs/storage/sync_repository.hpp"
+#include "pacs/storage/viewer_state_repository.hpp"
 
 namespace pacs::storage {
 
 repository_factory::repository_factory(
     std::shared_ptr<pacs_database_adapter> db)
     : db_(std::move(db)) {}
-
-// TODO(Issue #610): Implement these methods after repository migration
-// Currently, all repositories use sqlite3* directly and must be migrated
-// to accept std::shared_ptr<pacs_database_adapter> in their constructors.
 
 auto repository_factory::jobs() -> std::shared_ptr<job_repository> {
     if (!jobs_) {
@@ -49,24 +42,32 @@ auto repository_factory::jobs() -> std::shared_ptr<job_repository> {
 
 auto repository_factory::annotations()
     -> std::shared_ptr<annotation_repository> {
-    // TODO: Implement after annotation_repository migration
-    return nullptr;
+    if (!annotations_) {
+        annotations_ = std::make_shared<annotation_repository>(db_);
+    }
+    return annotations_;
 }
 
 auto repository_factory::routing_rules()
     -> std::shared_ptr<routing_repository> {
-    // TODO: Implement after routing_repository migration
-    return nullptr;
+    if (!routing_rules_) {
+        routing_rules_ = std::make_shared<routing_repository>(db_);
+    }
+    return routing_rules_;
 }
 
 auto repository_factory::nodes() -> std::shared_ptr<node_repository> {
-    // TODO: Implement after node_repository migration
-    return nullptr;
+    if (!nodes_) {
+        nodes_ = std::make_shared<node_repository>(db_);
+    }
+    return nodes_;
 }
 
 auto repository_factory::sync_states() -> std::shared_ptr<sync_repository> {
-    // TODO: Implement after sync_repository migration
-    return nullptr;
+    if (!sync_states_) {
+        sync_states_ = std::make_shared<sync_repository>(db_);
+    }
+    return sync_states_;
 }
 
 auto repository_factory::key_images()
@@ -87,14 +88,18 @@ auto repository_factory::measurements()
 
 auto repository_factory::viewer_states()
     -> std::shared_ptr<viewer_state_repository> {
-    // TODO: Implement after viewer_state_repository migration
-    return nullptr;
+    if (!viewer_states_) {
+        viewer_states_ = std::make_shared<viewer_state_repository>(db_);
+    }
+    return viewer_states_;
 }
 
 auto repository_factory::prefetch_queue()
     -> std::shared_ptr<prefetch_repository> {
-    // TODO: Implement after prefetch_repository migration
-    return nullptr;
+    if (!prefetch_queue_) {
+        prefetch_queue_ = std::make_shared<prefetch_repository>(db_);
+    }
+    return prefetch_queue_;
 }
 
 auto repository_factory::commitments()
