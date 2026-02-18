@@ -45,6 +45,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-02-18 | 1.1.0 | Add Storage Commitment Push Model SCP/SCU, update known limitations |
 | 2026-02-17 | 1.0.0 | Initial Conformance Statement |
 
 ### 1.3 Terminology
@@ -89,15 +90,15 @@ monitoring_system, network_system).
 
 | AE | Function |
 |----|----------|
-| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Verification SCP |
-| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Verification SCU |
+| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Verification SCP |
+| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Verification SCU |
 
 ### 2.2 AE Specifications
 
 #### 2.2.1 PACS_SCP Application Entity
 
 **Description**: Accepts incoming associations for storage, query/retrieve,
-worklist, MPPS, and verification services.
+worklist, MPPS, storage commitment, and verification services.
 
 ##### Association Policies
 
@@ -124,7 +125,7 @@ worklist, MPPS, and verification services.
 #### 2.2.2 PACS_SCU Application Entity
 
 **Description**: Initiates outgoing associations for storage, query/retrieve,
-worklist, and MPPS operations.
+worklist, MPPS, and storage commitment operations.
 
 ##### Association Policies
 
@@ -318,6 +319,60 @@ Query levels supported: PATIENT, STUDY, SERIES, IMAGE.
 | Modality Performed Procedure Step | 1.2.840.10008.3.1.2.3.3 | Yes | Yes |
 
 MPPS status transitions: IN PROGRESS -> COMPLETED | DISCONTINUED
+
+### 3.6 Storage Commitment Push Model
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Storage Commitment Push Model | 1.2.840.10008.1.20.1 | Yes | Yes |
+
+The Storage Commitment Push Model service is implemented per DICOM PS3.4 Annex J.
+
+#### Protocol Flow
+
+```
+SCU (Requestor)                    SCP (Provider)
+     |                                  |
+     |  N-ACTION-RQ (Commitment Req)    |
+     |  Transaction UID + SOP list      |
+     | -------------------------------->|
+     |                                  |
+     |  N-ACTION-RSP (Accepted)         |
+     |<-------------------------------- |
+     |                                  |
+     |         [SCP verifies storage]   |
+     |                                  |
+     |  N-EVENT-REPORT-RQ (Result)      |
+     |  Event Type: 1=Success, 2=Fail   |
+     |<-------------------------------- |
+     |                                  |
+     |  N-EVENT-REPORT-RSP              |
+     | -------------------------------->|
+     |                                  |
+```
+
+#### Supported Features
+
+| Feature | Support |
+|---------|---------|
+| N-ACTION Request (commit request) | Yes |
+| N-EVENT-REPORT (commit result) | Yes |
+| Event Type ID 1 (Storage Commitment Request - Successful) | Yes |
+| Event Type ID 2 (Storage Commitment Request - Failure) | Yes |
+| Per-instance failure reason codes | Yes |
+| Transaction UID tracking | Yes |
+| Asynchronous commit verification | Yes |
+| Well-known SOP Instance UID (1.2.840.10008.1.20.1.1) | Yes |
+
+#### Failure Reason Codes
+
+| Code | Meaning |
+|------|---------|
+| 0110H | Processing failure |
+| 0112H | No such object instance |
+| 0213H | Resource limitation |
+| 0122H | Referenced SOP Class not supported |
+| 0119H | Class/Instance conflict |
 
 ---
 
@@ -559,7 +614,7 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | Area | Limitation | Reference |
 |------|-----------|-----------|
 | Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
-| Storage Commitment | Service-level business logic not yet implemented | Issue #701 |
+| Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
 | Print Management | Not supported | N/A |
 
