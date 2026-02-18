@@ -19,6 +19,7 @@
 #include "pacs/storage/job_repository.hpp"
 #include "pacs/storage/key_image_repository.hpp"
 #include "pacs/storage/measurement_repository.hpp"
+#include "pacs/storage/commitment_repository.hpp"
 
 // TODO(Issue #610): Uncomment these includes when remaining repositories are
 // migrated
@@ -94,6 +95,14 @@ auto repository_factory::prefetch_queue()
     -> std::shared_ptr<prefetch_repository> {
     // TODO: Implement after prefetch_repository migration
     return nullptr;
+}
+
+auto repository_factory::commitments()
+    -> std::shared_ptr<commitment_repository> {
+    if (!commitments_) {
+        commitments_ = std::make_shared<commitment_repository>(db_);
+    }
+    return commitments_;
 }
 
 auto repository_factory::db() const
