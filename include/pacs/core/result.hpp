@@ -180,6 +180,13 @@ namespace error_codes {
     constexpr int worklist_handler_not_set = service_base - 80;
     constexpr int worklist_unexpected_command = service_base - 81;
 
+    // N-GET service errors (-882 to -886)
+    constexpr int n_get_handler_not_set = service_base - 82;
+    constexpr int n_get_unexpected_command = service_base - 83;
+    constexpr int n_get_instance_not_found = service_base - 84;
+    constexpr int n_get_context_not_accepted = service_base - 85;
+    constexpr int n_get_missing_uid = service_base - 86;
+
     // General service errors (-890 to -899)
     constexpr int association_not_established = service_base - 90;
     constexpr int file_not_found_service = service_base - 91;

@@ -974,6 +974,8 @@ add_library(pacs_services
     src/services/worklist_scu.cpp
     src/services/mpps_scp.cpp
     src/services/mpps_scu.cpp
+    src/services/n_get_scp.cpp
+    src/services/n_get_scu.cpp
     src/services/storage_commitment_scp.cpp
     src/services/storage_commitment_scu.cpp
     src/services/sop_class_registry.cpp
@@ -1765,6 +1767,8 @@ if(PACS_BUILD_TESTS)
         tests/services/worklist_scu_test.cpp
         tests/services/mpps_scp_test.cpp
         tests/services/mpps_scu_test.cpp
+        tests/services/n_get_scp_test.cpp
+        tests/services/n_get_scu_test.cpp
         tests/services/storage_commitment_types_test.cpp
         tests/services/storage_commitment_scp_test.cpp
         tests/services/storage_commitment_scu_test.cpp
