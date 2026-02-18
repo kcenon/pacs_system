@@ -28,6 +28,7 @@ class access_control_manager;
 
 namespace pacs::storage {
 class index_database;
+class file_storage;
 } // namespace pacs::storage
 
 namespace pacs::client {
@@ -59,6 +60,9 @@ struct rest_server_context {
 
   /// Index database for patient/study/series data access
   std::shared_ptr<storage::index_database> database;
+
+  /// File storage for DICOM instance persistence
+  std::shared_ptr<storage::file_storage> file_storage;
 
   /// Remote node manager for remote PACS node management
   std::shared_ptr<client::remote_node_manager> node_manager;
