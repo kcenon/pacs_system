@@ -8,6 +8,18 @@
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/monitoring_adapter.hpp>
 
+// Platform-specific socket headers for HTTP client
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -342,6 +354,83 @@ from_iso8601(const std::string& str) {
     return info;
 }
 
+/**
+ * @brief Encode data to Base64
+ */
+[[nodiscard]] inline std::string base64_encode(std::string_view input) {
+    static constexpr char table[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    std::string result;
+    result.reserve(((input.size() + 2) / 3) * 4);
+
+    auto ptr = reinterpret_cast<const unsigned char*>(input.data());
+    auto len = input.size();
+
+    for (std::size_t i = 0; i < len; i += 3) {
+        uint32_t octet_a = ptr[i];
+        uint32_t octet_b = (i + 1 < len) ? ptr[i + 1] : 0;
+        uint32_t octet_c = (i + 2 < len) ? ptr[i + 2] : 0;
+
+        uint32_t triple = (octet_a << 16) | (octet_b << 8) | octet_c;
+
+        result += table[(triple >> 18) & 0x3F];
+        result += table[(triple >> 12) & 0x3F];
+        result += (i + 1 < len) ? table[(triple >> 6) & 0x3F] : '=';
+        result += (i + 2 < len) ? table[triple & 0x3F] : '=';
+    }
+
+    return result;
+}
+
+/**
+ * @brief Extract JSON objects from a JSON array string
+ */
+[[nodiscard]] inline std::vector<std::string> extract_json_array_objects(
+    const std::string& json) {
+    std::vector<std::string> objects;
+
+    // Find array start
+    auto arr_start = json.find('[');
+    if (arr_start == std::string::npos) {
+        return objects;
+    }
+
+    int depth = 0;
+    std::size_t obj_start = std::string::npos;
+
+    for (std::size_t i = arr_start + 1; i < json.size(); ++i) {
+        char c = json[i];
+
+        if (c == '"') {
+            // Skip string content
+            ++i;
+            while (i < json.size() && json[i] != '"') {
+                if (json[i] == '\\') ++i;  // Skip escaped character
+                ++i;
+            }
+            continue;
+        }
+
+        if (c == '{') {
+            if (depth == 0) {
+                obj_start = i;
+            }
+            ++depth;
+        } else if (c == '}') {
+            --depth;
+            if (depth == 0 && obj_start != std::string::npos) {
+                objects.push_back(json.substr(obj_start, i - obj_start + 1));
+                obj_start = std::string::npos;
+            }
+        } else if (c == ']' && depth == 0) {
+            break;
+        }
+    }
+
+    return objects;
+}
+
 }  // namespace json_util
 
 // =============================================================================
@@ -362,10 +451,101 @@ struct http_response {
 };
 
 /**
- * @brief HTTP client interface for AI service communication
+ * @brief RAII wrapper for platform socket handle
+ */
+class socket_handle {
+public:
+#ifdef _WIN32
+    using native_type = SOCKET;
+    static constexpr native_type invalid_value = INVALID_SOCKET;
+#else
+    using native_type = int;
+    static constexpr native_type invalid_value = -1;
+#endif
+
+    socket_handle() = default;
+    explicit socket_handle(native_type fd) : fd_(fd) {}
+    ~socket_handle() { close(); }
+
+    socket_handle(const socket_handle&) = delete;
+    socket_handle& operator=(const socket_handle&) = delete;
+
+    socket_handle(socket_handle&& other) noexcept : fd_(other.fd_) {
+        other.fd_ = invalid_value;
+    }
+
+    socket_handle& operator=(socket_handle&& other) noexcept {
+        if (this != &other) {
+            close();
+            fd_ = other.fd_;
+            other.fd_ = invalid_value;
+        }
+        return *this;
+    }
+
+    [[nodiscard]] bool valid() const noexcept { return fd_ != invalid_value; }
+    [[nodiscard]] native_type get() const noexcept { return fd_; }
+
+    void close() noexcept {
+        if (fd_ != invalid_value) {
+#ifdef _WIN32
+            closesocket(fd_);
+#else
+            ::close(fd_);
+#endif
+            fd_ = invalid_value;
+        }
+    }
+
+private:
+    native_type fd_{invalid_value};
+};
+
+/**
+ * @brief Parse URL into host, port, and path components
+ */
+struct parsed_url {
+    std::string host;
+    std::string port;
+    std::string path;
+
+    static std::optional<parsed_url> parse(const std::string& url) {
+        parsed_url result;
+
+        // Find scheme end
+        auto scheme_end = url.find("://");
+        if (scheme_end == std::string::npos) return std::nullopt;
+
+        auto host_start = scheme_end + 3;
+        auto path_start = url.find('/', host_start);
+
+        std::string host_port;
+        if (path_start == std::string::npos) {
+            host_port = url.substr(host_start);
+            result.path = "/";
+        } else {
+            host_port = url.substr(host_start, path_start - host_start);
+            result.path = url.substr(path_start);
+        }
+
+        auto colon = host_port.find(':');
+        if (colon != std::string::npos) {
+            result.host = host_port.substr(0, colon);
+            result.port = host_port.substr(colon + 1);
+        } else {
+            result.host = host_port;
+            result.port = "80";
+        }
+
+        return result;
+    }
+};
+
+/**
+ * @brief HTTP client for AI service communication
  *
- * This is an abstraction layer that can be implemented using different
- * HTTP libraries (e.g., libcurl, Boost.Beast, or custom implementation).
+ * Uses synchronous POSIX/Winsock sockets for HTTP/1.1 operations.
+ * No dependency on network_system internals (messaging_client, thread_manager).
  */
 class http_client {
 public:
@@ -374,60 +554,33 @@ public:
 
     [[nodiscard]] auto post(const std::string& path,
                             const std::string& body,
-                            [[maybe_unused]] const std::string& content_type = "application/json")
+                            const std::string& content_type = "application/json")
         -> Result<http_response> {
-        // Build full URL
-        std::string url = config_.base_url + path;
-
-        // Log the request
         pacs::integration::logger_adapter::debug(
             "AI service POST request: {} (body size: {} bytes)",
-            url, body.size());
+            config_.base_url + path, body.size());
 
-        // TODO: Implement actual HTTP POST using network_system or libcurl
-        // For now, return a mock response for compilation
-
-        // Simulate network latency for testing
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-        // Mock successful response
-        http_response response;
-        response.status_code = 200;
-        response.body = R"({"job_id":"mock-job-12345","status":"pending","progress":0})";
-
-        return response;
+        auto headers = build_headers();
+        headers["Content-Type"] = content_type;
+        return send_request("POST", path, headers, body);
     }
 
     [[nodiscard]] auto get(const std::string& path)
         -> Result<http_response> {
-        std::string url = config_.base_url + path;
-
         pacs::integration::logger_adapter::debug(
-            "AI service GET request: {}", url);
+            "AI service GET request: {}", config_.base_url + path);
 
-        // TODO: Implement actual HTTP GET
-        // For now, return a mock response
-
-        http_response response;
-        response.status_code = 200;
-        response.body = R"({"job_id":"mock-job-12345","status":"completed","progress":100})";
-
-        return response;
+        auto headers = build_headers();
+        return send_request("GET", path, headers, "");
     }
 
     [[nodiscard]] auto del(const std::string& path)
         -> Result<http_response> {
-        std::string url = config_.base_url + path;
-
         pacs::integration::logger_adapter::debug(
-            "AI service DELETE request: {}", url);
+            "AI service DELETE request: {}", config_.base_url + path);
 
-        // TODO: Implement actual HTTP DELETE
-
-        http_response response;
-        response.status_code = 204;
-
-        return response;
+        auto headers = build_headers();
+        return send_request("DELETE", path, headers, "");
     }
 
     [[nodiscard]] auto check_connectivity() -> bool {
@@ -450,6 +603,173 @@ public:
 private:
     ai_service_config config_;
 
+    [[nodiscard]] auto send_request(
+        const std::string& method,
+        const std::string& path,
+        const std::map<std::string, std::string>& headers,
+        const std::string& body) -> Result<http_response> {
+
+        std::string full_url = config_.base_url + path;
+        auto url = parsed_url::parse(full_url);
+        if (!url) {
+            return error_info(-1, "Invalid URL: " + full_url, "ai_service_connector");
+        }
+
+        // Resolve hostname
+        struct addrinfo hints{};
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+
+        struct addrinfo* addr_result = nullptr;
+        int gai_err = getaddrinfo(url->host.c_str(), url->port.c_str(),
+                                  &hints, &addr_result);
+        if (gai_err != 0) {
+            return error_info(-1,
+                "DNS resolution failed for " + url->host + ": " +
+                    gai_strerror(gai_err),
+                "ai_service_connector");
+        }
+
+        // RAII cleanup for addrinfo
+        auto addr_cleanup = [](struct addrinfo* p) { freeaddrinfo(p); };
+        std::unique_ptr<struct addrinfo, decltype(addr_cleanup)>
+            addr_guard(addr_result, addr_cleanup);
+
+        // Create and connect socket
+        socket_handle sock(
+            ::socket(addr_result->ai_family, addr_result->ai_socktype,
+                     addr_result->ai_protocol));
+        if (!sock.valid()) {
+            return error_info(-1, "Failed to create socket", "ai_service_connector");
+        }
+
+        // Set socket timeout
+        auto timeout_sec = std::chrono::duration_cast<std::chrono::seconds>(
+            config_.connection_timeout).count();
+        if (timeout_sec <= 0) timeout_sec = 30;
+
+#ifdef _WIN32
+        DWORD tv = static_cast<DWORD>(timeout_sec * 1000);
+        setsockopt(sock.get(), SOL_SOCKET, SO_RCVTIMEO,
+                   reinterpret_cast<const char*>(&tv), sizeof(tv));
+        setsockopt(sock.get(), SOL_SOCKET, SO_SNDTIMEO,
+                   reinterpret_cast<const char*>(&tv), sizeof(tv));
+#else
+        struct timeval tv{};
+        tv.tv_sec = timeout_sec;
+        setsockopt(sock.get(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        setsockopt(sock.get(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#endif
+
+        // Connect
+        if (::connect(sock.get(), addr_result->ai_addr,
+                      static_cast<int>(addr_result->ai_addrlen)) != 0) {
+            return error_info(-1,
+                "Connection failed to " + url->host + ":" + url->port,
+                "ai_service_connector");
+        }
+
+        // Build HTTP request
+        std::ostringstream request_stream;
+        request_stream << method << " " << url->path << " HTTP/1.1\r\n";
+        request_stream << "Host: " << url->host << "\r\n";
+        request_stream << "Connection: close\r\n";
+
+        for (const auto& [name, value] : headers) {
+            request_stream << name << ": " << value << "\r\n";
+        }
+
+        if (!body.empty()) {
+            request_stream << "Content-Length: " << body.size() << "\r\n";
+        }
+        request_stream << "\r\n";
+        request_stream << body;
+
+        std::string request_data = request_stream.str();
+
+        // Send request
+        auto total_sent = std::size_t{0};
+        while (total_sent < request_data.size()) {
+            auto sent = ::send(sock.get(),
+                               request_data.data() + total_sent,
+                               static_cast<int>(request_data.size() - total_sent),
+                               0);
+            if (sent <= 0) {
+                return error_info(-1, "Failed to send HTTP request",
+                                  "ai_service_connector");
+            }
+            total_sent += static_cast<std::size_t>(sent);
+        }
+
+        // Receive response
+        std::string response_data;
+        char buffer[4096];
+        while (true) {
+            auto received = ::recv(sock.get(), buffer, sizeof(buffer), 0);
+            if (received < 0) {
+                return error_info(-1, "Failed to receive HTTP response",
+                                  "ai_service_connector");
+            }
+            if (received == 0) break;  // Connection closed
+            response_data.append(buffer, static_cast<std::size_t>(received));
+        }
+
+        // Parse HTTP response
+        return parse_http_response(response_data);
+    }
+
+    [[nodiscard]] static auto parse_http_response(const std::string& raw)
+        -> Result<http_response> {
+        http_response response;
+
+        auto header_end = raw.find("\r\n\r\n");
+        if (header_end == std::string::npos) {
+            return error_info(-1, "Malformed HTTP response", "ai_service_connector");
+        }
+
+        // Parse status line
+        auto first_line_end = raw.find("\r\n");
+        std::string status_line = raw.substr(0, first_line_end);
+
+        // Parse "HTTP/1.x STATUS_CODE REASON"
+        auto first_space = status_line.find(' ');
+        if (first_space == std::string::npos) {
+            return error_info(-1, "Invalid HTTP status line", "ai_service_connector");
+        }
+        auto code_start = first_space + 1;
+        try {
+            response.status_code = std::stoi(status_line.substr(code_start));
+        } catch (...) {
+            return error_info(-1, "Invalid HTTP status code", "ai_service_connector");
+        }
+
+        // Parse headers
+        auto headers_str = raw.substr(first_line_end + 2,
+                                      header_end - first_line_end - 2);
+        std::istringstream header_stream(headers_str);
+        std::string line;
+        while (std::getline(header_stream, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            auto colon = line.find(':');
+            if (colon != std::string::npos) {
+                auto name = line.substr(0, colon);
+                auto value = line.substr(colon + 1);
+                // Trim leading whitespace from value
+                auto val_start = value.find_first_not_of(' ');
+                if (val_start != std::string::npos) {
+                    value = value.substr(val_start);
+                }
+                response.headers[name] = value;
+            }
+        }
+
+        // Extract body
+        response.body = raw.substr(header_end + 4);
+
+        return response;
+    }
+
     [[nodiscard]] std::map<std::string, std::string> build_headers() const {
         std::map<std::string, std::string> headers;
         headers["Content-Type"] = "application/json";
@@ -462,10 +782,8 @@ private:
                 headers["Authorization"] = "Bearer " + config_.bearer_token;
                 break;
             case authentication_type::basic: {
-                // Base64 encode username:password
                 std::string credentials = config_.username + ":" + config_.password;
-                // TODO: Implement proper Base64 encoding
-                headers["Authorization"] = "Basic " + credentials;
+                headers["Authorization"] = "Basic " + json_util::base64_encode(credentials);
                 break;
             }
             case authentication_type::none:
@@ -828,9 +1146,19 @@ public:
                 "ai_service_connector");
         }
 
-        // TODO: Parse models array from response
-        // For now, return empty list
-        return std::vector<model_info>{};
+        // Parse models array from JSON response
+        std::vector<model_info> models;
+        auto model_objects = json_util::extract_json_array_objects(
+            response.value().body);
+
+        for (const auto& obj : model_objects) {
+            auto info = json_util::parse_model_json(obj);
+            if (info) {
+                models.push_back(std::move(*info));
+            }
+        }
+
+        return models;
     }
 
     auto get_model_info(const std::string& model_id) -> Result<model_info> {
