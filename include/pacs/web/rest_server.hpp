@@ -32,6 +32,10 @@ class index_database;
 class file_storage;
 } // namespace pacs::storage
 
+namespace pacs::network {
+class dicom_server;
+} // namespace pacs::network
+
 namespace pacs::client {
 class remote_node_manager;
 class job_manager;
@@ -164,6 +168,12 @@ public:
    * @param manager Routing manager instance
    */
   void set_routing_manager(std::shared_ptr<client::routing_manager> manager);
+
+  /**
+   * @brief Set DICOM server for live association management
+   * @param server DICOM server instance
+   */
+  void set_dicom_server(std::shared_ptr<network::dicom_server> server);
 
   // =========================================================================
   // Lifecycle
