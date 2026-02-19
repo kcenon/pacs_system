@@ -2358,6 +2358,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] mpps_scu: OFF (requires pacs_integration)")
     endif()
 
+    # Print SCU sample - Print Management client
+    if(TARGET pacs_integration)
+        add_subdirectory(examples/print_scu)
+        message(STATUS "  [OK] print_scu: Print Management client")
+    else()
+        message(STATUS "  [--] print_scu: OFF (requires pacs_integration)")
+    endif()
+
     # Store SCP sample - DICOM image receiver
     if(TARGET pacs_storage AND TARGET pacs_integration)
         add_subdirectory(examples/store_scp)
