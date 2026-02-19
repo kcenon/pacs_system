@@ -31,6 +31,10 @@ class index_database;
 class file_storage;
 } // namespace pacs::storage
 
+namespace pacs::network {
+class dicom_server;
+} // namespace pacs::network
+
 namespace pacs::client {
 class remote_node_manager;
 class job_manager;
@@ -72,6 +76,9 @@ struct rest_server_context {
 
   /// Routing manager for auto-forwarding rules
   std::shared_ptr<client::routing_manager> routing_manager;
+
+  /// DICOM server for live association management
+  std::shared_ptr<network::dicom_server> dicom_server;
 
   /// Database metrics service for monitoring
   std::shared_ptr<services::monitoring::database_metrics_service> database_metrics;

@@ -175,6 +175,12 @@ void rest_server::set_routing_manager(
   impl_->context->routing_manager = std::move(manager);
 }
 
+void rest_server::set_dicom_server(
+    std::shared_ptr<network::dicom_server> server) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->dicom_server = std::move(server);
+}
+
 void rest_server::start() {
   if (impl_->running.exchange(true)) {
     return; // Already running
