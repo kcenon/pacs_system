@@ -187,6 +187,11 @@ namespace error_codes {
     constexpr int n_get_context_not_accepted = service_base - 85;
     constexpr int n_get_missing_uid = service_base - 86;
 
+    // Print Management service errors (-887 to -889)
+    constexpr int print_handler_not_set = service_base - 87;
+    constexpr int print_unexpected_command = service_base - 88;
+    constexpr int print_invalid_sop_class = service_base - 89;
+
     // General service errors (-890 to -899)
     constexpr int association_not_established = service_base - 90;
     constexpr int file_not_found_service = service_base - 91;
