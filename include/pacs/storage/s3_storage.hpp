@@ -151,11 +151,23 @@ using progress_callback =
  * auto retrieved = storage.retrieve("1.2.3.4.5.6.7.8.9");
  * @endcode
  *
- * @note This implementation currently uses mock S3 operations for testing.
- *       Full AWS SDK integration will be added in a future update.
+ * @note Uses mock S3 client by default. Enable PACS_WITH_AWS_SDK CMake option
+ *       for production AWS SDK integration. Tests use mock via PACS_USE_MOCK_S3.
  */
 class s3_storage : public storage_interface {
 public:
+  // =========================================================================
+  // Client Interface (public for backend implementations in .cpp)
+  // =========================================================================
+
+  /**
+   * @brief Abstract S3 client interface
+   *
+   * Implemented by mock_s3_client (testing) and aws_s3_client (production).
+   * Selected at compile time via PACS_WITH_AWS_SDK and PACS_USE_MOCK_S3 flags.
+   */
+  class s3_client_interface;
+
   // =========================================================================
   // Construction
   // =========================================================================
@@ -320,17 +332,6 @@ public:
 
 private:
   // =========================================================================
-  // Internal Types
-  // =========================================================================
-
-  /**
-   * @brief Mock S3 client interface for testing
-   *
-   * This will be replaced with AWS SDK S3Client when integrated.
-   */
-  class mock_s3_client;
-
-  // =========================================================================
   // Internal Helper Methods
   // =========================================================================
 
@@ -381,8 +382,8 @@ private:
   /// Storage configuration
   cloud_storage_config config_;
 
-  /// Mock S3 client for testing (will be replaced with AWS SDK client)
-  std::unique_ptr<mock_s3_client> client_;
+  /// S3 client (mock for testing, AWS SDK for production)
+  std::unique_ptr<s3_client_interface> client_;
 
   /// Mapping from SOP Instance UID to S3 object info
   std::unordered_map<std::string, s3_object_info> index_;
