@@ -3,8 +3,9 @@
  * @brief Implementation of Azure Blob DICOM storage backend
  *
  * This file implements the azure_blob_storage class for cloud storage support.
- * Currently uses a mock Azure client for testing and API validation.
- * Full Azure SDK integration will be added in a future update.
+ * Supports two Azure client backends selected at compile time:
+ * - Mock client (default / PACS_USE_MOCK_AZURE): in-memory testing
+ * - Azure SDK client (PACS_WITH_AZURE_SDK): production Blob operations
  */
 
 #include <pacs/storage/azure_blob_storage.hpp>
@@ -18,6 +19,10 @@
 #include <iomanip>
 #include <set>
 #include <sstream>
+
+#if defined(PACS_WITH_AZURE_SDK) && !defined(PACS_USE_MOCK_AZURE)
+#include <azure/storage/blobs.hpp>
+#endif
 
 namespace pacs::storage {
 
@@ -37,12 +42,12 @@ constexpr int kSerializationError = -8;
 constexpr int kTierChangeError = -9;
 
 /**
- * @brief Generate a simple MD5-like hash for content verification
+ * @brief Generate a simple hash for content verification
  * @param data Data to hash
  * @return Hex string representation of hash
  */
-auto compute_content_hash(const std::vector<std::uint8_t> &data) -> std::string {
-  // Simple hash for mock implementation
+auto compute_content_hash(const std::vector<std::uint8_t> &data)
+    -> std::string {
   std::size_t hash = 0;
   for (const auto &byte : data) {
     hash = hash * 31 + byte;
@@ -56,7 +61,7 @@ auto compute_content_hash(const std::vector<std::uint8_t> &data) -> std::string 
 /**
  * @brief Generate a unique block ID for block blob upload
  * @param block_index Block index
- * @return Base64-encoded block ID
+ * @return Block ID string
  */
 auto generate_block_id(std::size_t block_index) -> std::string {
   std::ostringstream oss;
@@ -67,31 +72,84 @@ auto generate_block_id(std::size_t block_index) -> std::string {
 } // namespace
 
 // ============================================================================
+// Azure Client Interface
+// ============================================================================
+
+/**
+ * @brief Abstract interface for Azure Blob client operations
+ *
+ * Both mock_azure_client and azure_sdk_client implement this interface,
+ * allowing compile-time selection of the backend.
+ */
+class azure_blob_storage::azure_client_interface {
+public:
+  virtual ~azure_client_interface() = default;
+
+  [[nodiscard]] virtual auto put_blob(const std::string &blob_name,
+                                      const std::vector<std::uint8_t> &data)
+      -> VoidResult = 0;
+
+  [[nodiscard]] virtual auto get_blob(const std::string &blob_name)
+      -> Result<std::vector<std::uint8_t>> = 0;
+
+  [[nodiscard]] virtual auto delete_blob(const std::string &blob_name)
+      -> VoidResult = 0;
+
+  [[nodiscard]] virtual auto head_blob(const std::string &blob_name) const
+      -> bool = 0;
+
+  [[nodiscard]] virtual auto get_blob_size(const std::string &blob_name) const
+      -> std::size_t = 0;
+
+  [[nodiscard]] virtual auto get_blob_etag(const std::string &blob_name) const
+      -> std::string = 0;
+
+  [[nodiscard]] virtual auto get_blob_md5(const std::string &blob_name) const
+      -> std::string = 0;
+
+  [[nodiscard]] virtual auto list_blobs() const
+      -> std::vector<std::string> = 0;
+
+  [[nodiscard]] virtual auto is_connected() const -> bool = 0;
+
+  [[nodiscard]] virtual auto stage_block(
+      const std::string &blob_name, const std::string &block_id,
+      const std::vector<std::uint8_t> &data) -> VoidResult = 0;
+
+  [[nodiscard]] virtual auto commit_blocks(
+      const std::string &blob_name,
+      const std::vector<std::string> &block_ids) -> VoidResult = 0;
+
+  [[nodiscard]] virtual auto set_tier(const std::string &blob_name,
+                                      const std::string &tier)
+      -> VoidResult = 0;
+};
+
+// ============================================================================
 // Mock Azure Client Implementation
 // ============================================================================
 
 /**
  * @brief Mock Azure Blob client for testing without Azure SDK dependency
  *
- * This class simulates Azure Blob operations using an in-memory storage.
- * It will be replaced with Azure SDK BlobContainerClient when integrated.
+ * Simulates Azure Blob operations using in-memory storage.
+ * Always used when PACS_USE_MOCK_AZURE is defined or PACS_WITH_AZURE_SDK is
+ * not set.
  */
-class azure_blob_storage::mock_azure_client {
+class mock_azure_client
+    : public azure_blob_storage::azure_client_interface {
 public:
   explicit mock_azure_client(const azure_storage_config & /*config*/)
       : connected_(true) {}
 
-  /**
-   * @brief Simulate Azure PutBlob operation
-   */
   [[nodiscard]] auto put_blob(const std::string &blob_name,
                               const std::vector<std::uint8_t> &data)
-      -> VoidResult {
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
-          kConnectionError, "Azure client not connected", "azure_blob_storage");
+          kConnectionError, "Azure client not connected",
+          "azure_blob_storage");
     }
-
     blob_data blob;
     blob.data = data;
     blob.etag = "\"" + compute_content_hash(data) + "\"";
@@ -101,53 +159,43 @@ public:
     return ok();
   }
 
-  /**
-   * @brief Simulate Azure GetBlob operation
-   */
   [[nodiscard]] auto get_blob(const std::string &blob_name)
-      -> Result<std::vector<std::uint8_t>> {
+      -> Result<std::vector<std::uint8_t>> override {
     if (!connected_) {
       return make_error<std::vector<std::uint8_t>>(
-          kConnectionError, "Azure client not connected", "azure_blob_storage");
+          kConnectionError, "Azure client not connected",
+          "azure_blob_storage");
     }
-
     auto it = blobs_.find(blob_name);
     if (it == blobs_.end()) {
       return make_error<std::vector<std::uint8_t>>(
-          kBlobNotFound, "Blob not found: " + blob_name, "azure_blob_storage");
+          kBlobNotFound, "Blob not found: " + blob_name,
+          "azure_blob_storage");
     }
-
     return it->second.data;
   }
 
-  /**
-   * @brief Simulate Azure DeleteBlob operation
-   */
-  [[nodiscard]] auto delete_blob(const std::string &blob_name) -> VoidResult {
+  [[nodiscard]] auto delete_blob(const std::string &blob_name)
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
-          kConnectionError, "Azure client not connected", "azure_blob_storage");
+          kConnectionError, "Azure client not connected",
+          "azure_blob_storage");
     }
-
     blobs_.erase(blob_name);
     return ok();
   }
 
-  /**
-   * @brief Simulate Azure GetBlobProperties operation
-   */
-  [[nodiscard]] auto head_blob(const std::string &blob_name) const -> bool {
+  [[nodiscard]] auto head_blob(const std::string &blob_name) const
+      -> bool override {
     if (!connected_) {
       return false;
     }
     return blobs_.contains(blob_name);
   }
 
-  /**
-   * @brief Get blob size
-   */
   [[nodiscard]] auto get_blob_size(const std::string &blob_name) const
-      -> std::size_t {
+      -> std::size_t override {
     auto it = blobs_.find(blob_name);
     if (it != blobs_.end()) {
       return it->second.data.size();
@@ -155,11 +203,8 @@ public:
     return 0;
   }
 
-  /**
-   * @brief Get blob ETag
-   */
   [[nodiscard]] auto get_blob_etag(const std::string &blob_name) const
-      -> std::string {
+      -> std::string override {
     auto it = blobs_.find(blob_name);
     if (it != blobs_.end()) {
       return it->second.etag;
@@ -167,11 +212,8 @@ public:
     return {};
   }
 
-  /**
-   * @brief Get blob content MD5
-   */
   [[nodiscard]] auto get_blob_md5(const std::string &blob_name) const
-      -> std::string {
+      -> std::string override {
     auto it = blobs_.find(blob_name);
     if (it != blobs_.end()) {
       return it->second.content_md5;
@@ -179,10 +221,8 @@ public:
     return {};
   }
 
-  /**
-   * @brief List all blob names
-   */
-  [[nodiscard]] auto list_blobs() const -> std::vector<std::string> {
+  [[nodiscard]] auto list_blobs() const
+      -> std::vector<std::string> override {
     std::vector<std::string> names;
     names.reserve(blobs_.size());
     for (const auto &[name, data] : blobs_) {
@@ -191,41 +231,30 @@ public:
     return names;
   }
 
-  /**
-   * @brief Check connection status
-   */
-  [[nodiscard]] auto is_connected() const -> bool { return connected_; }
+  [[nodiscard]] auto is_connected() const -> bool override {
+    return connected_;
+  }
 
-  /**
-   * @brief Set connection status (for testing)
-   */
-  void set_connected(bool connected) { connected_ = connected; }
-
-  /**
-   * @brief Simulate block blob upload - stage block
-   */
   [[nodiscard]] auto stage_block(const std::string &blob_name,
                                  const std::string &block_id,
                                  const std::vector<std::uint8_t> &data)
-      -> VoidResult {
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
-          kConnectionError, "Azure client not connected", "azure_blob_storage");
+          kConnectionError, "Azure client not connected",
+          "azure_blob_storage");
     }
-
     staged_blocks_[blob_name][block_id] = data;
     return ok();
   }
 
-  /**
-   * @brief Simulate block blob upload - commit blocks
-   */
   [[nodiscard]] auto commit_blocks(const std::string &blob_name,
                                    const std::vector<std::string> &block_ids)
-      -> VoidResult {
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
-          kConnectionError, "Azure client not connected", "azure_blob_storage");
+          kConnectionError, "Azure client not connected",
+          "azure_blob_storage");
     }
 
     auto it = staged_blocks_.find(blob_name);
@@ -235,19 +264,18 @@ public:
           "azure_blob_storage");
     }
 
-    // Combine all blocks
     std::vector<std::uint8_t> combined_data;
     for (const auto &block_id : block_ids) {
       auto block_it = it->second.find(block_id);
       if (block_it == it->second.end()) {
         return make_error<std::monostate>(
-            kUploadError, "Block not found: " + block_id, "azure_blob_storage");
+            kUploadError, "Block not found: " + block_id,
+            "azure_blob_storage");
       }
       combined_data.insert(combined_data.end(), block_it->second.begin(),
                            block_it->second.end());
     }
 
-    // Store as blob
     blob_data blob;
     blob.data = std::move(combined_data);
     blob.etag = "\"" + compute_content_hash(blob.data) + "\"";
@@ -255,28 +283,24 @@ public:
     blob.tier = "Hot";
     blobs_[blob_name] = std::move(blob);
 
-    // Clean up staged blocks
     staged_blocks_.erase(blob_name);
-
     return ok();
   }
 
-  /**
-   * @brief Set blob access tier
-   */
   [[nodiscard]] auto set_tier(const std::string &blob_name,
-                              const std::string &tier) -> VoidResult {
+                              const std::string &tier)
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
-          kConnectionError, "Azure client not connected", "azure_blob_storage");
+          kConnectionError, "Azure client not connected",
+          "azure_blob_storage");
     }
-
     auto it = blobs_.find(blob_name);
     if (it == blobs_.end()) {
       return make_error<std::monostate>(
-          kBlobNotFound, "Blob not found: " + blob_name, "azure_blob_storage");
+          kBlobNotFound, "Blob not found: " + blob_name,
+          "azure_blob_storage");
     }
-
     it->second.tier = tier;
     return ok();
   }
@@ -297,11 +321,239 @@ private:
 };
 
 // ============================================================================
+// Azure SDK Client Implementation
+// ============================================================================
+
+#if defined(PACS_WITH_AZURE_SDK) && !defined(PACS_USE_MOCK_AZURE)
+
+/**
+ * @brief Production Azure Blob client using Azure SDK for C++
+ *
+ * Wraps Azure::Storage::Blobs::BlobContainerClient for real Azure operations.
+ * Enabled when PACS_WITH_AZURE_SDK is defined and PACS_USE_MOCK_AZURE is not.
+ */
+class azure_sdk_client
+    : public azure_blob_storage::azure_client_interface {
+public:
+  explicit azure_sdk_client(const azure_storage_config &config) {
+    if (config.endpoint_url.has_value()) {
+      // Azurite or custom endpoint
+      container_client_ =
+          std::make_unique<Azure::Storage::Blobs::BlobContainerClient>(
+              config.endpoint_url.value() + "/" + config.container_name);
+    } else {
+      container_client_ =
+          std::make_unique<Azure::Storage::Blobs::BlobContainerClient>(
+              Azure::Storage::Blobs::BlobContainerClient::
+                  CreateFromConnectionString(config.connection_string,
+                                             config.container_name));
+    }
+  }
+
+  [[nodiscard]] auto put_blob(const std::string &blob_name,
+                              const std::vector<std::uint8_t> &data)
+      -> VoidResult override {
+    try {
+      auto blob_client = container_client_->GetBlockBlobClient(blob_name);
+      Azure::Core::IO::MemoryBodyStream stream(data);
+      blob_client.Upload(stream);
+      return ok();
+    } catch (const Azure::Storage::StorageException &e) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "Azure PutBlob failed: " + std::string(e.what()),
+          "azure_blob_storage");
+    }
+  }
+
+  [[nodiscard]] auto get_blob(const std::string &blob_name)
+      -> Result<std::vector<std::uint8_t>> override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      auto response = blob_client.Download();
+      auto &body = response.Value.BodyStream;
+
+      std::vector<std::uint8_t> result(
+          static_cast<std::size_t>(body->Length()));
+      body->ReadToCount(result.data(), result.size());
+      return result;
+    } catch (const Azure::Storage::StorageException &e) {
+      if (e.StatusCode == Azure::Core::Http::HttpStatusCode::NotFound) {
+        return make_error<std::vector<std::uint8_t>>(
+            kBlobNotFound, "Blob not found: " + blob_name,
+            "azure_blob_storage");
+      }
+      return make_error<std::vector<std::uint8_t>>(
+          kDownloadError,
+          "Azure GetBlob failed: " + std::string(e.what()),
+          "azure_blob_storage");
+    }
+  }
+
+  [[nodiscard]] auto delete_blob(const std::string &blob_name)
+      -> VoidResult override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      blob_client.Delete();
+      return ok();
+    } catch (const Azure::Storage::StorageException &e) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "Azure DeleteBlob failed: " + std::string(e.what()),
+          "azure_blob_storage");
+    }
+  }
+
+  [[nodiscard]] auto head_blob(const std::string &blob_name) const
+      -> bool override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      blob_client.GetProperties();
+      return true;
+    } catch (const Azure::Storage::StorageException &) {
+      return false;
+    }
+  }
+
+  [[nodiscard]] auto get_blob_size(const std::string &blob_name) const
+      -> std::size_t override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      auto props = blob_client.GetProperties();
+      return static_cast<std::size_t>(props.Value.BlobSize);
+    } catch (const Azure::Storage::StorageException &) {
+      return 0;
+    }
+  }
+
+  [[nodiscard]] auto get_blob_etag(const std::string &blob_name) const
+      -> std::string override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      auto props = blob_client.GetProperties();
+      return props.Value.ETag.ToString();
+    } catch (const Azure::Storage::StorageException &) {
+      return {};
+    }
+  }
+
+  [[nodiscard]] auto get_blob_md5(const std::string &blob_name) const
+      -> std::string override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      auto props = blob_client.GetProperties();
+      if (props.Value.HttpHeaders.ContentHash.Value.empty()) {
+        return {};
+      }
+      // Convert hash bytes to hex string
+      std::ostringstream oss;
+      for (auto byte : props.Value.HttpHeaders.ContentHash.Value) {
+        oss << std::hex << std::setfill('0') << std::setw(2)
+            << static_cast<int>(byte);
+      }
+      return oss.str();
+    } catch (const Azure::Storage::StorageException &) {
+      return {};
+    }
+  }
+
+  [[nodiscard]] auto list_blobs() const
+      -> std::vector<std::string> override {
+    std::vector<std::string> names;
+    try {
+      for (auto page = container_client_->ListBlobs(); page.HasPage();
+           page.MoveToNextPage()) {
+        for (const auto &blob : page.Blobs) {
+          names.push_back(blob.Name);
+        }
+      }
+    } catch (const Azure::Storage::StorageException &) {
+      // Return whatever was collected
+    }
+    return names;
+  }
+
+  [[nodiscard]] auto is_connected() const -> bool override {
+    return container_client_ != nullptr;
+  }
+
+  [[nodiscard]] auto stage_block(const std::string &blob_name,
+                                 const std::string &block_id,
+                                 const std::vector<std::uint8_t> &data)
+      -> VoidResult override {
+    try {
+      auto blob_client = container_client_->GetBlockBlobClient(blob_name);
+      Azure::Core::IO::MemoryBodyStream stream(data);
+      blob_client.StageBlock(block_id, stream);
+      return ok();
+    } catch (const Azure::Storage::StorageException &e) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "Azure StageBlock failed: " + std::string(e.what()),
+          "azure_blob_storage");
+    }
+  }
+
+  [[nodiscard]] auto commit_blocks(const std::string &blob_name,
+                                   const std::vector<std::string> &block_ids)
+      -> VoidResult override {
+    try {
+      auto blob_client = container_client_->GetBlockBlobClient(blob_name);
+      blob_client.CommitBlockList(block_ids);
+      return ok();
+    } catch (const Azure::Storage::StorageException &e) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "Azure CommitBlockList failed: " + std::string(e.what()),
+          "azure_blob_storage");
+    }
+  }
+
+  [[nodiscard]] auto set_tier(const std::string &blob_name,
+                              const std::string &tier)
+      -> VoidResult override {
+    try {
+      auto blob_client = container_client_->GetBlobClient(blob_name);
+      Azure::Storage::Blobs::Models::AccessTier access_tier;
+      if (tier == "Hot") {
+        access_tier = Azure::Storage::Blobs::Models::AccessTier::Hot;
+      } else if (tier == "Cool") {
+        access_tier = Azure::Storage::Blobs::Models::AccessTier::Cool;
+      } else if (tier == "Archive") {
+        access_tier = Azure::Storage::Blobs::Models::AccessTier::Archive;
+      } else {
+        access_tier = Azure::Storage::Blobs::Models::AccessTier::Hot;
+      }
+      blob_client.SetAccessTier(access_tier);
+      return ok();
+    } catch (const Azure::Storage::StorageException &e) {
+      return make_error<std::monostate>(
+          kTierChangeError,
+          "Azure SetAccessTier failed: " + std::string(e.what()),
+          "azure_blob_storage");
+    }
+  }
+
+private:
+  std::unique_ptr<Azure::Storage::Blobs::BlobContainerClient>
+      container_client_;
+};
+
+#endif // PACS_WITH_AZURE_SDK && !PACS_USE_MOCK_AZURE
+
+// ============================================================================
 // Construction
 // ============================================================================
 
 azure_blob_storage::azure_blob_storage(const azure_storage_config &config)
-    : config_(config), client_(std::make_unique<mock_azure_client>(config)) {}
+    : config_(config),
+#if defined(PACS_WITH_AZURE_SDK) && !defined(PACS_USE_MOCK_AZURE)
+      client_(std::make_unique<azure_sdk_client>(config))
+#else
+      client_(std::make_unique<mock_azure_client>(config))
+#endif
+{
+}
 
 azure_blob_storage::~azure_blob_storage() = default;
 
@@ -314,8 +566,8 @@ auto azure_blob_storage::store(const core::dicom_dataset &dataset)
   return store_with_progress(dataset, nullptr);
 }
 
-auto azure_blob_storage::store_with_progress(const core::dicom_dataset &dataset,
-                                             azure_progress_callback callback)
+auto azure_blob_storage::store_with_progress(
+    const core::dicom_dataset &dataset, azure_progress_callback callback)
     -> VoidResult {
   // Extract required UIDs
   auto study_uid = dataset.get_string(core::tags::study_instance_uid);
@@ -554,8 +806,8 @@ auto azure_blob_storage::verify_integrity() -> VoidResult {
 // Azure-specific Operations
 // ============================================================================
 
-auto azure_blob_storage::get_blob_name(std::string_view sop_instance_uid) const
-    -> std::string {
+auto azure_blob_storage::get_blob_name(
+    std::string_view sop_instance_uid) const -> std::string {
   std::shared_lock lock(mutex_);
   auto it = index_.find(std::string{sop_instance_uid});
   if (it != index_.end()) {
@@ -670,10 +922,9 @@ auto azure_blob_storage::sanitize_uid(std::string_view uid) -> std::string {
   return result;
 }
 
-auto azure_blob_storage::upload_block_blob(const std::string &blob_name,
-                                           const std::vector<std::uint8_t> &data,
-                                           azure_progress_callback callback)
-    -> VoidResult {
+auto azure_blob_storage::upload_block_blob(
+    const std::string &blob_name, const std::vector<std::uint8_t> &data,
+    azure_progress_callback callback) -> VoidResult {
   std::size_t total_bytes = data.size();
   std::size_t bytes_uploaded = 0;
   std::vector<std::string> block_ids;

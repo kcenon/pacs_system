@@ -158,11 +158,23 @@ using azure_progress_callback =
  * auto retrieved = storage.retrieve("1.2.3.4.5.6.7.8.9");
  * @endcode
  *
- * @note This implementation currently uses mock Azure operations for testing.
- *       Full Azure SDK integration will be added in a future update.
+ * @note Uses mock Azure client by default. Enable PACS_WITH_AZURE_SDK CMake option
+ *       for production Azure SDK integration. Tests use mock via PACS_USE_MOCK_AZURE.
  */
 class azure_blob_storage : public storage_interface {
 public:
+  // =========================================================================
+  // Client Interface (public for backend implementations in .cpp)
+  // =========================================================================
+
+  /**
+   * @brief Abstract Azure Blob client interface
+   *
+   * Implemented by mock_azure_client (testing) and azure_sdk_client (production).
+   * Selected at compile time via PACS_WITH_AZURE_SDK and PACS_USE_MOCK_AZURE flags.
+   */
+  class azure_client_interface;
+
   // =========================================================================
   // Construction
   // =========================================================================
@@ -337,17 +349,6 @@ public:
 
 private:
   // =========================================================================
-  // Internal Types
-  // =========================================================================
-
-  /**
-   * @brief Mock Azure Blob client interface for testing
-   *
-   * This will be replaced with Azure SDK BlobContainerClient when integrated.
-   */
-  class mock_azure_client;
-
-  // =========================================================================
   // Internal Helper Methods
   // =========================================================================
 
@@ -399,8 +400,8 @@ private:
   /// Storage configuration
   azure_storage_config config_;
 
-  /// Mock Azure client for testing (will be replaced with Azure SDK client)
-  std::unique_ptr<mock_azure_client> client_;
+  /// Azure client (mock for testing, Azure SDK for production)
+  std::unique_ptr<azure_client_interface> client_;
 
   /// Mapping from SOP Instance UID to Azure blob info
   std::unordered_map<std::string, azure_blob_info> index_;
