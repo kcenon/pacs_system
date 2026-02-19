@@ -2899,6 +2899,114 @@ if (cursor_result.is_ok()) {
 }
 ```
 
+### `pacs::services::print_scu`
+
+Print Management SCU for sending DICOM print requests to remote Print SCP systems (PS3.4 Annex H).
+
+#### Data Types
+
+```cpp
+#include "pacs/services/print_scu.hpp"
+
+// Result of a Print DIMSE-N operation
+struct print_result {
+    std::string sop_instance_uid;     // SOP Instance UID
+    uint16_t status{0};               // DIMSE status (0x0000 = success)
+    std::string error_comment;        // Error comment from SCP
+    std::chrono::milliseconds elapsed{0};
+    core::dicom_dataset response_data; // Response dataset
+
+    bool is_success() const noexcept;  // status == 0x0000
+    bool is_warning() const noexcept;  // (status & 0xF000) == 0xB000
+    bool is_error() const noexcept;    // !success && !warning
+};
+
+// Film Session creation data
+struct print_session_data {
+    std::string sop_instance_uid;      // Auto-generated if empty
+    uint32_t number_of_copies{1};
+    std::string print_priority{"MED"}; // HIGH, MED, LOW
+    std::string medium_type{"BLUE FILM"};
+    std::string film_destination{"MAGAZINE"};
+    std::string film_session_label;
+};
+
+// Film Box creation data
+struct print_film_box_data {
+    std::string image_display_format{"STANDARD\\1,1"};
+    std::string film_orientation{"PORTRAIT"};
+    std::string film_size_id{"8INX10IN"};
+    std::string magnification_type;
+    std::string film_session_uid;      // Parent session UID
+};
+
+// Image Box data (for N-SET)
+struct print_image_data {
+    core::dicom_dataset pixel_data;
+    uint16_t image_position{0};        // 1-based position in film box
+};
+```
+
+#### Usage
+
+```cpp
+#include "pacs/services/print_scu.hpp"
+using namespace pacs::services;
+
+// Create Print SCU
+print_scu scu;
+
+// 1. Create Film Session
+print_session_data session_data;
+session_data.number_of_copies = 1;
+session_data.print_priority = "HIGH";
+auto session_result = scu.create_film_session(assoc, session_data);
+auto session_uid = session_result.value().sop_instance_uid;
+
+// 2. Create Film Box (SCP auto-creates Image Boxes)
+print_film_box_data box_data;
+box_data.image_display_format = "STANDARD\\1,1";
+box_data.film_session_uid = session_uid;
+auto box_result = scu.create_film_box(assoc, box_data);
+auto film_box_uid = box_result.value().sop_instance_uid;
+
+// 3. Set Image Box pixel data
+print_image_data image_data;
+image_data.pixel_data = my_image_dataset;
+scu.set_image_box(assoc, image_box_uid, image_data);
+
+// 4. Print and cleanup
+scu.print_film_box(assoc, film_box_uid);
+scu.delete_film_session(assoc, session_uid);
+
+// Query printer status
+auto status = scu.query_printer_status(assoc);
+```
+
+### `pacs::services::print_scp`
+
+Print Management SCP that handles incoming print requests from remote SCU systems.
+
+#### Handler Types
+
+```cpp
+#include "pacs/services/print_scp.hpp"
+using namespace pacs::services;
+
+// Register print handler with SCP service
+auto handler = std::make_shared<print_handler>();
+scp_service.register_handler(handler);
+```
+
+The Print SCP handles the following SOP Classes:
+- Basic Film Session SOP Class (1.2.840.10008.5.1.1.1)
+- Basic Film Box SOP Class (1.2.840.10008.5.1.1.2)
+- Basic Grayscale Image Box SOP Class (1.2.840.10008.5.1.1.4)
+- Basic Color Image Box SOP Class (1.2.840.10008.5.1.1.4.1)
+- Printer SOP Class (1.2.840.10008.5.1.1.16)
+- Basic Grayscale Print Meta SOP Class (1.2.840.10008.5.1.1.9)
+- Basic Color Print Meta SOP Class (1.2.840.10008.5.1.1.18)
+
 ---
 
 ## Storage Module

@@ -30,8 +30,8 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | ✅ Complete |
 | **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | ✅ Complete |
 | **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
-| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock), Security, Workflow, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
-| **Phase 5**: Enterprise Features | Full AWS/Azure SDK, VTK Integration, FHIR, Clustering, Connection Pooling | 🔜 Planned |
+| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
+| **Phase 5**: Enterprise Features | VTK Integration, FHIR, Clustering, Connection Pooling | 🔜 Planned |
 
 **Test Coverage**: 1,837+ tests passing across 128 test files
 
@@ -94,6 +94,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - `worklist_scp/scu` - Modality Worklist service (MWL)
 - `mpps_scp/scu` - Modality Performed Procedure Step
 - `storage_commitment_scp/scu` - Storage Commitment Push Model (N-ACTION/N-EVENT-REPORT, PS3.4 Annex J)
+- `print_scp/scu` - Print Management service (Film Session/Box, Image Box, Printer, PS3.4 Annex H)
 - `sop_class_registry` - 47+ Storage SOP Classes (CT, MR, US, XA, DX, MG, NM, PET, RT, SR, SEG, CR, SC, etc.)
 - `parallel_query_executor` - Parallel batch query execution with timeout
 - IOD validators for modality-specific validation
@@ -133,10 +134,16 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - AI service connector for external inference endpoints
 - AI result handler (SR, SEG, PR DICOM object processing)
 
-**Cloud Storage** *(Mock Implementation — Full SDK integration planned for Phase 5)*:
-- S3 cloud storage (mock in-memory client for API validation; no AWS SDK dependency)
-- Azure Blob storage (mock in-memory client for API validation; no Azure SDK dependency)
+**Cloud Storage**:
+- S3 cloud storage with AWS SDK integration (real S3 operations)
+- Azure Blob storage with Azure SDK integration (real Blob operations)
 - Hierarchical Storage Management (HSM) with three-tier storage (Hot/Warm/Cold)
+
+**Print Management** (PS3.4 Annex H):
+- `print_scp` - Print Management SCP (Film Session, Film Box, Image Box, Printer SOP Classes)
+- `print_scu` - Print Management SCU (N-CREATE/N-SET/N-GET/N-ACTION/N-DELETE operations)
+- Basic Grayscale and Color Print Meta SOP Class support
+- `print_scu` example application with full print workflow
 
 **Monitoring**:
 - Health checks (/health, /ready, /live endpoints)
@@ -157,7 +164,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
 │       └─────────────┼───────────┼───────────┼──────────────┘        │
 │  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
-│  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commitment)   │  │
+│  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commit/Print) │  │
 │  └──────────────────────────────┬────────────────────────────────┘  │
 │  ┌──────────────────────────────▼────────────────────────────────┐  │
 │  │  Network (PDU/Association/DIMSE) + Security (RBAC/TLS/Anon)   │  │
@@ -258,6 +265,8 @@ pacs_system/
 │   │   ├── storage_commitment_types.hpp # Storage Commitment data types
 │   │   ├── storage_commitment_scp.hpp # Storage Commitment SCP (N-ACTION)
 │   │   ├── storage_commitment_scu.hpp # Storage Commitment SCU
+│   │   ├── print_scp.hpp         # Print Management SCP (PS3.4 Annex H)
+│   │   ├── print_scu.hpp         # Print Management SCU
 │   │   ├── sop_class_registry.hpp # SOP Class registry (47+ classes)
 │   │   ├── cache/               # Query caching and parallel execution
 │   │   │   ├── query_cache.hpp  # LRU query result cache
@@ -370,7 +379,7 @@ pacs_system/
 │   ├── ai/                      # AI integration tests
 │   └── integration/             # Adapter + cross-module tests
 │
-├── examples/                    # Example Applications (31 apps)
+├── examples/                    # Example Applications (32 apps)
 │   ├── dcm_dump/                # DICOM file inspection utility
 │   ├── dcm_info/                # DICOM file summary utility
 │   ├── dcm_conv/                # Transfer Syntax conversion utility
@@ -399,6 +408,7 @@ pacs_system/
 │   ├── worklist_scp/            # Modality Worklist SCP server (MWL C-FIND)
 │   ├── mpps_scu/                # MPPS client (N-CREATE/N-SET)
 │   ├── mpps_scp/                # MPPS server (N-CREATE/N-SET)
+│   ├── print_scu/               # Print Management client (Film Session/Box workflow)
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
 │
@@ -452,6 +462,9 @@ pacs_system/
 | **MG Storage** | 1.2.840.10008.5.1.4.1.1.1.2.x | ✅ Complete |
 | **CR Storage** | 1.2.840.10008.5.1.4.1.1.1 | ✅ Complete |
 | **SC Storage** | 1.2.840.10008.5.1.4.1.1.7 | ✅ Complete |
+| **Basic Grayscale Print** | 1.2.840.10008.5.1.1.9 | ✅ Complete |
+| **Basic Color Print** | 1.2.840.10008.5.1.1.18 | ✅ Complete |
+| **Printer** | 1.2.840.10008.5.1.1.16 | ✅ Complete |
 
 ### Transfer Syntax Support
 
@@ -1243,6 +1256,37 @@ Features:
 - **Statistics**: Display session statistics on shutdown
 - **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
 
+### Print SCU (Print Management Client)
+
+DICOM Print Management client for sending print requests to remote Print SCP systems (PS3.4 Annex H).
+
+```bash
+# Full print workflow: Create Session → Create Film Box → Print → Delete
+./build/bin/print_scu localhost 10400 PRINTER_SCP print \
+  --copies 1 \
+  --priority HIGH \
+  --medium "BLUE FILM" \
+  --format "STANDARD\\1,1" \
+  --orientation PORTRAIT \
+  --film-size 8INX10IN
+
+# Query printer status
+./build/bin/print_scu localhost 10400 PRINTER_SCP status
+
+# With custom AE title and verbose output
+./build/bin/print_scu -aet MY_WORKSTATION -v localhost 10400 PRINTER_SCP print
+
+# Show help
+./build/bin/print_scu --help
+```
+
+Features:
+- **Film Session**: N-CREATE/N-DELETE for session lifecycle management
+- **Film Box**: N-CREATE/N-ACTION (print) for film layout and printing
+- **Image Box**: N-SET for setting pixel data on image positions
+- **Printer Status**: N-GET for querying printer status (NORMAL, WARNING, FAILURE)
+- **Meta SOP Class**: Supports Basic Grayscale and Color Print Meta SOP Classes
+
 ### Query/Retrieve SCP (C-FIND/C-MOVE/C-GET Server)
 
 Lightweight Query/Retrieve SCP server for serving DICOM files from a storage directory.
@@ -1465,13 +1509,13 @@ cmake --build build --target run_full_benchmarks
 | **Total LOC** | 251,242 lines |
 | **Test Files** | 128 files |
 | **Test Cases** | 1,837 tests |
-| **Example Programs** | 31 apps |
+| **Example Programs** | 32 apps |
 | **Documentation** | 55 markdown files |
 | **CI/CD Workflows** | 10 workflows |
 | **Version** | 0.2.0 |
-| **Last Updated** | 2026-02-18 |
+| **Last Updated** | 2026-02-20 |
 
-> **Measurement date**: 2026-02-18. LOC counted via `find <dir> -name "*.cpp" -exec cat {} + | wc -l`, excluding `build-ci/`.
+> **Measurement date**: 2026-02-20. LOC counted via `find <dir> -name "*.cpp" -exec cat {} + | wc -l`, excluding `build-ci/`.
 
 <!-- STATS_END -->
 
