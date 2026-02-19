@@ -38,9 +38,16 @@
 #include <memory>
 #include <mutex>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
+
+#if defined(_WIN32)
+#include <processthreadsapi.h>
+#else
+#include <unistd.h>
+#endif
 
 using namespace pacs::integration;
 using namespace std::chrono_literals;
@@ -50,6 +57,14 @@ using namespace std::chrono_literals;
 // =============================================================================
 
 namespace {
+
+auto current_process_id() -> unsigned long long {
+#if defined(_WIN32)
+    return static_cast<unsigned long long>(::GetCurrentProcessId());
+#else
+    return static_cast<unsigned long long>(::getpid());
+#endif
+}
 
 /**
  * @brief RAII guard for test cleanup
@@ -65,9 +80,8 @@ struct load_test_guard {
         thread_adapter::shutdown(true);
         logger_adapter::shutdown();
         std::this_thread::sleep_for(100ms);  // Extra time for high-load cleanup
-        if (std::filesystem::exists(log_dir)) {
-            std::filesystem::remove_all(log_dir);
-        }
+        std::error_code ec;
+        std::filesystem::remove_all(log_dir, ec);
     }
 };
 
@@ -90,9 +104,25 @@ bool wait_for(Pred condition, std::chrono::milliseconds timeout = 10000ms) {
  * @brief Create a temporary directory for test logs
  */
 auto create_temp_log_directory() -> std::filesystem::path {
-    auto temp_dir = std::filesystem::temp_directory_path() / "pacs_load_test";
-    std::filesystem::create_directories(temp_dir);
-    return temp_dir;
+    const auto temp_base = std::filesystem::temp_directory_path();
+    const auto pid = current_process_id();
+
+    for (int attempt = 0; attempt < 100; ++attempt) {
+        const auto timestamp = static_cast<unsigned long long>(
+            std::chrono::steady_clock::now().time_since_epoch().count());
+        const auto dir_name = "pacs_load_test_" + std::to_string(pid) + "_" +
+                              std::to_string(timestamp) + "_" + std::to_string(attempt);
+        auto temp_dir = temp_base / dir_name;
+
+        std::error_code ec;
+        if (std::filesystem::create_directories(temp_dir, ec) && !ec) {
+            return temp_dir;
+        }
+
+        std::this_thread::sleep_for(1ms);
+    }
+
+    throw std::runtime_error("Failed to create unique temporary load test directory");
 }
 
 /**

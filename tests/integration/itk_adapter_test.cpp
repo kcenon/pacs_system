@@ -20,11 +20,51 @@
 
 #include <pacs/integration/itk_adapter.hpp>
 
+#include <chrono>
+#include <stdexcept>
+#include <thread>
+
+#if defined(_WIN32)
+#include <processthreadsapi.h>
+#else
+#include <unistd.h>
+#endif
+
 using namespace pacs::core;
 using namespace pacs::encoding;
 using namespace pacs::integration::itk;
 
 namespace {
+
+auto current_process_id() -> unsigned long long {
+#if defined(_WIN32)
+    return static_cast<unsigned long long>(::GetCurrentProcessId());
+#else
+    return static_cast<unsigned long long>(::getpid());
+#endif
+}
+
+auto create_unique_temp_directory(const std::string& prefix) -> std::filesystem::path {
+    const auto temp_base = std::filesystem::temp_directory_path();
+    const auto pid = current_process_id();
+
+    for (int attempt = 0; attempt < 100; ++attempt) {
+        const auto timestamp = static_cast<unsigned long long>(
+            std::chrono::steady_clock::now().time_since_epoch().count());
+        const auto dir_name = prefix + "_" + std::to_string(pid) + "_" +
+                              std::to_string(timestamp) + "_" + std::to_string(attempt);
+        auto temp_dir = temp_base / dir_name;
+
+        std::error_code ec;
+        if (std::filesystem::create_directories(temp_dir, ec) && !ec) {
+            return temp_dir;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds{1});
+    }
+
+    throw std::runtime_error("Failed to create unique temporary ITK test directory");
+}
 
 /**
  * @brief Create a minimal DICOM dataset with image parameters
@@ -260,13 +300,13 @@ TEST_CASE("ITK adapter directory scanning", "[integration][itk]") {
 
     SECTION("handles empty directory") {
         // Create temporary empty directory
-        auto temp_dir = std::filesystem::temp_directory_path() / "pacs_itk_test";
-        std::filesystem::create_directories(temp_dir);
+        auto temp_dir = create_unique_temp_directory("pacs_itk_test");
 
         auto files = scan_dicom_directory(temp_dir);
         REQUIRE(files.empty());
 
-        std::filesystem::remove_all(temp_dir);
+        std::error_code ec;
+        std::filesystem::remove_all(temp_dir, ec);
     }
 }
 
