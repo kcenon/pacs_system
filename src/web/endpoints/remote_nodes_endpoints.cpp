@@ -17,8 +17,13 @@
 #undef DELETE
 #endif
 
+#include "pacs/client/job_manager.hpp"
 #include "pacs/client/remote_node.hpp"
 #include "pacs/client/remote_node_manager.hpp"
+#include "pacs/network/association.hpp"
+#include "pacs/network/dicom_server.hpp"
+#include "pacs/network/server_config.hpp"
+#include "pacs/services/query_scu.hpp"
 #include "pacs/web/endpoints/remote_nodes_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
@@ -583,11 +588,9 @@ void register_remote_nodes_endpoints_impl(crow::SimpleApp& app,
             });
 
     // POST /api/v1/remote-nodes/<nodeId>/query - Query remote PACS
-    // Note: Full implementation requires query_scu integration
-    // This is a placeholder that returns NOT_IMPLEMENTED for now
     CROW_ROUTE(app, "/api/v1/remote-nodes/<string>/query")
         .methods(crow::HTTPMethod::POST)(
-            [ctx](const crow::request& /*req*/, const std::string& node_id) {
+            [ctx](const crow::request& req, const std::string& node_id) {
                 crow::response res;
                 res.add_header("Content-Type", "application/json");
                 add_cors_headers(res, *ctx);
@@ -599,7 +602,6 @@ void register_remote_nodes_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                // Check if node exists
                 auto node = ctx->node_manager->get_node(node_id);
                 if (!node) {
                     res.code = 404;
@@ -607,20 +609,167 @@ void register_remote_nodes_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                // TODO: Implement query functionality with query_scu integration
-                // This requires association management and proper DICOM query handling
-                res.code = 501;
-                res.body = make_error_json("NOT_IMPLEMENTED",
-                    "Query functionality requires query_scu integration");
+                if (!node->supports_find) {
+                    res.code = 400;
+                    res.body = make_error_json("UNSUPPORTED",
+                        "Remote node does not support C-FIND queries");
+                    return res;
+                }
+
+                // Parse query parameters from request body
+                auto get_str = [&req](const std::string& key) -> std::string {
+                    std::string search = "\"" + key + "\":\"";
+                    auto pos = req.body.find(search);
+                    if (pos == std::string::npos) return "";
+                    pos += search.length();
+                    auto end_pos = req.body.find('"', pos);
+                    if (end_pos == std::string::npos) return "";
+                    return req.body.substr(pos, end_pos - pos);
+                };
+
+                auto level = get_str("level");
+                if (level.empty()) level = "STUDY";
+
+                // Determine calling AE title from dicom_server config
+                std::string calling_ae = "PACS_SCU";
+                if (ctx->dicom_server) {
+                    calling_ae = ctx->dicom_server->config().ae_title;
+                }
+
+                // Build association config for C-FIND
+                network::association_config assoc_config;
+                assoc_config.calling_ae_title = calling_ae;
+                assoc_config.called_ae_title = node->ae_title;
+                assoc_config.proposed_contexts.push_back({
+                    1,
+                    std::string(services::study_root_find_sop_class_uid),
+                    {"1.2.840.10008.1.2.1"}  // Explicit VR Little Endian
+                });
+
+                auto timeout = std::chrono::milliseconds(
+                    node->connection_timeout.count() * 1000);
+                auto assoc_result = network::association::connect(
+                    node->host,
+                    static_cast<uint16_t>(node->port),
+                    assoc_config,
+                    timeout);
+
+                if (assoc_result.is_err()) {
+                    res.code = 502;
+                    res.body = make_error_json("CONNECTION_FAILED",
+                        "Failed to connect to remote PACS: " +
+                        assoc_result.error().message);
+                    return res;
+                }
+
+                auto& assoc = assoc_result.value();
+                services::query_scu scu;
+
+                // Helper to format query results as JSON
+                auto format_query_response = [](
+                    const services::query_result& qr) -> std::string {
+                    std::ostringstream oss;
+                    oss << R"({"matches":[)";
+                    for (size_t i = 0; i < qr.matches.size(); ++i) {
+                        if (i > 0) oss << ',';
+                        oss << '{';
+                        bool first_field = true;
+                        for (const auto& [tag, element] : qr.matches[i]) {
+                            auto val = element.as_string();
+                            if (val.is_err()) continue;
+                            if (!first_field) oss << ',';
+                            first_field = false;
+                            oss << '"' << json_escape(tag.to_string())
+                                << R"(":")" << json_escape(val.value()) << '"';
+                        }
+                        oss << '}';
+                    }
+                    oss << R"(],"total_matches":)" << qr.matches.size()
+                        << R"(,"elapsed_ms":)" << qr.elapsed.count()
+                        << R"(,"status":")"
+                        << (qr.is_success() ? "success" : "error")
+                        << R"("})";
+                    return oss.str();
+                };
+
+                // Helper to handle query result and build response
+                auto handle_result = [&](
+                    network::Result<services::query_result>& result) {
+                    (void)assoc.release();
+                    if (result.is_err()) {
+                        res.code = 502;
+                        res.body = make_error_json("QUERY_FAILED",
+                            "C-FIND query failed: " + result.error().message);
+                    } else {
+                        res.code = 200;
+                        res.body = format_query_response(result.value());
+                    }
+                };
+
+                // Execute query based on level
+                if (level == "PATIENT") {
+                    services::patient_query_keys keys;
+                    keys.patient_name = get_str("patient_name");
+                    keys.patient_id = get_str("patient_id");
+                    keys.birth_date = get_str("birth_date");
+                    keys.sex = get_str("sex");
+                    auto result = scu.find_patients(assoc, keys);
+                    handle_result(result);
+                } else if (level == "STUDY") {
+                    services::study_query_keys keys;
+                    keys.patient_id = get_str("patient_id");
+                    keys.study_uid = get_str("study_uid");
+                    keys.study_date = get_str("study_date");
+                    keys.accession_number = get_str("accession_number");
+                    keys.modality = get_str("modality");
+                    keys.study_description = get_str("study_description");
+                    auto result = scu.find_studies(assoc, keys);
+                    handle_result(result);
+                } else if (level == "SERIES") {
+                    services::series_query_keys keys;
+                    keys.study_uid = get_str("study_uid");
+                    keys.series_uid = get_str("series_uid");
+                    keys.modality = get_str("modality");
+                    keys.series_number = get_str("series_number");
+                    if (keys.study_uid.empty()) {
+                        (void)assoc.release();
+                        res.code = 400;
+                        res.body = make_error_json("INVALID_REQUEST",
+                            "study_uid is required for SERIES level queries");
+                        return res;
+                    }
+                    auto result = scu.find_series(assoc, keys);
+                    handle_result(result);
+                } else if (level == "IMAGE") {
+                    services::instance_query_keys keys;
+                    keys.series_uid = get_str("series_uid");
+                    keys.sop_instance_uid = get_str("sop_instance_uid");
+                    keys.instance_number = get_str("instance_number");
+                    if (keys.series_uid.empty()) {
+                        (void)assoc.release();
+                        res.code = 400;
+                        res.body = make_error_json("INVALID_REQUEST",
+                            "series_uid is required for IMAGE level queries");
+                        return res;
+                    }
+                    auto result = scu.find_instances(assoc, keys);
+                    handle_result(result);
+                } else {
+                    (void)assoc.release();
+                    res.code = 400;
+                    res.body = make_error_json("INVALID_REQUEST",
+                        "Invalid query level. Use PATIENT, STUDY, SERIES, "
+                        "or IMAGE.");
+                    return res;
+                }
+
                 return res;
             });
 
     // POST /api/v1/remote-nodes/<nodeId>/retrieve - Retrieve from remote PACS
-    // Note: Full implementation requires job_manager (#537)
-    // This is a placeholder that returns NOT_IMPLEMENTED for now
     CROW_ROUTE(app, "/api/v1/remote-nodes/<string>/retrieve")
         .methods(crow::HTTPMethod::POST)(
-            [ctx](const crow::request& /*req*/, const std::string& node_id) {
+            [ctx](const crow::request& req, const std::string& node_id) {
                 crow::response res;
                 res.add_header("Content-Type", "application/json");
                 add_cors_headers(res, *ctx);
@@ -632,7 +781,13 @@ void register_remote_nodes_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                // Check if node exists
+                if (!ctx->job_manager) {
+                    res.code = 503;
+                    res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                               "Job manager not configured");
+                    return res;
+                }
+
                 auto node = ctx->node_manager->get_node(node_id);
                 if (!node) {
                     res.code = 404;
@@ -640,11 +795,70 @@ void register_remote_nodes_endpoints_impl(crow::SimpleApp& app,
                     return res;
                 }
 
-                // TODO: Implement retrieve functionality with job_manager (#537)
-                // Retrieve operations should create a job and return job_id
-                res.code = 501;
-                res.body = make_error_json("NOT_IMPLEMENTED",
-                    "Retrieve functionality requires job_manager (Issue #537)");
+                if (!node->supports_move && !node->supports_get) {
+                    res.code = 400;
+                    res.body = make_error_json("UNSUPPORTED",
+                        "Remote node does not support C-MOVE or C-GET");
+                    return res;
+                }
+
+                // Parse retrieve parameters from request body
+                auto get_str = [&req](const std::string& key) -> std::string {
+                    std::string search = "\"" + key + "\":\"";
+                    auto pos = req.body.find(search);
+                    if (pos == std::string::npos) return "";
+                    pos += search.length();
+                    auto end_pos = req.body.find('"', pos);
+                    if (end_pos == std::string::npos) return "";
+                    return req.body.substr(pos, end_pos - pos);
+                };
+
+                auto study_uid = get_str("study_uid");
+                if (study_uid.empty()) {
+                    res.code = 400;
+                    res.body = make_error_json("INVALID_REQUEST",
+                        "study_uid is required");
+                    return res;
+                }
+
+                auto series_uid = get_str("series_uid");
+                auto priority_str = get_str("priority");
+
+                // Map priority string to enum
+                auto priority = client::job_priority::normal;
+                if (priority_str == "low") {
+                    priority = client::job_priority::low;
+                } else if (priority_str == "high") {
+                    priority = client::job_priority::high;
+                } else if (priority_str == "urgent") {
+                    priority = client::job_priority::urgent;
+                }
+
+                // Create retrieve job
+                std::optional<std::string_view> series_opt;
+                if (!series_uid.empty()) {
+                    series_opt = series_uid;
+                }
+
+                auto job_id = ctx->job_manager->create_retrieve_job(
+                    node_id, study_uid, series_opt, priority);
+
+                // Start the job
+                auto start_result = ctx->job_manager->start_job(job_id);
+                if (start_result.is_err()) {
+                    res.code = 500;
+                    res.body = make_error_json("JOB_START_FAILED",
+                        "Failed to start retrieve job: " +
+                        start_result.error().message);
+                    return res;
+                }
+
+                std::ostringstream oss;
+                oss << R"({"job_id":")" << json_escape(job_id)
+                    << R"(","status":"pending"})";
+
+                res.code = 202;
+                res.body = oss.str();
                 return res;
             });
 }

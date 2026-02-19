@@ -16,6 +16,8 @@
 #undef DELETE
 #endif
 
+#include "pacs/network/dicom_server.hpp"
+#include "pacs/network/server_config.hpp"
 #include "pacs/web/endpoints/association_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
@@ -50,12 +52,28 @@ void register_association_endpoints_impl(
         res.add_header("Content-Type", "application/json");
         add_cors_headers(res, *ctx);
 
-        // Note: This endpoint requires integration with the DICOM server
-        // to get real-time association data. Currently returns empty list.
-        // TODO: Integrate with dicom_server or association_registry when available
+        if (!ctx->dicom_server) {
+            res.code = 503;
+            res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                       "DICOM server not configured");
+            return res;
+        }
+
+        auto stats = ctx->dicom_server->get_statistics();
+        auto active_count = ctx->dicom_server->active_associations();
+        auto uptime_sec = stats.uptime().count();
 
         std::ostringstream oss;
-        oss << R"({"data":[],"count":0})";
+        oss << R"({"active_count":)" << active_count
+            << R"(,"total_associations":)" << stats.total_associations
+            << R"(,"rejected_associations":)" << stats.rejected_associations
+            << R"(,"messages_processed":)" << stats.messages_processed
+            << R"(,"bytes_received":)" << stats.bytes_received
+            << R"(,"bytes_sent":)" << stats.bytes_sent
+            << R"(,"uptime_seconds":)" << uptime_sec
+            << R"(,"server_running":)"
+            << (ctx->dicom_server->is_running() ? "true" : "false")
+            << '}';
 
         res.code = 200;
         res.body = oss.str();
@@ -71,10 +89,6 @@ void register_association_endpoints_impl(
             res.add_header("Content-Type", "application/json");
             add_cors_headers(res, *ctx);
 
-            // Note: This endpoint requires integration with the DICOM server
-            // to actually terminate associations.
-            // TODO: Integrate with dicom_server when available
-
             if (association_id.empty()) {
               res.code = 400;
               res.body = make_error_json("INVALID_REQUEST",
@@ -82,11 +96,23 @@ void register_association_endpoints_impl(
               return res;
             }
 
-            // Currently not implemented - would need DICOM server integration
+            if (!ctx->dicom_server) {
+              res.code = 503;
+              res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                         "DICOM server not configured");
+              return res;
+            }
+
+            // Individual association termination is not supported via the
+            // dicom_server public API. The server manages association
+            // lifecycles internally through idle timeouts and graceful
+            // shutdown.
             res.code = 501;
             res.body = make_error_json(
                 "NOT_IMPLEMENTED",
-                "Association termination requires DICOM server integration");
+                "Individual association termination is not supported. "
+                "Associations are managed by the DICOM server via idle "
+                "timeouts and graceful shutdown.");
             return res;
           });
 
@@ -106,11 +132,22 @@ void register_association_endpoints_impl(
               return res;
             }
 
-            // Note: This endpoint requires integration with the DICOM server
-            // TODO: Integrate with dicom_server when available
+            if (!ctx->dicom_server) {
+              res.code = 503;
+              res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                         "DICOM server not configured");
+              return res;
+            }
 
-            res.code = 404;
-            res.body = make_error_json("NOT_FOUND", "Association not found");
+            // Individual association lookup is not supported via the
+            // dicom_server public API. Use GET /associations/active for
+            // aggregate statistics.
+            res.code = 501;
+            res.body = make_error_json(
+                "NOT_IMPLEMENTED",
+                "Individual association lookup is not supported. "
+                "Use GET /api/v1/associations/active for aggregate "
+                "statistics.");
             return res;
           });
 }
