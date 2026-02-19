@@ -3,8 +3,9 @@
  * @brief Implementation of S3-compatible DICOM storage backend
  *
  * This file implements the s3_storage class for cloud storage support.
- * Currently uses a mock S3 client for testing and API validation.
- * Full AWS SDK integration will be added in a future update.
+ * Supports two S3 client backends selected at compile time:
+ * - Mock client (default / PACS_USE_MOCK_S3): in-memory testing
+ * - AWS SDK client (PACS_WITH_AWS_SDK): production S3 operations
  */
 
 #include <pacs/storage/s3_storage.hpp>
@@ -17,6 +18,24 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
+
+#if defined(PACS_WITH_AWS_SDK) && !defined(PACS_USE_MOCK_S3)
+#include <aws/core/Aws.h>
+#include <aws/core/auth/AWSCredentials.h>
+#include <aws/s3/S3Client.h>
+#include <aws/s3/model/DeleteObjectRequest.h>
+#include <aws/s3/model/GetObjectRequest.h>
+#include <aws/s3/model/HeadObjectRequest.h>
+#include <aws/s3/model/ListObjectsV2Request.h>
+#include <aws/s3/model/PutObjectRequest.h>
+
+#include <aws/s3/model/AbortMultipartUploadRequest.h>
+#include <aws/s3/model/CompleteMultipartUploadRequest.h>
+#include <aws/s3/model/CreateMultipartUploadRequest.h>
+#include <aws/s3/model/UploadPartRequest.h>
+
+#include <mutex>
+#endif
 
 namespace pacs::storage {
 
@@ -37,82 +56,105 @@ constexpr int kSerializationError = -8;
 } // namespace
 
 // ============================================================================
+// S3 Client Interface
+// ============================================================================
+
+/**
+ * @brief Abstract interface for S3 client operations
+ *
+ * Both mock_s3_client and aws_s3_client implement this interface,
+ * allowing compile-time selection of the backend.
+ */
+class s3_storage::s3_client_interface {
+public:
+  virtual ~s3_client_interface() = default;
+
+  [[nodiscard]] virtual auto put_object(const std::string &key,
+                                        const std::vector<std::uint8_t> &data)
+      -> VoidResult = 0;
+
+  [[nodiscard]] virtual auto get_object(const std::string &key)
+      -> Result<std::vector<std::uint8_t>> = 0;
+
+  [[nodiscard]] virtual auto delete_object(const std::string &key)
+      -> VoidResult = 0;
+
+  [[nodiscard]] virtual auto head_object(const std::string &key) const
+      -> bool = 0;
+
+  [[nodiscard]] virtual auto get_object_size(const std::string &key) const
+      -> std::size_t = 0;
+
+  [[nodiscard]] virtual auto list_objects() const
+      -> std::vector<std::string> = 0;
+
+  [[nodiscard]] virtual auto is_connected() const -> bool = 0;
+
+  [[nodiscard]] virtual auto multipart_upload(
+      const std::string &key, const std::vector<std::uint8_t> &data,
+      std::size_t part_size, progress_callback callback) -> VoidResult = 0;
+};
+
+// ============================================================================
 // Mock S3 Client Implementation
 // ============================================================================
 
 /**
  * @brief Mock S3 client for testing without AWS SDK dependency
  *
- * This class simulates S3 operations using an in-memory storage.
- * It will be replaced with AWS SDK S3Client when integrated.
+ * Simulates S3 operations using in-memory storage.
+ * Always used when PACS_USE_MOCK_S3 is defined or PACS_WITH_AWS_SDK is not set.
  */
-class s3_storage::mock_s3_client {
+class mock_s3_client : public s3_storage::s3_client_interface {
 public:
   explicit mock_s3_client(const cloud_storage_config & /*config*/)
       : connected_(true) {}
 
-  /**
-   * @brief Simulate S3 PutObject operation
-   */
   [[nodiscard]] auto put_object(const std::string &key,
                                 const std::vector<std::uint8_t> &data)
-      -> VoidResult {
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
           kConnectionError, "S3 client not connected", "s3_storage");
     }
-
     objects_[key] = data;
     return ok();
   }
 
-  /**
-   * @brief Simulate S3 GetObject operation
-   */
   [[nodiscard]] auto get_object(const std::string &key)
-      -> Result<std::vector<std::uint8_t>> {
+      -> Result<std::vector<std::uint8_t>> override {
     if (!connected_) {
       return make_error<std::vector<std::uint8_t>>(
           kConnectionError, "S3 client not connected", "s3_storage");
     }
-
     auto it = objects_.find(key);
     if (it == objects_.end()) {
       return make_error<std::vector<std::uint8_t>>(
           kObjectNotFound, "Object not found: " + key, "s3_storage");
     }
-
     return it->second;
   }
 
-  /**
-   * @brief Simulate S3 DeleteObject operation
-   */
-  [[nodiscard]] auto delete_object(const std::string &key) -> VoidResult {
+  [[nodiscard]] auto delete_object(const std::string &key)
+      -> VoidResult override {
     if (!connected_) {
       return make_error<std::monostate>(
           kConnectionError, "S3 client not connected", "s3_storage");
     }
-
     objects_.erase(key);
     return ok();
   }
 
-  /**
-   * @brief Simulate S3 HeadObject operation
-   */
-  [[nodiscard]] auto head_object(const std::string &key) const -> bool {
+  [[nodiscard]] auto head_object(const std::string &key) const
+      -> bool override {
     if (!connected_) {
       return false;
     }
     return objects_.contains(key);
   }
 
-  /**
-   * @brief Get object size
-   */
   [[nodiscard]] auto get_object_size(const std::string &key) const
-      -> std::size_t {
+      -> std::size_t override {
     auto it = objects_.find(key);
     if (it != objects_.end()) {
       return it->second.size();
@@ -120,10 +162,8 @@ public:
     return 0;
   }
 
-  /**
-   * @brief List all object keys
-   */
-  [[nodiscard]] auto list_objects() const -> std::vector<std::string> {
+  [[nodiscard]] auto list_objects() const
+      -> std::vector<std::string> override {
     std::vector<std::string> keys;
     keys.reserve(objects_.size());
     for (const auto &[key, data] : objects_) {
@@ -132,15 +172,30 @@ public:
     return keys;
   }
 
-  /**
-   * @brief Check connection status
-   */
-  [[nodiscard]] auto is_connected() const -> bool { return connected_; }
+  [[nodiscard]] auto is_connected() const -> bool override {
+    return connected_;
+  }
 
-  /**
-   * @brief Set connection status (for testing)
-   */
-  void set_connected(bool connected) { connected_ = connected; }
+  [[nodiscard]] auto multipart_upload(const std::string &key,
+                                      const std::vector<std::uint8_t> &data,
+                                      std::size_t part_size,
+                                      progress_callback callback)
+      -> VoidResult override {
+    std::size_t total_bytes = data.size();
+    std::size_t bytes_uploaded = 0;
+
+    while (bytes_uploaded < total_bytes) {
+      std::size_t chunk = (std::min)(part_size, total_bytes - bytes_uploaded);
+      bytes_uploaded += chunk;
+
+      if (callback && !callback(bytes_uploaded, total_bytes)) {
+        return make_error<std::monostate>(
+            kUploadError, "Upload cancelled by user", "s3_storage");
+      }
+    }
+
+    return put_object(key, data);
+  }
 
 private:
   std::unordered_map<std::string, std::vector<std::uint8_t>> objects_;
@@ -148,11 +203,310 @@ private:
 };
 
 // ============================================================================
+// AWS SDK S3 Client Implementation
+// ============================================================================
+
+#if defined(PACS_WITH_AWS_SDK) && !defined(PACS_USE_MOCK_S3)
+
+namespace {
+
+/// RAII guard for AWS SDK initialization
+class aws_sdk_guard {
+public:
+  static void ensure_initialized() {
+    std::call_once(init_flag_, [] {
+      Aws::InitAPI(options_);
+      std::atexit([] { Aws::ShutdownAPI(options_); });
+    });
+  }
+
+private:
+  static inline std::once_flag init_flag_;
+  static inline Aws::SDKOptions options_;
+};
+
+} // namespace
+
+/**
+ * @brief Production S3 client using AWS SDK for C++
+ *
+ * Wraps Aws::S3::S3Client for real S3/MinIO operations.
+ * Enabled when PACS_WITH_AWS_SDK is defined and PACS_USE_MOCK_S3 is not.
+ */
+class aws_s3_client : public s3_storage::s3_client_interface {
+public:
+  explicit aws_s3_client(const cloud_storage_config &config)
+      : bucket_(config.bucket_name) {
+    aws_sdk_guard::ensure_initialized();
+
+    Aws::Client::ClientConfiguration client_config;
+    client_config.region = config.region;
+    client_config.connectTimeoutMs = config.connect_timeout_ms;
+    client_config.requestTimeoutMs = config.request_timeout_ms;
+    client_config.maxConnections = static_cast<unsigned>(config.max_connections);
+
+    if (config.endpoint_url.has_value()) {
+      client_config.endpointOverride = config.endpoint_url.value();
+      // For S3-compatible services (MinIO), use path-style addressing
+      use_path_style_ = true;
+    }
+
+    Aws::Auth::AWSCredentials credentials(config.access_key_id,
+                                          config.secret_access_key);
+
+    Aws::S3::S3ClientConfiguration s3_config(client_config);
+    s3_config.useVirtualAddressing = !use_path_style_;
+    client_ = std::make_unique<Aws::S3::S3Client>(credentials, nullptr,
+                                                   s3_config);
+  }
+
+  [[nodiscard]] auto put_object(const std::string &key,
+                                const std::vector<std::uint8_t> &data)
+      -> VoidResult override {
+    Aws::S3::Model::PutObjectRequest request;
+    request.SetBucket(bucket_);
+    request.SetKey(key);
+    request.SetContentType("application/dicom");
+
+    auto stream = Aws::MakeShared<Aws::StringStream>("PutObjectStream");
+    stream->write(reinterpret_cast<const char *>(data.data()),
+                  static_cast<std::streamsize>(data.size()));
+    request.SetBody(stream);
+
+    auto outcome = client_->PutObject(request);
+    if (!outcome.IsSuccess()) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "S3 PutObject failed: " +
+              std::string(outcome.GetError().GetMessage()),
+          "s3_storage");
+    }
+
+    return ok();
+  }
+
+  [[nodiscard]] auto get_object(const std::string &key)
+      -> Result<std::vector<std::uint8_t>> override {
+    Aws::S3::Model::GetObjectRequest request;
+    request.SetBucket(bucket_);
+    request.SetKey(key);
+
+    auto outcome = client_->GetObject(request);
+    if (!outcome.IsSuccess()) {
+      const auto &error = outcome.GetError();
+      if (error.GetErrorType() ==
+          Aws::S3::S3Errors::NO_SUCH_KEY) {
+        return make_error<std::vector<std::uint8_t>>(
+            kObjectNotFound, "Object not found: " + key, "s3_storage");
+      }
+      return make_error<std::vector<std::uint8_t>>(
+          kDownloadError,
+          "S3 GetObject failed: " + std::string(error.GetMessage()),
+          "s3_storage");
+    }
+
+    auto &body = outcome.GetResult().GetBody();
+    std::vector<std::uint8_t> result(
+        (std::istreambuf_iterator<char>(body)),
+        std::istreambuf_iterator<char>());
+    return result;
+  }
+
+  [[nodiscard]] auto delete_object(const std::string &key)
+      -> VoidResult override {
+    Aws::S3::Model::DeleteObjectRequest request;
+    request.SetBucket(bucket_);
+    request.SetKey(key);
+
+    auto outcome = client_->DeleteObject(request);
+    if (!outcome.IsSuccess()) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "S3 DeleteObject failed: " +
+              std::string(outcome.GetError().GetMessage()),
+          "s3_storage");
+    }
+
+    return ok();
+  }
+
+  [[nodiscard]] auto head_object(const std::string &key) const
+      -> bool override {
+    Aws::S3::Model::HeadObjectRequest request;
+    request.SetBucket(bucket_);
+    request.SetKey(key);
+
+    auto outcome = client_->HeadObject(request);
+    return outcome.IsSuccess();
+  }
+
+  [[nodiscard]] auto get_object_size(const std::string &key) const
+      -> std::size_t override {
+    Aws::S3::Model::HeadObjectRequest request;
+    request.SetBucket(bucket_);
+    request.SetKey(key);
+
+    auto outcome = client_->HeadObject(request);
+    if (outcome.IsSuccess()) {
+      return static_cast<std::size_t>(
+          outcome.GetResult().GetContentLength());
+    }
+    return 0;
+  }
+
+  [[nodiscard]] auto list_objects() const
+      -> std::vector<std::string> override {
+    std::vector<std::string> keys;
+
+    Aws::S3::Model::ListObjectsV2Request request;
+    request.SetBucket(bucket_);
+
+    bool has_more = true;
+    while (has_more) {
+      auto outcome = client_->ListObjectsV2(request);
+      if (!outcome.IsSuccess()) {
+        break;
+      }
+
+      const auto &result = outcome.GetResult();
+      for (const auto &object : result.GetContents()) {
+        keys.push_back(object.GetKey());
+      }
+
+      has_more = result.GetIsTruncated();
+      if (has_more) {
+        request.SetContinuationToken(result.GetNextContinuationToken());
+      }
+    }
+
+    return keys;
+  }
+
+  [[nodiscard]] auto is_connected() const -> bool override {
+    return client_ != nullptr;
+  }
+
+  [[nodiscard]] auto multipart_upload(const std::string &key,
+                                      const std::vector<std::uint8_t> &data,
+                                      std::size_t part_size,
+                                      progress_callback callback)
+      -> VoidResult override {
+    // Initiate multipart upload
+    Aws::S3::Model::CreateMultipartUploadRequest create_request;
+    create_request.SetBucket(bucket_);
+    create_request.SetKey(key);
+    create_request.SetContentType("application/dicom");
+
+    auto create_outcome = client_->CreateMultipartUpload(create_request);
+    if (!create_outcome.IsSuccess()) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "Failed to initiate multipart upload: " +
+              std::string(create_outcome.GetError().GetMessage()),
+          "s3_storage");
+    }
+
+    auto upload_id = create_outcome.GetResult().GetUploadId();
+    Aws::S3::Model::CompletedMultipartUpload completed_upload;
+
+    std::size_t total_bytes = data.size();
+    std::size_t bytes_uploaded = 0;
+    int part_number = 1;
+
+    while (bytes_uploaded < total_bytes) {
+      std::size_t chunk =
+          (std::min)(part_size, total_bytes - bytes_uploaded);
+
+      auto stream = Aws::MakeShared<Aws::StringStream>("UploadPartStream");
+      stream->write(
+          reinterpret_cast<const char *>(data.data() + bytes_uploaded),
+          static_cast<std::streamsize>(chunk));
+
+      Aws::S3::Model::UploadPartRequest part_request;
+      part_request.SetBucket(bucket_);
+      part_request.SetKey(key);
+      part_request.SetUploadId(upload_id);
+      part_request.SetPartNumber(part_number);
+      part_request.SetBody(stream);
+      part_request.SetContentLength(static_cast<long long>(chunk));
+
+      auto part_outcome = client_->UploadPart(part_request);
+      if (!part_outcome.IsSuccess()) {
+        // Abort the multipart upload on failure
+        Aws::S3::Model::AbortMultipartUploadRequest abort_request;
+        abort_request.SetBucket(bucket_);
+        abort_request.SetKey(key);
+        abort_request.SetUploadId(upload_id);
+        client_->AbortMultipartUpload(abort_request);
+
+        return make_error<std::monostate>(
+            kUploadError,
+            "Failed to upload part " + std::to_string(part_number) + ": " +
+                std::string(part_outcome.GetError().GetMessage()),
+            "s3_storage");
+      }
+
+      Aws::S3::Model::CompletedPart completed_part;
+      completed_part.SetPartNumber(part_number);
+      completed_part.SetETag(part_outcome.GetResult().GetETag());
+      completed_upload.AddParts(std::move(completed_part));
+
+      bytes_uploaded += chunk;
+      part_number++;
+
+      if (callback && !callback(bytes_uploaded, total_bytes)) {
+        // Abort on user cancellation
+        Aws::S3::Model::AbortMultipartUploadRequest abort_request;
+        abort_request.SetBucket(bucket_);
+        abort_request.SetKey(key);
+        abort_request.SetUploadId(upload_id);
+        client_->AbortMultipartUpload(abort_request);
+
+        return make_error<std::monostate>(
+            kUploadError, "Upload cancelled by user", "s3_storage");
+      }
+    }
+
+    // Complete multipart upload
+    Aws::S3::Model::CompleteMultipartUploadRequest complete_request;
+    complete_request.SetBucket(bucket_);
+    complete_request.SetKey(key);
+    complete_request.SetUploadId(upload_id);
+    complete_request.SetMultipartUpload(completed_upload);
+
+    auto complete_outcome = client_->CompleteMultipartUpload(complete_request);
+    if (!complete_outcome.IsSuccess()) {
+      return make_error<std::monostate>(
+          kUploadError,
+          "Failed to complete multipart upload: " +
+              std::string(complete_outcome.GetError().GetMessage()),
+          "s3_storage");
+    }
+
+    return ok();
+  }
+
+private:
+  std::string bucket_;
+  std::unique_ptr<Aws::S3::S3Client> client_;
+  bool use_path_style_{false};
+};
+
+#endif // PACS_WITH_AWS_SDK && !PACS_USE_MOCK_S3
+
+// ============================================================================
 // Construction
 // ============================================================================
 
 s3_storage::s3_storage(const cloud_storage_config &config)
-    : config_(config), client_(std::make_unique<mock_s3_client>(config)) {}
+    : config_(config),
+#if defined(PACS_WITH_AWS_SDK) && !defined(PACS_USE_MOCK_S3)
+      client_(std::make_unique<aws_s3_client>(config))
+#else
+      client_(std::make_unique<mock_s3_client>(config))
+#endif
+{
+}
 
 s3_storage::~s3_storage() = default;
 
@@ -200,7 +554,8 @@ auto s3_storage::store_with_progress(const core::dicom_dataset &dataset,
   // Upload to S3 (use multipart for large files)
   VoidResult upload_result = ok();
   if (data.size() > config_.multipart_threshold) {
-    upload_result = upload_multipart(object_key, data, callback);
+    upload_result =
+        client_->multipart_upload(object_key, data, config_.part_size, callback);
   } else {
     upload_result = client_->put_object(object_key, data);
 
@@ -486,26 +841,7 @@ auto s3_storage::sanitize_uid(std::string_view uid) -> std::string {
 auto s3_storage::upload_multipart(const std::string &key,
                                   const std::vector<std::uint8_t> &data,
                                   progress_callback callback) -> VoidResult {
-  // For mock implementation, just use regular put_object
-  // Real implementation would use S3 multipart upload API
-
-  std::size_t total_bytes = data.size();
-  std::size_t bytes_uploaded = 0;
-
-  // Simulate multipart upload with progress
-  while (bytes_uploaded < total_bytes) {
-    std::size_t part_size =
-        (std::min)(config_.part_size, total_bytes - bytes_uploaded);
-    bytes_uploaded += part_size;
-
-    if (callback && !callback(bytes_uploaded, total_bytes)) {
-      return make_error<std::monostate>(
-          kUploadError, "Upload cancelled by user", "s3_storage");
-    }
-  }
-
-  // Actually store the data
-  return client_->put_object(key, data);
+  return client_->multipart_upload(key, data, config_.part_size, callback);
 }
 
 auto s3_storage::matches_query(const core::dicom_dataset &dataset,
