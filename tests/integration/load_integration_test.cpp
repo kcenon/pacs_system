@@ -44,7 +44,7 @@
 #include <vector>
 
 #if defined(_WIN32)
-#include <processthreadsapi.h>
+#include <process.h>
 #else
 #include <unistd.h>
 #endif
@@ -60,7 +60,7 @@ namespace {
 
 auto current_process_id() -> unsigned long long {
 #if defined(_WIN32)
-    return static_cast<unsigned long long>(::GetCurrentProcessId());
+    return static_cast<unsigned long long>(::_getpid());
 #else
     return static_cast<unsigned long long>(::getpid());
 #endif
