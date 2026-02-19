@@ -45,6 +45,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-02-20 | 1.2.0 | Add Print Management SCP/SCU (PS3.4 Annex H), update Cloud Storage to real SDK |
 | 2026-02-18 | 1.1.0 | Add Storage Commitment Push Model SCP/SCU, update known limitations |
 | 2026-02-17 | 1.0.0 | Initial Conformance Statement |
 
@@ -90,15 +91,15 @@ monitoring_system, network_system).
 
 | AE | Function |
 |----|----------|
-| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Verification SCP |
-| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Verification SCU |
+| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Print SCP, Verification SCP |
+| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Print SCU, Verification SCU |
 
 ### 2.2 AE Specifications
 
 #### 2.2.1 PACS_SCP Application Entity
 
 **Description**: Accepts incoming associations for storage, query/retrieve,
-worklist, MPPS, storage commitment, and verification services.
+worklist, MPPS, storage commitment, print management, and verification services.
 
 ##### Association Policies
 
@@ -125,7 +126,7 @@ worklist, MPPS, storage commitment, and verification services.
 #### 2.2.2 PACS_SCU Application Entity
 
 **Description**: Initiates outgoing associations for storage, query/retrieve,
-worklist, MPPS, and storage commitment operations.
+worklist, MPPS, storage commitment, and print management operations.
 
 ##### Association Policies
 
@@ -373,6 +374,64 @@ SCU (Requestor)                    SCP (Provider)
 | 0213H | Resource limitation |
 | 0122H | Referenced SOP Class not supported |
 | 0119H | Class/Instance conflict |
+
+### 3.7 Print Management (PS3.4 Annex H)
+
+#### SOP Classes
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Basic Film Session | 1.2.840.10008.5.1.1.1 | Yes | Yes |
+| Basic Film Box | 1.2.840.10008.5.1.1.2 | Yes | Yes |
+| Basic Grayscale Image Box | 1.2.840.10008.5.1.1.4 | Yes | Yes |
+| Basic Color Image Box | 1.2.840.10008.5.1.1.4.1 | Yes | Yes |
+| Printer | 1.2.840.10008.5.1.1.16 | Yes | Yes |
+| Basic Grayscale Print Meta SOP Class | 1.2.840.10008.5.1.1.9 | Yes | Yes |
+| Basic Color Print Meta SOP Class | 1.2.840.10008.5.1.1.18 | Yes | Yes |
+
+#### Protocol Flow
+
+```
+Workstation (Print SCU)                      Printer (Print SCP)
+ |                                           |
+ |  N-CREATE Film Session                    |
+ |------------------------------------------>|
+ |  N-CREATE-RSP (session UID)               |
+ |<------------------------------------------|
+ |                                           |
+ |  N-CREATE Film Box                        |
+ |------------------------------------------>|
+ |  N-CREATE-RSP (box UID + image box UIDs)  |
+ |<------------------------------------------|
+ |                                           |
+ |  N-SET Image Box (pixel data)             |
+ |------------------------------------------>|
+ |  N-SET-RSP (success)                      |
+ |<------------------------------------------|
+ |                                           |
+ |  N-ACTION Film Box (Print)                |
+ |------------------------------------------>|
+ |  N-ACTION-RSP (success)                   |
+ |<------------------------------------------|
+ |                                           |
+ |  N-DELETE Film Session                    |
+ |------------------------------------------>|
+ |  N-DELETE-RSP (success)                   |
+ |<------------------------------------------|
+```
+
+#### Supported Features
+
+| Feature | Support |
+|---------|---------|
+| N-CREATE Film Session | Yes |
+| N-CREATE Film Box (auto-creates Image Boxes) | Yes |
+| N-SET Image Box (Grayscale and Color) | Yes |
+| N-ACTION Film Box (initiate print) | Yes |
+| N-DELETE Film Session/Box | Yes |
+| N-GET Printer Status | Yes |
+| Well-Known Printer SOP Instance UID (1.2.840.10008.5.1.1.17) | Yes |
+| Meta SOP Class fallback negotiation | Yes |
 
 ---
 
