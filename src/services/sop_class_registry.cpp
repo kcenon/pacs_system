@@ -162,6 +162,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_rt_sop_classes();
     register_seg_sop_classes();
     register_sr_sop_classes();
+    register_print_sop_classes();
     register_other_sop_classes();
 }
 
@@ -764,6 +765,99 @@ void sop_class_registry::register_sr_sop_classes() {
             "X-Ray Radiation Dose SR Storage",
             sop_class_category::storage,
             modality_type::sr,
+            false,
+            false
+        }
+    );
+}
+
+void sop_class_registry::register_print_sop_classes() {
+    // Basic Film Session SOP Class (PS3.4 Annex H)
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.1",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.1",
+            "Basic Film Session",
+            sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Basic Film Box SOP Class
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.2",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.2",
+            "Basic Film Box",
+            sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Basic Grayscale Image Box SOP Class
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.4",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.4",
+            "Basic Grayscale Image Box",
+            sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Basic Color Image Box SOP Class
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.4.1",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.4.1",
+            "Basic Color Image Box",
+            sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Printer SOP Class
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.16",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.16",
+            "Printer",
+            sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Basic Grayscale Print Management Meta SOP Class
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.9",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.9",
+            "Basic Grayscale Print Management Meta",
+            sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // Basic Color Print Management Meta SOP Class
+    registry_.emplace(
+        "1.2.840.10008.5.1.1.18",
+        sop_class_info{
+            "1.2.840.10008.5.1.1.18",
+            "Basic Color Print Management Meta",
+            sop_class_category::print,
+            modality_type::other,
             false,
             false
         }
