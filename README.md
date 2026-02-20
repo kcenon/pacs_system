@@ -33,7 +33,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
 | **Phase 5**: Enterprise Features | VTK Integration, FHIR, Clustering, Connection Pooling | 🔜 Planned |
 
-**Test Coverage**: 1,837+ tests passing across 128 test files
+**Test Coverage**: 1,980+ tests passing across 141+ test files
 
 ### Phase 1 Achievements (Complete)
 
@@ -365,7 +365,7 @@ pacs_system/
 │   ├── di/                      # Dependency injection
 │   └── integration/             # Ecosystem adapter implementations
 │
-├── tests/                       # Test suites (128 files, 1,837+ tests)
+├── tests/                       # Test suites (141+ files, 1,980+ tests)
 │   ├── core/                    # Core module tests
 │   ├── encoding/                # Encoding + codec tests
 │   ├── network/                 # Network + association tests
@@ -552,7 +552,7 @@ cd build
 ctest --output-on-failure
 ```
 
-**Test Results**: 1,837+ tests passing across 128 test files (Core, Encoding, Network, Services, Storage, Security, Web, Workflow, Client, AI, Monitoring, Integration)
+**Test Results**: 1,980+ tests passing across 141+ test files (Core, Encoding, Network, Services, Storage, Security, Web, Workflow, Client, AI, Monitoring, Integration)
 
 ### Build Options
 
@@ -1507,8 +1507,8 @@ cmake --build build --target run_full_benchmarks
 | **Example LOC** | 34,752 lines |
 | **Test LOC** | 62,241 lines |
 | **Total LOC** | 251,242 lines |
-| **Test Files** | 128 files |
-| **Test Cases** | 1,837 tests |
+| **Test Files** | 141+ files |
+| **Test Cases** | 1,980+ tests |
 | **Example Programs** | 32 apps |
 | **Documentation** | 55 markdown files |
 | **CI/CD Workflows** | 10 workflows |
