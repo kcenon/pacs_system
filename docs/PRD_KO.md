@@ -793,7 +793,7 @@ PACS 시스템 (Picture Archiving and Communication System)
 | **2** | 네트워크 프로토콜 | 상위 계층 프로토콜 (PDU), 연결 상태 머신, DIMSE-C 기본 (C-ECHO, C-STORE), 압축 코덱 | ✅ 완료 |
 | **3** | 코어 서비스 | 저장소 SCP/SCU, 파일 저장소 백엔드, 인덱스 데이터베이스, 쿼리/검색 (C-FIND, C-MOVE, C-GET), 로깅, 모니터링 | ✅ 완료 |
 | **4** | 고급 서비스 및 프로덕션 강화 | 워크리스트, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI 통합, 클라이언트 모듈, 클라우드 저장소 (목 구현), 보안 (RBAC, 익명화, 디지털 서명), 워크플로우 (프리페치, 스케줄러, 스터디 잠금), 추가 SOP 클래스, 오브젝트 풀, SIMD, 주석/뷰어 | ✅ 완료 |
-| **5** | 엔터프라이즈 기능 | 전체 AWS/Azure SDK, ITK/VTK, FHIR, 클러스터링, 연결 풀링 | 계획됨 |
+| **5** | 엔터프라이즈 기능 | 전체 AWS/Azure SDK, ITK/VTK, FHIR, 클러스터링 | 계획됨 |
 
 **교차 참조**: PRD 단계는 SRS 요구사항 단계에 매핑됩니다 (SRS-CORE-* → Phase 1, SRS-NET-*/SRS-ENC-* → Phase 2, SRS-SVC-* → Phase 3, SRS-WF-*/SRS-SEC-*/SRS-WEB-* → Phase 4, SRS-INT-007 → Phase 5).
 
@@ -873,7 +873,8 @@ PACS 시스템 (Picture Archiving and Communication System)
 | ITK/VTK 통합 | 고급 영상 처리 및 3D 재구성 | 영상 분석 파이프라인 |
 | FHIR 통합 | HL7 FHIR 상호운용성 | 의료 데이터 교환 |
 | 클러스터링 | 다중 노드 PACS 배포 | 수평 확장 |
-| 연결 풀링 | DICOM 연결 재사용 | 지연시간 단축 |
+
+*참고: 연결 풀링은 이전에 여기 나열되었으나, 클라이언트 모듈(`remote_node_manager`)에 이미 구현되어 있습니다 — FR-10.4 참조.*
 
 **의존성**: 모든 시스템
 
