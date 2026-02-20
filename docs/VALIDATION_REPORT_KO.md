@@ -132,7 +132,7 @@
 
 | 속성 | 값 |
 |------|-----|
-| **요구사항** | PS3.5에 따라 모든 27개 DICOM Value Representation 타입 구현 |
+| **요구사항** | PS3.5에 따라 모든 34개 DICOM Value Representation 타입 구현 |
 | **우선순위** | 필수 |
 | **검증 방법** | 시스템 테스트 |
 | **테스트 ID** | VAL-CORE-002 |

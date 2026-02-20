@@ -611,7 +611,7 @@ private:
 
 **Traces to:** SRS-CORE-006, FR-1.2
 
-**Purpose:** Enumeration of 27 DICOM Value Representations.
+**Purpose:** Enumeration of 34 DICOM Value Representations.
 
 **Design:**
 
