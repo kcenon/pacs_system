@@ -132,7 +132,7 @@ This **Validation Report** confirms that the PACS (Picture Archiving and Communi
 
 | Attribute | Value |
 |-----------|-------|
-| **Requirement** | Implement all 27 DICOM Value Representation types per PS3.5 |
+| **Requirement** | Implement all 34 DICOM Value Representation types per PS3.5 |
 | **Priority** | Must Have |
 | **Validation Method** | System Test |
 | **Test ID** | VAL-CORE-002 |

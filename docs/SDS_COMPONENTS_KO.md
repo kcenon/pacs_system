@@ -473,7 +473,7 @@ private:
 
 **추적:** SRS-CORE-006, FR-1.2
 
-**목적:** 27개 DICOM 값 표현(Value Representation)의 열거형입니다.
+**목적:** 34개 DICOM 값 표현(Value Representation)의 열거형입니다.
 
 **설계:**
 
