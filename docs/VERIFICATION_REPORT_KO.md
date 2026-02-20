@@ -92,7 +92,7 @@
 | Data Set 컨테이너 | SRS-CORE-005 | `dicom_dataset.hpp/cpp` | ✅ 완료 |
 | DICOM Part 10 파일 I/O | SRS-CORE-006 | `dicom_file.hpp/cpp` | ✅ 완료 |
 | Transfer Syntax 지원 | SRS-CORE-007 | `transfer_syntax.hpp/cpp`, codecs | ✅ 완료 |
-| Tag Dictionary | SRS-CORE-008 | `dicom_dictionary.hpp/cpp` | ✅ 완료 (5,000+ 태그) |
+| Tag Dictionary | SRS-CORE-008 | `dicom_dictionary.hpp/cpp` | ✅ 완료 (298개 주요 태그) |
 
 **검증 증거:**
 - Core 모듈에 대한 57개 단위 테스트 통과
@@ -272,7 +272,7 @@
 | 표준 | 준수 영역 | 상태 |
 |------|----------|------|
 | **PS3.5** | 데이터 구조 및 인코딩 | ✅ 완료 |
-| **PS3.6** | 데이터 사전 | ✅ 5,000+ 태그 |
+| **PS3.6** | 데이터 사전 | ✅ 298개 주요 태그 |
 | **PS3.7** | 메시지 교환 (DIMSE) | ✅ 완료 |
 | **PS3.8** | 네트워크 통신 | ✅ 완료 |
 | **PS3.10** | 파일 포맷 | ✅ Part 10 적합 |

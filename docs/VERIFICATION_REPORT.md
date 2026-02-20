@@ -92,7 +92,7 @@ The verification was conducted through static code analysis, documentation revie
 | Data Set container | SRS-CORE-005 | `dicom_dataset.hpp/cpp` | ✅ Complete |
 | DICOM Part 10 file I/O | SRS-CORE-006 | `dicom_file.hpp/cpp` | ✅ Complete |
 | Transfer Syntax support | SRS-CORE-007 | `transfer_syntax.hpp/cpp`, codecs | ✅ Complete |
-| Tag Dictionary | SRS-CORE-008 | `dicom_dictionary.hpp/cpp` | ✅ Complete (5,000+ tags) |
+| Tag Dictionary | SRS-CORE-008 | `dicom_dictionary.hpp/cpp` | ✅ Complete (298 commonly-used tags) |
 
 **Verification Evidence:**
 - 57 unit tests passing for core module
@@ -287,7 +287,7 @@ The verification was conducted through static code analysis, documentation revie
 | Standard | Compliance Area | Status |
 |----------|-----------------|--------|
 | **PS3.5** | Data Structures and Encoding | ✅ Complete |
-| **PS3.6** | Data Dictionary | ✅ 5,000+ tags |
+| **PS3.6** | Data Dictionary | ✅ 298 commonly-used tags |
 | **PS3.7** | Message Exchange (DIMSE) | ✅ Complete |
 | **PS3.8** | Network Communication | ✅ Complete |
 | **PS3.10** | File Format | ✅ Part 10 compliant |
