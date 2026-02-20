@@ -135,8 +135,8 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - AI result handler (SR, SEG, PR DICOM object processing)
 
 **Cloud Storage**:
-- S3 cloud storage with AWS SDK integration (real S3 operations)
-- Azure Blob storage with Azure SDK integration (real Blob operations)
+- S3 cloud storage with dual-implementation architecture (mock default + AWS SDK via `PACS_WITH_AWS_SDK`)
+- Azure Blob storage with dual-implementation architecture (mock default + Azure SDK via `PACS_WITH_AZURE_SDK`)
 - Hierarchical Storage Management (HSM) with three-tier storage (Hot/Warm/Cold)
 
 **Print Management** (PS3.4 Annex H):

@@ -162,8 +162,8 @@
 | monitoring_system | SRS-INT-006 | `monitoring_adapter.hpp/cpp` (508줄) | ✅ 완료 |
 | ITK/VTK | SRS-INT-007 | - | 🔜 계획됨 (Phase 5) |
 | Crow REST 프레임워크 | SRS-INT-008 | `web_server.hpp/cpp`, Crow 통합 | ✅ 완료 |
-| AWS SDK | SRS-INT-009 | - | 🔜 계획됨 (Phase 4) |
-| Azure SDK | SRS-INT-010 | - | 🔜 계획됨 (Phase 4) |
+| AWS SDK | SRS-INT-009 | `s3_storage.hpp/cpp` (mock + `aws_s3_client`, `PACS_WITH_AWS_SDK`) | ✅ 완료 |
+| Azure SDK | SRS-INT-010 | `azure_blob_storage.hpp/cpp` (mock + `azure_sdk_client`, `PACS_WITH_AZURE_SDK`) | ✅ 완료 |
 
 **검증 증거:**
 - `dicom_session.hpp/cpp` (404줄)이 고수준 세션 관리 제공
@@ -203,9 +203,9 @@
 
 | 요구사항 | SRS ID | 구현 | 상태 |
 |----------|--------|------|------|
-| AWS S3 저장소 백엔드 | SRS-CSTOR-001 | - | 🔜 계획됨 (Phase 4) |
-| Azure Blob 저장소 백엔드 | SRS-CSTOR-002 | - | 🔜 계획됨 (Phase 4) |
-| 계층적 저장소 관리 | SRS-CSTOR-003 | - | 🔜 계획됨 (Phase 5) |
+| AWS S3 저장소 백엔드 | SRS-CSTOR-001 | `s3_storage.hpp/cpp` (mock 기본 + `PACS_WITH_AWS_SDK`로 전체 SDK) | ✅ 검증됨 |
+| Azure Blob 저장소 백엔드 | SRS-CSTOR-002 | `azure_blob_storage.hpp/cpp` (mock 기본 + `PACS_WITH_AZURE_SDK`로 전체 SDK) | ✅ 검증됨 |
+| 계층적 저장소 관리 | SRS-CSTOR-003 | `hsm_storage.hpp/cpp` | ✅ 검증됨 |
 
 #### 2.1.10 AI 서비스 모듈 (FR-9.x)
 
@@ -483,7 +483,7 @@ tests/
 |----------|----------|
 | **높음** | JPEG 압축 지원 추가 (Transfer Syntax 1.2.840.10008.1.2.4.50) |
 | **중간** | SCU 작업을 위한 연결 풀링 구현 |
-| **낮음** | 클라우드 저장소 백엔드 (S3/Azure Blob) |
+| **낮음** | 클라우드 저장소 SDK 통합 검증 — `PACS_WITH_AWS_SDK`/`PACS_WITH_AZURE_SDK` 플래그 뒤에 전체 SDK 구현 존재, 클라우드 환경 통합 테스트 필요 |
 
 > **참고:** 다음 항목은 이미 구현되었습니다:
 > - ✅ Explicit VR Big Endian 전송 구문 (Issue #126)
