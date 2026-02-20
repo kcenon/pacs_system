@@ -688,14 +688,14 @@ CREATE TABLE instance (
 );
 ```
 
-### S3 Cloud Storage (Mock Implementation)
+### S3 Cloud Storage
 
-**Implementation**: S3-compatible cloud storage backend with mock client for testing.
+**Implementation**: S3-compatible cloud storage backend with dual-implementation architecture — mock client (default) and full AWS SDK client (enabled via `PACS_WITH_AWS_SDK` CMake flag).
 
 **Features**:
 - AWS S3 and S3-compatible storage (MinIO, etc.)
 - Hierarchical object key structure (Study/Series/SOP)
-- Multipart upload support for large files (placeholder)
+- Multipart upload support for large files
 - Progress callbacks for upload/download monitoring
 - Thread-safe operations with shared_mutex
 - Configurable connection and timeout settings
@@ -756,11 +756,13 @@ storage.store_with_progress(ds, progress);
           └── {SOPInstanceUID}.dcm
 ```
 
-**Note**: This is currently a mock implementation for API validation and testing. Full AWS SDK C++ integration will be added in a future release.
+**Build Configuration**:
+- Default (no flags): Uses `mock_s3_client` — in-memory mock for testing without cloud credentials
+- `PACS_WITH_AWS_SDK` defined: Uses `aws_s3_client` — full AWS SDK with `PutObject`, `GetObject`, `DeleteObject`, `HeadObject`, `ListObjectsV2`, multipart upload (`CreateMultipartUpload`/`UploadPart`/`CompleteMultipartUpload`), path-style addressing for MinIO
 
-### Azure Blob Storage (Mock Implementation)
+### Azure Blob Storage
 
-**Implementation**: Azure Blob storage backend with mock client for testing.
+**Implementation**: Azure Blob storage backend with dual-implementation architecture — mock client (default) and full Azure SDK client (enabled via `PACS_WITH_AZURE_SDK` CMake flag).
 
 **Features**:
 - Azure Blob Storage container support
@@ -831,7 +833,9 @@ storage.store_with_progress(ds, progress);
           └── {SOPInstanceUID}.dcm
 ```
 
-**Note**: This is currently a mock implementation for API validation and testing. Full Azure SDK C++ integration will be added in a future release.
+**Build Configuration**:
+- Default (no flags): Uses `mock_azure_client` — in-memory mock for testing without cloud credentials
+- `PACS_WITH_AZURE_SDK` defined: Uses `azure_sdk_client` — full Azure SDK with `Upload`, `Download`, `Delete`, `GetProperties`, `ListBlobs`, block blob upload (`StageBlock`/`CommitBlockList`), `SetAccessTier` (Hot/Cool/Archive)
 
 ### Hierarchical Storage Management (HSM)
 
@@ -1767,12 +1771,12 @@ std::cout << "Contentions: " << stats.contention_count << "\n";
 | Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | ✅ Complete |
 | Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | ✅ Complete |
 | Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
-| Azure Blob Storage | Azure Blob storage backend (mock implementation) with block blob upload | #199 | ✅ Complete |
+| Azure Blob Storage | Azure Blob storage backend (mock + full Azure SDK via `PACS_WITH_AZURE_SDK`) | #199 | ✅ Complete |
 | Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
 | Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
 | RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
 | REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
-| S3 Cloud Storage | S3-compatible storage backend (mock implementation) | #198 | ✅ Complete |
+| S3 Cloud Storage | S3-compatible storage backend (mock + full AWS SDK via `PACS_WITH_AWS_SDK`) | #198 | ✅ Complete |
 | Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
 | Network System V2 | Optional messaging_server integration | #163 | ✅ Complete |
 | DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | ✅ Complete |
@@ -1860,6 +1864,8 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | ~~Additional SOP Classes (RT)~~ | RT Plan, RT Structure Set, etc. | Phase 4 ✅ |
 | ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb support per PS3.18 | Phase 4 ✅ |
 | ~~AI Integration~~ | External AI service connector + result handler | Phase 4 ✅ |
+| ~~Full AWS S3 SDK~~ | Production AWS SDK integration (`PACS_WITH_AWS_SDK`) | Phase 4 ✅ |
+| ~~Full Azure SDK~~ | Production Azure SDK integration (`PACS_WITH_AZURE_SDK`) | Phase 4 ✅ |
 
 ### Phase 5: Enterprise Features (Future)
 
@@ -1868,8 +1874,6 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | Connection Pooling | Reuse associations | Phase 5 |
 | Enhanced Metrics | Per-association timing | Phase 5 |
 | Clustering | Multi-node PACS | Phase 5 |
-| Full AWS S3 SDK | Production AWS S3 integration (replace mock) | Phase 5 |
-| Full Azure SDK | Production Azure Blob Storage integration (replace mock) | Phase 5 |
 | VTK Integration | 3D visualization and advanced processing pipelines (extends existing ITK adapter) | Phase 5 |
 | FHIR Integration | Healthcare interop | Phase 5 |
 

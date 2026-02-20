@@ -350,16 +350,16 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 
 | ID | Requirement | Priority | Phase | Status |
 |----|-------------|----------|-------|--------|
-| FR-8.1 | Support AWS S3 as storage backend for DICOM files | Should Have | 4 | ✅ Implemented (Mock) |
-| FR-8.2 | Support Azure Blob Storage as storage backend | Should Have | 4 | ✅ Implemented (Mock) |
+| FR-8.1 | Support AWS S3 as storage backend for DICOM files | Should Have | 4 | ✅ Implemented |
+| FR-8.2 | Support Azure Blob Storage as storage backend | Should Have | 4 | ✅ Implemented |
 | FR-8.3 | Implement hierarchical storage management (HSM) with three-tier storage | Should Have | 4 | ✅ Implemented |
 | FR-8.4 | Implement automatic age-based migration between storage tiers | Should Have | 4 | ✅ Implemented |
 | FR-8.5 | Provide transparent data retrieval across all storage tiers | Should Have | 4 | ✅ Implemented |
 | FR-8.6 | Support progress callbacks for upload/download monitoring | Should Have | 4 | ✅ Implemented |
-| FR-8.7 | Integrate full AWS SDK for production S3 operations | Could Have | 5 | |
-| FR-8.8 | Integrate full Azure SDK for production Blob Storage operations | Could Have | 5 | |
+| FR-8.7 | Integrate full AWS SDK for production S3 operations | Could Have | 4 | ✅ Implemented |
+| FR-8.8 | Integrate full Azure SDK for production Blob Storage operations | Could Have | 4 | ✅ Implemented |
 
-*Note: FR-8.1 and FR-8.2 are currently mock implementations for API validation and testing. Full SDK integrations (FR-8.7, FR-8.8) are planned for Phase 5.*
+*Note: FR-8.1/FR-8.2 use a dual-implementation architecture. Mock clients are the default for testing; full SDK clients (FR-8.7/FR-8.8) are available via CMake flags `PACS_WITH_AWS_SDK` and `PACS_WITH_AZURE_SDK`.*
 
 ---
 
@@ -747,13 +747,13 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 | System | Integration Type | Purpose | Phase | Status |
 |--------|-----------------|---------|-------|--------|
-| **AWS SDK for C++** | Cloud Storage | S3 storage backend operations | 5 | Mock implemented (Phase 4); Full SDK planned (Phase 5) |
+| **AWS SDK for C++** | Cloud Storage | S3 storage backend operations | 4 | ✅ Implemented (mock default + full SDK via `PACS_WITH_AWS_SDK`) |
 
 ### IR-9: Azure SDK Integration
 
 | System | Integration Type | Purpose | Phase | Status |
 |--------|-----------------|---------|-------|--------|
-| **Azure SDK for C++** | Cloud Storage | Blob Storage backend operations | 5 | Mock implemented (Phase 4); Full SDK planned (Phase 5) |
+| **Azure SDK for C++** | Cloud Storage | Blob Storage backend operations | 4 | ✅ Implemented (mock default + full SDK via `PACS_WITH_AZURE_SDK`) |
 
 ---
 
@@ -815,8 +815,8 @@ The following table provides a unified overview of all development phases. This 
 | **1** | Foundation | DICOM Core: Data Elements, Data Sets, File I/O (Part 10), Tag Dictionary, Transfer Syntax | ✅ Complete |
 | **2** | Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C basics (C-ECHO, C-STORE), Compression Codecs | ✅ Complete |
 | **3** | Core Services | Storage SCP/SCU, File Storage Backend, Index Database, Query/Retrieve (C-FIND, C-MOVE, C-GET), Logging, Monitoring | ✅ Complete |
-| **4** | Advanced Services & Production Hardening | Worklist, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock), Security (RBAC, Anonymization, Digital Signatures), Workflow (Prefetch, Scheduler, Study Lock), Additional SOP Classes, Object Pools, SIMD, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
-| **5** | Enterprise Features | Full AWS/Azure SDK, VTK Integration, FHIR, Clustering, Connection Pooling | Planned |
+| **4** | Advanced Services & Production Hardening | Worklist, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock + full SDK), Security (RBAC, Anonymization, Digital Signatures), Workflow (Prefetch, Scheduler, Study Lock), Additional SOP Classes, Object Pools, SIMD, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
+| **5** | Enterprise Features | VTK Integration, FHIR, Clustering, Connection Pooling | Planned |
 
 **Cross-Reference**: PRD phases map to SRS requirement phases (SRS-CORE-* → Phase 1, SRS-NET-*/SRS-ENC-* → Phase 2, SRS-SVC-* → Phase 3, SRS-WF-*/SRS-SEC-*/SRS-WEB-* → Phase 4, SRS-INT-007 → Phase 5).
 
@@ -877,7 +877,7 @@ The following table provides a unified overview of all development phases. This 
 | DICOMweb | WADO-RS, STOW-RS, QIDO-RS | PS3.18 conformant | ✅ Complete |
 | AI Integration | AI service connector + result handler | External AI inference | ✅ Complete |
 | Client Module | Job, Routing, Sync, Prefetch, Remote Node | Multi-node federation | ✅ Complete |
-| Cloud Storage | S3 + Azure Blob (mock) + HSM | Three-tier storage | ✅ Complete |
+| Cloud Storage | S3 + Azure Blob (mock + full SDK) + HSM | Three-tier storage | ✅ Complete |
 | Security | RBAC, Anonymization, Digital Signatures | PS3.15 conformant | ✅ Complete |
 | Workflow | Auto Prefetch, Task Scheduler, Study Lock | Automated operations | ✅ Complete |
 | Monitoring | DICOM metrics, Object Pool, Health Checks | Production observability | ✅ Complete |
@@ -892,8 +892,6 @@ The following table provides a unified overview of all development phases. This 
 
 | Deliverable | Description | Acceptance Criteria |
 |-------------|-------------|---------------------|
-| Full AWS S3 SDK | Production S3 integration | Replace mock implementation |
-| Full Azure SDK | Production Azure Blob integration | Replace mock implementation |
 | VTK Integration | 3D reconstruction and advanced visualization pipelines (extends existing ITK adapter) | VTK rendering, volume rendering |
 | FHIR Integration | HL7 FHIR interoperability | Healthcare data exchange |
 | Clustering | Multi-node PACS deployment | Horizontal scaling |
