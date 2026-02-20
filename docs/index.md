@@ -68,7 +68,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | **Phase 4**: Advanced Services | REST API, DICOMweb, AI, Client Module, Cloud Storage, Security, Workflow | ✅ Complete |
 | **Phase 5**: Enterprise Features | VTK Integration, FHIR, Clustering, Connection Pooling | 🔜 Planned |
 
-**Test Coverage**: 1,837 tests passing across 128 test files | **Total**: 251,242 LOC (measured 2026-02-11)
+**Test Coverage**: 1,980+ tests passing across 141+ test files | **Total**: 251,242 LOC (measured 2026-02-11)
 
 ## Getting Started
 
