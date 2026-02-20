@@ -45,7 +45,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - `dicom_dictionary` - Standard tag metadata lookup (298 commonly-used tags)
 
 **Encoding Module** (41 tests):
-- `vr_type` - All 27 DICOM Value Representation types
+- `vr_type` - All 34 DICOM Value Representation types
 - `vr_info` - VR metadata and validation utilities
 - `transfer_syntax` - Transfer Syntax management
 - `implicit_vr_codec` - Implicit VR Little Endian codec
