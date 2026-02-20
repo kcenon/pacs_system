@@ -1476,12 +1476,12 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | ~~C-GET~~ | 대체 검색 방법 | Phase 3 ✅ |
 | ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb 지원 (PS3.18) | Phase 4 ✅ |
 | ~~AI 통합~~ | 외부 AI 서비스 커넥터 + 결과 핸들러 | Phase 4 ✅ |
+| ~~연결 풀링~~ | `remote_node_manager`를 통한 DICOM 연결 재사용 | Phase 4 ✅ |
 
 ### Phase 5: 엔터프라이즈 기능 (향후)
 
 | 기능 | 설명 | 목표 |
 |------|------|------|
-| 연결 풀링 | 연결 재사용 | Phase 5 |
 | 향상된 메트릭 | 연결별 타이밍 | Phase 5 |
 | 클러스터링 | 다중 노드 PACS | Phase 5 |
 | 전체 AWS S3 SDK | 프로덕션 AWS S3 통합 (목 구현 대체) | Phase 5 |
