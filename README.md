@@ -412,7 +412,7 @@ pacs_system/
 │   ├── pacs_server/             # Full PACS server example
 │   └── integration_tests/       # End-to-end integration test suite
 │
-├── docs/                        # Documentation (37 files)
+├── docs/                        # Documentation (57 files)
 └── CMakeLists.txt               # Build configuration (v0.2.0)
 ```
 
@@ -1510,7 +1510,7 @@ cmake --build build --target run_full_benchmarks
 | **Test Files** | 141+ files |
 | **Test Cases** | 1,980+ tests |
 | **Example Programs** | 32 apps |
-| **Documentation** | 55 markdown files |
+| **Documentation** | 57 markdown files |
 | **CI/CD Workflows** | 10 workflows |
 | **Version** | 0.2.0 |
 | **Last Updated** | 2026-02-20 |
