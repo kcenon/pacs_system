@@ -402,6 +402,8 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 |----|-------------|----------|-------|--------|
 | FR-10.4.1 | Implement remote PACS node discovery and management | Should Have | 4 | ✅ Implemented |
 | FR-10.4.2 | Provide REST API for remote node registration and status monitoring | Should Have | 4 | ✅ Implemented |
+| FR-10.4.3 | Implement DICOM association connection pooling with TTL-based expiration | Should Have | 4 | ✅ Implemented |
+| FR-10.4.4 | Support configurable pool size (`max_pool_connections_per_node`) and TTL (`pool_connection_ttl`) | Should Have | 4 | ✅ Implemented |
 
 #### FR-10.5: Prefetch Manager
 | ID | Requirement | Priority | Phase | Status |
@@ -816,7 +818,7 @@ The following table provides a unified overview of all development phases. This 
 | **2** | Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C basics (C-ECHO, C-STORE), Compression Codecs | ✅ Complete |
 | **3** | Core Services | Storage SCP/SCU, File Storage Backend, Index Database, Query/Retrieve (C-FIND, C-MOVE, C-GET), Logging, Monitoring | ✅ Complete |
 | **4** | Advanced Services & Production Hardening | Worklist, MPPS, DIMSE-N, TLS, REST API, DICOMweb, AI Integration, Client Module, Cloud Storage (mock + full SDK), Security (RBAC, Anonymization, Digital Signatures), Workflow (Prefetch, Scheduler, Study Lock), Additional SOP Classes, Object Pools, SIMD, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
-| **5** | Enterprise Features | VTK Integration, FHIR, Clustering, Connection Pooling | Planned |
+| **5** | Enterprise Features | VTK Integration, FHIR, Clustering | Planned |
 
 **Cross-Reference**: PRD phases map to SRS requirement phases (SRS-CORE-* → Phase 1, SRS-NET-*/SRS-ENC-* → Phase 2, SRS-SVC-* → Phase 3, SRS-WF-*/SRS-SEC-*/SRS-WEB-* → Phase 4, SRS-INT-007 → Phase 5).
 
@@ -895,7 +897,8 @@ The following table provides a unified overview of all development phases. This 
 | VTK Integration | 3D reconstruction and advanced visualization pipelines (extends existing ITK adapter) | VTK rendering, volume rendering |
 | FHIR Integration | HL7 FHIR interoperability | Healthcare data exchange |
 | Clustering | Multi-node PACS deployment | Horizontal scaling |
-| Connection Pooling | Reuse DICOM associations | Reduced latency |
+
+*Note: Connection Pooling was previously listed here but is already implemented in the Client Module (`remote_node_manager`) — see FR-10.4.*
 
 **Dependencies**: All systems
 
@@ -1122,6 +1125,7 @@ When referencing other documents, always cite the specific version being referen
 | 2.0.0 | 2026-02-08 | raphaelshin | Major update: Added 15+ implemented features to PRD. New sections: FR-10 (Client Module), FR-11 (Annotation/Viewer State/Clinical Data), FR-12 (Monitoring/Observability). Updated status for FR-3.4 (Worklist), FR-3.5 (MPPS), FR-5 (Security), FR-6 (Web API - 19 endpoints), FR-7 (Workflow - 3 services), FR-8 (Cloud Storage + HSM), FR-9 (AI Integration). Updated architecture diagram and development phases. Reclassified Phase 5 items that are already implemented to Phase 4. |
 | 2.1.0 | 2026-02-09 | raphaelshin | Added: Phase Summary table, Version Numbering Convention (Appendix C). Fixed: Phase target alignment in cross-references for Issue #673. |
 | 2.2.0 | 2026-02-09 | raphaelshin | Added: database_system to IR-1 ecosystem integration table. Updated: ecosystem count from 6 to 7 systems for Issue #674. |
+| 2.3.0 | 2026-02-21 | raphaelshin | Moved: Connection Pooling from Phase 5 to Phase 4 completed. Added: FR-10.4.3/FR-10.4.4 for connection pool requirements. Updated: Phase Summary table for Issue #747. |
 
 ---
 

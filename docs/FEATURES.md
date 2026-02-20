@@ -12,6 +12,8 @@ This document provides comprehensive details on all features available in the PA
 > - **Phase 3** (Complete): DICOM Services, Storage Backend
 > - **Phase 4** (Complete): Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
 > - **Phase 5** (Planned): Enterprise Features (see [Planned Features](#planned-features))
+>
+> **Note**: Connection Pooling was originally listed as a Phase 5 feature but is already fully implemented in the Client Module (`remote_node_manager`). See [Remote Node Manager](#remote-node-manager-connection-pooling) for details.
 
 ---
 
@@ -1761,6 +1763,63 @@ std::cout << "Contentions: " << stats.contention_count << "\n";
 - **logger_adapter**: Audit logging for lock operations
 - **monitoring_adapter**: Lock contention and duration metrics
 
+### Remote Node Manager (Connection Pooling)
+
+**Implementation**: DICOM association connection pooling in the Remote Node Manager (`remote_node_manager`) for reusing established associations across multiple DIMSE operations.
+
+**Features**:
+- Per-node connection pools with `std::deque<pooled_association>` per node ID
+- TTL-based expiration via `pool_connection_ttl` configuration (default: 300 seconds)
+- Max pool size limits via `max_pool_connections_per_node` (default: 4)
+- Acquire/release pattern: `acquire_association()` checks pool first, creates new if needed
+- Thread safety: `std::mutex` guards all pool operations
+- Graceful cleanup: pool connections released on node removal/shutdown
+- Automatic validation: expired or disconnected associations are discarded on acquire
+
+**Configuration Options**:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `max_pool_connections_per_node` | `size_t` | 4 | Maximum pooled connections per remote node |
+| `pool_connection_ttl` | `std::chrono::seconds` | 300 | Time-to-live for pooled connections |
+
+**Example**:
+```cpp
+#include <pacs/client/remote_node_manager.hpp>
+
+using namespace pacs::client;
+
+// Configure remote node manager with connection pool settings
+remote_node_manager_config config;
+config.local_ae_title = "MY_SCU";
+config.max_pool_connections_per_node = 8;
+config.pool_connection_ttl = std::chrono::seconds{600};
+
+remote_node_manager manager{config, logger};
+
+// Acquire association (reuses pooled connection if available)
+auto result = manager.acquire_association("REMOTE_PACS", sop_classes);
+if (result.is_ok()) {
+    auto& assoc = result.value();
+
+    // Perform DIMSE operations...
+
+    // Return to pool for reuse (instead of closing)
+    manager.release_association("REMOTE_PACS", std::move(assoc));
+}
+```
+
+**Related Pooling Mechanisms**:
+
+The PACS system also includes two other object pooling mechanisms:
+
+| Pool | Location | Purpose |
+|------|----------|---------|
+| **Object Pool** | `src/core/pool_manager.cpp` | Pools `dicom_element` and `dicom_dataset` objects to reduce allocation overhead |
+| **PDU Buffer Pool** | `src/network/pdu_buffer_pool.cpp` | Pools network buffers, PDV items, and P-DATA-TF PDUs for efficient network I/O |
+
+See [Object Pool Memory Management](#object-pool-memory-management) for details on object pooling.
+
 ---
 
 ## Recently Completed Features (v1.2.0 - 2025-12-13)
@@ -1866,12 +1925,12 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | ~~AI Integration~~ | External AI service connector + result handler | Phase 4 ✅ |
 | ~~Full AWS S3 SDK~~ | Production AWS SDK integration (`PACS_WITH_AWS_SDK`) | Phase 4 ✅ |
 | ~~Full Azure SDK~~ | Production Azure SDK integration (`PACS_WITH_AZURE_SDK`) | Phase 4 ✅ |
+| ~~Connection Pooling~~ | DICOM association reuse via `remote_node_manager` | Phase 4 ✅ |
 
 ### Phase 5: Enterprise Features (Future)
 
 | Feature | Description | Target |
 |---------|-------------|--------|
-| Connection Pooling | Reuse associations | Phase 5 |
 | Enhanced Metrics | Per-association timing | Phase 5 |
 | Clustering | Multi-node PACS | Phase 5 |
 | VTK Integration | 3D visualization and advanced processing pipelines (extends existing ITK adapter) | Phase 5 |
@@ -1900,6 +1959,7 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | 2.4.0 | 2025-12-17 | raphaelshin | Added: SIMD optimization infrastructure for byte swap operations (SSE/AVX/NEON) for Issue #313 |
 | 2.5.0 | 2025-12-18 | raphaelshin | Added: Service-specific error codes (-800 to -899), unified Result<T> pattern for services module for Issue #325 |
 | 2.6.0 | 2026-02-09 | raphaelshin | Fixed: Resolved version conflicts (0.1.9.0 → 0.2.0.0), updated Planned Features to reflect completed items (DICOMweb, AI Integration), aligned phase targets with PRD for Issue #673 |
+| 2.7.0 | 2026-02-21 | raphaelshin | Moved: Connection Pooling from Phase 5 planned to Phase 4 completed. Added: Remote Node Manager Connection Pooling documentation with configuration options and examples for Issue #747 |
 
 *Note: The Document History table above tracks revisions to this document itself (document revision version). The product version is specified in the header.*
 
