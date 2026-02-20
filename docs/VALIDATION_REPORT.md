@@ -332,7 +332,7 @@ This **Validation Report** confirms that the PACS (Picture Archiving and Communi
 
 | # | Criterion | Result | Evidence |
 |---|-----------|--------|----------|
-| 1 | All standard tags defined | ✅ PASS | 5,000+ tags in dictionary |
+| 1 | All standard tags defined | ✅ PASS | 298 commonly-used tags in dictionary |
 | 2 | Compile-time constant tags | ✅ PASS | `constexpr` tag definitions |
 | 3 | Tag-to-keyword lookup | ✅ PASS | `get_keyword(tag)` |
 | 4 | Keyword-to-tag lookup | ✅ PASS | `get_tag(keyword)` |

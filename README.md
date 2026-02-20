@@ -42,7 +42,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - `dicom_element` - Data Element with tag, VR, and value
 - `dicom_dataset` - Ordered collection of Data Elements
 - `dicom_file` - DICOM Part 10 file read/write
-- `dicom_dictionary` - Standard tag metadata lookup (5,000+ tags)
+- `dicom_dictionary` - Standard tag metadata lookup (298 commonly-used tags)
 
 **Encoding Module** (41 tests):
 - `vr_type` - All 27 DICOM Value Representation types
