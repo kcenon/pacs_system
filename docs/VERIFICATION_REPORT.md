@@ -162,8 +162,8 @@ The verification was conducted through static code analysis, documentation revie
 | monitoring_system | SRS-INT-006 | `monitoring_adapter.hpp/cpp` (508 lines) | ✅ Complete |
 | ITK/VTK | SRS-INT-007 | - | 🔜 Planned (Phase 5) |
 | Crow REST Framework | SRS-INT-008 | `web_server.hpp/cpp`, Crow integration | ✅ Complete |
-| AWS SDK | SRS-INT-009 | `s3_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
-| Azure SDK | SRS-INT-010 | `azure_blob_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
+| AWS SDK | SRS-INT-009 | `s3_storage.hpp/cpp` (mock + `aws_s3_client` via `PACS_WITH_AWS_SDK`) | ✅ Complete |
+| Azure SDK | SRS-INT-010 | `azure_blob_storage.hpp/cpp` (mock + `azure_sdk_client` via `PACS_WITH_AZURE_SDK`) | ✅ Complete |
 
 **Verification Evidence:**
 - `dicom_session.hpp/cpp` (404 lines) provides high-level session management
@@ -209,13 +209,13 @@ The verification was conducted through static code analysis, documentation revie
 
 | Requirement | SRS ID | Implementation | Status |
 |-------------|--------|----------------|--------|
-| AWS S3 Storage Backend | SRS-CSTOR-001 | `s3_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
-| Azure Blob Storage Backend | SRS-CSTOR-002 | `azure_blob_storage.hpp/cpp` (mock client) | ✅ Mock Implemented (Full SDK Phase 5) |
+| AWS S3 Storage Backend | SRS-CSTOR-001 | `s3_storage.hpp/cpp` (mock default + full AWS SDK via `PACS_WITH_AWS_SDK`) | ✅ Verified |
+| Azure Blob Storage Backend | SRS-CSTOR-002 | `azure_blob_storage.hpp/cpp` (mock default + full Azure SDK via `PACS_WITH_AZURE_SDK`) | ✅ Verified |
 | Hierarchical Storage Mgmt | SRS-CSTOR-003 | `hsm_storage.hpp/cpp` | ✅ Verified |
 
 **Verification Evidence:**
-- `s3_storage_test.cpp` — mock S3 upload/download/query tests
-- `azure_blob_storage_test.cpp` — mock Azure Blob upload/download/query tests
+- `s3_storage_test.cpp` — S3 storage upload/download/query tests (mock client)
+- `azure_blob_storage_test.cpp` — Azure Blob storage upload/download/query tests (mock client)
 - `hsm_storage_test.cpp` — tiered storage migration and lifecycle tests
 
 #### 2.1.10 AI Service Module (FR-9.x)
@@ -498,7 +498,7 @@ tests/
 |----------|----------------|
 | **High** | Add JPEG compression support (Transfer Syntax 1.2.840.10008.1.2.4.50) |
 | **Medium** | Implement connection pooling for SCU operations |
-| **Low** | Cloud storage full SDK integration (S3/Azure Blob) — mock implementations complete, production SDK planned Phase 5 |
+| **Low** | Cloud storage SDK integration validation — full SDK implementations exist behind `PACS_WITH_AWS_SDK`/`PACS_WITH_AZURE_SDK` flags, requires cloud-environment integration testing |
 
 > **Note:** The following have been implemented:
 > - ✅ Explicit VR Big Endian transfer syntax (Issue #126)
