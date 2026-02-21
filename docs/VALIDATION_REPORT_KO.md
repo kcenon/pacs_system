@@ -1014,19 +1014,6 @@ storage_root/
 
 ---
 
-#### SRS-INT-007: ITK/VTK 통합
-
-| 속성 | 값 |
-|------|-----|
-| **요구사항** | 고급 영상 처리를 위한 ITK/VTK 통합 |
-| **우선순위** | 가능하면 |
-| **검증 방법** | 통합 테스트 |
-| **테스트 ID** | VAL-INT-007 |
-
-**상태:** 🔜 **계획됨** (Phase 5)
-
----
-
 #### SRS-INT-008: Crow REST 프레임워크 통합
 
 | 속성 | 값 |
@@ -1485,7 +1472,6 @@ storage_root/
 | SRS-INT-004 | VAL-INT-004 | 성능 테스트 | ✅ |
 | SRS-INT-005 | VAL-INT-005 | 감사 | ✅ |
 | SRS-INT-006 | VAL-INT-006 | 시스템 테스트 | ✅ |
-| SRS-INT-007 | VAL-INT-007 | 통합 테스트 | 🔜 |
 | SRS-INT-008 | VAL-INT-008 | 시스템 테스트 | ✅ |
 | SRS-INT-009 | VAL-INT-009 | 통합 테스트 | 🔜 |
 | SRS-INT-010 | VAL-INT-010 | 통합 테스트 | 🔜 |
