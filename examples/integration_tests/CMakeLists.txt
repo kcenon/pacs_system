@@ -8,6 +8,9 @@
 # @see Issue #453 - C-FIND Interoperability Test with DCMTK
 # @see Issue #454 - C-MOVE Interoperability Test with DCMTK
 
+# Ensure test-results output directory exists for JUnit XML reporters
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/test-results)
+
 add_executable(pacs_integration_e2e
     main.cpp
     test_connectivity.cpp
