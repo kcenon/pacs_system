@@ -58,6 +58,12 @@ std::string build_command(const std::string& executable,
         cmd += " \"" + arg + "\"";
     }
     cmd += " 2>&1";
+#ifdef _WIN32
+    // Wrap entire command in extra quotes for cmd.exe /c parsing.
+    // Without this, cmd.exe strips the first and last quote characters
+    // when the command string starts with a double-quote.
+    cmd = "\"" + cmd + "\"";
+#endif
     return cmd;
 }
 
@@ -163,12 +169,14 @@ TEST_CASE("JSON round-trip preserves metadata", "[cli][roundtrip]") {
     // DCM -> JSON
     auto to_json = run_cli("dcm_to_json",
         {src.string(), json_path.string(), "--pretty", "--no-pixel"});
+    INFO("dcm_to_json output: " << to_json.output);
     REQUIRE(to_json.exit_code == 0);
     REQUIRE(fs::exists(json_path));
 
     // JSON -> DCM
     auto to_dcm = run_cli("json_to_dcm",
         {json_path.string(), dcm_path.string()});
+    INFO("json_to_dcm output: " << to_dcm.output);
     REQUIRE(to_dcm.exit_code == 0);
     REQUIRE(fs::exists(dcm_path));
 
@@ -197,12 +205,14 @@ TEST_CASE("XML round-trip preserves metadata", "[cli][roundtrip]") {
     // DCM -> XML
     auto to_xml = run_cli("dcm_to_xml",
         {src.string(), xml_path.string(), "--no-pixel"});
+    INFO("dcm_to_xml output: " << to_xml.output);
     REQUIRE(to_xml.exit_code == 0);
     REQUIRE(fs::exists(xml_path));
 
     // XML -> DCM
     auto to_dcm = run_cli("xml_to_dcm",
         {xml_path.string(), dcm_path.string()});
+    INFO("xml_to_dcm output: " << to_dcm.output);
     REQUIRE(to_dcm.exit_code == 0);
     REQUIRE(fs::exists(dcm_path));
 
@@ -229,12 +239,14 @@ TEST_CASE("Transfer Syntax conversion preserves tags", "[cli][roundtrip]") {
     // Convert to Explicit VR LE
     auto to_explicit = run_cli("dcm_conv",
         {src.string(), explicit_path.string(), "--explicit"});
+    INFO("dcm_conv --explicit output: " << to_explicit.output);
     REQUIRE(to_explicit.exit_code == 0);
     REQUIRE(fs::exists(explicit_path));
 
     // Convert back to Implicit VR LE
     auto to_implicit = run_cli("dcm_conv",
         {explicit_path.string(), implicit_path.string(), "--implicit"});
+    INFO("dcm_conv --implicit output: " << to_implicit.output);
     REQUIRE(to_implicit.exit_code == 0);
     REQUIRE(fs::exists(implicit_path));
 
@@ -263,6 +275,7 @@ TEST_CASE("Anonymization changes patient identifiers", "[cli][roundtrip]") {
     // Anonymize
     auto result = run_cli("dcm_anonymize",
         {src.string(), anon_path.string()});
+    INFO("dcm_anonymize output: " << result.output);
     REQUIRE(result.exit_code == 0);
     REQUIRE(fs::exists(anon_path));
 
@@ -293,6 +306,7 @@ TEST_CASE("Tag modification updates values correctly", "[cli][roundtrip]") {
     auto result = run_cli("dcm_modify",
         {"-i", "(0010,0010)=" + new_name, "-o", modified_path.string(),
          src.string()});
+    INFO("dcm_modify output: " << result.output);
     REQUIRE(result.exit_code == 0);
     REQUIRE(fs::exists(modified_path));
 
