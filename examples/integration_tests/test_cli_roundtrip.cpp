@@ -70,6 +70,11 @@ std::string build_command(const std::string& executable,
 cli_result run_cli(const std::string& tool_name,
                    const std::vector<std::string>& args = {}) {
     auto tool_path = fs::path(CLI_BINARY_DIR) / tool_name;
+#ifdef _WIN32
+    if (!tool_path.has_extension()) {
+        tool_path.replace_extension(".exe");
+    }
+#endif
     auto cmd = build_command(tool_path.string(), args);
 
     cli_result result{};

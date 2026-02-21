@@ -136,10 +136,6 @@ target_compile_definitions(pacs_cli_roundtrip PRIVATE
 
 catch_discover_tests(pacs_cli_roundtrip
     TEST_PREFIX "roundtrip::"
-    REPORTER junit
-    OUTPUT_DIR ${CMAKE_BINARY_DIR}/test-results
-    OUTPUT_PREFIX roundtrip_
-    OUTPUT_SUFFIX .xml
     PROPERTIES
         LABELS "cli;roundtrip"
         TIMEOUT 60
