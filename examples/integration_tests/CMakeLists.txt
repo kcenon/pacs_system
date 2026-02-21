@@ -104,6 +104,21 @@ add_custom_target(generate_binary_test_data
     COMMENT "Generating DICOM test data files..."
 )
 
+# CLI File Utility Functional Tests
+# @see Issue #758 - Add shell script functional tests for file utility CLIs
+if(UNIX)
+    add_test(
+        NAME "cli_functional::file_utilities"
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/test_cli_tools.sh
+                ${CMAKE_BINARY_DIR}
+    )
+    set_tests_properties("cli_functional::file_utilities" PROPERTIES
+        LABELS "cli;functional"
+        TIMEOUT 120
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()
+
 # Install target (optional)
 install(TARGETS pacs_integration_e2e generate_test_data
     RUNTIME DESTINATION bin/tests
