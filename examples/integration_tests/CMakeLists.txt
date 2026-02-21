@@ -130,7 +130,7 @@ target_link_libraries(pacs_cli_roundtrip
 target_compile_features(pacs_cli_roundtrip PRIVATE cxx_std_20)
 
 target_compile_definitions(pacs_cli_roundtrip PRIVATE
-    CLI_BINARY_DIR="${CMAKE_BINARY_DIR}/bin"
+    CLI_BINARY_DIR="$<TARGET_FILE_DIR:dcm_dump>"
     CLI_TEST_DATA_DIR="${CMAKE_BINARY_DIR}/bin/test_data"
 )
 
