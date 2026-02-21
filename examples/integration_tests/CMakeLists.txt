@@ -104,6 +104,44 @@ add_custom_target(generate_binary_test_data
     COMMENT "Generating DICOM test data files..."
 )
 
+# CLI Round-trip Integrity Tests
+# @see Issue #759 - Add Catch2 round-trip integrity tests for conversion CLIs
+add_executable(pacs_cli_roundtrip
+    test_cli_roundtrip.cpp
+)
+
+target_include_directories(pacs_cli_roundtrip
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(pacs_cli_roundtrip
+    PRIVATE
+        pacs_core
+        pacs_encoding
+        Catch2::Catch2WithMain
+        Threads::Threads
+)
+
+target_compile_features(pacs_cli_roundtrip PRIVATE cxx_std_20)
+
+target_compile_definitions(pacs_cli_roundtrip PRIVATE
+    CLI_BINARY_DIR="${CMAKE_BINARY_DIR}/bin"
+    CLI_TEST_DATA_DIR="${CMAKE_BINARY_DIR}/bin/test_data"
+)
+
+catch_discover_tests(pacs_cli_roundtrip
+    TEST_PREFIX "roundtrip::"
+    REPORTER junit
+    OUTPUT_DIR ${CMAKE_BINARY_DIR}/test-results
+    OUTPUT_PREFIX roundtrip_
+    OUTPUT_SUFFIX .xml
+    PROPERTIES
+        LABELS "cli;roundtrip"
+        TIMEOUT 60
+)
+
 # CLI File Utility Functional Tests
 # @see Issue #758 - Add shell script functional tests for file utility CLIs
 if(UNIX)
