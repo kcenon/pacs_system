@@ -2429,6 +2429,102 @@ if(PACS_BUILD_EXAMPLES)
     else()
         message(STATUS "  [OK] module_example: C++20 module demo (fallback to headers)")
     endif()
+
+    # CLI Smoke Tests - verify all CLI binaries can execute
+    # @see Issue #757 - Add CTest Smoke Tests for All CLI Binaries
+    if(PACS_BUILD_TESTS)
+        message(STATUS "")
+        message(STATUS "=== Registering CLI Smoke Tests ===")
+
+        # File Utilities (always built)
+        set(CLI_FILE_TOOLS
+            dcm_dump
+            dcm_info
+            dcm_conv
+            dcm_modify
+            dcm_anonymize
+            dcm_dir
+            dcm_to_json
+            json_to_dcm
+            dcm_to_xml
+            xml_to_dcm
+            img_to_dcm
+            dcm_extract
+        )
+
+        # Network Tools (require pacs_integration)
+        set(CLI_NETWORK_TOOLS
+            echo_scu
+            echo_scp
+            store_scu
+            store_scp
+            query_scu
+            find_scu
+            retrieve_scu
+            move_scu
+            get_scu
+            worklist_scu
+            worklist_scp
+            mpps_scu
+            mpps_scp
+            print_scu
+            qr_scp
+            secure_echo_scu
+            secure_echo_scp
+        )
+
+        # Storage Tools (require pacs_storage)
+        set(CLI_STORAGE_TOOLS
+            db_browser
+            pacs_server
+        )
+
+        # Tools that start a server with default args (no no_args test)
+        set(CLI_SERVER_DEFAULT_TOOLS
+            pacs_server
+        )
+
+        set(CLI_ALL_TOOLS
+            ${CLI_FILE_TOOLS}
+            ${CLI_NETWORK_TOOLS}
+            ${CLI_STORAGE_TOOLS}
+        )
+
+        set(_smoke_count 0)
+        foreach(tool ${CLI_ALL_TOOLS})
+            if(TARGET ${tool})
+                # Test 1: --help outputs usage text
+                add_test(
+                    NAME "cli_smoke::${tool}::help"
+                    COMMAND ${tool} --help
+                )
+                set_tests_properties("cli_smoke::${tool}::help" PROPERTIES
+                    LABELS "cli;smoke"
+                    TIMEOUT 10
+                    PASS_REGULAR_EXPRESSION "Usage|usage|USAGE|Options|options"
+                )
+
+                # Test 2: no arguments exits non-zero
+                # Skip for tools that start a server with default arguments
+                list(FIND CLI_SERVER_DEFAULT_TOOLS ${tool} _is_server_default)
+                if(_is_server_default EQUAL -1)
+                    add_test(
+                        NAME "cli_smoke::${tool}::no_args"
+                        COMMAND ${tool}
+                    )
+                    set_tests_properties("cli_smoke::${tool}::no_args" PROPERTIES
+                        LABELS "cli;smoke"
+                        TIMEOUT 10
+                        WILL_FAIL true
+                    )
+                endif()
+
+                math(EXPR _smoke_count "${_smoke_count} + 1")
+            endif()
+        endforeach()
+
+        message(STATUS "  Registered smoke tests for ${_smoke_count} CLI tools")
+    endif()
 endif()
 
 ##################################################
