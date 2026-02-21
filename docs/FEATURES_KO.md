@@ -11,7 +11,7 @@
 > - **Phase 2** (완료): 네트워크 프로토콜 기능, 압축 코덱
 > - **Phase 3** (완료): DICOM 서비스, 저장 백엔드
 > - **Phase 4** (완료): 보안, 모니터링, 워크플로우, 에코시스템 통합 (고급), 에러 처리
-> - **Phase 5** (계획됨): 엔터프라이즈 기능 ([계획된 기능](#계획된-기능) 참조)
+> - **Phase 5** (계획됨): 엔터프라이즈 기능 — 향상된 메트릭, 전체 AWS/Azure SDK ([계획된 기능](#계획된-기능) 참조)
 
 ---
 
@@ -1483,11 +1483,8 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | 기능 | 설명 | 목표 |
 |------|------|------|
 | 향상된 메트릭 | 연결별 타이밍 | Phase 5 |
-| 클러스터링 | 다중 노드 PACS | Phase 5 |
 | 전체 AWS S3 SDK | 프로덕션 AWS S3 통합 (목 구현 대체) | Phase 5 |
 | 전체 Azure SDK | 프로덕션 Azure Blob Storage 통합 (목 구현 대체) | Phase 5 |
-| ITK/VTK 통합 | 고급 영상 처리 및 3D 재구성 | Phase 5 |
-| FHIR 통합 | 의료 상호운용성 | Phase 5 |
 
 ---
 

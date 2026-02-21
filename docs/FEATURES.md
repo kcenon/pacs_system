@@ -11,7 +11,7 @@ This document provides comprehensive details on all features available in the PA
 > - **Phase 2** (Complete): Network Protocol Features, Compression Codecs
 > - **Phase 3** (Complete): DICOM Services, Storage Backend
 > - **Phase 4** (Complete): Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
-> - **Phase 5** (Planned): Enterprise Features (see [Planned Features](#planned-features))
+> - **Phase 5** (Planned): Enterprise Features — Enhanced Metrics (see [Planned Features](#planned-features))
 >
 > **Note**: Connection Pooling was originally listed as a Phase 5 feature but is already fully implemented in the Client Module (`remote_node_manager`). See [Remote Node Manager](#remote-node-manager-connection-pooling) for details.
 
@@ -1161,20 +1161,6 @@ storage_scp scp_via_di(logger);
 - Storage throughput (MB/s)
 - Error rates
 
-### ITK Adapter (Optional)
-
-**Purpose**: DICOM-to-ITK image conversion for medical image analysis.
-
-**Build**: Conditional compilation via `PACS_BUILD_ITK_ADAPTER` CMake option (OFF by default, requires ITK installation).
-
-**Features**:
-- DICOM dataset to ITK image conversion (`dataset_to_image<>()` template)
-- DICOM series to 3D volume reconstruction (`series_to_image()`)
-- CT Hounsfield Unit conversion (`apply_hounsfield_conversion()`)
-- Metadata extraction (spatial information, orientation, position)
-- Type aliases for common medical images (`ct_image_type`, `mr_image_type`)
-- Convenience loaders: `load_ct_series()`, `load_mr_series()`
-
 ---
 
 ## Security Features
@@ -1932,9 +1918,6 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 | Feature | Description | Target |
 |---------|-------------|--------|
 | Enhanced Metrics | Per-association timing | Phase 5 |
-| Clustering | Multi-node PACS | Phase 5 |
-| VTK Integration | 3D visualization and advanced processing pipelines (extends existing ITK adapter) | Phase 5 |
-| FHIR Integration | Healthcare interop | Phase 5 |
 
 ---
 

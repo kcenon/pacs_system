@@ -126,7 +126,6 @@
 | **IR-3** | thread_system 통합 | SRS-INT-004 | 완전 |
 | **IR-4** | logger_system 통합 | SRS-INT-005 | 완전 |
 | **IR-5** | monitoring_system 통합 | SRS-INT-006 | 완전 |
-| **IR-6** | ITK/VTK 통합 | SRS-INT-007 | 완전 |
 | **IR-7** | Crow REST Framework 통합 | SRS-INT-008 | 완전 |
 | **IR-8** | AWS SDK 통합 | SRS-INT-009 | 완전 |
 | **IR-9** | Azure SDK 통합 | SRS-INT-010 | 완전 |
@@ -187,7 +186,6 @@
 | **SRS-INT-004** | thread_system 어댑터 | DES-INT-003 | `thread_adapter` |
 | **SRS-INT-005** | logger_system 어댑터 | DES-INT-004 | `logger_adapter` |
 | **SRS-INT-006** | monitoring_system 어댑터 | DES-INT-005 | `monitoring_adapter` |
-| **SRS-INT-007** | ITK/VTK 통합 | DES-INT-008 | `itk_adapter` |
 | **SRS-INT-008** | Crow REST Framework | DES-WEB-001 | `rest_server` |
 | **SRS-INT-009** | AWS SDK 통합 | DES-STOR-005 | `s3_storage` |
 | **SRS-INT-010** | Azure SDK 통합 | DES-STOR-006 | `azure_blob_storage` |

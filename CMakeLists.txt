@@ -51,7 +51,6 @@ option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
 option(PACS_WITH_CONTAINER_SYSTEM "Enable container_system integration (REQUIRED)" ON)
 option(PACS_WITH_NETWORK_SYSTEM "Enable network_system integration (REQUIRED)" ON)
 option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
-option(PACS_BUILD_ITK_ADAPTER "Build ITK integration adapter (requires ITK 5.x)" OFF)
 option(PACS_WITH_AWS_SDK "Enable AWS SDK integration for S3 storage" OFF)
 option(PACS_WITH_AZURE_SDK "Enable Azure SDK integration for Blob storage" OFF)
 option(PACS_WARNINGS_AS_ERRORS "Treat warnings as errors (disable in CI if dependency warnings occur)" ON)
@@ -252,35 +251,6 @@ if(NOT PACS_JPEGLS_FOUND)
         "  - macOS: brew install charls\n"
         "  - Windows: vcpkg install charls:x64-windows")
     set(PACS_JPEGLS_FOUND FALSE)
-endif()
-
-# ITK (for ITK integration adapter - Issue #463)
-if(PACS_BUILD_ITK_ADAPTER)
-    message(STATUS "")
-    message(STATUS "=== Finding ITK (for ITK integration adapter) ===")
-
-    find_package(ITK QUIET COMPONENTS
-        ITKCommon
-        ITKIOImageBase
-    )
-
-    if(ITK_FOUND)
-        message(STATUS "Found ITK: ${ITK_VERSION}")
-        set(PACS_ITK_FOUND TRUE)
-        include(${ITK_USE_FILE})
-    else()
-        message(WARNING
-            "ITK not found!\n"
-            "ITK integration adapter will be disabled.\n"
-            "\n"
-            "To enable ITK support, install ITK 5.x:\n"
-            "  - Ubuntu: sudo apt install libinsighttoolkit5-dev\n"
-            "  - macOS: brew install itk\n"
-            "  - Windows: vcpkg install itk:x64-windows\n"
-            "  - Or build from source: https://itk.org/")
-        set(PACS_ITK_FOUND FALSE)
-        set(PACS_BUILD_ITK_ADAPTER OFF)
-    endif()
 endif()
 
 # OpenSSL (for digital signatures - Issue #191)
@@ -1407,11 +1377,6 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         list(APPEND PACS_INTEGRATION_SOURCES src/integration/monitoring_adapter.cpp)
     endif()
 
-    # Only include itk_adapter.cpp if ITK is available (Issue #463)
-    if(PACS_ITK_FOUND)
-        list(APPEND PACS_INTEGRATION_SOURCES src/integration/itk_adapter.cpp)
-    endif()
-
     add_library(pacs_integration ${PACS_INTEGRATION_SOURCES})
     target_include_directories(pacs_integration
         PUBLIC
@@ -1506,15 +1471,6 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         message(STATUS "    - monitoring_adapter: ON (headers only)")
     else()
         message(WARNING "    - monitoring_adapter: OFF (monitoring_system target not found)")
-    endif()
-
-    # Link ITK for itk_adapter (Issue #463)
-    if(PACS_ITK_FOUND)
-        target_link_libraries(pacs_integration PUBLIC ${ITK_LIBRARIES})
-        target_compile_definitions(pacs_integration PUBLIC PACS_WITH_ITK)
-        message(STATUS "    - itk_adapter: ON (ITK ${ITK_VERSION})")
-    else()
-        message(STATUS "    - itk_adapter: OFF (ITK not found or disabled)")
     endif()
 
     message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system, network_system, monitoring_system)")
@@ -1996,8 +1952,6 @@ if(PACS_BUILD_TESTS)
             tests/integration/load_integration_test.cpp
             tests/integration/shutdown_integration_test.cpp
             tests/integration/config_reload_integration_test.cpp
-            # ITK/VTK Integration Adapter tests (Issue #463)
-            tests/integration/itk_adapter_test.cpp
         )
         target_link_libraries(pacs_integration_tests
             PRIVATE
@@ -2005,10 +1959,6 @@ if(PACS_BUILD_TESTS)
                 pacs_network
                 Catch2::Catch2WithMain
         )
-        # Link ITK libraries for ITK adapter tests (Issue #463)
-        if(PACS_ITK_FOUND)
-            target_link_libraries(pacs_integration_tests PRIVATE ${ITK_LIBRARIES})
-        endif()
         # Link integrated_database and monitoring_system for database dependencies (Issue #642)
         pacs_link_database_deps(pacs_integration_tests)
     endif()
