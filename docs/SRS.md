@@ -1251,23 +1251,6 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 
 ---
 
-#### SRS-INT-007: ITK/VTK Integration
-| Attribute | Value |
-|-----------|-------|
-| **ID** | SRS-INT-007 |
-| **Title** | ITK/VTK Medical Imaging Integration |
-| **Description** | The system shall integrate with ITK/VTK libraries for advanced image processing operations. |
-| **Priority** | Could Have |
-| **Phase** | 5 |
-| **Traces To** | IR-6 |
-
-**Acceptance Criteria:**
-1. DICOM to ITK image adapter
-2. Image format conversion support
-3. 3D reconstruction capabilities
-
----
-
 #### SRS-INT-008: Crow REST Framework Integration
 | Attribute | Value |
 |-----------|-------|
@@ -2032,7 +2015,6 @@ The PACS System provides no direct user interface. All interaction is through:
 | NFR-4.1-NFR-4.5 | SRS-SEC-001 - SRS-SEC-005 | Specified |
 | NFR-5.1-NFR-5.5 | SRS-MAINT-001 - SRS-MAINT-005 | Specified |
 | IR-1 | SRS-INT-001 - SRS-INT-006, SRS-INT-011 | Specified |
-| IR-6 | SRS-INT-007 | Specified |
 | IR-7 | SRS-INT-008 | Specified |
 | IR-8 | SRS-INT-009 | Specified |
 | IR-9 | SRS-INT-010 | Specified |
@@ -2063,7 +2045,6 @@ The PACS System provides no direct user interface. All interaction is through:
 | SRS-SVC-007 | TC-SVC-007 | Conformance | Planned |
 | SRS-STOR-001 | TC-STOR-001 | Integration | Planned |
 | SRS-STOR-002 | TC-STOR-002 | Integration | Planned |
-| SRS-INT-007 | TC-INT-007 | Integration | Planned |
 | SRS-INT-008 | TC-INT-008 | Integration | Planned |
 | SRS-INT-009 | TC-INT-009 | Integration | Planned |
 | SRS-INT-010 | TC-INT-010 | Integration | Planned |
@@ -2159,7 +2140,7 @@ The PACS System provides no direct user interface. All interaction is through:
 | 1.0.0 | 2025-11-30 | kcenon | Initial version |
 | 1.1.0 | 2025-12-04 | kcenon | Updated integration requirements |
 | 1.2.0 | 2025-12-07 | kcenon | Added: SRS-SVC-008 (DIMSE-N), SRS-SVC-009 (Ultrasound), SRS-SVC-010 (XA); Updated: SRS-CORE-007 (Explicit VR BE), SRS-INT-003 (network_system V2), SRS-INT-004 (thread_system migration) |
-| 1.3.0 | 2026-01-04 | kcenon | Added: FR-5.x Security (SRS-SEC-010 to SRS-SEC-013), FR-6.x Web/REST API (SRS-WEB-001 to SRS-WEB-004), FR-7.x Workflow (SRS-WKF-001, SRS-WKF-002), FR-8.x Cloud Storage (SRS-CSTOR-001 to SRS-CSTOR-003), FR-9.x AI (SRS-AI-001); Updated: Integration requirements (SRS-INT-007 to SRS-INT-010) |
+| 1.3.0 | 2026-01-04 | kcenon | Added: FR-5.x Security (SRS-SEC-010 to SRS-SEC-013), FR-6.x Web/REST API (SRS-WEB-001 to SRS-WEB-004), FR-7.x Workflow (SRS-WKF-001, SRS-WKF-002), FR-8.x Cloud Storage (SRS-CSTOR-001 to SRS-CSTOR-003), FR-9.x AI (SRS-AI-001); Updated: Integration requirements (SRS-INT-008 to SRS-INT-010) |
 | 1.3.1 | 2026-02-09 | raphaelshin | Fixed: SRS-AI-001 phase assignment (Phase 5 → Phase 4) to match PRD FR-9.1 implementation status for Issue #673 |
 | 1.3.2 | 2026-02-09 | raphaelshin | Fixed: Operating environment (Ubuntu 22.04+ → 24.04+, GCC 11+ → 13+, Clang 14+ → 15+) to match CI configuration; Added: SRS-INT-011 (database_system integration) for Issue #674 |
 

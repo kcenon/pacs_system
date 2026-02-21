@@ -1014,19 +1014,6 @@ storage_root/
 
 ---
 
-#### SRS-INT-007: ITK/VTK Integration
-
-| Attribute | Value |
-|-----------|-------|
-| **Requirement** | Integrate with ITK/VTK for advanced image processing |
-| **Priority** | Could Have |
-| **Validation Method** | Integration Test |
-| **Test ID** | VAL-INT-007 |
-
-**Status:** 🔜 **PLANNED** (Phase 5)
-
----
-
 #### SRS-INT-008: Crow REST Framework Integration
 
 | Attribute | Value |
@@ -1485,7 +1472,6 @@ storage_root/
 | SRS-INT-004 | VAL-INT-004 | Performance Test | ✅ |
 | SRS-INT-005 | VAL-INT-005 | Audit | ✅ |
 | SRS-INT-006 | VAL-INT-006 | System Test | ✅ |
-| SRS-INT-007 | VAL-INT-007 | Integration Test | 🔜 |
 | SRS-INT-008 | VAL-INT-008 | System Test | ✅ |
 | SRS-INT-009 | VAL-INT-009 | Integration Test | 🔜 |
 | SRS-INT-010 | VAL-INT-010 | Integration Test | 🔜 |

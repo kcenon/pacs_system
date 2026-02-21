@@ -48,8 +48,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | ✅ Complete |
 | **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | ✅ Complete |
 | **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
-| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer, ITK Adapter (optional) | ✅ Complete |
-| **Phase 5**: Enterprise Features | VTK Integration, FHIR, Clustering | 🔜 Planned |
+| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer | ✅ Complete |
 
 **Test Coverage**: 1,980+ tests passing across 141+ test files
 
@@ -84,7 +83,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
 ├─────────┼────────────────────────────────────────────────────────────┤
 │         │             Integration Adapters                           │
-│  container │ network │ thread │ logger │ monitoring │ ITK (opt)     │
+│  container │ network │ thread │ logger │ monitoring                  │
 ├─────────┼────────────────────────────────────────────────────────────┤
 │         │              kcenon Ecosystem                               │
 │  common_system │ container_system │ thread_system │ network_system   │
@@ -337,7 +336,7 @@ This project leverages the following kcenon ecosystem components:
 | **Client** | `include/pacs/client/` | Job, routing, sync, prefetch, remote node management |
 | **Workflow** | `include/pacs/workflow/` | Auto prefetch, task scheduler, study lock manager |
 | **AI** | `include/pacs/ai/` | AI service connector, result handler (SR/SEG) |
-| **Integration** | `include/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring, ITK) |
+| **Integration** | `include/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring) |
 
 ```
 pacs_system/

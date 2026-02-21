@@ -160,7 +160,6 @@
 | thread_system | SRS-INT-004 | `thread_adapter.hpp/cpp` | ✅ 완료 |
 | logger_system | SRS-INT-005 | `logger_adapter.hpp/cpp` (562줄) | ✅ 완료 |
 | monitoring_system | SRS-INT-006 | `monitoring_adapter.hpp/cpp` (508줄) | ✅ 완료 |
-| ITK/VTK | SRS-INT-007 | - | 🔜 계획됨 (Phase 5) |
 | Crow REST 프레임워크 | SRS-INT-008 | `web_server.hpp/cpp`, Crow 통합 | ✅ 완료 |
 | AWS SDK | SRS-INT-009 | `s3_storage.hpp/cpp` (mock + `aws_s3_client`, `PACS_WITH_AWS_SDK`) | ✅ 완료 |
 | Azure SDK | SRS-INT-010 | `azure_blob_storage.hpp/cpp` (mock + `azure_sdk_client`, `PACS_WITH_AZURE_SDK`) | ✅ 완료 |
@@ -608,7 +607,7 @@ src/
 | 1.3.0 | 2025-12-01 | kcenon@naver.com | 검증(SDS 준수)만으로 범위 한정; 확인은 별도 VALIDATION_REPORT_KO.md로 이동 |
 | 1.4.0 | 2025-12-05 | kcenon@naver.com | network_system 마이그레이션용 Network V2 테스트 추가 (Issue #163) |
 | 1.5.0 | 2025-12-07 | kcenon@naver.com | 추가: 스레드 마이그레이션 검증 (Epic #153), DIMSE-N (#127), 초음파 (#128), XA (#129), Explicit VR BE (#126); 프로젝트 지표 업데이트 |
-| 1.6.0 | 2026-02-08 | kcenon@naver.com | 추가: SVC-008~010, INT-007~010, SEC-010~013, WEB-001~004, WKF-001~002, CSTOR-001~003, AI-001, SCAL-001~004; 8-상태→13-상태 수정; Explicit VR BE 완료; 요구사항 커버리지 77% 업데이트 |
+| 1.6.0 | 2026-02-08 | kcenon@naver.com | 추가: SVC-008~010, INT-008~010, SEC-010~013, WEB-001~004, WKF-001~002, CSTOR-001~003, AI-001, SCAL-001~004; 8-상태→13-상태 수정; Explicit VR BE 완료; 요구사항 커버리지 77% 업데이트 |
 
 ---
 
