@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see DICOM PS3.3 Section A.6 - US Image IOD
  * @see DES-SVC-008 - Ultrasound Storage Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_SOP_CLASSES_US_STORAGE_HPP

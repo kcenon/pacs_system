@@ -35,6 +35,8 @@
  * which schedules and executes recurring maintenance tasks.
  *
  * @see SRS-WKF-002 - Task Scheduler Service Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

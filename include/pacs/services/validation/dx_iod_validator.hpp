@@ -40,6 +40,8 @@
  * @see DICOM PS3.3 Section A.26 - DX Image IOD
  * @see DICOM PS3.3 Section C.8.11 - DX Modules
  * @see DES-SVC-009 - Digital X-Ray Storage Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_DX_IOD_VALIDATOR_HPP

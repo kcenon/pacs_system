@@ -37,6 +37,8 @@
  *
  * @see Issue #609 - Phase 3-2: Cursor & Security Storage Migration
  * @copyright Copyright (c) 2025
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -37,6 +37,8 @@
  *
  * @see Issue #310 - IMonitor Integration and DICOM Metric Collector
  * @see common_system IMonitor interface
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Section K - Basic Worklist Management Service Class
  * @see DICOM PS3.7 Section 9.1 - C-FIND Service
  * @see DES-SVC-006 - Worklist SCP Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_WORKLIST_SCP_HPP

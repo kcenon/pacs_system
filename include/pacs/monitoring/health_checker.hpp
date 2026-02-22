@@ -37,6 +37,8 @@
  *
  * @see Issue #211 - Implement health check endpoint
  * @see DICOM PS3.7 - Message Exchange (Association Status)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

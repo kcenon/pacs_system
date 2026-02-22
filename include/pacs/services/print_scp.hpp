@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.4 Annex H - Print Management Service Class
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_PRINT_SCP_HPP

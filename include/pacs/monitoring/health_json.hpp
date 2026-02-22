@@ -37,6 +37,8 @@
  *
  * @see Issue #211 - Implement health check endpoint
  * @see RFC 8259 - The JavaScript Object Notation (JSON) Data Interchange Format
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

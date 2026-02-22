@@ -40,6 +40,8 @@
  * @see Issue #542 - Implement Sync Manager for Bidirectional Synchronization
  * @see Issue #530 - PACS Client System Support (Parent Epic)
  * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

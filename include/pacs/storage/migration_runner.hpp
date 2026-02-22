@@ -40,6 +40,8 @@
  *
  * @see SRS-STOR-003
  * @see Issue #643 - Update migration_runner to use pacs_database_adapter
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -36,6 +36,8 @@
  * the modality worklist.
  *
  * @see SRS-WKF-001 - Auto Prefetch Service Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

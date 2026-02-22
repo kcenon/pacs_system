@@ -38,6 +38,8 @@
  * @see DICOM PS3.3 Section A.18 - RT Dose IOD
  * @see DICOM PS3.3 Section A.19 - RT Structure Set IOD
  * @see DICOM PS3.3 Section C.8.8 - RT Modules
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_RT_IOD_VALIDATOR_HPP

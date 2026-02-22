@@ -41,6 +41,8 @@
  * @see Issue #560 - Part 3: Jobs WebSocket Progress Streaming
  * @copyright Copyright (c) 2025
  * @license MIT
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

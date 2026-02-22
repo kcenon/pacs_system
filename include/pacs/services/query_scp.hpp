@@ -37,6 +37,8 @@
  * @see DICOM PS3.4 Section C - Query/Retrieve Service Class
  * @see DICOM PS3.7 Section 9.1 - C-FIND Service
  * @see DES-SVC-004 - Query SCP Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_QUERY_SCP_HPP

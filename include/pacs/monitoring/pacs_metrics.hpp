@@ -37,6 +37,8 @@
  *
  * @see Issue #210 - [Quick Win] feat(monitoring): Implement operation metrics collection
  * @see DICOM PS3.7 - Message Exchange (DIMSE Services)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

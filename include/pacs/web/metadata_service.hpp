@@ -37,6 +37,8 @@
  * @see Issue #544 - Implement Selective Metadata & Navigation APIs
  * @copyright Copyright (c) 2025
  * @license MIT
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

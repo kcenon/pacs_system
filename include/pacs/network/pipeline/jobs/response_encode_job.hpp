@@ -36,6 +36,8 @@
  *
  * @see Issue #517 - Implement typed_thread_pool-based I/O Pipeline
  * @see Issue #522 - Phase 5: Response Jobs
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

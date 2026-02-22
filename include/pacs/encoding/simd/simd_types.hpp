@@ -33,6 +33,8 @@
  *
  * Provides portable type aliases and wrapper classes for SIMD operations
  * across x86 (SSE2/AVX2) and ARM (NEON) platforms.
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_SIMD_TYPES_HPP

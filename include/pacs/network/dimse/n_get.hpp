@@ -66,6 +66,8 @@
  * | (0000,1005) | AttributeIdentifierList | U | - |
  *
  * M = Mandatory, U = User option (if empty, all attributes returned)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_N_GET_HPP

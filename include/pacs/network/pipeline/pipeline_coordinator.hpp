@@ -36,6 +36,8 @@
  *
  * @see Issue #517 - Implement typed_thread_pool-based I/O Pipeline
  * @see DICOM PS3.8 Network Communication Support
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

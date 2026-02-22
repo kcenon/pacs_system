@@ -36,6 +36,8 @@
  * SIMD optimization when available (SSE/AVX on x86, NEON on ARM).
  *
  * @see DICOM PS3.5 Section 7 - Data Set Encoding
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_BYTE_SWAP_HPP

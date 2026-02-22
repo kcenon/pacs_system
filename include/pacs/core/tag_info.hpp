@@ -36,6 +36,8 @@
  * includes the tag, VR, value multiplicity, keyword, name, and retirement status.
  *
  * @see DICOM PS3.6 - Data Dictionary
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

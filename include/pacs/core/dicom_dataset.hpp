@@ -35,6 +35,8 @@
  * collection of DICOM Data Elements as specified in DICOM PS3.5.
  *
  * @see DICOM PS3.5 Section 7.1 - Data Set
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

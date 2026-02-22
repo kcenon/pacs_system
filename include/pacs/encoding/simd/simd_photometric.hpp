@@ -37,6 +37,8 @@
  * - RGB <-> YCbCr color space conversion
  *
  * @see DICOM PS3.3 C.7.6.3.1 - Photometric Interpretation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_SIMD_PHOTOMETRIC_HPP

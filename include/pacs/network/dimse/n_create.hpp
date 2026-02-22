@@ -59,6 +59,8 @@
  * | (0000,1000) | AffectedSOPInstanceUID | U | C |
  *
  * M = Mandatory, U = User option, C = Conditional
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_N_CREATE_HPP

@@ -36,6 +36,8 @@
  * tracing for request tracking, and health check functionality.
  *
  * @see IR-5 (monitoring_system Integration), NFR-1 (Performance)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

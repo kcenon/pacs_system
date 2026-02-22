@@ -36,6 +36,8 @@
  *
  * @see Issue #539 - Implement Routing Manager for Auto-Forwarding
  * @see Issue #530 - PACS Client System Support (Parent Epic)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -46,6 +46,8 @@
  *
  * @see DICOM PS3.5 Section 6.1 - Support of Character Repertoires
  * @see DICOM PS3.3 Section C.12.1.1.2 - Specific Character Set
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_CHARACTER_SET_HPP

@@ -38,6 +38,8 @@
  * @see Issue #607 - Phase 2: Base Repository Pattern Implementation
  * @see Epic #605 - Migrate Direct Database Access to database_system
  * Abstraction
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

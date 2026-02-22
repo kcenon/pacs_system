@@ -37,6 +37,8 @@
  *
  * @see SRS-WKF-003 - Study Lock Manager Specification
  * @see FR-4.8 - Study Modification Control
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -36,6 +36,8 @@
  * to avoid circular dependencies with scp_service.hpp.
  *
  * @see Issue #309 - Full Adoption of ILogger Interface
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

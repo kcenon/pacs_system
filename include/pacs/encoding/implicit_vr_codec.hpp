@@ -39,6 +39,8 @@
  * Instead, it is determined by looking up the tag in the DICOM dictionary.
  *
  * @see DICOM PS3.5 Section 7.1.1 - Implicit VR Little Endian Transfer Syntax
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_IMPLICIT_VR_CODEC_HPP

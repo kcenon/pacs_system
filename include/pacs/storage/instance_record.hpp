@@ -35,6 +35,8 @@
  * for instance (SOP Instance) data manipulation in the PACS index database.
  *
  * @see SRS-STOR-003, FR-4.3
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

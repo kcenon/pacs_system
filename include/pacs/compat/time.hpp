@@ -42,6 +42,8 @@
  *   #include <pacs/compat/time.hpp>
  *   std::tm tm{};
  *   pacs::compat::localtime_safe(&time_val, &tm);
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

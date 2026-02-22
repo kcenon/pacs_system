@@ -35,6 +35,8 @@
  * for x86 (SSE2/AVX2/AVX-512) and ARM (NEON) platforms.
  *
  * @see DICOM PS3.5 - Performance optimization for pixel data processing
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_SIMD_CONFIG_HPP

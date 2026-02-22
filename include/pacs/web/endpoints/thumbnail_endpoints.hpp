@@ -36,6 +36,8 @@
  * @see Issue #543 - Implement Thumbnail API for DICOM Viewer
  * @copyright Copyright (c) 2025
  * @license MIT
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

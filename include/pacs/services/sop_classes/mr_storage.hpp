@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see DICOM PS3.3 Section A.4 - MR Image IOD
  * @see Issue #718 - Add MR Image IOD Validator
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_SOP_CLASSES_MR_STORAGE_HPP

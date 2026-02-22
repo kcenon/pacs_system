@@ -37,6 +37,8 @@
  *
  * @see Issue #490 - Implement CRTP-based DICOM metrics collector
  * @see monitoring_system/src/impl/battery_collector.cpp for pattern reference
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -39,6 +39,8 @@
  * interoperability with legacy systems.
  *
  * @see DICOM PS3.5 Section 7.1.2 - Explicit VR Transfer Syntaxes
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_EXPLICIT_VR_BIG_ENDIAN_CODEC_HPP

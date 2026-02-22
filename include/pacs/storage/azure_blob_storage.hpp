@@ -35,6 +35,8 @@
  * storage_interface using Azure Blob Storage service.
  *
  * @see SRS-STOR-004, FR-4.2 (Cloud Storage Backend)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

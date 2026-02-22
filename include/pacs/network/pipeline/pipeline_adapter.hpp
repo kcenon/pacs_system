@@ -37,6 +37,8 @@
  *
  * @see Issue #517 - Implement typed_thread_pool-based I/O Pipeline
  * @see Issue #523 - Phase 6: Integration
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

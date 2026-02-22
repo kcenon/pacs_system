@@ -36,6 +36,8 @@
  *
  * @see Issue #310 - IMonitor Integration and DICOM Metric Collector
  * @see DICOM PS3.8 - Network Communication Support for Message Exchange
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once
