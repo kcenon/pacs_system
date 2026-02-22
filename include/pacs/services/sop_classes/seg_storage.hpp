@@ -37,6 +37,8 @@
  *
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see DICOM PS3.3 Section A.51 - Segmentation IOD
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_SOP_CLASSES_SEG_STORAGE_HPP

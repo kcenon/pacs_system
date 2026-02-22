@@ -38,6 +38,8 @@
  * functions to avoid circular dependency between pacs_core and pacs_encoding.
  *
  * @see DICOM PS3.5 Section 6.1 - Support of Character Repertoires
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_DATASET_CHARSET_HPP

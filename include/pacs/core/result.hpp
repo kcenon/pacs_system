@@ -36,6 +36,8 @@
  * Result pattern.
  *
  * @see common_system/include/kcenon/common/patterns/result.h
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

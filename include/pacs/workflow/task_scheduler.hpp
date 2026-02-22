@@ -36,6 +36,8 @@
  *
  * @see SRS-WKF-002 - Task Scheduler Service Specification
  * @see FR-4.7 - Automated Maintenance Tasks
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

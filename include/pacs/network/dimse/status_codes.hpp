@@ -36,6 +36,8 @@
  * of a DIMSE operation.
  *
  * @see DICOM PS3.7 Annex C - Status Type Encoding
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_STATUS_CODES_HPP

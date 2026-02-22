@@ -32,6 +32,8 @@
  * @brief Repository for sync conflict records using base_repository pattern
  *
  * @see Issue #610 - Phase 4: Repository Migrations
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

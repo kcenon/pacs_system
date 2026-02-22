@@ -35,6 +35,8 @@
  * storing and querying audit log entries in the PACS index database.
  *
  * @see NFR-3.3 (Audit Logging), HIPAA compliance requirements
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

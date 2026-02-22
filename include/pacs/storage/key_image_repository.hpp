@@ -37,6 +37,8 @@
  * @see Issue #545 - Implement Annotation & Measurement APIs
  * @see Issue #581 - Part 1: Data Models and Repositories
  * @see Issue #610 - Phase 4: Repository Migrations
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

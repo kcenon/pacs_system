@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.7 Section 10.1.2 - N-GET Service
  * @see Issue #720 - Implement N-GET SCP/SCU service
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_N_GET_SCP_HPP

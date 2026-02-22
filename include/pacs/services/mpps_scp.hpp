@@ -37,6 +37,8 @@
  * @see DICOM PS3.4 Section F - MPPS SOP Class
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
  * @see DES-SVC-007 - MPPS SCP Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_MPPS_SCP_HPP

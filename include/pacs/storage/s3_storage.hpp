@@ -35,6 +35,8 @@
  * using S3-compatible object storage (AWS S3, MinIO, etc.).
  *
  * @see SRS-STOR-003, FR-4.2 (Cloud Storage Backend)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

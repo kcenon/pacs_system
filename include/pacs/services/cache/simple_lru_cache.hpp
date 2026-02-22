@@ -40,6 +40,8 @@
  *
  * @see Issue #209 - [Quick Win] feat(services): Implement simple LRU query cache
  * @see Issue #189 - Implement LRU cache for query results
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

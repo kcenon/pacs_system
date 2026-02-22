@@ -39,6 +39,8 @@
  *   output = clamp((input - (center - width/2)) * 255 / width, 0, 255)
  *
  * @see DICOM PS3.3 C.11.2 - VOI LUT Module
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_SIMD_WINDOWING_HPP

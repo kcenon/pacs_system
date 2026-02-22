@@ -36,6 +36,8 @@
  *
  * @see Issue #537 - Implement Job Manager for Async DICOM Operations
  * @see Issue #552 - Part 1: Job Types and Repository Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

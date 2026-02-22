@@ -39,6 +39,8 @@
  * - 16-bit: byte plane splitting and merging
  *
  * @see DICOM PS3.5 Annex G - RLE Lossless Compression
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_SIMD_RLE_HPP

@@ -61,6 +61,8 @@
  * M = Mandatory
  *
  * Note: N-DELETE has no data set (CommandDataSetType = 0x0101)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_N_DELETE_HPP

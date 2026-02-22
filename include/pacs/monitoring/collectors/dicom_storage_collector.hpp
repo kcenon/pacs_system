@@ -36,6 +36,8 @@
  *
  * @see Issue #310 - IMonitor Integration and DICOM Metric Collector
  * @see DICOM PS3.4 - Service Class Specifications (Storage Service)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

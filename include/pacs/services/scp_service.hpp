@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.4 - Service Class Specifications
  * @see DICOM PS3.7 - Message Exchange
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_SCP_SERVICE_HPP

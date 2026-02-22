@@ -44,6 +44,8 @@
  * @see DICOM PS3.3 Section A.14 - XA Image IOD
  * @see DICOM PS3.3 Section A.53 - Enhanced XA Image IOD
  * @see DES-SVC-009 - XA Storage Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_XA_IOD_VALIDATOR_HPP

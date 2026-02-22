@@ -36,6 +36,8 @@
  * priority scheduling, and DIMSE-specific job wrappers.
  *
  * @see IR-3 (thread_system Integration)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

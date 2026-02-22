@@ -37,6 +37,8 @@
  *
  * @see DES-NET-005 - DICOM Server Class Design Specification
  * @see Issue #156 - Implement accept_worker class inheriting from thread_base
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DETAIL_ACCEPT_WORKER_HPP

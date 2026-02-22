@@ -36,6 +36,8 @@
  * automatically migrated between tiers based on configurable age policies.
  *
  * @see SRS-STOR-010, FR-4.5 (Hierarchical Storage Management)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

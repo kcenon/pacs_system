@@ -36,6 +36,8 @@
  * logging for HIPAA compliance, and security event logging.
  *
  * @see IR-4 (logger_system Integration), NFR-3.3 (Audit Logging)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

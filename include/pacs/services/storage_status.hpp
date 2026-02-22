@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.4 Section B.2.3 - C-STORE SCP Behavior
  * @see DES-SVC-002 - Storage SCP Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_STORAGE_STATUS_HPP

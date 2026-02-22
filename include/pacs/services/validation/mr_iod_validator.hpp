@@ -41,6 +41,8 @@
  * @see DICOM PS3.3 Section A.4 - MR Image IOD
  * @see DICOM PS3.3 Table A.4-1 - MR Image IOD Modules
  * @see Issue #718 - Add MR Image IOD Validator
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_MR_IOD_VALIDATOR_HPP

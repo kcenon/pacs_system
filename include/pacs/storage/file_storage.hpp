@@ -36,6 +36,8 @@
  * directory structure based on Study/Series/Instance UIDs.
  *
  * @see SRS-STOR-002, FR-4.1 (Hierarchical File Storage)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

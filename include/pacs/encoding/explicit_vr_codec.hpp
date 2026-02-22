@@ -39,6 +39,8 @@
  * two ASCII characters following the tag.
  *
  * @see DICOM PS3.5 Section 7.1.2 - Explicit VR Little Endian Transfer Syntax
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_EXPLICIT_VR_CODEC_HPP

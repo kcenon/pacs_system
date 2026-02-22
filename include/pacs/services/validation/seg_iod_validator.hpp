@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.3 Section A.51 - Segmentation IOD
  * @see DICOM PS3.3 Section C.8.20 - Segmentation Module
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_SEG_IOD_VALIDATOR_HPP

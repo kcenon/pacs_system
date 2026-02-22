@@ -38,6 +38,8 @@
  * @see IR-2 (network_system Integration)
  * @see DES-INT-002 - Network Adapter Design Specification
  * @see DICOM PS3.8 - Network Communication Support for Message Exchange
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

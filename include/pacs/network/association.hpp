@@ -37,6 +37,8 @@
  *
  * @see DICOM PS3.8 - Network Communication Support for Message Exchange
  * @see DES-NET-004 - Association Class Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_ASSOCIATION_HPP

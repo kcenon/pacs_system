@@ -36,6 +36,8 @@
  *
  * @see Issue #541 - Implement Prefetch Manager for Proactive Data Loading
  * @see Issue #530 - PACS Client System Support (Parent Epic)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

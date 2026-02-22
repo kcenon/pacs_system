@@ -36,6 +36,8 @@
  * efficient serialization and deserialization of DICOM datasets.
  *
  * @see IR-1 (container_system Integration)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

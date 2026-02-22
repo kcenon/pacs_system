@@ -62,6 +62,8 @@
  * | (0000,1000) | AffectedSOPInstanceUID | - | M |
  *
  * M = Mandatory
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_N_SET_HPP

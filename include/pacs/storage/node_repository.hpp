@@ -37,6 +37,8 @@
  * @see Issue #535 - Implement Remote Node Manager
  * @see Issue #610 - Phase 4: Repository Migrations
  * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -38,6 +38,8 @@
  * @see Issue #540 - Parent: Routing REST API & Storage SCP Integration
  * @copyright Copyright (c) 2025
  * @license MIT
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

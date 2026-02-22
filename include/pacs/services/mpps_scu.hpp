@@ -37,6 +37,8 @@
  * @see DICOM PS3.4 Section F - Modality Performed Procedure Step
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
  * @see Issue #534 - MPPS SCU Library Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_MPPS_SCU_HPP

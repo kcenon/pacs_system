@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.4 Annex J - Storage Commitment Push Model
  * @see Issue #711 - Storage Commitment database tracking
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

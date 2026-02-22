@@ -39,6 +39,8 @@
  * @see Issue #162 - Implement dicom_server_v2 using network_system messaging_server
  * @see Issue #161 - Design dicom_association_handler layer for network_system integration
  * @see DICOM PS3.8 - Network Communication Support for Message Exchange
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_V2_DICOM_SERVER_V2_HPP

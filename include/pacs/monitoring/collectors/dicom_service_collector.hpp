@@ -36,6 +36,8 @@
  *
  * @see Issue #310 - IMonitor Integration and DICOM Metric Collector
  * @see DICOM PS3.7 - Message Exchange (DIMSE Services)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

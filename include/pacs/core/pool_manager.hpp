@@ -35,6 +35,8 @@
  * DICOM objects to reduce allocation overhead and memory fragmentation.
  *
  * @see Issue #315 - ObjectPool Memory Management
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

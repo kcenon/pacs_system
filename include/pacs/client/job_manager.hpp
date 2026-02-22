@@ -36,6 +36,8 @@
  *
  * @see Issue #537 - Implement Job Manager for Async DICOM Operations
  * @see Issue #553 - Part 2: Job Manager Core Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

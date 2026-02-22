@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.3 Section A.21 - PET Image IOD
  * @see DICOM PS3.3 Section C.8.9 - PET Modules
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_PET_IOD_VALIDATOR_HPP

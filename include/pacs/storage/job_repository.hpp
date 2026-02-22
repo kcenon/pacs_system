@@ -39,6 +39,8 @@
  * @see Issue #552 - Part 1: Job Types and Repository Implementation
  * @see Issue #610 - Phase 4: Repository Migrations
  * @see Issue #649 - Part 1: Migrate job_repository
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

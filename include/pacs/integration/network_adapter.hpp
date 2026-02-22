@@ -37,6 +37,8 @@
  *
  * @see IR-2 (network_system Integration)
  * @see DES-INT-002 - Network Adapter Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once
