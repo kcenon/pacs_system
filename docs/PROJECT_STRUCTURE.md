@@ -2,7 +2,7 @@
 
 > **Version:** 0.1.3.0
 > **Last Updated:** 2025-12-13
-> **Language:** **English** | [한국어](PROJECT_STRUCTURE_KO.md)
+> **Language:** **English** | [한국어](PROJECT_STRUCTURE.kr.md)
 
 ---
 
@@ -30,7 +30,7 @@ The PACS System follows a modular directory structure consistent with other kcen
 ```
 pacs_system/
 ├── README.md                   # Project overview
-├── README_KO.md                # Korean version
+├── README.kr.md                # Korean version
 ├── LICENSE                     # BSD 3-Clause License
 ├── CMakeLists.txt              # Root CMake configuration
 ├── .gitignore                  # Git ignore patterns
@@ -272,15 +272,15 @@ pacs_system/
 ├── docs/                       # Documentation
 │   ├── README.md               # Documentation index
 │   ├── PRD.md                  # Product Requirements
-│   ├── PRD_KO.md               # Korean version
+│   ├── PRD.kr.md               # Korean version
 │   ├── FEATURES.md             # Feature documentation
-│   ├── FEATURES_KO.md          # Korean version
+│   ├── FEATURES.kr.md          # Korean version
 │   ├── ARCHITECTURE.md         # Architecture guide
-│   ├── ARCHITECTURE_KO.md      # Korean version
+│   ├── ARCHITECTURE.kr.md      # Korean version
 │   ├── PROJECT_STRUCTURE.md    # This file
-│   ├── PROJECT_STRUCTURE_KO.md # Korean version
+│   ├── PROJECT_STRUCTURE.kr.md # Korean version
 │   ├── API_REFERENCE.md        # API documentation
-│   ├── API_REFERENCE_KO.md     # Korean version
+│   ├── API_REFERENCE.kr.md     # Korean version
 │   ├── BENCHMARKS.md           # Performance benchmarks
 │   ├── PRODUCTION_QUALITY.md   # Quality metrics
 │   ├── CHANGELOG.md            # Version history
@@ -572,7 +572,7 @@ endif()
 
 All documents available in English and Korean:
 - English: `DOCUMENT.md`
-- Korean: `DOCUMENT_KO.md`
+- Korean: `DOCUMENT.kr.md`
 
 ---
 

@@ -1,7 +1,7 @@
 # SDS - 요구사항 추적성 매트릭스
 
 > **버전:** 0.1.3
-> **상위 문서:** [SDS_KO.md](SDS_KO.md)
+> **상위 문서:** [SDS.kr.md](SDS.kr.md)
 > **최종 수정일:** 2026-02-07
 
 ---
@@ -569,14 +569,14 @@
 
 ### 6.8 Validation 추적성 (별도 문서)
 
-**Validation** (SRS → 시스템 테스트)은 별도의 [VALIDATION_REPORT_KO.md](VALIDATION_REPORT_KO.md)에서 문서화됩니다.
+**Validation** (SRS → 시스템 테스트)은 별도의 [VALIDATION_REPORT.kr.md](VALIDATION_REPORT.kr.md)에서 문서화됩니다.
 
 | 문서 | 목적 | 추적성 |
 |------|------|--------|
-| **VERIFICATION_REPORT_KO.md** | 코드가 SDS와 일치하는지 확인 | SDS ↔ 단위/통합 테스트 |
-| **VALIDATION_REPORT_KO.md** | 구현이 SRS를 충족하는지 확인 | SRS ↔ 시스템/인수 테스트 |
+| **VERIFICATION_REPORT.kr.md** | 코드가 SDS와 일치하는지 확인 | SDS ↔ 단위/통합 테스트 |
+| **VALIDATION_REPORT.kr.md** | 구현이 SRS를 충족하는지 확인 | SRS ↔ 시스템/인수 테스트 |
 
-> **참고:** 이 문서(SDS_TRACEABILITY_KO.md)는 **Verification** 추적성에만 집중합니다.
+> **참고:** 이 문서(SDS_TRACEABILITY.kr.md)는 **Verification** 추적성에만 집중합니다.
 
 ---
 
@@ -741,7 +741,7 @@
 | 1.0.0 | 2025-11-30 | kcenon@naver.com | 초기 추적성 매트릭스 |
 | 1.1.0 | 2025-12-01 | kcenon@naver.com | SDS에서 구현 및 테스트 추적성 추가 (섹션 5, 6) |
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | V-모델 다이어그램에 Verification/Validation 구분 수정 |
-| 1.3.0 | 2025-12-01 | kcenon@naver.com | Verification에만 집중하도록 범위 조정; Validation은 별도 VALIDATION_REPORT_KO.md로 이동 |
+| 1.3.0 | 2025-12-01 | kcenon@naver.com | Verification에만 집중하도록 범위 조정; Validation은 별도 VALIDATION_REPORT.kr.md로 이동 |
 | 1.4.0 | 2025-12-01 | kcenon@naver.com | DES-SVC-008 ~ DES-SVC-010 추가 (SOP Class Registry, XA Storage, IOD Validator) |
 
 ---

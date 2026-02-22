@@ -2,7 +2,7 @@
 
 > **Version:** 0.2.0.0
 > **Last Updated:** 2026-02-08
-> **Language:** **English** | [한국어](PRD_KO.md)
+> **Language:** **English** | [한국어](PRD.kr.md)
 
 ---
 

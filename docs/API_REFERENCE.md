@@ -2,7 +2,7 @@
 
 > **Version:** 0.1.5.0
 > **Last Updated:** 2025-12-13
-> **Language:** **English** | [한국어](API_REFERENCE_KO.md)
+> **Language:** **English** | [한국어](API_REFERENCE.kr.md)
 
 ---
 
