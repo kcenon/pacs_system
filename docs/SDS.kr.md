@@ -21,10 +21,10 @@
 
 | 문서 | ID | 버전 |
 |------|-----|------|
-| 제품 요구사항 문서 | [PRD](PRD_KO.md) | 1.0.0 |
-| 소프트웨어 요구사항 명세서 | [SRS](SRS_KO.md) | 1.0.0 |
-| 아키텍처 문서 | [ARCHITECTURE](ARCHITECTURE_KO.md) | 1.0.0 |
-| API 레퍼런스 | [API_REFERENCE](API_REFERENCE_KO.md) | 1.0.0 |
+| 제품 요구사항 문서 | [PRD](PRD.kr.md) | 1.0.0 |
+| 소프트웨어 요구사항 명세서 | [SRS](SRS.kr.md) | 1.0.0 |
+| 아키텍처 문서 | [ARCHITECTURE](ARCHITECTURE.kr.md) | 1.0.0 |
+| API 레퍼런스 | [API_REFERENCE](API_REFERENCE.kr.md) | 1.0.0 |
 
 ### 문서 구조
 
@@ -32,12 +32,12 @@
 
 | 파일 | 설명 |
 |------|------|
-| **SDS_KO.md** (본 문서) | 개요, 설계 원칙, 모듈 요약 |
-| [SDS_COMPONENTS.md](SDS_COMPONENTS_KO.md) | 상세 컴포넌트 설계 |
-| [SDS_INTERFACES.md](SDS_INTERFACES_KO.md) | 인터페이스 명세 |
-| [SDS_DATABASE.md](SDS_DATABASE_KO.md) | 데이터베이스 스키마 설계 |
-| [SDS_SEQUENCES.md](SDS_SEQUENCES_KO.md) | 시퀀스 다이어그램 |
-| [SDS_TRACEABILITY.md](SDS_TRACEABILITY_KO.md) | 요구사항 추적성 매트릭스 |
+| **SDS.kr.md** (본 문서) | 개요, 설계 원칙, 모듈 요약 |
+| [SDS_COMPONENTS.md](SDS_COMPONENTS.kr.md) | 상세 컴포넌트 설계 |
+| [SDS_INTERFACES.md](SDS_INTERFACES.kr.md) | 인터페이스 명세 |
+| [SDS_DATABASE.md](SDS_DATABASE.kr.md) | 데이터베이스 스키마 설계 |
+| [SDS_SEQUENCES.md](SDS_SEQUENCES.kr.md) | 시퀀스 다이어그램 |
+| [SDS_TRACEABILITY.md](SDS_TRACEABILITY.kr.md) | 요구사항 추적성 매트릭스 |
 | [SDS_SECURITY.md](SDS_SECURITY.md) | 보안 모듈 설계 (RBAC, 익명화, 디지털 서명) |
 | [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | 클라우드 스토리지 백엔드 (S3, Azure, HSM) |
 | [SDS_WORKFLOW.md](SDS_WORKFLOW.md) | 워크플로우 모듈 (Auto Prefetch, Task Scheduler, Study Lock) |
@@ -644,10 +644,10 @@ PACS 시스템은 계층 아키텍처를 따릅니다:
 ## 참조
 
 1. DICOM 표준 PS3.1-PS3.20
-2. [PRD - 제품 요구사항 문서](PRD_KO.md)
-3. [SRS - 소프트웨어 요구사항 명세서](SRS_KO.md)
-4. [ARCHITECTURE - 아키텍처 문서](ARCHITECTURE_KO.md)
-5. [API_REFERENCE - API 레퍼런스](API_REFERENCE_KO.md)
+2. [PRD - 제품 요구사항 문서](PRD.kr.md)
+3. [SRS - 소프트웨어 요구사항 명세서](SRS.kr.md)
+4. [ARCHITECTURE - 아키텍처 문서](ARCHITECTURE.kr.md)
+5. [API_REFERENCE - API 레퍼런스](API_REFERENCE.kr.md)
 6. kcenon 에코시스템 문서
 
 ---

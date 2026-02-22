@@ -30,7 +30,7 @@ PACS 시스템은 다른 kcenon 에코시스템 프로젝트와 일관된 모듈
 ```
 pacs_system/
 ├── README.md                   # 프로젝트 개요
-├── README_KO.md                # 한국어 버전
+├── README.kr.md                # 한국어 버전
 ├── LICENSE                     # BSD 3-Clause 라이선스
 ├── CMakeLists.txt              # 루트 CMake 구성
 ├── .gitignore                  # Git 무시 패턴
@@ -272,15 +272,15 @@ pacs_system/
 ├── docs/                       # 문서화
 │   ├── README.md               # 문서 인덱스
 │   ├── PRD.md                  # 제품 요구사항
-│   ├── PRD_KO.md               # 한국어 버전
+│   ├── PRD.kr.md               # 한국어 버전
 │   ├── FEATURES.md             # 기능 문서
-│   ├── FEATURES_KO.md          # 한국어 버전
+│   ├── FEATURES.kr.md          # 한국어 버전
 │   ├── ARCHITECTURE.md         # 아키텍처 가이드
-│   ├── ARCHITECTURE_KO.md      # 한국어 버전
+│   ├── ARCHITECTURE.kr.md      # 한국어 버전
 │   ├── PROJECT_STRUCTURE.md    # 이 파일
-│   ├── PROJECT_STRUCTURE_KO.md # 한국어 버전
+│   ├── PROJECT_STRUCTURE.kr.md # 한국어 버전
 │   ├── API_REFERENCE.md        # API 문서
-│   ├── API_REFERENCE_KO.md     # 한국어 버전
+│   ├── API_REFERENCE.kr.md     # 한국어 버전
 │   ├── BENCHMARKS.md           # 성능 벤치마크
 │   ├── PRODUCTION_QUALITY.md   # 품질 메트릭
 │   ├── CHANGELOG.md            # 버전 히스토리
@@ -569,7 +569,7 @@ endif()
 
 모든 문서는 영어와 한국어로 제공됩니다:
 - 영어: `DOCUMENT.md`
-- 한국어: `DOCUMENT_KO.md`
+- 한국어: `DOCUMENT.kr.md`
 
 ---
 

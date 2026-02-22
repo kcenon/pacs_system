@@ -4,7 +4,7 @@
 > **보고서 일자:** 2026-02-08
 > **언어:** [English](VERIFICATION_REPORT.md) | **한국어**
 > **상태:** 완료
-> **관련 문서:** [VALIDATION_REPORT_KO.md](VALIDATION_REPORT_KO.md) (SRS 요구사항 충족 확인)
+> **관련 문서:** [VALIDATION_REPORT.kr.md](VALIDATION_REPORT.kr.md) (SRS 요구사항 충족 확인)
 
 ---
 
@@ -17,7 +17,7 @@
 > - 단위 테스트 → 컴포넌트 설계 (DES-xxx)
 > - 통합 테스트 → 모듈 상호작용 설계 (SEQ-xxx)
 
-> **참고**: **확인(Validation)**(SRS 요구사항 준수)에 대해서는 별도의 [VALIDATION_REPORT_KO.md](VALIDATION_REPORT_KO.md)를 참조하세요.
+> **참고**: **확인(Validation)**(SRS 요구사항 준수)에 대해서는 별도의 [VALIDATION_REPORT.kr.md](VALIDATION_REPORT.kr.md)를 참조하세요.
 
 검증은 정적 코드 분석, 문서 검토 및 구조적 평가를 통해 수행되었습니다.
 
@@ -422,7 +422,7 @@ tests/
 | **프로젝트 구조** | PROJECT_STRUCTURE.md | ✅ 업데이트됨 (v1.1.0) |
 | **분석** | PACS_IMPLEMENTATION_ANALYSIS.md | ✅ 완료 |
 | **추적성** | SDS_TRACEABILITY.md | ✅ 완료 |
-| **한국어 번역** | *_KO.md 파일 | ✅ 완료 |
+| **한국어 번역** | *.kr.md 파일 | ✅ 완료 |
 
 ### 6.2 문서 업데이트 사항 (2025-12-01)
 
@@ -604,7 +604,7 @@ src/
 | 1.0.0 | 2025-12-01 | kcenon@naver.com | 최초 검증 보고서 |
 | 1.1.0 | 2025-12-01 | kcenon@naver.com | 추적성 문서 상태 업데이트, SDS_TRACEABILITY.md 업데이트 추가 |
 | 1.2.0 | 2025-12-01 | kcenon@naver.com | V-Model에 따른 V&V 구분 명확화 |
-| 1.3.0 | 2025-12-01 | kcenon@naver.com | 검증(SDS 준수)만으로 범위 한정; 확인은 별도 VALIDATION_REPORT_KO.md로 이동 |
+| 1.3.0 | 2025-12-01 | kcenon@naver.com | 검증(SDS 준수)만으로 범위 한정; 확인은 별도 VALIDATION_REPORT.kr.md로 이동 |
 | 1.4.0 | 2025-12-05 | kcenon@naver.com | network_system 마이그레이션용 Network V2 테스트 추가 (Issue #163) |
 | 1.5.0 | 2025-12-07 | kcenon@naver.com | 추가: 스레드 마이그레이션 검증 (Epic #153), DIMSE-N (#127), 초음파 (#128), XA (#129), Explicit VR BE (#126); 프로젝트 지표 업데이트 |
 | 1.6.0 | 2026-02-08 | kcenon@naver.com | 추가: SVC-008~010, INT-008~010, SEC-010~013, WEB-001~004, WKF-001~002, CSTOR-001~003, AI-001, SCAL-001~004; 8-상태→13-상태 수정; Explicit VR BE 완료; 요구사항 커버리지 77% 업데이트 |

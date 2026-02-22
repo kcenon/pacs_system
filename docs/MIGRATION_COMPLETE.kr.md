@@ -182,7 +182,7 @@ server.start();
 - [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) - 마이그레이션 전 벤치마크
 - [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) - 마이그레이션 후 벤치마크
 - [THREAD_SYSTEM_STABILITY_REPORT.md](THREAD_SYSTEM_STABILITY_REPORT.md) - 플랫폼 안정성 분석
-- [API_REFERENCE_KO.md](API_REFERENCE_KO.md) - 업데이트된 API 문서
+- [API_REFERENCE.kr.md](API_REFERENCE.kr.md) - 업데이트된 API 문서
 
 ## 결론
 

@@ -2,7 +2,7 @@
 
 > **Version:** 0.1.4.0
 > **Last Updated:** 2026-02-09
-> **Language:** **English** | [한국어](ARCHITECTURE_KO.md)
+> **Language:** **English** | [한국어](ARCHITECTURE.kr.md)
 
 ---
 

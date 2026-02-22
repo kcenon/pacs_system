@@ -2,7 +2,7 @@
 
 > **Report Version:** 0.1.3.0
 > **Report Date:** 2026-02-08
-> **Language:** **English** | [한국어](VALIDATION_REPORT_KO.md)
+> **Language:** **English** | [한국어](VALIDATION_REPORT.kr.md)
 > **Status:** Complete
 > **Related Document:** [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) (SDS 설계대로 구현 확인)
 

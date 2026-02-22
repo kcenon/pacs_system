@@ -49,12 +49,12 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ### Korean Documentation (한국어)
 
-- [아키텍처](ARCHITECTURE_KO.md)
-- [API 참조](API_REFERENCE_KO.md)
-- [기능](FEATURES_KO.md)
-- [PRD](PRD_KO.md)
-- [SRS](SRS_KO.md)
-- [SDS](SDS_KO.md)
+- [아키텍처](ARCHITECTURE.kr.md)
+- [API 참조](API_REFERENCE.kr.md)
+- [기능](FEATURES.kr.md)
+- [PRD](PRD.kr.md)
+- [SRS](SRS.kr.md)
+- [SDS](SDS.kr.md)
 
 ## Project Status
 

@@ -15,7 +15,7 @@
 | **프로젝트** | PACS System |
 | **작성자** | kcenon@naver.com |
 | **상태** | 승인됨 |
-| **관련 문서** | [PRD](PRD_KO.md), [ARCHITECTURE](ARCHITECTURE_KO.md), [API_REFERENCE](API_REFERENCE_KO.md) |
+| **관련 문서** | [PRD](PRD.kr.md), [ARCHITECTURE](ARCHITECTURE.kr.md), [API_REFERENCE](API_REFERENCE.kr.md) |
 
 ---
 
