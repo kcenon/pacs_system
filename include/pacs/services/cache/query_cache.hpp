@@ -40,6 +40,8 @@
  * - Helper methods for building cache keys from query parameters
  *
  * @see Issue #209 - [Quick Win] feat(services): Implement simple LRU query cache
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

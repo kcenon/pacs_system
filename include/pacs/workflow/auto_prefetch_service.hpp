@@ -37,6 +37,8 @@
  *
  * @see SRS-WKF-001 - Auto Prefetch Service Specification
  * @see FR-4.6 - Automatic Prior Study Prefetch
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

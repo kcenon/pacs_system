@@ -37,6 +37,8 @@
  *
  * @see DICOM PS3.3 - SR, SEG, PR IODs
  * @see Issue #204 - AI result handler implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

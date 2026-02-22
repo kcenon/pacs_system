@@ -39,6 +39,8 @@
  * @see DICOM PS3.7 Section 9.1.2 - C-FIND Service
  * @see IHE Radiology Technical Framework - Scheduled Workflow
  * @see Issue #533 - Implement worklist_scu Library (MWL SCU)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_WORKLIST_SCU_HPP

@@ -40,6 +40,8 @@
  * with prepared statements.
  *
  * @see SRS-STOR-003, FR-4.2
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

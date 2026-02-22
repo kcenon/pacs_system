@@ -42,6 +42,8 @@
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see DICOM PS3.3 Section A.26 - DX Image IOD
  * @see DES-SVC-009 - Digital X-Ray Storage Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_SOP_CLASSES_DX_STORAGE_HPP

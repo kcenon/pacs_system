@@ -73,6 +73,8 @@
  * | (0000,1008) | ActionTypeID | M | C |
  *
  * M = Mandatory, C = Conditional
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_N_ACTION_HPP

@@ -41,6 +41,8 @@
  * @see SRS-SVC-006, FR-5.3
  * @see Issue #190 - Parallel query executor
  * @see DICOM PS3.4 Section C - Query/Retrieve Service Class
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

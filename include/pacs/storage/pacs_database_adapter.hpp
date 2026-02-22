@@ -41,6 +41,8 @@
  *
  * @see Issue #606 - Phase 1: Foundation - PACS Database Adapter
  * @see Epic #605 - Migrate Direct Database Access to database_system Abstraction
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

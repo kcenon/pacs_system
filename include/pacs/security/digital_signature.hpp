@@ -37,6 +37,8 @@
  *
  * @see DICOM PS3.15 Section C - Digital Signatures
  * @copyright Copyright (c) 2025
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

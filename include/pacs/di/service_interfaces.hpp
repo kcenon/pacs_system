@@ -36,6 +36,8 @@
  * under a consistent naming convention for DI registration and resolution.
  *
  * @see Issue #312 - ServiceContainer based DI Integration
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

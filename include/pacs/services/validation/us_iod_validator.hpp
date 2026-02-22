@@ -38,6 +38,8 @@
  * @see DICOM PS3.3 Section A.6 - US Image IOD
  * @see DICOM PS3.3 Section A.7 - US Multi-frame Image IOD
  * @see DES-SVC-008 - Ultrasound Storage Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_US_IOD_VALIDATOR_HPP

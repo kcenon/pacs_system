@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.4 - Service Class Specifications
  * @see DICOM PS3.6 - Data Dictionary (SOP Class UIDs)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_SOP_CLASS_REGISTRY_HPP

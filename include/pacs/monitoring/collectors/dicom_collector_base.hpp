@@ -37,6 +37,8 @@
  *
  * @see Issue #490 - Implement CRTP-based DICOM metrics collector
  * @see monitoring_system/include/kcenon/monitoring/collectors/collector_base.h
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

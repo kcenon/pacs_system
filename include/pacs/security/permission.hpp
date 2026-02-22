@@ -32,6 +32,8 @@
  * @brief Permission definitions for RBAC
  *
  * @copyright Copyright (c) 2025
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

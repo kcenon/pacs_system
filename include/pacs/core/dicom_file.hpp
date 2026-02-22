@@ -35,6 +35,8 @@
  * file structure as specified in DICOM PS3.10.
  *
  * @see DICOM PS3.10 - Media Storage and File Format
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

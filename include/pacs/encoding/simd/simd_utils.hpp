@@ -33,6 +33,8 @@
  *
  * Provides portable SIMD operations for common tasks like byte swapping,
  * data conversion, and bulk memory operations.
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_ENCODING_SIMD_UTILS_HPP

@@ -35,6 +35,8 @@
  *
  * @see DICOM PS3.8 - Network Communication Support for Message Exchange
  * @see DES-NET-005 - DICOM Server Class Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_SERVER_CONFIG_HPP

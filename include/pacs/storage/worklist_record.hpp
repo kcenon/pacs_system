@@ -36,6 +36,8 @@
  * scheduled procedure information to modalities for patient/procedure selection.
  *
  * @see SRS-SVC-006, FR-3.3
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

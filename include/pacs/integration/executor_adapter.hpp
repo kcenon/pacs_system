@@ -38,6 +38,8 @@
  *
  * @see Issue #487 - Integrate IExecutor interface for workflow pipeline execution
  * @see common_system's executor_interface.h
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

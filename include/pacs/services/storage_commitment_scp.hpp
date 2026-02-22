@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Annex J - Storage Commitment Push Model Service Class
  * @see DICOM PS3.7 Section 10.1.4 - N-ACTION Service
  * @see DICOM PS3.7 Section 10.1.1 - N-EVENT-REPORT Service
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_STORAGE_COMMITMENT_SCP_HPP

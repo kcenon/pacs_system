@@ -36,6 +36,8 @@
  * AI analysis, tracking job status, and managing inference requests.
  *
  * @see Issue #205 - AI Service Connector Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

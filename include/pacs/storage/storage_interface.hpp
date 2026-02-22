@@ -36,6 +36,8 @@
  * (file_storage, cloud_storage, etc.) must inherit from this interface.
  *
  * @see SRS-STOR-001, FR-4.1
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

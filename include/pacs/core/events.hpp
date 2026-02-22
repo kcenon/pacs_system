@@ -35,6 +35,8 @@
  * PACS system using the common_system Event Bus pattern.
  *
  * @see common_system/include/kcenon/common/patterns/event_bus.h
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

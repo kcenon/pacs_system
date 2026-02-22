@@ -33,6 +33,8 @@
  *
  * @copyright Copyright (c) 2025
  * @license MIT
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -40,6 +40,8 @@
  * @see DICOM PS3.7 Section 9.1.3 - C-MOVE Service
  * @see DICOM PS3.7 Section 9.1.4 - C-GET Service
  * @see DES-SVC-005 - Retrieve SCP Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_RETRIEVE_SCP_HPP

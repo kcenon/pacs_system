@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Section C.4 - Query/Retrieve Service Class
  * @see DICOM PS3.7 Section 9.1.2 - C-FIND Service
  * @see Issue #531 - Implement query_scu Library (C-FIND SCU)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_QUERY_SCU_HPP

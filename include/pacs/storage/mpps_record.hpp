@@ -36,6 +36,8 @@
  * modalities and enables workflow integration with RIS/HIS systems.
  *
  * @see SRS-SVC-007, FR-3.4
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

@@ -35,6 +35,8 @@
  * for patient data manipulation in the PACS index database.
  *
  * @see SRS-STOR-003, FR-4.2
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

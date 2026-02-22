@@ -36,6 +36,8 @@
  * a Tag, Value Representation (VR), and Value.
  *
  * @see DICOM PS3.5 Section 7.1 - Data Elements
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

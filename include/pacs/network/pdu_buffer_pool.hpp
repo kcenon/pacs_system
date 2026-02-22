@@ -35,6 +35,8 @@
  * to reduce allocation overhead during network operations.
  *
  * @see Issue #315, #318 - ObjectPool Memory Management
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

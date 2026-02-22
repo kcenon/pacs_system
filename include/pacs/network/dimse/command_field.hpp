@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.7 Section 9.3 - DIMSE-C Service and Protocol
  * @see DICOM PS3.7 Section 10.3 - DIMSE-N Service and Protocol
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_COMMAND_FIELD_HPP

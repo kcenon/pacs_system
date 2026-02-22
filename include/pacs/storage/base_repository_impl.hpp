@@ -37,6 +37,8 @@
  *
  * @see base_repository.hpp
  * @see Issue #607 - Phase 2: Base Repository Pattern Implementation
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

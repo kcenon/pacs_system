@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see DICOM PS3.7 Section 9.1.1 - C-STORE Service
  * @see DES-SVC-003 - Storage SCU Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_STORAGE_SCU_HPP

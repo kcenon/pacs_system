@@ -36,6 +36,8 @@
  *
  * @see Issue #535 - Implement Remote Node Manager
  * @see DICOM PS3.7 Section 9.1.5 - C-ECHO Service
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

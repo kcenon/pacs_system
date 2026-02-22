@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.3 Section A.35 - SR Document IODs
  * @see DICOM PS3.3 Section C.17 - SR Document Content Module
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VALIDATION_SR_IOD_VALIDATOR_HPP

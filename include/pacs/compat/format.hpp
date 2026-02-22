@@ -42,6 +42,8 @@
  *   auto s = pacs::compat::format("Hello, {}!", name);
  *
  * @see logger_system/cmake/LoggerCompatibility.cmake for detection patterns
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

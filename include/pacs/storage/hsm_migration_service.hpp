@@ -36,6 +36,8 @@
  * configurable age policies.
  *
  * @see SRS-STOR-011, FR-4.5 (HSM Migration Service)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

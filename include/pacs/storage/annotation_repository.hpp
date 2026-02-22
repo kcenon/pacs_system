@@ -38,6 +38,8 @@
  * @see Issue #581 - Part 1: Data Models and Repositories
  * @see Issue #610 - Phase 4: Repository Migrations
  * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

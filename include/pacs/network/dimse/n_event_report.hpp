@@ -72,6 +72,8 @@
  * | (0000,1002) | EventTypeID | M | C |
  *
  * M = Mandatory, C = Conditional
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_N_EVENT_REPORT_HPP

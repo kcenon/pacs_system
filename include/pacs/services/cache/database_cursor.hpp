@@ -40,6 +40,8 @@
  * @see SRS-SVC-006, FR-5.3
  * @see Issue #188 - Streaming query results with pagination
  * @see Issue #609 - Phase 3-2: Cursor & Security Storage Migration
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

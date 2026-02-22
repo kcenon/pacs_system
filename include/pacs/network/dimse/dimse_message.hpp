@@ -37,6 +37,8 @@
  * @see DICOM PS3.7 Section 6 - Message Structure
  * @see DICOM PS3.7 Section 9 - DIMSE-C Services
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_NETWORK_DIMSE_DIMSE_MESSAGE_HPP

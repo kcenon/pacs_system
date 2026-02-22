@@ -37,6 +37,8 @@
  *
  * @see DICOM PS3.15 - Security and System Management Profiles
  * @copyright Copyright (c) 2025
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

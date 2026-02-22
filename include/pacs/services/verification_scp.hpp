@@ -38,6 +38,8 @@
  * @see DICOM PS3.4 Section A.4 - Verification Service Class
  * @see DICOM PS3.7 Section 9.1 - C-ECHO Service
  * @see DES-SVC-001 - Verification SCP Design Specification
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_VERIFICATION_SCP_HPP

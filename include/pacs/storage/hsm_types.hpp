@@ -35,6 +35,8 @@
  * storage tiers, migration policies, and tier metadata tracking.
  *
  * @see SRS-STOR-010, FR-4.5 (Hierarchical Storage Management)
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

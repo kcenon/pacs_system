@@ -36,6 +36,8 @@
  *
  * @see DICOM PS3.4 Annex J - Storage Commitment Push Model Service Class
  * @see DICOM PS3.4 Table J.3-1 - Storage Commitment Request
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #ifndef PACS_SERVICES_STORAGE_COMMITMENT_TYPES_HPP

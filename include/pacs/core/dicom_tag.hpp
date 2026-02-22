@@ -36,6 +36,8 @@
  * and an Element Number, each being 16-bit unsigned integers.
  *
  * @see DICOM PS3.5 Section 7.1 - Data Elements
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once

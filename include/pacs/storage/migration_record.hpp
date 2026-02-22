@@ -33,6 +33,8 @@
  *
  * This file provides the migration_record structure that represents
  * an applied database migration.
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once
