@@ -1,0 +1,22 @@
+# Doxyfile for pacs_system
+
+PROJECT_NAME           = "pacs_system"
+PROJECT_NUMBER         = "1.0.0"
+PROJECT_BRIEF          = "PACS DICOM system library"
+OUTPUT_DIRECTORY       = documents
+INPUT                  = include/
+FILE_PATTERNS          = *.h *.hpp *.cpp
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_OUTPUT            = html
+WARN_IF_UNDOCUMENTED   = YES
+WARN_NO_PARAMDOC       = YES
+JAVADOC_AUTOBRIEF      = YES
+BUILTIN_STL_SUPPORT    = YES
+GENERATE_TREEVIEW      = YES
+SEARCHENGINE           = YES
+SOURCE_BROWSER         = YES
+PREDEFINED             = BUILD_WITH_PACS_SYSTEM
+EXCLUDE_PATTERNS       = */build/* */test/* */.git/*

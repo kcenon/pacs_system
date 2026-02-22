@@ -4,7 +4,7 @@
 > **보고서 일자:** 2026-02-08
 > **언어:** [English](VALIDATION_REPORT.md) | **한국어**
 > **상태:** 완료
-> **관련 문서:** [VERIFICATION_REPORT_KO.md](VERIFICATION_REPORT_KO.md) (SDS 설계대로 구현 확인)
+> **관련 문서:** [VERIFICATION_REPORT.kr.md](VERIFICATION_REPORT.kr.md) (SDS 설계대로 구현 확인)
 
 ---
 
@@ -17,7 +17,7 @@
 > - 시스템 테스트 → 기능 요구사항 (SRS-xxx)
 > - 인수 테스트 → 사용자 요구사항 및 유스케이스
 
-> **참고**: **Verification (확인)**(SDS 설계 준수)에 대해서는 별도의 [VERIFICATION_REPORT_KO.md](VERIFICATION_REPORT_KO.md)를 참조하세요.
+> **참고**: **Verification (확인)**(SDS 설계 준수)에 대해서는 별도의 [VERIFICATION_REPORT.kr.md](VERIFICATION_REPORT.kr.md)를 참조하세요.
 
 ### 전체 검증 상태: **합격**
 
@@ -1589,7 +1589,7 @@ PACS 시스템은 전체 74개 SRS 요구사항에 대한 검증 상태입니다
 | SRS.md | 소프트웨어 요구사항 명세서 | [SRS.md](SRS.md) |
 | SDS.md | 소프트웨어 설계 명세서 | [SDS.md](SDS.md) |
 | SDS_TRACEABILITY.md | 설계 추적성 | [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) |
-| VERIFICATION_REPORT_KO.md | 설계 확인 | [VERIFICATION_REPORT_KO.md](VERIFICATION_REPORT_KO.md) |
+| VERIFICATION_REPORT.kr.md | 설계 확인 | [VERIFICATION_REPORT.kr.md](VERIFICATION_REPORT.kr.md) |
 | PRD.md | 제품 요구사항 문서 | [PRD.md](PRD.md) |
 | PERFORMANCE_RESULTS.md | 스레드 마이그레이션 성능 | [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) |
 | MIGRATION_COMPLETE.md | 스레드 시스템 마이그레이션 요약 | [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) |

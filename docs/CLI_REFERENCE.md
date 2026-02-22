@@ -1,6 +1,6 @@
 # CLI Reference
 
-> **Language:** **English** | [한국어](CLI_REFERENCE_KO.md)
+> **Language:** **English** | [한국어](CLI_REFERENCE.kr.md)
 
 Complete documentation for all 32 CLI tools included in the PACS System. For a quick overview, see the [README](../README.md#cli-tools--examples).
 

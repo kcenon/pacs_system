@@ -2,7 +2,7 @@
 
 > **Version:** 0.1.3.2
 > **Last Updated:** 2026-02-09
-> **Language:** **English** | [한국어](SRS_KO.md)
+> **Language:** **English** | [한국어](SRS.kr.md)
 > **Standard:** IEEE 830-1998 based
 
 ---

@@ -2,7 +2,7 @@
 
 > **Report Version:** 0.1.6.1
 > **Report Date:** 2026-02-12
-> **Language:** **English** | [한국어](VERIFICATION_REPORT_KO.md)
+> **Language:** **English** | [한국어](VERIFICATION_REPORT.kr.md)
 > **Status:** Complete
 > **Related Document:** [VALIDATION_REPORT.md](VALIDATION_REPORT.md) (SRS 요구사항 충족 확인)
 
@@ -437,7 +437,7 @@ tests/
 | **Project Structure** | PROJECT_STRUCTURE.md | ✅ Updated (v1.1.0) |
 | **Analysis** | PACS_IMPLEMENTATION_ANALYSIS.md | ✅ Complete |
 | **Traceability** | SDS_TRACEABILITY.md | ✅ Complete |
-| **Korean Translations** | *_KO.md files | ✅ Complete |
+| **Korean Translations** | *.kr.md files | ✅ Complete |
 
 ### 6.2 Documentation Updates Made (2025-12-01)
 
