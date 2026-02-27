@@ -825,3 +825,83 @@ TEST_CASE("dicom_dataset charset round-trip", "[core][dicom_dataset][charset]") 
         CHECK(decoded == utf8_input);
     }
 }
+
+// ============================================================================
+// Private Tag Access Tests
+// ============================================================================
+
+TEST_CASE("dicom_dataset get_private_creator", "[core][dicom_dataset][private]") {
+    dicom_dataset ds;
+    // Set up: Private Creator at (0009,0010) = "SIEMENS CSA HEADER"
+    ds.set_string({0x0009, 0x0010}, vr_type::LO, "SIEMENS CSA HEADER");
+    // Data element in that block
+    ds.insert(dicom_element::from_string({0x0009, 0x1001}, vr_type::UN, "data1"));
+    ds.insert(dicom_element::from_string({0x0009, 0x1002}, vr_type::UN, "data2"));
+
+    SECTION("returns creator string for private data element") {
+        auto creator = ds.get_private_creator({0x0009, 0x1001});
+        REQUIRE(creator.has_value());
+        CHECK(*creator == "SIEMENS CSA HEADER");
+    }
+
+    SECTION("returns creator for any element in the block") {
+        auto creator = ds.get_private_creator({0x0009, 0x1002});
+        REQUIRE(creator.has_value());
+        CHECK(*creator == "SIEMENS CSA HEADER");
+    }
+
+    SECTION("returns nullopt for non-private-data tag") {
+        CHECK_FALSE(ds.get_private_creator(tags::patient_name).has_value());
+    }
+
+    SECTION("returns nullopt when creator element is missing") {
+        // No creator at block 0x11
+        CHECK_FALSE(ds.get_private_creator({0x0009, 0x1100}).has_value());
+    }
+
+    SECTION("returns nullopt for private creator tag itself") {
+        CHECK_FALSE(ds.get_private_creator({0x0009, 0x0010}).has_value());
+    }
+}
+
+TEST_CASE("dicom_dataset get_private_block", "[core][dicom_dataset][private]") {
+    dicom_dataset ds;
+    // Two creators in group 0x0009
+    ds.set_string({0x0009, 0x0010}, vr_type::LO, "SIEMENS CSA HEADER");
+    ds.set_string({0x0009, 0x0011}, vr_type::LO, "SIEMENS CSA NON-IMAGE");
+
+    // Data for block 0x10
+    ds.insert(dicom_element::from_string({0x0009, 0x1000}, vr_type::UN, "hdr0"));
+    ds.insert(dicom_element::from_string({0x0009, 0x1001}, vr_type::UN, "hdr1"));
+
+    // Data for block 0x11
+    ds.insert(dicom_element::from_string({0x0009, 0x1100}, vr_type::UN, "nonimg0"));
+
+    SECTION("returns all elements in the matching block") {
+        auto elems = ds.get_private_block("SIEMENS CSA HEADER", 0x0009);
+        REQUIRE(elems.size() == 2);
+        CHECK(elems[0]->tag() == dicom_tag{0x0009, 0x1000});
+        CHECK(elems[1]->tag() == dicom_tag{0x0009, 0x1001});
+    }
+
+    SECTION("different creator returns its own block") {
+        auto elems = ds.get_private_block("SIEMENS CSA NON-IMAGE", 0x0009);
+        REQUIRE(elems.size() == 1);
+        CHECK(elems[0]->tag() == dicom_tag{0x0009, 0x1100});
+    }
+
+    SECTION("returns empty for unknown creator") {
+        auto elems = ds.get_private_block("UNKNOWN CREATOR", 0x0009);
+        CHECK(elems.empty());
+    }
+
+    SECTION("returns empty for wrong group") {
+        auto elems = ds.get_private_block("SIEMENS CSA HEADER", 0x0011);
+        CHECK(elems.empty());
+    }
+
+    SECTION("returns empty for even group") {
+        auto elems = ds.get_private_block("SIEMENS CSA HEADER", 0x0010);
+        CHECK(elems.empty());
+    }
+}

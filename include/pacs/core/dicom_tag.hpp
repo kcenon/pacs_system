@@ -48,6 +48,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace pacs::core {
 
@@ -167,6 +168,73 @@ public:
         }
         const auto elem = element();
         return elem >= 0x0010 && elem <= 0x00FF;
+    }
+
+    /**
+     * @brief Check if this is a private data element
+     *
+     * Private data elements have element number > 0x00FF within a private group.
+     * This excludes private creator elements (0x0010-0x00FF) and group length (0x0000).
+     *
+     * @return true if this is a private data element
+     */
+    [[nodiscard]] constexpr auto is_private_data() const noexcept -> bool {
+        return is_private() && element() > 0x00FF;
+    }
+
+    /**
+     * @brief Extract the Private Creator block number from this tag
+     *
+     * For a private data element (gggg,xxyy) where xx >= 0x10, returns xx.
+     * Per DICOM PS3.5 §7.8.1, the high byte of the element number identifies
+     * which Private Creator block owns this data element.
+     *
+     * @return The block number (0x10-0xFF), or nullopt if not a private data element
+     */
+    [[nodiscard]] constexpr auto private_block_number() const noexcept
+        -> std::optional<uint8_t> {
+        if (!is_private_data()) {
+            return std::nullopt;
+        }
+        return static_cast<uint8_t>(element() >> 8);
+    }
+
+    /**
+     * @brief Get the Private Creator tag that owns this data element
+     *
+     * For a private data element (gggg,xxyy), returns (gggg,00xx).
+     * Per DICOM PS3.5 §7.8.1, the creator tag identifies the owner
+     * of this private data block.
+     *
+     * @return The Private Creator tag, or nullopt if not a private data element
+     */
+    [[nodiscard]] constexpr auto private_creator_tag() const noexcept
+        -> std::optional<dicom_tag> {
+        const auto block = private_block_number();
+        if (!block) {
+            return std::nullopt;
+        }
+        return dicom_tag{group(), *block};
+    }
+
+    /**
+     * @brief Get the data element range owned by this Private Creator tag
+     *
+     * For a Private Creator tag (gggg,00xx), returns the range
+     * (gggg,xx00) to (gggg,xxFF) inclusive.
+     *
+     * @return Pair of {first, last} tags in the range, or nullopt if not a creator tag
+     */
+    [[nodiscard]] constexpr auto private_data_range() const noexcept
+        -> std::optional<std::pair<dicom_tag, dicom_tag>> {
+        if (!is_private_creator()) {
+            return std::nullopt;
+        }
+        const auto block = static_cast<uint16_t>(element() << 8);
+        return std::pair{
+            dicom_tag{group(), block},
+            dicom_tag{group(), static_cast<uint16_t>(block | 0x00FF)}
+        };
     }
 
     /**
