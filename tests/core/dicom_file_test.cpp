@@ -1329,3 +1329,330 @@ TEST_CASE("dicom_file Item and Sequence Delimitation tags", "[core][dicom_file][
         CHECK(tags::sequence_delimitation_item.element() == 0xE0DD);
     }
 }
+
+// ============================================================================
+// Unknown VR Fallback Tests (Issue #771)
+// ============================================================================
+
+TEST_CASE("dicom_file Explicit VR LE unknown VR fallback", "[core][dicom_file][unknown_vr]") {
+    // Helper lambdas for building raw byte streams
+    auto write_u16 = [](std::vector<uint8_t>& data, uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+    auto write_u32 = [](std::vector<uint8_t>& data, uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+    auto write_string = [](std::vector<uint8_t>& data, std::string_view str,
+                           char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    SECTION("parser continues past element with unknown VR") {
+        std::vector<uint8_t> data;
+
+        // 128-byte preamble + DICM
+        data.resize(128, 0);
+        data.push_back('D');
+        data.push_back('I');
+        data.push_back('C');
+        data.push_back('M');
+
+        // === File Meta Information (Explicit VR LE) ===
+
+        // (0002,0001) File Meta Information Version - OB
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0001);
+        data.push_back('O');
+        data.push_back('B');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 2);
+        data.push_back(0x00);
+        data.push_back(0x01);
+
+        // (0002,0002) Media Storage SOP Class UID - UI
+        std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0002);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        // (0002,0003) Media Storage SOP Instance UID - UI
+        std::string_view sop_inst = "9.9.9.9.9.9.9.8";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0003);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        // (0002,0010) Transfer Syntax UID - Explicit VR LE
+        std::string_view ts_uid = "1.2.840.10008.1.2.1";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0010);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(ts_uid.size() % 2 == 0
+                                                  ? ts_uid.size()
+                                                  : ts_uid.size() + 1));
+        write_string(data, ts_uid);
+
+        // (0002,0012) Implementation Class UID - UI
+        std::string_view impl_uid = "1.2.3.4.5";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0012);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(impl_uid.size() % 2 == 0
+                                                  ? impl_uid.size()
+                                                  : impl_uid.size() + 1));
+        write_string(data, impl_uid);
+
+        // === Main Dataset ===
+
+        // (0008,0016) SOP Class UID - UI (standard element before unknown VR)
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0016);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        // (0008,0018) SOP Instance UID - UI
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0018);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        // (0009,0010) Private Creator - LO (standard element before unknown)
+        std::string_view creator = "TEST_VENDOR";
+        write_u16(data, 0x0009);
+        write_u16(data, 0x0010);
+        data.push_back('L');
+        data.push_back('O');
+        write_u16(data, static_cast<uint16_t>(creator.size() % 2 == 0
+                                                  ? creator.size()
+                                                  : creator.size() + 1));
+        write_string(data, creator, ' ');
+
+        // (0009,1001) Unknown VR "ZZ" - 4 bytes of data
+        // UN-style header: tag(4) + VR(2) + reserved(2) + length32(4) = 12 bytes
+        write_u16(data, 0x0009);
+        write_u16(data, 0x1001);
+        data.push_back('Z');  // Unknown VR
+        data.push_back('Z');
+        data.push_back(0x00);  // Reserved bytes
+        data.push_back(0x00);
+        write_u32(data, 4);  // 4-byte length (32-bit)
+        data.push_back(0xDE);  // Value: 4 bytes of data
+        data.push_back(0xAD);
+        data.push_back(0xBE);
+        data.push_back(0xEF);
+
+        // (0010,0010) Patient Name - PN (standard element AFTER unknown VR)
+        std::string_view patient_name = "AFTER^UNKNOWN";
+        write_u16(data, 0x0010);
+        write_u16(data, 0x0010);
+        data.push_back('P');
+        data.push_back('N');
+        write_u16(data, static_cast<uint16_t>(patient_name.size() % 2 == 0
+                                                  ? patient_name.size()
+                                                  : patient_name.size() + 1));
+        write_string(data, patient_name, ' ');
+
+        // (0010,0020) Patient ID - LO (another element after unknown VR)
+        std::string_view patient_id = "ID771";
+        write_u16(data, 0x0010);
+        write_u16(data, 0x0020);
+        data.push_back('L');
+        data.push_back('O');
+        write_u16(data, static_cast<uint16_t>(patient_id.size() % 2 == 0
+                                                  ? patient_id.size()
+                                                  : patient_id.size() + 1));
+        write_string(data, patient_id, ' ');
+
+        // Parse the crafted byte stream
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_ok());
+        const auto& file = result.value();
+        const auto& ds = file.dataset();
+
+        // Element before unknown VR is preserved
+        CHECK(ds.contains(dicom_tag{0x0009, 0x0010}));
+
+        // Unknown VR element is stored as UN
+        const auto* unknown_elem = ds.get(dicom_tag{0x0009, 0x1001});
+        REQUIRE(unknown_elem != nullptr);
+        CHECK(unknown_elem->vr() == vr_type::UN);
+        CHECK(unknown_elem->length() == 4);
+        auto raw = unknown_elem->raw_data();
+        CHECK(raw[0] == 0xDE);
+        CHECK(raw[1] == 0xAD);
+        CHECK(raw[2] == 0xBE);
+        CHECK(raw[3] == 0xEF);
+
+        // Elements AFTER unknown VR are correctly parsed (not lost)
+        CHECK(ds.get_string(tags::patient_name) == "AFTER^UNKNOWN");
+        CHECK(ds.get_string(tags::patient_id) == "ID771");
+    }
+
+    SECTION("multiple unknown VR elements do not break parsing") {
+        std::vector<uint8_t> data;
+
+        // 128-byte preamble + DICM
+        data.resize(128, 0);
+        data.push_back('D');
+        data.push_back('I');
+        data.push_back('C');
+        data.push_back('M');
+
+        // Minimal File Meta Information
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0001);
+        data.push_back('O');
+        data.push_back('B');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 2);
+        data.push_back(0x00);
+        data.push_back(0x01);
+
+        std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0002);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        std::string_view sop_inst = "8.8.8.8.8.8.8.8";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0003);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        std::string_view ts_uid = "1.2.840.10008.1.2.1";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0010);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(ts_uid.size() % 2 == 0
+                                                  ? ts_uid.size()
+                                                  : ts_uid.size() + 1));
+        write_string(data, ts_uid);
+
+        std::string_view impl_uid = "1.2.3.4.5";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0012);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(impl_uid.size() % 2 == 0
+                                                  ? impl_uid.size()
+                                                  : impl_uid.size() + 1));
+        write_string(data, impl_uid);
+
+        // === Main Dataset ===
+
+        // (0008,0016) SOP Class UID
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0016);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        // (0008,0018) SOP Instance UID
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0018);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        // First unknown VR: (0009,1001) "AA" with 2 bytes
+        write_u16(data, 0x0009);
+        write_u16(data, 0x1001);
+        data.push_back('A');
+        data.push_back('A');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 2);
+        data.push_back(0x01);
+        data.push_back(0x02);
+
+        // Second unknown VR: (0009,1002) "ZZ" with 6 bytes
+        write_u16(data, 0x0009);
+        write_u16(data, 0x1002);
+        data.push_back('Z');
+        data.push_back('Z');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 6);
+        data.push_back(0xA0);
+        data.push_back(0xA1);
+        data.push_back(0xA2);
+        data.push_back(0xA3);
+        data.push_back(0xA4);
+        data.push_back(0xA5);
+
+        // (0010,0010) Patient Name AFTER both unknown VRs
+        std::string_view name = "MULTI^UNKNOWN";
+        write_u16(data, 0x0010);
+        write_u16(data, 0x0010);
+        data.push_back('P');
+        data.push_back('N');
+        write_u16(data, static_cast<uint16_t>(name.size() % 2 == 0
+                                                  ? name.size()
+                                                  : name.size() + 1));
+        write_string(data, name, ' ');
+
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_ok());
+        const auto& ds = result.value().dataset();
+
+        // Both unknown VR elements stored as UN
+        const auto* elem1 = ds.get(dicom_tag{0x0009, 0x1001});
+        REQUIRE(elem1 != nullptr);
+        CHECK(elem1->vr() == vr_type::UN);
+        CHECK(elem1->length() == 2);
+
+        const auto* elem2 = ds.get(dicom_tag{0x0009, 0x1002});
+        REQUIRE(elem2 != nullptr);
+        CHECK(elem2->vr() == vr_type::UN);
+        CHECK(elem2->length() == 6);
+
+        // Element after unknown VRs is preserved
+        CHECK(ds.get_string(tags::patient_name) == "MULTI^UNKNOWN");
+    }
+}
