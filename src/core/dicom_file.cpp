@@ -541,11 +541,8 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
             '\0'
         };
         const auto vr_opt = encoding::from_string(std::string_view(vr_chars, 2));
-        if (!vr_opt) {
-            // Unknown VR, treat as UN
-            break;
-        }
-        const auto vr = *vr_opt;
+        // Unknown VR: fallback to UN per PS3.5 §6.2.2 (uses 4-byte length)
+        const auto vr = vr_opt.value_or(encoding::vr_type::UN);
 
         // Determine length field size
         uint32_t length = 0;
@@ -787,10 +784,8 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
             '\0'
         };
         const auto vr_opt = encoding::from_string(std::string_view(vr_chars, 2));
-        if (!vr_opt) {
-            break;
-        }
-        const auto vr = *vr_opt;
+        // Unknown VR: fallback to UN per PS3.5 §6.2.2 (uses 4-byte length)
+        const auto vr = vr_opt.value_or(encoding::vr_type::UN);
 
         // Determine length field size
         uint32_t length = 0;
