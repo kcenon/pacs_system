@@ -59,6 +59,7 @@ anonymizer::anonymizer(const anonymizer& other)
     , date_offset_{other.date_offset_}
     , encryption_key_{other.encryption_key_}
     , hash_salt_{other.hash_salt_}
+    , private_tag_action_{other.private_tag_action_}
     , detailed_reporting_{other.detailed_reporting_} {}
 
 anonymizer::anonymizer(anonymizer&& other) noexcept
@@ -67,6 +68,7 @@ anonymizer::anonymizer(anonymizer&& other) noexcept
     , date_offset_{other.date_offset_}
     , encryption_key_{std::move(other.encryption_key_)}
     , hash_salt_{std::move(other.hash_salt_)}
+    , private_tag_action_{other.private_tag_action_}
     , detailed_reporting_{other.detailed_reporting_} {}
 
 auto anonymizer::operator=(const anonymizer& other) -> anonymizer& {
@@ -76,6 +78,7 @@ auto anonymizer::operator=(const anonymizer& other) -> anonymizer& {
         date_offset_ = other.date_offset_;
         encryption_key_ = other.encryption_key_;
         hash_salt_ = other.hash_salt_;
+        private_tag_action_ = other.private_tag_action_;
         detailed_reporting_ = other.detailed_reporting_;
     }
     return *this;
@@ -88,6 +91,7 @@ auto anonymizer::operator=(anonymizer&& other) noexcept -> anonymizer& {
         date_offset_ = other.date_offset_;
         encryption_key_ = std::move(other.encryption_key_);
         hash_salt_ = std::move(other.hash_salt_);
+        private_tag_action_ = other.private_tag_action_;
         detailed_reporting_ = other.detailed_reporting_;
     }
     return *this;
@@ -176,6 +180,30 @@ auto anonymizer::anonymize_with_mapping(
         }
     }
 
+    // Remove private tags if configured
+    if (private_tag_action_ != private_tag_action::keep) {
+        std::vector<dicom_tag> tags_to_remove;
+
+        for (auto it = dataset.begin(); it != dataset.end(); ++it) {
+            auto tag = it->first;
+            if (private_tag_action_ == private_tag_action::remove_all) {
+                if (tag.is_private()) {
+                    tags_to_remove.push_back(tag);
+                }
+            } else if (private_tag_action_ == private_tag_action::remove_data) {
+                if (tag.is_private_data()) {
+                    tags_to_remove.push_back(tag);
+                }
+            }
+        }
+
+        for (const auto& tag : tags_to_remove) {
+            if (dataset.remove(tag)) {
+                report.private_tags_removed++;
+            }
+        }
+    }
+
     return report;
 }
 
@@ -186,6 +214,15 @@ auto anonymizer::get_profile() const noexcept -> anonymization_profile {
 void anonymizer::set_profile(anonymization_profile profile) {
     profile_ = profile;
     initialize_profile_actions();
+}
+
+void anonymizer::set_private_tag_action(private_tag_action action) {
+    private_tag_action_ = action;
+}
+
+auto anonymizer::get_private_tag_action() const noexcept
+    -> private_tag_action {
+    return private_tag_action_;
 }
 
 void anonymizer::add_tag_action(dicom_tag tag, tag_action_config config) {
