@@ -57,7 +57,7 @@ struct ts_entry {
  * This table contains the standard Transfer Syntaxes defined in DICOM PS3.5.
  * Compression support will be added in later phases.
  */
-static constexpr std::array<ts_entry, 9> TS_REGISTRY = {{
+static constexpr std::array<ts_entry, 12> TS_REGISTRY = {{
     // Uncompressed Transfer Syntaxes (supported in Phase 1)
     {"1.2.840.10008.1.2",
      "Implicit VR Little Endian",
@@ -116,6 +116,25 @@ static constexpr std::array<ts_entry, 9> TS_REGISTRY = {{
      byte_order::little_endian,
      vr_encoding::explicit_vr,
      true, false, true},
+
+    // High-Throughput JPEG 2000 Transfer Syntaxes (DICOM Supplement 235)
+    {"1.2.840.10008.1.2.4.201",
+     "High-Throughput JPEG 2000 Image Compression (Lossless Only)",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, false},
+
+    {"1.2.840.10008.1.2.4.202",
+     "High-Throughput JPEG 2000 with RPCL Options Image Compression (Lossless Only)",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, false},
+
+    {"1.2.840.10008.1.2.4.203",
+     "High-Throughput JPEG 2000 Image Compression",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, false},
 }};
 
 /**
@@ -196,6 +215,27 @@ const transfer_syntax transfer_syntax::rle_lossless{
     byte_order::little_endian,
     vr_encoding::explicit_vr,
     true, false, true};
+
+const transfer_syntax transfer_syntax::htj2k_lossless{
+    "1.2.840.10008.1.2.4.201",
+    "High-Throughput JPEG 2000 Image Compression (Lossless Only)",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, false};
+
+const transfer_syntax transfer_syntax::htj2k_rpcl{
+    "1.2.840.10008.1.2.4.202",
+    "High-Throughput JPEG 2000 with RPCL Options Image Compression (Lossless Only)",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, false};
+
+const transfer_syntax transfer_syntax::htj2k_lossy{
+    "1.2.840.10008.1.2.4.203",
+    "High-Throughput JPEG 2000 Image Compression",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, false};
 
 // Public constructor - looks up UID in registry
 transfer_syntax::transfer_syntax(std::string_view uid)
