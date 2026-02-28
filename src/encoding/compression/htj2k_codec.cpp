@@ -276,7 +276,7 @@ codec_result htj2k_codec::encode(
         codestream.flush();
 
         // Copy compressed data BEFORE close (close deallocates the buffer)
-        auto compressed_size = output.get_used_size();
+        auto compressed_size = static_cast<size_t>(output.tell());
         std::vector<uint8_t> result_data(compressed_size);
         if (compressed_size > 0) {
             std::memcpy(result_data.data(), output.get_data(), compressed_size);
