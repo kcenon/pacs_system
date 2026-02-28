@@ -253,6 +253,59 @@ if(NOT PACS_JPEGLS_FOUND)
     set(PACS_JPEGLS_FOUND FALSE)
 endif()
 
+# OpenJPH (for HTJ2K compression codec)
+message(STATUS "")
+message(STATUS "=== Finding OpenJPH (for HTJ2K compression) ===")
+
+# Try to find system OpenJPH
+find_package(openjph CONFIG QUIET)
+
+if(openjph_FOUND)
+    message(STATUS "Found system OpenJPH")
+    set(PACS_HTJ2K_FOUND TRUE)
+else()
+    # Try pkg-config as fallback
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(OPENJPH QUIET openjph)
+        if(OPENJPH_FOUND)
+            message(STATUS "Found OpenJPH via pkg-config: ${OPENJPH_VERSION}")
+            set(PACS_HTJ2K_FOUND TRUE)
+        endif()
+    endif()
+endif()
+
+if(NOT PACS_HTJ2K_FOUND)
+    # Fetch OpenJPH from GitHub as last resort
+    message(STATUS "OpenJPH not found on system, fetching from GitHub...")
+    include(FetchContent)
+    set(OJPH_BUILD_EXECUTABLES OFF CACHE BOOL "" FORCE)
+    set(OJPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(OJPH_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        openjph
+        GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
+        GIT_TAG        0.18.2
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(openjph)
+    if(TARGET openjphstatic)
+        set(PACS_HTJ2K_FOUND TRUE)
+        message(STATUS "OpenJPH fetched and built from source (static)")
+    elseif(TARGET openjph)
+        set(PACS_HTJ2K_FOUND TRUE)
+        message(STATUS "OpenJPH fetched and built from source")
+    else()
+        message(WARNING
+            "OpenJPH build failed!\n"
+            "HTJ2K codec will be disabled.\n"
+            "\n"
+            "To enable HTJ2K support, install OpenJPH:\n"
+            "  - Build from source: https://github.com/aous72/OpenJPH")
+        set(PACS_HTJ2K_FOUND FALSE)
+    endif()
+endif()
+
 # OpenSSL (for digital signatures - Issue #191)
 message(STATUS "")
 message(STATUS "=== Finding OpenSSL (for digital signatures) ===")
@@ -804,6 +857,24 @@ if(PACS_JPEGLS_FOUND)
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEGLS_CODEC)
     message(STATUS "  [OK] pacs_encoding: JPEG-LS codec enabled")
+endif()
+
+# Link OpenJPH for HTJ2K compression codec
+if(PACS_HTJ2K_FOUND)
+    if(TARGET openjphstatic)
+        target_link_libraries(pacs_encoding PUBLIC openjphstatic)
+    elseif(TARGET openjph::openjph)
+        target_link_libraries(pacs_encoding PUBLIC openjph::openjph)
+    elseif(TARGET openjph)
+        target_link_libraries(pacs_encoding PUBLIC openjph)
+    elseif(OPENJPH_LIBRARIES)
+        target_link_libraries(pacs_encoding PUBLIC ${OPENJPH_LIBRARIES})
+        if(OPENJPH_INCLUDE_DIRS)
+            target_include_directories(pacs_encoding PUBLIC ${OPENJPH_INCLUDE_DIRS})
+        endif()
+    endif()
+    target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_HTJ2K_CODEC)
+    message(STATUS "  [OK] pacs_encoding: HTJ2K codec enabled")
 endif()
 
 # Network library
