@@ -282,10 +282,11 @@ if(NOT PACS_HTJ2K_FOUND)
     set(OJPH_BUILD_EXECUTABLES OFF CACHE BOOL "" FORCE)
     set(OJPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(OJPH_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-    # Preserve BUILD_SHARED_LIBS across FetchContent to prevent OpenJPH
-    # from changing the library type of subsequently defined targets
-    set(_pacs_saved_build_shared_libs ${BUILD_SHARED_LIBS})
-    set(BUILD_SHARED_LIBS OFF)
+    # Preserve BUILD_SHARED_LIBS across FetchContent to prevent OpenJPH's
+    # option(BUILD_SHARED_LIBS ...) from changing library type of our targets.
+    # Must use CACHE FORCE because option() clears normal variables.
+    set(_pacs_saved_build_shared_libs "${BUILD_SHARED_LIBS}")
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
     FetchContent_Declare(
         openjph
         GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
@@ -293,7 +294,11 @@ if(NOT PACS_HTJ2K_FOUND)
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(openjph)
-    set(BUILD_SHARED_LIBS ${_pacs_saved_build_shared_libs})
+    if(_pacs_saved_build_shared_libs)
+        set(BUILD_SHARED_LIBS "${_pacs_saved_build_shared_libs}" CACHE BOOL "" FORCE)
+    else()
+        unset(BUILD_SHARED_LIBS CACHE)
+    endif()
     if(TARGET openjphstatic)
         set(PACS_HTJ2K_FOUND TRUE)
         message(STATUS "OpenJPH fetched and built from source (static)")
