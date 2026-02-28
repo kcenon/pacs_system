@@ -158,6 +158,15 @@ public:
     /// RLE Lossless (1.2.840.10008.1.2.5)
     static const transfer_syntax rle_lossless;
 
+    /// HTJ2K Lossless Only (1.2.840.10008.1.2.4.201)
+    static const transfer_syntax htj2k_lossless;
+
+    /// HTJ2K RPCL (1.2.840.10008.1.2.4.202) - Lossless or Lossy
+    static const transfer_syntax htj2k_rpcl;
+
+    /// HTJ2K (1.2.840.10008.1.2.4.203) - Lossy
+    static const transfer_syntax htj2k_lossy;
+
     /// @}
 
     /// @name Comparison Operators
