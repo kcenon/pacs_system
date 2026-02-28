@@ -518,7 +518,169 @@ TEST_CASE("Anonymization Report", "[security][anonymization]") {
         report.uids_replaced = 4;
         report.dates_shifted = 1;
         report.values_hashed = 2;
+        report.private_tags_removed = 3;
 
-        REQUIRE(report.total_modifications() == 17);
+        REQUIRE(report.total_modifications() == 20);
     }
+}
+
+// ============================================================================
+// Private Tag Removal Tests
+// ============================================================================
+
+namespace {
+
+dicom_dataset create_dataset_with_private_tags() {
+    dicom_dataset ds;
+
+    // Standard tags
+    ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+    ds.set_string(tags::patient_id, vr_type::LO, "12345");
+    ds.set_string(tags::study_instance_uid, vr_type::UI, "1.2.3.4.5");
+    ds.set_string(tags::series_instance_uid, vr_type::UI, "1.2.3.4.6");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.7");
+
+    // Private Creator 1 (group 0x0009, block 0x10)
+    ds.set_string({0x0009, 0x0010}, vr_type::LO, "SIEMENS CSA HEADER");
+    // Private data elements for block 0x10
+    ds.set_string({0x0009, 0x1001}, vr_type::OB, "csa_data_1");
+    ds.set_string({0x0009, 0x1002}, vr_type::OB, "csa_data_2");
+
+    // Private Creator 2 (group 0x0009, block 0x11)
+    ds.set_string({0x0009, 0x0011}, vr_type::LO, "GE PRIVATE DATA");
+    // Private data elements for block 0x11
+    ds.set_string({0x0009, 0x1101}, vr_type::LO, "ge_data_1");
+    ds.set_string({0x0009, 0x1102}, vr_type::LO, "ge_data_2");
+    ds.set_string({0x0009, 0x1103}, vr_type::LO, "ge_data_3");
+
+    return ds;
+}
+
+} // namespace
+
+TEST_CASE("Anonymizer: Private Tag Action - keep", "[security][anonymization][private]") {
+    anonymizer anon(anonymization_profile::basic);
+    anon.set_private_tag_action(private_tag_action::keep);
+
+    auto dataset = create_dataset_with_private_tags();
+
+    auto result = anon.anonymize(dataset);
+    REQUIRE(result.is_ok());
+
+    auto report = result.value();
+    CHECK(report.private_tags_removed == 0);
+
+    // All private tags should still exist
+    CHECK(dataset.contains({0x0009, 0x0010}));
+    CHECK(dataset.contains({0x0009, 0x0011}));
+    CHECK(dataset.contains({0x0009, 0x1001}));
+    CHECK(dataset.contains({0x0009, 0x1102}));
+}
+
+TEST_CASE("Anonymizer: Private Tag Action - remove_all", "[security][anonymization][private]") {
+    anonymizer anon(anonymization_profile::basic);
+    anon.set_private_tag_action(private_tag_action::remove_all);
+
+    auto dataset = create_dataset_with_private_tags();
+
+    auto result = anon.anonymize(dataset);
+    REQUIRE(result.is_ok());
+
+    auto report = result.value();
+
+    SECTION("All private elements are removed") {
+        // 2 creators + 5 data elements = 7 total
+        CHECK(report.private_tags_removed == 7);
+    }
+
+    SECTION("No private tags remain") {
+        CHECK_FALSE(dataset.contains({0x0009, 0x0010}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x0011}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1001}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1002}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1101}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1102}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1103}));
+    }
+
+    SECTION("Standard tags are unaffected") {
+        CHECK(dataset.contains(tags::patient_name));
+        CHECK(dataset.contains(tags::study_instance_uid));
+    }
+}
+
+TEST_CASE("Anonymizer: Private Tag Action - remove_data", "[security][anonymization][private]") {
+    anonymizer anon(anonymization_profile::basic);
+    anon.set_private_tag_action(private_tag_action::remove_data);
+
+    auto dataset = create_dataset_with_private_tags();
+
+    auto result = anon.anonymize(dataset);
+    REQUIRE(result.is_ok());
+
+    auto report = result.value();
+
+    SECTION("Only data elements are removed, creators preserved") {
+        // 5 data elements removed
+        CHECK(report.private_tags_removed == 5);
+    }
+
+    SECTION("Creators still exist") {
+        CHECK(dataset.contains({0x0009, 0x0010}));
+        CHECK(dataset.contains({0x0009, 0x0011}));
+        CHECK(dataset.get_string({0x0009, 0x0010}) == "SIEMENS CSA HEADER");
+        CHECK(dataset.get_string({0x0009, 0x0011}) == "GE PRIVATE DATA");
+    }
+
+    SECTION("Data elements are removed") {
+        CHECK_FALSE(dataset.contains({0x0009, 0x1001}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1002}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1101}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1102}));
+        CHECK_FALSE(dataset.contains({0x0009, 0x1103}));
+    }
+}
+
+TEST_CASE("Anonymizer: Private tag action getter/setter", "[security][anonymization][private]") {
+    anonymizer anon(anonymization_profile::basic);
+
+    SECTION("Default is keep") {
+        CHECK(anon.get_private_tag_action() == private_tag_action::keep);
+    }
+
+    SECTION("Can set to remove_all") {
+        anon.set_private_tag_action(private_tag_action::remove_all);
+        CHECK(anon.get_private_tag_action() == private_tag_action::remove_all);
+    }
+
+    SECTION("Can set to remove_data") {
+        anon.set_private_tag_action(private_tag_action::remove_data);
+        CHECK(anon.get_private_tag_action() == private_tag_action::remove_data);
+    }
+}
+
+TEST_CASE("Anonymizer: Private tag removal with no private tags", "[security][anonymization][private]") {
+    anonymizer anon(anonymization_profile::basic);
+    anon.set_private_tag_action(private_tag_action::remove_all);
+
+    auto dataset = create_test_dataset();  // No private tags
+
+    auto result = anon.anonymize(dataset);
+    REQUIRE(result.is_ok());
+
+    CHECK(result.value().private_tags_removed == 0);
+}
+
+TEST_CASE("Anonymizer: Private tag removal report in total_modifications", "[security][anonymization][private]") {
+    anonymizer anon(anonymization_profile::basic);
+    anon.set_private_tag_action(private_tag_action::remove_all);
+
+    auto dataset = create_dataset_with_private_tags();
+
+    auto result = anon.anonymize(dataset);
+    REQUIRE(result.is_ok());
+
+    auto report = result.value();
+    CHECK(report.private_tags_removed > 0);
+    CHECK(report.total_modifications() >= report.private_tags_removed);
 }

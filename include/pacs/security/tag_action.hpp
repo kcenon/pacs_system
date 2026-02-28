@@ -280,6 +280,9 @@ struct anonymization_report {
     /// Number of values hashed
     std::size_t values_hashed{0};
 
+    /// Number of private tags removed
+    std::size_t private_tags_removed{0};
+
     /// Detailed action records (optional, for audit)
     std::vector<tag_action_record> action_records;
 
@@ -310,7 +313,8 @@ struct anonymization_report {
      */
     [[nodiscard]] auto total_modifications() const noexcept -> std::size_t {
         return tags_removed + tags_emptied + tags_replaced +
-               uids_replaced + dates_shifted + values_hashed;
+               uids_replaced + dates_shifted + values_hashed +
+               private_tags_removed;
     }
 };
 

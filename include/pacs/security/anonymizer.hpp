@@ -63,6 +63,21 @@
 namespace pacs::security {
 
 /**
+ * @brief Action to take on private tags during anonymization
+ *
+ * DICOM PS3.15 Annex E recommends removing private data elements
+ * during de-identification, as they may contain Protected Health
+ * Information (PHI) in vendor-specific formats.
+ *
+ * @see DICOM PS3.15 Annex E - Basic Profile
+ */
+enum class private_tag_action : std::uint8_t {
+    keep,        ///< Preserve all private tags (default for backward compatibility)
+    remove_all,  ///< Remove all private data elements and their creators
+    remove_data  ///< Remove private data elements but keep creators (for auditing)
+};
+
+/**
  * @brief DICOM de-identification/anonymization engine
  *
  * This class provides comprehensive DICOM de-identification capabilities
@@ -186,6 +201,28 @@ public:
      * @param profile The new profile to use
      */
     void set_profile(anonymization_profile profile);
+
+    // ========================================================================
+    // Private Tag Handling
+    // ========================================================================
+
+    /**
+     * @brief Set the action to take on private tags during anonymization
+     *
+     * DICOM PS3.15 Annex E recommends removing private data elements
+     * during de-identification, as they may contain PHI in vendor-specific
+     * formats that cannot be reliably inspected.
+     *
+     * @param action The private tag action
+     */
+    void set_private_tag_action(private_tag_action action);
+
+    /**
+     * @brief Get the current private tag action
+     * @return The configured private tag action
+     */
+    [[nodiscard]] auto get_private_tag_action() const noexcept
+        -> private_tag_action;
 
     // ========================================================================
     // Custom Tag Actions
@@ -372,6 +409,9 @@ private:
 
     /// Hash salt
     std::optional<std::string> hash_salt_;
+
+    /// Action for private tags
+    private_tag_action private_tag_action_{private_tag_action::keep};
 
     /// Whether to include detailed action records in report
     bool detailed_reporting_{false};
