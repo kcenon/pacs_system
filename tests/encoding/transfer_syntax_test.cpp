@@ -91,6 +91,43 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_supported());
     }
+
+    SECTION("HTJ2K Lossless") {
+        const auto& ts = transfer_syntax::htj2k_lossless;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.201");
+        CHECK(ts.name() == "High-Throughput JPEG 2000 Image Compression (Lossless Only)");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK_FALSE(ts.is_supported());
+    }
+
+    SECTION("HTJ2K RPCL") {
+        const auto& ts = transfer_syntax::htj2k_rpcl;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.202");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK_FALSE(ts.is_supported());
+    }
+
+    SECTION("HTJ2K Lossy") {
+        const auto& ts = transfer_syntax::htj2k_lossy;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.203");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK_FALSE(ts.is_supported());
+    }
 }
 
 TEST_CASE("transfer_syntax construction from UID", "[encoding][transfer_syntax]") {
@@ -116,6 +153,33 @@ TEST_CASE("transfer_syntax construction from UID", "[encoding][transfer_syntax]"
 
         CHECK_FALSE(ts.is_valid());
         CHECK(ts.name() == "Unknown");
+    }
+}
+
+TEST_CASE("transfer_syntax construction from HTJ2K UID", "[encoding][transfer_syntax]") {
+    SECTION("HTJ2K Lossless UID creates valid transfer_syntax") {
+        transfer_syntax ts{"1.2.840.10008.1.2.4.201"};
+
+        CHECK(ts.is_valid());
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.201");
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_supported());
+    }
+
+    SECTION("HTJ2K RPCL UID creates valid transfer_syntax") {
+        transfer_syntax ts{"1.2.840.10008.1.2.4.202"};
+
+        CHECK(ts.is_valid());
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.202");
+        CHECK(ts.is_encapsulated());
+    }
+
+    SECTION("HTJ2K Lossy UID creates valid transfer_syntax") {
+        transfer_syntax ts{"1.2.840.10008.1.2.4.203"};
+
+        CHECK(ts.is_valid());
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.203");
+        CHECK(ts.is_encapsulated());
     }
 }
 
@@ -157,7 +221,7 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("all_transfer_syntaxes returns all registered") {
         auto all = all_transfer_syntaxes();
 
-        CHECK(all.size() >= 8);
+        CHECK(all.size() >= 12);
 
         for (const auto& ts : all) {
             CHECK(ts.is_valid());
