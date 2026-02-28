@@ -46,6 +46,7 @@
 
 #include <cstdint>
 #include <map>
+#include <mutex>
 #include <optional>
 #include <shared_mutex>
 #include <span>
