@@ -230,6 +230,36 @@ public:
         -> std::vector<dicom_dataset>&;
 
     // ========================================================================
+    // Private Tag Access
+    // ========================================================================
+
+    /**
+     * @brief Get the Private Creator identification string for a private data element
+     *
+     * Looks up the Private Creator element (gggg,00xx) for a given private data
+     * element (gggg,xxyy) and returns its string value.
+     *
+     * @param private_data_tag A private data element tag
+     * @return The creator identification string, or nullopt if not found
+     */
+    [[nodiscard]] auto get_private_creator(dicom_tag private_data_tag) const
+        -> std::optional<std::string>;
+
+    /**
+     * @brief Get all private data elements belonging to a specific creator
+     *
+     * Searches the given group for a Private Creator element matching creator_id,
+     * then returns all data elements in that creator's block.
+     *
+     * @param creator_id The Private Creator identification string (e.g. "SIEMENS CSA HEADER")
+     * @param group The private group number (must be odd)
+     * @return Vector of pointers to matching data elements (empty if none found)
+     */
+    [[nodiscard]] auto get_private_block(std::string_view creator_id,
+                                          uint16_t group) const
+        -> std::vector<const dicom_element*>;
+
+    // ========================================================================
     // Modification
     // ========================================================================
 

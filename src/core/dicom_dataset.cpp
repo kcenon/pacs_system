@@ -113,6 +113,61 @@ auto dicom_dataset::get_or_create_sequence(dicom_tag tag)
 }
 
 // ============================================================================
+// Private Tag Access
+// ============================================================================
+
+auto dicom_dataset::get_private_creator(dicom_tag private_data_tag) const
+    -> std::optional<std::string> {
+    const auto creator_tag = private_data_tag.private_creator_tag();
+    if (!creator_tag) {
+        return std::nullopt;
+    }
+    const auto* elem = get(*creator_tag);
+    if (elem == nullptr) {
+        return std::nullopt;
+    }
+    auto result = elem->as_string();
+    if (result.is_ok()) {
+        return result.value();
+    }
+    return std::nullopt;
+}
+
+auto dicom_dataset::get_private_block(std::string_view creator_id,
+                                       uint16_t group) const
+    -> std::vector<const dicom_element*> {
+    std::vector<const dicom_element*> result;
+
+    // Scan Private Creator elements (gggg,0010)-(gggg,00FF) for a match
+    for (uint16_t slot = 0x0010; slot <= 0x00FF; ++slot) {
+        const dicom_tag creator_tag{group, slot};
+        const auto* creator_elem = get(creator_tag);
+        if (creator_elem == nullptr) {
+            continue;
+        }
+        auto str_result = creator_elem->as_string();
+        if (str_result.is_err() || str_result.value() != creator_id) {
+            continue;
+        }
+
+        // Found the creator — collect all data elements in its block
+        const auto range = creator_tag.private_data_range();
+        if (!range) {
+            break;
+        }
+        const auto [first, last] = *range;
+        auto it = elements_.lower_bound(first);
+        while (it != elements_.end() && it->first <= last) {
+            result.push_back(&it->second);
+            ++it;
+        }
+        break;
+    }
+
+    return result;
+}
+
+// ============================================================================
 // Modification
 // ============================================================================
 

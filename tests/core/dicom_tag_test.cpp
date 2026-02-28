@@ -412,3 +412,139 @@ TEST_CASE("dicom_tag constants are constexpr", "[dicom_tag][constants]") {
     constexpr auto pixel_data_combined = tags::pixel_data.combined();
     static_assert(pixel_data_combined == 0x7FE00010);
 }
+
+// ============================================================================
+// Private Block Mapping Tests
+// ============================================================================
+
+TEST_CASE("dicom_tag is_private_data", "[dicom_tag][private]") {
+    SECTION("private data elements have element > 0x00FF in private group") {
+        CHECK(dicom_tag{0x0009, 0x0100}.is_private_data());
+        CHECK(dicom_tag{0x0009, 0x1000}.is_private_data());
+        CHECK(dicom_tag{0x0009, 0x10FF}.is_private_data());
+        CHECK(dicom_tag{0x0009, 0xFF00}.is_private_data());
+    }
+
+    SECTION("private creators are not private data") {
+        CHECK_FALSE(dicom_tag{0x0009, 0x0010}.is_private_data());
+        CHECK_FALSE(dicom_tag{0x0009, 0x00FF}.is_private_data());
+    }
+
+    SECTION("standard group elements are not private data") {
+        CHECK_FALSE(dicom_tag{0x0010, 0x0010}.is_private_data());
+        CHECK_FALSE(dicom_tag{0x0008, 0x1000}.is_private_data());
+    }
+
+    SECTION("group length in private group is not private data") {
+        CHECK_FALSE(dicom_tag{0x0009, 0x0000}.is_private_data());
+    }
+}
+
+TEST_CASE("dicom_tag private_block_number", "[dicom_tag][private]") {
+    SECTION("extracts block number from private data element") {
+        CHECK(dicom_tag{0x0009, 0x1042}.private_block_number() == 0x10);
+        CHECK(dicom_tag{0x0009, 0x1000}.private_block_number() == 0x10);
+        CHECK(dicom_tag{0x0009, 0x10FF}.private_block_number() == 0x10);
+        CHECK(dicom_tag{0x0009, 0x1100}.private_block_number() == 0x11);
+        CHECK(dicom_tag{0x0009, 0xFF00}.private_block_number() == 0xFF);
+    }
+
+    SECTION("returns nullopt for non-private-data tags") {
+        CHECK_FALSE(dicom_tag{0x0009, 0x0010}.private_block_number().has_value());
+        CHECK_FALSE(dicom_tag{0x0010, 0x0010}.private_block_number().has_value());
+        CHECK_FALSE(dicom_tag{0x0009, 0x0000}.private_block_number().has_value());
+    }
+
+    SECTION("constexpr evaluation") {
+        constexpr auto block = dicom_tag{0x0009, 0x1042}.private_block_number();
+        static_assert(block.has_value());
+        static_assert(*block == 0x10);
+    }
+}
+
+TEST_CASE("dicom_tag private_creator_tag", "[dicom_tag][private]") {
+    SECTION("maps data element to its creator tag") {
+        auto creator = dicom_tag{0x0009, 0x1001}.private_creator_tag();
+        REQUIRE(creator.has_value());
+        CHECK(*creator == dicom_tag{0x0009, 0x0010});
+    }
+
+    SECTION("different blocks map to different creators") {
+        auto c10 = dicom_tag{0x0009, 0x1000}.private_creator_tag();
+        auto c11 = dicom_tag{0x0009, 0x1100}.private_creator_tag();
+        REQUIRE(c10.has_value());
+        REQUIRE(c11.has_value());
+        CHECK(*c10 == dicom_tag{0x0009, 0x0010});
+        CHECK(*c11 == dicom_tag{0x0009, 0x0011});
+    }
+
+    SECTION("max block number maps correctly") {
+        auto cff = dicom_tag{0x0009, 0xFF42}.private_creator_tag();
+        REQUIRE(cff.has_value());
+        CHECK(*cff == dicom_tag{0x0009, 0x00FF});
+    }
+
+    SECTION("returns nullopt for non-private-data tags") {
+        CHECK_FALSE(dicom_tag{0x0009, 0x0010}.private_creator_tag().has_value());
+        CHECK_FALSE(dicom_tag{0x0010, 0x0010}.private_creator_tag().has_value());
+    }
+
+    SECTION("constexpr evaluation") {
+        constexpr auto creator = dicom_tag{0x0009, 0x1001}.private_creator_tag();
+        static_assert(creator.has_value());
+        static_assert(*creator == dicom_tag{0x0009, 0x0010});
+    }
+}
+
+TEST_CASE("dicom_tag private_data_range", "[dicom_tag][private]") {
+    SECTION("creator tag maps to its data range") {
+        auto range = dicom_tag{0x0009, 0x0010}.private_data_range();
+        REQUIRE(range.has_value());
+        CHECK(range->first == dicom_tag{0x0009, 0x1000});
+        CHECK(range->second == dicom_tag{0x0009, 0x10FF});
+    }
+
+    SECTION("different creator slots have non-overlapping ranges") {
+        auto r10 = dicom_tag{0x0009, 0x0010}.private_data_range();
+        auto r11 = dicom_tag{0x0009, 0x0011}.private_data_range();
+        REQUIRE(r10.has_value());
+        REQUIRE(r11.has_value());
+
+        // r10 ends before r11 starts
+        CHECK(r10->second < r11->first);
+    }
+
+    SECTION("max creator element 0x00FF") {
+        auto range = dicom_tag{0x0009, 0x00FF}.private_data_range();
+        REQUIRE(range.has_value());
+        CHECK(range->first == dicom_tag{0x0009, 0xFF00});
+        CHECK(range->second == dicom_tag{0x0009, 0xFFFF});
+    }
+
+    SECTION("returns nullopt for non-creator tags") {
+        CHECK_FALSE(dicom_tag{0x0009, 0x1000}.private_data_range().has_value());
+        CHECK_FALSE(dicom_tag{0x0010, 0x0010}.private_data_range().has_value());
+        CHECK_FALSE(dicom_tag{0x0009, 0x0000}.private_data_range().has_value());
+    }
+
+    SECTION("constexpr evaluation") {
+        constexpr auto range = dicom_tag{0x0009, 0x0010}.private_data_range();
+        static_assert(range.has_value());
+        static_assert(range->first == dicom_tag{0x0009, 0x1000});
+        static_assert(range->second == dicom_tag{0x0009, 0x10FF});
+    }
+}
+
+TEST_CASE("dicom_tag private mapping round-trip", "[dicom_tag][private]") {
+    // Data element → creator tag → data range contains original element
+    constexpr dicom_tag data_elem{0x0009, 0x1042};
+
+    const auto creator = data_elem.private_creator_tag();
+    REQUIRE(creator.has_value());
+
+    const auto range = creator->private_data_range();
+    REQUIRE(range.has_value());
+
+    CHECK(data_elem >= range->first);
+    CHECK(data_elem <= range->second);
+}
