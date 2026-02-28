@@ -314,6 +314,18 @@ if(NOT PACS_HTJ2K_FOUND)
             "  - Build from source: https://github.com/aous72/OpenJPH")
         set(PACS_HTJ2K_FOUND FALSE)
     endif()
+    # FetchContent headers live at src/core/common/ojph_*.h (flat layout),
+    # but installed OpenJPH uses openjph/ prefix (#include <openjph/ojph_*.h>).
+    # Create a compatibility include directory with an openjph/ symlink so both
+    # system-installed and FetchContent builds use the same #include paths.
+    if(PACS_HTJ2K_FOUND)
+        set(_openjph_compat_include "${CMAKE_BINARY_DIR}/_openjph_compat_include")
+        file(MAKE_DIRECTORY "${_openjph_compat_include}")
+        file(CREATE_LINK
+            "${openjph_SOURCE_DIR}/src/core/common"
+            "${_openjph_compat_include}/openjph"
+            SYMBOLIC)
+    endif()
 endif()
 
 # OpenSSL (for digital signatures - Issue #191)
@@ -882,6 +894,10 @@ if(PACS_HTJ2K_FOUND)
         if(OPENJPH_INCLUDE_DIRS)
             target_include_directories(pacs_encoding PUBLIC ${OPENJPH_INCLUDE_DIRS})
         endif()
+    endif()
+    # FetchContent compatibility: add include bridge for openjph/ prefix
+    if(DEFINED _openjph_compat_include)
+        target_include_directories(pacs_encoding PUBLIC "${_openjph_compat_include}")
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_HTJ2K_CODEC)
     message(STATUS "  [OK] pacs_encoding: HTJ2K codec enabled")
