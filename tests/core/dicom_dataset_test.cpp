@@ -864,6 +864,241 @@ TEST_CASE("dicom_dataset get_private_creator", "[core][dicom_dataset][private]")
     }
 }
 
+TEST_CASE("dicom_dataset set_private_element", "[core][dicom_dataset][private]") {
+    SECTION("creates both creator and data element") {
+        dicom_dataset ds;
+        auto tag = ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO,
+                                          "some value");
+
+        REQUIRE(tag.has_value());
+        CHECK(tag->group() == 0x0009);
+        // Creator should be at (0009,0010), data at (0009,1001)
+        CHECK(ds.contains({0x0009, 0x0010}));
+        CHECK(ds.get_string({0x0009, 0x0010}) == "MY_APP");
+        CHECK(ds.get_string(*tag) == "some value");
+    }
+
+    SECTION("reuses same block for same creator") {
+        dicom_dataset ds;
+        auto tag1 = ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO,
+                                           "value1");
+        auto tag2 = ds.set_private_element("MY_APP", 0x0009, 0x02, vr_type::LO,
+                                           "value2");
+
+        REQUIRE(tag1.has_value());
+        REQUIRE(tag2.has_value());
+        // Both should use block 0x10
+        CHECK(*tag1 == dicom_tag{0x0009, 0x1001});
+        CHECK(*tag2 == dicom_tag{0x0009, 0x1002});
+        // Only one creator element
+        CHECK(ds.get_string({0x0009, 0x0010}) == "MY_APP");
+    }
+
+    SECTION("different creators get different blocks") {
+        dicom_dataset ds;
+        auto tag1 = ds.set_private_element("APP_A", 0x0009, 0x01, vr_type::LO,
+                                           "a_value");
+        auto tag2 = ds.set_private_element("APP_B", 0x0009, 0x01, vr_type::LO,
+                                           "b_value");
+
+        REQUIRE(tag1.has_value());
+        REQUIRE(tag2.has_value());
+        // APP_A at block 0x10, APP_B at block 0x11
+        CHECK(*tag1 == dicom_tag{0x0009, 0x1001});
+        CHECK(*tag2 == dicom_tag{0x0009, 0x1101});
+        CHECK(ds.get_string({0x0009, 0x0010}) == "APP_A");
+        CHECK(ds.get_string({0x0009, 0x0011}) == "APP_B");
+    }
+
+    SECTION("rejects even group number") {
+        dicom_dataset ds;
+        auto tag = ds.set_private_element("MY_APP", 0x0010, 0x01, vr_type::LO,
+                                          "value");
+        CHECK_FALSE(tag.has_value());
+    }
+
+    SECTION("rejects group <= 0x0008") {
+        dicom_dataset ds;
+        auto tag = ds.set_private_element("MY_APP", 0x0007, 0x01, vr_type::LO,
+                                          "value");
+        CHECK_FALSE(tag.has_value());
+    }
+
+    SECTION("overwrites existing data element value") {
+        dicom_dataset ds;
+        ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO, "old");
+        auto tag = ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO,
+                                          "new");
+
+        REQUIRE(tag.has_value());
+        CHECK(ds.get_string(*tag) == "new");
+    }
+}
+
+TEST_CASE("dicom_dataset remove_private_block", "[core][dicom_dataset][private]") {
+    SECTION("removes creator and all data elements") {
+        dicom_dataset ds;
+        ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO, "v1");
+        ds.set_private_element("MY_APP", 0x0009, 0x02, vr_type::LO, "v2");
+
+        auto removed = ds.remove_private_block("MY_APP", 0x0009);
+
+        CHECK(removed == 3);  // creator + 2 data elements
+        CHECK_FALSE(ds.contains({0x0009, 0x0010}));
+        CHECK_FALSE(ds.contains({0x0009, 0x1001}));
+        CHECK_FALSE(ds.contains({0x0009, 0x1002}));
+    }
+
+    SECTION("does not affect other creators") {
+        dicom_dataset ds;
+        ds.set_private_element("APP_A", 0x0009, 0x01, vr_type::LO, "a_val");
+        ds.set_private_element("APP_B", 0x0009, 0x01, vr_type::LO, "b_val");
+
+        ds.remove_private_block("APP_A", 0x0009);
+
+        CHECK_FALSE(ds.contains({0x0009, 0x0010}));
+        CHECK(ds.contains({0x0009, 0x0011}));
+        CHECK(ds.get_string({0x0009, 0x1101}) == "b_val");
+    }
+
+    SECTION("returns zero for unknown creator") {
+        dicom_dataset ds;
+        ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO, "val");
+
+        auto removed = ds.remove_private_block("UNKNOWN", 0x0009);
+        CHECK(removed == 0);
+    }
+
+    SECTION("returns zero for wrong group") {
+        dicom_dataset ds;
+        ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO, "val");
+
+        auto removed = ds.remove_private_block("MY_APP", 0x0011);
+        CHECK(removed == 0);
+    }
+}
+
+TEST_CASE("dicom_dataset cleanup_orphaned_creators",
+          "[core][dicom_dataset][private]") {
+    SECTION("removes creators with no data elements") {
+        dicom_dataset ds;
+        // Manually add a creator without any data elements
+        ds.set_string({0x0009, 0x0010}, vr_type::LO, "ORPHAN_CREATOR");
+
+        auto removed = ds.cleanup_orphaned_creators();
+
+        CHECK(removed == 1);
+        CHECK_FALSE(ds.contains({0x0009, 0x0010}));
+    }
+
+    SECTION("preserves creators that have data elements") {
+        dicom_dataset ds;
+        ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO, "value");
+
+        auto removed = ds.cleanup_orphaned_creators();
+
+        CHECK(removed == 0);
+        CHECK(ds.contains({0x0009, 0x0010}));
+    }
+
+    SECTION("handles mixed orphaned and valid creators") {
+        dicom_dataset ds;
+        ds.set_private_element("VALID_APP", 0x0009, 0x01, vr_type::LO, "val");
+        // Add orphan manually
+        ds.set_string({0x0009, 0x0011}, vr_type::LO, "ORPHAN_APP");
+
+        auto removed = ds.cleanup_orphaned_creators();
+
+        CHECK(removed == 1);
+        CHECK(ds.contains({0x0009, 0x0010}));  // VALID_APP stays
+        CHECK_FALSE(ds.contains({0x0009, 0x0011}));  // ORPHAN_APP removed
+    }
+
+    SECTION("returns zero when no orphans exist") {
+        dicom_dataset ds;
+        auto removed = ds.cleanup_orphaned_creators();
+        CHECK(removed == 0);
+    }
+}
+
+TEST_CASE("dicom_dataset validate_private_tags",
+          "[core][dicom_dataset][private]") {
+    SECTION("returns empty for valid dataset") {
+        dicom_dataset ds;
+        ds.set_private_element("MY_APP", 0x0009, 0x01, vr_type::LO, "val");
+
+        auto missing = ds.validate_private_tags();
+        CHECK(missing.empty());
+    }
+
+    SECTION("detects data elements without creator") {
+        dicom_dataset ds;
+        // Manually add data element without creator
+        ds.insert(dicom_element::from_string({0x0009, 0x1001}, vr_type::UN,
+                                             "orphan_data"));
+
+        auto missing = ds.validate_private_tags();
+
+        REQUIRE(missing.size() == 1);
+        CHECK(missing[0] == dicom_tag{0x0009, 0x1001});
+    }
+
+    SECTION("returns empty for dataset with no private elements") {
+        dicom_dataset ds;
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        auto missing = ds.validate_private_tags();
+        CHECK(missing.empty());
+    }
+
+    SECTION("detects multiple missing creators") {
+        dicom_dataset ds;
+        ds.insert(dicom_element::from_string({0x0009, 0x1001}, vr_type::UN,
+                                             "data1"));
+        ds.insert(dicom_element::from_string({0x0009, 0x1100}, vr_type::UN,
+                                             "data2"));
+
+        auto missing = ds.validate_private_tags();
+        CHECK(missing.size() == 2);
+    }
+}
+
+TEST_CASE("dicom_dataset private element round-trip",
+          "[core][dicom_dataset][private]") {
+    SECTION("write private elements and verify creator relationships") {
+        dicom_dataset ds;
+        ds.set_private_element("VENDOR_A", 0x0009, 0x01, vr_type::LO,
+                               "value_a1");
+        ds.set_private_element("VENDOR_A", 0x0009, 0x02, vr_type::LO,
+                               "value_a2");
+        ds.set_private_element("VENDOR_B", 0x0009, 0x01, vr_type::LO,
+                               "value_b1");
+
+        // Verify creator relationships
+        auto creator_a = ds.get_private_creator({0x0009, 0x1001});
+        REQUIRE(creator_a.has_value());
+        CHECK(*creator_a == "VENDOR_A");
+
+        auto creator_a2 = ds.get_private_creator({0x0009, 0x1002});
+        REQUIRE(creator_a2.has_value());
+        CHECK(*creator_a2 == "VENDOR_A");
+
+        auto creator_b = ds.get_private_creator({0x0009, 0x1101});
+        REQUIRE(creator_b.has_value());
+        CHECK(*creator_b == "VENDOR_B");
+
+        // get_private_block returns correct elements
+        auto block_a = ds.get_private_block("VENDOR_A", 0x0009);
+        CHECK(block_a.size() == 2);
+
+        auto block_b = ds.get_private_block("VENDOR_B", 0x0009);
+        CHECK(block_b.size() == 1);
+
+        // Validation passes
+        CHECK(ds.validate_private_tags().empty());
+    }
+}
+
 TEST_CASE("dicom_dataset get_private_block", "[core][dicom_dataset][private]") {
     dicom_dataset ds;
     // Two creators in group 0x0009
