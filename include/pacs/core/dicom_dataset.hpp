@@ -259,6 +259,56 @@ public:
                                           uint16_t group) const
         -> std::vector<const dicom_element*>;
 
+    /**
+     * @brief Insert a private data element with automatic creator management
+     *
+     * Automatically ensures the corresponding Private Creator element exists.
+     * If the creator already owns a block in the given group, reuses that block.
+     * Otherwise, allocates the next available slot.
+     *
+     * Per DICOM PS3.5 §7.8.1, Private Creator elements are placed at
+     * (gggg,00xx) and data elements at (gggg,xxyy).
+     *
+     * @param creator_id Private Creator identification (e.g. "SIEMENS CSA HEADER")
+     * @param group Odd group number (e.g. 0x0009)
+     * @param element_offset Offset within the block (0x00-0xFF)
+     * @param vr Value Representation for the data element
+     * @param value The element value
+     * @return The actual tag assigned, or nullopt if allocation failed
+     */
+    auto set_private_element(std::string_view creator_id, uint16_t group,
+                             uint8_t element_offset, encoding::vr_type vr,
+                             std::string_view value) -> std::optional<dicom_tag>;
+
+    /**
+     * @brief Remove all private data elements and their creator for a given creator
+     *
+     * Removes both the Private Creator element and all associated data elements
+     * in the specified group.
+     *
+     * @param creator_id The Private Creator identification string
+     * @param group The private group number (must be odd)
+     * @return Number of elements removed (including the creator)
+     */
+    auto remove_private_block(std::string_view creator_id, uint16_t group)
+        -> size_t;
+
+    /**
+     * @brief Remove orphaned Private Creator elements that have no data elements
+     * @return Number of orphaned creators removed
+     */
+    auto cleanup_orphaned_creators() -> size_t;
+
+    /**
+     * @brief Validate private tag relationships in this dataset
+     *
+     * Checks that every private data element has a corresponding Private Creator
+     * element and returns tags that are missing their creator.
+     *
+     * @return Vector of private data element tags missing their Private Creator
+     */
+    [[nodiscard]] auto validate_private_tags() const -> std::vector<dicom_tag>;
+
     // ========================================================================
     // Modification
     // ========================================================================
