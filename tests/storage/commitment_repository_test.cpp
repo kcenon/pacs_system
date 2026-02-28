@@ -67,9 +67,9 @@ TEST_CASE("migration V8 creates commitment tables",
     }
     test_database tdb;
 
-    SECTION("schema version is 8") {
+    SECTION("schema version is 9") {
         migration_runner runner;
-        CHECK(runner.get_current_version(*tdb.get()) == 8);
+        CHECK(runner.get_current_version(*tdb.get()) == 9);
     }
 
     SECTION("storage_commitment table exists") {

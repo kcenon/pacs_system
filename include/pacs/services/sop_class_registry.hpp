@@ -65,6 +65,7 @@ enum class sop_class_category {
     worklist,             ///< Modality Worklist Service Class
     mpps,                 ///< Modality Performed Procedure Step
     storage_commitment,   ///< Storage Commitment Push Model Service Class
+    ups,                  ///< Unified Procedure Step Service Class
     verification,         ///< Verification Service Class
     print,                ///< Print Management Service Class
     media,                ///< Media Storage Service Class
@@ -233,6 +234,7 @@ private:
     void register_seg_sop_classes();
     void register_sr_sop_classes();
     void register_print_sop_classes();
+    void register_ups_sop_classes();
     void register_other_sop_classes();
 
     std::unordered_map<std::string, sop_class_info> registry_;

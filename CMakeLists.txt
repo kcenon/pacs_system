@@ -1841,6 +1841,7 @@ if(PACS_BUILD_TESTS)
             tests/storage/index_database_test.cpp
             tests/storage/mpps_test.cpp
             tests/storage/worklist_test.cpp
+            tests/storage/ups_workitem_test.cpp
             tests/storage/pacs_database_adapter_test.cpp
             tests/storage/base_repository_test.cpp
             tests/storage/commitment_repository_test.cpp
@@ -1852,6 +1853,7 @@ if(PACS_BUILD_TESTS)
         target_link_libraries(storage_tests
             PRIVATE
                 pacs_storage
+                pacs_services
                 Catch2::Catch2WithMain
                 $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
                 $<$<TARGET_EXISTS:database>:database>

@@ -325,6 +325,7 @@ private:
     [[nodiscard]] auto migrate_v6(sqlite3* db) -> VoidResult;
     [[nodiscard]] auto migrate_v7(sqlite3* db) -> VoidResult;
     [[nodiscard]] auto migrate_v8(sqlite3* db) -> VoidResult;
+    [[nodiscard]] auto migrate_v9(sqlite3* db) -> VoidResult;
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // ========================================================================
@@ -381,13 +382,14 @@ private:
     [[nodiscard]] auto migrate_v6(pacs_database_adapter& db) -> VoidResult;
     [[nodiscard]] auto migrate_v7(pacs_database_adapter& db) -> VoidResult;
     [[nodiscard]] auto migrate_v8(pacs_database_adapter& db) -> VoidResult;
+    [[nodiscard]] auto migrate_v9(pacs_database_adapter& db) -> VoidResult;
 
     /// Migration function registry (pacs_database_adapter)
     std::vector<std::pair<int, adapter_migration_function>> adapter_migrations_;
 #endif
 
     /// Latest schema version (increment when adding migrations)
-    static constexpr int LATEST_VERSION = 8;
+    static constexpr int LATEST_VERSION = 9;
 
     /// Migration function registry
     std::vector<std::pair<int, migration_function>> migrations_;
