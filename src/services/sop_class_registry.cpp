@@ -192,6 +192,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_seg_sop_classes();
     register_sr_sop_classes();
     register_print_sop_classes();
+    register_ups_sop_classes();
     register_other_sop_classes();
 }
 
@@ -886,6 +887,73 @@ void sop_class_registry::register_print_sop_classes() {
             "1.2.840.10008.5.1.1.18",
             "Basic Color Print Management Meta",
             sop_class_category::print,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+}
+
+void sop_class_registry::register_ups_sop_classes() {
+    // UPS Push SOP Class (PS3.4 Annex CC)
+    registry_.emplace(
+        "1.2.840.10008.5.1.4.34.6.1",
+        sop_class_info{
+            "1.2.840.10008.5.1.4.34.6.1",
+            "Unified Procedure Step - Push SOP Class",
+            sop_class_category::ups,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // UPS Watch SOP Class (PS3.4 Annex CC)
+    registry_.emplace(
+        "1.2.840.10008.5.1.4.34.6.2",
+        sop_class_info{
+            "1.2.840.10008.5.1.4.34.6.2",
+            "Unified Procedure Step - Watch SOP Class",
+            sop_class_category::ups,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // UPS Pull SOP Class (PS3.4 Annex CC)
+    registry_.emplace(
+        "1.2.840.10008.5.1.4.34.6.3",
+        sop_class_info{
+            "1.2.840.10008.5.1.4.34.6.3",
+            "Unified Procedure Step - Pull SOP Class",
+            sop_class_category::ups,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // UPS Event SOP Class (PS3.4 Annex CC)
+    registry_.emplace(
+        "1.2.840.10008.5.1.4.34.6.4",
+        sop_class_info{
+            "1.2.840.10008.5.1.4.34.6.4",
+            "Unified Procedure Step - Event SOP Class",
+            sop_class_category::ups,
+            modality_type::other,
+            false,
+            false
+        }
+    );
+
+    // UPS Query SOP Class (PS3.4 Annex CC)
+    registry_.emplace(
+        "1.2.840.10008.5.1.4.34.6.5",
+        sop_class_info{
+            "1.2.840.10008.5.1.4.34.6.5",
+            "Unified Procedure Step - Query SOP Class",
+            sop_class_category::ups,
             modality_type::other,
             false,
             false

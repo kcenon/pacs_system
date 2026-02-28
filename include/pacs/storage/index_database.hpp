@@ -53,6 +53,7 @@
 #include "patient_record.hpp"
 #include "series_record.hpp"
 #include "study_record.hpp"
+#include "ups_workitem.hpp"
 #include "worklist_record.hpp"
 
 #include <kcenon/common/patterns/result.h>
@@ -835,6 +836,144 @@ public:
     [[nodiscard]] auto worklist_count(std::string_view status) const -> Result<size_t>;
 
     // ========================================================================
+    // UPS Workitem Operations
+    // ========================================================================
+
+    /**
+     * @brief Create a new UPS workitem (N-CREATE)
+     *
+     * Creates a new UPS workitem with state "SCHEDULED".
+     * This corresponds to the DICOM N-CREATE operation.
+     *
+     * @param workitem The workitem data (pk field is ignored)
+     * @return Result containing the workitem primary key or error
+     */
+    [[nodiscard]] auto create_ups_workitem(const ups_workitem& workitem)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Update an existing UPS workitem
+     *
+     * Updates the workitem attributes. State transitions are validated:
+     * - SCHEDULED -> IN PROGRESS or CANCELED (allowed)
+     * - IN PROGRESS -> COMPLETED or CANCELED (allowed)
+     * - COMPLETED or CANCELED -> any (not allowed, final states)
+     *
+     * @param workitem Updated workitem data (workitem_uid required)
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto update_ups_workitem(const ups_workitem& workitem)
+        -> VoidResult;
+
+    /**
+     * @brief Change UPS workitem state
+     *
+     * Performs a state transition with validation per PS3.4 Table CC.1.1-2.
+     *
+     * @param workitem_uid The workitem SOP Instance UID
+     * @param new_state The target state
+     * @param transaction_uid Transaction UID (required for IN PROGRESS transition)
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto change_ups_state(std::string_view workitem_uid,
+                                         std::string_view new_state,
+                                         std::string_view transaction_uid = "")
+        -> VoidResult;
+
+    /**
+     * @brief Find a UPS workitem by SOP Instance UID
+     *
+     * @param workitem_uid The workitem SOP Instance UID
+     * @return Optional containing the workitem if found
+     */
+    [[nodiscard]] auto find_ups_workitem(std::string_view workitem_uid) const
+        -> std::optional<ups_workitem>;
+
+    /**
+     * @brief Search UPS workitems with query criteria
+     *
+     * Used for UPS C-FIND operations.
+     *
+     * @param query Query parameters with optional filters
+     * @return Result containing vector of matching workitems or error
+     */
+    [[nodiscard]] auto search_ups_workitems(const ups_workitem_query& query) const
+        -> Result<std::vector<ups_workitem>>;
+
+    /**
+     * @brief Delete a UPS workitem
+     *
+     * Only COMPLETED or CANCELED workitems can be deleted unless
+     * no subscribers have a deletion lock.
+     *
+     * @param workitem_uid The workitem SOP Instance UID
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto delete_ups_workitem(std::string_view workitem_uid)
+        -> VoidResult;
+
+    /**
+     * @brief Get total UPS workitem count
+     *
+     * @return Result containing number of workitems in the database or error
+     */
+    [[nodiscard]] auto ups_workitem_count() const -> Result<size_t>;
+
+    /**
+     * @brief Get UPS workitem count by state
+     *
+     * @param state The state to count
+     * @return Result containing number of workitems with the given state or error
+     */
+    [[nodiscard]] auto ups_workitem_count(std::string_view state) const
+        -> Result<size_t>;
+
+    // ========================================================================
+    // UPS Subscription Operations
+    // ========================================================================
+
+    /**
+     * @brief Subscribe to UPS workitem events
+     *
+     * @param subscription The subscription data (pk field is ignored)
+     * @return Result containing the subscription primary key or error
+     */
+    [[nodiscard]] auto subscribe_ups(const ups_subscription& subscription)
+        -> Result<int64_t>;
+
+    /**
+     * @brief Unsubscribe from UPS workitem events
+     *
+     * @param subscriber_ae The subscriber AE Title
+     * @param workitem_uid The workitem UID (empty for global unsubscribe)
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto unsubscribe_ups(std::string_view subscriber_ae,
+                                        std::string_view workitem_uid = "")
+        -> VoidResult;
+
+    /**
+     * @brief Get all subscriptions for a subscriber
+     *
+     * @param subscriber_ae The subscriber AE Title
+     * @return Result containing vector of subscriptions or error
+     */
+    [[nodiscard]] auto get_ups_subscriptions(std::string_view subscriber_ae) const
+        -> Result<std::vector<ups_subscription>>;
+
+    /**
+     * @brief Get all subscribers for a workitem
+     *
+     * Returns subscribers that would receive notifications for the
+     * specified workitem (workitem-specific + global subscriptions).
+     *
+     * @param workitem_uid The workitem SOP Instance UID
+     * @return Result containing vector of subscriber AE Titles or error
+     */
+    [[nodiscard]] auto get_ups_subscribers(std::string_view workitem_uid) const
+        -> Result<std::vector<std::string>>;
+
+    // ========================================================================
     // Audit Log Operations
     // ========================================================================
 
@@ -1093,6 +1232,11 @@ private:
      * @brief Parse a worklist record from a prepared statement
      */
     [[nodiscard]] auto parse_worklist_row(void* stmt) const -> worklist_item;
+
+    /**
+     * @brief Parse a UPS workitem record from a prepared statement
+     */
+    [[nodiscard]] auto parse_ups_workitem_row(void* stmt) const -> ups_workitem;
 
     /**
      * @brief Parse an audit record from a prepared statement

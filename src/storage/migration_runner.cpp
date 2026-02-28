@@ -68,6 +68,7 @@ migration_runner::migration_runner() {
     migrations_.push_back({6, [this](sqlite3* db) { return migrate_v6(db); }});
     migrations_.push_back({7, [this](sqlite3* db) { return migrate_v7(db); }});
     migrations_.push_back({8, [this](sqlite3* db) { return migrate_v8(db); }});
+    migrations_.push_back({9, [this](sqlite3* db) { return migrate_v9(db); }});
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     // Register all migrations (pacs_database_adapter version)
@@ -87,6 +88,8 @@ migration_runner::migration_runner() {
         {7, [this](pacs_database_adapter& db) { return migrate_v7(db); }});
     adapter_migrations_.push_back(
         {8, [this](pacs_database_adapter& db) { return migrate_v8(db); }});
+    adapter_migrations_.push_back(
+        {9, [this](pacs_database_adapter& db) { return migrate_v9(db); }});
 #endif
 }
 
@@ -958,6 +961,68 @@ auto migration_runner::migrate_v8(sqlite3* db) -> VoidResult {
     }
 
     return record_migration(db, 8, "Add Storage Commitment tracking tables");
+}
+
+auto migration_runner::migrate_v9(sqlite3* db) -> VoidResult {
+    // V9: Add Unified Procedure Step (UPS) tables
+    const char* sql = R"(
+        -- =====================================================================
+        -- UPS WORKITEMS TABLE (Unified Procedure Step - PS3.4 Annex CC)
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS ups_workitems (
+            workitem_pk                     INTEGER PRIMARY KEY AUTOINCREMENT,
+            workitem_uid                    TEXT NOT NULL UNIQUE,
+            state                           TEXT NOT NULL DEFAULT 'SCHEDULED',
+            procedure_step_label            TEXT,
+            worklist_label                  TEXT,
+            priority                        TEXT DEFAULT 'MEDIUM',
+            scheduled_start_datetime        TEXT,
+            expected_completion_datetime    TEXT,
+            scheduled_station_name          TEXT,
+            scheduled_station_class         TEXT,
+            scheduled_station_geographic    TEXT,
+            scheduled_human_performers      TEXT,
+            input_information               TEXT,
+            performing_ae                   TEXT,
+            progress_description            TEXT,
+            progress_percent                INTEGER DEFAULT 0,
+            output_information              TEXT,
+            transaction_uid                 TEXT,
+            created_at                      TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at                      TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (state IN ('SCHEDULED', 'IN PROGRESS', 'COMPLETED', 'CANCELED')),
+            CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ups_state ON ups_workitems(state);
+        CREATE INDEX IF NOT EXISTS idx_ups_priority ON ups_workitems(priority);
+        CREATE INDEX IF NOT EXISTS idx_ups_performing ON ups_workitems(performing_ae);
+        CREATE INDEX IF NOT EXISTS idx_ups_scheduled ON ups_workitems(scheduled_start_datetime);
+        CREATE INDEX IF NOT EXISTS idx_ups_worklist ON ups_workitems(worklist_label);
+
+        -- =====================================================================
+        -- UPS SUBSCRIPTIONS TABLE
+        -- =====================================================================
+        CREATE TABLE IF NOT EXISTS ups_subscriptions (
+            subscription_pk     INTEGER PRIMARY KEY AUTOINCREMENT,
+            subscriber_ae       TEXT NOT NULL,
+            workitem_uid        TEXT,
+            deletion_lock       INTEGER DEFAULT 0,
+            filter_criteria     TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE (subscriber_ae, workitem_uid)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ups_sub_ae ON ups_subscriptions(subscriber_ae);
+        CREATE INDEX IF NOT EXISTS idx_ups_sub_workitem ON ups_subscriptions(workitem_uid);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 9, "Add Unified Procedure Step (UPS) tables");
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -1835,6 +1900,62 @@ auto migration_runner::migrate_v8(pacs_database_adapter& db) -> VoidResult {
     }
 
     return record_migration(db, 8, "Add Storage Commitment tracking tables");
+}
+
+auto migration_runner::migrate_v9(pacs_database_adapter& db) -> VoidResult {
+    // V9: Add Unified Procedure Step (UPS) tables
+    const std::string sql = R"(
+        CREATE TABLE IF NOT EXISTS ups_workitems (
+            workitem_pk                     INTEGER PRIMARY KEY AUTOINCREMENT,
+            workitem_uid                    TEXT NOT NULL UNIQUE,
+            state                           TEXT NOT NULL DEFAULT 'SCHEDULED',
+            procedure_step_label            TEXT,
+            worklist_label                  TEXT,
+            priority                        TEXT DEFAULT 'MEDIUM',
+            scheduled_start_datetime        TEXT,
+            expected_completion_datetime    TEXT,
+            scheduled_station_name          TEXT,
+            scheduled_station_class         TEXT,
+            scheduled_station_geographic    TEXT,
+            scheduled_human_performers      TEXT,
+            input_information               TEXT,
+            performing_ae                   TEXT,
+            progress_description            TEXT,
+            progress_percent                INTEGER DEFAULT 0,
+            output_information              TEXT,
+            transaction_uid                 TEXT,
+            created_at                      TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at                      TEXT NOT NULL DEFAULT (datetime('now')),
+            CHECK (state IN ('SCHEDULED', 'IN PROGRESS', 'COMPLETED', 'CANCELED')),
+            CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ups_state ON ups_workitems(state);
+        CREATE INDEX IF NOT EXISTS idx_ups_priority ON ups_workitems(priority);
+        CREATE INDEX IF NOT EXISTS idx_ups_performing ON ups_workitems(performing_ae);
+        CREATE INDEX IF NOT EXISTS idx_ups_scheduled ON ups_workitems(scheduled_start_datetime);
+        CREATE INDEX IF NOT EXISTS idx_ups_worklist ON ups_workitems(worklist_label);
+
+        CREATE TABLE IF NOT EXISTS ups_subscriptions (
+            subscription_pk     INTEGER PRIMARY KEY AUTOINCREMENT,
+            subscriber_ae       TEXT NOT NULL,
+            workitem_uid        TEXT,
+            deletion_lock       INTEGER DEFAULT 0,
+            filter_criteria     TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE (subscriber_ae, workitem_uid)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ups_sub_ae ON ups_subscriptions(subscriber_ae);
+        CREATE INDEX IF NOT EXISTS idx_ups_sub_workitem ON ups_subscriptions(workitem_uid);
+    )";
+
+    auto result = execute_sql(db, sql);
+    if (result.is_err()) {
+        return result;
+    }
+
+    return record_migration(db, 9, "Add Unified Procedure Step (UPS) tables");
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
