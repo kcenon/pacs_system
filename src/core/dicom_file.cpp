@@ -35,6 +35,7 @@
 #include "pacs/core/dicom_file.hpp"
 
 #include "pacs/core/dicom_dictionary.hpp"
+#include "pacs/core/private_tag_registry.hpp"
 #include "pacs/encoding/compression/codec_factory.hpp"
 
 #include <algorithm>
@@ -676,6 +677,28 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
             if (vr_opt) {
                 vr = *vr_opt;
             }
+        }
+
+        // For private data elements without dictionary entry, try creator-based lookup
+        if (vr == encoding::vr_type::UN && tag.is_private_data()) {
+            auto creator = dataset.get_private_creator(tag);
+            if (creator) {
+                auto block_num = tag.private_block_number();
+                if (block_num) {
+                    uint8_t elem_offset = static_cast<uint8_t>(
+                        tag.element() & 0x00FF);
+                    auto def = private_tag_registry::instance().find(
+                        *creator, elem_offset);
+                    if (def) {
+                        vr = def->vr;
+                    }
+                }
+            }
+        }
+
+        // Private Creator elements are always LO
+        if (tag.is_private_creator()) {
+            vr = encoding::vr_type::LO;
         }
 
         constexpr size_t kImplicitHeaderSize = 8;  // 4 bytes tag + 4 bytes length
