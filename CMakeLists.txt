@@ -707,6 +707,7 @@ add_library(pacs_core
     src/core/dicom_dictionary.cpp
     src/core/standard_tags_data.cpp
     src/core/pool_manager.cpp
+    src/core/private_tag_registry.cpp
 )
 target_include_directories(pacs_core
     PUBLIC
@@ -1663,6 +1664,7 @@ if(PACS_BUILD_TESTS)
         tests/core/tag_info_test.cpp
         tests/core/dicom_dictionary_test.cpp
         tests/core/events_test.cpp
+        tests/core/private_tag_registry_test.cpp
     )
     target_link_libraries(core_tests
         PRIVATE
