@@ -49,6 +49,7 @@
 #include "pacs/core/dicom_element.hpp"
 #include "pacs/core/dicom_file.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
+#include "pacs/encoding/compression/htj2k_codec.hpp"
 #include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
 #include "pacs/encoding/transfer_syntax.hpp"
 #include "pacs/encoding/vr_type.hpp"
@@ -1228,7 +1229,9 @@ auto parse_rendered_params(
     rendered_params params;
 
     // Determine format from Accept header
-    if (accept_header.find("image/png") != std::string_view::npos) {
+    if (accept_header.find("image/jphc") != std::string_view::npos) {
+        params.format = rendered_format::jphc;
+    } else if (accept_header.find("image/png") != std::string_view::npos) {
         params.format = rendered_format::png;
     } else {
         params.format = rendered_format::jpeg;  // Default to JPEG
@@ -1483,20 +1486,32 @@ auto render_dicom_image(
         }
     }
 
-    // Encode to JPEG or PNG
-    if (params.format == rendered_format::jpeg) {
+    // Encode to requested format
+    encoding::compression::image_params img_params;
+    img_params.width = cols;
+    img_params.height = rows;
+    img_params.bits_allocated = 8;
+    img_params.bits_stored = 8;
+    img_params.high_bit = 7;
+    img_params.samples_per_pixel = samples_per_pixel;
+    img_params.photometric =
+        (samples_per_pixel == 1) ?
+        encoding::compression::photometric_interpretation::monochrome2 :
+        encoding::compression::photometric_interpretation::rgb;
+
+    if (params.format == rendered_format::jphc) {
+        encoding::compression::htj2k_codec codec(
+            /*lossless=*/false, /*use_rpcl=*/false);
+
+        auto result = codec.encode(output_pixels, img_params);
+        if (result.is_err()) {
+            return rendered_result::error("HTJ2K encoding failed: " +
+                                          result.error().message);
+        }
+
+        return rendered_result::ok(std::move(result.value().data), media_type::jphc);
+    } else if (params.format == rendered_format::jpeg) {
         encoding::compression::jpeg_baseline_codec codec;
-        encoding::compression::image_params img_params;
-        img_params.width = cols;
-        img_params.height = rows;
-        img_params.bits_allocated = 8;
-        img_params.bits_stored = 8;
-        img_params.high_bit = 7;
-        img_params.samples_per_pixel = samples_per_pixel;
-        img_params.photometric =
-            (samples_per_pixel == 1) ?
-            encoding::compression::photometric_interpretation::monochrome2 :
-            encoding::compression::photometric_interpretation::rgb;
 
         encoding::compression::compression_options opts;
         opts.quality = params.quality;
@@ -1510,7 +1525,6 @@ auto render_dicom_image(
         return rendered_result::ok(std::move(result.value().data), media_type::jpeg);
     } else {
         // PNG encoding - not implemented yet
-        // For now, return JPEG as fallback
         return rendered_result::error("PNG encoding not yet implemented");
     }
 }
