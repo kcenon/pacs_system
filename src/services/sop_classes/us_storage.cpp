@@ -51,6 +51,8 @@ std::vector<std::string> get_us_transfer_syntaxes() {
         "1.2.840.10008.1.2",
         // JPEG Baseline (lossy, good for color US)
         "1.2.840.10008.1.2.4.50",
+        // HTJ2K Lossless (high-throughput lossless)
+        "1.2.840.10008.1.2.4.201",
         // JPEG Lossless (for diagnostic quality)
         "1.2.840.10008.1.2.4.70",
         // JPEG 2000 Lossless (better compression)

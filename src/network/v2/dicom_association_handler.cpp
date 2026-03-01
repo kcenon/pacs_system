@@ -473,10 +473,20 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
         scp_cfg.supported_abstract_syntaxes.push_back(uid);
     }
 
-    // Add common transfer syntaxes
+    // Accept compressed and uncompressed transfer syntaxes
     scp_cfg.supported_transfer_syntaxes = {
-        "1.2.840.10008.1.2.1",  // Explicit VR Little Endian
-        "1.2.840.10008.1.2",    // Implicit VR Little Endian
+        "1.2.840.10008.1.2.4.201", // HTJ2K Lossless Only
+        "1.2.840.10008.1.2.4.202", // HTJ2K RPCL (Lossless or Lossy)
+        "1.2.840.10008.1.2.4.203", // HTJ2K Lossy
+        "1.2.840.10008.1.2.4.90",  // JPEG 2000 Lossless
+        "1.2.840.10008.1.2.4.91",  // JPEG 2000 Lossy
+        "1.2.840.10008.1.2.4.80",  // JPEG-LS Lossless
+        "1.2.840.10008.1.2.4.81",  // JPEG-LS Near-Lossless
+        "1.2.840.10008.1.2.4.70",  // JPEG Lossless
+        "1.2.840.10008.1.2.4.50",  // JPEG Baseline
+        "1.2.840.10008.1.2.5",     // RLE Lossless
+        "1.2.840.10008.1.2.1",     // Explicit VR Little Endian
+        "1.2.840.10008.1.2",       // Implicit VR Little Endian
     };
 
     // Perform association negotiation

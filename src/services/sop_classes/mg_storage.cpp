@@ -351,6 +351,8 @@ bool is_mg_for_presentation_sop_class(std::string_view uid) noexcept {
 
 std::vector<std::string> get_mg_transfer_syntaxes() {
     return {
+        // HTJ2K Lossless - high-throughput lossless for large mammography images
+        "1.2.840.10008.1.2.4.201",
         // JPEG 2000 Lossless - excellent for high-resolution mammography
         "1.2.840.10008.1.2.4.90",
         // JPEG Lossless - widely supported

@@ -49,6 +49,8 @@ std::vector<std::string> get_dx_transfer_syntaxes() {
         "1.2.840.10008.1.2.1",
         // Implicit VR Little Endian (universal baseline)
         "1.2.840.10008.1.2",
+        // HTJ2K Lossless (high-throughput lossless for large DX images)
+        "1.2.840.10008.1.2.4.201",
         // JPEG Lossless (for diagnostic quality - most important for DX)
         "1.2.840.10008.1.2.4.70",
         // JPEG 2000 Lossless (better compression, good for large DX images)
