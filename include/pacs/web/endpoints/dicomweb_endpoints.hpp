@@ -84,6 +84,7 @@ struct media_type {
     static constexpr std::string_view octet_stream = "application/octet-stream";
     static constexpr std::string_view jpeg = "image/jpeg";
     static constexpr std::string_view png = "image/png";
+    static constexpr std::string_view jphc = "image/jphc";
     static constexpr std::string_view multipart_related = "multipart/related";
 };
 
@@ -479,7 +480,8 @@ struct validation_result {
  */
 enum class rendered_format {
     jpeg,   ///< JPEG format (default)
-    png     ///< PNG format
+    png,    ///< PNG format
+    jphc    ///< HTJ2K format (image/jphc)
 };
 
 /**
