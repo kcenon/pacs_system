@@ -238,6 +238,7 @@ namespace error_codes {
     constexpr int ups_workitem_not_found = service_base - 99;
     constexpr int ups_invalid_action_type = service_base - 100;
     constexpr int ups_missing_transaction_uid = service_base - 101;
+    constexpr int ups_context_not_accepted = service_base - 102;
 } // namespace error_codes
 
 // Re-export common utility functions
