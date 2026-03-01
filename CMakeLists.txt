@@ -1054,6 +1054,7 @@ add_library(pacs_services
     src/services/ups/ups_push_scp.cpp
     src/services/ups/ups_push_scu.cpp
     src/services/ups/ups_query_scp.cpp
+    src/services/ups/ups_watch_scp.cpp
     src/services/sop_class_registry.cpp
     src/services/sop_classes/us_storage.cpp
     src/services/sop_classes/dx_storage.cpp
@@ -1865,6 +1866,7 @@ if(PACS_BUILD_TESTS)
         tests/services/ups_push_scp_test.cpp
         tests/services/ups_push_scu_test.cpp
         tests/services/ups_query_scp_test.cpp
+        tests/services/ups_watch_scp_test.cpp
         tests/services/us_storage_test.cpp
         tests/services/dx_storage_test.cpp
         tests/services/mg_storage_test.cpp
