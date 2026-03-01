@@ -84,6 +84,9 @@ Transfer Syntax Options:
   --jpeg-lossless     JPEG Lossless, Non-Hierarchical
   --jpeg2000          JPEG 2000 Image Compression (Lossless Only)
   --jpeg2000-lossy    JPEG 2000 Image Compression
+  --htj2k             HTJ2K Lossless Only (1.2.840.10008.1.2.4.201)
+  --htj2k-rpcl        HTJ2K with RPCL Options (1.2.840.10008.1.2.4.202)
+  --htj2k-lossy       HTJ2K Lossy (1.2.840.10008.1.2.4.203)
   --rle               RLE Lossless
   -t, --transfer-syntax <uid>  Specify Transfer Syntax by UID
 
@@ -109,6 +112,8 @@ Examples:
               << R"( image.dcm compressed.dcm --jpeg-baseline -q 85
   )" << program_name
               << R"( ./input_dir/ ./output_dir/ --recursive --implicit
+  )" << program_name
+              << R"( image.dcm htj2k.dcm --htj2k
   )" << program_name
               << R"( image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 
@@ -193,6 +198,12 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
             opts.target_transfer_syntax = std::string(transfer_syntax::jpeg2000_lossless.uid());
         } else if (arg == "--jpeg2000-lossy") {
             opts.target_transfer_syntax = std::string(transfer_syntax::jpeg2000_lossy.uid());
+        } else if (arg == "--htj2k") {
+            opts.target_transfer_syntax = std::string(transfer_syntax::htj2k_lossless.uid());
+        } else if (arg == "--htj2k-rpcl") {
+            opts.target_transfer_syntax = std::string(transfer_syntax::htj2k_rpcl.uid());
+        } else if (arg == "--htj2k-lossy") {
+            opts.target_transfer_syntax = std::string(transfer_syntax::htj2k_lossy.uid());
         } else if (arg == "--rle") {
             opts.target_transfer_syntax = std::string(transfer_syntax::rle_lossless.uid());
         } else if ((arg == "-t" || arg == "--transfer-syntax") && i + 1 < argc) {
