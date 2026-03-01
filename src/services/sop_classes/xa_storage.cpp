@@ -50,9 +50,11 @@ std::vector<std::string> get_xa_transfer_syntaxes() {
         "1.2.840.10008.1.2.1",
         // Implicit VR Little Endian (universal baseline)
         "1.2.840.10008.1.2",
-        // JPEG Lossless (for diagnostic quality - future support)
+        // HTJ2K Lossless (high-throughput lossless for multi-frame)
+        "1.2.840.10008.1.2.4.201",
+        // JPEG Lossless (for diagnostic quality)
         "1.2.840.10008.1.2.4.70",
-        // RLE Lossless (for multi-frame - future support)
+        // RLE Lossless (for multi-frame)
         "1.2.840.10008.1.2.5"
     };
 }
