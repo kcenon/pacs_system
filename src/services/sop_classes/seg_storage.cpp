@@ -50,6 +50,8 @@ std::vector<std::string> get_seg_transfer_syntaxes() {
         "1.2.840.10008.1.2.1",
         // Implicit VR Little Endian (universal baseline)
         "1.2.840.10008.1.2",
+        // HTJ2K Lossless (high-throughput lossless for segmentation data)
+        "1.2.840.10008.1.2.4.201",
         // JPEG 2000 Lossless (good for binary data)
         "1.2.840.10008.1.2.4.90",
         // RLE Lossless (excellent for binary segmentations)

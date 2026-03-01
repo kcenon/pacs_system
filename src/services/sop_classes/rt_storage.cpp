@@ -49,6 +49,8 @@ std::vector<std::string> get_rt_transfer_syntaxes() {
         "1.2.840.10008.1.2.1",
         // Implicit VR Little Endian (universal baseline)
         "1.2.840.10008.1.2",
+        // HTJ2K Lossless (high-throughput lossless for dose grids)
+        "1.2.840.10008.1.2.4.201",
         // JPEG Lossless (for RT Image and RT Dose with pixel data)
         "1.2.840.10008.1.2.4.70",
         // JPEG 2000 Lossless (better compression for dose grids)

@@ -49,6 +49,8 @@ std::vector<std::string> get_pet_transfer_syntaxes() {
         "1.2.840.10008.1.2.1",
         // Implicit VR Little Endian (universal baseline)
         "1.2.840.10008.1.2",
+        // HTJ2K Lossless (high-throughput lossless, preserves quantitative data)
+        "1.2.840.10008.1.2.4.201",
         // JPEG Lossless (for diagnostic quality - recommended for quantitative data)
         "1.2.840.10008.1.2.4.70",
         // JPEG 2000 Lossless (better compression, preserves quantitative values)
