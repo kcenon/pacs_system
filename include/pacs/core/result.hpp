@@ -229,6 +229,15 @@ namespace error_codes {
     constexpr int not_a_regular_file = service_base - 92;
     constexpr int file_parsing_not_implemented = service_base - 93;
     constexpr int file_parse_failed = service_base - 94;
+
+    // UPS service errors (-895 to -905)
+    constexpr int ups_handler_not_set = service_base - 95;
+    constexpr int ups_unexpected_command = service_base - 96;
+    constexpr int ups_invalid_state_transition = service_base - 97;
+    constexpr int ups_missing_uid = service_base - 98;
+    constexpr int ups_workitem_not_found = service_base - 99;
+    constexpr int ups_invalid_action_type = service_base - 100;
+    constexpr int ups_missing_transaction_uid = service_base - 101;
 } // namespace error_codes
 
 // Re-export common utility functions
