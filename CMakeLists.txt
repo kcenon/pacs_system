@@ -253,6 +253,81 @@ if(NOT PACS_JPEGLS_FOUND)
     set(PACS_JPEGLS_FOUND FALSE)
 endif()
 
+# OpenJPH (for HTJ2K compression codec)
+message(STATUS "")
+message(STATUS "=== Finding OpenJPH (for HTJ2K compression) ===")
+
+# Try to find system OpenJPH
+find_package(openjph CONFIG QUIET)
+
+if(openjph_FOUND)
+    message(STATUS "Found system OpenJPH")
+    set(PACS_HTJ2K_FOUND TRUE)
+else()
+    # Try pkg-config as fallback
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(OPENJPH QUIET openjph)
+        if(OPENJPH_FOUND)
+            message(STATUS "Found OpenJPH via pkg-config: ${OPENJPH_VERSION}")
+            set(PACS_HTJ2K_FOUND TRUE)
+        endif()
+    endif()
+endif()
+
+if(NOT PACS_HTJ2K_FOUND)
+    # Fetch OpenJPH from GitHub as last resort
+    message(STATUS "OpenJPH not found on system, fetching from GitHub...")
+    include(FetchContent)
+    set(OJPH_BUILD_EXECUTABLES OFF CACHE BOOL "" FORCE)
+    set(OJPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(OJPH_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    # Preserve BUILD_SHARED_LIBS across FetchContent to prevent OpenJPH's
+    # option(BUILD_SHARED_LIBS ...) from changing library type of our targets.
+    # Must use CACHE FORCE because option() clears normal variables.
+    set(_pacs_saved_build_shared_libs "${BUILD_SHARED_LIBS}")
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        openjph
+        GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
+        GIT_TAG        0.18.2
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(openjph)
+    if(_pacs_saved_build_shared_libs)
+        set(BUILD_SHARED_LIBS "${_pacs_saved_build_shared_libs}" CACHE BOOL "" FORCE)
+    else()
+        unset(BUILD_SHARED_LIBS CACHE)
+    endif()
+    if(TARGET openjphstatic)
+        set(PACS_HTJ2K_FOUND TRUE)
+        message(STATUS "OpenJPH fetched and built from source (static)")
+    elseif(TARGET openjph)
+        set(PACS_HTJ2K_FOUND TRUE)
+        message(STATUS "OpenJPH fetched and built from source")
+    else()
+        message(WARNING
+            "OpenJPH build failed!\n"
+            "HTJ2K codec will be disabled.\n"
+            "\n"
+            "To enable HTJ2K support, install OpenJPH:\n"
+            "  - Build from source: https://github.com/aous72/OpenJPH")
+        set(PACS_HTJ2K_FOUND FALSE)
+    endif()
+    # FetchContent headers live at src/core/common/ojph_*.h (flat layout),
+    # but installed OpenJPH uses openjph/ prefix (#include <openjph/ojph_*.h>).
+    # Create a compatibility include directory with an openjph/ symlink so both
+    # system-installed and FetchContent builds use the same #include paths.
+    if(PACS_HTJ2K_FOUND)
+        set(_openjph_compat_include "${CMAKE_BINARY_DIR}/_openjph_compat_include")
+        file(MAKE_DIRECTORY "${_openjph_compat_include}")
+        file(CREATE_LINK
+            "${openjph_SOURCE_DIR}/src/core/common"
+            "${_openjph_compat_include}/openjph"
+            SYMBOLIC)
+    endif()
+endif()
+
 # OpenSSL (for digital signatures - Issue #191)
 message(STATUS "")
 message(STATUS "=== Finding OpenSSL (for digital signatures) ===")
@@ -804,6 +879,28 @@ if(PACS_JPEGLS_FOUND)
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEGLS_CODEC)
     message(STATUS "  [OK] pacs_encoding: JPEG-LS codec enabled")
+endif()
+
+# Link OpenJPH for HTJ2K compression codec
+if(PACS_HTJ2K_FOUND)
+    if(TARGET openjphstatic)
+        target_link_libraries(pacs_encoding PUBLIC openjphstatic)
+    elseif(TARGET openjph::openjph)
+        target_link_libraries(pacs_encoding PUBLIC openjph::openjph)
+    elseif(TARGET openjph)
+        target_link_libraries(pacs_encoding PUBLIC openjph)
+    elseif(OPENJPH_LIBRARIES)
+        target_link_libraries(pacs_encoding PUBLIC ${OPENJPH_LIBRARIES})
+        if(OPENJPH_INCLUDE_DIRS)
+            target_include_directories(pacs_encoding PUBLIC ${OPENJPH_INCLUDE_DIRS})
+        endif()
+    endif()
+    # FetchContent compatibility: add include bridge for openjph/ prefix
+    if(DEFINED _openjph_compat_include)
+        target_include_directories(pacs_encoding PUBLIC "${_openjph_compat_include}")
+    endif()
+    target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_HTJ2K_CODEC)
+    message(STATUS "  [OK] pacs_encoding: HTJ2K codec enabled")
 endif()
 
 # Network library
