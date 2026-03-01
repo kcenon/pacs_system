@@ -1403,6 +1403,54 @@ TEST_CASE("parse_rendered_params - accept header priority",
 }
 
 // ============================================================================
+// HTJ2K (image/jphc) Rendered Output Support
+// ============================================================================
+
+TEST_CASE("media_type::jphc constant", "[dicomweb][htj2k]") {
+    REQUIRE(media_type::jphc == "image/jphc");
+}
+
+TEST_CASE("rendered_format includes jphc value", "[dicomweb][htj2k]") {
+    rendered_format fmt = rendered_format::jphc;
+    REQUIRE(fmt != rendered_format::jpeg);
+    REQUIRE(fmt != rendered_format::png);
+}
+
+TEST_CASE("parse_rendered_params - jphc format from accept header",
+          "[dicomweb][rendered][htj2k]") {
+    auto params = parse_rendered_params("", "image/jphc");
+
+    REQUIRE(params.format == rendered_format::jphc);
+}
+
+TEST_CASE("parse_rendered_params - jphc with quality parameter",
+          "[dicomweb][rendered][htj2k]") {
+    auto params = parse_rendered_params("?quality=85", "image/jphc");
+
+    REQUIRE(params.format == rendered_format::jphc);
+    REQUIRE(params.quality == 85);
+}
+
+TEST_CASE("parse_rendered_params - jphc takes priority over png",
+          "[dicomweb][rendered][htj2k]") {
+    // jphc appears before png in the accept header
+    auto params = parse_rendered_params("", "image/jphc, image/png;q=0.5");
+
+    REQUIRE(params.format == rendered_format::jphc);
+}
+
+TEST_CASE("parse_rendered_params - jphc with viewport and frame",
+          "[dicomweb][rendered][htj2k]") {
+    auto params = parse_rendered_params(
+        "?viewport=256x256&frame=3", "image/jphc");
+
+    REQUIRE(params.format == rendered_format::jphc);
+    REQUIRE(params.viewport_width == 256);
+    REQUIRE(params.viewport_height == 256);
+    REQUIRE(params.frame == 3);
+}
+
+// ============================================================================
 // Performance Tests
 // ============================================================================
 
