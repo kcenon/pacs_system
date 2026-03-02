@@ -41,6 +41,7 @@
 #include "pacs/services/sop_classes/seg_storage.hpp"
 #include "pacs/services/sop_classes/sr_storage.hpp"
 #include "pacs/services/sop_classes/us_storage.hpp"
+#include "pacs/services/sop_classes/wsi_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
 
 #include <algorithm>
@@ -149,6 +150,7 @@ std::string_view sop_class_registry::modality_to_string(modality_type modality) 
         case modality_type::sc: return "SC";
         case modality_type::sr: return "SR";
         case modality_type::seg: return "SEG";
+        case modality_type::sm: return "SM";
         case modality_type::other: return "OT";
     }
     return "OT";
@@ -173,6 +175,7 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
     if (modality == "SC") return modality_type::sc;
     if (modality == "SR") return modality_type::sr;
     if (modality == "SEG") return modality_type::seg;
+    if (modality == "SM") return modality_type::sm;
     return modality_type::other;
 }
 
@@ -193,6 +196,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_sr_sop_classes();
     register_print_sop_classes();
     register_ups_sop_classes();
+    register_wsi_sop_classes();
     register_other_sop_classes();
 }
 
@@ -957,6 +961,21 @@ void sop_class_registry::register_ups_sop_classes() {
             modality_type::other,
             false,
             false
+        }
+    );
+}
+
+void sop_class_registry::register_wsi_sop_classes() {
+    // VL Whole Slide Microscopy Image Storage
+    registry_.emplace(
+        std::string(sop_classes::wsi_image_storage_uid),
+        sop_class_info{
+            sop_classes::wsi_image_storage_uid,
+            "VL Whole Slide Microscopy Image Storage",
+            sop_class_category::storage,
+            modality_type::sm,
+            false,
+            true  // supports multiframe (tiled images)
         }
     );
 }

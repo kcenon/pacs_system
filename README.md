@@ -414,15 +414,15 @@ cmake --build build --target run_full_benchmarks
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 247 files |
-| **Source Files** | 171 files |
-| **Header LOC** | ~75,400 lines |
-| **Source LOC** | ~100,800 lines |
+| **Header Files** | 248 files |
+| **Source Files** | 172 files |
+| **Header LOC** | ~75,500 lines |
+| **Source LOC** | ~100,900 lines |
 | **Example LOC** | ~35,600 lines |
-| **Test LOC** | ~73,200 lines |
-| **Total LOC** | ~285,000 lines |
-| **Test Files** | 152 files |
-| **Test Cases** | 2253+ tests |
+| **Test LOC** | ~73,400 lines |
+| **Total LOC** | ~285,400 lines |
+| **Test Files** | 153 files |
+| **Test Cases** | 2261+ tests |
 | **Example Programs** | 32 apps |
 | **Documentation** | 59 markdown files |
 | **CI/CD Workflows** | 10 workflows |
