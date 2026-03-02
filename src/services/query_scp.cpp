@@ -39,6 +39,7 @@
 #include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
+#include "pacs/security/atna_service_auditor.hpp"
 
 #include <kcenon/common/patterns/event_bus.h>
 
@@ -82,6 +83,11 @@ size_t query_scp::max_results() const noexcept {
 
 void query_scp::set_cancel_check(cancel_check check) {
     cancel_check_ = std::move(check);
+}
+
+void query_scp::set_audit_handler(
+    std::shared_ptr<pacs::security::atna_service_auditor> auditor) {
+    auditor_ = std::move(auditor);
 }
 
 // =============================================================================
@@ -195,6 +201,15 @@ network::Result<std::monostate> query_scp::handle_message(
             static_cast<uint64_t>(execution_time_ms)
         }
     );
+
+    // Emit ATNA audit event
+    if (auditor_) {
+        auditor_->audit_query(
+            calling_ae,
+            std::string(assoc.called_ae()),
+            std::string(to_string(level.value())),
+            true);
+    }
 
     // Send final success response (no dataset)
     return send_final_response(
