@@ -1069,6 +1069,7 @@ add_library(pacs_services
     src/services/sop_classes/mr_storage.cpp
     src/services/sop_classes/wsi_storage.cpp
     src/services/sop_classes/ophthalmic_storage.cpp
+    src/services/sop_classes/parametric_map_storage.cpp
     src/services/validation/us_iod_validator.cpp
     src/services/validation/dx_iod_validator.cpp
     src/services/validation/mg_iod_validator.cpp
@@ -1892,6 +1893,7 @@ if(PACS_BUILD_TESTS)
         tests/services/ct_storage_test.cpp
         tests/services/wsi_storage_test.cpp
         tests/services/ophthalmic_storage_test.cpp
+        tests/services/parametric_map_storage_test.cpp
         tests/services/ct_iod_validator_test.cpp
         tests/services/mr_iod_validator_test.cpp
         tests/services/wsi_iod_validator_test.cpp

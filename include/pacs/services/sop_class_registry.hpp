@@ -92,6 +92,7 @@ enum class modality_type {
     seg,        ///< Segmentation
     sm,         ///< Slide Microscopy (Whole Slide Imaging)
     op,         ///< Ophthalmic Photography / Tomography
+    pmap,       ///< Parametric Map
     other       ///< Other modalities
 };
 
@@ -239,6 +240,7 @@ private:
     void register_ups_sop_classes();
     void register_wsi_sop_classes();
     void register_ophthalmic_sop_classes();
+    void register_parametric_map_sop_classes();
     void register_other_sop_classes();
 
     std::unordered_map<std::string, sop_class_info> registry_;
