@@ -79,8 +79,7 @@ TEST_CASE("to_json escapes special characters in strings",
 
     auto json = to_json(config);
 
-    CHECK_THAT(json,
-               ContainsSubstring(R"("audit_source_id":"PACS \"System\" 01")"));
+    CHECK_THAT(json, ContainsSubstring("PACS \\\"System\\\" 01"));
 }
 
 TEST_CASE("to_json default config produces disabled UDP config",
@@ -191,7 +190,7 @@ TEST_CASE("parse_atna_config with unknown protocol defaults to UDP",
 
 TEST_CASE("parse_atna_config handles escaped strings",
           "[security][atna_config]") {
-    std::string json = R"({"audit_source_id": "PACS \"Test\" System"})";
+    std::string json = "{\"audit_source_id\": \"PACS \\\"Test\\\" System\"}";
 
     auto config = parse_atna_config(json);
     CHECK(config.audit_source_id == "PACS \"Test\" System");
