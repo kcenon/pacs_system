@@ -51,8 +51,11 @@
 
 #include <atomic>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
+
+namespace pacs::security { class atna_service_auditor; }
 
 namespace pacs::services {
 
@@ -257,6 +260,17 @@ public:
      */
     void set_post_store_handler(post_store_handler handler);
 
+    /**
+     * @brief Set the ATNA audit handler for C-STORE operations
+     *
+     * When set, audit events are emitted for each C-STORE operation
+     * (both success and failure).
+     *
+     * @param auditor Shared pointer to an ATNA service auditor
+     */
+    void set_audit_handler(
+        std::shared_ptr<pacs::security::atna_service_auditor> auditor);
+
     // =========================================================================
     // scp_service Interface Implementation
     // =========================================================================
@@ -334,6 +348,9 @@ private:
 
     /// Post-store notification handler
     post_store_handler post_store_handler_;
+
+    /// ATNA audit handler
+    std::shared_ptr<pacs::security::atna_service_auditor> auditor_;
 
     /// Statistics: number of images received
     std::atomic<size_t> images_received_{0};
