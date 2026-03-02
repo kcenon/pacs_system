@@ -1136,6 +1136,7 @@ set(PACS_SECURITY_SOURCES
     src/security/tag_action.cpp
     src/security/uid_mapping.cpp
     src/security/anonymizer.cpp
+    src/security/atna_audit_logger.cpp
 )
 
 # Digital signature sources (requires OpenSSL - Issue #191)
@@ -1917,6 +1918,7 @@ if(PACS_BUILD_TESTS)
         tests/security/sqlite_security_storage_test.cpp
         tests/security/uid_mapping_test.cpp
         tests/security/anonymizer_test.cpp
+        tests/security/atna_audit_logger_test.cpp
     )
 
     # Add digital signature tests if OpenSSL is available (Issue #191)
