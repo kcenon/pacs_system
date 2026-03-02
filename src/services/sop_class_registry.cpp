@@ -43,6 +43,7 @@
 #include "pacs/services/sop_classes/us_storage.hpp"
 #include "pacs/services/sop_classes/wsi_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
+#include "pacs/services/sop_classes/ophthalmic_storage.hpp"
 
 #include <algorithm>
 
@@ -151,6 +152,7 @@ std::string_view sop_class_registry::modality_to_string(modality_type modality) 
         case modality_type::sr: return "SR";
         case modality_type::seg: return "SEG";
         case modality_type::sm: return "SM";
+        case modality_type::op: return "OP";
         case modality_type::other: return "OT";
     }
     return "OT";
@@ -176,6 +178,7 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
     if (modality == "SR") return modality_type::sr;
     if (modality == "SEG") return modality_type::seg;
     if (modality == "SM") return modality_type::sm;
+    if (modality == "OP" || modality == "OPT") return modality_type::op;
     return modality_type::other;
 }
 
@@ -197,6 +200,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_print_sop_classes();
     register_ups_sop_classes();
     register_wsi_sop_classes();
+    register_ophthalmic_sop_classes();
     register_other_sop_classes();
 }
 
@@ -976,6 +980,73 @@ void sop_class_registry::register_wsi_sop_classes() {
             modality_type::sm,
             false,
             true  // supports multiframe (tiled images)
+        }
+    );
+}
+
+void sop_class_registry::register_ophthalmic_sop_classes() {
+    // Ophthalmic Photography 8 Bit Image Storage
+    registry_.emplace(
+        std::string(sop_classes::ophthalmic_photo_8bit_storage_uid),
+        sop_class_info{
+            sop_classes::ophthalmic_photo_8bit_storage_uid,
+            "Ophthalmic Photography 8 Bit Image Storage",
+            sop_class_category::storage,
+            modality_type::op,
+            false,
+            false
+        }
+    );
+
+    // Ophthalmic Photography 16 Bit Image Storage
+    registry_.emplace(
+        std::string(sop_classes::ophthalmic_photo_16bit_storage_uid),
+        sop_class_info{
+            sop_classes::ophthalmic_photo_16bit_storage_uid,
+            "Ophthalmic Photography 16 Bit Image Storage",
+            sop_class_category::storage,
+            modality_type::op,
+            false,
+            false
+        }
+    );
+
+    // Ophthalmic Tomography Image Storage (OCT)
+    registry_.emplace(
+        std::string(sop_classes::ophthalmic_tomography_storage_uid),
+        sop_class_info{
+            sop_classes::ophthalmic_tomography_storage_uid,
+            "Ophthalmic Tomography Image Storage",
+            sop_class_category::storage,
+            modality_type::op,
+            false,
+            true  // OCT produces multi-frame B-scan volumes
+        }
+    );
+
+    // Wide Field Ophthalmic Photography SOP Class Storage
+    registry_.emplace(
+        std::string(sop_classes::wide_field_ophthalmic_photo_storage_uid),
+        sop_class_info{
+            sop_classes::wide_field_ophthalmic_photo_storage_uid,
+            "Wide Field Ophthalmic Photography Storage",
+            sop_class_category::storage,
+            modality_type::op,
+            false,
+            false
+        }
+    );
+
+    // Ophthalmic OCT B-scan Volume Analysis Storage
+    registry_.emplace(
+        std::string(sop_classes::ophthalmic_oct_bscan_analysis_storage_uid),
+        sop_class_info{
+            sop_classes::ophthalmic_oct_bscan_analysis_storage_uid,
+            "Ophthalmic OCT B-scan Volume Analysis Storage",
+            sop_class_category::storage,
+            modality_type::op,
+            false,
+            true  // B-scan volume analysis is multi-frame
         }
     );
 }
