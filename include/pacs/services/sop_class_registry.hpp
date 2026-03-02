@@ -91,6 +91,7 @@ enum class modality_type {
     sr,         ///< Structured Report
     seg,        ///< Segmentation
     sm,         ///< Slide Microscopy (Whole Slide Imaging)
+    op,         ///< Ophthalmic Photography / Tomography
     other       ///< Other modalities
 };
 
@@ -237,6 +238,7 @@ private:
     void register_print_sop_classes();
     void register_ups_sop_classes();
     void register_wsi_sop_classes();
+    void register_ophthalmic_sop_classes();
     void register_other_sop_classes();
 
     std::unordered_map<std::string, sop_class_info> registry_;
