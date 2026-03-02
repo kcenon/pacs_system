@@ -90,6 +90,7 @@ enum class modality_type {
     sc,         ///< Secondary Capture
     sr,         ///< Structured Report
     seg,        ///< Segmentation
+    sm,         ///< Slide Microscopy (Whole Slide Imaging)
     other       ///< Other modalities
 };
 
@@ -235,6 +236,7 @@ private:
     void register_sr_sop_classes();
     void register_print_sop_classes();
     void register_ups_sop_classes();
+    void register_wsi_sop_classes();
     void register_other_sop_classes();
 
     std::unordered_map<std::string, sop_class_info> registry_;
