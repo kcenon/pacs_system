@@ -48,7 +48,10 @@
 
 #include <atomic>
 #include <functional>
+#include <memory>
 #include <optional>
+
+namespace pacs::security { class atna_service_auditor; }
 
 namespace pacs::services {
 
@@ -261,6 +264,16 @@ public:
      */
     void set_cancel_check(cancel_check check);
 
+    /**
+     * @brief Set the ATNA audit handler for C-FIND operations
+     *
+     * When set, audit events are emitted for each completed C-FIND operation.
+     *
+     * @param auditor Shared pointer to an ATNA service auditor
+     */
+    void set_audit_handler(
+        std::shared_ptr<pacs::security::atna_service_auditor> auditor);
+
     // =========================================================================
     // scp_service Interface Implementation
     // =========================================================================
@@ -365,6 +378,7 @@ private:
 
     query_handler handler_;
     cancel_check cancel_check_;
+    std::shared_ptr<pacs::security::atna_service_auditor> auditor_;
     size_t max_results_{0};  // 0 = unlimited
     std::atomic<size_t> queries_processed_{0};
 };

@@ -38,6 +38,7 @@
 #include "pacs/core/result.hpp"
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
+#include "pacs/security/atna_service_auditor.hpp"
 
 #include <kcenon/common/patterns/event_bus.h>
 
@@ -68,6 +69,11 @@ void storage_scp::set_pre_store_handler(pre_store_handler handler) {
 
 void storage_scp::set_post_store_handler(post_store_handler handler) {
     post_store_handler_ = std::move(handler);
+}
+
+void storage_scp::set_audit_handler(
+    std::shared_ptr<pacs::security::atna_service_auditor> auditor) {
+    auditor_ = std::move(auditor);
 }
 
 // =============================================================================
@@ -188,6 +194,18 @@ network::Result<std::monostate> storage_scp::handle_message(
                 "C-STORE operation failed"
             }
         );
+    }
+
+    // Emit ATNA audit event
+    if (auditor_) {
+        auto audit_study_uid = dataset.get_string(core::tags::study_instance_uid);
+        auto audit_patient_id = dataset.get_string(core::tags::patient_id);
+        auditor_->audit_instance_stored(
+            std::string(assoc.calling_ae()),
+            std::string(assoc.called_ae()),
+            audit_study_uid,
+            audit_patient_id,
+            !is_failure(status));
     }
 
     // Build and send the response
