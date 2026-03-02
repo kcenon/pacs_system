@@ -45,6 +45,7 @@
 #ifndef PACS_SERVICES_SOP_CLASSES_WSI_STORAGE_HPP
 #define PACS_SERVICES_SOP_CLASSES_WSI_STORAGE_HPP
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
