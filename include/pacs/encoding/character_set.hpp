@@ -31,18 +31,25 @@
  * @file character_set.hpp
  * @brief DICOM Character Set registry, ISO 2022 parser, and string decoder
  *
- * Provides support for decoding DICOM strings encoded with CJK character sets
- * (Korean, Japanese, Chinese) using ISO 2022 escape sequence-based code extensions
+ * Provides support for decoding DICOM strings encoded with international
+ * character sets using ISO 2022 escape sequence-based code extensions
  * as specified in DICOM PS3.5 Section 6.1 and PS3.3 Annex C.12.1.1.2.
  *
  * Supported character sets:
  * - ISO-IR 6 (ASCII, default repertoire)
  * - ISO-IR 100 (Latin-1, Western European)
+ * - ISO-IR 101 (Latin-2, Central European)
+ * - ISO-IR 126 (Greek)
+ * - ISO-IR 127 (Arabic)
+ * - ISO-IR 138 (Hebrew)
+ * - ISO-IR 144 (Cyrillic)
+ * - ISO-IR 166 (Thai, TIS 620-2533)
  * - ISO-IR 192 (UTF-8, Unicode)
  * - ISO-IR 149 (Korean, KS X 1001 / EUC-KR)
  * - ISO-IR 87 (Japanese Kanji, JIS X 0208)
  * - ISO-IR 13 (Japanese Katakana, JIS X 0201)
  * - ISO-IR 58 (Chinese, GB2312)
+ * - GB18030 (Chinese, full character set)
  *
  * @see DICOM PS3.5 Section 6.1 - Support of Character Repertoires
  * @see DICOM PS3.3 Section C.12.1.1.2 - Specific Character Set

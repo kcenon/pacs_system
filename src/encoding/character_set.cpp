@@ -73,8 +73,26 @@ constexpr std::string_view esc_ir_6{"\x1B\x28\x42", 3};
 // Latin-1: ESC - A
 constexpr std::string_view esc_ir_100{"\x1B\x2D\x41", 3};
 
+// Latin-2 (Central European): ESC - B
+constexpr std::string_view esc_ir_101{"\x1B\x2D\x42", 3};
+
+// Greek: ESC - F
+constexpr std::string_view esc_ir_126{"\x1B\x2D\x46", 3};
+
+// Arabic: ESC - G
+constexpr std::string_view esc_ir_127{"\x1B\x2D\x47", 3};
+
+// Hebrew: ESC - H
+constexpr std::string_view esc_ir_138{"\x1B\x2D\x48", 3};
+
+// Cyrillic: ESC - L
+constexpr std::string_view esc_ir_144{"\x1B\x2D\x4C", 3};
+
+// Thai: ESC - T
+constexpr std::string_view esc_ir_166{"\x1B\x2D\x54", 3};
+
 /// Static registry of supported character sets
-const std::array<character_set_info, 8> charset_registry = {{
+const std::array<character_set_info, 20> charset_registry = {{
     {
         "ISO_IR 6",             // defined_term
         "ASCII (Default)",      // description
@@ -91,6 +109,60 @@ const std::array<character_set_info, 8> charset_registry = {{
         false,
         {},
         "ISO-8859-1",
+        false
+    },
+    {
+        "ISO_IR 101",
+        "Latin-2 (Central European)",
+        "ISO-IR 101",
+        false,
+        {},
+        "ISO-8859-2",
+        false
+    },
+    {
+        "ISO_IR 126",
+        "Greek",
+        "ISO-IR 126",
+        false,
+        {},
+        "ISO-8859-7",
+        false
+    },
+    {
+        "ISO_IR 127",
+        "Arabic",
+        "ISO-IR 127",
+        false,
+        {},
+        "ISO-8859-6",
+        false
+    },
+    {
+        "ISO_IR 138",
+        "Hebrew",
+        "ISO-IR 138",
+        false,
+        {},
+        "ISO-8859-8",
+        false
+    },
+    {
+        "ISO_IR 144",
+        "Cyrillic",
+        "ISO-IR 144",
+        false,
+        {},
+        "ISO-8859-5",
+        false
+    },
+    {
+        "ISO_IR 166",
+        "Thai (TIS 620-2533)",
+        "ISO-IR 166",
+        false,
+        {},
+        "TIS-620",
         false
     },
     {
@@ -121,6 +193,51 @@ const std::array<character_set_info, 8> charset_registry = {{
         false
     },
     {
+        "ISO 2022 IR 101",
+        "Latin-2 (with extensions)",
+        "ISO-IR 101",
+        true,
+        esc_ir_101,
+        "ISO-8859-2",
+        false
+    },
+    {
+        "ISO 2022 IR 126",
+        "Greek (with extensions)",
+        "ISO-IR 126",
+        true,
+        esc_ir_126,
+        "ISO-8859-7",
+        false
+    },
+    {
+        "ISO 2022 IR 127",
+        "Arabic (with extensions)",
+        "ISO-IR 127",
+        true,
+        esc_ir_127,
+        "ISO-8859-6",
+        false
+    },
+    {
+        "ISO 2022 IR 138",
+        "Hebrew (with extensions)",
+        "ISO-IR 138",
+        true,
+        esc_ir_138,
+        "ISO-8859-8",
+        false
+    },
+    {
+        "ISO 2022 IR 144",
+        "Cyrillic (with extensions)",
+        "ISO-IR 144",
+        true,
+        esc_ir_144,
+        "ISO-8859-5",
+        false
+    },
+    {
         "ISO 2022 IR 149",
         "Korean (KS X 1001)",
         "ISO-IR 149",
@@ -128,6 +245,15 @@ const std::array<character_set_info, 8> charset_registry = {{
         esc_ir_149,
         "EUC-KR",
         true
+    },
+    {
+        "ISO 2022 IR 166",
+        "Thai (with extensions)",
+        "ISO-IR 166",
+        true,
+        esc_ir_166,
+        "TIS-620",
+        false
     },
     {
         "ISO 2022 IR 87",
@@ -160,6 +286,17 @@ const character_set_info charset_ir_58 = {
     true
 };
 
+// GB18030 is separate: replacement encoding without ISO 2022 escape sequences
+const character_set_info charset_gb18030 = {
+    "GB18030",
+    "Chinese (GB18030, full)",
+    "GB18030",
+    false,
+    {},
+    "GB18030",
+    true
+};
+
 const character_set_info* find_in_registry(std::string_view term) noexcept {
     for (const auto& entry : charset_registry) {
         if (entry.defined_term == term) {
@@ -169,6 +306,9 @@ const character_set_info* find_in_registry(std::string_view term) noexcept {
     if (charset_ir_58.defined_term == term) {
         return &charset_ir_58;
     }
+    if (charset_gb18030.defined_term == term) {
+        return &charset_gb18030;
+    }
     return nullptr;
 }
 
@@ -177,6 +317,12 @@ const character_set_info* find_by_ir_number(int ir_number) noexcept {
     switch (ir_number) {
         case 6: return find_in_registry("ISO_IR 6");
         case 100: return find_in_registry("ISO_IR 100");
+        case 101: return find_in_registry("ISO_IR 101");
+        case 126: return find_in_registry("ISO_IR 126");
+        case 127: return find_in_registry("ISO_IR 127");
+        case 138: return find_in_registry("ISO_IR 138");
+        case 144: return find_in_registry("ISO_IR 144");
+        case 166: return find_in_registry("ISO_IR 166");
         case 192: return find_in_registry("ISO_IR 192");
         case 149: return find_in_registry("ISO 2022 IR 149");
         case 87: return find_in_registry("ISO 2022 IR 87");
@@ -221,8 +367,22 @@ std::string iconv_convert(std::string_view input,
         code_page = 50220;
     } else if (charset.encoding_name == "GB2312") {
         code_page = 936;
+    } else if (charset.encoding_name == "GB18030") {
+        code_page = 54936;
     } else if (charset.encoding_name == "ISO-8859-1") {
         code_page = 28591;
+    } else if (charset.encoding_name == "ISO-8859-2") {
+        code_page = 28592;
+    } else if (charset.encoding_name == "ISO-8859-5") {
+        code_page = 28595;
+    } else if (charset.encoding_name == "ISO-8859-6") {
+        code_page = 28596;
+    } else if (charset.encoding_name == "ISO-8859-7") {
+        code_page = 28597;
+    } else if (charset.encoding_name == "ISO-8859-8") {
+        code_page = 28598;
+    } else if (charset.encoding_name == "TIS-620") {
+        code_page = 874;
     } else if (charset.encoding_name == "JIS_X0201") {
         code_page = 50222;
     } else if (charset.encoding_name == "ASCII" ||
@@ -339,8 +499,22 @@ std::string iconv_reverse_convert(std::string_view utf8_input,
         code_page = 50220;
     } else if (charset.encoding_name == "GB2312") {
         code_page = 936;
+    } else if (charset.encoding_name == "GB18030") {
+        code_page = 54936;
     } else if (charset.encoding_name == "ISO-8859-1") {
         code_page = 28591;
+    } else if (charset.encoding_name == "ISO-8859-2") {
+        code_page = 28592;
+    } else if (charset.encoding_name == "ISO-8859-5") {
+        code_page = 28595;
+    } else if (charset.encoding_name == "ISO-8859-6") {
+        code_page = 28596;
+    } else if (charset.encoding_name == "ISO-8859-7") {
+        code_page = 28597;
+    } else if (charset.encoding_name == "ISO-8859-8") {
+        code_page = 28598;
+    } else if (charset.encoding_name == "TIS-620") {
+        code_page = 874;
     } else if (charset.encoding_name == "JIS_X0201") {
         code_page = 50222;
     }
@@ -467,11 +641,12 @@ const character_set_info& default_character_set() noexcept {
 
 std::vector<const character_set_info*> all_character_sets() noexcept {
     std::vector<const character_set_info*> result;
-    result.reserve(charset_registry.size() + 1);
+    result.reserve(charset_registry.size() + 2);
     for (const auto& entry : charset_registry) {
         result.push_back(&entry);
     }
     result.push_back(&charset_ir_58);
+    result.push_back(&charset_gb18030);
     return result;
 }
 
