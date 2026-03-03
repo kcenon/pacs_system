@@ -1424,6 +1424,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/measurement_endpoints.cpp
         src/web/endpoints/key_image_endpoints.cpp
         src/web/endpoints/viewer_state_endpoints.cpp
+        src/web/endpoints/wado_uri_endpoints.cpp
     )
 
     # Add metrics endpoints conditionally (use TARGET check, not CMake variable)
@@ -2058,6 +2059,7 @@ if(PACS_BUILD_TESTS)
             tests/web/measurement_endpoints_test.cpp
             tests/web/key_image_endpoints_test.cpp
             tests/web/viewer_state_endpoints_test.cpp
+            tests/web/wado_uri_endpoints_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE

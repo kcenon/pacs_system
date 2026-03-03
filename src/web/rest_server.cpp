@@ -56,6 +56,7 @@
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/endpoints/thumbnail_endpoints.hpp"
 #include "pacs/web/endpoints/viewer_state_endpoints.hpp"
+#include "pacs/web/endpoints/wado_uri_endpoints.hpp"
 #include "pacs/web/endpoints/worklist_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_server.hpp"
@@ -110,6 +111,8 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
                                        std::shared_ptr<rest_server_context> ctx);
 void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
                                           std::shared_ptr<rest_server_context> ctx);
+void register_wado_uri_endpoints_impl(crow::SimpleApp &app,
+                                      std::shared_ptr<rest_server_context> ctx);
 #ifdef PACS_WITH_DATABASE_SYSTEM
 void register_metrics_endpoints_impl(crow::SimpleApp &app,
                                      std::shared_ptr<rest_server_context> ctx);
@@ -276,6 +279,7 @@ void rest_server::start_async() {
     endpoints::register_measurement_endpoints_impl(app, impl_->context);
     endpoints::register_key_image_endpoints_impl(app, impl_->context);
     endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
+    endpoints::register_wado_uri_endpoints_impl(app, impl_->context);
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     endpoints::register_metrics_endpoints_impl(app, impl_->context);
