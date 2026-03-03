@@ -79,6 +79,67 @@ TEST_CASE("Character set registry lookup", "[encoding][charset]") {
         CHECK(cs->is_multi_byte);
     }
 
+    SECTION("Find Latin-2 (ISO_IR 101)") {
+        const auto* cs = find_character_set("ISO_IR 101");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->defined_term == "ISO_IR 101");
+        CHECK(cs->encoding_name == "ISO-8859-2");
+        CHECK_FALSE(cs->uses_code_extensions);
+        CHECK_FALSE(cs->is_multi_byte);
+    }
+
+    SECTION("Find Greek (ISO_IR 126)") {
+        const auto* cs = find_character_set("ISO_IR 126");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->encoding_name == "ISO-8859-7");
+        CHECK_FALSE(cs->is_multi_byte);
+    }
+
+    SECTION("Find Arabic (ISO_IR 127)") {
+        const auto* cs = find_character_set("ISO_IR 127");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->encoding_name == "ISO-8859-6");
+        CHECK_FALSE(cs->is_multi_byte);
+    }
+
+    SECTION("Find Hebrew (ISO_IR 138)") {
+        const auto* cs = find_character_set("ISO_IR 138");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->encoding_name == "ISO-8859-8");
+        CHECK_FALSE(cs->is_multi_byte);
+    }
+
+    SECTION("Find Cyrillic (ISO_IR 144)") {
+        const auto* cs = find_character_set("ISO_IR 144");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->encoding_name == "ISO-8859-5");
+        CHECK_FALSE(cs->is_multi_byte);
+    }
+
+    SECTION("Find Thai (ISO_IR 166)") {
+        const auto* cs = find_character_set("ISO_IR 166");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->encoding_name == "TIS-620");
+        CHECK_FALSE(cs->is_multi_byte);
+    }
+
+    SECTION("Find GB18030") {
+        const auto* cs = find_character_set("GB18030");
+        REQUIRE(cs != nullptr);
+        CHECK(cs->encoding_name == "GB18030");
+        CHECK(cs->is_multi_byte);
+        CHECK_FALSE(cs->uses_code_extensions);
+    }
+
+    SECTION("Find ISO 2022 IR extension forms") {
+        CHECK(find_character_set("ISO 2022 IR 101") != nullptr);
+        CHECK(find_character_set("ISO 2022 IR 126") != nullptr);
+        CHECK(find_character_set("ISO 2022 IR 127") != nullptr);
+        CHECK(find_character_set("ISO 2022 IR 138") != nullptr);
+        CHECK(find_character_set("ISO 2022 IR 144") != nullptr);
+        CHECK(find_character_set("ISO 2022 IR 166") != nullptr);
+    }
+
     SECTION("Unknown character set returns nullptr") {
         CHECK(find_character_set("UNKNOWN") == nullptr);
         CHECK(find_character_set("ISO_IR 999") == nullptr);
@@ -88,6 +149,12 @@ TEST_CASE("Character set registry lookup", "[encoding][charset]") {
     SECTION("Find by ISO-IR number") {
         CHECK(find_character_set_by_ir(6) != nullptr);
         CHECK(find_character_set_by_ir(100) != nullptr);
+        CHECK(find_character_set_by_ir(101) != nullptr);
+        CHECK(find_character_set_by_ir(126) != nullptr);
+        CHECK(find_character_set_by_ir(127) != nullptr);
+        CHECK(find_character_set_by_ir(138) != nullptr);
+        CHECK(find_character_set_by_ir(144) != nullptr);
+        CHECK(find_character_set_by_ir(166) != nullptr);
         CHECK(find_character_set_by_ir(192) != nullptr);
         CHECK(find_character_set_by_ir(149) != nullptr);
         CHECK(find_character_set_by_ir(87) != nullptr);
@@ -105,7 +172,7 @@ TEST_CASE("Default character set", "[encoding][charset]") {
 
 TEST_CASE("All character sets enumeration", "[encoding][charset]") {
     auto all = all_character_sets();
-    CHECK(all.size() == 9);  // 8 in array + GB2312
+    CHECK(all.size() == 22);  // 20 in array + GB2312 + GB18030
 
     // Verify all entries are non-null
     for (const auto* cs : all) {
@@ -547,4 +614,229 @@ TEST_CASE("Chinese round-trip encode/decode", "[encoding][charset]") {
     // Decode back to UTF-8: round-trip must produce identical result
     auto round_trip = decode_to_utf8(encoded, scs);
     CHECK(round_trip == utf8_input);
+}
+
+// =============================================================================
+// Extended Character Set Encoding/Decoding Tests
+// =============================================================================
+
+TEST_CASE("Latin-2 round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 101");
+
+    // Latin-2: č = 0xE8, ž = 0xBE (Czech characters)
+    std::string latin2_raw = "Pr\xE1ha \xE8\xE9";  // "Práha čé"
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(latin2_raw, scs);
+    // á in ISO-8859-2 = 0xE1 → UTF-8 C3 A1
+    // č in ISO-8859-2 = 0xE8 → UTF-8 C4 8D
+    // é in ISO-8859-2 = 0xE9 → UTF-8 C3 A9
+    CHECK(utf8.find("Pr\xC3\xA1ha") == 0);
+    CHECK(utf8.find("\xC4\x8D\xC3\xA9") != std::string::npos);
+
+    // Encode back to Latin-2
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == latin2_raw);
+}
+
+TEST_CASE("Greek round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 126");
+
+    // Greek: α = 0xE1, β = 0xE2 in ISO-8859-7
+    std::string greek_raw = "\xE1\xE2";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(greek_raw, scs);
+    // α (U+03B1) → UTF-8 CE B1
+    // β (U+03B2) → UTF-8 CE B2
+    CHECK(utf8 == "\xCE\xB1\xCE\xB2");
+
+    // Encode back to Greek
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == greek_raw);
+}
+
+TEST_CASE("Cyrillic round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 144");
+
+    // Cyrillic: М = 0xBC, и = 0xD8, р = 0xE0 in ISO-8859-5 ("Мир" = Peace)
+    std::string cyrillic_raw = "\xBC\xD8\xE0";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(cyrillic_raw, scs);
+    // М (U+041C) → UTF-8 D0 9C
+    // и (U+0438) → UTF-8 D0 B8
+    // р (U+0440) → UTF-8 D1 80
+    CHECK(utf8 == "\xD0\x9C\xD0\xB8\xD1\x80");
+
+    // Encode back to Cyrillic
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == cyrillic_raw);
+}
+
+TEST_CASE("Arabic decoding", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 127");
+
+    // Arabic: Alef = 0xC7, Beh = 0xC8 in ISO-8859-6
+    std::string arabic_raw = "\xC7\xC8";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(arabic_raw, scs);
+    // Alef (U+0627) → UTF-8 D8 A7
+    // Beh  (U+0628) → UTF-8 D8 A8
+    CHECK(utf8 == "\xD8\xA7\xD8\xA8");
+
+    // Round-trip
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == arabic_raw);
+}
+
+TEST_CASE("Hebrew decoding", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 138");
+
+    // Hebrew: Alef = 0xE0, Bet = 0xE1 in ISO-8859-8
+    std::string hebrew_raw = "\xE0\xE1";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(hebrew_raw, scs);
+    // Alef (U+05D0) → UTF-8 D7 90
+    // Bet  (U+05D1) → UTF-8 D7 91
+    CHECK(utf8 == "\xD7\x90\xD7\x91");
+
+    // Round-trip
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == hebrew_raw);
+}
+
+TEST_CASE("Thai decoding", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("ISO_IR 166");
+
+    // Thai: Ko Kai = 0xA1, Kho Khai = 0xA2 in TIS-620
+    std::string thai_raw = "\xA1\xA2";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(thai_raw, scs);
+    // Ko Kai  (U+0E01) → UTF-8 E0 B8 81
+    // Kho Khai (U+0E02) → UTF-8 E0 B8 82
+    CHECK(utf8 == "\xE0\xB8\x81\xE0\xB8\x82");
+
+    // Round-trip
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == thai_raw);
+}
+
+TEST_CASE("GB18030 round-trip encode/decode", "[encoding][charset]") {
+    auto scs = parse_specific_character_set("GB18030");
+
+    // GB18030 2-byte encoding: 你好
+    // 你 = 0xC4 0xE3 in GB18030
+    // 好 = 0xBA 0xC3 in GB18030
+    std::string gb18030_raw = "\xC4\xE3\xBA\xC3";
+
+    // Decode to UTF-8
+    auto utf8 = decode_to_utf8(gb18030_raw, scs);
+    // 你 (U+4F60) → UTF-8 E4 BD A0
+    // 好 (U+597D) → UTF-8 E5 A5 BD
+    CHECK(utf8 == "\xE4\xBD\xA0\xE5\xA5\xBD");
+
+    // Encode back to GB18030
+    auto encoded = encode_from_utf8(utf8, scs);
+    CHECK(encoded == gb18030_raw);
+}
+
+TEST_CASE("New escape sequence format verification", "[encoding][charset]") {
+    SECTION("Latin-2 ESC sequence: ESC - B") {
+        const auto* cs = find_character_set("ISO 2022 IR 101");
+        REQUIRE(cs != nullptr);
+        REQUIRE(cs->escape_sequence.size() == 3);
+        CHECK(cs->escape_sequence[0] == '\x1B');  // ESC
+        CHECK(cs->escape_sequence[1] == '\x2D');  // -
+        CHECK(cs->escape_sequence[2] == '\x42');  // B
+    }
+
+    SECTION("Greek ESC sequence: ESC - F") {
+        const auto* cs = find_character_set("ISO 2022 IR 126");
+        REQUIRE(cs != nullptr);
+        REQUIRE(cs->escape_sequence.size() == 3);
+        CHECK(cs->escape_sequence[0] == '\x1B');
+        CHECK(cs->escape_sequence[1] == '\x2D');
+        CHECK(cs->escape_sequence[2] == '\x46');
+    }
+
+    SECTION("Arabic ESC sequence: ESC - G") {
+        const auto* cs = find_character_set("ISO 2022 IR 127");
+        REQUIRE(cs != nullptr);
+        REQUIRE(cs->escape_sequence.size() == 3);
+        CHECK(cs->escape_sequence[0] == '\x1B');
+        CHECK(cs->escape_sequence[1] == '\x2D');
+        CHECK(cs->escape_sequence[2] == '\x47');
+    }
+
+    SECTION("Hebrew ESC sequence: ESC - H") {
+        const auto* cs = find_character_set("ISO 2022 IR 138");
+        REQUIRE(cs != nullptr);
+        REQUIRE(cs->escape_sequence.size() == 3);
+        CHECK(cs->escape_sequence[0] == '\x1B');
+        CHECK(cs->escape_sequence[1] == '\x2D');
+        CHECK(cs->escape_sequence[2] == '\x48');
+    }
+
+    SECTION("Cyrillic ESC sequence: ESC - L") {
+        const auto* cs = find_character_set("ISO 2022 IR 144");
+        REQUIRE(cs != nullptr);
+        REQUIRE(cs->escape_sequence.size() == 3);
+        CHECK(cs->escape_sequence[0] == '\x1B');
+        CHECK(cs->escape_sequence[1] == '\x2D');
+        CHECK(cs->escape_sequence[2] == '\x4C');
+    }
+
+    SECTION("Thai ESC sequence: ESC - T") {
+        const auto* cs = find_character_set("ISO 2022 IR 166");
+        REQUIRE(cs != nullptr);
+        REQUIRE(cs->escape_sequence.size() == 3);
+        CHECK(cs->escape_sequence[0] == '\x1B');
+        CHECK(cs->escape_sequence[1] == '\x2D');
+        CHECK(cs->escape_sequence[2] == '\x54');
+    }
+}
+
+TEST_CASE("Multi-valued specific character set with new charsets", "[encoding][charset]") {
+    SECTION("ASCII + Latin-2 extension") {
+        auto scs = parse_specific_character_set("\\ISO 2022 IR 101");
+        CHECK(scs.default_set->defined_term == "ISO_IR 6");
+        REQUIRE(scs.extension_sets.size() == 1);
+        CHECK(scs.extension_sets[0]->defined_term == "ISO 2022 IR 101");
+        CHECK(scs.uses_extensions());
+    }
+
+    SECTION("ASCII + Cyrillic extension") {
+        auto scs = parse_specific_character_set("\\ISO 2022 IR 144");
+        REQUIRE(scs.extension_sets.size() == 1);
+        CHECK(scs.extension_sets[0]->encoding_name == "ISO-8859-5");
+    }
+
+    SECTION("New charsets are single-byte only") {
+        auto latin2 = parse_specific_character_set("ISO_IR 101");
+        CHECK(latin2.is_single_byte_only());
+
+        auto greek = parse_specific_character_set("ISO_IR 126");
+        CHECK(greek.is_single_byte_only());
+
+        auto arabic = parse_specific_character_set("ISO_IR 127");
+        CHECK(arabic.is_single_byte_only());
+
+        auto hebrew = parse_specific_character_set("ISO_IR 138");
+        CHECK(hebrew.is_single_byte_only());
+
+        auto cyrillic = parse_specific_character_set("ISO_IR 144");
+        CHECK(cyrillic.is_single_byte_only());
+
+        auto thai = parse_specific_character_set("ISO_IR 166");
+        CHECK(thai.is_single_byte_only());
+    }
+
+    SECTION("GB18030 is multi-byte") {
+        auto gb18030 = parse_specific_character_set("GB18030");
+        CHECK_FALSE(gb18030.is_single_byte_only());
+    }
 }
