@@ -44,6 +44,7 @@
 #include "pacs/services/sop_classes/wsi_storage.hpp"
 #include "pacs/services/sop_classes/xa_storage.hpp"
 #include "pacs/services/sop_classes/ophthalmic_storage.hpp"
+#include "pacs/services/sop_classes/parametric_map_storage.hpp"
 
 #include <algorithm>
 
@@ -153,6 +154,7 @@ std::string_view sop_class_registry::modality_to_string(modality_type modality) 
         case modality_type::seg: return "SEG";
         case modality_type::sm: return "SM";
         case modality_type::op: return "OP";
+        case modality_type::pmap: return "RWV";
         case modality_type::other: return "OT";
     }
     return "OT";
@@ -179,6 +181,7 @@ modality_type sop_class_registry::parse_modality(std::string_view modality) noex
     if (modality == "SEG") return modality_type::seg;
     if (modality == "SM") return modality_type::sm;
     if (modality == "OP" || modality == "OPT") return modality_type::op;
+    if (modality == "RWV" || modality == "PMAP") return modality_type::pmap;
     return modality_type::other;
 }
 
@@ -201,6 +204,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_ups_sop_classes();
     register_wsi_sop_classes();
     register_ophthalmic_sop_classes();
+    register_parametric_map_sop_classes();
     register_other_sop_classes();
 }
 
@@ -1047,6 +1051,21 @@ void sop_class_registry::register_ophthalmic_sop_classes() {
             modality_type::op,
             false,
             true  // B-scan volume analysis is multi-frame
+        }
+    );
+}
+
+void sop_class_registry::register_parametric_map_sop_classes() {
+    // Parametric Map Storage
+    registry_.emplace(
+        std::string(sop_classes::parametric_map_storage_uid),
+        sop_class_info{
+            sop_classes::parametric_map_storage_uid,
+            "Parametric Map Storage",
+            sop_class_category::storage,
+            modality_type::pmap,
+            false,
+            true  // always multi-frame
         }
     );
 }
