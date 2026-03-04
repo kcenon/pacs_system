@@ -32,12 +32,13 @@
  * @brief CT Image Storage SOP Classes
  *
  * Provides SOP Class definitions and utilities for Computed Tomography (CT)
- * image storage. Supports both standard CT Image Storage and Enhanced CT
- * Image Storage.
+ * image storage. Supports standard CT Image Storage, Enhanced CT Image
+ * Storage, and CT For Processing Image Storage (multi-energy/spectral CT).
  *
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see DICOM PS3.3 Section A.3 - CT Image IOD
  * @see Issue #717 - Add CT Image IOD Validator
+ * @see Issue #848 - Add CT For Processing SOP Classes
  * @author kcenon
  * @since 1.0.0
  */
@@ -62,6 +63,11 @@ inline constexpr std::string_view ct_image_storage_uid =
 /// Enhanced CT Image Storage SOP Class UID
 inline constexpr std::string_view enhanced_ct_image_storage_uid =
     "1.2.840.10008.5.1.4.1.1.2.1";
+
+/// CT For Processing Image Storage SOP Class UID
+/// Multi-energy/spectral CT basis material decomposition images
+inline constexpr std::string_view ct_for_processing_image_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.2.2";
 
 // =============================================================================
 // CT SOP Class Utilities
