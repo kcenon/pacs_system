@@ -1149,6 +1149,7 @@ set(PACS_SECURITY_SOURCES
     src/security/atna_syslog_transport.cpp
     src/security/atna_service_auditor.cpp
     src/security/atna_config.cpp
+    src/security/tls_policy.cpp
 )
 
 # Digital signature sources (requires OpenSSL - Issue #191)
@@ -1953,6 +1954,7 @@ if(PACS_BUILD_TESTS)
         tests/security/atna_syslog_transport_test.cpp
         tests/security/atna_service_auditor_test.cpp
         tests/security/atna_config_test.cpp
+        tests/security/tls_policy_test.cpp
     )
 
     # Add digital signature tests if OpenSSL is available (Issue #191)
