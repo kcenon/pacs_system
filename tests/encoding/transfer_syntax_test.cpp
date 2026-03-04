@@ -248,8 +248,8 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + JPEG XL (3)
-        CHECK(supported.size() == 11);
+        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2) + JPEG XL (3)
+        CHECK(supported.size() == 13);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());

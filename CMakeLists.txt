@@ -818,6 +818,7 @@ add_library(pacs_encoding
     src/encoding/dataset_charset.cpp
     src/encoding/compression/jpeg_baseline_codec.cpp
     src/encoding/compression/jpeg_lossless_codec.cpp
+    src/encoding/compression/hevc_codec.cpp
     src/encoding/compression/htj2k_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp
     src/encoding/compression/jpeg_ls_codec.cpp
@@ -1150,6 +1151,7 @@ set(PACS_SECURITY_SOURCES
     src/security/atna_syslog_transport.cpp
     src/security/atna_service_auditor.cpp
     src/security/atna_config.cpp
+    src/security/tls_policy.cpp
 )
 
 # Digital signature sources (requires OpenSSL - Issue #191)
@@ -1429,6 +1431,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/key_image_endpoints.cpp
         src/web/endpoints/viewer_state_endpoints.cpp
         src/web/endpoints/wado_uri_endpoints.cpp
+        src/web/endpoints/storage_commitment_endpoints.cpp
         src/web/auth/jwt_validator.cpp
         src/web/auth/jwks_provider.cpp
         src/web/auth/oauth2_middleware.cpp
@@ -1824,6 +1827,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
         tests/encoding/compression/jpeg_baseline_codec_test.cpp
         tests/encoding/compression/jpeg_lossless_codec_test.cpp
+        tests/encoding/compression/hevc_codec_test.cpp
         tests/encoding/compression/htj2k_codec_test.cpp
         tests/encoding/compression/jpeg2000_codec_test.cpp
         tests/encoding/compression/jpeg_ls_codec_test.cpp
@@ -1955,6 +1959,7 @@ if(PACS_BUILD_TESTS)
         tests/security/atna_syslog_transport_test.cpp
         tests/security/atna_service_auditor_test.cpp
         tests/security/atna_config_test.cpp
+        tests/security/tls_policy_test.cpp
     )
 
     # Add digital signature tests if OpenSSL is available (Issue #191)
@@ -2077,6 +2082,7 @@ if(PACS_BUILD_TESTS)
             tests/web/key_image_endpoints_test.cpp
             tests/web/viewer_state_endpoints_test.cpp
             tests/web/wado_uri_endpoints_test.cpp
+            tests/web/storage_commitment_endpoints_test.cpp
             tests/web/auth/jwt_validator_test.cpp
             tests/web/auth/oauth2_middleware_test.cpp
         )

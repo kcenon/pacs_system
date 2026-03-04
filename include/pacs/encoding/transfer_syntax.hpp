@@ -167,6 +167,12 @@ public:
     /// HTJ2K (1.2.840.10008.1.2.4.203) - Lossless or Lossy
     static const transfer_syntax htj2k_lossy;
 
+    /// HEVC/H.265 Main Profile / Level 5.1 (1.2.840.10008.1.2.4.107)
+    static const transfer_syntax hevc_main;
+
+    /// HEVC/H.265 Main 10 Profile / Level 5.1 (1.2.840.10008.1.2.4.108)
+    static const transfer_syntax hevc_main10;
+
     /// JPEG XL Lossless (1.2.840.10008.1.2.4.110) - Supplement 232
     static const transfer_syntax jpegxl_lossless;
 
