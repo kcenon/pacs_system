@@ -705,6 +705,19 @@ void sop_class_registry::register_seg_sop_classes() {
             true  // supports multiframe (enhanced multi-frame architecture)
         }
     );
+
+    // Label Map Segmentation Storage (Supplement 243)
+    registry_.emplace(
+        std::string(sop_classes::label_map_segmentation_storage_uid),
+        sop_class_info{
+            sop_classes::label_map_segmentation_storage_uid,
+            "Label Map Segmentation Storage",
+            sop_class_category::storage,
+            modality_type::seg,
+            false,
+            true  // supports multiframe (enhanced multi-frame architecture)
+        }
+    );
 }
 
 void sop_class_registry::register_sr_sop_classes() {
