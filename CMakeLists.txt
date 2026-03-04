@@ -1428,6 +1428,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/key_image_endpoints.cpp
         src/web/endpoints/viewer_state_endpoints.cpp
         src/web/endpoints/wado_uri_endpoints.cpp
+        src/web/endpoints/storage_commitment_endpoints.cpp
         src/web/auth/jwt_validator.cpp
         src/web/auth/jwks_provider.cpp
         src/web/auth/oauth2_middleware.cpp
@@ -2075,6 +2076,7 @@ if(PACS_BUILD_TESTS)
             tests/web/key_image_endpoints_test.cpp
             tests/web/viewer_state_endpoints_test.cpp
             tests/web/wado_uri_endpoints_test.cpp
+            tests/web/storage_commitment_endpoints_test.cpp
             tests/web/auth/jwt_validator_test.cpp
             tests/web/auth/oauth2_middleware_test.cpp
         )

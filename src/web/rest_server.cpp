@@ -114,6 +114,8 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
                                           std::shared_ptr<rest_server_context> ctx);
 void register_wado_uri_endpoints_impl(crow::SimpleApp &app,
                                       std::shared_ptr<rest_server_context> ctx);
+void register_storage_commitment_endpoints_impl(
+    crow::SimpleApp &app, std::shared_ptr<rest_server_context> ctx);
 #ifdef PACS_WITH_DATABASE_SYSTEM
 void register_metrics_endpoints_impl(crow::SimpleApp &app,
                                      std::shared_ptr<rest_server_context> ctx);
@@ -287,6 +289,7 @@ void rest_server::start_async() {
     endpoints::register_key_image_endpoints_impl(app, impl_->context);
     endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
     endpoints::register_wado_uri_endpoints_impl(app, impl_->context);
+    endpoints::register_storage_commitment_endpoints_impl(app, impl_->context);
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     endpoints::register_metrics_endpoints_impl(app, impl_->context);
