@@ -167,6 +167,9 @@ public:
     /// HTJ2K (1.2.840.10008.1.2.4.203) - Lossless or Lossy
     static const transfer_syntax htj2k_lossy;
 
+    /// Frame Deflate (1.2.840.10008.1.2.11) - Supplement 244
+    static const transfer_syntax frame_deflate;
+
     /// @}
 
     /// @name Comparison Operators
