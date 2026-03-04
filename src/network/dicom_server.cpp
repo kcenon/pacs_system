@@ -624,8 +624,8 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
     // Accept compressed and uncompressed transfer syntaxes
     negotiation_config.supported_transfer_syntaxes = {
         "1.2.840.10008.1.2.4.201", // HTJ2K Lossless Only
-        "1.2.840.10008.1.2.4.202", // HTJ2K RPCL (Lossless or Lossy)
-        "1.2.840.10008.1.2.4.203", // HTJ2K Lossy
+        "1.2.840.10008.1.2.4.202", // HTJ2K RPCL Lossless Only
+        "1.2.840.10008.1.2.4.203", // HTJ2K (Lossless or Lossy)
         "1.2.840.10008.1.2.4.90",  // JPEG 2000 Lossless
         "1.2.840.10008.1.2.4.91",  // JPEG 2000 Lossy
         "1.2.840.10008.1.2.4.80",  // JPEG-LS Lossless

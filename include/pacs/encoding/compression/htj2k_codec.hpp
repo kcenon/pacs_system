@@ -46,7 +46,7 @@ namespace pacs::encoding::compression {
  * Implements DICOM Transfer Syntaxes defined in Supplement 235:
  * - 1.2.840.10008.1.2.4.201 (HTJ2K Lossless Only)
  * - 1.2.840.10008.1.2.4.202 (HTJ2K with RPCL Options - Lossless Only)
- * - 1.2.840.10008.1.2.4.203 (HTJ2K - Lossy)
+ * - 1.2.840.10008.1.2.4.203 (HTJ2K - Lossless or Lossy)
  *
  * HTJ2K provides 10-50x faster decoding than legacy JPEG 2000 while
  * maintaining comparable compression ratios. Uses the Part 15 (HTJ2K)
