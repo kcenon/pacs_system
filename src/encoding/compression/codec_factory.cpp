@@ -29,6 +29,7 @@
 
 #include "pacs/encoding/compression/codec_factory.hpp"
 #include "pacs/encoding/compression/frame_deflate_codec.hpp"
+#include "pacs/encoding/compression/hevc_codec.hpp"
 #include "pacs/encoding/compression/htj2k_codec.hpp"
 #include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
 #include "pacs/encoding/compression/jpeg_lossless_codec.hpp"
@@ -48,7 +49,7 @@ namespace {
  * As more codecs are implemented (RLE, etc.),
  * they should be added to this list.
  */
-static constexpr std::array<std::string_view, 11> kSupportedTransferSyntaxes = {{
+static constexpr std::array<std::string_view, 13> kSupportedTransferSyntaxes = {{
     rle_codec::kTransferSyntaxUID,                   // 1.2.840.10008.1.2.5
     jpeg_baseline_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.50
     jpeg_lossless_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.70
@@ -56,6 +57,8 @@ static constexpr std::array<std::string_view, 11> kSupportedTransferSyntaxes = {
     jpeg_ls_codec::kTransferSyntaxUIDNearLossless,   // 1.2.840.10008.1.2.4.81
     jpeg2000_codec::kTransferSyntaxUIDLossless,      // 1.2.840.10008.1.2.4.90
     jpeg2000_codec::kTransferSyntaxUIDLossy,         // 1.2.840.10008.1.2.4.91
+    hevc_codec::kTransferSyntaxUIDMain,              // 1.2.840.10008.1.2.4.107
+    hevc_codec::kTransferSyntaxUIDMain10,            // 1.2.840.10008.1.2.4.108
     htj2k_codec::kTransferSyntaxUIDLossless,         // 1.2.840.10008.1.2.4.201
     htj2k_codec::kTransferSyntaxUIDRPCL,             // 1.2.840.10008.1.2.4.202
     htj2k_codec::kTransferSyntaxUIDLossy,            // 1.2.840.10008.1.2.4.203
@@ -100,6 +103,16 @@ std::unique_ptr<compression_codec> codec_factory::create(
     // JPEG 2000 (1.2.840.10008.1.2.4.91) - can be lossy or lossless
     if (transfer_syntax_uid == jpeg2000_codec::kTransferSyntaxUIDLossy) {
         return std::make_unique<jpeg2000_codec>(false);  // lossless = false (default lossy)
+    }
+
+    // HEVC/H.265 Main Profile (1.2.840.10008.1.2.4.107)
+    if (transfer_syntax_uid == hevc_codec::kTransferSyntaxUIDMain) {
+        return std::make_unique<hevc_codec>(false);  // main10 = false
+    }
+
+    // HEVC/H.265 Main 10 Profile (1.2.840.10008.1.2.4.108)
+    if (transfer_syntax_uid == hevc_codec::kTransferSyntaxUIDMain10) {
+        return std::make_unique<hevc_codec>(true);  // main10 = true
     }
 
     // HTJ2K Lossless Only (1.2.840.10008.1.2.4.201)

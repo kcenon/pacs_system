@@ -57,7 +57,7 @@ struct ts_entry {
  * This table contains the standard Transfer Syntaxes defined in DICOM PS3.5.
  * Compression support will be added in later phases.
  */
-static constexpr std::array<ts_entry, 13> TS_REGISTRY = {{
+static constexpr std::array<ts_entry, 15> TS_REGISTRY = {{
     // Uncompressed Transfer Syntaxes (supported in Phase 1)
     {"1.2.840.10008.1.2",
      "Implicit VR Little Endian",
@@ -132,6 +132,19 @@ static constexpr std::array<ts_entry, 13> TS_REGISTRY = {{
 
     {"1.2.840.10008.1.2.4.203",
      "High-Throughput JPEG 2000 Image Compression",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, true},
+
+    // HEVC/H.265 Transfer Syntaxes
+    {"1.2.840.10008.1.2.4.107",
+     "HEVC/H.265 Main Profile / Level 5.1",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, true},
+
+    {"1.2.840.10008.1.2.4.108",
+     "HEVC/H.265 Main 10 Profile / Level 5.1",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
      true, false, true},
@@ -240,6 +253,20 @@ const transfer_syntax transfer_syntax::htj2k_rpcl{
 const transfer_syntax transfer_syntax::htj2k_lossy{
     "1.2.840.10008.1.2.4.203",
     "High-Throughput JPEG 2000 Image Compression",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, true};
+
+const transfer_syntax transfer_syntax::hevc_main{
+    "1.2.840.10008.1.2.4.107",
+    "HEVC/H.265 Main Profile / Level 5.1",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, true};
+
+const transfer_syntax transfer_syntax::hevc_main10{
+    "1.2.840.10008.1.2.4.108",
+    "HEVC/H.265 Main 10 Profile / Level 5.1",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
     true, false, true};
