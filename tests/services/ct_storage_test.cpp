@@ -23,6 +23,11 @@ TEST_CASE("enhanced_ct_image_storage_uid is correct", "[services][ct][storage]")
     CHECK(enhanced_ct_image_storage_uid == "1.2.840.10008.5.1.4.1.1.2.1");
 }
 
+TEST_CASE("ct_for_processing_image_storage_uid is correct",
+          "[services][ct][storage]") {
+    CHECK(ct_for_processing_image_storage_uid == "1.2.840.10008.5.1.4.1.1.2.2");
+}
+
 // ============================================================================
 // is_ct_storage_sop_class Tests
 // ============================================================================
@@ -35,6 +40,10 @@ TEST_CASE("is_ct_storage_sop_class identifies CT SOP Classes",
 
     SECTION("Enhanced CT Image Storage") {
         CHECK(is_ct_storage_sop_class("1.2.840.10008.5.1.4.1.1.2.1"));
+    }
+
+    SECTION("CT For Processing Image Storage") {
+        CHECK(is_ct_storage_sop_class("1.2.840.10008.5.1.4.1.1.2.2"));
     }
 
     SECTION("non-CT SOP Class - US") {
@@ -57,9 +66,10 @@ TEST_CASE("is_ct_storage_sop_class identifies CT SOP Classes",
 TEST_CASE("get_ct_storage_sop_classes returns all CT UIDs",
           "[services][ct][storage]") {
     auto uids = get_ct_storage_sop_classes();
-    CHECK(uids.size() == 2);
+    CHECK(uids.size() == 3);
     CHECK(uids[0] == "1.2.840.10008.5.1.4.1.1.2");
     CHECK(uids[1] == "1.2.840.10008.5.1.4.1.1.2.1");
+    CHECK(uids[2] == "1.2.840.10008.5.1.4.1.1.2.2");
 }
 
 // ============================================================================

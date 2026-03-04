@@ -435,6 +435,19 @@ void sop_class_registry::register_ct_sop_classes() {
             true
         }
     );
+
+    // CT For Processing Image Storage (multi-energy/spectral CT)
+    registry_.emplace(
+        "1.2.840.10008.5.1.4.1.1.2.2",
+        sop_class_info{
+            "1.2.840.10008.5.1.4.1.1.2.2",
+            "CT For Processing Image Storage",
+            sop_class_category::storage,
+            modality_type::ct,
+            false,
+            false
+        }
+    );
 }
 
 void sop_class_registry::register_mr_sop_classes() {
