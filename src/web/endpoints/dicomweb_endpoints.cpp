@@ -59,6 +59,7 @@
 #include "pacs/storage/patient_record.hpp"
 #include "pacs/storage/series_record.hpp"
 #include "pacs/storage/study_record.hpp"
+#include "pacs/web/auth/oauth2_middleware.hpp"
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
@@ -1536,6 +1537,31 @@ namespace pacs::web::endpoints {
 namespace {
 
 /**
+ * @brief Authenticate DICOMweb request using OAuth 2.0 or legacy X-User-ID
+ *
+ * When OAuth 2.0 is enabled, validates the Bearer token and checks the
+ * required scope. Falls back to legacy authentication when disabled.
+ */
+bool check_dicomweb_auth(const std::shared_ptr<rest_server_context>& ctx,
+                          const crow::request& req,
+                          crow::response& res,
+                          const std::vector<std::string>& required_scopes) {
+    if (ctx->oauth2 && ctx->oauth2->enabled()) {
+        auto user_ctx = ctx->oauth2->authenticate(req, res);
+        if (!user_ctx) return false;
+
+        if (!required_scopes.empty()) {
+            return ctx->oauth2->require_any_scope(
+                ctx->oauth2->last_claims(), res, required_scopes);
+        }
+        return true;
+    }
+
+    // Legacy X-User-ID fallback (no scope checking)
+    return true;
+}
+
+/**
  * @brief Add CORS headers to response
  */
 void add_cors_headers(crow::response& res, const rest_server_context& ctx) {
@@ -1801,6 +1827,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 crow::response res;
                 add_cors_headers(res, *ctx);
 
+                // OAuth 2.0 / legacy auth check
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.read"})) {
+                    return res;
+                }
+
                 if (!ctx->database) {
                     res.code = 503;
                     res.add_header("Content-Type", "application/json");
@@ -1845,9 +1877,15 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
     // GET /dicomweb/studies/{studyUID}/metadata - Study metadata
     CROW_ROUTE(app, "/dicomweb/studies/<string>/metadata")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& /*req*/, const std::string& study_uid) {
+            [ctx](const crow::request& req, const std::string& study_uid) {
                 crow::response res;
                 add_cors_headers(res, *ctx);
+
+                // OAuth 2.0 / legacy auth check
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.read"})) {
+                    return res;
+                }
 
                 if (!ctx->database) {
                     res.code = 503;
@@ -2385,6 +2423,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 crow::response res;
                 add_cors_headers(res, *ctx);
 
+                // OAuth 2.0 / legacy auth check (write scope)
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.write"})) {
+                    return res;
+                }
+
                 if (!ctx->database || !ctx->file_storage) {
                     res.code = 503;
                     res.add_header("Content-Type", "application/json");
@@ -2540,6 +2584,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
             [ctx](const crow::request& req, const std::string& target_study_uid) {
                 crow::response res;
                 add_cors_headers(res, *ctx);
+
+                // OAuth 2.0 / legacy auth check (write scope)
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.write"})) {
+                    return res;
+                }
 
                 if (!ctx->database || !ctx->file_storage) {
                     res.code = 503;
@@ -2699,6 +2749,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 add_cors_headers(res, *ctx);
                 res.add_header("Content-Type",
                                std::string(dicomweb::media_type::dicom_json));
+
+                // OAuth 2.0 / legacy auth check (read or search scope)
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.read", "dicomweb.search"})) {
+                    return res;
+                }
 
                 if (!ctx->database) {
                     res.code = 503;
@@ -2882,6 +2938,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 res.add_header("Content-Type",
                                std::string(dicomweb::media_type::dicom_json));
 
+                // OAuth 2.0 / legacy auth check
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.read", "dicomweb.search"})) {
+                    return res;
+                }
+
                 if (!ctx->database) {
                     res.code = 503;
                     res.body = make_error_json("DATABASE_UNAVAILABLE",
@@ -2942,6 +3004,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 add_cors_headers(res, *ctx);
                 res.add_header("Content-Type",
                                std::string(dicomweb::media_type::dicom_json));
+
+                // OAuth 2.0 / legacy auth check
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.read", "dicomweb.search"})) {
+                    return res;
+                }
 
                 if (!ctx->database) {
                     res.code = 503;
@@ -3039,6 +3107,12 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                 add_cors_headers(res, *ctx);
                 res.add_header("Content-Type",
                                std::string(dicomweb::media_type::dicom_json));
+
+                // OAuth 2.0 / legacy auth check
+                if (!check_dicomweb_auth(ctx, req, res,
+                        {"dicomweb.read", "dicomweb.search"})) {
+                    return res;
+                }
 
                 if (!ctx->database) {
                     res.code = 503;
