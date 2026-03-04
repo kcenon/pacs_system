@@ -1,0 +1,240 @@
+// BSD 3-Clause License
+//
+// Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * @file oauth2_middleware.cpp
+ * @brief Implementation of OAuth 2.0 middleware for DICOMweb endpoints
+ *
+ * @see RFC 6749 - OAuth 2.0 Authorization Framework
+ * @see Issue #852 - Implement OAuth 2.0 authorization for DICOMweb endpoints
+ */
+
+// IMPORTANT: Include Crow FIRST before any PACS headers
+#include "crow.h"
+
+#include "pacs/web/auth/oauth2_middleware.hpp"
+
+#include "pacs/security/access_control_manager.hpp"
+#include "pacs/security/role.hpp"
+#include "pacs/security/user.hpp"
+#include "pacs/security/user_context.hpp"
+#include "pacs/web/rest_types.hpp"
+
+#include <string>
+
+namespace pacs::web::auth {
+
+// =============================================================================
+// oauth2_middleware Implementation
+// =============================================================================
+
+oauth2_middleware::oauth2_middleware(const oauth2_config& config)
+    : config_(config), validator_(config) {}
+
+void oauth2_middleware::set_jwks_provider(
+    std::shared_ptr<jwks_provider> provider) {
+    jwks_provider_ = std::move(provider);
+}
+
+void oauth2_middleware::set_access_control_manager(
+    std::shared_ptr<security::access_control_manager> manager) {
+    security_manager_ = std::move(manager);
+}
+
+std::optional<security::user_context> oauth2_middleware::authenticate(
+    const crow::request& req, crow::response& res) const {
+
+    // Extract Bearer token from Authorization header
+    auto bearer = extract_bearer_token(req);
+    if (!bearer) {
+        set_unauthorized(res, "Missing or invalid Authorization header");
+        return std::nullopt;
+    }
+
+    // Decode JWT
+    auto [token, decode_err] = validator_.decode(*bearer);
+    if (decode_err != jwt_error::none) {
+        set_unauthorized(res, std::string(jwt_error_message(decode_err)));
+        return std::nullopt;
+    }
+
+    // Validate claims (issuer, audience, expiration)
+    auto claims_err = validator_.validate_claims(token.claims);
+    if (claims_err != jwt_error::none) {
+        set_unauthorized(res, std::string(jwt_error_message(claims_err)));
+        return std::nullopt;
+    }
+
+    // Verify signature using JWKS
+    if (!verify_signature(token)) {
+        set_unauthorized(res, "Token signature verification failed");
+        return std::nullopt;
+    }
+
+    // Cache the validated claims for subsequent scope checks
+    last_claims_ = token.claims;
+
+    // Create user_context from JWT subject
+    // Try to find existing user in RBAC system, or create an OAuth-based context
+    security::User user;
+    user.id = token.claims.sub;
+    user.username = token.claims.sub;
+    user.active = true;
+
+    // If we have an access control manager, try to look up the user
+    if (security_manager_) {
+        auto user_result = security_manager_->get_user(token.claims.sub);
+        if (user_result.is_ok()) {
+            user = user_result.unwrap();
+        } else {
+            // OAuth user not in RBAC system: grant Viewer role by default
+            user.roles = {security::Role::Viewer};
+        }
+    } else {
+        user.roles = {security::Role::Viewer};
+    }
+
+    auto ctx = security::user_context(std::move(user), token.claims.jti);
+    ctx.set_source_ip(std::string(req.remote_ip_address));
+    ctx.touch();
+
+    return ctx;
+}
+
+bool oauth2_middleware::require_scope(
+    const jwt_claims& claims,
+    crow::response& res,
+    std::string_view required_scope) const {
+
+    if (!jwt_validator::has_scope(claims, required_scope)) {
+        set_forbidden(res,
+            "Insufficient scope: requires " + std::string(required_scope));
+        return false;
+    }
+    return true;
+}
+
+bool oauth2_middleware::require_any_scope(
+    const jwt_claims& claims,
+    crow::response& res,
+    const std::vector<std::string>& required_scopes) const {
+
+    if (!jwt_validator::has_any_scope(claims, required_scopes)) {
+        std::string scope_list;
+        for (size_t i = 0; i < required_scopes.size(); ++i) {
+            if (i > 0) scope_list += " or ";
+            scope_list += required_scopes[i];
+        }
+        set_forbidden(res, "Insufficient scope: requires " + scope_list);
+        return false;
+    }
+    return true;
+}
+
+bool oauth2_middleware::enabled() const noexcept {
+    return config_.enabled;
+}
+
+const jwt_validator& oauth2_middleware::validator() const noexcept {
+    return validator_;
+}
+
+const jwt_claims& oauth2_middleware::last_claims() const noexcept {
+    return last_claims_;
+}
+
+// =============================================================================
+// Private Helpers
+// =============================================================================
+
+std::optional<std::string_view> oauth2_middleware::extract_bearer_token(
+    const crow::request& req) const {
+
+    auto auth_header = req.get_header_value("Authorization");
+    if (auth_header.empty()) return std::nullopt;
+
+    std::string_view header_view(auth_header);
+
+    // Check for "Bearer " prefix (case-insensitive for "Bearer")
+    constexpr std::string_view bearer_prefix = "Bearer ";
+    if (header_view.size() <= bearer_prefix.size()) return std::nullopt;
+
+    // Case-sensitive check per RFC 6750
+    if (header_view.substr(0, bearer_prefix.size()) != bearer_prefix) {
+        return std::nullopt;
+    }
+
+    auto token = header_view.substr(bearer_prefix.size());
+    if (token.empty()) return std::nullopt;
+
+    return token;
+}
+
+bool oauth2_middleware::verify_signature(const jwt_token& token) const {
+    if (!jwks_provider_) return false;
+
+    // Try to get key by kid from the token header
+    std::optional<jwk_key> key;
+    if (!token.header.kid.empty()) {
+        key = jwks_provider_->get_key(token.header.kid);
+    }
+
+    // Fall back to algorithm-based lookup
+    if (!key) {
+        key = jwks_provider_->get_key_by_alg(token.header.alg);
+    }
+
+    if (!key) return false;
+
+    // Verify based on algorithm
+    if (token.header.alg == "RS256") {
+        return validator_.verify_rs256(token, key->pem);
+    } else if (token.header.alg == "ES256") {
+        return validator_.verify_es256(token, key->pem);
+    }
+
+    return false;
+}
+
+void oauth2_middleware::set_unauthorized(crow::response& res,
+                                         std::string_view message) {
+    res.code = 401;
+    res.add_header("Content-Type", "application/json");
+    res.add_header("WWW-Authenticate", "Bearer");
+    res.body = make_error_json("UNAUTHORIZED", message);
+}
+
+void oauth2_middleware::set_forbidden(crow::response& res,
+                                      std::string_view message) {
+    res.code = 403;
+    res.add_header("Content-Type", "application/json");
+    res.body = make_error_json("FORBIDDEN", message);
+}
+
+}  // namespace pacs::web::auth

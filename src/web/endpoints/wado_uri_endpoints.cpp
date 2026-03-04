@@ -49,6 +49,7 @@
 
 #include "pacs/core/dicom_file.hpp"
 #include "pacs/storage/index_database.hpp"
+#include "pacs/web/auth/oauth2_middleware.hpp"
 #include "pacs/web/endpoints/dicomweb_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/endpoints/wado_uri_endpoints.hpp"
@@ -331,6 +332,17 @@ void register_wado_uri_endpoints_impl(
             [ctx](const crow::request& req) {
                 crow::response res;
                 add_cors_headers(res, *ctx);
+
+                // OAuth 2.0 / legacy auth check (read scope for WADO-URI)
+                if (ctx->oauth2 && ctx->oauth2->enabled()) {
+                    auto user_ctx = ctx->oauth2->authenticate(req, res);
+                    if (!user_ctx) return res;
+                    if (!ctx->oauth2->require_any_scope(
+                            ctx->oauth2->last_claims(), res,
+                            {"dicomweb.read"})) {
+                        return res;
+                    }
+                }
 
                 // Validate requestType parameter
                 auto request_type = req.url_params.get("requestType");

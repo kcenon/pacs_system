@@ -58,6 +58,7 @@
 #include "pacs/web/endpoints/viewer_state_endpoints.hpp"
 #include "pacs/web/endpoints/wado_uri_endpoints.hpp"
 #include "pacs/web/endpoints/worklist_endpoints.hpp"
+#include "pacs/web/auth/oauth2_middleware.hpp"
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_server.hpp"
 #include "pacs/web/rest_types.hpp"
@@ -211,6 +212,12 @@ void rest_server::set_dicom_server(
     std::shared_ptr<network::dicom_server> server) {
   std::lock_guard<std::mutex> lock(impl_->mutex);
   impl_->context->dicom_server = std::move(server);
+}
+
+void rest_server::set_oauth2_middleware(
+    std::shared_ptr<auth::oauth2_middleware> middleware) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->oauth2 = std::move(middleware);
 }
 
 void rest_server::start() {
