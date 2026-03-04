@@ -821,6 +821,7 @@ add_library(pacs_encoding
     src/encoding/compression/htj2k_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp
     src/encoding/compression/jpeg_ls_codec.cpp
+    src/encoding/compression/jpegxl_codec.cpp
     src/encoding/compression/rle_codec.cpp
     src/encoding/compression/codec_factory.cpp
 )
@@ -1826,6 +1827,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/compression/htj2k_codec_test.cpp
         tests/encoding/compression/jpeg2000_codec_test.cpp
         tests/encoding/compression/jpeg_ls_codec_test.cpp
+        tests/encoding/compression/jpegxl_codec_test.cpp
         tests/encoding/compression/rle_codec_test.cpp
         tests/encoding/simd/simd_rle_test.cpp
         tests/encoding/character_set_test.cpp
