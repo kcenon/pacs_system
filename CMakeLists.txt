@@ -1426,6 +1426,7 @@ if(TARGET Crow::Crow)
         src/web/endpoints/key_image_endpoints.cpp
         src/web/endpoints/viewer_state_endpoints.cpp
         src/web/endpoints/wado_uri_endpoints.cpp
+        src/web/auth/jwt_validator.cpp
     )
 
     # Add metrics endpoints conditionally (use TARGET check, not CMake variable)
@@ -1453,6 +1454,12 @@ if(TARGET Crow::Crow)
     # Link fmt library for format compatibility (if needed)
     if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
         target_link_libraries(pacs_web PUBLIC ${PACS_FMT_TARGET})
+    endif()
+
+    # Link OpenSSL for JWT signature verification (Issue #860)
+    if(PACS_OPENSSL_FOUND)
+        target_link_libraries(pacs_web PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+        target_compile_definitions(pacs_web PUBLIC PACS_WITH_DIGITAL_SIGNATURES)
     endif()
 
     message(STATUS "  [OK] pacs_web: ON (REST API server)")
@@ -2062,6 +2069,7 @@ if(PACS_BUILD_TESTS)
             tests/web/key_image_endpoints_test.cpp
             tests/web/viewer_state_endpoints_test.cpp
             tests/web/wado_uri_endpoints_test.cpp
+            tests/web/auth/jwt_validator_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
