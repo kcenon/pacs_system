@@ -692,6 +692,19 @@ void sop_class_registry::register_seg_sop_classes() {
             false
         }
     );
+
+    // Heightmap Segmentation Storage (Supplement 240)
+    registry_.emplace(
+        std::string(sop_classes::heightmap_segmentation_storage_uid),
+        sop_class_info{
+            sop_classes::heightmap_segmentation_storage_uid,
+            "Heightmap Segmentation Storage",
+            sop_class_category::storage,
+            modality_type::seg,
+            false,
+            true  // supports multiframe (enhanced multi-frame architecture)
+        }
+    );
 }
 
 void sop_class_registry::register_sr_sop_classes() {
