@@ -122,19 +122,19 @@ static constexpr std::array<ts_entry, 12> TS_REGISTRY = {{
      "High-Throughput JPEG 2000 Image Compression (Lossless Only)",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
     {"1.2.840.10008.1.2.4.202",
      "High-Throughput JPEG 2000 with RPCL Options Image Compression (Lossless Only)",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
     {"1.2.840.10008.1.2.4.203",
      "High-Throughput JPEG 2000 Image Compression",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 }};
 
 /**
@@ -221,21 +221,21 @@ const transfer_syntax transfer_syntax::htj2k_lossless{
     "High-Throughput JPEG 2000 Image Compression (Lossless Only)",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
-    true, false, false};
+    true, false, true};
 
 const transfer_syntax transfer_syntax::htj2k_rpcl{
     "1.2.840.10008.1.2.4.202",
     "High-Throughput JPEG 2000 with RPCL Options Image Compression (Lossless Only)",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
-    true, false, false};
+    true, false, true};
 
 const transfer_syntax transfer_syntax::htj2k_lossy{
     "1.2.840.10008.1.2.4.203",
     "High-Throughput JPEG 2000 Image Compression",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
-    true, false, false};
+    true, false, true};
 
 // Public constructor - looks up UID in registry
 transfer_syntax::transfer_syntax(std::string_view uid)
