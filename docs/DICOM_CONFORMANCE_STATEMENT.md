@@ -45,6 +45,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-03-04 | 1.4.0 | Add CT For Processing Image Storage SOP Class (multi-energy/spectral CT) |
 | 2026-03-04 | 1.3.0 | Add HTJ2K Transfer Syntax support (Supplement 235) |
 | 2026-02-20 | 1.2.0 | Add Print Management SCP/SCU (PS3.4 Annex H), update Cloud Storage to real SDK |
 | 2026-02-18 | 1.1.0 | Add Storage Commitment Push Model SCP/SCU, update known limitations |
@@ -198,6 +199,7 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | CT Image Storage | 1.2.840.10008.5.1.4.1.1.2 | Yes | Yes |
 | Enhanced CT Image Storage | 1.2.840.10008.5.1.4.1.1.2.1 | Yes | Yes |
+| CT For Processing Image Storage | 1.2.840.10008.5.1.4.1.1.2.2 | Yes | Yes |
 
 #### MR
 
