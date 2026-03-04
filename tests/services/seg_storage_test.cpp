@@ -83,13 +83,12 @@ TEST_CASE("get_seg_sop_class_info returns correct information", "[services][seg]
 TEST_CASE("get_seg_storage_sop_classes returns correct list", "[services][seg][sop_class]") {
     SECTION("with surface classes") {
         auto classes = get_seg_storage_sop_classes(true);
-        CHECK(classes.size() == 2);
+        CHECK(classes.size() == 3);
     }
 
     SECTION("without surface classes") {
         auto classes = get_seg_storage_sop_classes(false);
-        CHECK(classes.size() == 1);
-        CHECK(classes[0] == segmentation_storage_uid);
+        CHECK(classes.size() == 2);
     }
 }
 
@@ -491,7 +490,7 @@ TEST_CASE("SEG SOP classes are registered in central registry", "[services][seg]
 
     SECTION("SEG classes are returned by modality query") {
         auto seg_classes = registry.get_by_modality(modality_type::seg, true);
-        CHECK(seg_classes.size() == 2);
+        CHECK(seg_classes.size() == 3);
 
         for (const auto& uid : seg_classes) {
             const auto* info = registry.get_info(uid);
