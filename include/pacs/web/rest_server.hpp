@@ -58,6 +58,12 @@ namespace pacs::security {
 class access_control_manager;
 } // namespace pacs::security
 
+namespace pacs::web::auth {
+struct oauth2_config;
+class oauth2_middleware;
+class jwks_provider;
+} // namespace pacs::web::auth
+
 namespace pacs::storage {
 class index_database;
 class file_storage;
@@ -205,6 +211,13 @@ public:
    * @param server DICOM server instance
    */
   void set_dicom_server(std::shared_ptr<network::dicom_server> server);
+
+  /**
+   * @brief Set OAuth 2.0 middleware for DICOMweb endpoint authorization
+   * @param middleware OAuth 2.0 middleware instance
+   */
+  void set_oauth2_middleware(
+      std::shared_ptr<auth::oauth2_middleware> middleware);
 
   // =========================================================================
   // Lifecycle

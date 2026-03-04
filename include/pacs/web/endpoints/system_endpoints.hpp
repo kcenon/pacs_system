@@ -57,6 +57,10 @@ namespace pacs::security {
 class access_control_manager;
 } // namespace pacs::security
 
+namespace pacs::web::auth {
+class oauth2_middleware;
+} // namespace pacs::web::auth
+
 namespace pacs::storage {
 class index_database;
 class file_storage;
@@ -113,6 +117,9 @@ struct rest_server_context {
 
   /// Database metrics service for monitoring
   std::shared_ptr<services::monitoring::database_metrics_service> database_metrics;
+
+  /// OAuth 2.0 middleware for DICOMweb endpoint authorization
+  std::shared_ptr<auth::oauth2_middleware> oauth2;
 };
 
 namespace endpoints {
