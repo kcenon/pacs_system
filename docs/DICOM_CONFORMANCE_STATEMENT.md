@@ -45,6 +45,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-03-04 | 1.3.0 | Add HTJ2K Transfer Syntax support (Supplement 235) |
 | 2026-02-20 | 1.2.0 | Add Print Management SCP/SCU (PS3.4 Annex H), update Cloud Storage to real SDK |
 | 2026-02-18 | 1.1.0 | Add Storage Commitment Push Model SCP/SCU, update known limitations |
 | 2026-02-17 | 1.0.0 | Initial Conformance Statement |
@@ -455,6 +456,9 @@ Workstation (Print SCU)                      Printer (Print SCP)
 | JPEG 2000 Image Compression (Lossless Only) | 1.2.840.10008.1.2.4.90 | Lossless | Full |
 | JPEG 2000 Image Compression | 1.2.840.10008.1.2.4.91 | Lossy | Full |
 | RLE Lossless | 1.2.840.10008.1.2.5 | Lossless | Full |
+| High-Throughput JPEG 2000 (Lossless Only) | 1.2.840.10008.1.2.4.201 | Lossless | Full |
+| High-Throughput JPEG 2000 with RPCL (Lossless Only) | 1.2.840.10008.1.2.4.202 | Lossless | Full |
+| High-Throughput JPEG 2000 | 1.2.840.10008.1.2.4.203 | Lossless/Lossy | Full |
 
 ### 4.3 Default Transfer Syntax
 
@@ -610,6 +614,7 @@ The implementation supports DICOMweb services as defined in PS3.18:
 | application/octet-stream | Raw binary data |
 | image/jpeg | Rendered images |
 | image/png | Rendered images |
+| image/jphc | HTJ2K compressed images |
 | multipart/related | Multi-part responses/requests |
 
 ---
@@ -674,6 +679,7 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 |------|-----------|-----------|
 | Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
 | Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
+| HTJ2K Codec | Requires OpenJPH library at build time (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
 | Print Management | Not supported | N/A |
 

@@ -161,10 +161,10 @@ public:
     /// HTJ2K Lossless Only (1.2.840.10008.1.2.4.201)
     static const transfer_syntax htj2k_lossless;
 
-    /// HTJ2K RPCL (1.2.840.10008.1.2.4.202) - Lossless or Lossy
+    /// HTJ2K RPCL (1.2.840.10008.1.2.4.202) - Lossless Only
     static const transfer_syntax htj2k_rpcl;
 
-    /// HTJ2K (1.2.840.10008.1.2.4.203) - Lossy
+    /// HTJ2K (1.2.840.10008.1.2.4.203) - Lossless or Lossy
     static const transfer_syntax htj2k_lossy;
 
     /// @}

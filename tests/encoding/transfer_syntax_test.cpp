@@ -102,7 +102,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());
     }
 
     SECTION("HTJ2K RPCL") {
@@ -114,7 +114,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());
     }
 
     SECTION("HTJ2K Lossy") {
@@ -126,7 +126,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());
     }
 }
 
@@ -163,7 +163,7 @@ TEST_CASE("transfer_syntax construction from HTJ2K UID", "[encoding][transfer_sy
         CHECK(ts.is_valid());
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.201");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());
     }
 
     SECTION("HTJ2K RPCL UID creates valid transfer_syntax") {
@@ -209,8 +209,8 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Phase 3: uncompressed syntaxes (3) + JPEG Baseline (1) + RLE Lossless (1)
-        CHECK(supported.size() == 5);
+        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3)
+        CHECK(supported.size() == 8);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());
