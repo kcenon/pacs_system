@@ -71,6 +71,10 @@ inline constexpr std::string_view surface_segmentation_storage_uid =
 inline constexpr std::string_view heightmap_segmentation_storage_uid =
     "1.2.840.10008.5.1.4.1.1.66.7";
 
+/// Label Map Segmentation Storage SOP Class UID (Supplement 243)
+inline constexpr std::string_view label_map_segmentation_storage_uid =
+    "1.2.840.10008.5.1.4.1.1.66.8";
+
 /// @}
 
 // =============================================================================

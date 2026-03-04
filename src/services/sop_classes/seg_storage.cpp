@@ -197,7 +197,7 @@ segment_color get_recommended_segment_color(std::string_view segment_label) noex
 
 namespace {
 
-constexpr std::array<seg_sop_class_info, 3> seg_sop_classes = {{
+constexpr std::array<seg_sop_class_info, 4> seg_sop_classes = {{
     {
         segmentation_storage_uid,
         "Segmentation Storage",
@@ -218,6 +218,13 @@ constexpr std::array<seg_sop_class_info, 3> seg_sop_classes = {{
         "Height-value based retinal layer boundary segmentation (Sup 240)",
         false,
         false
+    },
+    {
+        label_map_segmentation_storage_uid,
+        "Label Map Segmentation Storage",
+        "Non-overlapping integer label voxel classification (Sup 243)",
+        false,
+        false
     }
 }};
 
@@ -225,7 +232,7 @@ constexpr std::array<seg_sop_class_info, 3> seg_sop_classes = {{
 
 std::vector<std::string> get_seg_storage_sop_classes(bool include_surface) {
     std::vector<std::string> result;
-    result.reserve(include_surface ? 3 : 2);
+    result.reserve(include_surface ? 4 : 3);
 
     for (const auto& info : seg_sop_classes) {
         if (!info.is_surface || include_surface) {
