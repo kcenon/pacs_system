@@ -82,7 +82,11 @@ runs:
           if [ -d "$repo" ]; then
             echo "=== Patching $repo ==="
             find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              sed -i 's/-Werror//g' "$file"
+              if grep -q '\-Werror' "$file" 2>/dev/null; then
+                # Use .bak suffix for BSD sed (macOS) compatibility, then remove backup
+                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
+                rm -f "${file}.bak"
+              fi
             done
           fi
         done
