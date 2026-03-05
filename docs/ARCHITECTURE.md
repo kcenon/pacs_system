@@ -47,6 +47,8 @@ Implement DICOM protocols according to the official standard (PS3.x) to ensure i
 
 ### 3. Zero External DICOM Dependencies
 
+> **See also:** [SOUP.md](SOUP.md) for the complete IEC 62304 dependency register with versions, licenses, and safety classifications.
+
 Implement all DICOM functionality from scratch using ecosystem components, eliminating dependency on external DICOM libraries (DCMTK, GDCM).
 
 **Benefits:**

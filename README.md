@@ -307,6 +307,8 @@ cmake --build build
 
 ## Ecosystem Dependencies
 
+> For the complete IEC 62304 SOUP register with versions, licenses, and safety classifications, see [docs/SOUP.md](docs/SOUP.md).
+
 This project leverages the following kcenon ecosystem components:
 
 | System | Purpose | Key Features |
