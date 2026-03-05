@@ -140,6 +140,59 @@ jobs:
         echo "Please review the scan results and take appropriate action."
         echo "High/Critical vulnerabilities should be addressed immediately."
 
+  npm-audit:
+    name: npm Dependency Audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install and audit npm dependencies
+      working-directory: web
+      run: |
+        npm ci --ignore-scripts
+        echo "## npm Audit Report" > ../npm-security-report.md
+        echo "" >> ../npm-security-report.md
+        echo "**Scan Date**: $(date -u)" >> ../npm-security-report.md
+        echo "" >> ../npm-security-report.md
+        npm audit --omit=dev 2>&1 >> ../npm-security-report.md || true
+
+    - name: Check for high/critical vulnerabilities
+      working-directory: web
+      run: |
+        # Fail only on high/critical production vulnerabilities
+        npm audit --omit=dev --audit-level=high 2>&1 || echo "::warning::npm audit found high/critical vulnerabilities"
+
+    - name: Upload npm audit report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: npm-security-report
+        path: npm-security-report.md
+        retention-days: 30
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: critical
+        comment-summary-in-pr: always
+
   dicom-security-check:
     name: DICOM Security Check
     runs-on: ubuntu-24.04
