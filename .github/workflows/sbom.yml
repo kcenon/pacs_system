@@ -43,6 +43,25 @@ jobs:
         output-file: sbom-spdx.json
         artifact-name: sbom-spdx
 
+    - name: Setup Node.js for web frontend SBOM
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Generate npm SBOM (CycloneDX)
+      working-directory: web
+      run: |
+        npm ci --ignore-scripts
+        npx @cyclonedx/cyclonedx-npm --output-file ../sbom-npm-cyclonedx.json --output-format JSON || true
+
+    - name: Run npm audit
+      working-directory: web
+      continue-on-error: true
+      run: |
+        npm audit --json > ../npm-audit-report.json 2>&1 || true
+        echo "## npm Audit Summary" > ../npm-audit-summary.md
+        npm audit --omit=dev 2>&1 | tail -20 >> ../npm-audit-summary.md || true
+
     - name: Parse vcpkg dependencies
       run: |
         if [ -f "vcpkg.json" ]; then
@@ -123,6 +142,9 @@ jobs:
         path: |
           sbom-cyclonedx.json
           sbom-spdx.json
+          sbom-npm-cyclonedx.json
+          npm-audit-report.json
+          npm-audit-summary.md
           vcpkg-dependencies.md
           SBOM_REPORT.md
         retention-days: 90
@@ -134,6 +156,7 @@ jobs:
         files: |
           sbom-cyclonedx.json
           sbom-spdx.json
+          sbom-npm-cyclonedx.json
           SBOM_REPORT.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
