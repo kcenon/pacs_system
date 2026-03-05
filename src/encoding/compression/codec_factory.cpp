@@ -28,6 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "pacs/encoding/compression/codec_factory.hpp"
+#include "pacs/encoding/compression/frame_deflate_codec.hpp"
 #include "pacs/encoding/compression/hevc_codec.hpp"
 #include "pacs/encoding/compression/htj2k_codec.hpp"
 #include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
@@ -48,7 +49,7 @@ namespace {
  * As more codecs are implemented (RLE, etc.),
  * they should be added to this list.
  */
-static constexpr std::array<std::string_view, 12> kSupportedTransferSyntaxes = {{
+static constexpr std::array<std::string_view, 13> kSupportedTransferSyntaxes = {{
     rle_codec::kTransferSyntaxUID,                   // 1.2.840.10008.1.2.5
     jpeg_baseline_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.50
     jpeg_lossless_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.70
@@ -61,6 +62,7 @@ static constexpr std::array<std::string_view, 12> kSupportedTransferSyntaxes = {
     htj2k_codec::kTransferSyntaxUIDLossless,         // 1.2.840.10008.1.2.4.201
     htj2k_codec::kTransferSyntaxUIDRPCL,             // 1.2.840.10008.1.2.4.202
     htj2k_codec::kTransferSyntaxUIDLossy,            // 1.2.840.10008.1.2.4.203
+    frame_deflate_codec::kTransferSyntaxUID,          // 1.2.840.10008.1.2.11
 }};
 
 }  // namespace
@@ -126,6 +128,11 @@ std::unique_ptr<compression_codec> codec_factory::create(
     // HTJ2K (1.2.840.10008.1.2.4.203) - lossy
     if (transfer_syntax_uid == htj2k_codec::kTransferSyntaxUIDLossy) {
         return std::make_unique<htj2k_codec>(false);
+    }
+
+    // Frame Deflate (1.2.840.10008.1.2.11)
+    if (transfer_syntax_uid == frame_deflate_codec::kTransferSyntaxUID) {
+        return std::make_unique<frame_deflate_codec>();
     }
 
     return nullptr;

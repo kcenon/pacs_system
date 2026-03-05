@@ -45,6 +45,7 @@
 #include "pacs/services/sop_classes/xa_storage.hpp"
 #include "pacs/services/sop_classes/ophthalmic_storage.hpp"
 #include "pacs/services/sop_classes/parametric_map_storage.hpp"
+#include "pacs/services/sop_classes/waveform_storage.hpp"
 
 #include <algorithm>
 
@@ -205,6 +206,7 @@ void sop_class_registry::register_standard_sop_classes() {
     register_wsi_sop_classes();
     register_ophthalmic_sop_classes();
     register_parametric_map_sop_classes();
+    register_waveform_sop_classes();
     register_other_sop_classes();
 }
 
@@ -1107,6 +1109,27 @@ void sop_class_registry::register_parametric_map_sop_classes() {
             true  // always multi-frame
         }
     );
+}
+
+void sop_class_registry::register_waveform_sop_classes() {
+    // Register all waveform storage SOP classes
+    auto waveform_classes = sop_classes::get_waveform_storage_sop_classes(true, true);
+    for (const auto& uid : waveform_classes) {
+        const auto* wf_info = sop_classes::get_waveform_sop_class_info(uid);
+        if (wf_info) {
+            registry_.emplace(
+                uid,
+                sop_class_info{
+                    wf_info->uid,
+                    wf_info->name,
+                    sop_class_category::storage,
+                    modality_type::other,
+                    wf_info->is_retired,
+                    false  // waveform objects are not multiframe images
+                }
+            );
+        }
+    }
 }
 
 void sop_class_registry::register_other_sop_classes() {

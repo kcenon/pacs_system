@@ -818,6 +818,7 @@ add_library(pacs_encoding
     src/encoding/dataset_charset.cpp
     src/encoding/compression/jpeg_baseline_codec.cpp
     src/encoding/compression/jpeg_lossless_codec.cpp
+    src/encoding/compression/frame_deflate_codec.cpp
     src/encoding/compression/hevc_codec.cpp
     src/encoding/compression/htj2k_codec.cpp
     src/encoding/compression/jpeg2000_codec.cpp
@@ -1071,6 +1072,7 @@ add_library(pacs_services
     src/services/sop_classes/wsi_storage.cpp
     src/services/sop_classes/ophthalmic_storage.cpp
     src/services/sop_classes/parametric_map_storage.cpp
+    src/services/sop_classes/waveform_storage.cpp
     src/services/validation/us_iod_validator.cpp
     src/services/validation/dx_iod_validator.cpp
     src/services/validation/mg_iod_validator.cpp
@@ -1088,6 +1090,9 @@ add_library(pacs_services
     src/services/validation/heightmap_seg_iod_validator.cpp
     src/services/validation/label_map_seg_iod_validator.cpp
     src/services/pir/patient_reconciliation_service.cpp
+    src/services/xds/imaging_document_source.cpp
+    src/services/xds/imaging_document_consumer.cpp
+    src/services/validation/waveform_ps_iod_validator.cpp
     src/services/cache/query_cache.cpp
     src/services/cache/database_cursor.cpp
     src/services/cache/query_result_stream.cpp
@@ -1322,6 +1327,8 @@ if(TARGET pacs_storage)
     add_library(pacs_ai
         src/ai/ai_result_handler.cpp
         src/ai/ai_service_connector.cpp
+        src/ai/aira_assessment.cpp
+        src/ai/aira_assessment_manager.cpp
     )
     target_include_directories(pacs_ai
         PUBLIC
@@ -1827,6 +1834,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
         tests/encoding/compression/jpeg_baseline_codec_test.cpp
         tests/encoding/compression/jpeg_lossless_codec_test.cpp
+        tests/encoding/compression/frame_deflate_codec_test.cpp
         tests/encoding/compression/hevc_codec_test.cpp
         tests/encoding/compression/htj2k_codec_test.cpp
         tests/encoding/compression/jpeg2000_codec_test.cpp
@@ -1922,6 +1930,8 @@ if(PACS_BUILD_TESTS)
         tests/services/heightmap_seg_iod_validator_test.cpp
         tests/services/label_map_seg_iod_validator_test.cpp
         tests/services/pir/patient_reconciliation_test.cpp
+        tests/services/xds/xds_imaging_test.cpp
+        tests/services/waveform_storage_test.cpp
         tests/services/cache/simple_lru_cache_test.cpp
         tests/services/cache/query_cache_test.cpp
         tests/services/cache/streaming_query_test.cpp
@@ -2020,6 +2030,7 @@ if(PACS_BUILD_TESTS)
         add_executable(ai_tests
             tests/ai/ai_result_handler_test.cpp
             tests/ai/ai_service_connector_test.cpp
+            tests/ai/aira_assessment_test.cpp
         )
         target_link_libraries(ai_tests
             PRIVATE
