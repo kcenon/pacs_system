@@ -1326,6 +1326,8 @@ if(TARGET pacs_storage)
     add_library(pacs_ai
         src/ai/ai_result_handler.cpp
         src/ai/ai_service_connector.cpp
+        src/ai/aira_assessment.cpp
+        src/ai/aira_assessment_manager.cpp
     )
     target_include_directories(pacs_ai
         PUBLIC
@@ -2026,6 +2028,7 @@ if(PACS_BUILD_TESTS)
         add_executable(ai_tests
             tests/ai/ai_result_handler_test.cpp
             tests/ai/ai_service_connector_test.cpp
+            tests/ai/aira_assessment_test.cpp
         )
         target_link_libraries(ai_tests
             PRIVATE
