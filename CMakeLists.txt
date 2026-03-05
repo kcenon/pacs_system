@@ -837,10 +837,24 @@ target_link_libraries(pacs_encoding
 )
 
 # Link iconv for character set conversion (required on macOS, optional on Linux)
+# LGPL-2.1 compliance: iconv MUST be dynamically linked (see docs/SOUP.md SOUP-018)
 if(NOT WIN32)
-    find_library(ICONV_LIBRARY iconv)
+    # Prefer shared library (.dylib/.so) over static (.a) for LGPL compliance
+    find_library(ICONV_LIBRARY
+        NAMES iconv libiconv
+        # CMAKE_FIND_LIBRARY_SUFFIXES defaults prefer shared on most platforms
+    )
     if(ICONV_LIBRARY)
+        # Verify dynamic linking: warn if static library detected
+        get_filename_component(_iconv_ext "${ICONV_LIBRARY}" EXT)
+        if(_iconv_ext STREQUAL ".a")
+            message(WARNING
+                "iconv appears to be statically linked (${ICONV_LIBRARY}).\n"
+                "iconv is LGPL-2.1 licensed and MUST be dynamically linked.\n"
+                "Please install the shared library (libiconv.so / libiconv.dylib).")
+        endif()
         target_link_libraries(pacs_encoding PUBLIC ${ICONV_LIBRARY})
+        message(STATUS "  [OK] iconv linked: ${ICONV_LIBRARY}")
     endif()
 endif()
 
