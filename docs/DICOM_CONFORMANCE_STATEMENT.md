@@ -45,6 +45,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-03-05 | 1.5.0 | Add HEVC, JPEG XL, Frame Deflate transfer syntaxes; Heightmap/Label Map Segmentation, Waveform PS/Annotation SOP classes; TLS 1.3 BCP 195 profiles; OAuth 2.0 and DICOMweb Storage Commitment |
 | 2026-03-04 | 1.4.0 | Add CT For Processing Image Storage SOP Class (multi-energy/spectral CT) |
 | 2026-03-04 | 1.3.0 | Add HTJ2K Transfer Syntax support (Supplement 235) |
 | 2026-02-20 | 1.2.0 | Add Print Management SCP/SCU (PS3.4 Annex H), update Cloud Storage to real SDK |
@@ -280,6 +281,8 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.4 | Yes | Yes |
 | Surface Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.5 | Yes | Yes |
+| Heightmap Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.7 | Yes | Yes |
+| Label Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.8 | Yes | Yes |
 
 #### SR
 
@@ -295,6 +298,27 @@ Response command pattern: `response = request | 0x8000`
 | Chest CAD SR Storage | 1.2.840.10008.5.1.4.1.1.88.65 | Yes | Yes |
 | Colon CAD SR Storage | 1.2.840.10008.5.1.4.1.1.88.69 | Yes | Yes |
 | X-Ray Radiation Dose SR Storage | 1.2.840.10008.5.1.4.1.1.88.67 | Yes | Yes |
+
+#### Waveform
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| 12-lead ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.1 | Yes | Yes |
+| General ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.2 | Yes | Yes |
+| Ambulatory ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.3 | Yes | Yes |
+| Hemodynamic Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.2.1 | Yes | Yes |
+| Cardiac Electrophysiology Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.3.1 | Yes | Yes |
+| Basic Voice Audio Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.4.1 | Yes | Yes |
+| General Audio Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.4.2 | Yes | Yes |
+| Arterial Pulse Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.5.1 | Yes | Yes |
+| Respiratory Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.6.1 | Yes | Yes |
+| Routine Scalp EEG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.1 | Yes | Yes |
+| Electromyography Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.2 | Yes | Yes |
+| Electrooculography Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.3 | Yes | Yes |
+| Sleep EEG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.4 | Yes | Yes |
+| Body Position Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.8.1 | Yes | Yes |
+| Waveform Presentation State Storage | 1.2.840.10008.5.1.4.1.1.11.11 | Yes | Yes |
+| Waveform Annotation Storage | 1.2.840.10008.5.1.4.1.1.11.12 | Yes | Yes |
 
 ### 3.3 Query/Retrieve
 
@@ -461,6 +485,12 @@ Workstation (Print SCU)                      Printer (Print SCP)
 | High-Throughput JPEG 2000 (Lossless Only) | 1.2.840.10008.1.2.4.201 | Lossless | Full |
 | High-Throughput JPEG 2000 with RPCL (Lossless Only) | 1.2.840.10008.1.2.4.202 | Lossless | Full |
 | High-Throughput JPEG 2000 | 1.2.840.10008.1.2.4.203 | Lossless/Lossy | Full |
+| HEVC/H.265 Main Profile / Level 5.1 | 1.2.840.10008.1.2.4.107 | Lossy | Full |
+| HEVC/H.265 Main 10 Profile / Level 5.1 | 1.2.840.10008.1.2.4.108 | Lossy | Full |
+| JPEG XL Lossless | 1.2.840.10008.1.2.4.110 | Lossless | Full |
+| JPEG XL JPEG Recompression | 1.2.840.10008.1.2.4.111 | Lossless | Full |
+| JPEG XL | 1.2.840.10008.1.2.4.112 | Lossless/Lossy | Full |
+| Frame Deflate | 1.2.840.10008.1.2.11 | Lossless | Full |
 
 ### 4.3 Default Transfer Syntax
 
@@ -533,7 +563,53 @@ Features:
 
 ### 7.1 TLS Transport Connection Profile
 
-The implementation supports TLS for secure DICOM communication.
+The implementation supports TLS for secure DICOM communication per DICOM PS3.15
+and BCP 195 (RFC 9325).
+
+#### TLS Protocol Versions
+
+| Protocol | Support |
+|----------|---------|
+| TLS 1.3 | Full (preferred) |
+| TLS 1.2 | Full (minimum required) |
+| TLS 1.1 and below | Rejected |
+
+#### BCP 195 Security Profiles
+
+| Profile | Minimum TLS | Key Features |
+|---------|-------------|-------------|
+| BCP 195 Basic | 1.2 | Standard cipher suites, RSA >= 2048, ECDSA >= P-256 |
+| BCP 195 Non-Downgrading | 1.2 (prefers 1.3) | No protocol downgrade allowed, DICOM PS3.15 recommended profile |
+| BCP 195 Extended | 1.3 only | Strictest cipher suites, RSA >= 3072, ECDSA >= P-256 |
+
+The **BCP 195 Non-Downgrading** profile is the default and recommended configuration
+per DICOM PS3.15.
+
+#### TLS 1.3 Cipher Suites
+
+| Cipher Suite | Profile |
+|-------------|---------|
+| TLS_AES_256_GCM_SHA384 | Basic, Non-Downgrading, Extended |
+| TLS_AES_128_GCM_SHA256 | Basic, Non-Downgrading |
+| TLS_CHACHA20_POLY1305_SHA256 | Basic, Non-Downgrading, Extended |
+
+#### TLS 1.2 Cipher Suites (BCP 195 Recommended)
+
+| Cipher Suite | Profile |
+|-------------|---------|
+| ECDHE-ECDSA-AES256-GCM-SHA384 | Basic, Non-Downgrading |
+| ECDHE-RSA-AES256-GCM-SHA384 | Basic, Non-Downgrading |
+| ECDHE-ECDSA-AES128-GCM-SHA256 | Basic, Non-Downgrading |
+| ECDHE-RSA-AES128-GCM-SHA256 | Basic, Non-Downgrading |
+| ECDHE-ECDSA-CHACHA20-POLY1305 | Basic, Non-Downgrading |
+| ECDHE-RSA-CHACHA20-POLY1305 | Basic, Non-Downgrading |
+
+#### Certificate Constraints
+
+| Parameter | Basic | Non-Downgrading | Extended |
+|-----------|-------|-----------------|----------|
+| RSA minimum key size | 2048 bits | 2048 bits | 3072 bits |
+| ECDSA minimum curve | P-256 | P-256 | P-256 |
 
 ### 7.2 Digital Signatures (PS3.15 Section C)
 
@@ -606,7 +682,38 @@ The implementation supports DICOMweb services as defined in PS3.18:
 | DicomJSON response format | Yes |
 | Query parameter parsing | Yes |
 
-### 8.4 Supported Media Types
+### 8.4 DICOMweb Storage Commitment (Supplement 234)
+
+The implementation provides a RESTful equivalent of the DIMSE Storage Commitment
+Push Model, as defined in DICOM Supplement 234.
+
+| Feature | Support |
+|---------|---------|
+| Request storage commitment (POST) | Yes |
+| Query commitment status (GET) | Yes |
+| Per-instance commitment results | Yes |
+| Transaction UID tracking | Yes |
+
+This supplements the DIMSE-based Storage Commitment (Section 3.6) with a RESTful
+interface for DICOMweb-native workflows.
+
+### 8.5 OAuth 2.0 Authorization
+
+DICOMweb endpoints support OAuth 2.0 authorization per RFC 6749.
+
+| Feature | Support |
+|---------|---------|
+| JWT Bearer token validation | Yes |
+| JWKS (JSON Web Key Set) key retrieval | Yes |
+| Scope-based access control | Yes |
+| Token issuer validation | Yes |
+| Configurable required scopes per endpoint | Yes |
+
+When OAuth 2.0 is enabled, all DICOMweb endpoints require a valid JWT Bearer
+token in the `Authorization` header. When disabled, the system falls back to
+X-User-ID header-based authentication for backward compatibility.
+
+### 8.6 Supported Media Types
 
 | Media Type | Usage |
 |-----------|-------|
@@ -663,6 +770,14 @@ All parameters in `server_config` are configurable at runtime:
 | DICOM PS3.10 | Media Storage and File Format for Media Interchange |
 | DICOM PS3.15 | Security and System Management Profiles |
 | DICOM PS3.18 | Web Services |
+| Supplement 232 | JPEG XL Transfer Syntaxes |
+| Supplement 234 | DICOMweb Storage Commitment |
+| Supplement 235 | HTJ2K Transfer Syntaxes |
+| Supplement 240 | Heightmap Segmentation IOD |
+| Supplement 243 | Label Map Segmentation IOD |
+| Supplement 244 | Frame Deflate Transfer Syntax |
+| RFC 6749 | OAuth 2.0 Authorization Framework |
+| RFC 9325 | Recommendations for Secure Use of TLS and DTLS (BCP 195) |
 
 ---
 
@@ -671,6 +786,10 @@ All parameters in `server_config` are configurable at runtime:
 The implementation includes modality-specific IOD validators for the following modalities:
 
 - CT, MR, US, XA/XRF, DX, MG, NM, PET, RT, SEG, SR, SC
+- CT For Processing (multi-energy/spectral CT)
+- Heightmap Segmentation (Supplement 240)
+- Label Map Segmentation (Supplement 243)
+- Waveform Presentation State and Annotation
 
 Each validator checks Mandatory (M), Conditional (C), and User-optional (U)
 attributes as defined in the corresponding IOD specifications in PS3.3.
@@ -683,7 +802,7 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
 | HTJ2K Codec | Requires OpenJPH library at build time (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
-| Print Management | Not supported | N/A |
+| Print Management | Fully implemented (SCP + SCU) | Section 3.7 |
 
 ---
 
