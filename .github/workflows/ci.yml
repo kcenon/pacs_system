@@ -51,32 +51,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout dependencies (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        # Clone dependencies as siblings to pacs_system in $GITHUB_WORKSPACE
-        # CMake expects: ../common_system relative to pacs_system
-        git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
-        git clone --depth 1 https://github.com/kcenon/logger_system.git
-        git clone --depth 1 https://github.com/kcenon/container_system.git
-        git clone --depth 1 https://github.com/kcenon/network_system.git
-        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
-        git clone --depth 1 https://github.com/kcenon/database_system.git
-
-    - name: Checkout dependencies (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        # Clone dependencies as siblings to pacs_system in $env:GITHUB_WORKSPACE
-        # CMake expects: ../common_system relative to pacs_system
-        git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
-        git clone --depth 1 https://github.com/kcenon/logger_system.git
-        git clone --depth 1 https://github.com/kcenon/container_system.git
-        git clone --depth 1 https://github.com/kcenon/network_system.git
-        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
-        git clone --depth 1 https://github.com/kcenon/database_system.git
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -111,44 +89,6 @@ jobs:
       run: |
         # Install dependencies via vcpkg
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
-
-    - name: Patch dependency CMake files to remove -Werror (Unix)
-      if: runner.os != 'Windows'
-      working-directory: ${{ github.workspace }}
-      run: |
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-          fi
-        done
-
-    - name: Patch dependency CMake files to remove -Werror (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        # Remove -Werror and /WX from CMake files for Windows build
-        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
-        foreach ($repo in $repos) {
-          if (Test-Path $repo) {
-            Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
-              $content = Get-Content $_.FullName -Raw
-              if ($content -match '-Werror|/WX') {
-                Write-Host "  Patching: $($_.FullName)"
-                $content = $content -replace '"-Werror[^"]*"', ''
-                $content = $content -replace '-Werror[^ )"]*', ''
-                $content = $content -replace '/WX', ''
-                Set-Content $_.FullName -Value $content
-              }
-            }
-          }
-        }
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'

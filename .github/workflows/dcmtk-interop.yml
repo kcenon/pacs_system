@@ -51,16 +51,10 @@ jobs:
       with:
         path: pacs_system
 
-    # Checkout required dependency systems (kcenon ecosystem)
-    - name: Checkout dependencies
-      run: |
-        git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
-        git clone --depth 1 https://github.com/kcenon/logger_system.git
-        git clone --depth 1 https://github.com/kcenon/container_system.git
-        git clone --depth 1 https://github.com/kcenon/network_system.git
-        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
-        git clone --depth 1 https://github.com/kcenon/database_system.git
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -90,21 +84,6 @@ jobs:
         which storescp || echo "storescp path not found"
         which findscu || echo "findscu path not found"
         which movescu || echo "movescu path not found"
-
-    - name: Patch dependency CMake files to remove -Werror
-      working-directory: ${{ github.workspace }}
-      run: |
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-          fi
-        done
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -235,15 +214,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout dependencies
-      run: |
-        git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
-        git clone --depth 1 https://github.com/kcenon/logger_system.git
-        git clone --depth 1 https://github.com/kcenon/container_system.git
-        git clone --depth 1 https://github.com/kcenon/network_system.git
-        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
-        git clone --depth 1 https://github.com/kcenon/database_system.git
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -264,19 +238,6 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo dcmtk coreutils
-
-    - name: Patch dependency CMake files to remove -Werror
-      working-directory: ${{ github.workspace }}
-      run: |
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-          fi
-        done
 
     - name: Configure and Build
       working-directory: pacs_system
