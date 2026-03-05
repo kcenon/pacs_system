@@ -726,14 +726,15 @@ endif()
 FetchContent_Declare(
     Crow
     GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-    GIT_TAG master  # Use master for ASIO 1.30+ compatibility (io_context vs io_service)
+    GIT_TAG v1.3.1  # Pinned release; compatible with ASIO 1.30+ io_context (IEC 62304 §8.1.2)
+    GIT_SHALLOW TRUE
 )
 set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(CROW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
 set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(Crow)
-message(STATUS "  [OK] Crow (master) fetched")
+message(STATUS "  [OK] Crow (v1.3.1) fetched")
 
 ##################################################
 # Dependency Chain Validation
