@@ -128,6 +128,19 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_valid());
         CHECK(ts.is_supported());
     }
+
+    SECTION("Frame Deflate") {
+        const auto& ts = transfer_syntax::frame_deflate;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.11");
+        CHECK(ts.name() == "Frame Deflate");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());
+    }
 }
 
 TEST_CASE("transfer_syntax construction from UID", "[encoding][transfer_syntax]") {
@@ -209,8 +222,8 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2)
-        CHECK(supported.size() == 10);
+        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2) + Frame Deflate (1)
+        CHECK(supported.size() == 11);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());
@@ -221,7 +234,7 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("all_transfer_syntaxes returns all registered") {
         auto all = all_transfer_syntaxes();
 
-        CHECK(all.size() >= 12);
+        CHECK(all.size() >= 13);
 
         for (const auto& ts : all) {
             CHECK(ts.is_valid());
