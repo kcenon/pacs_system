@@ -1089,6 +1089,7 @@ add_library(pacs_services
     src/services/validation/ct_processing_iod_validator.cpp
     src/services/validation/heightmap_seg_iod_validator.cpp
     src/services/validation/label_map_seg_iod_validator.cpp
+    src/services/pir/patient_reconciliation_service.cpp
     src/services/xds/imaging_document_source.cpp
     src/services/xds/imaging_document_consumer.cpp
     src/services/validation/waveform_ps_iod_validator.cpp
@@ -1928,6 +1929,7 @@ if(PACS_BUILD_TESTS)
         tests/services/ct_processing_iod_validator_test.cpp
         tests/services/heightmap_seg_iod_validator_test.cpp
         tests/services/label_map_seg_iod_validator_test.cpp
+        tests/services/pir/patient_reconciliation_test.cpp
         tests/services/xds/xds_imaging_test.cpp
         tests/services/waveform_storage_test.cpp
         tests/services/cache/simple_lru_cache_test.cpp
