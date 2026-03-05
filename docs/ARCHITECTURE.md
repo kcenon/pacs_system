@@ -44,6 +44,7 @@ Implement DICOM protocols according to the official standard (PS3.x) to ensure i
 - Follow PS3.7 (Message Exchange)
 - Follow PS3.8 (Network Communication)
 - Regular conformance testing
+- IHE profile conformance (XDS-I.b, AIRA, PIR) -- see [IHE Integration Statement](IHE_INTEGRATION_STATEMENT.md)
 
 ### 3. Zero External DICOM Dependencies
 

@@ -364,6 +364,7 @@ pacs_system/
 - 🔧 [API Reference](docs/API_REFERENCE.md) - API documentation
 - 🖥️ [CLI Reference](docs/CLI_REFERENCE.md) - CLI tools documentation
 - 📄 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) - DICOM conformance
+- 🏥 [IHE Integration Statement](docs/IHE_INTEGRATION_STATEMENT.md) - IHE profile conformance (XDS-I.b, AIRA, PIR)
 - 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - Thread system migration summary
 
 **Database Integration:**
