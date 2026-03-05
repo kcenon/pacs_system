@@ -173,6 +173,15 @@ public:
     /// HEVC/H.265 Main 10 Profile / Level 5.1 (1.2.840.10008.1.2.4.108)
     static const transfer_syntax hevc_main10;
 
+    /// JPEG XL Lossless (1.2.840.10008.1.2.4.110) - Supplement 232
+    static const transfer_syntax jpegxl_lossless;
+
+    /// JPEG XL JPEG Recompression (1.2.840.10008.1.2.4.111) - Supplement 232
+    static const transfer_syntax jpegxl_jpeg_recompression;
+
+    /// JPEG XL (1.2.840.10008.1.2.4.112) - Supplement 232
+    static const transfer_syntax jpegxl_lossy;
+
     /// Frame Deflate (1.2.840.10008.1.2.11) - Supplement 244
     static const transfer_syntax frame_deflate;
 

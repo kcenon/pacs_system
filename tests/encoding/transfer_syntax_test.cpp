@@ -129,6 +129,45 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_supported());
     }
 
+    SECTION("JPEG XL Lossless") {
+        const auto& ts = transfer_syntax::jpegxl_lossless;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.110");
+        CHECK(ts.name() == "JPEG XL Lossless");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());
+    }
+
+    SECTION("JPEG XL JPEG Recompression") {
+        const auto& ts = transfer_syntax::jpegxl_jpeg_recompression;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.111");
+        CHECK(ts.name() == "JPEG XL JPEG Recompression");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());
+    }
+
+    SECTION("JPEG XL Lossy") {
+        const auto& ts = transfer_syntax::jpegxl_lossy;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.112");
+        CHECK(ts.name() == "JPEG XL");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());
+    }
+
     SECTION("Frame Deflate") {
         const auto& ts = transfer_syntax::frame_deflate;
 
@@ -222,8 +261,8 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2) + Frame Deflate (1)
-        CHECK(supported.size() == 11);
+        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2) + JPEG XL (3) + Frame Deflate (1)
+        CHECK(supported.size() == 14);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());
@@ -234,7 +273,7 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("all_transfer_syntaxes returns all registered") {
         auto all = all_transfer_syntaxes();
 
-        CHECK(all.size() >= 13);
+        CHECK(all.size() >= 18);
 
         for (const auto& ts : all) {
             CHECK(ts.is_valid());

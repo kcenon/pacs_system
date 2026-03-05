@@ -35,6 +35,7 @@
 #include "pacs/encoding/compression/jpeg_lossless_codec.hpp"
 #include "pacs/encoding/compression/jpeg2000_codec.hpp"
 #include "pacs/encoding/compression/jpeg_ls_codec.hpp"
+#include "pacs/encoding/compression/jpegxl_codec.hpp"
 #include "pacs/encoding/compression/rle_codec.hpp"
 
 #include <array>
@@ -49,7 +50,7 @@ namespace {
  * As more codecs are implemented (RLE, etc.),
  * they should be added to this list.
  */
-static constexpr std::array<std::string_view, 13> kSupportedTransferSyntaxes = {{
+static constexpr std::array<std::string_view, 16> kSupportedTransferSyntaxes = {{
     rle_codec::kTransferSyntaxUID,                   // 1.2.840.10008.1.2.5
     jpeg_baseline_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.50
     jpeg_lossless_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.70
@@ -59,6 +60,9 @@ static constexpr std::array<std::string_view, 13> kSupportedTransferSyntaxes = {
     jpeg2000_codec::kTransferSyntaxUIDLossy,         // 1.2.840.10008.1.2.4.91
     hevc_codec::kTransferSyntaxUIDMain,              // 1.2.840.10008.1.2.4.107
     hevc_codec::kTransferSyntaxUIDMain10,            // 1.2.840.10008.1.2.4.108
+    jpegxl_codec::kTransferSyntaxUIDLossless,        // 1.2.840.10008.1.2.4.110
+    jpegxl_codec::kTransferSyntaxUIDJPEGRecompression, // 1.2.840.10008.1.2.4.111
+    jpegxl_codec::kTransferSyntaxUIDLossy,           // 1.2.840.10008.1.2.4.112
     htj2k_codec::kTransferSyntaxUIDLossless,         // 1.2.840.10008.1.2.4.201
     htj2k_codec::kTransferSyntaxUIDRPCL,             // 1.2.840.10008.1.2.4.202
     htj2k_codec::kTransferSyntaxUIDLossy,            // 1.2.840.10008.1.2.4.203
@@ -113,6 +117,21 @@ std::unique_ptr<compression_codec> codec_factory::create(
     // HEVC/H.265 Main 10 Profile (1.2.840.10008.1.2.4.108)
     if (transfer_syntax_uid == hevc_codec::kTransferSyntaxUIDMain10) {
         return std::make_unique<hevc_codec>(true);  // main10 = true
+    }
+
+    // JPEG XL Lossless (1.2.840.10008.1.2.4.110)
+    if (transfer_syntax_uid == jpegxl_codec::kTransferSyntaxUIDLossless) {
+        return std::make_unique<jpegxl_codec>(true, false);
+    }
+
+    // JPEG XL JPEG Recompression (1.2.840.10008.1.2.4.111)
+    if (transfer_syntax_uid == jpegxl_codec::kTransferSyntaxUIDJPEGRecompression) {
+        return std::make_unique<jpegxl_codec>(true, true);
+    }
+
+    // JPEG XL (1.2.840.10008.1.2.4.112) - lossy
+    if (transfer_syntax_uid == jpegxl_codec::kTransferSyntaxUIDLossy) {
+        return std::make_unique<jpegxl_codec>(false);
     }
 
     // HTJ2K Lossless Only (1.2.840.10008.1.2.4.201)
