@@ -1072,6 +1072,7 @@ add_library(pacs_services
     src/services/sop_classes/wsi_storage.cpp
     src/services/sop_classes/ophthalmic_storage.cpp
     src/services/sop_classes/parametric_map_storage.cpp
+    src/services/sop_classes/waveform_storage.cpp
     src/services/validation/us_iod_validator.cpp
     src/services/validation/dx_iod_validator.cpp
     src/services/validation/mg_iod_validator.cpp
@@ -1088,6 +1089,7 @@ add_library(pacs_services
     src/services/validation/ct_processing_iod_validator.cpp
     src/services/validation/heightmap_seg_iod_validator.cpp
     src/services/validation/label_map_seg_iod_validator.cpp
+    src/services/validation/waveform_ps_iod_validator.cpp
     src/services/cache/query_cache.cpp
     src/services/cache/database_cursor.cpp
     src/services/cache/query_result_stream.cpp
@@ -1922,6 +1924,7 @@ if(PACS_BUILD_TESTS)
         tests/services/ct_processing_iod_validator_test.cpp
         tests/services/heightmap_seg_iod_validator_test.cpp
         tests/services/label_map_seg_iod_validator_test.cpp
+        tests/services/waveform_storage_test.cpp
         tests/services/cache/simple_lru_cache_test.cpp
         tests/services/cache/query_cache_test.cpp
         tests/services/cache/streaming_query_test.cpp
