@@ -394,6 +394,19 @@ else()
     endif()
 endif()
 
+# ==========================================================================
+# kcenon Ecosystem SOUP Version Registry (IEC 62304 §8.1.2)
+# These SHA identifiers must match the pinned versions in:
+#   .github/actions/checkout-kcenon-deps/action.yml
+# ==========================================================================
+set(PACS_SOUP_COMMON_SYSTEM_SHA     "47be5fd27650f0ebfa2d029ebed35a1c262e55c4")
+set(PACS_SOUP_CONTAINER_SYSTEM_SHA  "0b95a0c10edf53315581b7f3fa458f0193e8c039")
+set(PACS_SOUP_THREAD_SYSTEM_SHA     "3ea6fd55704f70b880b13da190064ddbce70dda8")
+set(PACS_SOUP_LOGGER_SYSTEM_SHA     "66a00ccce9917a65179e1c42707af9f32d22361f")
+set(PACS_SOUP_MONITORING_SYSTEM_SHA "0b562ea3c60a8a51da77a1847d87efba3d99ef64")
+set(PACS_SOUP_NETWORK_SYSTEM_SHA    "c70026ab057e72a84a5031f24d2009f9ee641743")
+set(PACS_SOUP_DATABASE_SYSTEM_SHA   "b90b0f3bb1e7c9719494724b4c900fd89199e513")
+
 # common_system (REQUIRED - Tier 0)
 if(PACS_WITH_COMMON_SYSTEM)
     message(STATUS "")

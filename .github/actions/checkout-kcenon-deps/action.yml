@@ -1,0 +1,102 @@
+# Checkout kcenon ecosystem dependencies at pinned versions
+# IEC 62304 §8.1.2 requires unique SOUP identification for reproducible builds
+#
+# To update versions: change the SHA values below and verify CI passes.
+# All SHAs should match entries in docs/SOUP.md
+
+name: 'Checkout kcenon Dependencies'
+description: 'Clone kcenon ecosystem libraries at pinned commit SHAs for IEC 62304 SOUP traceability'
+
+inputs:
+  patch-werror:
+    description: 'Remove -Werror from dependency CMake files'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Clone kcenon dependencies (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      env:
+        # Pinned commit SHAs for IEC 62304 SOUP traceability
+        # Last verified: 2026-03-05
+        COMMON_SYSTEM_SHA: '47be5fd27650f0ebfa2d029ebed35a1c262e55c4'
+        CONTAINER_SYSTEM_SHA: '0b95a0c10edf53315581b7f3fa458f0193e8c039'
+        THREAD_SYSTEM_SHA: '3ea6fd55704f70b880b13da190064ddbce70dda8'
+        LOGGER_SYSTEM_SHA: '66a00ccce9917a65179e1c42707af9f32d22361f'
+        MONITORING_SYSTEM_SHA: '0b562ea3c60a8a51da77a1847d87efba3d99ef64'
+        NETWORK_SYSTEM_SHA: 'c70026ab057e72a84a5031f24d2009f9ee641743'
+        DATABASE_SYSTEM_SHA: 'b90b0f3bb1e7c9719494724b4c900fd89199e513'
+      run: |
+        clone_pinned() {
+          local name=$1 sha=$2
+          echo "Cloning kcenon/$name at $sha"
+          git init "$name"
+          git -C "$name" fetch --depth 1 "https://github.com/kcenon/$name.git" "$sha"
+          git -C "$name" checkout FETCH_HEAD
+        }
+
+        clone_pinned common_system    "$COMMON_SYSTEM_SHA"
+        clone_pinned container_system "$CONTAINER_SYSTEM_SHA"
+        clone_pinned thread_system    "$THREAD_SYSTEM_SHA"
+        clone_pinned logger_system    "$LOGGER_SYSTEM_SHA"
+        clone_pinned monitoring_system "$MONITORING_SYSTEM_SHA"
+        clone_pinned network_system   "$NETWORK_SYSTEM_SHA"
+        clone_pinned database_system  "$DATABASE_SYSTEM_SHA"
+
+    - name: Clone kcenon dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        COMMON_SYSTEM_SHA: '47be5fd27650f0ebfa2d029ebed35a1c262e55c4'
+        CONTAINER_SYSTEM_SHA: '0b95a0c10edf53315581b7f3fa458f0193e8c039'
+        THREAD_SYSTEM_SHA: '3ea6fd55704f70b880b13da190064ddbce70dda8'
+        LOGGER_SYSTEM_SHA: '66a00ccce9917a65179e1c42707af9f32d22361f'
+        MONITORING_SYSTEM_SHA: '0b562ea3c60a8a51da77a1847d87efba3d99ef64'
+        NETWORK_SYSTEM_SHA: 'c70026ab057e72a84a5031f24d2009f9ee641743'
+        DATABASE_SYSTEM_SHA: 'b90b0f3bb1e7c9719494724b4c900fd89199e513'
+      run: |
+        function Clone-Pinned {
+          param([string]$Name, [string]$Sha)
+          Write-Host "Cloning kcenon/$Name at $Sha"
+          git init $Name
+          git -C $Name fetch --depth 1 "https://github.com/kcenon/$Name.git" $Sha
+          git -C $Name checkout FETCH_HEAD
+        }
+
+        Clone-Pinned "common_system"     $env:COMMON_SYSTEM_SHA
+        Clone-Pinned "container_system"  $env:CONTAINER_SYSTEM_SHA
+        Clone-Pinned "thread_system"     $env:THREAD_SYSTEM_SHA
+        Clone-Pinned "logger_system"     $env:LOGGER_SYSTEM_SHA
+        Clone-Pinned "monitoring_system" $env:MONITORING_SYSTEM_SHA
+        Clone-Pinned "network_system"    $env:NETWORK_SYSTEM_SHA
+        Clone-Pinned "database_system"   $env:DATABASE_SYSTEM_SHA
+
+    - name: Patch -Werror in dependencies (Unix)
+      if: inputs.patch-werror == 'true' && runner.os != 'Windows'
+      shell: bash
+      run: |
+        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
+          if [ -d "$repo" ]; then
+            echo "=== Patching $repo ==="
+            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
+              sed -i 's/-Werror//g' "$file"
+            done
+          fi
+        done
+
+    - name: Patch -Werror in dependencies (Windows)
+      if: inputs.patch-werror == 'true' && runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
+        foreach ($repo in $repos) {
+          if (Test-Path $repo) {
+            Write-Host "=== Patching $repo ==="
+            Get-ChildItem -Path $repo -Recurse -Include "CMakeLists.txt","*.cmake" | ForEach-Object {
+              (Get-Content $_.FullName -Raw) -replace '-Werror', '' -replace '/WX', '' | Set-Content $_.FullName
+            }
+          }
+        }

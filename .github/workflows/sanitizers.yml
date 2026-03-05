@@ -43,15 +43,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout dependencies
-      run: |
-        git clone --depth 1 https://github.com/kcenon/common_system.git
-        git clone --depth 1 https://github.com/kcenon/thread_system.git
-        git clone --depth 1 https://github.com/kcenon/logger_system.git
-        git clone --depth 1 https://github.com/kcenon/container_system.git
-        git clone --depth 1 https://github.com/kcenon/network_system.git
-        git clone --depth 1 https://github.com/kcenon/monitoring_system.git
-        git clone --depth 1 https://github.com/kcenon/database_system.git
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
 
     - name: Install dependencies
       run: |
@@ -60,18 +55,6 @@ jobs:
         sudo apt-get install -y libsqlite3-dev libssl-dev libfmt-dev
         sudo apt-get install -y libgtest-dev libgmock-dev
         sudo apt-get install -y libjpeg-turbo8-dev
-
-    - name: Patch dependency CMake files to remove -Werror
-      run: |
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-          fi
-        done
 
     - name: Set up compiler
       run: |
