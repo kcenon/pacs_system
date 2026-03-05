@@ -57,7 +57,7 @@ struct ts_entry {
  * This table contains the standard Transfer Syntaxes defined in DICOM PS3.5.
  * Compression support will be added in later phases.
  */
-static constexpr std::array<ts_entry, 17> TS_REGISTRY = {{
+static constexpr std::array<ts_entry, 18> TS_REGISTRY = {{
     // Uncompressed Transfer Syntaxes (supported in Phase 1)
     {"1.2.840.10008.1.2",
      "Implicit VR Little Endian",
@@ -164,6 +164,13 @@ static constexpr std::array<ts_entry, 17> TS_REGISTRY = {{
 
     {"1.2.840.10008.1.2.4.112",
      "JPEG XL",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, true},
+
+    // Frame Deflate Transfer Syntax (DICOM Supplement 244)
+    {"1.2.840.10008.1.2.11",
+     "Frame Deflate",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
      true, false, true},
@@ -300,6 +307,13 @@ const transfer_syntax transfer_syntax::jpegxl_jpeg_recompression{
 const transfer_syntax transfer_syntax::jpegxl_lossy{
     "1.2.840.10008.1.2.4.112",
     "JPEG XL",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, true};
+
+const transfer_syntax transfer_syntax::frame_deflate{
+    "1.2.840.10008.1.2.11",
+    "Frame Deflate",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
     true, false, true};

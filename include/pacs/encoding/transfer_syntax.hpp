@@ -182,6 +182,9 @@ public:
     /// JPEG XL (1.2.840.10008.1.2.4.112) - Supplement 232
     static const transfer_syntax jpegxl_lossy;
 
+    /// Frame Deflate (1.2.840.10008.1.2.11) - Supplement 244
+    static const transfer_syntax frame_deflate;
+
     /// @}
 
     /// @name Comparison Operators
