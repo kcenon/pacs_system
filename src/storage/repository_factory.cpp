@@ -51,9 +51,16 @@
 #include "pacs/storage/key_image_repository.hpp"
 #include "pacs/storage/measurement_repository.hpp"
 #include "pacs/storage/node_repository.hpp"
+#include "pacs/storage/prefetch_history_repository.hpp"
 #include "pacs/storage/prefetch_repository.hpp"
+#include "pacs/storage/prefetch_rule_repository.hpp"
 #include "pacs/storage/routing_repository.hpp"
+#include "pacs/storage/recent_study_repository.hpp"
+#include "pacs/storage/sync_config_repository.hpp"
+#include "pacs/storage/sync_conflict_repository.hpp"
+#include "pacs/storage/sync_history_repository.hpp"
 #include "pacs/storage/sync_repository.hpp"
+#include "pacs/storage/viewer_state_record_repository.hpp"
 #include "pacs/storage/viewer_state_repository.hpp"
 
 namespace pacs::storage {
@@ -99,6 +106,30 @@ auto repository_factory::sync_states() -> std::shared_ptr<sync_repository> {
     return sync_states_;
 }
 
+auto repository_factory::sync_configs()
+    -> std::shared_ptr<sync_config_repository> {
+    if (!sync_configs_) {
+        sync_configs_ = std::make_shared<sync_config_repository>(db_);
+    }
+    return sync_configs_;
+}
+
+auto repository_factory::sync_conflicts()
+    -> std::shared_ptr<sync_conflict_repository> {
+    if (!sync_conflicts_) {
+        sync_conflicts_ = std::make_shared<sync_conflict_repository>(db_);
+    }
+    return sync_conflicts_;
+}
+
+auto repository_factory::sync_history()
+    -> std::shared_ptr<sync_history_repository> {
+    if (!sync_history_) {
+        sync_history_ = std::make_shared<sync_history_repository>(db_);
+    }
+    return sync_history_;
+}
+
 auto repository_factory::key_images()
     -> std::shared_ptr<key_image_repository> {
     if (!key_images_) {
@@ -123,6 +154,23 @@ auto repository_factory::viewer_states()
     return viewer_states_;
 }
 
+auto repository_factory::viewer_state_records()
+    -> std::shared_ptr<viewer_state_record_repository> {
+    if (!viewer_state_records_) {
+        viewer_state_records_ =
+            std::make_shared<viewer_state_record_repository>(db_);
+    }
+    return viewer_state_records_;
+}
+
+auto repository_factory::recent_studies()
+    -> std::shared_ptr<recent_study_repository> {
+    if (!recent_studies_) {
+        recent_studies_ = std::make_shared<recent_study_repository>(db_);
+    }
+    return recent_studies_;
+}
+
 auto repository_factory::prefetch_queue()
     -> std::shared_ptr<prefetch_repository> {
     if (!prefetch_queue_) {
@@ -131,12 +179,65 @@ auto repository_factory::prefetch_queue()
     return prefetch_queue_;
 }
 
+auto repository_factory::prefetch_rules()
+    -> std::shared_ptr<prefetch_rule_repository> {
+    if (!prefetch_rules_) {
+        prefetch_rules_ = std::make_shared<prefetch_rule_repository>(db_);
+    }
+    return prefetch_rules_;
+}
+
+auto repository_factory::prefetch_history()
+    -> std::shared_ptr<prefetch_history_repository> {
+    if (!prefetch_history_) {
+        prefetch_history_ = std::make_shared<prefetch_history_repository>(db_);
+    }
+    return prefetch_history_;
+}
+
 auto repository_factory::commitments()
     -> std::shared_ptr<commitment_repository> {
     if (!commitments_) {
         commitments_ = std::make_shared<commitment_repository>(db_);
     }
     return commitments_;
+}
+
+auto repository_factory::canonical_repositories() -> canonical_repository_set {
+    return {
+        .jobs = jobs(),
+        .annotations = annotations(),
+        .routing_rules = routing_rules(),
+        .nodes = nodes(),
+        .sync =
+            {
+                .configs = sync_configs(),
+                .conflicts = sync_conflicts(),
+                .history = sync_history(),
+            },
+        .key_images = key_images(),
+        .measurements = measurements(),
+        .viewer_state =
+            {
+                .records = viewer_state_records(),
+                .recent_studies = recent_studies(),
+            },
+        .prefetch =
+            {
+                .rules = prefetch_rules(),
+                .history = prefetch_history(),
+            },
+        .commitments = commitments(),
+    };
+}
+
+auto repository_factory::compatibility_repositories()
+    -> compatibility_repository_set {
+    return {
+        .sync_states = sync_states(),
+        .viewer_states = viewer_states(),
+        .prefetch_queue = prefetch_queue(),
+    };
 }
 
 auto repository_factory::db() const
