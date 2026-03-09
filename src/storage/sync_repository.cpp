@@ -192,7 +192,7 @@ VoidResult sync_repository::save_config(const client::sync_config& config) {
             -1, "Database not connected", "sync_repository"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto builder = db_->open_session().create_query_builder();
     std::ostringstream sql;
     sql << R"(
         INSERT INTO sync_configs (
@@ -237,7 +237,7 @@ VoidResult sync_repository::save_config(const client::sync_config& config) {
             updated_at = datetime('now')
     )";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -258,7 +258,7 @@ std::optional<client::sync_config> sync_repository::find_config(
                total_syncs, studies_synced
         FROM sync_configs WHERE config_id = ')" << config_id << "'";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -279,7 +279,7 @@ std::vector<client::sync_config> sync_repository::list_configs() const {
         FROM sync_configs ORDER BY name
     )";
 
-    auto result = db_->select(sql);
+    auto result = db_->open_session().select(sql);
     if (result.is_err()) return configs;
 
     configs.reserve(result.value().size());
@@ -303,7 +303,7 @@ std::vector<client::sync_config> sync_repository::list_enabled_configs() const {
         FROM sync_configs WHERE enabled = 1 ORDER BY name
     )";
 
-    auto result = db_->select(sql);
+    auto result = db_->open_session().select(sql);
     if (result.is_err()) return configs;
 
     configs.reserve(result.value().size());
@@ -323,7 +323,7 @@ VoidResult sync_repository::remove_config(std::string_view config_id) {
     std::ostringstream sql;
     sql << "DELETE FROM sync_configs WHERE config_id = '" << config_id << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -359,7 +359,7 @@ VoidResult sync_repository::update_config_stats(
             WHERE config_id = ')" << config_id << "'";
     }
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -417,7 +417,7 @@ VoidResult sync_repository::save_conflict(const client::sync_conflict& conflict)
             resolved_at = excluded.resolved_at
     )";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -437,7 +437,7 @@ std::optional<client::sync_conflict> sync_repository::find_conflict(
                resolved, resolution, detected_at, resolved_at
         FROM sync_conflicts WHERE study_uid = ')" << study_uid << "'";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -458,7 +458,7 @@ std::vector<client::sync_conflict> sync_repository::list_conflicts(
                resolved, resolution, detected_at, resolved_at
         FROM sync_conflicts WHERE config_id = ')" << config_id << R"(' ORDER BY detected_at DESC)";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err()) return conflicts;
 
     conflicts.reserve(result.value().size());
@@ -481,7 +481,7 @@ std::vector<client::sync_conflict> sync_repository::list_unresolved_conflicts() 
         FROM sync_conflicts WHERE resolved = 0 ORDER BY detected_at DESC
     )";
 
-    auto result = db_->select(sql);
+    auto result = db_->open_session().select(sql);
     if (result.is_err()) return conflicts;
 
     conflicts.reserve(result.value().size());
@@ -508,7 +508,7 @@ VoidResult sync_repository::resolve_conflict(
             resolved_at = datetime('now')
         WHERE study_uid = ')" << study_uid << "' AND resolved = 0";
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -529,7 +529,7 @@ Result<size_t> sync_repository::cleanup_old_conflicts(std::chrono::hours max_age
     sql << "DELETE FROM sync_conflicts WHERE resolved = 1 AND resolved_at < '"
         << cutoff_str << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -564,7 +564,7 @@ VoidResult sync_repository::save_history(const client::sync_history& history) {
         << "'" << format_timestamp(history.started_at) << "', "
         << "'" << format_timestamp(history.completed_at) << "')";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -585,7 +585,7 @@ std::vector<client::sync_history> sync_repository::list_history(
         FROM sync_history WHERE config_id = ')" << config_id
         << "' ORDER BY started_at DESC LIMIT " << limit;
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err()) return histories;
 
     histories.reserve(result.value().size());
@@ -608,7 +608,7 @@ std::optional<client::sync_history> sync_repository::get_last_history(
         FROM sync_history WHERE config_id = ')" << config_id
         << "' ORDER BY started_at DESC LIMIT 1";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -628,7 +628,7 @@ Result<size_t> sync_repository::cleanup_old_history(std::chrono::hours max_age) 
     std::ostringstream sql;
     sql << "DELETE FROM sync_history WHERE completed_at < '" << cutoff_str << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -643,7 +643,7 @@ Result<size_t> sync_repository::cleanup_old_history(std::chrono::hours max_age) 
 size_t sync_repository::count_configs() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select("SELECT COUNT(*) as count FROM sync_configs");
+    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM sync_configs");
     if (result.is_err() || result.value().empty()) return 0;
 
     return std::stoull(result.value()[0].at("count"));
@@ -652,7 +652,7 @@ size_t sync_repository::count_configs() const {
 size_t sync_repository::count_unresolved_conflicts() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select(
+    auto result = db_->open_session().select(
         "SELECT COUNT(*) as count FROM sync_conflicts WHERE resolved = 0");
     if (result.is_err() || result.value().empty()) return 0;
 
@@ -662,7 +662,7 @@ size_t sync_repository::count_unresolved_conflicts() const {
 size_t sync_repository::count_syncs_today() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select(R"(
+    auto result = db_->open_session().select(R"(
         SELECT COUNT(*) as count FROM sync_history
         WHERE date(completed_at) = date('now')
     )");

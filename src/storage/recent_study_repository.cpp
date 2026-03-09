@@ -138,7 +138,7 @@ auto recent_study_repository::record_access(
             accessed_at = excluded.accessed_at
     )";
 
-    auto result = db()->insert(sql.str());
+    auto result = storage_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -154,7 +154,7 @@ auto recent_study_repository::find_by_user(
             -1, "Database not connected", "recent_study_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where("user_id", "=", std::string(user_id))
@@ -163,7 +163,7 @@ auto recent_study_repository::find_by_user(
         .limit(limit);
 
     auto query = builder.build();
-    auto result = db()->select(query);
+    auto result = storage_session().select(query);
 
     if (result.is_err()) {
         return list_result_type(result.error());
@@ -201,13 +201,13 @@ auto recent_study_repository::count_for_user(std::string_view user_id)
             -1, "Database not connected", "recent_study_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select({"COUNT(*) as count"})
         .from(table_name())
         .where("user_id", "=", std::string(user_id));
 
     auto query = builder.build();
-    auto result = db()->select(query);
+    auto result = storage_session().select(query);
 
     if (result.is_err()) {
         return Result<size_t>(result.error());
@@ -241,13 +241,13 @@ auto recent_study_repository::was_recently_accessed(
     auto study_cond = database::query_condition(
         "study_uid", "=", std::string(study_uid));
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select({"COUNT(*) as count"})
         .from(table_name())
         .where(user_cond && study_cond);
 
     auto query = builder.build();
-    auto result = db()->select(query);
+    auto result = storage_session().select(query);
 
     if (result.is_err()) {
         return Result<bool>(result.error());
