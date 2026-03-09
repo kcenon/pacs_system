@@ -57,11 +57,75 @@ class annotation_repository;
 class routing_repository;
 class node_repository;
 class sync_repository;
+class sync_config_repository;
+class sync_conflict_repository;
+class sync_history_repository;
 class key_image_repository;
 class measurement_repository;
 class viewer_state_repository;
+class viewer_state_record_repository;
+class recent_study_repository;
 class prefetch_repository;
+class prefetch_rule_repository;
+class prefetch_history_repository;
 class commitment_repository;
+
+/**
+ * @brief Canonical sync repository set for higher-level PACS wiring
+ */
+struct sync_repository_set {
+    std::shared_ptr<sync_config_repository> configs;
+    std::shared_ptr<sync_conflict_repository> conflicts;
+    std::shared_ptr<sync_history_repository> history;
+};
+
+/**
+ * @brief Canonical viewer-state repository set for higher-level PACS wiring
+ */
+struct viewer_state_repository_set {
+    std::shared_ptr<viewer_state_record_repository> records;
+    std::shared_ptr<recent_study_repository> recent_studies;
+};
+
+/**
+ * @brief Canonical prefetch repository set for higher-level PACS wiring
+ */
+struct prefetch_repository_set {
+    std::shared_ptr<prefetch_rule_repository> rules;
+    std::shared_ptr<prefetch_history_repository> history;
+};
+
+/**
+ * @brief Canonical PACS repository-set contract for higher-level service wiring
+ *
+ * This contract exposes the split repositories that own PACS persistence
+ * semantics. Higher-level services should prefer this set over aggregate
+ * compatibility repositories.
+ */
+struct canonical_repository_set {
+    std::shared_ptr<job_repository> jobs;
+    std::shared_ptr<annotation_repository> annotations;
+    std::shared_ptr<routing_repository> routing_rules;
+    std::shared_ptr<node_repository> nodes;
+    sync_repository_set sync;
+    std::shared_ptr<key_image_repository> key_images;
+    std::shared_ptr<measurement_repository> measurements;
+    viewer_state_repository_set viewer_state;
+    prefetch_repository_set prefetch;
+    std::shared_ptr<commitment_repository> commitments;
+};
+
+/**
+ * @brief Compatibility repository contract kept for incremental migration
+ *
+ * These aggregate repositories remain available while higher layers are moved
+ * to canonical split repository sets.
+ */
+struct compatibility_repository_set {
+    std::shared_ptr<sync_repository> sync_states;
+    std::shared_ptr<viewer_state_repository> viewer_states;
+    std::shared_ptr<prefetch_repository> prefetch_queue;
+};
 
 /**
  * @brief Factory for creating repository instances with shared database
@@ -161,11 +225,31 @@ public:
     [[nodiscard]] auto nodes() -> std::shared_ptr<node_repository>;
 
     /**
-     * @brief Get or create sync repository
+     * @brief Get or create aggregate sync repository
      *
+     * Compatibility-only contract. Prefer sync_configs(), sync_conflicts(),
+     * and sync_history() for new higher-level wiring.
      * @return Shared pointer to sync repository
      */
     [[nodiscard]] auto sync_states() -> std::shared_ptr<sync_repository>;
+
+    /**
+     * @brief Get or create canonical sync config repository
+     */
+    [[nodiscard]] auto sync_configs()
+        -> std::shared_ptr<sync_config_repository>;
+
+    /**
+     * @brief Get or create canonical sync conflict repository
+     */
+    [[nodiscard]] auto sync_conflicts()
+        -> std::shared_ptr<sync_conflict_repository>;
+
+    /**
+     * @brief Get or create canonical sync history repository
+     */
+    [[nodiscard]] auto sync_history()
+        -> std::shared_ptr<sync_history_repository>;
 
     /**
      * @brief Get or create key image repository
@@ -183,20 +267,48 @@ public:
         -> std::shared_ptr<measurement_repository>;
 
     /**
-     * @brief Get or create viewer state repository
+     * @brief Get or create aggregate viewer state repository
      *
+     * Compatibility-only contract. Prefer viewer_state_records() and
+     * recent_studies() for new higher-level wiring.
      * @return Shared pointer to viewer state repository
      */
     [[nodiscard]] auto viewer_states()
         -> std::shared_ptr<viewer_state_repository>;
 
     /**
-     * @brief Get or create prefetch repository
+     * @brief Get or create canonical viewer state record repository
+     */
+    [[nodiscard]] auto viewer_state_records()
+        -> std::shared_ptr<viewer_state_record_repository>;
+
+    /**
+     * @brief Get or create canonical recent study repository
+     */
+    [[nodiscard]] auto recent_studies()
+        -> std::shared_ptr<recent_study_repository>;
+
+    /**
+     * @brief Get or create aggregate prefetch repository
      *
+     * Compatibility-only contract. Prefer prefetch_rules() and
+     * prefetch_history() for new higher-level wiring.
      * @return Shared pointer to prefetch repository
      */
     [[nodiscard]] auto prefetch_queue()
         -> std::shared_ptr<prefetch_repository>;
+
+    /**
+     * @brief Get or create canonical prefetch rule repository
+     */
+    [[nodiscard]] auto prefetch_rules()
+        -> std::shared_ptr<prefetch_rule_repository>;
+
+    /**
+     * @brief Get or create canonical prefetch history repository
+     */
+    [[nodiscard]] auto prefetch_history()
+        -> std::shared_ptr<prefetch_history_repository>;
 
     /**
      * @brief Get or create commitment repository
@@ -205,6 +317,17 @@ public:
      */
     [[nodiscard]] auto commitments()
         -> std::shared_ptr<commitment_repository>;
+
+    /**
+     * @brief Get canonical repository set for higher-level service wiring
+     */
+    [[nodiscard]] auto canonical_repositories() -> canonical_repository_set;
+
+    /**
+     * @brief Get compatibility-only aggregate repository set
+     */
+    [[nodiscard]] auto compatibility_repositories()
+        -> compatibility_repository_set;
 
     /**
      * @brief Get the database adapter
@@ -223,10 +346,17 @@ private:
     std::shared_ptr<routing_repository> routing_rules_;
     std::shared_ptr<node_repository> nodes_;
     std::shared_ptr<sync_repository> sync_states_;
+    std::shared_ptr<sync_config_repository> sync_configs_;
+    std::shared_ptr<sync_conflict_repository> sync_conflicts_;
+    std::shared_ptr<sync_history_repository> sync_history_;
     std::shared_ptr<key_image_repository> key_images_;
     std::shared_ptr<measurement_repository> measurements_;
     std::shared_ptr<viewer_state_repository> viewer_states_;
+    std::shared_ptr<viewer_state_record_repository> viewer_state_records_;
+    std::shared_ptr<recent_study_repository> recent_studies_;
     std::shared_ptr<prefetch_repository> prefetch_queue_;
+    std::shared_ptr<prefetch_rule_repository> prefetch_rules_;
+    std::shared_ptr<prefetch_history_repository> prefetch_history_;
     std::shared_ptr<commitment_repository> commitments_;
 };
 

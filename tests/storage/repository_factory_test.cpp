@@ -2,8 +2,8 @@
  * @file repository_factory_test.cpp
  * @brief Unit tests for repository_factory class
  *
- * Verifies that all 10 repositories are lazily initialized and return
- * valid (non-null) instances from the factory.
+ * Verifies that canonical and compatibility repositories are lazily
+ * initialized and return valid (non-null) instances from the factory.
  *
  * @see Issue #716 - Complete repository_factory migration
  */
@@ -75,7 +75,7 @@ TEST_CASE("repository_factory returns shared db adapter",
 // All repositories return non-null
 // ============================================================================
 
-TEST_CASE("repository_factory returns non-null for all repositories",
+TEST_CASE("repository_factory returns non-null for canonical and compatibility repositories",
           "[storage][repository_factory]") {
     if (!is_sqlite_backend_supported()) {
         SUCCEED("Skipped: SQLite backend not supported");
@@ -89,10 +89,19 @@ TEST_CASE("repository_factory returns non-null for all repositories",
     SECTION("routing_rules") { CHECK(factory.routing_rules() != nullptr); }
     SECTION("nodes") { CHECK(factory.nodes() != nullptr); }
     SECTION("sync_states") { CHECK(factory.sync_states() != nullptr); }
+    SECTION("sync_configs") { CHECK(factory.sync_configs() != nullptr); }
+    SECTION("sync_conflicts") { CHECK(factory.sync_conflicts() != nullptr); }
+    SECTION("sync_history") { CHECK(factory.sync_history() != nullptr); }
     SECTION("key_images") { CHECK(factory.key_images() != nullptr); }
     SECTION("measurements") { CHECK(factory.measurements() != nullptr); }
     SECTION("viewer_states") { CHECK(factory.viewer_states() != nullptr); }
+    SECTION("viewer_state_records") {
+        CHECK(factory.viewer_state_records() != nullptr);
+    }
+    SECTION("recent_studies") { CHECK(factory.recent_studies() != nullptr); }
     SECTION("prefetch_queue") { CHECK(factory.prefetch_queue() != nullptr); }
+    SECTION("prefetch_rules") { CHECK(factory.prefetch_rules() != nullptr); }
+    SECTION("prefetch_history") { CHECK(factory.prefetch_history() != nullptr); }
     SECTION("commitments") { CHECK(factory.commitments() != nullptr); }
 }
 
@@ -139,9 +148,39 @@ TEST_CASE("repository_factory caches instances on repeated calls",
         CHECK(first == second);
     }
 
+    SECTION("sync_configs returns same pointer") {
+        auto first = factory.sync_configs();
+        auto second = factory.sync_configs();
+        CHECK(first == second);
+    }
+
+    SECTION("sync_conflicts returns same pointer") {
+        auto first = factory.sync_conflicts();
+        auto second = factory.sync_conflicts();
+        CHECK(first == second);
+    }
+
+    SECTION("sync_history returns same pointer") {
+        auto first = factory.sync_history();
+        auto second = factory.sync_history();
+        CHECK(first == second);
+    }
+
     SECTION("viewer_states returns same pointer") {
         auto first = factory.viewer_states();
         auto second = factory.viewer_states();
+        CHECK(first == second);
+    }
+
+    SECTION("viewer_state_records returns same pointer") {
+        auto first = factory.viewer_state_records();
+        auto second = factory.viewer_state_records();
+        CHECK(first == second);
+    }
+
+    SECTION("recent_studies returns same pointer") {
+        auto first = factory.recent_studies();
+        auto second = factory.recent_studies();
         CHECK(first == second);
     }
 
@@ -150,6 +189,49 @@ TEST_CASE("repository_factory caches instances on repeated calls",
         auto second = factory.prefetch_queue();
         CHECK(first == second);
     }
+
+    SECTION("prefetch_rules returns same pointer") {
+        auto first = factory.prefetch_rules();
+        auto second = factory.prefetch_rules();
+        CHECK(first == second);
+    }
+
+    SECTION("prefetch_history returns same pointer") {
+        auto first = factory.prefetch_history();
+        auto second = factory.prefetch_history();
+        CHECK(first == second);
+    }
+}
+
+TEST_CASE("repository_factory returns structured canonical and compatibility sets",
+          "[storage][repository_factory]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: SQLite backend not supported");
+        return;
+    }
+    test_database tdb;
+    repository_factory factory(tdb.get());
+
+    const auto canonical = factory.canonical_repositories();
+    CHECK(canonical.jobs == factory.jobs());
+    CHECK(canonical.annotations == factory.annotations());
+    CHECK(canonical.routing_rules == factory.routing_rules());
+    CHECK(canonical.nodes == factory.nodes());
+    CHECK(canonical.sync.configs == factory.sync_configs());
+    CHECK(canonical.sync.conflicts == factory.sync_conflicts());
+    CHECK(canonical.sync.history == factory.sync_history());
+    CHECK(canonical.key_images == factory.key_images());
+    CHECK(canonical.measurements == factory.measurements());
+    CHECK(canonical.viewer_state.records == factory.viewer_state_records());
+    CHECK(canonical.viewer_state.recent_studies == factory.recent_studies());
+    CHECK(canonical.prefetch.rules == factory.prefetch_rules());
+    CHECK(canonical.prefetch.history == factory.prefetch_history());
+    CHECK(canonical.commitments == factory.commitments());
+
+    const auto compatibility = factory.compatibility_repositories();
+    CHECK(compatibility.sync_states == factory.sync_states());
+    CHECK(compatibility.viewer_states == factory.viewer_states());
+    CHECK(compatibility.prefetch_queue == factory.prefetch_queue());
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
