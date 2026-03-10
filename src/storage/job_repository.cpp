@@ -268,7 +268,7 @@ auto job_repository::find_by_pk(int64_t pk) -> result_type {
         .where("pk", "=", pk)
         .limit(1);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return result_type(result.error());
     }
@@ -337,7 +337,7 @@ auto job_repository::find_jobs(const job_query_options& options)
         }
     }
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -378,7 +378,7 @@ auto job_repository::find_pending_jobs(size_t limit) -> list_result_type {
         .order_by("created_at", database::sort_order::asc)
         .limit(limit);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -409,7 +409,7 @@ auto job_repository::find_by_node(std::string_view node_id) -> list_result_type 
         .where(source_cond || dest_cond)
         .order_by("created_at", database::sort_order::desc);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -448,7 +448,7 @@ auto job_repository::cleanup_old_jobs(std::chrono::hours max_age)
     auto builder = query_builder();
     builder.delete_from(table_name()).where(final_cond);
 
-    auto result = db()->remove(builder.build());
+    auto result = storage_session().remove(builder.build());
     if (result.is_err()) {
         return kcenon::common::make_error<size_t>(
             -1, result.error().message, "storage");
@@ -481,7 +481,7 @@ auto job_repository::update_status(std::string_view job_id,
 
     builder.where("job_id", "=", std::string(job_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -508,7 +508,7 @@ auto job_repository::update_progress(std::string_view job_id,
         .set("current_item_description", progress.current_item_description)
         .where("job_id", "=", std::string(job_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -530,7 +530,7 @@ auto job_repository::mark_started(std::string_view job_id) -> VoidResult {
         .set("started_at", now_str)
         .where("job_id", "=", std::string(job_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -552,7 +552,7 @@ auto job_repository::mark_completed(std::string_view job_id) -> VoidResult {
         .set("completed_at", now_str)
         .where("job_id", "=", std::string(job_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -586,7 +586,7 @@ auto job_repository::mark_failed(std::string_view job_id,
         .set("completed_at", now_str)
         .where("job_id", "=", std::string(job_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -612,7 +612,7 @@ auto job_repository::increment_retry(std::string_view job_id) -> VoidResult {
         .set("retry_count", static_cast<int64_t>(current_retry + 1))
         .where("job_id", "=", std::string(job_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -636,7 +636,7 @@ auto job_repository::count_by_status(client::job_status status)
         .from(table_name())
         .where("status", "=", std::string(client::to_string(status)));
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -666,7 +666,7 @@ auto job_repository::count_completed_today() -> Result<size_t> {
 
     // Note: For date comparison, we use the date portion of completed_at
     // This requires database-specific handling - using LIKE for portability
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -690,7 +690,7 @@ auto job_repository::count_failed_today() -> Result<size_t> {
         .from(table_name())
         .where("status", "=", std::string("failed"));
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }

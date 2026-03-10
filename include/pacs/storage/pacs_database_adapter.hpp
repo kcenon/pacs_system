@@ -127,6 +127,63 @@ struct database_result {
 
 // Forward declaration
 class scoped_transaction;
+class pacs_database_adapter;
+class pacs_unit_of_work;
+
+/**
+ * @brief PACS storage session over the unified database adapter
+ *
+ * Repositories should prefer this narrow session boundary instead of calling
+ * raw mutator methods directly on pacs_database_adapter.
+ */
+class pacs_storage_session {
+public:
+    explicit pacs_storage_session(pacs_database_adapter& adapter) noexcept;
+
+    [[nodiscard]] auto create_query_builder() const -> database::query_builder;
+    [[nodiscard]] auto select(const std::string& query)
+        -> Result<database_result>;
+    [[nodiscard]] auto insert(const std::string& query) -> Result<uint64_t>;
+    [[nodiscard]] auto update(const std::string& query) -> Result<uint64_t>;
+    [[nodiscard]] auto remove(const std::string& query) -> Result<uint64_t>;
+    [[nodiscard]] auto execute(const std::string& query) -> VoidResult;
+    [[nodiscard]] auto last_insert_rowid() const -> int64_t;
+    [[nodiscard]] auto begin_unit_of_work() -> Result<pacs_unit_of_work>;
+
+private:
+    pacs_database_adapter* adapter_{nullptr};
+};
+
+/**
+ * @brief PACS unit-of-work wrapper that owns transaction lifetime
+ */
+class pacs_unit_of_work {
+public:
+    pacs_unit_of_work() = default;
+    pacs_unit_of_work(pacs_database_adapter& adapter, bool active) noexcept;
+    ~pacs_unit_of_work();
+
+    pacs_unit_of_work(const pacs_unit_of_work&) = delete;
+    auto operator=(const pacs_unit_of_work&) -> pacs_unit_of_work& = delete;
+    pacs_unit_of_work(pacs_unit_of_work&& other) noexcept;
+    auto operator=(pacs_unit_of_work&& other) noexcept -> pacs_unit_of_work&;
+
+    [[nodiscard]] auto create_query_builder() const -> database::query_builder;
+    [[nodiscard]] auto select(const std::string& query)
+        -> Result<database_result>;
+    [[nodiscard]] auto insert(const std::string& query) -> Result<uint64_t>;
+    [[nodiscard]] auto update(const std::string& query) -> Result<uint64_t>;
+    [[nodiscard]] auto remove(const std::string& query) -> Result<uint64_t>;
+    [[nodiscard]] auto execute(const std::string& query) -> VoidResult;
+    [[nodiscard]] auto last_insert_rowid() const -> int64_t;
+    [[nodiscard]] auto commit() -> VoidResult;
+    [[nodiscard]] auto rollback() -> VoidResult;
+    [[nodiscard]] auto is_active() const noexcept -> bool;
+
+private:
+    pacs_database_adapter* adapter_{nullptr};
+    bool active_{false};
+};
 
 /**
  * @brief Unified database adapter for PACS system
@@ -237,6 +294,20 @@ public:
      */
     [[nodiscard]] auto is_connected() const noexcept -> bool;
 
+    /**
+     * @brief Open a PACS storage session over the connected database
+     *
+     * Repository code should use this boundary for query execution and query
+     * builder access.
+     */
+    [[nodiscard]] auto open_session() -> pacs_storage_session;
+    [[nodiscard]] auto open_session() const -> pacs_storage_session;
+
+    /**
+     * @brief Begin a PACS unit of work that owns a transaction lifecycle
+     */
+    [[nodiscard]] auto begin_unit_of_work() -> Result<pacs_unit_of_work>;
+
     // ========================================================================
     // Query Builder Factory
     // ========================================================================
@@ -278,6 +349,8 @@ public:
     /**
      * @brief Execute an INSERT query
      *
+     * Compatibility path. Prefer open_session() for repository runtime code.
+     *
      * @param query SQL INSERT statement
      * @return Result containing number of inserted rows or error
      */
@@ -285,6 +358,8 @@ public:
 
     /**
      * @brief Execute an UPDATE query
+     *
+     * Compatibility path. Prefer open_session() for repository runtime code.
      *
      * @param query SQL UPDATE statement
      * @return Result containing number of updated rows or error
@@ -294,6 +369,8 @@ public:
     /**
      * @brief Execute a DELETE query
      *
+     * Compatibility path. Prefer open_session() for repository runtime code.
+     *
      * @param query SQL DELETE statement
      * @return Result containing number of deleted rows or error
      */
@@ -302,7 +379,8 @@ public:
     /**
      * @brief Execute raw SQL (DDL, PRAGMA, etc.)
      *
-     * Use for schema changes, PRAGMA statements, and other non-CRUD operations.
+     * Infrastructure escape hatch for schema changes, PRAGMA statements, and
+     * other explicitly documented non-CRUD operations.
      *
      * @param query SQL statement to execute
      * @return Success or error result
@@ -409,6 +487,22 @@ public:
     [[nodiscard]] auto last_error() const -> std::string;
 
 private:
+    friend class pacs_storage_session;
+    friend class pacs_unit_of_work;
+
+    [[nodiscard]] auto run_select(const std::string& query)
+        -> Result<database_result>;
+    [[nodiscard]] auto run_insert(const std::string& query)
+        -> Result<uint64_t>;
+    [[nodiscard]] auto run_update(const std::string& query)
+        -> Result<uint64_t>;
+    [[nodiscard]] auto run_remove(const std::string& query)
+        -> Result<uint64_t>;
+    [[nodiscard]] auto run_execute(const std::string& query) -> VoidResult;
+    [[nodiscard]] auto begin_transaction_internal() -> VoidResult;
+    [[nodiscard]] auto commit_internal() -> VoidResult;
+    [[nodiscard]] auto rollback_internal() -> VoidResult;
+
     struct impl;
     std::unique_ptr<impl> impl_;
 };

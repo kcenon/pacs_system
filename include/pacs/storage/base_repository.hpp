@@ -419,6 +419,11 @@ protected:
     [[nodiscard]] auto query_builder() -> database::query_builder;
 
     /**
+     * @brief Open a PACS storage session for repository work
+     */
+    [[nodiscard]] auto storage_session() -> pacs_storage_session;
+
+    /**
      * @brief Get the database adapter
      *
      * @return Shared pointer to database adapter

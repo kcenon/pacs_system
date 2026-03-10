@@ -103,14 +103,14 @@ auto sync_history_repository::find_by_config(
             -1, "Database not connected", "sync_history_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where("config_id", "=", std::string(config_id))
         .order_by("started_at", database::sort_order::desc)
         .limit(limit);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -131,14 +131,14 @@ auto sync_history_repository::find_last_for_config(std::string_view config_id)
             -1, "Database not connected", "sync_history_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where("config_id", "=", std::string(config_id))
         .order_by("started_at", database::sort_order::desc)
         .limit(1);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return result_type(result.error());
     }
@@ -164,7 +164,7 @@ auto sync_history_repository::cleanup_old(std::chrono::hours max_age)
         WHERE started_at < datetime('now', '-)"
         << max_age.count() << R"( hours'))";
 
-    auto result = db()->remove(sql.str());
+    auto result = storage_session().remove(sql.str());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }

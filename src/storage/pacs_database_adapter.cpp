@@ -92,8 +92,6 @@ auto to_backend_type(database::database_types type)
     switch (type) {
         case database::database_types::postgres:
             return database::integrated::backend_type::postgres;
-        case database::database_types::mysql:
-            return database::integrated::backend_type::mysql;
         case database::database_types::sqlite:
             return database::integrated::backend_type::sqlite;
         case database::database_types::mongodb:
@@ -135,6 +133,145 @@ auto make_void_error(int code, const std::string& message,
 }
 
 }  // namespace
+
+// ============================================================================
+// pacs_storage_session Implementation
+// ============================================================================
+
+pacs_storage_session::pacs_storage_session(
+    pacs_database_adapter& adapter) noexcept
+    : adapter_(&adapter) {}
+
+auto pacs_storage_session::create_query_builder() const
+    -> database::query_builder {
+    return adapter_->create_query_builder();
+}
+
+auto pacs_storage_session::select(const std::string& query)
+    -> Result<database_result> {
+    return adapter_->run_select(query);
+}
+
+auto pacs_storage_session::insert(const std::string& query)
+    -> Result<uint64_t> {
+    return adapter_->run_insert(query);
+}
+
+auto pacs_storage_session::update(const std::string& query)
+    -> Result<uint64_t> {
+    return adapter_->run_update(query);
+}
+
+auto pacs_storage_session::remove(const std::string& query)
+    -> Result<uint64_t> {
+    return adapter_->run_remove(query);
+}
+
+auto pacs_storage_session::execute(const std::string& query) -> VoidResult {
+    return adapter_->run_execute(query);
+}
+
+auto pacs_storage_session::last_insert_rowid() const -> int64_t {
+    return adapter_->last_insert_rowid();
+}
+
+auto pacs_storage_session::begin_unit_of_work() -> Result<pacs_unit_of_work> {
+    return adapter_->begin_unit_of_work();
+}
+
+// ============================================================================
+// pacs_unit_of_work Implementation
+// ============================================================================
+
+pacs_unit_of_work::pacs_unit_of_work(
+    pacs_database_adapter& adapter, bool active) noexcept
+    : adapter_(&adapter), active_(active) {}
+
+pacs_unit_of_work::~pacs_unit_of_work() {
+    if (active_ && adapter_ != nullptr) {
+        (void)adapter_->rollback_internal();
+    }
+}
+
+pacs_unit_of_work::pacs_unit_of_work(pacs_unit_of_work&& other) noexcept
+    : adapter_(other.adapter_), active_(other.active_) {
+    other.adapter_ = nullptr;
+    other.active_ = false;
+}
+
+auto pacs_unit_of_work::operator=(pacs_unit_of_work&& other) noexcept
+    -> pacs_unit_of_work& {
+    if (this == &other) {
+        return *this;
+    }
+
+    if (active_ && adapter_ != nullptr) {
+        (void)adapter_->rollback_internal();
+    }
+
+    adapter_ = other.adapter_;
+    active_ = other.active_;
+    other.adapter_ = nullptr;
+    other.active_ = false;
+    return *this;
+}
+
+auto pacs_unit_of_work::create_query_builder() const -> database::query_builder {
+    return adapter_->create_query_builder();
+}
+
+auto pacs_unit_of_work::select(const std::string& query)
+    -> Result<database_result> {
+    return adapter_->run_select(query);
+}
+
+auto pacs_unit_of_work::insert(const std::string& query) -> Result<uint64_t> {
+    return adapter_->run_insert(query);
+}
+
+auto pacs_unit_of_work::update(const std::string& query) -> Result<uint64_t> {
+    return adapter_->run_update(query);
+}
+
+auto pacs_unit_of_work::remove(const std::string& query) -> Result<uint64_t> {
+    return adapter_->run_remove(query);
+}
+
+auto pacs_unit_of_work::execute(const std::string& query) -> VoidResult {
+    return adapter_->run_execute(query);
+}
+
+auto pacs_unit_of_work::last_insert_rowid() const -> int64_t {
+    return adapter_ != nullptr ? adapter_->last_insert_rowid() : 0;
+}
+
+auto pacs_unit_of_work::commit() -> VoidResult {
+    if (!active_ || adapter_ == nullptr) {
+        return make_void_error(-1, "Unit of work not active", "storage");
+    }
+
+    auto result = adapter_->commit_internal();
+    if (result.is_ok()) {
+        active_ = false;
+    }
+    return result;
+}
+
+auto pacs_unit_of_work::rollback() -> VoidResult {
+    if (!active_ || adapter_ == nullptr) {
+        return ok();
+    }
+
+    auto result = adapter_->rollback_internal();
+    if (result.is_ok()) {
+        active_ = false;
+    }
+    return result;
+}
+
+auto pacs_unit_of_work::is_active() const noexcept -> bool {
+    return active_;
+}
 
 // ============================================================================
 // Construction / Destruction
@@ -234,6 +371,26 @@ auto pacs_database_adapter::is_connected() const noexcept -> bool {
     return impl_ && impl_->db && impl_->db->is_connected();
 }
 
+auto pacs_database_adapter::open_session() -> pacs_storage_session {
+    return pacs_storage_session(*this);
+}
+
+auto pacs_database_adapter::open_session() const -> pacs_storage_session {
+    return pacs_storage_session(
+        const_cast<pacs_database_adapter&>(*this));
+}
+
+auto pacs_database_adapter::begin_unit_of_work()
+    -> Result<pacs_unit_of_work> {
+    auto result = begin_transaction_internal();
+    if (result.is_err()) {
+        return make_error<pacs_unit_of_work>(
+            result.error().code, result.error().message, result.error().module);
+    }
+
+    return Result<pacs_unit_of_work>::ok(pacs_unit_of_work(*this, true));
+}
+
 // ============================================================================
 // Query Builder Factory
 // ============================================================================
@@ -246,7 +403,7 @@ auto pacs_database_adapter::create_query_builder() -> database::query_builder {
 // CRUD Operations
 // ============================================================================
 
-auto pacs_database_adapter::select(const std::string& query)
+auto pacs_database_adapter::run_select(const std::string& query)
     -> Result<database_result> {
     if (!is_connected()) {
         return make_error<database_result>(
@@ -266,7 +423,7 @@ auto pacs_database_adapter::select(const std::string& query)
         convert_result(result.value()));
 }
 
-auto pacs_database_adapter::insert(const std::string& query)
+auto pacs_database_adapter::run_insert(const std::string& query)
     -> Result<uint64_t> {
     if (!is_connected()) {
         return make_error<uint64_t>(-1, "Not connected to database", "storage");
@@ -300,7 +457,7 @@ auto pacs_database_adapter::insert(const std::string& query)
         static_cast<uint64_t>(result.value()));
 }
 
-auto pacs_database_adapter::update(const std::string& query)
+auto pacs_database_adapter::run_update(const std::string& query)
     -> Result<uint64_t> {
     if (!is_connected()) {
         return make_error<uint64_t>(-1, "Not connected to database", "storage");
@@ -319,7 +476,7 @@ auto pacs_database_adapter::update(const std::string& query)
         static_cast<uint64_t>(result.value()));
 }
 
-auto pacs_database_adapter::remove(const std::string& query)
+auto pacs_database_adapter::run_remove(const std::string& query)
     -> Result<uint64_t> {
     if (!is_connected()) {
         return make_error<uint64_t>(-1, "Not connected to database", "storage");
@@ -338,7 +495,8 @@ auto pacs_database_adapter::remove(const std::string& query)
         static_cast<uint64_t>(result.value()));
 }
 
-auto pacs_database_adapter::execute(const std::string& query) -> VoidResult {
+auto pacs_database_adapter::run_execute(const std::string& query)
+    -> VoidResult {
     if (!is_connected()) {
         return make_void_error(-1, "Not connected to database", "storage");
     }
@@ -355,11 +513,35 @@ auto pacs_database_adapter::execute(const std::string& query) -> VoidResult {
     return ok();
 }
 
+auto pacs_database_adapter::select(const std::string& query)
+    -> Result<database_result> {
+    return run_select(query);
+}
+
+auto pacs_database_adapter::insert(const std::string& query)
+    -> Result<uint64_t> {
+    return run_insert(query);
+}
+
+auto pacs_database_adapter::update(const std::string& query)
+    -> Result<uint64_t> {
+    return run_update(query);
+}
+
+auto pacs_database_adapter::remove(const std::string& query)
+    -> Result<uint64_t> {
+    return run_remove(query);
+}
+
+auto pacs_database_adapter::execute(const std::string& query) -> VoidResult {
+    return run_execute(query);
+}
+
 // ============================================================================
 // Transaction Support
 // ============================================================================
 
-auto pacs_database_adapter::begin_transaction() -> VoidResult {
+auto pacs_database_adapter::begin_transaction_internal() -> VoidResult {
     if (!is_connected()) {
         return make_void_error(-1, "Not connected to database", "storage");
     }
@@ -383,7 +565,7 @@ auto pacs_database_adapter::begin_transaction() -> VoidResult {
     return ok();
 }
 
-auto pacs_database_adapter::commit() -> VoidResult {
+auto pacs_database_adapter::commit_internal() -> VoidResult {
     if (!is_connected()) {
         return make_void_error(-1, "Not connected to database", "storage");
     }
@@ -406,7 +588,7 @@ auto pacs_database_adapter::commit() -> VoidResult {
     return ok();
 }
 
-auto pacs_database_adapter::rollback() -> VoidResult {
+auto pacs_database_adapter::rollback_internal() -> VoidResult {
     if (!is_connected()) {
         return ok();  // No-op if not connected
     }
@@ -428,6 +610,18 @@ auto pacs_database_adapter::rollback() -> VoidResult {
     }
 
     return ok();
+}
+
+auto pacs_database_adapter::begin_transaction() -> VoidResult {
+    return begin_transaction_internal();
+}
+
+auto pacs_database_adapter::commit() -> VoidResult {
+    return commit_internal();
+}
+
+auto pacs_database_adapter::rollback() -> VoidResult {
+    return rollback_internal();
 }
 
 auto pacs_database_adapter::in_transaction() const noexcept -> bool {

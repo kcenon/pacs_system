@@ -120,7 +120,7 @@ auto prefetch_rule_repository::enable(std::string_view rule_id) -> VoidResult {
     sql << "UPDATE prefetch_rules SET enabled = 1 WHERE rule_id = '"
         << rule_id << "'";
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -138,7 +138,7 @@ auto prefetch_rule_repository::disable(std::string_view rule_id) -> VoidResult {
     sql << "UPDATE prefetch_rules SET enabled = 0 WHERE rule_id = '"
         << rule_id << "'";
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -161,7 +161,7 @@ auto prefetch_rule_repository::increment_triggered(std::string_view rule_id)
         WHERE rule_id = ')"
         << rule_id << "'";
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -181,7 +181,7 @@ auto prefetch_rule_repository::increment_studies_prefetched(
     sql << "UPDATE prefetch_rules SET studies_prefetched = studies_prefetched + "
         << count << " WHERE rule_id = '" << rule_id << "'";
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }

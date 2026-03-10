@@ -353,7 +353,7 @@ auto routing_repository::find_by_pk(int64_t pk) -> result_type {
         .where("pk", "=", pk)
         .limit(1);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return result_type(result.error());
     }
@@ -389,7 +389,7 @@ auto routing_repository::find_rules(const routing_rule_query_options& options)
 
     builder.limit(options.limit).offset(options.offset);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -426,7 +426,7 @@ auto routing_repository::update_priority(std::string_view rule_id, int priority)
         .set("priority", static_cast<int64_t>(priority))
         .where("rule_id", "=", std::string(rule_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -445,7 +445,7 @@ auto routing_repository::enable_rule(std::string_view rule_id) -> VoidResult {
         .set("enabled", static_cast<int64_t>(1))
         .where("rule_id", "=", std::string(rule_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -464,7 +464,7 @@ auto routing_repository::disable_rule(std::string_view rule_id) -> VoidResult {
         .set("enabled", static_cast<int64_t>(0))
         .where("rule_id", "=", std::string(rule_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -488,7 +488,7 @@ auto routing_repository::increment_triggered(std::string_view rule_id)
                "last_triggered = CURRENT_TIMESTAMP "
                "WHERE rule_id = '" + std::string(rule_id) + "'";
 
-    auto result = db()->execute(sql);
+    auto result = storage_session().execute(sql);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -507,7 +507,7 @@ auto routing_repository::increment_success(std::string_view rule_id)
                " SET success_count = success_count + 1 WHERE rule_id = '" +
                std::string(rule_id) + "'";
 
-    auto result = db()->execute(sql);
+    auto result = storage_session().execute(sql);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -526,7 +526,7 @@ auto routing_repository::increment_failure(std::string_view rule_id)
                " SET failure_count = failure_count + 1 WHERE rule_id = '" +
                std::string(rule_id) + "'";
 
-    auto result = db()->execute(sql);
+    auto result = storage_session().execute(sql);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -549,7 +549,7 @@ auto routing_repository::reset_statistics(std::string_view rule_id)
         .set("last_triggered", std::string{})
         .where("rule_id", "=", std::string(rule_id));
 
-    auto result = db()->execute(builder.build());
+    auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -568,7 +568,7 @@ auto routing_repository::count_enabled() -> Result<size_t> {
         .from(table_name())
         .where("enabled", "=", 1);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
