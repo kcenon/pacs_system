@@ -13,11 +13,13 @@
 #include <pacs/client/prefetch_types.hpp>
 #include <pacs/client/sync_types.hpp>
 #include <pacs/storage/prefetch_repository.hpp>
+#include <pacs/storage/prefetch_history_repository.hpp>
 #include <pacs/storage/prefetch_rule_repository.hpp>
 #include <pacs/storage/recent_study_repository.hpp>
 #include <pacs/storage/repository_factory.hpp>
 #include <pacs/storage/sync_config_repository.hpp>
 #include <pacs/storage/sync_repository.hpp>
+#include <pacs/storage/viewer_state_record_repository.hpp>
 #include <pacs/storage/viewer_state_repository.hpp>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -277,6 +279,74 @@ TEST_CASE("repository_factory split and compatibility repositories share state",
     REQUIRE(
         canonical.viewer_state.recent_studies->record_access("user1", "1.2.3").is_ok());
     CHECK(compatibility.viewer_states->count_recent_studies("user1") == 1);
+}
+
+TEST_CASE("repository_factory compatibility repositories delegate writes to canonical split repositories",
+          "[storage][repository_factory]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: SQLite backend not supported");
+        return;
+    }
+
+    test_database tdb;
+    repository_factory factory(tdb.get());
+    const auto canonical = factory.canonical_repositories();
+    const auto compatibility = factory.compatibility_repositories();
+
+    SECTION("sync compatibility writes are visible through split repositories") {
+        pacs::client::sync_config config;
+        config.config_id = "compat-sync";
+        config.source_node_id = "archive";
+        config.name = "Compatibility Sync";
+        REQUIRE(compatibility.sync_states->save_config(config).is_ok());
+
+        auto loaded = canonical.sync.configs->find_by_config_id(config.config_id);
+        REQUIRE(loaded.is_ok());
+        CHECK(loaded.value().name == config.name);
+    }
+
+    SECTION("viewer compatibility writes are visible through split repositories") {
+        pacs::storage::viewer_state_record state;
+        state.state_id = "compat-state";
+        state.study_uid = "1.2.3.4";
+        state.user_id = "user42";
+        state.state_json = R"({"layout":"compat"})";
+        state.created_at = std::chrono::system_clock::now();
+        state.updated_at = state.created_at;
+        REQUIRE(compatibility.viewer_states->save_state(state).is_ok());
+
+        auto loaded = canonical.viewer_state.records->find_by_id(state.state_id);
+        REQUIRE(loaded.is_ok());
+        CHECK(loaded.value().state_json == state.state_json);
+    }
+
+    SECTION("prefetch compatibility writes are visible through split repositories") {
+        pacs::client::prefetch_rule rule;
+        rule.rule_id = "compat-rule";
+        rule.name = "Compatibility Rule";
+        rule.trigger = pacs::client::prefetch_trigger::manual;
+        rule.source_node_ids = {"archive"};
+        REQUIRE(compatibility.prefetch_queue->save_rule(rule).is_ok());
+
+        auto loaded_rule = canonical.prefetch.rules->find_by_rule_id(rule.rule_id);
+        REQUIRE(loaded_rule.is_ok());
+        CHECK(loaded_rule.value().name == rule.name);
+
+        pacs::client::prefetch_history history;
+        history.patient_id = "PAT001";
+        history.study_uid = "1.2.3.4.5";
+        history.rule_id = rule.rule_id;
+        history.source_node_id = "archive";
+        history.job_id = "job-compat";
+        history.status = "pending";
+        history.prefetched_at = std::chrono::system_clock::now();
+        REQUIRE(compatibility.prefetch_queue->save_history(history).is_ok());
+
+        auto loaded_history = canonical.prefetch.history->find_by_study(history.study_uid);
+        REQUIRE(loaded_history.is_ok());
+        REQUIRE_FALSE(loaded_history.value().empty());
+        CHECK(loaded_history.value().front().status == history.status);
+    }
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

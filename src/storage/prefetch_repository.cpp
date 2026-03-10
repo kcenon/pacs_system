@@ -37,7 +37,10 @@
  */
 
 #include "pacs/storage/prefetch_repository.hpp"
+#include "pacs/storage/prefetch_history_repository.hpp"
+#include "pacs/storage/prefetch_rule_repository.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <sstream>
@@ -158,6 +161,14 @@ namespace {
 }
 
 }  // namespace
+
+template <typename T>
+[[nodiscard]] std::optional<T> optional_from_result(Result<T> result) {
+    if (result.is_err()) {
+        return std::nullopt;
+    }
+    return result.value();
+}
 
 // =============================================================================
 // JSON Serialization
@@ -302,83 +313,7 @@ VoidResult prefetch_repository::initialize_tables() {
 // =============================================================================
 
 VoidResult prefetch_repository::save_rule(const client::prefetch_rule& rule) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << R"(
-        INSERT INTO prefetch_rules (
-            rule_id, name, enabled, trigger_type,
-            modality_filter, body_part_filter, station_ae_filter,
-            prior_lookback_hours, max_prior_studies, prior_modalities_json,
-            source_node_ids_json, schedule_cron, advance_time_minutes,
-            triggered_count, studies_prefetched, last_triggered
-        ) VALUES (
-            ')" << rule.rule_id << "', "
-        << "'" << rule.name << "', "
-        << (rule.enabled ? 1 : 0) << ", "
-        << "'" << client::to_string(rule.trigger) << "', ";
-
-    if (rule.modality_filter.empty()) {
-        sql << "NULL, ";
-    } else {
-        sql << "'" << rule.modality_filter << "', ";
-    }
-
-    if (rule.body_part_filter.empty()) {
-        sql << "NULL, ";
-    } else {
-        sql << "'" << rule.body_part_filter << "', ";
-    }
-
-    if (rule.station_ae_filter.empty()) {
-        sql << "NULL, ";
-    } else {
-        sql << "'" << rule.station_ae_filter << "', ";
-    }
-
-    sql << rule.prior_lookback.count() << ", "
-        << rule.max_prior_studies << ", "
-        << "'" << serialize_modalities(rule.prior_modalities) << "', "
-        << "'" << serialize_node_ids(rule.source_node_ids) << "', ";
-
-    if (rule.schedule_cron.empty()) {
-        sql << "NULL, ";
-    } else {
-        sql << "'" << rule.schedule_cron << "', ";
-    }
-
-    sql << rule.advance_time.count() << ", "
-        << rule.triggered_count << ", "
-        << rule.studies_prefetched << ", ";
-
-    auto last_triggered_str = format_timestamp(rule.last_triggered);
-    if (last_triggered_str.empty()) {
-        sql << "NULL";
-    } else {
-        sql << "'" << last_triggered_str << "'";
-    }
-
-    sql << R"()
-        ON CONFLICT(rule_id) DO UPDATE SET
-            name = excluded.name,
-            enabled = excluded.enabled,
-            trigger_type = excluded.trigger_type,
-            modality_filter = excluded.modality_filter,
-            body_part_filter = excluded.body_part_filter,
-            station_ae_filter = excluded.station_ae_filter,
-            prior_lookback_hours = excluded.prior_lookback_hours,
-            max_prior_studies = excluded.max_prior_studies,
-            prior_modalities_json = excluded.prior_modalities_json,
-            source_node_ids_json = excluded.source_node_ids_json,
-            schedule_cron = excluded.schedule_cron,
-            advance_time_minutes = excluded.advance_time_minutes,
-            updated_at = CURRENT_TIMESTAMP
-    )";
-
-    auto result = db_->open_session().insert(sql.str());
+    auto result = prefetch_rule_repository(db_).save(rule);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -388,39 +323,37 @@ VoidResult prefetch_repository::save_rule(const client::prefetch_rule& rule) {
 
 std::optional<client::prefetch_rule> prefetch_repository::find_rule_by_id(
     std::string_view rule_id) const {
-    if (!db_ || !db_->is_connected()) return std::nullopt;
-
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, rule_id, name, enabled, trigger_type,
-               modality_filter, body_part_filter, station_ae_filter,
-               prior_lookback_hours, max_prior_studies, prior_modalities_json,
-               source_node_ids_json, schedule_cron, advance_time_minutes,
-               triggered_count, studies_prefetched, last_triggered
-        FROM prefetch_rules WHERE rule_id = ')" << rule_id << "'";
-
-    auto result = db_->open_session().select(sql.str());
-    if (result.is_err() || result.value().empty()) {
-        return std::nullopt;
-    }
-
-    return map_row_to_rule(result.value()[0]);
+    return optional_from_result(
+        prefetch_rule_repository(db_).find_by_rule_id(rule_id));
 }
 
 std::optional<client::prefetch_rule> prefetch_repository::find_rule_by_pk(
     int64_t pk) const {
     if (!db_ || !db_->is_connected()) return std::nullopt;
 
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, rule_id, name, enabled, trigger_type,
-               modality_filter, body_part_filter, station_ae_filter,
-               prior_lookback_hours, max_prior_studies, prior_modalities_json,
-               source_node_ids_json, schedule_cron, advance_time_minutes,
-               triggered_count, studies_prefetched, last_triggered
-        FROM prefetch_rules WHERE pk = )" << pk;
+    auto builder = db_->open_session().create_query_builder();
+    builder.select({"pk",
+                    "rule_id",
+                    "name",
+                    "enabled",
+                    "trigger_type",
+                    "modality_filter",
+                    "body_part_filter",
+                    "station_ae_filter",
+                    "prior_lookback_hours",
+                    "max_prior_studies",
+                    "prior_modalities_json",
+                    "source_node_ids_json",
+                    "schedule_cron",
+                    "advance_time_minutes",
+                    "triggered_count",
+                    "studies_prefetched",
+                    "last_triggered"})
+        .from("prefetch_rules")
+        .where("pk", "=", pk)
+        .limit(1);
 
-    auto result = db_->open_session().select(sql.str());
+    auto result = db_->open_session().select(builder.build());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -433,28 +366,54 @@ std::vector<client::prefetch_rule> prefetch_repository::find_rules(
     std::vector<client::prefetch_rule> rules;
     if (!db_ || !db_->is_connected()) return rules;
 
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, rule_id, name, enabled, trigger_type,
-               modality_filter, body_part_filter, station_ae_filter,
-               prior_lookback_hours, max_prior_studies, prior_modalities_json,
-               source_node_ids_json, schedule_cron, advance_time_minutes,
-               triggered_count, studies_prefetched, last_triggered
-        FROM prefetch_rules WHERE 1=1
-    )";
+    auto builder = db_->open_session().create_query_builder();
+    builder.select({"pk",
+                    "rule_id",
+                    "name",
+                    "enabled",
+                    "trigger_type",
+                    "modality_filter",
+                    "body_part_filter",
+                    "station_ae_filter",
+                    "prior_lookback_hours",
+                    "max_prior_studies",
+                    "prior_modalities_json",
+                    "source_node_ids_json",
+                    "schedule_cron",
+                    "advance_time_minutes",
+                    "triggered_count",
+                    "studies_prefetched",
+                    "last_triggered"})
+        .from("prefetch_rules");
 
+    std::optional<database::query_condition> condition;
     if (options.enabled_only.has_value()) {
-        sql << " AND enabled = " << (options.enabled_only.value() ? "1" : "0");
+        condition = database::query_condition(
+            "enabled", "=", static_cast<int64_t>(options.enabled_only.value() ? 1 : 0));
     }
 
     if (options.trigger.has_value()) {
-        sql << " AND trigger_type = '" << client::to_string(options.trigger.value()) << "'";
+        auto trigger_condition = database::query_condition(
+            "trigger_type", "=",
+            std::string(client::to_string(options.trigger.value())));
+        if (condition.has_value()) {
+            condition = condition.value() && trigger_condition;
+        } else {
+            condition = trigger_condition;
+        }
     }
 
-    sql << " ORDER BY created_at DESC";
-    sql << " LIMIT " << options.limit << " OFFSET " << options.offset;
+    if (condition.has_value()) {
+        builder.where(condition.value());
+    }
 
-    auto result = db_->open_session().select(sql.str());
+    builder.order_by("created_at", database::sort_order::desc)
+        .limit(options.limit);
+    if (options.offset > 0) {
+        builder.offset(options.offset);
+    }
+
+    auto result = db_->open_session().select(builder.build());
     if (result.is_err()) return rules;
 
     rules.reserve(result.value().size());
@@ -472,15 +431,7 @@ std::vector<client::prefetch_rule> prefetch_repository::find_enabled_rules() con
 }
 
 VoidResult prefetch_repository::remove_rule(std::string_view rule_id) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << "DELETE FROM prefetch_rules WHERE rule_id = '" << rule_id << "'";
-
-    auto result = db_->open_session().remove(sql.str());
+    auto result = prefetch_rule_repository(db_).remove(std::string(rule_id));
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -489,13 +440,8 @@ VoidResult prefetch_repository::remove_rule(std::string_view rule_id) {
 }
 
 bool prefetch_repository::rule_exists(std::string_view rule_id) const {
-    if (!db_ || !db_->is_connected()) return false;
-
-    std::ostringstream sql;
-    sql << "SELECT 1 FROM prefetch_rules WHERE rule_id = '" << rule_id << "'";
-
-    auto result = db_->open_session().select(sql.str());
-    return result.is_ok() && !result.value().empty();
+    auto result = prefetch_rule_repository(db_).exists(std::string(rule_id));
+    return result.is_ok() && result.value();
 }
 
 // =============================================================================
@@ -503,87 +449,21 @@ bool prefetch_repository::rule_exists(std::string_view rule_id) const {
 // =============================================================================
 
 VoidResult prefetch_repository::increment_triggered(std::string_view rule_id) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << R"(
-        UPDATE prefetch_rules SET
-            triggered_count = triggered_count + 1,
-            last_triggered = CURRENT_TIMESTAMP
-        WHERE rule_id = ')" << rule_id << "'";
-
-    auto result = db_->open_session().update(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
-    }
-
-    return kcenon::common::ok();
+    return prefetch_rule_repository(db_).increment_triggered(rule_id);
 }
 
 VoidResult prefetch_repository::increment_studies_prefetched(
     std::string_view rule_id, size_t count) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << R"(
-        UPDATE prefetch_rules SET
-            studies_prefetched = studies_prefetched + )" << count
-        << " WHERE rule_id = '" << rule_id << "'";
-
-    auto result = db_->open_session().update(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
-    }
-
-    return kcenon::common::ok();
+    return prefetch_rule_repository(db_).increment_studies_prefetched(
+        rule_id, count);
 }
 
 VoidResult prefetch_repository::enable_rule(std::string_view rule_id) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << R"(
-        UPDATE prefetch_rules SET
-            enabled = 1,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE rule_id = ')" << rule_id << "'";
-
-    auto result = db_->open_session().update(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
-    }
-
-    return kcenon::common::ok();
+    return prefetch_rule_repository(db_).enable(rule_id);
 }
 
 VoidResult prefetch_repository::disable_rule(std::string_view rule_id) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << R"(
-        UPDATE prefetch_rules SET
-            enabled = 0,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE rule_id = ')" << rule_id << "'";
-
-    auto result = db_->open_session().update(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
-    }
-
-    return kcenon::common::ok();
+    return prefetch_rule_repository(db_).disable(rule_id);
 }
 
 // =============================================================================
@@ -591,36 +471,7 @@ VoidResult prefetch_repository::disable_rule(std::string_view rule_id) {
 // =============================================================================
 
 VoidResult prefetch_repository::save_history(const client::prefetch_history& history) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << R"(
-        INSERT INTO prefetch_history (
-            patient_id, study_uid, rule_id, source_node_id, job_id, status
-        ) VALUES (
-            ')" << history.patient_id << "', "
-        << "'" << history.study_uid << "', ";
-
-    if (history.rule_id.empty()) {
-        sql << "NULL, ";
-    } else {
-        sql << "'" << history.rule_id << "', ";
-    }
-
-    sql << "'" << history.source_node_id << "', ";
-
-    if (history.job_id.empty()) {
-        sql << "NULL, ";
-    } else {
-        sql << "'" << history.job_id << "', ";
-    }
-
-    sql << "'" << history.status << "')";
-
-    auto result = db_->open_session().insert(sql.str());
+    auto result = prefetch_history_repository(db_).save(history);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -633,28 +484,54 @@ std::vector<client::prefetch_history> prefetch_repository::find_history(
     std::vector<client::prefetch_history> histories;
     if (!db_ || !db_->is_connected()) return histories;
 
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, patient_id, study_uid, rule_id, source_node_id, job_id, status, prefetched_at
-        FROM prefetch_history WHERE 1=1
-    )";
+    auto builder = db_->open_session().create_query_builder();
+    builder.select({"pk",
+                    "patient_id",
+                    "study_uid",
+                    "rule_id",
+                    "source_node_id",
+                    "job_id",
+                    "status",
+                    "prefetched_at"})
+        .from("prefetch_history");
 
+    std::optional<database::query_condition> condition;
     if (options.patient_id.has_value()) {
-        sql << " AND patient_id = '" << options.patient_id.value() << "'";
+        condition = database::query_condition(
+            "patient_id", "=", options.patient_id.value());
     }
 
     if (options.rule_id.has_value()) {
-        sql << " AND rule_id = '" << options.rule_id.value() << "'";
+        auto rule_condition = database::query_condition(
+            "rule_id", "=", options.rule_id.value());
+        if (condition.has_value()) {
+            condition = condition.value() && rule_condition;
+        } else {
+            condition = rule_condition;
+        }
     }
 
     if (options.status.has_value()) {
-        sql << " AND status = '" << options.status.value() << "'";
+        auto status_condition = database::query_condition(
+            "status", "=", options.status.value());
+        if (condition.has_value()) {
+            condition = condition.value() && status_condition;
+        } else {
+            condition = status_condition;
+        }
     }
 
-    sql << " ORDER BY prefetched_at DESC";
-    sql << " LIMIT " << options.limit << " OFFSET " << options.offset;
+    if (condition.has_value()) {
+        builder.where(condition.value());
+    }
 
-    auto result = db_->open_session().select(sql.str());
+    builder.order_by("prefetched_at", database::sort_order::desc)
+        .limit(options.limit);
+    if (options.offset > 0) {
+        builder.offset(options.offset);
+    }
+
+    auto result = db_->open_session().select(builder.build());
     if (result.is_err()) return histories;
 
     histories.reserve(result.value().size());
@@ -666,81 +543,56 @@ std::vector<client::prefetch_history> prefetch_repository::find_history(
 }
 
 bool prefetch_repository::is_study_prefetched(std::string_view study_uid) const {
-    if (!db_ || !db_->is_connected()) return false;
+    auto result = prefetch_history_repository(db_).find_by_study(study_uid);
+    if (result.is_err()) {
+        return false;
+    }
 
-    std::ostringstream sql;
-    sql << R"(
-        SELECT 1 FROM prefetch_history
-        WHERE study_uid = ')" << study_uid << "' AND status IN ('completed', 'pending')";
-
-    auto result = db_->open_session().select(sql.str());
-    return result.is_ok() && !result.value().empty();
+    return std::any_of(
+        result.value().begin(),
+        result.value().end(),
+        [](const client::prefetch_history& history) {
+            return history.status == "completed" || history.status == "pending";
+        });
 }
 
 size_t prefetch_repository::count_completed_today() const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    auto result = db_->open_session().select(R"(
-        SELECT COUNT(*) as count FROM prefetch_history
-        WHERE status = 'completed'
-        AND date(prefetched_at) = date('now')
-    )");
-
-    if (result.is_err() || result.value().empty()) return 0;
-    return std::stoull(result.value()[0].at("count"));
+    auto result = prefetch_history_repository(db_).count_completed_today();
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value();
 }
 
 size_t prefetch_repository::count_failed_today() const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    auto result = db_->open_session().select(R"(
-        SELECT COUNT(*) as count FROM prefetch_history
-        WHERE status = 'failed'
-        AND date(prefetched_at) = date('now')
-    )");
-
-    if (result.is_err() || result.value().empty()) return 0;
-    return std::stoull(result.value()[0].at("count"));
+    auto result = prefetch_history_repository(db_).count_failed_today();
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value();
 }
 
 VoidResult prefetch_repository::update_history_status(
     std::string_view study_uid,
     std::string_view status) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
+    auto history_repo = prefetch_history_repository(db_);
+    auto history_result = history_repo.find_by_study(study_uid);
+    if (history_result.is_err()) {
+        return VoidResult(history_result.error());
     }
 
-    std::ostringstream sql;
-    sql << "UPDATE prefetch_history SET status = '" << status
-        << "' WHERE study_uid = '" << study_uid << "'";
-
-    auto result = db_->open_session().update(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
+    for (const auto& entry : history_result.value()) {
+        auto update_result = history_repo.update_status(entry.pk, status);
+        if (update_result.is_err()) {
+            return update_result;
+        }
     }
 
     return kcenon::common::ok();
 }
 
 Result<size_t> prefetch_repository::cleanup_old_history(std::chrono::hours max_age) {
-    if (!db_ || !db_->is_connected()) {
-        return Result<size_t>(kcenon::common::error_info{
-            -1, "Database not connected", "prefetch_repository"});
-    }
-
-    auto cutoff = std::chrono::system_clock::now() - max_age;
-    auto cutoff_str = format_timestamp(cutoff);
-
-    std::ostringstream sql;
-    sql << "DELETE FROM prefetch_history WHERE prefetched_at < '" << cutoff_str << "'";
-
-    auto result = db_->open_session().remove(sql.str());
-    if (result.is_err()) {
-        return Result<size_t>(result.error());
-    }
-
-    return kcenon::common::ok(static_cast<size_t>(result.value()));
+    return prefetch_history_repository(db_).cleanup_old(max_age);
 }
 
 // =============================================================================
@@ -748,28 +600,27 @@ Result<size_t> prefetch_repository::cleanup_old_history(std::chrono::hours max_a
 // =============================================================================
 
 size_t prefetch_repository::rule_count() const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM prefetch_rules");
-    if (result.is_err() || result.value().empty()) return 0;
-    return std::stoull(result.value()[0].at("count"));
+    auto result = prefetch_rule_repository(db_).count();
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value();
 }
 
 size_t prefetch_repository::enabled_rule_count() const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    auto result = db_->open_session().select(
-        "SELECT COUNT(*) as count FROM prefetch_rules WHERE enabled = 1");
-    if (result.is_err() || result.value().empty()) return 0;
-    return std::stoull(result.value()[0].at("count"));
+    auto result = prefetch_rule_repository(db_).find_enabled();
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value().size();
 }
 
 size_t prefetch_repository::history_count() const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM prefetch_history");
-    if (result.is_err() || result.value().empty()) return 0;
-    return std::stoull(result.value()[0].at("count"));
+    auto result = prefetch_history_repository(db_).count();
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value();
 }
 
 // =============================================================================

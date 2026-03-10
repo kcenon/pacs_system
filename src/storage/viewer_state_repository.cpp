@@ -37,6 +37,8 @@
  */
 
 #include "pacs/storage/viewer_state_repository.hpp"
+#include "pacs/storage/recent_study_repository.hpp"
+#include "pacs/storage/viewer_state_record_repository.hpp"
 
 #include <chrono>
 #include <cstdio>
@@ -102,6 +104,22 @@ namespace {
 
 }  // namespace
 
+template <typename T>
+[[nodiscard]] std::optional<T> optional_from_result(Result<T> result) {
+    if (result.is_err()) {
+        return std::nullopt;
+    }
+    return result.value();
+}
+
+template <typename T>
+[[nodiscard]] std::vector<T> vector_from_result(Result<std::vector<T>> result) {
+    if (result.is_err()) {
+        return {};
+    }
+    return result.value();
+}
+
 // =============================================================================
 // Construction / Destruction
 // =============================================================================
@@ -136,30 +154,7 @@ auto viewer_state_repository::format_timestamp(
 // =============================================================================
 
 VoidResult viewer_state_repository::save_state(const viewer_state_record& record) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "viewer_state_repository"});
-    }
-
-    auto now_str = format_timestamp(std::chrono::system_clock::now());
-
-    std::ostringstream sql;
-    sql << R"(
-        INSERT INTO viewer_states (
-            state_id, study_uid, user_id, state_json, created_at, updated_at
-        ) VALUES (
-            ')" << record.state_id << "', "
-        << "'" << record.study_uid << "', "
-        << "'" << record.user_id << "', "
-        << "'" << record.state_json << "', "
-        << "'" << now_str << "', "
-        << "'" << now_str << R"(')
-        ON CONFLICT(state_id) DO UPDATE SET
-            state_json = excluded.state_json,
-            updated_at = excluded.updated_at
-    )";
-
-    auto result = db_->open_session().insert(sql.str());
+    auto result = viewer_state_record_repository(db_).save(record);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -169,74 +164,25 @@ VoidResult viewer_state_repository::save_state(const viewer_state_record& record
 
 std::optional<viewer_state_record> viewer_state_repository::find_state_by_id(
     std::string_view state_id) const {
-    if (!db_ || !db_->is_connected()) return std::nullopt;
-
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, state_id, study_uid, user_id, state_json, created_at, updated_at
-        FROM viewer_states WHERE state_id = ')" << state_id << "'";
-
-    auto result = db_->open_session().select(sql.str());
-    if (result.is_err() || result.value().empty()) {
-        return std::nullopt;
-    }
-
-    return map_row_to_state(result.value()[0]);
+    return optional_from_result(
+        viewer_state_record_repository(db_).find_by_id(std::string(state_id)));
 }
 
 std::vector<viewer_state_record> viewer_state_repository::find_states_by_study(
     std::string_view study_uid) const {
-    viewer_state_query query;
-    query.study_uid = std::string(study_uid);
-    return search_states(query);
+    return vector_from_result(
+        viewer_state_record_repository(db_).find_by_study(study_uid));
 }
 
 std::vector<viewer_state_record> viewer_state_repository::search_states(
     const viewer_state_query& query) const {
-    std::vector<viewer_state_record> states;
-    if (!db_ || !db_->is_connected()) return states;
-
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, state_id, study_uid, user_id, state_json, created_at, updated_at
-        FROM viewer_states WHERE 1=1
-    )";
-
-    if (query.study_uid.has_value()) {
-        sql << " AND study_uid = '" << query.study_uid.value() << "'";
-    }
-
-    if (query.user_id.has_value()) {
-        sql << " AND user_id = '" << query.user_id.value() << "'";
-    }
-
-    sql << " ORDER BY updated_at DESC";
-
-    if (query.limit > 0) {
-        sql << " LIMIT " << query.limit << " OFFSET " << query.offset;
-    }
-
-    auto result = db_->open_session().select(sql.str());
-    if (result.is_err()) return states;
-
-    states.reserve(result.value().size());
-    for (const auto& row : result.value()) {
-        states.push_back(map_row_to_state(row));
-    }
-
-    return states;
+    return vector_from_result(
+        viewer_state_record_repository(db_).search(query));
 }
 
 VoidResult viewer_state_repository::remove_state(std::string_view state_id) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "viewer_state_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << "DELETE FROM viewer_states WHERE state_id = '" << state_id << "'";
-
-    auto result = db_->open_session().remove(sql.str());
+    auto result =
+        viewer_state_record_repository(db_).remove(std::string(state_id));
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -245,12 +191,11 @@ VoidResult viewer_state_repository::remove_state(std::string_view state_id) {
 }
 
 size_t viewer_state_repository::count_states() const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM viewer_states");
-    if (result.is_err() || result.value().empty()) return 0;
-
-    return std::stoull(result.value()[0].at("count"));
+    auto result = viewer_state_record_repository(db_).count();
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value();
 }
 
 // =============================================================================
@@ -260,82 +205,26 @@ size_t viewer_state_repository::count_states() const {
 VoidResult viewer_state_repository::record_study_access(
     std::string_view user_id,
     std::string_view study_uid) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "viewer_state_repository"});
-    }
-
-    auto now_str = format_timestamp(std::chrono::system_clock::now());
-
-    std::ostringstream sql;
-    sql << R"(
-        INSERT INTO recent_studies (user_id, study_uid, accessed_at)
-        VALUES (')" << user_id << "', '" << study_uid << "', '" << now_str << R"(')
-        ON CONFLICT(user_id, study_uid) DO UPDATE SET
-            accessed_at = excluded.accessed_at
-    )";
-
-    auto result = db_->open_session().insert(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
-    }
-
-    return kcenon::common::ok();
+    return recent_study_repository(db_).record_access(user_id, study_uid);
 }
 
 std::vector<recent_study_record> viewer_state_repository::get_recent_studies(
     std::string_view user_id,
     size_t limit) const {
-    std::vector<recent_study_record> studies;
-    if (!db_ || !db_->is_connected()) return studies;
-
-    std::ostringstream sql;
-    sql << R"(
-        SELECT pk, user_id, study_uid, accessed_at
-        FROM recent_studies
-        WHERE user_id = ')" << user_id << R"('
-        ORDER BY accessed_at DESC, pk DESC
-        LIMIT )" << limit;
-
-    auto result = db_->open_session().select(sql.str());
-    if (result.is_err()) return studies;
-
-    studies.reserve(result.value().size());
-    for (const auto& row : result.value()) {
-        studies.push_back(map_row_to_recent_study(row));
-    }
-
-    return studies;
+    return vector_from_result(
+        recent_study_repository(db_).find_by_user(user_id, limit));
 }
 
 VoidResult viewer_state_repository::clear_recent_studies(std::string_view user_id) {
-    if (!db_ || !db_->is_connected()) {
-        return VoidResult(kcenon::common::error_info{
-            -1, "Database not connected", "viewer_state_repository"});
-    }
-
-    std::ostringstream sql;
-    sql << "DELETE FROM recent_studies WHERE user_id = '" << user_id << "'";
-
-    auto result = db_->open_session().remove(sql.str());
-    if (result.is_err()) {
-        return VoidResult(result.error());
-    }
-
-    return kcenon::common::ok();
+    return recent_study_repository(db_).clear_for_user(user_id);
 }
 
 size_t viewer_state_repository::count_recent_studies(std::string_view user_id) const {
-    if (!db_ || !db_->is_connected()) return 0;
-
-    std::ostringstream sql;
-    sql << "SELECT COUNT(*) as count FROM recent_studies WHERE user_id = '"
-        << user_id << "'";
-
-    auto result = db_->open_session().select(sql.str());
-    if (result.is_err() || result.value().empty()) return 0;
-
-    return std::stoull(result.value()[0].at("count"));
+    auto result = recent_study_repository(db_).count_for_user(user_id);
+    if (result.is_err()) {
+        return 0;
+    }
+    return result.value();
 }
 
 // =============================================================================
