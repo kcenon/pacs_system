@@ -103,14 +103,14 @@ auto prefetch_history_repository::find_by_patient(
             -1, "Database not connected", "prefetch_history_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where("patient_id", "=", std::string(patient_id))
         .order_by("prefetched_at", database::sort_order::desc)
         .limit(limit);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -137,14 +137,14 @@ auto prefetch_history_repository::find_by_rule(
             -1, "Database not connected", "prefetch_history_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where("rule_id", "=", std::string(rule_id))
         .order_by("prefetched_at", database::sort_order::desc)
         .limit(limit);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -166,14 +166,14 @@ auto prefetch_history_repository::find_by_status(
             -1, "Database not connected", "prefetch_history_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where("status", "=", std::string(status))
         .order_by("prefetched_at", database::sort_order::desc)
         .limit(limit);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -193,13 +193,13 @@ auto prefetch_history_repository::find_recent(size_t limit) -> list_result_type 
             -1, "Database not connected", "prefetch_history_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .order_by("prefetched_at", database::sort_order::desc)
         .limit(limit);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -225,7 +225,7 @@ auto prefetch_history_repository::update_status(
     sql << "UPDATE prefetch_history SET status = '" << status
         << "' WHERE pk = " << pk;
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -246,7 +246,7 @@ auto prefetch_history_repository::cleanup_old(std::chrono::hours max_age)
         WHERE prefetched_at < datetime('now', '-)"
         << max_age.count() << R"( hours'))";
 
-    auto result = db()->remove(sql.str());
+    auto result = storage_session().remove(sql.str());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }

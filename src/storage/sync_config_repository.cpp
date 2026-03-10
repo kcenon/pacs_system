@@ -151,7 +151,7 @@ auto sync_config_repository::update_stats(
             << config_id << "'";
     }
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }

@@ -159,7 +159,7 @@ VoidResult viewer_state_repository::save_state(const viewer_state_record& record
             updated_at = excluded.updated_at
     )";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -176,7 +176,7 @@ std::optional<viewer_state_record> viewer_state_repository::find_state_by_id(
         SELECT pk, state_id, study_uid, user_id, state_json, created_at, updated_at
         FROM viewer_states WHERE state_id = ')" << state_id << "'";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -216,7 +216,7 @@ std::vector<viewer_state_record> viewer_state_repository::search_states(
         sql << " LIMIT " << query.limit << " OFFSET " << query.offset;
     }
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err()) return states;
 
     states.reserve(result.value().size());
@@ -236,7 +236,7 @@ VoidResult viewer_state_repository::remove_state(std::string_view state_id) {
     std::ostringstream sql;
     sql << "DELETE FROM viewer_states WHERE state_id = '" << state_id << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -247,7 +247,7 @@ VoidResult viewer_state_repository::remove_state(std::string_view state_id) {
 size_t viewer_state_repository::count_states() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select("SELECT COUNT(*) as count FROM viewer_states");
+    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM viewer_states");
     if (result.is_err() || result.value().empty()) return 0;
 
     return std::stoull(result.value()[0].at("count"));
@@ -275,7 +275,7 @@ VoidResult viewer_state_repository::record_study_access(
             accessed_at = excluded.accessed_at
     )";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -297,7 +297,7 @@ std::vector<recent_study_record> viewer_state_repository::get_recent_studies(
         ORDER BY accessed_at DESC, pk DESC
         LIMIT )" << limit;
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err()) return studies;
 
     studies.reserve(result.value().size());
@@ -317,7 +317,7 @@ VoidResult viewer_state_repository::clear_recent_studies(std::string_view user_i
     std::ostringstream sql;
     sql << "DELETE FROM recent_studies WHERE user_id = '" << user_id << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -332,7 +332,7 @@ size_t viewer_state_repository::count_recent_studies(std::string_view user_id) c
     sql << "SELECT COUNT(*) as count FROM recent_studies WHERE user_id = '"
         << user_id << "'";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) return 0;
 
     return std::stoull(result.value()[0].at("count"));

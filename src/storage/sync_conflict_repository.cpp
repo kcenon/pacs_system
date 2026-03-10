@@ -127,7 +127,7 @@ auto sync_conflict_repository::resolve(
         WHERE study_uid = ')"
         << study_uid << "'";
 
-    auto result = db()->update(sql.str());
+    auto result = storage_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -148,7 +148,7 @@ auto sync_conflict_repository::cleanup_old(std::chrono::hours max_age)
         WHERE resolved = 1 AND resolved_at < datetime('now', '-)"
         << max_age.count() << R"( hours'))";
 
-    auto result = db()->remove(sql.str());
+    auto result = storage_session().remove(sql.str());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }

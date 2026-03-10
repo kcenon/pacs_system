@@ -68,7 +68,7 @@ auto commitment_repository::record_request(
             -1, "Database not connected", "storage"});
     }
 
-    return db()->transaction([&]() -> VoidResult {
+    return in_transaction([&]() -> VoidResult {
         commitment_record record;
         record.transaction_uid = transaction_uid;
         record.requesting_ae = requesting_ae;
@@ -94,7 +94,7 @@ auto commitment_repository::update_result(
             -1, "Database not connected", "storage"});
     }
 
-    return db()->transaction([&]() -> VoidResult {
+    return in_transaction([&]() -> VoidResult {
         // Determine overall status
         commitment_status new_status;
         if (result.failed_references.empty() &&
@@ -122,7 +122,7 @@ auto commitment_repository::update_result(
             std::to_string(result.failed_references.size()) +
             " WHERE transaction_uid = '" + transaction_uid + "'";
 
-        auto exec_result = db()->execute(sql);
+        auto exec_result = storage_session().execute(sql);
         if (exec_result.is_err()) {
             return VoidResult(exec_result.error());
         }
@@ -133,7 +133,7 @@ auto commitment_repository::update_result(
                 "UPDATE commitment_references SET status = 'success'"
                 " WHERE transaction_uid = '" + transaction_uid +
                 "' AND sop_instance_uid = '" + ref.sop_instance_uid + "'";
-            auto ref_result = db()->execute(ref_sql);
+            auto ref_result = storage_session().execute(ref_sql);
             if (ref_result.is_err()) {
                 return VoidResult(ref_result.error());
             }
@@ -147,7 +147,7 @@ auto commitment_repository::update_result(
                 std::to_string(static_cast<uint16_t>(reason)) +
                 " WHERE transaction_uid = '" + transaction_uid +
                 "' AND sop_instance_uid = '" + ref.sop_instance_uid + "'";
-            auto ref_result = db()->execute(ref_sql);
+            auto ref_result = storage_session().execute(ref_sql);
             if (ref_result.is_err()) {
                 return VoidResult(ref_result.error());
             }
@@ -187,7 +187,7 @@ auto commitment_repository::get_references(
         .from("commitment_references")
         .where("transaction_uid", "=", transaction_uid);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return Result<std::vector<commitment_reference_record>>(result.error());
     }
@@ -237,7 +237,7 @@ auto commitment_repository::cleanup_old_transactions(
         "WHERE status IN ('success', 'failed', 'partial') "
         "AND completion_time < '" + cutoff_str + "')";
 
-    auto ref_result = db()->execute(ref_sql);
+    auto ref_result = storage_session().execute(ref_sql);
     if (ref_result.is_err()) {
         return Result<size_t>(ref_result.error());
     }
@@ -248,7 +248,7 @@ auto commitment_repository::cleanup_old_transactions(
         "WHERE status IN ('success', 'failed', 'partial') "
         "AND completion_time < '" + cutoff_str + "'";
 
-    auto count_result = db()->select(count_sql);
+    auto count_result = storage_session().select(count_sql);
     size_t deleted_count = 0;
     if (count_result.is_ok() && !count_result.value().empty()) {
         deleted_count = std::stoull(count_result.value()[0].at("cnt"));
@@ -260,7 +260,7 @@ auto commitment_repository::cleanup_old_transactions(
         "WHERE status IN ('success', 'failed', 'partial') "
         "AND completion_time < '" + cutoff_str + "'";
 
-    auto result = db()->execute(sql);
+    auto result = storage_session().execute(sql);
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -360,7 +360,7 @@ auto commitment_repository::insert_references(
             ref.sop_class_uid + "', '" +
             ref.sop_instance_uid + "', 'pending')";
 
-        auto result = db()->execute(sql);
+        auto result = storage_session().execute(sql);
         if (result.is_err()) {
             return VoidResult(result.error());
         }

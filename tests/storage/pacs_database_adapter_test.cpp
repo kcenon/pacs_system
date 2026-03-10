@@ -96,12 +96,15 @@ TEST_CASE("pacs_database_adapter: construction and initial state",
 TEST_CASE("pacs_database_adapter: operations fail when not connected",
           "[storage][adapter][interface]") {
     pacs_database_adapter db(":memory:");
+    auto session = db.open_session();
 
     auto select_result = db.select("SELECT 1");
     CHECK(select_result.is_err());
+    CHECK(session.select("SELECT 1").is_err());
 
     auto insert_result = db.insert("INSERT INTO test VALUES (1)");
     CHECK(insert_result.is_err());
+    CHECK(session.insert("INSERT INTO test VALUES (1)").is_err());
 
     auto update_result = db.update("UPDATE test SET x = 1");
     CHECK(update_result.is_err());
@@ -111,6 +114,9 @@ TEST_CASE("pacs_database_adapter: operations fail when not connected",
 
     auto exec_result = db.execute("CREATE TABLE test (x INT)");
     CHECK(exec_result.is_err());
+
+    auto uow_result = db.begin_unit_of_work();
+    CHECK(uow_result.is_err());
 }
 
 TEST_CASE("pacs_database_adapter: transaction state when not connected",
@@ -441,6 +447,77 @@ TEST_CASE("pacs_database_adapter: transaction template function",
     auto check = db.select("SELECT COUNT(*) as cnt FROM patients");
     REQUIRE(check.is_ok());
     CHECK(check.value()[0].at("cnt") == "2");
+}
+
+TEST_CASE("pacs_database_adapter: session boundary executes queries",
+          "[storage][adapter][integration]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
+    }
+
+    pacs_database_adapter db(":memory:");
+    REQUIRE(db.connect().is_ok());
+
+    auto session = db.open_session();
+    REQUIRE(session.execute(
+                  "CREATE TABLE patients (id INTEGER PRIMARY KEY, name TEXT)")
+                .is_ok());
+
+    auto insert_result =
+        session.insert("INSERT INTO patients (name) VALUES ('Session User')");
+    REQUIRE(insert_result.is_ok());
+    CHECK(session.last_insert_rowid() == 1);
+
+    auto select_result = session.select("SELECT name FROM patients WHERE id = 1");
+    REQUIRE(select_result.is_ok());
+    REQUIRE_FALSE(select_result.value().empty());
+    CHECK(select_result.value()[0].at("name") == "Session User");
+}
+
+TEST_CASE("pacs_database_adapter: unit_of_work owns transaction lifecycle",
+          "[storage][adapter][integration]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: " << SQLITE_NOT_SUPPORTED_MSG);
+        return;
+    }
+
+    pacs_database_adapter db(":memory:");
+    REQUIRE(db.connect().is_ok());
+    REQUIRE(db.execute(
+                  "CREATE TABLE patients (id INTEGER PRIMARY KEY, name TEXT)")
+                .is_ok());
+
+    SECTION("commit persists changes") {
+        auto uow_result = db.begin_unit_of_work();
+        REQUIRE(uow_result.is_ok());
+
+        auto uow = std::move(uow_result.value());
+        REQUIRE(uow.insert("INSERT INTO patients (name) VALUES ('Committed')")
+                    .is_ok());
+        REQUIRE(uow.commit().is_ok());
+        CHECK_FALSE(uow.is_active());
+
+        auto check = db.select("SELECT COUNT(*) as cnt FROM patients");
+        REQUIRE(check.is_ok());
+        CHECK(check.value()[0].at("cnt") == "1");
+    }
+
+    SECTION("destructor rolls back uncommitted work") {
+        {
+            auto uow_result = db.begin_unit_of_work();
+            REQUIRE(uow_result.is_ok());
+
+            auto uow = std::move(uow_result.value());
+            REQUIRE(uow.insert("INSERT INTO patients (name) VALUES ('Rolled Back')")
+                        .is_ok());
+            CHECK(uow.is_active());
+        }
+
+        auto check = db.select("SELECT COUNT(*) as cnt FROM patients");
+        REQUIRE(check.is_ok());
+        CHECK(check.value()[0].at("cnt") == "0");
+    }
 }
 
 // ============================================================================

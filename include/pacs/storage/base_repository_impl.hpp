@@ -76,7 +76,8 @@ auto base_repository<Entity, PrimaryKey>::find_by_id(PrimaryKey id)
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
     auto columns = select_columns();
 
     if (columns.empty() || (columns.size() == 1 && columns[0] == "*")) {
@@ -103,7 +104,7 @@ auto base_repository<Entity, PrimaryKey>::find_by_id(PrimaryKey id)
     builder.limit(1);
 
     auto query = builder.build();
-    auto result = db_->select(query);
+    auto result = storage.select(query);
 
     if (result.is_err()) {
         return Result<Entity>(result.error());
@@ -139,7 +140,8 @@ auto base_repository<Entity, PrimaryKey>::find_all(
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
     auto columns = select_columns();
 
     if (columns.empty() || (columns.size() == 1 && columns[0] == "*")) {
@@ -155,7 +157,7 @@ auto base_repository<Entity, PrimaryKey>::find_all(
     }
 
     auto query = builder.build();
-    auto result = db_->select(query);
+    auto result = storage.select(query);
 
     if (result.is_err()) {
         return list_result_type(result.error());
@@ -186,7 +188,8 @@ auto base_repository<Entity, PrimaryKey>::find_where(
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
     auto columns = select_columns();
 
     if (columns.empty() || (columns.size() == 1 && columns[0] == "*")) {
@@ -198,7 +201,7 @@ auto base_repository<Entity, PrimaryKey>::find_where(
     builder.from(table_name_).where(column, op, value);
 
     auto query = builder.build();
-    auto result = db_->select(query);
+    auto result = storage.select(query);
 
     if (result.is_err()) {
         return list_result_type(result.error());
@@ -227,7 +230,8 @@ auto base_repository<Entity, PrimaryKey>::exists(PrimaryKey id)
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
 
     // Convert primary key to database_value
     database_value pk_value;
@@ -246,7 +250,7 @@ auto base_repository<Entity, PrimaryKey>::exists(PrimaryKey id)
         .where(pk_column_, "=", pk_value);
 
     auto query = builder.build();
-    auto result = db_->select(query);
+    auto result = storage.select(query);
 
     if (result.is_err()) {
         return Result<bool>(result.error());
@@ -273,11 +277,12 @@ auto base_repository<Entity, PrimaryKey>::count() -> Result<size_t> {
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
     builder.select({"COUNT(*) as count"}).from(table_name_);
 
     auto query = builder.build();
-    auto result = db_->select(query);
+    auto result = storage.select(query);
 
     if (result.is_err()) {
         return Result<size_t>(result.error());
@@ -325,18 +330,19 @@ auto base_repository<Entity, PrimaryKey>::insert(const Entity& entity)
 
     try {
         auto row = entity_to_row(entity);
-        auto builder = db_->create_query_builder();
+        auto storage = storage_session();
+        auto builder = storage.create_query_builder();
         builder.insert_into(table_name_).values(row);
 
         auto query = builder.build();
-        auto result = db_->insert(query);
+        auto result = storage.insert(query);
 
         if (result.is_err()) {
             return Result<PrimaryKey>(result.error());
         }
 
         // Get the last insert rowid
-        auto rowid = db_->last_insert_rowid();
+        auto rowid = storage.last_insert_rowid();
 
         if constexpr (std::is_integral_v<PrimaryKey>) {
             return Result<PrimaryKey>(static_cast<PrimaryKey>(rowid));
@@ -371,7 +377,8 @@ auto base_repository<Entity, PrimaryKey>::update(const Entity& entity)
         auto row = entity_to_row(entity);
         auto pk = get_pk(entity);
 
-        auto builder = db_->create_query_builder();
+        auto storage = storage_session();
+        auto builder = storage.create_query_builder();
         builder.update(table_name_).set(row);
 
         // Convert primary key to database_value
@@ -389,7 +396,7 @@ auto base_repository<Entity, PrimaryKey>::update(const Entity& entity)
         builder.where(pk_column_, "=", pk_value);
 
         auto query = builder.build();
-        auto result = db_->update(query);
+        auto result = storage.update(query);
 
         if (result.is_err()) {
             return VoidResult(result.error());
@@ -416,7 +423,8 @@ auto base_repository<Entity, PrimaryKey>::remove(PrimaryKey id)
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
 
     // Convert primary key to database_value
     database_value pk_value;
@@ -433,7 +441,7 @@ auto base_repository<Entity, PrimaryKey>::remove(PrimaryKey id)
     builder.delete_from(table_name_).where(pk_column_, "=", pk_value);
 
     auto query = builder.build();
-    auto result = db_->remove(query);
+    auto result = storage.remove(query);
 
     if (result.is_err()) {
         return VoidResult(result.error());
@@ -457,11 +465,12 @@ auto base_repository<Entity, PrimaryKey>::remove_where(
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = db_->create_query_builder();
+    auto storage = storage_session();
+    auto builder = storage.create_query_builder();
     builder.delete_from(table_name_).where(column, op, value);
 
     auto query = builder.build();
-    auto result = db_->remove(query);
+    auto result = storage.remove(query);
 
     if (result.is_err()) {
         return Result<size_t>(result.error());
@@ -485,19 +494,24 @@ auto base_repository<Entity, PrimaryKey>::insert_batch(
     std::vector<PrimaryKey> ids;
     ids.reserve(entities.size());
 
-    auto tx_result = db_->transaction([&]() -> VoidResult {
-        for (const auto& entity : entities) {
-            auto insert_result = insert(entity);
-            if (insert_result.is_err()) {
-                return VoidResult(insert_result.error());
-            }
-            ids.push_back(insert_result.value());
-        }
-        return kcenon::common::ok();
-    });
+    auto uow_result = db_->begin_unit_of_work();
+    if (uow_result.is_err()) {
+        return Result<std::vector<PrimaryKey>>(uow_result.error());
+    }
 
-    if (tx_result.is_err()) {
-        return Result<std::vector<PrimaryKey>>(tx_result.error());
+    auto uow = std::move(uow_result.value());
+    for (const auto& entity : entities) {
+        auto insert_result = insert(entity);
+        if (insert_result.is_err()) {
+            (void)uow.rollback();
+            return Result<std::vector<PrimaryKey>>(insert_result.error());
+        }
+        ids.push_back(insert_result.value());
+    }
+
+    auto commit_result = uow.commit();
+    if (commit_result.is_err()) {
+        return Result<std::vector<PrimaryKey>>(commit_result.error());
     }
 
     return Result<std::vector<PrimaryKey>>(std::move(ids));
@@ -513,7 +527,33 @@ auto base_repository<Entity, PrimaryKey>::in_transaction(Func&& func)
             -1, "Database not connected", "storage"});
     }
 
-    return db_->transaction(std::forward<Func>(func));
+    auto uow_result = db_->begin_unit_of_work();
+    if (uow_result.is_err()) {
+        using ResultType = std::invoke_result_t<Func>;
+        return ResultType(uow_result.error());
+    }
+
+    auto uow = std::move(uow_result.value());
+    try {
+        auto result = std::forward<Func>(func)();
+        if (result.is_err()) {
+            (void)uow.rollback();
+            return result;
+        }
+
+        auto commit_result = uow.commit();
+        if (commit_result.is_err()) {
+            using ResultType = std::invoke_result_t<Func>;
+            return ResultType(commit_result.error());
+        }
+
+        return result;
+    } catch (const std::exception& e) {
+        (void)uow.rollback();
+        using ResultType = std::invoke_result_t<Func>;
+        return ResultType(kcenon::common::error_info{
+            -1, std::string("Transaction failed: ") + e.what(), "storage"});
+    }
 }
 
 // =============================================================================
@@ -529,7 +569,13 @@ auto base_repository<Entity, PrimaryKey>::select_columns() const
 template <typename Entity, typename PrimaryKey>
 auto base_repository<Entity, PrimaryKey>::query_builder()
     -> database::query_builder {
-    return db_->create_query_builder();
+    return storage_session().create_query_builder();
+}
+
+template <typename Entity, typename PrimaryKey>
+auto base_repository<Entity, PrimaryKey>::storage_session()
+    -> pacs_storage_session {
+    return db_->open_session();
 }
 
 template <typename Entity, typename PrimaryKey>

@@ -243,7 +243,7 @@ VoidResult prefetch_repository::initialize_tables() {
             -1, "Database not connected", "prefetch_repository"});
     }
 
-    auto result = db_->execute(R"(
+    auto result = db_->open_session().execute(R"(
         CREATE TABLE IF NOT EXISTS prefetch_rules (
             pk INTEGER PRIMARY KEY AUTOINCREMENT,
             rule_id TEXT UNIQUE NOT NULL,
@@ -271,7 +271,7 @@ VoidResult prefetch_repository::initialize_tables() {
         return result;
     }
 
-    result = db_->execute(R"(
+    result = db_->open_session().execute(R"(
         CREATE TABLE IF NOT EXISTS prefetch_history (
             pk INTEGER PRIMARY KEY AUTOINCREMENT,
             patient_id TEXT NOT NULL,
@@ -288,7 +288,7 @@ VoidResult prefetch_repository::initialize_tables() {
         return result;
     }
 
-    result = db_->execute(R"(
+    result = db_->open_session().execute(R"(
         CREATE INDEX IF NOT EXISTS idx_prefetch_history_patient ON prefetch_history(patient_id);
         CREATE INDEX IF NOT EXISTS idx_prefetch_history_study ON prefetch_history(study_uid);
         CREATE INDEX IF NOT EXISTS idx_prefetch_history_status ON prefetch_history(status);
@@ -378,7 +378,7 @@ VoidResult prefetch_repository::save_rule(const client::prefetch_rule& rule) {
             updated_at = CURRENT_TIMESTAMP
     )";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -399,7 +399,7 @@ std::optional<client::prefetch_rule> prefetch_repository::find_rule_by_id(
                triggered_count, studies_prefetched, last_triggered
         FROM prefetch_rules WHERE rule_id = ')" << rule_id << "'";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -420,7 +420,7 @@ std::optional<client::prefetch_rule> prefetch_repository::find_rule_by_pk(
                triggered_count, studies_prefetched, last_triggered
         FROM prefetch_rules WHERE pk = )" << pk;
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err() || result.value().empty()) {
         return std::nullopt;
     }
@@ -454,7 +454,7 @@ std::vector<client::prefetch_rule> prefetch_repository::find_rules(
     sql << " ORDER BY created_at DESC";
     sql << " LIMIT " << options.limit << " OFFSET " << options.offset;
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err()) return rules;
 
     rules.reserve(result.value().size());
@@ -480,7 +480,7 @@ VoidResult prefetch_repository::remove_rule(std::string_view rule_id) {
     std::ostringstream sql;
     sql << "DELETE FROM prefetch_rules WHERE rule_id = '" << rule_id << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -494,7 +494,7 @@ bool prefetch_repository::rule_exists(std::string_view rule_id) const {
     std::ostringstream sql;
     sql << "SELECT 1 FROM prefetch_rules WHERE rule_id = '" << rule_id << "'";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     return result.is_ok() && !result.value().empty();
 }
 
@@ -515,7 +515,7 @@ VoidResult prefetch_repository::increment_triggered(std::string_view rule_id) {
             last_triggered = CURRENT_TIMESTAMP
         WHERE rule_id = ')" << rule_id << "'";
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -536,7 +536,7 @@ VoidResult prefetch_repository::increment_studies_prefetched(
             studies_prefetched = studies_prefetched + )" << count
         << " WHERE rule_id = '" << rule_id << "'";
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -557,7 +557,7 @@ VoidResult prefetch_repository::enable_rule(std::string_view rule_id) {
             updated_at = CURRENT_TIMESTAMP
         WHERE rule_id = ')" << rule_id << "'";
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -578,7 +578,7 @@ VoidResult prefetch_repository::disable_rule(std::string_view rule_id) {
             updated_at = CURRENT_TIMESTAMP
         WHERE rule_id = ')" << rule_id << "'";
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -620,7 +620,7 @@ VoidResult prefetch_repository::save_history(const client::prefetch_history& his
 
     sql << "'" << history.status << "')";
 
-    auto result = db_->insert(sql.str());
+    auto result = db_->open_session().insert(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -654,7 +654,7 @@ std::vector<client::prefetch_history> prefetch_repository::find_history(
     sql << " ORDER BY prefetched_at DESC";
     sql << " LIMIT " << options.limit << " OFFSET " << options.offset;
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     if (result.is_err()) return histories;
 
     histories.reserve(result.value().size());
@@ -673,14 +673,14 @@ bool prefetch_repository::is_study_prefetched(std::string_view study_uid) const 
         SELECT 1 FROM prefetch_history
         WHERE study_uid = ')" << study_uid << "' AND status IN ('completed', 'pending')";
 
-    auto result = db_->select(sql.str());
+    auto result = db_->open_session().select(sql.str());
     return result.is_ok() && !result.value().empty();
 }
 
 size_t prefetch_repository::count_completed_today() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select(R"(
+    auto result = db_->open_session().select(R"(
         SELECT COUNT(*) as count FROM prefetch_history
         WHERE status = 'completed'
         AND date(prefetched_at) = date('now')
@@ -693,7 +693,7 @@ size_t prefetch_repository::count_completed_today() const {
 size_t prefetch_repository::count_failed_today() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select(R"(
+    auto result = db_->open_session().select(R"(
         SELECT COUNT(*) as count FROM prefetch_history
         WHERE status = 'failed'
         AND date(prefetched_at) = date('now')
@@ -715,7 +715,7 @@ VoidResult prefetch_repository::update_history_status(
     sql << "UPDATE prefetch_history SET status = '" << status
         << "' WHERE study_uid = '" << study_uid << "'";
 
-    auto result = db_->update(sql.str());
+    auto result = db_->open_session().update(sql.str());
     if (result.is_err()) {
         return VoidResult(result.error());
     }
@@ -735,7 +735,7 @@ Result<size_t> prefetch_repository::cleanup_old_history(std::chrono::hours max_a
     std::ostringstream sql;
     sql << "DELETE FROM prefetch_history WHERE prefetched_at < '" << cutoff_str << "'";
 
-    auto result = db_->remove(sql.str());
+    auto result = db_->open_session().remove(sql.str());
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -750,7 +750,7 @@ Result<size_t> prefetch_repository::cleanup_old_history(std::chrono::hours max_a
 size_t prefetch_repository::rule_count() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select("SELECT COUNT(*) as count FROM prefetch_rules");
+    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM prefetch_rules");
     if (result.is_err() || result.value().empty()) return 0;
     return std::stoull(result.value()[0].at("count"));
 }
@@ -758,7 +758,7 @@ size_t prefetch_repository::rule_count() const {
 size_t prefetch_repository::enabled_rule_count() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select(
+    auto result = db_->open_session().select(
         "SELECT COUNT(*) as count FROM prefetch_rules WHERE enabled = 1");
     if (result.is_err() || result.value().empty()) return 0;
     return std::stoull(result.value()[0].at("count"));
@@ -767,7 +767,7 @@ size_t prefetch_repository::enabled_rule_count() const {
 size_t prefetch_repository::history_count() const {
     if (!db_ || !db_->is_connected()) return 0;
 
-    auto result = db_->select("SELECT COUNT(*) as count FROM prefetch_history");
+    auto result = db_->open_session().select("SELECT COUNT(*) as count FROM prefetch_history");
     if (result.is_err() || result.value().empty()) return 0;
     return std::stoull(result.value()[0].at("count"));
 }

@@ -140,14 +140,14 @@ auto viewer_state_record_repository::find_by_study_and_user(
     auto user_cond = database::query_condition(
         "user_id", "=", std::string(user_id));
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns())
         .from(table_name())
         .where(study_cond && user_cond)
         .order_by("updated_at", database::sort_order::desc);
 
     auto query = builder.build();
-    auto result = db()->select(query);
+    auto result = storage_session().select(query);
 
     if (result.is_err()) {
         return list_result_type(result.error());
@@ -176,7 +176,7 @@ auto viewer_state_record_repository::search(const viewer_state_query& query)
             -1, "Database not connected", "viewer_state_record_repository"});
     }
 
-    auto builder = db()->create_query_builder();
+    auto builder = storage_session().create_query_builder();
     builder.select(select_columns()).from(table_name());
 
     // Build condition based on query filters
@@ -211,7 +211,7 @@ auto viewer_state_record_repository::search(const viewer_state_query& query)
     }
 
     auto sql = builder.build();
-    auto result = db()->select(sql);
+    auto result = storage_session().select(sql);
 
     if (result.is_err()) {
         return list_result_type(result.error());

@@ -115,7 +115,7 @@ auto node_repository::find_by_pk(int64_t pk) -> result_type {
         .where("pk", "=", pk)
         .limit(1);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return result_type(result.error());
     }
@@ -139,7 +139,7 @@ auto node_repository::find_all_nodes() -> list_result_type {
         .from(table_name())
         .order_by("name", database::sort_order::asc);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -166,7 +166,7 @@ auto node_repository::find_by_status(client::node_status status)
         .where("status", "=", std::string(client::to_string(status)))
         .order_by("name", database::sort_order::asc);
 
-    auto result = db()->select(builder.build());
+    auto result = storage_session().select(builder.build());
     if (result.is_err()) {
         return list_result_type(result.error());
     }
@@ -202,7 +202,7 @@ auto node_repository::update_status(
                    "last_error_message = '" + std::string(error_message) +
                    "', updated_at = CURRENT_TIMESTAMP "
                    "WHERE node_id = '" + std::string(node_id) + "'";
-        auto result = db()->execute(sql);
+        auto result = storage_session().execute(sql);
         if (result.is_err()) {
             return VoidResult(result.error());
         }
@@ -212,7 +212,7 @@ auto node_repository::update_status(
             .set("status", std::string(client::to_string(status)))
             .where("node_id", "=", std::string(node_id));
 
-        auto result = db()->execute(builder.build());
+        auto result = storage_session().execute(builder.build());
         if (result.is_err()) {
             return VoidResult(result.error());
         }
@@ -233,7 +233,7 @@ auto node_repository::update_last_verified(std::string_view node_id)
                "updated_at = CURRENT_TIMESTAMP WHERE node_id = '" +
                std::string(node_id) + "'";
 
-    auto result = db()->execute(sql);
+    auto result = storage_session().execute(sql);
     if (result.is_err()) {
         return VoidResult(result.error());
     }
