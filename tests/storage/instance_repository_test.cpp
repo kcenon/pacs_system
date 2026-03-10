@@ -69,6 +69,8 @@ public:
         if (rc != SQLITE_OK) {
             throw std::runtime_error("Failed to open in-memory database");
         }
+        sqlite3_exec(db_, "PRAGMA foreign_keys = ON;", nullptr, nullptr,
+                     nullptr);
         migration_runner runner;
         auto result = runner.run_migrations(db_);
         if (result.is_err()) {
