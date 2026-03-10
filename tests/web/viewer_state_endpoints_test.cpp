@@ -349,30 +349,57 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   viewer_state_repository repo(db->native_handle());
 #endif
   SECTION("record study access") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     auto result = repo.record_access("user1", "1.2.840.study1");
+ #else
+    auto result = repo.record_study_access("user1", "1.2.840.study1");
+ #endif
     REQUIRE(result.is_ok());
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     auto recent = repo.find_by_user("user1", 10);
     REQUIRE(recent.is_ok());
     REQUIRE(recent.value().size() == 1);
     REQUIRE(recent.value()[0].study_uid == "1.2.840.study1");
+ #else
+    auto recent = repo.get_recent_studies("user1", 10);
+    REQUIRE(recent.size() == 1);
+    REQUIRE(recent[0].study_uid == "1.2.840.study1");
+ #endif
   }
 
   SECTION("multiple study accesses") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     (void)repo.record_access("user1", "1.2.840.study1");
     (void)repo.record_access("user1", "1.2.840.study2");
     (void)repo.record_access("user1", "1.2.840.study3");
+ #else
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user1", "1.2.840.study3");
+ #endif
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     auto recent = repo.find_by_user("user1", 10);
     REQUIRE(recent.is_ok());
     REQUIRE(recent.value().size() == 3);
+ #else
+    auto recent = repo.get_recent_studies("user1", 10);
+    REQUIRE(recent.size() == 3);
+ #endif
   }
 
   SECTION("recent studies with limit") {
     for (int i = 1; i <= 25; ++i) {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
       (void)repo.record_access("user1", "1.2.840.study" + std::to_string(i));
+ #else
+      (void)repo.record_study_access("user1",
+                                     "1.2.840.study" + std::to_string(i));
+ #endif
     }
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     auto recent_20 = repo.find_by_user("user1", 20);
     REQUIRE(recent_20.is_ok());
     REQUIRE(recent_20.value().size() == 20);
@@ -380,16 +407,32 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
     auto recent_10 = repo.find_by_user("user1", 10);
     REQUIRE(recent_10.is_ok());
     REQUIRE(recent_10.value().size() == 10);
+ #else
+    auto recent_20 = repo.get_recent_studies("user1", 20);
+    REQUIRE(recent_20.size() == 20);
+
+    auto recent_10 = repo.get_recent_studies("user1", 10);
+    REQUIRE(recent_10.size() == 10);
+ #endif
   }
 
   SECTION("recent studies ordered by access time") {
     // Small sleeps ensure distinct timestamps across all platforms
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     (void)repo.record_access("user1", "1.2.840.study1");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     (void)repo.record_access("user1", "1.2.840.study2");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     (void)repo.record_access("user1", "1.2.840.study3");
+ #else
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    (void)repo.record_study_access("user1", "1.2.840.study3");
+ #endif
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     auto recent = repo.find_by_user("user1", 10);
     REQUIRE(recent.is_ok());
     REQUIRE(recent.value().size() == 3);
@@ -397,24 +440,49 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
     REQUIRE(recent.value()[0].study_uid == "1.2.840.study3");
     REQUIRE(recent.value()[1].study_uid == "1.2.840.study2");
     REQUIRE(recent.value()[2].study_uid == "1.2.840.study1");
+ #else
+    auto recent = repo.get_recent_studies("user1", 10);
+    REQUIRE(recent.size() == 3);
+    // Most recent first
+    REQUIRE(recent[0].study_uid == "1.2.840.study3");
+    REQUIRE(recent[1].study_uid == "1.2.840.study2");
+    REQUIRE(recent[2].study_uid == "1.2.840.study1");
+ #endif
   }
 
   SECTION("re-access updates timestamp") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     (void)repo.record_access("user1", "1.2.840.study1");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     (void)repo.record_access("user1", "1.2.840.study2");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     (void)repo.record_access("user1", "1.2.840.study1"); // Re-access
+ #else
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    (void)repo.record_study_access("user1", "1.2.840.study1"); // Re-access
+ #endif
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     auto recent = repo.find_by_user("user1", 10);
     REQUIRE(recent.is_ok());
     REQUIRE(recent.value().size() == 2);
     // study1 should be most recent now
     REQUIRE(recent.value()[0].study_uid == "1.2.840.study1");
     REQUIRE(recent.value()[1].study_uid == "1.2.840.study2");
+ #else
+    auto recent = repo.get_recent_studies("user1", 10);
+    REQUIRE(recent.size() == 2);
+    // study1 should be most recent now
+    REQUIRE(recent[0].study_uid == "1.2.840.study1");
+    REQUIRE(recent[1].study_uid == "1.2.840.study2");
+ #endif
   }
 
   SECTION("clear recent studies") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     (void)repo.record_access("user1", "1.2.840.study1");
     (void)repo.record_access("user1", "1.2.840.study2");
     (void)repo.record_access("user2", "1.2.840.study3");
@@ -427,18 +495,42 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
 
     REQUIRE(repo.count_for_user("user1").value() == 0);
     REQUIRE(repo.count_for_user("user2").value() == 1); // Unaffected
+ #else
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_study_access("user2", "1.2.840.study3");
+
+    REQUIRE(repo.count_recent_studies("user1") == 2);
+    REQUIRE(repo.count_recent_studies("user2") == 1);
+
+    auto clear_result = repo.clear_recent_studies("user1");
+    REQUIRE(clear_result.is_ok());
+
+    REQUIRE(repo.count_recent_studies("user1") == 0);
+    REQUIRE(repo.count_recent_studies("user2") == 1); // Unaffected
+ #endif
   }
 
   SECTION("count recent studies") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     REQUIRE(repo.count_for_user("user1").value() == 0);
 
     (void)repo.record_access("user1", "1.2.840.study1");
     (void)repo.record_access("user1", "1.2.840.study2");
 
     REQUIRE(repo.count_for_user("user1").value() == 2);
+ #else
+    REQUIRE(repo.count_recent_studies("user1") == 0);
+
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user1", "1.2.840.study2");
+
+    REQUIRE(repo.count_recent_studies("user1") == 2);
+ #endif
   }
 
   SECTION("user isolation") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
     (void)repo.record_access("user1", "1.2.840.study1");
     (void)repo.record_access("user2", "1.2.840.study2");
 
@@ -451,5 +543,17 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
     REQUIRE(user2_recent.is_ok());
     REQUIRE(user2_recent.value().size() == 1);
     REQUIRE(user2_recent.value()[0].study_uid == "1.2.840.study2");
+ #else
+    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_study_access("user2", "1.2.840.study2");
+
+    auto user1_recent = repo.get_recent_studies("user1", 10);
+    REQUIRE(user1_recent.size() == 1);
+    REQUIRE(user1_recent[0].study_uid == "1.2.840.study1");
+
+    auto user2_recent = repo.get_recent_studies("user2", 10);
+    REQUIRE(user2_recent.size() == 1);
+    REQUIRE(user2_recent[0].study_uid == "1.2.840.study2");
+ #endif
   }
 }
