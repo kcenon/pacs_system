@@ -277,7 +277,17 @@ auto base_repository<Entity, PrimaryKey>::count() -> Result<size_t> {
     }
 
     try {
-        size_t count = std::stoull(result.value()[0].at("count"));
+        const auto& row = result.value()[0];
+        auto it = row.find("count");
+        if (it == row.end() && !row.empty()) {
+            it = row.begin();
+        }
+
+        if (it == row.end() || it->second.empty()) {
+            return Result<size_t>(static_cast<size_t>(0));
+        }
+
+        size_t count = std::stoull(it->second);
         return Result<size_t>(count);
     } catch (const std::exception& e) {
         return Result<size_t>(kcenon::common::error_info{

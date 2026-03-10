@@ -440,6 +440,9 @@ auto series_repository::series_count(std::string_view study_uid)
 
     const auto& row = result.value()[0];
     auto it = row.find("cnt");
+    if (it == row.end() && !row.empty()) {
+        it = row.begin();
+    }
     if (it == row.end() || it->second.empty()) {
         return ok(static_cast<size_t>(0));
     }

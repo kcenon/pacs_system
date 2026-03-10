@@ -465,12 +465,7 @@ auto study_repository::study_count() -> Result<size_t> {
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                         .from("studies")
-                         .build();
-
-    auto result = db()->select(count_sql);
+    auto result = db()->select("SELECT COUNT(*) AS count FROM studies;");
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
@@ -480,7 +475,11 @@ auto study_repository::study_count() -> Result<size_t> {
 
     if (!result.value().empty()) {
         const auto& row = result.value()[0];
-        auto it = row.find("cnt");
+        auto it = row.find("count");
+        if (it == row.end() && !row.empty()) {
+            it = row.begin();
+        }
+
         if (it != row.end() && !it->second.empty()) {
             try {
                 return ok(static_cast<size_t>(std::stoll(it->second)));
@@ -498,13 +497,9 @@ auto study_repository::study_count_for_patient(int64_t patient_pk)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                         .from("studies")
-                         .where("patient_pk", "=", patient_pk)
-                         .build();
-
-    auto result = db()->select(count_sql);
+    auto result = db()->select(pacs::compat::format(
+        "SELECT COUNT(*) AS count FROM studies WHERE patient_pk = {};",
+        patient_pk));
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
@@ -514,7 +509,11 @@ auto study_repository::study_count_for_patient(int64_t patient_pk)
 
     if (!result.value().empty()) {
         const auto& row = result.value()[0];
-        auto it = row.find("cnt");
+        auto it = row.find("count");
+        if (it == row.end() && !row.empty()) {
+            it = row.begin();
+        }
+
         if (it != row.end() && !it->second.empty()) {
             try {
                 return ok(static_cast<size_t>(std::stoll(it->second)));
@@ -532,49 +531,19 @@ auto study_repository::update_modalities_in_study(int64_t study_pk)
         return make_error<std::monostate>(-1, "Database not connected", "storage");
     }
 
-    // Step 1: Get distinct modalities from series table
-    auto select_builder = db()->create_query_builder();
-    auto select_sql =
-        select_builder
-            .select(std::vector<std::string>{"DISTINCT modality"})
-            .from("series")
-            .where("study_pk", "=", study_pk)
-            .build();
-
-    auto select_result = db()->select(select_sql);
-    if (select_result.is_err()) {
-        return make_error<std::monostate>(
-            -1,
-            pacs::compat::format("Failed to query modalities: {}",
-                                 select_result.error().message),
-            "storage");
-    }
-
-    // Step 2: Build modalities string with backslash separator
-    std::set<std::string> unique_modalities;
-    for (const auto& row : select_result.value()) {
-        auto it = row.find("modality");
-        if (it != row.end() && !it->second.empty()) {
-            unique_modalities.insert(it->second);
-        }
-    }
-
-    std::string modalities_str;
-    for (const auto& mod : unique_modalities) {
-        if (!modalities_str.empty()) {
-            modalities_str += "\\";  // DICOM multi-value separator
-        }
-        modalities_str += mod;
-    }
-
-    // Step 3: Update studies table
-    auto update_builder = db()->create_query_builder();
-    auto update_sql =
-        update_builder.update("studies")
-            .set({{"modalities_in_study", modalities_str},
-                  {"updated_at", "datetime('now')"}})
-            .where("study_pk", "=", study_pk)
-            .build();
+    auto update_sql = pacs::compat::format(
+        R"(UPDATE studies
+SET modalities_in_study = (
+        SELECT GROUP_CONCAT(modality, '\')
+        FROM (
+            SELECT DISTINCT modality
+            FROM series
+            WHERE study_pk = {} AND modality IS NOT NULL AND modality != ''
+        )
+    ),
+    updated_at = datetime('now')
+WHERE study_pk = {};)",
+        study_pk, study_pk);
 
     auto update_result = db()->update(update_sql);
     if (update_result.is_err()) {

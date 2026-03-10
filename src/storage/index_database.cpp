@@ -159,6 +159,7 @@ auto create_adapter_compatible_memory_path() -> std::string {
         pacs::compat::format("pacs_index_memory_{}.sqlite", unique_id);
     return (std::filesystem::temp_directory_path() / file_name).string();
 }
+#endif
 
 void remove_database_sidecars(const std::string& path) {
     if (path.empty()) {
@@ -170,7 +171,6 @@ void remove_database_sidecars(const std::string& path) {
     std::filesystem::remove(path + "-wal", ec);
     std::filesystem::remove(path + "-shm", ec);
 }
-#endif
 
 }  // namespace
 
@@ -967,14 +967,34 @@ auto index_database::upsert_series(int64_t study_pk,
                                    std::string_view body_part_examined,
                                    std::string_view station_name)
     -> Result<int64_t> {
-    return series_repository_->upsert_series(
-        study_pk, series_uid, modality, series_number, series_description,
-        body_part_examined, station_name);
+    series_record record;
+    record.study_pk = study_pk;
+    record.series_uid = std::string(series_uid);
+    record.modality = std::string(modality);
+    record.series_number = series_number;
+    record.series_description = std::string(series_description);
+    record.body_part_examined = std::string(body_part_examined);
+    record.station_name = std::string(station_name);
+    return upsert_series(record);
 }
 
 auto index_database::upsert_series(const series_record& record)
     -> Result<int64_t> {
-    return series_repository_->upsert_series(record);
+    auto existing = find_series(record.series_uid);
+    auto result = series_repository_->upsert_series(record);
+    if (result.is_err()) {
+        return result;
+    }
+
+    if (existing.has_value() && existing->study_pk > 0 &&
+        existing->study_pk != record.study_pk) {
+        (void)update_modalities_in_study(existing->study_pk);
+    }
+    if (record.study_pk > 0) {
+        (void)update_modalities_in_study(record.study_pk);
+    }
+
+    return result;
 }
 
 auto index_database::find_series(std::string_view series_uid) const
@@ -998,7 +1018,12 @@ auto index_database::search_series(const series_query& query) const
 }
 
 auto index_database::delete_series(std::string_view series_uid) -> VoidResult {
-    return series_repository_->delete_series(series_uid);
+    auto existing = find_series(series_uid);
+    auto result = series_repository_->delete_series(series_uid);
+    if (result.is_ok() && existing.has_value() && existing->study_pk > 0) {
+        (void)update_modalities_in_study(existing->study_pk);
+    }
+    return result;
 }
 
 auto index_database::series_count() const -> Result<size_t> {
