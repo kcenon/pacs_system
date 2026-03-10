@@ -71,6 +71,10 @@ public:
 
     [[nodiscard]] auto find_recent(size_t limit = 100) -> list_result_type;
 
+    [[nodiscard]] auto count_completed_today() -> Result<size_t>;
+
+    [[nodiscard]] auto count_failed_today() -> Result<size_t>;
+
     [[nodiscard]] auto update_status(
         int64_t pk,
         std::string_view status) -> VoidResult;
@@ -95,6 +99,9 @@ protected:
         -> std::vector<std::string> override;
 
 private:
+    [[nodiscard]] auto count_by_status_today(std::string_view status)
+        -> Result<size_t>;
+
     [[nodiscard]] auto parse_timestamp(const std::string& str) const
         -> std::chrono::system_clock::time_point;
 

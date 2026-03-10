@@ -38,6 +38,10 @@
 #include "pacs/client/sync_manager.hpp"
 #include "pacs/client/job_manager.hpp"
 #include "pacs/client/remote_node_manager.hpp"
+#include "pacs/storage/repository_factory.hpp"
+#include "pacs/storage/sync_config_repository.hpp"
+#include "pacs/storage/sync_conflict_repository.hpp"
+#include "pacs/storage/sync_history_repository.hpp"
 #include "pacs/storage/sync_repository.hpp"
 #include "pacs/services/query_scu.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
@@ -102,6 +106,11 @@ struct sync_manager::impl {
 
     // Dependencies
     std::shared_ptr<storage::sync_repository> repo;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    std::shared_ptr<storage::sync_config_repository> config_repo;
+    std::shared_ptr<storage::sync_conflict_repository> conflict_repo;
+    std::shared_ptr<storage::sync_history_repository> history_repo;
+#endif
     std::shared_ptr<remote_node_manager> node_manager;
     std::shared_ptr<job_manager> job_mgr;
     std::shared_ptr<services::query_scu> query_scu;
@@ -167,6 +176,16 @@ struct sync_manager::impl {
             }
         }
 
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (config_repo) {
+            auto exists = config_repo->exists(cfg.config_id);
+            if (exists.is_ok() && exists.value()) {
+                [[maybe_unused]] auto result = config_repo->update(cfg);
+            } else {
+                [[maybe_unused]] auto result = config_repo->insert(cfg);
+            }
+        } else
+        #endif
         if (repo) {
             [[maybe_unused]] auto result = repo->save_config(cfg);
         }
@@ -198,6 +217,17 @@ struct sync_manager::impl {
             if (success) {
                 it->last_successful_sync = std::chrono::system_clock::now();
             }
+        }
+
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (config_repo) {
+            [[maybe_unused]] auto result =
+                config_repo->update_stats(config_id, success, studies_synced);
+        } else
+        #endif
+        if (repo) {
+            [[maybe_unused]] auto result =
+                repo->update_config_stats(config_id, success, studies_synced);
         }
     }
 
@@ -270,6 +300,16 @@ struct sync_manager::impl {
             }
         }
 
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (conflict_repo) {
+            auto exists = conflict_repo->exists(conflict.study_uid);
+            if (exists.is_ok() && exists.value()) {
+                [[maybe_unused]] auto result = conflict_repo->update(conflict);
+            } else {
+                [[maybe_unused]] auto result = conflict_repo->insert(conflict);
+            }
+        } else
+        #endif
         if (repo) {
             [[maybe_unused]] auto result = repo->save_conflict(conflict);
         }
@@ -415,17 +455,23 @@ struct sync_manager::impl {
         store_last_result(cfg.config_id, result);
 
         // Save history
+        sync_history history;
+        history.config_id = cfg.config_id;
+        history.job_id = result.job_id;
+        history.success = result.success;
+        history.studies_checked = result.studies_checked;
+        history.studies_synced = result.studies_synced;
+        history.conflicts_found = result.conflicts.size();
+        history.errors = result.errors;
+        history.started_at = result.started_at;
+        history.completed_at = result.completed_at;
+
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (history_repo) {
+            [[maybe_unused]] auto save_result = history_repo->save(history);
+        } else
+        #endif
         if (repo) {
-            sync_history history;
-            history.config_id = cfg.config_id;
-            history.job_id = result.job_id;
-            history.success = result.success;
-            history.studies_checked = result.studies_checked;
-            history.studies_synced = result.studies_synced;
-            history.conflicts_found = result.conflicts.size();
-            history.errors = result.errors;
-            history.started_at = result.started_at;
-            history.completed_at = result.completed_at;
             [[maybe_unused]] auto save_result = repo->save_history(history);
         }
 
@@ -636,6 +682,27 @@ struct sync_manager::impl {
     }
 
     void load_configs_from_repo() {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (config_repo) {
+            auto loaded = config_repo->find_all();
+            if (loaded.is_err()) {
+                return;
+            }
+
+            {
+                std::unique_lock lock(configs_mutex);
+                configs = std::move(loaded.value());
+            }
+
+            if (logger && !configs.empty()) {
+                logger->info_fmt(
+                    "Loaded {} sync configs from split repositories",
+                    configs.size());
+            }
+            return;
+        }
+        #endif
+
         if (!repo) return;
 
         auto loaded = repo->list_configs();
@@ -650,6 +717,27 @@ struct sync_manager::impl {
     }
 
     void load_conflicts_from_repo() {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (conflict_repo) {
+            auto loaded = conflict_repo->find_unresolved();
+            if (loaded.is_err()) {
+                return;
+            }
+
+            {
+                std::lock_guard lock(conflicts_mutex);
+                conflicts = std::move(loaded.value());
+            }
+
+            if (logger && !conflicts.empty()) {
+                logger->info_fmt(
+                    "Loaded {} unresolved conflicts from split repositories",
+                    conflicts.size());
+            }
+            return;
+        }
+        #endif
+
         if (!repo) return;
 
         auto loaded = repo->list_unresolved_conflicts();
@@ -678,6 +766,18 @@ sync_manager::sync_manager(
                    std::move(job_manager), std::move(query_scu), std::move(logger)) {
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+sync_manager::sync_manager(
+    const storage::sync_repository_set& repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::query_scu> query_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : sync_manager(sync_manager_config{}, repositories, std::move(node_manager),
+                   std::move(job_manager), std::move(query_scu),
+                   std::move(logger)) {}
+#endif
+
 sync_manager::sync_manager(
     const sync_manager_config& config,
     std::shared_ptr<storage::sync_repository> repo,
@@ -697,6 +797,29 @@ sync_manager::sync_manager(
     impl_->load_configs_from_repo();
     impl_->load_conflicts_from_repo();
 }
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+sync_manager::sync_manager(
+    const sync_manager_config& config,
+    const storage::sync_repository_set& repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::query_scu> query_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : impl_(std::make_unique<impl>()) {
+    impl_->config = config;
+    impl_->config_repo = repositories.configs;
+    impl_->conflict_repo = repositories.conflicts;
+    impl_->history_repo = repositories.history;
+    impl_->node_manager = std::move(node_manager);
+    impl_->job_mgr = std::move(job_manager);
+    impl_->query_scu = std::move(query_scu);
+    impl_->logger = logger ? std::move(logger) : di::null_logger();
+
+    impl_->load_configs_from_repo();
+    impl_->load_conflicts_from_repo();
+}
+#endif
 
 sync_manager::~sync_manager() {
     stop_scheduler();
@@ -767,6 +890,12 @@ pacs::VoidResult sync_manager::remove_config(std::string_view config_id) {
         impl_->configs.erase(it);
     }
 
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->config_repo) {
+        [[maybe_unused]] auto result =
+            impl_->config_repo->remove(std::string(config_id));
+    } else
+    #endif
     if (impl_->repo) {
         [[maybe_unused]] auto result = impl_->repo->remove_config(config_id);
     }
@@ -945,8 +1074,15 @@ pacs::VoidResult sync_manager::resolve_conflict(
     it->resolution_used = resolution;
     it->resolved_at = std::chrono::system_clock::now();
 
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->conflict_repo) {
+        [[maybe_unused]] auto result =
+            impl_->conflict_repo->resolve(study_uid, resolution);
+    } else
+    #endif
     if (impl_->repo) {
-        [[maybe_unused]] auto result = impl_->repo->resolve_conflict(study_uid, resolution);
+        [[maybe_unused]] auto result =
+            impl_->repo->resolve_conflict(study_uid, resolution);
     }
 
     if (impl_->logger) {

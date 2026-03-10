@@ -10,12 +10,22 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <pacs/client/prefetch_types.hpp>
+#include <pacs/client/sync_types.hpp>
+#include <pacs/storage/prefetch_repository.hpp>
+#include <pacs/storage/prefetch_rule_repository.hpp>
+#include <pacs/storage/recent_study_repository.hpp>
 #include <pacs/storage/repository_factory.hpp>
+#include <pacs/storage/sync_config_repository.hpp>
+#include <pacs/storage/sync_repository.hpp>
+#include <pacs/storage/viewer_state_repository.hpp>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
 #include <pacs/storage/migration_runner.hpp>
 #include <pacs/storage/pacs_database_adapter.hpp>
+
+#include <stdexcept>
 
 using namespace pacs::storage;
 
@@ -232,6 +242,41 @@ TEST_CASE("repository_factory returns structured canonical and compatibility set
     CHECK(compatibility.sync_states == factory.sync_states());
     CHECK(compatibility.viewer_states == factory.viewer_states());
     CHECK(compatibility.prefetch_queue == factory.prefetch_queue());
+}
+
+TEST_CASE("repository_factory split and compatibility repositories share state",
+          "[storage][repository_factory]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: SQLite backend not supported");
+        return;
+    }
+
+    test_database tdb;
+    repository_factory factory(tdb.get());
+    const auto canonical = factory.canonical_repositories();
+    const auto compatibility = factory.compatibility_repositories();
+
+    pacs::client::sync_config config;
+    config.config_id = "sync-config";
+    config.source_node_id = "archive";
+    config.name = "Shared Sync";
+    REQUIRE(canonical.sync.configs->insert(config).is_ok());
+
+    auto loaded_config = compatibility.sync_states->find_config(config.config_id);
+    REQUIRE(loaded_config.has_value());
+    CHECK(loaded_config->name == config.name);
+
+    pacs::client::prefetch_rule rule;
+    rule.rule_id = "prefetch-rule";
+    rule.name = "Shared Rule";
+    rule.trigger = pacs::client::prefetch_trigger::manual;
+    rule.source_node_ids = {"archive"};
+    REQUIRE(canonical.prefetch.rules->insert(rule).is_ok());
+    CHECK(compatibility.prefetch_queue->rule_exists(rule.rule_id));
+
+    REQUIRE(
+        canonical.viewer_state.recent_studies->record_access("user1", "1.2.3").is_ok());
+    CHECK(compatibility.viewer_states->count_recent_studies("user1") == 1);
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

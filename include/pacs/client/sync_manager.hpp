@@ -57,6 +57,12 @@
 // Forward declarations
 namespace pacs::storage {
 class sync_repository;
+class sync_config_repository;
+class sync_conflict_repository;
+class sync_history_repository;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+struct sync_repository_set;
+#endif
 }
 
 namespace pacs::services {
@@ -137,6 +143,24 @@ public:
         std::shared_ptr<services::query_scu> query_scu,
         std::shared_ptr<di::ILogger> logger = nullptr);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    /**
+     * @brief Construct a sync manager from split sync repositories
+     *
+     * @param repositories Canonical sync repository set (required)
+     * @param node_manager Remote node manager (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param query_scu Query SCU for study comparisons (required)
+     * @param logger Logger instance (optional)
+     */
+    explicit sync_manager(
+        const storage::sync_repository_set& repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::query_scu> query_scu,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+#endif
+
     /**
      * @brief Construct a sync manager with custom configuration
      *
@@ -154,6 +178,26 @@ public:
         std::shared_ptr<job_manager> job_manager,
         std::shared_ptr<services::query_scu> query_scu,
         std::shared_ptr<di::ILogger> logger = nullptr);
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    /**
+     * @brief Construct a sync manager with split repositories and custom config
+     *
+     * @param config Manager configuration
+     * @param repositories Canonical sync repository set (required)
+     * @param node_manager Remote node manager (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param query_scu Query SCU for study comparisons (required)
+     * @param logger Logger instance (optional)
+     */
+    explicit sync_manager(
+        const sync_manager_config& config,
+        const storage::sync_repository_set& repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::query_scu> query_scu,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+#endif
 
     /**
      * @brief Destructor - stops scheduler if running

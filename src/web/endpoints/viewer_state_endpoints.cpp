@@ -49,6 +49,10 @@
 #endif
 
 #include "pacs/storage/index_database.hpp"
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include "pacs/storage/recent_study_repository.hpp"
+#include "pacs/storage/viewer_state_record_repository.hpp"
+#endif
 #include "pacs/storage/viewer_state_record.hpp"
 #include "pacs/storage/viewer_state_repository.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
@@ -300,11 +304,17 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
         }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-        storage::viewer_state_repository repo(ctx->database->db_adapter());
+        storage::viewer_state_record_repository state_repo(
+            ctx->database->db_adapter());
+        storage::recent_study_repository recent_repo(ctx->database->db_adapter());
 #else
         storage::viewer_state_repository repo(ctx->database->native_handle());
 #endif
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto save_result = state_repo.insert(state);
+#else
         auto save_result = repo.save_state(state);
+#endif
         if (!save_result.is_ok()) {
           res.code = 500;
           res.body =
@@ -314,7 +324,11 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
 
         // Also record study access if user_id is provided
         if (!state.user_id.empty()) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+          (void)recent_repo.record_access(state.user_id, state.study_uid);
+#else
           (void)repo.record_study_access(state.user_id, state.study_uid);
+#endif
         }
 
         res.code = 201;
@@ -363,11 +377,22 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
         }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-        storage::viewer_state_repository repo(ctx->database->db_adapter());
+        storage::viewer_state_record_repository repo(ctx->database->db_adapter());
 #else
         storage::viewer_state_repository repo(ctx->database->native_handle());
 #endif
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto states_result = repo.search(query);
+        if (!states_result.is_ok()) {
+          res.code = 500;
+          res.body =
+              make_error_json("QUERY_ERROR", states_result.error().message);
+          return res;
+        }
+        auto states = std::move(states_result.value());
+#else
         auto states = repo.search_states(query);
+#endif
 
         res.code = 200;
         res.body = viewer_states_to_json(states);
@@ -390,19 +415,47 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
             }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-            storage::viewer_state_repository repo(ctx->database->db_adapter());
+            storage::viewer_state_record_repository repo(
+                ctx->database->db_adapter());
 #else
             storage::viewer_state_repository repo(ctx->database->native_handle());
 #endif
+#ifdef PACS_WITH_DATABASE_SYSTEM
+            auto exists = repo.exists(state_id);
+            if (exists.is_err()) {
+              res.code = 500;
+              res.body =
+                  make_error_json("QUERY_ERROR", exists.error().message);
+              return res;
+            }
+            if (!exists.value()) {
+              res.code = 404;
+              res.body = make_error_json("NOT_FOUND", "Viewer state not found");
+              return res;
+            }
+
+            auto state = repo.find_by_id(state_id);
+            if (state.is_err()) {
+              res.code = 500;
+              res.body =
+                  make_error_json("QUERY_ERROR", state.error().message);
+              return res;
+            }
+#else
             auto state = repo.find_state_by_id(state_id);
             if (!state.has_value()) {
               res.code = 404;
               res.body = make_error_json("NOT_FOUND", "Viewer state not found");
               return res;
             }
+#endif
 
             res.code = 200;
+#ifdef PACS_WITH_DATABASE_SYSTEM
             res.body = viewer_state_to_json(state.value());
+#else
+            res.body = viewer_state_to_json(state.value());
+#endif
             return res;
           });
 
@@ -422,10 +475,29 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
             }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-            storage::viewer_state_repository repo(ctx->database->db_adapter());
+            storage::viewer_state_record_repository repo(
+                ctx->database->db_adapter());
 #else
             storage::viewer_state_repository repo(ctx->database->native_handle());
 #endif
+#ifdef PACS_WITH_DATABASE_SYSTEM
+            auto exists = repo.exists(state_id);
+            if (exists.is_err()) {
+              res.code = 500;
+              res.add_header("Content-Type", "application/json");
+              res.body =
+                  make_error_json("QUERY_ERROR", exists.error().message);
+              return res;
+            }
+            if (!exists.value()) {
+              res.code = 404;
+              res.add_header("Content-Type", "application/json");
+              res.body = make_error_json("NOT_FOUND", "Viewer state not found");
+              return res;
+            }
+
+            auto remove_result = repo.remove(state_id);
+#else
             auto existing = repo.find_state_by_id(state_id);
             if (!existing.has_value()) {
               res.code = 404;
@@ -435,6 +507,7 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
             }
 
             auto remove_result = repo.remove_state(state_id);
+#endif
             if (!remove_result.is_ok()) {
               res.code = 500;
               res.add_header("Content-Type", "application/json");
@@ -476,15 +549,36 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
             }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-            storage::viewer_state_repository repo(ctx->database->db_adapter());
+            storage::recent_study_repository repo(ctx->database->db_adapter());
 #else
             storage::viewer_state_repository repo(ctx->database->native_handle());
 #endif
+#ifdef PACS_WITH_DATABASE_SYSTEM
+            auto records = repo.find_by_user(user_id, limit);
+            if (records.is_err()) {
+              res.code = 500;
+              res.body =
+                  make_error_json("QUERY_ERROR", records.error().message);
+              return res;
+            }
+
+            auto total = repo.count_for_user(user_id);
+            if (total.is_err()) {
+              res.code = 500;
+              res.body =
+                  make_error_json("QUERY_ERROR", total.error().message);
+              return res;
+            }
+
+            res.code = 200;
+            res.body = recent_studies_to_json(records.value(), total.value());
+#else
             auto records = repo.get_recent_studies(user_id, limit);
             size_t total = repo.count_recent_studies(user_id);
 
             res.code = 200;
             res.body = recent_studies_to_json(records, total);
+#endif
             return res;
           });
 }

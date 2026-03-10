@@ -64,6 +64,11 @@
 // Forward declarations
 namespace pacs::storage {
 class prefetch_repository;
+class prefetch_rule_repository;
+class prefetch_history_repository;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+struct prefetch_repository_set;
+#endif
 }
 
 namespace pacs::services {
@@ -148,6 +153,24 @@ public:
         std::shared_ptr<services::worklist_scu> worklist_scu = nullptr,
         std::shared_ptr<di::ILogger> logger = nullptr);
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    /**
+     * @brief Construct a prefetch manager from split prefetch repositories
+     *
+     * @param repositories Canonical prefetch repository set (required)
+     * @param node_manager Remote node manager for DICOM operations (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param worklist_scu Worklist SCU for MWL queries (optional)
+     * @param logger Logger instance (optional, defaults to NullLogger)
+     */
+    explicit prefetch_manager(
+        const storage::prefetch_repository_set& repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::worklist_scu> worklist_scu = nullptr,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+#endif
+
     /**
      * @brief Construct with custom configuration
      *
@@ -165,6 +188,26 @@ public:
         std::shared_ptr<job_manager> job_manager,
         std::shared_ptr<services::worklist_scu> worklist_scu = nullptr,
         std::shared_ptr<di::ILogger> logger = nullptr);
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    /**
+     * @brief Construct with split repositories and custom configuration
+     *
+     * @param config Manager configuration
+     * @param repositories Canonical prefetch repository set (required)
+     * @param node_manager Remote node manager for DICOM operations (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param worklist_scu Worklist SCU for MWL queries (optional)
+     * @param logger Logger instance (optional, defaults to NullLogger)
+     */
+    explicit prefetch_manager(
+        const prefetch_manager_config& config,
+        const storage::prefetch_repository_set& repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::worklist_scu> worklist_scu = nullptr,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+#endif
 
     /**
      * @brief Destructor - stops scheduler and monitor if running

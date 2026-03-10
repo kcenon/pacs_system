@@ -11,8 +11,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include <pacs/storage/migration_runner.hpp>
+#include <pacs/storage/pacs_database_adapter.hpp>
+#include <pacs/storage/prefetch_history_repository.hpp>
+#include <pacs/storage/prefetch_rule_repository.hpp>
+#include <pacs/storage/repository_factory.hpp>
+#endif
+
 #include <chrono>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -69,6 +78,45 @@ private:
 };
 
 }  // namespace
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+namespace {
+
+bool is_sqlite_backend_supported() {
+    pacs::storage::pacs_database_adapter db(":memory:");
+    auto result = db.connect();
+    return result.is_ok();
+}
+
+class test_database {
+public:
+    test_database() {
+        db_ = std::make_shared<pacs::storage::pacs_database_adapter>(":memory:");
+        auto conn_result = db_->connect();
+        if (conn_result.is_err()) {
+            throw std::runtime_error(
+                "Failed to connect: " + conn_result.error().message);
+        }
+
+        pacs::storage::migration_runner runner;
+        auto result = runner.run_migrations(*db_);
+        if (result.is_err()) {
+            throw std::runtime_error(
+                "Migration failed: " + result.error().message);
+        }
+    }
+
+    [[nodiscard]] auto get() const noexcept
+        -> std::shared_ptr<pacs::storage::pacs_database_adapter> {
+        return db_;
+    }
+
+private:
+    std::shared_ptr<pacs::storage::pacs_database_adapter> db_;
+};
+
+}  // namespace
+#endif
 
 // =============================================================================
 // Prefetch Types Tests
@@ -145,6 +193,49 @@ TEST_CASE("prefetch_manager_config default values", "[prefetch_types]") {
     CHECK(config.max_concurrent_prefetch == 4);
     CHECK(config.deduplicate_requests == true);
 }
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+TEST_CASE("prefetch_manager loads split repository sets",
+          "[prefetch_manager][storage]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: SQLite backend not supported");
+        return;
+    }
+
+    test_database tdb;
+    pacs::storage::repository_factory factory(tdb.get());
+
+    prefetch_rule rule;
+    rule.rule_id = "rule-1";
+    rule.name = "CT Priors";
+    rule.trigger = prefetch_trigger::prior_studies;
+    rule.source_node_ids = {"archive"};
+    REQUIRE(factory.prefetch_rules()->insert(rule).is_ok());
+
+    prefetch_history history;
+    history.patient_id = "PATIENT001";
+    history.study_uid = "1.2.3.4";
+    history.rule_id = rule.rule_id;
+    history.source_node_id = "archive";
+    history.job_id = "job-1";
+    history.status = "completed";
+    history.prefetched_at = std::chrono::system_clock::now();
+    REQUIRE(factory.prefetch_history()->save(history).is_ok());
+
+    auto logger = std::make_shared<MockLogger>();
+    prefetch_manager manager(
+        factory.canonical_repositories().prefetch,
+        nullptr,
+        nullptr,
+        nullptr,
+        logger);
+
+    auto rules = manager.list_rules();
+    REQUIRE(rules.size() == 1);
+    CHECK(rules.front().rule_id == rule.rule_id);
+    CHECK(manager.completed_today() == 1);
+}
+#endif
 
 // =============================================================================
 // Prefetch Manager Construction Tests

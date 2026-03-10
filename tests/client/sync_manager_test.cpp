@@ -12,9 +12,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include <pacs/storage/migration_runner.hpp>
+#include <pacs/storage/pacs_database_adapter.hpp>
+#include <pacs/storage/repository_factory.hpp>
+#include <pacs/storage/sync_config_repository.hpp>
+#include <pacs/storage/sync_conflict_repository.hpp>
+#endif
+
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -72,6 +81,45 @@ private:
 };
 
 }  // namespace
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+namespace {
+
+bool is_sqlite_backend_supported() {
+    pacs::storage::pacs_database_adapter db(":memory:");
+    auto result = db.connect();
+    return result.is_ok();
+}
+
+class test_database {
+public:
+    test_database() {
+        db_ = std::make_shared<pacs::storage::pacs_database_adapter>(":memory:");
+        auto conn_result = db_->connect();
+        if (conn_result.is_err()) {
+            throw std::runtime_error(
+                "Failed to connect: " + conn_result.error().message);
+        }
+
+        pacs::storage::migration_runner runner;
+        auto result = runner.run_migrations(*db_);
+        if (result.is_err()) {
+            throw std::runtime_error(
+                "Migration failed: " + result.error().message);
+        }
+    }
+
+    [[nodiscard]] auto get() const noexcept
+        -> std::shared_ptr<pacs::storage::pacs_database_adapter> {
+        return db_;
+    }
+
+private:
+    std::shared_ptr<pacs::storage::pacs_database_adapter> db_;
+};
+
+}  // namespace
+#endif
 
 // =============================================================================
 // Sync Direction Tests
@@ -278,6 +326,48 @@ TEST_CASE("sync_manager_config initialization", "[sync_types]") {
     CHECK(config.auto_resolve_conflicts == true);
     CHECK(config.default_resolution == conflict_resolution::prefer_newer);
 }
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+TEST_CASE("sync_manager loads split repository sets", "[sync_manager][storage]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: SQLite backend not supported");
+        return;
+    }
+
+    test_database tdb;
+    pacs::storage::repository_factory factory(tdb.get());
+
+    sync_config config;
+    config.config_id = "daily-sync";
+    config.source_node_id = "archive";
+    config.name = "Daily Sync";
+    REQUIRE(factory.sync_configs()->insert(config).is_ok());
+
+    sync_conflict conflict;
+    conflict.config_id = config.config_id;
+    conflict.study_uid = "1.2.3.4";
+    conflict.patient_id = "PATIENT001";
+    conflict.conflict_type = sync_conflict_type::missing_local;
+    conflict.detected_at = std::chrono::system_clock::now();
+    REQUIRE(factory.sync_conflicts()->insert(conflict).is_ok());
+
+    auto logger = std::make_shared<MockLogger>();
+    sync_manager manager(
+        factory.canonical_repositories().sync,
+        nullptr,
+        nullptr,
+        nullptr,
+        logger);
+
+    auto configs = manager.list_configs();
+    REQUIRE(configs.size() == 1);
+    CHECK(configs.front().config_id == config.config_id);
+
+    auto conflicts = manager.get_conflicts();
+    REQUIRE(conflicts.size() == 1);
+    CHECK(conflicts.front().study_uid == conflict.study_uid);
+}
+#endif
 
 // =============================================================================
 // Sync Statistics Tests

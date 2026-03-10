@@ -38,7 +38,10 @@
 #include "pacs/client/prefetch_manager.hpp"
 #include "pacs/client/job_manager.hpp"
 #include "pacs/client/remote_node_manager.hpp"
+#include "pacs/storage/prefetch_history_repository.hpp"
 #include "pacs/storage/prefetch_repository.hpp"
+#include "pacs/storage/prefetch_rule_repository.hpp"
+#include "pacs/storage/repository_factory.hpp"
 #include "pacs/services/worklist_scu.hpp"
 #include "pacs/core/dicom_dataset.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
@@ -144,6 +147,10 @@ struct prefetch_manager::impl {
 
     // Dependencies
     std::shared_ptr<storage::prefetch_repository> repo;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    std::shared_ptr<storage::prefetch_rule_repository> rule_repo;
+    std::shared_ptr<storage::prefetch_history_repository> history_repo;
+#endif
     std::shared_ptr<remote_node_manager> node_manager;
     std::shared_ptr<job_manager> job_mgr;
     std::shared_ptr<services::worklist_scu> worklist_scu;
@@ -178,6 +185,19 @@ struct prefetch_manager::impl {
     // =========================================================================
 
     void load_rules_from_repo() {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (rule_repo) {
+            auto loaded = rule_repo->find_enabled();
+            if (loaded.is_err()) {
+                return;
+            }
+
+            std::unique_lock lock(rules_mutex);
+            rules_cache = std::move(loaded.value());
+            return;
+        }
+        #endif
+
         if (!repo) return;
 
         std::unique_lock lock(rules_mutex);
@@ -185,6 +205,16 @@ struct prefetch_manager::impl {
     }
 
     void save_rule_to_repo(const prefetch_rule& rule) {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (rule_repo) {
+            auto exists = rule_repo->exists(rule.rule_id);
+            if (exists.is_ok() && exists.value()) {
+                [[maybe_unused]] auto result = rule_repo->update(rule);
+            } else {
+                [[maybe_unused]] auto result = rule_repo->insert(rule);
+            }
+        } else
+        #endif
         if (repo) {
             [[maybe_unused]] auto result = repo->save_rule(rule);
         }
@@ -212,6 +242,20 @@ struct prefetch_manager::impl {
 
     bool is_study_local(std::string_view study_uid) const {
         // Check history for completed prefetch
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (history_repo) {
+            auto history = history_repo->find_by_study(study_uid);
+            if (history.is_err()) {
+                return false;
+            }
+
+            return std::any_of(history.value().begin(), history.value().end(),
+                [](const prefetch_history& entry) {
+                    return entry.status == "completed" || entry.status == "pending";
+                });
+        }
+        #endif
+
         if (repo) {
             return repo->is_study_prefetched(study_uid);
         }
@@ -247,7 +291,11 @@ struct prefetch_manager::impl {
         const std::string& source_node_id,
         const std::string& job_id,
         const std::string& status) {
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        if (!repo && !history_repo) return;
+#else
         if (!repo) return;
+#endif
 
         prefetch_history history;
         history.patient_id = patient_id;
@@ -258,10 +306,28 @@ struct prefetch_manager::impl {
         history.status = status;
         history.prefetched_at = std::chrono::system_clock::now();
 
-        [[maybe_unused]] auto result = repo->save_history(history);
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (history_repo) {
+            [[maybe_unused]] auto result = history_repo->save(history);
+        } else
+        #endif
+        {
+            [[maybe_unused]] auto result = repo->save_history(history);
+        }
     }
 
     void increment_rule_stats(const std::string& rule_id, size_t studies) {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (rule_repo) {
+            [[maybe_unused]] auto result1 = rule_repo->increment_triggered(rule_id);
+            if (studies > 0) {
+                [[maybe_unused]] auto result2 =
+                    rule_repo->increment_studies_prefetched(rule_id, studies);
+            }
+            return;
+        }
+        #endif
+
         if (!repo) return;
 
         [[maybe_unused]] auto result1 = repo->increment_triggered(rule_id);
@@ -356,6 +422,18 @@ prefetch_manager::prefetch_manager(
           std::move(worklist_scu),
           std::move(logger)) {}
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+prefetch_manager::prefetch_manager(
+    const storage::prefetch_repository_set& repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::worklist_scu> worklist_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : prefetch_manager(prefetch_manager_config{}, repositories,
+                       std::move(node_manager), std::move(job_manager),
+                       std::move(worklist_scu), std::move(logger)) {}
+#endif
+
 prefetch_manager::prefetch_manager(
     const prefetch_manager_config& config,
     std::shared_ptr<storage::prefetch_repository> repo,
@@ -380,6 +458,27 @@ prefetch_manager::prefetch_manager(
     impl_->load_rules_from_repo();
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+prefetch_manager::prefetch_manager(
+    const prefetch_manager_config& config,
+    const storage::prefetch_repository_set& repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::worklist_scu> worklist_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : impl_(std::make_unique<impl>()) {
+    impl_->config = config;
+    impl_->rule_repo = repositories.rules;
+    impl_->history_repo = repositories.history;
+    impl_->node_manager = std::move(node_manager);
+    impl_->job_mgr = std::move(job_manager);
+    impl_->worklist_scu = std::move(worklist_scu);
+    impl_->logger = logger ? std::move(logger) : std::make_shared<di::NullLogger>();
+
+    impl_->load_rules_from_repo();
+}
+#endif
+
 prefetch_manager::~prefetch_manager() {
     stop_scheduler();
     stop_worklist_monitor();
@@ -396,6 +495,14 @@ pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
     }
 
     // Save to repository
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->rule_repo) {
+        auto result = impl_->rule_repo->insert(new_rule);
+        if (result.is_err()) {
+            return VoidResult(result.error());
+        }
+    } else
+    #endif
     if (impl_->repo) {
         auto result = impl_->repo->save_rule(new_rule);
         if (result.is_err()) {
@@ -419,6 +526,14 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
     }
 
     // Save to repository
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->rule_repo) {
+        auto result = impl_->rule_repo->update(rule);
+        if (result.is_err()) {
+            return VoidResult(result.error());
+        }
+    } else
+    #endif
     if (impl_->repo) {
         auto result = impl_->repo->save_rule(rule);
         if (result.is_err()) {
@@ -443,6 +558,14 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
 
 pacs::VoidResult prefetch_manager::remove_rule(std::string_view rule_id) {
     // Remove from repository
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->rule_repo) {
+        auto result = impl_->rule_repo->remove(std::string(rule_id));
+        if (result.is_err()) {
+            return result;
+        }
+    } else
+    #endif
     if (impl_->repo) {
         auto result = impl_->repo->remove_rule(rule_id);
         if (result.is_err()) {
@@ -738,6 +861,12 @@ size_t prefetch_manager::pending_prefetches() const {
 }
 
 size_t prefetch_manager::completed_today() const {
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->history_repo) {
+        auto count = impl_->history_repo->count_completed_today();
+        return count.is_ok() ? count.value() : 0;
+    }
+    #endif
     if (impl_->repo) {
         return impl_->repo->count_completed_today();
     }
@@ -745,6 +874,12 @@ size_t prefetch_manager::completed_today() const {
 }
 
 size_t prefetch_manager::failed_today() const {
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->history_repo) {
+        auto count = impl_->history_repo->count_failed_today();
+        return count.is_ok() ? count.value() : 0;
+    }
+    #endif
     if (impl_->repo) {
         return impl_->repo->count_failed_today();
     }

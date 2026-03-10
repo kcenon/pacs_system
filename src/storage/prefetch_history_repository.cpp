@@ -213,6 +213,14 @@ auto prefetch_history_repository::find_recent(size_t limit) -> list_result_type 
     return list_result_type(std::move(entities));
 }
 
+auto prefetch_history_repository::count_completed_today() -> Result<size_t> {
+    return count_by_status_today("completed");
+}
+
+auto prefetch_history_repository::count_failed_today() -> Result<size_t> {
+    return count_by_status_today("failed");
+}
+
 auto prefetch_history_repository::update_status(
     int64_t pk,
     std::string_view status) -> VoidResult {
@@ -252,6 +260,38 @@ auto prefetch_history_repository::cleanup_old(std::chrono::hours max_age)
     }
 
     return Result<size_t>(static_cast<size_t>(result.value()));
+}
+
+auto prefetch_history_repository::count_by_status_today(std::string_view status)
+    -> Result<size_t> {
+    if (!db() || !db()->is_connected()) {
+        return Result<size_t>(kcenon::common::error_info{
+            -1, "Database not connected", "prefetch_history_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << R"(
+        SELECT COUNT(*) as count FROM prefetch_history
+        WHERE status = ')" << status << R"('
+        AND date(prefetched_at) = date('now')
+    )";
+
+    auto result = storage_session().select(sql.str());
+    if (result.is_err()) {
+        return Result<size_t>(result.error());
+    }
+
+    if (result.value().empty()) {
+        return Result<size_t>(static_cast<size_t>(0));
+    }
+
+    try {
+        return Result<size_t>(std::stoull(result.value()[0].at("count")));
+    } catch (const std::exception& e) {
+        return Result<size_t>(kcenon::common::error_info{
+            -1, std::string("Failed to parse count: ") + e.what(),
+            "prefetch_history_repository"});
+    }
 }
 
 auto prefetch_history_repository::map_row_to_entity(
