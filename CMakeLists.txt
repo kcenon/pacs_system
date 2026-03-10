@@ -1244,6 +1244,8 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/prefetch_repository.cpp
         src/storage/sync_repository.cpp
         src/storage/annotation_repository.cpp
+        src/storage/patient_repository.cpp
+        src/storage/study_repository.cpp
         src/storage/measurement_repository.cpp
         src/storage/key_image_repository.cpp
         src/storage/viewer_state_repository.cpp
@@ -2035,6 +2037,8 @@ if(PACS_BUILD_TESTS)
             tests/storage/pacs_database_adapter_test.cpp
             tests/storage/base_repository_test.cpp
             tests/storage/commitment_repository_test.cpp
+            tests/storage/patient_repository_test.cpp
+            tests/storage/study_repository_test.cpp
             tests/storage/repository_factory_test.cpp
             # Annotation & Measurement API integration tests (Issue #545, #584)
             tests/integration/annotation_api_test.cpp

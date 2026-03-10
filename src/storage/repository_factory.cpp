@@ -46,6 +46,8 @@
 #include "pacs/storage/pacs_database_adapter.hpp"
 
 #include "pacs/storage/annotation_repository.hpp"
+#include "pacs/storage/patient_repository.hpp"
+#include "pacs/storage/study_repository.hpp"
 #include "pacs/storage/commitment_repository.hpp"
 #include "pacs/storage/job_repository.hpp"
 #include "pacs/storage/key_image_repository.hpp"
@@ -68,6 +70,20 @@ namespace pacs::storage {
 repository_factory::repository_factory(
     std::shared_ptr<pacs_database_adapter> db)
     : db_(std::move(db)) {}
+
+auto repository_factory::patients() -> std::shared_ptr<patient_repository> {
+    if (!patients_) {
+        patients_ = std::make_shared<patient_repository>(db_);
+    }
+    return patients_;
+}
+
+auto repository_factory::studies() -> std::shared_ptr<study_repository> {
+    if (!studies_) {
+        studies_ = std::make_shared<study_repository>(db_);
+    }
+    return studies_;
+}
 
 auto repository_factory::jobs() -> std::shared_ptr<job_repository> {
     if (!jobs_) {
@@ -205,6 +221,8 @@ auto repository_factory::commitments()
 
 auto repository_factory::canonical_repositories() -> canonical_repository_set {
     return {
+        .patients = patients(),
+        .studies = studies(),
         .jobs = jobs(),
         .annotations = annotations(),
         .routing_rules = routing_rules(),
