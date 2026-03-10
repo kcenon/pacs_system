@@ -10,14 +10,27 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <chrono>
+
 #include <pacs/storage/repository_factory.hpp>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
 #include <pacs/storage/migration_runner.hpp>
 #include <pacs/storage/pacs_database_adapter.hpp>
+#include <pacs/storage/prefetch_repository.hpp>
+#include <pacs/storage/prefetch_rule_repository.hpp>
+#include <pacs/storage/recent_study_repository.hpp>
+#include <pacs/storage/viewer_state_record.hpp>
+#include <pacs/storage/viewer_state_record_repository.hpp>
+#include <pacs/storage/viewer_state_repository.hpp>
+#include <pacs/storage/sync_config_repository.hpp>
+#include <pacs/storage/sync_repository.hpp>
+#include <pacs/client/prefetch_types.hpp>
+#include <pacs/client/sync_types.hpp>
 
 using namespace pacs::storage;
+using namespace pacs::client;
 
 namespace {
 
@@ -232,6 +245,63 @@ TEST_CASE("repository_factory returns structured canonical and compatibility set
     CHECK(compatibility.sync_states == factory.sync_states());
     CHECK(compatibility.viewer_states == factory.viewer_states());
     CHECK(compatibility.prefetch_queue == factory.prefetch_queue());
+}
+
+TEST_CASE("repository_factory canonical repositories share persistence with compatibility repositories",
+          "[storage][repository_factory]") {
+    if (!is_sqlite_backend_supported()) {
+        SUCCEED("Skipped: SQLite backend not supported");
+        return;
+    }
+
+    test_database tdb;
+    repository_factory factory(tdb.get());
+    const auto canonical = factory.canonical_repositories();
+    const auto compatibility = factory.compatibility_repositories();
+
+    sync_config config;
+    config.config_id = "factory-sync-config";
+    config.source_node_id = "archive-ae";
+    config.name = "Factory Sync Config";
+
+    auto save_config_result = canonical.sync.configs->save(config);
+    REQUIRE(save_config_result.is_ok());
+    auto loaded_config = compatibility.sync_states->find_config(config.config_id);
+    REQUIRE(loaded_config.has_value());
+    CHECK(loaded_config->name == config.name);
+
+    viewer_state_record state;
+    state.state_id = "factory-viewer-state";
+    state.study_uid = "1.2.840.factory.study";
+    state.user_id = "viewer-user";
+    state.state_json = "{}";
+    state.created_at = std::chrono::system_clock::now();
+    state.updated_at = state.created_at;
+
+    auto save_state_result = canonical.viewer_state.records->save(state);
+    REQUIRE(save_state_result.is_ok());
+    auto loaded_state = compatibility.viewer_states->find_state_by_id(state.state_id);
+    REQUIRE(loaded_state.has_value());
+    CHECK(loaded_state->study_uid == state.study_uid);
+
+    auto record_access_result =
+        canonical.viewer_state.recent_studies->record_access("viewer-user",
+                                                             state.study_uid);
+    REQUIRE(record_access_result.is_ok());
+    CHECK(compatibility.viewer_states->count_recent_studies("viewer-user") == 1);
+
+    prefetch_rule rule;
+    rule.rule_id = "factory-prefetch-rule";
+    rule.name = "Factory Prefetch Rule";
+    rule.trigger = prefetch_trigger::manual;
+    rule.source_node_ids = {"archive-ae"};
+
+    auto save_rule_result = canonical.prefetch.rules->save(rule);
+    REQUIRE(save_rule_result.is_ok());
+    auto loaded_rule =
+        compatibility.prefetch_queue->find_rule_by_id(rule.rule_id);
+    REQUIRE(loaded_rule.has_value());
+    CHECK(loaded_rule->name == rule.name);
 }
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

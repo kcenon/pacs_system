@@ -2249,6 +2249,7 @@ if(PACS_BUILD_TESTS)
 
     include(CTest)
     include(Catch)
+    find_package(Python3 COMPONENTS Interpreter QUIET)
 
     ##################################################
     # CTest Labels for CI/CD Integration
@@ -2338,6 +2339,19 @@ if(PACS_BUILD_TESTS)
         catch_discover_tests(pacs_integration_tests
             TEST_PREFIX "integration::"
             PROPERTIES LABELS "integration"
+        )
+    endif()
+
+    if(Python3_Interpreter_FOUND)
+        add_test(
+            NAME storage_boundary_guard
+            COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/storage/check_storage_boundary.py
+                    ${CMAKE_SOURCE_DIR}
+        )
+        set_tests_properties(storage_boundary_guard PROPERTIES
+            LABELS "unit;boundary"
+            TIMEOUT 10
         )
     endif()
 

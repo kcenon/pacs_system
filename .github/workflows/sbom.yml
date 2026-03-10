@@ -62,62 +62,34 @@ jobs:
         echo "## npm Audit Summary" > ../npm-audit-summary.md
         npm audit --omit=dev 2>&1 | tail -20 >> ../npm-audit-summary.md || true
 
-    - name: Parse vcpkg dependencies
+    - name: Build dependency provenance summary
       run: |
-        if [ -f "vcpkg.json" ]; then
-          echo "# vcpkg Dependencies" > vcpkg-dependencies.md
-          echo "" >> vcpkg-dependencies.md
-          echo "**Generated**: $(date -u)" >> vcpkg-dependencies.md
-          echo "" >> vcpkg-dependencies.md
-          echo "## Direct Dependencies" >> vcpkg-dependencies.md
-          echo "" >> vcpkg-dependencies.md
-
-          python3 << 'EOF'
+        python3 << 'EOF' > dependency-provenance.md
         import json
 
-        with open('vcpkg.json', 'r') as f:
+        with open('dependency-manifest.json', 'r', encoding='utf-8') as f:
             manifest = json.load(f)
 
-        print(f"**Project**: {manifest.get('name', 'N/A')}")
-        print(f"**Version**: {manifest.get('version', 'N/A')}")
+        print("# Dependency Provenance")
         print()
-        print("| Package | Features |")
-        print("|---------|----------|")
-
-        deps = manifest.get('dependencies', [])
-        for dep in deps:
-            if isinstance(dep, str):
-                print(f"| {dep} | - |")
-            elif isinstance(dep, dict):
-                name = dep.get('name', 'unknown')
-                features = ', '.join(dep.get('features', [])) or '-'
-                print(f"| {name} | {features} |")
-        EOF
-
-          python3 << 'EOF' >> vcpkg-dependencies.md
-        import json
-
-        with open('vcpkg.json', 'r') as f:
-            manifest = json.load(f)
-
-        print(f"**Project**: {manifest.get('name', 'N/A')}")
-        print(f"**Version**: {manifest.get('version', 'N/A')}")
+        print(f"Generated: workflow run")
         print()
-        print("| Package | Features |")
-        print("|---------|----------|")
-
-        deps = manifest.get('dependencies', [])
-        for dep in deps:
-            if isinstance(dep, str):
-                print(f"| {dep} | - |")
-            elif isinstance(dep, dict):
-                name = dep.get('name', 'unknown')
-                features = ', '.join(dep.get('features', [])) or '-'
-                print(f"| {name} | {features} |")
+        print("## Internal ecosystem")
+        for dep in manifest.get("internal_ecosystem", []):
+            print(f"- {dep['name']}: {dep['version']} ({dep['license']})")
+        print()
+        print("## Native and system dependencies")
+        for dep in manifest.get("native_and_system", []):
+            print(f"- {dep['name']}: {dep['resolution']} [{dep['license']}]")
+        print()
+        print("## FetchContent / vendored inputs")
+        for dep in manifest.get("fetched_content", []):
+            print(f"- {dep['name']}: {dep['version']} ({dep['license']})")
+        print()
+        print("## Frontend inputs")
+        print(f"- package manifest: {manifest['web_frontend']['manifest']}")
+        print(f"- lockfile: {manifest['web_frontend']['lockfile']}")
         EOF
-        else
-          echo "No vcpkg.json found" > vcpkg-dependencies.md
-        fi
 
     - name: Create combined SBOM report
       run: |
@@ -133,7 +105,7 @@ jobs:
         echo "- **CycloneDX**: sbom-cyclonedx.json" >> SBOM_REPORT.md
         echo "- **SPDX**: sbom-spdx.json" >> SBOM_REPORT.md
         echo "" >> SBOM_REPORT.md
-        cat vcpkg-dependencies.md >> SBOM_REPORT.md
+        cat dependency-provenance.md >> SBOM_REPORT.md
 
     - name: Upload SBOM artifacts
       uses: actions/upload-artifact@v4
@@ -145,7 +117,9 @@ jobs:
           sbom-npm-cyclonedx.json
           npm-audit-report.json
           npm-audit-summary.md
-          vcpkg-dependencies.md
+          dependency-provenance.md
+          dependency-manifest.json
+          LICENSE-THIRD-PARTY
           SBOM_REPORT.md
         retention-days: 90
 
@@ -157,6 +131,8 @@ jobs:
           sbom-cyclonedx.json
           sbom-spdx.json
           sbom-npm-cyclonedx.json
+          dependency-manifest.json
+          LICENSE-THIRD-PARTY
           SBOM_REPORT.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

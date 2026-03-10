@@ -263,9 +263,6 @@ index_database::~index_database() {
         (void)db_adapter_->disconnect();
         db_adapter_.reset();
     }
-    if (db_manager_) {
-        (void)db_manager_->disconnect_result();
-    }
 #endif
     if (db_) {
         sqlite3_close(db_);
@@ -275,32 +272,7 @@ index_database::~index_database() {
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 auto index_database::initialize_database_system() -> VoidResult {
-    db_context_ = std::make_shared<database::database_context>();
-    db_manager_ = std::make_shared<database::database_manager>(db_context_);
-
-    if (!db_manager_->set_mode(database::database_types::sqlite)) {
-        return make_error<std::monostate>(
-            database_connection_error, "Failed to set SQLite mode", "storage");
-    }
-
-    auto connect_result = db_manager_->connect_result(path_);
-    if (connect_result.is_err()) {
-        return make_error<std::monostate>(
-            database_connection_error,
-            pacs::compat::format("Failed to connect: {}",
-                                 connect_result.error().message),
-            "storage");
-    }
-
-    // Initialize pacs_database_adapter as well
-    auto adapter_result = initialize_database_adapter();
-    if (adapter_result.is_err()) {
-        // Log warning but continue - can fallback to database_manager
-        // Note: For now, in-memory databases may not work with unified_database_system
-        // TODO: Investigate unified_database_system in-memory support (Issue #625)
-    }
-
-    return ok();
+    return initialize_database_adapter();
 }
 
 auto index_database::initialize_database_adapter() -> VoidResult {
@@ -640,8 +612,6 @@ auto index_database::parse_worklist_from_adapter_row(const database_row& row) co
 index_database::index_database(index_database&& other) noexcept
     : db_(other.db_), path_(std::move(other.path_)) {
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    db_context_ = std::move(other.db_context_);
-    db_manager_ = std::move(other.db_manager_);
     db_adapter_ = std::move(other.db_adapter_);
 #endif
     other.db_ = nullptr;
@@ -654,11 +624,6 @@ auto index_database::operator=(index_database&& other) noexcept
         if (db_adapter_) {
             (void)db_adapter_->disconnect();
         }
-        if (db_manager_) {
-            (void)db_manager_->disconnect_result();
-        }
-        db_context_ = std::move(other.db_context_);
-        db_manager_ = std::move(other.db_manager_);
         db_adapter_ = std::move(other.db_adapter_);
 #endif
         if (db_) {
@@ -1723,88 +1688,6 @@ auto index_database::search_studies(const study_query& query) const
         // Fall through on error
     }
 
-    // Legacy fallback: use database_manager if adapter not available
-    if (db_manager_ && !query.patient_id.has_value() &&
-        !query.patient_name.has_value()) {
-        database::query_builder builder(database::database_types::sqlite);
-        builder.select(std::vector<std::string>{
-            "study_pk", "patient_pk", "study_uid", "study_id", "study_date",
-            "study_time", "accession_number", "referring_physician",
-            "study_description", "modalities_in_study", "num_series",
-            "num_instances", "created_at", "updated_at"});
-        builder.from("studies");
-
-        if (query.study_uid.has_value()) {
-            builder.where("study_uid", "=", *query.study_uid);
-        }
-
-        if (query.study_id.has_value()) {
-            builder.where("study_id", "LIKE", to_like_pattern(*query.study_id));
-        }
-
-        if (query.study_date.has_value()) {
-            builder.where("study_date", "=", *query.study_date);
-        }
-
-        if (query.study_date_from.has_value()) {
-            builder.where("study_date", ">=", *query.study_date_from);
-        }
-
-        if (query.study_date_to.has_value()) {
-            builder.where("study_date", "<=", *query.study_date_to);
-        }
-
-        if (query.accession_number.has_value()) {
-            builder.where("accession_number", "LIKE",
-                          to_like_pattern(*query.accession_number));
-        }
-
-        if (query.referring_physician.has_value()) {
-            builder.where("referring_physician", "LIKE",
-                          to_like_pattern(*query.referring_physician));
-        }
-
-        if (query.study_description.has_value()) {
-            builder.where("study_description", "LIKE",
-                          to_like_pattern(*query.study_description));
-        }
-
-        // Note: modality filter requires complex OR conditions
-        // which Query Builder may not support well, fallback handles this
-
-        builder.order_by("study_date", database::sort_order::desc);
-        builder.order_by("study_time", database::sort_order::desc);
-
-        if (query.limit > 0) {
-            builder.limit(static_cast<int>(query.limit));
-        }
-
-        if (query.offset > 0) {
-            builder.offset(static_cast<int>(query.offset));
-        }
-
-        auto select_sql =
-            builder.build();
-        auto result = db_manager_->select_query_result(select_sql);
-        if (result.is_ok()) {
-            std::vector<study_record> results;
-            for (const auto& row : result.value()) {
-                auto record = parse_study_from_row(row);
-                // Apply modality filter manually if present
-                if (query.modality.has_value()) {
-                    const auto& mod = *query.modality;
-                    const auto& mods = record.modalities_in_study;
-                    if (mods != mod && mods.find("\\" + mod) == std::string::npos &&
-                        mods.find(mod + "\\") == std::string::npos) {
-                        continue;  // Skip non-matching modality
-                    }
-                }
-                results.push_back(std::move(record));
-            }
-            return ok(std::move(results));
-        }
-        // Query failed, fall through to SQLite
-    }
 #endif
 
     // Fallback to direct SQLite for complex queries with JOINs
@@ -3977,11 +3860,6 @@ auto index_database::native_handle() const noexcept -> sqlite3* {
 }
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-auto index_database::db_manager() const noexcept
-    -> std::shared_ptr<database::database_manager> {
-    return db_manager_;
-}
-
 auto index_database::db_adapter() const noexcept
     -> std::shared_ptr<pacs_database_adapter> {
     // Return a shared_ptr wrapper around the unique_ptr

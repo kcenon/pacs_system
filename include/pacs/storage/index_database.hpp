@@ -67,10 +67,6 @@
 #include <vector>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include <database/core/database_backend.h>
-#include <database/core/database_context.h>
-#include <database/database_manager.h>
-
 #include "pacs_database_adapter.hpp"
 #endif
 
@@ -1143,15 +1139,6 @@ public:
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
     /**
-     * @brief Get the database manager for database_system integration
-     *
-     * @return Shared pointer to the database manager
-     * @see Issue #420 - Migrate database_cursor to database_system
-     */
-    [[nodiscard]] auto db_manager() const noexcept
-        -> std::shared_ptr<database::database_manager>;
-
-    /**
      * @brief Get the database adapter for unified database access
      *
      * @return Shared pointer to the pacs_database_adapter
@@ -1252,19 +1239,12 @@ private:
         -> std::string;
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    /// Database context for database_system
-    std::shared_ptr<database::database_context> db_context_;
-
-    /// Database manager for database_system queries
-    /// Marked mutable to allow use in const member functions (queries are read-only)
-    mutable std::shared_ptr<database::database_manager> db_manager_;
-
     /// PACS database adapter for unified database operations
     /// Provides simplified API through pacs_database_adapter (Issue #606)
     mutable std::unique_ptr<pacs_database_adapter> db_adapter_;
 
     /**
-     * @brief Initialize database_system connection
+     * @brief Initialize PACS storage adapter for database_system-backed access
      */
     [[nodiscard]] auto initialize_database_system() -> VoidResult;
 

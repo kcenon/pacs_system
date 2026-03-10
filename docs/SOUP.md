@@ -8,7 +8,7 @@
 | Document | Version |
 |----------|---------|
 | IEC 62304 Reference | &sect;8.1.2 Software items from SOUP |
-| Last Reviewed | 2026-03-05 |
+| Last Reviewed | 2026-03-10 |
 | pacs_system Version | 0.1.0 |
 
 ---
@@ -19,16 +19,17 @@
 
 | ID | Name | Manufacturer | Version (Commit SHA) | License | Usage in pacs_system | Safety Class | Known Anomalies |
 |----|------|-------------|----------------------|---------|---------------------|-------------|-----------------|
-| SOUP-001 | [common_system](https://github.com/kcenon/common_system) | kcenon | `47be5fd2` | MIT | Result&lt;T&gt; pattern, error handling primitives | B | None |
-| SOUP-002 | [container_system](https://github.com/kcenon/container_system) | kcenon | `0b95a0c1` | MIT | DICOM data serialization containers | B | None |
-| SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `3ea6fd55` | MIT | Thread pool, async task scheduling | B | None |
-| SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `66a00ccc` | MIT | Structured logging infrastructure | A | None |
-| SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `0b562ea3` | MIT | Performance metrics collection | A | None |
-| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `c70026ab` | MIT | TCP/UDP socket abstraction for DICOM PDU | B | None |
-| SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `b90b0f3b` | MIT | SQL query builder, database abstraction | B | None |
+| SOUP-001 | [common_system](https://github.com/kcenon/common_system) | kcenon | `47be5fd2` | BSD-3-Clause | Result&lt;T&gt; pattern, error handling primitives | B | None |
+| SOUP-002 | [container_system](https://github.com/kcenon/container_system) | kcenon | `0b95a0c1` | BSD-3-Clause | DICOM data serialization containers | B | None |
+| SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `3ea6fd55` | BSD-3-Clause | Thread pool, async task scheduling | B | None |
+| SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `66a00ccc` | BSD-3-Clause | Structured logging infrastructure | A | None |
+| SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `0b562ea3` | BSD-3-Clause | Performance metrics collection | A | None |
+| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `c70026ab` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | None |
+| SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `b90b0f3b` | BSD-3-Clause | SQL query builder, database abstraction | B | None |
 
 > **Note**: kcenon libraries are pinned by commit SHA (no release tags available).
 > CI clones are managed by `.github/actions/checkout-kcenon-deps/action.yml`.
+> The root [dependency-manifest.json](../dependency-manifest.json) is the canonical provenance input for internal SHAs, FetchContent fallbacks, native/system resolution, and frontend lockfiles.
 
 ### Third-Party C++ Libraries
 
@@ -105,17 +106,18 @@ When updating any SOUP dependency:
 
 ## License Compliance Summary
 
-| License | Count | Copyleft | Obligation |
-|---------|-------|----------|------------|
-| MIT | 18 | No | Include copyright notice |
-| BSD-2-Clause | 2 | No | Include copyright notice |
-| BSD-3-Clause | 3 | No | Include copyright + no-endorsement clause |
-| BSL-1.0 | 2 | No | Include license |
-| Apache-2.0 | 3 | No | Include license + NOTICE file |
-| Public Domain | 1 | No | None |
-| LGPL-2.1 | 1 | Weak | Dynamic linking required (see #879) |
-| libpng-2.0 | 1 | No | Include copyright notice |
-| IJG | 1 | No | Include copyright notice |
+| License | Copyleft | Primary obligation |
+|---------|----------|--------------------|
+| MIT | No | Include copyright notice |
+| BSD-2-Clause | No | Include copyright notice |
+| BSD-3-Clause | No | Include copyright notice and no-endorsement clause |
+| BSL-1.0 | No | Include license text |
+| Apache-2.0 | No | Include license text and NOTICE when required |
+| Public Domain | No | Preserve provenance |
+| LGPL-2.1 | Weak | Dynamic linking required (see #879) |
+| libpng-2.0 | No | Include copyright notice |
+| IJG | No | Include copyright notice |
 
 > **GPL contamination**: None detected. All dependencies are permissively licensed.
 > **LGPL note**: iconv (SOUP-018) uses LGPL-2.1; dynamic linking compliance verified in #879.
+> **Distribution note**: the product-level third-party inventory is maintained in [LICENSE-THIRD-PARTY](../LICENSE-THIRD-PARTY).

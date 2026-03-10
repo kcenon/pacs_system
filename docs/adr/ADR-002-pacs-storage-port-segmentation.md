@@ -1,7 +1,7 @@
 # ADR-002: Define PACS Storage Port Segmentation
 
 > **Status:** Accepted
-> **Date:** 2026-03-09
+> **Date:** 2026-03-10
 > **Decision Makers:** pacs_system core team
 > **Related Issues:** [#891](https://github.com/kcenon/pacs_system/issues/891), [#892](https://github.com/kcenon/pacs_system/issues/892), #893, #894, #896, #897
 
@@ -92,6 +92,8 @@ Aggregate repositories are classified as compatibility-only:
 
 These compatibility repositories may remain temporarily for migration windows, but new service wiring must not introduce new dependencies on them.
 
+As of 2026-03-10, `sync_manager`, `prefetch_manager`, and viewer-state web endpoints have been rewired to the canonical split repositories. Aggregate repositories remain available only as compatibility shims.
+
 ---
 
 ## Ownership Boundary
@@ -123,6 +125,7 @@ Raw SQL or native-backend seams are allowed only for the following categories:
 3. Backend bootstrap and infrastructure-only code that does not encode PACS domain semantics
 
 These exceptions do **not** permit higher-level PACS services or repositories to construct new ad hoc SQL strings outside documented storage boundaries.
+The repository-scoped guard in `tests/storage/check_storage_boundary.py` enforces this rule for canonical repositories and service wiring in CI.
 
 ---
 
@@ -146,4 +149,4 @@ These exceptions do **not** permit higher-level PACS services or repositories to
 
 1. #893 will replace raw adapter access with PACS session and unit-of-work boundaries
 2. #894 will move more wiring to repository-set contracts
-3. #896 and #897 will split `index_database` and remove legacy fallback paths
+3. #896 and #897 will continue decomposing `index_database` while keeping runtime `database_manager` paths removed
