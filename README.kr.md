@@ -368,7 +368,10 @@ pacs_system/
 - 🗄️ [마이그레이션 가이드](docs/database/MIGRATION_GUIDE.md) - database_system 통합 가이드
 - 📚 [API 레퍼런스 (Database)](docs/database/API_REFERENCE.md) - Query Builder API 문서
 - 🏛️ [ADR-001](docs/adr/ADR-001-database-system-integration.md) - 아키텍처 결정 기록
+- 🏛️ [ADR-002](docs/adr/ADR-002-pacs-storage-port-segmentation.md) - PACS 스토리지 경계와 저장소 세트 계약
 - ⚡ [성능 가이드](docs/database/PERFORMANCE_GUIDE.md) - 데이터베이스 최적화 팁
+- 📦 [Dependency Manifest](dependency-manifest.json) - 내부/네이티브/FetchContent/npm 입력의 기준 provenance
+- ⚖️ [Third-Party Licenses](LICENSE-THIRD-PARTY) - 제품 배포용 서드파티 라이선스 인벤토리
 
 ---
 

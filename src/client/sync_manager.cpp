@@ -38,6 +38,11 @@
 #include "pacs/client/sync_manager.hpp"
 #include "pacs/client/job_manager.hpp"
 #include "pacs/client/remote_node_manager.hpp"
+#ifdef PACS_WITH_DATABASE_SYSTEM
+#include "pacs/storage/sync_config_repository.hpp"
+#include "pacs/storage/sync_conflict_repository.hpp"
+#include "pacs/storage/sync_history_repository.hpp"
+#endif
 #include "pacs/storage/sync_repository.hpp"
 #include "pacs/services/query_scu.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
@@ -101,7 +106,8 @@ struct sync_manager::impl {
     sync_manager_config config;
 
     // Dependencies
-    std::shared_ptr<storage::sync_repository> repo;
+    sync_repositories repositories;
+    std::shared_ptr<storage::sync_repository> compatibility_repo;
     std::shared_ptr<remote_node_manager> node_manager;
     std::shared_ptr<job_manager> job_mgr;
     std::shared_ptr<services::query_scu> query_scu;
@@ -167,9 +173,17 @@ struct sync_manager::impl {
             }
         }
 
-        if (repo) {
-            [[maybe_unused]] auto result = repo->save_config(cfg);
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (repositories.configs) {
+            [[maybe_unused]] auto result = repositories.configs->save(cfg);
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto result = compatibility_repo->save_config(cfg);
         }
+        #else
+        if (compatibility_repo) {
+            [[maybe_unused]] auto result = compatibility_repo->save_config(cfg);
+        }
+        #endif
     }
 
     std::optional<sync_config> get_config_from_cache(std::string_view config_id) const {
@@ -199,6 +213,24 @@ struct sync_manager::impl {
                 it->last_successful_sync = std::chrono::system_clock::now();
             }
         }
+
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (repositories.configs) {
+            [[maybe_unused]] auto result =
+                repositories.configs->update_stats(config_id, success,
+                                                   studies_synced);
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto result =
+                compatibility_repo->update_config_stats(config_id, success,
+                                                        studies_synced);
+        }
+        #else
+        if (compatibility_repo) {
+            [[maybe_unused]] auto result =
+                compatibility_repo->update_config_stats(config_id, success,
+                                                        studies_synced);
+        }
+        #endif
     }
 
     void mark_sync_active(std::string_view config_id) {
@@ -270,9 +302,19 @@ struct sync_manager::impl {
             }
         }
 
-        if (repo) {
-            [[maybe_unused]] auto result = repo->save_conflict(conflict);
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (repositories.conflicts) {
+            [[maybe_unused]] auto result = repositories.conflicts->save(conflict);
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto result =
+                compatibility_repo->save_conflict(conflict);
         }
+        #else
+        if (compatibility_repo) {
+            [[maybe_unused]] auto result =
+                compatibility_repo->save_conflict(conflict);
+        }
+        #endif
 
         total_conflicts_detected.fetch_add(1, std::memory_order_relaxed);
         notify_conflict(conflict);
@@ -415,19 +457,30 @@ struct sync_manager::impl {
         store_last_result(cfg.config_id, result);
 
         // Save history
-        if (repo) {
-            sync_history history;
-            history.config_id = cfg.config_id;
-            history.job_id = result.job_id;
-            history.success = result.success;
-            history.studies_checked = result.studies_checked;
-            history.studies_synced = result.studies_synced;
-            history.conflicts_found = result.conflicts.size();
-            history.errors = result.errors;
-            history.started_at = result.started_at;
-            history.completed_at = result.completed_at;
-            [[maybe_unused]] auto save_result = repo->save_history(history);
+        sync_history history;
+        history.config_id = cfg.config_id;
+        history.job_id = result.job_id;
+        history.success = result.success;
+        history.studies_checked = result.studies_checked;
+        history.studies_synced = result.studies_synced;
+        history.conflicts_found = result.conflicts.size();
+        history.errors = result.errors;
+        history.started_at = result.started_at;
+        history.completed_at = result.completed_at;
+
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (repositories.history) {
+            [[maybe_unused]] auto save_result = repositories.history->save(history);
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto save_result =
+                compatibility_repo->save_history(history);
         }
+        #else
+        if (compatibility_repo) {
+            [[maybe_unused]] auto save_result =
+                compatibility_repo->save_history(history);
+        }
+        #endif
 
         if (logger) {
             logger->info_fmt("Sync completed for config '{}': {} checked, {} synced, {} conflicts",
@@ -636,9 +689,26 @@ struct sync_manager::impl {
     }
 
     void load_configs_from_repo() {
-        if (!repo) return;
-
-        auto loaded = repo->list_configs();
+        std::vector<sync_config> loaded;
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (repositories.configs) {
+            auto result = repositories.configs->find_all();
+            if (result.is_err()) {
+                return;
+            }
+            loaded = std::move(result.value());
+        } else if (compatibility_repo) {
+            loaded = compatibility_repo->list_configs();
+        } else {
+            return;
+        }
+        #else
+        if (compatibility_repo) {
+            loaded = compatibility_repo->list_configs();
+        } else {
+            return;
+        }
+        #endif
         {
             std::unique_lock lock(configs_mutex);
             configs = std::move(loaded);
@@ -650,9 +720,26 @@ struct sync_manager::impl {
     }
 
     void load_conflicts_from_repo() {
-        if (!repo) return;
-
-        auto loaded = repo->list_unresolved_conflicts();
+        std::vector<sync_conflict> loaded;
+        #ifdef PACS_WITH_DATABASE_SYSTEM
+        if (repositories.conflicts) {
+            auto result = repositories.conflicts->find_unresolved();
+            if (result.is_err()) {
+                return;
+            }
+            loaded = std::move(result.value());
+        } else if (compatibility_repo) {
+            loaded = compatibility_repo->list_unresolved_conflicts();
+        } else {
+            return;
+        }
+        #else
+        if (compatibility_repo) {
+            loaded = compatibility_repo->list_unresolved_conflicts();
+        } else {
+            return;
+        }
+        #endif
         {
             std::lock_guard lock(conflicts_mutex);
             conflicts = std::move(loaded);
@@ -667,6 +754,36 @@ struct sync_manager::impl {
 // =============================================================================
 // Construction / Destruction
 // =============================================================================
+
+sync_manager::sync_manager(
+    sync_repositories repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::query_scu> query_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : sync_manager(sync_manager_config{}, std::move(repositories),
+                   std::move(node_manager), std::move(job_manager),
+                   std::move(query_scu), std::move(logger)) {}
+
+sync_manager::sync_manager(
+    const sync_manager_config& config,
+    sync_repositories repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::query_scu> query_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : impl_(std::make_unique<impl>()) {
+
+    impl_->config = config;
+    impl_->repositories = std::move(repositories);
+    impl_->node_manager = std::move(node_manager);
+    impl_->job_mgr = std::move(job_manager);
+    impl_->query_scu = std::move(query_scu);
+    impl_->logger = logger ? std::move(logger) : di::null_logger();
+
+    impl_->load_configs_from_repo();
+    impl_->load_conflicts_from_repo();
+}
 
 sync_manager::sync_manager(
     std::shared_ptr<storage::sync_repository> repo,
@@ -688,7 +805,7 @@ sync_manager::sync_manager(
     : impl_(std::make_unique<impl>()) {
 
     impl_->config = config;
-    impl_->repo = std::move(repo);
+    impl_->compatibility_repo = std::move(repo);
     impl_->node_manager = std::move(node_manager);
     impl_->job_mgr = std::move(job_manager);
     impl_->query_scu = std::move(query_scu);
@@ -767,9 +884,20 @@ pacs::VoidResult sync_manager::remove_config(std::string_view config_id) {
         impl_->configs.erase(it);
     }
 
-    if (impl_->repo) {
-        [[maybe_unused]] auto result = impl_->repo->remove_config(config_id);
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->repositories.configs) {
+        [[maybe_unused]] auto result =
+            impl_->repositories.configs->remove(std::string(config_id));
+    } else if (impl_->compatibility_repo) {
+        [[maybe_unused]] auto result =
+            impl_->compatibility_repo->remove_config(config_id);
     }
+    #else
+    if (impl_->compatibility_repo) {
+        [[maybe_unused]] auto result =
+            impl_->compatibility_repo->remove_config(config_id);
+    }
+    #endif
 
     if (impl_->logger) {
         impl_->logger->info_fmt("Removed sync config '{}'", config_id);
@@ -945,9 +1073,20 @@ pacs::VoidResult sync_manager::resolve_conflict(
     it->resolution_used = resolution;
     it->resolved_at = std::chrono::system_clock::now();
 
-    if (impl_->repo) {
-        [[maybe_unused]] auto result = impl_->repo->resolve_conflict(study_uid, resolution);
+    #ifdef PACS_WITH_DATABASE_SYSTEM
+    if (impl_->repositories.conflicts) {
+        [[maybe_unused]] auto result =
+            impl_->repositories.conflicts->resolve(study_uid, resolution);
+    } else if (impl_->compatibility_repo) {
+        [[maybe_unused]] auto result =
+            impl_->compatibility_repo->resolve_conflict(study_uid, resolution);
     }
+    #else
+    if (impl_->compatibility_repo) {
+        [[maybe_unused]] auto result =
+            impl_->compatibility_repo->resolve_conflict(study_uid, resolution);
+    }
+    #endif
 
     if (impl_->logger) {
         impl_->logger->info_fmt("Resolved conflict for study '{}' using {}",

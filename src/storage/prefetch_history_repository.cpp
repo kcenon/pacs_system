@@ -213,6 +213,54 @@ auto prefetch_history_repository::find_recent(size_t limit) -> list_result_type 
     return list_result_type(std::move(entities));
 }
 
+auto prefetch_history_repository::is_study_prefetched(
+    std::string_view study_uid) -> Result<bool> {
+    if (!db() || !db()->is_connected()) {
+        return Result<bool>(kcenon::common::error_info{
+            -1, "Database not connected", "prefetch_history_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << "SELECT COUNT(*) as count FROM prefetch_history "
+        << "WHERE study_uid = '" << study_uid << "' "
+        << "AND status IN ('completed', 'pending')";
+
+    auto result = storage_session().select(sql.str());
+    if (result.is_err()) {
+        return Result<bool>(result.error());
+    }
+
+    if (result.value().empty()) {
+        return Result<bool>(false);
+    }
+
+    return Result<bool>(std::stoull(result.value()[0].at("count")) > 0);
+}
+
+auto prefetch_history_repository::count_by_status_on_current_date(
+    std::string_view status) -> Result<size_t> {
+    if (!db() || !db()->is_connected()) {
+        return Result<size_t>(kcenon::common::error_info{
+            -1, "Database not connected", "prefetch_history_repository"});
+    }
+
+    std::ostringstream sql;
+    sql << "SELECT COUNT(*) as count FROM prefetch_history "
+        << "WHERE status = '" << status << "' "
+        << "AND date(prefetched_at) = date('now')";
+
+    auto result = storage_session().select(sql.str());
+    if (result.is_err()) {
+        return Result<size_t>(result.error());
+    }
+
+    if (result.value().empty()) {
+        return Result<size_t>(static_cast<size_t>(0));
+    }
+
+    return Result<size_t>(std::stoull(result.value()[0].at("count")));
+}
+
 auto prefetch_history_repository::update_status(
     int64_t pk,
     std::string_view status) -> VoidResult {

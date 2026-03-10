@@ -1,0 +1,46 @@
+Third-Party License Inventory for pacs_system
+=============================================
+
+Project license
+---------------
+- pacs_system: BSD-3-Clause
+
+Internal ecosystem inputs
+-------------------------
+- common_system: BSD-3-Clause
+- container_system: BSD-3-Clause
+- thread_system: BSD-3-Clause
+- logger_system: BSD-3-Clause
+- monitoring_system: BSD-3-Clause
+- network_system: BSD-3-Clause
+- database_system: BSD-3-Clause
+
+Native and fetched dependencies
+-------------------------------
+- SQLite3: Public Domain
+- OpenSSL: Apache-2.0
+- Crow: BSD-3-Clause
+- ASIO: BSL-1.0
+- libjpeg-turbo: IJG/BSD-3-Clause
+- OpenJPEG: BSD-2-Clause
+- CharLS: BSD-3-Clause
+- OpenJPH: BSD-2-Clause
+- fmt: MIT
+- Catch2: BSL-1.0
+- iconv: LGPL-2.1 (dynamic link required)
+- libpng: libpng-2.0
+
+Optional SDKs
+-------------
+- AWS SDK for C++: Apache-2.0
+- Azure SDK for C++: MIT
+
+Frontend distribution inputs
+----------------------------
+- See web/package-lock.json for the resolved npm dependency tree.
+- Runtime and build dependency provenance is summarized in dependency-manifest.json.
+
+Notes
+-----
+- This inventory supports product distribution review and complements docs/SOUP.md.
+- NOTICE obligations, when applicable, are tracked through the upstream license terms listed above.

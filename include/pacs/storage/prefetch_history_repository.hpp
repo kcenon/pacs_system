@@ -71,6 +71,12 @@ public:
 
     [[nodiscard]] auto find_recent(size_t limit = 100) -> list_result_type;
 
+    [[nodiscard]] auto is_study_prefetched(std::string_view study_uid)
+        -> Result<bool>;
+
+    [[nodiscard]] auto count_by_status_on_current_date(
+        std::string_view status) -> Result<size_t>;
+
     [[nodiscard]] auto update_status(
         int64_t pk,
         std::string_view status) -> VoidResult;
