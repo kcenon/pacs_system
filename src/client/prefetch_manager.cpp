@@ -38,9 +38,11 @@
 #include "pacs/client/prefetch_manager.hpp"
 #include "pacs/client/job_manager.hpp"
 #include "pacs/client/remote_node_manager.hpp"
+#ifdef PACS_WITH_DATABASE_SYSTEM
 #include "pacs/storage/prefetch_history_repository.hpp"
-#include "pacs/storage/prefetch_repository.hpp"
 #include "pacs/storage/prefetch_rule_repository.hpp"
+#endif
+#include "pacs/storage/prefetch_repository.hpp"
 #include "pacs/services/worklist_scu.hpp"
 #include "pacs/core/dicom_dataset.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
@@ -181,6 +183,7 @@ struct prefetch_manager::impl {
     // =========================================================================
 
     void load_rules_from_repo() {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (repositories.rules) {
             auto result = repositories.rules->find_enabled();
             if (result.is_err()) {
@@ -191,6 +194,7 @@ struct prefetch_manager::impl {
             rules_cache = std::move(result.value());
             return;
         }
+        #endif
 
         if (!compatibility_repo) {
             return;
@@ -201,11 +205,17 @@ struct prefetch_manager::impl {
     }
 
     void save_rule_to_repo(const prefetch_rule& rule) {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (repositories.rules) {
             [[maybe_unused]] auto result = repositories.rules->save(rule);
         } else if (compatibility_repo) {
             [[maybe_unused]] auto result = compatibility_repo->save_rule(rule);
         }
+        #else
+        if (compatibility_repo) {
+            [[maybe_unused]] auto result = compatibility_repo->save_rule(rule);
+        }
+        #endif
     }
 
     bool is_study_pending(const std::string& study_uid) {
@@ -230,10 +240,12 @@ struct prefetch_manager::impl {
 
     bool is_study_local(std::string_view study_uid) const {
         // Check history for completed prefetch
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (repositories.history) {
             auto result = repositories.history->is_study_prefetched(study_uid);
             return result.is_ok() && result.value();
         }
+        #endif
         if (compatibility_repo) {
             return compatibility_repo->is_study_prefetched(study_uid);
         }
@@ -269,7 +281,11 @@ struct prefetch_manager::impl {
         const std::string& source_node_id,
         const std::string& job_id,
         const std::string& status) {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (!repositories.history && !compatibility_repo) return;
+        #else
+        if (!compatibility_repo) return;
+        #endif
 
         prefetch_history history;
         history.patient_id = patient_id;
@@ -280,17 +296,29 @@ struct prefetch_manager::impl {
         history.status = status;
         history.prefetched_at = std::chrono::system_clock::now();
 
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (repositories.history) {
             [[maybe_unused]] auto result = repositories.history->save(history);
         } else if (compatibility_repo) {
             [[maybe_unused]] auto result =
                 compatibility_repo->save_history(history);
         }
+        #else
+        if (compatibility_repo) {
+            [[maybe_unused]] auto result =
+                compatibility_repo->save_history(history);
+        }
+        #endif
     }
 
     void increment_rule_stats(const std::string& rule_id, size_t studies) {
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (!repositories.rules && !compatibility_repo) return;
+        #else
+        if (!compatibility_repo) return;
+        #endif
 
+        #ifdef PACS_WITH_DATABASE_SYSTEM
         if (repositories.rules) {
             [[maybe_unused]] auto result1 =
                 repositories.rules->increment_triggered(rule_id);
@@ -306,6 +334,14 @@ struct prefetch_manager::impl {
                     compatibility_repo->increment_studies_prefetched(rule_id, studies);
             }
         }
+        #else
+        [[maybe_unused]] auto result1 =
+            compatibility_repo->increment_triggered(rule_id);
+        if (studies > 0) {
+            [[maybe_unused]] auto result2 =
+                compatibility_repo->increment_studies_prefetched(rule_id, studies);
+        }
+        #endif
     }
 
     // =========================================================================
@@ -466,6 +502,7 @@ pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
     }
 
     // Save to repository
+    #ifdef PACS_WITH_DATABASE_SYSTEM
     if (impl_->repositories.rules) {
         auto result = impl_->repositories.rules->save(new_rule);
         if (result.is_err()) {
@@ -477,6 +514,14 @@ pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
             return result;
         }
     }
+    #else
+    if (impl_->compatibility_repo) {
+        auto result = impl_->compatibility_repo->save_rule(new_rule);
+        if (result.is_err()) {
+            return result;
+        }
+    }
+    #endif
 
     // Update cache
     {
@@ -494,6 +539,7 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
     }
 
     // Save to repository
+    #ifdef PACS_WITH_DATABASE_SYSTEM
     if (impl_->repositories.rules) {
         auto result = impl_->repositories.rules->save(rule);
         if (result.is_err()) {
@@ -505,6 +551,14 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
             return result;
         }
     }
+    #else
+    if (impl_->compatibility_repo) {
+        auto result = impl_->compatibility_repo->save_rule(rule);
+        if (result.is_err()) {
+            return result;
+        }
+    }
+    #endif
 
     // Update cache
     {
@@ -523,6 +577,7 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
 
 pacs::VoidResult prefetch_manager::remove_rule(std::string_view rule_id) {
     // Remove from repository
+    #ifdef PACS_WITH_DATABASE_SYSTEM
     if (impl_->repositories.rules) {
         auto result = impl_->repositories.rules->remove(std::string(rule_id));
         if (result.is_err()) {
@@ -534,6 +589,14 @@ pacs::VoidResult prefetch_manager::remove_rule(std::string_view rule_id) {
             return result;
         }
     }
+    #else
+    if (impl_->compatibility_repo) {
+        auto result = impl_->compatibility_repo->remove_rule(rule_id);
+        if (result.is_err()) {
+            return result;
+        }
+    }
+    #endif
 
     // Remove from cache
     {
@@ -823,11 +886,13 @@ size_t prefetch_manager::pending_prefetches() const {
 }
 
 size_t prefetch_manager::completed_today() const {
+    #ifdef PACS_WITH_DATABASE_SYSTEM
     if (impl_->repositories.history) {
         auto result =
             impl_->repositories.history->count_by_status_on_current_date("completed");
         return result.is_ok() ? result.value() : 0;
     }
+    #endif
     if (impl_->compatibility_repo) {
         return impl_->compatibility_repo->count_completed_today();
     }
@@ -835,11 +900,13 @@ size_t prefetch_manager::completed_today() const {
 }
 
 size_t prefetch_manager::failed_today() const {
+    #ifdef PACS_WITH_DATABASE_SYSTEM
     if (impl_->repositories.history) {
         auto result =
             impl_->repositories.history->count_by_status_on_current_date("failed");
         return result.is_ok() ? result.value() : 0;
     }
+    #endif
     if (impl_->compatibility_repo) {
         return impl_->compatibility_repo->count_failed_today();
     }
