@@ -64,6 +64,8 @@
 // Forward declarations
 namespace pacs::storage {
 class prefetch_repository;
+class prefetch_rule_repository;
+class prefetch_history_repository;
 }
 
 namespace pacs::services {
@@ -79,6 +81,11 @@ namespace pacs::client {
 // Forward declarations
 class remote_node_manager;
 class job_manager;
+
+struct prefetch_repositories {
+    std::shared_ptr<storage::prefetch_rule_repository> rules;
+    std::shared_ptr<storage::prefetch_history_repository> history;
+};
 
 // =============================================================================
 // Prefetch Manager
@@ -133,7 +140,43 @@ public:
     // =========================================================================
 
     /**
+     * @brief Construct a prefetch manager from split repositories
+     *
+     * @param repositories Split prefetch repositories for rules and history
+     * @param node_manager Remote node manager for DICOM operations (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param worklist_scu Worklist SCU for MWL queries (optional)
+     * @param logger Logger instance (optional, defaults to NullLogger)
+     */
+    explicit prefetch_manager(
+        prefetch_repositories repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::worklist_scu> worklist_scu = nullptr,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+
+    /**
+     * @brief Construct with custom configuration and split repositories
+     *
+     * @param config Manager configuration
+     * @param repositories Split prefetch repositories for rules and history
+     * @param node_manager Remote node manager for DICOM operations (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param worklist_scu Worklist SCU for MWL queries (optional)
+     * @param logger Logger instance (optional, defaults to NullLogger)
+     */
+    explicit prefetch_manager(
+        const prefetch_manager_config& config,
+        prefetch_repositories repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::worklist_scu> worklist_scu = nullptr,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+
+    /**
      * @brief Construct a prefetch manager with dependencies
+     *
+     * Compatibility-only overload. Prefer split repositories for new wiring.
      *
      * @param repo Prefetch repository for persistence (required)
      * @param node_manager Remote node manager for DICOM operations (required)
@@ -150,6 +193,8 @@ public:
 
     /**
      * @brief Construct with custom configuration
+     *
+     * Compatibility-only overload. Prefer split repositories for new wiring.
      *
      * @param config Manager configuration
      * @param repo Prefetch repository for persistence (required)

@@ -348,7 +348,7 @@ TEST_CASE("cursor test") {
 ```
 
 This pattern ensures tests compile correctly in both:
-- **With database_system**: Uses `db_manager()` returning `std::shared_ptr<database::database_manager>`
+- **With database_system**: Uses `db_adapter()` returning `std::shared_ptr<pacs_database_adapter>`
 - **Without database_system**: Uses `native_handle()` returning `sqlite3*`
 
 ### 4.2 Value Extraction Helpers
@@ -477,11 +477,35 @@ if (std::holds_alternative<std::string>(it->second)) {
 
 ---
 
+## 5. Repository-Set Boundary
+
+Higher-level PACS services should prefer the canonical split repository sets
+from `repository_factory::canonical_repositories()`:
+
+- `sync.configs`, `sync.conflicts`, `sync.history`
+- `viewer_state.records`, `viewer_state.recent_studies`
+- `prefetch.rules`, `prefetch.history`
+
+Aggregate repositories such as `sync_repository`, `viewer_state_repository`,
+and `prefetch_repository` remain compatibility shims only. New service wiring
+should not introduce fresh dependencies on those aggregate contracts.
+
+Allowed raw-SQL/native-backend exceptions remain limited to:
+
+1. `migration_runner` DDL and schema migration code
+2. documented `index_database` seams pending decomposition
+3. backend bootstrap/infrastructure code that does not encode PACS domain rules
+
+The CI guard `tests/storage/check_storage_boundary.py` enforces this boundary
+for canonical repositories and service wiring.
+
+---
+
 ## 6. FAQ
 
 ### Q: Is database_system required for pacs_system?
 
-**A:** No. database_system is optional. Without it, pacs_system falls back to direct SQLite with manual string escaping for SQL injection prevention. However, using database_system is **strongly recommended** for better security and maintainability.
+**A:** No. database_system is optional at build time. When enabled, PACS runtime storage should consume it through `pacs_database_adapter` and split repository sets instead of `database_manager` directly. Legacy direct-SQLite code remains only in documented exception areas such as `index_database` seams and migration/bootstrap code.
 
 ### Q: What databases are supported?
 

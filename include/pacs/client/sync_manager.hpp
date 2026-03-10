@@ -57,6 +57,9 @@
 // Forward declarations
 namespace pacs::storage {
 class sync_repository;
+class sync_config_repository;
+class sync_conflict_repository;
+class sync_history_repository;
 }
 
 namespace pacs::services {
@@ -68,6 +71,12 @@ namespace pacs::client {
 // Forward declarations
 class remote_node_manager;
 class job_manager;
+
+struct sync_repositories {
+    std::shared_ptr<storage::sync_config_repository> configs;
+    std::shared_ptr<storage::sync_conflict_repository> conflicts;
+    std::shared_ptr<storage::sync_history_repository> history;
+};
 
 // =============================================================================
 // Sync Manager
@@ -122,7 +131,46 @@ public:
     // =========================================================================
 
     /**
+     * @brief Construct a sync manager from split repositories
+     *
+     * @param repositories Split sync repositories for configs, conflicts, and
+     * history
+     * @param node_manager Remote node manager (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param query_scu Query SCU for study comparisons (required)
+     * @param logger Logger instance (optional)
+     */
+    explicit sync_manager(
+        sync_repositories repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::query_scu> query_scu,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+
+    /**
+     * @brief Construct a sync manager from split repositories with custom
+     * configuration
+     *
+     * @param config Manager configuration
+     * @param repositories Split sync repositories for configs, conflicts, and
+     * history
+     * @param node_manager Remote node manager (required)
+     * @param job_manager Job manager for async operations (required)
+     * @param query_scu Query SCU for study comparisons (required)
+     * @param logger Logger instance (optional)
+     */
+    explicit sync_manager(
+        const sync_manager_config& config,
+        sync_repositories repositories,
+        std::shared_ptr<remote_node_manager> node_manager,
+        std::shared_ptr<job_manager> job_manager,
+        std::shared_ptr<services::query_scu> query_scu,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+
+    /**
      * @brief Construct a sync manager with default configuration
+     *
+     * Compatibility-only overload. Prefer split repositories for new wiring.
      *
      * @param repo Sync repository for persistence (required)
      * @param node_manager Remote node manager (required)
@@ -139,6 +187,8 @@ public:
 
     /**
      * @brief Construct a sync manager with custom configuration
+     *
+     * Compatibility-only overload. Prefer split repositories for new wiring.
      *
      * @param config Manager configuration
      * @param repo Sync repository for persistence (required)

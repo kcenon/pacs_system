@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "generated_by": "manual-maintained",
+  "project": {
+    "name": "pacs_system",
+    "license": "BSD-3-Clause",
+    "manifest_purpose": "Canonical dependency provenance for IEC 62304 SOUP/SBOM workflows."
+  },
+  "internal_ecosystem": [
+    {
+      "name": "common_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../common_system/include",
+      "version": "47be5fd27650f0ebfa2d029ebed35a1c262e55c4",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "container_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../container_system",
+      "version": "0b95a0c10edf53315581b7f3fa458f0193e8c039",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "thread_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../thread_system",
+      "version": "3ea6fd55704f70b880b13da190064ddbce70dda8",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "logger_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../logger_system",
+      "version": "66a00ccce9917a65179e1c42707af9f32d22361f",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "monitoring_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../monitoring_system",
+      "version": "0b562ea3c60a8a51da77a1847d87efba3d99ef64",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "network_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../network_system",
+      "version": "c70026ab057e72a84a5031f24d2009f9ee641743",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "database_system",
+      "source": "add_subdirectory or sibling checkout",
+      "resolution": "../database_system",
+      "version": "b90b0f3bb1e7c9719494724b4c900fd89199e513",
+      "license": "BSD-3-Clause"
+    }
+  ],
+  "native_and_system": [
+    {
+      "name": "sqlite3",
+      "resolution": "find_package(SQLite3) or FetchContent sqlite-amalgamation-3450100",
+      "version": "3.45.1",
+      "license": "Public Domain"
+    },
+    {
+      "name": "openssl",
+      "resolution": "find_package(OpenSSL)",
+      "version": "system-provided",
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "libjpeg-turbo",
+      "resolution": "find_package(JPEG)",
+      "version": "system-provided",
+      "license": "IJG/BSD-3-Clause"
+    },
+    {
+      "name": "openjpeg",
+      "resolution": "find_package(OpenJPEG) or pkg-config libopenjp2",
+      "version": "system-provided",
+      "license": "BSD-2-Clause"
+    },
+    {
+      "name": "charls",
+      "resolution": "find_package(charls) or pkg-config charls",
+      "version": "system-provided",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "libpng",
+      "resolution": "find_package(PNG)",
+      "version": "system-provided",
+      "license": "libpng-2.0"
+    },
+    {
+      "name": "iconv",
+      "resolution": "system dynamic link",
+      "version": "system-provided",
+      "license": "LGPL-2.1"
+    }
+  ],
+  "fetched_content": [
+    {
+      "name": "Crow",
+      "resolution": "FetchContent",
+      "version": "v1.3.1",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "name": "ASIO",
+      "resolution": "network_system copy or FetchContent fallback",
+      "version": "asio-1-30-2",
+      "license": "BSL-1.0"
+    },
+    {
+      "name": "OpenJPH",
+      "resolution": "find_package(openjph) or FetchContent fallback",
+      "version": "0.18.2",
+      "license": "BSD-2-Clause"
+    },
+    {
+      "name": "fmt",
+      "resolution": "find_package(fmt) or FetchContent fallback",
+      "version": "10.2.1",
+      "license": "MIT"
+    }
+  ],
+  "web_frontend": {
+    "manifest": "web/package.json",
+    "lockfile": "web/package-lock.json",
+    "runtime_dependencies": [
+      "@hookform/resolvers",
+      "@tanstack/react-query",
+      "axios",
+      "clsx",
+      "lucide-react",
+      "react",
+      "react-dom",
+      "react-hook-form",
+      "react-router-dom",
+      "recharts",
+      "tailwind-merge",
+      "zod"
+    ]
+  },
+  "license_inventory": "LICENSE-THIRD-PARTY"
+}

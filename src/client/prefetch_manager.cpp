@@ -38,7 +38,9 @@
 #include "pacs/client/prefetch_manager.hpp"
 #include "pacs/client/job_manager.hpp"
 #include "pacs/client/remote_node_manager.hpp"
+#include "pacs/storage/prefetch_history_repository.hpp"
 #include "pacs/storage/prefetch_repository.hpp"
+#include "pacs/storage/prefetch_rule_repository.hpp"
 #include "pacs/services/worklist_scu.hpp"
 #include "pacs/core/dicom_dataset.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
@@ -143,7 +145,8 @@ struct prefetch_manager::impl {
     prefetch_manager_config config;
 
     // Dependencies
-    std::shared_ptr<storage::prefetch_repository> repo;
+    prefetch_repositories repositories;
+    std::shared_ptr<storage::prefetch_repository> compatibility_repo;
     std::shared_ptr<remote_node_manager> node_manager;
     std::shared_ptr<job_manager> job_mgr;
     std::shared_ptr<services::worklist_scu> worklist_scu;
@@ -178,15 +181,30 @@ struct prefetch_manager::impl {
     // =========================================================================
 
     void load_rules_from_repo() {
-        if (!repo) return;
+        if (repositories.rules) {
+            auto result = repositories.rules->find_enabled();
+            if (result.is_err()) {
+                return;
+            }
+
+            std::unique_lock lock(rules_mutex);
+            rules_cache = std::move(result.value());
+            return;
+        }
+
+        if (!compatibility_repo) {
+            return;
+        }
 
         std::unique_lock lock(rules_mutex);
-        rules_cache = repo->find_enabled_rules();
+        rules_cache = compatibility_repo->find_enabled_rules();
     }
 
     void save_rule_to_repo(const prefetch_rule& rule) {
-        if (repo) {
-            [[maybe_unused]] auto result = repo->save_rule(rule);
+        if (repositories.rules) {
+            [[maybe_unused]] auto result = repositories.rules->save(rule);
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto result = compatibility_repo->save_rule(rule);
         }
     }
 
@@ -212,8 +230,12 @@ struct prefetch_manager::impl {
 
     bool is_study_local(std::string_view study_uid) const {
         // Check history for completed prefetch
-        if (repo) {
-            return repo->is_study_prefetched(study_uid);
+        if (repositories.history) {
+            auto result = repositories.history->is_study_prefetched(study_uid);
+            return result.is_ok() && result.value();
+        }
+        if (compatibility_repo) {
+            return compatibility_repo->is_study_prefetched(study_uid);
         }
         return false;
     }
@@ -247,7 +269,7 @@ struct prefetch_manager::impl {
         const std::string& source_node_id,
         const std::string& job_id,
         const std::string& status) {
-        if (!repo) return;
+        if (!repositories.history && !compatibility_repo) return;
 
         prefetch_history history;
         history.patient_id = patient_id;
@@ -258,15 +280,31 @@ struct prefetch_manager::impl {
         history.status = status;
         history.prefetched_at = std::chrono::system_clock::now();
 
-        [[maybe_unused]] auto result = repo->save_history(history);
+        if (repositories.history) {
+            [[maybe_unused]] auto result = repositories.history->save(history);
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto result =
+                compatibility_repo->save_history(history);
+        }
     }
 
     void increment_rule_stats(const std::string& rule_id, size_t studies) {
-        if (!repo) return;
+        if (!repositories.rules && !compatibility_repo) return;
 
-        [[maybe_unused]] auto result1 = repo->increment_triggered(rule_id);
-        if (studies > 0) {
-            [[maybe_unused]] auto result2 = repo->increment_studies_prefetched(rule_id, studies);
+        if (repositories.rules) {
+            [[maybe_unused]] auto result1 =
+                repositories.rules->increment_triggered(rule_id);
+            if (studies > 0) {
+                [[maybe_unused]] auto result2 =
+                    repositories.rules->increment_studies_prefetched(rule_id, studies);
+            }
+        } else if (compatibility_repo) {
+            [[maybe_unused]] auto result1 =
+                compatibility_repo->increment_triggered(rule_id);
+            if (studies > 0) {
+                [[maybe_unused]] auto result2 =
+                    compatibility_repo->increment_studies_prefetched(rule_id, studies);
+            }
         }
     }
 
@@ -343,6 +381,38 @@ struct prefetch_manager::impl {
 // =============================================================================
 
 prefetch_manager::prefetch_manager(
+    prefetch_repositories repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::worklist_scu> worklist_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : prefetch_manager(
+          prefetch_manager_config{},
+          std::move(repositories),
+          std::move(node_manager),
+          std::move(job_manager),
+          std::move(worklist_scu),
+          std::move(logger)) {}
+
+prefetch_manager::prefetch_manager(
+    const prefetch_manager_config& config,
+    prefetch_repositories repositories,
+    std::shared_ptr<remote_node_manager> node_manager,
+    std::shared_ptr<job_manager> job_manager,
+    std::shared_ptr<services::worklist_scu> worklist_scu,
+    std::shared_ptr<di::ILogger> logger)
+    : impl_(std::make_unique<impl>()) {
+    impl_->config = config;
+    impl_->repositories = std::move(repositories);
+    impl_->node_manager = std::move(node_manager);
+    impl_->job_mgr = std::move(job_manager);
+    impl_->worklist_scu = std::move(worklist_scu);
+    impl_->logger = logger ? std::move(logger) : std::make_shared<di::NullLogger>();
+
+    impl_->load_rules_from_repo();
+}
+
+prefetch_manager::prefetch_manager(
     std::shared_ptr<storage::prefetch_repository> repo,
     std::shared_ptr<remote_node_manager> node_manager,
     std::shared_ptr<job_manager> job_manager,
@@ -365,15 +435,15 @@ prefetch_manager::prefetch_manager(
     std::shared_ptr<di::ILogger> logger)
     : impl_(std::make_unique<impl>()) {
     impl_->config = config;
-    impl_->repo = std::move(repo);
+    impl_->compatibility_repo = std::move(repo);
     impl_->node_manager = std::move(node_manager);
     impl_->job_mgr = std::move(job_manager);
     impl_->worklist_scu = std::move(worklist_scu);
     impl_->logger = logger ? std::move(logger) : std::make_shared<di::NullLogger>();
 
     // Initialize tables if repository exists
-    if (impl_->repo) {
-        [[maybe_unused]] auto result = impl_->repo->initialize_tables();
+    if (impl_->compatibility_repo) {
+        [[maybe_unused]] auto result = impl_->compatibility_repo->initialize_tables();
     }
 
     // Load rules from repository
@@ -396,8 +466,13 @@ pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
     }
 
     // Save to repository
-    if (impl_->repo) {
-        auto result = impl_->repo->save_rule(new_rule);
+    if (impl_->repositories.rules) {
+        auto result = impl_->repositories.rules->save(new_rule);
+        if (result.is_err()) {
+            return result.error();
+        }
+    } else if (impl_->compatibility_repo) {
+        auto result = impl_->compatibility_repo->save_rule(new_rule);
         if (result.is_err()) {
             return result;
         }
@@ -419,8 +494,13 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
     }
 
     // Save to repository
-    if (impl_->repo) {
-        auto result = impl_->repo->save_rule(rule);
+    if (impl_->repositories.rules) {
+        auto result = impl_->repositories.rules->save(rule);
+        if (result.is_err()) {
+            return result.error();
+        }
+    } else if (impl_->compatibility_repo) {
+        auto result = impl_->compatibility_repo->save_rule(rule);
         if (result.is_err()) {
             return result;
         }
@@ -443,8 +523,13 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
 
 pacs::VoidResult prefetch_manager::remove_rule(std::string_view rule_id) {
     // Remove from repository
-    if (impl_->repo) {
-        auto result = impl_->repo->remove_rule(rule_id);
+    if (impl_->repositories.rules) {
+        auto result = impl_->repositories.rules->remove(std::string(rule_id));
+        if (result.is_err()) {
+            return result;
+        }
+    } else if (impl_->compatibility_repo) {
+        auto result = impl_->compatibility_repo->remove_rule(rule_id);
         if (result.is_err()) {
             return result;
         }
@@ -738,15 +823,25 @@ size_t prefetch_manager::pending_prefetches() const {
 }
 
 size_t prefetch_manager::completed_today() const {
-    if (impl_->repo) {
-        return impl_->repo->count_completed_today();
+    if (impl_->repositories.history) {
+        auto result =
+            impl_->repositories.history->count_by_status_on_current_date("completed");
+        return result.is_ok() ? result.value() : 0;
+    }
+    if (impl_->compatibility_repo) {
+        return impl_->compatibility_repo->count_completed_today();
     }
     return 0;
 }
 
 size_t prefetch_manager::failed_today() const {
-    if (impl_->repo) {
-        return impl_->repo->count_failed_today();
+    if (impl_->repositories.history) {
+        auto result =
+            impl_->repositories.history->count_by_status_on_current_date("failed");
+        return result.is_ok() ? result.value() : 0;
+    }
+    if (impl_->compatibility_repo) {
+        return impl_->compatibility_repo->count_failed_today();
     }
     return 0;
 }

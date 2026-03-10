@@ -371,7 +371,10 @@ pacs_system/
 - 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system integration guide
 - 📚 [API Reference (Database)](docs/database/API_REFERENCE.md) - Query Builder API documentation
 - 🏛️ [ADR-001](docs/adr/ADR-001-database-system-integration.md) - Architecture Decision Record
+- 🏛️ [ADR-002](docs/adr/ADR-002-pacs-storage-port-segmentation.md) - PACS storage boundary and repository-set contract
 - ⚡ [Performance Guide](docs/database/PERFORMANCE_GUIDE.md) - Database optimization tips
+- 📦 [Dependency Manifest](dependency-manifest.json) - Canonical native, fetched, internal, and frontend provenance
+- ⚖️ [Third-Party Licenses](LICENSE-THIRD-PARTY) - Product distribution license inventory
 
 ---
 

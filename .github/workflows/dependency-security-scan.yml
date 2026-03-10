@@ -54,34 +54,25 @@ jobs:
         # Create license checker script
         cat > license_check.py << 'EOF'
         #!/usr/bin/env python3
+        import json
         import sys
 
-        # Compatible licenses with MIT
+        # Compatible licenses with BSD-3-Clause
         COMPATIBLE_LICENSES = {
             'MIT', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0',
-            'ISC', 'Unlicense', 'LGPL-2.1+', 'LGPL-3.0+', 'Zlib'
+            'ISC', 'Unlicense', 'LGPL-2.1', 'LGPL-2.1+', 'LGPL-3.0+', 'Zlib'
         }
 
-        print("License Compatibility Check for PACS System (MIT License)")
+        print("License Compatibility Check for PACS System (BSD-3-Clause)")
         print("=" * 60)
 
-        # Known licenses for PACS dependencies
-        known_licenses = {
-            # kcenon ecosystem
-            'common_system': 'MIT',
-            'container_system': 'MIT',
-            'thread_system': 'MIT',
-            'logger_system': 'MIT',
-            'monitoring_system': 'MIT',
-            'network_system': 'MIT',
-            # External dependencies
-            'sqlite3': 'Unlicense',
-            'openssl': 'Apache-2.0',
-            'gtest': 'BSD-3-Clause',
-            'catch2': 'BSL-1.0',  # Boost Software License
-            'fmt': 'MIT',
-            'spdlog': 'MIT',
-        }
+        with open('dependency-manifest.json', 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
+
+        known_licenses = {}
+        for section in ('internal_ecosystem', 'native_and_system', 'fetched_content'):
+            for dep in manifest.get(section, []):
+                known_licenses[dep['name']] = dep['license']
 
         all_compatible = True
 
@@ -123,7 +114,7 @@ jobs:
 
         echo "" >> security_report.md
         echo "## License Compatibility" >> security_report.md
-        echo "All dependencies verified for MIT license compatibility." >> security_report.md
+        echo "All dependencies verified for BSD-3-Clause license compatibility." >> security_report.md
 
     - name: Upload security report
       uses: actions/upload-artifact@v4

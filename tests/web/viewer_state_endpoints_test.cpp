@@ -13,13 +13,15 @@
 
 #include "pacs/storage/index_database.hpp"
 #include "pacs/storage/migration_runner.hpp"
-#include "pacs/storage/viewer_state_record.hpp"
-#include "pacs/storage/viewer_state_repository.hpp"
-#include "pacs/web/rest_types.hpp"
-
 #ifdef PACS_WITH_DATABASE_SYSTEM
 #include "pacs/storage/pacs_database_adapter.hpp"
+#include "pacs/storage/recent_study_repository.hpp"
+#include "pacs/storage/viewer_state_record_repository.hpp"
+#else
+#include "pacs/storage/viewer_state_record.hpp"
+#include "pacs/storage/viewer_state_repository.hpp"
 #endif
+#include "pacs/web/rest_types.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -119,14 +121,18 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
   auto migration_result = runner.run_migrations(*db_adapter);
   REQUIRE(migration_result.is_ok());
 
-  viewer_state_repository repo(db_adapter);
+  viewer_state_record_repository repo(db_adapter);
 #else
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
   viewer_state_repository repo(db->native_handle());
 #endif
+#ifdef PACS_WITH_DATABASE_SYSTEM
+  SUCCEED("Repository constructed with connected adapter");
+#else
   REQUIRE(repo.is_valid());
+#endif
 
   SECTION("save and find viewer state") {
     viewer_state_record state;
@@ -137,15 +143,29 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state.created_at = std::chrono::system_clock::now();
     state.updated_at = state.created_at;
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto save_result = repo.save(state);
+ #else
     auto save_result = repo.save_state(state);
+ #endif
     REQUIRE(save_result.is_ok());
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto found = repo.find_by_id("state-uuid-123");
+    REQUIRE(found.is_ok());
+    REQUIRE(found.value().state_id == "state-uuid-123");
+    REQUIRE(found.value().study_uid == "1.2.840.study");
+    REQUIRE(found.value().user_id == "user1");
+    REQUIRE(found.value().state_json ==
+            R"({"layout":{"rows":2,"cols":2},"viewports":[]})");
+ #else
     auto found = repo.find_state_by_id("state-uuid-123");
     REQUIRE(found.has_value());
     REQUIRE(found->state_id == "state-uuid-123");
     REQUIRE(found->study_uid == "1.2.840.study");
     REQUIRE(found->user_id == "user1");
     REQUIRE(found->state_json == R"({"layout":{"rows":2,"cols":2},"viewports":[]})");
+ #endif
   }
 
   SECTION("find states by study") {
@@ -156,7 +176,11 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state1.state_json = "{}";
     state1.created_at = std::chrono::system_clock::now();
     state1.updated_at = state1.created_at;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    (void)repo.save(state1);
+ #else
     (void)repo.save_state(state1);
+ #endif
 
     viewer_state_record state2;
     state2.state_id = "state-2";
@@ -165,7 +189,11 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state2.state_json = "{}";
     state2.created_at = std::chrono::system_clock::now();
     state2.updated_at = state2.created_at;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    (void)repo.save(state2);
+ #else
     (void)repo.save_state(state2);
+ #endif
 
     viewer_state_record state3;
     state3.state_id = "state-3";
@@ -174,10 +202,20 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state3.state_json = "{}";
     state3.created_at = std::chrono::system_clock::now();
     state3.updated_at = state3.created_at;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    (void)repo.save(state3);
+ #else
     (void)repo.save_state(state3);
+ #endif
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto states = repo.find_by_study("1.2.840.study");
+    REQUIRE(states.is_ok());
+    REQUIRE(states.value().size() == 2);
+ #else
     auto states = repo.find_states_by_study("1.2.840.study");
     REQUIRE(states.size() == 2);
+ #endif
   }
 
   SECTION("search with pagination") {
@@ -189,7 +227,11 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
       state.state_json = "{}";
       state.created_at = std::chrono::system_clock::now();
       state.updated_at = state.created_at;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+      (void)repo.save(state);
+ #else
       (void)repo.save_state(state);
+ #endif
     }
 
     viewer_state_query query;
@@ -197,12 +239,24 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     query.limit = 5;
     query.offset = 0;
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto page1 = repo.search(query);
+    REQUIRE(page1.is_ok());
+    REQUIRE(page1.value().size() == 5);
+ #else
     auto page1 = repo.search_states(query);
     REQUIRE(page1.size() == 5);
+ #endif
 
     query.offset = 5;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto page2 = repo.search(query);
+    REQUIRE(page2.is_ok());
+    REQUIRE(page2.value().size() == 5);
+ #else
     auto page2 = repo.search_states(query);
     REQUIRE(page2.size() == 5);
+ #endif
   }
 
   SECTION("delete viewer state") {
@@ -212,20 +266,44 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state.state_json = "{}";
     state.created_at = std::chrono::system_clock::now();
     state.updated_at = state.created_at;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    (void)repo.save(state);
+ #else
     (void)repo.save_state(state);
+ #endif
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto found = repo.find_by_id("delete-test");
+    REQUIRE(found.is_ok());
+ #else
     auto found = repo.find_state_by_id("delete-test");
     REQUIRE(found.has_value());
+ #endif
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto remove_result = repo.remove("delete-test");
+ #else
     auto remove_result = repo.remove_state("delete-test");
+ #endif
     REQUIRE(remove_result.is_ok());
 
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto not_found = repo.find_by_id("delete-test");
+    REQUIRE(not_found.is_err());
+ #else
     auto not_found = repo.find_state_by_id("delete-test");
     REQUIRE_FALSE(not_found.has_value());
+ #endif
   }
 
   SECTION("count viewer states") {
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    auto initial_count = repo.count();
+    REQUIRE(initial_count.is_ok());
+    REQUIRE(initial_count.value() == 0);
+ #else
     REQUIRE(repo.count_states() == 0);
+ #endif
 
     viewer_state_record state;
     state.state_id = "count-test";
@@ -233,9 +311,15 @@ TEST_CASE("Viewer state repository operations", "[web][viewer_state][database]")
     state.state_json = "{}";
     state.created_at = std::chrono::system_clock::now();
     state.updated_at = state.created_at;
+ #ifdef PACS_WITH_DATABASE_SYSTEM
+    (void)repo.save(state);
+    auto count = repo.count();
+    REQUIRE(count.is_ok());
+    REQUIRE(count.value() == 1);
+ #else
     (void)repo.save_state(state);
-
     REQUIRE(repo.count_states() == 1);
+ #endif
   }
 }
 
@@ -257,109 +341,115 @@ TEST_CASE("Recent studies repository operations", "[web][viewer_state][database]
   auto migration_result = runner.run_migrations(*db_adapter);
   REQUIRE(migration_result.is_ok());
 
-  viewer_state_repository repo(db_adapter);
+  recent_study_repository repo(db_adapter);
 #else
   auto db_result = index_database::open(":memory:");
   REQUIRE(db_result.is_ok());
   auto &db = db_result.value();
   viewer_state_repository repo(db->native_handle());
 #endif
-  REQUIRE(repo.is_valid());
-
   SECTION("record study access") {
-    auto result = repo.record_study_access("user1", "1.2.840.study1");
+    auto result = repo.record_access("user1", "1.2.840.study1");
     REQUIRE(result.is_ok());
 
-    auto recent = repo.get_recent_studies("user1", 10);
-    REQUIRE(recent.size() == 1);
-    REQUIRE(recent[0].study_uid == "1.2.840.study1");
+    auto recent = repo.find_by_user("user1", 10);
+    REQUIRE(recent.is_ok());
+    REQUIRE(recent.value().size() == 1);
+    REQUIRE(recent.value()[0].study_uid == "1.2.840.study1");
   }
 
   SECTION("multiple study accesses") {
-    (void)repo.record_study_access("user1", "1.2.840.study1");
-    (void)repo.record_study_access("user1", "1.2.840.study2");
-    (void)repo.record_study_access("user1", "1.2.840.study3");
+    (void)repo.record_access("user1", "1.2.840.study1");
+    (void)repo.record_access("user1", "1.2.840.study2");
+    (void)repo.record_access("user1", "1.2.840.study3");
 
-    auto recent = repo.get_recent_studies("user1", 10);
-    REQUIRE(recent.size() == 3);
+    auto recent = repo.find_by_user("user1", 10);
+    REQUIRE(recent.is_ok());
+    REQUIRE(recent.value().size() == 3);
   }
 
   SECTION("recent studies with limit") {
     for (int i = 1; i <= 25; ++i) {
-      (void)repo.record_study_access("user1", "1.2.840.study" + std::to_string(i));
+      (void)repo.record_access("user1", "1.2.840.study" + std::to_string(i));
     }
 
-    auto recent_20 = repo.get_recent_studies("user1", 20);
-    REQUIRE(recent_20.size() == 20);
+    auto recent_20 = repo.find_by_user("user1", 20);
+    REQUIRE(recent_20.is_ok());
+    REQUIRE(recent_20.value().size() == 20);
 
-    auto recent_10 = repo.get_recent_studies("user1", 10);
-    REQUIRE(recent_10.size() == 10);
+    auto recent_10 = repo.find_by_user("user1", 10);
+    REQUIRE(recent_10.is_ok());
+    REQUIRE(recent_10.value().size() == 10);
   }
 
   SECTION("recent studies ordered by access time") {
     // Small sleeps ensure distinct timestamps across all platforms
-    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_access("user1", "1.2.840.study1");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_access("user1", "1.2.840.study2");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    (void)repo.record_study_access("user1", "1.2.840.study3");
+    (void)repo.record_access("user1", "1.2.840.study3");
 
-    auto recent = repo.get_recent_studies("user1", 10);
-    REQUIRE(recent.size() == 3);
+    auto recent = repo.find_by_user("user1", 10);
+    REQUIRE(recent.is_ok());
+    REQUIRE(recent.value().size() == 3);
     // Most recent first
-    REQUIRE(recent[0].study_uid == "1.2.840.study3");
-    REQUIRE(recent[1].study_uid == "1.2.840.study2");
-    REQUIRE(recent[2].study_uid == "1.2.840.study1");
+    REQUIRE(recent.value()[0].study_uid == "1.2.840.study3");
+    REQUIRE(recent.value()[1].study_uid == "1.2.840.study2");
+    REQUIRE(recent.value()[2].study_uid == "1.2.840.study1");
   }
 
   SECTION("re-access updates timestamp") {
-    (void)repo.record_study_access("user1", "1.2.840.study1");
+    (void)repo.record_access("user1", "1.2.840.study1");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_access("user1", "1.2.840.study2");
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    (void)repo.record_study_access("user1", "1.2.840.study1"); // Re-access
+    (void)repo.record_access("user1", "1.2.840.study1"); // Re-access
 
-    auto recent = repo.get_recent_studies("user1", 10);
-    REQUIRE(recent.size() == 2);
+    auto recent = repo.find_by_user("user1", 10);
+    REQUIRE(recent.is_ok());
+    REQUIRE(recent.value().size() == 2);
     // study1 should be most recent now
-    REQUIRE(recent[0].study_uid == "1.2.840.study1");
-    REQUIRE(recent[1].study_uid == "1.2.840.study2");
+    REQUIRE(recent.value()[0].study_uid == "1.2.840.study1");
+    REQUIRE(recent.value()[1].study_uid == "1.2.840.study2");
   }
 
   SECTION("clear recent studies") {
-    (void)repo.record_study_access("user1", "1.2.840.study1");
-    (void)repo.record_study_access("user1", "1.2.840.study2");
-    (void)repo.record_study_access("user2", "1.2.840.study3");
+    (void)repo.record_access("user1", "1.2.840.study1");
+    (void)repo.record_access("user1", "1.2.840.study2");
+    (void)repo.record_access("user2", "1.2.840.study3");
 
-    REQUIRE(repo.count_recent_studies("user1") == 2);
-    REQUIRE(repo.count_recent_studies("user2") == 1);
+    REQUIRE(repo.count_for_user("user1").value() == 2);
+    REQUIRE(repo.count_for_user("user2").value() == 1);
 
-    auto clear_result = repo.clear_recent_studies("user1");
+    auto clear_result = repo.clear_for_user("user1");
     REQUIRE(clear_result.is_ok());
 
-    REQUIRE(repo.count_recent_studies("user1") == 0);
-    REQUIRE(repo.count_recent_studies("user2") == 1); // Unaffected
+    REQUIRE(repo.count_for_user("user1").value() == 0);
+    REQUIRE(repo.count_for_user("user2").value() == 1); // Unaffected
   }
 
   SECTION("count recent studies") {
-    REQUIRE(repo.count_recent_studies("user1") == 0);
+    REQUIRE(repo.count_for_user("user1").value() == 0);
 
-    (void)repo.record_study_access("user1", "1.2.840.study1");
-    (void)repo.record_study_access("user1", "1.2.840.study2");
+    (void)repo.record_access("user1", "1.2.840.study1");
+    (void)repo.record_access("user1", "1.2.840.study2");
 
-    REQUIRE(repo.count_recent_studies("user1") == 2);
+    REQUIRE(repo.count_for_user("user1").value() == 2);
   }
 
   SECTION("user isolation") {
-    (void)repo.record_study_access("user1", "1.2.840.study1");
-    (void)repo.record_study_access("user2", "1.2.840.study2");
+    (void)repo.record_access("user1", "1.2.840.study1");
+    (void)repo.record_access("user2", "1.2.840.study2");
 
-    auto user1_recent = repo.get_recent_studies("user1", 10);
-    REQUIRE(user1_recent.size() == 1);
-    REQUIRE(user1_recent[0].study_uid == "1.2.840.study1");
+    auto user1_recent = repo.find_by_user("user1", 10);
+    REQUIRE(user1_recent.is_ok());
+    REQUIRE(user1_recent.value().size() == 1);
+    REQUIRE(user1_recent.value()[0].study_uid == "1.2.840.study1");
 
-    auto user2_recent = repo.get_recent_studies("user2", 10);
-    REQUIRE(user2_recent.size() == 1);
-    REQUIRE(user2_recent[0].study_uid == "1.2.840.study2");
+    auto user2_recent = repo.find_by_user("user2", 10);
+    REQUIRE(user2_recent.is_ok());
+    REQUIRE(user2_recent.value().size() == 1);
+    REQUIRE(user2_recent.value()[0].study_uid == "1.2.840.study2");
   }
 }
