@@ -1364,6 +1364,9 @@ private:
     /// Database file path
     std::string path_;
 
+    /// Remove the backing file on destruction for adapter-compatible memory DBs
+    bool remove_on_close_{false};
+
     /// Extracted repositories used by the facade API
     mutable std::shared_ptr<patient_repository> patient_repository_;
     mutable std::shared_ptr<study_repository> study_repository_;

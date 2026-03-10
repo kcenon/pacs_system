@@ -171,39 +171,39 @@ auto instance_repository::upsert_instance(const instance_record& record)
                 -1, "Instance exists but could not retrieve record", "storage");
         }
 
-        database::query_builder update_builder(database::database_types::sqlite);
-        update_builder
-            .update("instances")
-            .set({{"series_pk", std::to_string(record.series_pk)},
-                  {"sop_class_uid", record.sop_class_uid},
-                  {"transfer_syntax", record.transfer_syntax},
-                  {"content_date", record.content_date},
-                  {"content_time", record.content_time},
-                  {"file_path", record.file_path},
-                  {"file_size", std::to_string(record.file_size)},
-                  {"file_hash", record.file_hash}});
-
+        std::map<std::string, database::core::database_value> update_data{
+            {"series_pk", std::to_string(record.series_pk)},
+            {"sop_class_uid", record.sop_class_uid},
+            {"transfer_syntax", record.transfer_syntax},
+            {"content_date", record.content_date},
+            {"content_time", record.content_time},
+            {"file_path", record.file_path},
+            {"file_size", std::to_string(record.file_size)},
+            {"file_hash", record.file_hash}};
         if (record.instance_number.has_value()) {
-            update_builder.set(
-                {{"instance_number", std::to_string(*record.instance_number)}});
+            update_data["instance_number"] =
+                std::to_string(*record.instance_number);
         }
         if (record.rows.has_value()) {
-            update_builder.set({{"rows", std::to_string(*record.rows)}});
+            update_data["rows"] = std::to_string(*record.rows);
         }
         if (record.columns.has_value()) {
-            update_builder.set({{"columns", std::to_string(*record.columns)}});
+            update_data["columns"] = std::to_string(*record.columns);
         }
         if (record.bits_allocated.has_value()) {
-            update_builder.set(
-                {{"bits_allocated", std::to_string(*record.bits_allocated)}});
+            update_data["bits_allocated"] =
+                std::to_string(*record.bits_allocated);
         }
         if (record.number_of_frames.has_value()) {
-            update_builder.set({{"number_of_frames",
-                                 std::to_string(*record.number_of_frames)}});
+            update_data["number_of_frames"] =
+                std::to_string(*record.number_of_frames);
         }
 
-        auto update_sql =
-            update_builder.where("sop_uid", "=", record.sop_uid).build();
+        database::query_builder update_builder(database::database_types::sqlite);
+        auto update_sql = update_builder.update("instances")
+                              .set(update_data)
+                              .where("sop_uid", "=", record.sop_uid)
+                              .build();
         auto update_result = db()->update(update_sql);
         if (update_result.is_err()) {
             return make_error<int64_t>(
@@ -216,37 +216,37 @@ auto instance_repository::upsert_instance(const instance_record& record)
         return existing->pk;
     }
 
-    database::query_builder insert_builder(database::database_types::sqlite);
-    insert_builder
-        .insert_into("instances")
-        .values({{"series_pk", std::to_string(record.series_pk)},
-                 {"sop_uid", record.sop_uid},
-                 {"sop_class_uid", record.sop_class_uid},
-                 {"transfer_syntax", record.transfer_syntax},
-                 {"content_date", record.content_date},
-                 {"content_time", record.content_time},
-                 {"file_path", record.file_path},
-                 {"file_size", std::to_string(record.file_size)},
-                 {"file_hash", record.file_hash}});
-
+    std::map<std::string, database::core::database_value> insert_data{
+        {"series_pk", std::to_string(record.series_pk)},
+        {"sop_uid", record.sop_uid},
+        {"sop_class_uid", record.sop_class_uid},
+        {"transfer_syntax", record.transfer_syntax},
+        {"content_date", record.content_date},
+        {"content_time", record.content_time},
+        {"file_path", record.file_path},
+        {"file_size", std::to_string(record.file_size)},
+        {"file_hash", record.file_hash}};
     if (record.instance_number.has_value()) {
-        insert_builder.values(
-            {{"instance_number", std::to_string(*record.instance_number)}});
+        insert_data["instance_number"] =
+            std::to_string(*record.instance_number);
     }
     if (record.rows.has_value()) {
-        insert_builder.values({{"rows", std::to_string(*record.rows)}});
+        insert_data["rows"] = std::to_string(*record.rows);
     }
     if (record.columns.has_value()) {
-        insert_builder.values({{"columns", std::to_string(*record.columns)}});
+        insert_data["columns"] = std::to_string(*record.columns);
     }
     if (record.bits_allocated.has_value()) {
-        insert_builder.values(
-            {{"bits_allocated", std::to_string(*record.bits_allocated)}});
+        insert_data["bits_allocated"] =
+            std::to_string(*record.bits_allocated);
     }
     if (record.number_of_frames.has_value()) {
-        insert_builder.values(
-            {{"number_of_frames", std::to_string(*record.number_of_frames)}});
+        insert_data["number_of_frames"] =
+            std::to_string(*record.number_of_frames);
     }
+
+    database::query_builder insert_builder(database::database_types::sqlite);
+    insert_builder.insert_into("instances").values(insert_data);
 
     auto insert_result = db()->insert(insert_builder.build());
     if (insert_result.is_err()) {

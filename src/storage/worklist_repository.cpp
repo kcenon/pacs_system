@@ -209,10 +209,13 @@ auto worklist_repository::update_worklist_status(std::string_view step_id,
                                           "storage");
     }
 
+    std::map<std::string, database::core::database_value> update_data{
+        {"step_status", std::string(new_status)},
+        {"updated_at", std::string("datetime('now')")}};
+
     auto builder = query_builder();
     builder.update(table_name())
-        .set("step_status", std::string(new_status))
-        .set("updated_at", std::string("datetime('now')"))
+        .set(update_data)
         .where("step_id", "=", std::string(step_id))
         .where("accession_no", "=", std::string(accession_no));
 
@@ -429,12 +432,9 @@ auto worklist_repository::worklist_count(std::string_view status)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    auto query = builder.select(std::vector<std::string>{"COUNT(*) as count"})
-                     .from(table_name())
-                     .where("step_status", "=", std::string(status))
-                     .build();
-
+    auto query = pacs::compat::format(
+        "SELECT COUNT(*) as count FROM {} WHERE step_status = '{}'",
+        table_name(), std::string(status));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());

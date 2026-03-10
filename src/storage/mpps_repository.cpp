@@ -221,18 +221,19 @@ auto mpps_repository::update_mpps(std::string_view mpps_uid,
                                           "storage");
     }
 
-    auto builder = query_builder();
-    builder.update("mpps").set("status", std::string(new_status));
-
+    std::map<std::string, database::core::database_value> update_data{
+        {"status", std::string(new_status)},
+        {"updated_at", std::string("datetime('now')")}};
     if (!end_datetime.empty()) {
-        builder.set("end_datetime", std::string(end_datetime));
+        update_data["end_datetime"] = std::string(end_datetime);
     }
-
     if (!performed_series.empty()) {
-        builder.set("performed_series", std::string(performed_series));
+        update_data["performed_series"] = std::string(performed_series);
     }
 
-    builder.set("updated_at", std::string("datetime('now')"))
+    auto builder = query_builder();
+    builder.update("mpps")
+        .set(update_data)
         .where("mpps_uid", "=", std::string(mpps_uid));
 
     auto result = db()->update(builder.build());
@@ -437,12 +438,9 @@ auto mpps_repository::mpps_count(std::string_view status) -> Result<size_t> {
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    auto query = builder.select(std::vector<std::string>{"COUNT(*) as count"})
-                     .from(table_name())
-                     .where("status", "=", std::string(status))
-                     .build();
-
+    auto query = pacs::compat::format(
+        "SELECT COUNT(*) as count FROM {} WHERE status = '{}'",
+        table_name(), std::string(status));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());

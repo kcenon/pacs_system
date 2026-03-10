@@ -163,7 +163,7 @@ auto key_image_repository::count_by_study(std::string_view study_uid)
     }
 
     auto builder = query_builder();
-    builder.select({"COUNT(*) as count"})
+    builder.select({"pk"})
         .from(table_name())
         .where("study_uid", "=", std::string(study_uid));
 
@@ -172,11 +172,7 @@ auto key_image_repository::count_by_study(std::string_view study_uid)
         return Result<size_t>(result.error());
     }
 
-    if (result.value().empty()) {
-        return Result<size_t>(static_cast<size_t>(0));
-    }
-
-    return Result<size_t>(std::stoull(result.value()[0].at("count")));
+    return Result<size_t>(result.value().size());
 }
 
 // =============================================================================

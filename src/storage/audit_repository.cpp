@@ -141,27 +141,24 @@ auto audit_repository::add_audit_log(const audit_record& record)
         return make_error<int64_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    builder.insert_into(table_name())
-        .values({{"event_type", record.event_type},
-                 {"user_id", record.user_id},
-                 {"source_ae", record.source_ae},
-                 {"target_ae", record.target_ae},
-                 {"source_ip", record.source_ip},
-                 {"patient_id", record.patient_id},
-                 {"study_uid", record.study_uid},
-                 {"message", record.message},
-                 {"details", record.details}});
-
-    if (record.outcome.empty()) {
-        builder.values({{"outcome", std::string("SUCCESS")}});
-    } else {
-        builder.values({{"outcome", record.outcome}});
-    }
-
+    std::map<std::string, database::core::database_value> insert_data{
+        {"event_type", record.event_type},
+        {"user_id", record.user_id},
+        {"source_ae", record.source_ae},
+        {"target_ae", record.target_ae},
+        {"source_ip", record.source_ip},
+        {"patient_id", record.patient_id},
+        {"study_uid", record.study_uid},
+        {"message", record.message},
+        {"details", record.details},
+        {"outcome", record.outcome.empty() ? std::string("SUCCESS")
+                                            : record.outcome}};
     if (record.timestamp != std::chrono::system_clock::time_point{}) {
-        builder.values({{"timestamp", format_timestamp(record.timestamp)}});
+        insert_data["timestamp"] = format_timestamp(record.timestamp);
     }
+
+    auto builder = query_builder();
+    builder.insert_into(table_name()).values(insert_data);
 
     auto insert_result = db()->insert(builder.build());
     if (insert_result.is_err()) {

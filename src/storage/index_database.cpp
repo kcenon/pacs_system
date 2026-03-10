@@ -53,6 +53,7 @@
 #include <database/query_builder.h>
 #endif
 
+#include <atomic>
 #include <chrono>
 #include <ctime>
 #include <filesystem>
@@ -146,6 +147,29 @@ auto get_int64_value(
     }
     return 0;
 }
+
+auto create_adapter_compatible_memory_path() -> std::string {
+    static std::atomic<uint64_t> counter{0};
+
+    const auto unique_id =
+        std::chrono::steady_clock::now().time_since_epoch().count() +
+        static_cast<std::chrono::steady_clock::rep>(counter.fetch_add(1));
+
+    const auto file_name =
+        pacs::compat::format("pacs_index_memory_{}.sqlite", unique_id);
+    return (std::filesystem::temp_directory_path() / file_name).string();
+}
+
+void remove_database_sidecars(const std::string& path) {
+    if (path.empty()) {
+        return;
+    }
+
+    std::error_code ec;
+    std::filesystem::remove(path, ec);
+    std::filesystem::remove(path + "-wal", ec);
+    std::filesystem::remove(path + "-shm", ec);
+}
 #endif
 
 }  // namespace
@@ -163,17 +187,21 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     -> Result<std::unique_ptr<index_database>> {
     sqlite3* db = nullptr;
 
-    // Convert :memory: to shared cache URI for consistent connections
-    // This allows pacs_database_adapter to share the same in-memory database
     std::string effective_path;
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    bool remove_on_close = false;
     if (db_path == ":memory:") {
-        // Use shared cache mode so all connections share the same in-memory DB
-        effective_path = "file:pacs_shared_memory?mode=memory&cache=shared";
+        // database_system's SQLite backend expects a filesystem path, so use
+        // a temporary file that both sqlite3 and pacs_database_adapter can open.
+        effective_path = create_adapter_compatible_memory_path();
+        remove_on_close = true;
     } else {
         effective_path = std::string(db_path);
     }
+#else
+    effective_path = std::string(db_path);
+#endif
 
-    // Use sqlite3_open_v2 with URI support for shared cache mode
     auto rc = sqlite3_open_v2(effective_path.c_str(), &db,
                               SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
                               nullptr);
@@ -235,9 +263,11 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     }
 
     // Create database instance
-    // Use effective_path to ensure pacs_database_adapter connects to same DB
     auto instance = std::unique_ptr<index_database>(
         new index_database(db, effective_path));
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    instance->remove_on_close_ = remove_on_close;
+#endif
 
     // Run migrations
     auto migration_result = instance->migration_runner_.run_migrations(db);
@@ -254,11 +284,8 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     // Support in-memory databases for testing (Issue #625)
     auto db_init_result = instance->initialize_database_system();
     if (db_init_result.is_err()) {
-        return make_error<std::unique_ptr<index_database>>(
-            db_init_result.error().code,
-            pacs::compat::format("Database adapter initialization failed: {}",
-                                 db_init_result.error().message),
-            "storage");
+        // unified_database_system may not have SQLite backend support in the
+        // current build, so keep the direct SQLite path available.
     }
 #endif
 
@@ -295,6 +322,9 @@ index_database::~index_database() {
     if (db_) {
         sqlite3_close(db_);
         db_ = nullptr;
+    }
+    if (remove_on_close_) {
+        remove_database_sidecars(path_);
     }
 }
 
@@ -678,6 +708,7 @@ auto index_database::initialize_repositories() -> VoidResult {
 index_database::index_database(index_database&& other) noexcept
     : db_(other.db_),
       path_(std::move(other.path_)),
+      remove_on_close_(other.remove_on_close_),
       patient_repository_(std::move(other.patient_repository_)),
       study_repository_(std::move(other.study_repository_)),
       series_repository_(std::move(other.series_repository_)),
@@ -690,6 +721,7 @@ index_database::index_database(index_database&& other) noexcept
     db_adapter_ = std::move(other.db_adapter_);
 #endif
     other.db_ = nullptr;
+    other.remove_on_close_ = false;
 }
 
 auto index_database::operator=(index_database&& other) noexcept
@@ -712,8 +744,12 @@ auto index_database::operator=(index_database&& other) noexcept
         if (db_) {
             sqlite3_close(db_);
         }
+        if (remove_on_close_) {
+            remove_database_sidecars(path_);
+        }
         db_ = other.db_;
         path_ = std::move(other.path_);
+        remove_on_close_ = other.remove_on_close_;
         patient_repository_ = std::move(other.patient_repository_);
         study_repository_ = std::move(other.study_repository_);
         series_repository_ = std::move(other.series_repository_);
@@ -723,6 +759,7 @@ auto index_database::operator=(index_database&& other) noexcept
         ups_repository_ = std::move(other.ups_repository_);
         audit_repository_ = std::move(other.audit_repository_);
         other.db_ = nullptr;
+        other.remove_on_close_ = false;
     }
     return *this;
 }

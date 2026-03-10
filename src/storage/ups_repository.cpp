@@ -161,37 +161,32 @@ auto ups_repository::create_ups_workitem(const ups_workitem& workitem)
         return make_error<int64_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    builder.insert_into(table_name())
-        .values({{"workitem_uid", workitem.workitem_uid},
-                 {"state", std::string("SCHEDULED")},
-                 {"procedure_step_label", workitem.procedure_step_label},
-                 {"worklist_label", workitem.worklist_label},
-                 {"scheduled_start_datetime",
-                  workitem.scheduled_start_datetime},
-                 {"expected_completion_datetime",
-                  workitem.expected_completion_datetime},
-                 {"scheduled_station_name",
-                  workitem.scheduled_station_name},
-                 {"scheduled_station_class",
-                  workitem.scheduled_station_class},
-                 {"scheduled_station_geographic",
-                  workitem.scheduled_station_geographic},
-                 {"scheduled_human_performers",
-                  workitem.scheduled_human_performers},
-                 {"input_information", workitem.input_information},
-                 {"performing_ae", workitem.performing_ae},
-                 {"progress_description", workitem.progress_description},
-                 {"progress_percent",
-                  static_cast<int64_t>(workitem.progress_percent)},
-                 {"output_information", workitem.output_information},
-                 {"transaction_uid", workitem.transaction_uid}});
+    std::map<std::string, database::core::database_value> insert_data{
+        {"workitem_uid", workitem.workitem_uid},
+        {"state", std::string("SCHEDULED")},
+        {"procedure_step_label", workitem.procedure_step_label},
+        {"worklist_label", workitem.worklist_label},
+        {"scheduled_start_datetime", workitem.scheduled_start_datetime},
+        {"expected_completion_datetime",
+         workitem.expected_completion_datetime},
+        {"scheduled_station_name", workitem.scheduled_station_name},
+        {"scheduled_station_class", workitem.scheduled_station_class},
+        {"scheduled_station_geographic",
+         workitem.scheduled_station_geographic},
+        {"scheduled_human_performers",
+         workitem.scheduled_human_performers},
+        {"input_information", workitem.input_information},
+        {"performing_ae", workitem.performing_ae},
+        {"progress_description", workitem.progress_description},
+        {"progress_percent",
+         static_cast<int64_t>(workitem.progress_percent)},
+        {"output_information", workitem.output_information},
+        {"transaction_uid", workitem.transaction_uid},
+        {"priority", workitem.priority.empty() ? std::string("MEDIUM")
+                                               : workitem.priority}};
 
-    if (workitem.priority.empty()) {
-        builder.values({{"priority", std::string("MEDIUM")}});
-    } else {
-        builder.values({{"priority", workitem.priority}});
-    }
+    auto builder = query_builder();
+    builder.insert_into(table_name()).values(insert_data);
 
     auto insert_result = db()->insert(builder.build());
     if (insert_result.is_err()) {
@@ -241,27 +236,30 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
                                           "storage");
     }
 
+    std::map<std::string, database::core::database_value> update_data{
+        {"procedure_step_label", workitem.procedure_step_label},
+        {"worklist_label", workitem.worklist_label},
+        {"priority", workitem.priority},
+        {"scheduled_start_datetime", workitem.scheduled_start_datetime},
+        {"expected_completion_datetime",
+         workitem.expected_completion_datetime},
+        {"scheduled_station_name", workitem.scheduled_station_name},
+        {"scheduled_station_class", workitem.scheduled_station_class},
+        {"scheduled_station_geographic",
+         workitem.scheduled_station_geographic},
+        {"scheduled_human_performers",
+         workitem.scheduled_human_performers},
+        {"input_information", workitem.input_information},
+        {"performing_ae", workitem.performing_ae},
+        {"progress_description", workitem.progress_description},
+        {"progress_percent",
+         static_cast<int64_t>(workitem.progress_percent)},
+        {"output_information", workitem.output_information},
+        {"updated_at", std::string("datetime('now')")}};
+
     auto builder = query_builder();
     builder.update(table_name())
-        .set("procedure_step_label", workitem.procedure_step_label)
-        .set("worklist_label", workitem.worklist_label)
-        .set("priority", workitem.priority)
-        .set("scheduled_start_datetime", workitem.scheduled_start_datetime)
-        .set("expected_completion_datetime",
-             workitem.expected_completion_datetime)
-        .set("scheduled_station_name", workitem.scheduled_station_name)
-        .set("scheduled_station_class", workitem.scheduled_station_class)
-        .set("scheduled_station_geographic",
-             workitem.scheduled_station_geographic)
-        .set("scheduled_human_performers",
-             workitem.scheduled_human_performers)
-        .set("input_information", workitem.input_information)
-        .set("performing_ae", workitem.performing_ae)
-        .set("progress_description", workitem.progress_description)
-        .set("progress_percent",
-             static_cast<int64_t>(workitem.progress_percent))
-        .set("output_information", workitem.output_information)
-        .set("updated_at", std::string("datetime('now')"))
+        .set(update_data)
         .where("workitem_uid", "=", workitem.workitem_uid);
 
     auto result = db()->update(builder.build());
@@ -336,11 +334,14 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
                                           "storage");
     }
 
+    std::map<std::string, database::core::database_value> update_data{
+        {"state", std::string(new_state)},
+        {"transaction_uid", std::string(transaction_uid)},
+        {"updated_at", std::string("datetime('now')")}};
+
     auto builder = query_builder();
     builder.update(table_name())
-        .set("state", std::string(new_state))
-        .set("transaction_uid", std::string(transaction_uid))
-        .set("updated_at", std::string("datetime('now')"))
+        .set(update_data)
         .where("workitem_uid", "=", std::string(workitem_uid));
 
     auto result = db()->update(builder.build());
@@ -474,12 +475,9 @@ auto ups_repository::ups_workitem_count(std::string_view state)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    auto query = builder.select(std::vector<std::string>{"COUNT(*) as count"})
-                     .from(table_name())
-                     .where("state", "=", std::string(state))
-                     .build();
-
+    auto query = pacs::compat::format(
+        "SELECT COUNT(*) as count FROM {} WHERE state = '{}'",
+        table_name(), std::string(state));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());
@@ -517,13 +515,14 @@ auto ups_repository::subscribe_ups(const ups_subscription& subscription)
 
     for (const auto& row : existing.value()) {
         if (row.workitem_uid == subscription.workitem_uid) {
+            std::map<std::string, database::core::database_value> update_data{
+                {"deletion_lock",
+                 static_cast<int64_t>(subscription.deletion_lock ? 1 : 0)},
+                {"filter_criteria", subscription.filter_criteria}};
+
             auto builder = query_builder();
             auto query = builder.update("ups_subscriptions")
-                             .set("deletion_lock",
-                                  static_cast<int64_t>(
-                                      subscription.deletion_lock ? 1 : 0))
-                             .set("filter_criteria",
-                                  subscription.filter_criteria)
+                             .set(update_data)
                              .where("subscription_pk", "=", row.pk)
                              .build();
 
@@ -539,18 +538,19 @@ auto ups_repository::subscribe_ups(const ups_subscription& subscription)
         }
     }
 
-    auto builder = query_builder();
-    builder.insert_into("ups_subscriptions")
-        .values({{"subscriber_ae", subscription.subscriber_ae},
-                 {"deletion_lock",
-                  static_cast<int64_t>(subscription.deletion_lock ? 1 : 0)},
-                 {"filter_criteria", subscription.filter_criteria}});
-
+    std::map<std::string, database::core::database_value> insert_data{
+        {"subscriber_ae", subscription.subscriber_ae},
+        {"deletion_lock",
+         static_cast<int64_t>(subscription.deletion_lock ? 1 : 0)},
+        {"filter_criteria", subscription.filter_criteria}};
     if (subscription.workitem_uid.empty()) {
-        builder.values({{"workitem_uid", nullptr}});
+        insert_data["workitem_uid"] = nullptr;
     } else {
-        builder.values({{"workitem_uid", subscription.workitem_uid}});
+        insert_data["workitem_uid"] = subscription.workitem_uid;
     }
+
+    auto builder = query_builder();
+    builder.insert_into("ups_subscriptions").values(insert_data);
 
     auto insert_result = db()->insert(builder.build());
     if (insert_result.is_err()) {

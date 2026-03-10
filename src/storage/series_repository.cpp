@@ -181,23 +181,23 @@ auto series_repository::upsert_series(const series_record& record)
                 -1, "Series exists but could not retrieve record", "storage");
         }
 
-        database::query_builder update_builder(database::database_types::sqlite);
-        update_builder
-            .update("series")
-            .set({{"study_pk", std::to_string(record.study_pk)},
-                  {"modality", record.modality},
-                  {"series_description", record.series_description},
-                  {"body_part_examined", record.body_part_examined},
-                  {"station_name", record.station_name},
-                  {"updated_at", "datetime('now')"}});
-
+        std::map<std::string, database::core::database_value> update_data{
+            {"study_pk", std::to_string(record.study_pk)},
+            {"modality", record.modality},
+            {"series_description", record.series_description},
+            {"body_part_examined", record.body_part_examined},
+            {"station_name", record.station_name},
+            {"updated_at", std::string("datetime('now')")}};
         if (record.series_number.has_value()) {
-            update_builder.set(
-                {{"series_number", std::to_string(*record.series_number)}});
+            update_data["series_number"] =
+                std::to_string(*record.series_number);
         }
 
-        auto update_sql =
-            update_builder.where("series_uid", "=", record.series_uid).build();
+        database::query_builder update_builder(database::database_types::sqlite);
+        auto update_sql = update_builder.update("series")
+                              .set(update_data)
+                              .where("series_uid", "=", record.series_uid)
+                              .build();
         auto update_result = db()->update(update_sql);
         if (update_result.is_err()) {
             return make_error<int64_t>(
@@ -210,20 +210,19 @@ auto series_repository::upsert_series(const series_record& record)
         return existing->pk;
     }
 
-    database::query_builder insert_builder(database::database_types::sqlite);
-    insert_builder
-        .insert_into("series")
-        .values({{"study_pk", std::to_string(record.study_pk)},
-                 {"series_uid", record.series_uid},
-                 {"modality", record.modality},
-                 {"series_description", record.series_description},
-                 {"body_part_examined", record.body_part_examined},
-                 {"station_name", record.station_name}});
-
+    std::map<std::string, database::core::database_value> insert_data{
+        {"study_pk", std::to_string(record.study_pk)},
+        {"series_uid", record.series_uid},
+        {"modality", record.modality},
+        {"series_description", record.series_description},
+        {"body_part_examined", record.body_part_examined},
+        {"station_name", record.station_name}};
     if (record.series_number.has_value()) {
-        insert_builder.values(
-            {{"series_number", std::to_string(*record.series_number)}});
+        insert_data["series_number"] = std::to_string(*record.series_number);
     }
+
+    database::query_builder insert_builder(database::database_types::sqlite);
+    insert_builder.insert_into("series").values(insert_data);
 
     auto insert_result = db()->insert(insert_builder.build());
     if (insert_result.is_err()) {
