@@ -1244,6 +1244,8 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/prefetch_repository.cpp
         src/storage/sync_repository.cpp
         src/storage/annotation_repository.cpp
+        src/storage/patient_repository.cpp
+        src/storage/study_repository.cpp
         src/storage/measurement_repository.cpp
         src/storage/key_image_repository.cpp
         src/storage/viewer_state_repository.cpp
