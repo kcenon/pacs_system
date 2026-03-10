@@ -75,6 +75,15 @@ struct sqlite3;
 
 namespace pacs::storage {
 
+class patient_repository;
+class study_repository;
+class series_repository;
+class instance_repository;
+class mpps_repository;
+class worklist_repository;
+class ups_repository;
+class audit_repository;
+
 /**
  * @brief Configuration for index database
  *
@@ -1241,7 +1250,7 @@ private:
 #ifdef PACS_WITH_DATABASE_SYSTEM
     /// PACS database adapter for unified database operations
     /// Provides simplified API through pacs_database_adapter (Issue #606)
-    mutable std::unique_ptr<pacs_database_adapter> db_adapter_;
+    mutable std::shared_ptr<pacs_database_adapter> db_adapter_;
 
     /**
      * @brief Initialize PACS storage adapter for database_system-backed access
@@ -1344,11 +1353,26 @@ private:
         const database_row& row) const -> worklist_item;
 #endif
 
+    /**
+     * @brief Initialize extracted repositories for facade delegation
+     */
+    [[nodiscard]] auto initialize_repositories() -> VoidResult;
+
     /// SQLite database handle (used for migrations and fallback)
     sqlite3* db_{nullptr};
 
     /// Database file path
     std::string path_;
+
+    /// Extracted repositories used by the facade API
+    mutable std::shared_ptr<patient_repository> patient_repository_;
+    mutable std::shared_ptr<study_repository> study_repository_;
+    mutable std::shared_ptr<series_repository> series_repository_;
+    mutable std::shared_ptr<instance_repository> instance_repository_;
+    mutable std::shared_ptr<mpps_repository> mpps_repository_;
+    mutable std::shared_ptr<worklist_repository> worklist_repository_;
+    mutable std::shared_ptr<ups_repository> ups_repository_;
+    mutable std::shared_ptr<audit_repository> audit_repository_;
 
     /// Migration runner for schema management
     migration_runner migration_runner_;

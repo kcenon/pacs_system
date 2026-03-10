@@ -1246,6 +1246,12 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         src/storage/annotation_repository.cpp
         src/storage/patient_repository.cpp
         src/storage/study_repository.cpp
+        src/storage/series_repository.cpp
+        src/storage/instance_repository.cpp
+        src/storage/mpps_repository.cpp
+        src/storage/worklist_repository.cpp
+        src/storage/ups_repository.cpp
+        src/storage/audit_repository.cpp
         src/storage/measurement_repository.cpp
         src/storage/key_image_repository.cpp
         src/storage/viewer_state_repository.cpp
@@ -2039,6 +2045,12 @@ if(PACS_BUILD_TESTS)
             tests/storage/commitment_repository_test.cpp
             tests/storage/patient_repository_test.cpp
             tests/storage/study_repository_test.cpp
+            tests/storage/series_repository_test.cpp
+            tests/storage/instance_repository_test.cpp
+            tests/storage/mpps_repository_test.cpp
+            tests/storage/worklist_repository_test.cpp
+            tests/storage/ups_repository_test.cpp
+            tests/storage/audit_repository_test.cpp
             tests/storage/repository_factory_test.cpp
             # Annotation & Measurement API integration tests (Issue #545, #584)
             tests/integration/annotation_api_test.cpp
