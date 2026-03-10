@@ -52,6 +52,8 @@ namespace pacs::storage {
 
 // Forward declarations
 class pacs_database_adapter;
+class patient_repository;
+class study_repository;
 class job_repository;
 class annotation_repository;
 class routing_repository;
@@ -103,6 +105,8 @@ struct prefetch_repository_set {
  * compatibility repositories.
  */
 struct canonical_repository_set {
+    std::shared_ptr<patient_repository> patients;
+    std::shared_ptr<study_repository> studies;
     std::shared_ptr<job_repository> jobs;
     std::shared_ptr<annotation_repository> annotations;
     std::shared_ptr<routing_repository> routing_rules;
@@ -192,6 +196,20 @@ public:
     repository_factory(repository_factory&&) noexcept = default;
     auto operator=(repository_factory&&) noexcept
         -> repository_factory& = default;
+
+    /**
+     * @brief Get or create patient repository
+     *
+     * @return Shared pointer to patient repository
+     */
+    [[nodiscard]] auto patients() -> std::shared_ptr<patient_repository>;
+
+    /**
+     * @brief Get or create study repository
+     *
+     * @return Shared pointer to study repository
+     */
+    [[nodiscard]] auto studies() -> std::shared_ptr<study_repository>;
 
     /**
      * @brief Get or create job repository
@@ -341,6 +359,8 @@ private:
     std::shared_ptr<pacs_database_adapter> db_;
 
     /// Lazy-initialized repositories
+    std::shared_ptr<patient_repository> patients_;
+    std::shared_ptr<study_repository> studies_;
     std::shared_ptr<job_repository> jobs_;
     std::shared_ptr<annotation_repository> annotations_;
     std::shared_ptr<routing_repository> routing_rules_;

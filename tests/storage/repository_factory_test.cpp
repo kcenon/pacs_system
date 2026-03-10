@@ -97,6 +97,8 @@ TEST_CASE("repository_factory returns non-null for canonical and compatibility r
     test_database tdb;
     repository_factory factory(tdb.get());
 
+    SECTION("patients") { CHECK(factory.patients() != nullptr); }
+    SECTION("studies") { CHECK(factory.studies() != nullptr); }
     SECTION("jobs") { CHECK(factory.jobs() != nullptr); }
     SECTION("annotations") { CHECK(factory.annotations() != nullptr); }
     SECTION("routing_rules") { CHECK(factory.routing_rules() != nullptr); }
@@ -130,6 +132,18 @@ TEST_CASE("repository_factory caches instances on repeated calls",
     }
     test_database tdb;
     repository_factory factory(tdb.get());
+
+    SECTION("patients returns same pointer") {
+        auto first = factory.patients();
+        auto second = factory.patients();
+        CHECK(first == second);
+    }
+
+    SECTION("studies returns same pointer") {
+        auto first = factory.studies();
+        auto second = factory.studies();
+        CHECK(first == second);
+    }
 
     SECTION("jobs returns same pointer") {
         auto first = factory.jobs();
@@ -226,6 +240,8 @@ TEST_CASE("repository_factory returns structured canonical and compatibility set
     repository_factory factory(tdb.get());
 
     const auto canonical = factory.canonical_repositories();
+    CHECK(canonical.patients == factory.patients());
+    CHECK(canonical.studies == factory.studies());
     CHECK(canonical.jobs == factory.jobs());
     CHECK(canonical.annotations == factory.annotations());
     CHECK(canonical.routing_rules == factory.routing_rules());
