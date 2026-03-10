@@ -161,7 +161,7 @@ auto extract_sqlite_connection_target(std::string_view connection_string)
 
 auto should_use_native_sqlite(std::string_view connection_string) -> bool {
     const auto target = extract_sqlite_connection_target(connection_string);
-    return !target.empty() && target != ":memory:";
+    return !target.empty();
 }
 
 /**
