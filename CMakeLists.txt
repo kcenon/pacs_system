@@ -92,12 +92,31 @@ function(pacs_apply_warnings target_name)
     endif()
 endfunction()
 
-function(pacs_link_external_dependency target_name visibility build_target install_target)
-    if(TARGET "${build_target}")
-        target_link_libraries(${target_name} ${visibility}
+function(pacs_get_export_bridge_target out_var build_target install_target)
+    if(NOT TARGET "${build_target}")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    string(MAKE_C_IDENTIFIER "${build_target}" _bridge_suffix)
+    set(_bridge_target "pacs_export_dep_${_bridge_suffix}")
+
+    if(NOT TARGET ${_bridge_target})
+        add_library(${_bridge_target} INTERFACE)
+        target_link_libraries(${_bridge_target} INTERFACE
             "$<BUILD_LOCAL_INTERFACE:${build_target}>"
             "$<INSTALL_INTERFACE:${install_target}>"
         )
+        set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_TARGETS ${_bridge_target})
+    endif()
+
+    set(${out_var} ${_bridge_target} PARENT_SCOPE)
+endfunction()
+
+function(pacs_link_external_dependency target_name visibility build_target install_target)
+    pacs_get_export_bridge_target(_bridge_target "${build_target}" "${install_target}")
+    if(_bridge_target)
+        target_link_libraries(${target_name} ${visibility} ${_bridge_target})
     endif()
 endfunction()
 
@@ -116,15 +135,6 @@ function(pacs_register_export_target target_name export_name)
         set_target_properties(${target_name} PROPERTIES EXPORT_NAME ${export_name})
         if(NOT TARGET kcenon::pacs::${export_name})
             add_library(kcenon::pacs::${export_name} ALIAS ${target_name})
-        endif()
-    endif()
-endfunction()
-
-function(pacs_mark_export_dependency target_name package_name)
-    if(TARGET ${target_name})
-        get_target_property(_aliased_target ${target_name} ALIASED_TARGET)
-        if(NOT _aliased_target)
-            set_property(TARGET ${target_name} PROPERTY EXPORT_FIND_PACKAGE_NAME ${package_name})
         endif()
     endif()
 endfunction()
@@ -2043,22 +2053,6 @@ pacs_register_export_target(pacs_workflow workflow)
 pacs_register_export_target(pacs_web web)
 pacs_register_export_target(pacs_integration integration)
 
-set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES
-    "1942b4fa-b2c5-4546-9385-83f254070067"
-)
-
-pacs_mark_export_dependency(container_system ContainerSystem)
-pacs_mark_export_dependency(thread_base ThreadSystem)
-pacs_mark_export_dependency(ThreadSystem ThreadSystem)
-pacs_mark_export_dependency(LoggerSystem LoggerSystem)
-pacs_mark_export_dependency(monitoring_system monitoring_system)
-pacs_mark_export_dependency(database DatabaseSystem)
-pacs_mark_export_dependency(integrated_database DatabaseSystem)
-pacs_mark_export_dependency(charls charls)
-pacs_mark_export_dependency(openjp2 OpenJPEG)
-pacs_mark_export_dependency(openjph openjph)
-pacs_mark_export_dependency(openjphstatic openjph)
-
 set(PACS_SYSTEM_INSTALL_TARGETS
     pacs_core
     pacs_encoding
@@ -2080,6 +2074,12 @@ foreach(_optional_target
         list(APPEND PACS_SYSTEM_INSTALL_TARGETS ${_optional_target})
     endif()
 endforeach()
+
+get_property(PACS_EXPORT_BRIDGE_TARGETS GLOBAL PROPERTY PACS_EXPORT_BRIDGE_TARGETS)
+if(PACS_EXPORT_BRIDGE_TARGETS)
+    list(APPEND PACS_SYSTEM_INSTALL_TARGETS ${PACS_EXPORT_BRIDGE_TARGETS})
+endif()
+list(REMOVE_DUPLICATES PACS_SYSTEM_INSTALL_TARGETS)
 
 set(PACS_SYSTEM_WITH_SQLITE FALSE)
 if(TARGET pacs_storage)
@@ -2183,7 +2183,6 @@ install(EXPORT pacs_systemTargets
     FILE pacs_systemTargets.cmake
     NAMESPACE kcenon::pacs::
     DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
-    EXPORT_PACKAGE_DEPENDENCIES
 )
 
 install(FILES
