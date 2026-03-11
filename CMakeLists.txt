@@ -102,12 +102,6 @@ function(pacs_get_export_bridge_target out_var build_target install_target)
     set(_bridge_target "pacs_export_dep_${_bridge_suffix}")
     set(_bridge_build_link "$<BUILD_LOCAL_INTERFACE:${build_target}>")
 
-    if(build_target STREQUAL "container_system"
-       OR build_target STREQUAL "openjph"
-       OR build_target STREQUAL "openjphstatic")
-        set(_bridge_build_link "$<BUILD_LOCAL_INTERFACE:$<TARGET_LINKER_FILE:${build_target}>>")
-    endif()
-
     if(NOT TARGET ${_bridge_target})
         add_library(${_bridge_target} INTERFACE)
         target_link_libraries(${_bridge_target} INTERFACE
