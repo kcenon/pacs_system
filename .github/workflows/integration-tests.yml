@@ -229,7 +229,7 @@ jobs:
           -DPACS_BUILD_TESTS=ON `
           -DPACS_BUILD_EXAMPLES=ON `
           -DPACS_BUILD_STORAGE=ON `
-          -DVCPKG_MANIFEST_INSTALL=OFF `
+          -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
@@ -493,7 +493,7 @@ jobs:
           -DPACS_BUILD_TESTS=ON `
           -DPACS_BUILD_EXAMPLES=ON `
           -DPACS_BUILD_STORAGE=ON `
-          -DVCPKG_MANIFEST_INSTALL=OFF `
+          -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
@@ -860,7 +860,7 @@ jobs:
           -DPACS_BUILD_TESTS=ON `
           -DPACS_BUILD_EXAMPLES=ON `
           -DPACS_BUILD_STORAGE=ON `
-          -DVCPKG_MANIFEST_INSTALL=OFF `
+          -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
