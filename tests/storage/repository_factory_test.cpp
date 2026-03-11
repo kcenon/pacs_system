@@ -99,6 +99,12 @@ TEST_CASE("repository_factory returns non-null for canonical and compatibility r
 
     SECTION("patients") { CHECK(factory.patients() != nullptr); }
     SECTION("studies") { CHECK(factory.studies() != nullptr); }
+    SECTION("series") { CHECK(factory.series() != nullptr); }
+    SECTION("instances") { CHECK(factory.instances() != nullptr); }
+    SECTION("mpps") { CHECK(factory.mpps() != nullptr); }
+    SECTION("worklist") { CHECK(factory.worklist() != nullptr); }
+    SECTION("ups") { CHECK(factory.ups() != nullptr); }
+    SECTION("audit") { CHECK(factory.audit() != nullptr); }
     SECTION("jobs") { CHECK(factory.jobs() != nullptr); }
     SECTION("annotations") { CHECK(factory.annotations() != nullptr); }
     SECTION("routing_rules") { CHECK(factory.routing_rules() != nullptr); }
@@ -142,6 +148,42 @@ TEST_CASE("repository_factory caches instances on repeated calls",
     SECTION("studies returns same pointer") {
         auto first = factory.studies();
         auto second = factory.studies();
+        CHECK(first == second);
+    }
+
+    SECTION("series returns same pointer") {
+        auto first = factory.series();
+        auto second = factory.series();
+        CHECK(first == second);
+    }
+
+    SECTION("instances returns same pointer") {
+        auto first = factory.instances();
+        auto second = factory.instances();
+        CHECK(first == second);
+    }
+
+    SECTION("mpps returns same pointer") {
+        auto first = factory.mpps();
+        auto second = factory.mpps();
+        CHECK(first == second);
+    }
+
+    SECTION("worklist returns same pointer") {
+        auto first = factory.worklist();
+        auto second = factory.worklist();
+        CHECK(first == second);
+    }
+
+    SECTION("ups returns same pointer") {
+        auto first = factory.ups();
+        auto second = factory.ups();
+        CHECK(first == second);
+    }
+
+    SECTION("audit returns same pointer") {
+        auto first = factory.audit();
+        auto second = factory.audit();
         CHECK(first == second);
     }
 
@@ -242,6 +284,12 @@ TEST_CASE("repository_factory returns structured canonical and compatibility set
     const auto canonical = factory.canonical_repositories();
     CHECK(canonical.patients == factory.patients());
     CHECK(canonical.studies == factory.studies());
+    CHECK(canonical.series == factory.series());
+    CHECK(canonical.instances == factory.instances());
+    CHECK(canonical.mpps == factory.mpps());
+    CHECK(canonical.worklist == factory.worklist());
+    CHECK(canonical.ups == factory.ups());
+    CHECK(canonical.audit == factory.audit());
     CHECK(canonical.jobs == factory.jobs());
     CHECK(canonical.annotations == factory.annotations());
     CHECK(canonical.routing_rules == factory.routing_rules());

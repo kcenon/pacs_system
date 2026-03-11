@@ -1380,6 +1380,28 @@ TEST_CASE("index_database: series insert updates modalities_in_study",
     CHECK(study->modalities_in_study.find("MR") != std::string::npos);
 }
 
+TEST_CASE("index_database: series delete updates modalities_in_study",
+          "[storage][series]") {
+    auto db = create_test_database();
+    auto patient_pk = create_test_patient(*db);
+    auto study_pk = create_test_study(*db, patient_pk, "1.2.3.4.5.6.7");
+
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.1", "CT").is_ok());
+    REQUIRE(db->upsert_series(study_pk, "1.2.3.2", "MR").is_ok());
+
+    REQUIRE(db->delete_series("1.2.3.1").is_ok());
+
+    auto study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->modalities_in_study == "MR");
+
+    REQUIRE(db->delete_series("1.2.3.2").is_ok());
+
+    study = db->find_study("1.2.3.4.5.6.7");
+    REQUIRE(study.has_value());
+    CHECK(study->modalities_in_study.empty());
+}
+
 // ============================================================================
 // Series Ordering Tests
 // ============================================================================

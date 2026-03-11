@@ -231,8 +231,6 @@ auto base_repository<Entity, PrimaryKey>::exists(PrimaryKey id)
     }
 
     auto storage = storage_session();
-    auto builder = storage.create_query_builder();
-
     // Convert primary key to database_value
     database_value pk_value;
     if constexpr (std::is_integral_v<PrimaryKey>) {
@@ -245,29 +243,18 @@ auto base_repository<Entity, PrimaryKey>::exists(PrimaryKey id)
         pk_value = oss.str();
     }
 
-    builder.select({"COUNT(*) as count"})
+    auto builder = storage.create_query_builder();
+    builder.select({pk_column_})
         .from(table_name_)
         .where(pk_column_, "=", pk_value);
 
-    auto query = builder.build();
-    auto result = storage.select(query);
+    auto result = storage.select(builder.build());
 
     if (result.is_err()) {
         return Result<bool>(result.error());
     }
 
-    if (result.value().empty()) {
-        return Result<bool>(false);
-    }
-
-    try {
-        int count = std::stoi(result.value()[0].at("count"));
-        return Result<bool>(count > 0);
-    } catch (const std::exception& e) {
-        return Result<bool>(kcenon::common::error_info{
-            -1, std::string("Failed to parse count: ") + e.what(),
-            "storage"});
-    }
+    return Result<bool>(!result.value().empty());
 }
 
 template <typename Entity, typename PrimaryKey>
@@ -278,10 +265,7 @@ auto base_repository<Entity, PrimaryKey>::count() -> Result<size_t> {
     }
 
     auto storage = storage_session();
-    auto builder = storage.create_query_builder();
-    builder.select({"COUNT(*) as count"}).from(table_name_);
-
-    auto query = builder.build();
+    auto query = std::string("SELECT COUNT(*) as count FROM ") + table_name_;
     auto result = storage.select(query);
 
     if (result.is_err()) {
@@ -293,7 +277,17 @@ auto base_repository<Entity, PrimaryKey>::count() -> Result<size_t> {
     }
 
     try {
-        size_t count = std::stoull(result.value()[0].at("count"));
+        const auto& row = result.value()[0];
+        auto it = row.find("count");
+        if (it == row.end() && !row.empty()) {
+            it = row.begin();
+        }
+
+        if (it == row.end() || it->second.empty()) {
+            return Result<size_t>(static_cast<size_t>(0));
+        }
+
+        size_t count = std::stoull(it->second);
         return Result<size_t>(count);
     } catch (const std::exception& e) {
         return Result<size_t>(kcenon::common::error_info{

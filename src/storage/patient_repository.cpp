@@ -387,12 +387,7 @@ auto patient_repository::patient_count() -> Result<size_t> {
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    auto count_sql = builder.select(std::vector<std::string>{"COUNT(*) AS cnt"})
-                         .from("patients")
-                         .build();
-
-    auto result = db()->select(count_sql);
+    auto result = db()->select("SELECT COUNT(*) AS count FROM patients;");
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
@@ -402,7 +397,11 @@ auto patient_repository::patient_count() -> Result<size_t> {
 
     if (!result.value().empty()) {
         const auto& row = result.value()[0];
-        auto it = row.find("cnt");
+        auto it = row.find("count");
+        if (it == row.end() && !row.empty()) {
+            it = row.begin();
+        }
+
         if (it != row.end() && !it->second.empty()) {
             try {
                 return ok(static_cast<size_t>(std::stoll(it->second)));
