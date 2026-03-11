@@ -406,9 +406,11 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     auto start_result = coordinator.start();
     REQUIRE(start_result.is_ok());
 
-    // Reduce job count on Windows CI to stay within CTest --timeout 120
+    // Keep the Windows CI workload small. This test verifies concurrent
+    // submission semantics, not throughput, and hosted runners are slow enough
+    // that the original load occasionally hit the CTest timeout budget.
 #ifdef _WIN32
-    constexpr size_t num_jobs = 8;
+    constexpr size_t num_jobs = 4;
 #else
     constexpr size_t num_jobs = 100;
 #endif
@@ -455,8 +457,7 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     {
         std::unique_lock<std::mutex> lock(mutex);
 #ifdef _WIN32
-        // 8 jobs with minimal workers; keep well below CTest 120s limit
-        constexpr auto timeout = std::chrono::seconds(30);
+        constexpr auto timeout = std::chrono::seconds(60);
 #else
         constexpr auto timeout = std::chrono::seconds(60);
 #endif

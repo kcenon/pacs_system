@@ -165,7 +165,7 @@ auto measurement_repository::count(const measurement_query& query)
     }
 
     auto builder = query_builder();
-    builder.select({"COUNT(*) as count"}).from(table_name());
+    builder.select({"pk"}).from(table_name());
 
     // Build compound condition
     std::optional<database::query_condition> condition;
@@ -206,11 +206,7 @@ auto measurement_repository::count(const measurement_query& query)
         return Result<size_t>(result.error());
     }
 
-    if (result.value().empty()) {
-        return Result<size_t>(static_cast<size_t>(0));
-    }
-
-    return Result<size_t>(std::stoull(result.value()[0].at("count")));
+    return Result<size_t>(result.value().size());
 }
 
 // =============================================================================

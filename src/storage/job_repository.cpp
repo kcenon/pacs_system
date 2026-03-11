@@ -43,6 +43,8 @@
 #include <cstring>
 #include <sstream>
 
+#include <pacs/compat/format.hpp>
+
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
 namespace pacs::storage {
@@ -631,12 +633,9 @@ auto job_repository::count_by_status(client::job_status status)
             -1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    builder.select({"COUNT(*) as count"})
-        .from(table_name())
-        .where("status", "=", std::string(client::to_string(status)));
-
-    auto result = storage_session().select(builder.build());
+    auto result = storage_session().select(pacs::compat::format(
+        "SELECT COUNT(*) as count FROM {} WHERE status = '{}'",
+        table_name(), std::string(client::to_string(status))));
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -659,14 +658,11 @@ auto job_repository::count_completed_today() -> Result<size_t> {
     auto now = std::chrono::system_clock::now();
     auto today_str = format_timestamp(now).substr(0, 10);  // YYYY-MM-DD
 
-    auto builder = query_builder();
-    builder.select({"COUNT(*) as count"})
-        .from(table_name())
-        .where("status", "=", std::string("completed"));
-
     // Note: For date comparison, we use the date portion of completed_at
     // This requires database-specific handling - using LIKE for portability
-    auto result = storage_session().select(builder.build());
+    auto result = storage_session().select(pacs::compat::format(
+        "SELECT COUNT(*) as count FROM {} WHERE status = 'completed'",
+        table_name()));
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }
@@ -685,12 +681,9 @@ auto job_repository::count_failed_today() -> Result<size_t> {
             -1, "Database not connected", "storage");
     }
 
-    auto builder = query_builder();
-    builder.select({"COUNT(*) as count"})
-        .from(table_name())
-        .where("status", "=", std::string("failed"));
-
-    auto result = storage_session().select(builder.build());
+    auto result = storage_session().select(pacs::compat::format(
+        "SELECT COUNT(*) as count FROM {} WHERE status = 'failed'",
+        table_name()));
     if (result.is_err()) {
         return Result<size_t>(result.error());
     }

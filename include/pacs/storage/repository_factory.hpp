@@ -54,6 +54,12 @@ namespace pacs::storage {
 class pacs_database_adapter;
 class patient_repository;
 class study_repository;
+class series_repository;
+class instance_repository;
+class mpps_repository;
+class worklist_repository;
+class ups_repository;
+class audit_repository;
 class job_repository;
 class annotation_repository;
 class routing_repository;
@@ -107,6 +113,12 @@ struct prefetch_repository_set {
 struct canonical_repository_set {
     std::shared_ptr<patient_repository> patients;
     std::shared_ptr<study_repository> studies;
+    std::shared_ptr<series_repository> series;
+    std::shared_ptr<instance_repository> instances;
+    std::shared_ptr<mpps_repository> mpps;
+    std::shared_ptr<worklist_repository> worklist;
+    std::shared_ptr<ups_repository> ups;
+    std::shared_ptr<audit_repository> audit;
     std::shared_ptr<job_repository> jobs;
     std::shared_ptr<annotation_repository> annotations;
     std::shared_ptr<routing_repository> routing_rules;
@@ -210,6 +222,48 @@ public:
      * @return Shared pointer to study repository
      */
     [[nodiscard]] auto studies() -> std::shared_ptr<study_repository>;
+
+    /**
+     * @brief Get or create series repository
+     *
+     * @return Shared pointer to series repository
+     */
+    [[nodiscard]] auto series() -> std::shared_ptr<series_repository>;
+
+    /**
+     * @brief Get or create instance repository
+     *
+     * @return Shared pointer to instance repository
+     */
+    [[nodiscard]] auto instances() -> std::shared_ptr<instance_repository>;
+
+    /**
+     * @brief Get or create MPPS repository
+     *
+     * @return Shared pointer to MPPS repository
+     */
+    [[nodiscard]] auto mpps() -> std::shared_ptr<mpps_repository>;
+
+    /**
+     * @brief Get or create worklist repository
+     *
+     * @return Shared pointer to worklist repository
+     */
+    [[nodiscard]] auto worklist() -> std::shared_ptr<worklist_repository>;
+
+    /**
+     * @brief Get or create UPS repository
+     *
+     * @return Shared pointer to UPS repository
+     */
+    [[nodiscard]] auto ups() -> std::shared_ptr<ups_repository>;
+
+    /**
+     * @brief Get or create audit repository
+     *
+     * @return Shared pointer to audit repository
+     */
+    [[nodiscard]] auto audit() -> std::shared_ptr<audit_repository>;
 
     /**
      * @brief Get or create job repository
@@ -361,6 +415,12 @@ private:
     /// Lazy-initialized repositories
     std::shared_ptr<patient_repository> patients_;
     std::shared_ptr<study_repository> studies_;
+    std::shared_ptr<series_repository> series_;
+    std::shared_ptr<instance_repository> instances_;
+    std::shared_ptr<mpps_repository> mpps_;
+    std::shared_ptr<worklist_repository> worklist_;
+    std::shared_ptr<ups_repository> ups_;
+    std::shared_ptr<audit_repository> audit_;
     std::shared_ptr<job_repository> jobs_;
     std::shared_ptr<annotation_repository> annotations_;
     std::shared_ptr<routing_repository> routing_rules_;

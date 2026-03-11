@@ -46,8 +46,14 @@
 #include "pacs/storage/pacs_database_adapter.hpp"
 
 #include "pacs/storage/annotation_repository.hpp"
+#include "pacs/storage/audit_repository.hpp"
+#include "pacs/storage/instance_repository.hpp"
+#include "pacs/storage/mpps_repository.hpp"
 #include "pacs/storage/patient_repository.hpp"
+#include "pacs/storage/series_repository.hpp"
 #include "pacs/storage/study_repository.hpp"
+#include "pacs/storage/ups_repository.hpp"
+#include "pacs/storage/worklist_repository.hpp"
 #include "pacs/storage/commitment_repository.hpp"
 #include "pacs/storage/job_repository.hpp"
 #include "pacs/storage/key_image_repository.hpp"
@@ -83,6 +89,48 @@ auto repository_factory::studies() -> std::shared_ptr<study_repository> {
         studies_ = std::make_shared<study_repository>(db_);
     }
     return studies_;
+}
+
+auto repository_factory::series() -> std::shared_ptr<series_repository> {
+    if (!series_) {
+        series_ = std::make_shared<series_repository>(db_);
+    }
+    return series_;
+}
+
+auto repository_factory::instances() -> std::shared_ptr<instance_repository> {
+    if (!instances_) {
+        instances_ = std::make_shared<instance_repository>(db_);
+    }
+    return instances_;
+}
+
+auto repository_factory::mpps() -> std::shared_ptr<mpps_repository> {
+    if (!mpps_) {
+        mpps_ = std::make_shared<mpps_repository>(db_);
+    }
+    return mpps_;
+}
+
+auto repository_factory::worklist() -> std::shared_ptr<worklist_repository> {
+    if (!worklist_) {
+        worklist_ = std::make_shared<worklist_repository>(db_);
+    }
+    return worklist_;
+}
+
+auto repository_factory::ups() -> std::shared_ptr<ups_repository> {
+    if (!ups_) {
+        ups_ = std::make_shared<ups_repository>(db_);
+    }
+    return ups_;
+}
+
+auto repository_factory::audit() -> std::shared_ptr<audit_repository> {
+    if (!audit_) {
+        audit_ = std::make_shared<audit_repository>(db_);
+    }
+    return audit_;
 }
 
 auto repository_factory::jobs() -> std::shared_ptr<job_repository> {
@@ -223,6 +271,12 @@ auto repository_factory::canonical_repositories() -> canonical_repository_set {
     return {
         .patients = patients(),
         .studies = studies(),
+        .series = series(),
+        .instances = instances(),
+        .mpps = mpps(),
+        .worklist = worklist(),
+        .ups = ups(),
+        .audit = audit(),
         .jobs = jobs(),
         .annotations = annotations(),
         .routing_rules = routing_rules(),

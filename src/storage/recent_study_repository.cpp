@@ -202,7 +202,7 @@ auto recent_study_repository::count_for_user(std::string_view user_id)
     }
 
     auto builder = storage_session().create_query_builder();
-    builder.select({"COUNT(*) as count"})
+    builder.select({"pk"})
         .from(table_name())
         .where("user_id", "=", std::string(user_id));
 
@@ -213,19 +213,7 @@ auto recent_study_repository::count_for_user(std::string_view user_id)
         return Result<size_t>(result.error());
     }
 
-    if (result.value().empty()) {
-        return Result<size_t>(static_cast<size_t>(0));
-    }
-
-    try {
-        size_t cnt = std::stoull(result.value()[0].at("count"));
-        return Result<size_t>(cnt);
-    } catch (const std::exception& e) {
-        return Result<size_t>(kcenon::common::error_info{
-            -1,
-            std::string("Failed to parse count: ") + e.what(),
-            "recent_study_repository"});
-    }
+    return Result<size_t>(result.value().size());
 }
 
 auto recent_study_repository::was_recently_accessed(
@@ -242,7 +230,7 @@ auto recent_study_repository::was_recently_accessed(
         "study_uid", "=", std::string(study_uid));
 
     auto builder = storage_session().create_query_builder();
-    builder.select({"COUNT(*) as count"})
+    builder.select({"pk"})
         .from(table_name())
         .where(user_cond && study_cond);
 
@@ -253,19 +241,7 @@ auto recent_study_repository::was_recently_accessed(
         return Result<bool>(result.error());
     }
 
-    if (result.value().empty()) {
-        return Result<bool>(false);
-    }
-
-    try {
-        int cnt = std::stoi(result.value()[0].at("count"));
-        return Result<bool>(cnt > 0);
-    } catch (const std::exception& e) {
-        return Result<bool>(kcenon::common::error_info{
-            -1,
-            std::string("Failed to parse count: ") + e.what(),
-            "recent_study_repository"});
-    }
+    return Result<bool>(!result.value().empty());
 }
 
 // =============================================================================
