@@ -109,7 +109,12 @@ function(pacs_get_export_bridge_target out_var build_target install_target)
         # install(EXPORT) validation pre-scans INTERFACE_LINK_LIBRARIES
         # for target names before evaluating generator expressions,
         # which breaks BUILD_LOCAL_INTERFACE wrapping of local targets.
-        target_link_libraries(${_bridge_target} INTERFACE
+        #
+        # Set the interface property directly instead of using
+        # target_link_libraries() so CMake does not register a build-tree
+        # target dependency when the install-side package target name happens
+        # to exist as a local alias during the unified build.
+        set_property(TARGET ${_bridge_target} APPEND PROPERTY INTERFACE_LINK_LIBRARIES
             "$<INSTALL_INTERFACE:${install_target}>"
         )
 
