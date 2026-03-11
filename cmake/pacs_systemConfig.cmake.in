@@ -3,8 +3,6 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(Threads REQUIRED)
-find_dependency(OpenSSL REQUIRED)
-find_dependency(ZLIB REQUIRED)
 find_dependency(common_system CONFIG REQUIRED)
 find_dependency(ContainerSystem CONFIG REQUIRED)
 find_dependency(NetworkSystem CONFIG REQUIRED)
