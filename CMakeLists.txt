@@ -100,34 +100,18 @@ function(pacs_get_export_bridge_target out_var build_target install_target)
 
     string(MAKE_C_IDENTIFIER "${build_target}" _bridge_suffix)
     set(_bridge_target "pacs_export_dep_${_bridge_suffix}")
-    set(_bridge_build_link "$<BUILD_LOCAL_INTERFACE:${build_target}>")
 
     if(NOT TARGET ${_bridge_target})
         add_library(${_bridge_target} INTERFACE)
+
+        # Bridge target carries ONLY the install-time dependency.
+        # No local build-target references here — CMake 3.31's
+        # install(EXPORT) validation pre-scans INTERFACE_LINK_LIBRARIES
+        # for target names before evaluating generator expressions,
+        # which breaks BUILD_LOCAL_INTERFACE wrapping of local targets.
         target_link_libraries(${_bridge_target} INTERFACE
-            "${_bridge_build_link}"
             "$<INSTALL_INTERFACE:${install_target}>"
         )
-
-        if(build_target STREQUAL "container_system")
-            get_target_property(_container_include_dirs ${build_target} INTERFACE_INCLUDE_DIRECTORIES)
-            if(_container_include_dirs AND NOT _container_include_dirs STREQUAL "_container_include_dirs-NOTFOUND")
-                foreach(_include_dir IN LISTS _container_include_dirs)
-                    target_include_directories(${_bridge_target} INTERFACE
-                        "$<BUILD_LOCAL_INTERFACE:${_include_dir}>"
-                    )
-                endforeach()
-            endif()
-
-            get_target_property(_container_compile_defs ${build_target} INTERFACE_COMPILE_DEFINITIONS)
-            if(_container_compile_defs AND NOT _container_compile_defs STREQUAL "_container_compile_defs-NOTFOUND")
-                foreach(_compile_def IN LISTS _container_compile_defs)
-                    target_compile_definitions(${_bridge_target} INTERFACE
-                        "$<BUILD_LOCAL_INTERFACE:${_compile_def}>"
-                    )
-                endforeach()
-            endif()
-        endif()
 
         set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_TARGETS ${_bridge_target})
     endif()
@@ -138,7 +122,16 @@ endfunction()
 function(pacs_link_external_dependency target_name visibility build_target install_target)
     pacs_get_export_bridge_target(_bridge_target "${build_target}" "${install_target}")
     if(_bridge_target)
-        target_link_libraries(${target_name} ${visibility} ${_bridge_target})
+        # Build time: link directly to the local build target.
+        # BUILD_LOCAL_INTERFACE ensures this is excluded from all exports.
+        target_link_libraries(${target_name} ${visibility}
+            "$<BUILD_LOCAL_INTERFACE:${build_target}>"
+        )
+        # Install time: link to the bridge target (which provides
+        # the installed package dependency via INSTALL_INTERFACE).
+        target_link_libraries(${target_name} ${visibility}
+            "$<INSTALL_INTERFACE:${_bridge_target}>"
+        )
     endif()
 endfunction()
 
