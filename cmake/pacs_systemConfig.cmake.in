@@ -67,6 +67,8 @@ endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/pacs_systemTargets.cmake")
 
+@PACS_SYSTEM_BRIDGE_TARGET_SETUP@
+
 set(pacs_system_FOUND TRUE)
 set(PACS_SYSTEM_FOUND TRUE)
 

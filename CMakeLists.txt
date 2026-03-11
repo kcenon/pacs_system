@@ -104,18 +104,12 @@ function(pacs_get_export_bridge_target out_var build_target install_target)
     if(NOT TARGET ${_bridge_target})
         add_library(${_bridge_target} INTERFACE)
 
-        # Bridge target carries ONLY the install-time dependency.
-        # No local build-target references here — CMake 3.31's
-        # install(EXPORT) validation pre-scans INTERFACE_LINK_LIBRARIES
-        # for target names before evaluating generator expressions,
-        # which breaks BUILD_LOCAL_INTERFACE wrapping of local targets.
-        #
-        # Set the interface property directly instead of using
-        # target_link_libraries() so CMake does not register a build-tree
-        # target dependency when the install-side package target name happens
-        # to exist as a local alias during the unified build.
-        set_property(TARGET ${_bridge_target} APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-            "$<INSTALL_INTERFACE:${install_target}>"
+        # Leave bridge targets link-empty during export generation.
+        # The installed package config hydrates them after find_dependency()
+        # so CMake never resolves install-side package targets back to local
+        # unified-build aliases while validating install(EXPORT).
+        set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_MAPPINGS
+            "${_bridge_target}=${install_target}"
         )
 
         set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_TARGETS ${_bridge_target})
@@ -2170,6 +2164,25 @@ set(PACS_SYSTEM_WITH_AZURE_SDK FALSE)
 if(TARGET pacs_storage AND PACS_WITH_AZURE_SDK AND azure-storage-blobs-cpp_FOUND)
     set(PACS_SYSTEM_WITH_AZURE_SDK TRUE)
 endif()
+
+set(PACS_SYSTEM_BRIDGE_TARGET_SETUP "")
+get_property(PACS_EXPORT_BRIDGE_MAPPINGS GLOBAL PROPERTY PACS_EXPORT_BRIDGE_MAPPINGS)
+foreach(_bridge_mapping IN LISTS PACS_EXPORT_BRIDGE_MAPPINGS)
+    string(FIND "${_bridge_mapping}" "=" _bridge_sep)
+    if(_bridge_sep LESS 0)
+        continue()
+    endif()
+
+    string(SUBSTRING "${_bridge_mapping}" 0 ${_bridge_sep} _bridge_target_name)
+    math(EXPR _bridge_value_index "${_bridge_sep} + 1")
+    string(SUBSTRING "${_bridge_mapping}" ${_bridge_value_index} -1 _bridge_install_target)
+
+    string(APPEND PACS_SYSTEM_BRIDGE_TARGET_SETUP
+        "if(TARGET kcenon::pacs::${_bridge_target_name})\n"
+        "  set_property(TARGET kcenon::pacs::${_bridge_target_name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES \"${_bridge_install_target}\")\n"
+        "endif()\n"
+    )
+endforeach()
 
 install(DIRECTORY include/pacs
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
