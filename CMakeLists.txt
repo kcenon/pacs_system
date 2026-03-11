@@ -100,13 +100,41 @@ function(pacs_get_export_bridge_target out_var build_target install_target)
 
     string(MAKE_C_IDENTIFIER "${build_target}" _bridge_suffix)
     set(_bridge_target "pacs_export_dep_${_bridge_suffix}")
+    set(_bridge_build_link "$<BUILD_LOCAL_INTERFACE:${build_target}>")
+
+    if(build_target STREQUAL "container_system"
+       OR build_target STREQUAL "openjph"
+       OR build_target STREQUAL "openjphstatic")
+        set(_bridge_build_link "$<BUILD_LOCAL_INTERFACE:$<TARGET_LINKER_FILE:${build_target}>>")
+    endif()
 
     if(NOT TARGET ${_bridge_target})
         add_library(${_bridge_target} INTERFACE)
         target_link_libraries(${_bridge_target} INTERFACE
-            "$<BUILD_LOCAL_INTERFACE:${build_target}>"
+            "${_bridge_build_link}"
             "$<INSTALL_INTERFACE:${install_target}>"
         )
+
+        if(build_target STREQUAL "container_system")
+            get_target_property(_container_include_dirs ${build_target} INTERFACE_INCLUDE_DIRECTORIES)
+            if(_container_include_dirs AND NOT _container_include_dirs STREQUAL "_container_include_dirs-NOTFOUND")
+                foreach(_include_dir IN LISTS _container_include_dirs)
+                    target_include_directories(${_bridge_target} INTERFACE
+                        "$<BUILD_LOCAL_INTERFACE:${_include_dir}>"
+                    )
+                endforeach()
+            endif()
+
+            get_target_property(_container_compile_defs ${build_target} INTERFACE_COMPILE_DEFINITIONS)
+            if(_container_compile_defs AND NOT _container_compile_defs STREQUAL "_container_compile_defs-NOTFOUND")
+                foreach(_compile_def IN LISTS _container_compile_defs)
+                    target_compile_definitions(${_bridge_target} INTERFACE
+                        "$<BUILD_LOCAL_INTERFACE:${_compile_def}>"
+                    )
+                endforeach()
+            endif()
+        endif()
+
         set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_TARGETS ${_bridge_target})
     endif()
 
