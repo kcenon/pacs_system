@@ -1,0 +1,107 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "kcenon-pacs-system",
+  "version": "0.1.0",
+  "port-version": 0,
+  "description": "Modern C++20 PACS implementation for DICOM medical imaging",
+  "homepage": "https://github.com/kcenon/pacs_system",
+  "license": "BSD-3-Clause",
+  "supports": "!(uwp | xbox)",
+  "dependencies": [
+    "kcenon-common-system",
+    "kcenon-container-system",
+    "kcenon-network-system",
+    { "name": "vcpkg-cmake", "host": true },
+    { "name": "vcpkg-cmake-config", "host": true }
+  ],
+  "overrides": [
+    { "name": "sqlite3", "version": "3.45.1" },
+    { "name": "openssl", "version": "3.3.0" },
+    { "name": "libjpeg-turbo", "version": "3.0.2" },
+    { "name": "libpng", "version": "1.6.43" },
+    { "name": "openjpeg", "version": "2.5.2" },
+    { "name": "charls", "version": "2.4.2" },
+    { "name": "crow", "version": "1.2.1" },
+    { "name": "gtest", "version": "1.14.0" },
+    { "name": "benchmark", "version": "1.8.3" }
+  ],
+  "features": {
+    "storage": {
+      "description": "SQLite3-based PACS storage",
+      "dependencies": [
+        {
+          "name": "sqlite3",
+          "version>=": "3.45.1"
+        }
+      ]
+    },
+    "codecs": {
+      "description": "Optional image compression codecs (JPEG, JPEG2000, JPEG-LS, PNG)",
+      "dependencies": [
+        {
+          "name": "libjpeg-turbo",
+          "version>=": "3.0.2"
+        },
+        {
+          "name": "libpng",
+          "version>=": "1.6.43"
+        },
+        {
+          "name": "openjpeg",
+          "version>=": "2.5.2"
+        },
+        {
+          "name": "charls",
+          "version>=": "2.4.2"
+        }
+      ]
+    },
+    "ssl": {
+      "description": "TLS/SSL support for secure DICOM associations",
+      "dependencies": [
+        {
+          "name": "openssl",
+          "version>=": "3.0.0"
+        }
+      ]
+    },
+    "aws": {
+      "description": "AWS S3 integration for cloud-based PACS storage",
+      "dependencies": [
+        {
+          "name": "aws-sdk-cpp",
+          "default-features": false,
+          "features": ["s3"]
+        }
+      ]
+    },
+    "azure": {
+      "description": "Azure Blob storage integration for cloud-based PACS storage",
+      "dependencies": [
+        "azure-storage-blobs-cpp"
+      ]
+    },
+    "rest-api": {
+      "description": "DICOMweb REST API via Crow HTTP framework",
+      "dependencies": [
+        {
+          "name": "crow",
+          "version>=": "1.2.1"
+        }
+      ]
+    },
+    "testing": {
+      "description": "Build unit tests and benchmarks",
+      "dependencies": [
+        {
+          "name": "gtest",
+          "version>=": "1.14.0",
+          "features": ["gmock"]
+        },
+        {
+          "name": "benchmark"
+        }
+      ]
+    }
+  }
+}
