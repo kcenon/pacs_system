@@ -120,6 +120,15 @@ function(pacs_register_export_target target_name export_name)
     endif()
 endfunction()
 
+function(pacs_mark_export_dependency target_name package_name)
+    if(TARGET ${target_name})
+        get_target_property(_aliased_target ${target_name} ALIASED_TARGET)
+        if(NOT _aliased_target)
+            set_property(TARGET ${target_name} PROPERTY EXPORT_FIND_PACKAGE_NAME ${package_name})
+        endif()
+    endif()
+endfunction()
+
 ##################################################
 # Required Dependencies (Tier 0-4)
 ##################################################
@@ -2034,6 +2043,22 @@ pacs_register_export_target(pacs_workflow workflow)
 pacs_register_export_target(pacs_web web)
 pacs_register_export_target(pacs_integration integration)
 
+set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES
+    "1942b4fa-b2c5-4546-9385-83f254070067"
+)
+
+pacs_mark_export_dependency(container_system ContainerSystem)
+pacs_mark_export_dependency(thread_base ThreadSystem)
+pacs_mark_export_dependency(ThreadSystem ThreadSystem)
+pacs_mark_export_dependency(LoggerSystem LoggerSystem)
+pacs_mark_export_dependency(monitoring_system monitoring_system)
+pacs_mark_export_dependency(database DatabaseSystem)
+pacs_mark_export_dependency(integrated_database DatabaseSystem)
+pacs_mark_export_dependency(charls charls)
+pacs_mark_export_dependency(openjp2 OpenJPEG)
+pacs_mark_export_dependency(openjph openjph)
+pacs_mark_export_dependency(openjphstatic openjph)
+
 set(PACS_SYSTEM_INSTALL_TARGETS
     pacs_core
     pacs_encoding
@@ -2158,6 +2183,7 @@ install(EXPORT pacs_systemTargets
     FILE pacs_systemTargets.cmake
     NAMESPACE kcenon::pacs::
     DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
+    EXPORT_PACKAGE_DEPENDENCIES
 )
 
 install(FILES
