@@ -20,6 +20,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(PACS_SYSTEM_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/pacs_system")
+
 ##################################################
 # Dependency Chain Documentation (Option A)
 #
@@ -84,6 +89,67 @@ endif()
 function(pacs_apply_warnings target_name)
     if(TARGET ${target_name} AND PACS_WARNING_FLAGS)
         target_compile_options(${target_name} PRIVATE ${PACS_WARNING_FLAGS})
+    endif()
+endfunction()
+
+function(pacs_get_export_bridge_target out_var build_target install_target)
+    if(NOT TARGET "${build_target}")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    string(MAKE_C_IDENTIFIER "${build_target}" _bridge_suffix)
+    set(_bridge_target "pacs_export_dep_${_bridge_suffix}")
+
+    if(NOT TARGET ${_bridge_target})
+        add_library(${_bridge_target} INTERFACE)
+
+        # Leave bridge targets link-empty during export generation.
+        # The installed package config hydrates them after find_dependency()
+        # so CMake never resolves install-side package targets back to local
+        # unified-build aliases while validating install(EXPORT).
+        set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_MAPPINGS
+            "${_bridge_target}=${install_target}"
+        )
+
+        set_property(GLOBAL APPEND PROPERTY PACS_EXPORT_BRIDGE_TARGETS ${_bridge_target})
+    endif()
+
+    set(${out_var} ${_bridge_target} PARENT_SCOPE)
+endfunction()
+
+function(pacs_link_external_dependency target_name visibility build_target install_target)
+    pacs_get_export_bridge_target(_bridge_target "${build_target}" "${install_target}")
+    if(_bridge_target)
+        # Build time: link directly to the local build target.
+        # BUILD_LOCAL_INTERFACE ensures this is excluded from all exports.
+        target_link_libraries(${target_name} ${visibility}
+            "$<BUILD_LOCAL_INTERFACE:${build_target}>"
+        )
+        # Install time: link to the bridge target (which provides
+        # the installed package dependency via INSTALL_INTERFACE).
+        target_link_libraries(${target_name} ${visibility}
+            "$<INSTALL_INTERFACE:${_bridge_target}>"
+        )
+    endif()
+endfunction()
+
+function(pacs_add_build_interface_include_dirs target_name visibility)
+    foreach(_dir IN ITEMS ${ARGN})
+        if(_dir)
+            target_include_directories(${target_name} ${visibility}
+                "$<BUILD_INTERFACE:${_dir}>"
+            )
+        endif()
+    endforeach()
+endfunction()
+
+function(pacs_register_export_target target_name export_name)
+    if(TARGET ${target_name})
+        set_target_properties(${target_name} PROPERTIES EXPORT_NAME ${export_name})
+        if(NOT TARGET kcenon::pacs::${export_name})
+            add_library(kcenon::pacs::${export_name} ALIAS ${target_name})
+        endif()
     endif()
 endfunction()
 
@@ -779,6 +845,27 @@ message(STATUS "")
 message(STATUS "=== Dependency Chain: VALID ===")
 message(STATUS "")
 
+if(PACS_COMMON_SYSTEM_INCLUDE_DIR AND NOT TARGET pacs_common_system_headers)
+    add_library(pacs_common_system_headers INTERFACE)
+    target_include_directories(pacs_common_system_headers INTERFACE
+        "${PACS_COMMON_SYSTEM_INCLUDE_DIR}"
+    )
+endif()
+
+if(PACS_THREAD_SYSTEM_INCLUDE_DIR AND NOT TARGET pacs_thread_system_headers)
+    add_library(pacs_thread_system_headers INTERFACE)
+    target_include_directories(pacs_thread_system_headers INTERFACE
+        "${PACS_THREAD_SYSTEM_INCLUDE_DIR}"
+    )
+endif()
+
+if(PACS_MONITORING_SYSTEM_INCLUDE_DIR AND NOT TARGET pacs_monitoring_system_headers)
+    add_library(pacs_monitoring_system_headers INTERFACE)
+    target_include_directories(pacs_monitoring_system_headers INTERFACE
+        "${PACS_MONITORING_SYSTEM_INCLUDE_DIR}"
+    )
+endif()
+
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -806,7 +893,12 @@ target_include_directories(pacs_core
 
 # Link common_system (Tier 0) - Result<T> pattern
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-    target_include_directories(pacs_core PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    pacs_link_external_dependency(
+        pacs_core
+        PUBLIC
+        pacs_common_system_headers
+        kcenon::common_system
+    )
     # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
     # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
     target_compile_definitions(pacs_core PUBLIC
@@ -817,7 +909,12 @@ endif()
 
 # Link container_system (Tier 1) - DICOM serialization
 if(TARGET container_system)
-    target_link_libraries(pacs_core PUBLIC container_system)
+    pacs_link_external_dependency(
+        pacs_core
+        PUBLIC
+        container_system
+        ContainerSystem::container
+    )
     target_compile_definitions(pacs_core PUBLIC PACS_WITH_CONTAINER_SYSTEM)
 endif()
 
@@ -876,7 +973,11 @@ endif()
 if(PACS_JPEG_FOUND)
     target_link_libraries(pacs_encoding PUBLIC ${PACS_JPEG_TARGET})
     if(PACS_JPEG_INCLUDE_DIR)
-        target_include_directories(pacs_encoding PUBLIC ${PACS_JPEG_INCLUDE_DIR})
+        pacs_add_build_interface_include_dirs(
+            pacs_encoding
+            PUBLIC
+            ${PACS_JPEG_INCLUDE_DIR}
+        )
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG_CODEC)
     message(STATUS "  [OK] pacs_encoding: JPEG codec enabled")
@@ -884,12 +985,23 @@ endif()
 
 # Link OpenJPEG for JPEG 2000 compression codec
 if(PACS_JPEG2000_FOUND)
-    if(TARGET openjp2)
-        target_link_libraries(pacs_encoding PUBLIC openjp2)
+    if(TARGET OpenJPEG::OpenJPEG)
+        target_link_libraries(pacs_encoding PUBLIC OpenJPEG::OpenJPEG)
+    elseif(TARGET openjp2)
+        pacs_link_external_dependency(
+            pacs_encoding
+            PUBLIC
+            openjp2
+            openjp2
+        )
     elseif(OPENJPEG_LIBRARIES)
         target_link_libraries(pacs_encoding PUBLIC ${OPENJPEG_LIBRARIES})
         if(OPENJPEG_INCLUDE_DIRS)
-            target_include_directories(pacs_encoding PUBLIC ${OPENJPEG_INCLUDE_DIRS})
+            pacs_add_build_interface_include_dirs(
+                pacs_encoding
+                PUBLIC
+                ${OPENJPEG_INCLUDE_DIRS}
+            )
         endif()
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEG2000_CODEC)
@@ -899,13 +1011,22 @@ endif()
 # Link CharLS for JPEG-LS compression codec
 if(PACS_JPEGLS_FOUND)
     if(TARGET charls)
-        target_link_libraries(pacs_encoding PUBLIC charls)
+        pacs_link_external_dependency(
+            pacs_encoding
+            PUBLIC
+            charls
+            charls
+        )
     elseif(TARGET charls::charls)
         target_link_libraries(pacs_encoding PUBLIC charls::charls)
     elseif(CHARLS_LIBRARIES)
         target_link_libraries(pacs_encoding PUBLIC ${CHARLS_LIBRARIES})
         if(CHARLS_INCLUDE_DIRS)
-            target_include_directories(pacs_encoding PUBLIC ${CHARLS_INCLUDE_DIRS})
+            pacs_add_build_interface_include_dirs(
+                pacs_encoding
+                PUBLIC
+                ${CHARLS_INCLUDE_DIRS}
+            )
         endif()
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_JPEGLS_CODEC)
@@ -915,20 +1036,38 @@ endif()
 # Link OpenJPH for HTJ2K compression codec
 if(PACS_HTJ2K_FOUND)
     if(TARGET openjphstatic)
-        target_link_libraries(pacs_encoding PUBLIC openjphstatic)
+        pacs_link_external_dependency(
+            pacs_encoding
+            PUBLIC
+            openjphstatic
+            openjph
+        )
     elseif(TARGET openjph::openjph)
         target_link_libraries(pacs_encoding PUBLIC openjph::openjph)
     elseif(TARGET openjph)
-        target_link_libraries(pacs_encoding PUBLIC openjph)
+        pacs_link_external_dependency(
+            pacs_encoding
+            PUBLIC
+            openjph
+            openjph
+        )
     elseif(OPENJPH_LIBRARIES)
         target_link_libraries(pacs_encoding PUBLIC ${OPENJPH_LIBRARIES})
         if(OPENJPH_INCLUDE_DIRS)
-            target_include_directories(pacs_encoding PUBLIC ${OPENJPH_INCLUDE_DIRS})
+            pacs_add_build_interface_include_dirs(
+                pacs_encoding
+                PUBLIC
+                ${OPENJPH_INCLUDE_DIRS}
+            )
         endif()
     endif()
     # FetchContent compatibility: add include bridge for openjph/ prefix
     if(DEFINED _openjph_compat_include)
-        target_include_directories(pacs_encoding PUBLIC "${_openjph_compat_include}")
+        pacs_add_build_interface_include_dirs(
+            pacs_encoding
+            PUBLIC
+            "${_openjph_compat_include}"
+        )
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_HTJ2K_CODEC)
     message(STATUS "  [OK] pacs_encoding: HTJ2K codec enabled")
@@ -977,23 +1116,42 @@ target_link_libraries(pacs_network
 
 # Link network_system (Tier 4) - DICOM PDU/Association
 if(TARGET NetworkSystem)
-    target_link_libraries(pacs_network PUBLIC NetworkSystem)
+    pacs_link_external_dependency(
+        pacs_network
+        PUBLIC
+        NetworkSystem
+        NetworkSystem::NetworkSystem
+    )
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
 endif()
 
 # Link thread_system (Tier 1) - for accept_worker
 if(TARGET ThreadSystem)
-    target_link_libraries(pacs_network PUBLIC ThreadSystem)
+    pacs_link_external_dependency(
+        pacs_network
+        PUBLIC
+        ThreadSystem
+        ThreadSystem::thread_base
+    )
     target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
 elseif(TARGET thread_base)
-    target_link_libraries(pacs_network PUBLIC thread_base)
+    pacs_link_external_dependency(
+        pacs_network
+        PUBLIC
+        thread_base
+        ThreadSystem::thread_base
+    )
     target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
     # CRITICAL: Explicitly add thread_system include directories
     # When thread_base is fetched via FetchContent (by logger_system), its INTERFACE
     # include directories may not be set up correctly. Ensure we can find thread_base.h
     # by explicitly adding the include directory from the sibling checkout.
     if(PACS_THREAD_SYSTEM_INCLUDE_DIR)
-        target_include_directories(pacs_network PUBLIC ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
+        pacs_add_build_interface_include_dirs(
+            pacs_network
+            PUBLIC
+            ${PACS_THREAD_SYSTEM_INCLUDE_DIR}
+        )
     endif()
 endif()
 
@@ -1056,7 +1214,12 @@ endif()
 
 # Link common_system (Tier 0)
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-    target_include_directories(pacs_client PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    pacs_link_external_dependency(
+        pacs_client
+        PUBLIC
+        pacs_common_system_headers
+        kcenon::common_system
+    )
     target_compile_definitions(pacs_client PUBLIC
         KCENON_HAS_COMMON_SYSTEM=1
         PACS_WITH_COMMON_SYSTEM=1
@@ -1147,7 +1310,12 @@ target_link_libraries(pacs_services
 
 # Link common_system for Result<T>
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-    target_include_directories(pacs_services PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    pacs_link_external_dependency(
+        pacs_services
+        PUBLIC
+        pacs_common_system_headers
+        kcenon::common_system
+    )
     # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
     # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
     target_compile_definitions(pacs_services PUBLIC
@@ -1158,8 +1326,12 @@ endif()
 
 # Link database_system for database_cursor query building (Issue #420)
 if(TARGET database)
-    target_link_libraries(pacs_services PUBLIC database)
-    target_include_directories(pacs_services PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
+    pacs_link_external_dependency(
+        pacs_services
+        PUBLIC
+        database
+        DatabaseSystem::database
+    )
     target_compile_definitions(pacs_services PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
     # Suppress deprecated warnings from database_system (database_base is deprecated)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
@@ -1208,7 +1380,12 @@ target_link_libraries(pacs_security PUBLIC pacs_core pacs_encoding)
 
 # Link common_system (Tier 0)
 if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-    target_include_directories(pacs_security PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+    pacs_link_external_dependency(
+        pacs_security
+        PUBLIC
+        pacs_common_system_headers
+        kcenon::common_system
+    )
     # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
     # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
     target_compile_definitions(pacs_security PUBLIC
@@ -1274,7 +1451,12 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
 
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-        target_include_directories(pacs_storage PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        pacs_link_external_dependency(
+            pacs_storage
+            PUBLIC
+            pacs_common_system_headers
+            kcenon::common_system
+        )
         # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
         # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
         target_compile_definitions(pacs_storage PUBLIC
@@ -1285,7 +1467,12 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
 
     # Link SQLite3
     if(SQLITE3_FROM_FETCH)
-        target_link_libraries(pacs_storage PUBLIC sqlite3_lib)
+        pacs_link_external_dependency(
+            pacs_storage
+            PUBLIC
+            sqlite3_lib
+            SQLite::SQLite3
+        )
     else()
         target_link_libraries(pacs_storage PUBLIC SQLite::SQLite3)
     endif()
@@ -1295,25 +1482,43 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
 
     # Link database_system for secure query building (SQL injection prevention)
     if(TARGET database)
-        target_link_libraries(pacs_storage PUBLIC database)
+        pacs_link_external_dependency(
+            pacs_storage
+            PUBLIC
+            database
+            DatabaseSystem::database
+        )
         # Link integrated_database for unified_database_system (Issue #606)
         # integrated_database depends on monitoring_system, so both must be linked together.
         # On Linux, use --start-group/--end-group to resolve circular dependencies.
         if(TARGET integrated_database AND TARGET monitoring_system)
             if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 target_link_libraries(pacs_storage PUBLIC
-                    -Wl,--start-group
-                    integrated_database
-                    monitoring_system
-                    -Wl,--end-group
+                    "$<BUILD_LOCAL_INTERFACE:-Wl,--start-group>"
+                    "$<BUILD_LOCAL_INTERFACE:integrated_database>"
+                    "$<BUILD_LOCAL_INTERFACE:monitoring_system>"
+                    "$<BUILD_LOCAL_INTERFACE:-Wl,--end-group>"
+                    "$<INSTALL_INTERFACE:-Wl,--start-group>"
+                    "$<INSTALL_INTERFACE:DatabaseSystem::integrated_database>"
+                    "$<INSTALL_INTERFACE:monitoring_system::monitoring_system>"
+                    "$<INSTALL_INTERFACE:-Wl,--end-group>"
                 )
             else()
-                target_link_libraries(pacs_storage PUBLIC integrated_database monitoring_system)
+                target_link_libraries(pacs_storage PUBLIC
+                    "$<BUILD_LOCAL_INTERFACE:integrated_database>"
+                    "$<BUILD_LOCAL_INTERFACE:monitoring_system>"
+                    "$<INSTALL_INTERFACE:DatabaseSystem::integrated_database>"
+                    "$<INSTALL_INTERFACE:monitoring_system::monitoring_system>"
+                )
             endif()
         elseif(TARGET integrated_database)
-            target_link_libraries(pacs_storage PUBLIC integrated_database)
+            pacs_link_external_dependency(
+                pacs_storage
+                PUBLIC
+                integrated_database
+                DatabaseSystem::integrated_database
+            )
         endif()
-        target_include_directories(pacs_storage PUBLIC ${PACS_DATABASE_SYSTEM_INCLUDE_DIR})
         target_compile_definitions(pacs_storage PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
         # Suppress deprecated warnings from database_system (database_base is deprecated)
         if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -1378,7 +1583,12 @@ if(TARGET pacs_storage)
 
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-        target_include_directories(pacs_ai PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        pacs_link_external_dependency(
+            pacs_ai
+            PUBLIC
+            pacs_common_system_headers
+            kcenon::common_system
+        )
         # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
         # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
         target_compile_definitions(pacs_ai PUBLIC
@@ -1435,7 +1645,12 @@ if(TARGET pacs_storage)
 
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-        target_include_directories(pacs_workflow PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        pacs_link_external_dependency(
+            pacs_workflow
+            PUBLIC
+            pacs_common_system_headers
+            kcenon::common_system
+        )
         # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
         # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
         target_compile_definitions(pacs_workflow PUBLIC
@@ -1494,7 +1709,13 @@ if(TARGET Crow::Crow)
             $<INSTALL_INTERFACE:include>
     )
     target_link_libraries(pacs_web
-        PUBLIC pacs_core pacs_storage pacs_client Crow::Crow
+        PUBLIC pacs_core pacs_storage pacs_client
+    )
+    pacs_link_external_dependency(
+        pacs_web
+        PUBLIC
+        Crow::Crow
+        Crow::Crow
     )
 
     # Link pacs_monitoring if available
@@ -1568,7 +1789,13 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         $<$<CXX_COMPILER_ID:MSVC>:/wd4996>
     )
     target_link_libraries(pacs_integration
-        PUBLIC pacs_core pacs_encoding pacs_network container_system
+        PUBLIC pacs_core pacs_encoding pacs_network
+    )
+    pacs_link_external_dependency(
+        pacs_integration
+        PUBLIC
+        container_system
+        ContainerSystem::container
     )
 
     # Link fmt library for format compatibility (if needed)
@@ -1578,7 +1805,12 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
 
     # Link logger_system (REQUIRED for logger_adapter)
     if(TARGET LoggerSystem)
-        target_link_libraries(pacs_integration PUBLIC LoggerSystem)
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            LoggerSystem
+            LoggerSystem::LoggerSystem
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_LOGGER_SYSTEM)
         message(STATUS "    - logger_adapter: ON (LoggerSystem)")
     else()
@@ -1588,16 +1820,31 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     # Link thread_system (REQUIRED for thread_adapter)
     # thread_system creates 'thread_base' as main target (legacy build) or 'ThreadSystem' (new build)
     if(TARGET ThreadSystem)
-        target_link_libraries(pacs_integration PUBLIC ThreadSystem)
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            ThreadSystem
+            ThreadSystem::thread_base
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
         message(STATUS "    - thread_adapter: ON (ThreadSystem)")
     elseif(TARGET thread_base)
-        target_link_libraries(pacs_integration PUBLIC thread_base)
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            thread_base
+            ThreadSystem::thread_base
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
         message(STATUS "    - thread_adapter: ON (thread_base)")
     elseif(PACS_THREAD_SYSTEM_INCLUDE_DIR)
         # Fallback: include headers only (will fail at link time)
-        target_include_directories(pacs_integration PUBLIC ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            pacs_thread_system_headers
+            ThreadSystem::thread_base
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
         message(WARNING "    - thread_adapter: ON (headers only - linking may fail)")
     else()
@@ -1612,7 +1859,12 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
 
     # Link common_system for Result<T>
     if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
-        target_include_directories(pacs_integration PUBLIC ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            pacs_common_system_headers
+            kcenon::common_system
+        )
         # Use KCENON_HAS_COMMON_SYSTEM for unified feature flag naming
         # Keep PACS_WITH_COMMON_SYSTEM as legacy alias for migration window
         # KCENON_HAS_COMMON_EXECUTOR is required for thread_system ABI compatibility
@@ -1625,7 +1877,12 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
 
     # Link network_system (REQUIRED for network_adapter)
     if(TARGET NetworkSystem)
-        target_link_libraries(pacs_integration PUBLIC NetworkSystem)
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            NetworkSystem
+            NetworkSystem::NetworkSystem
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_NETWORK_SYSTEM)
         message(STATUS "    - network_adapter: ON (NetworkSystem)")
     else()
@@ -1636,12 +1893,22 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     # NOTE: monitoring_system subdirectory is added earlier (before pacs_storage)
     #       to ensure TARGET monitoring_system exists when pacs_storage links it.
     if(TARGET monitoring_system)
-        target_link_libraries(pacs_integration PUBLIC monitoring_system)
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            monitoring_system
+            monitoring_system::monitoring_system
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_MONITORING_SYSTEM)
         message(STATUS "    - monitoring_adapter: ON (monitoring_system)")
     elseif(PACS_MONITORING_SYSTEM_INCLUDE_DIR)
         # Fallback: include headers only
-        target_include_directories(pacs_integration PUBLIC ${PACS_MONITORING_SYSTEM_INCLUDE_DIR})
+        pacs_link_external_dependency(
+            pacs_integration
+            PUBLIC
+            pacs_monitoring_system_headers
+            monitoring_system::monitoring_system
+        )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_MONITORING_SYSTEM)
         message(STATUS "    - monitoring_adapter: ON (headers only)")
     else()
@@ -1781,6 +2048,206 @@ if(PACS_BUILD_MODULES)
         message(STATUS "  Module partitions: 12")
         message(STATUS "==============================")
     endif()
+endif()
+
+##################################################
+# Installation
+##################################################
+
+pacs_register_export_target(pacs_core core)
+pacs_register_export_target(pacs_encoding encoding)
+pacs_register_export_target(pacs_network network)
+pacs_register_export_target(pacs_client client)
+pacs_register_export_target(pacs_services services)
+pacs_register_export_target(pacs_security security)
+pacs_register_export_target(pacs_storage storage)
+pacs_register_export_target(pacs_ai ai)
+pacs_register_export_target(pacs_monitoring monitoring)
+pacs_register_export_target(pacs_workflow workflow)
+pacs_register_export_target(pacs_web web)
+pacs_register_export_target(pacs_integration integration)
+
+set(PACS_SYSTEM_INSTALL_TARGETS
+    pacs_core
+    pacs_encoding
+    pacs_network
+    pacs_client
+    pacs_services
+    pacs_security
+)
+
+foreach(_optional_target
+    pacs_storage
+    pacs_ai
+    pacs_monitoring
+    pacs_workflow
+    pacs_web
+    pacs_integration
+)
+    if(TARGET ${_optional_target})
+        list(APPEND PACS_SYSTEM_INSTALL_TARGETS ${_optional_target})
+    endif()
+endforeach()
+
+get_property(PACS_EXPORT_BRIDGE_TARGETS GLOBAL PROPERTY PACS_EXPORT_BRIDGE_TARGETS)
+if(PACS_EXPORT_BRIDGE_TARGETS)
+    list(APPEND PACS_SYSTEM_INSTALL_TARGETS ${PACS_EXPORT_BRIDGE_TARGETS})
+endif()
+list(REMOVE_DUPLICATES PACS_SYSTEM_INSTALL_TARGETS)
+
+set(PACS_SYSTEM_WITH_SQLITE FALSE)
+if(TARGET pacs_storage)
+    set(PACS_SYSTEM_WITH_SQLITE TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_DATABASE_SYSTEM FALSE)
+if(TARGET database)
+    set(PACS_SYSTEM_WITH_DATABASE_SYSTEM TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_MONITORING_SYSTEM FALSE)
+if(TARGET monitoring_system OR PACS_MONITORING_SYSTEM_INCLUDE_DIR)
+    set(PACS_SYSTEM_WITH_MONITORING_SYSTEM TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_THREAD_SYSTEM FALSE)
+if(TARGET ThreadSystem OR TARGET thread_base OR PACS_THREAD_SYSTEM_INCLUDE_DIR)
+    set(PACS_SYSTEM_WITH_THREAD_SYSTEM TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_LOGGER_SYSTEM FALSE)
+if(TARGET LoggerSystem)
+    set(PACS_SYSTEM_WITH_LOGGER_SYSTEM TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_JPEG FALSE)
+if(PACS_JPEG_FOUND)
+    set(PACS_SYSTEM_WITH_JPEG TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_JPEG2000 FALSE)
+if(PACS_JPEG2000_FOUND)
+    set(PACS_SYSTEM_WITH_JPEG2000 TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_JPEGLS FALSE)
+if(PACS_JPEGLS_FOUND)
+    set(PACS_SYSTEM_WITH_JPEGLS TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_HTJ2K FALSE)
+if(PACS_HTJ2K_FOUND)
+    set(PACS_SYSTEM_WITH_HTJ2K TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_OPENSSL FALSE)
+if(PACS_OPENSSL_FOUND)
+    set(PACS_SYSTEM_WITH_OPENSSL TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_FMT FALSE)
+if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
+    set(PACS_SYSTEM_WITH_FMT TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_CROW FALSE)
+if(TARGET pacs_web)
+    set(PACS_SYSTEM_WITH_CROW TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_AWS_SDK FALSE)
+if(TARGET pacs_storage AND PACS_WITH_AWS_SDK AND AWSSDK_FOUND)
+    set(PACS_SYSTEM_WITH_AWS_SDK TRUE)
+endif()
+
+set(PACS_SYSTEM_WITH_AZURE_SDK FALSE)
+if(TARGET pacs_storage AND PACS_WITH_AZURE_SDK AND azure-storage-blobs-cpp_FOUND)
+    set(PACS_SYSTEM_WITH_AZURE_SDK TRUE)
+endif()
+
+set(PACS_SYSTEM_BRIDGE_TARGET_SETUP "")
+get_property(PACS_EXPORT_BRIDGE_MAPPINGS GLOBAL PROPERTY PACS_EXPORT_BRIDGE_MAPPINGS)
+foreach(_bridge_mapping IN LISTS PACS_EXPORT_BRIDGE_MAPPINGS)
+    string(FIND "${_bridge_mapping}" "=" _bridge_sep)
+    if(_bridge_sep LESS 0)
+        continue()
+    endif()
+
+    string(SUBSTRING "${_bridge_mapping}" 0 ${_bridge_sep} _bridge_target_name)
+    math(EXPR _bridge_value_index "${_bridge_sep} + 1")
+    string(SUBSTRING "${_bridge_mapping}" ${_bridge_value_index} -1 _bridge_install_target)
+
+    string(APPEND PACS_SYSTEM_BRIDGE_TARGET_SETUP
+        "if(TARGET kcenon::pacs::${_bridge_target_name})\n"
+        "  set_property(TARGET kcenon::pacs::${_bridge_target_name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES \"${_bridge_install_target}\")\n"
+        "endif()\n"
+    )
+endforeach()
+
+install(DIRECTORY include/pacs
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING
+    PATTERN "*.h"
+    PATTERN "*.hpp"
+)
+
+install(TARGETS ${PACS_SYSTEM_INSTALL_TARGETS}
+    EXPORT pacs_systemTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pacs_systemConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfig.cmake"
+    INSTALL_DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(EXPORT pacs_systemTargets
+    FILE pacs_systemTargets.cmake
+    NAMESPACE kcenon::pacs::
+    DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfigVersion.cmake"
+    DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
+)
+
+set(PACS_SYSTEM_CAN_EXPORT_BUILD_TREE TRUE)
+foreach(_pacs_non_exportable_dep
+    pacs_common_system_headers
+    pacs_thread_system_headers
+    pacs_monitoring_system_headers
+    NetworkSystem
+    thread_base
+    LoggerSystem
+    monitoring_system
+    Crow
+)
+    if(TARGET ${_pacs_non_exportable_dep})
+        set(PACS_SYSTEM_CAN_EXPORT_BUILD_TREE FALSE)
+        break()
+    endif()
+endforeach()
+
+if(PACS_SYSTEM_CAN_EXPORT_BUILD_TREE)
+    export(EXPORT pacs_systemTargets
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemTargets.cmake"
+        NAMESPACE kcenon::pacs::
+    )
+else()
+    message(STATUS "pacs_system: Skipping build-tree export (local dependency targets cannot be exported)")
 endif()
 
 # Testing
