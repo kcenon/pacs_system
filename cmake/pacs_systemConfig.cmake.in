@@ -1,0 +1,97 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Threads REQUIRED)
+find_dependency(OpenSSL REQUIRED)
+find_dependency(ZLIB REQUIRED)
+find_dependency(common_system CONFIG REQUIRED)
+find_dependency(ContainerSystem CONFIG REQUIRED)
+find_dependency(NetworkSystem CONFIG REQUIRED)
+
+if(@PACS_SYSTEM_WITH_THREAD_SYSTEM@)
+    find_dependency(ThreadSystem CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_LOGGER_SYSTEM@)
+    find_dependency(LoggerSystem CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_MONITORING_SYSTEM@)
+    find_dependency(monitoring_system CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_DATABASE_SYSTEM@)
+    find_dependency(DatabaseSystem CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_SQLITE@)
+    find_dependency(SQLite3 REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_JPEG@)
+    find_dependency(JPEG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_JPEG2000@)
+    find_dependency(OpenJPEG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_JPEGLS@)
+    find_dependency(charls CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_HTJ2K@)
+    find_dependency(openjph CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_OPENSSL@)
+    find_dependency(OpenSSL REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_FMT@)
+    find_dependency(fmt CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_CROW@)
+    find_dependency(Crow CONFIG REQUIRED)
+endif()
+
+if(@PACS_SYSTEM_WITH_AWS_SDK@)
+    find_dependency(AWSSDK REQUIRED COMPONENTS s3)
+endif()
+
+if(@PACS_SYSTEM_WITH_AZURE_SDK@)
+    find_dependency(azure-storage-blobs-cpp CONFIG REQUIRED)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/pacs_systemTargets.cmake")
+
+@PACS_SYSTEM_BRIDGE_TARGET_SETUP@
+
+set(pacs_system_FOUND TRUE)
+set(PACS_SYSTEM_FOUND TRUE)
+
+set(pacs_system_VERSION "@PROJECT_VERSION@")
+set(PACS_SYSTEM_VERSION "${pacs_system_VERSION}")
+set(pacs_system_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set(PACS_SYSTEM_INCLUDE_DIRS "${pacs_system_INCLUDE_DIRS}")
+
+set(pacs_system_LIBRARIES
+    kcenon::pacs::core
+    kcenon::pacs::encoding
+    kcenon::pacs::network
+    kcenon::pacs::client
+    kcenon::pacs::services
+    kcenon::pacs::security
+)
+
+foreach(_optional_target storage ai monitoring workflow web integration)
+    if(TARGET kcenon::pacs::${_optional_target})
+        list(APPEND pacs_system_LIBRARIES kcenon::pacs::${_optional_target})
+    endif()
+endforeach()
+
+set(PACS_SYSTEM_LIBRARIES "${pacs_system_LIBRARIES}")
+
+check_required_components(pacs_system)
