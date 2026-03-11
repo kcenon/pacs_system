@@ -120,6 +120,7 @@ jobs:
           -DPACS_BUILD_TESTS=ON `
           -DPACS_BUILD_EXAMPLES=OFF `
           -DPACS_BUILD_STORAGE=ON `
+          -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
