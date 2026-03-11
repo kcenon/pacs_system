@@ -95,7 +95,7 @@ endfunction()
 function(pacs_link_external_dependency target_name visibility build_target install_target)
     if(TARGET "${build_target}")
         target_link_libraries(${target_name} ${visibility}
-            "$<BUILD_INTERFACE:${build_target}>"
+            "$<BUILD_LOCAL_INTERFACE:${build_target}>"
             "$<INSTALL_INTERFACE:${install_target}>"
         )
     endif()
@@ -1461,10 +1461,10 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         if(TARGET integrated_database AND TARGET monitoring_system)
             if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 target_link_libraries(pacs_storage PUBLIC
-                    "$<BUILD_INTERFACE:-Wl,--start-group>"
-                    "$<BUILD_INTERFACE:integrated_database>"
-                    "$<BUILD_INTERFACE:monitoring_system>"
-                    "$<BUILD_INTERFACE:-Wl,--end-group>"
+                    "$<BUILD_LOCAL_INTERFACE:-Wl,--start-group>"
+                    "$<BUILD_LOCAL_INTERFACE:integrated_database>"
+                    "$<BUILD_LOCAL_INTERFACE:monitoring_system>"
+                    "$<BUILD_LOCAL_INTERFACE:-Wl,--end-group>"
                     "$<INSTALL_INTERFACE:-Wl,--start-group>"
                     "$<INSTALL_INTERFACE:DatabaseSystem::integrated_database>"
                     "$<INSTALL_INTERFACE:monitoring_system::monitoring_system>"
@@ -1472,8 +1472,8 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
                 )
             else()
                 target_link_libraries(pacs_storage PUBLIC
-                    "$<BUILD_INTERFACE:integrated_database>"
-                    "$<BUILD_INTERFACE:monitoring_system>"
+                    "$<BUILD_LOCAL_INTERFACE:integrated_database>"
+                    "$<BUILD_LOCAL_INTERFACE:monitoring_system>"
                     "$<INSTALL_INTERFACE:DatabaseSystem::integrated_database>"
                     "$<INSTALL_INTERFACE:monitoring_system::monitoring_system>"
                 )
