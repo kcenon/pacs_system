@@ -152,4 +152,4 @@ Edit `src/index.css` to customize the color theme and design tokens.
 
 ## License
 
-MIT License - see [LICENSE](../LICENSE) for details.
+BSD-3-Clause License - see [LICENSE](../LICENSE) for details.
