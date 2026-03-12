@@ -1,0 +1,273 @@
+# Release Workflow for PACS System
+# Creates versioned tags and GitHub Releases for vcpkg port references
+#
+# Triggered manually via workflow_dispatch with a version input.
+# Validates version consistency, runs full CI build matrix,
+# then creates an annotated tag and GitHub Release with changelog.
+#
+# See: common_system/docs/RELEASING.md for ecosystem release procedure
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (semver, e.g., 0.2.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate semver format
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Invalid version format: $VERSION"
+            echo "Expected: MAJOR.MINOR.PATCH (e.g., 0.2.0)"
+            exit 1
+          fi
+          echo "Version format valid: $VERSION"
+
+      - name: Check tag does not already exist
+        shell: bash
+        run: |
+          if git ls-remote --tags "https://github.com/${{ github.repository }}" "v${{ inputs.version }}" | grep -q .; then
+            echo "ERROR: Tag v${{ inputs.version }} already exists"
+            exit 1
+          fi
+          echo "Tag v${{ inputs.version }} is available"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify version consistency
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          CMAKE_VERSION=$(grep -m1 'project(pacs_system' CMakeLists.txt | \
+            sed -E 's/.*VERSION ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          VCPKG_VERSION=$(grep '"version"' vcpkg.json | head -1 | \
+            sed -E 's/.*"version": "([^"]+)".*/\1/')
+
+          echo "Input version:  $VERSION"
+          echo "CMake version:  $CMAKE_VERSION"
+          echo "vcpkg version:  $VCPKG_VERSION"
+
+          ERRORS=0
+          if [[ "$VERSION" != "$CMAKE_VERSION" ]]; then
+            echo "ERROR: Input version ($VERSION) does not match CMakeLists.txt ($CMAKE_VERSION)"
+            ERRORS=1
+          fi
+          if [[ "$VERSION" != "$VCPKG_VERSION" ]]; then
+            echo "ERROR: Input version ($VERSION) does not match vcpkg.json ($VCPKG_VERSION)"
+            ERRORS=1
+          fi
+
+          if [[ $ERRORS -ne 0 ]]; then
+            echo ""
+            echo "Update CMakeLists.txt and vcpkg.json to match the release version before running this workflow."
+            exit 1
+          fi
+          echo "Version consistency check passed: $VERSION"
+
+  build:
+    name: Build / ${{ matrix.os }} / ${{ matrix.compiler }}
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    env:
+      BUILD_TYPE: Release
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            compiler: gcc
+          - os: ubuntu-24.04
+            compiler: clang
+          - os: macos-14
+            compiler: clang
+          - os: windows-2022
+            compiler: msvc
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update
+        sudo apt install -y cmake build-essential ninja-build pkg-config
+        sudo apt install -y libsqlite3-dev libssl-dev libfmt-dev
+        sudo apt install -y libgtest-dev libgmock-dev
+        sudo apt install -y libjpeg-turbo8-dev
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          sudo apt install -y clang lld
+        fi
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install ninja pkg-config sqlite3 openssl@3 googletest fmt jpeg-turbo
+
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=OFF \
+          -DPACS_BUILD_STORAGE=ON \
+          -DCMAKE_C_COMPILER=${{ matrix.compiler == 'gcc' && 'gcc' || 'clang' }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=OFF `
+          -DPACS_BUILD_STORAGE=ON `
+          -DVCPKG_MANIFEST_MODE=OFF `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Run tests
+      working-directory: pacs_system
+      run: |
+        cd build
+        ctest -C Release --output-on-failure --timeout 120
+
+  publish:
+    name: Publish Release
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push annotated tag
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: Find previous tag
+        id: previous_tag
+        shell: bash
+        run: |
+          previous_tag=$(git describe --tags --abbrev=0 "v${{ inputs.version }}^" 2>/dev/null || true)
+          echo "tag=$previous_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog from conventional commits
+        id: changelog
+        if: steps.previous_tag.outputs.tag != ''
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          fromTag: "v${{ inputs.version }}"
+          toTag: ${{ steps.previous_tag.outputs.tag }}
+          writeToFile: false
+          useGitmojis: false
+
+      - name: Build release notes
+        shell: bash
+        env:
+          PREVIOUS_TAG: ${{ steps.previous_tag.outputs.tag }}
+          CHANGELOG: ${{ steps.changelog.outputs.changes }}
+        run: |
+          cat <<EOF > RELEASE_NOTES.md
+          ## pacs_system v${{ inputs.version }}
+
+          Modern C++20 PACS implementation for DICOM medical imaging.
+
+          ### Installation
+
+          **vcpkg overlay port** - reference this tag in your overlay:
+          \`\`\`
+          "version": "${{ inputs.version }}"
+          \`\`\`
+
+          **CMake FetchContent** - pin to this release:
+          \`\`\`cmake
+          FetchContent_Declare(
+            pacs_system
+            GIT_REPOSITORY https://github.com/kcenon/pacs_system.git
+            GIT_TAG        v${{ inputs.version }}
+          )
+          \`\`\`
+          EOF
+
+          {
+            echo
+            echo "## Changelog"
+            echo
+            if [[ -n "$PREVIOUS_TAG" ]]; then
+              printf '%s\n' "$CHANGELOG"
+            else
+              echo "Initial release."
+            fi
+          } >> RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.version }}"
+          name: "pacs_system v${{ inputs.version }}"
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
