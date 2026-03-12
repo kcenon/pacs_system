@@ -494,13 +494,33 @@ if(PACS_WITH_COMMON_SYSTEM)
         endif()
     endforeach()
 
+    # find_package() fallback for vcpkg/system installs
+    if(NOT COMMON_SYSTEM_FOUND)
+        find_package(common_system CONFIG QUIET)
+        if(common_system_FOUND)
+            message(STATUS "Found common_system via find_package(common_system)")
+            set(COMMON_SYSTEM_FOUND TRUE)
+            # Create compatibility target wrapping the installed package target
+            if(NOT TARGET pacs_common_system_headers)
+                add_library(pacs_common_system_headers INTERFACE)
+                if(TARGET kcenon::common_system)
+                    target_link_libraries(pacs_common_system_headers INTERFACE kcenon::common_system)
+                elseif(TARGET common_system)
+                    target_link_libraries(pacs_common_system_headers INTERFACE common_system)
+                endif()
+            endif()
+            set(PACS_COMMON_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
+        endif()
+    endif()
+
     if(NOT COMMON_SYSTEM_FOUND)
         message(FATAL_ERROR
             "common_system is REQUIRED (Tier 0).\n"
             "Could not find 'kcenon/common/patterns/result.h'.\n"
             "Please ensure common_system is available at:\n"
             "  - ../common_system/include\n"
-            "  - Set COMMON_SYSTEM_ROOT environment variable")
+            "  - Set COMMON_SYSTEM_ROOT environment variable\n"
+            "  - Or install via vcpkg: vcpkg install kcenon-common-system")
     endif()
 endif()
 
@@ -525,6 +545,19 @@ if(PACS_WITH_CONTAINER_SYSTEM)
         endif()
     endforeach()
 
+    # find_package() fallback for vcpkg/system installs
+    if(NOT CONTAINER_SYSTEM_FOUND AND NOT TARGET container_system)
+        find_package(ContainerSystem CONFIG QUIET)
+        if(ContainerSystem_FOUND)
+            message(STATUS "Found container_system via find_package(ContainerSystem)")
+            set(CONTAINER_SYSTEM_FOUND TRUE)
+            if(NOT TARGET container_system)
+                add_library(container_system INTERFACE)
+                target_link_libraries(container_system INTERFACE ContainerSystem::container)
+            endif()
+        endif()
+    endif()
+
     if(CONTAINER_SYSTEM_FOUND AND NOT TARGET container_system)
         set(BUILD_CONTAINERSYSTEM_AS_SUBMODULE ON CACHE BOOL "" FORCE)
         set(BUILD_CONTAINER_SAMPLES OFF CACHE BOOL "" FORCE)
@@ -536,7 +569,8 @@ if(PACS_WITH_CONTAINER_SYSTEM)
             "container_system is REQUIRED (Tier 1) for DICOM serialization.\n"
             "Please ensure container_system is available at:\n"
             "  - ../container_system\n"
-            "  - Set CONTAINER_SYSTEM_ROOT environment variable")
+            "  - Set CONTAINER_SYSTEM_ROOT environment variable\n"
+            "  - Or install via vcpkg: vcpkg install kcenon-container-system")
     endif()
 endif()
 
@@ -571,6 +605,21 @@ foreach(_path ${_PACS_THREAD_PATHS})
         break()
     endif()
 endforeach()
+
+# find_package() fallback for vcpkg/system installs
+if(NOT THREAD_SYSTEM_FOUND AND NOT TARGET thread_base AND NOT TARGET ThreadSystem)
+    find_package(ThreadSystem CONFIG QUIET)
+    if(ThreadSystem_FOUND)
+        message(STATUS "Found thread_system via find_package(ThreadSystem)")
+        set(THREAD_SYSTEM_FOUND TRUE)
+        set(PACS_THREAD_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
+        # Create non-namespaced target for compatibility with downstream checks
+        if(NOT TARGET ThreadSystem AND TARGET ThreadSystem::thread_base)
+            add_library(ThreadSystem INTERFACE)
+            target_link_libraries(ThreadSystem INTERFACE ThreadSystem::thread_base)
+        endif()
+    endif()
+endif()
 
 # Avoid re-adding thread_system when the unified build already provided the targets
 if(TARGET thread_base OR TARGET ThreadSystem OR TARGET interfaces)
@@ -610,6 +659,26 @@ foreach(_path ${_PACS_LOGGER_PATHS})
     endif()
 endforeach()
 
+# find_package() fallback for vcpkg/system installs
+if(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
+    find_package(LoggerSystem CONFIG QUIET)
+    if(LoggerSystem_FOUND)
+        message(STATUS "Found logger_system via find_package(LoggerSystem)")
+        set(LOGGER_SYSTEM_FOUND TRUE)
+        set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
+        # Create non-namespaced target for compatibility with downstream checks
+        if(NOT TARGET LoggerSystem)
+            if(TARGET LoggerSystem::LoggerSystem)
+                add_library(LoggerSystem INTERFACE)
+                target_link_libraries(LoggerSystem INTERFACE LoggerSystem::LoggerSystem)
+            elseif(TARGET LoggerSystem::logger)
+                add_library(LoggerSystem INTERFACE)
+                target_link_libraries(LoggerSystem INTERFACE LoggerSystem::logger)
+            endif()
+        endif()
+    endif()
+endif()
+
 if(LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
     set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
     set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -621,7 +690,8 @@ elseif(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET LoggerSystem)
         "logger_adapter will be disabled.\n"
         "Please ensure logger_system is available at:\n"
         "  - ../logger_system\n"
-        "  - Set LOGGER_SYSTEM_ROOT environment variable")
+        "  - Set LOGGER_SYSTEM_ROOT environment variable\n"
+        "  - Or install via vcpkg: vcpkg install kcenon-logger-system")
 endif()
 
 # database_system (OPTIONAL - Tier 3, for secure database operations)
@@ -645,6 +715,19 @@ if(PACS_BUILD_STORAGE)
             break()
         endif()
     endforeach()
+
+    # find_package() fallback for vcpkg/system installs
+    if(NOT DATABASE_SYSTEM_FOUND AND NOT TARGET database)
+        find_package(DatabaseSystem CONFIG QUIET)
+        if(DatabaseSystem_FOUND)
+            message(STATUS "Found database_system via find_package(DatabaseSystem)")
+            set(DATABASE_SYSTEM_FOUND TRUE)
+            if(NOT TARGET database AND TARGET DatabaseSystem::database)
+                add_library(database INTERFACE)
+                target_link_libraries(database INTERFACE DatabaseSystem::database)
+            endif()
+        endif()
+    endif()
 
     if(DATABASE_SYSTEM_FOUND AND NOT TARGET database)
         set(BUILD_DATABASE_SAMPLES OFF CACHE BOOL "" FORCE)
@@ -685,6 +768,21 @@ if(PACS_BUILD_STORAGE)
         endif()
     endforeach()
 
+    # find_package() fallback for vcpkg/system installs
+    if(NOT MONITORING_SYSTEM_FOUND AND NOT TARGET monitoring_system)
+        find_package(monitoring_system CONFIG QUIET)
+        if(monitoring_system_FOUND)
+            message(STATUS "Found monitoring_system via find_package(monitoring_system)")
+            set(MONITORING_SYSTEM_FOUND TRUE)
+            set(PACS_MONITORING_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
+            # Create non-namespaced target for compatibility with downstream checks
+            if(NOT TARGET monitoring_system AND TARGET monitoring_system::monitoring_system)
+                add_library(monitoring_system INTERFACE)
+                target_link_libraries(monitoring_system INTERFACE monitoring_system::monitoring_system)
+            endif()
+        endif()
+    endif()
+
     if(MONITORING_SYSTEM_FOUND AND NOT TARGET monitoring_system)
         set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
         set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -700,7 +798,7 @@ if(PACS_BUILD_STORAGE)
             if(TARGET common_system)
                 add_library(kcenon::common_system ALIAS common_system)
                 message(STATUS "Created kcenon::common_system alias for monitoring_system compatibility")
-            elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+            elseif(PACS_COMMON_SYSTEM_INCLUDE_DIR AND NOT PACS_COMMON_SYSTEM_INCLUDE_DIR STREQUAL "FOUND_VIA_PACKAGE")
                 add_library(kcenon_common_system_shim INTERFACE)
                 target_include_directories(kcenon_common_system_shim INTERFACE ${PACS_COMMON_SYSTEM_INCLUDE_DIR})
                 add_library(kcenon::common_system ALIAS kcenon_common_system_shim)
@@ -741,6 +839,20 @@ if(PACS_WITH_NETWORK_SYSTEM)
         endif()
     endforeach()
 
+    # find_package() fallback for vcpkg/system installs
+    if(NOT NETWORK_SYSTEM_FOUND AND NOT TARGET NetworkSystem)
+        find_package(NetworkSystem CONFIG QUIET)
+        if(NetworkSystem_FOUND)
+            message(STATUS "Found network_system via find_package(NetworkSystem)")
+            set(NETWORK_SYSTEM_FOUND TRUE)
+            # Create non-namespaced target for compatibility with downstream checks
+            if(NOT TARGET NetworkSystem AND TARGET NetworkSystem::NetworkSystem)
+                add_library(NetworkSystem INTERFACE)
+                target_link_libraries(NetworkSystem INTERFACE NetworkSystem::NetworkSystem)
+            endif()
+        endif()
+    endif()
+
     if(NETWORK_SYSTEM_FOUND AND NOT TARGET NetworkSystem)
         set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
         set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -773,7 +885,8 @@ if(PACS_WITH_NETWORK_SYSTEM)
             "\n"
             "Please ensure network_system is available at:\n"
             "  - ../network_system\n"
-            "  - Set NETWORK_SYSTEM_ROOT environment variable")
+            "  - Set NETWORK_SYSTEM_ROOT environment variable\n"
+            "  - Or install via vcpkg: vcpkg install kcenon-network-system")
     endif()
 endif()
 
@@ -845,21 +958,21 @@ message(STATUS "")
 message(STATUS "=== Dependency Chain: VALID ===")
 message(STATUS "")
 
-if(PACS_COMMON_SYSTEM_INCLUDE_DIR AND NOT TARGET pacs_common_system_headers)
+if(PACS_COMMON_SYSTEM_INCLUDE_DIR AND NOT PACS_COMMON_SYSTEM_INCLUDE_DIR STREQUAL "FOUND_VIA_PACKAGE" AND NOT TARGET pacs_common_system_headers)
     add_library(pacs_common_system_headers INTERFACE)
     target_include_directories(pacs_common_system_headers INTERFACE
         "${PACS_COMMON_SYSTEM_INCLUDE_DIR}"
     )
 endif()
 
-if(PACS_THREAD_SYSTEM_INCLUDE_DIR AND NOT TARGET pacs_thread_system_headers)
+if(PACS_THREAD_SYSTEM_INCLUDE_DIR AND NOT PACS_THREAD_SYSTEM_INCLUDE_DIR STREQUAL "FOUND_VIA_PACKAGE" AND NOT TARGET pacs_thread_system_headers)
     add_library(pacs_thread_system_headers INTERFACE)
     target_include_directories(pacs_thread_system_headers INTERFACE
         "${PACS_THREAD_SYSTEM_INCLUDE_DIR}"
     )
 endif()
 
-if(PACS_MONITORING_SYSTEM_INCLUDE_DIR AND NOT TARGET pacs_monitoring_system_headers)
+if(PACS_MONITORING_SYSTEM_INCLUDE_DIR AND NOT PACS_MONITORING_SYSTEM_INCLUDE_DIR STREQUAL "FOUND_VIA_PACKAGE" AND NOT TARGET pacs_monitoring_system_headers)
     add_library(pacs_monitoring_system_headers INTERFACE)
     target_include_directories(pacs_monitoring_system_headers INTERFACE
         "${PACS_MONITORING_SYSTEM_INCLUDE_DIR}"
@@ -1100,11 +1213,13 @@ target_include_directories(pacs_network
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
-    PRIVATE
-        # network_system internal headers for messaging_server/client (see network_system#651)
-        # These headers were moved from include/ to src/internal/ in network_system
-        $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
 )
+# network_system internal headers (only available in submodule build mode)
+if(PACS_NETWORK_SYSTEM_DIR)
+    target_include_directories(pacs_network PRIVATE
+        $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
+    )
+endif()
 # Suppress deprecated warnings from common_system/logger_system headers (logger_interface is deprecated)
 target_compile_options(pacs_network PRIVATE
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
@@ -1146,7 +1261,7 @@ elseif(TARGET thread_base)
     # When thread_base is fetched via FetchContent (by logger_system), its INTERFACE
     # include directories may not be set up correctly. Ensure we can find thread_base.h
     # by explicitly adding the include directory from the sibling checkout.
-    if(PACS_THREAD_SYSTEM_INCLUDE_DIR)
+    if(PACS_THREAD_SYSTEM_INCLUDE_DIR AND NOT PACS_THREAD_SYSTEM_INCLUDE_DIR STREQUAL "FOUND_VIA_PACKAGE")
         pacs_add_build_interface_include_dirs(
             pacs_network
             PUBLIC
@@ -1187,7 +1302,7 @@ endif()
 #   - KCENON_HAS_COMMON_EXECUTOR=0: is_running() declared as non-virtual
 # When common_system is available, thread_system compiles with KCENON_HAS_COMMON_EXECUTOR=1.
 # Consumer code must use the same definition to match the library's function signatures.
-if(PACS_COMMON_SYSTEM_FOUND)
+if(COMMON_SYSTEM_FOUND)
     message(STATUS "common_system found - enabling KCENON_HAS_COMMON_EXECUTOR for ABI compatibility")
     target_compile_definitions(pacs_network PUBLIC KCENON_HAS_COMMON_EXECUTOR=1)
 endif()
@@ -1778,11 +1893,13 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
-        PRIVATE
-            # network_system internal headers for messaging_server/client (see network_system#651)
-            # These headers were moved from include/ to src/internal/ in network_system
-            $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
     )
+    # network_system internal headers (only available in submodule build mode)
+    if(PACS_NETWORK_SYSTEM_DIR)
+        target_include_directories(pacs_integration PRIVATE
+            $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
+        )
+    endif()
     # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
     target_compile_options(pacs_integration PRIVATE
         $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
@@ -2719,8 +2836,8 @@ if(PACS_BUILD_TESTS)
         elseif(TARGET thread_base)
             target_link_libraries(concurrency_tests PRIVATE thread_base)
         endif()
-        # Add thread_system include directory explicitly
-        if(PACS_THREAD_SYSTEM_INCLUDE_DIR)
+        # Add thread_system include directory explicitly (submodule mode only)
+        if(PACS_THREAD_SYSTEM_INCLUDE_DIR AND NOT PACS_THREAD_SYSTEM_INCLUDE_DIR STREQUAL "FOUND_VIA_PACKAGE")
             target_include_directories(concurrency_tests PRIVATE ${PACS_THREAD_SYSTEM_INCLUDE_DIR})
         endif()
         # Suppress deprecated warnings
