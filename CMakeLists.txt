@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(pacs_system
-    VERSION 0.1.0.0
+    VERSION 0.1.0
     DESCRIPTION "Modern C++20 PACS implementation"
     LANGUAGES CXX
 )
@@ -341,7 +341,9 @@ else()
     endif()
 endif()
 
-if(NOT PACS_HTJ2K_FOUND)
+option(PACS_FETCH_OPENJPH "Fetch OpenJPH via FetchContent when not found (disable for vcpkg builds)" ON)
+
+if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
     # Fetch OpenJPH from GitHub as last resort
     message(STATUS "OpenJPH not found on system, fetching from GitHub...")
     include(FetchContent)
@@ -892,41 +894,52 @@ endif()
 
 # Crow Web Framework (for REST API - Issue #194)
 message(STATUS "")
-message(STATUS "=== Fetching Crow Web Framework (for REST API) ===")
+option(PACS_FETCH_CROW "Fetch Crow web framework via FetchContent (disable for vcpkg builds)" ON)
 
-# Crow requires Asio. The network_system already fetched standalone ASIO.
-# Point Crow to use the same ASIO headers.
-if(DEFINED CACHE{network_system_asio_SOURCE_DIR})
-    set(ASIO_INCLUDE_DIR "${network_system_asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
-    message(STATUS "  Using ASIO from network_system: ${ASIO_INCLUDE_DIR}")
-elseif(EXISTS "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include")
-    set(ASIO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include" CACHE PATH "" FORCE)
-    message(STATUS "  Using ASIO from build deps: ${ASIO_INCLUDE_DIR}")
-else()
-    # Fallback: fetch standalone ASIO for Crow
-    message(STATUS "  Fetching standalone ASIO for Crow...")
+if(PACS_FETCH_CROW)
+    message(STATUS "=== Fetching Crow Web Framework (for REST API) ===")
+
+    # Crow requires Asio. The network_system already fetched standalone ASIO.
+    # Point Crow to use the same ASIO headers.
+    if(DEFINED CACHE{network_system_asio_SOURCE_DIR})
+        set(ASIO_INCLUDE_DIR "${network_system_asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+        message(STATUS "  Using ASIO from network_system: ${ASIO_INCLUDE_DIR}")
+    elseif(EXISTS "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include")
+        set(ASIO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include" CACHE PATH "" FORCE)
+        message(STATUS "  Using ASIO from build deps: ${ASIO_INCLUDE_DIR}")
+    else()
+        # Fallback: fetch standalone ASIO for Crow
+        message(STATUS "  Fetching standalone ASIO for Crow...")
+        FetchContent_Declare(
+            asio
+            GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+            GIT_TAG asio-1-30-2
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(asio)
+        set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+    endif()
+
     FetchContent_Declare(
-        asio
-        GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-        GIT_TAG asio-1-30-2
+        Crow
+        GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
+        GIT_TAG v1.3.1  # Pinned release; compatible with ASIO 1.30+ io_context (IEC 62304 §8.1.2)
         GIT_SHALLOW TRUE
     )
-    FetchContent_MakeAvailable(asio)
-    set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+    set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(CROW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
+    set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(Crow)
+    message(STATUS "  [OK] Crow (v1.3.1) fetched")
+else()
+    find_package(Crow CONFIG QUIET)
+    if(Crow_FOUND)
+        message(STATUS "  [OK] Crow found via find_package")
+    else()
+        message(STATUS "  [SKIP] Crow not found and PACS_FETCH_CROW=OFF")
+    endif()
 endif()
-
-FetchContent_Declare(
-    Crow
-    GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-    GIT_TAG v1.3.1  # Pinned release; compatible with ASIO 1.30+ io_context (IEC 62304 §8.1.2)
-    GIT_SHALLOW TRUE
-)
-set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(CROW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
-set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(Crow)
-message(STATUS "  [OK] Crow (v1.3.1) fetched")
 
 ##################################################
 # Dependency Chain Validation
