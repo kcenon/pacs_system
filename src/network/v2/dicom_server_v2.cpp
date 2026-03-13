@@ -160,6 +160,7 @@ Result<std::monostate> dicom_server_v2::start() {
         kcenon::network::facade::tcp_facade facade;
         kcenon::network::facade::tcp_facade::server_config srv_cfg;
         srv_cfg.server_id = config_.ae_title;
+        srv_cfg.port = config_.port;
         server_ = facade.create_server(srv_cfg);
 
         // Set up server-level callbacks
@@ -264,18 +265,18 @@ void dicom_server_v2::stop(duration timeout) {
     }
     handlers_to_stop.clear();
 
-    // Allow any pending callbacks to complete before destroying server
+    // Allow any pending callbacks to complete
     std::this_thread::sleep_for(std::chrono::milliseconds{50});
 
-    // Clean up server
-    try {
-        server_.reset();
-    } catch (...) {
-        // Suppress exceptions during server cleanup
+    // Clear callbacks to break reference cycles before server is destroyed.
+    // The server object itself is kept alive until dicom_server_v2 is destroyed
+    // to avoid use-after-free in the adapter's background I/O threads.
+    if (server_) {
+        server_->set_connection_callback(nullptr);
+        server_->set_disconnection_callback(nullptr);
+        server_->set_receive_callback(nullptr);
+        server_->set_error_callback(nullptr);
     }
-
-    // Additional delay after server cleanup to ensure all resources are released
-    std::this_thread::sleep_for(std::chrono::milliseconds{10});
 #else
     (void)timeout;  // Unused without network_system
 #endif
