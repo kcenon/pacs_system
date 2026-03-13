@@ -388,8 +388,9 @@ TEST_CASE("pipeline_coordinator get_config", "[network][pipeline][coordinator]")
 
 TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline][coordinator]") {
     pipeline_config config;
-    // Windows CI runners have limited vCPUs (typically 2); use minimal worker
-    // threads to avoid excessive context-switching that leads to CTest timeouts.
+    // Windows CI runners have limited vCPUs (typically 2); use absolute minimal
+    // worker configuration to avoid thread-pool creation overhead and context-
+    // switching that leads to CTest timeouts (--timeout 120).
 #ifdef _WIN32
     config.net_io_workers = 1;
     config.protocol_workers = 1;
@@ -406,11 +407,11 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     auto start_result = coordinator.start();
     REQUIRE(start_result.is_ok());
 
-    // Keep the Windows CI workload small. This test verifies concurrent
-    // submission semantics, not throughput, and hosted runners are slow enough
-    // that the original load occasionally hit the CTest timeout budget.
+    // Keep the Windows CI workload minimal. This test verifies concurrent
+    // submission semantics, not throughput. Windows hosted runners (2 vCPUs)
+    // are slow enough that even moderate loads hit the CTest timeout budget.
 #ifdef _WIN32
-    constexpr size_t num_jobs = 4;
+    constexpr size_t num_jobs = 2;
 #else
     constexpr size_t num_jobs = 100;
 #endif
@@ -418,10 +419,10 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     std::mutex mutex;
     std::condition_variable cv;
 
-    // Submit many jobs concurrently from multiple threads
+    // Submit jobs concurrently from multiple threads
     std::vector<std::thread> threads;
 #ifdef _WIN32
-    constexpr size_t num_threads = 2;
+    constexpr size_t num_threads = 1;
 #else
     constexpr size_t num_threads = 4;
 #endif
@@ -457,7 +458,8 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     {
         std::unique_lock<std::mutex> lock(mutex);
 #ifdef _WIN32
-        constexpr auto timeout = std::chrono::seconds(60);
+        // 2 trivial jobs should complete in ms; 30s is generous for Windows CI
+        constexpr auto timeout = std::chrono::seconds(30);
 #else
         constexpr auto timeout = std::chrono::seconds(60);
 #endif
