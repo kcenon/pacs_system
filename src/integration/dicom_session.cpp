@@ -34,11 +34,13 @@
 
 #include <pacs/integration/dicom_session.hpp>
 
+#include <kcenon/network/interfaces/i_session.h>
 #include <kcenon/network/session/session.h>
 
 #include <algorithm>
 #include <cstring>
 #include <stdexcept>
+#include <type_traits>
 
 namespace pacs::integration {
 
@@ -80,6 +82,13 @@ dicom_session::dicom_session(
                 on_error(ec);
             });
     }
+}
+
+dicom_session::dicom_session(
+    std::shared_ptr<kcenon::network::interfaces::i_session> session)
+    : session_(std::move(session)) {
+    // i_session does not support session-level callbacks.
+    // Data must be fed externally via feed_data() / feed_error().
 }
 
 dicom_session::~dicom_session() {
@@ -226,7 +235,12 @@ void dicom_session::close() {
     // Stop the underlying session
     std::visit([](auto&& session) {
         if (session) {
-            session->stop_session();
+            if constexpr (std::is_same_v<std::decay_t<decltype(session)>,
+                          std::shared_ptr<kcenon::network::interfaces::i_session>>) {
+                session->close();
+            } else {
+                session->stop_session();
+            }
         }
     }, session_);
 
@@ -243,7 +257,12 @@ bool dicom_session::is_open() const noexcept {
 
     return std::visit([](auto&& session) -> bool {
         if (session) {
-            return !session->is_stopped();
+            if constexpr (std::is_same_v<std::decay_t<decltype(session)>,
+                          std::shared_ptr<kcenon::network::interfaces::i_session>>) {
+                return session->is_connected();
+            } else {
+                return !session->is_stopped();
+            }
         }
         return false;
     }, session_);
@@ -262,7 +281,12 @@ std::string dicom_session::session_id() const {
 
     return std::visit([](auto&& session) -> std::string {
         if (session) {
-            return session->server_id();
+            if constexpr (std::is_same_v<std::decay_t<decltype(session)>,
+                          std::shared_ptr<kcenon::network::interfaces::i_session>>) {
+                return std::string(session->id());
+            } else {
+                return session->server_id();
+            }
         }
         return "invalid";
     }, session_);
@@ -271,6 +295,18 @@ std::string dicom_session::session_id() const {
 bool dicom_session::is_secure() const noexcept {
     return std::holds_alternative<
         std::shared_ptr<network_system::session::secure_session>>(session_);
+}
+
+// =============================================================================
+// External Event Injection
+// =============================================================================
+
+void dicom_session::feed_data(const std::vector<uint8_t>& data) {
+    on_data_received(data);
+}
+
+void dicom_session::feed_error(std::error_code ec) {
+    on_error(ec);
 }
 
 // =============================================================================
@@ -424,7 +460,12 @@ bool dicom_session::parse_pdu_header(const std::vector<uint8_t>& buffer,
 void dicom_session::send_data(std::vector<uint8_t>&& data) {
     std::visit([&data](auto&& session) {
         if (session) {
-            session->send_packet(std::move(data));
+            if constexpr (std::is_same_v<std::decay_t<decltype(session)>,
+                          std::shared_ptr<kcenon::network::interfaces::i_session>>) {
+                (void)session->send(std::move(data));
+            } else {
+                session->send_packet(std::move(data));
+            }
         }
     }, session_);
 }

@@ -46,7 +46,7 @@
 #endif
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-#include <kcenon/network/session/session.h>
+#include <kcenon/network/interfaces/i_session.h>
 #endif
 
 #if KCENON_HAS_COMMON_SYSTEM
@@ -98,35 +98,9 @@ void dicom_association_handler::start() {
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    // Set up session callbacks
-    auto self = shared_from_this();
-
-    session_->set_receive_callback(
-        [weak_self = std::weak_ptr<dicom_association_handler>(self)]
-        (const std::vector<uint8_t>& data) {
-            if (auto self = weak_self.lock()) {
-                self->on_data_received(data);
-            }
-        });
-
-    session_->set_disconnection_callback(
-        [weak_self = std::weak_ptr<dicom_association_handler>(self)]
-        (const std::string& session_id) {
-            if (auto self = weak_self.lock()) {
-                self->on_disconnected(session_id);
-            }
-        });
-
-    session_->set_error_callback(
-        [weak_self = std::weak_ptr<dicom_association_handler>(self)]
-        (std::error_code ec) {
-            if (auto self = weak_self.lock()) {
-                self->on_error(ec);
-            }
-        });
-
-    // Start the session to begin receiving data
-    session_->start_session();
+    // In the i_protocol_server architecture, the server forwards events
+    // to the handler via feed_data(), handle_disconnect(), and handle_error().
+    // No session-level callback setup needed.
 #endif
 
     touch();
@@ -169,7 +143,7 @@ std::string dicom_association_handler::session_id() const {
 #ifdef PACS_WITH_NETWORK_SYSTEM
     std::lock_guard<std::mutex> lock(mutex_);
     if (session_) {
-        return session_->server_id();
+        return std::string(session_->id());
     }
 #endif
     return {};
@@ -258,6 +232,22 @@ void dicom_association_handler::set_access_control(
 void dicom_association_handler::set_access_control_enabled(bool enabled) {
     std::lock_guard<std::mutex> lock(mutex_);
     access_control_enabled_ = enabled;
+}
+
+// =============================================================================
+// Server-Level Event Forwarding
+// =============================================================================
+
+void dicom_association_handler::feed_data(const std::vector<uint8_t>& data) {
+    on_data_received(data);
+}
+
+void dicom_association_handler::handle_disconnect() {
+    on_disconnected(session_id());
+}
+
+void dicom_association_handler::handle_error(std::error_code ec) {
+    on_error(ec);
 }
 
 // =============================================================================
@@ -671,13 +661,13 @@ void dicom_association_handler::send_abort(abort_source source, abort_reason rea
 
 void dicom_association_handler::send_pdu(pdu_type /*type*/, const std::vector<uint8_t>& encoded_pdu) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    if (session_ && !session_->is_stopped()) {
+    if (session_ && session_->is_connected()) {
         // encoded_pdu already includes header for most PDU types
         // For encode_associate_ac, encode_associate_rj, etc., the encoder returns full PDU
 
         // We need to make a copy for the async send
         std::vector<uint8_t> data_copy = encoded_pdu;
-        session_->send_packet(std::move(data_copy));
+        (void)session_->send(std::move(data_copy));
         pdus_sent_.fetch_add(1, std::memory_order_relaxed);
     }
 #else
@@ -807,11 +797,11 @@ void dicom_association_handler::close_handler(bool graceful) {
     transition_to(handler_state::closed);
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    // Stop the session
+    // Close the session
     try {
         std::lock_guard<std::mutex> lock(mutex_);
         if (session_) {
-            session_->stop_session();
+            session_->close();
         }
     } catch (...) {
         // Suppress exceptions during session cleanup

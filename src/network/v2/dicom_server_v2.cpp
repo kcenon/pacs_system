@@ -38,6 +38,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <thread>
 
 // KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
 #ifndef KCENON_HAS_COMMON_SYSTEM
@@ -45,22 +46,7 @@
 #endif
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-// network_system#651: messaging_server.h moved from include/ to src/internal/
-// TODO(#656): Migrate to tcp_facade.h when API stabilizes
-// Suppress deprecation warnings temporarily
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-W#warnings"
-#endif
-
-#include "internal/core/messaging_server.h"
-
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
-#include <kcenon/network/session/session.h>
+#include <kcenon/network/facade/tcp_facade.h>
 #endif
 
 #if KCENON_HAS_COMMON_SYSTEM
@@ -170,38 +156,41 @@ Result<std::monostate> dicom_server_v2::start() {
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
     try {
-        // Create messaging_server with server ID based on AE title
-        server_ = std::make_shared<network_system::core::messaging_server>(config_.ae_title);
+        // Create TCP server via tcp_facade
+        kcenon::network::facade::tcp_facade facade;
+        kcenon::network::facade::tcp_facade::server_config srv_cfg;
+        srv_cfg.server_id = config_.ae_title;
+        server_ = facade.create_server(srv_cfg);
 
-        // Set up callbacks
+        // Set up server-level callbacks
         server_->set_connection_callback(
-            [this](std::shared_ptr<network_system::session::messaging_session> session) {
+            [this](std::shared_ptr<kcenon::network::interfaces::i_session> session) {
                 on_connection(std::move(session));
             });
 
         server_->set_disconnection_callback(
-            [this](const std::string& session_id) {
+            [this](std::string_view session_id) {
                 on_disconnection(session_id);
             });
 
         server_->set_receive_callback(
-            [this](std::shared_ptr<network_system::session::messaging_session> session,
+            [this](std::string_view session_id,
                    const std::vector<uint8_t>& data) {
-                on_receive(std::move(session), data);
+                on_receive(session_id, data);
             });
 
         server_->set_error_callback(
-            [this](std::shared_ptr<network_system::session::messaging_session> session,
+            [this](std::string_view session_id,
                    std::error_code ec) {
-                on_network_error(std::move(session), ec);
+                on_network_error(session_id, ec);
             });
 
-        // Start the messaging server
-        auto result = server_->start_server(config_.port);
+        // Start the server on configured port
+        auto result = server_->start(config_.port);
         if (result.is_err()) {
             running_ = false;
             server_.reset();
-            return error_info("Failed to start messaging server: " + result.error().message);
+            return error_info("Failed to start server");
         }
 
         return std::monostate{};
@@ -233,8 +222,8 @@ void dicom_server_v2::stop(duration timeout) {
     // Phase 1: Stop accepting new connections
     if (server_) {
         try {
-            // Stop the messaging_server - this closes the acceptor
-            (void)server_->stop_server();
+            // Stop the server - this closes the acceptor
+            (void)server_->stop();
         } catch (...) {
             // Suppress exceptions during server stop
         }
@@ -351,7 +340,7 @@ void dicom_server_v2::on_error(error_callback callback) {
 // =============================================================================
 
 void dicom_server_v2::on_connection(
-    std::shared_ptr<network_system::session::messaging_session> session) {
+    std::shared_ptr<kcenon::network::interfaces::i_session> session) {
 
     if (!running_ || !session) {
         return;
@@ -369,7 +358,7 @@ void dicom_server_v2::on_connection(
             stats_.rejected_associations++;
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-            session->stop_session();
+            session->close();
 #endif
             return;
         }
@@ -379,37 +368,35 @@ void dicom_server_v2::on_connection(
     create_handler(std::move(session));
 }
 
-void dicom_server_v2::on_disconnection(const std::string& session_id) {
+void dicom_server_v2::on_disconnection(std::string_view session_id) {
     // Skip if server is shutting down
     if (!running_) {
         return;
     }
 
+    std::string sid(session_id);
+
+    // Notify handler of disconnection before removing it
+    auto handler = find_handler(sid);
+    if (handler) {
+        handler->handle_disconnect();
+    }
+
     // Remove handler for this session
-    remove_handler(session_id);
+    remove_handler(sid);
 }
 
 void dicom_server_v2::on_receive(
-    std::shared_ptr<network_system::session::messaging_session> session,
+    std::string_view session_id,
     const std::vector<uint8_t>& data) {
 
-    if (!session) {
-        return;
-    }
-
-#ifdef PACS_WITH_NETWORK_SYSTEM
-    const std::string session_id = session->server_id();
-#else
-    const std::string session_id;
-#endif
+    std::string sid(session_id);
 
     // Find handler and forward data
-    auto handler = find_handler(session_id);
+    auto handler = find_handler(sid);
     if (handler) {
-        // Data is handled by handler's internal on_data_received callback
-        // which was set up in create_handler()
-        // The messaging_session calls the receive callback we set on the session
-        // So this callback is actually not needed - data flows directly to handler
+        // Forward data to handler for PDU processing
+        handler->feed_data(data);
 
         // Update statistics
         {
@@ -421,27 +408,29 @@ void dicom_server_v2::on_receive(
 }
 
 void dicom_server_v2::on_network_error(
-    std::shared_ptr<network_system::session::messaging_session> session,
+    std::string_view session_id,
     std::error_code ec) {
 
     // Skip if server is shutting down
-    if (!running_ || !session) {
+    if (!running_) {
         return;
     }
 
-#ifdef PACS_WITH_NETWORK_SYSTEM
-    const std::string session_id = session->server_id();
-#else
-    const std::string session_id;
-#endif
+    std::string sid(session_id);
 
     std::ostringstream oss;
-    oss << "Network error on session " << session_id
+    oss << "Network error on session " << sid
         << ": " << ec.message() << " (" << ec.value() << ")";
     report_error(oss.str());
 
+    // Notify handler of the error
+    auto handler = find_handler(sid);
+    if (handler) {
+        handler->handle_error(ec);
+    }
+
     // Remove the handler - it will clean itself up
-    remove_handler(session_id);
+    remove_handler(sid);
 }
 
 // =============================================================================
@@ -449,10 +438,10 @@ void dicom_server_v2::on_network_error(
 // =============================================================================
 
 void dicom_server_v2::create_handler(
-    std::shared_ptr<network_system::session::messaging_session> session) {
+    std::shared_ptr<kcenon::network::interfaces::i_session> session) {
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    const std::string session_id = session->server_id();
+    const std::string session_id(session->id());
 #else
     const std::string session_id;
     (void)session;

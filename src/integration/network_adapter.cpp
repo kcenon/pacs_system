@@ -36,23 +36,7 @@
 #include <pacs/integration/dicom_session.hpp>
 #include <pacs/network/dicom_server.hpp>
 
-// network_system#651: these headers moved from include/ to src/internal/
-// TODO(#656): Migrate to tcp_facade.h when API stabilizes
-// Suppress deprecation warnings temporarily
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-W#warnings"
-#endif
-
-#include "internal/core/messaging_server.h"
-#include "internal/core/messaging_client.h"
-#include "internal/core/secure_messaging_server.h"
-
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-#include <kcenon/network/session/session.h>
+#include <kcenon/network/facade/tcp_facade.h>
 
 #include <filesystem>
 #include <future>
@@ -107,23 +91,35 @@ network_adapter::connect(const connection_config& config) {
     }
 
     try {
-        // Create messaging client
-        auto client = std::make_shared<kcenon::network::core::messaging_client>(
-            "pacs_client");
+        // Create TCP client via tcp_facade
+        kcenon::network::facade::tcp_facade facade;
+        kcenon::network::facade::tcp_facade::client_config client_cfg;
+        client_cfg.host = config.host;
+        client_cfg.port = config.port;
+        client_cfg.client_id = "pacs_client";
+        client_cfg.timeout = config.timeout;
+        client_cfg.use_ssl = config.tls.enabled;
+        if (config.tls.enabled && !config.tls.ca_path.empty()) {
+            client_cfg.ca_cert_path = config.tls.ca_path.string();
+        }
+        client_cfg.verify_certificate = config.tls.verify_peer;
+
+        auto client = facade.create_client(client_cfg);
 
         // Set up promise/future for synchronous connection
         std::promise<std::error_code> connect_promise;
         auto connect_future = connect_promise.get_future();
 
-        // Track the session when connected
-        std::shared_ptr<kcenon::network::session::messaging_session> connected_session;
-
-        // Set connection callback
+        // Use deprecated callbacks for synchronous connect pattern
+        // (observer pattern would be preferred for long-lived clients)
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
         client->set_connected_callback([&connect_promise]() {
             connect_promise.set_value(std::error_code{});
         });
 
-        // Set error callback
         client->set_error_callback([&connect_promise](std::error_code ec) {
             try {
                 connect_promise.set_value(ec);
@@ -131,9 +127,12 @@ network_adapter::connect(const connection_config& config) {
                 // Promise already satisfied
             }
         });
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
         // Start connection
-        auto start_result = client->start_client(config.host, config.port);
+        auto start_result = client->start(config.host, config.port);
         if (start_result.is_err()) {
             return Result<session_ptr>(error_info("Connection failed: unable to start client"));
         }
@@ -141,26 +140,19 @@ network_adapter::connect(const connection_config& config) {
         // Wait for connection with timeout
         auto status = connect_future.wait_for(config.timeout);
         if (status == std::future_status::timeout) {
-            [[maybe_unused]] auto stop_result = client->stop_client();
+            (void)client->stop();
             return Result<session_ptr>(error_info("Connection failed: timeout"));
         }
 
         // Check connection result
         auto ec = connect_future.get();
         if (ec) {
-            [[maybe_unused]] auto stop_result = client->stop_client();
+            (void)client->stop();
             return Result<session_ptr>(error_info("Connection failed: " + ec.message()));
         }
 
-        // Connection successful - create a DICOM session wrapper
-        // Note: For client connections, we need to handle this differently
-        // as messaging_client doesn't directly expose a session object
-        // For now, we'll create a client-based session
-        // This is a simplified implementation; real implementation would
-        // need proper session management
-
-        // Return success with a placeholder for now
-        // In production, this would return a proper dicom_session
+        // Connection successful but client-based session wrapping
+        // is not yet fully implemented for the public API
         return Result<session_ptr>(error_info("Connection not yet fully implemented"));
 
     } catch (const std::exception& e) {
@@ -235,6 +227,15 @@ network_adapter::wrap_session(
 network_adapter::session_ptr
 network_adapter::wrap_session(
     std::shared_ptr<network_system::session::secure_session> session) {
+    if (!session) {
+        return nullptr;
+    }
+    return std::make_shared<dicom_session>(std::move(session));
+}
+
+network_adapter::session_ptr
+network_adapter::wrap_session(
+    std::shared_ptr<kcenon::network::interfaces::i_session> session) {
     if (!session) {
         return nullptr;
     }
