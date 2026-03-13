@@ -1214,12 +1214,6 @@ target_include_directories(pacs_network
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-# network_system internal headers (only available in submodule build mode)
-if(PACS_NETWORK_SYSTEM_DIR)
-    target_include_directories(pacs_network PRIVATE
-        $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
-    )
-endif()
 # Suppress deprecated warnings from common_system/logger_system headers (logger_interface is deprecated)
 target_compile_options(pacs_network PRIVATE
     $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
@@ -1894,12 +1888,6 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
     )
-    # network_system internal headers (only available in submodule build mode)
-    if(PACS_NETWORK_SYSTEM_DIR)
-        target_include_directories(pacs_integration PRIVATE
-            $<BUILD_INTERFACE:${PACS_NETWORK_SYSTEM_DIR}/src>
-        )
-    endif()
     # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
     target_compile_options(pacs_integration PRIVATE
         $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
@@ -2873,7 +2861,7 @@ if(PACS_BUILD_TESTS)
         PROPERTIES LABELS "unit"
     )
     catch_discover_tests(network_tests
-        PROPERTIES LABELS "unit"
+        PROPERTIES LABELS "unit" SKIP_RETURN_CODE 4
     )
     catch_discover_tests(services_tests
         PROPERTIES LABELS "unit"

@@ -59,23 +59,15 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
-// Forward declarations for kcenon::network types (no ASIO dependency)
-// Using direct forward declarations to reduce external header dependencies
-// and maintain compatibility with network_system namespace refactoring
-namespace kcenon::network::core {
-class messaging_server;
-}  // namespace kcenon::network::core
-
-// Legacy namespace alias for backward compatibility
-namespace network_system::core {
-using messaging_server = kcenon::network::core::messaging_server;
-}  // namespace network_system::core
-
-// Note: messaging_session forward declarations are provided by
-// pacs/network/v2/dicom_association_handler.hpp via pacs/integration/dicom_session.hpp
+// Forward declarations for public network_system interfaces
+namespace kcenon::network::interfaces {
+class i_protocol_server;
+class i_session;
+}  // namespace kcenon::network::interfaces
 
 namespace pacs::network::v2 {
 
@@ -332,18 +324,18 @@ private:
     // Network System Callbacks
     // =========================================================================
 
-    /// Handle new connection from messaging_server
-    void on_connection(std::shared_ptr<network_system::session::messaging_session> session);
+    /// Handle new connection from server
+    void on_connection(std::shared_ptr<kcenon::network::interfaces::i_session> session);
 
     /// Handle disconnection notification
-    void on_disconnection(const std::string& session_id);
+    void on_disconnection(std::string_view session_id);
 
-    /// Handle receive data (delegated to handler)
-    void on_receive(std::shared_ptr<network_system::session::messaging_session> session,
+    /// Handle receive data (forwarded to handler)
+    void on_receive(std::string_view session_id,
                     const std::vector<uint8_t>& data);
 
     /// Handle network error
-    void on_network_error(std::shared_ptr<network_system::session::messaging_session> session,
+    void on_network_error(std::string_view session_id,
                           std::error_code ec);
 
     // =========================================================================
@@ -351,7 +343,7 @@ private:
     // =========================================================================
 
     /// Create and register a new handler for a session
-    void create_handler(std::shared_ptr<network_system::session::messaging_session> session);
+    void create_handler(std::shared_ptr<kcenon::network::interfaces::i_session> session);
 
     /// Remove handler by session ID
     void remove_handler(const std::string& session_id);
@@ -380,8 +372,8 @@ private:
     /// Server configuration
     server_config config_;
 
-    /// network_system's messaging server
-    std::shared_ptr<network_system::core::messaging_server> server_;
+    /// network_system's protocol server (via tcp_facade)
+    std::shared_ptr<kcenon::network::interfaces::i_protocol_server> server_;
 
     /// Registered SCP services
     std::vector<services::scp_service_ptr> services_;

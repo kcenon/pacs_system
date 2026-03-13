@@ -65,13 +65,15 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Forward declarations for kcenon::network types (no ASIO dependency)
-// Using direct forward declarations to reduce external header dependencies
-// and maintain compatibility with network_system namespace refactoring
+// Forward declarations for kcenon::network types
 namespace kcenon::network::session {
 class messaging_session;
 class secure_session;
 }  // namespace kcenon::network::session
+
+namespace kcenon::network::interfaces {
+class i_session;
+}  // namespace kcenon::network::interfaces
 
 // Legacy namespace aliases for backward compatibility
 namespace network_system::session {
@@ -230,6 +232,17 @@ public:
         std::shared_ptr<network_system::session::secure_session> session);
 
     /**
+     * @brief Construct a DICOM session wrapping an i_session interface
+     *
+     * When using i_session, data must be fed externally via feed_data()
+     * since i_session does not support session-level callbacks.
+     *
+     * @param session The i_session interface to wrap
+     */
+    explicit dicom_session(
+        std::shared_ptr<kcenon::network::interfaces::i_session> session);
+
+    /**
      * @brief Destructor (closes session if open)
      */
     ~dicom_session();
@@ -305,6 +318,29 @@ public:
     void clear_pdu_callback();
 
     // ─────────────────────────────────────────────────────
+    // External Event Injection (for i_session)
+    // ─────────────────────────────────────────────────────
+
+    /**
+     * @brief Feed received data from external source
+     *
+     * Used when the session is backed by i_session, which does not
+     * support session-level callbacks. The server forwards data here.
+     *
+     * @param data The received data bytes
+     */
+    void feed_data(const std::vector<uint8_t>& data);
+
+    /**
+     * @brief Feed an error from external source
+     *
+     * Used when the session is backed by i_session.
+     *
+     * @param ec The error code
+     */
+    void feed_error(std::error_code ec);
+
+    // ─────────────────────────────────────────────────────
     // Connection State
     // ─────────────────────────────────────────────────────
 
@@ -361,10 +397,11 @@ private:
     // Private Types
     // ─────────────────────────────────────────────────────
 
-    /// Variant for holding either session type
+    /// Variant for holding session types (legacy + public interface)
     using session_variant = std::variant<
         std::shared_ptr<network_system::session::messaging_session>,
-        std::shared_ptr<network_system::session::secure_session>>;
+        std::shared_ptr<network_system::session::secure_session>,
+        std::shared_ptr<kcenon::network::interfaces::i_session>>;
 
     // ─────────────────────────────────────────────────────
     // Private Methods
