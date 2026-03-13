@@ -63,29 +63,23 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-// Forward declarations for kcenon::network types (no ASIO dependency)
-// Using direct forward declarations to reduce external header dependencies
-// and maintain compatibility with network_system namespace refactoring
+// Forward declarations for public network_system interfaces
+namespace kcenon::network::interfaces {
+class i_session;
+class i_protocol_client;
+}  // namespace kcenon::network::interfaces
+
+// Forward declarations for legacy session types (used by wrap_session overloads)
 namespace kcenon::network::session {
 class messaging_session;
 class secure_session;
 }  // namespace kcenon::network::session
-
-namespace kcenon::network::core {
-class messaging_server;
-class secure_messaging_server;
-}  // namespace kcenon::network::core
 
 // Legacy namespace aliases for backward compatibility
 namespace network_system::session {
 using messaging_session = kcenon::network::session::messaging_session;
 using secure_session = kcenon::network::session::secure_session;
 }  // namespace network_system::session
-
-namespace network_system::core {
-using messaging_server = kcenon::network::core::messaging_server;
-using secure_messaging_server = kcenon::network::core::secure_messaging_server;
-}  // namespace network_system::core
 
 namespace pacs::network {
 class dicom_server;
@@ -386,6 +380,15 @@ public:
      */
     [[nodiscard]] static session_ptr wrap_session(
         std::shared_ptr<network_system::session::secure_session> session);
+
+    /**
+     * @brief Wrap a public i_session interface for DICOM communication
+     *
+     * @param session The i_session interface to wrap
+     * @return Wrapped DICOM session
+     */
+    [[nodiscard]] static session_ptr wrap_session(
+        std::shared_ptr<kcenon::network::interfaces::i_session> session);
 
 private:
     // Prevent instantiation

@@ -61,8 +61,13 @@
 #include <string>
 #include <vector>
 
-// Note: Forward declarations for network_system types are provided by
+// Note: pdu_data and Result types are provided by
 // pacs/integration/dicom_session.hpp which is included above
+
+// Forward declaration for public network_system interface
+namespace kcenon::network::interfaces {
+class i_session;
+}  // namespace kcenon::network::interfaces
 
 namespace pacs::network::v2 {
 
@@ -172,7 +177,7 @@ public:
     // Type Aliases
     // =========================================================================
 
-    using session_ptr = std::shared_ptr<network_system::session::messaging_session>;
+    using session_ptr = std::shared_ptr<kcenon::network::interfaces::i_session>;
     using service_map = std::map<std::string, services::scp_service*>;
     using clock = std::chrono::steady_clock;
     using time_point = clock::time_point;
@@ -232,6 +237,38 @@ public:
      * @param graceful If true, attempt graceful release before aborting
      */
     void stop(bool graceful = false);
+
+    // =========================================================================
+    // Server-Level Event Forwarding
+    // =========================================================================
+
+    /**
+     * @brief Feed received data to the handler.
+     *
+     * Called by the server when data arrives for this handler's session.
+     * This replaces the session-level receive callback pattern used with
+     * messaging_session. In the i_protocol_server architecture, the server
+     * receives data via its receive callback and forwards it here.
+     *
+     * @param data The received data bytes
+     */
+    void feed_data(const std::vector<uint8_t>& data);
+
+    /**
+     * @brief Handle session disconnection.
+     *
+     * Called by the server when the session disconnects.
+     */
+    void handle_disconnect();
+
+    /**
+     * @brief Handle session error.
+     *
+     * Called by the server when an error occurs on the session.
+     *
+     * @param ec The error code
+     */
+    void handle_error(std::error_code ec);
 
     // =========================================================================
     // State Queries
