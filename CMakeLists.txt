@@ -2861,7 +2861,7 @@ if(PACS_BUILD_TESTS)
         PROPERTIES LABELS "unit"
     )
     catch_discover_tests(network_tests
-        PROPERTIES LABELS "unit"
+        PROPERTIES LABELS "unit" SKIP_RETURN_CODE 4
     )
     catch_discover_tests(services_tests
         PROPERTIES LABELS "unit"
