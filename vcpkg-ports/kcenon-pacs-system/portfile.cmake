@@ -5,7 +5,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO kcenon/pacs_system
     REF v0.1.0
-    SHA512 0  # TODO: Update with actual SHA512 hash after release
+    SHA512 242dd7bc82f56e0267e4978dd406aebeebd1bb50e70f93a8c809d3474ae6de1d0e692cc8fbbbaa81dbb68e2642b48c14100b8d5daa5f99097287af2d9465904c
     HEAD_REF main
 )
 
