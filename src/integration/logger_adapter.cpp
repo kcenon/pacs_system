@@ -34,11 +34,13 @@
 
 #include <pacs/integration/logger_adapter.hpp>
 
+#ifdef PACS_WITH_LOGGER_SYSTEM
 #include <kcenon/common/interfaces/logger_interface.h>
 #include <kcenon/logger/core/logger.h>
 #include <kcenon/logger/interfaces/logger_types.h>
 #include <kcenon/logger/writers/console_writer.h>
 #include <kcenon/logger/writers/rotating_file_writer.h>
+#endif  // PACS_WITH_LOGGER_SYSTEM
 
 #include <atomic>
 #include <chrono>
@@ -53,6 +55,8 @@ namespace pacs::integration {
 // =============================================================================
 // Implementation Class
 // =============================================================================
+
+#ifdef PACS_WITH_LOGGER_SYSTEM
 
 class logger_adapter::impl {
 public:
@@ -319,7 +323,65 @@ auto logger_adapter::is_level_enabled(log_level level) noexcept -> bool {
 void logger_adapter::flush() { pimpl_->flush(); }
 
 // =============================================================================
-// DICOM Audit Logging
+// Configuration
+// =============================================================================
+
+void logger_adapter::set_min_level(log_level level) {
+    pimpl_->set_min_level(level);
+}
+
+auto logger_adapter::get_min_level() noexcept -> log_level {
+    return pimpl_->get_min_level();
+}
+
+auto logger_adapter::get_config() -> const logger_config& {
+    return pimpl_->get_config();
+}
+
+// =============================================================================
+// Private Helpers
+// =============================================================================
+
+void logger_adapter::write_audit_log(
+    const std::string& event_type,
+    const std::string& outcome,
+    const std::map<std::string, std::string>& fields) {
+    pimpl_->write_audit_log(event_type, outcome, fields);
+}
+
+#else  // PACS_WITH_LOGGER_SYSTEM not defined — no-op stubs
+
+// =============================================================================
+// No-op Implementation (logger_system not available)
+// =============================================================================
+
+class logger_adapter::impl {};
+
+std::unique_ptr<logger_adapter::impl> logger_adapter::pimpl_ = nullptr;
+
+void logger_adapter::initialize(const logger_config&) {}
+void logger_adapter::shutdown() {}
+auto logger_adapter::is_initialized() noexcept -> bool { return false; }
+void logger_adapter::log(log_level, const std::string&) {}
+auto logger_adapter::is_level_enabled(log_level) noexcept -> bool { return false; }
+void logger_adapter::flush() {}
+void logger_adapter::set_min_level(log_level) {}
+auto logger_adapter::get_min_level() noexcept -> log_level { return log_level::off; }
+
+auto logger_adapter::get_config() -> const logger_config& {
+    static const logger_config default_config;
+    return default_config;
+}
+
+void logger_adapter::write_audit_log(
+    const std::string&,
+    const std::string&,
+    const std::map<std::string, std::string>&) {}
+
+#endif  // PACS_WITH_LOGGER_SYSTEM
+
+// =============================================================================
+// DICOM Audit Logging (delegates to log()/write_audit_log() — always compiled)
 // =============================================================================
 
 void logger_adapter::log_association_established(const std::string& calling_ae,
@@ -440,31 +502,8 @@ void logger_adapter::log_security_event(security_event_type type,
 }
 
 // =============================================================================
-// Configuration
+// String Conversion Helpers (always compiled — no logger_system dependency)
 // =============================================================================
-
-void logger_adapter::set_min_level(log_level level) {
-    pimpl_->set_min_level(level);
-}
-
-auto logger_adapter::get_min_level() noexcept -> log_level {
-    return pimpl_->get_min_level();
-}
-
-auto logger_adapter::get_config() -> const logger_config& {
-    return pimpl_->get_config();
-}
-
-// =============================================================================
-// Private Helpers
-// =============================================================================
-
-void logger_adapter::write_audit_log(
-    const std::string& event_type,
-    const std::string& outcome,
-    const std::map<std::string, std::string>& fields) {
-    pimpl_->write_audit_log(event_type, outcome, fields);
-}
 
 auto logger_adapter::storage_status_to_string(storage_status status) -> std::string {
     switch (status) {

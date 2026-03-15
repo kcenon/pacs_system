@@ -1864,21 +1864,6 @@ endif()
 
 # Integration library (requires container_system and logger_system via network_system)
 if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
-    # Check for monitoring_system availability BEFORE defining pacs_integration
-    # This allows conditional inclusion of monitoring_adapter.cpp
-    set(_PACS_MONITORING_PATHS_EARLY
-        "$ENV{MONITORING_SYSTEM_ROOT}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../monitoring_system"
-        "${CMAKE_CURRENT_SOURCE_DIR}/monitoring_system"
-    )
-    set(MONITORING_SYSTEM_AVAILABLE FALSE)
-    foreach(_path ${_PACS_MONITORING_PATHS_EARLY})
-        if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/monitoring/core/performance_monitor.h")
-            set(MONITORING_SYSTEM_AVAILABLE TRUE)
-            break()
-        endif()
-    endforeach()
-
     # Define integration library sources
     set(PACS_INTEGRATION_SOURCES
         src/integration/container_adapter.cpp
@@ -1890,8 +1875,8 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         src/integration/dicom_session.cpp
     )
 
-    # Only include monitoring_adapter.cpp if monitoring_system is available
-    if(MONITORING_SYSTEM_AVAILABLE)
+    # Include monitoring_adapter.cpp when monitoring_system is available (local or vcpkg)
+    if(MONITORING_SYSTEM_FOUND OR TARGET monitoring_system)
         list(APPEND PACS_INTEGRATION_SOURCES src/integration/monitoring_adapter.cpp)
     endif()
 
