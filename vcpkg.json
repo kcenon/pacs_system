@@ -7,7 +7,11 @@
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
   "supports": "!(uwp | xbox)",
-  "dependencies": [],
+  "dependencies": [
+    "kcenon-common-system",
+    "kcenon-container-system",
+    "kcenon-network-system"
+  ],
   "overrides": [
     { "name": "sqlite3", "version": "3.45.1" },
     { "name": "openssl", "version": "3.3.0" },
