@@ -13,7 +13,7 @@
     "kcenon-network-system"
   ],
   "overrides": [
-    { "name": "sqlite3", "version": "3.45.1" },
+    { "name": "sqlite3", "version": "3.45.3" },
     { "name": "openssl", "version": "3.3.0" },
     { "name": "libjpeg-turbo", "version": "3.0.2" },
     { "name": "libpng", "version": "1.6.43" },
