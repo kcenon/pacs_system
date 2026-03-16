@@ -4,15 +4,15 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(Threads REQUIRED)
 find_dependency(common_system CONFIG REQUIRED)
-find_dependency(ContainerSystem CONFIG REQUIRED)
-find_dependency(NetworkSystem CONFIG REQUIRED)
+find_dependency(container_system CONFIG REQUIRED)
+find_dependency(network_system CONFIG REQUIRED)
 
 if(@PACS_SYSTEM_WITH_THREAD_SYSTEM@)
     find_dependency(ThreadSystem CONFIG REQUIRED)
 endif()
 
 if(@PACS_SYSTEM_WITH_LOGGER_SYSTEM@)
-    find_dependency(LoggerSystem CONFIG REQUIRED)
+    find_dependency(logger_system CONFIG REQUIRED)
 endif()
 
 if(@PACS_SYSTEM_WITH_MONITORING_SYSTEM@)
@@ -20,7 +20,7 @@ if(@PACS_SYSTEM_WITH_MONITORING_SYSTEM@)
 endif()
 
 if(@PACS_SYSTEM_WITH_DATABASE_SYSTEM@)
-    find_dependency(DatabaseSystem CONFIG REQUIRED)
+    find_dependency(database_system CONFIG REQUIRED)
 endif()
 
 if(@PACS_SYSTEM_WITH_SQLITE@)
