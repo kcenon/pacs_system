@@ -19,6 +19,7 @@
     { "name": "libpng", "version": "1.6.43" },
     { "name": "openjpeg", "version": "2.5.2" },
     { "name": "charls", "version": "2.4.2" },
+    { "name": "openjph", "version": "0.21.0" },
     { "name": "crow", "version": "1.2.1" },
     { "name": "gtest", "version": "1.14.0" },
     { "name": "benchmark", "version": "1.8.3" }
@@ -34,7 +35,7 @@
       ]
     },
     "codecs": {
-      "description": "Optional image compression codecs (JPEG, JPEG2000, JPEG-LS, PNG)",
+      "description": "Optional image compression codecs (JPEG, JPEG2000, HTJ2K, JPEG-LS, PNG)",
       "dependencies": [
         {
           "name": "libjpeg-turbo",
@@ -51,6 +52,10 @@
         {
           "name": "charls",
           "version>=": "2.4.2"
+        },
+        {
+          "name": "openjph",
+          "version>=": "0.21.0"
         }
       ]
     },
