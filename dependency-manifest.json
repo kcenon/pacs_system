@@ -119,12 +119,6 @@
       "resolution": "find_package(openjph) or FetchContent fallback",
       "version": "0.18.2",
       "license": "BSD-2-Clause"
-    },
-    {
-      "name": "fmt",
-      "resolution": "find_package(fmt) or FetchContent fallback",
-      "version": "10.2.1",
-      "license": "MIT"
     }
   ],
   "web_frontend": {

@@ -417,51 +417,6 @@ else()
     set(PACS_OPENSSL_FOUND FALSE)
 endif()
 
-# fmt library (for std::format compatibility on older compilers)
-message(STATUS "")
-message(STATUS "=== Finding fmt library (for format compatibility) ===")
-
-# Check if std::format is available
-include(CheckCXXSourceCompiles)
-set(CMAKE_REQUIRED_FLAGS "-std=c++20")
-check_cxx_source_compiles("
-    #include <format>
-    int main() {
-        auto s = std::format(\"Hello {}\", \"World\");
-        return 0;
-    }
-" PACS_HAS_STD_FORMAT)
-
-if(PACS_HAS_STD_FORMAT)
-    message(STATUS "std::format is available - no fmt fallback needed")
-    set(PACS_FMT_NEEDED FALSE)
-else()
-    message(STATUS "std::format not available - using fmt library as fallback")
-    set(PACS_FMT_NEEDED TRUE)
-
-    # Try to find fmt library
-    find_package(fmt CONFIG QUIET)
-    if(NOT fmt_FOUND)
-        find_package(fmt QUIET)
-    endif()
-
-    if(fmt_FOUND)
-        message(STATUS "Found fmt library")
-        set(PACS_FMT_TARGET fmt::fmt)
-    else()
-        # Fetch fmt if not found
-        message(STATUS "fmt not found, fetching from source...")
-        FetchContent_Declare(
-            fmt
-            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-            GIT_TAG 10.2.1
-        )
-        FetchContent_MakeAvailable(fmt)
-        set(PACS_FMT_TARGET fmt::fmt)
-        message(STATUS "fmt fetched and configured")
-    endif()
-endif()
-
 # ==========================================================================
 # kcenon Ecosystem SOUP Version Registry (IEC 62304 §8.1.2)
 # These SHA identifiers must match the pinned versions in:
@@ -1649,11 +1604,6 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         message(STATUS "    database_system: linked (SQL injection protection enabled)")
     endif()
 
-    # Link fmt library for format compatibility (if needed)
-    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
-        target_link_libraries(pacs_storage PUBLIC ${PACS_FMT_TARGET})
-    endif()
-
     # AWS SDK integration for S3 storage (Issue #724)
     if(PACS_WITH_AWS_SDK)
         find_package(AWSSDK COMPONENTS s3)
@@ -1846,11 +1796,6 @@ if(TARGET Crow::Crow)
         target_compile_definitions(pacs_web PUBLIC PACS_WITH_MONITORING)
     endif()
 
-    # Link fmt library for format compatibility (if needed)
-    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
-        target_link_libraries(pacs_web PUBLIC ${PACS_FMT_TARGET})
-    endif()
-
     # Link OpenSSL for JWT signature verification (Issue #860)
     if(PACS_OPENSSL_FOUND)
         target_link_libraries(pacs_web PUBLIC OpenSSL::SSL OpenSSL::Crypto)
@@ -1900,11 +1845,6 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         container_system
         ContainerSystem::container
     )
-
-    # Link fmt library for format compatibility (if needed)
-    if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
-        target_link_libraries(pacs_integration PUBLIC ${PACS_FMT_TARGET})
-    endif()
 
     # Link logger_system (REQUIRED for logger_adapter)
     if(TARGET LoggerSystem)
@@ -2246,11 +2186,6 @@ endif()
 set(PACS_SYSTEM_WITH_OPENSSL FALSE)
 if(PACS_OPENSSL_FOUND)
     set(PACS_SYSTEM_WITH_OPENSSL TRUE)
-endif()
-
-set(PACS_SYSTEM_WITH_FMT FALSE)
-if(PACS_FMT_NEEDED AND PACS_FMT_TARGET)
-    set(PACS_SYSTEM_WITH_FMT TRUE)
 endif()
 
 set(PACS_SYSTEM_WITH_CROW FALSE)
@@ -2631,7 +2566,6 @@ if(PACS_BUILD_TESTS)
                 pacs_storage
                 pacs_services
                 Catch2::Catch2WithMain
-                $<$<BOOL:${fmt_FOUND}>:fmt::fmt>
                 $<$<TARGET_EXISTS:database>:database>
         )
         # Use mock S3/Azure clients in tests regardless of SDK availability (Issue #724)
