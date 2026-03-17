@@ -4,8 +4,8 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "pacs_system"
-PROJECT_NUMBER         = 1.0.0
+PROJECT_NAME           = "PACS System"
+PROJECT_NUMBER         = 0.1.0
 PROJECT_BRIEF          = "PACS DICOM system library"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = documents
