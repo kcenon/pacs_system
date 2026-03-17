@@ -63,9 +63,16 @@ if(@PACS_SYSTEM_WITH_AZURE_SDK@)
     find_dependency(azure-storage-blobs-cpp CONFIG REQUIRED)
 endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/pacs_systemTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/pacs_system-targets.cmake")
 
 @PACS_SYSTEM_BRIDGE_TARGET_SETUP@
+
+# Backward compatibility aliases (kcenon::pacs:: -> pacs_system::)
+foreach(_compat_target core encoding network client services security storage ai monitoring workflow web integration)
+    if(TARGET pacs_system::${_compat_target} AND NOT TARGET kcenon::pacs::${_compat_target})
+        add_library(kcenon::pacs::${_compat_target} ALIAS pacs_system::${_compat_target})
+    endif()
+endforeach()
 
 set(pacs_system_FOUND TRUE)
 set(PACS_SYSTEM_FOUND TRUE)
@@ -76,17 +83,17 @@ set(pacs_system_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
 set(PACS_SYSTEM_INCLUDE_DIRS "${pacs_system_INCLUDE_DIRS}")
 
 set(pacs_system_LIBRARIES
-    kcenon::pacs::core
-    kcenon::pacs::encoding
-    kcenon::pacs::network
-    kcenon::pacs::client
-    kcenon::pacs::services
-    kcenon::pacs::security
+    pacs_system::core
+    pacs_system::encoding
+    pacs_system::network
+    pacs_system::client
+    pacs_system::services
+    pacs_system::security
 )
 
 foreach(_optional_target storage ai monitoring workflow web integration)
-    if(TARGET kcenon::pacs::${_optional_target})
-        list(APPEND pacs_system_LIBRARIES kcenon::pacs::${_optional_target})
+    if(TARGET pacs_system::${_optional_target})
+        list(APPEND pacs_system_LIBRARIES pacs_system::${_optional_target})
     endif()
 endforeach()
 
