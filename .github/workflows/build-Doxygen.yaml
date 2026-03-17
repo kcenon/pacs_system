@@ -1,0 +1,13 @@
+name: Generate-Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  docs:
+    uses: kcenon/common_system/.github/workflows/doxygen.yml@main
+    secrets: inherit
