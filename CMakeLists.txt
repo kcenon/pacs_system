@@ -147,8 +147,8 @@ endfunction()
 function(pacs_register_export_target target_name export_name)
     if(TARGET ${target_name})
         set_target_properties(${target_name} PROPERTIES EXPORT_NAME ${export_name})
-        if(NOT TARGET kcenon::pacs::${export_name})
-            add_library(kcenon::pacs::${export_name} ALIAS ${target_name})
+        if(NOT TARGET pacs_system::${export_name})
+            add_library(pacs_system::${export_name} ALIAS ${target_name})
         endif()
     endif()
 endfunction()
@@ -2216,8 +2216,8 @@ foreach(_bridge_mapping IN LISTS PACS_EXPORT_BRIDGE_MAPPINGS)
     string(SUBSTRING "${_bridge_mapping}" ${_bridge_value_index} -1 _bridge_install_target)
 
     string(APPEND PACS_SYSTEM_BRIDGE_TARGET_SETUP
-        "if(TARGET kcenon::pacs::${_bridge_target_name})\n"
-        "  set_property(TARGET kcenon::pacs::${_bridge_target_name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES \"${_bridge_install_target}\")\n"
+        "if(TARGET pacs_system::${_bridge_target_name})\n"
+        "  set_property(TARGET pacs_system::${_bridge_target_name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES \"${_bridge_install_target}\")\n"
         "endif()\n"
     )
 endforeach()
@@ -2230,7 +2230,7 @@ install(DIRECTORY include/pacs
 )
 
 install(TARGETS ${PACS_SYSTEM_INSTALL_TARGETS}
-    EXPORT pacs_systemTargets
+    EXPORT pacs_system-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -2250,9 +2250,9 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 
-install(EXPORT pacs_systemTargets
-    FILE pacs_systemTargets.cmake
-    NAMESPACE kcenon::pacs::
+install(EXPORT pacs_system-targets
+    FILE pacs_system-targets.cmake
+    NAMESPACE pacs_system::
     DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
 )
 
@@ -2280,9 +2280,9 @@ foreach(_pacs_non_exportable_dep
 endforeach()
 
 if(PACS_SYSTEM_CAN_EXPORT_BUILD_TREE)
-    export(EXPORT pacs_systemTargets
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemTargets.cmake"
-        NAMESPACE kcenon::pacs::
+    export(EXPORT pacs_system-targets
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/pacs_system-targets.cmake"
+        NAMESPACE pacs_system::
     )
 else()
     message(STATUS "pacs_system: Skipping build-tree export (local dependency targets cannot be exported)")
