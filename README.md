@@ -1,10 +1,10 @@
-# PACS System
-
 [![CI](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml)
 [![Integration Tests](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml)
 [![Code Coverage](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml)
 [![Static Analysis](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml)
 [![SBOM Generation](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml)
+
+# PACS System
 
 > **Language:** **English** | [한국어](README.kr.md)
 
@@ -220,6 +220,18 @@ PACS_BUILD_TESTS (ON)              # Enable unit tests
 PACS_BUILD_EXAMPLES (OFF)          # Enable example builds
 PACS_BUILD_BENCHMARKS (OFF)        # Enable benchmarks
 PACS_BUILD_STORAGE (ON)            # Build storage module
+```
+
+### Installation via vcpkg
+
+```bash
+vcpkg install kcenon-pacs-system
+```
+
+In your `CMakeLists.txt`:
+```cmake
+find_package(pacs_system CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE kcenon::pacs_system)
 ```
 
 ### Windows Development Notes

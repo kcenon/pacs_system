@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "PACS System"
-PROJECT_NUMBER         = 0.1.0
+PROJECT_NUMBER         = "0.1.0"
 PROJECT_BRIEF          = "PACS DICOM system library"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = documents
@@ -29,7 +29,8 @@ ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
 SHORT_NAMES            = NO
-JAVADOC_AUTOBRIEF      = YES
+JAVADOC_AUTOBRIEF      = NO
+QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = YES
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
@@ -53,7 +54,8 @@ INLINE_SIMPLE_STRUCTS  = NO
 TYPEDEF_HIDES_STRUCT   = NO
 LOOKUP_CACHE_SIZE      = 0
 NUM_PROC_THREADS       = 1
-TIMESTAMP              = YES
+TIMESTAMP              = NO
+HTML_TIMESTAMP         = NO
 
 #---------------------------------------------------------------------------
 # Build related configuration options
@@ -104,6 +106,7 @@ WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = YES
 WARN_AS_ERROR          = NO
+WARN_IF_INCOMPLETE_DOC = YES
 WARN_FORMAT            = "$file:$line: $text"
 WARN_LOGFILE           =
 
@@ -133,10 +136,11 @@ EXCLUDE                = ./build \
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = */CMakeFiles/* \
                          */.git/* \
-                         */build/* \
-                         */build_simple/* \
+                         */vcpkg*/* \
+                         */_deps/* \
                          */node_modules/* \
-                         */_deps/*
+                         */build/* \
+                         */build_simple/*
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           = ./examples
 EXAMPLE_PATTERNS       = *.cpp \
@@ -269,6 +273,7 @@ HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0
 DOT_FONTPATH           =
+DOT_PATH               =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
 GROUP_GRAPHS           = YES
