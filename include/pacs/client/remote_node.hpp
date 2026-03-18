@@ -34,6 +34,19 @@
  * This file provides data structures for representing external PACS nodes,
  * including connection parameters, supported services, and runtime status.
  *
+ * @code
+ * // Define a remote PACS node for C-ECHO verification
+ * remote_node node;
+ * node.ae_title = "REMOTE_PACS";
+ * node.host = "192.168.1.100";
+ * node.port = 11112;
+ *
+ * // Check node status
+ * if (node.status == node_status::online) {
+ *     // Node is reachable and verified
+ * }
+ * @endcode
+ *
  * @see Issue #535 - Implement Remote Node Manager
  * @see DICOM PS3.7 Section 9.1.5 - C-ECHO Service
  * @author kcenon
