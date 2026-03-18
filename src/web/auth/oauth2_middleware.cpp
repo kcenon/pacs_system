@@ -67,7 +67,7 @@ void oauth2_middleware::set_access_control_manager(
     security_manager_ = std::move(manager);
 }
 
-std::optional<security::user_context> oauth2_middleware::authenticate(
+std::optional<auth_result> oauth2_middleware::authenticate(
     const crow::request& req, crow::response& res) const {
 
     // Extract Bearer token from Authorization header
@@ -97,9 +97,6 @@ std::optional<security::user_context> oauth2_middleware::authenticate(
         return std::nullopt;
     }
 
-    // Cache the validated claims for subsequent scope checks
-    last_claims_ = token.claims;
-
     // Create user_context from JWT subject
     // Try to find existing user in RBAC system, or create an OAuth-based context
     security::User user;
@@ -124,7 +121,7 @@ std::optional<security::user_context> oauth2_middleware::authenticate(
     ctx.set_source_ip(std::string(req.remote_ip_address));
     ctx.touch();
 
-    return ctx;
+    return auth_result{std::move(ctx), std::move(token.claims)};
 }
 
 bool oauth2_middleware::require_scope(
@@ -163,10 +160,6 @@ bool oauth2_middleware::enabled() const noexcept {
 
 const jwt_validator& oauth2_middleware::validator() const noexcept {
     return validator_;
-}
-
-const jwt_claims& oauth2_middleware::last_claims() const noexcept {
-    return last_claims_;
 }
 
 // =============================================================================

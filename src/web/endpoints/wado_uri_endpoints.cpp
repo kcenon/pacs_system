@@ -335,10 +335,10 @@ void register_wado_uri_endpoints_impl(
 
                 // OAuth 2.0 / legacy auth check (read scope for WADO-URI)
                 if (ctx->oauth2 && ctx->oauth2->enabled()) {
-                    auto user_ctx = ctx->oauth2->authenticate(req, res);
-                    if (!user_ctx) return res;
+                    auto auth = ctx->oauth2->authenticate(req, res);
+                    if (!auth) return res;
                     if (!ctx->oauth2->require_any_scope(
-                            ctx->oauth2->last_claims(), res,
+                            auth->claims, res,
                             {"dicomweb.read"})) {
                         return res;
                     }
