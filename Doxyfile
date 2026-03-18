@@ -9,7 +9,7 @@ PROJECT_NUMBER         = "0.1.0"
 PROJECT_BRIEF          = "PACS DICOM system library"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = documents
-CREATE_SUBDIRS         = YES
+CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -55,7 +55,6 @@ TYPEDEF_HIDES_STRUCT   = NO
 LOOKUP_CACHE_SIZE      = 0
 NUM_PROC_THREADS       = 1
 TIMESTAMP              = NO
-HTML_TIMESTAMP         = NO
 
 #---------------------------------------------------------------------------
 # Build related configuration options
