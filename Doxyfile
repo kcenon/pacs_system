@@ -9,7 +9,7 @@ PROJECT_NUMBER         = "0.1.0"
 PROJECT_BRIEF          = "PACS DICOM system library"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = documents
-CREATE_SUBDIRS         = NO
+CREATE_SUBDIRS         = YES
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -259,6 +259,8 @@ SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 # Configuration options related to external references
 #---------------------------------------------------------------------------
+ALIASES                = "thread_safety=@par Thread Safety:^^" \
+                         "performance=@par Performance:^^"
 TAGFILES               =
 GENERATE_TAGFILE       =
 ALLEXTERNALS           = NO
