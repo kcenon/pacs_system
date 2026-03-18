@@ -83,6 +83,22 @@ constexpr std::string_view delete_resource = "dicomweb.delete";
 }  // namespace dicomweb_scopes
 
 // =============================================================================
+// Authentication Result
+// =============================================================================
+
+/**
+ * @brief Result of a successful OAuth 2.0 authentication
+ *
+ * Contains both the user context (for RBAC) and the validated JWT claims
+ * (for scope checking). This ensures thread-safe authentication by
+ * returning all state from authenticate() instead of caching it.
+ */
+struct auth_result {
+    security::user_context context;
+    jwt_claims claims;
+};
+
+// =============================================================================
 // OAuth 2.0 Middleware
 // =============================================================================
 
@@ -109,10 +125,10 @@ constexpr std::string_view delete_resource = "dicomweb.delete";
  * middleware.set_jwks_provider(jwks);
  *
  * // In endpoint handler:
- * auto ctx = middleware.authenticate(req, res);
- * if (!ctx) return res;  // Error response already set
+ * auto result = middleware.authenticate(req, res);
+ * if (!result) return res;  // Error response already set
  *
- * if (!middleware.require_scope(req, res, dicomweb_scopes::read)) {
+ * if (!middleware.require_scope(result->claims, res, dicomweb_scopes::read)) {
  *     return res;  // 403 Forbidden
  * }
  * @endcode
@@ -142,22 +158,22 @@ public:
      * @brief Authenticate a request using OAuth 2.0 Bearer token
      *
      * Extracts the Bearer token, validates JWT claims, verifies the
-     * signature, and creates a user_context. On failure, sets an
+     * signature, and creates an auth_result containing both the
+     * user_context and validated claims. On failure, sets an
      * appropriate error response (401 or 403).
      *
      * @param req The HTTP request
      * @param res The HTTP response (set on error)
-     * @return user_context on success, std::nullopt on failure
+     * @return auth_result on success, std::nullopt on failure
      */
-    [[nodiscard]] std::optional<security::user_context> authenticate(
+    [[nodiscard]] std::optional<auth_result> authenticate(
         const crow::request& req, crow::response& res) const;
 
     /**
      * @brief Check if the authenticated request has a required scope
      *
-     * Must be called after authenticate(). Reads the cached token claims
-     * from the request. Returns false and sets 403 response if the
-     * required scope is missing.
+     * Must be called after authenticate(). Returns false and sets 403
+     * response if the required scope is missing.
      *
      * @param claims JWT claims from a previously validated token
      * @param res The HTTP response (set on failure)
@@ -192,17 +208,11 @@ public:
      */
     [[nodiscard]] const jwt_validator& validator() const noexcept;
 
-    /**
-     * @brief Get the last validated claims (for scope checking after authenticate)
-     */
-    [[nodiscard]] const jwt_claims& last_claims() const noexcept;
-
 private:
     oauth2_config config_;
     jwt_validator validator_;
     std::shared_ptr<jwks_provider> jwks_provider_;
     std::shared_ptr<security::access_control_manager> security_manager_;
-    mutable jwt_claims last_claims_;
 
     /// Extract Bearer token from Authorization header
     [[nodiscard]] std::optional<std::string_view> extract_bearer_token(

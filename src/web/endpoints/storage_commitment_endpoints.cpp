@@ -360,12 +360,12 @@ bool check_storage_commitment_auth(
     crow::response& res,
     const std::vector<std::string>& required_scopes) {
     if (ctx->oauth2 && ctx->oauth2->enabled()) {
-        auto user_ctx = ctx->oauth2->authenticate(req, res);
-        if (!user_ctx) return false;
+        auto auth = ctx->oauth2->authenticate(req, res);
+        if (!auth) return false;
 
         if (!required_scopes.empty()) {
             return ctx->oauth2->require_any_scope(
-                ctx->oauth2->last_claims(), res, required_scopes);
+                auth->claims, res, required_scopes);
         }
         return true;
     }
