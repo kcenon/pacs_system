@@ -366,6 +366,51 @@ pacs_system/
 
 ---
 
+## C++20 Module Support
+
+PACS System provides C++20 module support as an alternative to the header-based interface.
+
+### Requirements for Modules
+
+- **CMake 3.28+**
+- **Clang 16+, GCC 14+, or MSVC 2022 17.4+**
+- **common_system**, **container_system**, **network_system** with module support
+
+### Building with Modules
+
+```bash
+cmake -B build -DPACS_BUILD_MODULES=ON
+cmake --build build
+```
+
+### Using Modules
+
+```cpp
+import kcenon.pacs;
+
+int main() {
+    // Use PACS components directly
+    auto server = kcenon::pacs::create_scp_server();
+    server->start();
+}
+```
+
+### Module Structure
+
+| Module | Contents |
+|--------|----------|
+| `kcenon.pacs` | Primary module (imports all partitions) |
+| `kcenon.pacs:core` | Core DICOM data structures and utilities |
+| `kcenon.pacs:network` | DICOM network protocol (DIMSE) |
+| `kcenon.pacs:storage` | DICOM file storage and retrieval |
+| `kcenon.pacs:encoding` | Transfer syntax and codec support |
+| `kcenon.pacs:services` | DICOM service implementations (C-STORE, C-FIND, etc.) |
+| `kcenon.pacs:security` | TLS and authentication |
+| `kcenon.pacs:web` | DICOMweb REST API |
+| `kcenon.pacs:workflow` | Workflow management |
+
+> **Note**: C++20 modules are experimental. The header-based interface remains the primary API.
+
 ## Documentation
 
 - 📋 [Implementation Analysis](docs/PACS_IMPLEMENTATION_ANALYSIS.md) - Detailed implementation strategy
