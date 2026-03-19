@@ -1,0 +1,52 @@
+# Codecov Configuration for pacs_system
+# https://docs.codecov.com/docs/codecovyml-reference
+
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "40...80"
+  status:
+    project:
+      default:
+        target: 40%
+        threshold: 2%
+        if_ci_failed: error
+    patch:
+      default:
+        target: 60%
+        threshold: 5%
+        if_ci_failed: error
+
+# Gradual improvement plan:
+# - Phase 1 (Current): 40% project, 60% patch
+# - Phase 2: 50% project, 70% patch
+# - Phase 3: 60% project, 80% patch
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+ignore:
+  - "tests/**/*"
+  - "benchmarks/**/*"
+  - "examples/**/*"
+  - "samples/**/*"
+  - "docs/**/*"
+  - "build/**/*"
+  - "build_*/**/*"
+  - "build-*/**/*"
+  - "web/**/*"
+  - "cmake/**/*"
+  - "scripts/**/*"
+
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: no
