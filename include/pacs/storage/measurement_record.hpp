@@ -46,7 +46,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Measurement types supported by the system
@@ -186,4 +186,4 @@ struct measurement_query {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

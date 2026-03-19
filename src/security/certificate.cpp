@@ -46,7 +46,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 namespace {
 
@@ -705,4 +705,4 @@ auto certificate_chain::load_from_pem(std::string_view path)
     return chain;
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

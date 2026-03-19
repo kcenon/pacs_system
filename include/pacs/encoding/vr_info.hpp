@@ -44,7 +44,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief Metadata structure containing comprehensive VR properties.
@@ -168,6 +168,6 @@ struct vr_info {
 
 /// @}
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_VR_INFO_HPP

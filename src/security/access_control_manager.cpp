@@ -36,7 +36,7 @@
 
 #include <pacs/security/access_control_manager.hpp>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 access_control_manager::access_control_manager() {
   initialize_default_permissions();
@@ -305,4 +305,4 @@ void access_control_manager::set_audit_callback(AccessAuditCallback callback) {
   audit_callback_ = std::move(callback);
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

@@ -20,8 +20,8 @@
 #include "pacs/storage/index_database.hpp"
 #include "pacs/web/rest_types.hpp"
 
-using namespace pacs::storage;
-using namespace pacs::web;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("Key image query structure", "[web][key_image]") {
   key_image_query query;

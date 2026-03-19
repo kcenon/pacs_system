@@ -57,7 +57,7 @@
 #include <sstream>
 #include <string>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 namespace storage_commitment {
 
@@ -606,4 +606,4 @@ void register_storage_commitment_endpoints_impl(
 
 }  // namespace endpoints
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

@@ -344,8 +344,8 @@ constexpr int8_t base64_decode_table[] = {
 // Utility Functions
 // ============================================================================
 
-[[nodiscard]] pacs::encoding::vr_type parse_vr(const std::string& vr_str) {
-    using namespace pacs::encoding;
+[[nodiscard]] kcenon::pacs::encoding::vr_type parse_vr(const std::string& vr_str) {
+    using namespace kcenon::pacs::encoding;
 
     static const std::map<std::string, vr_type> vr_map = {
         {"AE", vr_type::AE}, {"AS", vr_type::AS}, {"AT", vr_type::AT},
@@ -366,7 +366,7 @@ constexpr int8_t base64_decode_table[] = {
     return it != vr_map.end() ? it->second : vr_type::UN;
 }
 
-[[nodiscard]] std::optional<pacs::core::dicom_tag> parse_tag(const std::string& tag_str) {
+[[nodiscard]] std::optional<kcenon::pacs::core::dicom_tag> parse_tag(const std::string& tag_str) {
     if (tag_str.length() != 8) {
         return std::nullopt;
     }
@@ -374,7 +374,7 @@ constexpr int8_t base64_decode_table[] = {
     try {
         uint16_t group = static_cast<uint16_t>(std::stoul(tag_str.substr(0, 4), nullptr, 16));
         uint16_t elem = static_cast<uint16_t>(std::stoul(tag_str.substr(4, 4), nullptr, 16));
-        return pacs::core::dicom_tag{group, elem};
+        return kcenon::pacs::core::dicom_tag{group, elem};
     } catch (...) {
         return std::nullopt;
     }
@@ -417,7 +417,7 @@ constexpr int8_t base64_decode_table[] = {
 
 // Forward declaration
 void parse_dataset(const xml_node& node,
-                   pacs::core::dicom_dataset& dataset,
+                   kcenon::pacs::core::dicom_dataset& dataset,
                    const options& opts);
 
 /**
@@ -471,12 +471,12 @@ void parse_dataset(const xml_node& node,
 /**
  * @brief Create DICOM element from XML DicomAttribute node
  */
-[[nodiscard]] pacs::core::dicom_element create_element(
-    const pacs::core::dicom_tag& tag,
+[[nodiscard]] kcenon::pacs::core::dicom_element create_element(
+    const kcenon::pacs::core::dicom_tag& tag,
     const xml_node& attr_node,
     const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     std::string vr_str = attr_node.get_attr("vr", "UN");
     auto vr = parse_vr(vr_str);
@@ -617,7 +617,7 @@ void parse_dataset(const xml_node& node,
  * @brief Parse XML into DICOM dataset
  */
 void parse_dataset(const xml_node& node,
-                   pacs::core::dicom_dataset& dataset,
+                   kcenon::pacs::core::dicom_dataset& dataset,
                    const options& opts) {
     for (const auto& child : node.children) {
         if (child.name != "DicomAttribute") continue;
@@ -748,8 +748,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
 }
 
 int convert_file(const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     // Read and parse XML
     std::string xml_content;

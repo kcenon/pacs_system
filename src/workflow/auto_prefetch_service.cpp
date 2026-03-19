@@ -49,7 +49,7 @@
 #include <ranges>
 #include <sstream>
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 // =========================================================================
 // Construction
@@ -844,4 +844,4 @@ auto auto_prefetch_service::dequeue_request()
     return request;
 }
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

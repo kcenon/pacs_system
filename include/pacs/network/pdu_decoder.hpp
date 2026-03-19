@@ -45,7 +45,7 @@
 #include <variant>
 #include <vector>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 /**
  * @brief PDU variant type representing any DICOM Upper Layer PDU.
@@ -125,9 +125,9 @@ enum class pdu_decode_error : int {
     }
 }
 
-/// Result type alias for PDU decoding operations using standardized pacs::Result<T>
+/// Result type alias for PDU decoding operations using standardized kcenon::pacs::Result<T>
 template<typename T>
-using DecodeResult = pacs::Result<T>;
+using DecodeResult = kcenon::pacs::Result<T>;
 
 /**
  * @brief Decoder for DICOM PDU (Protocol Data Unit) messages.
@@ -303,6 +303,6 @@ private:
     /// @}
 };
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
 #endif  // PACS_NETWORK_PDU_DECODER_HPP

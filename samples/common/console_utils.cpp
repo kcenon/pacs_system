@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // ============================================================================
 // Static State
@@ -367,4 +367,4 @@ auto truncate(std::string_view text, size_t max_length,
            std::string{suffix};
 }
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

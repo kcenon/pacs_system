@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // =============================================================================
 // XML Generation
@@ -552,4 +552,4 @@ std::string atna_audit_logger::format_coded_value_attrs(
     return oss.str();
 }
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security

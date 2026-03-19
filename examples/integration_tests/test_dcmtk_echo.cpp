@@ -22,10 +22,10 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::integration_test;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
+using namespace kcenon::pacs::integration_test;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
 
 // =============================================================================
 // Test: pacs_system SCP with DCMTK echoscu

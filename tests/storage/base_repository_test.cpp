@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
 
 namespace {
 

@@ -49,7 +49,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 /**
  * @brief Configuration for DICOM server
@@ -151,6 +151,6 @@ struct server_statistics {
     }
 };
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
 #endif  // PACS_NETWORK_SERVER_CONFIG_HPP

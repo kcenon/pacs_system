@@ -39,7 +39,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 namespace {
 
@@ -229,4 +229,4 @@ std::string pacs_metrics::to_prometheus(std::string_view prefix) const {
     return oss.str();
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

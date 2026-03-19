@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // RT Storage SOP Class UIDs
@@ -481,6 +481,6 @@ enum class rt_image_plane {
  */
 [[nodiscard]] rt_image_plane parse_rt_image_plane(std::string_view value) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_RT_STORAGE_HPP

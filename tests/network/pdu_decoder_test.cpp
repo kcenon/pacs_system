@@ -4,7 +4,7 @@
 #include "pacs/network/pdu_encoder.hpp"
 #include "pacs/network/pdu_types.hpp"
 
-using namespace pacs::network;
+using namespace kcenon::pacs::network;
 
 // ============================================================================
 // pdu_length Tests

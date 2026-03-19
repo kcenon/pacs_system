@@ -60,7 +60,7 @@
 #include "health_checker.hpp"
 #include "pacs_metrics.hpp"
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Metric Types (compatible with common_system/monitoring_system)
@@ -667,4 +667,4 @@ inline dicom_metrics_snapshot pacs_monitor::get_unified_snapshot() const {
     return dicom_metrics_snapshot{};
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

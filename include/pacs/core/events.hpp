@@ -46,7 +46,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::events {
+namespace kcenon::pacs::events {
 
 // ============================================================================
 // Association Events
@@ -320,4 +320,5 @@ struct retrieve_completed_event {
           timestamp(std::chrono::steady_clock::now()) {}
 };
 
-}  // namespace pacs::events
+}  // namespace kcenon::pacs::events
+

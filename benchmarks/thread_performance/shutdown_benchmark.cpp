@@ -26,10 +26,10 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::benchmark;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
+using namespace kcenon::pacs::benchmark;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
 
 // =============================================================================
 // Shutdown Benchmarks
@@ -208,7 +208,7 @@ TEST_CASE("Shutdown under load", "[benchmark][shutdown][load]") {
 
         auto storage_service = std::make_shared<storage_scp>();
         storage_service->set_handler([](
-            const pacs::core::dicom_dataset& /* dataset */,
+            const kcenon::pacs::core::dicom_dataset& /* dataset */,
             const std::string& /* calling_ae */,
             const std::string& /* sop_class_uid */,
             const std::string& /* sop_instance_uid */) {

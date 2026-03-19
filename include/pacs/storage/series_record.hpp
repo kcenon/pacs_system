@@ -46,7 +46,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Series record from the database
@@ -149,4 +149,4 @@ struct series_query {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

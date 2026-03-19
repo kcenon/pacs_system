@@ -34,7 +34,7 @@
 #include <thread>
 #include <vector>
 
-namespace pacs::benchmark {
+namespace kcenon::pacs::benchmark {
 
 // =============================================================================
 // Constants
@@ -46,7 +46,7 @@ constexpr uint16_t default_benchmark_port = 42104;
 /// Default timeout for benchmark operations
 constexpr auto default_timeout = std::chrono::milliseconds{10000};
 
-// Note: verification_sop_class_uid is provided by pacs::services::verification_sop_class_uid
+// Note: verification_sop_class_uid is provided by kcenon::pacs::services::verification_sop_class_uid
 // from verification_scp.hpp to avoid symbol conflicts
 
 /// CT Image Storage SOP Class UID
@@ -341,6 +341,6 @@ inline network::association_config make_store_config(
     return config;
 }
 
-}  // namespace pacs::benchmark
+}  // namespace kcenon::pacs::benchmark
 
 #endif  // PACS_BENCHMARKS_THREAD_PERFORMANCE_BENCHMARK_COMMON_HPP

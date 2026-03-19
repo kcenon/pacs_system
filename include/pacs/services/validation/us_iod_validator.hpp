@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // Validation Result Types
@@ -305,6 +305,6 @@ private:
  */
 [[nodiscard]] bool is_valid_us_dataset(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_US_IOD_VALIDATOR_HPP

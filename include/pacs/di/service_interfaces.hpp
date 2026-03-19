@@ -52,7 +52,7 @@
 #include <memory>
 #include <string>
 
-namespace pacs::di {
+namespace kcenon::pacs::di {
 
 // =============================================================================
 // Storage Interface
@@ -61,10 +61,10 @@ namespace pacs::di {
 /**
  * @brief Storage interface for DICOM data persistence
  *
- * Alias for pacs::storage::storage_interface providing unified access
+ * Alias for kcenon::pacs::storage::storage_interface providing unified access
  * through the DI container.
  *
- * @see pacs::storage::storage_interface
+ * @see kcenon::pacs::storage::storage_interface
  */
 using IDicomStorage = storage::storage_interface;
 
@@ -75,10 +75,10 @@ using IDicomStorage = storage::storage_interface;
 /**
  * @brief Codec interface for image compression/decompression
  *
- * Alias for pacs::encoding::compression::compression_codec providing
+ * Alias for kcenon::pacs::encoding::compression::compression_codec providing
  * unified access through the DI container.
  *
- * @see pacs::encoding::compression::compression_codec
+ * @see kcenon::pacs::encoding::compression::compression_codec
  */
 using IDicomCodec = encoding::compression::compression_codec;
 
@@ -181,4 +181,4 @@ public:
     }
 };
 
-}  // namespace pacs::di
+}  // namespace kcenon::pacs::di

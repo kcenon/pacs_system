@@ -54,7 +54,7 @@
 #include <memory>
 #include <mutex>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 /**
  * @brief Statistics for object pool usage monitoring
@@ -302,4 +302,5 @@ private:
     return pool_manager::get().acquire_dataset();
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+

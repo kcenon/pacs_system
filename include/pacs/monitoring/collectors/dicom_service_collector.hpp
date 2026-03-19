@@ -53,7 +53,7 @@
 
 #include "../pacs_metrics.hpp"
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @struct service_metric
@@ -445,4 +445,4 @@ inline service_metric dicom_service_collector::create_metric(
         {{"ae", ae_title_}, {"operation", operation}});
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

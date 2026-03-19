@@ -74,7 +74,7 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::web::dicomweb {
+namespace kcenon::pacs::web::dicomweb {
 
 namespace {
 
@@ -110,8 +110,8 @@ std::vector<std::string> split(std::string_view s, char delimiter) {
 /**
  * @brief Convert VR enum to string representation
  */
-std::string vr_enum_to_string(pacs::encoding::vr_type vr) {
-    using vr_type = pacs::encoding::vr_type;
+std::string vr_enum_to_string(kcenon::pacs::encoding::vr_type vr) {
+    using vr_type = kcenon::pacs::encoding::vr_type;
     switch (vr) {
     case vr_type::AE: return "AE";
     case vr_type::AS: return "AS";
@@ -731,7 +731,7 @@ auto dataset_to_dicom_json(
                 oss << ",\"Value\":[";
 
                 // Handle different VR types
-                using vr_type = pacs::encoding::vr_type;
+                using vr_type = kcenon::pacs::encoding::vr_type;
                 switch (elem.vr()) {
                 case vr_type::PN:
                     // Person Name - object with Alphabetic component
@@ -1530,9 +1530,9 @@ auto render_dicom_image(
     }
 }
 
-} // namespace pacs::web::dicomweb
+} // namespace kcenon::pacs::web::dicomweb
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -3196,4 +3196,4 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
             });
 }
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

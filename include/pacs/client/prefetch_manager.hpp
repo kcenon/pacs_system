@@ -62,21 +62,21 @@
 #include <vector>
 
 // Forward declarations
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class prefetch_repository;
 class prefetch_rule_repository;
 class prefetch_history_repository;
 }
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 class worklist_scu;
 }
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 class dicom_dataset;
 }
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // Forward declarations
 class remote_node_manager;
@@ -232,7 +232,7 @@ public:
      * @param rule The rule to add
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto add_rule(const prefetch_rule& rule) -> pacs::VoidResult;
+    [[nodiscard]] auto add_rule(const prefetch_rule& rule) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Update an existing prefetch rule
@@ -240,7 +240,7 @@ public:
      * @param rule The rule to update (rule_id must match existing)
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto update_rule(const prefetch_rule& rule) -> pacs::VoidResult;
+    [[nodiscard]] auto update_rule(const prefetch_rule& rule) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Remove a prefetch rule
@@ -248,7 +248,7 @@ public:
      * @param rule_id ID of the rule to remove
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> pacs::VoidResult;
+    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Get a rule by ID
@@ -465,4 +465,4 @@ private:
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

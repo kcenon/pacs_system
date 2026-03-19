@@ -41,7 +41,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -76,8 +76,8 @@ network::Result<query_result> query_scu::find_impl(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<query_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<query_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
@@ -87,8 +87,8 @@ network::Result<query_result> query_scu::find_impl(
     // Get accepted presentation context for this SOP class
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<query_result>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<query_result>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for SOP Class: " +
             std::string(sop_class_uid));
     }
@@ -120,8 +120,8 @@ network::Result<query_result> query_scu::find_impl(
 
         // Verify it's a C-FIND response
         if (response.command() != command_field::c_find_rsp) {
-            return pacs::pacs_error<query_result>(
-                pacs::error_codes::find_unexpected_command,
+            return kcenon::pacs::pacs_error<query_result>(
+                kcenon::pacs::error_codes::find_unexpected_command,
                 "Expected C-FIND-RSP but received " +
                 std::string(to_string(response.command())));
         }
@@ -198,8 +198,8 @@ network::Result<size_t> query_scu::find_streaming(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<size_t>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<size_t>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
@@ -209,8 +209,8 @@ network::Result<size_t> query_scu::find_streaming(
     // Get accepted presentation context for this SOP class
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<size_t>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<size_t>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for SOP Class: " +
             std::string(sop_class_uid));
     }
@@ -243,8 +243,8 @@ network::Result<size_t> query_scu::find_streaming(
 
         // Verify it's a C-FIND response
         if (response.command() != command_field::c_find_rsp) {
-            return pacs::pacs_error<size_t>(
-                pacs::error_codes::find_unexpected_command,
+            return kcenon::pacs::pacs_error<size_t>(
+                kcenon::pacs::error_codes::find_unexpected_command,
                 "Expected C-FIND-RSP but received " +
                 std::string(to_string(response.command())));
         }
@@ -373,8 +373,8 @@ network::Result<std::monostate> query_scu::cancel(
 
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<std::monostate>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<std::monostate>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for cancel");
     }
 
@@ -533,4 +533,4 @@ std::string_view query_scu::get_sop_class_uid() const noexcept {
     return get_find_sop_class_uid(config_.model);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

@@ -15,10 +15,10 @@
 #include <vector>
 
 // Use explicit namespace aliases to avoid ambiguity
-namespace ai = pacs::ai;
-namespace core = pacs::core;
-namespace encoding = pacs::encoding;
-namespace storage = pacs::storage;
+namespace ai = kcenon::pacs::ai;
+namespace core = kcenon::pacs::core;
+namespace encoding = kcenon::pacs::encoding;
+namespace storage = kcenon::pacs::storage;
 
 // Use common_system's ok() function
 using kcenon::common::ok;

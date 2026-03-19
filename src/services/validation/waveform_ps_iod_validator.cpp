@@ -36,9 +36,9 @@
 #include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/services/sop_classes/waveform_storage.hpp"
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // Waveform PS-specific DICOM Tags
@@ -336,4 +336,4 @@ void waveform_ps_iod_validator::check_type2_attribute(
     }
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

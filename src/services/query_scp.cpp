@@ -43,17 +43,17 @@
 
 #include <kcenon/common/patterns/event_bus.h>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 namespace {
 // Convert services::query_level to events::query_level
-pacs::events::query_level to_event_level(query_level level) {
+kcenon::pacs::events::query_level to_event_level(query_level level) {
     switch (level) {
-        case query_level::patient: return pacs::events::query_level::patient;
-        case query_level::study: return pacs::events::query_level::study;
-        case query_level::series: return pacs::events::query_level::series;
-        case query_level::image: return pacs::events::query_level::image;
-        default: return pacs::events::query_level::patient;
+        case query_level::patient: return kcenon::pacs::events::query_level::patient;
+        case query_level::study: return kcenon::pacs::events::query_level::study;
+        case query_level::series: return kcenon::pacs::events::query_level::series;
+        case query_level::image: return kcenon::pacs::events::query_level::image;
+        default: return kcenon::pacs::events::query_level::patient;
     }
 }
 }  // namespace
@@ -86,7 +86,7 @@ void query_scp::set_cancel_check(cancel_check check) {
 }
 
 void query_scp::set_audit_handler(
-    std::shared_ptr<pacs::security::atna_service_auditor> auditor) {
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor) {
     auditor_ = std::move(auditor);
 }
 
@@ -112,8 +112,8 @@ network::Result<std::monostate> query_scp::handle_message(
 
     // Verify the message is a C-FIND request
     if (request.command() != command_field::c_find_rq) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::find_unexpected_command,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::find_unexpected_command,
             "Expected C-FIND-RQ but received " +
             std::string(to_string(request.command())));
     }
@@ -121,14 +121,14 @@ network::Result<std::monostate> query_scp::handle_message(
     // Verify we have a handler
     if (!handler_) {
         kcenon::common::get_event_bus().publish(
-            pacs::events::query_failed_event{
+            kcenon::pacs::events::query_failed_event{
                 calling_ae,
-                static_cast<int>(pacs::error_codes::find_handler_not_set),
+                static_cast<int>(kcenon::pacs::error_codes::find_handler_not_set),
                 "No query handler configured"
             }
         );
-        return pacs::pacs_void_error(
-            pacs::error_codes::find_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::find_handler_not_set,
             "No query handler configured");
     }
 
@@ -194,7 +194,7 @@ network::Result<std::monostate> query_scp::handle_message(
 
     // Publish query executed event
     kcenon::common::get_event_bus().publish(
-        pacs::events::query_executed_event{
+        kcenon::pacs::events::query_executed_event{
             to_event_level(level.value()),
             calling_ae,
             results.size(),
@@ -293,4 +293,4 @@ network::Result<std::monostate> query_scp::send_final_response(
     return assoc.send_dimse(context_id, response);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

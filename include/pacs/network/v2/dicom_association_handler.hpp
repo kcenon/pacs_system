@@ -69,7 +69,7 @@ namespace kcenon::network::interfaces {
 class i_session;
 }  // namespace kcenon::network::interfaces
 
-namespace pacs::network::v2 {
+namespace kcenon::pacs::network::v2 {
 
 // =============================================================================
 // Handler State
@@ -524,6 +524,6 @@ private:
     bool access_control_enabled_{false};
 };
 
-}  // namespace pacs::network::v2
+}  // namespace kcenon::pacs::network::v2
 
 #endif  // PACS_NETWORK_V2_DICOM_ASSOCIATION_HANDLER_HPP

@@ -50,7 +50,7 @@
 #include <ranges>
 #include <sstream>
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 // =============================================================================
 // Cron Schedule Implementation
@@ -539,7 +539,7 @@ auto task_scheduler::trigger_task(const task_id& id) -> bool {
     return true;
 }
 
-auto task_scheduler::update_schedule(const task_id& id, const pacs::workflow::schedule& new_schedule)
+auto task_scheduler::update_schedule(const task_id& id, const kcenon::pacs::workflow::schedule& new_schedule)
     -> bool {
     std::lock_guard<std::mutex> lock(tasks_mutex_);
 
@@ -1018,7 +1018,7 @@ auto task_scheduler::execute_task(scheduled_task& task)
 }
 
 auto task_scheduler::calculate_next_run(
-    const pacs::workflow::schedule& sched,
+    const kcenon::pacs::workflow::schedule& sched,
     std::chrono::system_clock::time_point from) const
     -> std::optional<std::chrono::system_clock::time_point> {
 
@@ -1603,4 +1603,4 @@ auto task_scheduler::deserialize_tasks(const std::string& json) -> std::size_t {
     return 0;
 }
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

@@ -60,7 +60,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @enum pipeline_stage
@@ -230,4 +230,4 @@ struct job_context {
     uint8_t priority{128};
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

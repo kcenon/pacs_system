@@ -14,8 +14,8 @@
 #include <string>
 #include <thread>
 
-using namespace pacs::network;
-using namespace pacs::network::v2;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::v2;
 
 // =============================================================================
 // Test Constants

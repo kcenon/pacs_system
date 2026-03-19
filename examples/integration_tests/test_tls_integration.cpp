@@ -27,10 +27,10 @@
 #include <filesystem>
 #include <thread>
 
-using namespace pacs::integration_test;
-using namespace pacs::services;
-using pacs::integration::tls_config;
-using pacs::integration::network_adapter;
+using namespace kcenon::pacs::integration_test;
+using namespace kcenon::pacs::services;
+using kcenon::pacs::integration::tls_config;
+using kcenon::pacs::integration::network_adapter;
 
 namespace {
 
@@ -122,7 +122,7 @@ public:
         , ae_title_(ae_title)
         , tls_cfg_(tls_cfg) {
 
-        pacs::network::server_config config;
+        kcenon::pacs::network::server_config config;
         config.ae_title = ae_title_;
         config.port = port_;
         config.max_associations = 10;
@@ -182,13 +182,13 @@ public:
     [[nodiscard]] const std::string& ae_title() const noexcept { return ae_title_; }
     [[nodiscard]] bool is_running() const noexcept { return running_; }
     [[nodiscard]] bool is_tls_valid() const noexcept { return tls_valid_; }
-    [[nodiscard]] pacs::network::dicom_server* server() { return server_.get(); }
+    [[nodiscard]] kcenon::pacs::network::dicom_server* server() { return server_.get(); }
 
 private:
     uint16_t port_;
     std::string ae_title_;
     tls_config tls_cfg_;
-    std::unique_ptr<pacs::network::dicom_server> server_;
+    std::unique_ptr<kcenon::pacs::network::dicom_server> server_;
     bool running_{false};
     bool tls_valid_{false};
 };
@@ -198,7 +198,7 @@ private:
  */
 class tls_test_client {
 public:
-    static pacs::network::Result<pacs::network::association> connect(
+    static kcenon::pacs::network::Result<kcenon::pacs::network::association> connect(
         const std::string& host,
         uint16_t port,
         const std::string& called_ae,
@@ -213,7 +213,7 @@ public:
         }
 
         // Configure association
-        pacs::network::association_config config;
+        kcenon::pacs::network::association_config config;
         config.calling_ae_title = calling_ae;
         config.called_ae_title = called_ae;
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.2";
@@ -234,7 +234,7 @@ public:
 
         // Connect with TLS configuration
         // Note: In full implementation, TLS config would be passed to connect
-        return pacs::network::association::connect(host, port, config, default_timeout());
+        return kcenon::pacs::network::association::connect(host, port, config, default_timeout());
     }
 };
 
@@ -295,7 +295,7 @@ TEST_CASE("TLS C-ECHO connection", "[tls][connectivity]") {
         REQUIRE(context_id_opt.has_value());
 
         // Send C-ECHO
-        using namespace pacs::network::dimse;
+        using namespace kcenon::pacs::network::dimse;
         auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
         auto send_result = assoc.send_dimse(*context_id_opt, echo_rq);
         REQUIRE(send_result.is_ok());
@@ -448,7 +448,7 @@ TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
         // Verify we can communicate
         REQUIRE(assoc.has_accepted_context(verification_sop_class_uid));
 
-        using namespace pacs::network::dimse;
+        using namespace kcenon::pacs::network::dimse;
         auto ctx_id = *assoc.accepted_context_id(verification_sop_class_uid);
         auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
         auto send_result = assoc.send_dimse(ctx_id, echo_rq);
@@ -646,7 +646,7 @@ TEST_CASE("Multiple concurrent TLS connections", "[tls][concurrent]") {
                 return;
             }
 
-            using namespace pacs::network::dimse;
+            using namespace kcenon::pacs::network::dimse;
             auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
             auto send_result = assoc.send_dimse(*ctx_opt, echo_rq);
             if (send_result.is_err()) {
@@ -746,7 +746,7 @@ public:
         , ae_title_(ae_title)
         , tls_cfg_(tls_cfg) {
 
-        pacs::network::server_config config;
+        kcenon::pacs::network::server_config config;
         config.ae_title = ae_title_;
         config.port = port_;
         config.max_associations = 10;
@@ -764,7 +764,7 @@ public:
 
         // Create V2 server
         // Note: TLS integration for V2 server uses network_system's TLS support
-        server_ = std::make_unique<pacs::network::v2::dicom_server_v2>(config);
+        server_ = std::make_unique<kcenon::pacs::network::v2::dicom_server_v2>(config);
     }
 
     ~tls_test_server_v2() {
@@ -806,13 +806,13 @@ public:
     [[nodiscard]] const std::string& ae_title() const noexcept { return ae_title_; }
     [[nodiscard]] bool is_running() const noexcept { return running_; }
     [[nodiscard]] bool is_tls_valid() const noexcept { return tls_valid_; }
-    [[nodiscard]] pacs::network::v2::dicom_server_v2* server() { return server_.get(); }
+    [[nodiscard]] kcenon::pacs::network::v2::dicom_server_v2* server() { return server_.get(); }
 
 private:
     uint16_t port_;
     std::string ae_title_;
     tls_config tls_cfg_;
-    std::unique_ptr<pacs::network::v2::dicom_server_v2> server_;
+    std::unique_ptr<kcenon::pacs::network::v2::dicom_server_v2> server_;
     bool running_{false};
     bool tls_valid_{false};
 };
@@ -865,7 +865,7 @@ TEST_CASE("TLS C-ECHO with dicom_server_v2", "[tls][v2][connectivity]") {
         auto context_id_opt = assoc.accepted_context_id(verification_sop_class_uid);
         REQUIRE(context_id_opt.has_value());
 
-        using namespace pacs::network::dimse;
+        using namespace kcenon::pacs::network::dimse;
         auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
         auto send_result = assoc.send_dimse(*context_id_opt, echo_rq);
         REQUIRE(send_result.is_ok());
@@ -933,7 +933,7 @@ TEST_CASE("TLS concurrent connections with dicom_server_v2", "[tls][v2][concurre
                 return;
             }
 
-            using namespace pacs::network::dimse;
+            using namespace kcenon::pacs::network::dimse;
             auto echo_rq = make_c_echo_rq(1, verification_sop_class_uid);
             auto send_result = assoc.send_dimse(*ctx_opt, echo_rq);
             if (send_result.is_err()) {

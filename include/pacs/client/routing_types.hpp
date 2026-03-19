@@ -51,7 +51,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Routing Condition Field
@@ -327,4 +327,4 @@ struct routing_test_result {
     std::vector<routing_action> actions;          ///< Actions that would execute
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

@@ -14,8 +14,8 @@
 #include <fstream>
 #include <vector>
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 namespace {
 
@@ -185,7 +185,7 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
         auto result = dicom_file::from_bytes(data);
 
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::invalid_dicom_file);
+        CHECK(result.error().code == kcenon::pacs::error_codes::invalid_dicom_file);
     }
 
     SECTION("missing DICM prefix returns error") {
@@ -194,7 +194,7 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
         auto result = dicom_file::from_bytes(data);
 
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::missing_dicm_prefix);
+        CHECK(result.error().code == kcenon::pacs::error_codes::missing_dicm_prefix);
     }
 
     SECTION("wrong DICM prefix returns error") {
@@ -205,7 +205,7 @@ TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
         auto result = dicom_file::from_bytes(data);
 
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::missing_dicm_prefix);
+        CHECK(result.error().code == kcenon::pacs::error_codes::missing_dicm_prefix);
     }
 }
 
@@ -214,7 +214,7 @@ TEST_CASE("dicom_file reading from file", "[core][dicom_file]") {
         auto result = dicom_file::open("/nonexistent/path/test.dcm");
 
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::file_not_found);
+        CHECK(result.error().code == kcenon::pacs::error_codes::file_not_found);
     }
 
     SECTION("valid file is read correctly") {
@@ -457,7 +457,7 @@ TEST_CASE("error codes are used correctly", "[core][dicom_file]") {
     SECTION("file_not_found error code") {
         auto result = dicom_file::open("/nonexistent/path/test.dcm");
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::file_not_found);
+        CHECK(result.error().code == kcenon::pacs::error_codes::file_not_found);
         CHECK_FALSE(result.error().message.empty());
     }
 
@@ -465,14 +465,14 @@ TEST_CASE("error codes are used correctly", "[core][dicom_file]") {
         std::vector<uint8_t> data(100, 0);
         auto result = dicom_file::from_bytes(data);
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::invalid_dicom_file);
+        CHECK(result.error().code == kcenon::pacs::error_codes::invalid_dicom_file);
     }
 
     SECTION("missing_dicm_prefix error code") {
         std::vector<uint8_t> data(256, 0);
         auto result = dicom_file::from_bytes(data);
         REQUIRE(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::missing_dicm_prefix);
+        CHECK(result.error().code == kcenon::pacs::error_codes::missing_dicm_prefix);
     }
 }
 

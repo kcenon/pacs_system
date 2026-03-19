@@ -44,7 +44,7 @@
 #include <mutex>
 #include <sstream>
 
-namespace pacs::services::monitoring {
+namespace kcenon::pacs::services::monitoring {
 
 // ============================================================================
 // database_metrics_service::impl
@@ -321,6 +321,6 @@ auto health_status_to_string(database_health::status status) -> std::string {
     }
 }
 
-}  // namespace pacs::services::monitoring
+}  // namespace kcenon::pacs::services::monitoring
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

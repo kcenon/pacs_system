@@ -59,7 +59,7 @@ namespace kcenon::thread {
 class thread_pool;
 }  // namespace kcenon::thread
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // ─────────────────────────────────────────────────────
 // Forward Declarations
@@ -390,4 +390,4 @@ auto thread_adapter::submit_with_priority(job_priority priority, F&& task)
     return future;
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

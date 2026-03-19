@@ -37,7 +37,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 std::vector<std::string> verification_scp::supported_sop_classes() const {
     return {std::string(verification_sop_class_uid)};
@@ -52,8 +52,8 @@ network::Result<std::monostate> verification_scp::handle_message(
 
     // Verify the message is a C-ECHO request
     if (request.command() != command_field::c_echo_rq) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::echo_unexpected_command,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::echo_unexpected_command,
             "Expected C-ECHO-RQ but received " +
             std::string(to_string(request.command())));
     }
@@ -73,4 +73,4 @@ std::string_view verification_scp::service_name() const noexcept {
     return "Verification SCP";
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

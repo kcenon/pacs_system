@@ -16,8 +16,8 @@
 #include <sqlite3.h>
 #endif
 
-using namespace pacs::storage;
-using namespace pacs::services;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::services;
 
 namespace {
 

@@ -55,7 +55,7 @@
 #include <span>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief DICOM Digital Signature creation and verification
@@ -259,4 +259,4 @@ private:
     ) -> bool;
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

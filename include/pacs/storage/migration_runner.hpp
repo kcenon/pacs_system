@@ -58,7 +58,7 @@
 
 // Forward declaration for pacs_database_adapter
 #ifdef PACS_WITH_DATABASE_SYSTEM
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class pacs_database_adapter;
 }
 #endif
@@ -66,7 +66,7 @@ class pacs_database_adapter;
 // Forward declaration of SQLite handle
 struct sqlite3;
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /// Result type alias for void operations
 using VoidResult = kcenon::common::VoidResult;
@@ -395,4 +395,4 @@ private:
     std::vector<std::pair<int, migration_function>> migrations_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

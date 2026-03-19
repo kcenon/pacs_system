@@ -42,7 +42,7 @@
 #include <sstream>
 #include <thread>
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 // =============================================================================
 // Construction / Destruction
@@ -895,4 +895,4 @@ void study_lock_manager::record_release(
     (void)type;  // Type-specific stats are calculated in get_stats()
 }
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

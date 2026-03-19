@@ -39,7 +39,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -87,16 +87,16 @@ network::Result<std::monostate> worklist_scp::handle_message(
 
     // Verify the message is a C-FIND request
     if (request.command() != command_field::c_find_rq) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::worklist_unexpected_command,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::worklist_unexpected_command,
             "Expected C-FIND-RQ but received " +
             std::string(to_string(request.command())));
     }
 
     // Verify we have a handler
     if (!handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::worklist_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::worklist_handler_not_set,
             "No worklist handler configured");
     }
 
@@ -232,4 +232,4 @@ network::Result<std::monostate> worklist_scp::send_final_response(
     return assoc.send_dimse(context_id, response);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

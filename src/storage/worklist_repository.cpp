@@ -48,7 +48,7 @@
 
 #include <database/query_builder.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -178,7 +178,7 @@ auto worklist_repository::add_worklist_item(const worklist_item& item)
     if (insert_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to add worklist item: {}",
+            kcenon::pacs::compat::format("Failed to add worklist item: {}",
                                  insert_result.error().message),
             "storage");
     }
@@ -223,7 +223,7 @@ auto worklist_repository::update_worklist_status(std::string_view step_id,
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to update worklist status: {}",
+            kcenon::pacs::compat::format("Failed to update worklist status: {}",
                                  result.error().message),
             "storage");
     }
@@ -252,12 +252,12 @@ auto worklist_repository::query_worklist(const worklist_query& query)
         builder.where("modality", "=", *query.modality);
     }
     if (query.scheduled_date_from.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "substr(scheduled_datetime, 1, 8) >= '{}'",
             *query.scheduled_date_from)));
     }
     if (query.scheduled_date_to.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "substr(scheduled_datetime, 1, 8) <= '{}'",
             *query.scheduled_date_to)));
     }
@@ -348,7 +348,7 @@ auto worklist_repository::delete_worklist_item(std::string_view step_id,
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to delete worklist item: {}",
+            kcenon::pacs::compat::format("Failed to delete worklist item: {}",
                                  result.error().message),
             "storage");
     }
@@ -361,7 +361,7 @@ auto worklist_repository::cleanup_old_worklist_items(std::chrono::hours age)
     auto cutoff = std::chrono::system_clock::now() - age;
     auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
     std::tm tm{};
-    pacs::compat::gmtime_safe(&cutoff_time, &tm);
+    kcenon::pacs::compat::gmtime_safe(&cutoff_time, &tm);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
@@ -375,13 +375,13 @@ auto worklist_repository::cleanup_old_worklist_items(std::chrono::hours age)
     builder.delete_from(table_name())
         .where("step_status", "!=", std::string("SCHEDULED"))
         .where(database::query_condition(
-            pacs::compat::format("created_at < '{}'", cutoff_str)));
+            kcenon::pacs::compat::format("created_at < '{}'", cutoff_str)));
 
     auto result = db()->remove(builder.build());
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Failed to cleanup old worklist items: {}",
+            kcenon::pacs::compat::format("Failed to cleanup old worklist items: {}",
                                  result.error().message),
             "storage");
     }
@@ -393,7 +393,7 @@ auto worklist_repository::cleanup_worklist_items_before(
     std::chrono::system_clock::time_point before) -> Result<size_t> {
     auto before_time = std::chrono::system_clock::to_time_t(before);
     std::tm tm{};
-    pacs::compat::localtime_safe(&before_time, &tm);
+    kcenon::pacs::compat::localtime_safe(&before_time, &tm);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
@@ -407,13 +407,13 @@ auto worklist_repository::cleanup_worklist_items_before(
     builder.delete_from(table_name())
         .where("step_status", "!=", std::string("SCHEDULED"))
         .where(database::query_condition(
-            pacs::compat::format("scheduled_datetime < '{}'", before_str)));
+            kcenon::pacs::compat::format("scheduled_datetime < '{}'", before_str)));
 
     auto result = db()->remove(builder.build());
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format(
+            kcenon::pacs::compat::format(
                 "Failed to cleanup worklist items before {}: {}",
                 before_str, result.error().message),
             "storage");
@@ -432,7 +432,7 @@ auto worklist_repository::worklist_count(std::string_view status)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto query = pacs::compat::format(
+    auto query = kcenon::pacs::compat::format(
         "SELECT COUNT(*) as count FROM {} WHERE step_status = '{}'",
         table_name(), std::string(status));
     auto result = db()->select(query);
@@ -450,7 +450,7 @@ auto worklist_repository::worklist_count(std::string_view status)
     } catch (const std::exception& e) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Failed to parse worklist count: {}",
+            kcenon::pacs::compat::format("Failed to parse worklist count: {}",
                                  e.what()),
             "storage");
     }
@@ -534,13 +534,13 @@ auto worklist_repository::select_columns() const -> std::vector<std::string> {
             "created_at",        "updated_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -675,7 +675,7 @@ auto worklist_repository::add_worklist_item(const worklist_item& item)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}",
+            kcenon::pacs::compat::format("Failed to prepare statement: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -708,7 +708,7 @@ auto worklist_repository::add_worklist_item(const worklist_item& item)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, pacs::compat::format("Failed to add worklist item: {}", error_msg),
+            rc, kcenon::pacs::compat::format("Failed to add worklist item: {}", error_msg),
             "storage");
     }
 
@@ -741,7 +741,7 @@ auto worklist_repository::update_worklist_status(std::string_view step_id,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}",
+            kcenon::pacs::compat::format("Failed to prepare statement: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -759,7 +759,7 @@ auto worklist_repository::update_worklist_status(std::string_view step_id,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to update worklist status: {}",
+            kcenon::pacs::compat::format("Failed to update worklist status: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -820,10 +820,10 @@ auto worklist_repository::query_worklist(const worklist_query& query) const
     sql += " ORDER BY scheduled_datetime ASC";
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -831,7 +831,7 @@ auto worklist_repository::query_worklist(const worklist_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<worklist_item>>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -925,7 +925,7 @@ auto worklist_repository::delete_worklist_item(std::string_view step_id,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare delete: {}",
+            kcenon::pacs::compat::format("Failed to prepare delete: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -941,7 +941,7 @@ auto worklist_repository::delete_worklist_item(std::string_view step_id,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to delete worklist item: {}",
+            kcenon::pacs::compat::format("Failed to delete worklist item: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -954,7 +954,7 @@ auto worklist_repository::cleanup_old_worklist_items(std::chrono::hours age)
     auto cutoff = std::chrono::system_clock::now() - age;
     auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
     std::tm tm{};
-    pacs::compat::gmtime_safe(&cutoff_time, &tm);
+    kcenon::pacs::compat::gmtime_safe(&cutoff_time, &tm);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
@@ -971,7 +971,7 @@ auto worklist_repository::cleanup_old_worklist_items(std::chrono::hours age)
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare cleanup: {}",
+            kcenon::pacs::compat::format("Failed to prepare cleanup: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -983,7 +983,7 @@ auto worklist_repository::cleanup_old_worklist_items(std::chrono::hours age)
     if (rc != SQLITE_DONE) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to cleanup old worklist items: {}",
+            kcenon::pacs::compat::format("Failed to cleanup old worklist items: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -995,7 +995,7 @@ auto worklist_repository::cleanup_worklist_items_before(
     std::chrono::system_clock::time_point before) -> Result<size_t> {
     auto before_time = std::chrono::system_clock::to_time_t(before);
     std::tm tm{};
-    pacs::compat::localtime_safe(&before_time, &tm);
+    kcenon::pacs::compat::localtime_safe(&before_time, &tm);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
@@ -1012,7 +1012,7 @@ auto worklist_repository::cleanup_worklist_items_before(
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare cleanup: {}",
+            kcenon::pacs::compat::format("Failed to prepare cleanup: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1024,7 +1024,7 @@ auto worklist_repository::cleanup_worklist_items_before(
     if (rc != SQLITE_DONE) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format(
+            kcenon::pacs::compat::format(
                 "Failed to cleanup worklist items before {}: {}",
                 before_str, sqlite3_errmsg(db_)),
             "storage");
@@ -1040,7 +1040,7 @@ auto worklist_repository::worklist_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1061,7 +1061,7 @@ auto worklist_repository::worklist_count(std::string_view status) const
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1077,6 +1077,6 @@ auto worklist_repository::worklist_count(std::string_view status) const
     return ok(count);
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -22,8 +22,8 @@
 #include <string>
 #include <vector>
 
-using namespace pacs::di;
-using namespace pacs::services;
+using namespace kcenon::pacs::di;
+using namespace kcenon::pacs::services;
 using namespace kcenon::common::di;
 
 // =============================================================================
@@ -70,7 +70,7 @@ public:
         last_message_ = std::string(message);
     }
 
-    [[nodiscard]] bool is_enabled(pacs::integration::log_level level) const noexcept override {
+    [[nodiscard]] bool is_enabled(kcenon::pacs::integration::log_level level) const noexcept override {
         return level >= enabled_level_;
     }
 
@@ -103,7 +103,7 @@ public:
         return last_message_;
     }
 
-    void set_enabled_level(pacs::integration::log_level level) noexcept {
+    void set_enabled_level(kcenon::pacs::integration::log_level level) noexcept {
         enabled_level_ = level;
     }
 
@@ -125,7 +125,7 @@ private:
     std::atomic<size_t> error_count_{0};
     std::atomic<size_t> fatal_count_{0};
     std::string last_message_;
-    pacs::integration::log_level enabled_level_ = pacs::integration::log_level::trace;
+    kcenon::pacs::integration::log_level enabled_level_ = kcenon::pacs::integration::log_level::trace;
 };
 
 }  // namespace
@@ -148,12 +148,12 @@ TEST_CASE("NullLogger is a no-op implementation", "[di][logger][null]") {
     }
 
     SECTION("is_enabled always returns false") {
-        CHECK_FALSE(logger.is_enabled(pacs::integration::log_level::trace));
-        CHECK_FALSE(logger.is_enabled(pacs::integration::log_level::debug));
-        CHECK_FALSE(logger.is_enabled(pacs::integration::log_level::info));
-        CHECK_FALSE(logger.is_enabled(pacs::integration::log_level::warn));
-        CHECK_FALSE(logger.is_enabled(pacs::integration::log_level::error));
-        CHECK_FALSE(logger.is_enabled(pacs::integration::log_level::fatal));
+        CHECK_FALSE(logger.is_enabled(kcenon::pacs::integration::log_level::trace));
+        CHECK_FALSE(logger.is_enabled(kcenon::pacs::integration::log_level::debug));
+        CHECK_FALSE(logger.is_enabled(kcenon::pacs::integration::log_level::info));
+        CHECK_FALSE(logger.is_enabled(kcenon::pacs::integration::log_level::warn));
+        CHECK_FALSE(logger.is_enabled(kcenon::pacs::integration::log_level::error));
+        CHECK_FALSE(logger.is_enabled(kcenon::pacs::integration::log_level::fatal));
     }
 
     SECTION("formatted logging methods are safe") {
@@ -189,7 +189,7 @@ TEST_CASE("null_logger() returns singleton instance", "[di][logger][null]") {
     SECTION("instance is NullLogger") {
         auto logger = null_logger();
         // Verify behavior matches NullLogger
-        CHECK_FALSE(logger->is_enabled(pacs::integration::log_level::info));
+        CHECK_FALSE(logger->is_enabled(kcenon::pacs::integration::log_level::info));
     }
 }
 
@@ -213,7 +213,7 @@ TEST_CASE("LoggerService delegates to logger_adapter", "[di][logger][service]") 
     SECTION("is_enabled delegates correctly") {
         // Should return based on logger_adapter's min level
         // Note: actual level depends on logger_adapter initialization state
-        (void)service.is_enabled(pacs::integration::log_level::info);
+        (void)service.is_enabled(kcenon::pacs::integration::log_level::info);
     }
 
     SECTION("formatted logging methods work") {
@@ -267,7 +267,7 @@ TEST_CASE("ILogger formatted logging with MockLogger", "[di][logger][format]") {
     }
 
     SECTION("formatted logging respects is_enabled") {
-        mock->set_enabled_level(pacs::integration::log_level::warn);
+        mock->set_enabled_level(kcenon::pacs::integration::log_level::warn);
 
         // These should not log because level is below warn
         logger->trace_fmt("skip: {}", 1);
@@ -297,7 +297,7 @@ TEST_CASE("verification_scp logger injection", "[di][logger][services]") {
         verification_scp scp;
         REQUIRE(scp.logger() != nullptr);
         // Verify it behaves like NullLogger
-        CHECK_FALSE(scp.logger()->is_enabled(pacs::integration::log_level::info));
+        CHECK_FALSE(scp.logger()->is_enabled(kcenon::pacs::integration::log_level::info));
     }
 
     SECTION("custom logger can be injected via constructor") {
@@ -321,7 +321,7 @@ TEST_CASE("verification_scp logger injection", "[di][logger][services]") {
 
         scp.set_logger(nullptr);
         REQUIRE(scp.logger() != nullptr);
-        CHECK_FALSE(scp.logger()->is_enabled(pacs::integration::log_level::info));
+        CHECK_FALSE(scp.logger()->is_enabled(kcenon::pacs::integration::log_level::info));
     }
 }
 

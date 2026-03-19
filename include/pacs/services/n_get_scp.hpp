@@ -50,7 +50,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Handler Types
@@ -239,6 +239,6 @@ private:
     std::atomic<size_t> gets_processed_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_N_GET_SCP_HPP

@@ -81,11 +81,11 @@ using messaging_session = kcenon::network::session::messaging_session;
 using secure_session = kcenon::network::session::secure_session;
 }  // namespace network_system::session
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 class dicom_server;
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // Forward declarations
 class dicom_session;
@@ -398,4 +398,4 @@ private:
     network_adapter& operator=(const network_adapter&) = delete;
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

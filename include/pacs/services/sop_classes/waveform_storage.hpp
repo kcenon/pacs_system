@@ -49,7 +49,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Waveform Storage SOP Class UIDs
@@ -240,6 +240,6 @@ get_waveform_sop_class_info(std::string_view uid) noexcept;
  */
 [[nodiscard]] std::vector<std::string> get_waveform_transfer_syntaxes();
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_WAVEFORM_STORAGE_HPP

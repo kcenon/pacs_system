@@ -47,9 +47,9 @@
 // This header requires database_system for database_context and database_manager
 #ifndef PACS_WITH_DATABASE_SYSTEM
 // Forward declare empty class when database_system is not available
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class sqlite_security_storage;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 #else  // PACS_WITH_DATABASE_SYSTEM
 
 #include <pacs/security/security_storage_interface.hpp>
@@ -61,7 +61,7 @@ class sqlite_security_storage;
 #include <string>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief SQLite backend for security storage with SQL injection protection
@@ -101,6 +101,6 @@ private:
   [[nodiscard]] auto initialize_database() -> VoidResult;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

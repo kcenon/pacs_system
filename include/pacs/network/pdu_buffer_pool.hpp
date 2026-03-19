@@ -53,7 +53,7 @@
 #include <memory>
 #include <vector>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 /**
  * @brief Statistics for PDU buffer pool usage monitoring
@@ -415,4 +415,4 @@ private:
     return pdu_buffer_pool::get().acquire_p_data_tf();
 }
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network

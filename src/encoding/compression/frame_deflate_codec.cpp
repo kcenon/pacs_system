@@ -37,7 +37,7 @@
 #include <zlib.h>
 #endif
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 frame_deflate_codec::frame_deflate_codec(int compression_level)
     : compression_level_(
@@ -96,20 +96,20 @@ codec_result frame_deflate_codec::encode(
     [[maybe_unused]] const compression_options& options) const {
 
     if (pixel_data.empty()) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error, "Empty pixel data");
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error, "Empty pixel data");
     }
 
     if (params.width == 0 || params.height == 0) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error, "Invalid image dimensions");
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error, "Invalid image dimensions");
     }
 
     // Calculate expected data size
     const size_t expected_size = params.frame_size_bytes();
     if (pixel_data.size() < expected_size) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error,
             "Pixel data too small: expected " + std::to_string(expected_size)
             + " bytes, got " + std::to_string(pixel_data.size()));
     }
@@ -125,14 +125,14 @@ codec_result frame_deflate_codec::encode(
                         compression_level_);
 
     if (ret != Z_OK) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error,
             "zlib compress2 failed with error code: " + std::to_string(ret));
     }
 
     compressed.resize(dest_len);
 
-    return pacs::ok<compression_result>(
+    return kcenon::pacs::ok<compression_result>(
         compression_result{std::move(compressed), params});
 }
 
@@ -141,15 +141,15 @@ codec_result frame_deflate_codec::decode(
     const image_params& params) const {
 
     if (compressed_data.empty()) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::decompression_error, "Empty compressed data");
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error, "Empty compressed data");
     }
 
     // Calculate expected decompressed size
     const size_t expected_size = params.frame_size_bytes();
     if (expected_size == 0) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::decompression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error,
             "Cannot determine output size from image parameters");
     }
 
@@ -161,19 +161,19 @@ codec_result frame_deflate_codec::decode(
                          compressed_data.data(), source_len);
 
     if (ret != Z_OK) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::decompression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error,
             "zlib uncompress failed with error code: " + std::to_string(ret));
     }
 
     if (dest_len != expected_size) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::decompression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error,
             "Decompressed size mismatch: expected " + std::to_string(expected_size)
             + " bytes, got " + std::to_string(dest_len));
     }
 
-    return pacs::ok<compression_result>(
+    return kcenon::pacs::ok<compression_result>(
         compression_result{std::move(decompressed), params});
 }
 
@@ -183,19 +183,19 @@ codec_result frame_deflate_codec::encode(
     [[maybe_unused]] std::span<const uint8_t> pixel_data,
     [[maybe_unused]] const image_params& params,
     [[maybe_unused]] const compression_options& options) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::compression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::compression_error,
         "Frame Deflate codec not available: zlib library not found at build time");
 }
 
 codec_result frame_deflate_codec::decode(
     [[maybe_unused]] std::span<const uint8_t> compressed_data,
     [[maybe_unused]] const image_params& params) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::decompression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::decompression_error,
         "Frame Deflate codec not available: zlib library not found at build time");
 }
 
 #endif  // PACS_WITH_ZLIB
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

@@ -11,7 +11,7 @@
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_types.hpp"
 
-using namespace pacs::web;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("http_status values", "[web][types]") {
   REQUIRE(static_cast<int>(http_status::ok) == 200);

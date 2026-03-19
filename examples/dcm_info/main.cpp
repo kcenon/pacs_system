@@ -274,7 +274,7 @@ std::string format_file_size(std::uintmax_t size) {
  */
 bool extract_summary(const std::filesystem::path& file_path,
                      dicom_summary& summary) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     auto result = dicom_file::open(file_path);
     if (result.is_err()) {

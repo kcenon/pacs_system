@@ -45,7 +45,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // Use common_system's result helpers
 using kcenon::common::ok;
@@ -593,6 +593,6 @@ auto database_cursor::reset() -> VoidResult {
     return ok();
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

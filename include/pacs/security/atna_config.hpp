@@ -22,7 +22,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // =============================================================================
 // ATNA Audit Configuration
@@ -142,6 +142,6 @@ struct atna_config_validation {
  */
 [[nodiscard]] atna_config_validation validate(const atna_config& config);
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security
 
 #endif  // PACS_SECURITY_ATNA_CONFIG_HPP

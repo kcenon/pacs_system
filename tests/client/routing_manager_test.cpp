@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-using namespace pacs::client;
+using namespace kcenon::pacs::client;
 
 // =============================================================================
 // Routing Types Tests

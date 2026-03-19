@@ -58,7 +58,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Query Model Enumeration
@@ -549,6 +549,6 @@ private:
     std::atomic<size_t> total_matches_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_QUERY_SCU_HPP

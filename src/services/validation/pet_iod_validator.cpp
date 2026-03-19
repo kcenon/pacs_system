@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // PET-specific DICOM tags
 namespace pet_tags {
@@ -667,4 +667,4 @@ bool is_valid_pet_dataset(const dicom_dataset& dataset) {
     return validator.quick_check(dataset);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

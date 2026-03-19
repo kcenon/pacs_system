@@ -50,7 +50,7 @@
 
 #include "simd/simd_utils.hpp"
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /// @name Single Value Byte Swapping
 /// @{
@@ -320,6 +320,6 @@ inline void write_be64(std::vector<uint8_t>& buffer, uint64_t value) {
 
 /// @}
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_BYTE_SWAP_HPP

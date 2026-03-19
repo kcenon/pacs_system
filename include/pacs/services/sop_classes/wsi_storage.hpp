@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // WSI Storage SOP Class UIDs
@@ -132,6 +132,6 @@ inline constexpr uint32_t dimension_organization_type = 0x00209311;
  */
 [[nodiscard]] bool is_valid_wsi_photometric(std::string_view value) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_WSI_STORAGE_HPP

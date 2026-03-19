@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -119,8 +119,8 @@ network::Result<ups_watch_event> ups_watch_scu::handle_event_report(
 
     // Verify command is N-EVENT-REPORT-RQ
     if (event_rq.command() != command_field::n_event_report_rq) {
-        return pacs::pacs_error<ups_watch_event>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_watch_event>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-EVENT-REPORT-RQ, got: " +
             std::string(to_string(event_rq.command())));
     }
@@ -128,8 +128,8 @@ network::Result<ups_watch_event> ups_watch_scu::handle_event_report(
     // Get event type ID
     auto event_type = event_rq.event_type_id();
     if (!event_type.has_value()) {
-        return pacs::pacs_error<ups_watch_event>(
-            pacs::error_codes::ups_invalid_action_type,
+        return kcenon::pacs::pacs_error<ups_watch_event>(
+            kcenon::pacs::error_codes::ups_invalid_action_type,
             "Missing Event Type ID in N-EVENT-REPORT");
     }
 
@@ -166,7 +166,7 @@ network::Result<ups_watch_event> ups_watch_scu::handle_event_report(
         event_callback_(event);
     }
 
-    return pacs::Result<ups_watch_event>::ok(std::move(event));
+    return kcenon::pacs::Result<ups_watch_event>::ok(std::move(event));
 }
 
 // =============================================================================
@@ -206,16 +206,16 @@ network::Result<ups_result> ups_watch_scu::send_watch_action(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Get accepted presentation context for UPS Watch
     auto context_id = assoc.accepted_context_id(ups_watch_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_context_not_accepted,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_context_not_accepted,
             "No accepted presentation context for UPS Watch SOP Class");
     }
 
@@ -246,8 +246,8 @@ network::Result<ups_result> ups_watch_scu::send_watch_action(
 
     // Verify it's an N-ACTION response
     if (response.command() != command_field::n_action_rsp) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-ACTION-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -325,4 +325,4 @@ uint16_t ups_watch_scu::next_message_id() noexcept {
     return id;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

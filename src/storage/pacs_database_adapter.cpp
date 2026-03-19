@@ -47,7 +47,7 @@
 #include <chrono>
 #include <pacs/compat/format.hpp>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // Use common_system's result helpers
 using kcenon::common::make_error;
@@ -142,7 +142,7 @@ auto normalize_connection_string(database::database_types type,
         return std::string(connection_string);
     }
 
-    return pacs::compat::format("dbname={}", connection_string);
+    return kcenon::pacs::compat::format("dbname={}", connection_string);
 }
 
 auto extract_sqlite_connection_target(std::string_view connection_string)
@@ -488,7 +488,7 @@ auto pacs_database_adapter::connect() -> VoidResult {
             }
             impl_->last_error_msg = message;
             return make_void_error(
-                rc, pacs::compat::format("Failed to connect: {}", message),
+                rc, kcenon::pacs::compat::format("Failed to connect: {}", message),
                 "storage");
         }
 
@@ -524,7 +524,7 @@ auto pacs_database_adapter::connect() -> VoidResult {
             impl_->last_error_msg = result.error().message;
             return make_void_error(
                 result.error().code,
-                pacs::compat::format("Failed to connect: {}",
+                kcenon::pacs::compat::format("Failed to connect: {}",
                                      result.error().message),
                 "storage");
         }
@@ -534,7 +534,7 @@ auto pacs_database_adapter::connect() -> VoidResult {
     } catch (const std::exception& e) {
         impl_->last_error_msg = e.what();
         return make_void_error(
-            -1, pacs::compat::format("Connection failed: {}", e.what()),
+            -1, kcenon::pacs::compat::format("Connection failed: {}", e.what()),
             "storage");
     }
 }
@@ -577,7 +577,7 @@ auto pacs_database_adapter::disconnect() -> VoidResult {
         impl_->last_error_msg = result.error().message;
         return make_void_error(
             result.error().code,
-            pacs::compat::format("Failed to disconnect: {}",
+            kcenon::pacs::compat::format("Failed to disconnect: {}",
                                  result.error().message),
             "storage");
     }
@@ -636,7 +636,7 @@ auto pacs_database_adapter::run_select(const std::string& query)
             impl_->last_error_msg = result.error().message;
             return make_error<database_result>(
                 result.error().code,
-                pacs::compat::format("SELECT failed: {}", result.error().message),
+                kcenon::pacs::compat::format("SELECT failed: {}", result.error().message),
                 "storage");
         }
 
@@ -648,7 +648,7 @@ auto pacs_database_adapter::run_select(const std::string& query)
         impl_->last_error_msg = result.error().message;
         return make_error<database_result>(
             result.error().code,
-            pacs::compat::format("SELECT failed: {}", result.error().message),
+            kcenon::pacs::compat::format("SELECT failed: {}", result.error().message),
             "storage");
     }
 
@@ -668,7 +668,7 @@ auto pacs_database_adapter::run_insert(const std::string& query)
             impl_->last_error_msg = result.error().message;
             return make_error<uint64_t>(
                 result.error().code,
-                pacs::compat::format("INSERT failed: {}", result.error().message),
+                kcenon::pacs::compat::format("INSERT failed: {}", result.error().message),
                 "storage");
         }
 
@@ -681,7 +681,7 @@ auto pacs_database_adapter::run_insert(const std::string& query)
         impl_->last_error_msg = result.error().message;
         return make_error<uint64_t>(
             result.error().code,
-            pacs::compat::format("INSERT failed: {}", result.error().message),
+            kcenon::pacs::compat::format("INSERT failed: {}", result.error().message),
             "storage");
     }
 
@@ -716,7 +716,7 @@ auto pacs_database_adapter::run_update(const std::string& query)
             impl_->last_error_msg = result.error().message;
             return make_error<uint64_t>(
                 result.error().code,
-                pacs::compat::format("UPDATE failed: {}", result.error().message),
+                kcenon::pacs::compat::format("UPDATE failed: {}", result.error().message),
                 "storage");
         }
 
@@ -728,7 +728,7 @@ auto pacs_database_adapter::run_update(const std::string& query)
         impl_->last_error_msg = result.error().message;
         return make_error<uint64_t>(
             result.error().code,
-            pacs::compat::format("UPDATE failed: {}", result.error().message),
+            kcenon::pacs::compat::format("UPDATE failed: {}", result.error().message),
             "storage");
     }
 
@@ -748,7 +748,7 @@ auto pacs_database_adapter::run_remove(const std::string& query)
             impl_->last_error_msg = result.error().message;
             return make_error<uint64_t>(
                 result.error().code,
-                pacs::compat::format("DELETE failed: {}", result.error().message),
+                kcenon::pacs::compat::format("DELETE failed: {}", result.error().message),
                 "storage");
         }
 
@@ -760,7 +760,7 @@ auto pacs_database_adapter::run_remove(const std::string& query)
         impl_->last_error_msg = result.error().message;
         return make_error<uint64_t>(
             result.error().code,
-            pacs::compat::format("DELETE failed: {}", result.error().message),
+            kcenon::pacs::compat::format("DELETE failed: {}", result.error().message),
             "storage");
     }
 
@@ -780,7 +780,7 @@ auto pacs_database_adapter::run_execute(const std::string& query)
             impl_->last_error_msg = result.error().message;
             return make_void_error(
                 result.error().code,
-                pacs::compat::format("Execute failed: {}", result.error().message),
+                kcenon::pacs::compat::format("Execute failed: {}", result.error().message),
                 "storage");
         }
 
@@ -792,7 +792,7 @@ auto pacs_database_adapter::run_execute(const std::string& query)
         impl_->last_error_msg = result.error().message;
         return make_void_error(
             result.error().code,
-            pacs::compat::format("Execute failed: {}", result.error().message),
+            kcenon::pacs::compat::format("Execute failed: {}", result.error().message),
             "storage");
     }
 
@@ -856,7 +856,7 @@ auto pacs_database_adapter::begin_transaction_internal() -> VoidResult {
         impl_->last_error_msg = result.error().message;
         return make_void_error(
             result.error().code,
-            pacs::compat::format("BEGIN TRANSACTION failed: {}",
+            kcenon::pacs::compat::format("BEGIN TRANSACTION failed: {}",
                                  result.error().message),
             "storage");
     }
@@ -894,7 +894,7 @@ auto pacs_database_adapter::commit_internal() -> VoidResult {
         impl_->last_error_msg = result.error().message;
         return make_void_error(
             result.error().code,
-            pacs::compat::format("COMMIT failed: {}", result.error().message),
+            kcenon::pacs::compat::format("COMMIT failed: {}", result.error().message),
             "storage");
     }
 
@@ -930,7 +930,7 @@ auto pacs_database_adapter::rollback_internal() -> VoidResult {
         impl_->last_error_msg = result.error().message;
         return make_void_error(
             result.error().code,
-            pacs::compat::format("ROLLBACK failed: {}",
+            kcenon::pacs::compat::format("ROLLBACK failed: {}",
                                  result.error().message),
             "storage");
     }
@@ -1009,6 +1009,6 @@ auto scoped_transaction::is_active() const noexcept -> bool {
     return active_ && !committed_;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

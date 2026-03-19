@@ -64,7 +64,7 @@
 #include <unistd.h>
 #endif
 
-namespace pacs::network::detail {
+namespace kcenon::pacs::network::detail {
 
 namespace common = kcenon::common;
 
@@ -301,6 +301,6 @@ private:
 #endif
 };
 
-}  // namespace pacs::network::detail
+}  // namespace kcenon::pacs::network::detail
 
 #endif  // PACS_NETWORK_DETAIL_ACCEPT_WORKER_HPP

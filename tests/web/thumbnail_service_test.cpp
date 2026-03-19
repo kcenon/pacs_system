@@ -11,7 +11,7 @@
 
 #include "pacs/web/thumbnail_service.hpp"
 
-using namespace pacs::web;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("thumbnail_params default values", "[web][thumbnail]") {
     thumbnail_params params;

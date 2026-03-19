@@ -57,7 +57,7 @@ namespace kcenon::thread {
 class thread_pool;
 }  // namespace kcenon::thread
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 /**
  * @class thread_pool_adapter
@@ -194,4 +194,4 @@ private:
     void submit_internal(std::function<void()> task, job_priority priority);
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

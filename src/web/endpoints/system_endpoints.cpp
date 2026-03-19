@@ -53,7 +53,7 @@
 
 #include <sstream>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -151,7 +151,7 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
 #ifdef PACS_WITH_MONITORING
         if (ctx->health_checker) {
           auto status = ctx->health_checker->get_status();
-          // to_json is a free function in pacs::monitoring namespace
+          // to_json is a free function in kcenon::pacs::monitoring namespace
           status_json = crow::json::load(
               monitoring::to_json(status)); // Parse existing JSON into wvalue
           status_json["version"] = "1.0.0"; // Add version
@@ -256,4 +256,4 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
   });
 }
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

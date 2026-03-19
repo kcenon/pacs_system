@@ -15,7 +15,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // ============================================================================
 // Static Member Definitions
@@ -453,4 +453,4 @@ void test_data_generator::save_to_directory(
     }
 }
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

@@ -13,7 +13,7 @@
 #include "pacs/security/role.hpp"
 #include "pacs/security/security_storage_interface.hpp"
 
-using namespace pacs::security;
+using namespace kcenon::pacs::security;
 
 // Mock Storage
 class MockSecurityStorage : public security_storage_interface {

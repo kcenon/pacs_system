@@ -44,7 +44,7 @@
 #include <random>
 #include <set>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -614,4 +614,4 @@ auto file_storage::sanitize_uid(std::string_view uid) -> std::string {
     return result;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

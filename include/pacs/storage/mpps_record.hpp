@@ -47,7 +47,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief MPPS status values
@@ -268,4 +268,4 @@ struct mpps_query {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

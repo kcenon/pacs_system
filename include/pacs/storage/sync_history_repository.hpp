@@ -43,7 +43,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Repository for sync history records using base_repository pattern
@@ -93,6 +93,6 @@ private:
         std::string_view json) -> std::vector<std::string>;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

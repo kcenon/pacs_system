@@ -61,7 +61,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // UUID Generation
@@ -823,23 +823,23 @@ sync_manager::~sync_manager() {
 // Config CRUD
 // =============================================================================
 
-pacs::VoidResult sync_manager::add_config(const sync_config& config) {
+kcenon::pacs::VoidResult sync_manager::add_config(const sync_config& config) {
     if (config.config_id.empty()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Config ID cannot be empty");
     }
 
     if (config.source_node_id.empty()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Source node ID cannot be empty");
     }
 
     // Check for duplicate
     if (impl_->get_config_from_cache(config.config_id).has_value()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::already_exists,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::already_exists,
             "Config already exists: " + config.config_id);
     }
 
@@ -850,13 +850,13 @@ pacs::VoidResult sync_manager::add_config(const sync_config& config) {
             config.config_id, config.source_node_id);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult sync_manager::update_config(const sync_config& config) {
+kcenon::pacs::VoidResult sync_manager::update_config(const sync_config& config) {
     if (!impl_->get_config_from_cache(config.config_id).has_value()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Config not found: " + config.config_id);
     }
 
@@ -866,10 +866,10 @@ pacs::VoidResult sync_manager::update_config(const sync_config& config) {
         impl_->logger->info_fmt("Updated sync config '{}'", config.config_id);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult sync_manager::remove_config(std::string_view config_id) {
+kcenon::pacs::VoidResult sync_manager::remove_config(std::string_view config_id) {
     {
         std::unique_lock lock(impl_->configs_mutex);
         auto it = std::find_if(impl_->configs.begin(), impl_->configs.end(),
@@ -877,8 +877,8 @@ pacs::VoidResult sync_manager::remove_config(std::string_view config_id) {
                 return c.config_id == config_id;
             });
         if (it == impl_->configs.end()) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::not_found,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::not_found,
                 "Config not found: " + std::string(config_id));
         }
         impl_->configs.erase(it);
@@ -903,7 +903,7 @@ pacs::VoidResult sync_manager::remove_config(std::string_view config_id) {
         impl_->logger->info_fmt("Removed sync config '{}'", config_id);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 std::optional<sync_config> sync_manager::get_config(std::string_view config_id) const {
@@ -1048,7 +1048,7 @@ std::vector<sync_conflict> sync_manager::get_conflicts(std::string_view config_i
     return filtered;
 }
 
-pacs::VoidResult sync_manager::resolve_conflict(
+kcenon::pacs::VoidResult sync_manager::resolve_conflict(
     std::string_view study_uid,
     conflict_resolution resolution) {
 
@@ -1060,8 +1060,8 @@ pacs::VoidResult sync_manager::resolve_conflict(
         });
 
     if (it == impl_->conflicts.end()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Conflict not found: " + std::string(study_uid));
     }
 
@@ -1093,10 +1093,10 @@ pacs::VoidResult sync_manager::resolve_conflict(
             study_uid, to_string(resolution));
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult sync_manager::resolve_all_conflicts(
+kcenon::pacs::VoidResult sync_manager::resolve_all_conflicts(
     std::string_view config_id,
     conflict_resolution resolution) {
 
@@ -1123,7 +1123,7 @@ pacs::VoidResult sync_manager::resolve_all_conflicts(
             study_uids.size(), config_id);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 // =============================================================================
@@ -1251,4 +1251,4 @@ const sync_manager_config& sync_manager::config() const noexcept {
     return impl_->config;
 }
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

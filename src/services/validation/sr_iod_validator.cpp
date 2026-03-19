@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // SR-specific DICOM Tags
@@ -1031,4 +1031,4 @@ std::string get_sr_document_title(const dicom_dataset& dataset) {
     return "";
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

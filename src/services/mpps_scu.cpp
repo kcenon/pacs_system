@@ -46,7 +46,7 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Local Helper Functions
@@ -130,16 +130,16 @@ network::Result<mpps_result> mpps_scu::create(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Get accepted presentation context for MPPS
     auto context_id = assoc.accepted_context_id(mpps_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_context_not_accepted,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_context_not_accepted,
             "No accepted presentation context for MPPS SOP Class");
     }
 
@@ -150,8 +150,8 @@ network::Result<mpps_result> mpps_scu::create(
     }
 
     if (mpps_uid.empty()) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_missing_uid,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_missing_uid,
             "MPPS SOP Instance UID is required");
     }
 
@@ -181,8 +181,8 @@ network::Result<mpps_result> mpps_scu::create(
 
     // Verify it's an N-CREATE response
     if (response.command() != command_field::n_create_rsp) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_unexpected_command,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_unexpected_command,
             "Expected N-CREATE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -229,30 +229,30 @@ network::Result<mpps_result> mpps_scu::set(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Validate MPPS UID is provided
     if (data.mpps_sop_instance_uid.empty()) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_missing_uid,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_missing_uid,
             "MPPS SOP Instance UID is required for N-SET");
     }
 
     // Validate status is not IN PROGRESS (can only set to COMPLETED or DISCONTINUED)
     if (data.status == mpps_status::in_progress) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_invalid_status_transition,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_invalid_status_transition,
             "Cannot set MPPS status back to IN PROGRESS");
     }
 
     // Get accepted presentation context for MPPS
     auto context_id = assoc.accepted_context_id(mpps_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_context_not_accepted,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_context_not_accepted,
             "No accepted presentation context for MPPS SOP Class");
     }
 
@@ -285,8 +285,8 @@ network::Result<mpps_result> mpps_scu::set(
 
     // Verify it's an N-SET response
     if (response.command() != command_field::n_set_rsp) {
-        return pacs::pacs_error<mpps_result>(
-            pacs::error_codes::mpps_unexpected_command,
+        return kcenon::pacs::pacs_error<mpps_result>(
+            kcenon::pacs::error_codes::mpps_unexpected_command,
             "Expected N-SET-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -538,4 +538,4 @@ uint16_t mpps_scu::next_message_id() noexcept {
     return id;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

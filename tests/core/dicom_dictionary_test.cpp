@@ -8,8 +8,8 @@
 #include "pacs/core/dicom_dictionary.hpp"
 #include "pacs/encoding/vr_type.hpp"
 
-using namespace pacs::core;
-using pacs::encoding::vr_type;
+using namespace kcenon::pacs::core;
+using kcenon::pacs::encoding::vr_type;
 
 TEST_CASE("dicom_dictionary singleton", "[dicom_dictionary]") {
     auto& dict1 = dicom_dictionary::instance();

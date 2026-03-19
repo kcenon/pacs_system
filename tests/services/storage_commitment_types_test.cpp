@@ -9,8 +9,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::core;
 
 // ============================================================================
 // SOP Reference Tests

@@ -37,9 +37,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // Heightmap Segmentation Storage SOP Class UID (Supplement 240)
 static constexpr std::string_view heightmap_segmentation_storage_uid =
@@ -690,4 +690,4 @@ bool is_heightmap_segmentation(const dicom_dataset& dataset) {
     return dataset.get_string(segmentation_type) == "HEIGHTMAP";
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

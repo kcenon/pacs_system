@@ -42,7 +42,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -249,6 +249,6 @@ auto sync_conflict_repository::format_timestamp(
     return to_timestamp_string(tp);
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

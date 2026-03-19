@@ -10,10 +10,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
 
 // ============================================================================
 // ups_watch_scu Construction Tests
@@ -266,7 +266,7 @@ TEST_CASE("ups_watch_scu handle_event_report", "[services][ups][watch-scu]") {
 
         dicom_dataset ds;
         ds.set_string(ups_tags::procedure_step_state,
-                      pacs::encoding::vr_type::CS, "COMPLETED");
+                      kcenon::pacs::encoding::vr_type::CS, "COMPLETED");
         msg.set_dataset(std::move(ds));
 
         auto result = scu.handle_event_report(msg);
@@ -285,7 +285,7 @@ TEST_CASE("ups_watch_scu handle_event_report", "[services][ups][watch-scu]") {
 
         dicom_dataset ds;
         ds.set_string(ups_tags::reason_for_cancellation,
-                      pacs::encoding::vr_type::LT, "Patient refused");
+                      kcenon::pacs::encoding::vr_type::LT, "Patient refused");
         msg.set_dataset(std::move(ds));
 
         auto result = scu.handle_event_report(msg);
@@ -303,7 +303,7 @@ TEST_CASE("ups_watch_scu handle_event_report", "[services][ups][watch-scu]") {
 
         dicom_dataset ds;
         ds.set_string(ups_tags::procedure_step_progress,
-                      pacs::encoding::vr_type::DS, "75");
+                      kcenon::pacs::encoding::vr_type::DS, "75");
         msg.set_dataset(std::move(ds));
 
         auto result = scu.handle_event_report(msg);
@@ -339,7 +339,7 @@ TEST_CASE("ups_watch_scu handle_event_report", "[services][ups][watch-scu]") {
 
         dicom_dataset ds;
         ds.set_string(ups_tags::procedure_step_state,
-                      pacs::encoding::vr_type::CS, "IN PROGRESS");
+                      kcenon::pacs::encoding::vr_type::CS, "IN PROGRESS");
         msg.set_dataset(std::move(ds));
 
         auto result = scu.handle_event_report(msg);
@@ -358,7 +358,7 @@ TEST_CASE("ups_watch_scu handle_event_report", "[services][ups][watch-scu]") {
 
             dicom_dataset ds;
             ds.set_string(ups_tags::procedure_step_state,
-                          pacs::encoding::vr_type::CS, "COMPLETED");
+                          kcenon::pacs::encoding::vr_type::CS, "COMPLETED");
             msg.set_dataset(std::move(ds));
 
             auto result = scu.handle_event_report(msg);
@@ -445,7 +445,7 @@ TEST_CASE("ups_watch_event preserves full event dataset",
 
     dicom_dataset ds;
     ds.set_string(ups_tags::procedure_step_state,
-                  pacs::encoding::vr_type::CS, "COMPLETED");
+                  kcenon::pacs::encoding::vr_type::CS, "COMPLETED");
     msg.set_dataset(std::move(ds));
 
     auto result = scu.handle_event_report(msg);

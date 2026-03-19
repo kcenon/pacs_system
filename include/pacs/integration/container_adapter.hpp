@@ -56,7 +56,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 /**
  * @brief Adapter for mapping DICOM VR types to container_system values
@@ -295,4 +295,4 @@ private:
         -> std::vector<core::dicom_dataset>;
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

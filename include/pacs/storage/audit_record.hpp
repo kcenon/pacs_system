@@ -45,7 +45,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Audit event type enumeration
@@ -282,4 +282,4 @@ struct audit_query {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

@@ -38,10 +38,10 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
-using namespace pacs::services::sop_classes;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::services::sop_classes;
 
 // =============================================================================
 // Mammography-Specific DICOM Tags
@@ -1065,4 +1065,4 @@ bool is_screening_mammogram(const dicom_dataset& dataset) {
     return is_screening_view(view);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

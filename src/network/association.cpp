@@ -40,17 +40,17 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
-// Use standardized error_info from pacs::core::result.hpp
-using pacs::error_info;
-using pacs::error_codes::association_rejected;
-using pacs::error_codes::association_aborted;
-using pacs::error_codes::invalid_association_state;
-using pacs::error_codes::no_acceptable_context;
-using pacs::error_codes::release_failed;
-using pacs::error_codes::already_released;
-using pacs::error_codes::receive_timeout;
+// Use standardized error_info from kcenon::pacs::core::result.hpp
+using kcenon::pacs::error_info;
+using kcenon::pacs::error_codes::association_rejected;
+using kcenon::pacs::error_codes::association_aborted;
+using kcenon::pacs::error_codes::invalid_association_state;
+using kcenon::pacs::error_codes::no_acceptable_context;
+using kcenon::pacs::error_codes::release_failed;
+using kcenon::pacs::error_codes::already_released;
+using kcenon::pacs::error_codes::receive_timeout;
 
 // =============================================================================
 // rejection_info Implementation
@@ -404,13 +404,13 @@ Result<std::monostate> association::send_dimse(
     // Verify context exists
     if (context_to_transfer_syntax_.find(context_id) ==
         context_to_transfer_syntax_.end()) {
-        return error_info{pacs::error_codes::dimse_error, "Invalid presentation context ID", "network"};
+        return error_info{kcenon::pacs::error_codes::dimse_error, "Invalid presentation context ID", "network"};
     }
 
     // Message encoding and network send would be handled by network_system
     // For now, validate the message
     if (!msg.is_valid()) {
-        return error_info{pacs::error_codes::dimse_error, "Invalid DIMSE message", "network"};
+        return error_info{kcenon::pacs::error_codes::dimse_error, "Invalid DIMSE message", "network"};
     }
 
     // Placeholder for actual send implementation
@@ -768,4 +768,4 @@ void association::negotiate_contexts(
     }
 }
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network

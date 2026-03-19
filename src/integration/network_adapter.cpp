@@ -42,7 +42,7 @@
 #include <future>
 #include <stdexcept>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // Server Creation
@@ -242,4 +242,4 @@ network_adapter::wrap_session(
     return std::make_shared<dicom_session>(std::move(session));
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

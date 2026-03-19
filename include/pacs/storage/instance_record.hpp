@@ -46,7 +46,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Instance record from the database
@@ -168,4 +168,4 @@ struct instance_query {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

@@ -16,10 +16,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // retrieve_mode Tests
@@ -415,8 +415,8 @@ TEST_CASE("retrieve_scu operations require established association", "[services]
 
     SECTION("move fails without association") {
         dicom_dataset query;
-        query.set_string(tags::query_retrieve_level, pacs::encoding::vr_type::CS, "STUDY");
-        query.set_string(tags::study_instance_uid, pacs::encoding::vr_type::UI, "1.2.3");
+        query.set_string(tags::query_retrieve_level, kcenon::pacs::encoding::vr_type::CS, "STUDY");
+        query.set_string(tags::study_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3");
 
         auto result = scu.move(assoc, query, "DEST");
         CHECK(result.is_err());
@@ -424,8 +424,8 @@ TEST_CASE("retrieve_scu operations require established association", "[services]
 
     SECTION("get fails without association") {
         dicom_dataset query;
-        query.set_string(tags::query_retrieve_level, pacs::encoding::vr_type::CS, "STUDY");
-        query.set_string(tags::study_instance_uid, pacs::encoding::vr_type::UI, "1.2.3");
+        query.set_string(tags::query_retrieve_level, kcenon::pacs::encoding::vr_type::CS, "STUDY");
+        query.set_string(tags::study_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3");
 
         auto result = scu.get(assoc, query);
         CHECK(result.is_err());
@@ -463,7 +463,7 @@ TEST_CASE("C-MOVE requires move destination", "[services][retrieve_scu]") {
 
     SECTION("move with empty destination") {
         dicom_dataset query;
-        query.set_string(tags::query_retrieve_level, pacs::encoding::vr_type::CS, "STUDY");
+        query.set_string(tags::query_retrieve_level, kcenon::pacs::encoding::vr_type::CS, "STUDY");
 
         auto result = scu.move(assoc, query, "");
         CHECK(result.is_err());

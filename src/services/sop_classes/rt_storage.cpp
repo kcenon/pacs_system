@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -654,4 +654,4 @@ rt_image_plane parse_rt_image_plane(std::string_view value) noexcept {
     return rt_image_plane::portal;
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

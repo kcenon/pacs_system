@@ -66,7 +66,7 @@
 #include <mutex>
 #endif
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -925,4 +925,4 @@ auto s3_storage::matches_query(const core::dicom_dataset &dataset,
   return true;
 }
 
-} // namespace pacs::storage
+} // namespace kcenon::pacs::storage

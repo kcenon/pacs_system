@@ -53,7 +53,7 @@
 #include <variant>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Actions to perform on DICOM attributes during de-identification
@@ -344,4 +344,4 @@ namespace hipaa_identifiers {
     [[nodiscard]] auto get_all_identifier_tags() -> std::vector<core::dicom_tag>;
 } // namespace hipaa_identifiers
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

@@ -47,7 +47,7 @@
 #include <database/query_builder.h>
 #include <pacs/compat/format.hpp>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -159,7 +159,7 @@ auto instance_repository::upsert_instance(const instance_record& record)
     if (check_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to check instance existence: {}",
+            kcenon::pacs::compat::format("Failed to check instance existence: {}",
                                  check_result.error().message),
             "storage");
     }
@@ -208,7 +208,7 @@ auto instance_repository::upsert_instance(const instance_record& record)
         if (update_result.is_err()) {
             return make_error<int64_t>(
                 -1,
-                pacs::compat::format("Failed to update instance: {}",
+                kcenon::pacs::compat::format("Failed to update instance: {}",
                                      update_result.error().message),
                 "storage");
         }
@@ -252,7 +252,7 @@ auto instance_repository::upsert_instance(const instance_record& record)
     if (insert_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to insert instance: {}",
+            kcenon::pacs::compat::format("Failed to insert instance: {}",
                                  insert_result.error().message),
             "storage");
     }
@@ -303,7 +303,7 @@ auto instance_repository::list_instances(std::string_view series_uid)
             -1, "Database not connected", "storage");
     }
 
-    auto sql = pacs::compat::format(
+    auto sql = kcenon::pacs::compat::format(
         "SELECT i.instance_pk, i.series_pk, i.sop_uid, i.sop_class_uid, "
         "i.instance_number, i.transfer_syntax, i.content_date, i.content_time, "
         "i.rows, i.columns, i.bits_allocated, i.number_of_frames, "
@@ -318,7 +318,7 @@ auto instance_repository::list_instances(std::string_view series_uid)
     if (result.is_err()) {
         return make_error<std::vector<instance_record>>(
             -1,
-            pacs::compat::format("Failed to list instances: {}",
+            kcenon::pacs::compat::format("Failed to list instances: {}",
                                  result.error().message),
             "storage");
     }
@@ -343,32 +343,32 @@ auto instance_repository::search_instances(const instance_query& query)
 
     if (query.series_uid.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("s.series_uid = '{}'", *query.series_uid));
+            kcenon::pacs::compat::format("s.series_uid = '{}'", *query.series_uid));
     }
     if (query.sop_uid.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("i.sop_uid = '{}'", *query.sop_uid));
+            kcenon::pacs::compat::format("i.sop_uid = '{}'", *query.sop_uid));
     }
     if (query.sop_class_uid.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("i.sop_class_uid = '{}'",
+            kcenon::pacs::compat::format("i.sop_class_uid = '{}'",
                                  *query.sop_class_uid));
     }
     if (query.content_date.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("i.content_date = '{}'", *query.content_date));
+            kcenon::pacs::compat::format("i.content_date = '{}'", *query.content_date));
     }
     if (query.content_date_from.has_value()) {
-        where_clauses.push_back(pacs::compat::format(
+        where_clauses.push_back(kcenon::pacs::compat::format(
             "i.content_date >= '{}'", *query.content_date_from));
     }
     if (query.content_date_to.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("i.content_date <= '{}'",
+            kcenon::pacs::compat::format("i.content_date <= '{}'",
                                  *query.content_date_to));
     }
     if (query.instance_number.has_value()) {
-        where_clauses.push_back(pacs::compat::format(
+        where_clauses.push_back(kcenon::pacs::compat::format(
             "i.instance_number = {}", *query.instance_number));
     }
 
@@ -390,17 +390,17 @@ auto instance_repository::search_instances(const instance_query& query)
     sql += " ORDER BY i.instance_number ASC, i.sop_uid ASC";
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     auto result = db()->select(sql);
     if (result.is_err()) {
         return make_error<std::vector<instance_record>>(
             -1,
-            pacs::compat::format("Failed to search instances: {}",
+            kcenon::pacs::compat::format("Failed to search instances: {}",
                                  result.error().message),
             "storage");
     }
@@ -431,7 +431,7 @@ auto instance_repository::delete_instance(std::string_view sop_uid)
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to delete instance: {}",
+            kcenon::pacs::compat::format("Failed to delete instance: {}",
                                  result.error().message),
             "storage");
     }
@@ -449,7 +449,7 @@ auto instance_repository::instance_count(std::string_view series_uid)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto sql = pacs::compat::format(
+    auto sql = kcenon::pacs::compat::format(
         "SELECT COUNT(*) AS cnt "
         "FROM instances i "
         "JOIN series s ON i.series_pk = s.series_pk "
@@ -460,7 +460,7 @@ auto instance_repository::instance_count(std::string_view series_uid)
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Failed to count instances: {}",
+            kcenon::pacs::compat::format("Failed to count instances: {}",
                                  result.error().message),
             "storage");
     }
@@ -520,7 +520,7 @@ auto instance_repository::get_study_files(std::string_view study_instance_uid)
             -1, "Database not connected", "storage");
     }
 
-    auto sql = pacs::compat::format(
+    auto sql = kcenon::pacs::compat::format(
         "SELECT i.file_path "
         "FROM instances i "
         "JOIN series se ON i.series_pk = se.series_pk "
@@ -533,7 +533,7 @@ auto instance_repository::get_study_files(std::string_view study_instance_uid)
     if (result.is_err()) {
         return make_error<std::vector<std::string>>(
             -1,
-            pacs::compat::format("Failed to query study files: {}",
+            kcenon::pacs::compat::format("Failed to query study files: {}",
                                  result.error().message),
             "storage");
     }
@@ -557,7 +557,7 @@ auto instance_repository::get_series_files(std::string_view series_instance_uid)
             -1, "Database not connected", "storage");
     }
 
-    auto sql = pacs::compat::format(
+    auto sql = kcenon::pacs::compat::format(
         "SELECT i.file_path "
         "FROM instances i "
         "JOIN series se ON i.series_pk = se.series_pk "
@@ -569,7 +569,7 @@ auto instance_repository::get_series_files(std::string_view series_instance_uid)
     if (result.is_err()) {
         return make_error<std::vector<std::string>>(
             -1,
-            pacs::compat::format("Failed to query series files: {}",
+            kcenon::pacs::compat::format("Failed to query series files: {}",
                                  result.error().message),
             "storage");
     }
@@ -700,7 +700,7 @@ auto instance_repository::select_columns() const -> std::vector<std::string> {
             "created_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -708,11 +708,11 @@ auto instance_repository::select_columns() const -> std::vector<std::string> {
 #include <pacs/core/result.hpp>
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
-using namespace pacs::error_codes;
+using namespace kcenon::pacs::error_codes;
 
 namespace {
 
@@ -869,7 +869,7 @@ auto instance_repository::upsert_instance(const instance_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}",
+            kcenon::pacs::compat::format("Failed to prepare statement: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -923,7 +923,7 @@ auto instance_repository::upsert_instance(const instance_record& record)
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to upsert instance: {}", error_msg),
+            kcenon::pacs::compat::format("Failed to upsert instance: {}", error_msg),
             "storage");
     }
 
@@ -1014,7 +1014,7 @@ auto instance_repository::list_instances(std::string_view series_uid) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<instance_record>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1075,10 +1075,10 @@ auto instance_repository::search_instances(const instance_query& query) const
     sql += " ORDER BY i.instance_number ASC, i.sop_uid ASC";
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -1086,7 +1086,7 @@ auto instance_repository::search_instances(const instance_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<instance_record>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1121,7 +1121,7 @@ auto instance_repository::delete_instance(std::string_view sop_uid)
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare delete: {}",
+            kcenon::pacs::compat::format("Failed to prepare delete: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1135,7 +1135,7 @@ auto instance_repository::delete_instance(std::string_view sop_uid)
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to delete instance: {}",
+            kcenon::pacs::compat::format("Failed to delete instance: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1151,7 +1151,7 @@ auto instance_repository::instance_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1178,7 +1178,7 @@ auto instance_repository::instance_count(std::string_view series_uid) const
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1204,7 +1204,7 @@ auto instance_repository::get_file_path(std::string_view sop_instance_uid) const
     if (rc != SQLITE_OK) {
         return make_error<std::optional<std::string>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1242,7 +1242,7 @@ auto instance_repository::get_study_files(std::string_view study_instance_uid) c
     if (rc != SQLITE_OK) {
         return make_error<std::vector<std::string>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1276,7 +1276,7 @@ auto instance_repository::get_series_files(std::string_view series_instance_uid)
     if (rc != SQLITE_OK) {
         return make_error<std::vector<std::string>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1293,6 +1293,6 @@ auto instance_repository::get_series_files(std::string_view series_instance_uid)
     return ok(std::move(results));
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

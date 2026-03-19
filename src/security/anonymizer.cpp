@@ -44,9 +44,9 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 anonymizer::anonymizer(anonymization_profile profile)
     : profile_{profile} {
@@ -672,4 +672,4 @@ void anonymizer::initialize_profile_actions() {
     // This method can be used for any initialization if needed
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

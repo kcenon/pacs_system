@@ -53,7 +53,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // CT Processing-Specific DICOM Tags
@@ -273,6 +273,6 @@ private:
 [[nodiscard]] bool is_valid_ct_processing_dataset(
     const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_CT_PROCESSING_IOD_VALIDATOR_HPP

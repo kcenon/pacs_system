@@ -60,7 +60,7 @@
 #include <thread>
 #include <unordered_map>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
 // =============================================================================
 // Metric Names
@@ -585,7 +585,7 @@ public:
                             const std::string& body,
                             const std::string& content_type = "application/json")
         -> Result<http_response> {
-        pacs::integration::logger_adapter::debug(
+        kcenon::pacs::integration::logger_adapter::debug(
             "AI service POST request: {} (body size: {} bytes)",
             config_.base_url + path, body.size());
 
@@ -596,7 +596,7 @@ public:
 
     [[nodiscard]] auto get(const std::string& path)
         -> Result<http_response> {
-        pacs::integration::logger_adapter::debug(
+        kcenon::pacs::integration::logger_adapter::debug(
             "AI service GET request: {}", config_.base_url + path);
 
         auto headers = build_headers();
@@ -605,7 +605,7 @@ public:
 
     [[nodiscard]] auto del(const std::string& path)
         -> Result<http_response> {
-        pacs::integration::logger_adapter::debug(
+        kcenon::pacs::integration::logger_adapter::debug(
             "AI service DELETE request: {}", config_.base_url + path);
 
         auto headers = build_headers();
@@ -846,7 +846,7 @@ public:
         jobs_[job_id] = status;
         request_map_[job_id] = request;
 
-        pacs::integration::monitoring_adapter::set_gauge(
+        kcenon::pacs::integration::monitoring_adapter::set_gauge(
             metrics::active_jobs, static_cast<double>(jobs_.size()));
     }
 
@@ -866,15 +866,15 @@ public:
                 auto duration = status.completed_at.value_or(std::chrono::system_clock::now())
                               - status.created_at;
 
-                pacs::integration::monitoring_adapter::record_timing(
+                kcenon::pacs::integration::monitoring_adapter::record_timing(
                     metrics::inference_duration,
                     std::chrono::duration_cast<std::chrono::nanoseconds>(duration));
 
                 if (status.status == inference_status_code::completed) {
-                    pacs::integration::monitoring_adapter::increment_counter(
+                    kcenon::pacs::integration::monitoring_adapter::increment_counter(
                         metrics::inference_requests_success);
                 } else {
-                    pacs::integration::monitoring_adapter::increment_counter(
+                    kcenon::pacs::integration::monitoring_adapter::increment_counter(
                         metrics::inference_requests_failed);
                 }
             }
@@ -886,7 +886,7 @@ public:
         jobs_.erase(job_id);
         request_map_.erase(job_id);
 
-        pacs::integration::monitoring_adapter::set_gauge(
+        kcenon::pacs::integration::monitoring_adapter::set_gauge(
             metrics::active_jobs, static_cast<double>(jobs_.size()));
     }
 
@@ -948,7 +948,7 @@ public:
 
         // Test connectivity
         if (!http_client_->check_connectivity()) {
-            pacs::integration::logger_adapter::warn(
+            kcenon::pacs::integration::logger_adapter::warn(
                 "AI service at {} is not responding, continuing anyway",
                 config.base_url);
         }
@@ -957,9 +957,9 @@ public:
         job_tracker_ = std::make_unique<job_tracker>();
 
         // Initialize metrics
-        pacs::integration::monitoring_adapter::set_gauge(metrics::active_jobs, 0);
+        kcenon::pacs::integration::monitoring_adapter::set_gauge(metrics::active_jobs, 0);
 
-        pacs::integration::logger_adapter::info(
+        kcenon::pacs::integration::logger_adapter::info(
             "AI service connector initialized: url={}, auth={}",
             config.base_url, to_string(config.auth_type));
 
@@ -974,7 +974,7 @@ public:
             return;
         }
 
-        pacs::integration::logger_adapter::info("AI service connector shutting down");
+        kcenon::pacs::integration::logger_adapter::info("AI service connector shutting down");
 
         http_client_.reset();
         job_tracker_.reset();
@@ -1004,7 +1004,7 @@ public:
         // Send request
         auto response = http_client_->post("/inference", body);
         if (response.is_err()) {
-            pacs::integration::logger_adapter::error(
+            kcenon::pacs::integration::logger_adapter::error(
                 "Failed to submit inference request: {}",
                 response.error().message);
             return response.error();
@@ -1026,11 +1026,11 @@ public:
         // Track the job
         job_tracker_->add_job(*job_id, request);
 
-        pacs::integration::logger_adapter::info(
+        kcenon::pacs::integration::logger_adapter::info(
             "Inference request submitted: job_id={}, study={}, model={}",
             *job_id, request.study_instance_uid, request.model_id);
 
-        pacs::integration::monitoring_adapter::increment_counter(
+        kcenon::pacs::integration::monitoring_adapter::increment_counter(
             metrics::inference_requests_total);
 
         return *job_id;
@@ -1102,7 +1102,7 @@ public:
         status.completed_at = std::chrono::system_clock::now();
         job_tracker_->update_status(job_id, status);
 
-        pacs::integration::logger_adapter::info("Inference job cancelled: {}", job_id);
+        kcenon::pacs::integration::logger_adapter::info("Inference job cancelled: {}", job_id);
 
         return std::monostate{};
     }
@@ -1264,7 +1264,7 @@ public:
         // Recreate HTTP client with new credentials
         http_client_ = std::make_unique<http_client>(config_);
 
-        pacs::integration::logger_adapter::info(
+        kcenon::pacs::integration::logger_adapter::info(
             "AI service credentials updated: auth={}",
             to_string(auth_type));
 
@@ -1361,4 +1361,4 @@ auto ai_service_connector::update_credentials(
     return pimpl_->update_credentials(auth_type, credentials);
 }
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai

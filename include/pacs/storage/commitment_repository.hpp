@@ -57,7 +57,7 @@
 
 #include "pacs/storage/base_repository.hpp"
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Entity Types
@@ -246,6 +246,6 @@ private:
         const std::vector<services::sop_reference>& references) -> VoidResult;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

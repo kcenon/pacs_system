@@ -2,7 +2,7 @@
 
 #include "pacs/security/tls_policy.hpp"
 
-using namespace pacs::security;
+using namespace kcenon::pacs::security;
 
 // ============================================================================
 // tls_profile enum tests

@@ -22,8 +22,8 @@
 
 namespace {
 
-using namespace pacs::benchmark::simd;
-using namespace pacs::encoding::simd;
+using namespace kcenon::pacs::benchmark::simd;
+using namespace kcenon::pacs::encoding::simd;
 
 // =============================================================================
 // Image size constants (in pixels)

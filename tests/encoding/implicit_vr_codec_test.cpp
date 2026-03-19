@@ -15,8 +15,8 @@
 
 #include <cstring>
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 namespace {
 
@@ -163,7 +163,7 @@ TEST_CASE("implicit_vr_codec element decoding", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(result.error().code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == kcenon::pacs::error_codes::insufficient_data);
     }
 }
 
@@ -321,13 +321,13 @@ TEST_CASE("implicit_vr_codec error handling", "[encoding][implicit]") {
         auto result = implicit_vr_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(result.error().code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == kcenon::pacs::error_codes::insufficient_data);
     }
 
     SECTION("error codes are properly defined") {
         // Verify encoding-related error codes exist and have expected values
-        CHECK(pacs::error_codes::insufficient_data == -746);
-        CHECK(pacs::error_codes::invalid_sequence == -747);
-        CHECK(pacs::error_codes::unknown_vr == -748);
+        CHECK(kcenon::pacs::error_codes::insufficient_data == -746);
+        CHECK(kcenon::pacs::error_codes::invalid_sequence == -747);
+        CHECK(kcenon::pacs::error_codes::unknown_vr == -748);
     }
 }

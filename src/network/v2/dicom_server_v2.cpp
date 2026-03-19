@@ -53,7 +53,7 @@
 using kcenon::common::error_info;
 #endif
 
-namespace pacs::network::v2 {
+namespace kcenon::pacs::network::v2 {
 
 // =============================================================================
 // Construction / Destruction
@@ -615,4 +615,4 @@ bool dicom_server_v2::is_access_control_enabled() const noexcept {
     return access_control_enabled_;
 }
 
-}  // namespace pacs::network::v2
+}  // namespace kcenon::pacs::network::v2

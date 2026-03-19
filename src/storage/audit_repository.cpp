@@ -48,7 +48,7 @@
 
 #include <database/query_builder.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -164,7 +164,7 @@ auto audit_repository::add_audit_log(const audit_record& record)
     if (insert_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to insert audit log: {}",
+            kcenon::pacs::compat::format("Failed to insert audit log: {}",
                                  insert_result.error().message),
             "storage");
     }
@@ -202,11 +202,11 @@ auto audit_repository::query_audit_log(const audit_query& query)
         builder.where("study_uid", "=", *query.study_uid);
     }
     if (query.date_from.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "date(timestamp) >= date('{}')", *query.date_from)));
     }
     if (query.date_to.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "date(timestamp) <= date('{}')", *query.date_to)));
     }
 
@@ -251,7 +251,7 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
     auto cutoff = std::chrono::system_clock::now() - age;
     auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
     std::tm tm{};
-    pacs::compat::gmtime_safe(&cutoff_time, &tm);
+    kcenon::pacs::compat::gmtime_safe(&cutoff_time, &tm);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
@@ -264,13 +264,13 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
     auto builder = query_builder();
     builder.delete_from(table_name())
         .where(database::query_condition(
-            pacs::compat::format("timestamp < '{}'", cutoff_str)));
+            kcenon::pacs::compat::format("timestamp < '{}'", cutoff_str)));
 
     auto result = db()->remove(builder.build());
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Failed to cleanup old audit logs: {}",
+            kcenon::pacs::compat::format("Failed to cleanup old audit logs: {}",
                                  result.error().message),
             "storage");
     }
@@ -332,13 +332,13 @@ auto audit_repository::select_columns() const -> std::vector<std::string> {
             "patient_id","study_uid",  "message",   "details"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -445,7 +445,7 @@ auto audit_repository::add_audit_log(const audit_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare audit insert: {}",
+            kcenon::pacs::compat::format("Failed to prepare audit insert: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -467,7 +467,7 @@ auto audit_repository::add_audit_log(const audit_record& record)
     if (rc != SQLITE_DONE) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to insert audit log: {}",
+            kcenon::pacs::compat::format("Failed to insert audit log: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -533,7 +533,7 @@ auto audit_repository::query_audit_log(const audit_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<audit_record>>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -582,7 +582,7 @@ auto audit_repository::audit_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -609,7 +609,7 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare audit cleanup: {}",
+            kcenon::pacs::compat::format("Failed to prepare audit cleanup: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -621,7 +621,7 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
     if (rc != SQLITE_DONE) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to cleanup old audit logs: {}",
+            kcenon::pacs::compat::format("Failed to cleanup old audit logs: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -629,6 +629,6 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
     return static_cast<size_t>(sqlite3_changes(db_));
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

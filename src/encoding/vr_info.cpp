@@ -34,7 +34,7 @@
 #include <cctype>
 #include <unordered_map>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 namespace {
 
@@ -310,4 +310,4 @@ bool is_valid_charset(vr_type vr, std::string_view value) {
     }
 }
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding

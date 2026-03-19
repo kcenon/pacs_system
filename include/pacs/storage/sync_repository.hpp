@@ -60,7 +60,7 @@
 
 #include "pacs/storage/pacs_database_adapter.hpp"
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /// Result type alias
 template <typename T>
@@ -371,7 +371,7 @@ private:
     std::shared_ptr<pacs_database_adapter> db_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -381,7 +381,7 @@ private:
 
 struct sqlite3;
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /// Result type alias
 template <typename T>
@@ -459,6 +459,6 @@ private:
     sqlite3* db_{nullptr};
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

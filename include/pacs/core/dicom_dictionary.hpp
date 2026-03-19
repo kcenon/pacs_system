@@ -54,7 +54,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 /**
  * @brief DICOM Data Dictionary singleton class
@@ -213,4 +213,5 @@ private:
     mutable std::shared_mutex mutex_;
 };
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+

@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::dcm_modify {
+namespace kcenon::pacs::dcm_modify {
 
 /**
  * @brief UID mapping for consistent anonymization across related instances
@@ -128,8 +128,8 @@ public:
      * @param dataset The dataset to anonymize
      */
     void anonymize(core::dicom_dataset& dataset) {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // Patient identifying information
         anonymize_patient_info(dataset);
@@ -196,8 +196,8 @@ public:
 
 private:
     void anonymize_patient_info(core::dicom_dataset& dataset) {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // Patient Name
         if (!options_.patient_name_replacement.empty()) {
@@ -222,8 +222,8 @@ private:
     }
 
     void anonymize_uids(core::dicom_dataset& dataset) {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // Study Instance UID
         auto study_uid = dataset.get_string(tags::study_instance_uid);
@@ -293,6 +293,6 @@ private:
     std::atomic<uint64_t> patient_counter_{0};
 };
 
-}  // namespace pacs::dcm_modify
+}  // namespace kcenon::pacs::dcm_modify
 
 #endif  // PACS_DCM_MODIFY_ANONYMIZER_HPP

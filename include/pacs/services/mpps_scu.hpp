@@ -57,7 +57,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // MPPS SCU Data Structures
@@ -489,6 +489,6 @@ inline constexpr core::dicom_tag discontinuation_reason_code_sequence{0x0040, 0x
 
 }  // namespace mpps_tags
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_MPPS_SCU_HPP

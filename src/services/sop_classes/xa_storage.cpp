@@ -38,7 +38,7 @@
 #include <array>
 #include <cmath>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -234,4 +234,4 @@ bool xa_calibration_data::is_valid() const noexcept {
            distance_source_to_detector > distance_source_to_patient;
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

@@ -51,7 +51,7 @@
 #include <sstream>
 #include <string>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @brief Convert time_point to ISO 8601 formatted string
@@ -406,4 +406,4 @@ namespace pacs::monitoring {
     return oss.str();
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

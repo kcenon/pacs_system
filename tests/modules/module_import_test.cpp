@@ -18,40 +18,40 @@ import kcenon.pacs;
 
 TEST_CASE("Module import - core partition", "[modules][core]") {
     SECTION("dicom_tag is accessible") {
-        pacs::core::dicom_tag tag(0x0010, 0x0010);
+        kcenon::pacs::core::dicom_tag tag(0x0010, 0x0010);
         REQUIRE(tag.group() == 0x0010);
         REQUIRE(tag.element() == 0x0010);
     }
 
     SECTION("dicom_element is accessible") {
-        pacs::core::dicom_tag tag(0x0010, 0x0010);
-        pacs::core::dicom_element elem(tag, "Test^Patient");
+        kcenon::pacs::core::dicom_tag tag(0x0010, 0x0010);
+        kcenon::pacs::core::dicom_element elem(tag, "Test^Patient");
         REQUIRE(elem.tag() == tag);
     }
 
     SECTION("dicom_dataset is accessible") {
-        pacs::core::dicom_dataset ds;
+        kcenon::pacs::core::dicom_dataset ds;
         REQUIRE(ds.empty());
     }
 }
 
 TEST_CASE("Module import - encoding partition", "[modules][encoding]") {
     SECTION("transfer_syntax is accessible") {
-        auto ts = pacs::encoding::transfer_syntax::implicit_vr_little_endian();
+        auto ts = kcenon::pacs::encoding::transfer_syntax::implicit_vr_little_endian();
         REQUIRE(ts.is_little_endian());
         REQUIRE(ts.is_implicit_vr());
     }
 
     SECTION("vr_type is accessible") {
-        auto vr = pacs::encoding::vr_type::PN;
-        REQUIRE(vr == pacs::encoding::vr_type::PN);
+        auto vr = kcenon::pacs::encoding::vr_type::PN;
+        REQUIRE(vr == kcenon::pacs::encoding::vr_type::PN);
     }
 }
 
 TEST_CASE("Module import - network partition", "[modules][network]") {
     SECTION("presentation_context is accessible") {
         // Verify type is accessible (compile-time check)
-        using pc_type = pacs::network::presentation_context;
+        using pc_type = kcenon::pacs::network::presentation_context;
         REQUIRE(sizeof(pc_type) > 0);
     }
 }
@@ -59,7 +59,7 @@ TEST_CASE("Module import - network partition", "[modules][network]") {
 TEST_CASE("Module import - services partition", "[modules][services]") {
     SECTION("service types are accessible") {
         // Verify types are accessible (compile-time check)
-        using verification_scp = pacs::services::verification_scp;
+        using verification_scp = kcenon::pacs::services::verification_scp;
         REQUIRE(sizeof(verification_scp) > 0);
     }
 }
@@ -68,7 +68,7 @@ TEST_CASE("Module import - services partition", "[modules][services]") {
 TEST_CASE("Module import - storage partition", "[modules][storage]") {
     SECTION("storage interface is accessible") {
         // Verify type is accessible (compile-time check)
-        using storage_interface = pacs::storage::storage_interface;
+        using storage_interface = kcenon::pacs::storage::storage_interface;
         REQUIRE(sizeof(storage_interface) > 0);
     }
 }
@@ -78,7 +78,7 @@ TEST_CASE("Module import - storage partition", "[modules][storage]") {
 TEST_CASE("Module import - ai partition", "[modules][ai]") {
     SECTION("ai types are accessible") {
         // Verify types are accessible (compile-time check)
-        using ai_result_handler = pacs::ai::ai_result_handler;
+        using ai_result_handler = kcenon::pacs::ai::ai_result_handler;
         REQUIRE(sizeof(ai_result_handler) > 0);
     }
 }
@@ -88,8 +88,8 @@ TEST_CASE("Module import - all partitions compile together", "[modules][integrat
     // This test verifies that all module partitions can be imported
     // together without conflicts
     SECTION("multiple partitions work together") {
-        pacs::core::dicom_dataset ds;
-        auto ts = pacs::encoding::transfer_syntax::implicit_vr_little_endian();
+        kcenon::pacs::core::dicom_dataset ds;
+        auto ts = kcenon::pacs::encoding::transfer_syntax::implicit_vr_little_endian();
         REQUIRE(ds.empty());
         REQUIRE(ts.is_little_endian());
     }

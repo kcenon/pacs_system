@@ -56,14 +56,14 @@
 #include <type_traits>
 #include <vector>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 // Forward declaration to break circular dependency
 class dicom_dataset;
 
 /**
  * @brief Exception thrown when value conversion fails
- * @deprecated Use Result<T> pattern instead. Error codes are in pacs::error_codes.
+ * @deprecated Use Result<T> pattern instead. Error codes are in kcenon::pacs::error_codes.
  */
 class [[deprecated("Use Result<T> pattern instead")]] value_conversion_error
     : public std::runtime_error {
@@ -232,7 +232,7 @@ public:
      *
      * @return Result containing the string value, or error if conversion fails
      */
-    [[nodiscard]] auto as_string() const -> pacs::Result<std::string>;
+    [[nodiscard]] auto as_string() const -> kcenon::pacs::Result<std::string>;
 
     /**
      * @brief Get multi-valued string as a list
@@ -242,7 +242,7 @@ public:
      * @return Result containing vector of individual string values, or error
      */
     [[nodiscard]] auto as_string_list() const
-        -> pacs::Result<std::vector<std::string>>;
+        -> kcenon::pacs::Result<std::vector<std::string>>;
 
     // ========================================================================
     // Numeric Value Access
@@ -255,7 +255,7 @@ public:
      */
     template <typename T>
         requires std::is_arithmetic_v<T>
-    [[nodiscard]] auto as_numeric() const -> pacs::Result<T>;
+    [[nodiscard]] auto as_numeric() const -> kcenon::pacs::Result<T>;
 
     /**
      * @brief Get multi-valued numeric data as a list
@@ -264,7 +264,7 @@ public:
      */
     template <typename T>
         requires std::is_arithmetic_v<T>
-    [[nodiscard]] auto as_numeric_list() const -> pacs::Result<std::vector<T>>;
+    [[nodiscard]] auto as_numeric_list() const -> kcenon::pacs::Result<std::vector<T>>;
 
     // ========================================================================
     // Sequence Access
@@ -401,10 +401,10 @@ auto dicom_element::from_numeric_list(dicom_tag tag, encoding::vr_type vr,
 
 template <typename T>
     requires std::is_arithmetic_v<T>
-auto dicom_element::as_numeric() const -> pacs::Result<T> {
+auto dicom_element::as_numeric() const -> kcenon::pacs::Result<T> {
     if (data_.size() < sizeof(T)) {
-        return pacs::pacs_error<T>(
-            pacs::error_codes::data_size_mismatch,
+        return kcenon::pacs::pacs_error<T>(
+            kcenon::pacs::error_codes::data_size_mismatch,
             "Insufficient data for numeric conversion: expected " +
                 std::to_string(sizeof(T)) + " bytes, got " +
                 std::to_string(data_.size()));
@@ -412,15 +412,15 @@ auto dicom_element::as_numeric() const -> pacs::Result<T> {
 
     T result{};
     std::memcpy(&result, data_.data(), sizeof(T));
-    return pacs::ok(result);
+    return kcenon::pacs::ok(result);
 }
 
 template <typename T>
     requires std::is_arithmetic_v<T>
-auto dicom_element::as_numeric_list() const -> pacs::Result<std::vector<T>> {
+auto dicom_element::as_numeric_list() const -> kcenon::pacs::Result<std::vector<T>> {
     if (data_.size() % sizeof(T) != 0) {
-        return pacs::pacs_error<std::vector<T>>(
-            pacs::error_codes::data_size_mismatch,
+        return kcenon::pacs::pacs_error<std::vector<T>>(
+            kcenon::pacs::error_codes::data_size_mismatch,
             "Data size not aligned for numeric type: " +
                 std::to_string(data_.size()) + " bytes is not divisible by " +
                 std::to_string(sizeof(T)));
@@ -433,7 +433,7 @@ auto dicom_element::as_numeric_list() const -> pacs::Result<std::vector<T>> {
         std::memcpy(&result[i], data_.data() + i * sizeof(T), sizeof(T));
     }
 
-    return pacs::ok(result);
+    return kcenon::pacs::ok(result);
 }
 
 template <typename T>
@@ -443,4 +443,5 @@ void dicom_element::set_numeric(T value) {
     std::memcpy(data_.data(), &value, sizeof(T));
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+

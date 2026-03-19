@@ -388,44 +388,44 @@ bool validate_options(const options& opts) {
 std::string_view get_retrieve_sop_class_uid(const options& opts) {
     if (opts.mode == retrieve_mode::c_move) {
         if (opts.query_model == "patient") {
-            return pacs::services::patient_root_move_sop_class_uid;
+            return kcenon::pacs::services::patient_root_move_sop_class_uid;
         }
-        return pacs::services::study_root_move_sop_class_uid;
+        return kcenon::pacs::services::study_root_move_sop_class_uid;
     } else {
         if (opts.query_model == "patient") {
-            return pacs::services::patient_root_get_sop_class_uid;
+            return kcenon::pacs::services::patient_root_get_sop_class_uid;
         }
-        return pacs::services::study_root_get_sop_class_uid;
+        return kcenon::pacs::services::study_root_get_sop_class_uid;
     }
 }
 
 /**
  * @brief Build retrieve query dataset
  */
-pacs::core::dicom_dataset build_query_dataset(const options& opts) {
-    using namespace pacs::core;
+kcenon::pacs::core::dicom_dataset build_query_dataset(const options& opts) {
+    using namespace kcenon::pacs::core;
 
     dicom_dataset ds;
 
     // Set Query/Retrieve Level
     std::string level_str{to_string(opts.level)};
-    ds.set_string(tags::query_retrieve_level, pacs::encoding::vr_type::CS, level_str);
+    ds.set_string(tags::query_retrieve_level, kcenon::pacs::encoding::vr_type::CS, level_str);
 
     // Set identifiers based on level
     if (!opts.patient_id.empty()) {
-        ds.set_string(tags::patient_id, pacs::encoding::vr_type::LO, opts.patient_id);
+        ds.set_string(tags::patient_id, kcenon::pacs::encoding::vr_type::LO, opts.patient_id);
     }
 
     if (!opts.study_uid.empty()) {
-        ds.set_string(tags::study_instance_uid, pacs::encoding::vr_type::UI, opts.study_uid);
+        ds.set_string(tags::study_instance_uid, kcenon::pacs::encoding::vr_type::UI, opts.study_uid);
     }
 
     if (!opts.series_uid.empty()) {
-        ds.set_string(tags::series_instance_uid, pacs::encoding::vr_type::UI, opts.series_uid);
+        ds.set_string(tags::series_instance_uid, kcenon::pacs::encoding::vr_type::UI, opts.series_uid);
     }
 
     if (!opts.sop_instance_uid.empty()) {
-        ds.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, opts.sop_instance_uid);
+        ds.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, opts.sop_instance_uid);
     }
 
     return ds;
@@ -503,9 +503,9 @@ void display_progress(const progress_state& state, bool verbose) {
  */
 std::filesystem::path generate_file_path(
     const options& opts,
-    const pacs::core::dicom_dataset& dataset) {
+    const kcenon::pacs::core::dicom_dataset& dataset) {
 
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     std::filesystem::path path = opts.output_dir;
 
@@ -535,7 +535,7 @@ std::filesystem::path generate_file_path(
  */
 bool save_dicom_file(
     const std::filesystem::path& path,
-    const pacs::core::dicom_dataset& dataset,
+    const kcenon::pacs::core::dicom_dataset& dataset,
     bool overwrite) {
 
     // Check if file exists
@@ -547,9 +547,9 @@ bool save_dicom_file(
     std::filesystem::create_directories(path.parent_path());
 
     // Create DICOM file using static factory method
-    auto file = pacs::core::dicom_file::create(
+    auto file = kcenon::pacs::core::dicom_file::create(
         dataset,
-        pacs::encoding::transfer_syntax::explicit_vr_little_endian);
+        kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
 
     auto result = file.save(path);
     return result.is_ok();
@@ -558,12 +558,12 @@ bool save_dicom_file(
 /**
  * @brief Create C-MOVE request message
  */
-pacs::network::dimse::dimse_message make_c_move_rq(
+kcenon::pacs::network::dimse::dimse_message make_c_move_rq(
     uint16_t message_id,
     std::string_view sop_class_uid,
     std::string_view move_destination) {
 
-    using namespace pacs::network::dimse;
+    using namespace kcenon::pacs::network::dimse;
 
     dimse_message msg{command_field::c_move_rq, message_id};
     msg.set_affected_sop_class_uid(sop_class_uid);
@@ -572,7 +572,7 @@ pacs::network::dimse::dimse_message make_c_move_rq(
     // Set Move Destination AE
     msg.command_set().set_string(
         tag_move_destination,
-        pacs::encoding::vr_type::AE,
+        kcenon::pacs::encoding::vr_type::AE,
         std::string(move_destination));
 
     return msg;
@@ -581,11 +581,11 @@ pacs::network::dimse::dimse_message make_c_move_rq(
 /**
  * @brief Create C-GET request message
  */
-pacs::network::dimse::dimse_message make_c_get_rq(
+kcenon::pacs::network::dimse::dimse_message make_c_get_rq(
     uint16_t message_id,
     std::string_view sop_class_uid) {
 
-    using namespace pacs::network::dimse;
+    using namespace kcenon::pacs::network::dimse;
 
     dimse_message msg{command_field::c_get_rq, message_id};
     msg.set_affected_sop_class_uid(sop_class_uid);
@@ -598,8 +598,8 @@ pacs::network::dimse::dimse_message make_c_get_rq(
  * @brief Perform C-GET retrieval
  */
 int perform_c_get(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::network::dimse;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::network::dimse;
 
     auto sop_class_uid = get_retrieve_sop_class_uid(opts);
 
@@ -869,8 +869,8 @@ int perform_c_get(const options& opts) {
  * @brief Perform C-MOVE retrieval
  */
 int perform_c_move(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::network::dimse;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::network::dimse;
 
     auto sop_class_uid = get_retrieve_sop_class_uid(opts);
 

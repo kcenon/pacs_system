@@ -29,8 +29,8 @@
 #include <pacs/client/prefetch_types.hpp>
 #include <pacs/client/sync_types.hpp>
 
-using namespace pacs::storage;
-using namespace pacs::client;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::client;
 
 namespace {
 

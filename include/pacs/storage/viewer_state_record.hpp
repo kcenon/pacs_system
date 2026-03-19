@@ -47,7 +47,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Viewer state record from the database
@@ -155,4 +155,4 @@ struct recent_study_record {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

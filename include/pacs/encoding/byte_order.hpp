@@ -36,7 +36,7 @@
 #ifndef PACS_ENCODING_BYTE_ORDER_HPP
 #define PACS_ENCODING_BYTE_ORDER_HPP
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief Byte ordering for DICOM data encoding.
@@ -60,6 +60,6 @@ enum class vr_encoding {
     explicit_vr  ///< VR explicitly encoded in the data stream
 };
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_BYTE_ORDER_HPP

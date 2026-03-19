@@ -44,7 +44,7 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Local Helper Functions
@@ -187,15 +187,15 @@ network::Result<print_result> print_scu::create_film_session(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     auto context_id = find_print_context(assoc, basic_film_session_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Film Session SOP Class");
     }
 
@@ -245,8 +245,8 @@ network::Result<print_result> print_scu::create_film_session(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_create_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-CREATE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -285,15 +285,15 @@ network::Result<print_result> print_scu::delete_film_session(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     auto context_id = find_print_context(assoc, basic_film_session_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Film Session SOP Class");
     }
 
@@ -320,8 +320,8 @@ network::Result<print_result> print_scu::delete_film_session(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_delete_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-DELETE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -362,15 +362,15 @@ network::Result<print_result> print_scu::create_film_box(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     auto context_id = find_print_context(assoc, basic_film_box_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Film Box SOP Class");
     }
 
@@ -427,8 +427,8 @@ network::Result<print_result> print_scu::create_film_box(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_create_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-CREATE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -471,15 +471,15 @@ network::Result<print_result> print_scu::print_film_box(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     auto context_id = find_print_context(assoc, basic_film_box_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Film Box SOP Class");
     }
 
@@ -508,8 +508,8 @@ network::Result<print_result> print_scu::print_film_box(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_action_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-ACTION-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -547,15 +547,15 @@ network::Result<print_result> print_scu::delete_film_box(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     auto context_id = find_print_context(assoc, basic_film_box_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Film Box SOP Class");
     }
 
@@ -582,8 +582,8 @@ network::Result<print_result> print_scu::delete_film_box(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_delete_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-DELETE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -626,8 +626,8 @@ network::Result<print_result> print_scu::set_image_box(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
@@ -637,8 +637,8 @@ network::Result<print_result> print_scu::set_image_box(
 
     auto context_id = find_print_context(assoc, sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Image Box SOP Class");
     }
 
@@ -674,8 +674,8 @@ network::Result<print_result> print_scu::set_image_box(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_set_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-SET-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -716,15 +716,15 @@ network::Result<print_result> print_scu::query_printer_status(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     auto context_id = find_print_context(assoc, printer_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_invalid_sop_class,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_invalid_sop_class,
             "No accepted presentation context for Printer SOP Class");
     }
 
@@ -755,8 +755,8 @@ network::Result<print_result> print_scu::query_printer_status(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_get_rsp) {
-        return pacs::pacs_error<print_result>(
-            pacs::error_codes::print_unexpected_command,
+        return kcenon::pacs::pacs_error<print_result>(
+            kcenon::pacs::error_codes::print_unexpected_command,
             "Expected N-GET-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -865,4 +865,4 @@ uint16_t print_scu::next_message_id() noexcept {
     return id;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

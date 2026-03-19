@@ -49,7 +49,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @enum health_level
@@ -312,4 +312,4 @@ struct health_status {
     }
 };
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

@@ -41,10 +41,10 @@
 #include <random>
 #include <set>
 
-namespace pacs::services::pir {
+namespace kcenon::pacs::services::pir {
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // =============================================================================
 // patient_reconciliation_service Implementation
@@ -285,4 +285,4 @@ std::string to_string(reconciliation_type type) {
     return "demographics_update";
 }
 
-}  // namespace pacs::services::pir
+}  // namespace kcenon::pacs::services::pir

@@ -38,7 +38,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 namespace {
 
@@ -205,17 +205,17 @@ public:
         [[maybe_unused]] const compression_options& options) const {
 
         if (pixel_data.empty()) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty pixel data");
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Empty pixel data");
         }
 
         if (!valid_for_rle(params)) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 "Invalid parameters for RLE: requires 8/16-bit, 1-3 samples per pixel");
         }
 
         size_t expected_size = params.frame_size_bytes();
         if (pixel_data.size() != expected_size) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 "Pixel data size mismatch: expected " + std::to_string(expected_size) +
                 ", got " + std::to_string(pixel_data.size()));
         }
@@ -223,7 +223,7 @@ public:
         try {
             return encode_frame(pixel_data, params);
         } catch (const std::exception& e) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, std::string("RLE encoding failed: ") + e.what());
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, std::string("RLE encoding failed: ") + e.what());
         }
     }
 
@@ -232,17 +232,17 @@ public:
         const image_params& params) const {
 
         if (compressed_data.empty()) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty compressed data");
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Empty compressed data");
         }
 
         if (compressed_data.size() < kRLEHeaderSize) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Compressed data too small for RLE header");
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Compressed data too small for RLE header");
         }
 
         try {
             return decode_frame(compressed_data, params);
         } catch (const std::exception& e) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, std::string("RLE decoding failed: ") + e.what());
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, std::string("RLE decoding failed: ") + e.what());
         }
     }
 
@@ -412,7 +412,7 @@ private:
         }
 
         image_params output_params = params;
-        return pacs::ok<compression_result>(compression_result{std::move(output), output_params});
+        return kcenon::pacs::ok<compression_result>(compression_result{std::move(output), output_params});
     }
 
     [[nodiscard]] codec_result decode_frame(
@@ -424,13 +424,13 @@ private:
         // Read number of segments from header
         uint32_t num_segments = read_le32(header);
         if (num_segments == 0 || num_segments > kMaxSegments) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 "Invalid RLE segment count: " + std::to_string(num_segments));
         }
 
         int expected_segments = calculate_segment_count(params);
         if (static_cast<int>(num_segments) != expected_segments) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 "Segment count mismatch: expected " + std::to_string(expected_segments) +
                 ", got " + std::to_string(num_segments));
         }
@@ -440,7 +440,7 @@ private:
         for (uint32_t i = 0; i < num_segments; ++i) {
             offsets[i] = read_le32(header + 4 + i * 4);
             if (offsets[i] >= compressed_data.size()) {
-                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+                return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                     "Invalid segment offset: " + std::to_string(offsets[i]));
             }
         }
@@ -466,7 +466,7 @@ private:
             decoded_segments[i] = decode_rle_segment(segment_data, pixels_per_frame);
 
             if (decoded_segments[i].size() != pixels_per_frame) {
-                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+                return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                     "Segment " + std::to_string(i) + " decoded size mismatch: expected " +
                     std::to_string(pixels_per_frame) + ", got " +
                     std::to_string(decoded_segments[i].size()));
@@ -559,7 +559,7 @@ private:
         output_params.pixel_representation = params.pixel_representation;
         output_params.photometric = params.photometric;
 
-        return pacs::ok<compression_result>(compression_result{std::move(output), output_params});
+        return kcenon::pacs::ok<compression_result>(compression_result{std::move(output), output_params});
     }
 };
 
@@ -635,4 +635,4 @@ codec_result rle_codec::decode(
     return impl_->decode(compressed_data, params);
 }
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

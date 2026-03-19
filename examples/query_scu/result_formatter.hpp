@@ -51,7 +51,7 @@ enum class output_format {
  */
 class result_formatter {
 public:
-    using query_level = pacs::services::query_level;
+    using query_level = kcenon::pacs::services::query_level;
 
     /**
      * @brief Construct formatter with output format
@@ -67,7 +67,7 @@ public:
      * @return Formatted string output
      */
     [[nodiscard]] std::string format(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
         switch (format_) {
             case output_format::json:
                 return format_json(results);
@@ -84,8 +84,8 @@ private:
      * @brief Format results as a human-readable table
      */
     [[nodiscard]] std::string format_table(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
-        using namespace pacs::core;
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
+        using namespace kcenon::pacs::core;
         std::ostringstream oss;
 
         if (results.empty()) {
@@ -118,7 +118,7 @@ private:
 
         // Print header
         oss << "\n=== Query Results (" << results.size() << " "
-            << pacs::services::to_string(level_) << "(s)) ===\n\n";
+            << kcenon::pacs::services::to_string(level_) << "(s)) ===\n\n";
 
         // Print column headers
         for (size_t i = 0; i < columns.size(); ++i) {
@@ -153,12 +153,12 @@ private:
      * @brief Format results as JSON
      */
     [[nodiscard]] std::string format_json(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
-        using namespace pacs::core;
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
+        using namespace kcenon::pacs::core;
         std::ostringstream oss;
 
         oss << "{\n";
-        oss << "  \"queryLevel\": \"" << pacs::services::to_string(level_) << "\",\n";
+        oss << "  \"queryLevel\": \"" << kcenon::pacs::services::to_string(level_) << "\",\n";
         oss << "  \"resultCount\": " << results.size() << ",\n";
         oss << "  \"results\": [\n";
 
@@ -195,8 +195,8 @@ private:
      * @brief Format results as CSV
      */
     [[nodiscard]] std::string format_csv(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
-        using namespace pacs::core;
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
+        using namespace kcenon::pacs::core;
         std::ostringstream oss;
 
         auto columns = get_columns_for_level();
@@ -230,7 +230,7 @@ private:
      */
     struct column_def {
         std::string header;
-        pacs::core::dicom_tag tag;
+        kcenon::pacs::core::dicom_tag tag;
         std::string json_key;
     };
 
@@ -238,7 +238,7 @@ private:
      * @brief Get columns appropriate for the query level
      */
     [[nodiscard]] std::vector<column_def> get_columns_for_level() const {
-        using namespace pacs::core;
+        using namespace kcenon::pacs::core;
         std::vector<column_def> columns;
 
         // Patient level columns (always included)
@@ -284,8 +284,8 @@ private:
      * @brief Get tag value from dataset as string
      */
     [[nodiscard]] static std::string get_tag_value(
-        const pacs::core::dicom_dataset& ds,
-        pacs::core::dicom_tag tag) {
+        const kcenon::pacs::core::dicom_dataset& ds,
+        kcenon::pacs::core::dicom_tag tag) {
         return ds.get_string(tag);
     }
 

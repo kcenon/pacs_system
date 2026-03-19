@@ -12,7 +12,7 @@
 #include "pacs/network/dimse/status_codes.hpp"
 #include "pacs/services/ups/ups_push_scp.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -60,8 +60,8 @@ network::Result<std::monostate> ups_watch_scp::handle_message(
     using namespace network::dimse;
 
     if (request.command() != command_field::n_action_rq) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-ACTION-RQ but received " +
             std::string(to_string(request.command())));
     }
@@ -151,8 +151,8 @@ network::Result<std::monostate> ups_watch_scp::handle_n_action(
     // Get Action Type ID
     auto action_type = request.action_type_id();
     if (!action_type.has_value()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_invalid_action_type,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_invalid_action_type,
             "Missing Action Type ID in N-ACTION request");
     }
 
@@ -199,8 +199,8 @@ network::Result<std::monostate> ups_watch_scp::handle_subscribe(
     using namespace network::dimse;
 
     if (!subscribe_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_handler_not_set,
             "No subscribe handler configured for UPS Watch SCP");
     }
 
@@ -251,8 +251,8 @@ network::Result<std::monostate> ups_watch_scp::handle_unsubscribe(
     using namespace network::dimse;
 
     if (!unsubscribe_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_handler_not_set,
             "No unsubscribe handler configured for UPS Watch SCP");
     }
 
@@ -298,8 +298,8 @@ network::Result<std::monostate> ups_watch_scp::handle_suspend_global(
     using namespace network::dimse;
 
     if (!unsubscribe_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_handler_not_set,
             "No unsubscribe handler configured for UPS Watch SCP");
     }
 
@@ -391,4 +391,4 @@ void ups_watch_scp::dispatch_event(
     }
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

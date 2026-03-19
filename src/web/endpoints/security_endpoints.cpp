@@ -41,7 +41,7 @@
 #include "pacs/security/user.hpp"
 #include "pacs/web/rest_types.hpp"
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 void register_security_endpoints_impl(
     crow::SimpleApp &app, std::shared_ptr<rest_server_context> ctx) {
@@ -73,7 +73,7 @@ void register_security_endpoints_impl(
           return res;
         }
 
-        pacs::security::User user;
+        kcenon::pacs::security::User user;
         user.id = x["id"].s();
         user.username = x["username"].s();
         user.active = true; // Default to active
@@ -113,7 +113,7 @@ void register_security_endpoints_impl(
         }
 
         std::string role_str = x["role"].s();
-        auto role_opt = pacs::security::parse_role(role_str);
+        auto role_opt = kcenon::pacs::security::parse_role(role_str);
         if (!role_opt) {
           res.body = make_error_json("INVALID_ROLE", "Invalid role specified");
           res.code = 400;
@@ -133,4 +133,4 @@ void register_security_endpoints_impl(
       });
 }
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

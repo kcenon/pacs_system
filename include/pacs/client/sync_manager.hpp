@@ -55,18 +55,18 @@
 #include <vector>
 
 // Forward declarations
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class sync_repository;
 class sync_config_repository;
 class sync_conflict_repository;
 class sync_history_repository;
 }
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 class query_scu;
 }
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // Forward declarations
 class remote_node_manager;
@@ -226,7 +226,7 @@ public:
      * @param config The configuration to add
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto add_config(const sync_config& config) -> pacs::VoidResult;
+    [[nodiscard]] auto add_config(const sync_config& config) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Update an existing sync configuration
@@ -234,7 +234,7 @@ public:
      * @param config The configuration to update (identified by config_id)
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto update_config(const sync_config& config) -> pacs::VoidResult;
+    [[nodiscard]] auto update_config(const sync_config& config) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Remove a sync configuration
@@ -242,7 +242,7 @@ public:
      * @param config_id The ID of the configuration to remove
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto remove_config(std::string_view config_id) -> pacs::VoidResult;
+    [[nodiscard]] auto remove_config(std::string_view config_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Get a sync configuration by ID
@@ -355,7 +355,7 @@ public:
      */
     [[nodiscard]] auto resolve_conflict(
         std::string_view study_uid,
-        conflict_resolution resolution) -> pacs::VoidResult;
+        conflict_resolution resolution) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Resolve all conflicts for a configuration
@@ -366,7 +366,7 @@ public:
      */
     [[nodiscard]] auto resolve_all_conflicts(
         std::string_view config_id,
-        conflict_resolution resolution) -> pacs::VoidResult;
+        conflict_resolution resolution) -> kcenon::pacs::VoidResult;
 
     // =========================================================================
     // Scheduler
@@ -477,4 +477,4 @@ private:
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

@@ -43,7 +43,7 @@
 #include <chrono>
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -103,8 +103,8 @@ network::Result<std::monostate> print_scp::handle_message(
         case command_field::n_delete_rq:
             return handle_n_delete(assoc, context_id, request);
         default:
-            return pacs::pacs_void_error(
-                pacs::error_codes::print_unexpected_command,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::print_unexpected_command,
                 "Unexpected command for Print SCP: " +
                 std::string(to_string(request.command())));
     }
@@ -738,4 +738,4 @@ auto print_scp::generate_uid() -> std::string {
     return oss.str();
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

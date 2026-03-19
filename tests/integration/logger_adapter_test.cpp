@@ -20,7 +20,7 @@
 #include <unistd.h>
 #endif
 
-using namespace pacs::integration;
+using namespace kcenon::pacs::integration;
 
 // =============================================================================
 // Test Helpers

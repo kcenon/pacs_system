@@ -43,7 +43,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief Represents a DICOM Transfer Syntax.
@@ -252,6 +252,6 @@ private:
 
 /// @}
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_TRANSFER_SYNTAX_HPP

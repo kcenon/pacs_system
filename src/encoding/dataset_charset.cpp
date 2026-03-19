@@ -36,7 +36,7 @@
 
 #include <pacs/core/dicom_tag_constants.hpp>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 std::string get_decoded_string(
     const core::dicom_dataset& ds,
@@ -74,4 +74,4 @@ void set_encoded_string(
     ds.insert(core::dicom_element::from_string(tag, vr, encoded));
 }
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding

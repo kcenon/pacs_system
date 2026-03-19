@@ -43,7 +43,7 @@
 #include <shared_mutex>
 #include <unordered_map>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // Metric Names
@@ -534,4 +534,4 @@ auto monitoring_adapter::query_level_to_string(query_level level) -> std::string
     }
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

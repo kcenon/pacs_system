@@ -47,7 +47,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Constructor
@@ -633,7 +633,7 @@ auto job_repository::count_by_status(client::job_status status)
             -1, "Database not connected", "storage");
     }
 
-    auto result = storage_session().select(pacs::compat::format(
+    auto result = storage_session().select(kcenon::pacs::compat::format(
         "SELECT COUNT(*) as count FROM {} WHERE status = '{}'",
         table_name(), std::string(client::to_string(status))));
     if (result.is_err()) {
@@ -660,7 +660,7 @@ auto job_repository::count_completed_today() -> Result<size_t> {
 
     // Note: For date comparison, we use the date portion of completed_at
     // This requires database-specific handling - using LIKE for portability
-    auto result = storage_session().select(pacs::compat::format(
+    auto result = storage_session().select(kcenon::pacs::compat::format(
         "SELECT COUNT(*) as count FROM {} WHERE status = 'completed'",
         table_name()));
     if (result.is_err()) {
@@ -681,7 +681,7 @@ auto job_repository::count_failed_today() -> Result<size_t> {
             -1, "Database not connected", "storage");
     }
 
-    auto result = storage_session().select(pacs::compat::format(
+    auto result = storage_session().select(kcenon::pacs::compat::format(
         "SELECT COUNT(*) as count FROM {} WHERE status = 'failed'",
         table_name()));
     if (result.is_err()) {
@@ -941,7 +941,7 @@ auto job_repository::select_columns() const -> std::vector<std::string> {
             "completed_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -951,7 +951,7 @@ auto job_repository::select_columns() const -> std::vector<std::string> {
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -2037,6 +2037,6 @@ client::job_record job_repository::parse_row(void* stmt_ptr) const {
     return job;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

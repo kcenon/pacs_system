@@ -64,7 +64,7 @@
 #include <database/query_builder.h>
 #endif
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -580,4 +580,4 @@ private:
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

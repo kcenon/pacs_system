@@ -12,7 +12,7 @@
 
 #include <thread>
 
-using namespace pacs::monitoring;
+using namespace kcenon::pacs::monitoring;
 using Catch::Matchers::WithinRel;
 
 // =============================================================================

@@ -64,16 +64,16 @@
 #include <vector>
 
 // Include database_cursor only when PACS_WITH_DATABASE_SYSTEM is defined
-// IMPORTANT: Must be outside namespace to avoid polluting pacs::services with std
+// IMPORTANT: Must be outside namespace to avoid polluting kcenon::pacs::services with std
 #ifdef PACS_WITH_DATABASE_SYSTEM
 #include "database_cursor.hpp"
 #endif
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -319,4 +319,4 @@ private:
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

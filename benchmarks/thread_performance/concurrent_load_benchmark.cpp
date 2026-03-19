@@ -28,10 +28,10 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::benchmark;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
+using namespace kcenon::pacs::benchmark;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
 
 // =============================================================================
 // Helper Structures

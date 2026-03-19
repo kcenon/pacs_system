@@ -53,7 +53,7 @@
 using kcenon::common::error_info;
 #endif
 
-namespace pacs::network::v2 {
+namespace kcenon::pacs::network::v2 {
 
 // =============================================================================
 // Construction / Destruction
@@ -162,7 +162,7 @@ std::string dicom_association_handler::called_ae() const {
 Result<std::reference_wrapper<association>> dicom_association_handler::get_association() {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!is_established()) {
-        return pacs::error_info{pacs::error_codes::invalid_association_state,
+        return kcenon::pacs::error_info{kcenon::pacs::error_codes::invalid_association_state,
             "Association not established", "network"};
     }
     return std::ref(association_);
@@ -171,7 +171,7 @@ Result<std::reference_wrapper<association>> dicom_association_handler::get_assoc
 Result<std::reference_wrapper<const association>> dicom_association_handler::get_association() const {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!is_established()) {
-        return pacs::error_info{pacs::error_codes::invalid_association_state,
+        return kcenon::pacs::error_info{kcenon::pacs::error_codes::invalid_association_state,
             "Association not established", "network"};
     }
     return std::cref(association_);
@@ -822,4 +822,4 @@ void dicom_association_handler::close_handler(bool graceful) {
     }
 }
 
-}  // namespace pacs::network::v2
+}  // namespace kcenon::pacs::network::v2

@@ -39,11 +39,11 @@
 #include <memory>
 #include <string>
 
-namespace net = pacs::network;
-namespace svc = pacs::services;
-namespace stg = pacs::storage;
-namespace core = pacs::core;
-namespace tags = pacs::core::tags;
+namespace net = kcenon::pacs::network;
+namespace svc = kcenon::pacs::services;
+namespace stg = kcenon::pacs::storage;
+namespace core = kcenon::pacs::core;
+namespace tags = kcenon::pacs::core::tags;
 
 namespace {
 
@@ -161,7 +161,7 @@ bool update_index(stg::index_database& db,
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    pacs::samples::print_header("Storage Server - Level 3 Sample");
+    kcenon::pacs::samples::print_header("Storage Server - Level 3 Sample");
 
     // ===========================================================================
     // Part 1: Storage Configuration
@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
     // - Duplicate handling policy (reject, replace, or ignore)
     // - File extension for saved files
 
-    pacs::samples::print_section("Part 1: Storage Configuration");
+    kcenon::pacs::samples::print_section("Part 1: Storage Configuration");
 
     std::cout << "DICOM storage systems organize files hierarchically:\n";
     std::cout << "  - UID-based:  {root}/{StudyUID}/{SeriesUID}/{SOPUID}.dcm\n";
@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
     fs_config.create_directories = true;
     fs_config.file_extension = ".dcm";
 
-    pacs::samples::print_table("File Storage Configuration", {
+    kcenon::pacs::samples::print_table("File Storage Configuration", {
         {"Root Path", storage_root.string()},
         {"Naming Scheme", "uid_hierarchical"},
         {"Duplicate Policy", "replace"},
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
     // Create file storage backend
     auto file_storage = std::make_shared<stg::file_storage>(fs_config);
 
-    pacs::samples::print_success("Part 1 complete - File storage configured!");
+    kcenon::pacs::samples::print_success("Part 1 complete - File storage configured!");
 
     // ===========================================================================
     // Part 2: Index Database
@@ -213,7 +213,7 @@ int main(int argc, char* argv[]) {
     // - Series metadata (modality, series number, description)
     // - Instance references (SOP UID, file path, file size)
 
-    pacs::samples::print_section("Part 2: Index Database");
+    kcenon::pacs::samples::print_section("Part 2: Index Database");
 
     std::cout << "Index database stores metadata for fast queries:\n";
     std::cout << "  - Patient demographics\n";
@@ -224,19 +224,19 @@ int main(int argc, char* argv[]) {
 
     auto db_result = stg::index_database::open(db_path.string());
     if (db_result.is_err()) {
-        pacs::samples::print_error("Failed to open database: " +
+        kcenon::pacs::samples::print_error("Failed to open database: " +
                                    db_result.error().message);
         return 1;
     }
     auto index_db = std::move(db_result.value());
 
-    pacs::samples::print_table("Database Configuration", {
+    kcenon::pacs::samples::print_table("Database Configuration", {
         {"Database Path", db_path.string()},
         {"Storage Engine", "SQLite"},
         {"Mode", "WAL (Write-Ahead Logging)"}
     });
 
-    pacs::samples::print_success("Part 2 complete - Database initialized!");
+    kcenon::pacs::samples::print_success("Part 2 complete - Database initialized!");
 
     // ===========================================================================
     // Part 3: Storage SCP Setup
@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
     // - Duplicate Policy: How to handle images that already exist
     // - Handler callbacks: Custom logic for storage, validation, post-processing
 
-    pacs::samples::print_section("Part 3: Storage SCP Setup");
+    kcenon::pacs::samples::print_section("Part 3: Storage SCP Setup");
 
     std::cout << "Storage SCP handles C-STORE requests from modalities:\n";
     std::cout << "  1. Pre-store handler: Validate incoming data\n";
@@ -272,8 +272,8 @@ int main(int argc, char* argv[]) {
             const std::string& sop_instance_uid) -> svc::storage_status {
 
             std::cout << "\n[" << current_timestamp() << "] "
-                      << pacs::samples::colors::cyan << "[C-STORE]"
-                      << pacs::samples::colors::reset << " From: " << calling_ae << "\n";
+                      << kcenon::pacs::samples::colors::cyan << "[C-STORE]"
+                      << kcenon::pacs::samples::colors::reset << " From: " << calling_ae << "\n";
 
             // Extract key metadata for logging
             std::cout << "  Patient:  " << dataset.get_string(tags::patient_name) << "\n";
@@ -284,8 +284,8 @@ int main(int argc, char* argv[]) {
             // Store to filesystem
             auto store_result = file_storage->store(dataset);
             if (store_result.is_err()) {
-                std::cout << "  " << pacs::samples::colors::red << "Storage failed: "
-                          << pacs::samples::colors::reset
+                std::cout << "  " << kcenon::pacs::samples::colors::red << "Storage failed: "
+                          << kcenon::pacs::samples::colors::reset
                           << store_result.error().message << "\n";
                 reject_count++;
                 return svc::storage_status::storage_error;
@@ -301,8 +301,8 @@ int main(int argc, char* argv[]) {
             }
 
             store_count++;
-            std::cout << "  " << pacs::samples::colors::green << "Stored"
-                      << pacs::samples::colors::reset << " (#" << store_count
+            std::cout << "  " << kcenon::pacs::samples::colors::green << "Stored"
+                      << kcenon::pacs::samples::colors::reset << " (#" << store_count
                       << ") -> " << file_path.filename().string() << "\n";
 
             return svc::storage_status::success;
@@ -315,8 +315,8 @@ int main(int argc, char* argv[]) {
         [&reject_count](const core::dicom_dataset& dataset) -> bool {
             // Example validation: Require Patient ID
             if (dataset.get_string(tags::patient_id).empty()) {
-                std::cout << "  " << pacs::samples::colors::yellow << "[REJECTED]"
-                          << pacs::samples::colors::reset
+                std::cout << "  " << kcenon::pacs::samples::colors::yellow << "[REJECTED]"
+                          << kcenon::pacs::samples::colors::reset
                           << " Missing Patient ID\n";
                 reject_count++;
                 return false;
@@ -324,8 +324,8 @@ int main(int argc, char* argv[]) {
 
             // Example validation: Require Study Instance UID
             if (dataset.get_string(tags::study_instance_uid).empty()) {
-                std::cout << "  " << pacs::samples::colors::yellow << "[REJECTED]"
-                          << pacs::samples::colors::reset
+                std::cout << "  " << kcenon::pacs::samples::colors::yellow << "[REJECTED]"
+                          << kcenon::pacs::samples::colors::reset
                           << " Missing Study Instance UID\n";
                 reject_count++;
                 return false;
@@ -351,14 +351,14 @@ int main(int argc, char* argv[]) {
         }
     );
 
-    pacs::samples::print_table("Storage SCP Configuration", {
+    kcenon::pacs::samples::print_table("Storage SCP Configuration", {
         {"SOP Classes", "All standard storage classes"},
         {"Duplicate Policy", "Replace existing"},
         {"Pre-store Handler", "Validate Patient ID and Study UID"},
         {"Post-store Handler", "Workflow notification"}
     });
 
-    pacs::samples::print_success("Part 3 complete - Storage SCP configured!");
+    kcenon::pacs::samples::print_success("Part 3 complete - Storage SCP configured!");
 
     // ===========================================================================
     // Part 4: Server Startup
@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
     // - Verification SCP (C-ECHO) for connectivity testing
     // - Storage SCP (C-STORE) for receiving images
 
-    pacs::samples::print_section("Part 4: Running Server");
+    kcenon::pacs::samples::print_section("Part 4: Running Server");
 
     // Parse optional port argument
     uint16_t port = 11112;
@@ -404,8 +404,8 @@ int main(int argc, char* argv[]) {
         [&active_connections](const net::association& assoc) {
             active_connections++;
             std::cout << "[" << current_timestamp() << "] "
-                      << pacs::samples::colors::green << "[CONNECT]"
-                      << pacs::samples::colors::reset << " "
+                      << kcenon::pacs::samples::colors::green << "[CONNECT]"
+                      << kcenon::pacs::samples::colors::reset << " "
                       << assoc.calling_ae() << " -> " << assoc.called_ae()
                       << " (active: " << active_connections << ")\n";
         }
@@ -415,8 +415,8 @@ int main(int argc, char* argv[]) {
         [&active_connections](const net::association& assoc) {
             active_connections--;
             std::cout << "[" << current_timestamp() << "] "
-                      << pacs::samples::colors::cyan << "[RELEASE]"
-                      << pacs::samples::colors::reset << " "
+                      << kcenon::pacs::samples::colors::cyan << "[RELEASE]"
+                      << kcenon::pacs::samples::colors::reset << " "
                       << assoc.calling_ae() << " disconnected"
                       << " (active: " << active_connections << ")\n";
         }
@@ -425,30 +425,30 @@ int main(int argc, char* argv[]) {
     server->on_error(
         [](const std::string& error_msg) {
             std::cerr << "[" << current_timestamp() << "] "
-                      << pacs::samples::colors::red << "[ERROR]"
-                      << pacs::samples::colors::reset << " "
+                      << kcenon::pacs::samples::colors::red << "[ERROR]"
+                      << kcenon::pacs::samples::colors::reset << " "
                       << error_msg << "\n";
         }
     );
 
     // Install signal handler for graceful shutdown
-    pacs::samples::scoped_signal_handler sig_handler([&server]() {
-        std::cout << "\n" << pacs::samples::colors::yellow
+    kcenon::pacs::samples::scoped_signal_handler sig_handler([&server]() {
+        std::cout << "\n" << kcenon::pacs::samples::colors::yellow
                   << "Shutdown signal received..."
-                  << pacs::samples::colors::reset << "\n";
+                  << kcenon::pacs::samples::colors::reset << "\n";
         server->stop();
     });
 
     // Start the server
     auto start_result = server->start();
     if (start_result.is_err()) {
-        pacs::samples::print_error("Failed to start server: " +
+        kcenon::pacs::samples::print_error("Failed to start server: " +
                                    start_result.error().message);
         return 1;
     }
 
     // Print server running banner
-    pacs::samples::print_box({
+    kcenon::pacs::samples::print_box({
         "Storage Server Running",
         "",
         "Test with DCMTK:",
@@ -473,11 +473,11 @@ int main(int argc, char* argv[]) {
     // ===========================================================================
     // Display final statistics and verify database contents.
 
-    pacs::samples::print_section("Final Statistics");
+    kcenon::pacs::samples::print_section("Final Statistics");
 
     // Server statistics
     auto stats = server->get_statistics();
-    pacs::samples::print_table("Server Statistics", {
+    kcenon::pacs::samples::print_table("Server Statistics", {
         {"Total Associations", std::to_string(stats.total_associations)},
         {"Messages Processed", std::to_string(stats.messages_processed)},
         {"Bytes Received", std::to_string(stats.bytes_received)},
@@ -485,7 +485,7 @@ int main(int argc, char* argv[]) {
     });
 
     // Storage statistics
-    pacs::samples::print_table("Storage Statistics", {
+    kcenon::pacs::samples::print_table("Storage Statistics", {
         {"Images Stored", std::to_string(store_count.load())},
         {"Images Rejected", std::to_string(reject_count.load())},
         {"Storage Path", storage_root.string()}
@@ -495,7 +495,7 @@ int main(int argc, char* argv[]) {
     auto db_stats_result = index_db->get_storage_stats();
     if (db_stats_result.is_ok()) {
         auto db_stats = db_stats_result.value();
-        pacs::samples::print_table("Database Statistics", {
+        kcenon::pacs::samples::print_table("Database Statistics", {
             {"Patients", std::to_string(db_stats.total_patients)},
             {"Studies", std::to_string(db_stats.total_studies)},
             {"Series", std::to_string(db_stats.total_series)},
@@ -505,7 +505,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Summary
-    pacs::samples::print_box({
+    kcenon::pacs::samples::print_box({
         "Congratulations! You have learned:",
         "",
         "1. File Storage - Hierarchical DICOM file organization",
@@ -520,7 +520,7 @@ int main(int argc, char* argv[]) {
         "Next step: Level 4 - Mini PACS (Query/Retrieve)"
     });
 
-    pacs::samples::print_success("Storage Server terminated successfully.");
+    kcenon::pacs::samples::print_success("Storage Server terminated successfully.");
 
     return 0;
 }

@@ -39,7 +39,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -70,8 +70,8 @@ network::Result<std::monostate> storage_commitment_scu::request_commitment(
     using namespace network::dimse;
 
     if (transaction_uid.empty() || references.empty()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::storage_commitment_missing_transaction_uid,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::storage_commitment_missing_transaction_uid,
             "Transaction UID and references must not be empty");
     }
 
@@ -93,7 +93,7 @@ network::Result<std::monostate> storage_commitment_scu::request_commitment(
     }
 
     ++requests_sent_;
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 // =============================================================================
@@ -107,16 +107,16 @@ network::Result<commitment_result> storage_commitment_scu::handle_event_report(
 
     // Verify command is N-EVENT-REPORT-RQ
     if (event_rq.command() != command_field::n_event_report_rq) {
-        return pacs::pacs_error<commitment_result>(
-            pacs::error_codes::storage_commitment_unexpected_command,
+        return kcenon::pacs::pacs_error<commitment_result>(
+            kcenon::pacs::error_codes::storage_commitment_unexpected_command,
             "Expected N-EVENT-REPORT-RQ, got: " +
             std::string(to_string(event_rq.command())));
     }
 
     // Verify dataset is present
     if (!event_rq.has_dataset()) {
-        return pacs::pacs_error<commitment_result>(
-            pacs::error_codes::storage_commitment_missing_sequence,
+        return kcenon::pacs::pacs_error<commitment_result>(
+            kcenon::pacs::error_codes::storage_commitment_missing_sequence,
             "N-EVENT-REPORT-RQ has no dataset");
     }
 
@@ -132,7 +132,7 @@ network::Result<commitment_result> storage_commitment_scu::handle_event_report(
         callback_(result.transaction_uid, result);
     }
 
-    return pacs::Result<commitment_result>::ok(std::move(result));
+    return kcenon::pacs::Result<commitment_result>::ok(std::move(result));
 }
 
 // =============================================================================
@@ -232,4 +232,4 @@ commitment_result storage_commitment_scu::parse_event_report_dataset(
     return result;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

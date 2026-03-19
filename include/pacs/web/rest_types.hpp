@@ -46,7 +46,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 /**
  * @enum http_status
@@ -157,4 +157,4 @@ make_success_json(std::string_view message = "OK") {
   return result;
 }
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

@@ -27,8 +27,8 @@
 #include <filesystem>
 #include <thread>
 
-using namespace pacs::storage;
-using namespace pacs::web;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("Viewer state query structure", "[web][viewer_state]") {
   viewer_state_query query;

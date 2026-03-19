@@ -38,9 +38,9 @@
 #include <algorithm>
 #include <sstream>
 
-namespace pacs::services::xds {
+namespace kcenon::pacs::services::xds {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // KOS-specific DICOM Tags (for reference parsing)
@@ -196,4 +196,4 @@ void imaging_document_consumer::set_config(
     config_ = config;
 }
 
-}  // namespace pacs::services::xds
+}  // namespace kcenon::pacs::services::xds

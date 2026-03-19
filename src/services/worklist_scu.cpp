@@ -47,7 +47,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -90,16 +90,16 @@ network::Result<worklist_result> worklist_scu::query_impl(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<worklist_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<worklist_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Get accepted presentation context for MWL
     auto context_id = assoc.accepted_context_id(worklist_find_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<worklist_result>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<worklist_result>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for Modality Worklist: " +
             std::string(worklist_find_sop_class_uid));
     }
@@ -130,8 +130,8 @@ network::Result<worklist_result> worklist_scu::query_impl(
 
         // Verify it's a C-FIND response
         if (response.command() != command_field::c_find_rsp) {
-            return pacs::pacs_error<worklist_result>(
-                pacs::error_codes::find_unexpected_command,
+            return kcenon::pacs::pacs_error<worklist_result>(
+                kcenon::pacs::error_codes::find_unexpected_command,
                 "Expected C-FIND-RSP but received " +
                 std::string(to_string(response.command())));
         }
@@ -254,16 +254,16 @@ network::Result<size_t> worklist_scu::query_streaming(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<size_t>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<size_t>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Get accepted presentation context for MWL
     auto context_id = assoc.accepted_context_id(worklist_find_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<size_t>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<size_t>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for Modality Worklist");
     }
 
@@ -296,8 +296,8 @@ network::Result<size_t> worklist_scu::query_streaming(
 
         // Verify it's a C-FIND response
         if (response.command() != command_field::c_find_rsp) {
-            return pacs::pacs_error<size_t>(
-                pacs::error_codes::find_unexpected_command,
+            return kcenon::pacs::pacs_error<size_t>(
+                kcenon::pacs::error_codes::find_unexpected_command,
                 "Expected C-FIND-RSP but received " +
                 std::string(to_string(response.command())));
         }
@@ -365,8 +365,8 @@ network::Result<std::monostate> worklist_scu::cancel(
 
     auto context_id = assoc.accepted_context_id(worklist_find_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<std::monostate>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<std::monostate>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for cancel");
     }
 
@@ -513,4 +513,4 @@ core::dicom_dataset worklist_scu::build_query_dataset(
     return ds;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

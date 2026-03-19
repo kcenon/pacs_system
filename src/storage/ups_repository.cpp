@@ -48,7 +48,7 @@
 
 #include <database/query_builder.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -192,7 +192,7 @@ auto ups_repository::create_ups_workitem(const ups_workitem& workitem)
     if (insert_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to create UPS workitem: {}",
+            kcenon::pacs::compat::format("Failed to create UPS workitem: {}",
                                  insert_result.error().message),
             "storage");
     }
@@ -218,7 +218,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (!existing.has_value()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("UPS workitem not found: {}",
+            kcenon::pacs::compat::format("UPS workitem not found: {}",
                                  workitem.workitem_uid),
             "storage");
     }
@@ -226,7 +226,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (existing->is_final()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Cannot update workitem in final state: {}",
+            kcenon::pacs::compat::format("Cannot update workitem in final state: {}",
                                  existing->state),
             "storage");
     }
@@ -266,7 +266,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to update UPS workitem: {}",
+            kcenon::pacs::compat::format("Failed to update UPS workitem: {}",
                                  result.error().message),
             "storage");
     }
@@ -280,7 +280,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     -> VoidResult {
     if (!parse_ups_state(new_state).has_value()) {
         return make_error<std::monostate>(
-            -1, pacs::compat::format("Invalid UPS state: {}", new_state),
+            -1, kcenon::pacs::compat::format("Invalid UPS state: {}", new_state),
             "storage");
     }
 
@@ -288,7 +288,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (!existing.has_value()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("UPS workitem not found: {}", workitem_uid),
+            kcenon::pacs::compat::format("UPS workitem not found: {}", workitem_uid),
             "storage");
     }
 
@@ -298,7 +298,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (existing->is_final()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Cannot change state from final state: {}",
+            kcenon::pacs::compat::format("Cannot change state from final state: {}",
                                  existing->state),
             "storage");
     }
@@ -308,7 +308,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
             target != ups_state::canceled) {
             return make_error<std::monostate>(
                 -1,
-                pacs::compat::format(
+                kcenon::pacs::compat::format(
                     "Invalid transition from SCHEDULED to {}", new_state),
                 "storage");
         }
@@ -317,7 +317,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
             target != ups_state::canceled) {
             return make_error<std::monostate>(
                 -1,
-                pacs::compat::format(
+                kcenon::pacs::compat::format(
                     "Invalid transition from IN PROGRESS to {}", new_state),
                 "storage");
         }
@@ -348,7 +348,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to change UPS state: {}",
+            kcenon::pacs::compat::format("Failed to change UPS state: {}",
                                  result.error().message),
             "storage");
     }
@@ -408,12 +408,12 @@ auto ups_repository::search_ups_workitems(const ups_workitem_query& query)
         builder.where("performing_ae", "=", *query.performing_ae);
     }
     if (query.scheduled_date_from.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "scheduled_start_datetime >= '{}'",
             *query.scheduled_date_from)));
     }
     if (query.scheduled_date_to.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "scheduled_start_datetime <= '{}235959'",
             *query.scheduled_date_to)));
     }
@@ -457,7 +457,7 @@ auto ups_repository::delete_ups_workitem(std::string_view workitem_uid)
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to delete UPS workitem: {}",
+            kcenon::pacs::compat::format("Failed to delete UPS workitem: {}",
                                  result.error().message),
             "storage");
     }
@@ -475,7 +475,7 @@ auto ups_repository::ups_workitem_count(std::string_view state)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto query = pacs::compat::format(
+    auto query = kcenon::pacs::compat::format(
         "SELECT COUNT(*) as count FROM {} WHERE state = '{}'",
         table_name(), std::string(state));
     auto result = db()->select(query);
@@ -493,7 +493,7 @@ auto ups_repository::ups_workitem_count(std::string_view state)
     } catch (const std::exception& e) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Failed to parse UPS count: {}", e.what()),
+            kcenon::pacs::compat::format("Failed to parse UPS count: {}", e.what()),
             "storage");
     }
 }
@@ -530,7 +530,7 @@ auto ups_repository::subscribe_ups(const ups_subscription& subscription)
             if (update_result.is_err()) {
                 return make_error<int64_t>(
                     -1,
-                    pacs::compat::format("Failed to update subscription: {}",
+                    kcenon::pacs::compat::format("Failed to update subscription: {}",
                                          update_result.error().message),
                     "storage");
             }
@@ -556,7 +556,7 @@ auto ups_repository::subscribe_ups(const ups_subscription& subscription)
     if (insert_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to create subscription: {}",
+            kcenon::pacs::compat::format("Failed to create subscription: {}",
                                  insert_result.error().message),
             "storage");
     }
@@ -596,7 +596,7 @@ auto ups_repository::unsubscribe_ups(std::string_view subscriber_ae,
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to unsubscribe: {}",
+            kcenon::pacs::compat::format("Failed to unsubscribe: {}",
                                  result.error().message),
             "storage");
     }
@@ -781,13 +781,13 @@ auto ups_repository::select_columns() const -> std::vector<std::string> {
             "updated_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -914,7 +914,7 @@ auto ups_repository::create_ups_workitem(const ups_workitem& workitem)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare UPS insert: {}",
+            kcenon::pacs::compat::format("Failed to prepare UPS insert: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -962,7 +962,7 @@ auto ups_repository::create_ups_workitem(const ups_workitem& workitem)
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to create UPS workitem: {}",
+            kcenon::pacs::compat::format("Failed to create UPS workitem: {}",
                                  error_msg),
             "storage");
     }
@@ -983,7 +983,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (!existing.has_value()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("UPS workitem not found: {}",
+            kcenon::pacs::compat::format("UPS workitem not found: {}",
                                  workitem.workitem_uid),
             "storage");
     }
@@ -991,7 +991,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (existing->is_final()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Cannot update workitem in final state: {}",
+            kcenon::pacs::compat::format("Cannot update workitem in final state: {}",
                                  existing->state),
             "storage");
     }
@@ -1021,7 +1021,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare UPS update: {}",
+            kcenon::pacs::compat::format("Failed to prepare UPS update: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1065,7 +1065,7 @@ auto ups_repository::update_ups_workitem(const ups_workitem& workitem)
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to update UPS workitem: {}",
+            kcenon::pacs::compat::format("Failed to update UPS workitem: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1079,7 +1079,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     -> VoidResult {
     if (!parse_ups_state(new_state).has_value()) {
         return make_error<std::monostate>(
-            -1, pacs::compat::format("Invalid UPS state: {}", new_state),
+            -1, kcenon::pacs::compat::format("Invalid UPS state: {}", new_state),
             "storage");
     }
 
@@ -1087,7 +1087,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (!existing.has_value()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("UPS workitem not found: {}", workitem_uid),
+            kcenon::pacs::compat::format("UPS workitem not found: {}", workitem_uid),
             "storage");
     }
 
@@ -1097,7 +1097,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (existing->is_final()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Cannot change state from final state: {}",
+            kcenon::pacs::compat::format("Cannot change state from final state: {}",
                                  existing->state),
             "storage");
     }
@@ -1107,7 +1107,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
             target != ups_state::canceled) {
             return make_error<std::monostate>(
                 -1,
-                pacs::compat::format(
+                kcenon::pacs::compat::format(
                     "Invalid transition from SCHEDULED to {}", new_state),
                 "storage");
         }
@@ -1116,7 +1116,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
             target != ups_state::canceled) {
             return make_error<std::monostate>(
                 -1,
-                pacs::compat::format(
+                kcenon::pacs::compat::format(
                     "Invalid transition from IN PROGRESS to {}", new_state),
                 "storage");
         }
@@ -1141,7 +1141,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare state change: {}",
+            kcenon::pacs::compat::format("Failed to prepare state change: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1160,7 +1160,7 @@ auto ups_repository::change_ups_state(std::string_view workitem_uid,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to change UPS state: {}",
+            kcenon::pacs::compat::format("Failed to change UPS state: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1244,7 +1244,7 @@ auto ups_repository::search_ups_workitems(const ups_workitem_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<ups_workitem>>(
             rc,
-            pacs::compat::format("Failed to prepare UPS search: {}",
+            kcenon::pacs::compat::format("Failed to prepare UPS search: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1272,7 +1272,7 @@ auto ups_repository::delete_ups_workitem(std::string_view workitem_uid)
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare UPS delete: {}",
+            kcenon::pacs::compat::format("Failed to prepare UPS delete: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1285,7 +1285,7 @@ auto ups_repository::delete_ups_workitem(std::string_view workitem_uid)
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to delete UPS workitem: {}",
+            kcenon::pacs::compat::format("Failed to delete UPS workitem: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1300,7 +1300,7 @@ auto ups_repository::ups_workitem_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1321,7 +1321,7 @@ auto ups_repository::ups_workitem_count(std::string_view state) const
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1356,7 +1356,7 @@ auto ups_repository::subscribe_ups(const ups_subscription& subscription)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare subscription insert: {}",
+            kcenon::pacs::compat::format("Failed to prepare subscription insert: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1378,7 +1378,7 @@ auto ups_repository::subscribe_ups(const ups_subscription& subscription)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, pacs::compat::format("Failed to create subscription: {}", error_msg),
+            rc, kcenon::pacs::compat::format("Failed to create subscription: {}", error_msg),
             "storage");
     }
 
@@ -1402,7 +1402,7 @@ auto ups_repository::unsubscribe_ups(std::string_view subscriber_ae,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare unsubscribe: {}",
+            kcenon::pacs::compat::format("Failed to prepare unsubscribe: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1421,7 +1421,7 @@ auto ups_repository::unsubscribe_ups(std::string_view subscriber_ae,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to unsubscribe: {}",
+            kcenon::pacs::compat::format("Failed to unsubscribe: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1439,7 +1439,7 @@ auto ups_repository::get_ups_subscriptions(std::string_view subscriber_ae) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<ups_subscription>>(
             rc,
-            pacs::compat::format("Failed to prepare subscription query: {}",
+            kcenon::pacs::compat::format("Failed to prepare subscription query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1475,7 +1475,7 @@ auto ups_repository::get_ups_subscribers(std::string_view workitem_uid) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<std::string>>(
             rc,
-            pacs::compat::format("Failed to prepare subscriber query: {}",
+            kcenon::pacs::compat::format("Failed to prepare subscriber query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1492,6 +1492,6 @@ auto ups_repository::get_ups_subscribers(std::string_view workitem_uid) const
     return ok(std::move(results));
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

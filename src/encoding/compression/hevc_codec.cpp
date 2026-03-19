@@ -30,7 +30,7 @@
 #include "pacs/encoding/compression/hevc_codec.hpp"
 #include <pacs/core/result.hpp>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 hevc_codec::hevc_codec(bool main10, int quality)
     : main10_(main10),
@@ -95,8 +95,8 @@ codec_result hevc_codec::encode(
     [[maybe_unused]] std::span<const uint8_t> pixel_data,
     [[maybe_unused]] const image_params& params,
     [[maybe_unused]] const compression_options& options) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::compression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::compression_error,
         "HEVC codec not available: HEVC library not found at build time. "
         "Build with PACS_WITH_HEVC=ON to enable.");
 }
@@ -104,10 +104,10 @@ codec_result hevc_codec::encode(
 codec_result hevc_codec::decode(
     [[maybe_unused]] std::span<const uint8_t> compressed_data,
     [[maybe_unused]] const image_params& params) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::decompression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::decompression_error,
         "HEVC codec not available: HEVC library not found at build time. "
         "Build with PACS_WITH_HEVC=ON to enable.");
 }
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

@@ -59,7 +59,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @struct session_context
@@ -130,7 +130,7 @@ public:
 
     /// Type for association event callback
     using association_callback = std::function<void(uint64_t session_id,
-                                                    pacs::network::pdu_type type,
+                                                    kcenon::pacs::network::pdu_type type,
                                                     const std::vector<uint8_t>& data)>;
 
     /// Type for session event callback
@@ -353,4 +353,4 @@ private:
     void on_backpressure(pipeline_stage stage, size_t queue_depth);
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

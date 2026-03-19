@@ -13,7 +13,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // =============================================================================
 // Construction
@@ -362,4 +362,4 @@ void production_pacs::dispatch_access_denied(const events::access_denied_event& 
     }
 }
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

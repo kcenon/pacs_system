@@ -51,7 +51,7 @@
 #include <variant>
 #include <vector>
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 // =============================================================================
 // Schedule Expression Types
@@ -590,4 +590,4 @@ struct scheduler_stats {
     std::optional<std::chrono::system_clock::time_point> last_cycle_at;
 };
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

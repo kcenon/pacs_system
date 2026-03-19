@@ -8,9 +8,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-using namespace pacs::integration;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::integration;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // Common test tags
 namespace tags {

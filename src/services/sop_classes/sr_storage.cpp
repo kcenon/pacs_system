@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -509,4 +509,4 @@ std::string_view get_recommended_sr_template(std::string_view uid) noexcept {
     return "";
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

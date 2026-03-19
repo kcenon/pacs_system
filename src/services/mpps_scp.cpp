@@ -39,7 +39,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -84,8 +84,8 @@ network::Result<std::monostate> mpps_scp::handle_message(
             return handle_n_set(assoc, context_id, request);
 
         default:
-            return pacs::pacs_void_error(
-                pacs::error_codes::mpps_unexpected_command,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::mpps_unexpected_command,
                 "Unexpected command for MPPS SCP: " +
                 std::string(to_string(request.command())));
     }
@@ -135,8 +135,8 @@ network::Result<std::monostate> mpps_scp::handle_n_create(
 
     // Verify we have a handler configured
     if (!create_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::mpps_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::mpps_handler_not_set,
             "No N-CREATE handler configured for MPPS SCP");
     }
 
@@ -220,8 +220,8 @@ network::Result<std::monostate> mpps_scp::handle_n_set(
 
     // Verify we have a handler configured
     if (!set_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::mpps_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::mpps_handler_not_set,
             "No N-SET handler configured for MPPS SCP");
     }
 
@@ -359,4 +359,4 @@ network::Result<std::monostate> mpps_scp::send_n_set_response(
     return assoc.send_dimse(context_id, response);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

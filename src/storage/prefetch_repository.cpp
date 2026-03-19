@@ -48,7 +48,7 @@
 // pacs_database_adapter Implementation
 // =============================================================================
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -859,7 +859,7 @@ client::prefetch_history prefetch_repository::map_row_to_history(
     return history;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -869,7 +869,7 @@ client::prefetch_history prefetch_repository::map_row_to_history(
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Helper Functions
@@ -1902,6 +1902,6 @@ client::prefetch_history prefetch_repository::parse_history_row(void* stmt_ptr) 
     return history;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

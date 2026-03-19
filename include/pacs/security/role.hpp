@@ -42,7 +42,7 @@
 #include <string_view>
 #include <optional>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief User roles in the PACS system
@@ -81,4 +81,4 @@ inline std::optional<Role> parse_role(std::string_view str) {
     return std::nullopt;
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

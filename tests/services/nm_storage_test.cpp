@@ -8,8 +8,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services::sop_classes;
-using namespace pacs::services;
+using namespace kcenon::pacs::services::sop_classes;
+using namespace kcenon::pacs::services;
 
 // ============================================================================
 // NM Storage SOP Class UID Tests

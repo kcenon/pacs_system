@@ -64,11 +64,11 @@
 #include <string>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -424,4 +424,4 @@ private:
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

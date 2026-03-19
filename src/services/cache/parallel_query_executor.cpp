@@ -47,7 +47,7 @@
 #include <thread>
 #include <utility>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 namespace {
 
@@ -447,6 +447,6 @@ auto parallel_query_executor::create_stream(const query_request& query)
     return query_result_stream::create(db_, query.level, query.query_keys, config);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

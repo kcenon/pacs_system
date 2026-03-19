@@ -54,7 +54,7 @@
 #include <memory>
 #include <string>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /**
  * @brief Storage Commitment Push Model SCP
@@ -175,6 +175,6 @@ private:
     std::atomic<size_t> instances_failed_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_STORAGE_COMMITMENT_SCP_HPP

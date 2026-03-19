@@ -58,7 +58,7 @@
 #include <utility>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UIDs
@@ -471,6 +471,6 @@ private:
     std::atomic<size_t> images_transferred_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_RETRIEVE_SCP_HPP

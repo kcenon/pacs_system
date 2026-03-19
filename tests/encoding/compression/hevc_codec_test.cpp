@@ -9,8 +9,8 @@
 
 #include <vector>
 
-using namespace pacs::encoding::compression;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding::compression;
+using namespace kcenon::pacs::encoding;
 
 TEST_CASE("hevc_codec construction", "[encoding][compression][hevc]") {
     SECTION("Default construction creates Main Profile codec") {

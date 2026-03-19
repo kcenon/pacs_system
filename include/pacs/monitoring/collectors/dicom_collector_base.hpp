@@ -51,7 +51,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @brief Type alias for configuration map
@@ -310,4 +310,4 @@ private:
     const Derived& derived() const { return static_cast<const Derived&>(*this); }
 };
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

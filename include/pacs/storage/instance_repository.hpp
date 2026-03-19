@@ -56,7 +56,7 @@
 
 #include "pacs/storage/base_repository.hpp"
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Repository for instance metadata persistence using base_repository pattern
@@ -200,13 +200,13 @@ private:
         std::chrono::system_clock::time_point tp) const -> std::string;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
 struct sqlite3;
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 template <typename T>
 using Result = kcenon::common::Result<T>;
@@ -345,6 +345,6 @@ private:
     sqlite3* db_{nullptr};
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

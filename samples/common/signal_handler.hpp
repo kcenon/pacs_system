@@ -14,7 +14,7 @@
 #include <functional>
 #include <mutex>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 /**
  * @brief Cross-platform signal handler for graceful shutdown
@@ -166,4 +166,4 @@ public:
     [[nodiscard]] auto should_shutdown() const noexcept -> bool;
 };
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

@@ -48,7 +48,7 @@
 #include <database/query_builder.h>
 #include <pacs/compat/format.hpp>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -191,7 +191,7 @@ auto study_repository::upsert_study(const study_record& record)
     if (check_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to check study existence: {}",
+            kcenon::pacs::compat::format("Failed to check study existence: {}",
                                 check_result.error().message),
             "storage");
     }
@@ -222,7 +222,7 @@ auto study_repository::upsert_study(const study_record& record)
         if (update_result.is_err()) {
             return make_error<int64_t>(
                 -1,
-                pacs::compat::format("Failed to update study: {}",
+                kcenon::pacs::compat::format("Failed to update study: {}",
                                     update_result.error().message),
                 "storage");
         }
@@ -246,7 +246,7 @@ auto study_repository::upsert_study(const study_record& record)
         if (insert_result.is_err()) {
             return make_error<int64_t>(
                 -1,
-                pacs::compat::format("Failed to insert study: {}",
+                kcenon::pacs::compat::format("Failed to insert study: {}",
                                     insert_result.error().message),
                 "storage");
         }
@@ -327,13 +327,13 @@ auto study_repository::search_studies(const study_query& query)
 
         if (query.patient_id.has_value()) {
             where_clauses.push_back(
-                pacs::compat::format("p.patient_id LIKE '{}'",
+                kcenon::pacs::compat::format("p.patient_id LIKE '{}'",
                                    to_like_pattern(*query.patient_id)));
         }
 
         if (query.patient_name.has_value()) {
             where_clauses.push_back(
-                pacs::compat::format("p.patient_name LIKE '{}'",
+                kcenon::pacs::compat::format("p.patient_name LIKE '{}'",
                                    to_like_pattern(*query.patient_name)));
         }
     } else {
@@ -351,51 +351,51 @@ auto study_repository::search_studies(const study_query& query)
 
     if (query.study_uid.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}study_uid = '{}'", prefix, *query.study_uid));
+            kcenon::pacs::compat::format("{}study_uid = '{}'", prefix, *query.study_uid));
     }
 
     if (query.study_id.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}study_id LIKE '{}'", prefix,
+            kcenon::pacs::compat::format("{}study_id LIKE '{}'", prefix,
                                to_like_pattern(*query.study_id)));
     }
 
     if (query.study_date.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}study_date = '{}'", prefix, *query.study_date));
+            kcenon::pacs::compat::format("{}study_date = '{}'", prefix, *query.study_date));
     }
 
     if (query.study_date_from.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}study_date >= '{}'", prefix, *query.study_date_from));
+            kcenon::pacs::compat::format("{}study_date >= '{}'", prefix, *query.study_date_from));
     }
 
     if (query.study_date_to.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}study_date <= '{}'", prefix, *query.study_date_to));
+            kcenon::pacs::compat::format("{}study_date <= '{}'", prefix, *query.study_date_to));
     }
 
     if (query.accession_number.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}accession_number LIKE '{}'", prefix,
+            kcenon::pacs::compat::format("{}accession_number LIKE '{}'", prefix,
                                to_like_pattern(*query.accession_number)));
     }
 
     if (query.referring_physician.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}referring_physician LIKE '{}'", prefix,
+            kcenon::pacs::compat::format("{}referring_physician LIKE '{}'", prefix,
                                to_like_pattern(*query.referring_physician)));
     }
 
     if (query.study_description.has_value()) {
         where_clauses.push_back(
-            pacs::compat::format("{}study_description LIKE '{}'", prefix,
+            kcenon::pacs::compat::format("{}study_description LIKE '{}'", prefix,
                                to_like_pattern(*query.study_description)));
     }
 
     if (query.modality.has_value()) {
         const auto& mod = *query.modality;
-        where_clauses.push_back(pacs::compat::format(
+        where_clauses.push_back(kcenon::pacs::compat::format(
             "({}modalities_in_study = '{}' OR "
             "{}modalities_in_study LIKE '{}\\%' OR "
             "{}modalities_in_study LIKE '%\\{}' OR "
@@ -412,22 +412,22 @@ auto study_repository::search_studies(const study_query& query)
     }
 
     // Add ORDER BY
-    sql += pacs::compat::format(" ORDER BY {}study_date DESC, {}study_time DESC",
+    sql += kcenon::pacs::compat::format(" ORDER BY {}study_date DESC, {}study_time DESC",
                                prefix, prefix);
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     auto result = db()->select(sql);
     if (result.is_err()) {
         return make_error<std::vector<study_record>>(
             -1,
-            pacs::compat::format("Query failed: {}", result.error().message),
+            kcenon::pacs::compat::format("Query failed: {}", result.error().message),
             "storage");
     }
 
@@ -453,7 +453,7 @@ auto study_repository::delete_study(std::string_view study_uid) -> VoidResult {
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to delete study: {}",
+            kcenon::pacs::compat::format("Failed to delete study: {}",
                                  result.error().message),
             "storage");
     }
@@ -469,7 +469,7 @@ auto study_repository::study_count() -> Result<size_t> {
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Query failed: {}", result.error().message),
+            kcenon::pacs::compat::format("Query failed: {}", result.error().message),
             "storage");
     }
 
@@ -497,13 +497,13 @@ auto study_repository::study_count_for_patient(int64_t patient_pk)
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto result = db()->select(pacs::compat::format(
+    auto result = db()->select(kcenon::pacs::compat::format(
         "SELECT COUNT(*) AS count FROM studies WHERE patient_pk = {};",
         patient_pk));
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Query failed: {}", result.error().message),
+            kcenon::pacs::compat::format("Query failed: {}", result.error().message),
             "storage");
     }
 
@@ -531,7 +531,7 @@ auto study_repository::update_modalities_in_study(int64_t study_pk)
         return make_error<std::monostate>(-1, "Database not connected", "storage");
     }
 
-    auto update_sql = pacs::compat::format(
+    auto update_sql = kcenon::pacs::compat::format(
         R"(UPDATE studies
 SET modalities_in_study = (
         SELECT GROUP_CONCAT(modality, '\')
@@ -549,7 +549,7 @@ WHERE study_pk = {};)",
     if (update_result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to update modalities: {}",
+            kcenon::pacs::compat::format("Failed to update modalities: {}",
                                  update_result.error().message),
             "storage");
     }
@@ -667,7 +667,7 @@ auto study_repository::select_columns() const -> std::vector<std::string> {
             "created_at",      "updated_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -679,11 +679,11 @@ auto study_repository::select_columns() const -> std::vector<std::string> {
 #include <pacs/core/result.hpp>
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
-using namespace pacs::error_codes;
+using namespace kcenon::pacs::error_codes;
 
 namespace {
 
@@ -830,7 +830,7 @@ auto study_repository::upsert_study(const study_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -851,7 +851,7 @@ auto study_repository::upsert_study(const study_record& record)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, pacs::compat::format("Failed to upsert study: {}", error_msg),
+            rc, kcenon::pacs::compat::format("Failed to upsert study: {}", error_msg),
             "storage");
     }
 
@@ -1004,11 +1004,11 @@ auto study_repository::search_studies(const study_query& query) const
     sql += " ORDER BY s.study_date DESC, s.study_time DESC";
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -1016,7 +1016,7 @@ auto study_repository::search_studies(const study_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<study_record>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1041,7 +1041,7 @@ auto study_repository::delete_study(std::string_view study_uid) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1053,7 +1053,7 @@ auto study_repository::delete_study(std::string_view study_uid) -> VoidResult {
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, pacs::compat::format("Failed to delete study: {}", sqlite3_errmsg(db_)),
+            rc, kcenon::pacs::compat::format("Failed to delete study: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1068,7 +1068,7 @@ auto study_repository::study_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1093,7 +1093,7 @@ auto study_repository::study_count_for_patient(int64_t patient_pk) const
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1128,7 +1128,7 @@ auto study_repository::update_modalities_in_study(int64_t study_pk)
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare update: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare update: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -1141,13 +1141,13 @@ auto study_repository::update_modalities_in_study(int64_t study_pk)
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to update modalities: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to update modalities: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
     return ok();
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -15,33 +15,33 @@
 #include <set>
 #include <string>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Mock Storage Interface
 // ============================================================================
 
-class mock_storage : public pacs::storage::storage_interface {
+class mock_storage : public kcenon::pacs::storage::storage_interface {
 public:
     void add_instance(std::string uid) {
         instances_.insert(std::move(uid));
     }
 
-    auto store(const dicom_dataset&) -> pacs::storage::VoidResult override {
+    auto store(const dicom_dataset&) -> kcenon::pacs::storage::VoidResult override {
         return kcenon::common::ok();
     }
 
     auto retrieve(std::string_view)
-        -> pacs::storage::Result<dicom_dataset> override {
+        -> kcenon::pacs::storage::Result<dicom_dataset> override {
         return kcenon::common::make_error<dicom_dataset>(
             -1, "not implemented");
     }
 
-    auto remove(std::string_view) -> pacs::storage::VoidResult override {
+    auto remove(std::string_view) -> kcenon::pacs::storage::VoidResult override {
         return kcenon::common::ok();
     }
 
@@ -50,16 +50,16 @@ public:
     }
 
     auto find(const dicom_dataset&)
-        -> pacs::storage::Result<std::vector<dicom_dataset>> override {
+        -> kcenon::pacs::storage::Result<std::vector<dicom_dataset>> override {
         return kcenon::common::Result<std::vector<dicom_dataset>>::ok(
             std::vector<dicom_dataset>{});
     }
 
-    auto get_statistics() const -> pacs::storage::storage_statistics override {
+    auto get_statistics() const -> kcenon::pacs::storage::storage_statistics override {
         return {};
     }
 
-    auto verify_integrity() -> pacs::storage::VoidResult override {
+    auto verify_integrity() -> kcenon::pacs::storage::VoidResult override {
         return kcenon::common::ok();
     }
 

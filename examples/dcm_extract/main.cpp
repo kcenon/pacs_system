@@ -276,8 +276,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @param dataset The DICOM dataset
  * @return Pixel information structure
  */
-pixel_info get_pixel_info(const pacs::core::dicom_dataset& dataset) {
-    using namespace pacs::core;
+pixel_info get_pixel_info(const kcenon::pacs::core::dicom_dataset& dataset) {
+    using namespace kcenon::pacs::core;
 
     pixel_info info;
 
@@ -640,7 +640,7 @@ std::vector<uint8_t> convert_to_8bit(const std::vector<uint8_t>& data,
 bool extract_file(const std::filesystem::path& input_path,
                   const std::filesystem::path& output_path,
                   const options& opts) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     // Open DICOM file
     auto result = dicom_file::open(input_path);

@@ -51,7 +51,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 /**
  * @brief Represents a single JSON Web Key converted to PEM format
@@ -169,4 +169,4 @@ private:
     bool try_refresh() const;
 };
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

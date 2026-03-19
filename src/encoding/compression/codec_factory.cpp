@@ -40,7 +40,7 @@
 
 #include <array>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 namespace {
 
@@ -179,4 +179,4 @@ bool codec_factory::is_supported(const transfer_syntax& ts) {
     return is_supported(ts.uid());
 }
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

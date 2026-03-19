@@ -36,7 +36,7 @@
 
 #include "pacs/services/sop_classes/mr_storage.hpp"
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 std::vector<std::string> get_mr_storage_sop_classes() {
     return {
@@ -54,4 +54,4 @@ bool is_valid_mr_photometric(std::string_view value) noexcept {
     return value == "MONOCHROME1" || value == "MONOCHROME2";
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

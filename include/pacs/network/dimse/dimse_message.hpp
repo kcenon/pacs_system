@@ -61,7 +61,7 @@
 #include <variant>
 #include <vector>
 
-namespace pacs::network::dimse {
+namespace kcenon::pacs::network::dimse {
 
 /// @name DIMSE Command Tags
 /// @{
@@ -193,12 +193,12 @@ enum class dimse_error {
 }
 
 /**
- * @brief Result type for DIMSE operations using standardized pacs::Result<T>
+ * @brief Result type for DIMSE operations using standardized kcenon::pacs::Result<T>
  *
  * @tparam T The success value type
  */
 template <typename T>
-using dimse_result = pacs::Result<T>;
+using dimse_result = kcenon::pacs::Result<T>;
 
 /**
  * @brief DIMSE message class
@@ -309,13 +309,13 @@ public:
      * @brief Get mutable reference to the data set
      * @return Result containing reference to the data set or error if not present
      */
-    [[nodiscard]] auto dataset() -> pacs::Result<std::reference_wrapper<core::dicom_dataset>>;
+    [[nodiscard]] auto dataset() -> kcenon::pacs::Result<std::reference_wrapper<core::dicom_dataset>>;
 
     /**
      * @brief Get const reference to the data set
      * @return Result containing reference to the data set or error if not present
      */
-    [[nodiscard]] auto dataset() const -> pacs::Result<std::reference_wrapper<const core::dicom_dataset>>;
+    [[nodiscard]] auto dataset() const -> kcenon::pacs::Result<std::reference_wrapper<const core::dicom_dataset>>;
 
     /**
      * @brief Set the data set for this message
@@ -822,6 +822,6 @@ private:
     std::string_view sop_instance_uid,
     status_code status = status_success) -> dimse_message;
 
-}  // namespace pacs::network::dimse
+}  // namespace kcenon::pacs::network::dimse
 
 #endif  // PACS_NETWORK_DIMSE_DIMSE_MESSAGE_HPP

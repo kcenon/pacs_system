@@ -49,7 +49,7 @@ struct options {
     std::string calling_ae{default_calling_ae};
 
     // Query parameters
-    pacs::services::query_level level{pacs::services::query_level::study};
+    kcenon::pacs::services::query_level level{kcenon::pacs::services::query_level::study};
     std::string query_model{"study"};  // "patient" or "study" root
 
     // Search criteria
@@ -129,19 +129,19 @@ Exit Codes:
 /**
  * @brief Parse query level from string
  */
-std::optional<pacs::services::query_level> parse_level(std::string_view level_str) {
+std::optional<kcenon::pacs::services::query_level> parse_level(std::string_view level_str) {
     if (level_str == "PATIENT" || level_str == "patient") {
-        return pacs::services::query_level::patient;
+        return kcenon::pacs::services::query_level::patient;
     }
     if (level_str == "STUDY" || level_str == "study") {
-        return pacs::services::query_level::study;
+        return kcenon::pacs::services::query_level::study;
     }
     if (level_str == "SERIES" || level_str == "series") {
-        return pacs::services::query_level::series;
+        return kcenon::pacs::services::query_level::series;
     }
     if (level_str == "IMAGE" || level_str == "image" ||
         level_str == "INSTANCE" || level_str == "instance") {
-        return pacs::services::query_level::image;
+        return kcenon::pacs::services::query_level::image;
     }
     return std::nullopt;
 }
@@ -252,18 +252,18 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  */
 std::string_view get_find_sop_class_uid(const std::string& model) {
     if (model == "patient") {
-        return pacs::services::patient_root_find_sop_class_uid;
+        return kcenon::pacs::services::patient_root_find_sop_class_uid;
     }
-    return pacs::services::study_root_find_sop_class_uid;
+    return kcenon::pacs::services::study_root_find_sop_class_uid;
 }
 
 /**
  * @brief Perform C-FIND query
  */
 int perform_query(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::network::dimse;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::network::dimse;
+    using namespace kcenon::pacs::services;
 
     auto sop_class_uid = get_find_sop_class_uid(opts.query_model);
 
@@ -361,7 +361,7 @@ int perform_query(const options& opts) {
     }
 
     // Receive responses
-    std::vector<pacs::core::dicom_dataset> results;
+    std::vector<kcenon::pacs::core::dicom_dataset> results;
     bool query_complete = false;
     size_t pending_count = 0;
 

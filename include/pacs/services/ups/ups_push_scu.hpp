@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // UPS SCU Data Structures
@@ -376,6 +376,6 @@ private:
     std::atomic<size_t> actions_performed_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_UPS_PUSH_SCU_HPP

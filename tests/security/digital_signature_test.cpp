@@ -15,9 +15,9 @@
 #include <pacs/core/dicom_tag.hpp>
 #include <pacs/encoding/vr_type.hpp>
 
-using namespace pacs::security;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::security;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 namespace {
 

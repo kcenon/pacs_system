@@ -50,7 +50,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @class send_network_io_job
@@ -141,4 +141,4 @@ private:
     error_callback on_error_;
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

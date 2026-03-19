@@ -40,13 +40,13 @@
 namespace {
 
 /// Global pointer to server for signal handling
-std::atomic<pacs::network::dicom_server*> g_server{nullptr};
+std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
 
 /// Global running flag for signal handling
 std::atomic<bool> g_running{true};
 
 /// Global pointer to file storage for statistics
-std::atomic<pacs::storage::file_storage*> g_file_storage{nullptr};
+std::atomic<kcenon::pacs::storage::file_storage*> g_file_storage{nullptr};
 
 /**
  * @brief Signal handler for graceful shutdown
@@ -126,8 +126,8 @@ struct store_scp_args {
     std::filesystem::path storage_dir;
     std::filesystem::path index_db;
     std::vector<std::string> accepted_modalities;
-    pacs::storage::naming_scheme naming = pacs::storage::naming_scheme::uid_hierarchical;
-    pacs::storage::duplicate_policy duplicate = pacs::storage::duplicate_policy::reject;
+    kcenon::pacs::storage::naming_scheme naming = kcenon::pacs::storage::naming_scheme::uid_hierarchical;
+    kcenon::pacs::storage::duplicate_policy duplicate = kcenon::pacs::storage::duplicate_policy::reject;
     size_t max_associations = 10;
     uint32_t idle_timeout = 300;
 };
@@ -234,11 +234,11 @@ bool parse_arguments(int argc, char* argv[], store_scp_args& args) {
         } else if (arg == "--naming" && i + 1 < argc) {
             std::string scheme = argv[++i];
             if (scheme == "hierarchical") {
-                args.naming = pacs::storage::naming_scheme::uid_hierarchical;
+                args.naming = kcenon::pacs::storage::naming_scheme::uid_hierarchical;
             } else if (scheme == "date") {
-                args.naming = pacs::storage::naming_scheme::date_hierarchical;
+                args.naming = kcenon::pacs::storage::naming_scheme::date_hierarchical;
             } else if (scheme == "flat") {
-                args.naming = pacs::storage::naming_scheme::flat;
+                args.naming = kcenon::pacs::storage::naming_scheme::flat;
             } else {
                 std::cerr << "Error: Unknown naming scheme '" << scheme << "'\n";
                 return false;
@@ -246,11 +246,11 @@ bool parse_arguments(int argc, char* argv[], store_scp_args& args) {
         } else if (arg == "--duplicate" && i + 1 < argc) {
             std::string policy = argv[++i];
             if (policy == "reject") {
-                args.duplicate = pacs::storage::duplicate_policy::reject;
+                args.duplicate = kcenon::pacs::storage::duplicate_policy::reject;
             } else if (policy == "replace") {
-                args.duplicate = pacs::storage::duplicate_policy::replace;
+                args.duplicate = kcenon::pacs::storage::duplicate_policy::replace;
             } else if (policy == "ignore") {
-                args.duplicate = pacs::storage::duplicate_policy::ignore;
+                args.duplicate = kcenon::pacs::storage::duplicate_policy::ignore;
             } else {
                 std::cerr << "Error: Unknown duplicate policy '" << policy << "'\n";
                 return false;
@@ -338,10 +338,10 @@ std::string format_bytes(size_t bytes) {
  * @return true if server ran successfully
  */
 bool run_server(const store_scp_args& args) {
-    using namespace pacs::network;
-    using namespace pacs::services;
-    using namespace pacs::storage;
-    using namespace pacs::core;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
+    using namespace kcenon::pacs::storage;
+    using namespace kcenon::pacs::core;
 
     std::cout << "\nStarting Storage SCP...\n";
     std::cout << "  AE Title:           " << args.ae_title << "\n";
@@ -400,9 +400,9 @@ bool run_server(const store_scp_args& args) {
         scp_config.accepted_sop_classes = args.accepted_modalities;
     }
     scp_config.dup_policy =
-        args.duplicate == pacs::storage::duplicate_policy::reject ? pacs::services::duplicate_policy::reject :
-        args.duplicate == pacs::storage::duplicate_policy::replace ? pacs::services::duplicate_policy::replace :
-        pacs::services::duplicate_policy::ignore;
+        args.duplicate == kcenon::pacs::storage::duplicate_policy::reject ? kcenon::pacs::services::duplicate_policy::reject :
+        args.duplicate == kcenon::pacs::storage::duplicate_policy::replace ? kcenon::pacs::services::duplicate_policy::replace :
+        kcenon::pacs::services::duplicate_policy::ignore;
 
     auto storage_service = std::make_shared<storage_scp>(scp_config);
 

@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::benchmark::simd {
+namespace kcenon::pacs::benchmark::simd {
 
 // =============================================================================
 // Constants
@@ -348,6 +348,6 @@ inline std::string get_simd_features_string() {
     return oss.str();
 }
 
-}  // namespace pacs::benchmark::simd
+}  // namespace kcenon::pacs::benchmark::simd
 
 #endif  // PACS_BENCHMARKS_SIMD_PERFORMANCE_SIMD_BENCHMARK_COMMON_HPP

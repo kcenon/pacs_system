@@ -45,7 +45,7 @@
 
 #include <memory>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 struct rest_server_context;
 
@@ -57,4 +57,4 @@ namespace endpoints {
 
 } // namespace endpoints
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

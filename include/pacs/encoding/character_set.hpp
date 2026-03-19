@@ -66,7 +66,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief Information about a DICOM character set
@@ -277,6 +277,6 @@ struct text_segment {
 
 /// @}
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_CHARACTER_SET_HPP

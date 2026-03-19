@@ -12,8 +12,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::storage;
-using namespace pacs::security;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::security;
 
 TEST_CASE("SQLiteSecurityStorage: CRUD Operations", "[security][storage]") {
   // Use in-memory DB for speed and isolation

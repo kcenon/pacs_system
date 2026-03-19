@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::integration_test {
+namespace kcenon::pacs::integration_test {
 
 // =============================================================================
 // Forward Declarations and Types
@@ -335,6 +335,6 @@ private:
         uint16_t samples_per_pixel = 1);
 };
 
-}  // namespace pacs::integration_test
+}  // namespace kcenon::pacs::integration_test
 
 #endif  // PACS_INTEGRATION_TESTS_TEST_DATA_GENERATOR_HPP

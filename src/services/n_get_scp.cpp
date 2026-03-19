@@ -41,7 +41,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -79,16 +79,16 @@ network::Result<std::monostate> n_get_scp::handle_message(
 
     // Verify command type is N-GET-RQ
     if (request.command() != command_field::n_get_rq) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::n_get_unexpected_command,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::n_get_unexpected_command,
             "Unexpected command for N-GET SCP: " +
             std::string(to_string(request.command())));
     }
 
     // Verify we have a handler configured
     if (!handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::n_get_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::n_get_handler_not_set,
             "No N-GET handler configured");
     }
 
@@ -189,4 +189,4 @@ network::Result<std::monostate> n_get_scp::send_n_get_response(
     return assoc.send_dimse(context_id, response);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

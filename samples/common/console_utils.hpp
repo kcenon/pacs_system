@@ -14,7 +14,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // ============================================================================
 // ANSI Color Codes
@@ -270,4 +270,4 @@ void clear_line();
 [[nodiscard]] auto truncate(std::string_view text, size_t max_length,
                             std::string_view suffix = "...") -> std::string;
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples
