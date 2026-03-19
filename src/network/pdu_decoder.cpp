@@ -138,6 +138,15 @@ DecodeResult<uint32_t> pdu_decoder::validate_pdu_header(
     }
 
     const uint32_t pdu_length = read_uint32_be(data, 2);
+
+    // Reject unreasonably large PDUs to prevent memory exhaustion attacks
+    constexpr uint32_t MAX_PDU_LENGTH = 16 * 1024 * 1024; // 16 MB
+    if (pdu_length > MAX_PDU_LENGTH) {
+        return make_error<uint32_t>(pdu_decode_error::malformed_pdu,
+            "PDU length " + std::to_string(pdu_length) +
+            " exceeds maximum allowed " + std::to_string(MAX_PDU_LENGTH));
+    }
+
     const size_t total_length = PDU_HEADER_SIZE + pdu_length;
 
     if (data.size() < total_length) {

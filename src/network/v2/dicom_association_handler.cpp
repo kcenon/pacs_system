@@ -703,6 +703,9 @@ Result<std::monostate> dicom_association_handler::dispatch_to_service(
     }
 
     // Perform access control check if enabled
+    if (access_control_enabled_ && access_control_ && !user_context_) {
+        return error_info("Access denied: unregistered AE title");
+    }
     if (access_control_enabled_ && access_control_ && user_context_) {
         // Map DIMSE command to DICOM operation
         security::DicomOperation op = security::DicomOperation::CEcho;

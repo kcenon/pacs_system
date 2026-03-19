@@ -234,31 +234,25 @@ access_control_manager::check_dicom_operation(const user_context &ctx,
   return result;
 }
 
-user_context access_control_manager::get_context_for_ae(
+std::optional<user_context> access_control_manager::get_context_for_ae(
     std::string_view ae_title, const std::string &session_id) const {
   std::lock_guard<std::mutex> lock(mutex_);
 
   // Look up AE Title to user mapping
   auto it = ae_to_user_id_.find(std::string(ae_title));
   if (it == ae_to_user_id_.end()) {
-    // No mapping found, return anonymous context
-    auto ctx = user_context::anonymous_context(session_id);
-    ctx.set_source_ae_title(std::string(ae_title));
-    return ctx;
+    // Reject unregistered AE titles
+    return std::nullopt;
   }
 
   // Get user from storage
   if (!storage_) {
-    auto ctx = user_context::anonymous_context(session_id);
-    ctx.set_source_ae_title(std::string(ae_title));
-    return ctx;
+    return std::nullopt;
   }
 
   auto user_result = storage_->get_user(it->second);
   if (user_result.is_err()) {
-    auto ctx = user_context::anonymous_context(session_id);
-    ctx.set_source_ae_title(std::string(ae_title));
-    return ctx;
+    return std::nullopt;
   }
 
   auto ctx = user_context(user_result.unwrap(), session_id);
