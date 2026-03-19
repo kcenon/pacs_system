@@ -109,12 +109,18 @@ std::optional<auth_result> oauth2_middleware::authenticate(
         auto user_result = security_manager_->get_user(token.claims.sub);
         if (user_result.is_ok()) {
             user = user_result.unwrap();
-        } else {
-            // OAuth user not in RBAC system: grant Viewer role by default
+        } else if (config_.allow_unknown_users) {
+            // Backward compatibility: grant Viewer role to unknown OAuth users
             user.roles = {security::Role::Viewer};
+        } else {
+            set_unauthorized(res, "Unknown user: not registered in access control system");
+            return std::nullopt;
         }
-    } else {
+    } else if (config_.allow_unknown_users) {
         user.roles = {security::Role::Viewer};
+    } else {
+        set_unauthorized(res, "Unknown user: no access control manager configured");
+        return std::nullopt;
     }
 
     auto ctx = security::user_context(std::move(user), token.claims.jti);
