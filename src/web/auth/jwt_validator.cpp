@@ -39,6 +39,7 @@
 
 #include <algorithm>
 #include <array>
+#include <set>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -261,6 +262,13 @@ std::pair<jwt_token, jwt_error> jwt_validator::decode(
 
     if (token.header.alg.empty()) {
         return {token, jwt_error::missing_required_claim};
+    }
+
+    // Block dangerous algorithms unconditionally (CVE: JWT alg:none attack)
+    static const std::set<std::string> kDangerousAlgorithms = {
+        "none", "None", "NONE", "HS256", "HS384", "HS512"};
+    if (kDangerousAlgorithms.count(token.header.alg)) {
+        return {token, jwt_error::unsupported_algorithm};
     }
 
     // Check algorithm is allowed
