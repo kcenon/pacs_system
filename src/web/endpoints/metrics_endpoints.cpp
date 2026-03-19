@@ -40,6 +40,7 @@
 #include "crow.h"
 
 #include "pacs/services/monitoring/database_metrics_service.hpp"
+#include "pacs/web/auth/oauth2_middleware.hpp"
 #include "pacs/web/endpoints/metrics_endpoints.hpp"
 #include "pacs/web/endpoints/system_endpoints.hpp"
 #include "pacs/web/rest_config.hpp"
@@ -96,6 +97,24 @@ int get_query_param_int(const crow::request& req, const std::string& key,
     }
 }
 
+/**
+ * @brief Check OAuth2 authentication for metrics endpoints
+ * @return true if authentication passed or OAuth2 is not enabled
+ */
+bool check_metrics_auth(const std::shared_ptr<rest_server_context>& ctx,
+                        const crow::request& req,
+                        crow::response& res) {
+    if (ctx->oauth2 && ctx->oauth2->enabled()) {
+        auto auth = ctx->oauth2->authenticate(req, res);
+        if (!auth) return false;
+        if (!ctx->oauth2->require_any_scope(
+                auth->claims, res, {"metrics.read", "admin"})) {
+            return false;
+        }
+    }
+    return true;
+}
+
 }  // namespace
 
 void register_metrics_endpoints_impl(
@@ -104,10 +123,12 @@ void register_metrics_endpoints_impl(
 
     // GET /api/health/database - Database health check
     CROW_ROUTE(app, "/api/health/database")
-        .methods(crow::HTTPMethod::GET)([ctx]([[maybe_unused]] const crow::request& req) {
+        .methods(crow::HTTPMethod::GET)([ctx](const crow::request& req) {
             crow::response res;
             res.add_header("Content-Type", "application/json");
             add_cors_headers(res, *ctx);
+
+            if (!check_metrics_auth(ctx, req, res)) return res;
 
             // Check if database metrics service is available
             if (!ctx->database_metrics) {
@@ -157,10 +178,12 @@ void register_metrics_endpoints_impl(
 
     // GET /api/metrics/database - Current metrics in JSON format
     CROW_ROUTE(app, "/api/metrics/database")
-        .methods(crow::HTTPMethod::GET)([ctx]([[maybe_unused]] const crow::request& req) {
+        .methods(crow::HTTPMethod::GET)([ctx](const crow::request& req) {
             crow::response res;
             res.add_header("Content-Type", "application/json");
             add_cors_headers(res, *ctx);
+
+            if (!check_metrics_auth(ctx, req, res)) return res;
 
             if (!ctx->database_metrics) {
                 res.body = make_error_json(
@@ -203,6 +226,8 @@ void register_metrics_endpoints_impl(
             res.add_header("Content-Type", "application/json");
             add_cors_headers(res, *ctx);
 
+            if (!check_metrics_auth(ctx, req, res)) return res;
+
             if (!ctx->database_metrics) {
                 res.body = make_error_json(
                     "METRICS_UNAVAILABLE",
@@ -244,9 +269,11 @@ void register_metrics_endpoints_impl(
 
     // GET /metrics - Prometheus format
     CROW_ROUTE(app, "/metrics")
-        .methods(crow::HTTPMethod::GET)([ctx]([[maybe_unused]] const crow::request& req) {
+        .methods(crow::HTTPMethod::GET)([ctx](const crow::request& req) {
             crow::response res;
             add_cors_headers(res, *ctx);
+
+            if (!check_metrics_auth(ctx, req, res)) return res;
 
             if (!ctx->database_metrics) {
                 res.code = 503;
