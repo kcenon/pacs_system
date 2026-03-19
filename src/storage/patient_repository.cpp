@@ -71,13 +71,11 @@ auto patient_repository::parse_timestamp(const std::string& str) const
     }
 
     std::tm tm{};
-    if (std::sscanf(str.c_str(), "%d-%d-%d %d:%d:%d", &tm.tm_year, &tm.tm_mon,
-                    &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6) {
+    std::istringstream ss(str);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    if (ss.fail()) {
         return {};
     }
-
-    tm.tm_year -= 1900;
-    tm.tm_mon -= 1;
 
 #ifdef _WIN32
     auto time = _mkgmtime(&tm);
