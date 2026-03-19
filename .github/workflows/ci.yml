@@ -36,10 +36,18 @@ jobs:
           # Ubuntu 24.04 provides GCC 13+ with std::format support
           - os: ubuntu-24.04
             compiler: gcc
+            cc: gcc
+            cxx: g++
           - os: ubuntu-24.04
             compiler: clang
+            cc: clang
+            cxx: clang++
+          # macOS: use explicit /usr/bin paths to ensure Apple Clang (Xcode)
+          # is used instead of Homebrew LLVM Clang, which lacks std::format
           - os: macos-14
             compiler: clang
+            cc: /usr/bin/clang
+            cxx: /usr/bin/clang++
           # Windows 2022 with MSVC for cross-platform compatibility
           # Uses vcpkg for dependency management
           - os: windows-2022
@@ -102,8 +110,8 @@ jobs:
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=OFF \
           -DPACS_BUILD_STORAGE=ON \
-          -DCMAKE_C_COMPILER=${{ matrix.compiler == 'gcc' && 'gcc' || 'clang' }} \
-          -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
+          -DCMAKE_C_COMPILER=${{ matrix.cc }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
