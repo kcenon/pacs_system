@@ -70,6 +70,11 @@ struct oauth2_config {
 
     /// Allowed signing algorithms (default: RS256, ES256)
     std::vector<std::string> allowed_algorithms = {"RS256", "ES256"};
+
+    /// Allow unknown OAuth users not found in RBAC to access as Viewer
+    /// When false (default): unknown users receive 401 Unauthorized
+    /// When true: unknown users are granted Role::Viewer (backward compatibility)
+    bool allow_unknown_users = false;
 };
 
 }  // namespace pacs::web::auth
