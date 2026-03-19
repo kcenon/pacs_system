@@ -35,8 +35,14 @@ option(PACS_WITH_NETWORK_SYSTEM "Enable network_system integration (REQUIRED)" O
 option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
 option(PACS_WITH_AWS_SDK "Enable AWS SDK integration for S3 storage" OFF)
 option(PACS_WITH_AZURE_SDK "Enable Azure SDK integration for Blob storage" OFF)
+option(PACS_USE_MOCK_S3 "Use mock S3 client instead of AWS SDK (testing only)" OFF)
 option(PACS_WARNINGS_AS_ERRORS "Treat warnings as errors (disable in CI if dependency warnings occur)" ON)
 option(PACS_BUILD_MODULES "Build C++20 module version of pacs_system" OFF)
+
+# Prevent mock S3 from being used in Release builds
+if(PACS_USE_MOCK_S3 AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(FATAL_ERROR "PACS_USE_MOCK_S3 cannot be enabled in Release builds")
+endif()
 
 ##################################################
 # Utility Functions
