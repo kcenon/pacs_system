@@ -47,6 +47,7 @@ docs/latex/
 # vcpkg
 vcpkg_installed/
 !vcpkg-ports/**/*.cmake
+!cmake/**/*.cmake
 
 # Dependencies
 dependencies/
