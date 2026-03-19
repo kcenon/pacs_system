@@ -127,10 +127,10 @@ public:
    * @brief Get user context for an AE Title
    * @param ae_title The AE Title to look up
    * @param session_id Session identifier for the context
-   * @return User context if found, anonymous context otherwise
+   * @return User context if found, std::nullopt for unregistered AE titles
    */
-  [[nodiscard]] user_context get_context_for_ae(std::string_view ae_title,
-                                                const std::string &session_id) const;
+  [[nodiscard]] std::optional<user_context> get_context_for_ae(
+      std::string_view ae_title, const std::string &session_id) const;
 
   // Configuration
   void set_role_permissions(Role role, std::vector<Permission> permissions);

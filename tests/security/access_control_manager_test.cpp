@@ -215,16 +215,16 @@ TEST_CASE("AccessControlManager: AE Title Mapping", "[security]") {
     acm.register_ae_title("CT_SCANNER_AE", "modality1");
 
     auto ctx = acm.get_context_for_ae("CT_SCANNER_AE", "session123");
-    REQUIRE(ctx.user().id == "modality1");
-    REQUIRE(ctx.session_id() == "session123");
-    REQUIRE(ctx.source_ae_title().has_value());
-    REQUIRE(ctx.source_ae_title().value() == "CT_SCANNER_AE");
+    REQUIRE(ctx.has_value());
+    REQUIRE(ctx->user().id == "modality1");
+    REQUIRE(ctx->session_id() == "session123");
+    REQUIRE(ctx->source_ae_title().has_value());
+    REQUIRE(ctx->source_ae_title().value() == "CT_SCANNER_AE");
   }
 
-  SECTION("get_context_for_ae returns anonymous context for unknown AE") {
+  SECTION("get_context_for_ae rejects unknown AE title") {
     auto ctx = acm.get_context_for_ae("UNKNOWN_AE", "session456");
-    REQUIRE(ctx.user().id == "anonymous");
-    REQUIRE(ctx.session_id() == "session456");
+    REQUIRE_FALSE(ctx.has_value());
   }
 
   SECTION("Unregister AE Title") {
