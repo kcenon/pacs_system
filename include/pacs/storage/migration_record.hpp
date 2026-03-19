@@ -41,7 +41,7 @@
 
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Represents a record of an applied database migration
@@ -55,4 +55,4 @@ struct migration_record {
     std::string applied_at;   ///< Timestamp when migration was applied
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

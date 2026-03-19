@@ -46,7 +46,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Constructor
@@ -729,7 +729,7 @@ auto routing_repository::select_columns() const -> std::vector<std::string> {
     };
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -739,7 +739,7 @@ auto routing_repository::select_columns() const -> std::vector<std::string> {
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Helper Functions
@@ -1670,6 +1670,6 @@ client::routing_rule routing_repository::parse_row(void* stmt_ptr) const {
     return rule;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -11,10 +11,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
 
 // ============================================================================
 // storage_status Tests
@@ -171,7 +171,7 @@ TEST_CASE("storage_scp handler registration", "[services][storage]") {
 
     SECTION("can set storage handler") {
         bool handler_called = false;
-        scp.set_handler([&](const pacs::core::dicom_dataset&,
+        scp.set_handler([&](const kcenon::pacs::core::dicom_dataset&,
                            const std::string&,
                            const std::string&,
                            const std::string&) {
@@ -184,7 +184,7 @@ TEST_CASE("storage_scp handler registration", "[services][storage]") {
 
     SECTION("can set pre-store handler") {
         bool handler_called = false;
-        scp.set_pre_store_handler([&](const pacs::core::dicom_dataset&) {
+        scp.set_pre_store_handler([&](const kcenon::pacs::core::dicom_dataset&) {
             handler_called = true;
             return true;
         });

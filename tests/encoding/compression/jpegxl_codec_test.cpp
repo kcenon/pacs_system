@@ -8,7 +8,7 @@
 
 #include <vector>
 
-using namespace pacs::encoding::compression;
+using namespace kcenon::pacs::encoding::compression;
 
 TEST_CASE("jpegxl_codec construction", "[encoding][compression][jpegxl]") {
     SECTION("Default construction creates lossless codec") {
@@ -253,7 +253,7 @@ TEST_CASE("codec_factory JPEG XL support", "[encoding][compression][jpegxl]") {
 TEST_CASE("jpegxl_codec transfer syntax registry integration",
           "[encoding][compression][jpegxl]") {
     SECTION("JPEG XL Lossless in transfer syntax registry") {
-        pacs::encoding::transfer_syntax ts{"1.2.840.10008.1.2.4.110"};
+        kcenon::pacs::encoding::transfer_syntax ts{"1.2.840.10008.1.2.4.110"};
 
         CHECK(ts.is_valid());
         CHECK(ts.is_encapsulated());
@@ -262,7 +262,7 @@ TEST_CASE("jpegxl_codec transfer syntax registry integration",
     }
 
     SECTION("JPEG XL JPEG Recompression in transfer syntax registry") {
-        pacs::encoding::transfer_syntax ts{"1.2.840.10008.1.2.4.111"};
+        kcenon::pacs::encoding::transfer_syntax ts{"1.2.840.10008.1.2.4.111"};
 
         CHECK(ts.is_valid());
         CHECK(ts.is_encapsulated());
@@ -271,7 +271,7 @@ TEST_CASE("jpegxl_codec transfer syntax registry integration",
     }
 
     SECTION("JPEG XL Lossy in transfer syntax registry") {
-        pacs::encoding::transfer_syntax ts{"1.2.840.10008.1.2.4.112"};
+        kcenon::pacs::encoding::transfer_syntax ts{"1.2.840.10008.1.2.4.112"};
 
         CHECK(ts.is_valid());
         CHECK(ts.is_encapsulated());

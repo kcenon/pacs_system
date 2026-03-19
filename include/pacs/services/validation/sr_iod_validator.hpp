@@ -51,7 +51,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // SR Validation Options
@@ -395,6 +395,6 @@ private:
  */
 [[nodiscard]] std::string get_sr_document_title(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_SR_IOD_VALIDATOR_HPP

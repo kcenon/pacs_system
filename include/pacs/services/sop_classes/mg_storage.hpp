@@ -58,7 +58,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Digital Mammography Storage SOP Class UIDs (re-exported from dx_storage.hpp)
@@ -496,6 +496,6 @@ get_standard_screening_views() noexcept;
     bool is_primary,
     mg_image_type type);
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_MG_STORAGE_HPP

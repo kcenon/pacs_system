@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // =============================================================================
 // Syslog Facility Codes (RFC 5424 Section 6.2.1)
@@ -196,7 +196,7 @@ public:
      * @param xml_message RFC 3881 XML audit message string
      * @return VoidResult indicating success or transport error
      */
-    [[nodiscard]] pacs::VoidResult send(const std::string& xml_message);
+    [[nodiscard]] kcenon::pacs::VoidResult send(const std::string& xml_message);
 
     // =========================================================================
     // RFC 5424 Message Formatting
@@ -251,9 +251,9 @@ private:
     // Private Implementation
     // =========================================================================
 
-    [[nodiscard]] pacs::VoidResult send_udp(const std::string& syslog_message);
-    [[nodiscard]] pacs::VoidResult send_tls(const std::string& syslog_message);
-    [[nodiscard]] pacs::VoidResult ensure_tls_connected();
+    [[nodiscard]] kcenon::pacs::VoidResult send_udp(const std::string& syslog_message);
+    [[nodiscard]] kcenon::pacs::VoidResult send_tls(const std::string& syslog_message);
+    [[nodiscard]] kcenon::pacs::VoidResult ensure_tls_connected();
 
     [[nodiscard]] static std::string get_local_hostname();
     [[nodiscard]] static std::string get_timestamp();
@@ -284,6 +284,6 @@ private:
     std::atomic<size_t> send_errors_{0};
 };
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security
 
 #endif  // PACS_SECURITY_ATNA_SYSLOG_TRANSPORT_HPP

@@ -46,7 +46,7 @@ namespace {
 // =============================================================================
 
 /// Global pointer to server for signal handling
-std::atomic<pacs::network::dicom_server*> g_server{nullptr};
+std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
 
 /// Global running flag for signal handling
 std::atomic<bool> g_running{true};
@@ -643,13 +643,13 @@ public:
         std::cout << "Loaded " << items_.size() << " worklist item(s)\n";
     }
 
-    std::vector<pacs::core::dicom_dataset> query(
-        const pacs::core::dicom_dataset& query_keys,
+    std::vector<kcenon::pacs::core::dicom_dataset> query(
+        const kcenon::pacs::core::dicom_dataset& query_keys,
         [[maybe_unused]] const std::string& calling_ae) const {
 
-        using namespace pacs::core;
-        using namespace pacs::encoding;
-        namespace tags = pacs::core::tags;
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
+        namespace tags = kcenon::pacs::core::tags;
 
         std::lock_guard<std::mutex> lock(mutex_);
         std::vector<dicom_dataset> results;
@@ -792,8 +792,8 @@ private:
  * @return true if server ran successfully
  */
 bool run_server(const worklist_scp_args& args) {
-    using namespace pacs::network;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
 
     std::cout << "\nStarting Modality Worklist SCP...\n";
     std::cout << "  AE Title:           " << args.ae_title << "\n";
@@ -839,7 +839,7 @@ bool run_server(const worklist_scp_args& args) {
     // Configure Worklist SCP
     auto worklist_service = std::make_shared<worklist_scp>();
     worklist_service->set_handler(
-        [&repository](const pacs::core::dicom_dataset& keys, const std::string& ae) {
+        [&repository](const kcenon::pacs::core::dicom_dataset& keys, const std::string& ae) {
             return repository.query(keys, ae);
         });
 

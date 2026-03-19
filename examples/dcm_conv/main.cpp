@@ -128,7 +128,7 @@ Exit Codes:
  * @brief List all supported transfer syntaxes
  */
 void list_supported_syntaxes() {
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::encoding;
 
     std::cout << "\nSupported Transfer Syntaxes:\n";
     std::cout << std::string(70, '-') << "\n";
@@ -167,7 +167,7 @@ void list_supported_syntaxes() {
  * @return true if arguments are valid
  */
 bool parse_arguments(int argc, char* argv[], options& opts) {
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::encoding;
 
     if (argc < 2) {
         return false;
@@ -283,8 +283,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
 bool convert_file(const std::filesystem::path& input_path,
                   const std::filesystem::path& output_path,
                   const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     // Check if output exists and overwrite is disabled
     if (std::filesystem::exists(output_path) && !opts.overwrite) {
@@ -500,7 +500,7 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
-    auto target_ts = pacs::encoding::transfer_syntax(opts.target_transfer_syntax);
+    auto target_ts = kcenon::pacs::encoding::transfer_syntax(opts.target_transfer_syntax);
     if (!opts.quiet) {
         std::cout << "Target Transfer Syntax: " << target_ts.name() << "\n";
         std::cout << "                   UID: " << target_ts.uid() << "\n\n";

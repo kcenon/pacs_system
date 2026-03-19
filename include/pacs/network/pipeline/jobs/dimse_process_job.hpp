@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @enum dimse_command_type
@@ -137,7 +137,7 @@ public:
 
     /// Callback type for association handling
     using association_callback = std::function<void(uint64_t session_id,
-                                                    pacs::network::pdu_type type,
+                                                    kcenon::pacs::network::pdu_type type,
                                                     const std::vector<uint8_t>& data)>;
 
     /// Callback type for processing errors
@@ -205,4 +205,4 @@ private:
     [[nodiscard]] auto process_association_pdu() -> VoidResult;
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

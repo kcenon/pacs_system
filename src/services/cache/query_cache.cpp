@@ -38,7 +38,7 @@
 #include <mutex>
 #include <sstream>
 
-namespace pacs::services::cache {
+namespace kcenon::pacs::services::cache {
 
 // ─────────────────────────────────────────────────────
 // query_cache Implementation
@@ -202,4 +202,4 @@ bool configure_global_cache(const query_cache_config& config) {
     return true;
 }
 
-}  // namespace pacs::services::cache
+}  // namespace kcenon::pacs::services::cache

@@ -57,7 +57,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Print SCU Data Structures
@@ -447,6 +447,6 @@ private:
     std::atomic<size_t> printer_queries_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_PRINT_SCU_HPP

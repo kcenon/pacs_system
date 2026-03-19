@@ -33,7 +33,7 @@
 #include <cstring>
 #include <tuple>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 namespace {
 
@@ -47,39 +47,39 @@ constexpr size_t FIXED_PDU_SIZE = 10;
 /// (version + reserved + called AE + calling AE + reserved)
 constexpr size_t ASSOCIATE_HEADER_SIZE = 68;  // 2 + 2 + 16 + 16 + 32
 
-/// Helper to map pdu_decode_error to pacs::error_codes
+/// Helper to map pdu_decode_error to kcenon::pacs::error_codes
 inline int to_error_code(pdu_decode_error err) {
     switch (err) {
         case pdu_decode_error::incomplete_header:
         case pdu_decode_error::incomplete_pdu:
-            return pacs::error_codes::incomplete_pdu;
+            return kcenon::pacs::error_codes::incomplete_pdu;
         case pdu_decode_error::invalid_pdu_type:
-            return pacs::error_codes::invalid_pdu_type;
+            return kcenon::pacs::error_codes::invalid_pdu_type;
         case pdu_decode_error::malformed_pdu:
         case pdu_decode_error::buffer_overflow:
-            return pacs::error_codes::malformed_pdu;
+            return kcenon::pacs::error_codes::malformed_pdu;
         case pdu_decode_error::invalid_protocol_version:
         case pdu_decode_error::invalid_item_type:
-            return pacs::error_codes::pdu_decoding_error;
+            return kcenon::pacs::error_codes::pdu_decoding_error;
         default:
-            return pacs::error_codes::pdu_error;
+            return kcenon::pacs::error_codes::pdu_error;
     }
 }
 
-/// Create error result using standardized pacs::error_info
+/// Create error result using standardized kcenon::pacs::error_info
 template<typename T>
 DecodeResult<T> make_error(pdu_decode_error err, const std::string& msg = "") {
     std::string full_msg = to_string(err);
     if (!msg.empty()) {
         full_msg += ": " + msg;
     }
-    return pacs::error_info{to_error_code(err), full_msg, "network"};
+    return kcenon::pacs::error_info{to_error_code(err), full_msg, "network"};
 }
 
 /// Create success result
 template<typename T>
 DecodeResult<T> make_ok(T value) {
-    return pacs::ok(std::move(value));
+    return kcenon::pacs::ok(std::move(value));
 }
 
 }  // namespace
@@ -698,4 +698,4 @@ DecodeResult<associate_ac> pdu_decoder::decode_associate_ac(
     return make_ok(std::move(ac));
 }
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network

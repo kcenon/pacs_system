@@ -46,7 +46,7 @@ namespace {
 // =============================================================================
 
 /// Global pointer to server for signal handling
-std::atomic<pacs::network::dicom_server*> g_server{nullptr};
+std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
 
 /// Global running flag for signal handling
 std::atomic<bool> g_running{true};
@@ -335,21 +335,21 @@ public:
     /**
      * @brief Handle N-CREATE: store new MPPS record
      */
-    pacs::network::Result<std::monostate> on_create(
-        const pacs::services::mpps_instance& instance) {
+    kcenon::pacs::network::Result<std::monostate> on_create(
+        const kcenon::pacs::services::mpps_instance& instance) {
 
         std::lock_guard<std::mutex> lock(mutex_);
 
         // Extract data from the MPPS instance
         mpps_record record;
         record.sop_instance_uid = instance.sop_instance_uid;
-        record.status = std::string(pacs::services::to_string(instance.status));
+        record.status = std::string(kcenon::pacs::services::to_string(instance.status));
         record.station_ae = instance.station_ae;
         record.created_at = current_timestamp();
         record.updated_at = record.created_at;
 
         // Extract patient information from dataset
-        namespace tags = pacs::core::tags;
+        namespace tags = kcenon::pacs::core::tags;
         record.patient_id = instance.data.get_string(tags::patient_id, "");
         record.patient_name = instance.data.get_string(tags::patient_name, "");
         record.modality = instance.data.get_string(tags::modality, "");
@@ -360,7 +360,7 @@ public:
 
         // Extract procedure step ID from MPPS-specific tags
         record.procedure_step_id = instance.data.get_string(
-            pacs::services::mpps_tags::performed_procedure_step_id, "");
+            kcenon::pacs::services::mpps_tags::performed_procedure_step_id, "");
 
         // Store record
         records_[record.sop_instance_uid] = record;
@@ -377,16 +377,16 @@ public:
         // Save to file if configured
         save_record(record);
 
-        return pacs::network::Result<std::monostate>::ok({});
+        return kcenon::pacs::network::Result<std::monostate>::ok({});
     }
 
     /**
      * @brief Handle N-SET: update existing MPPS record
      */
-    pacs::network::Result<std::monostate> on_set(
+    kcenon::pacs::network::Result<std::monostate> on_set(
         const std::string& sop_instance_uid,
-        const pacs::core::dicom_dataset& modifications,
-        pacs::services::mpps_status new_status) {
+        const kcenon::pacs::core::dicom_dataset& modifications,
+        kcenon::pacs::services::mpps_status new_status) {
 
         std::lock_guard<std::mutex> lock(mutex_);
 
@@ -408,20 +408,20 @@ public:
             std::cerr << "[" << current_timestamp() << "] "
                       << "Warning: Cannot modify MPPS in final state: "
                       << record.sop_instance_uid << "\n";
-            return pacs::pacs_error<std::monostate>(
-                pacs::error_codes::mpps_invalid_state,
+            return kcenon::pacs::pacs_error<std::monostate>(
+                kcenon::pacs::error_codes::mpps_invalid_state,
                 "Cannot modify MPPS in final state");
         }
 
         // Update status
-        record.status = std::string(pacs::services::to_string(new_status));
+        record.status = std::string(kcenon::pacs::services::to_string(new_status));
         record.updated_at = current_timestamp();
 
         // Extract end date/time from modifications
         record.end_date = modifications.get_string(
-            pacs::services::mpps_tags::performed_procedure_step_end_date, "");
+            kcenon::pacs::services::mpps_tags::performed_procedure_step_end_date, "");
         record.end_time = modifications.get_string(
-            pacs::services::mpps_tags::performed_procedure_step_end_time, "");
+            kcenon::pacs::services::mpps_tags::performed_procedure_step_end_time, "");
 
         // Log the event
         std::cout << "[" << current_timestamp() << "] "
@@ -436,7 +436,7 @@ public:
         // Save updated record
         save_record(record);
 
-        return pacs::network::Result<std::monostate>::ok({});
+        return kcenon::pacs::network::Result<std::monostate>::ok({});
     }
 
     /**
@@ -504,8 +504,8 @@ private:
  * @return true if server ran successfully
  */
 bool run_server(const mpps_scp_args& args) {
-    using namespace pacs::network;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
 
     std::cout << "\nStarting MPPS SCP...\n";
     std::cout << "  AE Title:         " << args.ae_title << "\n";
@@ -551,7 +551,7 @@ bool run_server(const mpps_scp_args& args) {
     // Set N-SET handler
     mpps_service->set_set_handler(
         [&repository](const std::string& uid,
-                      const pacs::core::dicom_dataset& mods,
+                      const kcenon::pacs::core::dicom_dataset& mods,
                       mpps_status status) {
             return repository.on_set(uid, mods, status);
         });

@@ -49,7 +49,7 @@
 #include <future>
 #include <type_traits>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // Forward declaration
 enum class job_priority;
@@ -212,4 +212,4 @@ protected:
     thread_pool_interface& operator=(thread_pool_interface&&) = default;
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

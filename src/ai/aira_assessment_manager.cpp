@@ -37,9 +37,9 @@
 
 #include <algorithm>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // DICOM Tags for parsing assessment SR
@@ -239,4 +239,4 @@ assessment_info assessment_manager::parse_assessment_info(
     return info;
 }
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai

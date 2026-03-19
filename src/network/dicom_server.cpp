@@ -52,7 +52,7 @@
 using kcenon::common::error_info;
 #endif
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 // Registry for in-memory testing
 static std::mutex registry_mutex_;
@@ -356,7 +356,7 @@ void dicom_server::handle_association(uint64_t session_id, association assoc) {
 
     // Publish association established event
     kcenon::common::get_event_bus().publish(
-        pacs::events::association_established_event{
+        kcenon::pacs::events::association_established_event{
             std::string(info.assoc.calling_ae()),
             std::string(info.assoc.called_ae()),
             info.remote_address,
@@ -457,7 +457,7 @@ void dicom_server::message_loop(association_info& info) {
     // Publish association event (released or aborted)
     if (is_aborted) {
         kcenon::common::get_event_bus().publish(
-            pacs::events::association_aborted_event{
+            kcenon::pacs::events::association_aborted_event{
                 std::string(info.assoc.calling_ae()),
                 std::string(info.assoc.called_ae()),
                 "Association aborted"
@@ -465,7 +465,7 @@ void dicom_server::message_loop(association_info& info) {
         );
     } else {
         kcenon::common::get_event_bus().publish(
-            pacs::events::association_released_event{
+            kcenon::pacs::events::association_released_event{
                 std::string(info.assoc.calling_ae()),
                 std::string(info.assoc.called_ae()),
                 duration,
@@ -681,4 +681,4 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
     return ac;
 }
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network

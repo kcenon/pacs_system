@@ -34,7 +34,7 @@
  * Provides free functions that combine dicom_dataset string access with
  * character set decoding/encoding based on Specific Character Set (0008,0005).
  *
- * These are free functions in pacs::encoding rather than dicom_dataset member
+ * These are free functions in kcenon::pacs::encoding rather than dicom_dataset member
  * functions to avoid circular dependency between pacs_core and pacs_encoding.
  *
  * @see DICOM PS3.5 Section 6.1 - Support of Character Repertoires
@@ -53,7 +53,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief Get a string value from dataset, decoded to UTF-8.
@@ -88,6 +88,6 @@ void set_encoded_string(
     vr_type vr,
     std::string_view utf8_value);
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_DATASET_CHARSET_HPP

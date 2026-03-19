@@ -50,7 +50,7 @@
 #include <string_view>
 #include <utility>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 /**
  * @brief Represents a DICOM tag (Group, Element pair)
@@ -262,12 +262,13 @@ private:
     uint32_t combined_;
 };
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+
 
 // Hash specialization for use in unordered containers
 template <>
-struct std::hash<pacs::core::dicom_tag> {
-    [[nodiscard]] auto operator()(const pacs::core::dicom_tag& tag) const noexcept
+struct std::hash<kcenon::pacs::core::dicom_tag> {
+    [[nodiscard]] auto operator()(const kcenon::pacs::core::dicom_tag& tag) const noexcept
         -> size_t {
         return std::hash<uint32_t>{}(tag.combined());
     }

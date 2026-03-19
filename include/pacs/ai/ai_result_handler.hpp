@@ -58,7 +58,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -550,4 +550,4 @@ private:
     std::unique_ptr<impl> pimpl_;
 };
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai

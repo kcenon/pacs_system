@@ -46,7 +46,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace pacs::network::dimse {
+namespace kcenon::pacs::network::dimse {
 
 /**
  * @brief DIMSE command field values
@@ -225,6 +225,6 @@ enum class command_field : uint16_t {
 
 /// @}
 
-}  // namespace pacs::network::dimse
+}  // namespace kcenon::pacs::network::dimse
 
 #endif  // PACS_NETWORK_DIMSE_COMMAND_FIELD_HPP

@@ -13,9 +13,9 @@
 #include <iostream>
 #include <sstream>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
-namespace tags = pacs::core::tags;
+namespace tags = kcenon::pacs::core::tags;
 
 // =============================================================================
 // Construction
@@ -671,9 +671,9 @@ network::Result<std::monostate> mini_pacs::handle_mpps_set(
         }
     }
 
-    return pacs::pacs_error<std::monostate>(
-        pacs::error_codes::instance_not_found,
+    return kcenon::pacs::pacs_error<std::monostate>(
+        kcenon::pacs::error_codes::instance_not_found,
         "MPPS instance not found: " + sop_instance_uid);
 }
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

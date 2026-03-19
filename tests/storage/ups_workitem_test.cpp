@@ -13,7 +13,7 @@
 
 #include <memory>
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
 
 namespace {
 
@@ -551,20 +551,20 @@ TEST_CASE("UPS: get subscribers for workitem", "[storage][ups]") {
 TEST_CASE("UPS SOP classes registered in registry",
           "[services][sop_class_registry][ups]") {
     // UPS SOP Class UIDs per DICOM PS3.4 Annex CC
-    const auto& registry = pacs::services::sop_class_registry::instance();
+    const auto& registry = kcenon::pacs::services::sop_class_registry::instance();
 
     SECTION("UPS Push SOP Class registered") {
         CHECK(registry.is_supported("1.2.840.10008.5.1.4.34.6.1"));
         auto info = registry.get_info("1.2.840.10008.5.1.4.34.6.1");
         REQUIRE(info != nullptr);
-        CHECK(info->category == pacs::services::sop_class_category::ups);
+        CHECK(info->category == kcenon::pacs::services::sop_class_category::ups);
     }
 
     SECTION("UPS Watch SOP Class registered") {
         CHECK(registry.is_supported("1.2.840.10008.5.1.4.34.6.2"));
         auto info = registry.get_info("1.2.840.10008.5.1.4.34.6.2");
         REQUIRE(info != nullptr);
-        CHECK(info->category == pacs::services::sop_class_category::ups);
+        CHECK(info->category == kcenon::pacs::services::sop_class_category::ups);
     }
 
     SECTION("UPS Pull SOP Class registered") {
@@ -580,7 +580,7 @@ TEST_CASE("UPS SOP classes registered in registry",
     }
 
     SECTION("UPS classes are in 'ups' category") {
-        auto ups_classes = registry.get_by_category(pacs::services::sop_class_category::ups);
+        auto ups_classes = registry.get_by_category(kcenon::pacs::services::sop_class_category::ups);
         CHECK(ups_classes.size() == 5);
     }
 }

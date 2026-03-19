@@ -48,7 +48,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Storage tier classification
@@ -329,4 +329,4 @@ struct hsm_statistics {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

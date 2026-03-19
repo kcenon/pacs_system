@@ -16,8 +16,8 @@
 
 #include <cstring>
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Element Encoding Tests - 16-bit Length VRs
@@ -346,7 +346,7 @@ TEST_CASE("explicit_vr_big_endian_codec error handling", "[encoding][big_endian]
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(result.error().code == pacs::error_codes::unknown_vr);
+        CHECK(result.error().code == kcenon::pacs::error_codes::unknown_vr);
     }
 
     SECTION("insufficient data for header") {
@@ -356,7 +356,7 @@ TEST_CASE("explicit_vr_big_endian_codec error handling", "[encoding][big_endian]
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(result.error().code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == kcenon::pacs::error_codes::insufficient_data);
     }
 
     SECTION("truncated value data") {
@@ -372,7 +372,7 @@ TEST_CASE("explicit_vr_big_endian_codec error handling", "[encoding][big_endian]
         auto result = explicit_vr_big_endian_codec::decode_element(data);
 
         REQUIRE(!result.is_ok());
-        CHECK(result.error().code == pacs::error_codes::insufficient_data);
+        CHECK(result.error().code == kcenon::pacs::error_codes::insufficient_data);
     }
 }
 

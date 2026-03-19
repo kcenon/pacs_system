@@ -46,7 +46,7 @@
 
 #include <variant>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using namespace security;
 using kcenon::common::make_error;
@@ -460,6 +460,6 @@ auto sqlite_security_storage::get_users_by_role(Role role)
   return users;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

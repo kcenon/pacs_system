@@ -59,14 +59,14 @@ struct request;
 struct response;
 }  // namespace crow
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 class access_control_manager;
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security
 
 // user_context must be fully defined for std::optional<user_context>
 #include "pacs/security/user_context.hpp"
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 // =============================================================================
 // DICOMweb OAuth Scopes
@@ -230,4 +230,4 @@ private:
                               std::string_view message);
 };
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

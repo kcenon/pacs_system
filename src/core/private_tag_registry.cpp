@@ -34,7 +34,7 @@
 
 #include <pacs/core/private_tag_registry.hpp>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 auto private_tag_registry::instance() -> private_tag_registry& {
     static private_tag_registry registry;
@@ -89,4 +89,4 @@ void private_tag_registry::clear() {
     definitions_.clear();
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

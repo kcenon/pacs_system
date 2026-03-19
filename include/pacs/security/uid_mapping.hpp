@@ -53,7 +53,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Manages UID mappings for consistent de-identification
@@ -274,4 +274,4 @@ private:
     mutable std::shared_mutex mutex_;
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

@@ -55,7 +55,7 @@
 #include <openssl/rsa.h>
 #endif
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 // =============================================================================
 // JWK to PEM Conversion (OpenSSL)
@@ -357,4 +357,4 @@ bool jwks_provider::try_refresh() const {
     return true;
 }
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

@@ -261,8 +261,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @brief Perform MPPS N-CREATE operation using the library
  */
 int perform_mpps_create(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
 
     if (opts.verbose) {
         std::cout << "=== MPPS N-CREATE (Start Procedure) ===\n";
@@ -389,8 +389,8 @@ int perform_mpps_create(const options& opts) {
  * @brief Perform MPPS N-SET operation using the library
  */
 int perform_mpps_set(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
 
     const char* status_str = (opts.status == cli_status_type::completed)
         ? "COMPLETED" : "DISCONTINUED";

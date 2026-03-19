@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Segmentation Storage SOP Class UIDs
@@ -297,6 +297,6 @@ enum class segment_category {
  */
 [[nodiscard]] std::string_view get_segment_category_meaning(segment_category category) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_SEG_STORAGE_HPP

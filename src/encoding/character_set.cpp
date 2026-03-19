@@ -44,7 +44,7 @@
 #include <iconv.h>
 #endif
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 // =============================================================================
 // Character Set Registry
@@ -993,4 +993,4 @@ std::string encode_from_utf8(
     return result;
 }
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding

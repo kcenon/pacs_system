@@ -56,7 +56,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::services::monitoring {
+namespace kcenon::pacs::services::monitoring {
 
 /**
  * @brief Database health status
@@ -304,6 +304,6 @@ private:
 [[nodiscard]] auto health_status_to_string(database_health::status status)
     -> std::string;
 
-}  // namespace pacs::services::monitoring
+}  // namespace kcenon::pacs::services::monitoring
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

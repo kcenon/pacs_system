@@ -24,7 +24,7 @@
 
 #include "pacs/storage/ups_workitem.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UID
@@ -324,6 +324,6 @@ inline constexpr core::dicom_tag reason_for_cancellation{0x0074, 0x1238};
 
 }  // namespace ups_tags
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_UPS_PUSH_SCP_HPP

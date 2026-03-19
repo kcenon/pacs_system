@@ -56,7 +56,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // Ophthalmic-Specific DICOM Tags for Validation
@@ -282,6 +282,6 @@ private:
 [[nodiscard]] bool is_valid_ophthalmic_dataset(
     const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_OPHTHALMIC_IOD_VALIDATOR_HPP

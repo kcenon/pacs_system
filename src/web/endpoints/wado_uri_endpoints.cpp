@@ -63,7 +63,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 namespace wado_uri {
 
@@ -433,4 +433,4 @@ void register_wado_uri_endpoints_impl(
 
 }  // namespace endpoints
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

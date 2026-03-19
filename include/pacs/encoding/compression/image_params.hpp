@@ -39,7 +39,7 @@
 #include <cstdint>
 #include <string>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief Photometric interpretation of pixel data.
@@ -264,6 +264,6 @@ struct image_params {
     }
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_IMAGE_PARAMS_HPP

@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 namespace {
 
@@ -428,4 +428,4 @@ std::vector<transfer_syntax> all_transfer_syntaxes() {
     return result;
 }
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding

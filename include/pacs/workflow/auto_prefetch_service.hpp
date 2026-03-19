@@ -73,19 +73,19 @@ class IExecutor;
 }  // namespace kcenon::common::interfaces
 
 // Forward declarations for PACS modules
-namespace pacs::network {
+namespace kcenon::pacs::network {
 class association;
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 class dicom_dataset;
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 /**
  * @brief Prefetch request for a single patient
@@ -637,4 +637,4 @@ private:
     std::chrono::steady_clock::time_point next_cycle_time_;
 };
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

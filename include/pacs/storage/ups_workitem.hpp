@@ -48,7 +48,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief UPS workitem state values
@@ -405,4 +405,4 @@ struct ups_workitem_query {
     }
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

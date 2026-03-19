@@ -32,7 +32,7 @@
 #include <iostream>
 #include <string>
 
-using namespace pacs::samples;
+using namespace kcenon::pacs::samples;
 
 namespace {
 
@@ -53,21 +53,21 @@ void print_usage(const char* program) {
 /**
  * @brief Format anonymization profile as string
  */
-std::string profile_to_string(pacs::security::anonymization_profile profile) {
+std::string profile_to_string(kcenon::pacs::security::anonymization_profile profile) {
     switch (profile) {
-        case pacs::security::anonymization_profile::basic:
+        case kcenon::pacs::security::anonymization_profile::basic:
             return "Basic";
-        case pacs::security::anonymization_profile::hipaa_safe_harbor:
+        case kcenon::pacs::security::anonymization_profile::hipaa_safe_harbor:
             return "HIPAA Safe Harbor";
-        case pacs::security::anonymization_profile::retain_longitudinal:
+        case kcenon::pacs::security::anonymization_profile::retain_longitudinal:
             return "Retain Longitudinal";
-        case pacs::security::anonymization_profile::retain_patient_characteristics:
+        case kcenon::pacs::security::anonymization_profile::retain_patient_characteristics:
             return "Retain Patient Characteristics";
-        case pacs::security::anonymization_profile::gdpr_compliant:
+        case kcenon::pacs::security::anonymization_profile::gdpr_compliant:
             return "GDPR Compliant";
-        case pacs::security::anonymization_profile::clean_pixel:
+        case kcenon::pacs::security::anonymization_profile::clean_pixel:
             return "Clean Pixel";
-        case pacs::security::anonymization_profile::clean_descriptions:
+        case kcenon::pacs::security::anonymization_profile::clean_descriptions:
             return "Clean Descriptions";
         default:
             return "Unknown";

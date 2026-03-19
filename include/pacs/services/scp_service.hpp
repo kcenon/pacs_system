@@ -52,7 +52,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /**
  * @brief Abstract base class for DICOM SCP services
@@ -186,6 +186,6 @@ protected:
  */
 using scp_service_ptr = std::shared_ptr<scp_service>;
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_SCP_SERVICE_HPP

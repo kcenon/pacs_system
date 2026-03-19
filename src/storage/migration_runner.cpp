@@ -48,7 +48,7 @@
 #include <pacs/storage/pacs_database_adapter.hpp>
 #endif
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // Use common_system's ok() function
 using kcenon::common::ok;
@@ -106,7 +106,7 @@ auto migration_runner::run_migrations_to(sqlite3* db, int target_version)
     if (target_version > LATEST_VERSION) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Target version {} exceeds latest version {}",
+            kcenon::pacs::compat::format("Target version {} exceeds latest version {}",
                        target_version, LATEST_VERSION),
             "storage");
     }
@@ -263,7 +263,7 @@ auto migration_runner::apply_migration(sqlite3* db, int version) -> VoidResult {
 
     return make_error<std::monostate>(
         -1,
-        pacs::compat::format("Migration for version {} not found", version),
+        kcenon::pacs::compat::format("Migration for version {} not found", version),
         "storage");
 }
 
@@ -278,7 +278,7 @@ auto migration_runner::record_migration(sqlite3* db, int version,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}",
+            kcenon::pacs::compat::format("Failed to prepare statement: {}",
                        sqlite3_errmsg(db)),
             "storage");
     }
@@ -293,7 +293,7 @@ auto migration_runner::record_migration(sqlite3* db, int version,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to record migration: {}",
+            kcenon::pacs::compat::format("Failed to record migration: {}",
                        sqlite3_errmsg(db)),
             "storage");
     }
@@ -311,7 +311,7 @@ auto migration_runner::execute_sql(sqlite3* db, std::string_view sql)
         sqlite3_free(errmsg);
 
         return make_error<std::monostate>(
-            rc, pacs::compat::format("SQL execution failed: {}", error_str),
+            rc, kcenon::pacs::compat::format("SQL execution failed: {}", error_str),
             "storage");
     }
 
@@ -1044,7 +1044,7 @@ auto migration_runner::run_migrations_to(pacs_database_adapter& db,
     if (target_version > LATEST_VERSION) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Target version {} exceeds latest version {}",
+            kcenon::pacs::compat::format("Target version {} exceeds latest version {}",
                                  target_version, LATEST_VERSION),
             "storage");
     }
@@ -1225,7 +1225,7 @@ auto migration_runner::apply_migration(pacs_database_adapter& db, int version)
 
     return make_error<std::monostate>(
         -1,
-        pacs::compat::format("Migration for version {} not found", version),
+        kcenon::pacs::compat::format("Migration for version {} not found", version),
         "storage");
 }
 
@@ -1234,7 +1234,7 @@ auto migration_runner::record_migration(pacs_database_adapter& db, int version,
     -> VoidResult {
     // Use raw SQL for INSERT (simpler and more reliable for migrations)
     // Note: description is sanitized by the caller and controlled internally
-    const std::string sql = pacs::compat::format(
+    const std::string sql = kcenon::pacs::compat::format(
         "INSERT INTO schema_version (version, description) VALUES ({}, '{}');",
         version, description);
 
@@ -1242,7 +1242,7 @@ auto migration_runner::record_migration(pacs_database_adapter& db, int version,
     if (result.is_err()) {
         return make_error<std::monostate>(
             result.error().code,
-            pacs::compat::format("Failed to record migration: {}",
+            kcenon::pacs::compat::format("Failed to record migration: {}",
                                  result.error().message),
             "storage");
     }
@@ -1960,4 +1960,4 @@ auto migration_runner::migrate_v9(pacs_database_adapter& db) -> VoidResult {
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

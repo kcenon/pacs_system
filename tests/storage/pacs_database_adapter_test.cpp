@@ -22,7 +22,7 @@
 #include <filesystem>
 #include <memory>
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
 
 namespace {
 

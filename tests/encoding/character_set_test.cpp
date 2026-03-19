@@ -9,7 +9,7 @@
 
 #include <cstring>
 
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding;
 
 // =============================================================================
 // Character Set Registry Tests

@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <cctype>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Additional DICOM Tags (not in constants)
@@ -123,23 +123,23 @@ routing_manager::~routing_manager() {
 // Rule CRUD
 // =============================================================================
 
-pacs::VoidResult routing_manager::add_rule(const routing_rule& rule) {
+kcenon::pacs::VoidResult routing_manager::add_rule(const routing_rule& rule) {
     // Validate
     if (rule.rule_id.empty()) {
-        return pacs::pacs_void_error(-1, "Rule ID cannot be empty");
+        return kcenon::pacs::pacs_void_error(-1, "Rule ID cannot be empty");
     }
 
     {
         std::shared_lock lock(rules_mutex_);
         if (rules_.size() >= config_.max_rules) {
-            return pacs::pacs_void_error(-1, "Maximum number of rules reached");
+            return kcenon::pacs::pacs_void_error(-1, "Maximum number of rules reached");
         }
     }
 
     // Save to repository
     auto result = repo_->save(rule);
     if (result.is_err()) {
-        return pacs::pacs_void_error(
+        return kcenon::pacs::pacs_void_error(
             result.error().code,
             "Failed to save rule: " + result.error().message);
     }
@@ -160,14 +160,14 @@ pacs::VoidResult routing_manager::add_rule(const routing_rule& rule) {
         logger_->info_fmt("routing_manager: Added rule: {} ({})", rule.rule_id, rule.name);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult routing_manager::update_rule(const routing_rule& rule) {
+kcenon::pacs::VoidResult routing_manager::update_rule(const routing_rule& rule) {
     // Save to repository
     auto result = repo_->save(rule);
     if (result.is_err()) {
-        return pacs::pacs_void_error(
+        return kcenon::pacs::pacs_void_error(
             result.error().code,
             "Failed to update rule: " + result.error().message);
     }
@@ -196,10 +196,10 @@ pacs::VoidResult routing_manager::update_rule(const routing_rule& rule) {
         logger_->info_fmt("routing_manager: Updated rule: {} ({})", rule.rule_id, rule.name);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult routing_manager::remove_rule(std::string_view rule_id) {
+kcenon::pacs::VoidResult routing_manager::remove_rule(std::string_view rule_id) {
     // Remove from repository
     auto result = repo_->remove(std::string(rule_id));
     if (!result.is_ok()) {
@@ -221,7 +221,7 @@ pacs::VoidResult routing_manager::remove_rule(std::string_view rule_id) {
         logger_->info_fmt("routing_manager: Removed rule: {}", rule_id);
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 std::optional<routing_rule> routing_manager::get_rule(std::string_view rule_id) const {
@@ -253,7 +253,7 @@ std::vector<routing_rule> routing_manager::list_enabled_rules() const {
 // Rule Ordering
 // =============================================================================
 
-pacs::VoidResult routing_manager::set_rule_priority(std::string_view rule_id, int priority) {
+kcenon::pacs::VoidResult routing_manager::set_rule_priority(std::string_view rule_id, int priority) {
     auto result = repo_->update_priority(rule_id, priority);
     if (!result.is_ok()) {
         return result;
@@ -276,10 +276,10 @@ pacs::VoidResult routing_manager::set_rule_priority(std::string_view rule_id, in
                   });
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult routing_manager::reorder_rules(const std::vector<std::string>& rule_ids) {
+kcenon::pacs::VoidResult routing_manager::reorder_rules(const std::vector<std::string>& rule_ids) {
     std::unique_lock lock(rules_mutex_);
 
     // Assign priorities based on order (first = highest)
@@ -306,7 +306,7 @@ pacs::VoidResult routing_manager::reorder_rules(const std::vector<std::string>& 
                   return a.priority > b.priority;
               });
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 // =============================================================================
@@ -756,4 +756,4 @@ void routing_manager::load_rules() {
               });
 }
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

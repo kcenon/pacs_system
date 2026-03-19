@@ -49,7 +49,7 @@
 #include <optional>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief DICOM operation types for permission checking
@@ -179,4 +179,4 @@ private:
   map_dicom_operation(DicomOperation op);
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

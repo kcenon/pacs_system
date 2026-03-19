@@ -23,7 +23,7 @@
 #include <thread>
 #include <vector>
 
-namespace pacs::integration::testing {
+namespace kcenon::pacs::integration::testing {
 
 /**
  * @brief Record of a submitted task for verification
@@ -396,4 +396,4 @@ private:
     }
 };
 
-}  // namespace pacs::integration::testing
+}  // namespace kcenon::pacs::integration::testing

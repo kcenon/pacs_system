@@ -53,7 +53,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @enum dimse_operation
@@ -765,4 +765,4 @@ private:
     pool_counters pdu_buffer_pool_;
 };
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

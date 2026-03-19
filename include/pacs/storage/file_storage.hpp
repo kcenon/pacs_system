@@ -53,7 +53,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Naming scheme for DICOM file organization
@@ -358,4 +358,4 @@ private:
     mutable std::shared_mutex mutex_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

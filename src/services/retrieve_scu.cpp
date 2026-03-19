@@ -41,7 +41,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -80,15 +80,15 @@ network::Result<retrieve_result> retrieve_scu::perform_move(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<retrieve_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<retrieve_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Validate move destination
     if (destination_ae.empty()) {
-        return pacs::pacs_error<retrieve_result>(
-            pacs::error_codes::retrieve_missing_destination,
+        return kcenon::pacs::pacs_error<retrieve_result>(
+            kcenon::pacs::error_codes::retrieve_missing_destination,
             "Move destination AE title is required");
     }
 
@@ -98,8 +98,8 @@ network::Result<retrieve_result> retrieve_scu::perform_move(
     // Get accepted presentation context for this SOP class
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<retrieve_result>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<retrieve_result>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for SOP Class: " +
             std::string(sop_class_uid));
     }
@@ -144,8 +144,8 @@ network::Result<retrieve_result> retrieve_scu::perform_move(
 
         // Verify it's a C-MOVE response
         if (response.command() != command_field::c_move_rsp) {
-            return pacs::pacs_error<retrieve_result>(
-                pacs::error_codes::retrieve_unexpected_command,
+            return kcenon::pacs::pacs_error<retrieve_result>(
+                kcenon::pacs::error_codes::retrieve_unexpected_command,
                 "Expected C-MOVE-RSP but received " +
                 std::string(to_string(response.command())));
         }
@@ -228,8 +228,8 @@ network::Result<retrieve_result> retrieve_scu::perform_get(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<retrieve_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<retrieve_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
@@ -239,8 +239,8 @@ network::Result<retrieve_result> retrieve_scu::perform_get(
     // Get accepted presentation context for this SOP class
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<retrieve_result>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<retrieve_result>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for SOP Class: " +
             std::string(sop_class_uid));
     }
@@ -375,8 +375,8 @@ network::Result<retrieve_result> retrieve_scu::retrieve_study(
 
     if (config_.mode == retrieve_mode::c_move) {
         if (config_.move_destination.empty()) {
-            return pacs::pacs_error<retrieve_result>(
-                pacs::error_codes::retrieve_missing_destination,
+            return kcenon::pacs::pacs_error<retrieve_result>(
+                kcenon::pacs::error_codes::retrieve_missing_destination,
                 "Move destination is required for C-MOVE mode");
         }
         return move(assoc, query_ds, config_.move_destination, progress);
@@ -394,8 +394,8 @@ network::Result<retrieve_result> retrieve_scu::retrieve_series(
 
     if (config_.mode == retrieve_mode::c_move) {
         if (config_.move_destination.empty()) {
-            return pacs::pacs_error<retrieve_result>(
-                pacs::error_codes::retrieve_missing_destination,
+            return kcenon::pacs::pacs_error<retrieve_result>(
+                kcenon::pacs::error_codes::retrieve_missing_destination,
                 "Move destination is required for C-MOVE mode");
         }
         return move(assoc, query_ds, config_.move_destination, progress);
@@ -413,8 +413,8 @@ network::Result<retrieve_result> retrieve_scu::retrieve_instance(
 
     if (config_.mode == retrieve_mode::c_move) {
         if (config_.move_destination.empty()) {
-            return pacs::pacs_error<retrieve_result>(
-                pacs::error_codes::retrieve_missing_destination,
+            return kcenon::pacs::pacs_error<retrieve_result>(
+                kcenon::pacs::error_codes::retrieve_missing_destination,
                 "Move destination is required for C-MOVE mode");
         }
         return move(assoc, query_ds, config_.move_destination, progress);
@@ -439,8 +439,8 @@ network::Result<std::monostate> retrieve_scu::cancel(
 
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<std::monostate>(
-            pacs::error_codes::no_acceptable_context,
+        return kcenon::pacs::pacs_error<std::monostate>(
+            kcenon::pacs::error_codes::no_acceptable_context,
             "No accepted presentation context for cancel");
     }
 
@@ -561,4 +561,4 @@ core::dicom_dataset retrieve_scu::build_instance_query(
     return ds;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

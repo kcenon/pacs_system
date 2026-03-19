@@ -21,7 +21,7 @@
 #include <atomic>
 #include <functional>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UID
@@ -305,6 +305,6 @@ private:
     std::atomic<size_t> events_sent_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_UPS_WATCH_SCP_HPP

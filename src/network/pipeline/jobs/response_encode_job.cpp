@@ -40,7 +40,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 response_encode_job::response_encode_job(service_result result,
                                          uint32_t max_pdu_size,
@@ -359,4 +359,4 @@ auto response_encode_job::fragment_data(const std::vector<uint8_t>& data)
     return fragments;
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

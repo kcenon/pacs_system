@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -186,4 +186,4 @@ bool is_waveform_annotation_sop_class(std::string_view uid) noexcept {
     return uid == waveform_annotation_storage_uid;
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

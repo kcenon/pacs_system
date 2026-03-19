@@ -11,11 +11,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
-using namespace pacs::storage;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::storage;
 
 // ============================================================================
 // ups_push_scp Construction Tests

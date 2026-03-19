@@ -51,7 +51,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // Forward declaration of impl classes from certificate.cpp
 class certificate_impl;
@@ -768,4 +768,4 @@ auto digital_signature::verify_mac_signature(
     return result;
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

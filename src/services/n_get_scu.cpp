@@ -41,7 +41,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -71,29 +71,29 @@ network::Result<n_get_result> n_get_scu::get(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<n_get_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<n_get_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Validate UIDs
     if (sop_class_uid.empty()) {
-        return pacs::pacs_error<n_get_result>(
-            pacs::error_codes::n_get_missing_uid,
+        return kcenon::pacs::pacs_error<n_get_result>(
+            kcenon::pacs::error_codes::n_get_missing_uid,
             "SOP Class UID is required for N-GET");
     }
 
     if (sop_instance_uid.empty()) {
-        return pacs::pacs_error<n_get_result>(
-            pacs::error_codes::n_get_missing_uid,
+        return kcenon::pacs::pacs_error<n_get_result>(
+            kcenon::pacs::error_codes::n_get_missing_uid,
             "SOP Instance UID is required for N-GET");
     }
 
     // Get accepted presentation context
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<n_get_result>(
-            pacs::error_codes::n_get_context_not_accepted,
+        return kcenon::pacs::pacs_error<n_get_result>(
+            kcenon::pacs::error_codes::n_get_context_not_accepted,
             "No accepted presentation context for SOP Class: " +
             std::string(sop_class_uid));
     }
@@ -127,8 +127,8 @@ network::Result<n_get_result> n_get_scu::get(
 
     // Verify it's an N-GET response
     if (response.command() != command_field::n_get_rsp) {
-        return pacs::pacs_error<n_get_result>(
-            pacs::error_codes::n_get_unexpected_command,
+        return kcenon::pacs::pacs_error<n_get_result>(
+            kcenon::pacs::error_codes::n_get_unexpected_command,
             "Expected N-GET-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -195,4 +195,4 @@ uint16_t n_get_scu::next_message_id() noexcept {
     return id;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

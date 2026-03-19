@@ -54,7 +54,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 /**
  * @brief Represents a DICOM Dataset (ordered collection of Data Elements)
@@ -474,4 +474,5 @@ void dicom_dataset::set_numeric(dicom_tag tag, encoding::vr_type vr, T value) {
     insert(dicom_element::from_numeric<T>(tag, vr, value));
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+

@@ -45,7 +45,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace pacs::encoding::simd {
+namespace kcenon::pacs::encoding::simd {
 
 // Memory alignment requirements
 constexpr size_t SSE_ALIGNMENT = 16;
@@ -247,6 +247,6 @@ template <size_t Alignment>
     return remainder == 0 ? 0 : Alignment - remainder;
 }
 
-}  // namespace pacs::encoding::simd
+}  // namespace kcenon::pacs::encoding::simd
 
 #endif  // PACS_ENCODING_SIMD_TYPES_HPP

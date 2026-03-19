@@ -12,8 +12,8 @@
 
 #include <algorithm>
 
-using namespace pacs::services;
-using namespace pacs::services::sop_classes;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::services::sop_classes;
 
 // ============================================================================
 // SOP Class UID Tests

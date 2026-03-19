@@ -33,9 +33,9 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::network;
-using namespace pacs::network::v2;
-using namespace pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::v2;
+using namespace kcenon::pacs::services;
 
 // =============================================================================
 // Test Constants

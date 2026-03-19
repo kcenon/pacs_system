@@ -43,10 +43,10 @@
 #include <sstream>
 #include <unordered_map>
 
-namespace pacs::services::xds {
+namespace kcenon::pacs::services::xds {
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // =============================================================================
 // KOS-specific DICOM Tags
@@ -368,4 +368,4 @@ void imaging_document_source::build_evidence_sequence(
                     std::move(study_items));
 }
 
-}  // namespace pacs::services::xds
+}  // namespace kcenon::pacs::services::xds

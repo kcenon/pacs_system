@@ -3,7 +3,7 @@
 #include "pacs/network/pdu_encoder.hpp"
 #include "pacs/network/pdu_types.hpp"
 
-using namespace pacs::network;
+using namespace kcenon::pacs::network;
 
 // Helper function to extract 16-bit big-endian value
 inline uint16_t read_uint16_be(const std::vector<uint8_t>& data, size_t offset) {

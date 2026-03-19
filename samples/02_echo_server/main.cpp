@@ -34,8 +34,8 @@
 #include <memory>
 #include <string>
 
-namespace net = pacs::network;
-namespace svc = pacs::services;
+namespace net = kcenon::pacs::network;
+namespace svc = kcenon::pacs::services;
 
 namespace {
 
@@ -58,7 +58,7 @@ std::string current_timestamp() {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    pacs::samples::print_header("Echo Server - Level 2 Sample");
+    kcenon::pacs::samples::print_header("Echo Server - Level 2 Sample");
 
     // ===========================================================================
     // Part 1: Server Configuration
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     // - Timeouts: Connection and idle timeouts for resource management
     // - Max Associations: Limit concurrent connections to prevent overload
 
-    pacs::samples::print_section("Part 1: Server Configuration");
+    kcenon::pacs::samples::print_section("Part 1: Server Configuration");
 
     std::cout << "DICOM servers use these key parameters:\n";
     std::cout << "  - AE Title:    Application Entity identifier (like hostname)\n";
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     config.implementation_class_uid = "1.2.410.200001.1.1";
     config.implementation_version_name = "PACS_SAMPLE_2.0";
 
-    pacs::samples::print_table("Server Configuration", {
+    kcenon::pacs::samples::print_table("Server Configuration", {
         {"AE Title", config.ae_title},
         {"Port", std::to_string(config.port)},
         {"Max Associations", std::to_string(config.max_associations)},
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
         {"Max PDU Size", std::to_string(config.max_pdu_size) + " bytes"}
     });
 
-    pacs::samples::print_success("Part 1 complete - Configuration ready!");
+    kcenon::pacs::samples::print_success("Part 1 complete - Configuration ready!");
 
     // ===========================================================================
     // Part 2: Create Server and Register Services
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
     // For this sample, we only register the Verification SCP to handle C-ECHO.
     // C-ECHO is the simplest DICOM service - like a "ping" for DICOM.
 
-    pacs::samples::print_section("Part 2: Server & Service Setup");
+    kcenon::pacs::samples::print_section("Part 2: Server & Service Setup");
 
     std::cout << "DICOM Service Class Provider (SCP) types:\n";
     std::cout << "  - Verification SCP: C-ECHO (connectivity test)\n";
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    pacs::samples::print_success("Part 2 complete - Verification SCP registered!");
+    kcenon::pacs::samples::print_success("Part 2 complete - Verification SCP registered!");
 
     // ===========================================================================
     // Part 3: Event Callbacks
@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
     // The server provides callbacks for monitoring these events.
     // This is useful for logging, statistics, and debugging.
 
-    pacs::samples::print_section("Part 3: Event Handlers");
+    kcenon::pacs::samples::print_section("Part 3: Event Handlers");
 
     std::cout << "DICOM Association lifecycle:\n";
     std::cout << "  1. A-ASSOCIATE-RQ  -> Client requests connection\n";
@@ -187,8 +187,8 @@ int main(int argc, char* argv[]) {
             connection_count++;
             total_connections++;
             std::cout << "[" << current_timestamp() << "] "
-                      << pacs::samples::colors::green << "[CONNECT]"
-                      << pacs::samples::colors::reset << " "
+                      << kcenon::pacs::samples::colors::green << "[CONNECT]"
+                      << kcenon::pacs::samples::colors::reset << " "
                       << assoc.calling_ae() << " -> " << assoc.called_ae()
                       << " (active: " << connection_count << ")\n";
         }
@@ -200,8 +200,8 @@ int main(int argc, char* argv[]) {
         [&connection_count](const net::association& assoc) {
             connection_count--;
             std::cout << "[" << current_timestamp() << "] "
-                      << pacs::samples::colors::cyan << "[RELEASE]"
-                      << pacs::samples::colors::reset << " "
+                      << kcenon::pacs::samples::colors::cyan << "[RELEASE]"
+                      << kcenon::pacs::samples::colors::reset << " "
                       << assoc.calling_ae() << " disconnected"
                       << " (active: " << connection_count << ")\n";
         }
@@ -212,13 +212,13 @@ int main(int argc, char* argv[]) {
     server->on_error(
         [](const std::string& error_msg) {
             std::cerr << "[" << current_timestamp() << "] "
-                      << pacs::samples::colors::red << "[ERROR]"
-                      << pacs::samples::colors::reset << " "
+                      << kcenon::pacs::samples::colors::red << "[ERROR]"
+                      << kcenon::pacs::samples::colors::reset << " "
                       << error_msg << "\n";
         }
     );
 
-    pacs::samples::print_success("Part 3 complete - Event handlers registered!");
+    kcenon::pacs::samples::print_success("Part 3 complete - Event handlers registered!");
 
     // ===========================================================================
     // Part 4: Start Server
@@ -227,27 +227,27 @@ int main(int argc, char* argv[]) {
     // It runs in the background, handling associations in a thread pool.
     // The main thread waits for a shutdown signal (Ctrl+C).
 
-    pacs::samples::print_section("Part 4: Running Server");
+    kcenon::pacs::samples::print_section("Part 4: Running Server");
 
     // Install signal handler for graceful shutdown (Ctrl+C)
     // scoped_signal_handler automatically cleans up when destroyed
-    pacs::samples::scoped_signal_handler sig_handler([&server]() {
-        std::cout << "\n" << pacs::samples::colors::yellow
+    kcenon::pacs::samples::scoped_signal_handler sig_handler([&server]() {
+        std::cout << "\n" << kcenon::pacs::samples::colors::yellow
                   << "Shutdown signal received..."
-                  << pacs::samples::colors::reset << "\n";
+                  << kcenon::pacs::samples::colors::reset << "\n";
         server->stop();
     });
 
     // Start the server (non-blocking)
     auto start_result = server->start();
     if (start_result.is_err()) {
-        pacs::samples::print_error("Failed to start server: " +
+        kcenon::pacs::samples::print_error("Failed to start server: " +
                                    start_result.error().message);
         return 1;
     }
 
     // Print server running banner
-    pacs::samples::print_box({
+    kcenon::pacs::samples::print_box({
         "Echo Server Running",
         "",
         "Test with DCMTK:",
@@ -270,11 +270,11 @@ int main(int argc, char* argv[]) {
     // After shutdown, we can retrieve server statistics for monitoring.
     // The server automatically cleans up all resources.
 
-    pacs::samples::print_section("Final Statistics");
+    kcenon::pacs::samples::print_section("Final Statistics");
 
     auto stats = server->get_statistics();
 
-    pacs::samples::print_table("Server Statistics", {
+    kcenon::pacs::samples::print_table("Server Statistics", {
         {"Total Associations", std::to_string(stats.total_associations)},
         {"Rejected Associations", std::to_string(stats.rejected_associations)},
         {"Messages Processed", std::to_string(stats.messages_processed)},
@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
     });
 
     // Summary
-    pacs::samples::print_box({
+    kcenon::pacs::samples::print_box({
         "Congratulations! You have learned:",
         "",
         "1. Server Configuration - AE Title, port, timeouts",
@@ -296,7 +296,7 @@ int main(int argc, char* argv[]) {
         "Next step: Level 3 - Storage Server (C-STORE SCP)"
     });
 
-    pacs::samples::print_success("Echo Server terminated successfully.");
+    kcenon::pacs::samples::print_success("Echo Server terminated successfully.");
 
     return 0;
 }

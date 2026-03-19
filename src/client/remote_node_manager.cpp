@@ -46,7 +46,7 @@
 #include <thread>
 #include <unordered_map>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Constants
@@ -145,7 +145,7 @@ struct remote_node_manager::impl {
         }
     }
 
-    pacs::VoidResult perform_echo(const remote_node& node) {
+    kcenon::pacs::VoidResult perform_echo(const remote_node& node) {
         using namespace network;
 
         // Build association config
@@ -167,8 +167,8 @@ struct remote_node_manager::impl {
         );
 
         if (connect_result.is_err()) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::connection_failed,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::connection_failed,
                 "Failed to connect to node: " + node.node_id,
                 connect_result.error().message);
         }
@@ -179,8 +179,8 @@ struct remote_node_manager::impl {
         auto context_id = assoc.accepted_context_id(verification_sop_class_uid);
         if (!context_id) {
             assoc.abort();
-            return pacs::pacs_void_error(
-                pacs::error_codes::no_acceptable_context,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::no_acceptable_context,
                 "Verification SOP Class not accepted by " + node.node_id);
         }
 
@@ -191,8 +191,8 @@ struct remote_node_manager::impl {
         auto send_result = assoc.send_dimse(*context_id, echo_rq);
         if (send_result.is_err()) {
             assoc.abort();
-            return pacs::pacs_void_error(
-                pacs::error_codes::send_failed,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::send_failed,
                 "Failed to send C-ECHO-RQ to " + node.node_id);
         }
 
@@ -203,8 +203,8 @@ struct remote_node_manager::impl {
 
         if (recv_result.is_err()) {
             assoc.abort();
-            return pacs::pacs_void_error(
-                pacs::error_codes::receive_failed,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::receive_failed,
                 "Failed to receive C-ECHO-RSP from " + node.node_id);
         }
 
@@ -213,16 +213,16 @@ struct remote_node_manager::impl {
         // Verify response
         if (response.command() != dimse::command_field::c_echo_rsp) {
             assoc.abort();
-            return pacs::pacs_void_error(
-                pacs::error_codes::dimse_error,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::dimse_error,
                 "Unexpected response from " + node.node_id);
         }
 
         // Check status (status_success is a constexpr, not enum member)
         if (response.status() != dimse::status_success) {
             [[maybe_unused]] auto release_result = assoc.release();
-            return pacs::pacs_void_error(
-                pacs::error_codes::dimse_error,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::dimse_error,
                 "C-ECHO failed with status: " +
                 std::to_string(static_cast<uint16_t>(response.status())));
         }
@@ -230,7 +230,7 @@ struct remote_node_manager::impl {
         // Release association
         [[maybe_unused]] auto release_result = assoc.release();
 
-        return pacs::ok();
+        return kcenon::pacs::ok();
     }
 
     void health_check_loop() {
@@ -343,22 +343,22 @@ remote_node_manager::~remote_node_manager() {
 // Node CRUD Operations
 // =============================================================================
 
-pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
+kcenon::pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
     if (node.node_id.empty()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Node ID cannot be empty");
     }
 
     if (node.ae_title.empty()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "AE Title cannot be empty");
     }
 
     if (node.host.empty()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Host cannot be empty");
     }
 
@@ -366,8 +366,8 @@ pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
     {
         std::lock_guard<std::mutex> lock(impl_->cache_mutex);
         if (impl_->node_cache.find(node.node_id) != impl_->node_cache.end()) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::already_exists,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::already_exists,
                 "Node with ID already exists: " + node.node_id);
         }
     }
@@ -377,14 +377,14 @@ pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
 #ifdef PACS_WITH_DATABASE_SYSTEM
         auto result = impl_->repo->save(node);
         if (result.is_err()) {
-            return pacs::pacs_void_error(
+            return kcenon::pacs::pacs_void_error(
                 result.error().code,
                 "Failed to persist node: " + result.error().message);
         }
 #else
         auto result = impl_->repo->upsert(node);
         if (result.is_err()) {
-            return pacs::pacs_void_error(
+            return kcenon::pacs::pacs_void_error(
                 result.error().code,
                 "Failed to persist node: " + result.error().message);
         }
@@ -400,16 +400,16 @@ pacs::VoidResult remote_node_manager::add_node(const remote_node& node) {
     impl_->logger->info_fmt("Added remote node: {} ({}:{})",
                             node.node_id, node.host, node.port);
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult remote_node_manager::update_node(const remote_node& node) {
+kcenon::pacs::VoidResult remote_node_manager::update_node(const remote_node& node) {
     // Check if exists
     {
         std::lock_guard<std::mutex> lock(impl_->cache_mutex);
         if (impl_->node_cache.find(node.node_id) == impl_->node_cache.end()) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::not_found,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::not_found,
                 "Node not found: " + node.node_id);
         }
     }
@@ -419,14 +419,14 @@ pacs::VoidResult remote_node_manager::update_node(const remote_node& node) {
 #ifdef PACS_WITH_DATABASE_SYSTEM
         auto result = impl_->repo->save(node);
         if (result.is_err()) {
-            return pacs::pacs_void_error(
+            return kcenon::pacs::pacs_void_error(
                 result.error().code,
                 "Failed to update node: " + result.error().message);
         }
 #else
         auto result = impl_->repo->upsert(node);
         if (result.is_err()) {
-            return pacs::pacs_void_error(
+            return kcenon::pacs::pacs_void_error(
                 result.error().code,
                 "Failed to update node: " + result.error().message);
         }
@@ -441,18 +441,18 @@ pacs::VoidResult remote_node_manager::update_node(const remote_node& node) {
 
     impl_->logger->info_fmt("Updated remote node: {}", node.node_id);
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult remote_node_manager::remove_node(std::string_view node_id) {
+kcenon::pacs::VoidResult remote_node_manager::remove_node(std::string_view node_id) {
     std::string id_str(node_id);
 
     // Check if exists
     {
         std::lock_guard<std::mutex> lock(impl_->cache_mutex);
         if (impl_->node_cache.find(id_str) == impl_->node_cache.end()) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::not_found,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::not_found,
                 "Node not found: " + id_str);
         }
     }
@@ -485,7 +485,7 @@ pacs::VoidResult remote_node_manager::remove_node(std::string_view node_id) {
 
     impl_->logger->info_fmt("Removed remote node: {}", id_str);
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 std::optional<remote_node> remote_node_manager::get_node(std::string_view node_id) const {
@@ -522,7 +522,7 @@ std::vector<remote_node> remote_node_manager::list_nodes_by_status(node_status s
 // Connection Verification
 // =============================================================================
 
-pacs::VoidResult remote_node_manager::verify_node(std::string_view node_id) {
+kcenon::pacs::VoidResult remote_node_manager::verify_node(std::string_view node_id) {
     std::optional<remote_node> node;
     {
         std::lock_guard<std::mutex> lock(impl_->cache_mutex);
@@ -533,8 +533,8 @@ pacs::VoidResult remote_node_manager::verify_node(std::string_view node_id) {
     }
 
     if (!node) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Node not found: " + std::string(node_id));
     }
 
@@ -555,7 +555,7 @@ pacs::VoidResult remote_node_manager::verify_node(std::string_view node_id) {
     return result;
 }
 
-std::future<pacs::VoidResult> remote_node_manager::verify_node_async(
+std::future<kcenon::pacs::VoidResult> remote_node_manager::verify_node_async(
     std::string_view node_id) {
 
     std::string id_str(node_id);
@@ -585,7 +585,7 @@ void remote_node_manager::verify_all_nodes_async() {
 // Association Pool Management
 // =============================================================================
 
-pacs::Result<std::unique_ptr<network::association>> remote_node_manager::acquire_association(
+kcenon::pacs::Result<std::unique_ptr<network::association>> remote_node_manager::acquire_association(
     std::string_view node_id,
     std::span<const std::string> sop_classes) {
 
@@ -601,8 +601,8 @@ pacs::Result<std::unique_ptr<network::association>> remote_node_manager::acquire
     }
 
     if (!node) {
-        return pacs::pacs_error<std::unique_ptr<network::association>>(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_error<std::unique_ptr<network::association>>(
+            kcenon::pacs::error_codes::not_found,
             "Node not found: " + id_str);
     }
 
@@ -619,7 +619,7 @@ pacs::Result<std::unique_ptr<network::association>> remote_node_manager::acquire
             if (age < impl_->config.pool_connection_ttl &&
                 pooled.assoc && pooled.assoc->is_established()) {
                 impl_->logger->debug_fmt("Reusing pooled association for {}", id_str);
-                return pacs::ok(std::move(pooled.assoc));
+                return kcenon::pacs::ok(std::move(pooled.assoc));
             }
         }
     }
@@ -659,7 +659,7 @@ pacs::Result<std::unique_ptr<network::association>> remote_node_manager::acquire
         impl_->statistics[id_str].active_connections++;
     }
 
-    return pacs::ok(std::make_unique<network::association>(std::move(connect_result.value())));
+    return kcenon::pacs::ok(std::make_unique<network::association>(std::move(connect_result.value())));
 }
 
 void remote_node_manager::release_association(
@@ -787,4 +787,4 @@ void remote_node_manager::set_config(node_manager_config new_config) {
     impl_->config = std::move(new_config);
 }
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

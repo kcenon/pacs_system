@@ -54,7 +54,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 /**
  * @brief Represents a DICOM Part 10 file
@@ -102,7 +102,7 @@ public:
      * @return Result containing the parsed file or an error
      */
     [[nodiscard]] static auto open(const std::filesystem::path& path)
-        -> pacs::Result<dicom_file>;
+        -> kcenon::pacs::Result<dicom_file>;
 
     /**
      * @brief Parse a DICOM file from raw bytes
@@ -110,7 +110,7 @@ public:
      * @return Result containing the parsed file or an error
      */
     [[nodiscard]] static auto from_bytes(std::span<const uint8_t> data)
-        -> pacs::Result<dicom_file>;
+        -> kcenon::pacs::Result<dicom_file>;
 
     // ========================================================================
     // Static Factory Methods (Creation)
@@ -144,7 +144,7 @@ public:
      * @return Result indicating success or failure
      */
     [[nodiscard]] auto save(const std::filesystem::path& path) const
-        -> pacs::VoidResult;
+        -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Encode the DICOM file to raw bytes
@@ -250,7 +250,7 @@ private:
      */
     [[nodiscard]] static auto parse_meta_information(
         std::span<const uint8_t> data, size_t& bytes_read)
-        -> pacs::Result<dicom_dataset>;
+        -> kcenon::pacs::Result<dicom_dataset>;
 
     /**
      * @brief Generate File Meta Information for a dataset
@@ -278,7 +278,7 @@ private:
      */
     [[nodiscard]] static auto decode_explicit_vr_le(
         std::span<const uint8_t> data, size_t& bytes_read)
-        -> pacs::Result<dicom_dataset>;
+        -> kcenon::pacs::Result<dicom_dataset>;
 
     /**
      * @brief Decode a dataset from Implicit VR Little Endian format
@@ -290,7 +290,7 @@ private:
      */
     [[nodiscard]] static auto decode_implicit_vr_le(
         std::span<const uint8_t> data, size_t& bytes_read)
-        -> pacs::Result<dicom_dataset>;
+        -> kcenon::pacs::Result<dicom_dataset>;
 
     /**
      * @brief Decode a dataset from Explicit VR Big Endian format
@@ -300,7 +300,7 @@ private:
      */
     [[nodiscard]] static auto decode_explicit_vr_be(
         std::span<const uint8_t> data, size_t& bytes_read)
-        -> pacs::Result<dicom_dataset>;
+        -> kcenon::pacs::Result<dicom_dataset>;
 
     /**
      * @brief Encode a dataset using Implicit VR Little Endian
@@ -329,7 +329,7 @@ private:
         std::span<const uint8_t> data,
         const encoding::transfer_syntax& ts,
         size_t& bytes_read)
-        -> pacs::Result<dicom_dataset>;
+        -> kcenon::pacs::Result<dicom_dataset>;
 
     /**
      * @brief Encode a dataset based on its Transfer Syntax
@@ -353,7 +353,7 @@ private:
     [[nodiscard]] static auto parse_undefined_length_sequence(
         std::span<const uint8_t> data, size_t& bytes_read,
         bool explicit_vr, bool big_endian)
-        -> pacs::Result<std::vector<dicom_dataset>>;
+        -> kcenon::pacs::Result<std::vector<dicom_dataset>>;
 
     /**
      * @brief Parse encapsulated pixel data frames
@@ -384,4 +384,5 @@ private:
     static constexpr size_t kPreambleSize = 128;
 };
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+

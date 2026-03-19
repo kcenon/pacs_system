@@ -236,10 +236,10 @@ bool perform_secure_echo(
     const tls_options& tls,
     std::chrono::milliseconds timeout) {
 
-    using namespace pacs::network;
-    using namespace pacs::network::dimse;
-    using namespace pacs::services;
-    using namespace pacs::integration;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::network::dimse;
+    using namespace kcenon::pacs::services;
+    using namespace kcenon::pacs::integration;
 
     std::cout << "Connecting securely to " << host << ":" << port << "...\n";
     std::cout << "  Calling AE:       " << calling_ae << "\n";

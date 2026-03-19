@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::xds {
+namespace kcenon::pacs::services::xds {
 
 // =============================================================================
 // Registry Query Types
@@ -300,6 +300,6 @@ private:
     imaging_document_consumer_config config_;
 };
 
-}  // namespace pacs::services::xds
+}  // namespace kcenon::pacs::services::xds
 
 #endif  // PACS_SERVICES_XDS_IMAGING_DOCUMENT_CONSUMER_HPP

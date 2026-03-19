@@ -44,39 +44,39 @@
 
 #include <memory>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 class health_checker;
 class pacs_metrics;
-} // namespace pacs::monitoring
+} // namespace kcenon::pacs::monitoring
 
-namespace pacs::services::monitoring {
+namespace kcenon::pacs::services::monitoring {
 class database_metrics_service;
-} // namespace pacs::services::monitoring
+} // namespace kcenon::pacs::services::monitoring
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 class access_control_manager;
-} // namespace pacs::security
+} // namespace kcenon::pacs::security
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 class oauth2_middleware;
-} // namespace pacs::web::auth
+} // namespace kcenon::pacs::web::auth
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
 class file_storage;
-} // namespace pacs::storage
+} // namespace kcenon::pacs::storage
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 class dicom_server;
-} // namespace pacs::network
+} // namespace kcenon::pacs::network
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 class remote_node_manager;
 class job_manager;
 class routing_manager;
-} // namespace pacs::client
+} // namespace kcenon::pacs::client
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 struct rest_server_config;
 
@@ -130,4 +130,4 @@ namespace endpoints {
 
 } // namespace endpoints
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

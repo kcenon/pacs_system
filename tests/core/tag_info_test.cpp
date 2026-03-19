@@ -7,7 +7,7 @@
 
 #include "pacs/core/tag_info.hpp"
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 TEST_CASE("value_multiplicity default construction", "[tag_info][vm]") {
     value_multiplicity vm;

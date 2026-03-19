@@ -38,9 +38,9 @@
 #include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/services/sop_classes/parametric_map_storage.hpp"
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // parametric_map_iod_validator Implementation
@@ -569,4 +569,4 @@ bool is_valid_parametric_map_dataset(const dicom_dataset& dataset) {
     return validator.quick_check(dataset);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

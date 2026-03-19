@@ -47,7 +47,7 @@
 #include <cstdint>
 #include <cstring>
 
-namespace pacs::encoding::simd {
+namespace kcenon::pacs::encoding::simd {
 
 // Forward declarations for byte swap functions
 void swap_bytes_16_simd(const uint8_t* src, uint8_t* dst,
@@ -396,6 +396,6 @@ inline void swap_bytes_64_simd(const uint8_t* src, uint8_t* dst,
     detail::swap_bytes_64_scalar(src, dst, byte_count);
 }
 
-}  // namespace pacs::encoding::simd
+}  // namespace kcenon::pacs::encoding::simd
 
 #endif  // PACS_ENCODING_SIMD_UTILS_HPP

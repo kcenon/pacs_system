@@ -11,8 +11,8 @@
 
 #include <vector>
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Registry API Tests

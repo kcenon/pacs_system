@@ -34,7 +34,7 @@
 namespace {
 
 /// Global pointer to server for signal handling
-std::atomic<pacs::network::dicom_server*> g_server{nullptr};
+std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
 
 /// Global running flag for signal handling
 std::atomic<bool> g_running{true};
@@ -295,9 +295,9 @@ bool run_server(
     size_t max_associations,
     uint32_t idle_timeout) {
 
-    using namespace pacs::network;
-    using namespace pacs::services;
-    using namespace pacs::integration;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
+    using namespace kcenon::pacs::integration;
 
     std::cout << "\nStarting Secure Echo SCP...\n";
     std::cout << "  AE Title:           " << ae_title << "\n";

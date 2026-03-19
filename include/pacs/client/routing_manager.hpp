@@ -54,19 +54,19 @@
 #include <vector>
 
 // Forward declarations
-namespace pacs::core {
+namespace kcenon::pacs::core {
 class dicom_dataset;
 }
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class routing_repository;
 }
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 class storage_scp;
 }
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // Forward declaration
 class job_manager;
@@ -168,7 +168,7 @@ public:
      * @param rule The rule to add
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto add_rule(const routing_rule& rule) -> pacs::VoidResult;
+    [[nodiscard]] auto add_rule(const routing_rule& rule) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Update an existing routing rule
@@ -176,7 +176,7 @@ public:
      * @param rule The rule to update (identified by rule_id)
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto update_rule(const routing_rule& rule) -> pacs::VoidResult;
+    [[nodiscard]] auto update_rule(const routing_rule& rule) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Remove a routing rule
@@ -184,7 +184,7 @@ public:
      * @param rule_id The ID of the rule to remove
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> pacs::VoidResult;
+    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Get a routing rule by ID
@@ -221,7 +221,7 @@ public:
      * @return VoidResult indicating success or error
      */
     [[nodiscard]] auto set_rule_priority(std::string_view rule_id, int priority)
-        -> pacs::VoidResult;
+        -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Reorder rules by specifying the desired order
@@ -230,7 +230,7 @@ public:
      * @return VoidResult indicating success or error
      */
     [[nodiscard]] auto reorder_rules(const std::vector<std::string>& rule_ids)
-        -> pacs::VoidResult;
+        -> kcenon::pacs::VoidResult;
 
     // =========================================================================
     // Rule Evaluation
@@ -439,4 +439,4 @@ private:
     services::storage_scp* attached_scp_{nullptr};
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

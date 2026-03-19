@@ -56,7 +56,7 @@
 #include <mutex>
 #include <string>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @struct pipeline_config
@@ -277,7 +277,7 @@ public:
      * @return Shared pointer to the stage's thread pool, or nullptr if not running
      */
     [[nodiscard]] auto get_stage_pool(pipeline_stage stage)
-        -> std::shared_ptr<pacs::integration::thread_pool_interface>;
+        -> std::shared_ptr<kcenon::pacs::integration::thread_pool_interface>;
 
     /**
      * @brief Get queue depth for a specific stage
@@ -372,7 +372,7 @@ private:
     static constexpr size_t stage_count =
         static_cast<size_t>(pipeline_stage::stage_count);
 
-    using pool_ptr = std::shared_ptr<pacs::integration::thread_pool_interface>;
+    using pool_ptr = std::shared_ptr<kcenon::pacs::integration::thread_pool_interface>;
     std::array<pool_ptr, stage_count> stage_pools_;
 
     // Configuration
@@ -454,4 +454,4 @@ protected:
     pipeline_job_base& operator=(pipeline_job_base&&) = default;
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

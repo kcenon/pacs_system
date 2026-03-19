@@ -21,8 +21,8 @@
 #include <vector>
 #include <algorithm>
 
-using namespace pacs::network::pipeline;
-using pacs::VoidResult;
+using namespace kcenon::pacs::network::pipeline;
+using kcenon::pacs::VoidResult;
 
 namespace {
 
@@ -91,7 +91,7 @@ public:
         if (on_execute_) {
             on_execute_();
         }
-        return pacs::ok();
+        return kcenon::pacs::ok();
     }
 
     [[nodiscard]] auto get_context() const noexcept -> const job_context& override {

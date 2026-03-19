@@ -43,7 +43,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Repository for prefetch history records using base_repository pattern
@@ -108,6 +108,6 @@ private:
         std::chrono::system_clock::time_point tp) const -> std::string;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -34,7 +34,7 @@
 
 #include <pacs/storage/storage_interface.hpp>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // Use common_system's ok() function
 using kcenon::common::ok;
@@ -72,4 +72,4 @@ auto storage_interface::retrieve_batch(
     return results;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

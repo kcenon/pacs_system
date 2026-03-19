@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
 // =============================================================================
 // Assessment Types
@@ -293,6 +293,6 @@ private:
  */
 [[nodiscard]] std::string to_string(assessment_status status);
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai
 
 #endif  // PACS_AI_AIRA_ASSESSMENT_HPP

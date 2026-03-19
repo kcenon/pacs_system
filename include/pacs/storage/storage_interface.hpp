@@ -53,7 +53,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -255,4 +255,4 @@ protected:
     storage_interface& operator=(storage_interface&&) = default;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

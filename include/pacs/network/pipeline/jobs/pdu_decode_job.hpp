@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @struct decoded_pdu
@@ -60,7 +60,7 @@ namespace pacs::network::pipeline {
  */
 struct decoded_pdu {
     /// The type of PDU that was decoded
-    pacs::network::pdu_type type;
+    kcenon::pacs::network::pdu_type type;
 
     /// Session this PDU belongs to
     uint64_t session_id;
@@ -154,4 +154,4 @@ private:
     [[nodiscard]] auto decode_pdu() -> Result<decoded_pdu>;
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

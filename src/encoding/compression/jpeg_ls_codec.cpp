@@ -38,7 +38,7 @@
 #include <charls/charls.h>
 #endif
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 namespace {
 
@@ -117,16 +117,16 @@ public:
         (void)pixel_data;
         (void)params;
         (void)options;
-        return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+        return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
             "JPEG-LS codec not available: CharLS library not found at build time");
 #else
         // Validate input
         if (pixel_data.empty()) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty pixel data");
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Empty pixel data");
         }
 
         if (params.width == 0 || params.height == 0) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Invalid image dimensions");
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid image dimensions");
         }
 
         // Determine effective NEAR value
@@ -183,13 +183,13 @@ public:
             // Resize to actual size
             destination.resize(bytes_written);
 
-            return pacs::ok<compression_result>(compression_result{std::move(destination), params});
+            return kcenon::pacs::ok<compression_result>(compression_result{std::move(destination), params});
 
         } catch (const charls::jpegls_error& e) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS encoding failed: ") + e.what());
         } catch (const std::exception& e) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS encoding failed: ") + e.what());
         }
 #endif  // PACS_WITH_JPEGLS_CODEC
@@ -200,11 +200,11 @@ public:
 #ifndef PACS_WITH_JPEGLS_CODEC
         (void)compressed_data;
         (void)params;
-        return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+        return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
             "JPEG-LS codec not available: CharLS library not found at build time");
 #else
         if (compressed_data.empty()) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Empty compressed data");
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Empty compressed data");
         }
 
         try {
@@ -236,12 +236,12 @@ public:
 
             // Validate dimensions if provided
             if (params.width > 0 && params.width != output_params.width) {
-                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Image width mismatch: expected " +
+                return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Image width mismatch: expected " +
                                             std::to_string(params.width) + ", got " +
                                             std::to_string(output_params.width));
             }
             if (params.height > 0 && params.height != output_params.height) {
-                return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, "Image height mismatch: expected " +
+                return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Image height mismatch: expected " +
                                             std::to_string(params.height) + ", got " +
                                             std::to_string(output_params.height));
             }
@@ -256,13 +256,13 @@ public:
             // Set output as interleaved
             output_params.planar_configuration = 0;
 
-            return pacs::ok<compression_result>(compression_result{std::move(destination), output_params});
+            return kcenon::pacs::ok<compression_result>(compression_result{std::move(destination), output_params});
 
         } catch (const charls::jpegls_error& e) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS decoding failed: ") + e.what());
         } catch (const std::exception& e) {
-            return pacs::pacs_error<compression_result>(pacs::error_codes::decompression_error, 
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
                 std::string("JPEG-LS decoding failed: ") + e.what());
         }
 #endif  // PACS_WITH_JPEGLS_CODEC
@@ -354,4 +354,4 @@ codec_result jpeg_ls_codec::decode(std::span<const uint8_t> compressed_data,
     return impl_->decode(compressed_data, params);
 }
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

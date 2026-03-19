@@ -13,8 +13,8 @@
 #include "pacs/client/job_types.hpp"
 #include "pacs/web/rest_types.hpp"
 
-using namespace pacs::client;
-using namespace pacs::web;
+using namespace kcenon::pacs::client;
+using namespace kcenon::pacs::web;
 
 // =============================================================================
 // Job Status State Transition Tests

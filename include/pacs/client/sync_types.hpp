@@ -51,7 +51,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Sync Direction
@@ -394,4 +394,4 @@ using sync_completion_callback = std::function<void(
  */
 using sync_conflict_callback = std::function<void(const sync_conflict& conflict)>;
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

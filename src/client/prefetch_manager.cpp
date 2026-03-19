@@ -59,7 +59,7 @@
 #include <thread>
 #include <unordered_set>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // UUID Generation
@@ -495,7 +495,7 @@ prefetch_manager::~prefetch_manager() {
 // Rule Management
 // =============================================================================
 
-pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
+kcenon::pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
     prefetch_rule new_rule = rule;
     if (new_rule.rule_id.empty()) {
         new_rule.rule_id = generate_uuid();
@@ -533,9 +533,9 @@ pacs::VoidResult prefetch_manager::add_rule(const prefetch_rule& rule) {
     return kcenon::common::ok();
 }
 
-pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
+kcenon::pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
     if (rule.rule_id.empty()) {
-        return pacs::pacs_void_error(-1, "Rule ID is required for update");
+        return kcenon::pacs::pacs_void_error(-1, "Rule ID is required for update");
     }
 
     // Save to repository
@@ -575,7 +575,7 @@ pacs::VoidResult prefetch_manager::update_rule(const prefetch_rule& rule) {
     return kcenon::common::ok();
 }
 
-pacs::VoidResult prefetch_manager::remove_rule(std::string_view rule_id) {
+kcenon::pacs::VoidResult prefetch_manager::remove_rule(std::string_view rule_id) {
     // Remove from repository
     #ifdef PACS_WITH_DATABASE_SYSTEM
     if (impl_->repositories.rules) {
@@ -938,4 +938,4 @@ void prefetch_manager::set_config(prefetch_manager_config new_config) {
     impl_->config = new_config;
 }
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

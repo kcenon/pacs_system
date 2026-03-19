@@ -39,7 +39,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 namespace {
 
@@ -158,4 +158,4 @@ auto dicom_tag::to_string() const -> std::string {
     return result;
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

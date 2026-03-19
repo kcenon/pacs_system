@@ -12,7 +12,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace pacs::ai;
+using namespace kcenon::pacs::ai;
 
 // =============================================================================
 // Test Helpers
@@ -27,14 +27,14 @@ class ai_connector_test_fixture {
 public:
     explicit ai_connector_test_fixture(const ai_service_config& config = default_config()) {
         // Initialize dependencies
-        pacs::integration::logger_config log_config;
+        kcenon::pacs::integration::logger_config log_config;
         log_config.enable_console = false;
         log_config.enable_file = false;
-        pacs::integration::logger_adapter::initialize(log_config);
+        kcenon::pacs::integration::logger_adapter::initialize(log_config);
 
-        pacs::integration::monitoring_config mon_config;
+        kcenon::pacs::integration::monitoring_config mon_config;
         mon_config.enable_metrics = true;
-        pacs::integration::monitoring_adapter::initialize(mon_config);
+        kcenon::pacs::integration::monitoring_adapter::initialize(mon_config);
 
         // Initialize AI service connector
         (void)ai_service_connector::initialize(config);
@@ -42,8 +42,8 @@ public:
 
     ~ai_connector_test_fixture() {
         ai_service_connector::shutdown();
-        pacs::integration::monitoring_adapter::shutdown();
-        pacs::integration::logger_adapter::shutdown();
+        kcenon::pacs::integration::monitoring_adapter::shutdown();
+        kcenon::pacs::integration::logger_adapter::shutdown();
     }
 
     ai_connector_test_fixture(const ai_connector_test_fixture&) = delete;
@@ -69,13 +69,13 @@ public:
 TEST_CASE("ai_service_connector initialization and shutdown",
           "[ai_service_connector][init]") {
     SECTION("Basic initialization") {
-        pacs::integration::logger_config log_config;
+        kcenon::pacs::integration::logger_config log_config;
         log_config.enable_console = false;
         log_config.enable_file = false;
-        pacs::integration::logger_adapter::initialize(log_config);
+        kcenon::pacs::integration::logger_adapter::initialize(log_config);
 
-        pacs::integration::monitoring_config mon_config;
-        pacs::integration::monitoring_adapter::initialize(mon_config);
+        kcenon::pacs::integration::monitoring_config mon_config;
+        kcenon::pacs::integration::monitoring_adapter::initialize(mon_config);
 
         ai_service_config config;
         config.base_url = "http://localhost:8080/api/v1";
@@ -88,17 +88,17 @@ TEST_CASE("ai_service_connector initialization and shutdown",
         ai_service_connector::shutdown();
         REQUIRE_FALSE(ai_service_connector::is_initialized());
 
-        pacs::integration::monitoring_adapter::shutdown();
-        pacs::integration::logger_adapter::shutdown();
+        kcenon::pacs::integration::monitoring_adapter::shutdown();
+        kcenon::pacs::integration::logger_adapter::shutdown();
     }
 
     SECTION("Initialization without base URL fails") {
-        pacs::integration::logger_config log_config;
+        kcenon::pacs::integration::logger_config log_config;
         log_config.enable_console = false;
-        pacs::integration::logger_adapter::initialize(log_config);
+        kcenon::pacs::integration::logger_adapter::initialize(log_config);
 
-        pacs::integration::monitoring_config mon_config;
-        pacs::integration::monitoring_adapter::initialize(mon_config);
+        kcenon::pacs::integration::monitoring_config mon_config;
+        kcenon::pacs::integration::monitoring_adapter::initialize(mon_config);
 
         ai_service_config config;
         // base_url is empty
@@ -107,8 +107,8 @@ TEST_CASE("ai_service_connector initialization and shutdown",
         REQUIRE(result.is_err());
         REQUIRE_FALSE(ai_service_connector::is_initialized());
 
-        pacs::integration::monitoring_adapter::shutdown();
-        pacs::integration::logger_adapter::shutdown();
+        kcenon::pacs::integration::monitoring_adapter::shutdown();
+        kcenon::pacs::integration::logger_adapter::shutdown();
     }
 
     SECTION("Shutdown without initialization is safe") {
@@ -117,12 +117,12 @@ TEST_CASE("ai_service_connector initialization and shutdown",
     }
 
     SECTION("Configuration is preserved") {
-        pacs::integration::logger_config log_config;
+        kcenon::pacs::integration::logger_config log_config;
         log_config.enable_console = false;
-        pacs::integration::logger_adapter::initialize(log_config);
+        kcenon::pacs::integration::logger_adapter::initialize(log_config);
 
-        pacs::integration::monitoring_config mon_config;
-        pacs::integration::monitoring_adapter::initialize(mon_config);
+        kcenon::pacs::integration::monitoring_config mon_config;
+        kcenon::pacs::integration::monitoring_adapter::initialize(mon_config);
 
         ai_service_config config;
         config.base_url = "https://ai.example.com/api";
@@ -144,8 +144,8 @@ TEST_CASE("ai_service_connector initialization and shutdown",
         REQUIRE(stored_config.max_retries == 5);
 
         ai_service_connector::shutdown();
-        pacs::integration::monitoring_adapter::shutdown();
-        pacs::integration::logger_adapter::shutdown();
+        kcenon::pacs::integration::monitoring_adapter::shutdown();
+        kcenon::pacs::integration::logger_adapter::shutdown();
     }
 }
 

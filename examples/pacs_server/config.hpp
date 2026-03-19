@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::example {
+namespace kcenon::pacs::example {
 
 /**
  * @brief Server network configuration
@@ -128,6 +128,6 @@ struct pacs_server_config {
     static void print_help();
 };
 
-}  // namespace pacs::example
+}  // namespace kcenon::pacs::example
 
 #endif  // PACS_EXAMPLE_PACS_SERVER_CONFIG_HPP

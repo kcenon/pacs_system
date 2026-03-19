@@ -50,7 +50,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // Waveform PS Validation Options
@@ -184,6 +184,6 @@ private:
         validation_result& result) const;
 };
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_WAVEFORM_PS_IOD_VALIDATOR_HPP

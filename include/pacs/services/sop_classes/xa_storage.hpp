@@ -59,7 +59,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // X-Ray Angiographic Storage SOP Class UIDs
@@ -325,6 +325,6 @@ struct xa_calibration_data {
     [[nodiscard]] bool is_valid() const noexcept;
 };
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_XA_STORAGE_HPP

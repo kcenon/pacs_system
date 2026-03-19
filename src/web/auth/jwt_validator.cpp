@@ -57,7 +57,7 @@
 #include <openssl/pem.h>
 #endif
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 // =============================================================================
 // Base64url Decode
@@ -507,4 +507,4 @@ const oauth2_config& jwt_validator::config() const noexcept {
     return config_;
 }
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

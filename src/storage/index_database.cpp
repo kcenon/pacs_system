@@ -64,14 +64,14 @@
 #include <sstream>
 #include <variant>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // Use common_system's result helpers
 using kcenon::common::make_error;
 using kcenon::common::ok;
 
 // Use pacs error codes
-using namespace pacs::error_codes;
+using namespace kcenon::pacs::error_codes;
 
 // ============================================================================
 // Helper Functions
@@ -156,7 +156,7 @@ auto create_adapter_compatible_memory_path() -> std::string {
         static_cast<std::chrono::steady_clock::rep>(counter.fetch_add(1));
 
     const auto file_name =
-        pacs::compat::format("pacs_index_memory_{}.sqlite", unique_id);
+        kcenon::pacs::compat::format("pacs_index_memory_{}.sqlite", unique_id);
     return (std::filesystem::temp_directory_path() / file_name).string();
 }
 #endif
@@ -212,7 +212,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
             sqlite3_close(db);
         }
         return make_error<std::unique_ptr<index_database>>(
-            rc, pacs::compat::format("Failed to open database: {}", error_msg),
+            rc, kcenon::pacs::compat::format("Failed to open database: {}", error_msg),
             "storage");
     }
 
@@ -238,7 +238,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
 
     // Configure cache size (negative value means KB)
     auto cache_sql =
-        pacs::compat::format("PRAGMA cache_size = -{};", config.cache_size_mb * 1024);
+        kcenon::pacs::compat::format("PRAGMA cache_size = -{};", config.cache_size_mb * 1024);
     rc = sqlite3_exec(db, cache_sql.c_str(), nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         sqlite3_close(db);
@@ -248,7 +248,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
 
     // Configure memory-mapped I/O
     if (config.mmap_enabled && db_path != ":memory:") {
-        auto mmap_sql = pacs::compat::format("PRAGMA mmap_size = {};", config.mmap_size);
+        auto mmap_sql = kcenon::pacs::compat::format("PRAGMA mmap_size = {};", config.mmap_size);
         rc = sqlite3_exec(db, mmap_sql.c_str(), nullptr, nullptr, nullptr);
         if (rc != SQLITE_OK) {
             // mmap failure is not critical, continue with regular I/O
@@ -274,7 +274,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     if (migration_result.is_err()) {
         return make_error<std::unique_ptr<index_database>>(
             migration_result.error().code,
-            pacs::compat::format("Migration failed: {}",
+            kcenon::pacs::compat::format("Migration failed: {}",
                        migration_result.error().message),
             "storage");
     }
@@ -293,7 +293,7 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     if (repository_result.is_err()) {
         return make_error<std::unique_ptr<index_database>>(
             repository_result.error().code,
-            pacs::compat::format("Repository initialization failed: {}",
+            kcenon::pacs::compat::format("Repository initialization failed: {}",
                                  repository_result.error().message),
             "storage");
     }
@@ -342,7 +342,7 @@ auto index_database::initialize_database_adapter() -> VoidResult {
         db_adapter_.reset();
         return make_error<std::monostate>(
             database_connection_error,
-            pacs::compat::format("Failed to connect adapter: {}",
+            kcenon::pacs::compat::format("Failed to connect adapter: {}",
                                  connect_result.error().message),
             "storage");
     }
@@ -1197,7 +1197,7 @@ auto index_database::vacuum() -> VoidResult {
     auto rc = sqlite3_exec(db_, "VACUUM;", nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
-            rc, pacs::compat::format("VACUUM failed: {}", sqlite3_errmsg(db_)),
+            rc, kcenon::pacs::compat::format("VACUUM failed: {}", sqlite3_errmsg(db_)),
             "storage");
     }
     return ok();
@@ -1214,7 +1214,7 @@ auto index_database::analyze() -> VoidResult {
     auto rc = sqlite3_exec(db_, "ANALYZE;", nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
-            rc, pacs::compat::format("ANALYZE failed: {}", sqlite3_errmsg(db_)),
+            rc, kcenon::pacs::compat::format("ANALYZE failed: {}", sqlite3_errmsg(db_)),
             "storage");
     }
     return ok();
@@ -1234,7 +1234,7 @@ auto index_database::verify_integrity() const -> VoidResult {
             auto it = row.find("integrity_check");
             if (it != row.end() && it->second != "ok") {
                 return make_error<std::monostate>(
-                    -1, pacs::compat::format("Integrity check failed: {}", it->second),
+                    -1, kcenon::pacs::compat::format("Integrity check failed: {}", it->second),
                     "storage");
             }
         }
@@ -1249,7 +1249,7 @@ auto index_database::verify_integrity() const -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare integrity check: {}",
+            kcenon::pacs::compat::format("Failed to prepare integrity check: {}",
                        sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1260,7 +1260,7 @@ auto index_database::verify_integrity() const -> VoidResult {
         if (result != "ok") {
             sqlite3_finalize(stmt);
             return make_error<std::monostate>(
-                -1, pacs::compat::format("Integrity check failed: {}", result),
+                -1, kcenon::pacs::compat::format("Integrity check failed: {}", result),
                 "storage");
         }
     }
@@ -1284,7 +1284,7 @@ auto index_database::checkpoint(bool truncate) -> VoidResult {
     auto rc = sqlite3_exec(db_, sql, nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
-            rc, pacs::compat::format("Checkpoint failed: {}", sqlite3_errmsg(db_)),
+            rc, kcenon::pacs::compat::format("Checkpoint failed: {}", sqlite3_errmsg(db_)),
             "storage");
     }
     return ok();
@@ -1341,7 +1341,7 @@ auto index_database::get_storage_stats() const -> Result<storage_stats> {
     if (rc != SQLITE_OK) {
         return pacs_error<storage_stats>(
             error_codes::database_query_error,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)));
     }
 
@@ -1966,4 +1966,4 @@ auto index_database::parse_instance_from_row(
 }
 #endif
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

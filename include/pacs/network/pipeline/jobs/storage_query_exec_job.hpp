@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @enum dimse_status
@@ -201,4 +201,4 @@ private:
     static auto get_category_for_command(dimse_command_type type) -> job_category;
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

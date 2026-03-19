@@ -40,7 +40,7 @@
 #include <optional>
 #include <string_view>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief DICOM Value Representation (VR) types.
@@ -326,6 +326,6 @@ enum class vr_type : uint16_t {
 
 /// @}
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_VR_TYPE_HPP

@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // CT Storage SOP Class UIDs
@@ -96,6 +96,6 @@ inline constexpr std::string_view ct_for_processing_image_storage_uid =
  */
 [[nodiscard]] bool is_valid_ct_photometric(std::string_view value) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_CT_STORAGE_HPP

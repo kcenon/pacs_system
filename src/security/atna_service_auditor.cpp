@@ -5,7 +5,7 @@
 
 #include "pacs/security/atna_service_auditor.hpp"
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // =============================================================================
 // Construction
@@ -193,4 +193,4 @@ void atna_service_auditor::send_audit(const atna_audit_message& message) {
     }
 }
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security

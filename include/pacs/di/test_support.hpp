@@ -58,7 +58,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::di::test {
+namespace kcenon::pacs::di::test {
 
 // =============================================================================
 // Mock Storage Implementation
@@ -300,7 +300,7 @@ private:
  *     .build();
  *
  * // Use container in test
- * auto storage = container->resolve<pacs::di::IDicomStorage>().value();
+ * auto storage = container->resolve<kcenon::pacs::di::IDicomStorage>().value();
  * @endcode
  */
 class TestContainerBuilder {
@@ -418,4 +418,4 @@ inline void register_mock_network(
     container.register_instance<IDicomNetwork>(std::move(mock));
 }
 
-}  // namespace pacs::di::test
+}  // namespace kcenon::pacs::di::test

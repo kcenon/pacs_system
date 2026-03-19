@@ -40,7 +40,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 dimse_process_job::dimse_process_job(decoded_pdu pdu,
                                      request_callback on_request,
@@ -63,7 +63,7 @@ dimse_process_job::dimse_process_job(decoded_pdu pdu,
 
 auto dimse_process_job::execute(pipeline_coordinator& coordinator) -> VoidResult {
     // Handle association PDUs differently
-    if (pdu_.type != pacs::network::pdu_type::p_data_tf) {
+    if (pdu_.type != kcenon::pacs::network::pdu_type::p_data_tf) {
         return process_association_pdu();
     }
 
@@ -260,4 +260,4 @@ auto dimse_process_job::process_association_pdu() -> VoidResult {
     return ok();
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

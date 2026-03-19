@@ -60,7 +60,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Action to take on private tags during anonymization
@@ -436,4 +436,4 @@ private:
     void initialize_profile_actions();
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

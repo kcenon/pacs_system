@@ -168,7 +168,7 @@ Exit Codes:
  * @return true if arguments are valid
  */
 bool parse_arguments(int argc, char* argv[], options& opts) {
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::encoding;
 
     if (argc < 2) {
         return false;
@@ -397,10 +397,10 @@ image_data read_image(const std::filesystem::path& file_path) {
  * @param opts Conversion options
  * @return DICOM dataset
  */
-pacs::core::dicom_dataset create_dicom_dataset(const image_data& img,
+kcenon::pacs::core::dicom_dataset create_dicom_dataset(const image_data& img,
                                                 const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     dicom_dataset dataset;
 
@@ -479,8 +479,8 @@ pacs::core::dicom_dataset create_dicom_dataset(const image_data& img,
 bool convert_file(const std::filesystem::path& input_path,
                   const std::filesystem::path& output_path,
                   const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     // Check if output exists and overwrite is disabled
     if (std::filesystem::exists(output_path) && !opts.overwrite) {

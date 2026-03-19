@@ -51,9 +51,9 @@
 #include <memory>
 #include <optional>
 
-namespace pacs::security { class atna_service_auditor; }
+namespace kcenon::pacs::security { class atna_service_auditor; }
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UIDs
@@ -272,7 +272,7 @@ public:
      * @param auditor Shared pointer to an ATNA service auditor
      */
     void set_audit_handler(
-        std::shared_ptr<pacs::security::atna_service_auditor> auditor);
+        std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor);
 
     // =========================================================================
     // scp_service Interface Implementation
@@ -378,11 +378,11 @@ private:
 
     query_handler handler_;
     cancel_check cancel_check_;
-    std::shared_ptr<pacs::security::atna_service_auditor> auditor_;
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor_;
     size_t max_results_{0};  // 0 = unlimited
     std::atomic<size_t> queries_processed_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_QUERY_SCP_HPP

@@ -42,7 +42,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // DICOM Tag Constants (for dataset extraction)
@@ -106,31 +106,31 @@ network::Result<store_result> storage_scu::store_impl(
     // Extract SOP Class UID from dataset
     const auto sop_class_uid = dataset.get_string(tag_sop_class_uid);
     if (sop_class_uid.empty()) {
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::store_missing_sop_class_uid,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::store_missing_sop_class_uid,
             "Missing SOP Class UID in dataset");
     }
 
     // Extract SOP Instance UID from dataset
     const auto sop_instance_uid = dataset.get_string(tag_sop_instance_uid);
     if (sop_instance_uid.empty()) {
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::store_missing_sop_instance_uid,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::store_missing_sop_instance_uid,
             "Missing SOP Instance UID in dataset");
     }
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Get accepted presentation context for this SOP class
     auto context_id = assoc.accepted_context_id(sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::store_no_accepted_context,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::store_no_accepted_context,
             "No accepted presentation context for SOP Class: " + sop_class_uid);
     }
 
@@ -164,8 +164,8 @@ network::Result<store_result> storage_scu::store_impl(
     // Verify it's a C-STORE response
     if (response.command() != command_field::c_store_rsp) {
         failures_.fetch_add(1, std::memory_order_relaxed);
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::store_unexpected_command,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::store_unexpected_command,
             "Expected C-STORE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -250,15 +250,15 @@ network::Result<store_result> storage_scu::store_file(
 
     // Check if file exists
     if (!std::filesystem::exists(file_path)) {
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::file_not_found_service,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::file_not_found_service,
             "File not found: " + file_path.string());
     }
 
     // Check if it's a regular file
     if (!std::filesystem::is_regular_file(file_path)) {
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::not_a_regular_file,
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::not_a_regular_file,
             "Not a regular file: " + file_path.string());
     }
 
@@ -269,8 +269,8 @@ network::Result<store_result> storage_scu::store_file(
                                file_path.string() + ": " +
                                file_result.error().message;
         logger_->error(error_msg);
-        return pacs::pacs_error<store_result>(
-            pacs::error_codes::file_parse_failed, error_msg);
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::file_parse_failed, error_msg);
     }
 
     // Get the dataset from the parsed file
@@ -402,4 +402,4 @@ uint16_t storage_scu::next_message_id() noexcept {
     return id;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

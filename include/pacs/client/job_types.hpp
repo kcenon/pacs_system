@@ -52,7 +52,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Job Type
@@ -438,4 +438,4 @@ struct job_manager_config {
     std::string local_ae_title{"PACS_CLIENT"};       ///< Local AE title for operations
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

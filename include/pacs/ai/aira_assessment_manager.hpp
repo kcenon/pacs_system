@@ -51,7 +51,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
 // =============================================================================
 // Assessment Manager
@@ -174,6 +174,6 @@ private:
     std::map<std::string, assessment_info> metadata_;
 };
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai
 
 #endif  // PACS_AI_AIRA_ASSESSMENT_MANAGER_HPP

@@ -10,7 +10,7 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::security;
+using namespace kcenon::pacs::security;
 
 TEST_CASE("UidMapping: Basic Operations", "[security][anonymization]") {
     uid_mapping mapping;

@@ -29,15 +29,15 @@
 
 /**
  * @file format.hpp
- * @brief Compatibility header providing pacs::compat::format as an alias for std::format
+ * @brief Compatibility header providing kcenon::pacs::compat::format as an alias for std::format
  *
  * All supported compilers (GCC 13+, Clang 17+, MSVC 2022+, Apple Clang 15+)
- * provide C++20 std::format. This header aliases it into the pacs::compat namespace
+ * provide C++20 std::format. This header aliases it into the kcenon::pacs::compat namespace
  * so existing call sites continue to work without modification.
  *
  * Usage:
  *   #include <pacs/compat/format.hpp>
- *   auto s = pacs::compat::format("Hello, {}!", name);
+ *   auto s = kcenon::pacs::compat::format("Hello, {}!", name);
  *
  * @author kcenon
  * @since 1.0.0
@@ -50,7 +50,7 @@
 
 #define PACS_HAS_STD_FORMAT 1
 
-namespace pacs::compat {
+namespace kcenon::pacs::compat {
     using std::format;
     template <typename... Args>
     using format_string = std::format_string<Args...>;

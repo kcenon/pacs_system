@@ -38,7 +38,7 @@
 
 #include "pacs/storage/index_database.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -138,6 +138,6 @@ auto streaming_query_handler::as_query_handler() -> query_handler {
     };
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

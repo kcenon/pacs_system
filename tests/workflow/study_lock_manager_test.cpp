@@ -15,7 +15,7 @@
 
 #include "pacs/workflow/study_lock_manager.hpp"
 
-using namespace pacs::workflow;
+using namespace kcenon::pacs::workflow;
 using namespace std::chrono_literals;
 
 // ============================================================================

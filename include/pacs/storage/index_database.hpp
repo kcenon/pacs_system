@@ -73,7 +73,7 @@
 // Forward declaration of SQLite handle
 struct sqlite3;
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 class patient_repository;
 class study_repository;
@@ -1381,4 +1381,4 @@ private:
     migration_runner migration_runner_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

@@ -22,10 +22,10 @@
 #include <numeric>
 #include <vector>
 
-using namespace pacs::benchmark;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
+using namespace kcenon::pacs::benchmark;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
 
 // =============================================================================
 // C-ECHO Throughput Benchmarks
@@ -303,27 +303,27 @@ TEST_CASE("C-STORE with varying image sizes", "[benchmark][throughput][store][si
 
                 // Update image dimensions
                 dataset.set_numeric<uint16_t>(
-                    pacs::core::tags::rows, pacs::encoding::vr_type::US,
+                    kcenon::pacs::core::tags::rows, kcenon::pacs::encoding::vr_type::US,
                     static_cast<uint16_t>(size.rows));
                 dataset.set_numeric<uint16_t>(
-                    pacs::core::tags::columns, pacs::encoding::vr_type::US,
+                    kcenon::pacs::core::tags::columns, kcenon::pacs::encoding::vr_type::US,
                     static_cast<uint16_t>(size.cols));
 
                 // Generate new pixel data
                 std::vector<uint16_t> pixel_data(size.rows * size.cols, 512);
-                pacs::core::dicom_element pixel_elem(
-                    pacs::core::tags::pixel_data, pacs::encoding::vr_type::OW);
+                kcenon::pacs::core::dicom_element pixel_elem(
+                    kcenon::pacs::core::tags::pixel_data, kcenon::pacs::encoding::vr_type::OW);
                 pixel_elem.set_value(std::span<const uint8_t>(
                     reinterpret_cast<const uint8_t*>(pixel_data.data()),
                     pixel_data.size() * sizeof(uint16_t)));
 
                 // Remove old pixel data and add new
-                dataset.remove(pacs::core::tags::pixel_data);
+                dataset.remove(kcenon::pacs::core::tags::pixel_data);
                 dataset.insert(std::move(pixel_elem));
 
                 // Generate new SOP Instance UID
-                dataset.set_string(pacs::core::tags::sop_instance_uid,
-                                   pacs::encoding::vr_type::UI, generate_uid());
+                dataset.set_string(kcenon::pacs::core::tags::sop_instance_uid,
+                                   kcenon::pacs::encoding::vr_type::UI, generate_uid());
 
                 high_resolution_timer timer;
                 timer.start();

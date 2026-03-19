@@ -47,7 +47,7 @@
 
 #include "scp_service.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /// Verification SOP Class UID (1.2.840.10008.1.1)
 inline constexpr std::string_view verification_sop_class_uid = "1.2.840.10008.1.1";
@@ -148,6 +148,6 @@ public:
     [[nodiscard]] std::string_view service_name() const noexcept override;
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_VERIFICATION_SCP_HPP

@@ -49,7 +49,7 @@
 #include <shared_mutex>
 #include <unordered_map>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Configuration for HSM storage
@@ -384,4 +384,4 @@ private:
     mutable std::shared_mutex mutex_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

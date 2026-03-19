@@ -46,9 +46,9 @@
 #include <array>
 #include <span>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
-using VR = pacs::encoding::vr_type;
+using VR = kcenon::pacs::encoding::vr_type;
 
 // Helper to create VR value
 constexpr auto vr(VR v) -> uint16_t {
@@ -412,4 +412,4 @@ auto get_standard_tags() -> std::span<const tag_info> {
     return standard_tags;
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

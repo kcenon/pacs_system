@@ -37,7 +37,7 @@
 
 #include <algorithm>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 // Forward declaration - defined in standard_tags_data.cpp
 extern auto get_standard_tags() -> std::span<const tag_info>;
@@ -171,4 +171,4 @@ auto dicom_dictionary::get_tags_in_group(uint16_t group) const
     return result;
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

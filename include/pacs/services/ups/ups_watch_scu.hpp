@@ -29,7 +29,7 @@
 #include <memory>
 #include <string>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // UPS Watch SCU Data Structures
@@ -269,6 +269,6 @@ private:
     std::atomic<size_t> events_received_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_UPS_WATCH_SCU_HPP

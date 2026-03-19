@@ -15,8 +15,8 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::integration;
-using namespace pacs::network;
+using namespace kcenon::pacs::integration;
+using namespace kcenon::pacs::network;
 using namespace std::chrono_literals;
 
 // =============================================================================

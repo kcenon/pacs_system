@@ -11,7 +11,7 @@
 
 #include "pacs/web/endpoints/wado_uri_endpoints.hpp"
 
-using namespace pacs::web::wado_uri;
+using namespace kcenon::pacs::web::wado_uri;
 
 // ============================================================================
 // parse_wado_uri_params Tests

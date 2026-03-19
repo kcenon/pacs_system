@@ -46,7 +46,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace pacs::network::dimse {
+namespace kcenon::pacs::network::dimse {
 
 /**
  * @brief DIMSE status code type alias
@@ -326,6 +326,6 @@ constexpr status_code status_warning_subops_complete_failures = 0xB000;
 
 /// @}
 
-}  // namespace pacs::network::dimse
+}  // namespace kcenon::pacs::network::dimse
 
 #endif  // PACS_NETWORK_DIMSE_STATUS_CODES_HPP

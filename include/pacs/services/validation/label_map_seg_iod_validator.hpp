@@ -53,7 +53,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // Label Map Segmentation-Specific DICOM Tags
@@ -368,6 +368,6 @@ private:
 [[nodiscard]] bool is_label_map_segmentation(
     const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_LABEL_MAP_SEG_IOD_VALIDATOR_HPP

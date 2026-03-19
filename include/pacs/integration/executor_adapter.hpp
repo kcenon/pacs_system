@@ -62,7 +62,7 @@ namespace kcenon::thread {
 class thread_pool;
 }  // namespace kcenon::thread
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // Forward declaration
 class thread_pool_interface;
@@ -307,4 +307,4 @@ private:
 [[nodiscard]] std::shared_ptr<kcenon::common::interfaces::IExecutor>
 make_executor(std::shared_ptr<thread_pool_interface> pool_interface);
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

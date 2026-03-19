@@ -43,7 +43,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Represents the security context for a user session
@@ -137,4 +137,4 @@ private:
   std::optional<std::string> source_ip_;
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

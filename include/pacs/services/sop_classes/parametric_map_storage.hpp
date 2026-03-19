@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Parametric Map Storage SOP Class UIDs
@@ -196,6 +196,6 @@ inline constexpr uint32_t content_creator_name = 0x00700084;
  */
 [[nodiscard]] bool is_valid_parametric_map_photometric(std::string_view value) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_PARAMETRIC_MAP_STORAGE_HPP

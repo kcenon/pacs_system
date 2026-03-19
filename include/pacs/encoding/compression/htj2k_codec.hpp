@@ -38,7 +38,7 @@
 
 #include "pacs/encoding/compression/compression_codec.hpp"
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief High-Throughput JPEG 2000 (HTJ2K) codec implementation.
@@ -196,6 +196,6 @@ private:
     int resolution_levels_;
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_HTJ2K_CODEC_HPP

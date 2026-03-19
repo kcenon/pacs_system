@@ -74,7 +74,7 @@
 #include <sstream>
 #include <thread>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 // Forward declare internal registration functions
 namespace endpoints {
@@ -351,4 +351,4 @@ std::uint16_t rest_server::port() const noexcept {
   return impl_->running ? impl_->config.port : 0;
 }
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

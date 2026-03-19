@@ -51,7 +51,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 // =============================================================================
 // JWT Token Structures
@@ -238,4 +238,4 @@ private:
 [[nodiscard]] std::optional<std::string> base64url_decode(
     std::string_view input);
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

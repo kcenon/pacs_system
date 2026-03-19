@@ -42,7 +42,7 @@
 
 #include <kcenon/common/patterns/event_bus.h>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -72,7 +72,7 @@ void storage_scp::set_post_store_handler(post_store_handler handler) {
 }
 
 void storage_scp::set_audit_handler(
-    std::shared_ptr<pacs::security::atna_service_auditor> auditor) {
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor) {
     auditor_ = std::move(auditor);
 }
 
@@ -96,8 +96,8 @@ network::Result<std::monostate> storage_scp::handle_message(
 
     // Verify the message is a C-STORE request
     if (request.command() != command_field::c_store_rq) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::store_unexpected_command,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::store_unexpected_command,
             "Expected C-STORE-RQ but received " +
             std::string(to_string(request.command())));
     }
@@ -171,7 +171,7 @@ network::Result<std::monostate> storage_scp::handle_message(
 
         // Publish image received event
         kcenon::common::get_event_bus().publish(
-            pacs::events::image_received_event{
+            kcenon::pacs::events::image_received_event{
                 patient_id,
                 study_uid,
                 series_uid,
@@ -186,7 +186,7 @@ network::Result<std::monostate> storage_scp::handle_message(
         auto patient_id = dataset.get_string(core::tags::patient_id);
 
         kcenon::common::get_event_bus().publish(
-            pacs::events::storage_failed_event{
+            kcenon::pacs::events::storage_failed_event{
                 patient_id,
                 sop_instance_uid,
                 std::string(assoc.calling_ae()),
@@ -302,4 +302,4 @@ std::vector<std::string> get_standard_storage_sop_classes() {
     };
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

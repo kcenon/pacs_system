@@ -55,7 +55,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Configuration for Azure Blob storage
@@ -441,4 +441,4 @@ private:
   mutable std::shared_mutex mutex_;
 };
 
-} // namespace pacs::storage
+} // namespace kcenon::pacs::storage

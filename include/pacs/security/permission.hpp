@@ -42,7 +42,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Categories of resources requiring protection
@@ -88,4 +88,4 @@ struct Permission {
   bool operator==(const Permission &other) const = default;
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

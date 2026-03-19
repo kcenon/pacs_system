@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // ============================================================================
 // Construction
@@ -285,4 +285,4 @@ void hsm_migration_service::update_stats(const migration_result& result) {
     }
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

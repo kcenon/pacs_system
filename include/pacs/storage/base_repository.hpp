@@ -61,7 +61,7 @@
 #include <database/core/database_backend.h>
 #include <database/database_types.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /// Database value type alias
 using database_value = database::core::database_value;
@@ -455,7 +455,7 @@ private:
     std::string pk_column_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 // Include template implementation
 #include "base_repository_impl.hpp"

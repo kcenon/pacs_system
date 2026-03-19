@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace pacs::example {
+namespace kcenon::pacs::example {
 
 void pacs_server_config::print_help() {
     std::cout << R"(
@@ -145,4 +145,4 @@ auto pacs_server_config::parse_args(int argc, char* argv[])
     return config;
 }
 
-}  // namespace pacs::example
+}  // namespace kcenon::pacs::example

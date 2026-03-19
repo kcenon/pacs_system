@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 // ============================================================================
 // Helper Functions
@@ -508,4 +508,4 @@ std::vector<uint8_t> pdu_encoder::encode_p_data_tf(
     return encode_p_data_tf(std::vector<presentation_data_value>{pdv});
 }
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network

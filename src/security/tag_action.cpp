@@ -37,9 +37,9 @@
 #include "pacs/security/tag_action.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
 
-namespace pacs::security::hipaa_identifiers {
+namespace kcenon::pacs::security::hipaa_identifiers {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 auto get_name_tags() -> std::vector<dicom_tag> {
     return {
@@ -114,4 +114,4 @@ auto get_all_identifier_tags() -> std::vector<dicom_tag> {
     return all_tags;
 }
 
-} // namespace pacs::security::hipaa_identifiers
+} // namespace kcenon::pacs::security::hipaa_identifiers

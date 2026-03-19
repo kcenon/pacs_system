@@ -47,7 +47,7 @@
 
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -487,6 +487,6 @@ auto query_result_stream::instance_to_dataset(const storage::instance_record& re
     return ds;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

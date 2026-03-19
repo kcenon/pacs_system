@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Represents a user in the system
@@ -62,4 +62,4 @@ struct User {
   }
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

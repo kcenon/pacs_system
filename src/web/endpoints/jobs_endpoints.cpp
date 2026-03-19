@@ -63,7 +63,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -1128,4 +1128,4 @@ void register_jobs_endpoints_impl(crow::SimpleApp& app,
         });
 }
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

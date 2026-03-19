@@ -13,7 +13,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 namespace {
 
@@ -408,4 +408,4 @@ auto config_loader::trim(std::string_view str) -> std::string {
     return std::string(str.substr(start, end - start + 1));
 }
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

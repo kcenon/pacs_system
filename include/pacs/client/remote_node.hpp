@@ -62,7 +62,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Node Status
@@ -295,4 +295,4 @@ struct node_manager_config {
     std::string local_ae_title{"PACS_CLIENT"};
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

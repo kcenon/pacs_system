@@ -11,9 +11,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-namespace ai = pacs::ai;
-namespace core = pacs::core;
-namespace encoding = pacs::encoding;
+namespace ai = kcenon::pacs::ai;
+namespace core = kcenon::pacs::core;
+namespace encoding = kcenon::pacs::encoding;
 
 // ============================================================================
 // Helper Functions

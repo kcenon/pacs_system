@@ -51,7 +51,7 @@
 #include <cstdint>
 #include <cstring>
 
-namespace pacs::encoding::simd {
+namespace kcenon::pacs::encoding::simd {
 
 // Forward declarations
 void invert_monochrome_8bit(const uint8_t* src, uint8_t* dst,
@@ -715,6 +715,6 @@ inline void ycbcr_to_rgb_8bit(const uint8_t* src, uint8_t* dst,
     detail::ycbcr_to_rgb_8bit_scalar(src, dst, pixel_count);
 }
 
-}  // namespace pacs::encoding::simd
+}  // namespace kcenon::pacs::encoding::simd
 
 #endif  // PACS_ENCODING_SIMD_PHOTOMETRIC_HPP

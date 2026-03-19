@@ -2,7 +2,7 @@
 
 #include "pacs/encoding/vr_type.hpp"
 
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding;
 
 TEST_CASE("vr_type string conversion", "[encoding][vr_type]") {
     SECTION("to_string returns correct 2-character code") {

@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::pir {
+namespace kcenon::pacs::services::pir {
 
 // =============================================================================
 // PIR Operation Types
@@ -307,6 +307,6 @@ private:
  */
 [[nodiscard]] std::string to_string(reconciliation_type type);
 
-}  // namespace pacs::services::pir
+}  // namespace kcenon::pacs::services::pir
 
 #endif  // PACS_SERVICES_PIR_PATIENT_RECONCILIATION_SERVICE_HPP

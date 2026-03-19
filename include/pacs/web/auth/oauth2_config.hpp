@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 /**
  * @brief OAuth 2.0 configuration for DICOMweb authorization
@@ -77,4 +77,4 @@ struct oauth2_config {
     bool allow_unknown_users = false;
 };
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief High-level facade for emitting ATNA audit events from DICOM services
@@ -209,6 +209,6 @@ private:
     std::atomic<size_t> events_failed_{0};
 };
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security
 
 #endif  // PACS_SECURITY_ATNA_SERVICE_AUDITOR_HPP

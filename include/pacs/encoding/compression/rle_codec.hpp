@@ -38,7 +38,7 @@
 
 #include "pacs/encoding/compression/compression_codec.hpp"
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief DICOM RLE Lossless codec implementation.
@@ -150,6 +150,6 @@ private:
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_RLE_CODEC_HPP

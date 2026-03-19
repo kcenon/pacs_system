@@ -43,7 +43,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Constructor
@@ -352,7 +352,7 @@ auto measurement_repository::format_timestamp(
     return buf;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -362,7 +362,7 @@ auto measurement_repository::format_timestamp(
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -769,6 +769,6 @@ measurement_record measurement_repository::parse_row(void* stmt_ptr) const {
     return record;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -44,7 +44,7 @@
 #include <fcntl.h>
 #endif
 
-namespace pacs::network::detail {
+namespace kcenon::pacs::network::detail {
 
 // =============================================================================
 // Construction / Destruction
@@ -354,4 +354,4 @@ uint64_t accept_worker::next_session_id() {
     return session_id_counter_.fetch_add(1, std::memory_order_relaxed);
 }
 
-}  // namespace pacs::network::detail
+}  // namespace kcenon::pacs::network::detail

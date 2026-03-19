@@ -42,7 +42,7 @@
 #include <cstring>
 #include <fstream>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 namespace {
 
@@ -135,11 +135,11 @@ void write_uint32_be(std::vector<uint8_t>& buffer, uint32_t value) {
  * @brief Read file contents into a vector
  */
 [[nodiscard]] auto read_file_contents(const std::filesystem::path& path)
-    -> pacs::Result<std::vector<uint8_t>> {
+    -> kcenon::pacs::Result<std::vector<uint8_t>> {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) {
-        return pacs::pacs_error<std::vector<uint8_t>>(
-            pacs::error_codes::file_not_found,
+        return kcenon::pacs::pacs_error<std::vector<uint8_t>>(
+            kcenon::pacs::error_codes::file_not_found,
             "File not found: " + path.string());
     }
 
@@ -149,12 +149,12 @@ void write_uint32_be(std::vector<uint8_t>& buffer, uint32_t value) {
     std::vector<uint8_t> buffer(static_cast<size_t>(size));
     if (!file.read(reinterpret_cast<char*>(buffer.data()),
                    static_cast<std::streamsize>(size))) {
-        return pacs::pacs_error<std::vector<uint8_t>>(
-            pacs::error_codes::file_read_error,
+        return kcenon::pacs::pacs_error<std::vector<uint8_t>>(
+            kcenon::pacs::error_codes::file_read_error,
             "Failed to read file: " + path.string());
     }
 
-    return pacs::Result<std::vector<uint8_t>>::ok(std::move(buffer));
+    return kcenon::pacs::Result<std::vector<uint8_t>>::ok(std::move(buffer));
 }
 
 }  // namespace
@@ -171,29 +171,29 @@ dicom_file::dicom_file(dicom_dataset meta_info, dicom_dataset main_dataset)
 // ============================================================================
 
 auto dicom_file::open(const std::filesystem::path& path)
-    -> pacs::Result<dicom_file> {
+    -> kcenon::pacs::Result<dicom_file> {
     auto contents = read_file_contents(path);
     if (contents.is_err()) {
-        return pacs::Result<dicom_file>::err(contents.error());
+        return kcenon::pacs::Result<dicom_file>::err(contents.error());
     }
 
     return from_bytes(contents.value());
 }
 
 auto dicom_file::from_bytes(std::span<const uint8_t> data)
-    -> pacs::Result<dicom_file> {
+    -> kcenon::pacs::Result<dicom_file> {
     // Minimum size: 128 (preamble) + 4 (DICM) + minimal meta info
     if (data.size() < kPreambleSize + 4) {
-        return pacs::pacs_error<dicom_file>(
-            pacs::error_codes::invalid_dicom_file,
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::invalid_dicom_file,
             "File too small to be valid DICOM Part 10 file");
     }
 
     // Check for DICM prefix at offset 128
     const auto prefix = data.subspan(kPreambleSize, 4);
     if (std::memcmp(prefix.data(), kDicmPrefix, 4) != 0) {
-        return pacs::pacs_error<dicom_file>(
-            pacs::error_codes::missing_dicm_prefix,
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::missing_dicm_prefix,
             "Missing DICM prefix at offset 128");
     }
 
@@ -203,29 +203,29 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
 
     auto meta_result = parse_meta_information(meta_start, meta_bytes_read);
     if (meta_result.is_err()) {
-        return pacs::Result<dicom_file>::err(meta_result.error());
+        return kcenon::pacs::Result<dicom_file>::err(meta_result.error());
     }
 
     // Extract Transfer Syntax from meta information
     const auto* ts_elem = meta_result.value().get(tags::transfer_syntax_uid);
     if (ts_elem == nullptr) {
-        return pacs::pacs_error<dicom_file>(
-            pacs::error_codes::missing_transfer_syntax,
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::missing_transfer_syntax,
             "Transfer Syntax UID not found in meta information");
     }
 
     auto ts_uid_result = ts_elem->as_string();
     if (ts_uid_result.is_err()) {
-        return pacs::pacs_error<dicom_file>(
-            pacs::error_codes::value_conversion_error,
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::value_conversion_error,
             "Failed to read Transfer Syntax UID");
     }
     const auto ts_uid = ts_uid_result.value();
     encoding::transfer_syntax ts{ts_uid};
 
     if (!ts.is_valid()) {
-        return pacs::pacs_error<dicom_file>(
-            pacs::error_codes::unsupported_transfer_syntax,
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::unsupported_transfer_syntax,
             "Unsupported Transfer Syntax: " + ts_uid);
     }
 
@@ -235,10 +235,10 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
 
     auto dataset_result = decode_dataset(dataset_start, ts, dataset_bytes_read);
     if (dataset_result.is_err()) {
-        return pacs::Result<dicom_file>::err(dataset_result.error());
+        return kcenon::pacs::Result<dicom_file>::err(dataset_result.error());
     }
 
-    return pacs::Result<dicom_file>::ok(
+    return kcenon::pacs::Result<dicom_file>::ok(
         dicom_file{std::move(meta_result.value()), std::move(dataset_result.value())});
 }
 
@@ -258,24 +258,24 @@ auto dicom_file::create(dicom_dataset dataset,
 // ============================================================================
 
 auto dicom_file::save(const std::filesystem::path& path) const
-    -> pacs::VoidResult {
+    -> kcenon::pacs::VoidResult {
     auto bytes = to_bytes();
 
     std::ofstream file(path, std::ios::binary);
     if (!file) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::file_write_error,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::file_write_error,
             "Failed to open file for writing: " + path.string());
     }
 
     if (!file.write(reinterpret_cast<const char*>(bytes.data()),
                     static_cast<std::streamsize>(bytes.size()))) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::file_write_error,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::file_write_error,
             "Failed to write to file: " + path.string());
     }
 
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 auto dicom_file::to_bytes() const -> std::vector<uint8_t> {
@@ -345,7 +345,7 @@ auto dicom_file::sop_instance_uid() const -> std::string {
 
 auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
                                         size_t& bytes_read)
-    -> pacs::Result<dicom_dataset> {
+    -> kcenon::pacs::Result<dicom_dataset> {
     // File Meta Information is always encoded as Explicit VR Little Endian
     // First, we need to find the group length to know how much to read
 
@@ -366,8 +366,8 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
 
         // Read VR (2 bytes)
         if (offset + 6 > data.size()) {
-            return pacs::pacs_error<dicom_dataset>(
-                pacs::error_codes::decode_error,
+            return kcenon::pacs::pacs_error<dicom_dataset>(
+                kcenon::pacs::error_codes::decode_error,
                 "Unexpected end of data while reading VR");
         }
 
@@ -378,8 +378,8 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
         };
         const auto vr_opt = encoding::from_string(std::string_view(vr_chars, 2));
         if (!vr_opt) {
-            return pacs::pacs_error<dicom_dataset>(
-                pacs::error_codes::decode_error,
+            return kcenon::pacs::pacs_error<dicom_dataset>(
+                kcenon::pacs::error_codes::decode_error,
                 "Invalid VR: " + std::string(vr_chars, 2));
         }
         const auto vr = *vr_opt;
@@ -391,8 +391,8 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
         if (encoding::has_explicit_32bit_length(vr)) {
             // VR + 2 reserved bytes + 4 byte length
             if (offset + 12 > data.size()) {
-                return pacs::pacs_error<dicom_dataset>(
-                    pacs::error_codes::decode_error,
+                return kcenon::pacs::pacs_error<dicom_dataset>(
+                    kcenon::pacs::error_codes::decode_error,
                     "Unexpected end of data while reading length field");
             }
             length = read_uint32_le(data.subspan(offset + 8, 4));
@@ -400,8 +400,8 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
         } else {
             // VR + 2 byte length
             if (offset + 8 > data.size()) {
-                return pacs::pacs_error<dicom_dataset>(
-                    pacs::error_codes::decode_error,
+                return kcenon::pacs::pacs_error<dicom_dataset>(
+                    kcenon::pacs::error_codes::decode_error,
                     "Unexpected end of data while reading length field");
             }
             length = read_uint16_le(data.subspan(offset + 6, 2));
@@ -410,8 +410,8 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
 
         // Validate and read value
         if (offset + header_size + length > data.size()) {
-            return pacs::pacs_error<dicom_dataset>(
-                pacs::error_codes::decode_error,
+            return kcenon::pacs::pacs_error<dicom_dataset>(
+                kcenon::pacs::error_codes::decode_error,
                 "Value length exceeds available data");
         }
 
@@ -423,7 +423,7 @@ auto dicom_file::parse_meta_information(std::span<const uint8_t> data,
     }
 
     bytes_read = offset;
-    return pacs::Result<dicom_dataset>::ok(std::move(meta_info));
+    return kcenon::pacs::Result<dicom_dataset>::ok(std::move(meta_info));
 }
 
 auto dicom_file::generate_meta_information(const dicom_dataset& dataset,
@@ -516,7 +516,7 @@ auto dicom_file::encode_explicit_vr_le(const dicom_dataset& dataset)
 
 auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
                                        size_t& bytes_read)
-    -> pacs::Result<dicom_dataset> {
+    -> kcenon::pacs::Result<dicom_dataset> {
     dicom_dataset dataset;
     size_t offset = 0;
 
@@ -638,12 +638,12 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
     }
 
     bytes_read = offset;
-    return pacs::Result<dicom_dataset>::ok(std::move(dataset));
+    return kcenon::pacs::Result<dicom_dataset>::ok(std::move(dataset));
 }
 
 auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
                                        size_t& bytes_read)
-    -> pacs::Result<dicom_dataset> {
+    -> kcenon::pacs::Result<dicom_dataset> {
     dicom_dataset dataset;
     size_t offset = 0;
     const auto& dict = dicom_dictionary::instance();
@@ -776,12 +776,12 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
     }
 
     bytes_read = offset;
-    return pacs::Result<dicom_dataset>::ok(std::move(dataset));
+    return kcenon::pacs::Result<dicom_dataset>::ok(std::move(dataset));
 }
 
 auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
                                        size_t& bytes_read)
-    -> pacs::Result<dicom_dataset> {
+    -> kcenon::pacs::Result<dicom_dataset> {
     dicom_dataset dataset;
     size_t offset = 0;
 
@@ -924,7 +924,7 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
     }
 
     bytes_read = offset;
-    return pacs::Result<dicom_dataset>::ok(std::move(dataset));
+    return kcenon::pacs::Result<dicom_dataset>::ok(std::move(dataset));
 }
 
 auto dicom_file::encode_implicit_vr_le(const dicom_dataset& dataset)
@@ -1010,7 +1010,7 @@ auto dicom_file::encode_explicit_vr_be(const dicom_dataset& dataset)
 auto dicom_file::decode_dataset(std::span<const uint8_t> data,
                                 const encoding::transfer_syntax& ts,
                                 size_t& bytes_read)
-    -> pacs::Result<dicom_dataset> {
+    -> kcenon::pacs::Result<dicom_dataset> {
 
     // Route to appropriate decoder based on Transfer Syntax properties
     if (ts.vr_type() == encoding::vr_encoding::implicit) {
@@ -1049,7 +1049,7 @@ auto dicom_file::encode_dataset(const dicom_dataset& dataset,
 auto dicom_file::parse_undefined_length_sequence(
     std::span<const uint8_t> data, size_t& bytes_read,
     bool explicit_vr, bool big_endian)
-    -> pacs::Result<std::vector<dicom_dataset>> {
+    -> kcenon::pacs::Result<std::vector<dicom_dataset>> {
 
     std::vector<dicom_dataset> items;
     size_t offset = 0;
@@ -1101,7 +1101,7 @@ auto dicom_file::parse_undefined_length_sequence(
             // Parse item content
             size_t item_bytes_read = 0;
             auto item_data = data.subspan(offset, item_end - offset);
-            pacs::Result<dicom_dataset> item_result = explicit_vr
+            kcenon::pacs::Result<dicom_dataset> item_result = explicit_vr
                 ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
                               : decode_explicit_vr_le(item_data, item_bytes_read))
                 : decode_implicit_vr_le(item_data, item_bytes_read);
@@ -1117,7 +1117,7 @@ auto dicom_file::parse_undefined_length_sequence(
             }
             size_t item_bytes_read = 0;
             auto item_data = data.subspan(offset, item_length);
-            pacs::Result<dicom_dataset> item_result = explicit_vr
+            kcenon::pacs::Result<dicom_dataset> item_result = explicit_vr
                 ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
                               : decode_explicit_vr_le(item_data, item_bytes_read))
                 : decode_implicit_vr_le(item_data, item_bytes_read);
@@ -1130,7 +1130,7 @@ auto dicom_file::parse_undefined_length_sequence(
     }
 
     bytes_read = offset;
-    return pacs::Result<std::vector<dicom_dataset>>::ok(std::move(items));
+    return kcenon::pacs::Result<std::vector<dicom_dataset>>::ok(std::move(items));
 }
 
 auto dicom_file::parse_encapsulated_frames(std::span<const uint8_t> data)
@@ -1184,4 +1184,4 @@ auto dicom_file::parse_encapsulated_frames(std::span<const uint8_t> data)
     return frames;
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

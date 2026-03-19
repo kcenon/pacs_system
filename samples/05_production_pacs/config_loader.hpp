@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // =============================================================================
 // TLS Configuration
@@ -305,4 +305,4 @@ private:
     static auto trim(std::string_view str) -> std::string;
 };
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

@@ -42,7 +42,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -301,6 +301,6 @@ std::vector<std::string> sync_history_repository::deserialize_errors(
     return result;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

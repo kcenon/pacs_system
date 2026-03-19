@@ -79,7 +79,7 @@ enum class output_format {
 // =============================================================================
 
 struct query_key {
-    pacs::core::dicom_tag tag;
+    kcenon::pacs::core::dicom_tag tag;
     std::string value;
 };
 
@@ -148,11 +148,11 @@ std::string_view query_level_to_string(query_level level) {
 std::string_view get_find_sop_class_uid(query_model model) {
     switch (model) {
         case query_model::patient_root:
-            return pacs::services::patient_root_find_sop_class_uid;
+            return kcenon::pacs::services::patient_root_find_sop_class_uid;
         case query_model::study_root:
-            return pacs::services::study_root_find_sop_class_uid;
+            return kcenon::pacs::services::study_root_find_sop_class_uid;
         default:
-            return pacs::services::patient_root_find_sop_class_uid;
+            return kcenon::pacs::services::patient_root_find_sop_class_uid;
     }
 }
 
@@ -325,7 +325,7 @@ bool parse_query_key(const std::string& key_str, query_key& key) {
     uint16_t group = static_cast<uint16_t>(std::stoul(match[1].str(), nullptr, 16));
     uint16_t element = static_cast<uint16_t>(std::stoul(match[2].str(), nullptr, 16));
 
-    key.tag = pacs::core::dicom_tag{group, element};
+    key.tag = kcenon::pacs::core::dicom_tag{group, element};
     key.value = match[3].str();
 
     return true;
@@ -536,9 +536,9 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
 // Query Dataset Building
 // =============================================================================
 
-pacs::core::dicom_dataset build_query_dataset(const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+kcenon::pacs::core::dicom_dataset build_query_dataset(const options& opts) {
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     dicom_dataset ds;
 
@@ -601,7 +601,7 @@ pacs::core::dicom_dataset build_query_dataset(const options& opts) {
 // Result Formatting
 // =============================================================================
 
-void format_text_result(std::ostream& os, const pacs::core::dicom_dataset& ds,
+void format_text_result(std::ostream& os, const kcenon::pacs::core::dicom_dataset& ds,
                         size_t index) {
     os << "Result " << (index + 1) << ":\n";
 
@@ -617,7 +617,7 @@ void format_text_result(std::ostream& os, const pacs::core::dicom_dataset& ds,
 }
 
 void format_json_results(std::ostream& os,
-                         const std::vector<pacs::core::dicom_dataset>& results) {
+                         const std::vector<kcenon::pacs::core::dicom_dataset>& results) {
     os << "[\n";
     for (size_t i = 0; i < results.size(); ++i) {
         os << "  {\n";
@@ -644,7 +644,7 @@ void format_json_results(std::ostream& os,
 }
 
 void format_csv_results(std::ostream& os,
-                        const std::vector<pacs::core::dicom_dataset>& results,
+                        const std::vector<kcenon::pacs::core::dicom_dataset>& results,
                         query_level level) {
     // Header based on level
     switch (level) {
@@ -665,7 +665,7 @@ void format_csv_results(std::ostream& os,
     }
 
     for (const auto& ds : results) {
-        using namespace pacs::core;
+        using namespace kcenon::pacs::core;
         switch (level) {
             case query_level::patient:
                 os << "\"" << ds.get_string(tags::patient_name, "") << "\","
@@ -704,9 +704,9 @@ void format_csv_results(std::ostream& os,
 // =============================================================================
 
 int perform_query(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::network::dimse;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::network::dimse;
+    using namespace kcenon::pacs::services;
 
     auto sop_class_uid = get_find_sop_class_uid(opts.model);
 
@@ -805,7 +805,7 @@ int perform_query(const options& opts) {
     }
 
     // Receive responses
-    std::vector<pacs::core::dicom_dataset> results;
+    std::vector<kcenon::pacs::core::dicom_dataset> results;
     bool query_complete = false;
     size_t pending_count = 0;
 

@@ -28,16 +28,16 @@ int main(int argc, char* argv[]) {
     std::cout << "-------------------\n";
 
     // Create DICOM tags using module-exported types
-    pacs::core::dicom_tag patient_name_tag(0x0010, 0x0010);
-    pacs::core::dicom_tag patient_id_tag(0x0010, 0x0020);
-    pacs::core::dicom_tag study_uid_tag(0x0020, 0x000D);
+    kcenon::pacs::core::dicom_tag patient_name_tag(0x0010, 0x0010);
+    kcenon::pacs::core::dicom_tag patient_id_tag(0x0010, 0x0020);
+    kcenon::pacs::core::dicom_tag study_uid_tag(0x0020, 0x000D);
 
     std::cout << "Patient Name Tag: (" << std::hex
               << patient_name_tag.group() << ","
               << patient_name_tag.element() << ")\n";
 
     // Create a DICOM dataset
-    pacs::core::dicom_dataset dataset;
+    kcenon::pacs::core::dicom_dataset dataset;
     std::cout << "Created empty dataset (size: " << std::dec
               << dataset.size() << " elements)\n\n";
 
@@ -45,8 +45,8 @@ int main(int argc, char* argv[]) {
     std::cout << "2. Encoding Module Demo\n";
     std::cout << "-----------------------\n";
 
-    auto implicit_le = pacs::encoding::transfer_syntax::implicit_vr_little_endian();
-    auto explicit_le = pacs::encoding::transfer_syntax::explicit_vr_little_endian();
+    auto implicit_le = kcenon::pacs::encoding::transfer_syntax::implicit_vr_little_endian();
+    auto explicit_le = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian();
 
     std::cout << "Implicit VR LE - Little Endian: "
               << (implicit_le.is_little_endian() ? "Yes" : "No") << "\n";
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
         std::string filepath = argv[1];
         std::cout << "Reading DICOM file: " << filepath << "\n";
 
-        pacs::core::dicom_file file;
+        kcenon::pacs::core::dicom_file file;
         auto result = file.read(filepath);
 
         if (result) {

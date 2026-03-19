@@ -43,7 +43,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Abstract interface for persisting security data (Users, Roles)
@@ -78,4 +78,4 @@ protected:
   operator=(security_storage_interface &&) = default;
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

@@ -223,11 +223,11 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
 /**
  * @brief Create an association configured for Print Management
  */
-pacs::network::Result<pacs::network::association> create_print_association(
+kcenon::pacs::network::Result<kcenon::pacs::network::association> create_print_association(
     const options& opts) {
 
-    using namespace pacs::network;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
 
     association_config config;
     config.calling_ae_title = opts.calling_ae;
@@ -275,7 +275,7 @@ pacs::network::Result<pacs::network::association> create_print_association(
  * @brief Execute the full print workflow
  */
 int perform_print(const options& opts) {
-    using namespace pacs::services;
+    using namespace kcenon::pacs::services;
 
     if (opts.verbose) {
         std::cout << "=== Print Workflow ===\n";
@@ -443,7 +443,7 @@ int perform_print(const options& opts) {
  * @brief Query printer status
  */
 int perform_status_query(const options& opts) {
-    using namespace pacs::services;
+    using namespace kcenon::pacs::services;
 
     if (opts.verbose) {
         std::cout << "=== Printer Status Query ===\n";

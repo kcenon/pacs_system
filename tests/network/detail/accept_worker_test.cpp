@@ -12,7 +12,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace pacs::network::detail;
+using namespace kcenon::pacs::network::detail;
 using namespace std::chrono_literals;
 
 namespace {

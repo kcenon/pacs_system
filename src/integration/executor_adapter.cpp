@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // thread_pool_executor_adapter Implementation
@@ -339,4 +339,4 @@ make_executor(std::shared_ptr<thread_pool_interface> pool_interface) {
     return std::make_shared<interface_executor_adapter>(std::move(pool_interface));
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

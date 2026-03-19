@@ -62,7 +62,7 @@
 #include <kcenon/common/patterns/result.h>
 #endif
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
 // =============================================================================
 // Result Type (fallback when common_system is unavailable)
@@ -563,4 +563,4 @@ private:
     }
 }
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai

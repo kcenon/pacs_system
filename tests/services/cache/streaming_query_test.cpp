@@ -25,10 +25,10 @@
 #include <filesystem>
 #include <memory>
 
-using namespace pacs::services;
-using namespace pacs::storage;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // Helper macro to get cursor handle (always uses db_adapter since we're inside PACS_WITH_DATABASE_SYSTEM)
 #define GET_CURSOR_HANDLE(db) (db)->db_adapter()

@@ -14,7 +14,7 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::services::cache;
+using namespace kcenon::pacs::services::cache;
 using namespace std::chrono_literals;
 
 // ─────────────────────────────────────────────────────

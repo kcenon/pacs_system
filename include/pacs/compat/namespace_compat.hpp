@@ -1,6 +1,6 @@
 // BSD 3-Clause License
 //
-// Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
+// Copyright (c) 2021-2025, kcenon
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -28,33 +28,29 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file ct_storage.cpp
- * @brief Implementation of CT Image Storage SOP Class utilities
+ * @file namespace_compat.hpp
+ * @brief Backward-compatible namespace alias for migration from pacs:: to kcenon::pacs::
  *
- * @see Issue #717 - Add CT Image IOD Validator
- * @see Issue #848 - Add CT For Processing SOP Classes
+ * Include this header in downstream code that still uses the old pacs:: namespace
+ * to transparently redirect to kcenon::pacs::.
+ *
+ * IMPORTANT: Do NOT include this header from any pacs internal header, as it
+ * would prevent reopening the kcenon::pacs namespace via the alias.
+ *
+ * @code
+ * #include <pacs/compat/namespace_compat.hpp>
+ * // Now pacs::core::dicom_tag resolves to kcenon::pacs::core::dicom_tag
+ * @endcode
+ *
+ * @author kcenon
+ * @since 2.0.0
  */
 
-#include "pacs/services/sop_classes/ct_storage.hpp"
+#pragma once
 
-namespace kcenon::pacs::services::sop_classes {
+// Establish kcenon::pacs namespace (must exist before aliasing)
+namespace kcenon::pacs {}
 
-std::vector<std::string> get_ct_storage_sop_classes() {
-    return {
-        std::string(ct_image_storage_uid),
-        std::string(enhanced_ct_image_storage_uid),
-        std::string(ct_for_processing_image_storage_uid),
-    };
-}
-
-bool is_ct_storage_sop_class(std::string_view uid) noexcept {
-    return uid == ct_image_storage_uid ||
-           uid == enhanced_ct_image_storage_uid ||
-           uid == ct_for_processing_image_storage_uid;
-}
-
-bool is_valid_ct_photometric(std::string_view value) noexcept {
-    return value == "MONOCHROME1" || value == "MONOCHROME2";
-}
-
-}  // namespace kcenon::pacs::services::sop_classes
+/// Backward-compatible alias: allows existing code using pacs:: to compile
+/// without modification after the namespace migration to kcenon::pacs::.
+namespace pacs = kcenon::pacs;

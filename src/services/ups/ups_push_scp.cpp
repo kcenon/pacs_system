@@ -12,7 +12,7 @@
 #include "pacs/network/dimse/dimse_message.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -74,8 +74,8 @@ network::Result<std::monostate> ups_push_scp::handle_message(
             return handle_n_action(assoc, context_id, request);
 
         default:
-            return pacs::pacs_void_error(
-                pacs::error_codes::ups_unexpected_command,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::ups_unexpected_command,
                 "Unexpected command for UPS Push SCP: " +
                 std::string(to_string(request.command())));
     }
@@ -135,8 +135,8 @@ network::Result<std::monostate> ups_push_scp::handle_n_create(
 
     // Verify we have a handler configured
     if (!create_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_handler_not_set,
             "No N-CREATE handler configured for UPS Push SCP");
     }
 
@@ -225,8 +225,8 @@ network::Result<std::monostate> ups_push_scp::handle_n_set(
 
     // Verify we have a handler configured
     if (!set_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_handler_not_set,
             "No N-SET handler configured for UPS Push SCP");
     }
 
@@ -295,8 +295,8 @@ network::Result<std::monostate> ups_push_scp::handle_n_get(
 
     // Verify we have a handler configured
     if (!get_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_handler_not_set,
             "No N-GET handler configured for UPS Push SCP");
     }
 
@@ -372,8 +372,8 @@ network::Result<std::monostate> ups_push_scp::handle_n_action(
     // Get Action Type ID
     auto action_type = request.action_type_id();
     if (!action_type.has_value()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::ups_invalid_action_type,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::ups_invalid_action_type,
             "Missing Action Type ID in N-ACTION request");
     }
 
@@ -394,8 +394,8 @@ network::Result<std::monostate> ups_push_scp::handle_n_action(
     if (action_id == ups_action_change_state) {
         // N-ACTION Type 1: Change UPS State
         if (!change_state_handler_) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::ups_handler_not_set,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::ups_handler_not_set,
                 "No Change State handler configured for UPS Push SCP");
         }
 
@@ -454,8 +454,8 @@ network::Result<std::monostate> ups_push_scp::handle_n_action(
     } else if (action_id == ups_action_request_cancel) {
         // N-ACTION Type 3: Request Cancellation
         if (!request_cancel_handler_) {
-            return pacs::pacs_void_error(
-                pacs::error_codes::ups_handler_not_set,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::ups_handler_not_set,
                 "No Request Cancel handler configured for UPS Push SCP");
         }
 
@@ -573,4 +573,4 @@ network::Result<std::monostate> ups_push_scp::send_n_action_response(
     return assoc.send_dimse(context_id, response);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

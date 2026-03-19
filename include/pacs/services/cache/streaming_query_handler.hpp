@@ -55,11 +55,11 @@
 #include <memory>
 #include <string>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
@@ -204,4 +204,4 @@ private:
 
 #endif  // PACS_WITH_DATABASE_SYSTEM
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

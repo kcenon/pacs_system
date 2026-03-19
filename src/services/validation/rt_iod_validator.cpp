@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // RT-specific DICOM tags
@@ -1199,4 +1199,4 @@ bool is_valid_rt_dataset(const dicom_dataset& dataset) {
     return validator.quick_check(dataset);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

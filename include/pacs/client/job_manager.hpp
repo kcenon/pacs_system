@@ -60,11 +60,11 @@
 #include <vector>
 
 // Forward declarations
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class job_repository;
 }
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // Forward declaration
 class remote_node_manager;
@@ -253,7 +253,7 @@ public:
      * @param job_id The job ID to start
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto start_job(std::string_view job_id) -> pacs::VoidResult;
+    [[nodiscard]] auto start_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Pause a running or queued job
@@ -261,7 +261,7 @@ public:
      * @param job_id The job ID to pause
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto pause_job(std::string_view job_id) -> pacs::VoidResult;
+    [[nodiscard]] auto pause_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Resume a paused job
@@ -269,7 +269,7 @@ public:
      * @param job_id The job ID to resume
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto resume_job(std::string_view job_id) -> pacs::VoidResult;
+    [[nodiscard]] auto resume_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Cancel a job
@@ -279,7 +279,7 @@ public:
      * @param job_id The job ID to cancel
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto cancel_job(std::string_view job_id) -> pacs::VoidResult;
+    [[nodiscard]] auto cancel_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Retry a failed job
@@ -289,7 +289,7 @@ public:
      * @param job_id The job ID to retry
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto retry_job(std::string_view job_id) -> pacs::VoidResult;
+    [[nodiscard]] auto retry_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Delete a job
@@ -299,7 +299,7 @@ public:
      * @param job_id The job ID to delete
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto delete_job(std::string_view job_id) -> pacs::VoidResult;
+    [[nodiscard]] auto delete_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
     // =========================================================================
     // Job Queries
@@ -466,4 +466,4 @@ private:
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

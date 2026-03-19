@@ -42,7 +42,7 @@
 #include <set>
 #include <stdexcept>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -633,4 +633,4 @@ auto hsm_storage::migrate_instance(std::string_view uid, storage_tier from_tier,
     return ok();
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

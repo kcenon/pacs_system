@@ -49,7 +49,7 @@
 
 #include <sstream>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Constructor
@@ -590,4 +590,4 @@ auto base_repository<Entity, PrimaryKey>::pk_column() const
     return pk_column_;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

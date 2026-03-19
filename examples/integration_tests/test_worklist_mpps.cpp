@@ -26,12 +26,12 @@
 #include <mutex>
 #include <vector>
 
-using namespace pacs::integration_test;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::integration_test;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // =============================================================================
 // Helper: RIS Mock Server
@@ -46,7 +46,7 @@ namespace local_tags {
     inline constexpr dicom_tag performed_procedure_step_description{0x0040, 0x0254};
 }
 using namespace local_tags;
-using namespace pacs::services::mpps_tags;
+using namespace kcenon::pacs::services::mpps_tags;
 
 /**
  * @brief Mock RIS server for worklist and MPPS testing
@@ -206,7 +206,7 @@ private:
         for (const auto& existing : mpps_instances_) {
             if (existing.sop_instance_uid == instance.sop_instance_uid) {
                 return Result<std::monostate>::err({
-                    pacs::network::dimse::dimse_error::invalid_data_format,
+                    kcenon::pacs::network::dimse::dimse_error::invalid_data_format,
                     "MPPS instance already exists"
                 });
             }
@@ -229,7 +229,7 @@ private:
                 if (mpps.status == mpps_status::completed ||
                     mpps.status == mpps_status::discontinued) {
                     return Result<std::monostate>::err({
-                        pacs::network::dimse::dimse_error::invalid_data_format,
+                        kcenon::pacs::network::dimse::dimse_error::invalid_data_format,
                         "Cannot modify completed/discontinued MPPS"
                     });
                 }
@@ -243,7 +243,7 @@ private:
         }
 
         return Result<std::monostate>::err({
-            pacs::network::dimse::dimse_error::invalid_data_format,
+            kcenon::pacs::network::dimse::dimse_error::invalid_data_format,
             "MPPS instance not found"
         });
     }

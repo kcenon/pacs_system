@@ -38,7 +38,7 @@
 #include <array>
 #include <unordered_map>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -304,4 +304,4 @@ std::string_view get_segment_category_meaning(segment_category category) noexcep
     return category_codes[0].meaning;
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

@@ -48,7 +48,7 @@
 // pacs_database_adapter Implementation
 // =============================================================================
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -377,7 +377,7 @@ recent_study_record viewer_state_repository::map_row_to_recent_study(
     return record;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -387,7 +387,7 @@ recent_study_record viewer_state_repository::map_row_to_recent_study(
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -818,6 +818,6 @@ recent_study_record viewer_state_repository::parse_recent_study_row(void* stmt_p
     return record;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

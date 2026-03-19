@@ -42,7 +42,7 @@
 #include "crow.h"
 #include "pacs/web/endpoints/system_endpoints.hpp" // For rest_server_context
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 /**
  * @brief Register security endpoints with the Crow app
@@ -52,4 +52,4 @@ namespace pacs::web::endpoints {
 void register_security_endpoints_impl(crow::SimpleApp &app,
                                       std::shared_ptr<rest_server_context> ctx);
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

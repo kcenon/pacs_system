@@ -54,7 +54,7 @@
 #include <span>
 #include <vector>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 /**
  * @brief Encoder/decoder for Implicit VR Little Endian transfer syntax
@@ -78,10 +78,10 @@ namespace pacs::encoding {
 class implicit_vr_codec {
 public:
     /**
-     * @brief Result type for decode operations using pacs::Result<T> pattern
+     * @brief Result type for decode operations using kcenon::pacs::Result<T> pattern
      */
     template <typename T>
-    using result = pacs::Result<T>;
+    using result = kcenon::pacs::Result<T>;
 
     // ========================================================================
     // Dataset Encoding/Decoding
@@ -143,6 +143,6 @@ private:
         std::span<const uint8_t>& data);
 };
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding
 
 #endif  // PACS_ENCODING_IMPLICIT_VR_CODEC_HPP

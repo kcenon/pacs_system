@@ -55,7 +55,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Digital X-Ray Storage SOP Class UIDs
@@ -355,6 +355,6 @@ enum class dx_body_part {
  */
 [[nodiscard]] dx_body_part parse_body_part(std::string_view value) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_DX_STORAGE_HPP

@@ -56,7 +56,7 @@
 #include <memory>
 #include <sstream>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -533,4 +533,4 @@ void register_metadata_endpoints_impl(crow::SimpleApp& app,
             });
 }
 
-}  // namespace pacs::web::endpoints
+}  // namespace kcenon::pacs::web::endpoints

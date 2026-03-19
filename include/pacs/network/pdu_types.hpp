@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 /**
  * @brief PDU (Protocol Data Unit) types as defined in DICOM PS3.8.
@@ -305,6 +305,6 @@ constexpr uint32_t UNLIMITED_MAX_PDU_LENGTH = 0;
 
 /// @}
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
 #endif  // PACS_NETWORK_PDU_TYPES_HPP

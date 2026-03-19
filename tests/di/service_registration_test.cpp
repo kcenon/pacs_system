@@ -12,9 +12,9 @@
 
 #include <filesystem>
 
-using namespace pacs::di;
-using namespace pacs::di::test;
-using namespace pacs::core;
+using namespace kcenon::pacs::di;
+using namespace kcenon::pacs::di::test;
+using namespace kcenon::pacs::core;
 using namespace kcenon::common::di;
 
 // =============================================================================
@@ -159,7 +159,7 @@ TEST_CASE("MockStorage stores and retrieves datasets", "[di][test][mock]") {
 
     SECTION("store increments count") {
         dicom_dataset ds;
-        ds.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.5");
 
         auto result = mock->store(ds);
         REQUIRE(result.is_ok());
@@ -168,7 +168,7 @@ TEST_CASE("MockStorage stores and retrieves datasets", "[di][test][mock]") {
 
     SECTION("exists returns correct state") {
         dicom_dataset ds;
-        ds.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.5");
 
         REQUIRE_FALSE(mock->exists("1.2.3.4.5"));
 
@@ -180,8 +180,8 @@ TEST_CASE("MockStorage stores and retrieves datasets", "[di][test][mock]") {
 
     SECTION("retrieve returns stored dataset") {
         dicom_dataset ds;
-        ds.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.5");
-        ds.set_string(tags::patient_id, pacs::encoding::vr_type::LO, "PATIENT123");
+        ds.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::patient_id, kcenon::pacs::encoding::vr_type::LO, "PATIENT123");
 
         auto store_result = mock->store(ds);
         REQUIRE(store_result.is_ok());
@@ -196,7 +196,7 @@ TEST_CASE("MockStorage stores and retrieves datasets", "[di][test][mock]") {
 
     SECTION("remove deletes dataset") {
         dicom_dataset ds;
-        ds.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.5");
 
         auto result = mock->store(ds);
         REQUIRE(result.is_ok());
@@ -209,10 +209,10 @@ TEST_CASE("MockStorage stores and retrieves datasets", "[di][test][mock]") {
 
     SECTION("clear removes all data") {
         dicom_dataset ds1;
-        ds1.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.1");
+        ds1.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.1");
 
         dicom_dataset ds2;
-        ds2.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.2");
+        ds2.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.2");
 
         auto r1 = mock->store(ds1);
         auto r2 = mock->store(ds2);
@@ -238,7 +238,7 @@ TEST_CASE("MockStorage stores and retrieves datasets", "[di][test][mock]") {
         });
 
         dicom_dataset ds;
-        ds.set_string(tags::sop_instance_uid, pacs::encoding::vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3.4.5");
 
         auto result = mock->store(ds);
         REQUIRE(result.is_ok());
@@ -263,7 +263,7 @@ TEST_CASE("MockNetwork records connection attempts", "[di][test][mock]") {
     }
 
     SECTION("create_server increments counter") {
-        pacs::network::server_config config;
+        kcenon::pacs::network::server_config config;
         config.ae_title = "TEST_SCP";
         config.port = 11112;
 
@@ -283,7 +283,7 @@ TEST_CASE("MockNetwork records connection attempts", "[di][test][mock]") {
     SECTION("clear resets counters") {
         (void)mock->connect("localhost", 11112, std::chrono::seconds{30});
 
-        pacs::network::server_config config;
+        kcenon::pacs::network::server_config config;
         (void)mock->create_server(config, {});
 
         mock->clear();

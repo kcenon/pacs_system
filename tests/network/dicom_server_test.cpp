@@ -14,8 +14,8 @@
 #include <latch>
 #include <thread>
 
-using namespace pacs::network;
-using namespace pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::services;
 
 // =============================================================================
 // Test Constants

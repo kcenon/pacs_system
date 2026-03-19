@@ -71,7 +71,7 @@
 #include "pacs/storage/viewer_state_record_repository.hpp"
 #include "pacs/storage/viewer_state_repository.hpp"
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 repository_factory::repository_factory(
     std::shared_ptr<pacs_database_adapter> db)
@@ -317,6 +317,6 @@ auto repository_factory::db() const
     return db_;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

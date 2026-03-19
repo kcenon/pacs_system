@@ -9,7 +9,7 @@
 #include "pacs/network/pdu_types.hpp"
 #include "pacs/core/result.hpp"
 
-using namespace pacs::network;
+using namespace kcenon::pacs::network;
 
 // =============================================================================
 // Test Constants
@@ -512,7 +512,7 @@ TEST_CASE("context_transfer_syntax returns error for invalid ID", "[association]
     association assoc;
     auto result = assoc.context_transfer_syntax(99);
     CHECK(result.is_err());
-    CHECK(result.error().code == pacs::error_codes::no_acceptable_context);
+    CHECK(result.error().code == kcenon::pacs::error_codes::no_acceptable_context);
 }
 
 // =============================================================================

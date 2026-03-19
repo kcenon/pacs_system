@@ -14,8 +14,8 @@
 #include "pacs/web/rest_config.hpp"
 #include "pacs/web/rest_types.hpp"
 
-using namespace pacs::storage;
-using namespace pacs::web;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::web;
 
 // ============================================================================
 // Worklist Query Tests

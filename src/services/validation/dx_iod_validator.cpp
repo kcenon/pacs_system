@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // DX-Specific DICOM Tags
@@ -722,4 +722,4 @@ bool is_for_processing_dx(const dicom_dataset& dataset) {
     return sop_classes::is_dx_for_processing_sop_class(sop_class);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

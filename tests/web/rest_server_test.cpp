@@ -14,7 +14,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace pacs::web;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("rest_server_config default values", "[web][config]") {
   rest_server_config config;

@@ -15,10 +15,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
 
 // ============================================================================
 // n_get_scp Construction Tests
@@ -105,9 +105,9 @@ TEST_CASE("n_get_scp handler configuration", "[services][n_get]") {
             dicom_dataset ds;
             if (tags.empty()) {
                 // Return all attributes
-                ds.set_string(tags::patient_name, pacs::encoding::vr_type::PN,
+                ds.set_string(tags::patient_name, kcenon::pacs::encoding::vr_type::PN,
                               "Test^Patient");
-                ds.set_string(tags::patient_id, pacs::encoding::vr_type::LO,
+                ds.set_string(tags::patient_id, kcenon::pacs::encoding::vr_type::LO,
                               "12345");
             }
             return Result<dicom_dataset>{std::move(ds)};

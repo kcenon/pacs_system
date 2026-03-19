@@ -62,7 +62,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // UUID Generation
@@ -1298,17 +1298,17 @@ std::string job_manager::create_prefetch_job(
 // Job Control
 // =============================================================================
 
-pacs::VoidResult job_manager::start_job(std::string_view job_id) {
+kcenon::pacs::VoidResult job_manager::start_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Job not found: " + std::string(job_id));
     }
 
     if (!job_opt->can_start()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Job cannot be started in current state: " + std::string(to_string(job_opt->status)));
     }
 
@@ -1324,20 +1324,20 @@ pacs::VoidResult job_manager::start_job(std::string_view job_id) {
     impl_->enqueue_job(std::string(job_id), job_opt->priority);
 
     impl_->logger->info_fmt("Started job {}", job_id);
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult job_manager::pause_job(std::string_view job_id) {
+kcenon::pacs::VoidResult job_manager::pause_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Job not found: " + std::string(job_id));
     }
 
     if (!job_opt->can_pause()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Job cannot be paused in current state: " + std::string(to_string(job_opt->status)));
     }
 
@@ -1348,20 +1348,20 @@ pacs::VoidResult job_manager::pause_job(std::string_view job_id) {
     impl_->update_job_status(std::string(job_id), job_status::paused);
 
     impl_->logger->info_fmt("Paused job {}", job_id);
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult job_manager::resume_job(std::string_view job_id) {
+kcenon::pacs::VoidResult job_manager::resume_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Job not found: " + std::string(job_id));
     }
 
     if (job_opt->status != job_status::paused) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Job is not paused: " + std::string(to_string(job_opt->status)));
     }
 
@@ -1372,20 +1372,20 @@ pacs::VoidResult job_manager::resume_job(std::string_view job_id) {
     impl_->update_job_status(std::string(job_id), job_status::queued);
 
     impl_->logger->info_fmt("Resumed job {}", job_id);
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult job_manager::cancel_job(std::string_view job_id) {
+kcenon::pacs::VoidResult job_manager::cancel_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Job not found: " + std::string(job_id));
     }
 
     if (!job_opt->can_cancel()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Job cannot be cancelled in current state: " + std::string(to_string(job_opt->status)));
     }
 
@@ -1407,20 +1407,20 @@ pacs::VoidResult job_manager::cancel_job(std::string_view job_id) {
     }
 
     impl_->logger->info_fmt("Cancelled job {}", job_id);
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult job_manager::retry_job(std::string_view job_id) {
+kcenon::pacs::VoidResult job_manager::retry_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Job not found: " + std::string(job_id));
     }
 
     if (!job_opt->can_retry()) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::invalid_argument,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_argument,
             "Job cannot be retried: " + std::string(to_string(job_opt->status)));
     }
 
@@ -1445,14 +1445,14 @@ pacs::VoidResult job_manager::retry_job(std::string_view job_id) {
     }
 
     impl_->logger->info_fmt("Retrying job {} (attempt {})", job_id, job_opt->retry_count + 1);
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
-pacs::VoidResult job_manager::delete_job(std::string_view job_id) {
+kcenon::pacs::VoidResult job_manager::delete_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::not_found,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::not_found,
             "Job not found: " + std::string(job_id));
     }
 
@@ -1476,7 +1476,7 @@ pacs::VoidResult job_manager::delete_job(std::string_view job_id) {
     }
 
     impl_->logger->info_fmt("Deleted job {}", job_id);
-    return pacs::ok();
+    return kcenon::pacs::ok();
 }
 
 // =============================================================================
@@ -1692,4 +1692,4 @@ const job_manager_config& job_manager::config() const noexcept {
     return impl_->config;
 }
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

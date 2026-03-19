@@ -45,7 +45,7 @@
 #include <kcenon/common/patterns/result.h>
 #include <kcenon/common/error/error_codes.h>
 
-namespace pacs {
+namespace kcenon::pacs {
 
 /**
  * @brief Result type alias for PACS operations
@@ -250,7 +250,7 @@ using kcenon::common::try_catch_void;
 /**
  * @brief Create a PACS error result with module context
  * @tparam T The result value type
- * @param code Error code from pacs::error_codes
+ * @param code Error code from kcenon::pacs::error_codes
  * @param message Error message
  * @param details Optional additional details
  * @return Result<T> containing the error
@@ -266,7 +266,7 @@ inline Result<T> pacs_error(int code, const std::string& message,
 
 /**
  * @brief Create a PACS void error result
- * @param code Error code from pacs::error_codes
+ * @param code Error code from kcenon::pacs::error_codes
  * @param message Error message
  * @param details Optional additional details
  * @return VoidResult containing the error
@@ -279,7 +279,8 @@ inline VoidResult pacs_void_error(int code, const std::string& message,
     return VoidResult(error_info{code, message, "pacs", details});
 }
 
-} // namespace pacs
+} // namespace kcenon::pacs
+
 
 // Convenience macros for PACS Result pattern usage
 
