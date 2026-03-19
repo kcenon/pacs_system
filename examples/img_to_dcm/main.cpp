@@ -397,7 +397,7 @@ image_data read_image(const std::filesystem::path& file_path) {
  * @param opts Conversion options
  * @return DICOM dataset
  */
-pacs::core::dicom_dataset create_dicom_dataset(const image_data& img,
+kcenon::pacs::core::dicom_dataset create_dicom_dataset(const image_data& img,
                                                 const options& opts) {
     using namespace kcenon::pacs::core;
     using namespace kcenon::pacs::encoding;
