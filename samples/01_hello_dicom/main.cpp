@@ -27,12 +27,12 @@
 #include <iomanip>
 #include <iostream>
 
-namespace core = pacs::core;
-namespace enc = pacs::encoding;
-namespace tags = pacs::core::tags;
+namespace core = kcenon::pacs::core;
+namespace enc = kcenon::pacs::encoding;
+namespace tags = kcenon::pacs::core::tags;
 
 int main() {
-    pacs::samples::print_header("Hello DICOM - Level 1 Sample");
+    kcenon::pacs::samples::print_header("Hello DICOM - Level 1 Sample");
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Part 1: Understanding DICOM Tags
@@ -42,7 +42,7 @@ int main() {
     // - Group 0008 = Study/Series/Instance identification
     // - Group 0028 = Image pixel parameters
 
-    pacs::samples::print_section("Part 1: DICOM Tags");
+    kcenon::pacs::samples::print_section("Part 1: DICOM Tags");
 
     std::cout << "DICOM tags are the fundamental identifiers for data elements.\n";
     std::cout << "Each tag is a (Group, Element) pair of 16-bit hexadecimal numbers.\n\n";
@@ -69,7 +69,7 @@ int main() {
     std::cout << "  (0010,0010) == tags::patient_name? "
               << (patient_name_tag == tags::patient_name ? "Yes" : "No") << "\n";
 
-    pacs::samples::print_success("Part 1 complete - DICOM tags understood!");
+    kcenon::pacs::samples::print_success("Part 1 complete - DICOM tags understood!");
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Part 2: Creating a DICOM Dataset
@@ -77,7 +77,7 @@ int main() {
     // A dataset is an ordered collection of DICOM elements.
     // Each element has: Tag + VR (Value Representation) + Value
 
-    pacs::samples::print_section("Part 2: DICOM Dataset");
+    kcenon::pacs::samples::print_section("Part 2: DICOM Dataset");
 
     std::cout << "A DICOM dataset is an ordered collection of data elements.\n";
     std::cout << "Each element consists of: Tag + VR + Value\n\n";
@@ -133,14 +133,14 @@ int main() {
     // Reading values back from the dataset
     std::cout << "Dataset created with " << dataset.size() << " elements:\n\n";
 
-    pacs::samples::print_table("Patient Information", {
+    kcenon::pacs::samples::print_table("Patient Information", {
         {"Name", dataset.get_string(tags::patient_name)},
         {"ID", dataset.get_string(tags::patient_id)},
         {"Birth Date", dataset.get_string(tags::patient_birth_date)},
         {"Sex", dataset.get_string(tags::patient_sex)}
     });
 
-    pacs::samples::print_table("Study Information", {
+    kcenon::pacs::samples::print_table("Study Information", {
         {"Date", dataset.get_string(tags::study_date)},
         {"Description", dataset.get_string(tags::study_description)},
         {"Modality", dataset.get_string(tags::modality)},
@@ -153,7 +153,7 @@ int main() {
     std::cout << "\nImage dimensions: "
               << rows_val.value_or(0) << " x " << cols_val.value_or(0) << " pixels\n";
 
-    pacs::samples::print_success("Part 2 complete - Dataset created with patient and study info!");
+    kcenon::pacs::samples::print_success("Part 2 complete - Dataset created with patient and study info!");
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Part 3: Saving as DICOM File
@@ -164,7 +164,7 @@ int main() {
     // - File Meta Information (Group 0002, always Explicit VR LE)
     // - Dataset (encoded per specified Transfer Syntax)
 
-    pacs::samples::print_section("Part 3: DICOM File I/O");
+    kcenon::pacs::samples::print_section("Part 3: DICOM File I/O");
 
     std::cout << "DICOM Part 10 file structure:\n";
     std::cout << "  1. 128-byte preamble (typically zeros)\n";
@@ -186,9 +186,9 @@ int main() {
     auto save_result = dicom_file.save(output_path);
 
     if (save_result.is_ok()) {
-        pacs::samples::print_success("File saved: " + output_path);
+        kcenon::pacs::samples::print_success("File saved: " + output_path);
     } else {
-        pacs::samples::print_error("Save failed: " + save_result.error().message);
+        kcenon::pacs::samples::print_error("Save failed: " + save_result.error().message);
         return 1;
     }
 
@@ -196,7 +196,7 @@ int main() {
     // Part 4: Reading DICOM File
     // ═══════════════════════════════════════════════════════════════════════════
 
-    pacs::samples::print_section("Part 4: Reading DICOM File");
+    kcenon::pacs::samples::print_section("Part 4: Reading DICOM File");
 
     auto read_result = core::dicom_file::open(output_path);
 
@@ -204,7 +204,7 @@ int main() {
         auto& loaded_file = read_result.value();
         const auto& loaded_ds = loaded_file.dataset();
 
-        pacs::samples::print_success("File loaded successfully!");
+        kcenon::pacs::samples::print_success("File loaded successfully!");
 
         std::cout << "\nFile properties:\n";
         std::cout << "  Transfer Syntax: " << loaded_file.transfer_syntax().name() << "\n";
@@ -233,7 +233,7 @@ int main() {
         std::cout << std::string(60, '-') << "\n";
 
     } else {
-        pacs::samples::print_error("Read failed: " + read_result.error().message);
+        kcenon::pacs::samples::print_error("Read failed: " + read_result.error().message);
         return 1;
     }
 
@@ -241,9 +241,9 @@ int main() {
     // Summary
     // ═══════════════════════════════════════════════════════════════════════════
 
-    pacs::samples::print_section("Summary");
+    kcenon::pacs::samples::print_section("Summary");
 
-    pacs::samples::print_box({
+    kcenon::pacs::samples::print_box({
         "Congratulations! You have learned:",
         "",
         "1. DICOM Tags - (Group, Element) pairs that identify data",

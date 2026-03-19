@@ -12,7 +12,7 @@
 #include <atomic>
 #include <thread>
 
-using namespace pacs::monitoring;
+using namespace kcenon::pacs::monitoring;
 
 // =============================================================================
 // Construction Tests

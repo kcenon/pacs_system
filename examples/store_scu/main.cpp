@@ -788,7 +788,7 @@ void generate_report(const std::string& report_file,
  */
 std::vector<std::pair<std::filesystem::path, std::string>> analyze_files(
     const std::vector<std::filesystem::path>& files, bool verbose) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     std::vector<std::pair<std::filesystem::path, std::string>> valid_files;
 
@@ -815,9 +815,9 @@ std::vector<std::pair<std::filesystem::path, std::string>> analyze_files(
  * @brief Perform store operations
  */
 int perform_store(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::services;
-    using namespace pacs::core;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
+    using namespace kcenon::pacs::core;
 
     bool is_quiet = opts.verbosity == verbosity_level::quiet;
     bool is_verbose = opts.verbosity == verbosity_level::verbose ||

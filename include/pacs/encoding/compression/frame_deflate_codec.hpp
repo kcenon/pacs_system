@@ -38,7 +38,7 @@
 
 #include "pacs/encoding/compression/compression_codec.hpp"
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief Frame-level Deflate codec implementation (Supplement 244).
@@ -165,6 +165,6 @@ private:
     int compression_level_;
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_FRAME_DEFLATE_CODEC_HPP

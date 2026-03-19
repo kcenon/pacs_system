@@ -47,7 +47,7 @@
 #include <database/query_builder.h>
 #include <pacs/compat/format.hpp>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -181,7 +181,7 @@ auto patient_repository::upsert_patient(const patient_record& record)
     if (check_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to check patient existence: {}",
+            kcenon::pacs::compat::format("Failed to check patient existence: {}",
                                 check_result.error().message),
             "storage");
     }
@@ -211,7 +211,7 @@ auto patient_repository::upsert_patient(const patient_record& record)
         if (update_result.is_err()) {
             return make_error<int64_t>(
                 -1,
-                pacs::compat::format("Failed to update patient: {}",
+                kcenon::pacs::compat::format("Failed to update patient: {}",
                                     update_result.error().message),
                 "storage");
         }
@@ -235,7 +235,7 @@ auto patient_repository::upsert_patient(const patient_record& record)
         if (insert_result.is_err()) {
             return make_error<int64_t>(
                 -1,
-                pacs::compat::format("Failed to insert patient: {}",
+                kcenon::pacs::compat::format("Failed to insert patient: {}",
                                     insert_result.error().message),
                 "storage");
         }
@@ -346,7 +346,7 @@ auto patient_repository::search_patients(const patient_query& query)
     if (result.is_err()) {
         return make_error<std::vector<patient_record>>(
             -1,
-            pacs::compat::format("Query failed: {}", result.error().message),
+            kcenon::pacs::compat::format("Query failed: {}", result.error().message),
             "storage");
     }
 
@@ -373,7 +373,7 @@ auto patient_repository::delete_patient(std::string_view patient_id)
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to delete patient: {}",
+            kcenon::pacs::compat::format("Failed to delete patient: {}",
                                  result.error().message),
             "storage");
     }
@@ -389,7 +389,7 @@ auto patient_repository::patient_count() -> Result<size_t> {
     if (result.is_err()) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Query failed: {}", result.error().message),
+            kcenon::pacs::compat::format("Query failed: {}", result.error().message),
             "storage");
     }
 
@@ -501,7 +501,7 @@ auto patient_repository::select_columns() const -> std::vector<std::string> {
             "created_at", "updated_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -513,11 +513,11 @@ auto patient_repository::select_columns() const -> std::vector<std::string> {
 #include <pacs/core/result.hpp>
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
-using namespace pacs::error_codes;
+using namespace kcenon::pacs::error_codes;
 
 namespace {
 
@@ -651,7 +651,7 @@ auto patient_repository::upsert_patient(const patient_record& record)
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare statement: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -668,7 +668,7 @@ auto patient_repository::upsert_patient(const patient_record& record)
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, pacs::compat::format("Failed to upsert patient: {}", error_msg),
+            rc, kcenon::pacs::compat::format("Failed to upsert patient: {}", error_msg),
             "storage");
     }
 
@@ -783,11 +783,11 @@ auto patient_repository::search_patients(const patient_query& query) const
     sql += " ORDER BY patient_name, patient_id";
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
 
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -795,7 +795,7 @@ auto patient_repository::search_patients(const patient_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<patient_record>>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -821,7 +821,7 @@ auto patient_repository::delete_patient(std::string_view patient_id)
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare delete: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -833,7 +833,7 @@ auto patient_repository::delete_patient(std::string_view patient_id)
 
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
-            rc, pacs::compat::format("Failed to delete patient: {}", sqlite3_errmsg(db_)),
+            rc, kcenon::pacs::compat::format("Failed to delete patient: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -848,7 +848,7 @@ auto patient_repository::patient_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             database_query_error,
-            pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
+            kcenon::pacs::compat::format("Failed to prepare query: {}", sqlite3_errmsg(db_)),
             "storage");
     }
 
@@ -861,6 +861,6 @@ auto patient_repository::patient_count() const -> Result<size_t> {
     return ok(count);
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

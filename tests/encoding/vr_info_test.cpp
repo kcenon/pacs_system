@@ -4,7 +4,7 @@
 
 #include <cstring>
 
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding;
 
 TEST_CASE("vr_info lookup returns correct properties", "[encoding][vr_info]") {
     SECTION("Person Name (PN) properties") {

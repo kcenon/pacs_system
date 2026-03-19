@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -331,4 +331,4 @@ bool is_mammography_sop_class(std::string_view uid) noexcept {
     return info != nullptr && info->is_mammography;
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

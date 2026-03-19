@@ -52,7 +52,7 @@
 
 #include "../pacs_metrics.hpp"
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @struct association_metric
@@ -333,4 +333,4 @@ inline association_metric dicom_association_collector::create_metric(
         {{"ae", ae_title_}});
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

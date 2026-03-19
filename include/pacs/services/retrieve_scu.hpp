@@ -61,7 +61,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Retrieve Mode Enumeration
@@ -642,6 +642,6 @@ private:
     std::atomic<size_t> bytes_retrieved_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_RETRIEVE_SCU_HPP

@@ -51,7 +51,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Ultrasound Storage SOP Class UIDs
@@ -220,6 +220,6 @@ enum class us_region_data_type : uint16_t {
     b_mode = 0x0005            ///< B-mode amplitude
 };
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_US_STORAGE_HPP

@@ -11,10 +11,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
 
 // ============================================================================
 // print_scu Construction Tests
@@ -127,7 +127,7 @@ TEST_CASE("print_result structure", "[services][print][scu]") {
     SECTION("can store response data") {
         result.response_data.set_string(
             print_tags::printer_status_tag,
-            pacs::encoding::vr_type::CS,
+            kcenon::pacs::encoding::vr_type::CS,
             "NORMAL");
         CHECK(result.response_data.contains(print_tags::printer_status_tag));
     }

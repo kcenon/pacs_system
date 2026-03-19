@@ -47,7 +47,7 @@
 
 #include <database/query_builder.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -173,7 +173,7 @@ auto mpps_repository::create_mpps(const mpps_record& record) -> Result<int64_t> 
     if (insert_result.is_err()) {
         return make_error<int64_t>(
             -1,
-            pacs::compat::format("Failed to create MPPS: {}",
+            kcenon::pacs::compat::format("Failed to create MPPS: {}",
                                  insert_result.error().message),
             "storage");
     }
@@ -209,7 +209,7 @@ auto mpps_repository::update_mpps(std::string_view mpps_uid,
     if (current->status == "COMPLETED" || current->status == "DISCONTINUED") {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format(
+            kcenon::pacs::compat::format(
                 "Cannot update MPPS in final state '{}'. COMPLETED and "
                 "DISCONTINUED are final states.",
                 current->status),
@@ -240,7 +240,7 @@ auto mpps_repository::update_mpps(std::string_view mpps_uid,
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to update MPPS: {}",
+            kcenon::pacs::compat::format("Failed to update MPPS: {}",
                                  result.error().message),
             "storage");
     }
@@ -375,11 +375,11 @@ auto mpps_repository::search_mpps(const mpps_query& query)
         builder.where("accession_no", "=", *query.accession_no);
     }
     if (query.start_date_from.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "substr(start_datetime, 1, 8) >= '{}'", *query.start_date_from)));
     }
     if (query.start_date_to.has_value()) {
-        builder.where(database::query_condition(pacs::compat::format(
+        builder.where(database::query_condition(kcenon::pacs::compat::format(
             "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to)));
     }
 
@@ -421,7 +421,7 @@ auto mpps_repository::delete_mpps(std::string_view mpps_uid) -> VoidResult {
     if (result.is_err()) {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format("Failed to delete MPPS: {}",
+            kcenon::pacs::compat::format("Failed to delete MPPS: {}",
                                  result.error().message),
             "storage");
     }
@@ -438,7 +438,7 @@ auto mpps_repository::mpps_count(std::string_view status) -> Result<size_t> {
         return make_error<size_t>(-1, "Database not connected", "storage");
     }
 
-    auto query = pacs::compat::format(
+    auto query = kcenon::pacs::compat::format(
         "SELECT COUNT(*) as count FROM {} WHERE status = '{}'",
         table_name(), std::string(status));
     auto result = db()->select(query);
@@ -456,7 +456,7 @@ auto mpps_repository::mpps_count(std::string_view status) -> Result<size_t> {
     } catch (const std::exception& e) {
         return make_error<size_t>(
             -1,
-            pacs::compat::format("Failed to parse MPPS count: {}", e.what()),
+            kcenon::pacs::compat::format("Failed to parse MPPS count: {}", e.what()),
             "storage");
     }
 }
@@ -527,13 +527,13 @@ auto mpps_repository::select_columns() const -> std::vector<std::string> {
             "performed_series","created_at",      "updated_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::make_error;
 using kcenon::common::ok;
@@ -653,7 +653,7 @@ auto mpps_repository::create_mpps(const mpps_record& record) -> Result<int64_t> 
     if (rc != SQLITE_OK) {
         return make_error<int64_t>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}",
+            kcenon::pacs::compat::format("Failed to prepare statement: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -680,7 +680,7 @@ auto mpps_repository::create_mpps(const mpps_record& record) -> Result<int64_t> 
         auto error_msg = sqlite3_errmsg(db_);
         sqlite3_finalize(stmt);
         return make_error<int64_t>(
-            rc, pacs::compat::format("Failed to create MPPS: {}", error_msg),
+            rc, kcenon::pacs::compat::format("Failed to create MPPS: {}", error_msg),
             "storage");
     }
 
@@ -711,7 +711,7 @@ auto mpps_repository::update_mpps(std::string_view mpps_uid,
     if (current->status == "COMPLETED" || current->status == "DISCONTINUED") {
         return make_error<std::monostate>(
             -1,
-            pacs::compat::format(
+            kcenon::pacs::compat::format(
                 "Cannot update MPPS in final state '{}'. COMPLETED and "
                 "DISCONTINUED are final states.",
                 current->status),
@@ -732,7 +732,7 @@ auto mpps_repository::update_mpps(std::string_view mpps_uid,
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare statement: {}",
+            kcenon::pacs::compat::format("Failed to prepare statement: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -758,7 +758,7 @@ auto mpps_repository::update_mpps(std::string_view mpps_uid,
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to update MPPS: {}",
+            kcenon::pacs::compat::format("Failed to update MPPS: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -856,7 +856,7 @@ auto mpps_repository::list_active_mpps(std::string_view station_ae) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<mpps_record>>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -891,7 +891,7 @@ auto mpps_repository::find_mpps_by_study(std::string_view study_uid) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<mpps_record>>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -956,10 +956,10 @@ auto mpps_repository::search_mpps(const mpps_query& query) const
     sql += " ORDER BY start_datetime DESC";
 
     if (query.limit > 0) {
-        sql += pacs::compat::format(" LIMIT {}", query.limit);
+        sql += kcenon::pacs::compat::format(" LIMIT {}", query.limit);
     }
     if (query.offset > 0) {
-        sql += pacs::compat::format(" OFFSET {}", query.offset);
+        sql += kcenon::pacs::compat::format(" OFFSET {}", query.offset);
     }
 
     sqlite3_stmt* stmt = nullptr;
@@ -967,7 +967,7 @@ auto mpps_repository::search_mpps(const mpps_query& query) const
     if (rc != SQLITE_OK) {
         return make_error<std::vector<mpps_record>>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -993,7 +993,7 @@ auto mpps_repository::delete_mpps(std::string_view mpps_uid) -> VoidResult {
     if (rc != SQLITE_OK) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to prepare delete: {}",
+            kcenon::pacs::compat::format("Failed to prepare delete: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1007,7 +1007,7 @@ auto mpps_repository::delete_mpps(std::string_view mpps_uid) -> VoidResult {
     if (rc != SQLITE_DONE) {
         return make_error<std::monostate>(
             rc,
-            pacs::compat::format("Failed to delete MPPS: {}",
+            kcenon::pacs::compat::format("Failed to delete MPPS: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1022,7 +1022,7 @@ auto mpps_repository::mpps_count() const -> Result<size_t> {
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1043,7 +1043,7 @@ auto mpps_repository::mpps_count(std::string_view status) const
     if (rc != SQLITE_OK) {
         return make_error<size_t>(
             rc,
-            pacs::compat::format("Failed to prepare query: {}",
+            kcenon::pacs::compat::format("Failed to prepare query: {}",
                                  sqlite3_errmsg(db_)),
             "storage");
     }
@@ -1059,6 +1059,6 @@ auto mpps_repository::mpps_count(std::string_view status) const
     return ok(count);
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

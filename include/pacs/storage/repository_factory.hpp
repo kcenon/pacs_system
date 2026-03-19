@@ -48,7 +48,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // Forward declarations
 class pacs_database_adapter;
@@ -440,6 +440,6 @@ private:
     std::shared_ptr<commitment_repository> commitments_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

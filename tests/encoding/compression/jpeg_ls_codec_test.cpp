@@ -14,7 +14,7 @@
 #include <random>
 #include <vector>
 
-using namespace pacs::encoding::compression;
+using namespace kcenon::pacs::encoding::compression;
 
 namespace {
 
@@ -762,7 +762,7 @@ TEST_CASE("codec_factory creates jpeg_ls_codec", "[encoding][compression][jpegls
     }
 
     SECTION("create by transfer_syntax - lossless") {
-        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.80");
+        kcenon::pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.80");
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);
@@ -770,7 +770,7 @@ TEST_CASE("codec_factory creates jpeg_ls_codec", "[encoding][compression][jpegls
     }
 
     SECTION("create by transfer_syntax - near-lossless") {
-        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.81");
+        kcenon::pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.81");
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);

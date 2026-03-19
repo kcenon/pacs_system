@@ -65,7 +65,7 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -562,4 +562,4 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
           });
 }
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

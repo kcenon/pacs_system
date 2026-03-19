@@ -345,8 +345,8 @@ constexpr int8_t base64_decode_table[] = {
  * @param vr_str VR string (e.g., "PN", "LO")
  * @return Parsed vr_type
  */
-[[nodiscard]] pacs::encoding::vr_type parse_vr(const std::string& vr_str) {
-    using namespace pacs::encoding;
+[[nodiscard]] kcenon::pacs::encoding::vr_type parse_vr(const std::string& vr_str) {
+    using namespace kcenon::pacs::encoding;
 
     static const std::map<std::string, vr_type> vr_map = {
         {"AE", vr_type::AE}, {"AS", vr_type::AS}, {"AT", vr_type::AT},
@@ -372,7 +372,7 @@ constexpr int8_t base64_decode_table[] = {
  * @param tag_str Tag string
  * @return Parsed dicom_tag or nullopt
  */
-[[nodiscard]] std::optional<pacs::core::dicom_tag> parse_tag(const std::string& tag_str) {
+[[nodiscard]] std::optional<kcenon::pacs::core::dicom_tag> parse_tag(const std::string& tag_str) {
     if (tag_str.length() != 8) {
         return std::nullopt;
     }
@@ -380,7 +380,7 @@ constexpr int8_t base64_decode_table[] = {
     try {
         uint16_t group = static_cast<uint16_t>(std::stoul(tag_str.substr(0, 4), nullptr, 16));
         uint16_t elem = static_cast<uint16_t>(std::stoul(tag_str.substr(4, 4), nullptr, 16));
-        return pacs::core::dicom_tag{group, elem};
+        return kcenon::pacs::core::dicom_tag{group, elem};
     } catch (...) {
         return std::nullopt;
     }
@@ -436,7 +436,7 @@ constexpr int8_t base64_decode_table[] = {
 
 // Forward declaration
 void parse_dataset(const json_object& json_obj,
-                   pacs::core::dicom_dataset& dataset,
+                   kcenon::pacs::core::dicom_dataset& dataset,
                    const options& opts);
 
 /**
@@ -446,12 +446,12 @@ void parse_dataset(const json_object& json_obj,
  * @param opts Command line options
  * @return Created dicom_element
  */
-[[nodiscard]] pacs::core::dicom_element create_element(
-    const pacs::core::dicom_tag& tag,
+[[nodiscard]] kcenon::pacs::core::dicom_element create_element(
+    const kcenon::pacs::core::dicom_tag& tag,
     const json_value& element_json,
     const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     if (!element_json.is_object()) {
         throw std::runtime_error("Element value must be an object");
@@ -618,7 +618,7 @@ void parse_dataset(const json_object& json_obj,
  * @param opts Command line options
  */
 void parse_dataset(const json_object& json_obj,
-                   pacs::core::dicom_dataset& dataset,
+                   kcenon::pacs::core::dicom_dataset& dataset,
                    const options& opts) {
     for (const auto& [key, value] : json_obj) {
         // Skip non-tag keys (e.g., metadata fields)
@@ -759,8 +759,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @return 0 on success, non-zero on error
  */
 int convert_file(const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     // Read and parse JSON
     std::string json_content;

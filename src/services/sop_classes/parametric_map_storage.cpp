@@ -38,7 +38,7 @@
 
 #include <array>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -128,4 +128,4 @@ bool is_valid_parametric_map_photometric(std::string_view value) noexcept {
     return value == "MONOCHROME2";
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

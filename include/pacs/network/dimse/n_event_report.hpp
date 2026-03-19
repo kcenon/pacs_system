@@ -81,12 +81,12 @@
 
 #include "dimse_message.hpp"
 
-namespace pacs::network::dimse {
+namespace kcenon::pacs::network::dimse {
 
 // N-EVENT-REPORT factory functions are declared in dimse_message.hpp:
 // - make_n_event_report_rq()
 // - make_n_event_report_rsp()
 
-}  // namespace pacs::network::dimse
+}  // namespace kcenon::pacs::network::dimse
 
 #endif  // PACS_NETWORK_DIMSE_N_EVENT_REPORT_HPP

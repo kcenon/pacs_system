@@ -10,7 +10,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace pacs::integration;
+using namespace kcenon::pacs::integration;
 
 // =============================================================================
 // Test Helpers

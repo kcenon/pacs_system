@@ -59,7 +59,7 @@
 #include <unistd.h>
 #endif
 
-namespace pacs::integration_test {
+namespace kcenon::pacs::integration_test {
 
 // =============================================================================
 // CI Environment Detection
@@ -1504,6 +1504,6 @@ private:
     process_launcher::pid_type pid_{process_launcher::invalid_pid};
 };
 
-}  // namespace pacs::integration_test
+}  // namespace kcenon::pacs::integration_test
 
 #endif  // PACS_INTEGRATION_TESTS_TEST_FIXTURES_HPP

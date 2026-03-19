@@ -50,7 +50,7 @@
 
 #include <sstream>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -291,6 +291,6 @@ void register_metrics_endpoints_impl(
         });
 }
 
-}  // namespace pacs::web::endpoints
+}  // namespace kcenon::pacs::web::endpoints
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

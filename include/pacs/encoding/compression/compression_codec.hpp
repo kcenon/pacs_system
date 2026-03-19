@@ -47,7 +47,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief Compression quality settings for lossy codecs.
@@ -87,9 +87,9 @@ struct compression_result {
 };
 
 /**
- * @brief Result type alias for compression operations using pacs::Result<T> pattern
+ * @brief Result type alias for compression operations using kcenon::pacs::Result<T> pattern
  */
-using codec_result = pacs::Result<compression_result>;
+using codec_result = kcenon::pacs::Result<compression_result>;
 
 /**
  * @brief Abstract base class for image compression codecs.
@@ -191,6 +191,6 @@ protected:
     compression_codec& operator=(compression_codec&&) = default;
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_COMPRESSION_CODEC_HPP

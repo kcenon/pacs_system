@@ -42,7 +42,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // Construction / Destruction
@@ -470,4 +470,4 @@ void dicom_session::send_data(std::vector<uint8_t>&& data) {
     }, session_);
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

@@ -39,10 +39,10 @@
 #include <chrono>
 #include <random>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // =============================================================================
 // DICOM Tags for SR Assessment
@@ -402,4 +402,4 @@ std::string to_string(assessment_status status) {
     return "draft";
 }
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai

@@ -24,8 +24,8 @@
 
 namespace {
 
-using namespace pacs::integration_test;
-using namespace pacs::core;
+using namespace kcenon::pacs::integration_test;
+using namespace kcenon::pacs::core;
 
 /**
  * @brief Save a dataset to a DICOM file
@@ -37,7 +37,7 @@ bool save_dataset(
     // Create DICOM file with Explicit VR Little Endian transfer syntax
     auto file = dicom_file::create(
         dicom_dataset{ds},  // Copy the dataset
-        pacs::encoding::transfer_syntax::explicit_vr_little_endian);
+        kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
 
     auto result = file.save(path);
     if (result.is_err()) {

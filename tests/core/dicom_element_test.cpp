@@ -13,8 +13,8 @@
 #include <pacs/core/dicom_tag_constants.hpp>
 #include <pacs/core/result.hpp>
 
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Construction Tests
@@ -216,7 +216,7 @@ TEST_CASE("dicom_element error handling", "[core][dicom_element]") {
 
         auto result = elem.as_numeric<uint16_t>();
         CHECK(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::data_size_mismatch);
+        CHECK(result.error().code == kcenon::pacs::error_codes::data_size_mismatch);
     }
 
     SECTION("numeric list with unaligned data returns error") {
@@ -225,7 +225,7 @@ TEST_CASE("dicom_element error handling", "[core][dicom_element]") {
 
         auto result = elem.as_numeric_list<uint16_t>();
         CHECK(result.is_err());
-        CHECK(result.error().code == pacs::error_codes::data_size_mismatch);
+        CHECK(result.error().code == kcenon::pacs::error_codes::data_size_mismatch);
     }
 }
 

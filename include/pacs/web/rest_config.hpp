@@ -45,7 +45,7 @@
 #include <cstdint>
 #include <string>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 /**
  * @struct rest_server_config
@@ -83,4 +83,4 @@ struct rest_server_config {
   std::size_t max_body_size{10 * 1024 * 1024};
 };
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

@@ -43,7 +43,7 @@
 namespace {
 
 /// Global pointer to server for signal handling
-std::atomic<pacs::network::dicom_server*> g_server{nullptr};
+std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
 
 /// Global running flag for signal handling
 std::atomic<bool> g_running{true};
@@ -328,9 +328,9 @@ std::string format_bytes(size_t bytes) {
  */
 size_t scan_storage(
     const std::filesystem::path& storage_dir,
-    pacs::storage::index_database& db) {
+    kcenon::pacs::storage::index_database& db) {
 
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
     namespace fs = std::filesystem;
 
     size_t count = 0;
@@ -459,16 +459,16 @@ size_t scan_storage(
 /**
  * @brief Build query response datasets from database records
  */
-std::vector<pacs::core::dicom_dataset> handle_query(
-    pacs::services::query_level level,
-    const pacs::core::dicom_dataset& query_keys,
+std::vector<kcenon::pacs::core::dicom_dataset> handle_query(
+    kcenon::pacs::services::query_level level,
+    const kcenon::pacs::core::dicom_dataset& query_keys,
     [[maybe_unused]] const std::string& calling_ae,
-    pacs::storage::index_database& db) {
+    kcenon::pacs::storage::index_database& db) {
 
-    using namespace pacs::core;
-    using namespace pacs::storage;
-    using namespace pacs::services;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::storage;
+    using namespace kcenon::pacs::services;
+    using namespace kcenon::pacs::encoding;
 
     std::vector<dicom_dataset> results;
 
@@ -608,12 +608,12 @@ std::vector<pacs::core::dicom_dataset> handle_query(
 /**
  * @brief Handle retrieve request - find matching DICOM files
  */
-std::vector<pacs::core::dicom_file> handle_retrieve(
-    const pacs::core::dicom_dataset& query_keys,
-    pacs::storage::index_database& db) {
+std::vector<kcenon::pacs::core::dicom_file> handle_retrieve(
+    const kcenon::pacs::core::dicom_dataset& query_keys,
+    kcenon::pacs::storage::index_database& db) {
 
-    using namespace pacs::core;
-    using namespace pacs::storage;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::storage;
 
     std::vector<dicom_file> files;
 
@@ -691,10 +691,10 @@ std::vector<pacs::core::dicom_file> handle_retrieve(
  * @return true if server ran successfully
  */
 bool run_server(const qr_scp_args& args) {
-    using namespace pacs::network;
-    using namespace pacs::services;
-    using namespace pacs::storage;
-    using namespace pacs::core;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
+    using namespace kcenon::pacs::storage;
+    using namespace kcenon::pacs::core;
 
     std::cout << "\nStarting Query/Retrieve SCP...\n";
     std::cout << "  AE Title:           " << args.ae_title << "\n";

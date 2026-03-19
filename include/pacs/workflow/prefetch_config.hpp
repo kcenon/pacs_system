@@ -50,7 +50,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 /**
  * @brief Remote PACS connection configuration
@@ -293,4 +293,4 @@ struct prefetch_service_config {
     }
 };
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

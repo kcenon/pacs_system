@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief Signature algorithms supported for DICOM digital signatures
@@ -201,4 +201,4 @@ constexpr std::string_view to_dicom_term(certificate_type type) {
     return "";
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

@@ -53,11 +53,11 @@
 #include <unordered_set>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 /**
  * @brief Metadata preset types for common use cases
@@ -483,4 +483,4 @@ private:
         std::string_view sop_instance_uid);
 };
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

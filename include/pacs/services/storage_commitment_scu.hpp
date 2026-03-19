@@ -56,7 +56,7 @@
 #include <memory>
 #include <string>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /**
  * @brief Storage Commitment Push Model SCU
@@ -174,6 +174,6 @@ private:
     std::atomic<size_t> event_reports_received_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_STORAGE_COMMITMENT_SCU_HPP

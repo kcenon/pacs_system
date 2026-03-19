@@ -30,7 +30,7 @@
 #include "pacs/encoding/compression/jpegxl_codec.hpp"
 #include <pacs/core/result.hpp>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 jpegxl_codec::jpegxl_codec(bool lossless,
                            bool jpeg_recompression,
@@ -104,8 +104,8 @@ codec_result jpegxl_codec::encode(
     [[maybe_unused]] std::span<const uint8_t> pixel_data,
     [[maybe_unused]] const image_params& params,
     [[maybe_unused]] const compression_options& options) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::compression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::compression_error,
         "JPEG XL codec not available: libjxl library not found at build time. "
         "Build with PACS_WITH_JPEGXL=ON to enable.");
 }
@@ -113,10 +113,10 @@ codec_result jpegxl_codec::encode(
 codec_result jpegxl_codec::decode(
     [[maybe_unused]] std::span<const uint8_t> compressed_data,
     [[maybe_unused]] const image_params& params) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::decompression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::decompression_error,
         "JPEG XL codec not available: libjxl library not found at build time. "
         "Build with PACS_WITH_JPEGXL=ON to enable.");
 }
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

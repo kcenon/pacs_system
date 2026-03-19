@@ -38,7 +38,7 @@
 
 #include "pacs/encoding/compression/compression_codec.hpp"
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief JPEG XL codec implementation (Supplement 232).
@@ -147,6 +147,6 @@ private:
     float quality_distance_;
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_JPEGXL_CODEC_HPP

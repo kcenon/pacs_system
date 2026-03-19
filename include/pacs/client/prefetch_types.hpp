@@ -47,7 +47,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Prefetch Trigger
@@ -229,4 +229,4 @@ struct prefetch_rule_statistics {
     size_t bytes_prefetched{0};     ///< Total bytes prefetched
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

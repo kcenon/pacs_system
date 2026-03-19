@@ -81,7 +81,7 @@ using messaging_session = kcenon::network::session::messaging_session;
 using secure_session = kcenon::network::session::secure_session;
 }  // namespace network_system::session
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // Result Type and Error Info
@@ -461,4 +461,4 @@ private:
     std::condition_variable receive_cv_;
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

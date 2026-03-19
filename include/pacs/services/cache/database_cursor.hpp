@@ -64,7 +64,7 @@
 #include <variant>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /// Result type alias for operations returning a value
 template <typename T>
@@ -318,6 +318,6 @@ private:
     bool stepped_{false};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

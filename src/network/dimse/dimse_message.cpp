@@ -40,16 +40,16 @@
 
 #include <stdexcept>
 
-namespace pacs::network::dimse {
+namespace kcenon::pacs::network::dimse {
 
 namespace {
-/// Helper to convert dimse_error to pacs::error_info
-inline pacs::error_info make_dimse_error(dimse_error err, const std::string& details = "") {
+/// Helper to convert dimse_error to kcenon::pacs::error_info
+inline kcenon::pacs::error_info make_dimse_error(dimse_error err, const std::string& details = "") {
     std::string msg = std::string(to_string(err));
     if (!details.empty()) {
         msg += ": " + details;
     }
-    return pacs::error_info{pacs::error_codes::dimse_error, msg, "network"};
+    return kcenon::pacs::error_info{kcenon::pacs::error_codes::dimse_error, msg, "network"};
 }
 }  // namespace
 
@@ -94,14 +94,14 @@ auto dimse_message::has_dataset() const noexcept -> bool {
     return dataset_.has_value();
 }
 
-auto dimse_message::dataset() -> pacs::Result<std::reference_wrapper<core::dicom_dataset>> {
+auto dimse_message::dataset() -> kcenon::pacs::Result<std::reference_wrapper<core::dicom_dataset>> {
     if (!dataset_) {
         return make_dimse_error(dimse_error::invalid_data_format, "DIMSE message has no dataset");
     }
     return std::ref(*dataset_);
 }
 
-auto dimse_message::dataset() const -> pacs::Result<std::reference_wrapper<const core::dicom_dataset>> {
+auto dimse_message::dataset() const -> kcenon::pacs::Result<std::reference_wrapper<const core::dicom_dataset>> {
     if (!dataset_) {
         return make_dimse_error(dimse_error::invalid_data_format, "DIMSE message has no dataset");
     }
@@ -347,7 +347,7 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
     // Decode dataset if present
     if (!dataset_data.empty()) {
-        pacs::Result<core::dicom_dataset> ds_result =
+        kcenon::pacs::Result<core::dicom_dataset> ds_result =
             (dataset_ts.vr_type() == encoding::vr_encoding::implicit)
                 ? encoding::implicit_vr_codec::decode(dataset_data)
                 : encoding::explicit_vr_codec::decode(dataset_data);
@@ -602,4 +602,4 @@ auto make_n_delete_rsp(uint16_t message_id_responded_to,
     return msg;
 }
 
-}  // namespace pacs::network::dimse
+}  // namespace kcenon::pacs::network::dimse

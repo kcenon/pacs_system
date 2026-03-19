@@ -55,11 +55,11 @@
 
 #include <memory>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 struct rest_server_context;
 }
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 /**
  * @brief Register database metrics endpoints
@@ -79,6 +79,6 @@ void register_metrics_endpoints_impl(
     crow::SimpleApp& app,
     std::shared_ptr<rest_server_context> ctx);
 
-}  // namespace pacs::web::endpoints
+}  // namespace kcenon::pacs::web::endpoints
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

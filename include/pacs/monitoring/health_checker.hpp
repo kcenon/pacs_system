@@ -54,13 +54,13 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 // Forward declarations
 class index_database;
 class file_storage;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @struct health_checker_config
@@ -173,13 +173,13 @@ public:
      * @brief Set the database instance to monitor
      * @param database Pointer to the index_database (nullable to disable check)
      */
-    void set_database(pacs::storage::index_database* database);
+    void set_database(kcenon::pacs::storage::index_database* database);
 
     /**
      * @brief Set the storage instance to monitor
      * @param storage Pointer to the file_storage (nullable to disable check)
      */
-    void set_storage(pacs::storage::file_storage* storage);
+    void set_storage(kcenon::pacs::storage::file_storage* storage);
 
     /**
      * @brief Register a custom health check
@@ -348,10 +348,10 @@ private:
     health_checker_config config_;
 
     /// Database instance to monitor
-    pacs::storage::index_database* database_{nullptr};
+    kcenon::pacs::storage::index_database* database_{nullptr};
 
     /// Storage instance to monitor
-    pacs::storage::file_storage* storage_{nullptr};
+    kcenon::pacs::storage::file_storage* storage_{nullptr};
 
     /// Custom health checks
     std::unordered_map<std::string, check_callback> custom_checks_;
@@ -375,4 +375,4 @@ private:
     mutable std::shared_mutex mutex_;
 };
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

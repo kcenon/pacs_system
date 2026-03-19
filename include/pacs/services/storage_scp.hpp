@@ -55,9 +55,9 @@
 #include <string>
 #include <vector>
 
-namespace pacs::security { class atna_service_auditor; }
+namespace kcenon::pacs::security { class atna_service_auditor; }
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /**
  * @brief Policy for handling duplicate SOP instances
@@ -269,7 +269,7 @@ public:
      * @param auditor Shared pointer to an ATNA service auditor
      */
     void set_audit_handler(
-        std::shared_ptr<pacs::security::atna_service_auditor> auditor);
+        std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor);
 
     // =========================================================================
     // scp_service Interface Implementation
@@ -350,7 +350,7 @@ private:
     post_store_handler post_store_handler_;
 
     /// ATNA audit handler
-    std::shared_ptr<pacs::security::atna_service_auditor> auditor_;
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor_;
 
     /// Statistics: number of images received
     std::atomic<size_t> images_received_{0};
@@ -430,6 +430,6 @@ inline constexpr std::string_view rt_plan_storage_uid =
  */
 [[nodiscard]] std::vector<std::string> get_standard_storage_sop_classes();
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_STORAGE_SCP_HPP

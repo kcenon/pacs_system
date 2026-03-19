@@ -48,7 +48,7 @@
 #include <memory>
 #include <string_view>
 
-namespace pacs::di {
+namespace kcenon::pacs::di {
 
 // =============================================================================
 // Logger Interface
@@ -130,9 +130,9 @@ public:
      * @brief Log a formatted trace-level message
      */
     template <typename... Args>
-    void trace_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+    void trace_fmt(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
         if (is_enabled(integration::log_level::trace)) {
-            trace(pacs::compat::format(fmt, std::forward<Args>(args)...));
+            trace(kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
         }
     }
 
@@ -140,9 +140,9 @@ public:
      * @brief Log a formatted debug-level message
      */
     template <typename... Args>
-    void debug_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+    void debug_fmt(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
         if (is_enabled(integration::log_level::debug)) {
-            debug(pacs::compat::format(fmt, std::forward<Args>(args)...));
+            debug(kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
         }
     }
 
@@ -150,9 +150,9 @@ public:
      * @brief Log a formatted info-level message
      */
     template <typename... Args>
-    void info_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+    void info_fmt(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
         if (is_enabled(integration::log_level::info)) {
-            info(pacs::compat::format(fmt, std::forward<Args>(args)...));
+            info(kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
         }
     }
 
@@ -160,9 +160,9 @@ public:
      * @brief Log a formatted warning-level message
      */
     template <typename... Args>
-    void warn_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+    void warn_fmt(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
         if (is_enabled(integration::log_level::warn)) {
-            warn(pacs::compat::format(fmt, std::forward<Args>(args)...));
+            warn(kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
         }
     }
 
@@ -170,9 +170,9 @@ public:
      * @brief Log a formatted error-level message
      */
     template <typename... Args>
-    void error_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+    void error_fmt(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
         if (is_enabled(integration::log_level::error)) {
-            error(pacs::compat::format(fmt, std::forward<Args>(args)...));
+            error(kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
         }
     }
 
@@ -180,9 +180,9 @@ public:
      * @brief Log a formatted fatal-level message
      */
     template <typename... Args>
-    void fatal_fmt(pacs::compat::format_string<Args...> fmt, Args&&... args) {
+    void fatal_fmt(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
         if (is_enabled(integration::log_level::fatal)) {
-            fatal(pacs::compat::format(fmt, std::forward<Args>(args)...));
+            fatal(kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
         }
     }
 
@@ -298,4 +298,4 @@ public:
     return instance;
 }
 
-}  // namespace pacs::di
+}  // namespace kcenon::pacs::di

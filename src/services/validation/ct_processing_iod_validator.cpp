@@ -39,9 +39,9 @@
 #include "pacs/core/dicom_tag_constants.hpp"
 #include "pacs/services/sop_classes/ct_storage.hpp"
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // ct_processing_iod_validator Implementation
@@ -507,4 +507,4 @@ bool is_valid_ct_processing_dataset(const dicom_dataset& dataset) {
     return validator.quick_check(dataset);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

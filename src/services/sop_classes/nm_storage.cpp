@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <array>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Transfer Syntaxes
@@ -315,4 +315,4 @@ std::string_view to_string(nm_whole_body_technique technique) noexcept {
     return "1PASS";
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

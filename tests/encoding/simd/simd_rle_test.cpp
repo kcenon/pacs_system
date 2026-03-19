@@ -9,7 +9,7 @@
 #include <random>
 #include <vector>
 
-using namespace pacs::encoding::simd;
+using namespace kcenon::pacs::encoding::simd;
 
 namespace {
 

@@ -38,10 +38,10 @@
  * Usage:
  * @code
  * auto container = std::make_shared<kcenon::common::di::service_container>();
- * pacs::di::register_services(*container);
+ * kcenon::pacs::di::register_services(*container);
  *
- * auto storage = container->resolve<pacs::di::IDicomStorage>();
- * auto network = container->resolve<pacs::di::IDicomNetwork>();
+ * auto storage = container->resolve<kcenon::pacs::di::IDicomStorage>();
+ * auto network = container->resolve<kcenon::pacs::di::IDicomNetwork>();
  * @endcode
  *
  * @see Issue #312 - ServiceContainer based DI Integration
@@ -61,7 +61,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace pacs::di {
+namespace kcenon::pacs::di {
 
 // =============================================================================
 // Service Registration Configuration
@@ -110,7 +110,7 @@ struct registration_config {
  * @example
  * @code
  * kcenon::common::di::service_container container;
- * auto result = pacs::di::register_services(container);
+ * auto result = kcenon::pacs::di::register_services(container);
  * if (result.is_err()) {
  *     std::cerr << "Registration failed: " << result.error().message << '\n';
  * }
@@ -314,8 +314,8 @@ template<typename TLogger>
  *
  * @example
  * @code
- * auto container = pacs::di::create_container();
- * auto storage = container->resolve<pacs::di::IDicomStorage>().value();
+ * auto container = kcenon::pacs::di::create_container();
+ * auto storage = container->resolve<kcenon::pacs::di::IDicomStorage>().value();
  * @endcode
  */
 [[nodiscard]] inline std::shared_ptr<kcenon::common::di::service_container>
@@ -328,4 +328,4 @@ create_container(const registration_config& config = {}) {
     return container;
 }
 
-}  // namespace pacs::di
+}  // namespace kcenon::pacs::di

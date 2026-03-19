@@ -49,7 +49,7 @@
 
 #include <algorithm>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Singleton Implementation
@@ -1213,4 +1213,4 @@ std::string_view get_sop_class_name(std::string_view uid) {
     return "Unknown";
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

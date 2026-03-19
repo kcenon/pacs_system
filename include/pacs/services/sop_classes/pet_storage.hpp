@@ -49,7 +49,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // PET Storage SOP Class UIDs
@@ -305,6 +305,6 @@ enum class pet_radiotracer {
  */
 [[nodiscard]] std::string_view to_string(pet_radiotracer tracer) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_PET_STORAGE_HPP

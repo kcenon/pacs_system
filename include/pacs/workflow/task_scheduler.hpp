@@ -67,12 +67,12 @@ class IExecutor;
 }  // namespace kcenon::common::interfaces
 
 // Forward declarations for PACS modules
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
 class file_storage;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 // Forward declare Result type (defined in integration or common)
 template <typename T>
@@ -463,7 +463,7 @@ public:
      * @param new_schedule New schedule
      * @return true if task was found and updated
      */
-    auto update_schedule(const task_id& id, const pacs::workflow::schedule& new_schedule) -> bool;
+    auto update_schedule(const task_id& id, const kcenon::pacs::workflow::schedule& new_schedule) -> bool;
 
     // =========================================================================
     // Execution History
@@ -593,7 +593,7 @@ private:
      * @return Next run time
      */
     [[nodiscard]] auto calculate_next_run(
-        const pacs::workflow::schedule& sched,
+        const kcenon::pacs::workflow::schedule& sched,
         std::chrono::system_clock::time_point from =
             std::chrono::system_clock::now()) const
         -> std::optional<std::chrono::system_clock::time_point>;
@@ -747,4 +747,4 @@ private:
     mutable std::atomic<uint64_t> next_execution_id_{1};
 };
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

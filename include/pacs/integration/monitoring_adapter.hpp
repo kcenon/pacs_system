@@ -51,7 +51,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // ─────────────────────────────────────────────────────
 // Forward Declarations
@@ -429,4 +429,4 @@ private:
     static std::unique_ptr<impl> pimpl_;
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

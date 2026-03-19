@@ -57,7 +57,7 @@
 #include <png.h>
 #endif
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 // =============================================================================
 // Construction / Destruction
@@ -227,7 +227,7 @@ size_t thumbnail_service::max_cache_size() const {
 
 std::vector<uint8_t> thumbnail_service::generate_thumbnail(
     std::string_view file_path, const thumbnail_params& params) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     // Open DICOM file
     auto result = dicom_file::open(std::filesystem::path(file_path));
@@ -562,7 +562,7 @@ std::optional<std::string> thumbnail_service::select_representative_series(
 
     // Prefer series with images (CT, MR, CR, DX, etc.)
     // Use first series with most instances as representative
-    const pacs::storage::series_record* best = nullptr;
+    const kcenon::pacs::storage::series_record* best = nullptr;
     for (const auto& s : series_list) {
         // Skip structured reports, KOS, etc.
         if (s.modality == "SR" || s.modality == "KO" || s.modality == "PR") {
@@ -609,4 +609,4 @@ std::string thumbnail_service::get_content_type(std::string_view format) {
     return "application/octet-stream";
 }
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

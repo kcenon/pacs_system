@@ -45,12 +45,12 @@ namespace {
 struct options {
     std::vector<std::filesystem::path> input_paths;
     std::filesystem::path output_path;
-    pacs::security::anonymization_profile profile{
-        pacs::security::anonymization_profile::basic};
+    kcenon::pacs::security::anonymization_profile profile{
+        kcenon::pacs::security::anonymization_profile::basic};
     std::optional<std::string> new_patient_id;
     std::optional<std::string> new_patient_name;
-    std::vector<pacs::core::dicom_tag> keep_tags;
-    std::map<pacs::core::dicom_tag, std::string> replace_tags;
+    std::vector<kcenon::pacs::core::dicom_tag> keep_tags;
+    std::map<kcenon::pacs::core::dicom_tag, std::string> replace_tags;
     std::filesystem::path mapping_file;
     bool retain_uid{false};
     bool recursive{false};
@@ -183,7 +183,7 @@ void print_usage(const char* program_name) {
  * @param tag_str The tag string to parse
  * @return Parsed dicom_tag or nullopt if invalid
  */
-std::optional<pacs::core::dicom_tag> resolve_tag(const std::string& tag_str) {
+std::optional<kcenon::pacs::core::dicom_tag> resolve_tag(const std::string& tag_str) {
     std::string s = tag_str;
 
     // Check if it's a numeric tag format
@@ -207,7 +207,7 @@ std::optional<pacs::core::dicom_tag> resolve_tag(const std::string& tag_str) {
                     std::stoul(s.substr(0, comma_pos), nullptr, 16));
                 auto element = static_cast<std::uint16_t>(
                     std::stoul(s.substr(comma_pos + 1), nullptr, 16));
-                return pacs::core::dicom_tag{group, element};
+                return kcenon::pacs::core::dicom_tag{group, element};
             } catch (...) {
                 return std::nullopt;
             }
@@ -215,7 +215,7 @@ std::optional<pacs::core::dicom_tag> resolve_tag(const std::string& tag_str) {
     }
 
     // Try as keyword
-    auto& dict = pacs::core::dicom_dictionary::instance();
+    auto& dict = kcenon::pacs::core::dicom_dictionary::instance();
     auto info = dict.find_by_keyword(tag_str);
     if (info) {
         return info->tag;
@@ -244,7 +244,7 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
         } else if ((arg == "-p" || arg == "--profile") && i + 1 < argc) {
             std::string profile_name = argv[++i];
             auto profile =
-                pacs::security::profile_from_string(profile_name);
+                kcenon::pacs::security::profile_from_string(profile_name);
             if (!profile) {
                 std::cerr << "Error: Unknown profile '" << profile_name
                           << "'\n";
@@ -338,7 +338,7 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @return true on success
  */
 bool load_mapping(const std::filesystem::path& path,
-                  pacs::security::uid_mapping& mapping) {
+                  kcenon::pacs::security::uid_mapping& mapping) {
     if (!std::filesystem::exists(path)) {
         // File doesn't exist yet - will be created after anonymization
         return true;
@@ -369,7 +369,7 @@ bool load_mapping(const std::filesystem::path& path,
  * @return true on success
  */
 bool save_mapping(const std::filesystem::path& path,
-                  const pacs::security::uid_mapping& mapping) {
+                  const kcenon::pacs::security::uid_mapping& mapping) {
     std::ofstream file(path);
     if (!file) {
         std::cerr << "Error: Cannot write mapping file: " << path.string()
@@ -410,11 +410,11 @@ bool create_backup(const std::filesystem::path& file_path) {
  * @return Vector of warnings (empty if verification passed)
  */
 std::vector<std::string> verify_anonymization(
-    const pacs::core::dicom_dataset& dataset,
-    pacs::security::anonymization_profile profile) {
+    const kcenon::pacs::core::dicom_dataset& dataset,
+    kcenon::pacs::security::anonymization_profile profile) {
     std::vector<std::string> warnings;
 
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     // Check critical identifiers based on profile
     std::vector<std::pair<dicom_tag, std::string>> checks = {
@@ -451,10 +451,10 @@ std::vector<std::string> verify_anonymization(
 bool process_file(const std::filesystem::path& input_path,
                   const std::filesystem::path& output_path,
                   const options& opts,
-                  pacs::security::uid_mapping& mapping,
+                  kcenon::pacs::security::uid_mapping& mapping,
                   process_stats& stats) {
-    using namespace pacs::core;
-    using namespace pacs::security;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::security;
 
     if (opts.verbose) {
         std::cout << "Processing: " << input_path.string() << "\n";
@@ -613,7 +613,7 @@ bool process_file(const std::filesystem::path& input_path,
  * @param mapping UID mapping for consistent anonymization
  */
 void process_inputs(const options& opts, process_stats& stats,
-                    pacs::security::uid_mapping& mapping) {
+                    kcenon::pacs::security::uid_mapping& mapping) {
     for (const auto& input_path : opts.input_paths) {
         if (!std::filesystem::exists(input_path)) {
             std::cerr << "Error: Path does not exist: " << input_path.string()
@@ -730,7 +730,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Load existing UID mapping if specified
-    pacs::security::uid_mapping mapping;
+    kcenon::pacs::security::uid_mapping mapping;
     if (!opts.mapping_file.empty()) {
         if (!load_mapping(opts.mapping_file, mapping)) {
             return 2;

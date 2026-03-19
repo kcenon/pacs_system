@@ -57,7 +57,7 @@ enum class operation_type {
  */
 struct modification {
     operation_type op;
-    pacs::core::dicom_tag tag;
+    kcenon::pacs::core::dicom_tag tag;
     std::string value;  // For insert/modify operations
     std::string keyword;  // Original keyword or tag string for error messages
 };
@@ -162,7 +162,7 @@ void print_usage(const char* program_name) {
  * @param tag_str The tag string to parse
  * @return Parsed dicom_tag or nullopt if invalid
  */
-std::optional<pacs::core::dicom_tag> parse_tag_string(
+std::optional<kcenon::pacs::core::dicom_tag> parse_tag_string(
     const std::string& tag_str) {
     std::string s = tag_str;
 
@@ -185,7 +185,7 @@ std::optional<pacs::core::dicom_tag> parse_tag_string(
                 static_cast<uint16_t>(std::stoul(s.substr(0, comma_pos), nullptr, 16));
             uint16_t element =
                 static_cast<uint16_t>(std::stoul(s.substr(comma_pos + 1), nullptr, 16));
-            return pacs::core::dicom_tag{group, element};
+            return kcenon::pacs::core::dicom_tag{group, element};
         } catch (...) {
             return std::nullopt;
         }
@@ -198,7 +198,7 @@ std::optional<pacs::core::dicom_tag> parse_tag_string(
                 static_cast<uint16_t>(std::stoul(s.substr(0, 4), nullptr, 16));
             uint16_t element =
                 static_cast<uint16_t>(std::stoul(s.substr(4, 4), nullptr, 16));
-            return pacs::core::dicom_tag{group, element};
+            return kcenon::pacs::core::dicom_tag{group, element};
         } catch (...) {
             return std::nullopt;
         }
@@ -212,7 +212,7 @@ std::optional<pacs::core::dicom_tag> parse_tag_string(
  * @param str Tag keyword or numeric string
  * @return The tag if found/parsed, nullopt otherwise
  */
-std::optional<pacs::core::dicom_tag> resolve_tag(const std::string& str) {
+std::optional<kcenon::pacs::core::dicom_tag> resolve_tag(const std::string& str) {
     // First, try as numeric tag format
     if (str.find('(') != std::string::npos || str.find(',') != std::string::npos ||
         (str.length() == 8 && std::all_of(str.begin(), str.end(), ::isxdigit))) {
@@ -220,7 +220,7 @@ std::optional<pacs::core::dicom_tag> resolve_tag(const std::string& str) {
     }
 
     // Try as keyword
-    auto& dict = pacs::core::dicom_dictionary::instance();
+    auto& dict = kcenon::pacs::core::dicom_dictionary::instance();
     auto info = dict.find_by_keyword(str);
     if (info) {
         return info->tag;
@@ -481,8 +481,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @brief Remove all private tags from dataset (recursively)
  * @param dataset The dataset to modify
  */
-void remove_private_tags_recursive(pacs::core::dicom_dataset& dataset) {
-    std::vector<pacs::core::dicom_tag> private_tags;
+void remove_private_tags_recursive(kcenon::pacs::core::dicom_dataset& dataset) {
+    std::vector<kcenon::pacs::core::dicom_tag> private_tags;
 
     for (const auto& [tag, element] : dataset) {
         if (tag.is_private()) {
@@ -510,8 +510,8 @@ void remove_private_tags_recursive(pacs::core::dicom_dataset& dataset) {
  * @param tag Tag to remove
  * @return Number of tags removed
  */
-size_t remove_tag_recursive(pacs::core::dicom_dataset& dataset,
-                            const pacs::core::dicom_tag& tag) {
+size_t remove_tag_recursive(kcenon::pacs::core::dicom_dataset& dataset,
+                            const kcenon::pacs::core::dicom_tag& tag) {
     size_t count = 0;
 
     if (dataset.contains(tag)) {
@@ -538,10 +538,10 @@ size_t remove_tag_recursive(pacs::core::dicom_dataset& dataset,
  * @param uid_gen UID generator for UID regeneration
  * @return true if all modifications succeeded
  */
-bool apply_modifications(pacs::core::dicom_dataset& dataset, const options& opts,
+bool apply_modifications(kcenon::pacs::core::dicom_dataset& dataset, const options& opts,
                          uid_generator& uid_gen) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     auto& dict = dicom_dictionary::instance();
 
@@ -680,7 +680,7 @@ bool create_backup(const std::filesystem::path& file_path) {
 bool process_file(const std::filesystem::path& input_path,
                   const std::filesystem::path& output_path, const options& opts,
                   uid_generator& uid_gen) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     if (opts.verbose) {
         std::cout << "Processing: " << input_path.string() << "\n";

@@ -51,7 +51,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // NM Validation Options
@@ -290,6 +290,6 @@ private:
  */
 [[nodiscard]] bool is_valid_nm_dataset(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_NM_IOD_VALIDATOR_HPP

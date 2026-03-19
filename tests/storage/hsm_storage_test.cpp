@@ -21,9 +21,9 @@
 #include <filesystem>
 #include <thread>
 
-using namespace pacs::storage;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 namespace {
 

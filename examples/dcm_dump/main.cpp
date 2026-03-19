@@ -336,9 +336,9 @@ std::string format_hex(std::span<const uint8_t> data, size_t max_bytes = 32) {
  * @param max_length Maximum string length
  * @return Formatted value string
  */
-std::string format_value(const pacs::core::dicom_element& element,
+std::string format_value(const kcenon::pacs::core::dicom_element& element,
                          size_t max_length = 64) {
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::encoding;
 
     auto vr = element.vr();
 
@@ -441,7 +441,7 @@ bool contains_ci(const std::string& haystack, const std::string& needle) {
  * @param tag The DICOM tag
  * @return true if tag is private
  */
-bool is_private_tag(const pacs::core::dicom_tag& tag) {
+bool is_private_tag(const kcenon::pacs::core::dicom_tag& tag) {
     return (tag.group() % 2) != 0;
 }
 
@@ -450,7 +450,7 @@ bool is_private_tag(const pacs::core::dicom_tag& tag) {
  * @param tag The DICOM tag
  * @return true if tag is pixel data
  */
-bool is_pixel_data_tag(const pacs::core::dicom_tag& tag) {
+bool is_pixel_data_tag(const kcenon::pacs::core::dicom_tag& tag) {
     return tag.group() == 0x7FE0 && tag.element() == 0x0010;
 }
 
@@ -461,9 +461,9 @@ bool is_pixel_data_tag(const pacs::core::dicom_tag& tag) {
  * @param dict Reference to the dictionary
  * @return true if tag should be displayed
  */
-bool should_display_tag(const pacs::core::dicom_tag& tag,
+bool should_display_tag(const kcenon::pacs::core::dicom_tag& tag,
                         const options& opts,
-                        const pacs::core::dicom_dictionary& dict) {
+                        const kcenon::pacs::core::dicom_dictionary& dict) {
     // Handle pixel data exclusion
     if (opts.no_pixel && is_pixel_data_tag(tag)) {
         return false;
@@ -517,10 +517,10 @@ bool should_display_tag(const pacs::core::dicom_tag& tag,
  * @param current_depth Current depth level (for depth limiting)
  * @param indent Indentation level for nested sequences
  */
-void print_dataset_human(const pacs::core::dicom_dataset& dataset,
+void print_dataset_human(const kcenon::pacs::core::dicom_dataset& dataset,
                          const options& opts, int current_depth = 0, int indent = 0) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     auto& dict = dicom_dictionary::instance();
     std::string indent_str(indent * 2, ' ');
@@ -575,10 +575,10 @@ void print_dataset_human(const pacs::core::dicom_dataset& dataset,
  * @param current_depth Current depth level
  * @param indent Current indentation
  */
-void print_dataset_json(const pacs::core::dicom_dataset& dataset,
+void print_dataset_json(const kcenon::pacs::core::dicom_dataset& dataset,
                         const options& opts, int current_depth = 0, int indent = 2) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     auto& dict = dicom_dictionary::instance();
     std::string indent_str(indent, ' ');
@@ -672,10 +672,10 @@ std::string xml_escape(const std::string& str) {
  * @param current_depth Current depth level
  * @param indent Current indentation
  */
-void print_dataset_xml(const pacs::core::dicom_dataset& dataset,
+void print_dataset_xml(const kcenon::pacs::core::dicom_dataset& dataset,
                        const options& opts, int current_depth = 0, int indent = 2) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     auto& dict = dicom_dictionary::instance();
     std::string indent_str(indent, ' ');
@@ -745,9 +745,9 @@ void print_dataset_xml(const pacs::core::dicom_dataset& dataset,
  * @brief Print pixel data information
  * @param dataset The dataset containing pixel data
  */
-void print_pixel_info(const pacs::core::dicom_dataset& dataset) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+void print_pixel_info(const kcenon::pacs::core::dicom_dataset& dataset) {
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     std::cout << "\n# Pixel Data Information\n";
     std::cout << "----------------------------------------\n";
@@ -820,7 +820,7 @@ void print_pixel_info(const pacs::core::dicom_dataset& dataset) {
  * @return 0 on success, non-zero on error
  */
 int dump_file(const std::filesystem::path& file_path, const options& opts) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     auto result = dicom_file::open(file_path);
     if (result.is_err()) {
@@ -907,7 +907,7 @@ int dump_file(const std::filesystem::path& file_path, const options& opts) {
  */
 void scan_directory(const std::filesystem::path& dir_path, const options& opts,
                     scan_summary& summary) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     auto process_file = [&](const std::filesystem::path& file_path) {
         ++summary.total_files;

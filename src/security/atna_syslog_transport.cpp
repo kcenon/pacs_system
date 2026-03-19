@@ -33,7 +33,7 @@
     #include <openssl/ssl.h>
 #endif
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // =============================================================================
 // TLS Context (opaque, avoids OpenSSL in header)
@@ -134,7 +134,7 @@ atna_syslog_transport& atna_syslog_transport::operator=(
 // Send Operations
 // =============================================================================
 
-pacs::VoidResult atna_syslog_transport::send(
+kcenon::pacs::VoidResult atna_syslog_transport::send(
     const std::string& xml_message) {
 
     auto syslog_msg = format_syslog_message(xml_message);
@@ -227,7 +227,7 @@ const syslog_transport_config& atna_syslog_transport::config() const noexcept {
 // Private — UDP Transport (RFC 5426)
 // =============================================================================
 
-pacs::VoidResult atna_syslog_transport::send_udp(
+kcenon::pacs::VoidResult atna_syslog_transport::send_udp(
     const std::string& syslog_message) {
 
     // Resolve destination address
@@ -242,8 +242,8 @@ pacs::VoidResult atna_syslog_transport::send_udp(
     int ret = ::getaddrinfo(
         config_.host.c_str(), port_str.c_str(), &hints, &result);
     if (ret != 0 || result == nullptr) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to resolve syslog host: " + config_.host);
     }
 
@@ -252,8 +252,8 @@ pacs::VoidResult atna_syslog_transport::send_udp(
         result->ai_family, result->ai_socktype, result->ai_protocol);
     if (sock == invalid_socket) {
         ::freeaddrinfo(result);
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to create UDP socket");
     }
 
@@ -270,8 +270,8 @@ pacs::VoidResult atna_syslog_transport::send_udp(
     close_socket(sock);
 
     if (bytes_sent < 0) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::send_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::send_failed,
             "Failed to send UDP syslog message");
     }
 
@@ -282,13 +282,13 @@ pacs::VoidResult atna_syslog_transport::send_udp(
 // Private — TLS Transport (RFC 5425)
 // =============================================================================
 
-pacs::VoidResult atna_syslog_transport::send_tls(
+kcenon::pacs::VoidResult atna_syslog_transport::send_tls(
     const std::string& syslog_message) {
 
 #ifndef PACS_WITH_DIGITAL_SIGNATURES
     (void)syslog_message;
-    return pacs::pacs_void_error(
-        pacs::error_codes::connection_failed,
+    return kcenon::pacs::pacs_void_error(
+        kcenon::pacs::error_codes::connection_failed,
         "TLS syslog transport requires OpenSSL (PACS_WITH_DIGITAL_SIGNATURES)");
 #else
     auto connect_result = ensure_tls_connected();
@@ -307,8 +307,8 @@ pacs::VoidResult atna_syslog_transport::send_tls(
     if (bytes_written <= 0) {
         int ssl_err = SSL_get_error(tls_->ssl, bytes_written);
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::send_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::send_failed,
             "TLS write failed (SSL error: " +
             std::to_string(ssl_err) + ")");
     }
@@ -317,10 +317,10 @@ pacs::VoidResult atna_syslog_transport::send_tls(
 #endif
 }
 
-pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
+kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
 #ifndef PACS_WITH_DIGITAL_SIGNATURES
-    return pacs::pacs_void_error(
-        pacs::error_codes::connection_failed,
+    return kcenon::pacs::pacs_void_error(
+        kcenon::pacs::error_codes::connection_failed,
         "TLS not available — OpenSSL not linked");
 #else
     if (tls_ && tls_->ssl && socket_ != invalid_socket) {
@@ -335,8 +335,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     tls_->ctx = SSL_CTX_new(TLS_client_method());
     if (!tls_->ctx) {
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to create TLS context: " + get_openssl_error());
     }
 
@@ -348,8 +348,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
         if (SSL_CTX_load_verify_locations(
                 tls_->ctx, config_.ca_cert_path.c_str(), nullptr) != 1) {
             close();
-            return pacs::pacs_void_error(
-                pacs::error_codes::connection_failed,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::connection_failed,
                 "Failed to load CA certificate: " + get_openssl_error());
         }
     }
@@ -360,8 +360,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
                 tls_->ctx, config_.client_cert_path.c_str(),
                 SSL_FILETYPE_PEM) != 1) {
             close();
-            return pacs::pacs_void_error(
-                pacs::error_codes::connection_failed,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::connection_failed,
                 "Failed to load client certificate: " + get_openssl_error());
         }
     }
@@ -371,8 +371,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
                 tls_->ctx, config_.client_key_path.c_str(),
                 SSL_FILETYPE_PEM) != 1) {
             close();
-            return pacs::pacs_void_error(
-                pacs::error_codes::connection_failed,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::connection_failed,
                 "Failed to load client key: " + get_openssl_error());
         }
     }
@@ -397,8 +397,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
         config_.host.c_str(), port_str.c_str(), &hints, &result);
     if (ret != 0 || result == nullptr) {
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to resolve TLS syslog host: " + config_.host);
     }
 
@@ -407,8 +407,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     if (socket_ == invalid_socket) {
         ::freeaddrinfo(result);
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to create TCP socket");
     }
 
@@ -416,8 +416,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
                   static_cast<int>(result->ai_addrlen)) != 0) {
         ::freeaddrinfo(result);
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to connect to TLS syslog server: " +
             config_.host + ":" + port_str);
     }
@@ -427,8 +427,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     tls_->ssl = SSL_new(tls_->ctx);
     if (!tls_->ssl) {
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "Failed to create SSL object: " + get_openssl_error());
     }
 
@@ -440,8 +440,8 @@ pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     if (SSL_connect(tls_->ssl) != 1) {
         std::string err = get_openssl_error();
         close();
-        return pacs::pacs_void_error(
-            pacs::error_codes::connection_failed,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
             "TLS handshake failed: " + err);
     }
 
@@ -492,4 +492,4 @@ uint8_t atna_syslog_transport::compute_priority(
         static_cast<uint8_t>(severity));
 }
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security

@@ -11,7 +11,7 @@
 #include <numeric>
 #include <vector>
 
-using namespace pacs::encoding::compression;
+using namespace kcenon::pacs::encoding::compression;
 
 TEST_CASE("htj2k_codec construction", "[encoding][compression][htj2k]") {
     SECTION("Default construction creates lossless codec") {

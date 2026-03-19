@@ -38,7 +38,7 @@
 
 #include "pacs/encoding/compression/compression_codec.hpp"
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief JPEG Lossless (Process 14, Selection Value 1) codec implementation.
@@ -174,6 +174,6 @@ private:
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_JPEG_LOSSLESS_CODEC_HPP

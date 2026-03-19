@@ -45,7 +45,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // Constructors & Destructor
@@ -252,4 +252,4 @@ auto thread_pool_adapter::get_config() const noexcept -> const thread_pool_confi
     return config_;
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

@@ -44,39 +44,39 @@ namespace {
 
 namespace dir_tags {
 /// File-set ID
-inline constexpr pacs::core::dicom_tag file_set_id{0x0004, 0x1130};
+inline constexpr kcenon::pacs::core::dicom_tag file_set_id{0x0004, 0x1130};
 /// File-set Descriptor File ID
-inline constexpr pacs::core::dicom_tag file_set_descriptor_file_id{0x0004, 0x1141};
+inline constexpr kcenon::pacs::core::dicom_tag file_set_descriptor_file_id{0x0004, 0x1141};
 /// Specific Character Set of File-set Descriptor File
-inline constexpr pacs::core::dicom_tag specific_character_set_of_file_set{0x0004, 0x1142};
+inline constexpr kcenon::pacs::core::dicom_tag specific_character_set_of_file_set{0x0004, 0x1142};
 /// Offset of the First Directory Record of the Root Directory Entity
-inline constexpr pacs::core::dicom_tag offset_of_first_directory_record{0x0004, 0x1200};
+inline constexpr kcenon::pacs::core::dicom_tag offset_of_first_directory_record{0x0004, 0x1200};
 /// Offset of the Last Directory Record of the Root Directory Entity
-inline constexpr pacs::core::dicom_tag offset_of_last_directory_record{0x0004, 0x1202};
+inline constexpr kcenon::pacs::core::dicom_tag offset_of_last_directory_record{0x0004, 0x1202};
 /// File-set Consistency Flag
-inline constexpr pacs::core::dicom_tag file_set_consistency_flag{0x0004, 0x1212};
+inline constexpr kcenon::pacs::core::dicom_tag file_set_consistency_flag{0x0004, 0x1212};
 /// Directory Record Sequence
-inline constexpr pacs::core::dicom_tag directory_record_sequence{0x0004, 0x1220};
+inline constexpr kcenon::pacs::core::dicom_tag directory_record_sequence{0x0004, 0x1220};
 /// Offset of the Next Directory Record
-inline constexpr pacs::core::dicom_tag offset_of_next_directory_record{0x0004, 0x1400};
+inline constexpr kcenon::pacs::core::dicom_tag offset_of_next_directory_record{0x0004, 0x1400};
 /// Record In-use Flag
-inline constexpr pacs::core::dicom_tag record_in_use_flag{0x0004, 0x1410};
+inline constexpr kcenon::pacs::core::dicom_tag record_in_use_flag{0x0004, 0x1410};
 /// Offset of Referenced Lower-Level Directory Entity
-inline constexpr pacs::core::dicom_tag offset_of_lower_level_directory_entity{0x0004, 0x1420};
+inline constexpr kcenon::pacs::core::dicom_tag offset_of_lower_level_directory_entity{0x0004, 0x1420};
 /// Directory Record Type
-inline constexpr pacs::core::dicom_tag directory_record_type{0x0004, 0x1430};
+inline constexpr kcenon::pacs::core::dicom_tag directory_record_type{0x0004, 0x1430};
 /// Private Record UID
-inline constexpr pacs::core::dicom_tag private_record_uid{0x0004, 0x1432};
+inline constexpr kcenon::pacs::core::dicom_tag private_record_uid{0x0004, 0x1432};
 /// Referenced File ID
-inline constexpr pacs::core::dicom_tag referenced_file_id{0x0004, 0x1500};
+inline constexpr kcenon::pacs::core::dicom_tag referenced_file_id{0x0004, 0x1500};
 /// MRDR Directory Record Offset
-inline constexpr pacs::core::dicom_tag mrdr_directory_record_offset{0x0004, 0x1504};
+inline constexpr kcenon::pacs::core::dicom_tag mrdr_directory_record_offset{0x0004, 0x1504};
 /// Referenced SOP Class UID in File
-inline constexpr pacs::core::dicom_tag referenced_sop_class_uid_in_file{0x0004, 0x1510};
+inline constexpr kcenon::pacs::core::dicom_tag referenced_sop_class_uid_in_file{0x0004, 0x1510};
 /// Referenced SOP Instance UID in File
-inline constexpr pacs::core::dicom_tag referenced_sop_instance_uid_in_file{0x0004, 0x1511};
+inline constexpr kcenon::pacs::core::dicom_tag referenced_sop_instance_uid_in_file{0x0004, 0x1511};
 /// Referenced Transfer Syntax UID in File
-inline constexpr pacs::core::dicom_tag referenced_transfer_syntax_uid_in_file{0x0004, 0x1512};
+inline constexpr kcenon::pacs::core::dicom_tag referenced_transfer_syntax_uid_in_file{0x0004, 0x1512};
 }  // namespace dir_tags
 
 // ============================================================================
@@ -360,7 +360,7 @@ bool scan_directory(const std::filesystem::path& dir_path,
                     const std::filesystem::path& base_path,
                     std::map<std::string, patient_info>& patients,
                     const options& opts, statistics& stats) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     auto process_file = [&](const std::filesystem::path& file_path) {
         ++stats.total_files;
@@ -487,12 +487,12 @@ bool scan_directory(const std::filesystem::path& dir_path,
 /**
  * @brief Create DICOMDIR dataset from hierarchical structure
  */
-pacs::core::dicom_dataset create_dicomdir_dataset(
+kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
     const std::map<std::string, patient_info>& patients,
     const std::filesystem::path& base_path,
     const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     dicom_dataset ds;
 
@@ -583,8 +583,8 @@ pacs::core::dicom_dataset create_dicomdir_dataset(
  * @brief Execute create command
  */
 int execute_create(const options& opts) {
-    using namespace pacs::core;
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
 
     std::cout << "Creating DICOMDIR from: " << opts.input_path.string() << "\n";
 
@@ -662,7 +662,7 @@ int execute_create(const options& opts) {
 bool parse_dicomdir(const std::filesystem::path& dicomdir_path,
                     std::vector<directory_record>& root_records,
                     statistics& stats) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     auto result = dicom_file::open(dicomdir_path);
     if (result.is_err()) {
@@ -1105,8 +1105,8 @@ int execute_update(const options& opts) {
         std::cout << "\nRebuilding DICOMDIR...\n";
         auto ds = create_dicomdir_dataset(patients, base_path, opts);
 
-        auto file = pacs::core::dicom_file::create(
-            std::move(ds), pacs::encoding::transfer_syntax::explicit_vr_little_endian);
+        auto file = kcenon::pacs::core::dicom_file::create(
+            std::move(ds), kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
 
         auto result = file.save(opts.input_path);
         if (result.is_err()) {

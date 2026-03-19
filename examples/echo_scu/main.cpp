@@ -472,9 +472,9 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @return Echo result
  */
 echo_result perform_single_echo(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::network::dimse;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::network::dimse;
+    using namespace kcenon::pacs::services;
 
     echo_result result;
     auto start_time = std::chrono::steady_clock::now();

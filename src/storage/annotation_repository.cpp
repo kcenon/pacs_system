@@ -45,7 +45,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Constructor
@@ -484,7 +484,7 @@ auto annotation_repository::select_columns() const -> std::vector<std::string> {
             "style_json",  "created_at",    "updated_at"};
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -494,7 +494,7 @@ auto annotation_repository::select_columns() const -> std::vector<std::string> {
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 namespace {
 
@@ -1045,6 +1045,6 @@ annotation_record annotation_repository::parse_row(void* stmt_ptr) const {
     return record;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -42,7 +42,7 @@
 
 #include <kcenon/common/patterns/event_bus.h>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -100,8 +100,8 @@ network::Result<std::monostate> retrieve_scp::handle_message(
             return handle_c_get(assoc, context_id, request);
 
         default:
-            return pacs::pacs_void_error(
-                pacs::error_codes::retrieve_unexpected_command,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::retrieve_unexpected_command,
                 "Expected C-MOVE-RQ or C-GET-RQ but received " +
                 std::string(to_string(request.command())));
     }
@@ -146,15 +146,15 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
 
     // Verify we have a retrieve handler
     if (!retrieve_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::retrieve_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::retrieve_handler_not_set,
             "No retrieve handler configured");
     }
 
     // Verify we have a destination resolver for C-MOVE
     if (!destination_resolver_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::retrieve_missing_destination,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::retrieve_missing_destination,
             "No destination resolver configured for C-MOVE");
     }
 
@@ -210,8 +210,8 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
 
     // Publish retrieve started event
     kcenon::common::get_event_bus().publish(
-        pacs::events::retrieve_started_event{
-            pacs::events::retrieve_operation::c_move,
+        kcenon::pacs::events::retrieve_started_event{
+            kcenon::pacs::events::retrieve_operation::c_move,
             calling_ae,
             dest_ae,
             study_uid,
@@ -279,8 +279,8 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
         end_time - start_time).count();
 
     kcenon::common::get_event_bus().publish(
-        pacs::events::retrieve_completed_event{
-            pacs::events::retrieve_operation::c_move,
+        kcenon::pacs::events::retrieve_completed_event{
+            kcenon::pacs::events::retrieve_operation::c_move,
             calling_ae,
             dest_ae,
             stats.completed,
@@ -309,8 +309,8 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
 
     // Verify we have a retrieve handler
     if (!retrieve_handler_) {
-        return pacs::pacs_void_error(
-            pacs::error_codes::retrieve_handler_not_set,
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::retrieve_handler_not_set,
             "No retrieve handler configured");
     }
 
@@ -338,8 +338,8 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
 
     // Publish retrieve started event (C-GET has no destination AE)
     kcenon::common::get_event_bus().publish(
-        pacs::events::retrieve_started_event{
-            pacs::events::retrieve_operation::c_get,
+        kcenon::pacs::events::retrieve_started_event{
+            kcenon::pacs::events::retrieve_operation::c_get,
             calling_ae,
             "",  // No destination for C-GET
             study_uid,
@@ -456,8 +456,8 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
         end_time - start_time).count();
 
     kcenon::common::get_event_bus().publish(
-        pacs::events::retrieve_completed_event{
-            pacs::events::retrieve_operation::c_get,
+        kcenon::pacs::events::retrieve_completed_event{
+            kcenon::pacs::events::retrieve_operation::c_get,
             calling_ae,
             "",  // No destination for C-GET
             stats.completed,
@@ -557,4 +557,4 @@ std::string retrieve_scp::get_move_destination(
     return request.command_set().get_string(network::dimse::tag_move_destination);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

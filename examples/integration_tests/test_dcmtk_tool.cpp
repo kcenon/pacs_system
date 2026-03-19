@@ -16,7 +16,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace pacs::integration_test;
+using namespace kcenon::pacs::integration_test;
 
 // =============================================================================
 // DCMTK Availability Tests

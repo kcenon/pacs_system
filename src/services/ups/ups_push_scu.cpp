@@ -15,7 +15,7 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Local Helper Functions
@@ -97,16 +97,16 @@ network::Result<ups_result> ups_push_scu::create(
 
     // Verify association is established
     if (!assoc.is_established()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     // Get accepted presentation context for UPS Push
     auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_context_not_accepted,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_context_not_accepted,
             "No accepted presentation context for UPS Push SOP Class");
     }
 
@@ -117,8 +117,8 @@ network::Result<ups_result> ups_push_scu::create(
     }
 
     if (uid.empty()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_missing_uid,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_missing_uid,
             "Workitem UID is required");
     }
 
@@ -149,8 +149,8 @@ network::Result<ups_result> ups_push_scu::create(
 
     // Verify it's an N-CREATE response
     if (response.command() != command_field::n_create_rsp) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-CREATE-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -195,21 +195,21 @@ network::Result<ups_result> ups_push_scu::set(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     if (data.workitem_uid.empty()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_missing_uid,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_missing_uid,
             "Workitem UID is required for N-SET");
     }
 
     auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_context_not_accepted,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_context_not_accepted,
             "No accepted presentation context for UPS Push SOP Class");
     }
 
@@ -237,8 +237,8 @@ network::Result<ups_result> ups_push_scu::set(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_set_rsp) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-SET-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -282,21 +282,21 @@ network::Result<ups_result> ups_push_scu::get(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     if (data.workitem_uid.empty()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_missing_uid,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_missing_uid,
             "Workitem UID is required for N-GET");
     }
 
     auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_context_not_accepted,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_context_not_accepted,
             "No accepted presentation context for UPS Push SOP Class");
     }
 
@@ -328,8 +328,8 @@ network::Result<ups_result> ups_push_scu::get(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_get_rsp) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-GET-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -381,27 +381,27 @@ network::Result<ups_result> ups_push_scu::change_state(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     if (data.workitem_uid.empty()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_missing_uid,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_missing_uid,
             "Workitem UID is required for state change");
     }
 
     if (data.transaction_uid.empty()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_missing_transaction_uid,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_missing_transaction_uid,
             "Transaction UID is required for state change");
     }
 
     auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_context_not_accepted,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_context_not_accepted,
             "No accepted presentation context for UPS Push SOP Class");
     }
 
@@ -435,8 +435,8 @@ network::Result<ups_result> ups_push_scu::change_state(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_action_rsp) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-ACTION-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -477,21 +477,21 @@ network::Result<ups_result> ups_push_scu::request_cancel(
     auto start_time = std::chrono::steady_clock::now();
 
     if (!assoc.is_established()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::association_not_established,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::association_not_established,
             "Association not established");
     }
 
     if (data.workitem_uid.empty()) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_missing_uid,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_missing_uid,
             "Workitem UID is required for cancel request");
     }
 
     auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
     if (!context_id) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_context_not_accepted,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_context_not_accepted,
             "No accepted presentation context for UPS Push SOP Class");
     }
 
@@ -527,8 +527,8 @@ network::Result<ups_result> ups_push_scu::request_cancel(
     const auto& [recv_context_id, response] = recv_result.value();
 
     if (response.command() != command_field::n_action_rsp) {
-        return pacs::pacs_error<ups_result>(
-            pacs::error_codes::ups_unexpected_command,
+        return kcenon::pacs::pacs_error<ups_result>(
+            kcenon::pacs::error_codes::ups_unexpected_command,
             "Expected N-ACTION-RSP but received " +
             std::string(to_string(response.command())));
     }
@@ -703,4 +703,4 @@ uint16_t ups_push_scu::next_message_id() noexcept {
     return id;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

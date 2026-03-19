@@ -56,7 +56,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -386,4 +386,4 @@ void register_audit_endpoints_impl(
       });
 }
 
-}  // namespace pacs::web::endpoints
+}  // namespace kcenon::pacs::web::endpoints

@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // =============================================================================
 // RFC 3881 Coded Value
@@ -604,6 +604,6 @@ private:
         const atna_coded_value& cv);
 };
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security
 
 #endif  // PACS_SECURITY_ATNA_AUDIT_LOGGER_HPP

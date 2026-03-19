@@ -64,7 +64,7 @@
 
 #include "pacs/core/result.hpp"
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 // =============================================================================
 // Forward Declarations
@@ -76,12 +76,12 @@ class association;
 // Result Type
 // =============================================================================
 
-/// Result type alias using standardized pacs::Result<T>
+/// Result type alias using standardized kcenon::pacs::Result<T>
 template <typename T>
-using Result = pacs::Result<T>;
+using Result = kcenon::pacs::Result<T>;
 
 /// VoidResult type alias for operations without return value
-using VoidResult = pacs::VoidResult;
+using VoidResult = kcenon::pacs::VoidResult;
 
 // =============================================================================
 // Association State
@@ -665,6 +665,6 @@ private:
         std::make_unique<message_queue_type>()};
 };
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
 #endif  // PACS_NETWORK_ASSOCIATION_HPP

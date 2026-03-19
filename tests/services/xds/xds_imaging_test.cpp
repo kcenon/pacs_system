@@ -12,10 +12,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services::xds;
-using namespace pacs::services::sop_classes;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::services::xds;
+using namespace kcenon::pacs::services::sop_classes;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Helper: Create sample instance references

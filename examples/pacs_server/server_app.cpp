@@ -12,7 +12,7 @@
 #include <filesystem>
 #include <iostream>
 
-namespace pacs::example {
+namespace kcenon::pacs::example {
 
 namespace {
 
@@ -693,4 +693,4 @@ network::Result<std::monostate> pacs_server_app::handle_mpps_set(
     return network::Result<std::monostate>(std::monostate{});
 }
 
-}  // namespace pacs::example
+}  // namespace kcenon::pacs::example

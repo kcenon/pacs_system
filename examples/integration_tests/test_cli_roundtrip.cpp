@@ -106,8 +106,8 @@ cli_result run_cli(const std::string& tool_name,
  * @return dicom_file object
  * @throws Catch2 REQUIRE failure if file cannot be read
  */
-pacs::core::dicom_file read_dicom(const fs::path& path) {
-    auto result = pacs::core::dicom_file::open(path);
+kcenon::pacs::core::dicom_file read_dicom(const fs::path& path) {
+    auto result = kcenon::pacs::core::dicom_file::open(path);
     REQUIRE(result.is_ok());
     return std::move(result.value());
 }
@@ -115,8 +115,8 @@ pacs::core::dicom_file read_dicom(const fs::path& path) {
 /**
  * @brief Get a string tag value from a DICOM dataset
  */
-std::string get_tag(const pacs::core::dicom_file& file,
-                    pacs::core::dicom_tag tag) {
+std::string get_tag(const kcenon::pacs::core::dicom_file& file,
+                    kcenon::pacs::core::dicom_tag tag) {
     return file.dataset().get_string(tag);
 }
 
@@ -184,14 +184,14 @@ TEST_CASE("JSON round-trip preserves metadata", "[cli][roundtrip]") {
     auto original = read_dicom(src);
     auto roundtrip = read_dicom(dcm_path);
 
-    CHECK(get_tag(original, pacs::core::tags::patient_name)
-       == get_tag(roundtrip, pacs::core::tags::patient_name));
-    CHECK(get_tag(original, pacs::core::tags::patient_id)
-       == get_tag(roundtrip, pacs::core::tags::patient_id));
-    CHECK(get_tag(original, pacs::core::tags::modality)
-       == get_tag(roundtrip, pacs::core::tags::modality));
-    CHECK(get_tag(original, pacs::core::tags::study_date)
-       == get_tag(roundtrip, pacs::core::tags::study_date));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_name)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::patient_name));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_id)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::patient_id));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::modality)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::modality));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::study_date)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::study_date));
 }
 
 TEST_CASE("XML round-trip preserves metadata", "[cli][roundtrip]") {
@@ -220,12 +220,12 @@ TEST_CASE("XML round-trip preserves metadata", "[cli][roundtrip]") {
     auto original = read_dicom(src);
     auto roundtrip = read_dicom(dcm_path);
 
-    CHECK(get_tag(original, pacs::core::tags::patient_name)
-       == get_tag(roundtrip, pacs::core::tags::patient_name));
-    CHECK(get_tag(original, pacs::core::tags::patient_id)
-       == get_tag(roundtrip, pacs::core::tags::patient_id));
-    CHECK(get_tag(original, pacs::core::tags::modality)
-       == get_tag(roundtrip, pacs::core::tags::modality));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_name)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::patient_name));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_id)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::patient_id));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::modality)
+       == get_tag(roundtrip, kcenon::pacs::core::tags::modality));
 }
 
 TEST_CASE("Transfer Syntax conversion preserves tags", "[cli][roundtrip]") {
@@ -255,14 +255,14 @@ TEST_CASE("Transfer Syntax conversion preserves tags", "[cli][roundtrip]") {
     auto explicit_file = read_dicom(explicit_path);
     auto implicit_file = read_dicom(implicit_path);
 
-    CHECK(get_tag(original, pacs::core::tags::patient_name)
-       == get_tag(explicit_file, pacs::core::tags::patient_name));
-    CHECK(get_tag(original, pacs::core::tags::patient_name)
-       == get_tag(implicit_file, pacs::core::tags::patient_name));
-    CHECK(get_tag(original, pacs::core::tags::modality)
-       == get_tag(implicit_file, pacs::core::tags::modality));
-    CHECK(get_tag(original, pacs::core::tags::patient_id)
-       == get_tag(implicit_file, pacs::core::tags::patient_id));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_name)
+       == get_tag(explicit_file, kcenon::pacs::core::tags::patient_name));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_name)
+       == get_tag(implicit_file, kcenon::pacs::core::tags::patient_name));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::modality)
+       == get_tag(implicit_file, kcenon::pacs::core::tags::modality));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_id)
+       == get_tag(implicit_file, kcenon::pacs::core::tags::patient_id));
 }
 
 TEST_CASE("Anonymization changes patient identifiers", "[cli][roundtrip]") {
@@ -283,14 +283,14 @@ TEST_CASE("Anonymization changes patient identifiers", "[cli][roundtrip]") {
     auto original = read_dicom(src);
     auto anonymized = read_dicom(anon_path);
 
-    auto orig_name = get_tag(original, pacs::core::tags::patient_name);
-    auto anon_name = get_tag(anonymized, pacs::core::tags::patient_name);
+    auto orig_name = get_tag(original, kcenon::pacs::core::tags::patient_name);
+    auto anon_name = get_tag(anonymized, kcenon::pacs::core::tags::patient_name);
 
     // Patient name must be different after anonymization
     CHECK(orig_name != anon_name);
 
     // Anonymized file must still be valid DICOM (modality preserved)
-    CHECK_FALSE(get_tag(anonymized, pacs::core::tags::modality).empty());
+    CHECK_FALSE(get_tag(anonymized, kcenon::pacs::core::tags::modality).empty());
 }
 
 TEST_CASE("Tag modification updates values correctly", "[cli][roundtrip]") {
@@ -312,12 +312,12 @@ TEST_CASE("Tag modification updates values correctly", "[cli][roundtrip]") {
 
     // Verify modification
     auto modified = read_dicom(modified_path);
-    CHECK(get_tag(modified, pacs::core::tags::patient_name) == new_name);
+    CHECK(get_tag(modified, kcenon::pacs::core::tags::patient_name) == new_name);
 
     // Other tags should be unchanged
     auto original = read_dicom(src);
-    CHECK(get_tag(original, pacs::core::tags::patient_id)
-       == get_tag(modified, pacs::core::tags::patient_id));
-    CHECK(get_tag(original, pacs::core::tags::modality)
-       == get_tag(modified, pacs::core::tags::modality));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::patient_id)
+       == get_tag(modified, kcenon::pacs::core::tags::patient_id));
+    CHECK(get_tag(original, kcenon::pacs::core::tags::modality)
+       == get_tag(modified, kcenon::pacs::core::tags::modality));
 }

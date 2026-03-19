@@ -28,7 +28,7 @@
 #include <vector>
 
 namespace fs = std::filesystem;
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
 
 namespace {
 

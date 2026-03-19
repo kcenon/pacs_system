@@ -39,7 +39,7 @@
 
 #include <cstring>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 namespace {
 
@@ -103,8 +103,8 @@ constexpr bool is_item_tag(core::dicom_tag tag) {
 namespace {
 
 template <typename T>
-pacs::Result<T> make_codec_error(int code, const std::string& message) {
-    return pacs::pacs_error<T>(code, message);
+kcenon::pacs::Result<T> make_codec_error(int code, const std::string& message) {
+    return kcenon::pacs::pacs_error<T>(code, message);
 }
 
 }  // namespace
@@ -213,7 +213,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode(
 
         auto result = decode_element(data);
         if (!result.is_ok()) {
-            return pacs::pacs_error<core::dicom_dataset>(
+            return kcenon::pacs::pacs_error<core::dicom_dataset>(
                 result.error().code,
                 result.error().message);
         }
@@ -229,7 +229,7 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_element
     // Need at least 8 bytes: tag (4) + length (4)
     if (data.size() < 8) {
         return make_codec_error<core::dicom_element>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data to decode element");
     }
 
@@ -266,7 +266,7 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_element
     // Check if we have enough data
     if (data.size() < length) {
         return make_codec_error<core::dicom_element>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data for element value");
     }
 
@@ -288,7 +288,7 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_undefin
             // Check for sequence delimitation
             if (data.size() < 8) {
                 return make_codec_error<core::dicom_element>(
-                    pacs::error_codes::insufficient_data,
+                    kcenon::pacs::error_codes::insufficient_data,
                     "Insufficient data for sequence delimiter");
             }
 
@@ -306,7 +306,7 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_undefin
             // Must be an Item tag
             if (!is_item_tag(item_tag)) {
                 return make_codec_error<core::dicom_element>(
-                    pacs::error_codes::invalid_sequence,
+                    kcenon::pacs::error_codes::invalid_sequence,
                     "Expected Item tag in sequence");
             }
 
@@ -331,7 +331,7 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_undefin
     while (!data.empty()) {
         if (data.size() < 8) {
             return make_codec_error<core::dicom_element>(
-                pacs::error_codes::insufficient_data,
+                kcenon::pacs::error_codes::insufficient_data,
                 "Insufficient data for encapsulated data");
         }
 
@@ -357,7 +357,7 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_undefin
             }
         } else {
             return make_codec_error<core::dicom_element>(
-                pacs::error_codes::invalid_sequence,
+                kcenon::pacs::error_codes::invalid_sequence,
                 "Invalid tag in encapsulated data");
         }
     }
@@ -370,7 +370,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
     // Read Item tag and length
     if (data.size() < 8) {
         return make_codec_error<core::dicom_dataset>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data for sequence item");
     }
 
@@ -380,7 +380,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
 
     if (!is_item_tag(tag)) {
         return make_codec_error<core::dicom_dataset>(
-            pacs::error_codes::invalid_sequence,
+            kcenon::pacs::error_codes::invalid_sequence,
             "Expected Item tag for sequence item");
     }
 
@@ -394,7 +394,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
         while (!data.empty()) {
             if (data.size() < 4) {
                 return make_codec_error<core::dicom_dataset>(
-                    pacs::error_codes::insufficient_data,
+                    kcenon::pacs::error_codes::insufficient_data,
                     "Insufficient data for item delimiter check");
             }
 
@@ -424,7 +424,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
     // Explicit item length
     if (data.size() < item_length) {
         return make_codec_error<core::dicom_dataset>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data for item content");
     }
 
@@ -434,4 +434,4 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
     return decode(item_data);
 }
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding

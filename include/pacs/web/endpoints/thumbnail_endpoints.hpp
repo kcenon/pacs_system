@@ -44,11 +44,11 @@
 
 #include <memory>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 struct rest_server_context;
 class thumbnail_service;
@@ -61,4 +61,4 @@ namespace endpoints {
 
 }  // namespace endpoints
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

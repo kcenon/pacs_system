@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <string>
 
-using namespace pacs::web::auth;
+using namespace kcenon::pacs::web::auth;
 
 // ============================================================================
 // Test Helpers

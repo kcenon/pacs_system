@@ -39,7 +39,7 @@
 #include "pacs/network/dimse/command_field.hpp"
 #include "pacs/network/dimse/status_codes.hpp"
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Construction
@@ -71,8 +71,8 @@ network::Result<std::monostate> storage_commitment_scp::handle_message(
             return handle_n_action(assoc, context_id, request);
 
         default:
-            return pacs::pacs_void_error(
-                pacs::error_codes::storage_commitment_unexpected_command,
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::storage_commitment_unexpected_command,
                 "Unexpected command for Storage Commitment SCP: " +
                 std::string(to_string(request.command())));
     }
@@ -333,4 +333,4 @@ core::dicom_dataset storage_commitment_scp::build_event_report_dataset(
     return ds;
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services

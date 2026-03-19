@@ -384,8 +384,8 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @brief Perform MWL C-FIND query using worklist_scu library
  */
 int perform_query(const options& opts) {
-    using namespace pacs::network;
-    using namespace pacs::services;
+    using namespace kcenon::pacs::network;
+    using namespace kcenon::pacs::services;
 
     if (opts.verbose) {
         std::cout << "Connecting to " << opts.host << ":" << opts.port << "...\n";
@@ -464,14 +464,14 @@ int perform_query(const options& opts) {
     scu_config.max_results = opts.max_results;
 
     // Create worklist_scu instance
-    pacs::services::worklist_scu scu(scu_config);
+    kcenon::pacs::services::worklist_scu scu(scu_config);
 
     if (opts.verbose) {
         std::cout << "Sending C-FIND request...\n";
     }
 
     // Perform query using library
-    pacs::services::worklist_result query_result;
+    kcenon::pacs::services::worklist_result query_result;
 
     if (opts.custom_keys.empty()) {
         // Use typed query keys
@@ -531,7 +531,7 @@ int perform_query(const options& opts) {
         end_time - start_time);
 
     // Convert worklist_items to dicom_datasets for formatter
-    std::vector<pacs::core::dicom_dataset> result_datasets;
+    std::vector<kcenon::pacs::core::dicom_dataset> result_datasets;
     result_datasets.reserve(query_result.items.size());
     for (const auto& item : query_result.items) {
         result_datasets.push_back(item.dataset);

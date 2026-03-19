@@ -11,7 +11,7 @@
 
 #include <string>
 
-using namespace pacs::security;
+using namespace kcenon::pacs::security;
 using Catch::Matchers::ContainsSubstring;
 using Catch::Matchers::StartsWith;
 

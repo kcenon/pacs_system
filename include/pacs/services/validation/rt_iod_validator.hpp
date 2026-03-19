@@ -53,7 +53,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // RT Validation Options
@@ -428,6 +428,6 @@ private:
  */
 [[nodiscard]] bool is_valid_rt_dataset(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_RT_IOD_VALIDATOR_HPP

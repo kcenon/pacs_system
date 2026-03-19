@@ -17,8 +17,8 @@
 #include "pacs/storage/series_record.hpp"
 #include "pacs/storage/instance_record.hpp"
 
-using namespace pacs::web;
-using namespace pacs::web::dicomweb;
+using namespace kcenon::pacs::web;
+using namespace kcenon::pacs::web::dicomweb;
 
 // ============================================================================
 // Accept Header Parsing Tests
@@ -634,7 +634,7 @@ TEST_CASE("parse_instance_query_params - DICOM tag format",
 
 TEST_CASE("study_record_to_dicom_json - basic record",
           "[dicomweb][qidors][json]") {
-    pacs::storage::study_record record;
+    kcenon::pacs::storage::study_record record;
     record.study_uid = "1.2.3.4.5.6.7";
     record.study_date = "20231215";
     record.study_time = "143025";
@@ -673,7 +673,7 @@ TEST_CASE("study_record_to_dicom_json - basic record",
 
 TEST_CASE("study_record_to_dicom_json - with modalities",
           "[dicomweb][qidors][json]") {
-    pacs::storage::study_record record;
+    kcenon::pacs::storage::study_record record;
     record.study_uid = "1.2.3";
     record.modalities_in_study = "CT\\MR\\US";
     record.num_series = 0;
@@ -690,7 +690,7 @@ TEST_CASE("study_record_to_dicom_json - with modalities",
 
 TEST_CASE("series_record_to_dicom_json - basic record",
           "[dicomweb][qidors][json]") {
-    pacs::storage::series_record record;
+    kcenon::pacs::storage::series_record record;
     record.series_uid = "1.2.3.4.5.6.7.8";
     record.modality = "CT";
     record.series_number = 1;
@@ -726,7 +726,7 @@ TEST_CASE("series_record_to_dicom_json - basic record",
 
 TEST_CASE("instance_record_to_dicom_json - basic record",
           "[dicomweb][qidors][json]") {
-    pacs::storage::instance_record record;
+    kcenon::pacs::storage::instance_record record;
     record.sop_uid = "1.2.3.4.5.6.7.8.9";
     record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";
     record.instance_number = 10;
@@ -763,7 +763,7 @@ TEST_CASE("instance_record_to_dicom_json - basic record",
 
 TEST_CASE("instance_record_to_dicom_json - optional fields not present",
           "[dicomweb][qidors][json]") {
-    pacs::storage::instance_record record;
+    kcenon::pacs::storage::instance_record record;
     record.sop_uid = "1.2.3";
     record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";
     // No rows, columns, instance_number, number_of_frames
@@ -1067,7 +1067,7 @@ TEST_CASE("apply_window_level - rescale slope and intercept",
 
 TEST_CASE("study_record_to_dicom_json - empty optional fields",
           "[dicomweb][qidors][integration]") {
-    pacs::storage::study_record record;
+    kcenon::pacs::storage::study_record record;
     record.study_uid = "1.2.3.4.5.6.7.8.9";
     record.num_series = 0;
     record.num_instances = 0;
@@ -1085,7 +1085,7 @@ TEST_CASE("study_record_to_dicom_json - empty optional fields",
 
 TEST_CASE("study_record_to_dicom_json - special characters in fields",
           "[dicomweb][qidors][integration]") {
-    pacs::storage::study_record record;
+    kcenon::pacs::storage::study_record record;
     record.study_uid = "1.2.3";
     record.study_description = "CT \"Head\" with contrast";
     record.num_series = 1;
@@ -1100,7 +1100,7 @@ TEST_CASE("study_record_to_dicom_json - special characters in fields",
 
 TEST_CASE("series_record_to_dicom_json - complete record",
           "[dicomweb][qidors][integration]") {
-    pacs::storage::series_record record;
+    kcenon::pacs::storage::series_record record;
     record.series_uid = "1.2.3.4.5.6.7.8.9.10";
     record.modality = "CT";
     record.series_number = 1;
@@ -1127,7 +1127,7 @@ TEST_CASE("series_record_to_dicom_json - complete record",
 
 TEST_CASE("instance_record_to_dicom_json - multi-frame image",
           "[dicomweb][qidors][integration]") {
-    pacs::storage::instance_record record;
+    kcenon::pacs::storage::instance_record record;
     record.sop_uid = "1.2.3.4.5.6.7.8.9.10.11";
     record.sop_class_uid = "1.2.840.10008.5.1.4.1.1.2";  // CT Image Storage
     record.instance_number = 1;
@@ -1506,7 +1506,7 @@ TEST_CASE("performance - multipart builder with many parts",
 
 TEST_CASE("performance - study record JSON conversion",
           "[dicomweb][performance]") {
-    pacs::storage::study_record record;
+    kcenon::pacs::storage::study_record record;
     record.study_uid = "1.2.840.113619.2.334.3.2831168545.578.1513609426.234";
     record.study_date = "20231215";
     record.study_time = "143025.123456";
@@ -1742,7 +1742,7 @@ TEST_CASE("memory - large data handling", "[dicomweb][memory]") {
 TEST_CASE("memory - repeated operations", "[dicomweb][memory]") {
     // Test for memory leaks in repeated operations
     for (int iteration = 0; iteration < 100; ++iteration) {
-        pacs::storage::study_record record;
+        kcenon::pacs::storage::study_record record;
         record.study_uid = "1.2.3.4.5." + std::to_string(iteration);
         record.num_series = iteration;
         record.num_instances = iteration * 10;

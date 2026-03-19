@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // =============================================================================
 // Configuration
@@ -395,4 +395,4 @@ private:
     std::vector<mpps_entry> mpps_instances_;
 };
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

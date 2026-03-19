@@ -59,7 +59,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // XA-Specific DICOM Tags (not in core tag constants)
@@ -366,6 +366,6 @@ private:
  */
 [[nodiscard]] bool has_qca_calibration(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_XA_IOD_VALIDATOR_HPP

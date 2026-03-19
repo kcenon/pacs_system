@@ -42,7 +42,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // ─────────────────────────────────────────────────────
 // Static Member Definitions
@@ -214,4 +214,4 @@ auto thread_adapter::get_idle_worker_count() -> std::size_t {
     return 0;
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

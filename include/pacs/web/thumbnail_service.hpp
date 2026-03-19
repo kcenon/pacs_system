@@ -55,11 +55,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 /**
  * @brief Parameters for thumbnail generation
@@ -324,4 +324,4 @@ private:
     [[nodiscard]] static std::string get_content_type(std::string_view format);
 };
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

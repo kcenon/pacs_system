@@ -49,7 +49,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 /**
  * @brief Value Multiplicity (VM) specification
@@ -191,4 +191,5 @@ struct tag_info {
     }
 };
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core
+

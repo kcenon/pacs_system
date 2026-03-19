@@ -46,7 +46,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /**
  * @brief Storage operation status codes
@@ -159,6 +159,6 @@ enum class storage_status : uint16_t {
     return static_cast<uint16_t>(status);
 }
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_STORAGE_STATUS_HPP

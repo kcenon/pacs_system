@@ -41,7 +41,7 @@
 #include <filesystem>
 #include <fstream>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 // =============================================================================
 // Construction
@@ -101,12 +101,12 @@ health_checker& health_checker::operator=(health_checker&& other) noexcept {
 // Component Registration
 // =============================================================================
 
-void health_checker::set_database(pacs::storage::index_database* database) {
+void health_checker::set_database(kcenon::pacs::storage::index_database* database) {
     std::unique_lock lock(mutex_);
     database_ = database;
 }
 
-void health_checker::set_storage(pacs::storage::file_storage* storage) {
+void health_checker::set_storage(kcenon::pacs::storage::file_storage* storage) {
     std::unique_lock lock(mutex_);
     storage_ = storage;
 }
@@ -245,7 +245,7 @@ void health_checker::set_config(const health_checker_config& config) {
 // =============================================================================
 
 void health_checker::check_database(health_status& status) {
-    pacs::storage::index_database* db = nullptr;
+    kcenon::pacs::storage::index_database* db = nullptr;
     std::chrono::milliseconds timeout{};
 
     {
@@ -282,7 +282,7 @@ void health_checker::check_database(health_status& status) {
 }
 
 void health_checker::check_storage(health_status& status) {
-    pacs::storage::file_storage* storage = nullptr;
+    kcenon::pacs::storage::file_storage* storage = nullptr;
     double warning_threshold = 0.0;
     double critical_threshold = 0.0;
 
@@ -382,4 +382,4 @@ void health_checker::run_custom_checks(health_status& status) {
     }
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

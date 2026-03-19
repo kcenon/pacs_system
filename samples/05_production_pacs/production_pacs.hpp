@@ -35,7 +35,7 @@
 #include <thread>
 #include <vector>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // =============================================================================
 // Event Types
@@ -361,4 +361,4 @@ private:
     std::atomic<bool> running_{false};
 };
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

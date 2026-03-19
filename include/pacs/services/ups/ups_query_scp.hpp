@@ -20,7 +20,7 @@
 #include <atomic>
 #include <functional>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UID
@@ -177,6 +177,6 @@ private:
     std::atomic<size_t> items_returned_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_UPS_QUERY_SCP_HPP

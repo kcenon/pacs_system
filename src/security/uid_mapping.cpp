@@ -40,7 +40,7 @@
 #include <random>
 #include <sstream>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 uid_mapping::uid_mapping(std::string uid_root)
     : uid_root_{std::move(uid_root)} {}
@@ -276,4 +276,4 @@ auto uid_mapping::generate_uid() const -> std::string {
     return oss.str();
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

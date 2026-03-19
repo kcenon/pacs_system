@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // NM-specific DICOM tags
 namespace nm_tags {
@@ -712,4 +712,4 @@ bool is_valid_nm_dataset(const dicom_dataset& dataset) {
     return validator.quick_check(dataset);
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

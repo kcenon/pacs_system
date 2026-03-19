@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-using namespace pacs::client;
+using namespace kcenon::pacs::client;
 
 // =============================================================================
 // Mock Logger for Testing
@@ -24,7 +24,7 @@ using namespace pacs::client;
 
 namespace {
 
-class MockLogger final : public pacs::di::ILogger {
+class MockLogger final : public kcenon::pacs::di::ILogger {
 public:
     void trace(std::string_view) override {}
     void debug(std::string_view) override { debug_count_++; }
@@ -39,7 +39,7 @@ public:
     void error(std::string_view) override { error_count_++; }
     void fatal(std::string_view) override {}
 
-    [[nodiscard]] bool is_enabled(pacs::integration::log_level) const noexcept override {
+    [[nodiscard]] bool is_enabled(kcenon::pacs::integration::log_level) const noexcept override {
         return true;
     }
 

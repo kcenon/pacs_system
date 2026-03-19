@@ -49,7 +49,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Ophthalmic Storage SOP Class UIDs
@@ -142,6 +142,6 @@ inline constexpr uint32_t horizontal_field_of_view = 0x0022000C;
  */
 [[nodiscard]] bool is_valid_ophthalmic_photometric(std::string_view value) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_OPHTHALMIC_STORAGE_HPP

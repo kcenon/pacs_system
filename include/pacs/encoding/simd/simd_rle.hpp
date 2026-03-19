@@ -53,7 +53,7 @@
 #include <cstdint>
 #include <cstring>
 
-namespace pacs::encoding::simd {
+namespace kcenon::pacs::encoding::simd {
 
 // Forward declarations
 void interleaved_to_planar_rgb8(const uint8_t* src, uint8_t* r, uint8_t* g,
@@ -888,6 +888,6 @@ inline void merge_planes_to_16bit(const uint8_t* high, const uint8_t* low,
     detail::merge_planes_to_16bit_scalar(high, low, dst, pixel_count);
 }
 
-}  // namespace pacs::encoding::simd
+}  // namespace kcenon::pacs::encoding::simd
 
 #endif  // PACS_ENCODING_SIMD_RLE_HPP

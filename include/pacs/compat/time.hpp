@@ -41,7 +41,7 @@
  * Usage:
  *   #include <pacs/compat/time.hpp>
  *   std::tm tm{};
- *   pacs::compat::localtime_safe(&time_val, &tm);
+ *   kcenon::pacs::compat::localtime_safe(&time_val, &tm);
  * @author kcenon
  * @since 1.0.0
  */
@@ -50,7 +50,7 @@
 
 #include <ctime>
 
-namespace pacs::compat {
+namespace kcenon::pacs::compat {
 
 /**
  * @brief Cross-platform thread-safe local time conversion
@@ -94,4 +94,4 @@ inline std::tm* gmtime_safe(const std::time_t* time, std::tm* result) {
 #endif
 }
 
-}  // namespace pacs::compat
+}  // namespace kcenon::pacs::compat

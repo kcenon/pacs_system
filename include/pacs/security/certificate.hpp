@@ -52,7 +52,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // Forward declarations for PIMPL
 class certificate_impl;
@@ -414,4 +414,4 @@ private:
     std::vector<certificate> certs_;
 };
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

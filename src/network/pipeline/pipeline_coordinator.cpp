@@ -39,7 +39,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 // =============================================================================
 // Construction & Destruction
@@ -251,7 +251,7 @@ auto pipeline_coordinator::submit_task(pipeline_stage stage,
 // =============================================================================
 
 auto pipeline_coordinator::get_stage_pool(pipeline_stage stage)
-    -> std::shared_ptr<pacs::integration::thread_pool_interface> {
+    -> std::shared_ptr<kcenon::pacs::integration::thread_pool_interface> {
     size_t stage_idx = static_cast<size_t>(stage);
     if (stage_idx >= stage_count) {
         return nullptr;
@@ -342,12 +342,12 @@ auto pipeline_coordinator::generate_job_id() noexcept -> uint64_t {
 
 auto pipeline_coordinator::create_stage_pool(pipeline_stage stage)
     -> pool_ptr {
-    pacs::integration::thread_pool_config pool_config;
+    kcenon::pacs::integration::thread_pool_config pool_config;
     pool_config.min_threads = config_.get_workers_for_stage(stage);
     pool_config.max_threads = config_.get_workers_for_stage(stage);
     pool_config.pool_name = config_.name_prefix + "_" + std::string(get_stage_name(stage));
 
-    return std::make_shared<pacs::integration::thread_pool_adapter>(pool_config);
+    return std::make_shared<kcenon::pacs::integration::thread_pool_adapter>(pool_config);
 }
 
 void pipeline_coordinator::notify_job_completion(const job_context& ctx, bool success) {
@@ -385,4 +385,4 @@ void pipeline_coordinator::check_backpressure(pipeline_stage stage) {
     }
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

@@ -50,7 +50,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Structured Report Storage SOP Class UIDs
@@ -437,6 +437,6 @@ inline constexpr std::string_view measurement_report = "1500";
  */
 [[nodiscard]] std::string_view get_recommended_sr_template(std::string_view uid) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_SR_STORAGE_HPP

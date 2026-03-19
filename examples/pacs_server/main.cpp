@@ -30,7 +30,7 @@
 namespace {
 
 /// Global pointer to server app for signal handling
-std::atomic<pacs::example::pacs_server_app*> g_server{nullptr};
+std::atomic<kcenon::pacs::example::pacs_server_app*> g_server{nullptr};
 
 /// Signal handler for graceful shutdown
 void signal_handler(int signal) {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 )" << "\n";
 
     // Parse command line arguments
-    auto config = pacs::example::pacs_server_config::parse_args(argc, argv);
+    auto config = kcenon::pacs::example::pacs_server_config::parse_args(argc, argv);
     if (!config) {
         return 1;
     }
@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
     install_signal_handlers();
 
     // Create and initialize server
-    pacs::example::pacs_server_app server(config.value());
+    kcenon::pacs::example::pacs_server_app server(config.value());
     g_server = &server;
 
     if (!server.initialize()) {

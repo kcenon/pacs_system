@@ -17,8 +17,8 @@
 #include "pacs/storage/measurement_repository.hpp"
 #include "pacs/web/rest_types.hpp"
 
-using namespace pacs::storage;
-using namespace pacs::web;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("Measurement type conversion", "[web][measurement]") {
   SECTION("to_string") {

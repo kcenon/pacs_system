@@ -144,7 +144,7 @@ constexpr char base64_chars[] =
  * @param tag The DICOM tag
  * @return Formatted tag string
  */
-[[nodiscard]] std::string format_tag_key(const pacs::core::dicom_tag& tag) {
+[[nodiscard]] std::string format_tag_key(const kcenon::pacs::core::dicom_tag& tag) {
     std::ostringstream oss;
     oss << std::hex << std::uppercase << std::setfill('0')
         << std::setw(4) << tag.group()
@@ -157,8 +157,8 @@ constexpr char base64_chars[] =
  * @param vr The value representation
  * @return true if binary VR
  */
-[[nodiscard]] bool is_bulk_data_vr(pacs::encoding::vr_type vr) {
-    using namespace pacs::encoding;
+[[nodiscard]] bool is_bulk_data_vr(kcenon::pacs::encoding::vr_type vr) {
+    using namespace kcenon::pacs::encoding;
     return vr == vr_type::OB || vr == vr_type::OD || vr == vr_type::OF ||
            vr == vr_type::OL || vr == vr_type::OV || vr == vr_type::OW ||
            vr == vr_type::UN;
@@ -169,7 +169,7 @@ constexpr char base64_chars[] =
  * @param tag The DICOM tag
  * @return true if pixel data tag
  */
-[[nodiscard]] bool is_pixel_data_tag(const pacs::core::dicom_tag& tag) {
+[[nodiscard]] bool is_pixel_data_tag(const kcenon::pacs::core::dicom_tag& tag) {
     return tag.group() == 0x7FE0 && tag.element() == 0x0010;
 }
 
@@ -243,7 +243,7 @@ Exit Codes:
  * @param tag_str The tag string
  * @return Parsed tag or nullopt if invalid
  */
-[[nodiscard]] std::optional<pacs::core::dicom_tag> parse_tag_string(
+[[nodiscard]] std::optional<kcenon::pacs::core::dicom_tag> parse_tag_string(
     const std::string& tag_str) {
     std::string s = tag_str;
     // Remove parentheses if present
@@ -259,7 +259,7 @@ Exit Codes:
     try {
         uint16_t group = static_cast<uint16_t>(std::stoul(s.substr(0, 4), nullptr, 16));
         uint16_t elem = static_cast<uint16_t>(std::stoul(s.substr(4, 4), nullptr, 16));
-        return pacs::core::dicom_tag{group, elem};
+        return kcenon::pacs::core::dicom_tag{group, elem};
     } catch (...) {
         return std::nullopt;
     }
@@ -348,7 +348,7 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
  * @param opts Command line options
  * @return true if tag should be included
  */
-[[nodiscard]] bool should_include_tag(const pacs::core::dicom_tag& tag,
+[[nodiscard]] bool should_include_tag(const kcenon::pacs::core::dicom_tag& tag,
                                        const options& opts) {
     // Exclude pixel data if requested
     if (opts.no_pixel && is_pixel_data_tag(tag)) {
@@ -371,7 +371,7 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
 
 // Forward declaration
 void write_dataset_json(std::ostream& out,
-                        const pacs::core::dicom_dataset& dataset,
+                        const kcenon::pacs::core::dicom_dataset& dataset,
                         const options& opts,
                         const std::filesystem::path& base_path,
                         int indent_level,
@@ -387,12 +387,12 @@ void write_dataset_json(std::ostream& out,
  * @param bulk_data_counter Counter for bulk data files
  */
 void write_element_value_json(std::ostream& out,
-                               const pacs::core::dicom_element& element,
+                               const kcenon::pacs::core::dicom_element& element,
                                const options& opts,
                                const std::filesystem::path& base_path,
                                int indent_level,
                                size_t& bulk_data_counter) {
-    using namespace pacs::encoding;
+    using namespace kcenon::pacs::encoding;
 
     const std::string indent = opts.compact ? "" : std::string(indent_level * 2, ' ');
     const std::string newline = opts.compact ? "" : "\n";
@@ -639,7 +639,7 @@ void write_element_value_json(std::ostream& out,
  * @param bulk_data_counter Counter for bulk data files
  */
 void write_dataset_json(std::ostream& out,
-                        const pacs::core::dicom_dataset& dataset,
+                        const kcenon::pacs::core::dicom_dataset& dataset,
                         const options& opts,
                         const std::filesystem::path& base_path,
                         int indent_level,
@@ -679,7 +679,7 @@ void write_dataset_json(std::ostream& out,
 int convert_file(const std::filesystem::path& input_path,
                  std::ostream& output,
                  const options& opts) {
-    using namespace pacs::core;
+    using namespace kcenon::pacs::core;
 
     auto result = dicom_file::open(input_path);
     if (result.is_err()) {

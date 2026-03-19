@@ -58,7 +58,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Worklist Query Keys Structure
@@ -621,6 +621,6 @@ private:
     std::atomic<size_t> total_items_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_WORKLIST_SCU_HPP

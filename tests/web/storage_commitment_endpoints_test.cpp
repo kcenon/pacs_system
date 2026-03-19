@@ -12,8 +12,8 @@
 
 #include "pacs/web/endpoints/storage_commitment_endpoints.hpp"
 
-using namespace pacs::web::storage_commitment;
-using namespace pacs::services;
+using namespace kcenon::pacs::web::storage_commitment;
+using namespace kcenon::pacs::services;
 
 // ============================================================================
 // transaction_state tests
@@ -347,17 +347,17 @@ TEST_CASE("parse_commitment_request", "[web][storage-commitment]") {
 
 TEST_CASE("commitment_failure_reason to_string integration",
           "[web][storage-commitment]") {
-    CHECK(pacs::services::to_string(commitment_failure_reason::processing_failure) ==
+    CHECK(kcenon::pacs::services::to_string(commitment_failure_reason::processing_failure) ==
           "Processing failure");
-    CHECK(pacs::services::to_string(commitment_failure_reason::no_such_object_instance) ==
+    CHECK(kcenon::pacs::services::to_string(commitment_failure_reason::no_such_object_instance) ==
           "No such object instance");
-    CHECK(pacs::services::to_string(commitment_failure_reason::resource_limitation) ==
+    CHECK(kcenon::pacs::services::to_string(commitment_failure_reason::resource_limitation) ==
           "Resource limitation");
-    CHECK(pacs::services::to_string(
+    CHECK(kcenon::pacs::services::to_string(
               commitment_failure_reason::referenced_sop_class_not_supported) ==
           "Referenced SOP Class not supported");
-    CHECK(pacs::services::to_string(commitment_failure_reason::class_instance_conflict) ==
+    CHECK(kcenon::pacs::services::to_string(commitment_failure_reason::class_instance_conflict) ==
           "Class/Instance conflict");
-    CHECK(pacs::services::to_string(commitment_failure_reason::duplicate_transaction_uid) ==
+    CHECK(kcenon::pacs::services::to_string(commitment_failure_reason::duplicate_transaction_uid) ==
           "Duplicate Transaction UID");
 }

@@ -37,7 +37,7 @@
 #include <charconv>
 #include <sstream>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 auto value_multiplicity::from_string(std::string_view str)
     -> std::optional<value_multiplicity> {
@@ -129,4 +129,4 @@ auto value_multiplicity::to_string() const -> std::string {
     return oss.str();
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

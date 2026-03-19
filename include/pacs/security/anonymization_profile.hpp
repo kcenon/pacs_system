@@ -47,7 +47,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief DICOM de-identification profiles based on PS3.15 Annex E
@@ -194,4 +194,4 @@ enum class anonymization_profile : std::uint8_t {
     return std::nullopt;
 }
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security

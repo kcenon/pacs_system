@@ -2,7 +2,7 @@
 
 #include "pacs/encoding/transfer_syntax.hpp"
 
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding;
 
 TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
     SECTION("Implicit VR Little Endian") {

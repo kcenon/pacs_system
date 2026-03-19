@@ -36,7 +36,7 @@
 
 #include "pacs/services/sop_classes/wsi_storage.hpp"
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 std::vector<std::string> get_wsi_storage_sop_classes() {
     return {
@@ -54,4 +54,4 @@ bool is_valid_wsi_photometric(std::string_view value) noexcept {
            value == "MONOCHROME2";
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

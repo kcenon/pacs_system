@@ -58,7 +58,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace pacs::services::cache {
+namespace kcenon::pacs::services::cache {
 
 // ─────────────────────────────────────────────────────
 // Forward Declarations
@@ -650,4 +650,4 @@ private:
 template <typename Value>
 using string_lru_cache = simple_lru_cache<std::string, Value>;
 
-}  // namespace pacs::services::cache
+}  // namespace kcenon::pacs::services::cache

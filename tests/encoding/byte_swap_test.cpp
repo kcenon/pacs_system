@@ -9,7 +9,7 @@
 
 #include <cstring>
 
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Single Value Byte Swapping Tests
@@ -358,7 +358,7 @@ TEST_CASE("swap_fd_bytes swaps double correctly", "[encoding][byte_swap]") {
 // ============================================================================
 
 TEST_CASE("SIMD feature detection works", "[encoding][byte_swap][simd]") {
-    using namespace pacs::encoding::simd;
+    using namespace kcenon::pacs::encoding::simd;
 
     SECTION("feature detection returns valid flags") {
         auto features = get_features();

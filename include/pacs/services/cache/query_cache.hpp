@@ -53,7 +53,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::cache {
+namespace kcenon::pacs::services::cache {
 
 // ─────────────────────────────────────────────────────
 // Forward Declarations
@@ -384,4 +384,4 @@ private:
  */
 bool configure_global_cache(const query_cache_config& config);
 
-}  // namespace pacs::services::cache
+}  // namespace kcenon::pacs::services::cache

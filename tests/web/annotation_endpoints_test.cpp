@@ -21,8 +21,8 @@
 #include "pacs/storage/pacs_database_adapter.hpp"
 #endif
 
-using namespace pacs::storage;
-using namespace pacs::web;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::web;
 
 TEST_CASE("Annotation type conversion", "[web][annotation]") {
   SECTION("to_string") {

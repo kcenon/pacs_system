@@ -34,7 +34,7 @@
 
 #include <pacs/core/dicom_dataset.hpp>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 // ============================================================================
 // Element Access
@@ -397,4 +397,4 @@ void dicom_dataset::merge(dicom_dataset&& other) {
     other.clear();
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

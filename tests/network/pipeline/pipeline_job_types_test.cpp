@@ -9,7 +9,7 @@
 
 #include "pacs/network/pipeline/pipeline_job_types.hpp"
 
-using namespace pacs::network::pipeline;
+using namespace kcenon::pacs::network::pipeline;
 
 TEST_CASE("pipeline_stage enum values", "[network][pipeline][job_types]") {
     SECTION("stage values are sequential from 0") {

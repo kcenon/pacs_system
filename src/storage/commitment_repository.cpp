@@ -42,7 +42,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 using kcenon::common::ok;
 using kcenon::common::make_error;
@@ -368,6 +368,6 @@ auto commitment_repository::insert_references(
     return ok();
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

@@ -69,7 +69,7 @@ class i_protocol_server;
 class i_session;
 }  // namespace kcenon::network::interfaces
 
-namespace pacs::network::v2 {
+namespace kcenon::pacs::network::v2 {
 
 // =============================================================================
 // DICOM Server V2 Class
@@ -427,6 +427,6 @@ private:
     mutable std::mutex acl_mutex_;
 };
 
-}  // namespace pacs::network::v2
+}  // namespace kcenon::pacs::network::v2
 
 #endif  // PACS_NETWORK_V2_DICOM_SERVER_V2_HPP

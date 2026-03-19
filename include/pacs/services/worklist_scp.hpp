@@ -50,7 +50,7 @@
 #include <atomic>
 #include <functional>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UIDs (re-exported for convenience)
@@ -371,6 +371,6 @@ private:
     std::atomic<size_t> items_returned_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_WORKLIST_SCP_HPP

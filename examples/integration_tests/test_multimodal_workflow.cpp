@@ -39,17 +39,17 @@
 #include <thread>
 #include <vector>
 
-using namespace pacs::integration_test;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
-using namespace pacs::storage;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::integration_test;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 namespace {
 
-using namespace pacs::services::mpps_tags;
+using namespace kcenon::pacs::services::mpps_tags;
 
 // =============================================================================
 // Workflow Verification Helper
@@ -271,14 +271,14 @@ public:
         // MPPS SCP
         auto mpps_scp_ptr = std::make_shared<mpps_scp>();
         mpps_scp_ptr->set_create_handler([this](const mpps_instance& instance)
-            -> pacs::network::Result<std::monostate> {
+            -> kcenon::pacs::network::Result<std::monostate> {
             return create_mpps(instance);
         });
         mpps_scp_ptr->set_set_handler([this](
             const std::string& uid,
             const dicom_dataset& modifications,
-            pacs::services::mpps_status status)
-            -> pacs::network::Result<std::monostate> {
+            kcenon::pacs::services::mpps_status status)
+            -> kcenon::pacs::network::Result<std::monostate> {
             return update_mpps(uid, modifications, status);
         });
         server_->register_service(mpps_scp_ptr);
@@ -450,26 +450,26 @@ private:
         return worklist_items_;
     }
 
-    pacs::network::Result<std::monostate> create_mpps(const mpps_instance& instance) {
+    kcenon::pacs::network::Result<std::monostate> create_mpps(const mpps_instance& instance) {
         std::lock_guard<std::mutex> lock(mutex_);
         mpps_instances_.push_back(instance);
-        return pacs::network::Result<std::monostate>::ok({});
+        return kcenon::pacs::network::Result<std::monostate>::ok({});
     }
 
-    pacs::network::Result<std::monostate> update_mpps(
+    kcenon::pacs::network::Result<std::monostate> update_mpps(
         const std::string& uid,
         const dicom_dataset& /* modifications */,
-        pacs::services::mpps_status status) {
+        kcenon::pacs::services::mpps_status status) {
 
         std::lock_guard<std::mutex> lock(mutex_);
         for (auto& mpps : mpps_instances_) {
             if (mpps.sop_instance_uid == uid) {
                 mpps.status = status;
-                return pacs::network::Result<std::monostate>::ok({});
+                return kcenon::pacs::network::Result<std::monostate>::ok({});
             }
         }
-        return pacs::network::Result<std::monostate>::err({
-            pacs::network::dimse::dimse_error::invalid_data_format,
+        return kcenon::pacs::network::Result<std::monostate>::err({
+            kcenon::pacs::network::dimse::dimse_error::invalid_data_format,
             "MPPS not found"
         });
     }

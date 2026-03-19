@@ -46,7 +46,7 @@
 
 #include "dicom_tag.hpp"
 
-namespace pacs::core::tags {
+namespace kcenon::pacs::core::tags {
 
 // ============================================================================
 // File Meta Information (Group 0x0002)
@@ -468,4 +468,5 @@ inline constexpr dicom_tag item_delimitation_item{0xFFFE, 0xE00D};
 /// Sequence Delimitation Item
 inline constexpr dicom_tag sequence_delimitation_item{0xFFFE, 0xE0DD};
 
-}  // namespace pacs::core::tags
+}  // namespace kcenon::pacs::core::tags
+

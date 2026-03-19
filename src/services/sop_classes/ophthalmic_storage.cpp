@@ -36,7 +36,7 @@
 
 #include "pacs/services/sop_classes/ophthalmic_storage.hpp"
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 std::vector<std::string> get_ophthalmic_storage_sop_classes() {
     return {
@@ -62,4 +62,4 @@ bool is_valid_ophthalmic_photometric(std::string_view value) noexcept {
            value == "PALETTE COLOR";
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes

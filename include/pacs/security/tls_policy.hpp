@@ -51,7 +51,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 /**
  * @brief TLS policy profile levels
@@ -255,4 +255,4 @@ private:
  */
 [[nodiscard]] std::vector<tls_profile> available_tls_profiles();
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security

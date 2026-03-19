@@ -58,7 +58,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 /**
  * @brief Result of a C-STORE operation
@@ -383,6 +383,6 @@ private:
     std::atomic<size_t> bytes_sent_{0};
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_STORAGE_SCU_HPP

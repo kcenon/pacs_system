@@ -64,7 +64,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -1136,4 +1136,4 @@ void register_routing_endpoints_impl(crow::SimpleApp& app,
             });
 }
 
-} // namespace pacs::web::endpoints
+} // namespace kcenon::pacs::web::endpoints

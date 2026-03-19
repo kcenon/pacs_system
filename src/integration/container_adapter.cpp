@@ -38,7 +38,7 @@
 #include <pacs/compat/format.hpp>
 #include <sstream>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // VR to Container Value Mapping
@@ -338,7 +338,7 @@ auto container_adapter::deserialize_dataset(
         } catch (const std::exception& e) {
             return Result<core::dicom_dataset>::err(
                 kcenon::common::error_info{
-                    pacs::compat::format("Failed to convert element {}: {}", val.name, e.what())
+                    kcenon::pacs::compat::format("Failed to convert element {}: {}", val.name, e.what())
                 });
         }
     }
@@ -418,7 +418,7 @@ auto container_adapter::get_container_type(encoding::vr_type vr) noexcept
 auto container_adapter::make_element_key(core::dicom_tag tag,
                                           encoding::vr_type vr)
     -> std::string {
-    return pacs::compat::format("{:04X},{:04X}:{}", tag.group(), tag.element(),
+    return kcenon::pacs::compat::format("{:04X},{:04X}:{}", tag.group(), tag.element(),
                        encoding::to_string(vr));
 }
 
@@ -476,7 +476,7 @@ auto container_adapter::sequence_to_container(const core::dicom_element& element
     for (const auto& item : items) {
         auto item_container = serialize_dataset(item);
         container_module::optimized_value val;
-        val.name = pacs::compat::format("item_{}", item_index++);
+        val.name = kcenon::pacs::compat::format("item_{}", item_index++);
         val.type = container_module::value_types::container_value;
         val.data = item_container;
         container->set(val);
@@ -511,4 +511,4 @@ auto container_adapter::container_to_sequence(
     return items;
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

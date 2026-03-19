@@ -17,7 +17,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // ============================================================================
 // Data Structures
@@ -229,4 +229,4 @@ private:
     static std::atomic<uint64_t> uid_counter_;
 };
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

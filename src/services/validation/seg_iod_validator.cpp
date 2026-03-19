@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // SEG-specific DICOM Tags
@@ -745,4 +745,4 @@ size_t get_segment_count(const dicom_dataset& dataset) {
     return 0;
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

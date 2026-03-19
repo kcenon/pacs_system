@@ -50,7 +50,7 @@
 #include <utility>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Storage Commitment SOP Class UIDs
@@ -181,6 +181,6 @@ struct commitment_result {
     }
 };
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_STORAGE_COMMITMENT_TYPES_HPP

@@ -40,7 +40,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 pdu_decode_job::pdu_decode_job(uint64_t session_id,
                                std::vector<uint8_t> raw_data,
@@ -88,12 +88,12 @@ auto pdu_decode_job::execute(pipeline_coordinator& coordinator) -> VoidResult {
     }
 
     // Update context based on PDU type
-    if (pdu.type == pacs::network::pdu_type::associate_rq ||
-        pdu.type == pacs::network::pdu_type::associate_ac ||
-        pdu.type == pacs::network::pdu_type::associate_rj ||
-        pdu.type == pacs::network::pdu_type::release_rq ||
-        pdu.type == pacs::network::pdu_type::release_rp ||
-        pdu.type == pacs::network::pdu_type::abort) {
+    if (pdu.type == kcenon::pacs::network::pdu_type::associate_rq ||
+        pdu.type == kcenon::pacs::network::pdu_type::associate_ac ||
+        pdu.type == kcenon::pacs::network::pdu_type::associate_rj ||
+        pdu.type == kcenon::pacs::network::pdu_type::release_rq ||
+        pdu.type == kcenon::pacs::network::pdu_type::release_rp ||
+        pdu.type == kcenon::pacs::network::pdu_type::abort) {
         context_.category = job_category::association;
     }
 
@@ -140,7 +140,7 @@ auto pdu_decode_job::decode_pdu() -> Result<decoded_pdu> {
     }
 
     // Extract PDU type
-    result.type = static_cast<pacs::network::pdu_type>(raw_data_[0]);
+    result.type = static_cast<kcenon::pacs::network::pdu_type>(raw_data_[0]);
 
     // Extract length (big-endian, 4 bytes starting at offset 2)
     uint32_t length = (static_cast<uint32_t>(raw_data_[2]) << 24) |
@@ -159,7 +159,7 @@ auto pdu_decode_job::decode_pdu() -> Result<decoded_pdu> {
                        raw_data_.begin() + 6 + length);
 
     // For P-DATA-TF, extract presentation context ID and flags
-    if (result.type == pacs::network::pdu_type::p_data_tf && !result.data.empty()) {
+    if (result.type == kcenon::pacs::network::pdu_type::p_data_tf && !result.data.empty()) {
         // P-DATA-TF contains PDV items
         // PDV Item: Length (4) + Presentation Context ID (1) + Message Control Header (1) + Data
         if (result.data.size() >= 6) {
@@ -172,4 +172,4 @@ auto pdu_decode_job::decode_pdu() -> Result<decoded_pdu> {
     return ok(std::move(result));
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

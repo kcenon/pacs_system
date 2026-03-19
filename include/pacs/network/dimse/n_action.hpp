@@ -82,12 +82,12 @@
 
 #include "dimse_message.hpp"
 
-namespace pacs::network::dimse {
+namespace kcenon::pacs::network::dimse {
 
 // N-ACTION factory functions are declared in dimse_message.hpp:
 // - make_n_action_rq()
 // - make_n_action_rsp()
 
-}  // namespace pacs::network::dimse
+}  // namespace kcenon::pacs::network::dimse
 
 #endif  // PACS_NETWORK_DIMSE_N_ACTION_HPP

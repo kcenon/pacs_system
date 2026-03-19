@@ -18,7 +18,7 @@
 #include <set>
 #include <sstream>
 
-namespace pacs::integration_test {
+namespace kcenon::pacs::integration_test {
 
 // =============================================================================
 // multi_modal_study Implementation
@@ -652,4 +652,4 @@ core::dicom_dataset test_data_generator::invalid(invalid_dataset_type type) {
     return ds;
 }
 
-}  // namespace pacs::integration_test
+}  // namespace kcenon::pacs::integration_test

@@ -43,7 +43,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Constructor
@@ -385,7 +385,7 @@ auto node_repository::select_columns() const -> std::vector<std::string> {
     };
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
@@ -395,7 +395,7 @@ auto node_repository::select_columns() const -> std::vector<std::string> {
 
 #include <sqlite3.h>
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 // =============================================================================
 // Helper Functions
@@ -893,6 +893,6 @@ client::remote_node node_repository::parse_row(void* stmt_ptr) const {
     return node;
 }
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

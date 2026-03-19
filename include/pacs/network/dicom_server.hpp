@@ -61,11 +61,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 class thread_pool_interface;
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 // =============================================================================
 // Forward Declarations
@@ -407,6 +407,6 @@ private:
     std::mutex callback_mutex_;
 };
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network
 
 #endif  // PACS_NETWORK_DICOM_SERVER_HPP

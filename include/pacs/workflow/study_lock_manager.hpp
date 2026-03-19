@@ -62,7 +62,7 @@ class Result;
 struct error_info;
 }  // namespace kcenon::common
 
-namespace pacs::workflow {
+namespace kcenon::pacs::workflow {
 
 // =============================================================================
 // Lock Types and Configuration
@@ -736,4 +736,4 @@ private:
     lock_event_callback on_lock_expired_;
 };
 
-}  // namespace pacs::workflow
+}  // namespace kcenon::pacs::workflow

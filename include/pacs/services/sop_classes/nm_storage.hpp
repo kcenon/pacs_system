@@ -49,7 +49,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // NM Storage SOP Class UIDs
@@ -328,6 +328,6 @@ enum class nm_whole_body_technique {
  */
 [[nodiscard]] std::string_view to_string(nm_whole_body_technique technique) noexcept;
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
 
 #endif  // PACS_SERVICES_SOP_CLASSES_NM_STORAGE_HPP

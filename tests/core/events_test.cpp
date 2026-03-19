@@ -11,7 +11,7 @@
 #include "pacs/core/events.hpp"
 #include <kcenon/common/patterns/event_bus.h>
 
-using namespace pacs::events;
+using namespace kcenon::pacs::events;
 
 // ============================================================================
 // Event Type Construction Tests

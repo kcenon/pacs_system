@@ -44,7 +44,7 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 /**
  * @brief Factory class for creating compression codec instances.
@@ -110,6 +110,6 @@ private:
     codec_factory() = delete;  // Static-only class
 };
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression
 
 #endif  // PACS_ENCODING_COMPRESSION_CODEC_FACTORY_HPP

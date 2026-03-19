@@ -11,7 +11,7 @@
 
 #include "pacs/web/metadata_service.hpp"
 
-using namespace pacs::web;
+using namespace kcenon::pacs::web;
 
 // =============================================================================
 // Preset String Conversion Tests

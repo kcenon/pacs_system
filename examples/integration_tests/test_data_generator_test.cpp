@@ -14,7 +14,7 @@
 
 #include <algorithm>  // for std::all_of
 
-namespace pacs::integration_test {
+namespace kcenon::pacs::integration_test {
 
 // =============================================================================
 // Single Modality Generator Tests
@@ -382,4 +382,4 @@ TEST_CASE("test_data_generator::current_time returns valid DICOM time", "[data_g
     CHECK(std::all_of(time.begin(), time.end(), ::isdigit));
 }
 
-}  // namespace pacs::integration_test
+}  // namespace kcenon::pacs::integration_test

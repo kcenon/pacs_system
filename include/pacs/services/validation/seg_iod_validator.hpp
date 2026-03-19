@@ -51,7 +51,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // SEG Validation Options
@@ -332,6 +332,6 @@ private:
  */
 [[nodiscard]] size_t get_segment_count(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_SEG_IOD_VALIDATOR_HPP

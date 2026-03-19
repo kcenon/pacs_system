@@ -10,7 +10,7 @@
 #include <numeric>
 #include <vector>
 
-using namespace pacs::encoding::compression;
+using namespace kcenon::pacs::encoding::compression;
 
 TEST_CASE("frame_deflate_codec construction", "[encoding][compression][frame_deflate]") {
     SECTION("Default construction creates codec with default compression level") {
@@ -401,12 +401,12 @@ TEST_CASE("codec_factory Frame Deflate support", "[encoding][compression][frame_
 TEST_CASE("transfer_syntax registry Frame Deflate support",
           "[encoding][transfer_syntax][frame_deflate]") {
     SECTION("Frame Deflate static instance properties") {
-        const auto& ts = pacs::encoding::transfer_syntax::frame_deflate;
+        const auto& ts = kcenon::pacs::encoding::transfer_syntax::frame_deflate;
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.11");
         CHECK(ts.name() == "Frame Deflate");
-        CHECK(ts.endianness() == pacs::encoding::byte_order::little_endian);
-        CHECK(ts.vr_type() == pacs::encoding::vr_encoding::explicit_vr);
+        CHECK(ts.endianness() == kcenon::pacs::encoding::byte_order::little_endian);
+        CHECK(ts.vr_type() == kcenon::pacs::encoding::vr_encoding::explicit_vr);
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
@@ -414,14 +414,14 @@ TEST_CASE("transfer_syntax registry Frame Deflate support",
     }
 
     SECTION("find_transfer_syntax finds Frame Deflate") {
-        auto ts = pacs::encoding::find_transfer_syntax("1.2.840.10008.1.2.11");
+        auto ts = kcenon::pacs::encoding::find_transfer_syntax("1.2.840.10008.1.2.11");
         REQUIRE(ts.has_value());
         CHECK(ts->name() == "Frame Deflate");
         CHECK(ts->is_supported());
     }
 
     SECTION("Frame Deflate in supported_transfer_syntaxes list") {
-        auto supported = pacs::encoding::supported_transfer_syntaxes();
+        auto supported = kcenon::pacs::encoding::supported_transfer_syntaxes();
         bool found = false;
         for (const auto& ts : supported) {
             if (ts.uid() == "1.2.840.10008.1.2.11") {

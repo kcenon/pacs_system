@@ -13,7 +13,7 @@
 #include <random>
 #include <vector>
 
-using namespace pacs::encoding::compression;
+using namespace kcenon::pacs::encoding::compression;
 
 namespace {
 
@@ -449,7 +449,7 @@ TEST_CASE("codec_factory creates jpeg_lossless_codec", "[encoding][compression][
     }
 
     SECTION("create by transfer_syntax") {
-        pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.70");
+        kcenon::pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.70");
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);

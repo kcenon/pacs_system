@@ -21,7 +21,7 @@
 #include <sqlite3.h>
 #endif
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
 
 namespace {
 

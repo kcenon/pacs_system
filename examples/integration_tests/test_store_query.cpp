@@ -28,13 +28,13 @@
 
 #include <memory>
 
-using namespace pacs::integration_test;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::services;
-using namespace pacs::storage;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::integration_test;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::storage;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // =============================================================================
 // Helper: Simple PACS Server for Testing

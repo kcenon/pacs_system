@@ -10,9 +10,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using namespace pacs::services::pir;
-using namespace pacs::core;
-using namespace pacs::encoding;
+using namespace kcenon::pacs::services::pir;
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
 
 // ============================================================================
 // Helper Functions

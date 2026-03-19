@@ -55,7 +55,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 
 /**
  * @struct dicom_metrics_snapshot
@@ -717,4 +717,4 @@ inline void dicom_metrics_collector::collect_dimse_operation_metrics(
     }
 }
 
-}  // namespace pacs::monitoring
+}  // namespace kcenon::pacs::monitoring

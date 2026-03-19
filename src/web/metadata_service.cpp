@@ -50,7 +50,7 @@
 #include <filesystem>
 #include <sstream>
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 // =============================================================================
 // Preset and Sort Order String Conversion
@@ -130,7 +130,7 @@ namespace {
 /**
  * @brief Convert DICOM tag to hex string (without parentheses)
  */
-std::string tag_to_hex(pacs::core::dicom_tag tag) {
+std::string tag_to_hex(kcenon::pacs::core::dicom_tag tag) {
     std::ostringstream oss;
     oss << std::hex << std::uppercase << std::setfill('0') << std::setw(4)
         << tag.group() << std::setw(4) << tag.element();
@@ -140,7 +140,7 @@ std::string tag_to_hex(pacs::core::dicom_tag tag) {
 /**
  * @brief Parse hex string to DICOM tag
  */
-std::optional<pacs::core::dicom_tag> hex_to_tag(std::string_view hex) {
+std::optional<kcenon::pacs::core::dicom_tag> hex_to_tag(std::string_view hex) {
     if (hex.size() != 8) {
         return std::nullopt;
     }
@@ -150,7 +150,7 @@ std::optional<pacs::core::dicom_tag> hex_to_tag(std::string_view hex) {
             static_cast<uint16_t>(std::stoul(std::string(hex.substr(0, 4)), nullptr, 16));
         uint16_t element =
             static_cast<uint16_t>(std::stoul(std::string(hex.substr(4, 4)), nullptr, 16));
-        return pacs::core::dicom_tag{group, element};
+        return kcenon::pacs::core::dicom_tag{group, element};
     } catch (...) {
         return std::nullopt;
     }
@@ -206,7 +206,7 @@ metadata_service::~metadata_service() = default;
 
 std::unordered_set<std::string> metadata_service::get_preset_tags(
     metadata_preset preset) {
-    using namespace pacs::core::tags;
+    using namespace kcenon::pacs::core::tags;
 
     std::unordered_set<std::string> tags;
 
@@ -332,7 +332,7 @@ std::unordered_map<std::string, std::string> metadata_service::read_dicom_tags(
     std::unordered_map<std::string, std::string> result;
 
     // Open DICOM file
-    auto file_result = pacs::core::dicom_file::open(std::filesystem::path(file_path));
+    auto file_result = kcenon::pacs::core::dicom_file::open(std::filesystem::path(file_path));
     if (file_result.is_err()) {
         return result;  // Return empty map on failure
     }
@@ -419,12 +419,12 @@ sorted_instances_response metadata_service::get_sorted_instances(
         // Read additional positioning data from DICOM file if exists
         if (std::filesystem::exists(inst.file_path)) {
             auto file_result =
-                pacs::core::dicom_file::open(std::filesystem::path(inst.file_path));
+                kcenon::pacs::core::dicom_file::open(std::filesystem::path(inst.file_path));
             if (file_result.is_ok()) {
                 const auto& ds = file_result.value().dataset();
 
                 // Slice location
-                auto slice_str = ds.get_string(pacs::core::tags::slice_location);
+                auto slice_str = ds.get_string(kcenon::pacs::core::tags::slice_location);
                 if (!slice_str.empty()) {
                     try {
                         si.slice_location = std::stod(slice_str);
@@ -434,13 +434,13 @@ sorted_instances_response metadata_service::get_sorted_instances(
 
                 // Image position patient
                 auto pos_str =
-                    ds.get_string(pacs::core::tags::image_position_patient);
+                    ds.get_string(kcenon::pacs::core::tags::image_position_patient);
                 if (!pos_str.empty()) {
                     si.image_position_patient = parse_numeric_list(pos_str);
                 }
 
                 // Acquisition time
-                auto time_str = ds.get_string(pacs::core::tags::acquisition_time);
+                auto time_str = ds.get_string(kcenon::pacs::core::tags::acquisition_time);
                 if (!time_str.empty()) {
                     si.acquisition_time = time_str;
                 }
@@ -607,7 +607,7 @@ voi_lut_info metadata_service::get_voi_lut(std::string_view sop_instance_uid) {
     }
 
     auto file_result =
-        pacs::core::dicom_file::open(std::filesystem::path(instance->file_path));
+        kcenon::pacs::core::dicom_file::open(std::filesystem::path(instance->file_path));
     if (file_result.is_err()) {
         return voi_lut_info::error("Failed to open DICOM file");
     }
@@ -617,20 +617,20 @@ voi_lut_info metadata_service::get_voi_lut(std::string_view sop_instance_uid) {
     voi_lut_info info = voi_lut_info::ok();
 
     // Window Center
-    auto wc_str = ds.get_string(pacs::core::tags::window_center);
+    auto wc_str = ds.get_string(kcenon::pacs::core::tags::window_center);
     if (!wc_str.empty()) {
         info.window_center = parse_numeric_list(wc_str);
     }
 
     // Window Width
-    auto ww_str = ds.get_string(pacs::core::tags::window_width);
+    auto ww_str = ds.get_string(kcenon::pacs::core::tags::window_width);
     if (!ww_str.empty()) {
         info.window_width = parse_numeric_list(ww_str);
     }
 
     // Window Explanation (0028,1055)
     const auto* we_elem =
-        ds.get(pacs::core::dicom_tag{0x0028, 0x1055});
+        ds.get(kcenon::pacs::core::dicom_tag{0x0028, 0x1055});
     if (we_elem != nullptr) {
         auto we_result = we_elem->as_string();
         if (we_result.is_ok()) {
@@ -639,7 +639,7 @@ voi_lut_info metadata_service::get_voi_lut(std::string_view sop_instance_uid) {
     }
 
     // Rescale Slope
-    auto rs_str = ds.get_string(pacs::core::tags::rescale_slope);
+    auto rs_str = ds.get_string(kcenon::pacs::core::tags::rescale_slope);
     if (!rs_str.empty()) {
         try {
             info.rescale_slope = std::stod(rs_str);
@@ -648,7 +648,7 @@ voi_lut_info metadata_service::get_voi_lut(std::string_view sop_instance_uid) {
     }
 
     // Rescale Intercept
-    auto ri_str = ds.get_string(pacs::core::tags::rescale_intercept);
+    auto ri_str = ds.get_string(kcenon::pacs::core::tags::rescale_intercept);
     if (!ri_str.empty()) {
         try {
             info.rescale_intercept = std::stod(ri_str);
@@ -678,7 +678,7 @@ frame_info metadata_service::get_frame_info(std::string_view sop_instance_uid) {
     }
 
     auto file_result =
-        pacs::core::dicom_file::open(std::filesystem::path(instance->file_path));
+        kcenon::pacs::core::dicom_file::open(std::filesystem::path(instance->file_path));
     if (file_result.is_err()) {
         return frame_info::error("Failed to open DICOM file");
     }
@@ -688,7 +688,7 @@ frame_info metadata_service::get_frame_info(std::string_view sop_instance_uid) {
     frame_info info = frame_info::ok();
 
     // Number of Frames (0028,0008)
-    const auto* nf_elem = ds.get(pacs::core::dicom_tag{0x0028, 0x0008});
+    const auto* nf_elem = ds.get(kcenon::pacs::core::dicom_tag{0x0028, 0x0008});
     if (nf_elem != nullptr) {
         auto nf_result = nf_elem->as_string();
         if (nf_result.is_ok()) {
@@ -701,7 +701,7 @@ frame_info metadata_service::get_frame_info(std::string_view sop_instance_uid) {
     }
 
     // Frame Time (0018,1063) - in milliseconds
-    const auto* ft_elem = ds.get(pacs::core::dicom_tag{0x0018, 0x1063});
+    const auto* ft_elem = ds.get(kcenon::pacs::core::dicom_tag{0x0018, 0x1063});
     if (ft_elem != nullptr) {
         auto ft_result = ft_elem->as_string();
         if (ft_result.is_ok()) {
@@ -716,13 +716,13 @@ frame_info metadata_service::get_frame_info(std::string_view sop_instance_uid) {
     }
 
     // Rows
-    auto rows_opt = ds.get_numeric<uint16_t>(pacs::core::tags::rows);
+    auto rows_opt = ds.get_numeric<uint16_t>(kcenon::pacs::core::tags::rows);
     if (rows_opt.has_value()) {
         info.rows = rows_opt.value();
     }
 
     // Columns
-    auto cols_opt = ds.get_numeric<uint16_t>(pacs::core::tags::columns);
+    auto cols_opt = ds.get_numeric<uint16_t>(kcenon::pacs::core::tags::columns);
     if (cols_opt.has_value()) {
         info.columns = cols_opt.value();
     }
@@ -730,4 +730,4 @@ frame_info metadata_service::get_frame_info(std::string_view sop_instance_uid) {
     return info;
 }
 
-}  // namespace pacs::web
+}  // namespace kcenon::pacs::web

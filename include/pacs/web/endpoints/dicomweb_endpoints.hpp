@@ -54,11 +54,11 @@
 #include <string_view>
 #include <vector>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 class dicom_dataset;
-} // namespace pacs::core
+} // namespace kcenon::pacs::core
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
 struct study_record;
 struct series_record;
@@ -66,9 +66,9 @@ struct instance_record;
 struct study_query;
 struct series_query;
 struct instance_query;
-} // namespace pacs::storage
+} // namespace kcenon::pacs::storage
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 struct rest_server_context;
 
@@ -589,4 +589,4 @@ namespace endpoints {
 
 } // namespace endpoints
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

@@ -41,7 +41,7 @@ namespace query_scu {
  */
 class query_builder {
 public:
-    using query_level = pacs::services::query_level;
+    using query_level = kcenon::pacs::services::query_level;
 
     query_builder() = default;
 
@@ -223,15 +223,15 @@ public:
      * @brief Build the query dataset
      * @return Configured DICOM dataset ready for C-FIND
      */
-    [[nodiscard]] pacs::core::dicom_dataset build() const {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+    [[nodiscard]] kcenon::pacs::core::dicom_dataset build() const {
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         dicom_dataset ds;
 
         // Set Query/Retrieve Level (required)
         ds.set_string(tags::query_retrieve_level, vr_type::CS,
-                      std::string(pacs::services::to_string(level_)));
+                      std::string(kcenon::pacs::services::to_string(level_)));
 
         // Add return keys and search criteria based on level
         switch (level_) {
@@ -259,9 +259,9 @@ public:
     }
 
 private:
-    void add_patient_keys(pacs::core::dicom_dataset& ds) const {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+    void add_patient_keys(kcenon::pacs::core::dicom_dataset& ds) const {
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // Patient Name - always include as return key
         ds.set_string(tags::patient_name, vr_type::PN, patient_name_);
@@ -284,9 +284,9 @@ private:
         }
     }
 
-    void add_study_keys(pacs::core::dicom_dataset& ds) const {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+    void add_study_keys(kcenon::pacs::core::dicom_dataset& ds) const {
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // Study Instance UID - required for Study level
         ds.set_string(tags::study_instance_uid, vr_type::UI, study_instance_uid_);
@@ -327,9 +327,9 @@ private:
         ds.set_string(tags::modalities_in_study, vr_type::CS, modality_);
     }
 
-    void add_series_keys(pacs::core::dicom_dataset& ds) const {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+    void add_series_keys(kcenon::pacs::core::dicom_dataset& ds) const {
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // Series Instance UID - required for Series level
         ds.set_string(tags::series_instance_uid, vr_type::UI, series_instance_uid_);
@@ -351,9 +351,9 @@ private:
         ds.set_string(tags::number_of_series_related_instances, vr_type::IS, "");
     }
 
-    void add_instance_keys(pacs::core::dicom_dataset& ds) const {
-        using namespace pacs::core;
-        using namespace pacs::encoding;
+    void add_instance_keys(kcenon::pacs::core::dicom_dataset& ds) const {
+        using namespace kcenon::pacs::core;
+        using namespace kcenon::pacs::encoding;
 
         // SOP Instance UID - required for Instance level
         ds.set_string(tags::sop_instance_uid, vr_type::UI, sop_instance_uid_);

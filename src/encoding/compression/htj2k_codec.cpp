@@ -40,7 +40,7 @@
 #include <openjph/ojph_params.h>
 #endif
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 htj2k_codec::htj2k_codec(bool lossless,
                            bool use_rpcl,
@@ -133,21 +133,21 @@ codec_result htj2k_codec::encode(
     [[maybe_unused]] const compression_options& options) const {
 
     if (pixel_data.empty()) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error, "Empty pixel data");
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error, "Empty pixel data");
     }
 
     if (params.width == 0 || params.height == 0) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error, "Invalid image dimensions");
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error, "Invalid image dimensions");
     }
 
     const int bytes_per_sample = (params.bits_stored <= 8) ? 1 : 2;
     const size_t expected_size = static_cast<size_t>(params.width)
         * params.height * params.samples_per_pixel * bytes_per_sample;
     if (pixel_data.size() < expected_size) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error,
             "Pixel data too small: expected " + std::to_string(expected_size)
             + " bytes, got " + std::to_string(pixel_data.size()));
     }
@@ -284,12 +284,12 @@ codec_result htj2k_codec::encode(
 
         codestream.close();
 
-        return pacs::ok<compression_result>(
+        return kcenon::pacs::ok<compression_result>(
             compression_result{std::move(result_data), params});
 
     } catch (const std::exception& e) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::compression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error,
             std::string("HTJ2K encoding failed: ") + e.what());
     }
 }
@@ -299,8 +299,8 @@ codec_result htj2k_codec::decode(
     const image_params& params) const {
 
     if (compressed_data.empty()) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::decompression_error, "Empty compressed data");
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error, "Empty compressed data");
     }
 
     try {
@@ -340,14 +340,14 @@ codec_result htj2k_codec::decode(
 
         // Validate dimensions if provided
         if (params.width > 0 && params.width != decoded_width) {
-            return pacs::pacs_error<compression_result>(
-                pacs::error_codes::decompression_error,
+            return kcenon::pacs::pacs_error<compression_result>(
+                kcenon::pacs::error_codes::decompression_error,
                 "Image width mismatch: expected " + std::to_string(params.width)
                 + ", got " + std::to_string(decoded_width));
         }
         if (params.height > 0 && params.height != decoded_height) {
-            return pacs::pacs_error<compression_result>(
-                pacs::error_codes::decompression_error,
+            return kcenon::pacs::pacs_error<compression_result>(
+                kcenon::pacs::error_codes::decompression_error,
                 "Image height mismatch: expected " + std::to_string(params.height)
                 + ", got " + std::to_string(decoded_height));
         }
@@ -428,12 +428,12 @@ codec_result htj2k_codec::decode(
 
         codestream.close();
 
-        return pacs::ok<compression_result>(
+        return kcenon::pacs::ok<compression_result>(
             compression_result{std::move(output_data), output_params});
 
     } catch (const std::exception& e) {
-        return pacs::pacs_error<compression_result>(
-            pacs::error_codes::decompression_error,
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error,
             std::string("HTJ2K decoding failed: ") + e.what());
     }
 }
@@ -444,19 +444,19 @@ codec_result htj2k_codec::encode(
     [[maybe_unused]] std::span<const uint8_t> pixel_data,
     [[maybe_unused]] const image_params& params,
     [[maybe_unused]] const compression_options& options) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::compression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::compression_error,
         "HTJ2K codec not available: OpenJPH library not found at build time");
 }
 
 codec_result htj2k_codec::decode(
     [[maybe_unused]] std::span<const uint8_t> compressed_data,
     [[maybe_unused]] const image_params& params) const {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::decompression_error,
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::decompression_error,
         "HTJ2K codec not available: OpenJPH library not found at build time");
 }
 
 #endif  // PACS_WITH_HTJ2K_CODEC
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

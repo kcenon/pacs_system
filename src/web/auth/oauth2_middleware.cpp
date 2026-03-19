@@ -48,7 +48,7 @@
 
 #include <string>
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 
 // =============================================================================
 // oauth2_middleware Implementation
@@ -236,4 +236,4 @@ void oauth2_middleware::set_forbidden(crow::response& res,
     res.body = make_error_json("FORBIDDEN", message);
 }
 
-}  // namespace pacs::web::auth
+}  // namespace kcenon::pacs::web::auth

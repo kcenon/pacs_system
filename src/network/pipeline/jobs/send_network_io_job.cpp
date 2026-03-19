@@ -39,7 +39,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 send_network_io_job::send_network_io_job(uint64_t session_id,
                                          std::vector<uint8_t> data,
@@ -126,4 +126,4 @@ auto send_network_io_job::get_session_id() const noexcept -> uint64_t {
     return context_.session_id;
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

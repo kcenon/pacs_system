@@ -53,7 +53,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::xds {
+namespace kcenon::pacs::services::xds {
 
 // =============================================================================
 // XDS Document Metadata
@@ -368,6 +368,6 @@ private:
         const std::vector<kos_instance_reference>& references) const;
 };
 
-}  // namespace pacs::services::xds
+}  // namespace kcenon::pacs::services::xds
 
 #endif  // PACS_SERVICES_XDS_IMAGING_DOCUMENT_SOURCE_HPP

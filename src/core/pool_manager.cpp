@@ -34,7 +34,7 @@
 
 #include <pacs/core/pool_manager.hpp>
 
-namespace pacs::core {
+namespace kcenon::pacs::core {
 
 // ============================================================================
 // pool_manager Implementation
@@ -85,4 +85,4 @@ void pool_manager::reset_statistics() {
     const_cast<pool_statistics&>(dataset_pool_.statistics()).reset();
 }
 
-}  // namespace pacs::core
+}  // namespace kcenon::pacs::core

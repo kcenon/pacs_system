@@ -40,7 +40,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 storage_query_exec_job::storage_query_exec_job(dimse_request request,
                                                service_handler handler,
@@ -193,4 +193,4 @@ auto storage_query_exec_job::get_category_for_command(dimse_command_type type)
     }
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

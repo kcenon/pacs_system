@@ -22,10 +22,10 @@
 #define KCENON_HAS_COMMON_SYSTEM 0
 #endif
 
-using namespace pacs::services;
-using namespace pacs::network;
-using namespace pacs::network::dimse;
-using namespace pacs::core;
+using namespace kcenon::pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::network::dimse;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // Test Helpers
@@ -48,9 +48,9 @@ constexpr dicom_tag tag_patient_name{0x0010, 0x0010};
     const std::string& sop_instance_uid) {
 
     dicom_dataset ds;
-    ds.set_string(tag_sop_class_uid, pacs::encoding::vr_type::UI, sop_class_uid);
-    ds.set_string(tag_sop_instance_uid, pacs::encoding::vr_type::UI, sop_instance_uid);
-    ds.set_string(tag_patient_name, pacs::encoding::vr_type::PN, "TEST^PATIENT");
+    ds.set_string(tag_sop_class_uid, kcenon::pacs::encoding::vr_type::UI, sop_class_uid);
+    ds.set_string(tag_sop_instance_uid, kcenon::pacs::encoding::vr_type::UI, sop_instance_uid);
+    ds.set_string(tag_patient_name, kcenon::pacs::encoding::vr_type::PN, "TEST^PATIENT");
     return ds;
 }
 

@@ -27,7 +27,7 @@
 #include <iostream>
 #include <string>
 
-using namespace pacs::samples;
+using namespace kcenon::pacs::samples;
 
 namespace {
 

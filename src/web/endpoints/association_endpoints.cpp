@@ -54,7 +54,7 @@
 
 #include <sstream>
 
-namespace pacs::web::endpoints {
+namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
@@ -181,4 +181,4 @@ void register_association_endpoints_impl(
           });
 }
 
-}  // namespace pacs::web::endpoints
+}  // namespace kcenon::pacs::web::endpoints

@@ -55,7 +55,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace pacs::encoding::simd {
+namespace kcenon::pacs::encoding::simd {
 
 /**
  * @brief Window/Level parameters
@@ -940,6 +940,6 @@ inline void apply_window_level_16bit_signed(const int16_t* src, uint8_t* dst,
     detail::apply_window_level_16bit_signed_scalar(src, dst, pixel_count, params);
 }
 
-}  // namespace pacs::encoding::simd
+}  // namespace kcenon::pacs::encoding::simd
 
 #endif  // PACS_ENCODING_SIMD_WINDOWING_HPP

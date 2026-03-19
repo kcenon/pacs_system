@@ -49,7 +49,7 @@
 #include <chrono>
 #include <cstdint>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @struct stage_metrics
@@ -428,4 +428,4 @@ private:
     std::chrono::steady_clock::time_point start_time_{std::chrono::steady_clock::now()};
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

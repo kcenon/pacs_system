@@ -67,7 +67,7 @@ public:
      * @return Formatted string output
      */
     [[nodiscard]] std::string format(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
         switch (format_) {
             case output_format::json:
                 return format_json(results);
@@ -114,8 +114,8 @@ private:
      * from the main dataset.
      */
     [[nodiscard]] worklist_item extract_item(
-        const pacs::core::dicom_dataset& ds) const {
-        using namespace pacs::core;
+        const kcenon::pacs::core::dicom_dataset& ds) const {
+        using namespace kcenon::pacs::core;
 
         worklist_item item;
 
@@ -145,7 +145,7 @@ private:
      * @brief Format results as a human-readable table
      */
     [[nodiscard]] std::string format_table(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
         std::ostringstream oss;
 
         if (results.empty()) {
@@ -220,7 +220,7 @@ private:
      * @brief Format results as JSON
      */
     [[nodiscard]] std::string format_json(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
         std::ostringstream oss;
 
         oss << "{\n";
@@ -266,7 +266,7 @@ private:
      * @brief Format results as CSV
      */
     [[nodiscard]] std::string format_csv(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
         std::ostringstream oss;
 
         // Header row
@@ -300,7 +300,7 @@ private:
      * @brief Format results as XML
      */
     [[nodiscard]] std::string format_xml(
-        const std::vector<pacs::core::dicom_dataset>& results) const {
+        const std::vector<kcenon::pacs::core::dicom_dataset>& results) const {
         std::ostringstream oss;
 
         oss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";

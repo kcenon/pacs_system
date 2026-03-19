@@ -35,7 +35,7 @@
 #include <pacs/network/pdu_buffer_pool.hpp>
 #include <pacs/network/pdu_decoder.hpp>
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 
 // ============================================================================
 // pdu_buffer_pool Implementation
@@ -111,4 +111,4 @@ void pdu_buffer_pool::reset_statistics() {
     const_cast<pdu_pool_statistics&>(p_data_pool_.statistics()).reset();
 }
 
-}  // namespace pacs::network
+}  // namespace kcenon::pacs::network

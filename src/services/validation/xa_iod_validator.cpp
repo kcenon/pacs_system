@@ -38,9 +38,9 @@
 
 #include <sstream>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // =============================================================================
 // xa_iod_validator Implementation
@@ -648,4 +648,4 @@ bool has_qca_calibration(const dicom_dataset& dataset) {
     return true;
 }
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation

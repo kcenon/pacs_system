@@ -50,7 +50,7 @@
 #include <mutex>
 #include <sstream>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // =============================================================================
 // Implementation Class
@@ -605,4 +605,4 @@ auto logger_adapter::log_level_to_string(log_level level) -> std::string {
     }
 }
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

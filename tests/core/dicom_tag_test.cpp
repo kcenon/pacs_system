@@ -10,7 +10,7 @@
 #include "pacs/core/dicom_tag.hpp"
 #include "pacs/core/dicom_tag_constants.hpp"
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // ============================================================================
 // Construction Tests

@@ -51,7 +51,7 @@
 #include <functional>
 #include <vector>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 /**
  * @struct encoded_response
@@ -158,4 +158,4 @@ private:
         -> std::vector<std::vector<uint8_t>>;
 };
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

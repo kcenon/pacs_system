@@ -29,7 +29,7 @@
 
 #include "pacs/security/tls_policy.hpp"
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 // ============================================================================
 // tls_profile string conversion
@@ -180,4 +180,4 @@ std::vector<tls_profile> available_tls_profiles() {
             tls_profile::bcp195_extended};
 }
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security

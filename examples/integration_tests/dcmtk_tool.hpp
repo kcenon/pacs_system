@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-namespace pacs::integration_test {
+namespace kcenon::pacs::integration_test {
 
 // =============================================================================
 // DCMTK Result Structure
@@ -511,6 +511,6 @@ private:
     uint16_t port_{0};
 };
 
-}  // namespace pacs::integration_test
+}  // namespace kcenon::pacs::integration_test
 
 #endif  // PACS_INTEGRATION_TESTS_DCMTK_TOOL_HPP

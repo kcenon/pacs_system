@@ -51,7 +51,7 @@
 #include <optional>
 #include <string>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class UID
@@ -482,6 +482,6 @@ inline constexpr core::dicom_tag referenced_study_sequence{0x0008, 0x1110};
 
 }  // namespace mpps_tags
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_MPPS_SCP_HPP

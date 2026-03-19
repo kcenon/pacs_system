@@ -40,7 +40,7 @@
 
 #include <chrono>
 
-namespace pacs::network::pipeline {
+namespace kcenon::pacs::network::pipeline {
 
 // =============================================================================
 // Construction & Destruction
@@ -333,4 +333,4 @@ void pipeline_adapter::on_backpressure(pipeline_stage stage, size_t queue_depth)
     }
 }
 
-}  // namespace pacs::network::pipeline
+}  // namespace kcenon::pacs::network::pipeline

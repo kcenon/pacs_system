@@ -53,7 +53,7 @@
 #include <string>
 #include <string_view>
 
-namespace pacs::integration {
+namespace kcenon::pacs::integration {
 
 // ─────────────────────────────────────────────────────
 // Forward Declarations
@@ -248,8 +248,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void trace(pacs::compat::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::trace, pacs::compat::format(fmt, std::forward<Args>(args)...));
+    static void trace(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::trace, kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -259,8 +259,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void debug(pacs::compat::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::debug, pacs::compat::format(fmt, std::forward<Args>(args)...));
+    static void debug(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::debug, kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -270,8 +270,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void info(pacs::compat::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::info, pacs::compat::format(fmt, std::forward<Args>(args)...));
+    static void info(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::info, kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -281,8 +281,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void warn(pacs::compat::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::warn, pacs::compat::format(fmt, std::forward<Args>(args)...));
+    static void warn(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::warn, kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -292,8 +292,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void error(pacs::compat::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::error, pacs::compat::format(fmt, std::forward<Args>(args)...));
+    static void error(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::error, kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -303,8 +303,8 @@ public:
      * @param args Format arguments
      */
     template <typename... Args>
-    static void fatal(pacs::compat::format_string<Args...> fmt, Args&&... args) {
-        log(log_level::fatal, pacs::compat::format(fmt, std::forward<Args>(args)...));
+    static void fatal(kcenon::pacs::compat::format_string<Args...> fmt, Args&&... args) {
+        log(log_level::fatal, kcenon::pacs::compat::format(fmt, std::forward<Args>(args)...));
     }
 
     /**
@@ -455,4 +455,4 @@ private:
     static std::unique_ptr<impl> pimpl_;
 };
 
-}  // namespace pacs::integration
+}  // namespace kcenon::pacs::integration

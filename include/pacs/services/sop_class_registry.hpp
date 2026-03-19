@@ -50,7 +50,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // SOP Class Categories
@@ -272,6 +272,6 @@ private:
  */
 [[nodiscard]] std::string_view get_sop_class_name(std::string_view uid);
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_SOP_CLASS_REGISTRY_HPP

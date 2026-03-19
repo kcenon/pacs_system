@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <sstream>
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 
 namespace {
 
@@ -332,4 +332,4 @@ atna_config_validation validate(const atna_config& config) {
     return result;
 }
 
-}  // namespace pacs::security
+}  // namespace kcenon::pacs::security

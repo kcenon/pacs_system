@@ -104,7 +104,7 @@
     #include <arm_neon.h>
 #endif
 
-namespace pacs::encoding::simd {
+namespace kcenon::pacs::encoding::simd {
 
 /**
  * @brief SIMD feature flags for runtime detection
@@ -319,6 +319,6 @@ inline void cpuid_ex(int info[4], int function_id, int sub_function) noexcept {
     return 0;  // No SIMD
 }
 
-}  // namespace pacs::encoding::simd
+}  // namespace kcenon::pacs::encoding::simd
 
 #endif  // PACS_ENCODING_SIMD_CONFIG_HPP

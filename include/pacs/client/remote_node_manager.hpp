@@ -58,15 +58,15 @@
 #include <vector>
 
 // Forward declarations
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class node_repository;
 }
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 class association;
 }
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 
 // =============================================================================
 // Remote Node Manager
@@ -154,7 +154,7 @@ public:
      * @param node The node to add
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto add_node(const remote_node& node) -> pacs::VoidResult;
+    [[nodiscard]] auto add_node(const remote_node& node) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Update an existing remote node
@@ -162,7 +162,7 @@ public:
      * @param node The node to update (node_id must match existing)
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto update_node(const remote_node& node) -> pacs::VoidResult;
+    [[nodiscard]] auto update_node(const remote_node& node) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Remove a remote node
@@ -170,7 +170,7 @@ public:
      * @param node_id ID of the node to remove
      * @return VoidResult indicating success or error
      */
-    [[nodiscard]] auto remove_node(std::string_view node_id) -> pacs::VoidResult;
+    [[nodiscard]] auto remove_node(std::string_view node_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Get a node by ID
@@ -210,7 +210,7 @@ public:
      * @param node_id ID of the node to verify
      * @return VoidResult indicating success (online) or error (offline/error)
      */
-    [[nodiscard]] auto verify_node(std::string_view node_id) -> pacs::VoidResult;
+    [[nodiscard]] auto verify_node(std::string_view node_id) -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Verify a node's connectivity asynchronously
@@ -221,7 +221,7 @@ public:
      * @return Future containing the verification result
      */
     [[nodiscard]] auto verify_node_async(std::string_view node_id)
-        -> std::future<pacs::VoidResult>;
+        -> std::future<kcenon::pacs::VoidResult>;
 
     /**
      * @brief Verify all nodes asynchronously
@@ -248,7 +248,7 @@ public:
     [[nodiscard]] auto acquire_association(
         std::string_view node_id,
         std::span<const std::string> sop_classes)
-        -> pacs::Result<std::unique_ptr<network::association>>;
+        -> kcenon::pacs::Result<std::unique_ptr<network::association>>;
 
     /**
      * @brief Release an association back to the pool
@@ -361,4 +361,4 @@ private:
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace pacs::client
+}  // namespace kcenon::pacs::client

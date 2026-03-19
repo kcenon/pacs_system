@@ -64,7 +64,7 @@ namespace kcenon::logger {
 class logger;
 }  // namespace kcenon::logger
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Configuration for the migration service
@@ -348,4 +348,4 @@ private:
     std::chrono::steady_clock::time_point next_cycle_time_;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage

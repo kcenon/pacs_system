@@ -59,7 +59,7 @@
 
 #include "pacs/storage/base_repository.hpp"
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 /**
  * @brief Query options for listing routing rules
@@ -257,14 +257,14 @@ private:
         -> std::vector<client::routing_action>;
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #else  // !PACS_WITH_DATABASE_SYSTEM
 
 // Legacy interface for builds without database_system
 struct sqlite3;
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 
 template <typename T>
 using Result = kcenon::common::Result<T>;
@@ -344,6 +344,6 @@ private:
     sqlite3* db_{nullptr};
 };
 
-}  // namespace pacs::storage
+}  // namespace kcenon::pacs::storage
 
 #endif  // PACS_WITH_DATABASE_SYSTEM

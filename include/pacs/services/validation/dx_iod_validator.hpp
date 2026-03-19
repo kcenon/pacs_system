@@ -55,7 +55,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // DX Validation Options
@@ -316,6 +316,6 @@ private:
  */
 [[nodiscard]] bool is_for_processing_dx(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_DX_IOD_VALIDATOR_HPP

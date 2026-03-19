@@ -40,7 +40,7 @@
 
 #include <cstring>
 
-namespace pacs::encoding {
+namespace kcenon::pacs::encoding {
 
 namespace {
 
@@ -144,8 +144,8 @@ constexpr size_t swap_unit_size(vr_type vr) {
 namespace {
 
 template <typename T>
-pacs::Result<T> make_codec_error(int code, const std::string& message) {
-    return pacs::pacs_error<T>(code, message);
+kcenon::pacs::Result<T> make_codec_error(int code, const std::string& message) {
+    return kcenon::pacs::pacs_error<T>(code, message);
 }
 
 }  // namespace
@@ -301,7 +301,7 @@ explicit_vr_big_endian_codec::decode(std::span<const uint8_t> data) {
 
         auto result = decode_element(data);
         if (!result.is_ok()) {
-            return pacs::pacs_error<core::dicom_dataset>(
+            return kcenon::pacs::pacs_error<core::dicom_dataset>(
                 result.error().code,
                 result.error().message);
         }
@@ -317,7 +317,7 @@ explicit_vr_big_endian_codec::decode_element(std::span<const uint8_t>& data) {
     // Need at least 8 bytes for standard format: tag (4) + VR (2) + length (2)
     if (data.size() < 8) {
         return make_codec_error<core::dicom_element>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data to decode element");
     }
 
@@ -343,7 +343,7 @@ explicit_vr_big_endian_codec::decode_element(std::span<const uint8_t>& data) {
     auto vr_opt = from_string(vr_str);
     if (!vr_opt) {
         return make_codec_error<core::dicom_element>(
-            pacs::error_codes::unknown_vr,
+            kcenon::pacs::error_codes::unknown_vr,
             "Unknown VR type");
     }
     vr_type vr = *vr_opt;
@@ -356,7 +356,7 @@ explicit_vr_big_endian_codec::decode_element(std::span<const uint8_t>& data) {
         // Extended format: need 12 bytes total
         if (data.size() < 12) {
             return make_codec_error<core::dicom_element>(
-                pacs::error_codes::insufficient_data,
+                kcenon::pacs::error_codes::insufficient_data,
                 "Insufficient data for extended VR format");
         }
         // Skip reserved 2 bytes, then read 4-byte length (big-endian)
@@ -378,7 +378,7 @@ explicit_vr_big_endian_codec::decode_element(std::span<const uint8_t>& data) {
     // Check if we have enough data
     if (data.size() < length) {
         return make_codec_error<core::dicom_element>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data for element value");
     }
 
@@ -404,7 +404,7 @@ explicit_vr_big_endian_codec::decode_undefined_length(
             // Check for sequence delimitation
             if (data.size() < 8) {
                 return make_codec_error<core::dicom_element>(
-                    pacs::error_codes::insufficient_data,
+                    kcenon::pacs::error_codes::insufficient_data,
                     "Insufficient data for sequence delimiter");
             }
 
@@ -422,7 +422,7 @@ explicit_vr_big_endian_codec::decode_undefined_length(
             // Must be an Item tag
             if (!is_item_tag(item_tag)) {
                 return make_codec_error<core::dicom_element>(
-                    pacs::error_codes::invalid_sequence,
+                    kcenon::pacs::error_codes::invalid_sequence,
                     "Expected Item tag in sequence");
             }
 
@@ -447,7 +447,7 @@ explicit_vr_big_endian_codec::decode_undefined_length(
     while (!data.empty()) {
         if (data.size() < 8) {
             return make_codec_error<core::dicom_element>(
-                pacs::error_codes::insufficient_data,
+                kcenon::pacs::error_codes::insufficient_data,
                 "Insufficient data for encapsulated data");
         }
 
@@ -476,7 +476,7 @@ explicit_vr_big_endian_codec::decode_undefined_length(
             }
         } else {
             return make_codec_error<core::dicom_element>(
-                pacs::error_codes::invalid_sequence,
+                kcenon::pacs::error_codes::invalid_sequence,
                 "Invalid tag in encapsulated data");
         }
     }
@@ -490,7 +490,7 @@ explicit_vr_big_endian_codec::decode_sequence_item(
     // Read Item tag and length (big-endian)
     if (data.size() < 8) {
         return make_codec_error<core::dicom_dataset>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data for sequence item");
     }
 
@@ -500,7 +500,7 @@ explicit_vr_big_endian_codec::decode_sequence_item(
 
     if (!is_item_tag(tag)) {
         return make_codec_error<core::dicom_dataset>(
-            pacs::error_codes::invalid_sequence,
+            kcenon::pacs::error_codes::invalid_sequence,
             "Expected Item tag for sequence item");
     }
 
@@ -514,7 +514,7 @@ explicit_vr_big_endian_codec::decode_sequence_item(
         while (!data.empty()) {
             if (data.size() < 4) {
                 return make_codec_error<core::dicom_dataset>(
-                    pacs::error_codes::insufficient_data,
+                    kcenon::pacs::error_codes::insufficient_data,
                     "Insufficient data for item delimiter check");
             }
 
@@ -544,7 +544,7 @@ explicit_vr_big_endian_codec::decode_sequence_item(
     // Explicit item length
     if (data.size() < item_length) {
         return make_codec_error<core::dicom_dataset>(
-            pacs::error_codes::insufficient_data,
+            kcenon::pacs::error_codes::insufficient_data,
             "Insufficient data for item content");
     }
 
@@ -554,4 +554,4 @@ explicit_vr_big_endian_codec::decode_sequence_item(
     return decode(item_data);
 }
 
-}  // namespace pacs::encoding
+}  // namespace kcenon::pacs::encoding

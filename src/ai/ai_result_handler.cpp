@@ -40,7 +40,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace pacs::ai {
+namespace kcenon::pacs::ai {
 
 // Use common_system's ok() function
 using kcenon::common::ok;
@@ -779,4 +779,4 @@ auto ai_result_handler::remove_ai_results_for_study(std::string_view study_insta
     return removed_count;
 }
 
-}  // namespace pacs::ai
+}  // namespace kcenon::pacs::ai

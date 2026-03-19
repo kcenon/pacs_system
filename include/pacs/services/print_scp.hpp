@@ -55,7 +55,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace pacs::services {
+namespace kcenon::pacs::services {
 
 // =============================================================================
 // Print Management SOP Class UIDs (PS3.4 Annex H)
@@ -488,6 +488,6 @@ inline constexpr core::dicom_tag printer_name{0x2110, 0x0030};
 
 }  // namespace print_tags
 
-}  // namespace pacs::services
+}  // namespace kcenon::pacs::services
 
 #endif  // PACS_SERVICES_PRINT_SCP_HPP

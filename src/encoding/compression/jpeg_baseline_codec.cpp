@@ -40,7 +40,7 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
-namespace pacs::encoding::compression {
+namespace kcenon::pacs::encoding::compression {
 
 namespace {
 
@@ -138,17 +138,17 @@ private:
 
 // Helper function for creating codec errors
 codec_result make_compression_error(const std::string& message) {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::compression_error, message);
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::compression_error, message);
 }
 
 codec_result make_decompression_error(const std::string& message) {
-    return pacs::pacs_error<compression_result>(
-        pacs::error_codes::decompression_error, message);
+    return kcenon::pacs::pacs_error<compression_result>(
+        kcenon::pacs::error_codes::decompression_error, message);
 }
 
 codec_result make_compression_ok(std::vector<uint8_t> data, const image_params& params) {
-    return pacs::ok<compression_result>(compression_result{std::move(data), params});
+    return kcenon::pacs::ok<compression_result>(compression_result{std::move(data), params});
 }
 
 }  // namespace
@@ -416,4 +416,4 @@ codec_result jpeg_baseline_codec::decode(
     return impl_->decode(compressed_data, params);
 }
 
-}  // namespace pacs::encoding::compression
+}  // namespace kcenon::pacs::encoding::compression

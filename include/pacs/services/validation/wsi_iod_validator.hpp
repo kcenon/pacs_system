@@ -55,7 +55,7 @@
 #include <string>
 #include <vector>
 
-namespace pacs::services::validation {
+namespace kcenon::pacs::services::validation {
 
 // =============================================================================
 // WSI-Specific DICOM Tags for Validation
@@ -288,6 +288,6 @@ private:
  */
 [[nodiscard]] bool is_valid_wsi_dataset(const core::dicom_dataset& dataset);
 
-}  // namespace pacs::services::validation
+}  // namespace kcenon::pacs::services::validation
 
 #endif  // PACS_SERVICES_VALIDATION_WSI_IOD_VALIDATOR_HPP

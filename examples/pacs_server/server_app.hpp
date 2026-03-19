@@ -30,7 +30,7 @@
 #include <memory>
 #include <string>
 
-namespace pacs::example {
+namespace kcenon::pacs::example {
 
 /**
  * @brief Complete PACS server application
@@ -248,6 +248,6 @@ private:
     bool initialized_{false};
 };
 
-}  // namespace pacs::example
+}  // namespace kcenon::pacs::example
 
 #endif  // PACS_EXAMPLE_PACS_SERVER_SERVER_APP_HPP

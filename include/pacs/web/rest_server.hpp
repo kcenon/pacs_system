@@ -49,37 +49,37 @@
 #include <memory>
 
 // Forward declarations for PACS monitoring
-namespace pacs::monitoring {
+namespace kcenon::pacs::monitoring {
 class health_checker;
 class pacs_metrics;
-} // namespace pacs::monitoring
+} // namespace kcenon::pacs::monitoring
 
-namespace pacs::security {
+namespace kcenon::pacs::security {
 class access_control_manager;
-} // namespace pacs::security
+} // namespace kcenon::pacs::security
 
-namespace pacs::web::auth {
+namespace kcenon::pacs::web::auth {
 struct oauth2_config;
 class oauth2_middleware;
 class jwks_provider;
-} // namespace pacs::web::auth
+} // namespace kcenon::pacs::web::auth
 
-namespace pacs::storage {
+namespace kcenon::pacs::storage {
 class index_database;
 class file_storage;
-} // namespace pacs::storage
+} // namespace kcenon::pacs::storage
 
-namespace pacs::network {
+namespace kcenon::pacs::network {
 class dicom_server;
-} // namespace pacs::network
+} // namespace kcenon::pacs::network
 
-namespace pacs::client {
+namespace kcenon::pacs::client {
 class remote_node_manager;
 class job_manager;
 class routing_manager;
-} // namespace pacs::client
+} // namespace kcenon::pacs::client
 
-namespace pacs::web {
+namespace kcenon::pacs::web {
 
 /**
  * @class rest_server
@@ -269,4 +269,4 @@ private:
   std::unique_ptr<impl> impl_;
 };
 
-} // namespace pacs::web
+} // namespace kcenon::pacs::web

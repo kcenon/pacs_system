@@ -13,7 +13,7 @@
 #include <unistd.h>
 #endif
 
-namespace pacs::samples {
+namespace kcenon::pacs::samples {
 
 // ============================================================================
 // Static Member Definitions
@@ -97,4 +97,4 @@ auto scoped_signal_handler::should_shutdown() const noexcept -> bool {
     return signal_handler::should_shutdown();
 }
 
-}  // namespace pacs::samples
+}  // namespace kcenon::pacs::samples

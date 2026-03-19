@@ -19,8 +19,8 @@
 #include <stdexcept>
 #include <thread>
 
-using namespace pacs::workflow;
-using namespace pacs::storage;
+using namespace kcenon::pacs::workflow;
+using namespace kcenon::pacs::storage;
 using namespace std::chrono_literals;
 
 namespace {

@@ -38,7 +38,7 @@
 #include <array>
 #include <cctype>
 
-namespace pacs::services::sop_classes {
+namespace kcenon::pacs::services::sop_classes {
 
 // =============================================================================
 // Breast Laterality Implementation
@@ -433,4 +433,4 @@ std::string create_mg_image_type(
     return result;
 }
 
-}  // namespace pacs::services::sop_classes
+}  // namespace kcenon::pacs::services::sop_classes
