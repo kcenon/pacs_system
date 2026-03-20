@@ -664,6 +664,35 @@ private:
 
 **Thread Safety:** NOT thread-safe. Create separate instances for concurrent operations.
 
+#### Cryptographic Implementation Details
+
+**`hash_value()` — SHA-256 (Issue [#988](https://github.com/kcenon/pacs_system/issues/988))**
+
+Replaced non-cryptographic `std::hash` with SHA-256 via the OpenSSL EVP interface.
+
+| Property | Value |
+|----------|-------|
+| Algorithm | SHA-256 (OpenSSL `EVP_sha256`) |
+| Output | Hex-encoded 64-character string |
+| Input | `salt + value` when salt is set, otherwise `value` |
+| Salt | Configurable via `set_hash_salt()`; prepended before hashing |
+| Conditional build | Requires `PACS_WITH_DIGITAL_SIGNATURES` |
+
+**`encrypt_value()` — AES-256-GCM (Issue [#987](https://github.com/kcenon/pacs_system/issues/987))**
+
+Implements authenticated encryption using AES-256-GCM via OpenSSL EVP.
+
+| Property | Value |
+|----------|-------|
+| Algorithm | AES-256-GCM (OpenSSL `EVP_aes_256_gcm`) |
+| Key size | 32 bytes (256 bits); set via `set_encryption_key()` |
+| IV size | 12 bytes; generated per-call via `RAND_bytes` (CSPRNG) |
+| Auth tag | 16 bytes (128-bit GCM tag); appended after ciphertext |
+| Output format | Hex-encoded `IV \|\| ciphertext \|\| tag` |
+| Conditional build | Requires `PACS_WITH_DIGITAL_SIGNATURES` |
+
+The per-call IV generation ensures that encrypting the same value twice produces different ciphertexts, preventing frequency analysis attacks. The GCM authentication tag detects any tampering with the ciphertext before decryption is attempted.
+
 ---
 
 ## 4. Digital Signatures
