@@ -38,11 +38,19 @@
 #include "pacs/core/dicom_tag_constants.hpp"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <functional>
 #include <iomanip>
+#include <memory>
 #include <random>
 #include <sstream>
+#include <vector>
+
+#ifdef PACS_WITH_DIGITAL_SIGNATURES
+    #include <openssl/evp.h>
+    #include <openssl/rand.h>
+#endif
 
 namespace kcenon::pacs::security {
 
@@ -555,9 +563,14 @@ auto anonymizer::apply_action(
 
         case tag_action::hash: {
             auto hashed = hash_value(record.original_value);
-            dataset.set_string(tag, element->vr(), hashed);
-            record.new_value = hashed;
-            record.success = true;
+            if (hashed.empty()) {
+                record.success = false;
+                record.error_message = "Hash computation failed";
+            } else {
+                dataset.set_string(tag, element->vr(), hashed);
+                record.new_value = hashed;
+                record.success = true;
+            }
             break;
         }
 
@@ -569,7 +582,7 @@ auto anonymizer::apply_action(
                 record.success = true;
             } else {
                 record.success = false;
-                record.error_message = "Encryption failed: no key configured";
+                record.error_message = result.error().message;
             }
             break;
         }
@@ -637,34 +650,151 @@ auto anonymizer::shift_date(std::string_view date_string) const -> std::string {
 }
 
 auto anonymizer::hash_value(std::string_view value) const -> std::string {
-    // Simple hash implementation using std::hash
-    // In production, use a proper cryptographic hash like SHA-256
     std::string to_hash = std::string(value);
 
     if (hash_salt_.has_value()) {
         to_hash = hash_salt_.value() + to_hash;
     }
 
-    auto hash = std::hash<std::string>{}(to_hash);
+#ifdef PACS_WITH_DIGITAL_SIGNATURES
+    auto* ctx = EVP_MD_CTX_new();
+    if (ctx == nullptr) {
+        return {};
+    }
 
+    struct md_ctx_deleter {
+        void operator()(EVP_MD_CTX* c) const { EVP_MD_CTX_free(c); }
+    };
+    std::unique_ptr<EVP_MD_CTX, md_ctx_deleter> ctx_guard(ctx);
+
+    if (EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) != 1
+        || EVP_DigestUpdate(ctx, to_hash.data(), to_hash.size()) != 1) {
+        return {};
+    }
+
+    std::array<unsigned char, EVP_MAX_MD_SIZE> digest{};
+    unsigned int digest_len = 0;
+    if (EVP_DigestFinal_ex(ctx, digest.data(), &digest_len) != 1) {
+        return {};
+    }
+
+    std::ostringstream oss;
+    oss << std::hex << std::setfill('0');
+    for (unsigned int i = 0; i < digest_len; ++i) {
+        oss << std::setw(2) << static_cast<int>(digest[i]);
+    }
+    return oss.str();
+#else
+    // Non-cryptographic fallback when OpenSSL is unavailable
+    auto hash = std::hash<std::string>{}(to_hash);
     std::ostringstream oss;
     oss << std::hex << std::setfill('0') << std::setw(16) << hash;
     return oss.str();
+#endif
 }
 
-auto anonymizer::encrypt_value(std::string_view /*value*/) const
+auto anonymizer::encrypt_value(std::string_view value) const
     -> kcenon::common::Result<std::string> {
     if (encryption_key_.empty()) {
         return kcenon::common::make_error<std::string>(
-            1, "No encryption key configured"
-        );
+            1, "No encryption key configured");
     }
 
-    // Placeholder for actual encryption implementation
-    // In production, use AES-256-GCM or similar
+#ifdef PACS_WITH_DIGITAL_SIGNATURES
+    constexpr int iv_length = 12;
+    constexpr int tag_length = 16;
+
+    // Generate random IV
+    std::array<unsigned char, iv_length> iv{};
+    if (RAND_bytes(iv.data(), iv_length) != 1) {
+        return kcenon::common::make_error<std::string>(
+            2, "Failed to generate random IV");
+    }
+
+    // Create cipher context with RAII
+    struct cipher_ctx_deleter {
+        void operator()(EVP_CIPHER_CTX* c) const { EVP_CIPHER_CTX_free(c); }
+    };
+
+    std::unique_ptr<EVP_CIPHER_CTX, cipher_ctx_deleter> ctx(
+        EVP_CIPHER_CTX_new());
+    if (!ctx) {
+        return kcenon::common::make_error<std::string>(
+            3, "Failed to create cipher context");
+    }
+
+    // Initialize AES-256-GCM
+    if (EVP_EncryptInit_ex(
+            ctx.get(), EVP_aes_256_gcm(), nullptr, nullptr, nullptr)
+        != 1) {
+        return kcenon::common::make_error<std::string>(
+            4, "Failed to initialize AES-256-GCM");
+    }
+
+    if (EVP_CIPHER_CTX_ctrl(
+            ctx.get(), EVP_CTRL_GCM_SET_IVLEN, iv_length, nullptr)
+        != 1) {
+        return kcenon::common::make_error<std::string>(
+            5, "Failed to set IV length");
+    }
+
+    if (EVP_EncryptInit_ex(ctx.get(), nullptr, nullptr,
+                           encryption_key_.data(), iv.data())
+        != 1) {
+        return kcenon::common::make_error<std::string>(
+            6, "Failed to set encryption key and IV");
+    }
+
+    // Encrypt
+    std::vector<unsigned char> ciphertext(value.size() + EVP_MAX_BLOCK_LENGTH);
+    int out_len = 0;
+    if (EVP_EncryptUpdate(
+            ctx.get(), ciphertext.data(), &out_len,
+            reinterpret_cast<const unsigned char*>(value.data()),
+            static_cast<int>(value.size()))
+        != 1) {
+        return kcenon::common::make_error<std::string>(
+            7, "Encryption failed");
+    }
+    int ciphertext_len = out_len;
+
+    // Finalize
+    if (EVP_EncryptFinal_ex(
+            ctx.get(), ciphertext.data() + out_len, &out_len)
+        != 1) {
+        return kcenon::common::make_error<std::string>(
+            8, "Encryption finalization failed");
+    }
+    ciphertext_len += out_len;
+
+    // Get authentication tag
+    std::array<unsigned char, tag_length> tag{};
+    if (EVP_CIPHER_CTX_ctrl(
+            ctx.get(), EVP_CTRL_GCM_GET_TAG, tag_length, tag.data())
+        != 1) {
+        return kcenon::common::make_error<std::string>(
+            9, "Failed to get authentication tag");
+    }
+
+    // Encode as hex: IV || ciphertext || tag
+    std::ostringstream oss;
+    oss << std::hex << std::setfill('0');
+    for (int i = 0; i < iv_length; ++i) {
+        oss << std::setw(2) << static_cast<int>(iv[i]);
+    }
+    for (int i = 0; i < ciphertext_len; ++i) {
+        oss << std::setw(2) << static_cast<int>(ciphertext[i]);
+    }
+    for (int i = 0; i < tag_length; ++i) {
+        oss << std::setw(2) << static_cast<int>(tag[i]);
+    }
+
+    return kcenon::common::Result<std::string>(oss.str());
+#else
+    (void)value;
     return kcenon::common::make_error<std::string>(
-        1, "Encryption not yet implemented"
-    );
+        1, "Encryption requires OpenSSL (build with PACS_WITH_DIGITAL_SIGNATURES)");
+#endif
 }
 
 void anonymizer::initialize_profile_actions() {

@@ -159,6 +159,75 @@ Currently, the system supports token-based authentication (integrated via header
 
 > **Note**: In a future release, this will be replaced by JWT (JSON Web Tokens) or OIDC integration.
 
+## Anonymization Cryptography
+
+The anonymizer implements cryptographic operations for DICOM de-identification. These operations require OpenSSL and are conditionally compiled when `PACS_WITH_DIGITAL_SIGNATURES` is enabled.
+
+### Hash Algorithm: SHA-256
+
+The `hash_value()` method produces a deterministic, one-way hash of a DICOM attribute value using SHA-256 via the OpenSSL EVP interface.
+
+| Property | Value |
+|----------|-------|
+| Algorithm | SHA-256 (OpenSSL EVP_sha256) |
+| Output | Hex-encoded 64-character string |
+| Salt | Configurable via `set_hash_salt()` |
+| Use case | Research linkage, pseudonymization |
+
+**Salt configuration:**
+
+```cpp
+anonymizer anon(anonymization_profile::gdpr_compliant);
+anon.set_hash_salt("my-site-specific-salt");
+```
+
+When a salt is set, it is prepended to the value before hashing: `SHA-256(salt + value)`. This prevents cross-site linkage attacks on hashed identifiers.
+
+### Encryption Algorithm: AES-256-GCM
+
+The `encrypt_value()` method encrypts a DICOM attribute value using AES-256-GCM, providing both confidentiality and authenticated integrity protection.
+
+| Property | Value |
+|----------|-------|
+| Algorithm | AES-256-GCM (OpenSSL EVP_aes_256_gcm) |
+| Key size | 32 bytes (256 bits) |
+| IV size | 12 bytes (CSPRNG via `RAND_bytes`) |
+| Auth tag | 16 bytes (128-bit GCM tag) |
+| Output format | Hex-encoded: `IV \|\| ciphertext \|\| tag` |
+| Conditional build | Requires `PACS_WITH_DIGITAL_SIGNATURES` |
+
+**Key configuration:**
+
+```cpp
+std::array<uint8_t, 32> key = /* 32-byte secret key */;
+anonymizer anon(anonymization_profile::gdpr_compliant);
+auto result = anon.set_encryption_key(key);
+if (!result) {
+    // handle error: invalid key length
+}
+```
+
+A fresh 12-byte IV is generated using a cryptographically secure random number generator (`RAND_bytes`) for each call to `encrypt_value()`. The 16-byte GCM authentication tag is appended after the ciphertext in the output, enabling integrity verification on decryption.
+
+**Output format:**
+
+```
+[12 bytes IV][variable ciphertext][16 bytes GCM tag]
+→ hex-encoded as a single string
+```
+
+### Conditional Compilation
+
+Both `hash_value()` and `encrypt_value()` depend on OpenSSL. They are compiled only when the `PACS_WITH_DIGITAL_SIGNATURES` CMake feature is enabled:
+
+```cmake
+vcpkg_check_features(... pacs-digital-signatures PACS_WITH_DIGITAL_SIGNATURES)
+```
+
+Without this feature, calling `encrypt_value()` returns an error result indicating OpenSSL is not available.
+
+---
+
 ## Configuration
 
 Security is configured via the `AccessControlManager`.
