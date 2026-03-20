@@ -515,17 +515,27 @@ std::string mpps_scu::generate_mpps_uid() const {
 
 std::string mpps_scu::get_current_date() const {
     auto now = std::time(nullptr);
-    auto* tm = std::localtime(&now);
+    std::tm tm{};
+#if defined(_WIN32)
+    localtime_s(&tm, &now);
+#else
+    localtime_r(&now, &tm);
+#endif
     std::ostringstream oss;
-    oss << std::put_time(tm, "%Y%m%d");
+    oss << std::put_time(&tm, "%Y%m%d");
     return oss.str();
 }
 
 std::string mpps_scu::get_current_time() const {
     auto now = std::time(nullptr);
-    auto* tm = std::localtime(&now);
+    std::tm tm{};
+#if defined(_WIN32)
+    localtime_s(&tm, &now);
+#else
+    localtime_r(&now, &tm);
+#endif
     std::ostringstream oss;
-    oss << std::put_time(tm, "%H%M%S");
+    oss << std::put_time(&tm, "%H%M%S");
     return oss.str();
 }
 

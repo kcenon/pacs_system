@@ -634,13 +634,18 @@ auto anonymizer::shift_date(std::string_view date_string) const -> std::string {
 
         // Convert back to date string
         auto shifted_time = std::chrono::system_clock::to_time_t(time_point);
-        std::tm* shifted_tm = std::localtime(&shifted_time);
+        std::tm shifted_tm{};
+#if defined(_WIN32)
+        localtime_s(&shifted_tm, &shifted_time);
+#else
+        localtime_r(&shifted_time, &shifted_tm);
+#endif
 
         std::ostringstream oss;
         oss << std::setfill('0')
-            << std::setw(4) << (shifted_tm->tm_year + 1900)
-            << std::setw(2) << (shifted_tm->tm_mon + 1)
-            << std::setw(2) << shifted_tm->tm_mday;
+            << std::setw(4) << (shifted_tm.tm_year + 1900)
+            << std::setw(2) << (shifted_tm.tm_mon + 1)
+            << std::setw(2) << shifted_tm.tm_mday;
 
         return oss.str();
 
