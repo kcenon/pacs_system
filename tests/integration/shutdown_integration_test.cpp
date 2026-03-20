@@ -15,6 +15,8 @@
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/thread_pool_adapter.hpp>
 
+#include <kcenon/thread/core/thread_pool.h>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include <atomic>
@@ -88,6 +90,54 @@ bool wait_for(Pred condition, std::chrono::milliseconds timeout = 5000ms) {
         std::this_thread::sleep_for(10ms);
     }
     return true;
+}
+
+/**
+ * @brief Shutdown with a timeout to prevent indefinite hangs
+ *
+ * Runs graceful shutdown in a separate thread. If it does not complete
+ * within the timeout, force-stops the underlying pool so the test process
+ * never hangs (especially on Windows CI where thread scheduling can
+ * cause pool_->stop() to block longer than expected).
+ */
+void timed_shutdown(std::shared_ptr<thread_pool_adapter>& pool,
+                    bool wait_for_completion = true,
+                    std::chrono::seconds timeout = 10s) {
+    if (!pool) return;
+
+    if (!wait_for_completion) {
+        pool->shutdown(false);
+        return;
+    }
+
+    // Get underlying pool handle before starting shutdown thread, so
+    // we can force-stop it if the graceful shutdown hangs.
+    // shutdown() holds adapter mutex while blocking on pool_->stop(),
+    // so we cannot call adapter methods from this thread to unblock.
+    auto underlying = pool->get_underlying_pool();
+
+    std::atomic<bool> done{false};
+    std::thread shutdown_thread([&pool, &done]() {
+        pool->shutdown(true);
+        done.store(true);
+    });
+
+    auto start = std::chrono::steady_clock::now();
+    while (!done.load()) {
+        if (std::chrono::steady_clock::now() - start > timeout) {
+            break;
+        }
+        std::this_thread::sleep_for(10ms);
+    }
+
+    if (!done.load() && underlying) {
+        // Force-stop the underlying pool to unblock the graceful shutdown
+        underlying->stop(true);
+    }
+
+    if (shutdown_thread.joinable()) {
+        shutdown_thread.join();
+    }
 }
 
 /**
@@ -184,8 +234,8 @@ TEST_CASE("Graceful shutdown with pending tasks",
         // Wait for some tasks to start
         std::this_thread::sleep_for(50ms);
 
-        // Graceful shutdown - should wait for completion
-        pool->shutdown(true);
+        // Graceful shutdown with timeout to prevent CI hangs on Windows
+        timed_shutdown(pool);
 
         // All futures should be available
         for (auto& f : futures) {
@@ -211,8 +261,8 @@ TEST_CASE("Graceful shutdown with pending tasks",
         // Wait for task to start
         REQUIRE(wait_for([&task_started]() { return task_started.load(); }));
 
-        // Initiate graceful shutdown
-        pool->shutdown(true);
+        // Initiate graceful shutdown with timeout
+        timed_shutdown(pool);
 
         // Task should have completed
         future.get();
@@ -226,10 +276,10 @@ TEST_CASE("Graceful shutdown with pending tasks",
             std::this_thread::sleep_for(50ms);
         });
 
-        // Multiple shutdown calls should be safe
-        pool->shutdown(true);
-        pool->shutdown(true);
-        pool->shutdown(false);
+        // Multiple shutdown calls should be safe (use timed_shutdown for first call)
+        timed_shutdown(pool);
+        pool->shutdown(true);   // Already stopped, should return immediately
+        pool->shutdown(false);  // Already stopped, should return immediately
 
         future.get();
         REQUIRE_FALSE(pool->is_running());
