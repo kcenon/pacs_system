@@ -45,7 +45,7 @@ pool_manager::pool_manager()
     , dataset_pool_(DEFAULT_DATASET_POOL_SIZE) {}
 
 auto pool_manager::get() noexcept -> pool_manager& {
-    static pool_manager instance;
+    thread_local pool_manager instance;
     return instance;
 }
 
