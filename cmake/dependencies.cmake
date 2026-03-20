@@ -383,13 +383,13 @@ endif()
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(COMMON_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-# thread_system (REQUIRED for thread_adapter - Tier 1)
+# thread_system (REQUIRED for thread_pool_adapter - Tier 1)
 # NOTE: Must be added BEFORE logger_system to prevent FetchContent conflicts.
 # logger_system depends on thread_system and will fetch it via UnifiedDependencies
 # if targets don't exist. By adding thread_system first, we ensure the sibling
 # directory version is used with correct include paths.
 message(STATUS "")
-message(STATUS "=== Finding thread_system (REQUIRED for thread_adapter - Tier 1) ===")
+message(STATUS "=== Finding thread_system (REQUIRED for thread_pool_adapter - Tier 1) ===")
 
 set(_PACS_THREAD_PATHS
     "$ENV{THREAD_SYSTEM_ROOT}"
@@ -433,8 +433,8 @@ elseif(THREAD_SYSTEM_FOUND)
     add_subdirectory("${PACS_THREAD_SYSTEM_DIR}" "${CMAKE_BINARY_DIR}/thread_system_build")
 else()
     message(WARNING
-        "thread_system is REQUIRED for thread_adapter (Tier 1).\n"
-        "thread_adapter will be disabled.\n"
+        "thread_system is REQUIRED for thread_pool_adapter (Tier 1).\n"
+        "thread_pool_adapter will be disabled.\n"
         "Please ensure thread_system is available at:\n"
         "  - ../thread_system\n"
         "  - Set THREAD_SYSTEM_ROOT environment variable")

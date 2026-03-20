@@ -62,16 +62,6 @@ namespace kcenon::pacs::core {
 class dicom_dataset;
 
 /**
- * @brief Exception thrown when value conversion fails
- * @deprecated Use Result<T> pattern instead. Error codes are in kcenon::pacs::error_codes.
- */
-class [[deprecated("Use Result<T> pattern instead")]] value_conversion_error
-    : public std::runtime_error {
-public:
-    using std::runtime_error::runtime_error;
-};
-
-/**
  * @brief Represents a DICOM Data Element (Tag, VR, Value)
  *
  * A DICOM element is the fundamental unit of data in DICOM. It consists of:

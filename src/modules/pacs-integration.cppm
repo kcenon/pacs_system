@@ -8,7 +8,6 @@
  *
  * This module partition exports integration-related types:
  * - logger_adapter: Logging framework integration
- * - thread_adapter: Thread utilities
  * - thread_pool_adapter: Thread pool wrapper
  * - executor_adapter: Executor pattern
  * - network_adapter: Network integration
@@ -36,7 +35,6 @@ module;
 
 // PACS integration headers
 #include <pacs/integration/logger_adapter.hpp>
-#include <pacs/integration/thread_adapter.hpp>
 #include <pacs/integration/thread_pool_adapter.hpp>
 #include <pacs/integration/executor_adapter.hpp>
 #include <pacs/integration/network_adapter.hpp>
@@ -54,7 +52,6 @@ export namespace pacs::integration {
 
 // Adapters
 using pacs::integration::logger_adapter;
-using pacs::integration::thread_adapter;
 using pacs::integration::thread_pool_adapter;
 using pacs::integration::thread_pool_interface;
 using pacs::integration::executor_adapter;

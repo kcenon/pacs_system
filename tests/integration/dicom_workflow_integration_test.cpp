@@ -6,28 +6,15 @@
  * Store-and-Forward workflows involving network_system, thread_system,
  * and logger_system interactions.
  *
- * @note This file uses the deprecated thread_adapter API for backward
- *       compatibility testing. New tests should use thread_pool_adapter.
+ * Uses thread_pool_adapter with dependency injection pattern.
  *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #391 - DICOM Store-and-Forward integration test
  */
 
-// Suppress deprecation warnings for testing the deprecated API
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif
-
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/network_adapter.hpp>
-#include <pacs/integration/thread_adapter.hpp>
+#include <pacs/integration/thread_pool_adapter.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -69,13 +56,18 @@ auto current_process_id() -> unsigned long long {
  */
 struct cross_system_guard {
     std::filesystem::path log_dir;
+    std::shared_ptr<thread_pool_adapter> pool;
 
-    explicit cross_system_guard(const std::filesystem::path& dir) : log_dir(dir) {
+    cross_system_guard(const std::filesystem::path& dir,
+                       std::shared_ptr<thread_pool_adapter> p)
+        : log_dir(dir), pool(std::move(p)) {
         std::filesystem::create_directories(log_dir);
     }
 
     ~cross_system_guard() {
-        thread_adapter::shutdown(true);
+        if (pool) {
+            pool->shutdown(true);
+        }
         logger_adapter::shutdown();
         std::this_thread::sleep_for(50ms);
         std::error_code ec;
@@ -154,7 +146,6 @@ auto simulate_c_store_processing(const std::string& sop_uid) -> store_result {
 TEST_CASE("DICOM store workflow with thread pool and logging",
           "[integration][workflow][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    cross_system_guard guard(temp_dir);
 
     // Initialize logger
     logger_config log_config;
@@ -170,59 +161,63 @@ TEST_CASE("DICOM store workflow with thread pool and logging",
     thread_config.min_threads = 2;
     thread_config.max_threads = 4;
     thread_config.pool_name = "dicom_workflow_test";
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    cross_system_guard guard(temp_dir, pool);
 
     SECTION("Single C-STORE with logging") {
-        REQUIRE(thread_adapter::start());
-        REQUIRE(thread_adapter::is_running());
+        REQUIRE(pool->start());
+        REQUIRE(pool->is_running());
 
         std::atomic<bool> store_completed{false};
+        store_result task_result{};
 
-        auto future = thread_adapter::submit([&store_completed]() {
-            auto result = simulate_c_store_processing("1.2.3.4.5.6.7.8.9");
+        auto future = pool->submit([&store_completed, &task_result]() {
+            task_result = simulate_c_store_processing("1.2.3.4.5.6.7.8.9");
 
             logger_adapter::log_c_store_received(
                 "TEST_MODALITY", "PATIENT001", "1.2.3.4",
-                result.sop_instance_uid, result.status);
+                task_result.sop_instance_uid, task_result.status);
 
             store_completed = true;
-            return result;
         });
 
-        auto result = future.get();
-        REQUIRE(result.status == storage_status::success);
+        future.get();
+        REQUIRE(task_result.status == storage_status::success);
         REQUIRE(store_completed);
 
         logger_adapter::flush();
     }
 
     SECTION("Multiple concurrent C-STORE operations") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int store_count = 20;
         std::atomic<int> completed_count{0};
-        std::vector<std::future<store_result>> futures;
+        std::vector<store_result> results(store_count);
+        std::vector<std::future<void>> futures;
         futures.reserve(store_count);
 
         for (int i = 0; i < store_count; ++i) {
-            futures.push_back(thread_adapter::submit([i, &completed_count]() {
+            futures.push_back(pool->submit([i, &completed_count, &results]() {
                 std::string sop_uid = "1.2.3.4.5." + std::to_string(i);
-                auto result = simulate_c_store_processing(sop_uid);
+                results[i] = simulate_c_store_processing(sop_uid);
 
                 logger_adapter::log_c_store_received(
                     "MODALITY_" + std::to_string(i % 4),
                     "PATIENT" + std::to_string(i),
                     "1.2.3.4." + std::to_string(i),
-                    result.sop_instance_uid, result.status);
+                    results[i].sop_instance_uid, results[i].status);
 
                 completed_count++;
-                return result;
             }));
         }
 
         for (auto& future : futures) {
-            auto result = future.get();
-            REQUIRE(result.status == storage_status::success);
+            future.get();
+        }
+
+        for (int i = 0; i < store_count; ++i) {
+            REQUIRE(results[i].status == storage_status::success);
         }
 
         REQUIRE(completed_count == store_count);
@@ -230,35 +225,33 @@ TEST_CASE("DICOM store workflow with thread pool and logging",
     }
 
     SECTION("C-STORE with priority scheduling") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::vector<int> completion_order;
         std::mutex order_mutex;
         std::latch start_latch(1);
 
         // Submit low priority tasks first
-        std::vector<std::future<int>> low_futures;
+        std::vector<std::future<void>> low_futures;
         for (int i = 0; i < 3; ++i) {
-            low_futures.push_back(thread_adapter::submit_with_priority(
+            low_futures.push_back(pool->submit_with_priority(
                 job_priority::low,
                 [i, &completion_order, &order_mutex, &start_latch]() {
                     start_latch.wait();
                     std::this_thread::sleep_for(5ms);
                     std::lock_guard lock(order_mutex);
                     completion_order.push_back(i + 100);  // Low priority IDs
-                    return i + 100;
                 }));
         }
 
         // Submit high priority task
-        auto high_future = thread_adapter::submit_with_priority(
+        auto high_future = pool->submit_with_priority(
             job_priority::high,
             [&completion_order, &order_mutex, &start_latch]() {
                 start_latch.wait();
                 std::this_thread::sleep_for(5ms);
                 std::lock_guard lock(order_mutex);
                 completion_order.push_back(1);  // High priority ID
-                return 1;
             });
 
         // Release all tasks
@@ -281,7 +274,6 @@ TEST_CASE("DICOM store workflow with thread pool and logging",
 TEST_CASE("Association lifecycle with audit logging",
           "[integration][association][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    cross_system_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -292,12 +284,13 @@ TEST_CASE("Association lifecycle with audit logging",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 2;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    cross_system_guard guard(temp_dir, pool);
 
     SECTION("Association established and released with logging") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() {
+        auto future = pool->submit([]() {
             // Simulate association establishment
             logger_adapter::log_association_established(
                 "REMOTE_AE", "LOCAL_SCP", "192.168.1.100");
@@ -310,11 +303,9 @@ TEST_CASE("Association lifecycle with audit logging",
 
             // Simulate association release
             logger_adapter::log_association_released("REMOTE_AE", "LOCAL_SCP");
-
-            return true;
         });
 
-        REQUIRE(future.get());
+        future.get();
         logger_adapter::flush();
 
         // Verify audit log exists
@@ -325,7 +316,7 @@ TEST_CASE("Association lifecycle with audit logging",
     }
 
     SECTION("Multiple concurrent associations") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int association_count = 5;
         std::atomic<int> established_count{0};
@@ -333,7 +324,7 @@ TEST_CASE("Association lifecycle with audit logging",
 
         std::vector<std::future<void>> futures;
         for (int i = 0; i < association_count; ++i) {
-            futures.push_back(thread_adapter::submit(
+            futures.push_back(pool->submit(
                 [i, &established_count, &released_count]() {
                     std::string remote_ae = "MODALITY_" + std::to_string(i);
                     std::string remote_ip = "192.168.1." + std::to_string(100 + i);
@@ -367,7 +358,6 @@ TEST_CASE("Association lifecycle with audit logging",
 TEST_CASE("C-MOVE workflow with thread pool",
           "[integration][cmove][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    cross_system_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -378,20 +368,21 @@ TEST_CASE("C-MOVE workflow with thread pool",
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
     thread_config.max_threads = 8;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    cross_system_guard guard(temp_dir, pool);
 
     SECTION("C-MOVE with sub-operations") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> sub_operations_completed{0};
         constexpr int instance_count = 10;
 
         // Simulate C-MOVE that triggers multiple C-STORE sub-operations
-        auto move_future = thread_adapter::submit([&sub_operations_completed]() {
+        auto move_future = pool->submit([&pool, &sub_operations_completed]() {
             std::vector<std::future<void>> store_futures;
 
             for (int i = 0; i < instance_count; ++i) {
-                store_futures.push_back(thread_adapter::submit(
+                store_futures.push_back(pool->submit(
                     [&sub_operations_completed]() {
                         // Simulate C-STORE sub-operation
                         std::this_thread::sleep_for(5ms);
@@ -403,12 +394,10 @@ TEST_CASE("C-MOVE workflow with thread pool",
             for (auto& f : store_futures) {
                 f.get();
             }
-
-            return sub_operations_completed.load();
         });
 
-        auto result = move_future.get();
-        REQUIRE(result == instance_count);
+        move_future.get();
+        REQUIRE(sub_operations_completed == instance_count);
 
         logger_adapter::log_c_move_executed(
             "REQUESTING_AE", "DESTINATION_AE", "1.2.3.4.5",
@@ -425,7 +414,6 @@ TEST_CASE("C-MOVE workflow with thread pool",
 TEST_CASE("Thread pool statistics during DICOM workflow",
           "[integration][stats][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    cross_system_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -435,14 +423,15 @@ TEST_CASE("Thread pool statistics during DICOM workflow",
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
     thread_config.max_threads = 8;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    cross_system_guard guard(temp_dir, pool);
 
     SECTION("Statistics reflect workload") {
-        REQUIRE(thread_adapter::start());
-        REQUIRE(wait_for([]() { return thread_adapter::get_thread_count() >= 4; }));
+        REQUIRE(pool->start());
+        REQUIRE(wait_for([&pool]() { return pool->get_thread_count() >= 4; }));
 
         // Record initial state
-        auto initial_threads = thread_adapter::get_thread_count();
+        auto initial_threads = pool->get_thread_count();
         REQUIRE(initial_threads >= 4);
 
         // Submit many blocking tasks
@@ -451,7 +440,7 @@ TEST_CASE("Thread pool statistics during DICOM workflow",
         std::vector<std::future<void>> futures;
 
         for (int i = 0; i < 20; ++i) {
-            futures.push_back(thread_adapter::submit([&block_latch, &running_count]() {
+            futures.push_back(pool->submit([&block_latch, &running_count]() {
                 running_count++;
                 block_latch.wait();
             }));
@@ -462,8 +451,8 @@ TEST_CASE("Thread pool statistics during DICOM workflow",
             return running_count.load() >= 4;  // At least min_threads running
         }));
 
-        // Check pending jobs - verify thread pool is active
-        [[maybe_unused]] auto pending = thread_adapter::get_pending_job_count();
+        // Check pending tasks - verify thread pool is active
+        [[maybe_unused]] auto pending = pool->get_pending_task_count();
         // Some tasks should be pending since we submitted more than thread count
 
         // Release tasks
@@ -478,12 +467,3 @@ TEST_CASE("Thread pool statistics during DICOM workflow",
         logger_adapter::flush();
     }
 }
-
-// Restore warning settings
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif

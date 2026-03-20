@@ -144,12 +144,6 @@ auto get_evp_md(signature_algorithm algo) -> const EVP_MD* {
  */
 auto get_mac_evp_md(mac_algorithm algo) -> const EVP_MD* {
     switch (algo) {
-        case mac_algorithm::ripemd160:
-            return EVP_ripemd160();
-        case mac_algorithm::sha1:
-            return EVP_sha1();
-        case mac_algorithm::md5:
-            return EVP_md5();
         case mac_algorithm::sha256:
             return EVP_sha256();
         case mac_algorithm::sha384:

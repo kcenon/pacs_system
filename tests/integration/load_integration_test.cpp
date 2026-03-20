@@ -6,27 +6,12 @@
  * under high load conditions including concurrent associations, thread
  * pool saturation, and connection pool management.
  *
- * @note This file uses the deprecated thread_adapter API for backward
- *       compatibility testing.
- *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #393 - High Load Concurrent Associations integration test
  */
 
-// Suppress deprecation warnings for testing the deprecated API
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif
-
 #include <pacs/integration/logger_adapter.hpp>
-#include <pacs/integration/thread_adapter.hpp>
+#include <pacs/integration/thread_pool_adapter.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -71,13 +56,18 @@ auto current_process_id() -> unsigned long long {
  */
 struct load_test_guard {
     std::filesystem::path log_dir;
+    std::shared_ptr<thread_pool_adapter> pool;
 
-    explicit load_test_guard(const std::filesystem::path& dir) : log_dir(dir) {
+    load_test_guard(const std::filesystem::path& dir,
+                    std::shared_ptr<thread_pool_adapter> p)
+        : log_dir(dir), pool(std::move(p)) {
         std::filesystem::create_directories(log_dir);
     }
 
     ~load_test_guard() {
-        thread_adapter::shutdown(true);
+        if (pool) {
+            pool->shutdown(true);
+        }
         logger_adapter::shutdown();
         std::this_thread::sleep_for(100ms);  // Extra time for high-load cleanup
         std::error_code ec;
@@ -190,7 +180,6 @@ private:
 TEST_CASE("High load concurrent task execution",
           "[integration][load][concurrent][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    load_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -204,44 +193,45 @@ TEST_CASE("High load concurrent task execution",
     thread_config.min_threads = std::thread::hardware_concurrency();
     thread_config.max_threads = std::thread::hardware_concurrency() * 2;
     thread_config.pool_name = "load_test_pool";
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+
+    load_test_guard guard(temp_dir, pool);
 
     SECTION("100 concurrent tasks complete successfully") {
-        REQUIRE(thread_adapter::start());
-        REQUIRE(wait_for([]() { return thread_adapter::is_running(); }));
+        REQUIRE(pool->start());
+        REQUIRE(wait_for([&pool]() { return pool->is_running(); }));
 
         constexpr int task_count = 100;
         std::atomic<int> completed{0};
-        std::vector<std::future<int>> futures;
+        std::vector<std::future<void>> futures;
         futures.reserve(task_count);
 
         for (int i = 0; i < task_count; ++i) {
-            futures.push_back(thread_adapter::submit([i, &completed]() {
+            futures.push_back(pool->submit([i, &completed]() {
                 // Simulate variable workload
                 std::this_thread::sleep_for(
                     std::chrono::microseconds(50 + (i % 100)));
                 completed++;
-                return i;
             }));
         }
 
         // Wait for all futures
-        for (int i = 0; i < task_count; ++i) {
-            REQUIRE(futures[i].get() == i);
+        for (auto& f : futures) {
+            f.get();
         }
 
         REQUIRE(completed == task_count);
     }
 
     SECTION("Concurrent logging under load") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int task_count = 100;
         std::atomic<int> logged{0};
         std::vector<std::future<void>> futures;
 
         for (int i = 0; i < task_count; ++i) {
-            futures.push_back(thread_adapter::submit([i, &logged]() {
+            futures.push_back(pool->submit([i, &logged]() {
                 logger_adapter::info("Task {} executing", i);
                 logger_adapter::log_c_find_executed(
                     "LOAD_TEST_AE", query_level::study, static_cast<std::size_t>(i));
@@ -265,7 +255,6 @@ TEST_CASE("High load concurrent task execution",
 TEST_CASE("Thread pool saturation and queuing",
           "[integration][load][saturation][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    load_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -273,16 +262,16 @@ TEST_CASE("Thread pool saturation and queuing",
     logger_adapter::initialize(log_config);
 
     // Configure small pool to force saturation
-    // Use same min/max to ensure all threads are started immediately
-    // This prevents timeout on Windows where thread creation can be slow
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
     thread_config.max_threads = 4;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+
+    load_test_guard guard(temp_dir, pool);
 
     SECTION("Tasks queue when pool is saturated") {
-        REQUIRE(thread_adapter::start());
-        REQUIRE(wait_for([]() { return thread_adapter::get_thread_count() >= 4; }, 15000ms));
+        REQUIRE(pool->start());
+        REQUIRE(wait_for([&pool]() { return pool->get_thread_count() >= 4; }, 15000ms));
 
         concurrent_counter active_tasks;
         std::atomic<bool> release_flag{false};
@@ -293,7 +282,7 @@ TEST_CASE("Thread pool saturation and queuing",
         std::vector<std::future<void>> futures;
 
         for (int i = 0; i < task_count; ++i) {
-            futures.push_back(thread_adapter::submit(
+            futures.push_back(pool->submit(
                 [&active_tasks, &release_flag, &completed]() {
                     active_tasks.increment();
                     // Use atomic flag with polling instead of latch for safer cleanup
@@ -328,7 +317,7 @@ TEST_CASE("Thread pool saturation and queuing",
     }
 
     SECTION("Priority tasks execute under load") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<bool> release_flag{false};
         std::atomic<int> low_priority_started{0};
@@ -337,7 +326,7 @@ TEST_CASE("Thread pool saturation and queuing",
         // Fill pool with low priority blocking tasks (use fewer tasks)
         std::vector<std::future<void>> low_futures;
         for (int i = 0; i < 6; ++i) {
-            low_futures.push_back(thread_adapter::submit_with_priority(
+            low_futures.push_back(pool->submit_with_priority(
                 job_priority::low,
                 [&release_flag, &low_priority_started]() {
                     low_priority_started++;
@@ -354,18 +343,17 @@ TEST_CASE("Thread pool saturation and queuing",
         }, 10000ms));
 
         // Submit high priority task
-        auto high_future = thread_adapter::submit_with_priority(
+        auto high_future = pool->submit_with_priority(
             job_priority::critical,
             [&high_priority_completed]() {
                 high_priority_completed++;
-                return true;
             });
 
         // Release blocked tasks first, then wait for high priority
         release_flag.store(true);
 
         // High priority should complete
-        REQUIRE(high_future.get());
+        high_future.get();
         REQUIRE(high_priority_completed == 1);
 
         // Cleanup
@@ -382,7 +370,6 @@ TEST_CASE("Thread pool saturation and queuing",
 TEST_CASE("Simulated concurrent associations",
           "[integration][load][associations][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    load_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -393,21 +380,23 @@ TEST_CASE("Simulated concurrent associations",
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
     thread_config.max_threads = 16;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+
+    load_test_guard guard(temp_dir, pool);
 
     SECTION("50 concurrent simulated associations") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int association_count = 50;
         constexpr int operations_per_association = 10;
 
         std::atomic<int> associations_completed{0};
         std::atomic<int> total_operations{0};
-        std::vector<std::future<int>> futures;
+        std::vector<std::future<void>> futures;
         futures.reserve(association_count);
 
         for (int i = 0; i < association_count; ++i) {
-            futures.push_back(thread_adapter::submit(
+            futures.push_back(pool->submit(
                 [i, &associations_completed, &total_operations]() {
                     simulated_association assoc(i);
 
@@ -427,7 +416,6 @@ TEST_CASE("Simulated concurrent associations",
 
                     assoc.release();
                     associations_completed++;
-                    return assoc.id();
                 }));
         }
 
@@ -449,7 +437,6 @@ TEST_CASE("Simulated concurrent associations",
 TEST_CASE("Stress test: rapid task submission",
           "[integration][load][stress][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    load_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -459,10 +446,12 @@ TEST_CASE("Stress test: rapid task submission",
     thread_pool_config thread_config;
     thread_config.min_threads = std::thread::hardware_concurrency();
     thread_config.max_threads = std::thread::hardware_concurrency() * 2;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+
+    load_test_guard guard(temp_dir, pool);
 
     SECTION("Rapid fire-and-forget submissions") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int submission_count = 500;
         std::atomic<int> executed{0};
@@ -470,7 +459,7 @@ TEST_CASE("Stress test: rapid task submission",
         auto start_time = std::chrono::steady_clock::now();
 
         for (int i = 0; i < submission_count; ++i) {
-            thread_adapter::submit_fire_and_forget([&executed]() {
+            pool->submit_fire_and_forget([&executed]() {
                 executed++;
             });
         }
@@ -494,11 +483,11 @@ TEST_CASE("Stress test: rapid task submission",
     }
 
     SECTION("Mixed workload stress test") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int total_tasks = 200;
         std::atomic<int> completed{0};
-        std::vector<std::future<int>> futures;
+        std::vector<std::future<void>> futures;
 
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -507,12 +496,11 @@ TEST_CASE("Stress test: rapid task submission",
         for (int i = 0; i < total_tasks; ++i) {
             int work_units = work_dist(gen);
 
-            futures.push_back(thread_adapter::submit([i, work_units, &completed]() {
+            futures.push_back(pool->submit([work_units, &completed]() {
                 // Variable workload
                 std::this_thread::sleep_for(
                     std::chrono::microseconds(work_units));
                 completed++;
-                return i;
             }));
         }
 
@@ -532,7 +520,6 @@ TEST_CASE("Stress test: rapid task submission",
 TEST_CASE("No deadlocks under concurrent access",
           "[integration][load][deadlock][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    load_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -542,10 +529,12 @@ TEST_CASE("No deadlocks under concurrent access",
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
     thread_config.max_threads = 8;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+
+    load_test_guard guard(temp_dir, pool);
 
     SECTION("Nested task submission does not deadlock") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         // Use fewer outer tasks than min_threads to ensure threads are
         // available for inner tasks. This prevents deadlock where all
@@ -554,27 +543,24 @@ TEST_CASE("No deadlocks under concurrent access",
         constexpr int inner_count = 5;
         std::atomic<int> total_completed{0};
 
-        std::vector<std::future<int>> outer_futures;
+        std::vector<std::future<void>> outer_futures;
 
         for (int i = 0; i < outer_count; ++i) {
-            outer_futures.push_back(thread_adapter::submit(
-                [i, &total_completed]() {
-                    std::vector<std::future<int>> inner_futures;
+            outer_futures.push_back(pool->submit(
+                [i, &total_completed, &pool]() {
+                    std::vector<std::future<void>> inner_futures;
 
                     for (int j = 0; j < inner_count; ++j) {
-                        inner_futures.push_back(thread_adapter::submit(
-                            [i, j, &total_completed]() {
+                        inner_futures.push_back(pool->submit(
+                            [&total_completed]() {
                                 std::this_thread::sleep_for(1ms);
                                 total_completed++;
-                                return i * 100 + j;
                             }));
                     }
 
-                    int sum = 0;
                     for (auto& f : inner_futures) {
-                        sum += f.get();
+                        f.get();
                     }
-                    return sum;
                 }));
         }
 
@@ -587,18 +573,16 @@ TEST_CASE("No deadlocks under concurrent access",
     }
 
     SECTION("Concurrent statistics queries do not deadlock") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<bool> stop{false};
         std::atomic<int> query_count{0};
         std::atomic<int> tasks_completed{0};
 
-        // Background tasks - limit to min_threads to ensure all tasks start immediately
-        // On Windows, thread pool may only have min_threads initially
-        // Use fire_and_forget to avoid future.get() blocking
+        // Background tasks
         const int background_task_count = static_cast<int>(thread_config.min_threads);
         for (int i = 0; i < background_task_count; ++i) {
-            thread_adapter::submit_fire_and_forget([&stop, &tasks_completed]() {
+            pool->submit_fire_and_forget([&stop, &tasks_completed]() {
                 while (!stop.load()) {
                     std::this_thread::sleep_for(1ms);
                 }
@@ -609,11 +593,11 @@ TEST_CASE("No deadlocks under concurrent access",
         // Query statistics from multiple threads
         std::vector<std::thread> query_threads;
         for (int i = 0; i < 4; ++i) {
-            query_threads.emplace_back([&stop, &query_count]() {
+            query_threads.emplace_back([&stop, &query_count, &pool]() {
                 while (!stop.load()) {
-                    [[maybe_unused]] auto threads = thread_adapter::get_thread_count();
-                    [[maybe_unused]] auto pending = thread_adapter::get_pending_job_count();
-                    [[maybe_unused]] auto idle = thread_adapter::get_idle_worker_count();
+                    [[maybe_unused]] auto threads = pool->get_thread_count();
+                    [[maybe_unused]] auto pending = pool->get_pending_task_count();
+                    [[maybe_unused]] auto idle = pool->get_idle_worker_count();
                     query_count++;
                     std::this_thread::sleep_for(1ms);
                 }
@@ -645,7 +629,6 @@ TEST_CASE("No deadlocks under concurrent access",
 TEST_CASE("Memory stability under load",
           "[integration][load][memory][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    load_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -654,28 +637,32 @@ TEST_CASE("Memory stability under load",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+
+    load_test_guard guard(temp_dir, pool);
 
     SECTION("Repeated task cycles without memory growth") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         constexpr int cycles = 5;
         constexpr int tasks_per_cycle = 100;
 
         for (int cycle = 0; cycle < cycles; ++cycle) {
-            std::vector<std::future<std::vector<char>>> futures;
+            std::vector<std::future<void>> futures;
 
             for (int i = 0; i < tasks_per_cycle; ++i) {
-                futures.push_back(thread_adapter::submit([]() {
+                futures.push_back(pool->submit([]() {
                     // Allocate and deallocate memory
                     std::vector<char> data(1024, 'x');
-                    return data;
+                    // Use the data to prevent optimization
+                    if (data.size() != 1024) {
+                        throw std::runtime_error("unexpected size");
+                    }
                 }));
             }
 
             for (auto& f : futures) {
-                auto data = f.get();
-                REQUIRE(data.size() == 1024);
+                f.get();
             }
         }
 
@@ -683,12 +670,3 @@ TEST_CASE("Memory stability under load",
         REQUIRE(true);
     }
 }
-
-// Restore warning settings
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif

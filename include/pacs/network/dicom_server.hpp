@@ -296,7 +296,7 @@ private:
         time_point last_activity;
         std::string remote_address;
         /// Flag indicating if message loop is currently processing
-        /// (replaces std::thread worker_thread - now using thread_adapter pool)
+        /// (replaces std::thread worker_thread - now using thread_pool_adapter)
         /// Note: Protected by associations_mutex_ since std::atomic is not movable
         bool processing{false};
         /// Cancellation token for cooperative shutdown

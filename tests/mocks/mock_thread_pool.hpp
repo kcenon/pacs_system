@@ -11,7 +11,6 @@
 #pragma once
 
 #include <pacs/integration/thread_pool_interface.hpp>
-#include <pacs/integration/thread_adapter.hpp>  // for job_priority
 
 #include <atomic>
 #include <chrono>

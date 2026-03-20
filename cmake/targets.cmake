@@ -862,7 +862,6 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     set(PACS_INTEGRATION_SOURCES
         src/integration/container_adapter.cpp
         src/integration/logger_adapter.cpp
-        src/integration/thread_adapter.cpp
         src/integration/thread_pool_adapter.cpp
         src/integration/executor_adapter.cpp
         src/integration/network_adapter.cpp
@@ -909,7 +908,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
         message(WARNING "    - logger_adapter: OFF (LoggerSystem target not found)")
     endif()
 
-    # Link thread_system (REQUIRED for thread_adapter)
+    # Link thread_system (REQUIRED for thread_pool_adapter)
     # thread_system creates 'thread_base' as main target (legacy build) or 'ThreadSystem' (new build)
     if(TARGET ThreadSystem)
         pacs_link_external_dependency(
@@ -919,7 +918,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
             ThreadSystem::thread_base
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
-        message(STATUS "    - thread_adapter: ON (ThreadSystem)")
+        message(STATUS "    - thread_pool_adapter: ON (ThreadSystem)")
     elseif(TARGET thread_base)
         pacs_link_external_dependency(
             pacs_integration
@@ -928,7 +927,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
             ThreadSystem::thread_base
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
-        message(STATUS "    - thread_adapter: ON (thread_base)")
+        message(STATUS "    - thread_pool_adapter: ON (thread_base)")
     elseif(PACS_THREAD_SYSTEM_INCLUDE_DIR)
         # Fallback: include headers only (will fail at link time)
         pacs_link_external_dependency(
@@ -938,9 +937,9 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
             ThreadSystem::thread_base
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
-        message(WARNING "    - thread_adapter: ON (headers only - linking may fail)")
+        message(WARNING "    - thread_pool_adapter: ON (headers only - linking may fail)")
     else()
-        message(WARNING "    - thread_adapter: OFF (ThreadSystem/thread_base target not found)")
+        message(WARNING "    - thread_pool_adapter: OFF (ThreadSystem/thread_base target not found)")
     endif()
 
     # CRITICAL: Inherit thread_system compile definitions for ABI compatibility
@@ -1009,14 +1008,14 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
 
     message(STATUS "  [OK] pacs_integration: ON (container_system, logger_system, thread_system, network_system, monitoring_system)")
 
-    # CRITICAL: Link pacs_integration to pacs_network for thread_adapter usage in dicom_server.
-    # dicom_server.cpp uses thread_adapter::submit_fire_and_forget() for association worker threads.
+    # CRITICAL: Link pacs_integration to pacs_network for thread_pool_adapter usage in dicom_server.
+    # dicom_server.cpp uses thread_pool_adapter for association worker threads.
     # This creates a circular dependency (pacs_integration -> pacs_network -> pacs_integration)
     # but CMake handles this correctly for static libraries by passing libraries multiple times
     # to the linker. Using PUBLIC so that targets linking pacs_network also get pacs_integration
     # (required because static libraries don't actually link - symbols are resolved at final link).
     target_link_libraries(pacs_network PUBLIC pacs_integration)
-    message(STATUS "    - pacs_network: linked pacs_integration for thread_adapter")
+    message(STATUS "    - pacs_network: linked pacs_integration for thread_pool_adapter")
 
     # Link pacs_integration to pacs_ai for ai_service_connector (Issue #205)
     # ai_service_connector uses logger_adapter and monitoring_adapter
@@ -1026,7 +1025,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 
     # Link pacs_integration to pacs_workflow for auto_prefetch_service (Issue #206)
-    # auto_prefetch_service uses logger_adapter, monitoring_adapter, and thread_adapter
+    # auto_prefetch_service uses logger_adapter, monitoring_adapter, and thread_pool_adapter
     if(TARGET pacs_workflow)
         target_link_libraries(pacs_workflow PUBLIC pacs_integration)
         message(STATUS "    - pacs_workflow: linked pacs_integration for auto_prefetch_service")
