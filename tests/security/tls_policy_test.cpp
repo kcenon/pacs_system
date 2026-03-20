@@ -60,7 +60,7 @@ TEST_CASE("tls_policy BCP 195 basic profile", "[security][tls]") {
     SECTION("Profile properties") {
         CHECK(policy.profile() == tls_profile::bcp195_basic);
         CHECK(policy.profile_name() == "BCP195-Basic");
-        CHECK_FALSE(policy.non_downgrading());
+        CHECK(policy.non_downgrading());
     }
 
     SECTION("Protocol version requirements") {
@@ -203,7 +203,7 @@ TEST_CASE("tls_policy from_profile", "[security][tls]") {
     SECTION("Basic profile") {
         auto policy = tls_policy::from_profile(tls_profile::bcp195_basic);
         CHECK(policy.profile() == tls_profile::bcp195_basic);
-        CHECK_FALSE(policy.non_downgrading());
+        CHECK(policy.non_downgrading());
     }
 
     SECTION("Non-downgrading profile") {
