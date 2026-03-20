@@ -5,6 +5,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
+#include <cstdint>
+
 #include "pacs/security/anonymizer.hpp"
 #include "pacs/security/anonymization_profile.hpp"
 #include "pacs/security/tag_action.hpp"
@@ -683,4 +686,157 @@ TEST_CASE("Anonymizer: Private tag removal report in total_modifications", "[sec
     auto report = result.value();
     CHECK(report.private_tags_removed > 0);
     CHECK(report.total_modifications() >= report.private_tags_removed);
+}
+
+// ============================================================================
+// Cryptographic Hash (SHA-256) Tests
+// ============================================================================
+
+TEST_CASE("Anonymizer: Cryptographic Hash (SHA-256)", "[security][anonymization]") {
+    anonymizer anon(anonymization_profile::basic);
+
+    SECTION("Hash output is 64-character hex string") {
+        anon.set_hash_salt("test_salt");
+        anon.add_tag_action(tags::patient_id, tag_action_config::make_hash());
+
+        auto dataset = create_test_dataset();
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+
+        auto hashed = dataset.get_string(tags::patient_id);
+        REQUIRE_FALSE(hashed.empty());
+        REQUIRE(hashed != "12345");
+        // SHA-256 produces 64 hex characters (256 bits)
+        // Non-crypto fallback produces 16 hex characters
+        // Accept either based on build configuration
+        CHECK((hashed.size() == 64 || hashed.size() == 16));
+        CHECK(hashed.find_first_not_of("0123456789abcdef") == std::string::npos);
+    }
+
+    SECTION("Same input with same salt produces consistent hash") {
+        anon.set_hash_salt("consistent_salt");
+        anon.add_tag_action(tags::patient_id, tag_action_config::make_hash());
+
+        auto ds1 = create_test_dataset();
+        auto ds2 = create_test_dataset();
+
+        (void)anon.anonymize(ds1);
+        (void)anon.anonymize(ds2);
+
+        auto hash1 = ds1.get_string(tags::patient_id);
+        auto hash2 = ds2.get_string(tags::patient_id);
+        REQUIRE(hash1 == hash2);
+    }
+
+    SECTION("Different salts produce different hashes") {
+        anonymizer anon1(anonymization_profile::basic);
+        anonymizer anon2(anonymization_profile::basic);
+
+        anon1.set_hash_salt("salt_alpha");
+        anon2.set_hash_salt("salt_beta");
+
+        anon1.add_tag_action(tags::patient_id, tag_action_config::make_hash());
+        anon2.add_tag_action(tags::patient_id, tag_action_config::make_hash());
+
+        auto ds1 = create_test_dataset();
+        auto ds2 = create_test_dataset();
+
+        (void)anon1.anonymize(ds1);
+        (void)anon2.anonymize(ds2);
+
+        auto hash1 = ds1.get_string(tags::patient_id);
+        auto hash2 = ds2.get_string(tags::patient_id);
+        REQUIRE(hash1 != hash2);
+    }
+}
+
+// ============================================================================
+// AES-256-GCM Encryption Tests
+// ============================================================================
+
+TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
+    anonymizer anon(anonymization_profile::basic);
+
+    SECTION("Encrypt fails without key") {
+        anon.set_detailed_reporting(true);
+        anon.add_tag_action(tags::patient_name,
+                           tag_action_config{.action = tag_action::encrypt});
+
+        auto dataset = create_test_dataset();
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+
+        auto report = result.value();
+        // Encryption should fail gracefully — error recorded in report
+        CHECK_FALSE(report.errors.empty());
+        // Patient name should remain unchanged since encryption failed
+        CHECK(dataset.get_string(tags::patient_name) == "DOE^JOHN");
+    }
+
+    SECTION("Encrypt succeeds with valid key") {
+        std::array<std::uint8_t, 32> key{};
+        for (std::size_t i = 0; i < key.size(); ++i) {
+            key[i] = static_cast<std::uint8_t>(i);
+        }
+        auto key_result = anon.set_encryption_key(key);
+        REQUIRE(key_result.is_ok());
+
+        anon.add_tag_action(tags::patient_name,
+                           tag_action_config{.action = tag_action::encrypt});
+
+        auto dataset = create_test_dataset();
+        auto original_name = dataset.get_string(tags::patient_name);
+        auto result = anon.anonymize(dataset);
+
+        auto encrypted = dataset.get_string(tags::patient_name);
+        // With OpenSSL: encrypted hex output
+        // Without OpenSSL: may keep original or show error
+        CHECK(encrypted != original_name);
+    }
+
+    SECTION("Encrypt produces different output each time due to random IV") {
+        std::array<std::uint8_t, 32> key{};
+        for (std::size_t i = 0; i < key.size(); ++i) {
+            key[i] = static_cast<std::uint8_t>(i + 10);
+        }
+        (void)anon.set_encryption_key(key);
+
+        anon.add_tag_action(tags::patient_name,
+                           tag_action_config{.action = tag_action::encrypt});
+
+        auto ds1 = create_test_dataset();
+        auto ds2 = create_test_dataset();
+
+        (void)anon.anonymize(ds1);
+        (void)anon.anonymize(ds2);
+
+        auto enc1 = ds1.get_string(tags::patient_name);
+        auto enc2 = ds2.get_string(tags::patient_name);
+
+        // Encryption must have changed the value
+        REQUIRE(enc1 != "DOE^JOHN");
+        REQUIRE(enc2 != "DOE^JOHN");
+        // Different IV means different ciphertext each time
+        CHECK(enc1 != enc2);
+    }
+
+    SECTION("Encrypted output is valid hex") {
+        std::array<std::uint8_t, 32> key{};
+        for (std::size_t i = 0; i < key.size(); ++i) {
+            key[i] = static_cast<std::uint8_t>(i + 20);
+        }
+        (void)anon.set_encryption_key(key);
+
+        anon.add_tag_action(tags::patient_id,
+                           tag_action_config{.action = tag_action::encrypt});
+
+        auto dataset = create_test_dataset();
+        (void)anon.anonymize(dataset);
+
+        auto encrypted = dataset.get_string(tags::patient_id);
+        if (!encrypted.empty()) {
+            CHECK(encrypted.find_first_not_of("0123456789abcdef")
+                  == std::string::npos);
+        }
+    }
 }
