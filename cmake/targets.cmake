@@ -8,6 +8,7 @@ add_library(pacs_core
     src/core/dicom_element.cpp
     src/core/dicom_dataset.cpp
     src/core/dicom_file.cpp
+    src/core/memory_mapped_file.cpp
     src/core/tag_info.cpp
     src/core/dicom_dictionary.cpp
     src/core/standard_tags_data.cpp
