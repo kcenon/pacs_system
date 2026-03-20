@@ -153,9 +153,6 @@ struct signature_info {
  * These identifiers are used in the MAC Algorithm (0400,0015) attribute.
  */
 enum class mac_algorithm {
-    ripemd160,      ///< RIPEMD-160 (legacy, not recommended)
-    sha1,           ///< SHA-1 (deprecated, avoid for new signatures)
-    md5,            ///< MD5 (deprecated, avoid for new signatures)
     sha256,         ///< SHA-256 (recommended)
     sha384,         ///< SHA-384
     sha512          ///< SHA-512
@@ -168,9 +165,6 @@ enum class mac_algorithm {
  */
 constexpr std::string_view to_dicom_uid(mac_algorithm algo) {
     switch (algo) {
-        case mac_algorithm::ripemd160: return "1.2.840.113549.2.5";
-        case mac_algorithm::sha1: return "1.3.14.3.2.26";
-        case mac_algorithm::md5: return "1.2.840.113549.2.5";
         case mac_algorithm::sha256: return "2.16.840.1.101.3.4.2.1";
         case mac_algorithm::sha384: return "2.16.840.1.101.3.4.2.2";
         case mac_algorithm::sha512: return "2.16.840.1.101.3.4.2.3";

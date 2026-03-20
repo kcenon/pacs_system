@@ -66,7 +66,7 @@ namespace kcenon::pacs::encoding::compression {
  * - Create separate instances per thread for concurrent operations
  *
  * Integration:
- * - Uses thread_system for parallel tile encoding (via thread_adapter)
+ * - Uses thread_system for parallel tile encoding (via thread_pool_adapter)
  * - Logs operations via logger_system (via logger_adapter)
  * - Reports metrics to monitoring_system (via monitoring_adapter)
  *

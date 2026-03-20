@@ -129,7 +129,7 @@ if(PACS_BUILD_TESTS)
             pacs_services
             Catch2::Catch2WithMain
     )
-    # Link pacs_integration for thread_adapter (used by dicom_server)
+    # Link pacs_integration for thread_pool_adapter (used by dicom_server)
     if(TARGET pacs_integration)
         target_link_libraries(network_tests PRIVATE pacs_integration)
     endif()
@@ -205,7 +205,7 @@ if(PACS_BUILD_TESTS)
             pacs_storage
             Catch2::Catch2WithMain
     )
-    # Link pacs_integration for thread_adapter (used by parallel_query_executor tests)
+    # Link pacs_integration for thread_pool_adapter (used by parallel_query_executor tests)
     if(TARGET pacs_integration)
         target_link_libraries(services_tests PRIVATE pacs_integration)
     endif()
@@ -373,7 +373,6 @@ if(PACS_BUILD_TESTS)
         add_executable(pacs_integration_tests
             tests/integration/container_adapter_test.cpp
             tests/integration/logger_adapter_test.cpp
-            tests/integration/thread_adapter_test.cpp
             tests/integration/thread_system_direct_test.cpp
             tests/integration/network_adapter_test.cpp
             tests/integration/monitoring_adapter_test.cpp

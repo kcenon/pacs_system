@@ -2,7 +2,7 @@
  * @file thread_system_direct_test.cpp
  * @brief Direct tests for thread_system to isolate ARM64 stability issues
  *
- * This file tests thread_system directly (without thread_adapter) to determine
+ * This file tests thread_system directly (without thread_pool_adapter) to determine
  * if stability issues are in thread_system itself or in pacs_system's usage.
  *
  * Related Issues:
@@ -11,7 +11,7 @@
  *
  * Test Patterns:
  * 1. Direct thread_pool usage (same as thread_system's own tests)
- * 2. Manual worker management (pattern used by thread_adapter)
+ * 2. Manual worker management (pattern used by thread_pool_adapter)
  * 3. Batch enqueue pattern (exact pattern that crashes)
  */
 
@@ -71,17 +71,17 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
 }
 
 // =============================================================================
-// Test 2: Manual worker management (thread_adapter pattern)
+// Test 2: Manual worker management (thread_pool_adapter pattern)
 // =============================================================================
 
-TEST_CASE("manual worker batch enqueue - thread_adapter pattern",
+TEST_CASE("manual worker batch enqueue - thread_pool_adapter pattern",
           "[thread_system][manual][batch][!mayfail]") {
     SECTION("Create pool then batch enqueue workers") {
-        // This is the exact pattern used by thread_adapter::start()
+        // This is the exact pattern used by thread_pool_adapter::start()
         kcenon::thread::thread_context context;
         auto pool = std::make_shared<kcenon::thread::thread_pool>("adapter_pattern_pool", context);
 
-        // Create workers manually (like thread_adapter does)
+        // Create workers manually (like thread_pool_adapter does)
         constexpr std::size_t worker_count = 4;
         std::vector<std::unique_ptr<kcenon::thread::thread_worker>> workers;
         workers.reserve(worker_count);
@@ -93,7 +93,7 @@ TEST_CASE("manual worker batch enqueue - thread_adapter pattern",
 
         INFO("Created " << workers.size() << " workers");
 
-        // Batch enqueue (this is where thread_adapter does enqueue_batch)
+        // Batch enqueue (this is where thread_pool_adapter does enqueue_batch)
         auto enqueue_result = pool->enqueue_batch(std::move(workers));
         INFO("enqueue_batch() result: " << (enqueue_result.is_err() ? "error" : "success"));
 

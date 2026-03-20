@@ -240,9 +240,6 @@ struct mg_acquisition_params {
     /// Compressed breast thickness in mm (0018,11A0)
     std::optional<double> compressed_breast_thickness_mm;
 
-    /// Body part thickness in mm (0018,11A0) - deprecated, use compressed_breast_thickness
-    std::optional<double> body_part_thickness_mm;
-
     /// Relative X-ray exposure (0018,1405)
     std::optional<double> relative_x_ray_exposure;
 

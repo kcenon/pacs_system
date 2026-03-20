@@ -161,7 +161,7 @@ public:
      * - For planar_configuration=1: separate planes (RRR...GGG...BBB...)
      *
      * @note This is a potentially expensive operation. Consider using
-     * thread_adapter for batch processing.
+     * thread_pool_adapter for batch processing.
      */
     [[nodiscard]] virtual codec_result encode(
         std::span<const uint8_t> pixel_data,
