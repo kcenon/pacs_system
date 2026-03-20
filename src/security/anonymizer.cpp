@@ -335,7 +335,7 @@ auto anonymizer::get_profile_actions(anonymization_profile profile)
         actions[tags::patient_id] = tag_action_config::make_replace("ANON_ID");
         actions[tags::patient_birth_date] = tag_action_config::make_empty();
         actions[tags::patient_sex] = tag_action_config::make_keep();
-        actions[tags::patient_age] = tag_action_config::make_keep();
+        actions[tags::patient_age] = tag_action_config::make_remove();
         actions[tags::patient_address] = tag_action_config::make_remove();
         actions[tags::patient_comments] = tag_action_config::make_remove();
     };

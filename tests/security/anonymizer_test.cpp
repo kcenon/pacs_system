@@ -91,6 +91,10 @@ TEST_CASE("Anonymizer: Basic Profile", "[security][anonymization]") {
         REQUIRE(dataset.get_string(tags::patient_sex) == "M");
     }
 
+    SECTION("Patient age is removed per HIPAA Safe Harbor") {
+        REQUIRE(dataset.get(tags::patient_age) == nullptr);
+    }
+
     SECTION("Institution name is emptied") {
         REQUIRE(dataset.get_string(tags::institution_name).empty());
     }
