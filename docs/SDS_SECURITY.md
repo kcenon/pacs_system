@@ -1452,4 +1452,48 @@ The following 18 categories of identifiers must be removed for HIPAA Safe Harbor
 
 ---
 
+## Appendix C: Related Core Components
+
+### Memory-Mapped File I/O (`memory_mapped_file`)
+
+**File:** `include/pacs/core/memory_mapped_file.hpp`, `src/core/memory_mapped_file.cpp`
+
+**Related Issue:** [#989](https://github.com/kcenon/pacs_system/issues/989)
+
+The `memory_mapped_file` class provides RAII-based, read-only memory-mapped access to DICOM files. While primarily a performance component, it has security implications:
+
+- **Read-only mapping**: Files are mapped with read-only permissions, preventing accidental modification of source data during anonymization or signature operations
+- **Zero-copy access**: Returns `std::span<const std::uint8_t>` for safe, bounds-checked access without data duplication
+- **Move-only semantics**: Prevents accidental resource sharing across threads
+
+| Property | Value |
+|----------|-------|
+| Platform | POSIX (`mmap`) / Windows (`CreateFileMapping`) |
+| Access mode | Read-only |
+| Lifetime | RAII — unmaps on destruction |
+| Thread safety | Instances are not shared; create per-thread |
+
+```cpp
+namespace kcenon::pacs::core {
+
+class memory_mapped_file {
+public:
+    [[nodiscard]] static auto open(const std::filesystem::path& path)
+        -> kcenon::pacs::Result<memory_mapped_file>;
+
+    [[nodiscard]] auto data() const noexcept -> const std::uint8_t*;
+    [[nodiscard]] auto size() const noexcept -> std::size_t;
+    [[nodiscard]] auto as_span() const noexcept -> std::span<const std::uint8_t>;
+
+    // Move-only
+    memory_mapped_file(memory_mapped_file&& other) noexcept;
+    auto operator=(memory_mapped_file&& other) noexcept -> memory_mapped_file&;
+    ~memory_mapped_file();
+};
+
+} // namespace kcenon::pacs::core
+```
+
+---
+
 *Document generated for Issue #469 - Security Module SDS*
