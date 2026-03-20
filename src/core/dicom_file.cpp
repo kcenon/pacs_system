@@ -35,6 +35,7 @@
 #include "pacs/core/dicom_file.hpp"
 
 #include "pacs/core/dicom_dictionary.hpp"
+#include "pacs/core/memory_mapped_file.hpp"
 #include "pacs/core/private_tag_registry.hpp"
 #include "pacs/encoding/compression/codec_factory.hpp"
 
@@ -172,6 +173,13 @@ dicom_file::dicom_file(dicom_dataset meta_info, dicom_dataset main_dataset)
 
 auto dicom_file::open(const std::filesystem::path& path)
     -> kcenon::pacs::Result<dicom_file> {
+    // Try memory-mapped I/O first for better performance
+    auto mmap_result = memory_mapped_file::open(path);
+    if (mmap_result.is_ok()) {
+        return from_bytes(mmap_result.value().as_span());
+    }
+
+    // Fall back to traditional file I/O
     auto contents = read_file_contents(path);
     if (contents.is_err()) {
         return kcenon::pacs::Result<dicom_file>::err(contents.error());
