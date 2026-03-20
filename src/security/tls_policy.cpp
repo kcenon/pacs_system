@@ -79,7 +79,7 @@ tls_policy tls_policy::bcp195_basic_profile() {
     return {tls_profile::bcp195_basic,
             kTls12Version,
             kTls13Version,
-            false,
+            true,
             {std::string(kTls13Required), std::string(kTls12Recommended)},
             {2048, 256, 5, true}};
 }
