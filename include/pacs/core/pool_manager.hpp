@@ -163,9 +163,9 @@ private:
 /**
  * @brief Centralized pool manager for DICOM objects
  *
- * Provides thread-safe access to object pools for common DICOM types.
- * Uses a singleton pattern for global access while allowing explicit
- * pool instances for testing.
+ * Provides lock-free access to object pools for common DICOM types.
+ * Uses a thread-local instance per thread to eliminate contention,
+ * with each thread maintaining its own independent pool.
  *
  * @example
  * @code
@@ -185,8 +185,8 @@ public:
     static constexpr std::size_t DEFAULT_DATASET_POOL_SIZE = 128;
 
     /**
-     * @brief Get the global pool manager instance
-     * @return Reference to the singleton instance
+     * @brief Get the thread-local pool manager instance
+     * @return Reference to the current thread's pool manager
      */
     static auto get() noexcept -> pool_manager&;
 
