@@ -47,12 +47,50 @@
 #include <cstddef>
 #include <functional>
 #include <future>
+#include <string>
+#include <thread>
 #include <type_traits>
 
 namespace kcenon::pacs::integration {
 
-// Forward declaration
-enum class job_priority;
+// ─────────────────────────────────────────────────────
+// Shared Types
+// ─────────────────────────────────────────────────────
+
+/**
+ * @enum job_priority
+ * @brief Priority levels for job scheduling
+ *
+ * Jobs with higher priority (lower numeric value) are processed first.
+ * This enables critical DICOM operations to be handled with urgency.
+ */
+enum class job_priority {
+    critical = 0,  ///< C-ECHO, association handling - highest priority
+    high = 1,      ///< C-STORE responses
+    normal = 2,    ///< C-FIND queries
+    low = 3        ///< Background tasks (cleanup, maintenance)
+};
+
+/**
+ * @struct thread_pool_config
+ * @brief Configuration options for the thread pool
+ */
+struct thread_pool_config {
+    /// Minimum number of worker threads
+    std::size_t min_threads = 2;
+
+    /// Maximum number of worker threads
+    std::size_t max_threads = std::thread::hardware_concurrency();
+
+    /// Time before idle threads are terminated (for dynamic scaling)
+    std::chrono::milliseconds idle_timeout{30000};
+
+    /// Enable lock-free queue for higher throughput
+    bool use_lock_free_queue = true;
+
+    /// Thread pool name for logging
+    std::string pool_name = "pacs_thread_pool";
+};
 
 /**
  * @brief Abstract interface for thread pool operations

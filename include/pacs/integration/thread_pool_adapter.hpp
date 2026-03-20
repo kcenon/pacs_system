@@ -44,14 +44,10 @@
 #pragma once
 
 #include <pacs/integration/thread_pool_interface.hpp>
-#include <pacs/integration/thread_adapter.hpp>  // for thread_pool_config, job_priority
 
-#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <mutex>
-#include <string>
-#include <thread>
 
 namespace kcenon::thread {
 class thread_pool;

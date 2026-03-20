@@ -35,7 +35,6 @@
  */
 
 #include <pacs/integration/thread_pool_adapter.hpp>
-#include <pacs/integration/thread_adapter.hpp>  // for thread_pool_config, job_priority
 
 #include <kcenon/thread/core/thread_pool.h>
 #include <kcenon/thread/core/thread_worker.h>

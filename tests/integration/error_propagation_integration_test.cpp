@@ -6,28 +6,15 @@
  * propagation and recovery patterns involving Result<T>, RAII cleanup,
  * and monitoring system interactions.
  *
- * @note This file uses the deprecated thread_adapter API for backward
- *       compatibility testing.
+ * Uses thread_pool_adapter with dependency injection pattern.
  *
  * Part of Issue #390 - Enhance cross-system integration tests
  * Addresses Issue #392 - Error Propagation Chain integration test
  */
 
-// Suppress deprecation warnings for testing the deprecated API
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif
-
 #include <pacs/integration/logger_adapter.hpp>
 #include <pacs/integration/network_adapter.hpp>
-#include <pacs/integration/thread_adapter.hpp>
+#include <pacs/integration/thread_pool_adapter.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -70,13 +57,18 @@ auto current_process_id() -> unsigned long long {
  */
 struct error_test_guard {
     std::filesystem::path log_dir;
+    std::shared_ptr<thread_pool_adapter> pool;
 
-    explicit error_test_guard(const std::filesystem::path& dir) : log_dir(dir) {
+    error_test_guard(const std::filesystem::path& dir,
+                     std::shared_ptr<thread_pool_adapter> p)
+        : log_dir(dir), pool(std::move(p)) {
         std::filesystem::create_directories(log_dir);
     }
 
     ~error_test_guard() {
-        thread_adapter::shutdown(true);
+        if (pool) {
+            pool->shutdown(true);
+        }
         logger_adapter::shutdown();
         std::this_thread::sleep_for(50ms);
         std::error_code ec;
@@ -195,7 +187,6 @@ auto simulate_operation(simulated_error error_type) -> Result<std::string> {
 TEST_CASE("Result<T> error propagation across thread pool",
           "[integration][error][result][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    error_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -206,37 +197,38 @@ TEST_CASE("Result<T> error propagation across thread pool",
     thread_pool_config thread_config;
     thread_config.min_threads = 2;
     thread_config.max_threads = 4;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    error_test_guard guard(temp_dir, pool);
 
     SECTION("Error result propagates through future") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() {
-            auto result = simulate_operation(simulated_error::network_timeout);
-            return result;
+        Result<std::string> task_result = error_info("not executed");
+        auto future = pool->submit([&task_result]() {
+            task_result = simulate_operation(simulated_error::network_timeout);
         });
 
-        auto result = future.get();
-        REQUIRE(result.is_err());
-        REQUIRE(result.error().message == "Network timeout");
-        REQUIRE(result.error().module == "network");
+        future.get();
+        REQUIRE(task_result.is_err());
+        REQUIRE(task_result.error().message == "Network timeout");
+        REQUIRE(task_result.error().module == "network");
     }
 
     SECTION("Success result propagates through future") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() {
-            auto result = simulate_operation(simulated_error::none);
-            return result;
+        Result<std::string> task_result = error_info("not executed");
+        auto future = pool->submit([&task_result]() {
+            task_result = simulate_operation(simulated_error::none);
         });
 
-        auto result = future.get();
-        REQUIRE(result.is_ok());
-        REQUIRE(result.value() == "success");
+        future.get();
+        REQUIRE(task_result.is_ok());
+        REQUIRE(task_result.value() == "success");
     }
 
     SECTION("Mixed results with error logging") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> success_count{0};
         std::atomic<int> error_count{0};
@@ -253,7 +245,7 @@ TEST_CASE("Result<T> error propagation across thread pool",
             simulated_error::protocol_error};
 
         for (auto error : errors) {
-            futures.push_back(thread_adapter::submit(
+            futures.push_back(pool->submit(
                 [error, &success_count, &error_count]() {
                     auto result = simulate_operation(error);
 
@@ -285,7 +277,6 @@ TEST_CASE("Result<T> error propagation across thread pool",
 TEST_CASE("RAII cleanup during error scenarios",
           "[integration][error][raii][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    error_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -294,16 +285,16 @@ TEST_CASE("RAII cleanup during error scenarios",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 2;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    error_test_guard guard(temp_dir, pool);
 
     SECTION("Resources cleaned up on exception") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> cleanup_count{0};
         std::atomic<int> exception_caught{0};
 
-        auto future = thread_adapter::submit([&cleanup_count, &exception_caught]()
-                                                 -> int {
+        auto future = pool->submit([&cleanup_count, &exception_caught]() {
             tracked_resource resource(cleanup_count);
 
             try {
@@ -314,8 +305,6 @@ TEST_CASE("RAII cleanup during error scenarios",
                 logger_adapter::error("Exception caught: {}", e.what());
                 throw;  // Re-throw to test RAII cleanup
             }
-
-            return 0;  // Never reached
         });
 
         REQUIRE_THROWS_AS(future.get(), std::runtime_error);
@@ -324,11 +313,11 @@ TEST_CASE("RAII cleanup during error scenarios",
     }
 
     SECTION("Multiple resources cleaned up in reverse order") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> total_cleanup{0};
 
-        auto future = thread_adapter::submit([&total_cleanup]() {
+        auto future = pool->submit([&total_cleanup]() {
             tracked_resource r1(total_cleanup);
             tracked_resource r2(total_cleanup);
             tracked_resource r3(total_cleanup);
@@ -341,17 +330,16 @@ TEST_CASE("RAII cleanup during error scenarios",
     }
 
     SECTION("Resources cleaned up on normal exit") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> cleanup_count{0};
 
-        auto future = thread_adapter::submit([&cleanup_count]() {
+        auto future = pool->submit([&cleanup_count]() {
             tracked_resource resource(cleanup_count);
             // Normal completion
-            return 42;
         });
 
-        REQUIRE(future.get() == 42);
+        future.get();
         REQUIRE(cleanup_count == 1);
     }
 }
@@ -363,7 +351,6 @@ TEST_CASE("RAII cleanup during error scenarios",
 TEST_CASE("Exception propagation through thread pool",
           "[integration][error][exception][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    error_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -372,12 +359,13 @@ TEST_CASE("Exception propagation through thread pool",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 2;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    error_test_guard guard(temp_dir, pool);
 
     SECTION("std::runtime_error propagates") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() -> int {
+        auto future = pool->submit([]() {
             throw std::runtime_error("Test runtime error");
         });
 
@@ -385,9 +373,9 @@ TEST_CASE("Exception propagation through thread pool",
     }
 
     SECTION("std::logic_error propagates") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() -> int {
+        auto future = pool->submit([]() {
             throw std::logic_error("Test logic error");
         });
 
@@ -395,7 +383,7 @@ TEST_CASE("Exception propagation through thread pool",
     }
 
     SECTION("Custom exception propagates") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         class custom_exception : public std::exception {
         public:
@@ -404,7 +392,7 @@ TEST_CASE("Exception propagation through thread pool",
             }
         };
 
-        auto future = thread_adapter::submit([]() -> int {
+        auto future = pool->submit([]() {
             throw custom_exception();
         });
 
@@ -412,10 +400,10 @@ TEST_CASE("Exception propagation through thread pool",
     }
 
     SECTION("Thread pool continues after exception") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         // First task throws
-        auto failing_future = thread_adapter::submit([]() -> int {
+        auto failing_future = pool->submit([]() {
             throw std::runtime_error("Expected failure");
         });
 
@@ -426,8 +414,10 @@ TEST_CASE("Exception propagation through thread pool",
         }
 
         // Pool should still work
-        auto success_future = thread_adapter::submit([]() { return 42; });
-        REQUIRE(success_future.get() == 42);
+        std::atomic<int> result{0};
+        auto success_future = pool->submit([&result]() { result = 42; });
+        success_future.get();
+        REQUIRE(result == 42);
     }
 }
 
@@ -438,7 +428,6 @@ TEST_CASE("Exception propagation through thread pool",
 TEST_CASE("Error recovery and retry patterns",
           "[integration][error][recovery][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    error_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -447,16 +436,18 @@ TEST_CASE("Error recovery and retry patterns",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 2;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    error_test_guard guard(temp_dir, pool);
 
     SECTION("Retry on transient failure") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> attempt_count{0};
         constexpr int succeed_on_attempt = 2;
+        Result<std::string> task_result = error_info("not executed");
 
-        auto future = thread_adapter::submit(
-            [&attempt_count]() {
+        auto future = pool->submit(
+            [&attempt_count, &task_result]() {
                 constexpr int max_retries = 3;
                 constexpr int succeed_threshold = 2;
                 Result<std::string> result = error_info("transient error");
@@ -473,21 +464,22 @@ TEST_CASE("Error recovery and retry patterns",
                     }
                 }
 
-                return result;
+                task_result = std::move(result);
             });
 
-        auto result = future.get();
-        REQUIRE(result.is_ok());
+        future.get();
+        REQUIRE(task_result.is_ok());
         REQUIRE(attempt_count == succeed_on_attempt);
         logger_adapter::flush();
     }
 
     SECTION("Graceful degradation on persistent failure") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<bool> used_fallback{false};
+        std::string task_result;
 
-        auto future = thread_adapter::submit([&used_fallback]() {
+        auto future = pool->submit([&used_fallback, &task_result]() {
             // Primary operation fails
             auto primary_result =
                 simulate_operation(simulated_error::connection_refused);
@@ -498,14 +490,15 @@ TEST_CASE("Error recovery and retry patterns",
 
                 // Use fallback
                 used_fallback = true;
-                return std::string("fallback_result");
+                task_result = "fallback_result";
+                return;
             }
 
-            return primary_result.value();
+            task_result = primary_result.value();
         });
 
-        auto result = future.get();
-        REQUIRE(result == "fallback_result");
+        future.get();
+        REQUIRE(task_result == "fallback_result");
         REQUIRE(used_fallback);
         logger_adapter::flush();
     }
@@ -518,7 +511,6 @@ TEST_CASE("Error recovery and retry patterns",
 TEST_CASE("Error events logged to audit trail",
           "[integration][error][audit][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    error_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -529,22 +521,21 @@ TEST_CASE("Error events logged to audit trail",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 2;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    error_test_guard guard(temp_dir, pool);
 
     SECTION("Security events logged on access errors") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() {
+        auto future = pool->submit([]() {
             // Simulate access denied error
             logger_adapter::log_security_event(
                 security_event_type::access_denied,
                 "Access to protected study denied",
                 "unauthorized_user");
-
-            return true;
         });
 
-        REQUIRE(future.get());
+        future.get();
         logger_adapter::flush();
 
         auto audit_path = temp_dir / "audit.json";
@@ -554,9 +545,9 @@ TEST_CASE("Error events logged to audit trail",
     }
 
     SECTION("C-STORE failure logged with status") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() {
+        auto future = pool->submit([]() {
             logger_adapter::log_c_store_received(
                 "FAILED_MODALITY", "PATIENT001", "1.2.3.4", "1.2.3.4.5.6",
                 storage_status::out_of_resources);
@@ -572,9 +563,9 @@ TEST_CASE("Error events logged to audit trail",
     }
 
     SECTION("C-MOVE failure logged with status") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
-        auto future = thread_adapter::submit([]() {
+        auto future = pool->submit([]() {
             logger_adapter::log_c_move_executed(
                 "REQUESTING_AE", "UNKNOWN_DEST", "1.2.3.4", 0,
                 move_status::refused_move_destination_unknown);
@@ -597,7 +588,6 @@ TEST_CASE("Error events logged to audit trail",
 TEST_CASE("Nested operations with error handling",
           "[integration][error][nested][!mayfail]") {
     auto temp_dir = create_temp_log_directory();
-    error_test_guard guard(temp_dir);
 
     logger_config log_config;
     log_config.log_directory = temp_dir;
@@ -606,49 +596,46 @@ TEST_CASE("Nested operations with error handling",
 
     thread_pool_config thread_config;
     thread_config.min_threads = 4;
-    thread_adapter::configure(thread_config);
+    auto pool = std::make_shared<thread_pool_adapter>(thread_config);
+    error_test_guard guard(temp_dir, pool);
 
     SECTION("Parent handles child task error") {
-        REQUIRE(thread_adapter::start());
+        REQUIRE(pool->start());
 
         std::atomic<int> child_errors{0};
+        int total = 0;
 
-        auto parent_future = thread_adapter::submit([&child_errors]() {
-            std::vector<std::future<Result<int>>> child_futures;
+        // Child results stored by index
+        std::vector<Result<int>> child_results(5, error_info("not executed"));
+
+        auto parent_future = pool->submit([&pool, &child_errors, &total, &child_results]() {
+            std::vector<std::future<void>> child_futures;
 
             for (int i = 0; i < 5; ++i) {
-                child_futures.push_back(thread_adapter::submit([i]() -> Result<int> {
+                child_futures.push_back(pool->submit([i, &child_results]() {
                     if (i % 2 == 0) {
-                        return Result<int>(error_info("child error"));
+                        child_results[i] = Result<int>(error_info("child error"));
+                    } else {
+                        child_results[i] = Result<int>(i * 10);
                     }
-                    return Result<int>(i * 10);
                 }));
             }
 
-            int total = 0;
             for (auto& f : child_futures) {
-                auto result = f.get();
+                f.get();
+            }
+
+            for (auto& result : child_results) {
                 if (result.is_ok()) {
                     total += result.value();
                 } else {
                     child_errors++;
                 }
             }
-
-            return total;
         });
 
-        auto result = parent_future.get();
+        parent_future.get();
         REQUIRE(child_errors == 3);    // 0, 2, 4 failed
-        REQUIRE(result == 10 + 30);    // 1*10 + 3*10
+        REQUIRE(total == 10 + 30);     // 1*10 + 3*10
     }
 }
-
-// Restore warning settings
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif

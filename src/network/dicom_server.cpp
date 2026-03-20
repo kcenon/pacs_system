@@ -539,7 +539,7 @@ void dicom_server::remove_association(uint64_t id) {
     std::lock_guard<std::mutex> lock(associations_mutex_);
     auto it = associations_.find(id);
     if (it != associations_.end()) {
-        // With thread_adapter pool, no thread join is needed.
+        // With thread_pool_adapter, no thread join is needed.
         // Just mark as not processing and remove from map.
         // Note: Already holding associations_mutex_ so no atomic needed
         it->second->processing = false;
@@ -660,7 +660,7 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
             it->second->assoc.set_peer(client_peer);
             client_peer->set_peer(&it->second->assoc);
 
-            // Submit message loop to thread_adapter pool instead of creating dedicated thread.
+            // Submit message loop to thread_pool_adapter instead of creating dedicated thread.
             // We need to capture the raw pointer to info because unique_ptr is in the map.
             // The map might rehash but the unique_ptr value (the pointer to association_info) is stable.
             auto* info_ptr = it->second.get();
