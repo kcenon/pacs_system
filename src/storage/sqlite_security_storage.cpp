@@ -128,7 +128,7 @@ auto sqlite_security_storage::create_user(const User &user) -> VoidResult {
                                  {"active", user.active ? 1 : 0}})
                         .build();
 
-  auto result = db_manager_->insert_query_result(insert_sql);
+  auto result = db_manager_->execute_query_result(insert_sql);
   if (result.is_err()) {
     return make_error<std::monostate>(
         kSqliteError, "Failed to insert user: " + result.error().message,
@@ -144,7 +144,7 @@ auto sqlite_security_storage::create_user(const User &user) -> VoidResult {
                                  {"role", std::string(to_string(role))}})
                         .build();
 
-    auto role_result = db_manager_->insert_query_result(role_sql);
+    auto role_result = db_manager_->execute_query_result(role_sql);
     if (role_result.is_err()) {
       // Log warning but continue (best effort for roles)
     }
@@ -312,7 +312,7 @@ auto sqlite_security_storage::update_user(const User &user) -> VoidResult {
                         .where("id", "=", user.id)
                         .build();
 
-  auto update_result = db_manager_->update_query_result(update_sql);
+  auto update_result = db_manager_->execute_query_result(update_sql);
   if (update_result.is_err()) {
     (void)db_manager_->rollback_transaction();
     return make_error<std::monostate>(
@@ -326,7 +326,7 @@ auto sqlite_security_storage::update_user(const User &user) -> VoidResult {
                         .where("user_id", "=", user.id)
                         .build();
 
-  auto delete_result = db_manager_->delete_query_result(delete_sql);
+  auto delete_result = db_manager_->execute_query_result(delete_sql);
   if (delete_result.is_err()) {
     (void)db_manager_->rollback_transaction();
     return make_error<std::monostate>(
@@ -344,7 +344,7 @@ auto sqlite_security_storage::update_user(const User &user) -> VoidResult {
                 {{"user_id", user.id}, {"role", std::string(to_string(role))}})
             .build();
 
-    auto role_result = db_manager_->insert_query_result(role_sql);
+    auto role_result = db_manager_->execute_query_result(role_sql);
     if (role_result.is_err()) {
       (void)db_manager_->rollback_transaction();
       return make_error<std::monostate>(
@@ -379,7 +379,7 @@ auto sqlite_security_storage::delete_user(std::string_view id) -> VoidResult {
                         .where("id", "=", std::string(id))
                         .build();
 
-  auto result = db_manager_->delete_query_result(delete_sql);
+  auto result = db_manager_->execute_query_result(delete_sql);
   if (result.is_err()) {
     return make_error<std::monostate>(
         kSqliteError, "Failed to delete user: " + result.error().message,

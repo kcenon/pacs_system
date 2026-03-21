@@ -252,14 +252,14 @@ auto worklist_repository::query_worklist(const worklist_query& query)
         builder.where("modality", "=", *query.modality);
     }
     if (query.scheduled_date_from.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "substr(scheduled_datetime, 1, 8) >= '{}'",
-            *query.scheduled_date_from)));
+        builder.where(database::query_condition(
+            "substr(scheduled_datetime, 1, 8)", ">=",
+            *query.scheduled_date_from));
     }
     if (query.scheduled_date_to.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "substr(scheduled_datetime, 1, 8) <= '{}'",
-            *query.scheduled_date_to)));
+        builder.where(database::query_condition(
+            "substr(scheduled_datetime, 1, 8)", "<=",
+            *query.scheduled_date_to));
     }
     if (query.patient_id.has_value()) {
         builder.where("patient_id", "LIKE",
@@ -374,8 +374,7 @@ auto worklist_repository::cleanup_old_worklist_items(std::chrono::hours age)
     auto builder = query_builder();
     builder.delete_from(table_name())
         .where("step_status", "!=", std::string("SCHEDULED"))
-        .where(database::query_condition(
-            kcenon::pacs::compat::format("created_at < '{}'", cutoff_str)));
+        .where(database::query_condition("created_at", "<", cutoff_str));
 
     auto result = db()->remove(builder.build());
     if (result.is_err()) {
@@ -406,8 +405,7 @@ auto worklist_repository::cleanup_worklist_items_before(
     auto builder = query_builder();
     builder.delete_from(table_name())
         .where("step_status", "!=", std::string("SCHEDULED"))
-        .where(database::query_condition(
-            kcenon::pacs::compat::format("scheduled_datetime < '{}'", before_str)));
+        .where(database::query_condition("scheduled_datetime", "<", before_str));
 
     auto result = db()->remove(builder.build());
     if (result.is_err()) {

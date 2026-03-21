@@ -375,12 +375,12 @@ auto mpps_repository::search_mpps(const mpps_query& query)
         builder.where("accession_no", "=", *query.accession_no);
     }
     if (query.start_date_from.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "substr(start_datetime, 1, 8) >= '{}'", *query.start_date_from)));
+        builder.where("substr(start_datetime, 1, 8)", ">=",
+                       *query.start_date_from);
     }
     if (query.start_date_to.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "substr(start_datetime, 1, 8) <= '{}'", *query.start_date_to)));
+        builder.where("substr(start_datetime, 1, 8)", "<=",
+                       *query.start_date_to);
     }
 
     builder.order_by("start_datetime", database::sort_order::desc);
