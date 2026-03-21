@@ -40,8 +40,6 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <database/query_builder/value_formatter.h>
-
 #include <iomanip>
 #include <sstream>
 
@@ -203,22 +201,17 @@ auto get_optional_int(const storage::database_row& row,
 
 }  // namespace
 
-auto database_cursor::build_dicom_condition(
+void database_cursor::add_dicom_condition(
+    database::query_builder& builder,
     const std::string& field,
-    const std::string& value) -> std::string {
-    // Use value_formatter for SQL injection protection
-    // This properly escapes single quotes and other special characters
-    database::query::value_formatter formatter(database::database_types::sqlite);
-
+    const std::string& value) {
     if (contains_dicom_wildcards(value)) {
         // Use LIKE with DICOM-to-SQL wildcard conversion
         auto pattern = to_like_pattern(value);
-        auto escaped_pattern = formatter.escape_string(pattern);
-        return field + " LIKE '" + escaped_pattern + "' ESCAPE '\\'";
+        builder.where(field, "LIKE", pattern);
     } else {
-        // Exact match with properly escaped value
-        auto escaped_value = formatter.escape_string(value);
-        return field + " = '" + escaped_value + "'";
+        // Exact match
+        builder.where(field, "=", value);
     }
 }
 
@@ -324,12 +317,10 @@ auto database_cursor::create_patient_cursor(
 
     // Apply DICOM wildcard conditions
     if (query.patient_id.has_value()) {
-        auto condition = build_dicom_condition("patient_id", *query.patient_id);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "patient_id", *query.patient_id);
     }
     if (query.patient_name.has_value()) {
-        auto condition = build_dicom_condition("patient_name", *query.patient_name);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "patient_name", *query.patient_name);
     }
     if (query.birth_date.has_value()) {
         builder.where("birth_date", "=", *query.birth_date);
@@ -385,19 +376,16 @@ auto database_cursor::create_study_cursor(
 
     // Apply DICOM wildcard conditions
     if (query.patient_id.has_value()) {
-        auto condition = build_dicom_condition("p.patient_id", *query.patient_id);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "p.patient_id", *query.patient_id);
     }
     if (query.patient_name.has_value()) {
-        auto condition = build_dicom_condition("p.patient_name", *query.patient_name);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "p.patient_name", *query.patient_name);
     }
     if (query.study_uid.has_value()) {
         builder.where("s.study_uid", "=", *query.study_uid);
     }
     if (query.study_id.has_value()) {
-        auto condition = build_dicom_condition("s.study_id", *query.study_id);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "s.study_id", *query.study_id);
     }
     if (query.study_date.has_value()) {
         builder.where("s.study_date", "=", *query.study_date);
@@ -409,23 +397,18 @@ auto database_cursor::create_study_cursor(
         builder.where("s.study_date", "<=", *query.study_date_to);
     }
     if (query.accession_number.has_value()) {
-        auto condition = build_dicom_condition("s.accession_number", *query.accession_number);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "s.accession_number", *query.accession_number);
     }
     if (query.modality.has_value()) {
-        // Escape modality value to prevent SQL injection
-        database::query::value_formatter formatter(database::database_types::sqlite);
-        auto escaped_modality = formatter.escape_string(*query.modality);
         builder.where(database::query_condition(
-            "s.modalities_in_study LIKE '%" + escaped_modality + "%'"));
+            "s.modalities_in_study", "LIKE",
+            std::string("%" + *query.modality + "%")));
     }
     if (query.referring_physician.has_value()) {
-        auto condition = build_dicom_condition("s.referring_physician", *query.referring_physician);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "s.referring_physician", *query.referring_physician);
     }
     if (query.study_description.has_value()) {
-        auto condition = build_dicom_condition("s.study_description", *query.study_description);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "s.study_description", *query.study_description);
     }
 
     auto sql = builder.build();
@@ -478,8 +461,7 @@ auto database_cursor::create_series_cursor(
         builder.where("se.series_number", "=", static_cast<int64_t>(*query.series_number));
     }
     if (query.series_description.has_value()) {
-        auto condition = build_dicom_condition("se.series_description", *query.series_description);
-        builder.where(database::query_condition(condition));
+        add_dicom_condition(builder, "se.series_description", *query.series_description);
     }
 
     auto sql = builder.build();

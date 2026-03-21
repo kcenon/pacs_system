@@ -280,14 +280,15 @@ private:
         const storage::database_row& row) -> storage::instance_record;
 
     /**
-     * @brief Build WHERE clause string from DICOM wildcard pattern
+     * @brief Add WHERE condition from DICOM wildcard pattern to query builder
      *
      * Converts DICOM wildcards (* and ?) to SQL LIKE pattern (% and _)
-     * and returns appropriate SQL condition.
+     * and adds appropriate condition to the builder.
      */
-    [[nodiscard]] static auto build_dicom_condition(
+    static void add_dicom_condition(
+        database::query_builder& builder,
         const std::string& field,
-        const std::string& value) -> std::string;
+        const std::string& value);
 
     /// Cached results from database query
     std::vector<query_record> results_;
