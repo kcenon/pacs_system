@@ -408,14 +408,12 @@ auto ups_repository::search_ups_workitems(const ups_workitem_query& query)
         builder.where("performing_ae", "=", *query.performing_ae);
     }
     if (query.scheduled_date_from.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "scheduled_start_datetime >= '{}'",
-            *query.scheduled_date_from)));
+        builder.where("scheduled_start_datetime", ">=",
+                       *query.scheduled_date_from);
     }
     if (query.scheduled_date_to.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "scheduled_start_datetime <= '{}235959'",
-            *query.scheduled_date_to)));
+        builder.where("scheduled_start_datetime", "<=",
+                       *query.scheduled_date_to + "235959");
     }
 
     builder.order_by("scheduled_start_datetime", database::sort_order::asc);

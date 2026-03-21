@@ -202,12 +202,10 @@ auto audit_repository::query_audit_log(const audit_query& query)
         builder.where("study_uid", "=", *query.study_uid);
     }
     if (query.date_from.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "date(timestamp) >= date('{}')", *query.date_from)));
+        builder.where("date(timestamp)", ">=", *query.date_from);
     }
     if (query.date_to.has_value()) {
-        builder.where(database::query_condition(kcenon::pacs::compat::format(
-            "date(timestamp) <= date('{}')", *query.date_to)));
+        builder.where("date(timestamp)", "<=", *query.date_to);
     }
 
     builder.order_by("timestamp", database::sort_order::desc);
@@ -263,8 +261,7 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
 
     auto builder = query_builder();
     builder.delete_from(table_name())
-        .where(database::query_condition(
-            kcenon::pacs::compat::format("timestamp < '{}'", cutoff_str)));
+        .where("timestamp", "<", cutoff_str);
 
     auto result = db()->remove(builder.build());
     if (result.is_err()) {

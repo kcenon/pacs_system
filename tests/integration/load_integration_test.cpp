@@ -547,7 +547,7 @@ TEST_CASE("No deadlocks under concurrent access",
 
         for (int i = 0; i < outer_count; ++i) {
             outer_futures.push_back(pool->submit(
-                [i, &total_completed, &pool]() {
+                [&total_completed, &pool]() {
                     std::vector<std::future<void>> inner_futures;
 
                     for (int j = 0; j < inner_count; ++j) {
