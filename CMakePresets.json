@@ -92,6 +92,25 @@
                 "PACS_BUILD_EXAMPLES": "ON",
                 "PACS_BUILD_BENCHMARKS": "ON"
             }
+        },
+        {
+            "name": "vcpkg",
+            "displayName": "vcpkg Release",
+            "description": "Release build using vcpkg for dependency management",
+            "binaryDir": "${sourceDir}/build/vcpkg",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "FILEPATH",
+                    "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                },
+                "CMAKE_BUILD_TYPE": "Release",
+                "PACS_BUILD_TESTS": "OFF",
+                "PACS_BUILD_EXAMPLES": "OFF",
+                "PACS_BUILD_BENCHMARKS": "OFF",
+                "PACS_FETCH_CROW": "OFF",
+                "PACS_FETCH_OPENJPH": "OFF",
+                "FETCHCONTENT_FULLY_DISCONNECTED": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -122,6 +141,10 @@
         {
             "name": "ci",
             "configurePreset": "ci"
+        },
+        {
+            "name": "vcpkg",
+            "configurePreset": "vcpkg"
         }
     ],
     "testPresets": [
