@@ -47,10 +47,6 @@ if(@PACS_SYSTEM_WITH_OPENSSL@)
     find_dependency(OpenSSL REQUIRED)
 endif()
 
-if(@PACS_SYSTEM_WITH_FMT@)
-    find_dependency(fmt CONFIG REQUIRED)
-endif()
-
 if(@PACS_SYSTEM_WITH_CROW@)
     find_dependency(Crow CONFIG REQUIRED)
 endif()
