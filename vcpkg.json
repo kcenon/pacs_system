@@ -10,7 +10,8 @@
   "dependencies": [
     "kcenon-common-system",
     "kcenon-container-system",
-    "kcenon-network-system"
+    "kcenon-network-system",
+    "icu"
   ],
   "overrides": [
     { "name": "sqlite3", "version": "3.45.3" },

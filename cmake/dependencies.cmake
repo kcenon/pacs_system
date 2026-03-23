@@ -5,6 +5,31 @@
 include(FetchContent)
 find_package(Threads REQUIRED)
 
+# ICU (for character set encoding/decoding)
+message(STATUS "")
+message(STATUS "=== Finding ICU (for character set encoding) ===")
+
+# Homebrew on macOS installs ICU as keg-only; help CMake find it
+if(APPLE AND NOT ICU_ROOT)
+    execute_process(
+        COMMAND brew --prefix icu4c
+        OUTPUT_VARIABLE _brew_icu_prefix
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(_brew_icu_prefix)
+        list(APPEND CMAKE_PREFIX_PATH "${_brew_icu_prefix}")
+    endif()
+endif()
+
+# Try CONFIG mode first (vcpkg provides ICUConfig.cmake),
+# then fall back to MODULE mode (system ICU via CMake's FindICU.cmake)
+find_package(ICU CONFIG QUIET COMPONENTS uc data)
+if(NOT ICU_FOUND)
+    find_package(ICU REQUIRED COMPONENTS uc data)
+endif()
+message(STATUS "Found ICU: ${ICU_VERSION}")
+
 # SQLite3 (for storage module)
 if(PACS_BUILD_STORAGE)
     message(STATUS "")
