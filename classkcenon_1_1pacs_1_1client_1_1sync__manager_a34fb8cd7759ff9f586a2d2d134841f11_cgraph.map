@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::client::sync_manager::add_config" name="kcenon::pacs::client::sync_manager::add_config">
+<area shape="rect" id="Node000001" title="Add a new sync configuration." alt="" coords="5,49,208,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a26a4bafecb312a2575b0311c48c05219" title="Get current manager configuration." alt="" coords="256,5,428,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,48,242,41,243,47,209,53"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="269,93,415,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,86,256,95,255,100,208,91"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="298,94,296,84,303,74,318,69,342,67,369,70,384,77,382,82,368,75,342,72,319,74,306,79,301,85,303,92"/>
+</map>

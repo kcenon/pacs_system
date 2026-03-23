@@ -1,0 +1,24 @@
+<map id="include/pacs/web/auth/oauth2_config.hpp" name="include/pacs/web/auth/oauth2_config.hpp">
+<area shape="rect" id="Node000001" title="OAuth 2.0 configuration for DICOMweb endpoints." alt="" coords="659,5,826,45"/>
+<area shape="rect" id="Node000002" href="$jwt__validator_8hpp.html" title="JWT (JSON Web Token) validation for OAuth 2.0." alt="" coords="747,93,914,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="774,53,813,91,809,95,770,57"/>
+<area shape="rect" id="Node000003" href="$oauth2__middleware_8hpp.html" title="OAuth 2.0 middleware for DICOMweb endpoint authorization." alt="" coords="538,181,721,221"/>
+<area shape="poly" id="edge11_Node000001_Node000003" title=" " alt="" coords="725,58,644,183,639,180,721,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="775,141,674,184,672,179,773,136"/>
+<area shape="rect" id="Node000010" href="$jwks__provider_8cpp.html" title="Implementation of JWKS key management and JWK&#45;to&#45;PEM conversion." alt="" coords="745,189,972,214"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="844,145,857,187,852,189,839,147"/>
+<area shape="rect" id="Node000011" href="$jwt__validator_8cpp.html" title="Implementation of JWT token validation." alt="" coords="997,189,1217,214"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="905,135,1071,186,1069,191,903,140"/>
+<area shape="rect" id="Node000004" href="$oauth2__middleware_8cpp.html" title="Implementation of OAuth 2.0 middleware for DICOMweb endpoints." alt="" coords="5,269,160,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="525,219,359,242,172,272,161,274,160,269,172,267,358,237,524,213"/>
+<area shape="rect" id="Node000005" href="$dicomweb__endpoints_8cpp.html" title="DICOMweb (WADO&#45;RS) API endpoints implementation." alt="" coords="184,269,395,309"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="542,227,364,272,363,267,541,222"/>
+<area shape="rect" id="Node000006" href="$metrics__endpoints_8cpp.html" title="Database metrics REST API endpoints implementation." alt="" coords="419,269,613,309"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="595,232,543,271,539,267,592,228"/>
+<area shape="rect" id="Node000007" href="$storage__commitment__endpoints_8cpp.html" title="DICOMweb Storage Commitment REST endpoint implementation." alt="" coords="637,269,848,309"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="667,228,719,267,716,271,664,232"/>
+<area shape="rect" id="Node000008" href="$wado__uri__endpoints_8cpp.html" title="WADO&#45;URI (Web Access to DICOM Objects — URI&#45;based) endpoint implementation." alt="" coords="872,269,1051,309"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="716,222,889,267,888,272,715,227"/>
+<area shape="rect" id="Node000009" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="1075,277,1250,302"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="735,219,901,243,1063,267,1105,274,1104,279,1062,272,900,248,734,224"/>
+</map>

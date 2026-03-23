@@ -1,0 +1,20 @@
+<map id="include/pacs/storage/file_storage.hpp" name="include/pacs/storage/file_storage.hpp">
+<area shape="rect" id="Node000001" title="Filesystem&#45;based DICOM storage with hierarchical organization." alt="" coords="604,5,760,45"/>
+<area shape="rect" id="Node000002" href="$service__registration_8hpp.html" title="ServiceContainer registration module for PACS services." alt="" coords="50,93,221,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="591,42,233,96,221,98,220,93,232,91,590,36"/>
+<area shape="rect" id="Node000005" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="245,101,474,126"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="599,51,403,103,402,98,597,46"/>
+<area shape="rect" id="Node000006" href="$health__checker_8cpp.html" title="Implementation of health_checker class." alt="" coords="499,93,660,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="650,56,604,95,600,91,647,52"/>
+<area shape="rect" id="Node000007" href="$file__storage_8cpp.html" title="Implementation of filesystem&#45;based DICOM storage." alt="" coords="684,101,885,126"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="717,52,772,98,769,102,714,56"/>
+<area shape="rect" id="Node000008" href="$dicomweb__endpoints_8cpp.html" title="DICOMweb (WADO&#45;RS) API endpoints implementation." alt="" coords="910,93,1121,133"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="769,46,943,91,942,96,768,51"/>
+<area shape="rect" id="Node000009" href="$task__scheduler_8cpp.html" title="Implementation of task scheduler service for automated PACS operations." alt="" coords="1145,101,1377,126"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="774,38,1184,98,1183,103,773,43"/>
+<area shape="rect" id="Node000003" href="$test__support_8hpp.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,181,153,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,146,94,183,89,180,113,144"/>
+<area shape="rect" id="Node000004" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="39,269,231,295"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="155,145,167,181,170,201,167,222,157,249,145,270,141,268,153,246,162,221,165,201,162,182,150,147"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,231,129,267,125,271,99,234"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::web::endpoints::register_security_endpoints_impl" name="kcenon::pacs::web::endpoints::register_security_endpoints_impl">
+<area shape="rect" id="Node000001" title="Register security endpoints with the Crow app." alt="" coords="5,110,193,165"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="249,29,400,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,107,240,79,258,72,260,77,242,84,170,112"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web.html#afb727937f516358f97153f5337486476" title="Create success response with optional message." alt="" coords="249,117,400,157"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="194,135,236,135,236,140,194,140"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1security.html#a18b7885aae33c491a5df429aef054441" title="Parse Role from string." alt="" coords="241,181,408,221"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="195,162,241,175,240,180,193,167"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="283,30,280,20,287,10,302,5,325,3,351,6,365,13,363,18,349,11,325,8,303,10,290,15,285,21,288,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="283,118,280,108,287,98,302,93,325,91,351,94,365,101,363,106,349,99,325,96,303,98,290,103,285,109,288,116"/>
+</map>

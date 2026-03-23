@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_file::open" name="kcenon::pacs::core::dicom_file::open">
+<area shape="rect" id="Node000001" title="Open and read a DICOM file from disk." alt="" coords="5,5,148,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="196,5,408,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,23,182,23,182,28,148,28"/>
+</map>

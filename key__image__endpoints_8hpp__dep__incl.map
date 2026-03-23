@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/key_image_endpoints.hpp" name="include/pacs/web/endpoints/key_image_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Key image API endpoints for REST server." alt="" coords="85,5,288,45"/>
+<area shape="rect" id="Node000002" href="$key__image__endpoints_8cpp.html" title="Key image API endpoints implementation." alt="" coords="5,93,173,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,56,113,95,109,91,153,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="198,101,373,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="221,53,273,98,270,102,217,57"/>
+</map>

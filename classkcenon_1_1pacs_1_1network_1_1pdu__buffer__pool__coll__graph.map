@@ -1,0 +1,24 @@
+<map id="kcenon::pacs::network::pdu_buffer_pool" name="kcenon::pacs::network::pdu_buffer_pool">
+<area shape="rect" id="Node000001" title=" " alt="" coords="257,1140,480,1580"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title=" " alt="" coords="5,875,231,1070"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,1069,250,1172,246,1175,178,1072"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1network_1_1pdu__pool__statistics.html" title="Statistics for PDU buffer pool usage monitoring." alt="" coords="133,448,293,548"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="134,546,101,575,75,612,64,641,56,672,53,736,61,800,76,859,71,860,56,801,48,737,51,672,58,640,70,609,97,572,131,542"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title="Pool wrapper with statistics tracking for PDU buffers." alt="" coords="265,611,440,791"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="249,547,283,595,279,598,245,550"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title=" " alt="" coords="507,868,710,1077"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="294,516,404,552,467,579,532,612,595,651,654,697,705,751,746,814,752,836,750,858,740,879,725,898,720,895,735,876,745,857,747,837,741,816,701,755,650,701,592,655,529,616,465,584,402,557,292,521"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title=" " alt="" coords="255,875,483,1070"/>
+<area shape="poly" id="edge12_Node000009_Node000003" title=" " alt="" coords="190,550,164,614,145,691,141,731,144,770,154,808,172,842,185,854,200,858,218,860,241,866,239,871,217,865,199,863,182,859,168,846,149,810,138,771,136,731,140,690,159,612,185,548"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="127,261,298,327"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="215,327,215,432,210,432,210,327"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="150,133,275,199"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="215,213,215,261,210,261,210,213"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="201,5,224,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="215,71,215,117,210,117,210,71"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="256,761,223,787,193,816,173,845,156,876,151,874,168,842,189,813,219,783,252,757"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="454,748,497,777,536,813,556,839,572,867,567,869,551,842,532,816,494,781,451,752"/>
+<area shape="poly" id="edge13_Node000009_Node000007" title=" " alt="" coords="364,804,365,815,368,875,363,875,359,815,359,805"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="546,1079,491,1168,486,1165,542,1076"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="371,1070,371,1123,366,1123,366,1070"/>
+</map>

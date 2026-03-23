@@ -1,0 +1,19 @@
+<map id="include/pacs/web/auth/jwks_provider.hpp" name="include/pacs/web/auth/jwks_provider.hpp">
+<area shape="rect" id="Node000001" title="JSON Web Key Set (JWKS) provider with key caching." alt="" coords="661,5,827,45"/>
+<area shape="rect" id="Node000002" href="$oauth2__middleware_8hpp.html" title="OAuth 2.0 middleware for DICOMweb endpoint authorization." alt="" coords="538,93,721,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="709,56,656,95,653,91,706,52"/>
+<area shape="rect" id="Node000009" href="$jwks__provider_8cpp.html" title="Implementation of JWKS key management and JWK&#45;to&#45;PEM conversion." alt="" coords="745,101,972,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="782,52,844,98,841,102,779,56"/>
+<area shape="rect" id="Node000003" href="$oauth2__middleware_8cpp.html" title="Implementation of OAuth 2.0 middleware for DICOMweb endpoints." alt="" coords="5,181,160,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="525,131,359,154,172,184,161,186,160,181,172,179,358,149,524,125"/>
+<area shape="rect" id="Node000004" href="$dicomweb__endpoints_8cpp.html" title="DICOMweb (WADO&#45;RS) API endpoints implementation." alt="" coords="184,181,395,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="542,139,364,184,363,179,541,134"/>
+<area shape="rect" id="Node000005" href="$metrics__endpoints_8cpp.html" title="Database metrics REST API endpoints implementation." alt="" coords="419,181,613,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="595,144,543,183,539,179,592,140"/>
+<area shape="rect" id="Node000006" href="$storage__commitment__endpoints_8cpp.html" title="DICOMweb Storage Commitment REST endpoint implementation." alt="" coords="637,181,848,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="667,140,719,179,716,183,664,144"/>
+<area shape="rect" id="Node000007" href="$wado__uri__endpoints_8cpp.html" title="WADO&#45;URI (Web Access to DICOM Objects — URI&#45;based) endpoint implementation." alt="" coords="872,181,1051,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="716,134,889,179,888,184,715,139"/>
+<area shape="rect" id="Node000008" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="1075,189,1250,214"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="735,131,901,155,1063,179,1105,186,1104,191,1062,184,900,160,734,136"/>
+</map>

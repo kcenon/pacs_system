@@ -1,0 +1,21 @@
+<map id="include/pacs/web/metadata_service.hpp" name="include/pacs/web/metadata_service.hpp">
+<area shape="rect" id="Node000001" title="Selective DICOM metadata retrieval and series navigation service." alt="" coords="315,5,517,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="317,48,86,96,85,91,316,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,163,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="348,48,176,95,175,89,347,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,93,264,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="371,48,267,91,265,86,369,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="288,93,363,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="396,48,351,86,347,82,392,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="387,93,445,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="419,46,419,79,413,79,413,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="470,93,567,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="442,43,494,83,491,87,439,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="591,93,715,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="474,43,607,87,605,92,472,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="740,93,855,119"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="508,43,729,88,728,93,507,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="879,93,942,119"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="517,36,677,58,866,91,865,96,676,63,516,41"/>
+</map>

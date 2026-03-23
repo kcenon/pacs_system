@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::validate_mammography_series_module" name="kcenon::pacs::services::validation::mg_iod_validator::validate_mammography_series_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,297,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="345,13,535,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,30,332,30,332,35,297,35"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::make_pooled_dataset" name="kcenon::pacs::core::make_pooled_dataset">
+<area shape="rect" id="Node000001" title="Create a pooled dicom_dataset." alt="" coords="5,5,179,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1pool__manager.html#a84005f87e80163188670e10bd203e397" title="Get the thread&#45;local pool manager instance." alt="" coords="227,5,379,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,23,213,23,213,28,179,28"/>
+</map>

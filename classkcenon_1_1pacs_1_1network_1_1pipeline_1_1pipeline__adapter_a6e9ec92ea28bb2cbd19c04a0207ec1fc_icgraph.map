@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_adapter::on_job_completed" name="kcenon::pacs::network::pipeline::pipeline_adapter::on_job_completed">
+<area shape="rect" id="Node000001" title="Handle job completion." alt="" coords="249,5,456,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__adapter.html#a0993ccb13998edca9c5a6e67ea45a08a" title="Construct adapter with custom configuration." alt="" coords="5,5,201,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,35,202,35,202,30,236,30"/>
+</map>

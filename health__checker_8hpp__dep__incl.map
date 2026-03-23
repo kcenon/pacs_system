@@ -1,0 +1,10 @@
+<map id="include/pacs/monitoring/health_checker.hpp" name="include/pacs/monitoring/health_checker.hpp">
+<area shape="rect" id="Node000001" title="Health check service for PACS system components." alt="" coords="132,5,311,45"/>
+<area shape="rect" id="Node000002" href="$pacs__monitor_8hpp.html" title="Unified PACS monitoring with IMonitor interface integration." alt="" coords="5,93,184,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,56,124,95,121,91,180,51"/>
+<area shape="rect" id="Node000003" href="$pacs-monitoring_8cppm.html" title="C++20 module partition for system monitoring." alt="" coords="32,181,283,207"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="219,60,211,96,198,134,184,161,169,183,164,180,179,158,194,132,206,95,214,59"/>
+<area shape="rect" id="Node000004" href="$health__checker_8cpp.html" title="Implementation of health_checker class." alt="" coords="259,93,421,133"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="260,51,315,91,312,95,257,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,143,150,179,146,183,116,146"/>
+</map>

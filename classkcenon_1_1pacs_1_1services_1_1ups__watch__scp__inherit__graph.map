@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_watch_scp" name="kcenon::pacs::services::ups_watch_scp">
+<area shape="rect" id="Node000001" title="UPS Watch SCP service for subscription and event notification." alt="" coords="5,353,205,888"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html" title=" " alt="" coords="11,5,200,305"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,319,108,353,103,353,103,319"/>
+</map>

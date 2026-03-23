@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::client::sync_manager::remove_config" name="kcenon::pacs::client::sync_manager::remove_config">
+<area shape="rect" id="Node000001" title="Remove a sync configuration." alt="" coords="5,22,188,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="236,29,381,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,47,222,47,222,52,189,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="269,30,267,20,273,10,287,5,309,3,333,6,347,13,344,18,332,11,309,8,288,10,276,15,272,21,274,28"/>
+</map>

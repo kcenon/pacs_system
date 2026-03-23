@@ -1,0 +1,9 @@
+<map id="include/pacs/storage/audit_record.hpp" name="include/pacs/storage/audit_record.hpp">
+<area shape="rect" id="Node000001" title="Audit log record data structures." alt="" coords="55,5,211,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,48,65,86,62,82,109,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,171,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="136,46,136,79,131,79,131,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="195,93,253,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="157,44,202,82,198,86,154,48"/>
+</map>

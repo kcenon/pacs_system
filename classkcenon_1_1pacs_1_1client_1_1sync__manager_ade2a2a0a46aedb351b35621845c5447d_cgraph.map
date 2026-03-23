@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::sync_manager::sync_manager" name="kcenon::pacs::client::sync_manager::sync_manager">
+<area shape="rect" id="Node000001" title="Construct a sync manager with custom configuration." alt="" coords="5,30,168,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a26a4bafecb312a2575b0311c48c05219" title="Get current manager configuration." alt="" coords="216,5,388,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,43,202,37,203,43,169,48"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1di.html#a01ed2d5e51632e2000e83f89cff202d4" title="Get a shared null logger instance." alt="" coords="223,69,381,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,67,210,73,209,78,168,72"/>
+</map>

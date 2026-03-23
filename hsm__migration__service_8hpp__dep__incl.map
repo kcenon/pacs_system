@@ -1,0 +1,7 @@
+<map id="include/pacs/storage/hsm_migration_service.hpp" name="include/pacs/storage/hsm_migration_service.hpp">
+<area shape="rect" id="Node000001" title="Background migration service for Hierarchical Storage Management." alt="" coords="135,5,342,45"/>
+<area shape="rect" id="Node000002" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="5,101,235,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,56,138,103,134,98,200,51"/>
+<area shape="rect" id="Node000003" href="$hsm__migration__service_8cpp.html" title="Implementation of background migration service for HSM." alt="" coords="259,93,455,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="278,51,333,91,330,95,275,56"/>
+</map>

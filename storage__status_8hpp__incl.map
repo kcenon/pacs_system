@@ -1,0 +1,7 @@
+<map id="include/pacs/services/storage_status.hpp" name="include/pacs/services/storage_status.hpp">
+<area shape="rect" id="Node000001" title="Storage SCP status codes for C&#45;STORE operations." alt="" coords="11,5,173,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,47,57,83,52,80,77,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="97,93,194,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="107,44,132,80,127,83,103,47"/>
+</map>

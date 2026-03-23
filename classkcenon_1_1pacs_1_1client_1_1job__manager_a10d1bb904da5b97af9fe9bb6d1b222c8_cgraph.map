@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::client::job_manager::cancel_job" name="kcenon::pacs::client::job_manager::cancel_job">
+<area shape="rect" id="Node000001" title="Cancel a job." alt="" coords="5,29,197,69"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="245,29,391,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,47,232,47,232,52,198,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="277,30,275,20,282,10,296,5,318,3,343,6,357,13,355,18,342,11,318,8,297,10,285,15,280,21,283,28"/>
+</map>

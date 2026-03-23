@@ -1,0 +1,9 @@
+<map id="include/pacs/security/atna_service_auditor.hpp" name="include/pacs/security/atna_service_auditor.hpp">
+<area shape="rect" id="Node000001" title="High&#45;level facade for ATNA audit logging in DICOM services." alt="" coords="189,5,379,45"/>
+<area shape="rect" id="Node000002" href="$atna__service__auditor_8cpp.html" title="Implementation of the ATNA service auditor facade." alt="" coords="5,93,189,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,53,139,96,137,91,230,49"/>
+<area shape="rect" id="Node000003" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="214,93,354,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="287,59,287,93,281,93,281,59"/>
+<area shape="rect" id="Node000004" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="379,93,531,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="335,49,418,91,416,96,332,54"/>
+</map>

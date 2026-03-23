@@ -1,0 +1,13 @@
+<map id="include/pacs/security/atna_audit_logger.hpp" name="include/pacs/security/atna_audit_logger.hpp">
+<area shape="rect" id="Node000001" title="IHE ATNA&#45;compliant audit message generator (RFC 3881 XML format)" alt="" coords="300,5,471,45"/>
+<area shape="rect" id="Node000002" href="$atna__service__auditor_8hpp.html" title="High&#45;level facade for ATNA audit logging in DICOM services." alt="" coords="189,93,379,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="354,56,308,95,305,91,351,52"/>
+<area shape="rect" id="Node000006" href="$atna__audit__logger_8cpp.html" title="Implementation of the ATNA audit message generator." alt="" coords="403,93,573,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="420,52,467,91,464,95,417,56"/>
+<area shape="rect" id="Node000003" href="$atna__service__auditor_8cpp.html" title="Implementation of the ATNA service auditor facade." alt="" coords="5,181,189,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="232,141,139,184,137,179,230,137"/>
+<area shape="rect" id="Node000004" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="214,181,354,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="287,147,287,181,281,181,281,147"/>
+<area shape="rect" id="Node000005" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="379,181,531,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="335,137,418,179,416,184,332,142"/>
+</map>

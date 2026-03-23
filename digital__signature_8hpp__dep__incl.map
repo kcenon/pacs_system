@@ -1,0 +1,7 @@
+<map id="include/pacs/security/digital_signature.hpp" name="include/pacs/security/digital_signature.hpp">
+<area shape="rect" id="Node000001" title="DICOM Digital Signature creation and verification per PS3.15." alt="" coords="145,5,307,45"/>
+<area shape="rect" id="Node000002" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="5,101,236,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,56,137,102,134,98,190,52"/>
+<area shape="rect" id="Node000003" href="$digital__signature_8cpp.html" title="Implementation of DICOM digital signature operations." alt="" coords="260,93,403,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,52,310,91,306,95,258,56"/>
+</map>

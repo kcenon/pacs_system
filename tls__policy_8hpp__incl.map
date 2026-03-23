@@ -1,0 +1,13 @@
+<map id="include/pacs/security/tls_policy.hpp" name="include/pacs/security/tls_policy.hpp">
+<area shape="rect" id="Node000001" title="TLS security policy for BCP 195 compliance (DICOM PS3.15)" alt="" coords="145,5,303,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,48,79,90,77,85,179,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,171,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="204,48,159,86,155,82,200,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="195,93,253,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="227,46,227,79,221,79,221,46"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="278,93,375,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="250,43,302,83,299,87,247,48"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="399,93,462,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="274,43,389,86,387,91,273,48"/>
+</map>

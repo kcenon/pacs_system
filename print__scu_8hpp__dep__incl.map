@@ -1,0 +1,5 @@
+<map id="include/pacs/services/print_scu.hpp" name="include/pacs/services/print_scu.hpp">
+<area shape="rect" id="Node000001" title="DICOM Print Management SCU service (PS3.4 Annex H)" alt="" coords="5,5,167,45"/>
+<area shape="rect" id="Node000002" href="$print__scu_8cpp.html" title="Implementation of the Print Management SCU service (PS3.4 Annex H)" alt="" coords="19,93,153,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,59,89,93,83,93,83,59"/>
+</map>

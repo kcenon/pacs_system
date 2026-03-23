@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::web::dicomweb::extract_frame" name="kcenon::pacs::web::dicomweb::extract_frame">
+<area shape="rect" id="Node000001" title="Extract a single frame from pixel data." alt="" coords="765,29,955,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="904,18,889,11,860,8,835,10,820,15,814,21,817,28,812,30,809,20,817,10,834,5,860,3,890,6,906,13"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="232,22,435,77"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="752,39,717,36,600,32,483,36,435,40,435,34,483,31,600,26,717,31,752,33"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ae42d333cbf06384a1e37a148a34c8a6e" title="Render a DICOM image to JPEG or PNG." alt="" coords="483,69,717,109"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="752,69,718,74,717,69,751,63"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,29,184,69"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="218,52,184,52,184,47,218,47"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="469,72,434,67,435,62,469,67"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="644,58,629,51,600,48,575,50,560,55,554,61,557,68,552,70,549,60,557,50,574,45,600,43,630,46,646,53"/>
+</map>

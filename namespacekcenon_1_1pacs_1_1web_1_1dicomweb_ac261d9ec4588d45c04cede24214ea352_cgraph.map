@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::dicomweb::instance_record_to_dicom_json" name="kcenon::pacs::web::dicomweb::instance_record_to_dicom_json">
+<area shape="rect" id="Node000001" title="Convert an instance record to DicomJSON format for QIDO&#45;RS response." alt="" coords="5,29,205,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="62,29,62,19,70,10,84,5,105,3,130,6,145,14,142,18,129,11,105,8,86,10,73,15,67,21,67,29"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="253,37,404,77"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="205,54,240,54,240,59,205,59"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="287,37,285,27,291,18,306,12,329,10,355,13,369,20,366,25,353,18,329,15,307,17,295,22,290,28,292,36"/>
+</map>

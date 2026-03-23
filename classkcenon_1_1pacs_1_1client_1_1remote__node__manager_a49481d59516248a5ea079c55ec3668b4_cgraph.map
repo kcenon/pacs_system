@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::client::remote_node_manager::remote_node_manager" name="kcenon::pacs::client::remote_node_manager::remote_node_manager">
+<area shape="rect" id="Node000001" title="Construct a remote node manager." alt="" coords="5,77,187,132"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a87056ac85ea33c72a2fe8f629d2b2f7e" title="Get the current configuration." alt="" coords="235,5,416,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,75,224,62,226,67,184,80"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1di.html#a01ed2d5e51632e2000e83f89cff202d4" title="Get a shared null logger instance." alt="" coords="246,85,405,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,102,232,102,232,107,187,107"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a03771aa52ca89891dc7f7844d71fb98d" title="Start the automatic health check scheduler." alt="" coords="235,149,416,204"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="184,130,226,143,224,148,183,135"/>
+</map>

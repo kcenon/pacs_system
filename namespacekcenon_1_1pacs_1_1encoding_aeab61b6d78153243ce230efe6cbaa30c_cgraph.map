@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::encoding::trim_padding" name="kcenon::pacs::encoding::trim_padding">
+<area shape="rect" id="Node000001" title="Removes trailing padding characters from a string value." alt="" coords="5,29,180,69"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#af0f969e116f011c48e151d32eb372b93" title="Retrieves comprehensive metadata for a VR type." alt="" coords="228,29,403,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,47,214,47,214,52,180,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="274,30,271,20,278,10,293,5,315,3,341,6,355,13,353,18,340,11,315,8,294,10,281,15,277,21,279,28"/>
+</map>

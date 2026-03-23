@@ -1,0 +1,66 @@
+<map id="kcenon::pacs::client::job_manager::impl::execute_prefetch_job" name="kcenon::pacs::client::job_manager::impl::execute_prefetch_job">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,435,167,489"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a46309fb960bec6076acd0dd6e1bb63fa" title=" " alt="" coords="219,124,379,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,433,270,188,274,191,108,436"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#affeebdf961dc7a1b901bca0a3af1eb5a" title="Perform a C&#45;FIND query with raw dataset." alt="" coords="215,330,384,370"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="126,432,213,380,228,373,230,378,216,384,128,437"/>
+<area shape="rect" id="Node000020" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a7f31993fd18603e90b611fe6ddfe842d" title=" " alt="" coords="219,395,379,449"/>
+<area shape="poly" id="edge22_Node000001_Node000020" title=" " alt="" coords="166,444,205,437,206,442,167,449"/>
+<area shape="rect" id="Node000021" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a0b26b245a7ae420eda5300099cf7ec93" title=" " alt="" coords="219,473,379,528"/>
+<area shape="poly" id="edge23_Node000001_Node000021" title=" " alt="" coords="167,474,206,481,205,486,166,479"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="222,552,377,607"/>
+<area shape="poly" id="edge24_Node000001_Node000022" title=" " alt="" coords="132,487,216,537,228,543,226,548,213,542,129,492"/>
+<area shape="rect" id="Node000030" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a7a749d2c848ee009c4cb70cb03ecd676" title=" " alt="" coords="219,635,379,689"/>
+<area shape="poly" id="edge32_Node000001_Node000030" title=" " alt="" coords="107,488,153,551,183,585,216,616,229,625,226,630,213,620,179,589,149,554,103,491"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#af8c72d7d3e771befaca6d9109487b46a" title=" " alt="" coords="461,5,621,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="339,122,383,95,431,69,447,62,450,66,433,74,385,99,342,126"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#addc159a2dd92e1b5efaa1eff170fefb7" title=" " alt="" coords="461,84,621,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="379,135,447,124,448,129,380,141"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a3023b4ee476e60b7c0298e11ab1c6e82" title=" " alt="" coords="461,163,621,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="380,161,448,172,447,178,379,167"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1client.html#a2224cefe2f1791fceebbc935eb2d567e" title="Check if job status is a terminal state." alt="" coords="727,114,877,154"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="621,170,712,150,714,156,622,175"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#aab495768e51545e002bf8e33c0267b6d" title="Internal query implementation." alt="" coords="457,327,626,367"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="384,346,443,346,443,351,384,352"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#aa11eaebe528cb53cf03469c7a51b5093" title="Get the next message ID for DIMSE operations." alt="" coords="432,391,651,431"/>
+<area shape="poly" id="edge21_Node000007_Node000019" title=" " alt="" coords="380,367,449,385,448,390,378,373"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="979,363,1150,417"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="621,365,652,377,676,393,686,400,699,406,767,419,837,422,904,417,965,409,966,414,905,423,837,427,767,424,698,411,683,405,673,397,649,382,619,370"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a67540e5677d29df9b5ea7af6f412cc80" title="Send a C&#45;CANCEL request to stop an ongoing query." alt="" coords="717,357,887,397"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="626,354,704,363,703,368,626,359"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a0ed5b3f0c7d52cbf237998c0e289a7b3" title="Get SOP Class UID based on current configuration." alt="" coords="953,447,1176,487"/>
+<area shape="poly" id="edge17_Node000008_Node000011" title=" " alt="" coords="628,365,652,377,667,390,676,404,685,417,700,428,758,450,820,464,881,471,940,473,939,478,881,476,819,469,757,455,697,432,681,420,672,407,663,394,649,382,625,370"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="969,295,1160,335"/>
+<area shape="poly" id="edge20_Node000008_Node000013" title=" " alt="" coords="557,325,581,298,614,266,653,237,698,214,754,197,801,193,848,199,906,214,942,228,975,245,1031,284,1028,289,973,250,939,232,905,219,847,204,801,198,755,202,700,219,656,241,617,271,585,302,561,329"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a82750b07c0240f829d3b8f060d81503a" title="Check if association is established and ready for DIMSE." alt="" coords="699,229,905,269"/>
+<area shape="poly" id="edge18_Node000008_Node000017" title=" " alt="" coords="585,325,698,278,719,271,721,276,700,283,587,330"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1network_1_1association.html#ac110e6ef4ad511fc13481475bd5ef79a" title="Receive a DIMSE message." alt="" coords="699,293,905,333"/>
+<area shape="poly" id="edge19_Node000008_Node000018" title=" " alt="" coords="626,333,685,326,685,331,626,339"/>
+<area shape="poly" id="edge10_Node000010_Node000009" title=" " alt="" coords="887,378,966,382,966,388,887,384"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="862,394,994,440,992,445,860,399"/>
+<area shape="poly" id="edge13_Node000010_Node000013" title=" " alt="" coords="886,354,964,336,966,341,887,360"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1services.html#a628b6b2b208f7649c2e3573a21b5ada4" title="Get the FIND SOP Class UID for a query model." alt="" coords="1227,447,1405,487"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="1176,465,1213,465,1213,470,1176,470"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="1232,361,1400,416"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="1135,333,1220,358,1218,363,1133,338"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="1224,283,1408,337"/>
+<area shape="poly" id="edge15_Node000013_Node000015" title=" " alt="" coords="1160,311,1210,310,1210,315,1160,316"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="1456,290,1645,330"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="1408,307,1443,307,1443,313,1408,313"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="456,523,627,577"/>
+<area shape="poly" id="edge25_Node000022_Node000023" title=" " alt="" coords="377,567,442,559,443,565,377,573"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="456,602,627,642"/>
+<area shape="poly" id="edge30_Node000022_Node000028" title=" " alt="" coords="378,590,443,602,442,607,377,596"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="723,523,881,577"/>
+<area shape="poly" id="edge26_Node000023_Node000024" title=" " alt="" coords="627,547,709,547,709,553,627,553"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="977,523,1152,577"/>
+<area shape="poly" id="edge27_Node000024_Node000025" title=" " alt="" coords="881,547,964,547,964,553,881,553"/>
+<area shape="rect" id="Node000026" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="1229,530,1403,570"/>
+<area shape="poly" id="edge28_Node000025_Node000026" title=" " alt="" coords="1152,547,1215,547,1215,553,1152,553"/>
+<area shape="rect" id="Node000027" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="1463,530,1638,570"/>
+<area shape="poly" id="edge29_Node000026_Node000027" title=" " alt="" coords="1404,547,1450,547,1450,553,1404,553"/>
+<area shape="rect" id="Node000029" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="722,602,882,642"/>
+<area shape="poly" id="edge31_Node000028_Node000029" title=" " alt="" coords="627,619,708,619,708,625,627,625"/>
+<area shape="rect" id="Node000031" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a44e1ee6fde91919f2fdb9254779005e1" title=" " alt="" coords="461,667,621,721"/>
+<area shape="poly" id="edge33_Node000030_Node000031" title=" " alt="" coords="380,670,448,679,447,684,379,675"/>
+</map>

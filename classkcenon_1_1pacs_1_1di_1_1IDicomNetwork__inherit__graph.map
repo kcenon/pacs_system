@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::di::IDicomNetwork" name="kcenon::pacs::di::IDicomNetwork">
+<area shape="rect" id="Node000001" title="Network service interface for DICOM communication." alt="" coords="144,5,317,245"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1DicomNetworkService.html" title="Default implementation of IDicomNetwork using network_adapter." alt="" coords="5,371,229,531"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,259,148,371,143,370,182,257"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1test_1_1MockNetwork.html" title="Mock network service for testing." alt="" coords="254,293,437,608"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,257,292,292,287,294,275,259"/>
+</map>

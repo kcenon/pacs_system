@@ -1,0 +1,32 @@
+<map id="kcenon::pacs::storage::s3_storage" name="kcenon::pacs::storage::s3_storage">
+<area shape="rect" id="Node000001" title=" " alt="" coords="405,1305,561,1665"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1storage__interface.html" title=" " alt="" coords="5,883,169,1243"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,1238,183,1241,236,1298,294,1350,353,1395,406,1433,403,1437,350,1399,291,1354,232,1301,179,1244,176,1241"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1storage_1_1cloud__storage__config.html" title="Configuration for S3&#45;compatible cloud storage." alt="" coords="427,659,593,859"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="500,859,498,883,488,1092,485,1289,480,1289,483,1092,493,882,495,859"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="769,135,848,200"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="770,177,723,194,701,207,683,226,666,253,655,279,649,305,647,330,652,379,664,428,677,477,682,527,681,554,675,580,665,608,648,636,639,645,630,650,608,657,606,652,628,645,636,641,644,633,660,606,670,579,676,553,677,528,671,478,659,429,647,380,642,330,644,304,650,277,661,250,679,222,697,203,720,189,768,172"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="563,1008,742,1117"/>
+<area shape="poly" id="edge10_Node000010_Node000004" title=" " alt="" coords="812,200,815,555,809,749,803,819,792,860,784,870,775,874,766,878,757,885,717,938,685,994,681,992,712,935,753,881,764,873,773,869,781,865,788,857,797,818,804,749,810,555,807,200"/>
+<area shape="rect" id="Node000011" href="$structkcenon_1_1pacs_1_1storage_1_1s3__object__info.html" title="Information about an S3 object." alt="" coords="879,467,1035,547"/>
+<area shape="poly" id="edge12_Node000011_Node000004" title=" " alt="" coords="825,199,935,451,931,453,820,201"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="743,5,874,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="811,99,811,134,806,134,806,99"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="193,1015,381,1110"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="311,1109,401,1301,396,1303,306,1111"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1storage_1_1s3__storage_1_1s3__client__interface.html" title="Abstract interface for S3 client operations." alt="" coords="109,380,282,635"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="186,635,186,744,190,802,199,858,223,933,255,1000,250,1002,218,935,194,859,185,803,180,745,181,635"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="307,475,457,540"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="360,554,332,596,296,637,284,644,273,648,264,651,256,660,247,688,243,727,248,824,263,928,280,1015,274,1016,258,929,243,825,238,727,242,687,252,657,261,647,271,643,282,639,292,633,328,593,356,551"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="408,135,431,200"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="410,186,399,204,391,225,379,287,375,350,379,458,374,459,370,350,374,286,386,223,395,202,405,183"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="490,467,634,547"/>
+<area shape="poly" id="edge15_Node000012_Node000009" title=" " alt="" coords="430,199,451,271,482,355,532,452,527,454,477,357,446,273,425,201"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="634,1119,564,1291,559,1289,629,1117"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="956,548,945,615,923,698,907,742,886,785,860,825,829,861,810,872,792,874,775,876,757,885,733,909,712,936,680,994,675,992,707,933,729,905,754,880,773,871,792,869,809,867,826,857,856,822,881,782,902,740,918,697,940,614,951,547"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="577,560,597,658,648,1007,643,1008,591,659,571,561"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="551,135,573,200"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="565,200,565,451,559,451,559,200"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="767,1030,901,1095"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="827,1097,800,1167,780,1207,756,1244,715,1295,669,1342,576,1421,572,1417,665,1338,711,1291,752,1241,775,1204,795,1165,822,1095"/>
+</map>

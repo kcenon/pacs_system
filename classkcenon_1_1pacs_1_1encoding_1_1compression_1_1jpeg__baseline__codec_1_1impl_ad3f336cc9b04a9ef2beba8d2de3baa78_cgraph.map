@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_baseline_codec::impl::encode" name="kcenon::pacs::encoding::compression::jpeg_baseline_codec::impl::encode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,84,216,139"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#a3731ce9c577a4b1fa09dfc85187c2342" title="Calculates the size of uncompressed pixel data in bytes." alt="" coords="264,5,483,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,81,267,62,269,67,203,86"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#ae032d6aad89321385cbc4e6189f757cb" title="Checks if the image is grayscale (single sample per pixel)." alt="" coords="264,84,483,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,109,251,109,251,114,216,114"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#ad712657109234ef246d4c8a4a0f3dbea" title="Validates image parameters for JPEG Baseline compression." alt="" coords="264,163,483,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="203,136,269,156,267,161,202,141"/>
+</map>

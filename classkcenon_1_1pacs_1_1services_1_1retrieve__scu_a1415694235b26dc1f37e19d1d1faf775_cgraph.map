@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::services::retrieve_scu::cancel" name="kcenon::pacs::services::retrieve_scu::cancel">
+<area shape="rect" id="Node000001" title="Send a C&#45;CANCEL request to stop an ongoing retrieve." alt="" coords="5,131,175,171"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="233,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,129,221,69,233,63,235,68,224,74,123,133"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a81e9d12d536730abada96782e6fe826f" title="Get GET SOP Class UID based on current configuration." alt="" coords="233,84,403,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,134,219,126,220,131,176,139"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#acd3e9c39cea6a7c103bf887192187fcd" title="Get MOVE SOP Class UID based on current configuration." alt="" coords="227,163,409,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="176,163,214,170,213,175,175,168"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="223,242,413,282"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="123,169,170,198,224,226,243,235,241,239,222,231,167,202,120,174"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="469,195,637,249"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="413,243,455,236,456,241,414,248"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="461,273,645,328"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="414,275,448,281,447,286,413,280"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="693,281,883,321"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="646,298,680,298,680,303,646,303"/>
+</map>

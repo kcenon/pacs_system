@@ -1,0 +1,16 @@
+<map id="include/pacs/security/user.hpp" name="include/pacs/security/user.hpp">
+<area shape="rect" id="Node000001" title="User definition for RBAC." alt="" coords="102,5,261,45"/>
+<area shape="rect" id="Node000002" href="$role_8hpp.html" title="Role definitions for RBAC." alt="" coords="92,93,167,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,47,147,83,142,80,167,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,64,192"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="145,48,113,68,82,95,61,125,46,155,41,152,56,122,78,92,109,64,142,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="191,93,276,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="196,44,220,80,216,83,192,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="301,93,363,119"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="219,43,299,84,296,89,216,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="116,121,63,160,60,156,113,117"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="89,167,186,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="133,119,137,153,132,153,128,119"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="211,167,285,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="150,116,218,157,215,162,147,121"/>
+</map>

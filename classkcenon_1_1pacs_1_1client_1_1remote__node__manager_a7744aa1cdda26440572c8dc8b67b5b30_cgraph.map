@@ -1,0 +1,24 @@
+<map id="kcenon::pacs::client::remote_node_manager::acquire_association" name="kcenon::pacs::client::remote_node_manager::acquire_association">
+<area shape="rect" id="Node000001" title="Acquire an association from the pool." alt="" coords="5,88,187,143"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a87056ac85ea33c72a2fe8f629d2b2f7e" title="Get the current configuration." alt="" coords="235,52,416,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,98,221,93,221,98,187,104"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a5c1540b1e9c3ee78b9557140a17af42e" title="Initiate an SCU association to a remote SCP." alt="" coords="241,131,409,171"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,127,228,133,227,139,186,132"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1association.html#aa17e3c53b7ca6528599b66677cf65b92" title="Build A&#45;ASSOCIATE&#45;RQ PDU for sending." alt="" coords="477,5,645,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="389,129,415,116,429,104,438,93,448,81,462,69,470,64,473,69,466,74,451,85,442,96,432,108,417,120,392,134"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#aaf817132156f3f28ec42cfd7d1649669" title="Get server instance listening on port (for in&#45;memory testing)." alt="" coords="464,84,659,139"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="409,134,450,127,451,133,410,140"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a511cee48045239577b7833f0b0df74d5" title="Process received A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="477,163,645,217"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="410,162,464,171,463,177,409,168"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1association.html#aa60a1d5dc866d489a3f2dad28bbd17e8" title="Perform state transition." alt="" coords="707,235,881,275"/>
+<area shape="poly" id="edge11_Node000003_Node000010" title=" " alt="" coords="355,169,404,201,465,227,522,242,582,250,693,256,693,262,581,256,521,247,463,233,402,205,352,174"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7a248e63aa4c3004790316536ac86011" title="Build presentation context map from accepted contexts." alt="" coords="710,156,878,211"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="646,185,696,183,696,189,646,190"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="646,211,709,229,708,234,645,216"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a1cdb498e148231c8d7e682a041728c90" title="Constructs a transfer_syntax from a UID string." alt="" coords="946,156,1137,211"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="878,181,932,181,932,186,878,186"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a2e62a7fa09112312b2b375fe76141dd6" title="Returns the Transfer Syntax UID." alt="" coords="1201,163,1376,203"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="1137,181,1187,181,1187,186,1137,186"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7c66fc80fb836cca1ae810daaa70d951" title="Validate state transition." alt="" coords="929,235,1153,275"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="882,253,916,253,916,258,882,258"/>
+</map>

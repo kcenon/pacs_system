@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::worklist_scu::cancel" name="kcenon::pacs::services::worklist_scu::cancel">
+<area shape="rect" id="Node000001" title="Send a C&#45;CANCEL request to stop an ongoing query." alt="" coords="5,49,175,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="233,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,53,219,46,219,51,176,58"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="223,85,413,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,79,210,85,209,90,175,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="469,37,637,92"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="413,86,455,79,456,84,414,91"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="461,116,645,171"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="414,118,448,123,447,129,413,123"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="693,123,883,163"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="646,141,680,141,680,146,646,146"/>
+</map>

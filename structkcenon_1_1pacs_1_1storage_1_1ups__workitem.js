@@ -1,0 +1,27 @@
+var structkcenon_1_1pacs_1_1storage_1_1ups__workitem =
+[
+    [ "get_priority", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ad10cad50f9bdc29b3fb6840539f63b1a", null ],
+    [ "get_state", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ad254b7513dbc4676c0ff65b9ea630d5f", null ],
+    [ "is_final", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#aceca4aba706a1d2a8d182bf77b05f446", null ],
+    [ "is_valid", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#af9ffdbcf73cfbf99404fabb0f5d1f4ab", null ],
+    [ "created_at", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ab3bda638a4aaece9d0687cbed7b9e33e", null ],
+    [ "expected_completion_datetime", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a7b34a532e6b1cec2f96f926578af578f", null ],
+    [ "input_information", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a60766dbc598c45c5e88563bb4ed2a851", null ],
+    [ "output_information", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a9b91c9cf761fbc9a71f842ae0f1492c4", null ],
+    [ "performing_ae", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a6a740df7e37c074e8681b4b8e422d954", null ],
+    [ "pk", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#aa95423257329d9ef6421a37a77c88f05", null ],
+    [ "priority", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ad5aa51fbd8a5abb8bfa01dd88ddd55fe", null ],
+    [ "procedure_step_label", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#aec8828770e1c60fef3a7e1c0f80fc27b", null ],
+    [ "progress_description", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ab5f28801640192c95abba4ad247bfb0b", null ],
+    [ "progress_percent", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#accaa41bfd4cda38368b713c9c94037f8", null ],
+    [ "scheduled_human_performers", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a125679baba399b83cc8f5380ade38c5b", null ],
+    [ "scheduled_start_datetime", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ac19d09713329e647efafd1f5ed77eab1", null ],
+    [ "scheduled_station_class", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#af0991d2ca84b13b9ffca9ba8ee33cb89", null ],
+    [ "scheduled_station_geographic", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#abd89e331efdf0b2d45734618ab34f613", null ],
+    [ "scheduled_station_name", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a7c2d7248e1394ce715d39427dbc5c152", null ],
+    [ "state", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a920b36210f062b6c82691510d5ec75dc", null ],
+    [ "transaction_uid", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a94976cae5306382ace2eadbd3a93db91", null ],
+    [ "updated_at", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a9b43de67538c485579f4b4c5e77e5aaf", null ],
+    [ "workitem_uid", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#a0045ec7ad740a4830c08defb65834ccb", null ],
+    [ "worklist_label", "structkcenon_1_1pacs_1_1storage_1_1ups__workitem.html#ad8701e4e55e9749fe8a06457dfe517bf", null ]
+];

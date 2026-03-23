@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::web::storage_commitment::transaction_to_json" name="kcenon::pacs::web::storage_commitment::transaction_to_json">
+<area shape="rect" id="Node000001" title="Serialize a commitment transaction to DICOM JSON." alt="" coords="5,22,176,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="224,29,375,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,47,210,47,210,52,176,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="260,30,258,20,264,10,278,5,299,3,324,6,337,13,334,18,322,11,299,8,279,10,267,15,263,21,265,28"/>
+</map>

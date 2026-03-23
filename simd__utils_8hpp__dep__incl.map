@@ -1,0 +1,10 @@
+<map id="include/pacs/encoding/simd/simd_utils.hpp" name="include/pacs/encoding/simd/simd_utils.hpp">
+<area shape="rect" id="Node000001" title="Common SIMD utility functions." alt="" coords="197,5,363,45"/>
+<area shape="rect" id="Node000002" href="$byte__swap_8hpp.html" title="Byte swapping utilities for endianness conversion." alt="" coords="137,93,303,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="261,58,235,95,231,92,257,55"/>
+<area shape="rect" id="Node000004" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="222,189,461,214"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="301,56,318,92,334,145,342,188,337,189,329,147,314,94,296,59"/>
+<area shape="rect" id="Node000003" href="$explicit__vr__big__endian__codec_8cpp.html" title="Implementation of Explicit VR Big Endian encoder/decoder." alt="" coords="5,181,197,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="184,144,129,183,126,179,181,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="260,139,326,186,323,191,257,144"/>
+</map>

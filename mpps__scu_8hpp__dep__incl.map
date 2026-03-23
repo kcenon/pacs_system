@@ -1,0 +1,5 @@
+<map id="include/pacs/services/mpps_scu.hpp" name="include/pacs/services/mpps_scu.hpp">
+<area shape="rect" id="Node000001" title="DICOM MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="22,5,183,45"/>
+<area shape="rect" id="Node000002" href="$mpps__scu_8cpp.html" title="Implementation of the MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="5,93,200,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,59,105,93,100,93,100,59"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="include/pacs/ai/ai_result_handler.hpp" name="include/pacs/ai/ai_result_handler.hpp">
+<area shape="rect" id="Node000001" title="Handler for AI&#45;generated DICOM objects (SR, SEG, PR)" alt="" coords="30,5,179,45"/>
+<area shape="rect" id="Node000002" href="$ai__result__handler_8cpp.html" title="Implementation of the AI result handler." alt="" coords="5,93,204,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,59,107,93,102,93,102,59"/>
+</map>

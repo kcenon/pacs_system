@@ -1,0 +1,18 @@
+<map id="include/pacs/storage/viewer_state_record.hpp" name="include/pacs/storage/viewer_state_record.hpp">
+<area shape="rect" id="Node000001" title="Viewer state record data structures for database operations." alt="" coords="329,5,515,45"/>
+<area shape="rect" id="Node000002" href="$recent__study__repository_8hpp.html" title="Repository for recent study records using base_repository pattern." alt="" coords="5,101,215,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="347,52,174,103,172,98,345,47"/>
+<area shape="rect" id="Node000004" href="$viewer__state__record__repository_8hpp.html" title="Repository for viewer state records using base_repository pattern." alt="" coords="239,93,397,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="393,56,349,95,346,91,389,52"/>
+<area shape="rect" id="Node000006" href="$viewer__state__repository_8hpp.html" title="Repository for viewer state persistence." alt="" coords="421,101,631,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="455,53,507,99,503,103,452,57"/>
+<area shape="rect" id="Node000008" href="$viewer__state__endpoints_8cpp.html" title="Viewer state API endpoints implementation." alt="" coords="631,196,819,236"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="530,41,589,60,618,74,645,91,671,115,692,143,719,194,715,197,687,146,667,119,642,95,616,79,587,65,528,46"/>
+<area shape="rect" id="Node000003" href="$recent__study__repository_8cpp.html" title="Implementation of recent_study_repository using base_repository pattern." alt="" coords="27,196,190,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="112,154,112,196,106,196,107,154"/>
+<area shape="rect" id="Node000005" href="$viewer__state__record__repository_8cpp.html" title="Implementation of viewer_state_record_repository using base_repository pattern." alt="" coords="214,196,422,236"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="321,162,321,196,315,196,315,162"/>
+<area shape="rect" id="Node000007" href="$viewer__state__repository_8cpp.html" title="Implementation of the viewer state repository." alt="" coords="446,196,606,236"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="529,154,529,196,523,196,523,154"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="580,144,686,194,683,198,577,149"/>
+</map>

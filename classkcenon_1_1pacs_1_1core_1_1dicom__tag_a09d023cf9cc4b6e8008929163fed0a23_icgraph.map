@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::core::dicom_tag::private_block_number" name="kcenon::pacs::core::dicom_tag::private_block_number">
+<area shape="rect" id="Node000001" title="Extract the Private Creator block number from this tag." alt="" coords="440,5,592,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a7a10ab20491d319fc3234b2196ecfd24" title="Get the Private Creator tag that owns this data element." alt="" coords="240,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,35,392,35,392,30,426,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aa6c76d3e000f97010cfbdeb10f687a4a" title="Validate private tag relationships in this dataset." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="226,35,192,35,192,30,226,30"/>
+</map>

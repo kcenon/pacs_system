@@ -1,0 +1,15 @@
+<map id="include/pacs/client/routing_types.hpp" name="include/pacs/client/routing_types.hpp">
+<area shape="rect" id="Node000001" title="Routing types and structures for auto&#45;forwarding DICOM images." alt="" coords="149,5,292,45"/>
+<area shape="rect" id="Node000002" href="$routing__manager_8hpp.html" title="Routing manager for automatic DICOM image forwarding." alt="" coords="139,93,303,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,59,223,93,218,93,218,59"/>
+<area shape="rect" id="Node000004" href="$routing__endpoints_8cpp.html" title="Routing rule management REST API endpoints implementation." alt="" coords="5,181,196,221"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="172,55,148,73,128,95,117,116,110,139,104,181,99,181,105,138,112,114,124,92,144,69,168,50"/>
+<area shape="rect" id="Node000005" href="$routing__repository_8hpp.html" title="Repository for routing rule persistence using base_repository pattern." alt="" coords="327,93,498,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="276,49,372,91,370,96,274,53"/>
+<area shape="rect" id="Node000003" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="221,181,351,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="245,143,274,179,269,183,241,146"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="184,144,129,183,126,179,181,139"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="375,144,316,183,313,179,372,139"/>
+<area shape="rect" id="Node000006" href="$routing__repository_8cpp.html" title="Implementation of the routing repository for rule persistence." alt="" coords="375,181,519,221"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="428,145,442,180,437,182,423,147"/>
+</map>

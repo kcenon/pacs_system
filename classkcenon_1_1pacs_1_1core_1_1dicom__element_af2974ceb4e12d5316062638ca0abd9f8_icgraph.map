@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_element::from_numeric" name="kcenon::pacs::core::dicom_element::from_numeric">
+<area shape="rect" id="Node000001" title="Create an element from a numeric value." alt="" coords="240,5,411,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1container__adapter.html#a3b7bcaeb729fd2f989c61cdac004a925" title="Convert a container value back to a DICOM element." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,35,192,35,192,30,227,30"/>
+</map>

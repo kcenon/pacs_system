@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::set_event_type_id" name="kcenon::pacs::network::dimse::dimse_message::set_event_type_id">
+<area shape="rect" id="Node000001" title="Set the Event Type ID." alt="" coords="227,81,411,136"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#aa5d014b759946c52108b00fe01abda8a" title="Create an N&#45;EVENT&#45;REPORT request message." alt="" coords="5,29,179,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,87,178,79,180,74,214,82"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a46117d12bf65ec0353ca4616d2fe0b12" title="Create an N&#45;EVENT&#45;REPORT response message." alt="" coords="5,132,179,187"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="214,135,180,143,178,137,212,130"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="130,18,116,11,92,8,72,10,59,15,53,21,53,29,48,29,48,19,56,10,71,5,92,3,118,6,132,14"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="130,121,116,114,92,111,72,113,59,117,53,124,53,132,48,132,48,122,56,113,71,107,92,105,118,108,132,116"/>
+</map>

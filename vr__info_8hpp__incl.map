@@ -1,0 +1,19 @@
+<map id="include/pacs/encoding/vr_info.hpp" name="include/pacs/encoding/vr_info.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="169,5,335,45"/>
+<area shape="rect" id="Node000002" href="$vr__type_8hpp.html" title=" " alt="" coords="84,93,183,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,48,164,88,161,84,222,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="169,45,119,64,95,78,74,95,55,123,45,154,40,152,50,121,70,92,92,74,116,59,167,40"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="195,167,293,192"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="252,46,248,93,247,153,241,153,243,93,247,46"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="257,93,311,119"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="262,45,277,80,272,82,257,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,93,393,119"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="281,43,338,83,335,87,278,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="418,93,481,119"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="300,43,408,86,406,91,298,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,121,67,160,64,156,117,117"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,167,171,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="136,119,136,153,131,153,131,119"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="153,116,216,157,213,161,150,121"/>
+</map>

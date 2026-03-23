@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::dimse_message" name="kcenon::pacs::network::dimse::dimse_message::dimse_message">
+<area shape="rect" id="Node000001" title="Construct a new DIMSE message." alt="" coords="5,71,189,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a00d38e98cabc03f34fec6ffc1864e830" title="Get the message ID." alt="" coords="237,5,421,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,69,223,60,225,65,191,75"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a14d8dfdfe13a0430e72142e8896fb95a" title="Set a numeric value for the given tag." alt="" coords="469,104,624,159"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,102,456,122,455,127,189,107"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#aa145290d190e72d67ef5546f9f7ab3c8" title="Update the CommandDataSetType field based on dataset presence." alt="" coords="237,136,421,191"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="191,121,225,131,223,136,189,127"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="672,111,843,151"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="624,129,658,129,658,134,624,134"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="891,111,1051,151"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="843,129,877,129,877,134,843,134"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="421,147,455,142,456,147,422,152"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="include/pacs/storage/prefetch_history_repository.hpp" name="include/pacs/storage/prefetch_history_repository.hpp">
+<area shape="rect" id="Node000001" title="Repository for prefetch history records using base_repository pattern." alt="" coords="5,5,236,45"/>
+<area shape="rect" id="Node000002" href="$prefetch__history__repository_8cpp.html" title="Implementation of prefetch_history_repository using base_repository pattern." alt="" coords="35,93,207,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,59,123,93,118,93,118,59"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::atna_audit_logger::build_dicom_instances_transferred" name="kcenon::pacs::security::atna_audit_logger::build_dicom_instances_transferred">
+<area shape="rect" id="Node000001" title="Build DICOM Instances Transferred audit message (C&#45;STORE, C&#45;MOVE)" alt="" coords="227,5,444,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#af8fc4f873ed31b18a1476838ca3cf300" title="Audit a C&#45;STORE (DICOM Instances Transferred) event." alt="" coords="5,5,179,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,35,179,35,179,30,213,30"/>
+</map>

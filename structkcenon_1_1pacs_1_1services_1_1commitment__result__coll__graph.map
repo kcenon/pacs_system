@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::services::commitment_result" name="kcenon::pacs::services::commitment_result">
+<area shape="rect" id="Node000001" title="Result of a Storage Commitment verification." alt="" coords="261,636,423,736"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="460,135,539,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="540,199,555,223,558,238,555,254,554,359,557,445,553,485,542,525,523,568,492,614,468,638,439,656,436,652,464,634,488,610,518,565,537,524,547,484,551,445,549,359,550,253,552,238,550,225,535,202"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1services_1_1sop__reference.html" title="Reference to a SOP Instance in a commitment request." alt="" coords="360,277,521,357"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="462,192,444,207,431,225,426,243,426,262,421,261,421,242,426,223,440,203,458,188"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="434,5,565,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="502,99,502,134,497,134,497,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="269,471,415,566"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="345,566,345,619,339,619,339,566"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="447,358,444,399,431,441,419,460,414,457,426,439,439,398,441,358"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="104,285,225,350"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="215,358,234,380,242,396,246,410,250,423,259,438,286,469,282,473,254,442,246,425,241,411,237,398,229,383,211,361"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="5,464,212,573"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="95,356,72,383,66,402,66,422,78,463,73,464,60,423,61,401,68,380,90,353"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="153,135,176,200"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="167,200,167,268,162,268,162,200"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="163,572,209,610,248,635,246,640,206,614,160,576"/>
+</map>

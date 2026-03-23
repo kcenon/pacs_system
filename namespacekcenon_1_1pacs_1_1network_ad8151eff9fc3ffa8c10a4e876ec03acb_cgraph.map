@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::make_pooled_pdu_buffer" name="kcenon::pacs::network::make_pooled_pdu_buffer">
+<area shape="rect" id="Node000001" title="Create a pooled byte buffer with initial size." alt="" coords="5,37,199,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__buffer__pool.html#ad8e2db552ca441c7c3a0143a2cb5e3ce" title="Get the global PDU buffer pool instance." alt="" coords="247,5,415,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,41,233,36,233,42,200,46"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pooled__buffer.html#ad80d2b52f1a645a34959e2edf7511b1a" title="Resize the buffer." alt="" coords="247,69,415,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,68,233,73,233,78,199,74"/>
+</map>

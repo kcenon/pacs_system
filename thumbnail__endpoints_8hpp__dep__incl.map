@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/thumbnail_endpoints.hpp" name="include/pacs/web/endpoints/thumbnail_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Thumbnail REST API endpoints." alt="" coords="117,5,320,45"/>
+<area shape="rect" id="Node000002" href="$thumbnail__endpoints_8cpp.html" title="Thumbnail REST API endpoints implementation." alt="" coords="5,93,216,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,56,136,95,133,91,182,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="241,101,415,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="255,52,315,98,311,102,252,56"/>
+</map>

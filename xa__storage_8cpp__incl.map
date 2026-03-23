@@ -1,0 +1,20 @@
+<map id="src/services/sop_classes/xa_storage.cpp" name="src/services/sop_classes/xa_storage.cpp">
+<area shape="rect" id="Node000001" title="Implementation of X&#45;Ray Angiographic Image Storage SOP Classes." alt="" coords="185,5,367,45"/>
+<area shape="rect" id="Node000002" href="$xa__storage_8hpp.html" title="X&#45;Ray Angiographic (XA) Image Storage SOP Classes." alt="" coords="99,93,291,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,47,224,85,220,81,256,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,61,207"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="186,47,135,66,88,95,73,112,60,131,43,169,38,167,56,128,69,109,85,91,132,61,184,42"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="315,101,400,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="296,44,339,89,335,92,292,47"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="425,101,487,126"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="317,43,421,93,419,97,314,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="157,136,71,178,68,173,155,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="85,181,152,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="178,135,142,173,138,169,174,132"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="176,181,235,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="200,133,205,167,199,168,195,134"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="259,181,357,207"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="224,131,281,171,278,175,221,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="381,181,443,207"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="248,131,369,174,367,179,246,136"/>
+</map>

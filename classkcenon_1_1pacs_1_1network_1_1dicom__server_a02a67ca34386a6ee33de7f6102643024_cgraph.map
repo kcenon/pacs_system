@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::dicom_server::dispatch_to_service" name="kcenon::pacs::network::dicom_server::dispatch_to_service">
+<area shape="rect" id="Node000001" title="Dispatch message to appropriate service." alt="" coords="5,45,187,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a25f41bf2902c24cbd4c67ee708dbd488" title="Get the Affected SOP Class UID." alt="" coords="235,5,419,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,54,221,48,222,54,187,60"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a49deb3be4fbee3ff0ceaa1ee9ccedfdd" title="Get service for SOP Class." alt="" coords="243,84,411,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,85,230,92,229,98,186,90"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="467,5,621,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="419,30,453,30,453,35,419,35"/>
+</map>

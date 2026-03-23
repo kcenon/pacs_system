@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::association::build_context_map" name="kcenon::pacs::network::association::build_context_map">
+<area shape="rect" id="Node000001" title="Build presentation context map from accepted contexts." alt="" coords="5,5,173,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a1cdb498e148231c8d7e682a041728c90" title="Constructs a transfer_syntax from a UID string." alt="" coords="221,5,412,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,30,208,30,208,35,174,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a2e62a7fa09112312b2b375fe76141dd6" title="Returns the Transfer Syntax UID." alt="" coords="460,13,635,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="412,30,446,30,446,35,412,35"/>
+</map>

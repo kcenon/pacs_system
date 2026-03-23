@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::storage::file_storage::import_directory" name="kcenon::pacs::storage::file_storage::import_directory">
+<area shape="rect" id="Node000001" title="Import DICOM files from a directory." alt="" coords="5,5,169,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="217,13,360,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,30,203,30,203,35,169,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="408,13,620,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="360,30,394,30,394,35,360,35"/>
+</map>

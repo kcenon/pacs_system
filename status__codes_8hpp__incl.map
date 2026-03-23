@@ -1,0 +1,7 @@
+<map id="include/pacs/network/dimse/status_codes.hpp" name="include/pacs/network/dimse/status_codes.hpp">
+<area shape="rect" id="Node000001" title="DIMSE status codes." alt="" coords="5,5,188,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="10,93,77,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,47,61,83,57,80,82,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="101,93,199,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="112,44,136,80,132,83,107,47"/>
+</map>

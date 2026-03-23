@@ -1,0 +1,15 @@
+<map id="include/pacs/security/atna_syslog_transport.hpp" name="include/pacs/security/atna_syslog_transport.hpp">
+<area shape="rect" id="Node000001" title="Syslog transport for ATNA audit messages (RFC 5424/5425/5426)" alt="" coords="280,5,479,45"/>
+<area shape="rect" id="Node000002" href="$result_8hpp.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="123,93,276,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,48,239,90,237,85,335,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="301,93,367,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="371,47,350,83,345,80,366,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="391,93,458,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="393,44,413,80,409,83,388,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="482,93,541,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="412,43,481,84,478,88,410,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,193,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,121,136,160,133,156,183,117"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="218,167,383,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="216,117,267,156,264,160,213,121"/>
+</map>

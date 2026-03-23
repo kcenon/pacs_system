@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::client::to_string" name="kcenon::pacs::client::to_string">
+<area shape="rect" id="Node000001" title="Convert job_type to string representation." alt="" coords="509,343,660,383"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1node__repository.html#a3694fe8e4a99993187f43f97900974fe" title=" " alt="" coords="263,5,430,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="576,330,564,275,542,207,508,136,486,103,460,75,429,54,432,50,463,71,490,100,512,133,547,205,569,274,581,329"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1job__repository.html#aa451a0ff7b9556e4a3039daa045258c3" title=" " alt="" coords="253,85,441,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="572,331,557,287,534,235,501,183,482,159,460,139,439,126,442,122,463,135,486,156,506,180,538,232,562,285,577,329"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1prefetch__repository.html#a04c29fdf5cb1bb9cc6d9190ad547b31b" title=" " alt="" coords="265,149,429,204"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="562,333,519,275,491,245,460,219,427,201,430,197,463,214,495,241,524,272,566,330"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="232,228,461,283"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="538,339,460,298,430,285,432,280,462,293,540,334"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1storage_1_1job__repository.html#a08dad43bb9a9d79247294ecd35e82d0b" title=" " alt="" coords="265,307,429,347"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="495,353,429,342,429,337,496,347"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1storage_1_1prefetch__repository.html#a9e0b59cb1b1ccc75854a964b144d7ab7" title=" " alt="" coords="265,372,429,427"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="496,379,429,390,429,384,495,374"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1storage_1_1routing__repository.html#ad69c40ba25e8f0a90f8c49fc0b17e7a9" title=" " alt="" coords="265,451,429,505"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="545,393,506,418,462,442,430,455,428,451,460,437,503,414,542,389"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1storage_1_1routing__repository.html#a4818745489f5c77a21667670f979ed1a" title=" " alt="" coords="265,529,429,584"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="568,397,525,459,496,492,463,520,430,538,428,533,460,516,492,488,521,456,564,394"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1storage_1_1node__repository.html#ae0a50b7d672f0522113c024b0643e8a9" title=" " alt="" coords="253,608,440,663"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="577,397,562,442,539,496,506,551,486,576,463,599,442,613,439,609,460,595,482,573,502,548,534,494,557,440,572,395"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1storage_1_1node__repository.html#a568b37eda8ffc3b046376ca68d235ad0" title=" " alt="" coords="255,687,438,727"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="583,398,572,457,551,533,536,572,516,610,492,646,463,677,440,693,437,688,460,673,488,643,511,608,531,570,546,531,567,456,577,397"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1prefetch__repository.html#af29f06374b23ab5169811a925c67c2ed" title=" " alt="" coords="13,149,177,204"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="251,179,177,179,177,174,251,174"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,235,184,275"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="218,258,184,258,184,253,218,253"/>
+</map>

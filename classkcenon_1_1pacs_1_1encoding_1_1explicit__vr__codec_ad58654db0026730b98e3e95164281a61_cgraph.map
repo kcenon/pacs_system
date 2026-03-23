@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::encoding::explicit_vr_codec::encode_element" name="kcenon::pacs::encoding::explicit_vr_codec::encode_element">
+<area shape="rect" id="Node000001" title="Encode a single element to bytes." alt="" coords="5,253,204,308"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#a75426e4905024d6a7b0b2043a2cbf298" title=" " alt="" coords="252,5,451,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,252,137,212,167,164,205,114,250,71,258,65,261,69,254,75,209,118,172,167,142,215,121,255"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="253,85,449,125"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="125,251,178,193,213,161,251,134,262,128,264,133,253,139,216,166,182,196,129,255"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a0212259ad8f724cb49f3fb5591c3b9c2" title="Check if this element is a sequence." alt="" coords="276,149,427,204"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="167,251,251,214,268,207,270,212,253,219,169,256"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa93dadfa5db49533c0cc1dcc8bc8923b" title="Pads data to even length as required by DICOM." alt="" coords="264,229,439,269"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="204,265,250,259,251,264,205,270"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a6138cd831e5dd4fd443cc4ce3f1283b4" title="Get the raw data bytes." alt="" coords="252,293,451,333"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="205,291,239,295,238,301,204,296"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="271,357,431,397"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="166,306,253,342,274,350,272,355,251,347,164,311"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="275,421,427,461"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="133,306,186,357,218,383,253,406,266,413,264,418,251,411,215,388,182,361,129,310"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#a5334706aa49128bf068e0ceaae679e54" title=" " alt="" coords="522,5,721,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="451,30,508,30,508,35,451,35"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af5d554755e5a71cf427553bccecd8c83" title="Get mutable access to sequence items." alt="" coords="499,85,744,125"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="451,56,533,79,532,84,450,62"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#ad857a6afb532aa97c96b502d9b07194e" title="Encode a dataset to bytes using Explicit VR Little Endian." alt="" coords="792,246,991,286"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="723,57,746,71,788,108,825,152,854,195,876,232,871,235,850,198,821,155,784,112,742,75,720,62"/>
+<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="861,288,791,331,692,385,575,437,513,458,451,475,395,489,349,497,304,495,251,475,206,444,170,404,141,361,120,322,125,319,146,358,174,400,210,440,253,470,305,489,349,492,394,484,450,470,512,453,573,432,690,380,789,326,858,284"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1encoding.html#af0f969e116f011c48e151d32eb372b93" title="Retrieves comprehensive metadata for a VR type." alt="" coords="534,229,709,269"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="439,246,520,246,520,251,439,251"/>
+<area shape="poly" id="edge10_Node000009_Node000009" title=" " alt="" coords="571,229,568,219,577,210,594,204,621,202,653,205,670,212,667,217,651,210,621,207,595,209,579,214,574,220,577,227"/>
+</map>

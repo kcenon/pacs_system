@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/annotation_endpoints.hpp" name="include/pacs/web/endpoints/annotation_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Annotation API endpoints for REST server." alt="" coords="121,5,323,45"/>
+<area shape="rect" id="Node000002" href="$annotation__endpoints_8cpp.html" title="Annotation API endpoints implementation." alt="" coords="5,93,220,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,56,139,95,135,91,185,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="244,101,419,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,52,318,98,315,102,255,56"/>
+</map>

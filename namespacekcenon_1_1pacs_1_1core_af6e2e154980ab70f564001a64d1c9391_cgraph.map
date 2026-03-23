@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::core::make_pooled_element" name="kcenon::pacs::core::make_pooled_element">
+<area shape="rect" id="Node000001" title="Create a pooled dicom_element with string value." alt="" coords="5,41,184,81"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1pool__manager.html#a84005f87e80163188670e10bd203e397" title="Get the thread&#45;local pool manager instance." alt="" coords="235,5,387,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,44,221,38,222,43,185,49"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="232,70,391,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,74,219,79,218,85,184,79"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="439,70,613,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="391,95,425,95,425,100,391,100"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="661,77,836,117"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="614,95,648,95,648,100,614,100"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="884,77,1059,117"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="836,95,870,95,870,100,836,100"/>
+</map>

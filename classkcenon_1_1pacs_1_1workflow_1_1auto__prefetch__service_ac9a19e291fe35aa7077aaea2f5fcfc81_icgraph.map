@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::stop" name="kcenon::pacs::workflow::auto_prefetch_service::stop">
+<area shape="rect" id="Node000001" title="Stop the prefetch service (alias for disable)" alt="" coords="239,53,449,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a2d55959c4efd94f4d7e5de4361e9268d" title="Disable/stop the prefetch service." alt="" coords="11,5,185,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,56,185,49,186,44,226,51"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a98bca1e7a5ce6c04561bd8d1e9b51285" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,84,191,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="225,94,191,99,190,94,225,89"/>
+</map>

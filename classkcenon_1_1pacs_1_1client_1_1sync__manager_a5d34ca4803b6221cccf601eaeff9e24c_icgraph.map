@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::sync_manager::full_sync" name="kcenon::pacs::client::sync_manager::full_sync">
+<area shape="rect" id="Node000001" title="Perform a full sync for a configuration." alt="" coords="427,13,617,53"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#a4277e4dde0f6b4bd13ec5e668e887bd5" title=" " alt="" coords="216,5,379,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="413,35,379,35,379,30,413,30"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#aee3c5e85edb11a0357d0743e61cf9142" title=" " alt="" coords="5,5,168,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="202,35,168,35,168,30,202,30"/>
+</map>

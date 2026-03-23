@@ -1,0 +1,5 @@
+<map id="include/pacs/web/endpoints/storage_commitment_endpoints.hpp" name="include/pacs/web/endpoints/storage_commitment_endpoints.hpp">
+<area shape="rect" id="Node000001" title="DICOMweb Storage Commitment REST endpoints (Supplement 234)" alt="" coords="5,5,271,45"/>
+<area shape="rect" id="Node000002" href="$storage__commitment__endpoints_8cpp.html" title="DICOMweb Storage Commitment REST endpoint implementation." alt="" coords="33,93,243,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,59,141,93,135,93,135,59"/>
+</map>

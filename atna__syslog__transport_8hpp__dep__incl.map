@@ -1,0 +1,17 @@
+<map id="include/pacs/security/atna_syslog_transport.hpp" name="include/pacs/security/atna_syslog_transport.hpp">
+<area shape="rect" id="Node000001" title="Syslog transport for ATNA audit messages (RFC 5424/5425/5426)" alt="" coords="318,5,517,45"/>
+<area shape="rect" id="Node000002" href="$atna__config_8hpp.html" title="Configuration management for ATNA audit logging." alt="" coords="130,93,289,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="360,53,256,96,254,91,358,48"/>
+<area shape="rect" id="Node000004" href="$atna__service__auditor_8hpp.html" title="High&#45;level facade for ATNA audit logging in DICOM services." alt="" coords="323,93,512,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="420,59,420,93,415,93,415,59"/>
+<area shape="rect" id="Node000008" href="$atna__syslog__transport_8cpp.html" title="Implementation of the ATNA Syslog transport." alt="" coords="536,93,715,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="477,48,581,91,579,96,475,53"/>
+<area shape="rect" id="Node000003" href="$atna__config_8cpp.html" title="Implementation of ATNA audit configuration management." alt="" coords="5,189,208,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="178,144,123,190,119,186,174,140"/>
+<area shape="rect" id="Node000005" href="$atna__service__auditor_8cpp.html" title="Implementation of the ATNA service auditor facade." alt="" coords="232,181,416,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="388,145,346,183,343,179,385,141"/>
+<area shape="rect" id="Node000006" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="441,181,581,221"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="450,141,492,179,488,183,446,145"/>
+<area shape="rect" id="Node000007" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="605,181,757,221"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="489,135,624,179,623,184,487,140"/>
+</map>

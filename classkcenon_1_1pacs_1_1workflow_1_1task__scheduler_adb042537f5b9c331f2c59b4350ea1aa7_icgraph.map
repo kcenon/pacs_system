@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::workflow::task_scheduler::schedule_cleanup" name="kcenon::pacs::workflow::task_scheduler::schedule_cleanup">
+<area shape="rect" id="Node000001" title="Schedule cleanup task." alt="" coords="228,84,423,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a4e8af0a4b92f9baee334f9e5a0f7fe1c" title="Construct task scheduler." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,82,173,63,175,58,232,77"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a740d3c18e783ba36bb366bf23d1bd7c6" title="Construct task scheduler with IExecutor (recommended)" alt="" coords="5,84,180,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,114,180,114,180,109,214,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a02e76382fcce192b337b94082987d252" title="Construct task scheduler with storage and thread pool." alt="" coords="5,163,180,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="232,146,175,165,173,160,230,141"/>
+</map>

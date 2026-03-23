@@ -1,0 +1,29 @@
+<map id="kcenon::pacs::services::retrieve_scu::next_message_id" name="kcenon::pacs::services::retrieve_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="1384,91,1616,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a44135d15cb7a687b081f1d24e2b37002" title="Internal C&#45;GET implementation." alt="" coords="1129,59,1328,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1370,99,1328,94,1329,88,1371,93"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#ac7409e05eebe5e081bf4d8bac85e0f83" title="Internal C&#45;MOVE implementation." alt="" coords="1121,123,1336,163"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="1371,129,1337,133,1336,128,1370,124"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a773ca88f41bd9d30ee899c140efe2bbe" title="Perform a C&#45;GET operation with raw dataset." alt="" coords="904,59,1073,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1116,82,1073,82,1073,77,1116,77"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a027e7deaf6e070bf225a041fcc3b6edf" title="Retrieve a single instance by SOP Instance UID." alt="" coords="665,5,835,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="890,63,834,52,835,47,891,58"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a18b40be58bf8a06ebe49541fda6cebb0" title="Retrieve a series by Series Instance UID." alt="" coords="665,84,835,139"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="891,95,835,103,835,97,890,90"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a52b043a657f11e3702c45daf444dcbb3" title="Retrieve a study by Study Instance UID." alt="" coords="644,163,856,203"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="917,107,906,114,882,134,857,154,830,166,828,161,855,149,878,130,902,109,914,103"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a095befda2fd63841cfc331d77375c95f" title=" " alt="" coords="429,84,589,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="652,114,589,114,589,109,652,109"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#acd8de41a0c6c011d49f906aa819bcfdc" title=" " alt="" coords="213,84,373,139"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="415,114,374,114,374,109,415,109"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="5,84,165,139"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="200,114,166,114,166,109,200,109"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="669,162,588,138,590,133,670,157"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae943766ff6e20c22bd4df3fe973e4e8a" title="Prefetch a single study via C&#45;MOVE." alt="" coords="421,163,596,217"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="631,189,596,190,596,185,630,184"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#abaf9edfdc5e6ae6b8b2811cb675a1fed" title="Perform a C&#45;MOVE operation with raw dataset." alt="" coords="904,123,1073,163"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="1108,146,1074,146,1074,141,1108,141"/>
+<area shape="poly" id="edge13_Node000012_Node000004" title=" " alt="" coords="914,120,903,114,878,94,855,75,830,62,832,58,857,70,882,90,905,109,917,115"/>
+<area shape="poly" id="edge14_Node000012_Node000005" title=" " alt="" coords="890,133,835,125,835,120,891,128"/>
+<area shape="poly" id="edge15_Node000012_Node000009" title=" " alt="" coords="891,162,857,168,856,163,890,157"/>
+</map>

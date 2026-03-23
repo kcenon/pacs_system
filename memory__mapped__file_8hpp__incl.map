@@ -1,0 +1,15 @@
+<map id="include/pacs/core/memory_mapped_file.hpp" name="include/pacs/core/memory_mapped_file.hpp">
+<area shape="rect" id="Node000001" title="RAII wrapper for memory&#45;mapped file I/O." alt="" coords="254,5,449,45"/>
+<area shape="rect" id="Node000002" href="$result_8hpp.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="156,93,243,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="316,48,236,89,233,84,314,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="267,93,334,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="341,47,318,83,313,80,337,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="358,93,449,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="366,44,390,80,386,83,362,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="473,93,526,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="388,43,467,84,464,89,386,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,193,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,121,136,160,133,156,183,117"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="218,167,383,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="216,117,267,156,264,160,213,121"/>
+</map>

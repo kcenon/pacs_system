@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::encoding::validate_value" name="kcenon::pacs::encoding::validate_value">
+<area shape="rect" id="Node000001" title="Validates binary data against VR encoding rules." alt="" coords="5,93,180,133"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#af0f969e116f011c48e151d32eb372b93" title="Retrieves comprehensive metadata for a VR type." alt="" coords="228,29,403,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,91,231,71,233,76,164,96"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="228,93,403,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="180,111,214,111,214,116,180,116"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding.html#a9601b4be8eaeeaaf95e5e6a042db5d47" title="Validates that a string uses only allowed characters for its VR." alt="" coords="228,157,403,197"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="164,131,233,151,231,156,162,136"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="274,30,271,20,278,10,293,5,315,3,341,6,355,13,353,18,340,11,315,8,294,10,281,15,277,21,279,28"/>
+</map>

@@ -1,0 +1,49 @@
+<map id="kcenon::pacs::web::json_escape" name="kcenon::pacs::web::json_escape">
+<area shape="rect" id="Node000001" title="Escape a string for JSON." alt="" coords="1079,461,1229,501"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="1192,449,1178,442,1154,439,1133,441,1120,446,1115,452,1118,460,1113,461,1110,451,1117,442,1132,436,1154,434,1180,437,1194,444"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#a6a7b98d76f3f5588f5ea257b92e4b53d" title="Convert a DICOM dataset to DicomJSON format." alt="" coords="847,29,1014,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1149,447,1141,376,1122,282,1107,233,1087,184,1061,138,1029,97,1013,84,1016,80,1033,93,1065,135,1091,182,1112,231,1128,281,1147,375,1154,447"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ac261d9ec4588d45c04cede24214ea352" title="Convert an instance record to DicomJSON format for QIDO&#45;RS response." alt="" coords="831,132,1031,187"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="1144,448,1131,394,1109,328,1076,260,1054,228,1029,200,1015,189,1018,185,1032,196,1058,225,1080,257,1114,326,1137,393,1149,447"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#ae7e47117fa8cf765a28470864b70412e" title=" " alt="" coords="267,373,473,428"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="1064,463,1030,457,879,436,727,422,473,407,474,401,728,416,880,431,1031,451,1065,458"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#acfc4dff4fe63133ea3054c6c50ea32ec" title=" " alt="" coords="588,439,751,493"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="1065,481,751,471,751,466,1065,475"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a41c33684aca5ab97c7a51960aa643cb8" title=" " alt="" coords="267,504,473,559"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="1065,489,783,509,474,528,473,523,782,503,1065,484"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a0b54f0b2e2cc59f3b25a892da94e1230" title=" " alt="" coords="556,569,783,624"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="1115,511,1076,533,1032,553,969,570,904,582,783,596,783,591,903,577,968,565,1030,547,1073,529,1112,506"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="255,635,485,689"/>
+<area shape="poly" id="edge17_Node000001_Node000010" title=" " alt="" coords="1130,513,1087,556,1061,578,1032,595,963,624,891,646,818,661,744,671,604,679,485,676,485,670,603,674,743,666,817,656,890,640,962,619,1029,590,1058,573,1084,552,1126,510"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6bff5aa5fca9c59299d113d90bef1267" title=" " alt="" coords="559,700,779,755"/>
+<area shape="poly" id="edge19_Node000001_Node000011" title=" " alt="" coords="1145,515,1129,555,1106,601,1074,646,1054,666,1032,683,972,712,906,730,841,738,780,740,779,734,840,733,905,725,970,707,1029,678,1051,662,1070,643,1101,598,1125,552,1140,513"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#a2350d6f92f7b491bf12d78665083ec57" title="Convert a series record to DicomJSON format for QIDO&#45;RS response." alt="" coords="839,235,1023,289"/>
+<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="1135,449,1093,377,1064,338,1029,304,1010,292,1013,287,1032,300,1068,334,1098,374,1140,446"/>
+<area shape="rect" id="Node000013" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#a01c518e890da464db1901c81ae3f16ee" title="Convert a study record to DicomJSON format for QIDO&#45;RS response." alt="" coords="840,337,1021,392"/>
+<area shape="poly" id="edge24_Node000001_Node000013" title=" " alt="" coords="1106,456,1029,414,991,394,993,390,1032,409,1108,451"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#aeda55b0e6f2cee7f58a496a089b00085" title="Serialize a commitment transaction to DICOM JSON." alt="" coords="845,765,1016,820"/>
+<area shape="poly" id="edge27_Node000001_Node000014" title=" " alt="" coords="1147,515,1131,563,1108,622,1075,684,1033,740,997,767,994,763,1029,736,1070,681,1103,620,1126,561,1142,513"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="967,18,954,11,931,8,911,10,898,15,893,21,893,29,887,29,888,19,895,10,910,5,931,3,956,6,970,14"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="967,121,954,114,931,111,911,113,898,117,893,124,893,132,887,132,888,122,895,113,910,107,931,105,956,108,970,116"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="568,247,771,301"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="846,194,832,200,727,249,725,244,830,196,844,190"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,545,184,585"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="554,268,478,269,394,280,310,302,271,319,234,340,207,362,183,387,146,445,120,501,104,545,99,544,115,499,141,442,179,384,203,358,230,336,268,314,308,297,393,274,477,264,554,262"/>
+<area shape="poly" id="edge10_Node000006_Node000005" title=" " alt="" coords="262,436,233,450,199,472,167,498,116,546,113,543,163,494,196,468,231,445,259,431"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="416,362,399,355,370,352,345,354,329,359,322,365,322,373,317,373,317,363,327,354,344,349,370,347,401,350,418,358"/>
+<area shape="poly" id="edge12_Node000007_Node000005" title=" " alt="" coords="575,463,499,462,413,466,322,476,233,495,175,519,127,547,124,542,173,514,231,490,321,471,413,461,499,457,575,458"/>
+<area shape="poly" id="edge14_Node000008_Node000005" title=" " alt="" coords="253,548,184,557,184,551,253,543"/>
+<area shape="poly" id="edge16_Node000009_Node000005" title=" " alt="" coords="542,592,184,572,184,567,542,587"/>
+<area shape="poly" id="edge18_Node000010_Node000005" title=" " alt="" coords="273,633,231,618,148,587,150,582,233,613,275,628"/>
+<area shape="poly" id="edge20_Node000011_Node000005" title=" " alt="" coords="545,746,472,748,391,744,309,731,269,719,231,704,190,680,155,648,127,615,107,587,111,584,131,612,159,644,194,675,233,700,271,714,310,725,392,739,472,743,545,740"/>
+<area shape="poly" id="edge22_Node000012_Node000004" title=" " alt="" coords="825,270,771,272,771,267,825,264"/>
+<area shape="poly" id="edge23_Node000012_Node000012" title=" " alt="" coords="967,224,954,216,931,213,911,215,898,220,893,226,893,235,887,235,888,224,895,216,910,210,931,208,956,211,970,219"/>
+<area shape="poly" id="edge25_Node000013_Node000004" title=" " alt="" coords="837,335,748,304,750,299,839,330"/>
+<area shape="poly" id="edge26_Node000013_Node000013" title=" " alt="" coords="967,326,954,319,931,316,911,318,898,323,893,329,893,337,887,337,888,327,895,318,910,313,931,311,956,314,970,322"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a012692fdc9a6b155d683ccd37762551c" title=" " alt="" coords="232,765,508,820"/>
+<area shape="poly" id="edge28_Node000014_Node000015" title=" " alt="" coords="832,795,508,795,508,790,832,790"/>
+<area shape="rect" id="Node000016" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#aa88f84cd6de4626298c0048c9507e4c9" title="Serialize a list of transactions to DICOM JSON array." alt="" coords="584,831,755,885"/>
+<area shape="poly" id="edge30_Node000014_Node000016" title=" " alt="" coords="833,820,756,839,754,834,831,815"/>
+<area shape="poly" id="edge29_Node000015_Node000005" title=" " alt="" coords="252,762,230,748,187,709,151,664,123,621,103,586,108,583,127,618,155,661,191,705,234,744,255,757"/>
+<area shape="poly" id="edge31_Node000016_Node000015" title=" " alt="" coords="570,839,495,823,496,817,571,834"/>
+</map>

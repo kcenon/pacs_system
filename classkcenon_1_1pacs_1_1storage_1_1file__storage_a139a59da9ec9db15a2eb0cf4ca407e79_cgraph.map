@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::storage::file_storage::find" name="kcenon::pacs::storage::file_storage::find">
+<area shape="rect" id="Node000001" title="Find DICOM datasets matching query criteria." alt="" coords="5,5,169,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="217,5,360,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,23,203,23,203,28,169,28"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="408,5,620,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="360,23,394,23,394,28,360,28"/>
+</map>

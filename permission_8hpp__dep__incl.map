@@ -1,0 +1,28 @@
+<map id="include/pacs/security/permission.hpp" name="include/pacs/security/permission.hpp">
+<area shape="rect" id="Node000001" title="Permission definitions for RBAC." alt="" coords="273,5,432,45"/>
+<area shape="rect" id="Node000002" href="$access__control__manager_8hpp.html" title="Core RBAC logic." alt="" coords="383,93,597,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="396,51,461,91,459,96,393,55"/>
+<area shape="rect" id="Node000008" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="5,196,236,221"/>
+<area shape="poly" id="edge14_Node000001_Node000008" title=" " alt="" coords="319,56,137,198,134,194,316,52"/>
+<area shape="rect" id="Node000003" href="$dicom__association__handler_8hpp.html" title="DICOM association handler for network_system integration." alt="" coords="312,181,479,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="463,145,424,183,420,179,459,141"/>
+<area shape="rect" id="Node000004" href="$dicom__server__v2_8hpp.html" title="DICOM server implementation using network_system&#39;s messaging_server." alt="" coords="176,284,361,324"/>
+<area shape="poly" id="edge8_Node000002_Node000004" title=" " alt="" coords="371,140,334,158,303,183,287,207,278,234,271,284,266,283,272,233,282,204,299,180,331,153,368,135"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="403,139,167,198,166,193,402,134"/>
+<area shape="rect" id="Node000009" href="$access__control__manager_8cpp.html" title="Implementation of RBAC logic." alt="" coords="503,189,669,229"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="521,141,568,187,565,191,517,145"/>
+<area shape="rect" id="Node000010" href="$oauth2__middleware_8cpp.html" title="Implementation of OAuth 2.0 middleware for DICOMweb endpoints." alt="" coords="693,189,847,229"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="560,135,714,186,713,191,559,140"/>
+<area shape="rect" id="Node000011" href="$security__endpoints_8cpp.html" title="Security API endpoints implementation." alt="" coords="872,189,1068,229"/>
+<area shape="poly" id="edge12_Node000002_Node000011" title=" " alt="" coords="611,132,860,179,893,186,892,191,859,184,610,137"/>
+<area shape="rect" id="Node000012" href="$system__endpoints_8cpp.html" title="System API endpoints implementation." alt="" coords="1093,189,1285,229"/>
+<area shape="poly" id="edge13_Node000002_Node000012" title=" " alt="" coords="612,121,831,143,957,159,1081,179,1117,186,1116,191,1080,184,956,164,830,148,611,127"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="350,246,296,286,293,282,347,242"/>
+<area shape="rect" id="Node000005" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="283,379,516,405"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="399,250,402,379,396,379,394,250"/>
+<area shape="rect" id="Node000007" href="$dicom__association__handler_8cpp.html" title="DICOM association handler implementation for network_system integration." alt="" coords="437,284,623,324"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="446,242,504,282,501,286,443,246"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="311,330,383,377,380,381,308,334"/>
+<area shape="rect" id="Node000006" href="$dicom__server__v2_8cpp.html" title="DICOM server V2 implementation using network_system&#39;s messaging_server." alt="" coords="95,372,258,412"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="240,335,199,374,195,370,237,331"/>
+</map>

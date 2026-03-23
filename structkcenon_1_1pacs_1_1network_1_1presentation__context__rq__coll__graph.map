@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::network::presentation_context_rq" name="kcenon::pacs::network::presentation_context_rq">
+<area shape="rect" id="Node000001" title="Presentation Context for A&#45;ASSOCIATE&#45;RQ." alt="" coords="119,404,317,504"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="205,148,284,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,213,278,237,288,277,292,309,289,342,278,381,274,391,269,388,273,379,284,341,286,309,282,278,273,238,263,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="53,276,231,341"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="220,215,200,239,179,265,175,261,196,236,216,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,5,310,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,99,247,148,242,148,242,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="140,341,141,361,146,379,151,389,146,392,141,381,136,361,135,342"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="63,226,70,251,89,274,85,277,65,253,58,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

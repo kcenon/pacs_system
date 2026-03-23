@@ -1,0 +1,45 @@
+<map id="kcenon::pacs::network::dicom_server::simulate_association_request" name="kcenon::pacs::network::dicom_server::simulate_association_request">
+<area shape="rect" id="Node000001" title="Simulate an incoming association request (for in&#45;memory testing)." alt="" coords="5,440,188,495"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a39e558ad9d6fc62af27275c9ee0d73f9" title="Accept an incoming SCP association." alt="" coords="262,91,430,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,439,155,333,191,268,234,206,268,169,304,138,307,142,272,173,238,209,196,270,160,335,111,441"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#aa761dc665e84b67b914c1543ef075122" title="Handle a single association (runs in worker thread)" alt="" coords="261,220,431,275"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="121,438,172,384,234,325,291,281,295,285,238,329,176,388,125,442"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a754c35a6829affe02f040bc42bb09d4f" title="Process incoming DIMSE messages." alt="" coords="236,339,456,379"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="141,437,186,412,235,389,255,381,257,386,237,394,188,417,143,442"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a07ed9c60729e6f62a1650ed4dcba9478" title="Generate unique association ID." alt="" coords="262,404,430,459"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="188,452,248,443,249,448,188,457"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1network_1_1association.html#aa8d79e0019000f93ea19243f97e28aa4" title="Set peer association for in&#45;memory testing." alt="" coords="262,483,430,523"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="188,478,249,487,248,492,188,483"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a17d3026d7980fc7557e6d0c12fc4c679" title="Get list of supported SOP Class UIDs." alt="" coords="251,548,441,603"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="152,492,237,533,255,540,253,545,235,538,149,497"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a07e8c5440835888297250fae7322aa3a" title="Validate called AE title." alt="" coords="257,627,435,681"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="119,493,169,553,202,585,238,613,245,618,243,623,234,618,198,589,165,557,115,497"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a6253285644acb6dfcb0ab544578c3c5f" title="Validate calling AE title." alt="" coords="257,705,435,760"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="110,494,128,537,156,590,192,645,238,692,246,698,243,702,234,696,188,648,151,593,123,539,105,496"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7a248e63aa4c3004790316536ac86011" title="Build presentation context map from accepted contexts." alt="" coords="535,5,703,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,89,521,58,523,63,417,94"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1association.html#af26180c5943154974e63f126a177c9d3" title="Negotiate presentation contexts for SCP." alt="" coords="532,84,707,139"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="430,109,518,109,518,114,430,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a1cdb498e148231c8d7e682a041728c90" title="Constructs a transfer_syntax from a UID string." alt="" coords="783,5,973,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="703,30,769,30,769,35,703,35"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a2e62a7fa09112312b2b375fe76141dd6" title="Returns the Transfer Syntax UID." alt="" coords="1021,13,1196,53"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="973,30,1007,30,1007,35,973,35"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1association.html#adfa703465ab5143f6ee937208edbd16b" title="Abort the association immediately." alt="" coords="535,163,703,203"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="431,225,521,203,523,209,432,230"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#afa1f1a7af2eeaeaf415e0fdd625e0893" title="Add association to pool." alt="" coords="504,227,735,267"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="431,245,490,245,490,250,431,250"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a02a67ca34386a6ee33de7f6102643024" title="Dispatch message to appropriate service." alt="" coords="529,292,710,347"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="456,341,514,332,515,337,457,346"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a76cf5c7a2978b1eddd42dc3569af924e" title="Remove association from pool." alt="" coords="531,371,707,425"/>
+<area shape="poly" id="edge14_Node000010_Node000015" title=" " alt="" coords="457,372,518,381,517,386,456,378"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a160dccc6103c997c1cf961d30a68d09f" title="Report error through callback." alt="" coords="518,450,721,490"/>
+<area shape="poly" id="edge15_Node000010_Node000016" title=" " alt="" coords="432,377,457,389,473,401,482,412,491,424,505,434,521,442,519,447,503,439,487,427,478,416,469,404,455,394,430,382"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a829ca7eb32639bdcc1c0440cc64cb58a" title="Update association activity timestamp." alt="" coords="535,515,703,569"/>
+<area shape="poly" id="edge16_Node000010_Node000017" title=" " alt="" coords="440,377,458,389,470,403,477,418,483,446,488,473,495,487,506,500,525,514,521,518,502,504,490,490,483,475,478,447,472,419,466,406,454,393,437,382"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a25f41bf2902c24cbd4c67ee708dbd488" title="Get the Affected SOP Class UID." alt="" coords="786,253,970,308"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="710,303,772,294,773,299,711,308"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a49deb3be4fbee3ff0ceaa1ee9ccedfdd" title="Get service for SOP Class." alt="" coords="794,332,962,387"/>
+<area shape="poly" id="edge13_Node000011_Node000014" title=" " alt="" coords="711,331,781,342,780,347,710,336"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="1031,253,1186,308"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="970,278,1018,278,1018,283,970,283"/>
+</map>

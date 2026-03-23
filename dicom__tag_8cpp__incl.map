@@ -1,0 +1,27 @@
+<map id="src/core/dicom_tag.cpp" name="src/core/dicom_tag.cpp">
+<area shape="rect" id="Node000001" title="Implementation of dicom_tag class methods." alt="" coords="500,5,672,31"/>
+<area shape="rect" id="Node000002" href="$dicom__tag_8hpp.html" title="DICOM Tag representation (Group, Element pairs)" alt="" coords="257,79,441,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="549,33,401,77,399,72,547,28"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="465,79,521,104"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="573,33,520,72,517,68,569,29"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="545,79,627,104"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="589,31,589,65,583,65,583,31"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="651,79,726,104"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="604,28,662,68,659,73,601,33"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="750,79,825,104"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="619,28,743,71,741,77,617,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,152,84,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="300,107,98,154,97,149,299,101"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="109,152,175,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="316,107,189,150,188,145,315,101"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="200,152,287,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="333,106,273,147,270,142,330,102"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="311,152,386,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="351,104,351,138,346,138,346,104"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="410,152,469,177"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="365,102,415,141,412,145,362,106"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="493,152,591,177"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="381,102,499,145,497,150,379,107"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="615,152,675,177"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="401,101,602,149,601,154,399,107"/>
+</map>

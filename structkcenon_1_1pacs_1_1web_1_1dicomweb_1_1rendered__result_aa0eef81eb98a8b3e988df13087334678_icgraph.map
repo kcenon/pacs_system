@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::web::dicomweb::rendered_result::error" name="kcenon::pacs::web::dicomweb::rendered_result::error">
+<area shape="rect" id="Node000001" title=" " alt="" coords="765,22,964,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ae42d333cbf06384a1e37a148a34c8a6e" title="Render a DICOM image to JPEG or PNG." alt="" coords="483,29,717,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="751,52,717,52,717,47,751,47"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="645,18,629,11,600,8,574,10,559,15,553,21,556,28,551,30,548,20,556,10,573,5,600,3,631,5,647,13"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="232,22,435,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,52,435,52,435,47,469,47"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,29,184,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,52,184,52,184,47,218,47"/>
+</map>

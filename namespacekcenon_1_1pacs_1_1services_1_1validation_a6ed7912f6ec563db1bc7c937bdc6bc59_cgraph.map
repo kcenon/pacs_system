@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::is_sr_verified" name="kcenon::pacs::services::validation::is_sr_verified">
+<area shape="rect" id="Node000001" title="Check if SR document is verified." alt="" coords="5,41,195,81"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="243,5,432,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,44,229,39,230,44,195,50"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="260,70,415,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,73,247,81,246,86,194,78"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::security::atna_audit_logger::to_xml" name="kcenon::pacs::security::atna_audit_logger::to_xml">
+<area shape="rect" id="Node000001" title="Serialize an audit message to RFC 3881 XML." alt="" coords="441,131,641,171"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a54c92cf4955c20bbec5f291bca68498c" title="Send an audit message via syslog transport." alt="" coords="227,124,393,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="428,154,394,154,394,149,428,149"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a0766101d18d5ef7cbae3a3103c56c488" title="Audit a User Authentication event." alt="" coords="9,5,175,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="254,119,177,74,155,62,157,58,180,69,256,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#af8fc4f873ed31b18a1476838ca3cf300" title="Audit a C&#45;STORE (DICOM Instances Transferred) event." alt="" coords="5,84,179,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="213,136,178,130,179,125,214,131"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a4d61be4a91902ac14e823955635edd98" title="Audit a C&#45;FIND (Query) event." alt="" coords="9,163,175,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="214,171,176,178,175,173,213,166"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#aae79d4e20891e3c88437d664daab60bb" title="Audit a Security Alert event (e.g., access denied)" alt="" coords="9,241,175,296"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="255,188,180,231,155,244,153,239,177,226,252,184"/>
+</map>

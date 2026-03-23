@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::mr_iod_validator::quick_check" name="kcenon::pacs::services::validation::mr_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required MR attributes." alt="" coords="223,5,436,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a47720c30d378a4a6c99fb5d23ea9ef8e" title="Quick check if a dataset is a valid MR image." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

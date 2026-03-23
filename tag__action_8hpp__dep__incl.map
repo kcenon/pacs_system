@@ -1,0 +1,11 @@
+<map id="include/pacs/security/tag_action.hpp" name="include/pacs/security/tag_action.hpp">
+<area shape="rect" id="Node000001" title="Tag action definitions for DICOM de&#45;identification." alt="" coords="261,5,420,45"/>
+<area shape="rect" id="Node000002" href="$anonymizer_8hpp.html" title="DICOM de&#45;identification/anonymization per PS3.15 Annex E." alt="" coords="161,93,320,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="310,56,265,95,261,91,306,52"/>
+<area shape="rect" id="Node000005" href="$tag__action_8cpp.html" title="Implementation of HIPAA identifier tag collections." alt="" coords="344,101,540,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="375,52,430,98,426,102,372,56"/>
+<area shape="rect" id="Node000003" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="5,181,236,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="202,143,140,183,137,179,199,139"/>
+<area shape="rect" id="Node000004" href="$anonymizer_8cpp.html" title="Implementation of DICOM de&#45;identification/anonymization." alt="" coords="260,181,464,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="283,139,346,179,343,183,280,143"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_tag::is_private" name="kcenon::pacs::core::dicom_tag::is_private">
+<area shape="rect" id="Node000001" title="Check if this is a private tag." alt="" coords="5,5,176,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="224,5,367,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,23,210,23,210,28,176,28"/>
+</map>

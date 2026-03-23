@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::core::dicom_tag::is_private" name="kcenon::pacs::core::dicom_tag::is_private">
+<area shape="rect" id="Node000001" title="Check if this is a private tag." alt="" coords="911,91,1081,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a61e9ab88ec6a32488cdcab7b6d6c9dae" title="Check if this is a private creator tag." alt="" coords="674,9,845,64"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="918,90,844,66,845,61,920,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad5422abf4484a8a8e339ba581ad484f0" title="Check if this is a private data element." alt="" coords="656,91,863,131"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="897,114,863,114,863,109,897,109"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a984e6ec103ca43c126e00e5ef53fcc80" title="Read DICOM dataset from file." alt="" coords="671,159,847,213"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="919,138,847,161,846,156,918,133"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a0b83f0c3a7281eb2d54e465c99e12503" title="Get the data element range owned by this Private Creator tag." alt="" coords="448,5,600,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="660,38,600,37,600,31,660,32"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a09d023cf9cc4b6e8008929163fed0a23" title="Extract the Private Creator block number from this tag." alt="" coords="448,84,600,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="642,114,600,114,600,109,642,109"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a7a10ab20491d319fc3234b2196ecfd24" title="Get the Private Creator tag that owns this data element." alt="" coords="240,84,392,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="435,114,392,114,392,109,435,109"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aa6c76d3e000f97010cfbdeb10f687a4a" title="Validate private tag relationships in this dataset." alt="" coords="5,84,192,139"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="226,114,192,114,192,109,226,109"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#afa87b349fcc99cdace18e47346519fa1" title="Get selective metadata for an instance." alt="" coords="440,163,608,217"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="657,190,608,191,608,186,657,185"/>
+</map>

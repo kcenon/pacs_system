@@ -1,0 +1,66 @@
+var namespacekcenon_1_1pacs_1_1monitoring =
+[
+    [ "association_counters", "structkcenon_1_1pacs_1_1monitoring_1_1association__counters.html", "structkcenon_1_1pacs_1_1monitoring_1_1association__counters" ],
+    [ "association_metric", "structkcenon_1_1pacs_1_1monitoring_1_1association__metric.html", "structkcenon_1_1pacs_1_1monitoring_1_1association__metric" ],
+    [ "association_metrics", "structkcenon_1_1pacs_1_1monitoring_1_1association__metrics.html", "structkcenon_1_1pacs_1_1monitoring_1_1association__metrics" ],
+    [ "data_transfer_metrics", "structkcenon_1_1pacs_1_1monitoring_1_1data__transfer__metrics.html", "structkcenon_1_1pacs_1_1monitoring_1_1data__transfer__metrics" ],
+    [ "database_status", "structkcenon_1_1pacs_1_1monitoring_1_1database__status.html", "structkcenon_1_1pacs_1_1monitoring_1_1database__status" ],
+    [ "dicom_association_collector", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__association__collector.html", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__association__collector" ],
+    [ "dicom_collector_base", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base" ],
+    [ "dicom_metric", "structkcenon_1_1pacs_1_1monitoring_1_1dicom__metric.html", "structkcenon_1_1pacs_1_1monitoring_1_1dicom__metric" ],
+    [ "dicom_metrics_collector", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector" ],
+    [ "dicom_metrics_snapshot", "structkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__snapshot.html", "structkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__snapshot" ],
+    [ "dicom_service_collector", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector" ],
+    [ "dicom_storage_collector", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html", "classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector" ],
+    [ "health_check_result", "structkcenon_1_1pacs_1_1monitoring_1_1health__check__result.html", "structkcenon_1_1pacs_1_1monitoring_1_1health__check__result" ],
+    [ "health_checker", "classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html", "classkcenon_1_1pacs_1_1monitoring_1_1health__checker" ],
+    [ "health_checker_config", "structkcenon_1_1pacs_1_1monitoring_1_1health__checker__config.html", "structkcenon_1_1pacs_1_1monitoring_1_1health__checker__config" ],
+    [ "health_status", "structkcenon_1_1pacs_1_1monitoring_1_1health__status.html", "structkcenon_1_1pacs_1_1monitoring_1_1health__status" ],
+    [ "metric_value", "structkcenon_1_1pacs_1_1monitoring_1_1metric__value.html", "structkcenon_1_1pacs_1_1monitoring_1_1metric__value" ],
+    [ "metrics_snapshot", "structkcenon_1_1pacs_1_1monitoring_1_1metrics__snapshot.html", "structkcenon_1_1pacs_1_1monitoring_1_1metrics__snapshot" ],
+    [ "operation_counter", "structkcenon_1_1pacs_1_1monitoring_1_1operation__counter.html", "structkcenon_1_1pacs_1_1monitoring_1_1operation__counter" ],
+    [ "pacs_metrics", "classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html", "classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics" ],
+    [ "pacs_monitor", "classkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor.html", "classkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor" ],
+    [ "pacs_monitor_config", "structkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor__config.html", "structkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor__config" ],
+    [ "pool_counters", "structkcenon_1_1pacs_1_1monitoring_1_1pool__counters.html", "structkcenon_1_1pacs_1_1monitoring_1_1pool__counters" ],
+    [ "service_metric", "structkcenon_1_1pacs_1_1monitoring_1_1service__metric.html", "structkcenon_1_1pacs_1_1monitoring_1_1service__metric" ],
+    [ "storage_metric", "structkcenon_1_1pacs_1_1monitoring_1_1storage__metric.html", "structkcenon_1_1pacs_1_1monitoring_1_1storage__metric" ],
+    [ "storage_metrics", "structkcenon_1_1pacs_1_1monitoring_1_1storage__metrics.html", "structkcenon_1_1pacs_1_1monitoring_1_1storage__metrics" ],
+    [ "storage_status", "structkcenon_1_1pacs_1_1monitoring_1_1storage__status.html", "structkcenon_1_1pacs_1_1monitoring_1_1storage__status" ],
+    [ "version_info", "structkcenon_1_1pacs_1_1monitoring_1_1version__info.html", "structkcenon_1_1pacs_1_1monitoring_1_1version__info" ],
+    [ "config_map", "namespacekcenon_1_1pacs_1_1monitoring.html#a1877350aa9483dbc0c541b3efe1dc24e", null ],
+    [ "stats_map", "namespacekcenon_1_1pacs_1_1monitoring.html#ae42d137b538fc92cd9d92300f9ac5df8", null ],
+    [ "dimse_operation", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57", [
+      [ "c_echo", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57aaf182963b0f286d1932250ed2ba823b5", null ],
+      [ "c_store", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a2cd8efb43c17cc856919779e7ceb464a", null ],
+      [ "c_find", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a2fca038c6541497b5538172028afd553", null ],
+      [ "c_move", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a85916a2601b9f6a37b6332ebaa8cfb50", null ],
+      [ "c_get", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a37b62e299747e429d5e61e8491b84603", null ],
+      [ "n_create", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a576bf18881df701dfa2928961ef57e18", null ],
+      [ "n_set", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a92e0c3c480987d11fc5c1807ac8beebb", null ],
+      [ "n_get", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a7ec6371ca0cd0b8cd5f1153ea8218f6e", null ],
+      [ "n_action", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a73da662c77932d2480e0e1db609f63a9", null ],
+      [ "n_event", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57a2044e2159c62e85541bf4689dda682f5", null ],
+      [ "n_delete", "namespacekcenon_1_1pacs_1_1monitoring.html#a1cb2590d968101b9620b5f27cf9c8b57ab2251d3066574415be917c86629ff86c", null ]
+    ] ],
+    [ "health_level", "namespacekcenon_1_1pacs_1_1monitoring.html#af3c929e6f5c00048ad3e728f0b034133", [
+      [ "healthy", "namespacekcenon_1_1pacs_1_1monitoring.html#af3c929e6f5c00048ad3e728f0b034133a741839f346d6e8126ae38ee76a96fd12", null ],
+      [ "degraded", "namespacekcenon_1_1pacs_1_1monitoring.html#af3c929e6f5c00048ad3e728f0b034133a8377f5fd94f84ea08829f36e1ded3b74", null ],
+      [ "unhealthy", "namespacekcenon_1_1pacs_1_1monitoring.html#af3c929e6f5c00048ad3e728f0b034133ab7a582af4c2e181215b55161560713e5", null ]
+    ] ],
+    [ "metric_type", "namespacekcenon_1_1pacs_1_1monitoring.html#a9e1807718a74aee260fc4725d48c7f9c", [
+      [ "gauge", "namespacekcenon_1_1pacs_1_1monitoring.html#a9e1807718a74aee260fc4725d48c7f9ca37e1a9c3ba6042b79266687d13f3c5ff", null ],
+      [ "counter", "namespacekcenon_1_1pacs_1_1monitoring.html#a9e1807718a74aee260fc4725d48c7f9ca886bb73b3156b0aa24aac99d2de0b238", null ],
+      [ "histogram", "namespacekcenon_1_1pacs_1_1monitoring.html#a9e1807718a74aee260fc4725d48c7f9cabdfb01f3ea1f6351d0d53d79625c347f", null ],
+      [ "summary", "namespacekcenon_1_1pacs_1_1monitoring.html#a9e1807718a74aee260fc4725d48c7f9caa80da1282f2c775bbc5f2c92c836968b", null ]
+    ] ],
+    [ "monitor_health_status", "namespacekcenon_1_1pacs_1_1monitoring.html#a5039778b5441619ec22292382b4a87f6", [
+      [ "healthy", "namespacekcenon_1_1pacs_1_1monitoring.html#a5039778b5441619ec22292382b4a87f6a741839f346d6e8126ae38ee76a96fd12", null ],
+      [ "degraded", "namespacekcenon_1_1pacs_1_1monitoring.html#a5039778b5441619ec22292382b4a87f6a8377f5fd94f84ea08829f36e1ded3b74", null ],
+      [ "unhealthy", "namespacekcenon_1_1pacs_1_1monitoring.html#a5039778b5441619ec22292382b4a87f6ab7a582af4c2e181215b55161560713e5", null ],
+      [ "unknown", "namespacekcenon_1_1pacs_1_1monitoring.html#a5039778b5441619ec22292382b4a87f6aad921d60486366258809553a3db49a4a", null ]
+    ] ],
+    [ "to_string", "namespacekcenon_1_1pacs_1_1monitoring.html#a7fef4aaf55270773ff70e76bf3448659", null ],
+    [ "to_string", "namespacekcenon_1_1pacs_1_1monitoring.html#ad2335ef3bbc51a064374da9e18c8abb4", null ],
+    [ "to_string", "namespacekcenon_1_1pacs_1_1monitoring.html#a361c4512f1f42fbfb8052c2c8625f5e5", null ]
+];

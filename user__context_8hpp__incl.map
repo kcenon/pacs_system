@@ -1,0 +1,22 @@
+<map id="include/pacs/security/user_context.hpp" name="include/pacs/security/user_context.hpp">
+<area shape="rect" id="Node000001" title="User context for session&#45;based access control." alt="" coords="233,5,391,45"/>
+<area shape="rect" id="Node000002" href="$user_8hpp.html" title="User definition for RBAC." alt="" coords="189,93,267,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="293,48,252,86,249,82,290,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,240,64,265"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="243,48,194,66,143,92,94,126,54,168,42,197,37,227,32,226,36,195,50,165,91,122,140,87,192,61,241,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="291,240,365,265"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="325,44,350,98,372,166,374,179,372,193,362,213,350,231,346,228,358,211,367,191,369,179,367,167,345,100,320,47"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="433,93,500,119"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="350,43,433,85,431,89,348,48"/>
+<area shape="rect" id="Node000003" href="$role_8hpp.html" title="Role definitions for RBAC." alt="" coords="87,167,161,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,121,154,161,151,156,210,116"/>
+<area shape="poly" id="edge7_Node000002_Node000004" title=" " alt="" coords="190,117,132,134,103,149,77,169,56,197,43,228,38,226,51,194,73,165,100,145,130,130,188,111"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="185,167,271,192"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="231,119,231,153,225,153,225,119"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="295,167,358,192"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="245,117,301,156,298,161,242,121"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="111,194,62,233,58,229,108,190"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="89,240,186,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="129,192,135,226,130,227,124,193"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="158,190,283,233,281,238,156,195"/>
+</map>

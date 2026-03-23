@@ -1,0 +1,10 @@
+<map id="include/pacs/storage/annotation_record.hpp" name="include/pacs/storage/annotation_record.hpp">
+<area shape="rect" id="Node000001" title="Annotation record data structures for database operations." alt="" coords="151,5,323,45"/>
+<area shape="rect" id="Node000002" href="$annotation__repository_8hpp.html" title="Repository for annotation persistence using base_repository pattern." alt="" coords="73,93,268,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,58,188,95,183,91,212,55"/>
+<area shape="rect" id="Node000004" href="$annotation__endpoints_8cpp.html" title="Annotation API endpoints implementation." alt="" coords="198,181,413,221"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="262,55,282,92,297,140,305,181,300,182,292,141,278,94,257,58"/>
+<area shape="rect" id="Node000003" href="$annotation__repository_8cpp.html" title="Implementation of the annotation repository." alt="" coords="5,181,173,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,145,109,183,105,179,141,142"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="214,139,277,179,274,183,211,143"/>
+</map>

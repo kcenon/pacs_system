@@ -1,0 +1,21 @@
+<map id="include/pacs/storage/viewer_state_repository.hpp" name="include/pacs/storage/viewer_state_repository.hpp">
+<area shape="rect" id="Node000001" title="Repository for viewer state persistence." alt="" coords="289,5,498,45"/>
+<area shape="rect" id="Node000002" href="$viewer__state__record_8hpp.html" title="Viewer state record data structures for database operations." alt="" coords="70,93,223,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="340,48,215,91,213,86,338,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,181,80,207"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="289,37,221,46,154,58,97,74,75,84,61,95,50,111,44,130,42,167,37,167,39,129,45,109,57,91,73,80,95,69,152,53,220,40,288,32"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="217,181,276,207"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="353,48,320,68,290,95,268,132,255,169,250,167,263,130,286,92,317,64,350,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="299,93,487,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="396,46,396,79,391,79,391,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="512,101,589,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="429,43,519,92,516,96,427,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="614,101,711,126"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="453,43,615,94,613,99,452,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="735,101,798,126"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="499,39,609,60,725,91,731,93,730,98,723,96,607,66,498,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="113,181,180,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="149,134,149,167,144,167,144,134"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="123,136,71,175,67,171,120,131"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="173,131,222,170,219,175,169,136"/>
+</map>

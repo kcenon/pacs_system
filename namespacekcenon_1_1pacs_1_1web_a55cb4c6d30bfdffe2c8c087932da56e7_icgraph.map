@@ -1,0 +1,78 @@
+<map id="kcenon::pacs::web::make_error_json" name="kcenon::pacs::web::make_error_json">
+<area shape="rect" id="Node000001" title="Create JSON error response body with details." alt="" coords="565,863,716,903"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="685,852,670,845,641,842,615,844,600,849,594,855,597,862,592,864,589,854,597,844,614,839,641,837,671,840,687,847"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#ae7e47117fa8cf765a28470864b70412e" title=" " alt="" coords="276,29,483,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="636,850,630,691,612,465,597,349,576,243,549,156,533,123,515,97,500,84,482,74,484,69,503,79,519,94,538,120,554,154,581,242,602,348,618,464,636,690,641,849"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#ac06ba7751e7fb9977fcb796ca8fe2a11" title=" " alt="" coords="274,108,485,163"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="636,850,627,705,608,503,592,400,572,305,546,228,531,198,515,176,501,163,483,153,486,149,504,159,519,172,536,196,551,226,577,304,597,399,613,502,633,705,641,850"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a52a24da4b4291f48d34491dd3aedd1e1" title=" " alt="" coords="295,187,464,241"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="635,850,624,720,603,541,587,450,567,368,543,300,530,274,515,255,492,236,463,225,465,220,494,232,519,251,534,271,548,298,572,366,592,449,608,540,630,719,640,849"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="278,265,481,320"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="634,849,621,733,597,578,581,501,562,430,540,372,515,333,499,320,480,310,482,305,502,315,519,330,545,370,567,428,586,499,603,578,626,733,639,849"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#acfc4dff4fe63133ea3054c6c50ea32ec" title=" " alt="" coords="298,344,461,399"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="632,850,617,749,592,618,576,552,558,493,537,444,515,412,490,393,460,382,462,377,492,389,519,408,542,442,563,491,581,551,597,617,622,748,638,849"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a41c33684aca5ab97c7a51960aa643cb8" title=" " alt="" coords="276,423,483,477"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="636,850,631,776,613,679,598,628,577,578,550,531,515,491,500,478,482,469,484,464,503,474,519,487,554,528,582,575,603,626,618,678,636,775,642,849"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a0b54f0b2e2cc59f3b25a892da94e1230" title=" " alt="" coords="266,501,493,556"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="633,850,623,790,603,714,587,674,568,636,544,600,516,569,491,553,494,548,519,565,548,597,573,633,592,672,608,712,629,789,639,849"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a1a1ec85edb6de146da3e8603c7ecd481" title=" " alt="" coords="280,580,479,635"/>
+<area shape="poly" id="edge17_Node000001_Node000010" title=" " alt="" coords="629,851,614,805,591,750,559,695,539,670,516,648,478,627,480,622,519,644,542,666,563,692,596,748,619,803,634,849"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a97100f2a77a573d15b68a24913420d3b" title=" " alt="" coords="288,659,471,713"/>
+<area shape="poly" id="edge19_Node000001_Node000011" title=" " alt="" coords="621,853,578,788,549,755,516,727,470,705,472,700,519,722,553,751,583,785,625,850"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="265,737,494,792"/>
+<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="601,857,561,830,516,806,488,795,490,790,518,801,564,826,604,853"/>
+<area shape="rect" id="Node000013" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a8b9077a6fe3b1ee19a269c376c0289a3" title=" " alt="" coords="288,816,471,871"/>
+<area shape="poly" id="edge23_Node000001_Node000013" title=" " alt="" coords="551,872,470,860,471,855,552,867"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a13c9e513985d8a1cacf57b486af877af" title="Register security endpoints with the Crow app." alt="" coords="285,895,473,949"/>
+<area shape="poly" id="edge25_Node000001_Node000014" title=" " alt="" coords="552,899,474,911,473,905,552,894"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a642c489d6cc265348302ea035a7919a2" title=" " alt="" coords="292,973,467,1028"/>
+<area shape="poly" id="edge27_Node000001_Node000015" title=" " alt="" coords="602,914,563,939,518,963,468,982,466,977,516,958,560,935,600,909"/>
+<area shape="rect" id="Node000016" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a012692fdc9a6b155d683ccd37762551c" title=" " alt="" coords="241,1052,517,1107"/>
+<area shape="poly" id="edge29_Node000001_Node000016" title=" " alt="" coords="625,917,582,980,553,1013,519,1042,496,1054,494,1050,516,1037,549,1009,578,977,620,914"/>
+<area shape="rect" id="Node000017" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#ac9517101718757dad409bdb97f2dd9d3" title=" " alt="" coords="293,1131,465,1185"/>
+<area shape="poly" id="edge31_Node000001_Node000017" title=" " alt="" coords="634,917,619,963,596,1017,563,1073,542,1098,519,1120,494,1136,466,1147,464,1142,492,1131,516,1116,538,1094,558,1070,591,1015,614,961,629,916"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a7711ddd2d6c52c2297775ca7e0c74cd1" title=" " alt="" coords="287,1524,471,1579"/>
+<area shape="poly" id="edge33_Node000001_Node000018" title=" " alt="" coords="640,917,629,1047,607,1225,592,1316,572,1398,548,1466,534,1493,519,1513,498,1531,472,1542,470,1537,495,1526,515,1509,530,1490,543,1464,567,1397,586,1314,602,1224,624,1046,635,917"/>
+<area shape="rect" id="Node000020" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#af035c20d72c1c01462d1d2125e6c6dd7" title=" " alt="" coords="278,1209,481,1264"/>
+<area shape="poly" id="edge36_Node000001_Node000020" title=" " alt="" coords="639,918,628,978,607,1053,592,1093,572,1131,548,1167,519,1199,502,1212,482,1222,480,1217,499,1207,516,1195,544,1164,567,1129,587,1091,602,1052,623,977,633,917"/>
+<area shape="rect" id="Node000021" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6bff5aa5fca9c59299d113d90bef1267" title=" " alt="" coords="269,1288,489,1343"/>
+<area shape="poly" id="edge38_Node000001_Node000021" title=" " alt="" coords="642,917,636,991,618,1087,602,1139,581,1189,554,1236,519,1277,491,1297,488,1292,516,1273,549,1233,576,1187,597,1137,613,1086,630,990,636,917"/>
+<area shape="rect" id="Node000022" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a7625b0fe64556787b852f9bd32ff5f62" title=" " alt="" coords="282,1367,477,1421"/>
+<area shape="poly" id="edge40_Node000001_Node000022" title=" " alt="" coords="638,917,622,1018,597,1149,581,1214,562,1273,542,1322,519,1356,500,1371,478,1382,476,1377,497,1367,515,1352,537,1320,557,1272,576,1213,592,1147,617,1017,632,917"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a56f8aff8810e57ece41d3af36d9d2fd5" title=" " alt="" coords="285,1445,473,1500"/>
+<area shape="poly" id="edge42_Node000001_Node000023" title=" " alt="" coords="639,918,626,1033,602,1187,586,1265,567,1336,545,1394,519,1434,499,1451,475,1462,472,1458,496,1447,515,1431,540,1392,562,1334,581,1264,597,1187,621,1032,634,917"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#acbdbc3e48243b43e6062e877f12532cc" title="Set 403 Forbidden response." alt="" coords="285,1603,473,1657"/>
+<area shape="poly" id="edge44_Node000001_Node000024" title=" " alt="" coords="641,917,632,1061,612,1263,597,1366,576,1460,551,1538,536,1568,519,1592,499,1609,475,1620,473,1616,496,1604,515,1588,531,1566,546,1536,571,1459,591,1365,607,1262,627,1061,635,917"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a4467a0596896950c7f7064e8e8d5ef71" title="Set 401 Unauthorized response." alt="" coords="285,1699,473,1753"/>
+<area shape="poly" id="edge47_Node000001_Node000027" title=" " alt="" coords="641,917,633,1075,614,1299,598,1414,578,1520,552,1608,536,1643,519,1670,499,1690,475,1704,472,1700,496,1686,515,1667,532,1641,547,1607,573,1519,593,1413,609,1298,628,1074,636,917"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="423,18,407,11,379,8,356,10,341,15,334,21,334,29,329,29,329,19,338,10,355,5,379,3,409,6,425,14"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="10,785,189,825"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="265,80,243,97,226,121,210,152,182,233,159,333,140,440,116,648,105,785,99,784,110,647,135,440,154,331,177,232,205,150,222,118,239,93,262,76"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="263,160,243,176,228,196,213,224,187,295,164,383,145,478,118,661,105,785,100,784,113,661,140,477,159,381,182,294,208,222,223,194,239,172,260,156"/>
+<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="283,230,261,240,243,254,216,296,191,357,169,432,150,515,121,674,106,784,101,784,116,674,145,514,164,431,186,355,211,293,239,251,259,236,280,225"/>
+<area shape="poly" id="edge10_Node000006_Node000003" title=" " alt="" coords="267,316,243,333,199,387,166,448,141,514,123,581,112,644,106,702,103,785,98,785,101,702,107,644,118,579,136,512,161,446,195,384,240,329,264,312"/>
+<area shape="poly" id="edge12_Node000007_Node000003" title=" " alt="" coords="286,387,263,398,243,412,205,455,175,505,151,559,133,613,112,714,104,785,99,784,107,713,128,612,146,557,170,503,201,452,240,408,260,393,284,382"/>
+<area shape="poly" id="edge14_Node000008_Node000003" title=" " alt="" coords="265,476,243,491,211,524,183,563,161,605,143,647,118,727,106,785,101,784,113,726,138,645,156,602,179,560,207,521,240,487,262,471"/>
+<area shape="poly" id="edge16_Node000009_Node000003" title=" " alt="" coords="255,561,243,569,216,594,192,621,153,682,126,741,109,786,104,784,121,739,149,680,188,618,212,590,240,565,252,557"/>
+<area shape="poly" id="edge18_Node000010_Node000003" title=" " alt="" coords="269,635,243,648,202,680,166,718,115,786,111,783,161,714,198,676,240,644,266,630"/>
+<area shape="poly" id="edge20_Node000011_Node000003" title=" " alt="" coords="276,715,242,727,183,757,132,787,129,782,180,752,240,722,274,710"/>
+<area shape="poly" id="edge22_Node000012_Node000003" title=" " alt="" coords="251,786,189,795,189,789,250,780"/>
+<area shape="poly" id="edge24_Node000013_Node000003" title=" " alt="" coords="274,832,188,820,189,814,275,826"/>
+<area shape="poly" id="edge26_Node000014_Node000003" title=" " alt="" coords="271,896,240,884,182,856,131,827,134,823,184,851,242,880,273,891"/>
+<area shape="poly" id="edge28_Node000015_Node000003" title=" " alt="" coords="278,981,240,963,198,931,162,894,111,827,116,824,166,890,202,927,243,958,280,976"/>
+<area shape="poly" id="edge30_Node000016_Node000003" title=" " alt="" coords="248,1047,240,1041,213,1017,189,989,149,929,121,870,105,826,110,824,126,868,154,926,193,986,216,1013,243,1037,251,1043"/>
+<area shape="poly" id="edge32_Node000017_Node000003" title=" " alt="" coords="279,1143,258,1133,240,1120,207,1086,179,1047,157,1005,139,963,114,883,101,826,106,824,119,882,144,961,162,1003,184,1044,211,1083,243,1116,261,1129,282,1138"/>
+<area shape="poly" id="edge35_Node000018_Node000003" title=" " alt="" coords="273,1537,255,1527,239,1513,222,1489,206,1457,177,1375,154,1276,135,1168,110,961,99,825,105,825,116,961,141,1167,159,1275,182,1374,210,1455,226,1486,243,1510,258,1522,276,1532"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#acb7be94ae4cff0f0bcfe1937552eb2e7" title="Start the server (blocking)" alt="" coords="24,1513,175,1553"/>
+<area shape="poly" id="edge34_Node000018_Node000019" title=" " alt="" coords="274,1547,175,1540,175,1535,274,1542"/>
+<area shape="poly" id="edge37_Node000020_Node000003" title=" " alt="" coords="264,1216,240,1199,201,1155,170,1104,146,1050,128,996,107,895,99,825,104,824,112,895,134,994,151,1048,175,1102,205,1151,243,1195,267,1212"/>
+<area shape="poly" id="edge39_Node000021_Node000003" title=" " alt="" coords="256,1290,239,1277,195,1223,162,1161,136,1095,119,1029,108,965,101,908,98,825,103,825,107,907,113,965,124,1028,142,1094,166,1159,200,1220,243,1273,259,1286"/>
+<area shape="poly" id="edge41_Node000022_Node000003" title=" " alt="" coords="268,1376,239,1356,212,1313,187,1252,164,1176,145,1094,116,935,101,826,106,825,122,934,151,1093,170,1175,192,1250,216,1311,243,1352,271,1372"/>
+<area shape="poly" id="edge43_Node000023_Node000003" title=" " alt="" coords="271,1457,239,1435,223,1413,209,1385,182,1313,159,1226,140,1131,113,948,100,825,105,824,118,947,146,1130,164,1225,187,1312,213,1383,228,1410,243,1431,274,1453"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a401ee911751d87ca73893876176ee752" title="Check if the request has any of the required scopes." alt="" coords="5,1577,193,1632"/>
+<area shape="poly" id="edge45_Node000024_Node000025" title=" " alt="" coords="272,1623,194,1616,194,1611,272,1618"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a9cde5edaba87527d8a0f35aed8e94ab6" title="Check if the authenticated request has a required scope." alt="" coords="5,1656,193,1711"/>
+<area shape="poly" id="edge46_Node000024_Node000026" title=" " alt="" coords="272,1653,194,1668,193,1663,271,1648"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a12e351f755884a202b56975ce659e994" title="Authenticate a request using OAuth 2.0 Bearer token." alt="" coords="5,1735,193,1789"/>
+<area shape="poly" id="edge48_Node000027_Node000028" title=" " alt="" coords="272,1742,194,1753,193,1747,272,1737"/>
+</map>

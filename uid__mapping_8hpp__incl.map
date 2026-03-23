@@ -1,0 +1,21 @@
+<map id="include/pacs/security/uid_mapping.hpp" name="include/pacs/security/uid_mapping.hpp">
+<area shape="rect" id="Node000001" title="UID mapping for consistent de&#45;identification across studies." alt="" coords="427,5,585,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,46,202,93,201,88,426,41"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="218,101,285,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="443,48,298,96,292,98,290,93,296,91,442,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="309,101,375,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="471,48,377,97,375,92,469,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="399,101,450,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="490,47,447,92,443,89,486,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="474,101,538,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="509,46,509,87,503,87,503,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="562,101,637,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="529,44,578,89,575,93,525,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="661,101,775,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="554,43,678,93,676,98,552,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="799,101,858,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="586,39,683,60,788,91,794,93,792,98,787,96,682,66,585,44"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="883,101,980,126"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="586,36,720,59,871,91,884,94,883,99,869,96,719,64,585,41"/>
+</map>

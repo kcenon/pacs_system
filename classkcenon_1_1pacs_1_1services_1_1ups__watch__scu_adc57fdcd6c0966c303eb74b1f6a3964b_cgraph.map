@@ -1,0 +1,22 @@
+<map id="kcenon::pacs::services::ups_watch_scu::handle_event_report" name="kcenon::pacs::services::ups_watch_scu::handle_event_report">
+<area shape="rect" id="Node000001" title="Handle an N&#45;EVENT&#45;REPORT&#45;RQ received from the SCP." alt="" coords="5,203,185,257"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#ae3b687d7cd616157c8de32e2250ed869" title="Get the Affected SOP Instance UID." alt="" coords="233,5,436,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,201,161,136,194,100,232,69,239,65,242,69,235,73,198,104,165,139,116,204"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#aeaec0c446957454404fa033695b3d8ca" title="Get the command field." alt="" coords="243,84,427,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="138,200,232,148,245,142,247,147,235,152,141,205"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#ab4c9149714f2e7dd5e218e0b7964521f" title="Get mutable reference to the data set." alt="" coords="243,163,427,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="185,212,229,205,230,210,186,218"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a957beb94648e76cea96e8650fc2bb919" title="Get the Event Type ID (for N&#45;EVENT&#45;REPORT)" alt="" coords="243,399,427,453"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="117,256,166,320,199,354,235,384,244,390,241,394,232,388,195,358,162,323,113,259"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a9d03833a4d32514833083b3f78617873" title="Check if the message has an associated data set." alt="" coords="243,320,427,375"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="143,255,235,305,250,312,248,317,232,310,140,260"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#ae7e1d78621223750266520a548b68a39" title=" " alt="" coords="249,241,421,296"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="186,242,235,250,234,255,185,247"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="484,124,639,179"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="413,58,437,69,512,114,509,118,435,74,411,63"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="484,399,639,453"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="427,423,470,423,470,429,427,429"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="687,406,841,446"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="639,423,672,423,672,429,639,429"/>
+<area shape="poly" id="edge10_Node000010_Node000003" title=" " alt="" coords="408,239,435,226,507,184,509,189,437,231,410,244"/>
+</map>

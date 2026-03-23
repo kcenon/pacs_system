@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::core::dicom_file::decode_explicit_vr_be" name="kcenon::pacs::core::dicom_file::decode_explicit_vr_be">
+<area shape="rect" id="Node000001" title="Decode a dataset from Explicit VR Big Endian format." alt="" coords="5,197,157,252"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a966d621682c97e19129750ac16ec3945" title="Add a new item to the sequence." alt="" coords="222,5,385,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,195,140,134,170,100,204,71,212,65,215,69,207,75,174,104,145,137,101,199"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding.html#a2f90c2ff52c6a636b6b9cd57ee8cfa1b" title="Gets the fixed size of a VR if applicable." alt="" coords="216,85,391,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="114,195,155,164,204,134,219,127,221,132,207,139,158,168,117,199"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa6eb56fd1ffc16dd50fb102224dcae6d" title="Parses a two&#45;character string to a vr_type." alt="" coords="216,173,391,213"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="157,211,202,205,203,210,158,216"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="205,237,401,277"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="158,233,192,238,191,243,157,238"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="218,301,389,341"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="132,250,206,286,225,293,223,298,204,291,130,254"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1encoding.html#a3d0c2e9b6de882b3573455a39781592d" title="Checks if a VR is a numeric type." alt="" coords="216,365,391,405"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="105,251,148,301,176,328,207,350,218,357,215,361,204,355,173,332,144,305,101,254"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="262,173,259,163,266,154,281,148,303,146,329,149,343,156,341,161,328,154,303,151,282,153,269,158,265,164,267,172"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="449,301,609,341"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="389,318,436,318,436,323,389,323"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::encoding::swap_od_bytes" name="kcenon::pacs::encoding::swap_od_bytes">
+<area shape="rect" id="Node000001" title="Swaps bytes in&#45;place for OD (Other Double) data." alt="" coords="5,81,180,121"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a869b54363374fad7a167722fc0187d25" title="Swap bytes in 64&#45;bit words using best available SIMD." alt="" coords="228,81,437,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,99,214,99,214,104,180,104"/>
+<area shape="poly" id="edge11_Node000002_Node000002" title=" " alt="" coords="288,82,285,72,292,62,308,57,333,55,361,58,376,65,374,70,359,63,333,60,309,62,296,67,290,73,293,80"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6033b8c73db95ad59f315d9dfcc47139" title="Check if AVX2 is available." alt="" coords="494,81,669,121"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,99,481,99,481,104,438,104"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a75897377c534bc5623c9a62858917125" title="Check if SSSE3 is available." alt="" coords="494,17,669,57"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="410,79,490,58,491,63,412,84"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd_1_1detail.html#a68e3ed9a85146dc88c7b7e82358dd354" title=" " alt="" coords="485,146,677,201"/>
+<area shape="poly" id="edge10_Node000002_Node000008" title=" " alt="" coords="403,119,474,140,473,145,402,124"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a7c58b0fc45c37eb282ea7181574b6bbf" title="Get cached SIMD features (singleton pattern)" alt="" coords="725,5,900,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="643,79,737,47,739,52,644,84"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25232bbf012acb7d93bf3eb6ed813914" title="Check if a specific feature is set." alt="" coords="725,93,900,133"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="669,103,712,105,712,111,669,109"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c5b859f9c8a8af24c8150f90171eb7" title="Detect available SIMD features at runtime." alt="" coords="948,5,1123,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="900,23,934,23,934,28,900,28"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="771,94,769,84,775,74,790,69,813,67,839,70,853,77,850,82,837,75,813,72,791,74,779,79,774,85,776,92"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="669,30,712,28,712,33,669,35"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="644,55,739,86,737,91,643,60"/>
+</map>

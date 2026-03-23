@@ -1,0 +1,19 @@
+<map id="src/security/atna_audit_logger.cpp" name="src/security/atna_audit_logger.cpp">
+<area shape="rect" id="Node000001" title="Implementation of the ATNA audit message generator." alt="" coords="256,5,427,45"/>
+<area shape="rect" id="Node000002" href="$atna__audit__logger_8hpp.html" title="IHE ATNA&#45;compliant audit message generator (RFC 3881 XML format)" alt="" coords="101,93,243,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="305,48,222,90,220,85,303,43"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="267,101,325,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="334,47,311,89,306,87,329,44"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="349,101,424,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="354,44,376,87,372,89,349,47"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="448,101,523,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="374,43,456,91,453,96,372,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="141,136,71,177,69,172,139,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,181,163,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="164,135,144,171,140,168,159,132"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="187,181,245,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="185,132,205,168,200,171,180,135"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="270,181,333,207"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="205,131,272,172,269,176,202,136"/>
+</map>

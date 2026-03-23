@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::compression::image_params::is_grayscale" name="kcenon::pacs::encoding::compression::image_params::is_grayscale">
+<area shape="rect" id="Node000001" title="Checks if the image is grayscale (single sample per pixel)." alt="" coords="264,5,483,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec_1_1impl.html#ad3f336cc9b04a9ef2beba8d2de3baa78" title=" " alt="" coords="5,5,216,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="251,35,216,35,216,30,251,30"/>
+</map>

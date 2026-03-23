@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::storage::s3_storage::retrieve_with_progress" name="kcenon::pacs::storage::s3_storage::retrieve_with_progress">
+<area shape="rect" id="Node000001" title="Retrieve with progress tracking." alt="" coords="5,5,169,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a35d5c0ca5ab34832fbf1c6055ac7d196" title="Parse a DICOM file from raw bytes." alt="" coords="217,13,396,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,30,204,30,204,35,169,35"/>
+</map>

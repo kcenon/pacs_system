@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::filter_studies" name="kcenon::pacs::workflow::auto_prefetch_service::filter_studies">
+<area shape="rect" id="Node000001" title="Filter prior studies based on criteria." alt="" coords="5,5,180,60"/>
+<area shape="rect" id="Node000002" href="$annotation__repository_8cpp.html#a6426c8d290e57d5d7b74462e0d61d517" title=" " alt="" coords="228,20,267,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,30,214,30,214,35,180,35"/>
+</map>

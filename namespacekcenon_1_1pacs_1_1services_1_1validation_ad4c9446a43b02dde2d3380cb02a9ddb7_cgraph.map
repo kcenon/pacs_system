@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::is_valid_heightmap_seg_dataset" name="kcenon::pacs::services::validation::is_valid_heightmap_seg_dataset">
+<area shape="rect" id="Node000001" title="Quick check if a dataset is a valid Heightmap Segmentation object." alt="" coords="5,34,191,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1heightmap__seg__iod__validator.html#aa4817a4c96d9e391ff121b41bc30a7e5" title="Quick check if dataset has minimum required attributes." alt="" coords="239,34,471,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,59,225,59,225,64,191,64"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="519,5,708,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="471,43,505,38,506,43,471,48"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="536,70,691,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="471,75,522,82,522,87,471,80"/>
+</map>

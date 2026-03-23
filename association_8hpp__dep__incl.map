@@ -1,0 +1,131 @@
+<map id="include/pacs/network/association.hpp" name="include/pacs/network/association.hpp">
+<area shape="rect" id="Node000001" title="DICOM Association management per PS3.8." alt="" coords="1433,5,1593,45"/>
+<area shape="rect" id="Node000002" href="$dicom__server_8hpp.html" title="Multi&#45;threaded DICOM server for handling multiple associations." alt="" coords="967,189,1127,229"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1419,35,1362,42,1300,54,1237,71,1176,96,1142,117,1111,142,1064,190,1061,187,1108,138,1139,112,1174,91,1235,66,1299,48,1362,36,1418,29"/>
+<area shape="rect" id="Node000008" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="1253,379,1487,405"/>
+<area shape="poly" id="edge76_Node000001_Node000008" title=" " alt="" coords="1419,37,1197,59,933,96,760,119,537,151,426,174,326,203,283,221,246,240,215,262,192,285,184,305,186,313,192,322,206,328,235,335,331,347,626,365,969,378,1253,386,1253,391,969,384,626,371,330,352,234,340,204,333,188,326,181,315,179,304,188,283,212,258,243,236,281,216,325,198,425,169,536,146,760,113,932,91,1196,54,1419,32"/>
+<area shape="rect" id="Node000009" href="$association_8cpp.html" title="DICOM Association implementation." alt="" coords="202,291,405,317"/>
+<area shape="poly" id="edge77_Node000001_Node000009" title=" " alt="" coords="1420,42,1275,65,1113,96,883,149,659,206,343,294,341,289,658,201,882,144,1112,91,1274,60,1419,37"/>
+<area shape="rect" id="Node000012" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="347,372,537,412"/>
+<area shape="poly" id="edge78_Node000001_Node000012" title=" " alt="" coords="1419,30,1072,34,617,45,399,54,214,65,81,79,40,87,21,95,11,118,9,153,16,195,34,235,62,270,97,300,136,324,178,344,265,370,347,383,346,388,264,375,176,349,133,329,93,304,58,274,29,237,11,196,3,154,6,117,17,91,39,82,80,73,213,59,399,48,617,40,1072,29,1419,25"/>
+<area shape="rect" id="Node000013" href="$dicom__association__handler_8hpp.html" title="DICOM association handler for network_system integration." alt="" coords="1232,181,1399,236"/>
+<area shape="poly" id="edge9_Node000001_Node000013" title=" " alt="" coords="1484,57,1346,183,1342,179,1480,53"/>
+<area shape="rect" id="Node000017" href="$mpps__scu_8hpp.html" title="DICOM MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="2381,284,2543,324"/>
+<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="1518,58,1534,158,1548,205,1556,223,1565,234,1582,243,1609,250,1691,262,1798,269,1917,274,2285,281,2381,291,2381,296,2284,287,1917,279,1797,275,1690,267,1608,255,1580,247,1562,238,1552,225,1543,207,1529,159,1513,59"/>
+<area shape="rect" id="Node000019" href="$n__get__scu_8hpp.html" title="DICOM N&#45;GET SCU service for attribute retrieval." alt="" coords="32,93,193,133"/>
+<area shape="poly" id="edge16_Node000001_Node000019" title=" " alt="" coords="1419,30,1203,34,904,44,561,63,385,78,213,96,194,99,193,93,212,91,384,73,560,58,904,38,1203,28,1419,25"/>
+<area shape="rect" id="Node000021" href="$print__scu_8hpp.html" title="DICOM Print Management SCU service (PS3.4 Annex H)" alt="" coords="3343,284,3504,324"/>
+<area shape="poly" id="edge18_Node000001_Node000021" title=" " alt="" coords="1606,24,1931,26,2375,35,2604,43,2817,55,3001,70,3140,91,3210,103,3266,115,3317,136,3372,179,3392,204,3406,232,3422,283,3417,284,3401,234,3387,207,3368,183,3314,141,3264,120,3209,108,3139,96,3000,76,2817,60,2603,48,2374,40,1931,31,1606,29"/>
+<area shape="rect" id="Node000023" href="$query__scu_8hpp.html" title="DICOM Query SCU service (C&#45;FIND sender)" alt="" coords="1927,284,2088,324"/>
+<area shape="poly" id="edge20_Node000001_Node000023" title=" " alt="" coords="1505,59,1496,99,1492,146,1499,194,1508,215,1521,234,1534,245,1551,254,1594,266,1648,273,1706,277,1824,277,1914,281,1927,283,1926,289,1914,287,1824,282,1706,282,1647,279,1593,272,1549,259,1531,249,1517,238,1503,218,1494,195,1487,146,1491,99,1500,58"/>
+<area shape="rect" id="Node000024" href="$retrieve__scu_8hpp.html" title="DICOM Retrieve SCU service (C&#45;MOVE/C&#45;GET sender)" alt="" coords="1897,372,2059,412"/>
+<area shape="poly" id="edge31_Node000001_Node000024" title=" " alt="" coords="1427,52,1339,82,1296,102,1258,124,1229,149,1211,175,1207,189,1207,204,1212,219,1221,234,1239,253,1258,263,1277,267,1297,268,1342,268,1367,272,1394,282,1409,292,1420,303,1429,313,1444,322,1507,344,1562,356,1612,361,1659,362,1759,360,1817,362,1885,369,1898,371,1897,377,1884,375,1817,367,1759,365,1659,367,1612,367,1561,361,1506,349,1442,326,1426,317,1416,307,1406,296,1391,286,1366,277,1342,273,1297,273,1276,272,1256,268,1236,257,1217,238,1207,221,1202,204,1202,189,1206,173,1225,145,1255,120,1294,97,1338,77,1425,47"/>
+<area shape="rect" id="Node000027" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="1596,460,1795,500"/>
+<area shape="poly" id="edge79_Node000001_Node000027" title=" " alt="" coords="1419,30,1153,37,984,45,806,59,632,78,473,105,402,121,340,140,288,160,246,183,228,202,207,230,179,285,174,305,179,323,209,362,243,383,283,396,334,409,411,422,541,433,900,452,1596,474,1595,479,900,457,540,438,410,427,333,415,282,401,240,388,206,366,174,325,169,305,174,283,203,227,224,199,243,179,285,156,338,135,401,116,471,100,631,73,806,53,983,40,1153,31,1419,24"/>
+<area shape="rect" id="Node000031" href="$scp__service_8hpp.html" title="Base class for DICOM SCP (Service Class Provider) services." alt="" coords="2260,93,2421,133"/>
+<area shape="poly" id="edge32_Node000001_Node000031" title=" " alt="" coords="1606,34,2260,101,2260,106,1606,39"/>
+<area shape="rect" id="Node000056" href="$ups__push__scu_8hpp.html" title="DICOM UPS (Unified Procedure Step) Push SCU service." alt="" coords="3582,284,3753,324"/>
+<area shape="poly" id="edge71_Node000001_Node000056" title=" " alt="" coords="1607,25,1949,32,2421,45,2895,64,3093,76,3242,91,3306,96,3363,96,3462,95,3507,100,3552,114,3597,139,3644,180,3660,204,3669,232,3672,284,3666,284,3664,233,3655,206,3640,183,3594,144,3550,119,3506,105,3462,100,3363,101,3306,101,3242,96,3092,82,2895,69,2421,50,1949,37,1607,31"/>
+<area shape="rect" id="Node000057" href="$ups__watch__scu_8hpp.html" title="DICOM UPS Watch SCU service (subscription client and event receiver)" alt="" coords="3546,372,3725,412"/>
+<area shape="poly" id="edge72_Node000001_Node000057" title=" " alt="" coords="1607,25,2141,31,2895,44,3575,63,3796,76,3860,83,3889,91,3903,109,3912,126,3917,143,3917,161,3908,197,3890,237,3873,263,3853,287,3805,325,3752,354,3702,374,3700,369,3750,349,3802,321,3849,283,3869,260,3885,235,3903,195,3912,160,3912,144,3908,128,3899,112,3886,96,3859,88,3795,81,3575,69,2895,49,2141,36,1607,30"/>
+<area shape="rect" id="Node000070" href="$storage__commitment__scu_8hpp.html" title="DICOM Storage Commitment Push Model SCU service." alt="" coords="3653,93,3876,133"/>
+<area shape="poly" id="edge65_Node000001_Node000070" title=" " alt="" coords="1606,23,1939,23,2439,31,3030,51,3336,68,3636,91,3654,92,3653,98,3635,96,3336,73,3030,56,2439,36,1939,29,1606,29"/>
+<area shape="rect" id="Node000072" href="$storage__scu_8hpp.html" title="DICOM Storage SCU service (C&#45;STORE sender)" alt="" coords="3157,284,3319,324"/>
+<area shape="poly" id="edge67_Node000001_Node000072" title=" " alt="" coords="1606,25,2013,32,2283,41,2566,54,2838,74,3075,100,3173,117,3253,135,3312,156,3333,167,3348,180,3357,194,3359,208,3348,237,3323,266,3291,286,3289,282,3320,262,3344,235,3354,207,3352,195,3344,183,3330,172,3310,161,3251,140,3172,122,3074,106,2838,79,2566,60,2283,46,2012,37,1606,30"/>
+<area shape="rect" id="Node000073" href="$worklist__scu_8hpp.html" title="DICOM Modality Worklist SCU service (MWL C&#45;FIND sender)" alt="" coords="3951,93,4112,133"/>
+<area shape="poly" id="edge73_Node000001_Node000073" title=" " alt="" coords="1607,25,2068,29,2741,40,3427,60,3715,74,3932,91,3950,93,3950,98,3931,96,3714,79,3427,65,2741,46,2068,35,1607,30"/>
+<area shape="rect" id="Node000075" href="$remote__node__manager_8cpp.html" title="Implementation of the Remote Node Manager." alt="" coords="4137,93,4307,133"/>
+<area shape="poly" id="edge75_Node000001_Node000075" title=" " alt="" coords="1606,24,2100,28,2829,38,3576,58,3889,72,4125,91,4137,92,4136,97,4124,96,3888,78,3576,63,2829,43,2100,33,1606,30"/>
+<area shape="rect" id="Node000003" href="$service__interfaces_8hpp.html" title="Service interface aliases for dependency injection." alt="" coords="962,284,1133,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1050,242,1050,284,1045,284,1045,242"/>
+<area shape="rect" id="Node000007" href="$network__adapter_8cpp.html" title="Implementation of network_adapter for network_system integration." alt="" coords="1207,284,1381,324"/>
+<area shape="poly" id="edge3_Node000002_Node000007" title=" " alt="" coords="1111,231,1245,281,1243,286,1109,236"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="1085,235,1146,282,1171,303,1197,322,1267,354,1331,377,1329,382,1265,359,1194,326,1167,307,1143,286,1081,239"/>
+<area shape="poly" id="edge5_Node000002_Node000009" title=" " alt="" coords="954,223,713,250,424,287,374,294,373,289,423,281,713,245,953,217"/>
+<area shape="rect" id="Node000010" href="$dicom__server_8cpp.html" title="DICOM Server implementation." alt="" coords="479,291,695,317"/>
+<area shape="poly" id="edge6_Node000002_Node000010" title=" " alt="" coords="954,231,644,294,643,289,953,226"/>
+<area shape="rect" id="Node000011" href="$association__endpoints_8cpp.html" title="DICOM Association API endpoints implementation." alt="" coords="719,284,938,324"/>
+<area shape="poly" id="edge7_Node000002_Node000011" title=" " alt="" coords="992,237,874,286,872,281,989,232"/>
+<area shape="poly" id="edge8_Node000002_Node000012" title=" " alt="" coords="953,212,826,215,682,226,614,236,553,249,503,265,469,286,455,305,447,328,443,372,438,371,442,326,450,302,465,282,501,260,551,244,613,231,681,221,826,210,953,207"/>
+<area shape="poly" id="edge12_Node000013_Node000008" title=" " alt="" coords="1413,232,1418,233,1455,239,1489,239,1549,235,1577,236,1603,243,1629,257,1655,282,1667,306,1665,326,1651,343,1628,356,1563,375,1487,386,1487,381,1561,370,1626,352,1648,339,1660,324,1662,307,1650,286,1626,261,1601,248,1576,241,1549,241,1489,245,1455,244,1417,239,1411,237"/>
+<area shape="rect" id="Node000014" href="$dicom__server__v2_8hpp.html" title="DICOM server implementation using network_system&#39;s messaging_server." alt="" coords="1717,284,1903,324"/>
+<area shape="poly" id="edge10_Node000013_Node000014" title=" " alt="" coords="1413,232,1418,233,1718,284,1717,290,1417,239,1411,237"/>
+<area shape="rect" id="Node000016" href="$dicom__association__handler_8cpp.html" title="DICOM association handler implementation for network_system integration." alt="" coords="1456,284,1641,324"/>
+<area shape="poly" id="edge13_Node000013_Node000016" title=" " alt="" coords="1394,239,1503,282,1501,286,1392,243"/>
+<area shape="poly" id="edge11_Node000014_Node000008" title=" " alt="" coords="1704,329,1429,382,1428,377,1703,323"/>
+<area shape="rect" id="Node000018" href="$mpps__scu_8cpp.html" title="Implementation of the MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="2365,379,2559,405"/>
+<area shape="poly" id="edge15_Node000017_Node000018" title=" " alt="" coords="2465,338,2465,379,2459,379,2459,338"/>
+<area shape="rect" id="Node000020" href="$n__get__scu_8cpp.html" title="Implementation of the N&#45;GET SCU service." alt="" coords="43,189,182,229"/>
+<area shape="poly" id="edge17_Node000019_Node000020" title=" " alt="" coords="115,147,115,189,110,189,110,147"/>
+<area shape="rect" id="Node000022" href="$print__scu_8cpp.html" title="Implementation of the Print Management SCU service (PS3.4 Annex H)" alt="" coords="3357,372,3490,412"/>
+<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="3426,338,3426,372,3421,372,3421,338"/>
+<area shape="poly" id="edge29_Node000023_Node000012" title=" " alt="" coords="1913,327,1781,339,1614,350,1220,369,538,391,537,386,1220,363,1614,344,1781,333,1913,321"/>
+<area shape="poly" id="edge21_Node000023_Node000024" title=" " alt="" coords="1999,338,1987,373,1982,371,1994,336"/>
+<area shape="rect" id="Node000025" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="2229,467,2425,493"/>
+<area shape="poly" id="edge25_Node000023_Node000025" title=" " alt="" coords="2102,323,2232,352,2302,370,2318,393,2327,420,2331,467,2325,467,2322,421,2314,396,2299,374,2231,357,2101,328"/>
+<area shape="poly" id="edge30_Node000023_Node000027" title=" " alt="" coords="1914,327,1790,355,1722,374,1709,393,1701,416,1697,460,1692,459,1696,415,1704,391,1719,370,1789,350,1913,322"/>
+<area shape="rect" id="Node000028" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="2083,379,2289,405"/>
+<area shape="poly" id="edge26_Node000023_Node000028" title=" " alt="" coords="2060,327,2163,377,2161,382,2057,332"/>
+<area shape="rect" id="Node000029" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="2583,379,2818,405"/>
+<area shape="poly" id="edge27_Node000023_Node000029" title=" " alt="" coords="2102,322,2234,339,2338,348,2441,356,2572,369,2626,377,2625,382,2571,375,2440,361,2337,353,2234,344,2101,327"/>
+<area shape="rect" id="Node000030" href="$query__scu_8cpp.html" title="Implementation of the Query SCU service." alt="" coords="1733,372,1873,412"/>
+<area shape="poly" id="edge28_Node000023_Node000030" title=" " alt="" coords="1951,332,1849,374,1847,370,1949,327"/>
+<area shape="poly" id="edge22_Node000024_Node000025" title=" " alt="" coords="2069,413,2281,465,2280,470,2067,418"/>
+<area shape="rect" id="Node000026" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="1901,460,2055,500"/>
+<area shape="poly" id="edge23_Node000024_Node000026" title=" " alt="" coords="1981,426,1981,460,1975,460,1975,426"/>
+<area shape="poly" id="edge24_Node000024_Node000027" title=" " alt="" coords="1904,419,1758,463,1756,457,1902,413"/>
+<area shape="poly" id="edge33_Node000031_Node000002" title=" " alt="" coords="2247,120,1803,139,1513,158,1220,184,1128,196,1127,191,1219,179,1513,153,1803,134,2246,115"/>
+<area shape="poly" id="edge34_Node000031_Node000013" title=" " alt="" coords="2246,119,2088,124,1882,135,1651,154,1418,184,1400,187,1399,182,1418,179,1650,149,1881,129,2088,118,2246,113"/>
+<area shape="poly" id="edge35_Node000031_Node000014" title=" " alt="" coords="2246,118,2063,123,1848,134,1748,142,1662,153,1598,167,1577,175,1565,183,1557,196,1554,208,1557,221,1565,234,1588,251,1625,265,1717,287,1716,292,1623,270,1585,256,1561,238,1552,223,1549,208,1552,194,1561,179,1575,170,1597,162,1661,148,1747,137,1848,129,2062,118,2246,113"/>
+<area shape="poly" id="edge64_Node000031_Node000029" title=" " alt="" coords="2435,112,2538,115,2648,126,2699,134,2744,146,2780,161,2805,180,2814,194,2815,207,2806,237,2711,381,2706,378,2801,235,2809,207,2808,195,2801,183,2778,165,2742,151,2698,140,2647,131,2537,121,2435,117"/>
+<area shape="rect" id="Node000032" href="$mpps__scp_8hpp.html" title="DICOM MPPS (Modality Performed Procedure Step) SCP service." alt="" coords="2445,189,2607,229"/>
+<area shape="poly" id="edge36_Node000031_Node000032" title=" " alt="" coords="2392,137,2490,186,2487,191,2389,142"/>
+<area shape="rect" id="Node000034" href="$n__get__scp_8hpp.html" title="DICOM N&#45;GET SCP service for attribute retrieval." alt="" coords="1576,189,1737,229"/>
+<area shape="poly" id="edge39_Node000031_Node000034" title=" " alt="" coords="2246,123,2019,144,1884,161,1749,184,1718,191,1717,186,1748,179,1883,156,2018,139,2246,118"/>
+<area shape="rect" id="Node000036" href="$print__scp_8hpp.html" title="DICOM Print Management SCP service (PS3.4 Annex H)" alt="" coords="2969,189,3131,229"/>
+<area shape="poly" id="edge40_Node000031_Node000036" title=" " alt="" coords="2435,118,2670,139,2811,156,2950,179,2984,186,2983,191,2949,184,2810,162,2670,144,2435,123"/>
+<area shape="rect" id="Node000038" href="$query__scp_8hpp.html" title="DICOM Query SCP service (C&#45;FIND handler)" alt="" coords="2260,189,2421,229"/>
+<area shape="poly" id="edge42_Node000031_Node000038" title=" " alt="" coords="2343,147,2343,189,2338,189,2338,147"/>
+<area shape="rect" id="Node000047" href="$retrieve__scp_8hpp.html" title="DICOM Retrieve SCP service (C&#45;MOVE/C&#45;GET handler)" alt="" coords="2112,284,2273,324"/>
+<area shape="poly" id="edge45_Node000031_Node000047" title=" " alt="" coords="2247,126,2187,135,2127,147,2078,163,2060,172,2048,183,2040,196,2038,208,2041,221,2048,235,2061,250,2076,263,2113,282,2110,287,2073,267,2057,254,2044,237,2036,222,2033,208,2035,194,2044,180,2057,168,2076,158,2126,142,2186,129,2246,121"/>
+<area shape="rect" id="Node000049" href="$storage__commitment__scp_8hpp.html" title="DICOM Storage Commitment Push Model SCP service." alt="" coords="1761,189,1984,229"/>
+<area shape="poly" id="edge48_Node000031_Node000049" title=" " alt="" coords="2247,136,2002,184,1966,191,1965,186,2001,179,2246,130"/>
+<area shape="rect" id="Node000051" href="$storage__scp_8hpp.html" title="DICOM Storage SCP service (C&#45;STORE handler)" alt="" coords="2972,284,3133,324"/>
+<area shape="poly" id="edge49_Node000031_Node000051" title=" " alt="" coords="2436,118,2678,141,2796,158,2880,179,2904,191,2921,203,2958,234,3027,282,3024,286,2955,238,2918,207,2902,195,2878,184,2795,163,2677,146,2435,123"/>
+<area shape="rect" id="Node000055" href="$ups__push__scp_8hpp.html" title="DICOM UPS (Unified Procedure Step) Push SCP service." alt="" coords="3459,189,3630,229"/>
+<area shape="poly" id="edge52_Node000031_Node000055" title=" " alt="" coords="2435,116,2832,138,3088,156,3346,179,3460,192,3459,198,3346,184,3087,162,2832,144,2435,122"/>
+<area shape="rect" id="Node000062" href="$ups__query__scp_8hpp.html" title="DICOM UPS Query SCP service (C&#45;FIND handler for UPS workitems)" alt="" coords="2059,189,2236,229"/>
+<area shape="poly" id="edge57_Node000031_Node000062" title=" " alt="" coords="2290,142,2188,191,2185,186,2288,137"/>
+<area shape="rect" id="Node000064" href="$ups__watch__scp_8hpp.html" title="DICOM UPS Watch SCP service (subscription and event notification)" alt="" coords="3155,189,3334,229"/>
+<area shape="poly" id="edge58_Node000031_Node000064" title=" " alt="" coords="2435,115,2573,121,2750,133,2946,152,3142,179,3178,186,3176,191,3142,184,2945,157,2750,138,2573,127,2435,120"/>
+<area shape="rect" id="Node000065" href="$verification__scp_8hpp.html" title="DICOM Verification SCP service (C&#45;ECHO handler)" alt="" coords="2787,284,2948,324"/>
+<area shape="poly" id="edge60_Node000031_Node000065" title=" " alt="" coords="2435,111,2547,115,2670,125,2728,133,2779,145,2821,160,2851,179,2866,204,2874,232,2875,260,2873,284,2868,283,2870,260,2869,233,2862,206,2847,183,2819,165,2778,150,2727,138,2669,130,2547,120,2435,117"/>
+<area shape="rect" id="Node000067" href="$worklist__scp_8hpp.html" title="DICOM Modality Worklist SCP service (MWL C&#45;FIND handler)" alt="" coords="2631,189,2792,229"/>
+<area shape="poly" id="edge62_Node000031_Node000067" title=" " alt="" coords="2435,134,2619,179,2646,186,2644,191,2617,184,2434,139"/>
+<area shape="poly" id="edge37_Node000032_Node000017" title=" " alt="" coords="2508,241,2477,285,2473,282,2503,238"/>
+<area shape="poly" id="edge38_Node000032_Node000029" title=" " alt="" coords="2560,236,2611,282,2658,335,2693,377,2689,381,2654,338,2607,286,2557,239"/>
+<area shape="poly" id="edge41_Node000036_Node000021" title=" " alt="" coords="3130,230,3144,233,3343,282,3342,287,3143,239,3129,235"/>
+<area shape="poly" id="edge43_Node000038_Node000023" title=" " alt="" coords="2261,235,2248,239,2076,286,2074,281,2247,233,2259,230"/>
+<area shape="poly" id="edge44_Node000038_Node000029" title=" " alt="" coords="2415,230,2495,257,2555,282,2584,300,2610,322,2686,377,2683,381,2607,326,2581,305,2553,286,2493,262,2413,235"/>
+<area shape="poly" id="edge46_Node000047_Node000024" title=" " alt="" coords="2134,332,2026,374,2024,370,2132,327"/>
+<area shape="poly" id="edge47_Node000047_Node000029" title=" " alt="" coords="2287,319,2633,377,2632,382,2286,324"/>
+<area shape="poly" id="edge50_Node000051_Node000029" title=" " alt="" coords="2963,330,2748,382,2747,377,2962,325"/>
+<area shape="rect" id="Node000054" href="$storage__scu_8cpp.html" title="Implementation of the Storage SCU service." alt="" coords="2995,372,3147,412"/>
+<area shape="poly" id="edge51_Node000051_Node000054" title=" " alt="" coords="3062,337,3070,371,3065,372,3057,338"/>
+<area shape="poly" id="edge53_Node000055_Node000056" title=" " alt="" coords="3582,235,3644,282,3641,286,3579,239"/>
+<area shape="poly" id="edge54_Node000056_Node000057" title=" " alt="" coords="3658,338,3645,373,3640,371,3653,336"/>
+<area shape="rect" id="Node000059" href="$ups__push__scu_8cpp.html" title="Implementation of the UPS Push SCU service." alt="" coords="3749,372,3903,412"/>
+<area shape="poly" id="edge56_Node000056_Node000059" title=" " alt="" coords="3715,328,3792,370,3790,374,3713,333"/>
+<area shape="rect" id="Node000058" href="$ups__watch__scu_8cpp.html" title="Implementation of the UPS Watch SCU service." alt="" coords="3559,460,3712,500"/>
+<area shape="poly" id="edge55_Node000057_Node000058" title=" " alt="" coords="3638,426,3638,460,3633,460,3633,426"/>
+<area shape="poly" id="edge59_Node000064_Node000057" title=" " alt="" coords="3348,224,3432,246,3476,262,3517,282,3565,320,3618,370,3614,374,3562,324,3514,286,3474,267,3431,251,3347,229"/>
+<area shape="poly" id="edge61_Node000065_Node000029" title=" " alt="" coords="2820,333,2724,382,2722,377,2817,328"/>
+<area shape="poly" id="edge63_Node000067_Node000029" title=" " alt="" coords="2712,243,2704,379,2699,379,2707,243"/>
+<area shape="rect" id="Node000071" href="$storage__commitment__scu_8cpp.html" title="Implementation of Storage Commitment Push Model SCU service." alt="" coords="3705,189,3875,229"/>
+<area shape="poly" id="edge66_Node000070_Node000071" title=" " alt="" coords="3776,146,3787,188,3782,189,3771,147"/>
+<area shape="poly" id="edge68_Node000072_Node000025" title=" " alt="" coords="3226,338,3200,379,3182,399,3160,414,3119,427,3048,438,2847,457,2619,470,2426,478,2426,473,2618,464,2846,451,3047,433,3118,422,3158,410,3179,395,3196,376,3222,335"/>
+<area shape="poly" id="edge69_Node000072_Node000029" title=" " alt="" coords="3144,327,2785,382,2784,377,3143,321"/>
+<area shape="poly" id="edge70_Node000072_Node000054" title=" " alt="" coords="3191,333,3109,374,3107,370,3188,328"/>
+<area shape="rect" id="Node000074" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="3962,189,4101,229"/>
+<area shape="poly" id="edge74_Node000073_Node000074" title=" " alt="" coords="4034,147,4034,189,4029,189,4029,147"/>
+</map>

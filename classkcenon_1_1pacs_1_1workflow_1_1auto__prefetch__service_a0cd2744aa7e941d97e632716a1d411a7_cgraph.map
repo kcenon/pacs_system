@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::run_loop" name="kcenon::pacs::workflow::auto_prefetch_service::run_loop">
+<area shape="rect" id="Node000001" title="Background thread main loop." alt="" coords="5,102,180,157"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="228,5,415,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,99,263,49,265,54,155,104"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a5bef4089bc04286caa45fcc6a2057ea4" title="Execute a single prefetch cycle." alt="" coords="234,102,409,157"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="180,127,220,127,220,132,180,132"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a569cf9d0158523dc02ec22e7d9d461b6" title="Update cumulative statistics." alt="" coords="234,181,409,235"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="174,154,230,174,228,179,172,159"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="743,57,929,97"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,17,548,17,622,22,695,31,771,50,770,56,694,36,621,27,548,23,415,23"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#abab83a011fa6dddee2a05ff84f7a000c" title="Increment a counter metric." alt="" coords="463,46,695,101"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="408,108,449,99,450,104,409,113"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="485,125,672,165"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="409,132,472,136,471,141,409,137"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#a9d6865c3dab62c93fe82bb007972b4bb" title="Record a histogram sample." alt="" coords="475,190,682,245"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="403,154,486,183,485,188,401,159"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="654,123,746,98,747,103,656,128"/>
+</map>

@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::security::certificate_chain" name="kcenon::pacs::security::certificate_chain">
+<area shape="rect" id="Node000001" title="Represents a certificate chain for validation." alt="" coords="216,1204,375,1404"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="196,1061,395,1141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="298,1142,298,1188,293,1188,293,1142"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1certificate.html" title=" " alt="" coords="125,659,319,999"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="264,998,275,1037,278,1045,273,1047,270,1038,259,1000"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="57,487,241,581"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="163,581,178,642,173,643,158,582"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1security_1_1certificate__impl.html" title=" " alt="" coords="5,133,164,373"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="74,373,77,418,89,462,93,472,88,474,83,464,72,419,68,374"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="191,221,341,286"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="240,299,211,337,177,375,159,386,152,391,146,399,138,420,135,442,139,486,133,487,130,442,133,418,141,396,148,387,156,382,174,371,207,334,236,296"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="312,5,335,71"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="317,71,281,205,276,204,312,70"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="321,397,443,463"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="337,61,350,94,355,133,380,381,375,381,350,134,345,95,332,63"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="392,476,403,580,408,723,404,801,394,882,378,962,352,1038,338,1063,334,1060,348,1036,373,961,389,881,399,801,402,723,398,581,387,477"/>
+</map>

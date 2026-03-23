@@ -1,0 +1,5 @@
+<map id="include/pacs/network/pipeline/pipeline_adapter.hpp" name="include/pacs/network/pipeline/pipeline_adapter.hpp">
+<area shape="rect" id="Node000001" title="Adapter for integrating pipeline with existing DICOM components." alt="" coords="5,5,224,45"/>
+<area shape="rect" id="Node000002" href="$pipeline__adapter_8cpp.html" title="Implementation of pipeline adapter." alt="" coords="34,93,195,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,59,117,93,112,93,112,59"/>
+</map>

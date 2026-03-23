@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::run_loop" name="kcenon::pacs::workflow::auto_prefetch_service::run_loop">
+<area shape="rect" id="Node000001" title="Background thread main loop." alt="" coords="451,124,625,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ad54ce309500c14050bebc65f7fb21acb" title="Start the prefetch service (alias for enable)" alt="" coords="228,124,403,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,154,403,154,403,149,437,149"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a3a97a7a2b6b01b3953bc06847e9b5974" title="Construct auto prefetch service." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="258,119,179,74,156,63,159,58,181,69,261,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ad7b9b852da37e704489bb5040135c56d" title="Construct auto prefetch service with IExecutor (recommended)" alt="" coords="5,84,180,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="214,136,180,130,181,124,215,131"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#aaf3914d1bbbe0a5e7d19cc9cf25a3b82" title="Construct auto prefetch service with thread pool." alt="" coords="5,163,180,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="215,171,181,177,180,172,214,166"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a049b14fc80b664ef700d1f9069c3423a" title="Enable the prefetch service." alt="" coords="5,241,180,296"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="258,188,181,231,156,244,154,239,179,226,255,184"/>
+</map>

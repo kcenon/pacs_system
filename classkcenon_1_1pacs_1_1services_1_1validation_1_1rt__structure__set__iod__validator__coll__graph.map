@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::rt_structure_set_iod_validator" name="kcenon::pacs::services::validation::rt_structure_set_iod_validator">
+<area shape="rect" id="Node000001" title="Validator for RT Structure Set IODs." alt="" coords="5,343,219,855"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1validation_1_1rt__validation__options.html" title="Options for RT IOD validation." alt="" coords="17,5,207,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,280,115,326,109,326,109,280"/>
+</map>

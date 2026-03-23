@@ -1,0 +1,7 @@
+<map id="if" name="if">
+<area shape="rect" id="Node000001" title=" " alt="" coords="251,60,289,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__executor__adapter.html#afbe957b2d90ed57e96ed2525ff851cea" title="Execute a job with delay." alt="" coords="5,5,203,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,68,202,59,204,54,238,62"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#aab57469d394b2fb53e66d0fbc359b61f" title="Filter prior studies based on criteria." alt="" coords="17,84,191,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,83,192,94,191,88,237,77"/>
+</map>

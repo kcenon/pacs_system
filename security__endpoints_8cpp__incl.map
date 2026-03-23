@@ -1,0 +1,64 @@
+<map id="src/web/endpoints/security_endpoints.cpp" name="src/web/endpoints/security_endpoints.cpp">
+<area shape="rect" id="Node000001" title="Security API endpoints implementation." alt="" coords="701,5,897,45"/>
+<area shape="rect" id="Node000002" href="$security__endpoints_8hpp.html" title="Security API endpoints for REST server." alt="" coords="112,93,289,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="702,43,303,100,303,95,701,38"/>
+<area shape="rect" id="Node000006" href="$access__control__manager_8hpp.html" title="Core RBAC logic." alt="" coords="716,93,883,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="802,46,802,79,797,79,797,46"/>
+<area shape="rect" id="Node000012" href="$user_8hpp.html" title="User definition for RBAC." alt="" coords="945,277,1022,302"/>
+<area shape="poly" id="edge35_Node000001_Node000012" title=" " alt="" coords="844,43,884,65,928,95,969,134,986,156,999,180,1005,202,1005,224,996,264,991,263,1000,223,1000,202,994,182,981,159,965,137,925,99,881,69,841,48"/>
+<area shape="rect" id="Node000013" href="$role_8hpp.html" title="Role definitions for RBAC." alt="" coords="1029,357,1103,383"/>
+<area shape="poly" id="edge34_Node000001_Node000013" title=" " alt="" coords="870,43,918,63,962,91,989,119,1011,151,1029,185,1042,221,1060,290,1067,343,1062,344,1054,291,1037,223,1024,188,1007,153,985,122,959,95,915,67,868,48"/>
+<area shape="rect" id="Node000023" href="$rest__types_8hpp.html" title="Common types and utilities for REST API." alt="" coords="105,357,288,383"/>
+<area shape="poly" id="edge36_Node000001_Node000023" title=" " alt="" coords="701,30,552,35,377,46,214,65,149,79,100,96,57,119,24,147,14,163,9,180,9,199,16,220,45,263,83,299,123,328,160,349,158,354,120,332,79,303,41,267,12,223,4,200,4,179,9,160,21,144,54,115,98,91,147,74,213,60,376,40,551,30,701,25"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="26,189,90,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="171,136,90,184,87,179,168,131"/>
+<area shape="rect" id="Node000004" href="$system__endpoints_8hpp.html" title="System API endpoints for REST server." alt="" coords="114,181,287,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="203,134,203,167,198,167,198,134"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="211,277,289,302"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="214,220,239,263,234,266,209,223"/>
+<area shape="poly" id="edge30_Node000006_Node000005" title=" " alt="" coords="716,124,518,146,424,163,386,173,358,184,330,201,305,223,267,267,263,264,301,220,327,197,355,179,384,168,423,158,518,140,716,118"/>
+<area shape="rect" id="Node000007" href="$permission_8hpp.html" title="Permission definitions for RBAC." alt="" coords="313,357,435,383"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="716,123,638,131,555,143,483,160,455,171,436,183,420,200,407,220,390,264,380,308,377,344,372,344,375,307,384,262,402,218,416,197,432,179,453,166,481,155,554,138,637,125,715,117"/>
+<area shape="rect" id="Node000011" href="$security__storage__interface_8hpp.html" title="Storage interface for RBAC persistence." alt="" coords="463,189,685,214"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="751,136,618,186,616,181,749,131"/>
+<area shape="poly" id="edge22_Node000006_Node000012" title=" " alt="" coords="884,125,933,145,955,161,973,180,984,200,990,222,990,263,985,263,984,222,979,202,969,183,951,165,930,150,882,130"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1245,431,1319,456"/>
+<area shape="poly" id="edge32_Node000006_Node000014" title=" " alt="" coords="883,111,990,115,1110,124,1166,133,1217,145,1257,160,1285,179,1304,207,1316,238,1321,271,1320,305,1310,369,1294,418,1289,417,1304,367,1315,304,1315,271,1311,239,1300,209,1281,183,1255,165,1215,150,1165,138,1109,130,990,120,883,117"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="543,357,605,383"/>
+<area shape="poly" id="edge33_Node000006_Node000016" title=" " alt="" coords="716,121,641,128,562,140,495,158,470,170,453,183,442,204,442,226,450,249,464,272,505,314,547,347,543,352,501,318,460,275,445,252,436,227,437,203,449,180,467,165,493,153,561,135,640,123,716,116"/>
+<area shape="rect" id="Node000018" href="$user__context_8hpp.html" title="User context for session&#45;based access control." alt="" coords="1136,189,1271,214"/>
+<area shape="poly" id="edge23_Node000006_Node000018" title=" " alt="" coords="884,130,1137,183,1135,188,883,135"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="709,189,796,214"/>
+<area shape="poly" id="edge28_Node000006_Node000020" title=" " alt="" coords="791,135,768,178,763,175,787,132"/>
+<area shape="rect" id="Node000021" title=" " alt="" coords="821,189,871,214"/>
+<area shape="poly" id="edge29_Node000006_Node000021" title=" " alt="" coords="812,132,835,175,831,178,807,135"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="895,189,959,214"/>
+<area shape="poly" id="edge31_Node000006_Node000022" title=" " alt="" coords="829,131,900,179,897,183,826,136"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="249,431,315,456"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="361,385,309,424,306,420,358,381"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="853,431,911,456"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="436,377,839,433,839,439,435,383"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="375,431,472,456"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="384,381,410,418,405,421,380,385"/>
+<area shape="poly" id="edge20_Node000011_Node000010" title=" " alt="" coords="569,216,440,420,436,417,564,213"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="629,211,931,274,930,280,628,217"/>
+<area shape="poly" id="edge21_Node000011_Node000016" title=" " alt="" coords="577,214,577,344,571,344,571,214"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="612,269,800,309"/>
+<area shape="poly" id="edge19_Node000011_Node000017" title=" " alt="" coords="593,212,667,260,664,264,590,216"/>
+<area shape="poly" id="edge17_Node000012_Node000009" title=" " alt="" coords="967,304,937,327,910,359,896,388,888,418,883,416,891,386,905,356,934,324,963,300"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="997,300,1046,346,1042,350,994,304"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="919,357,1005,383"/>
+<area shape="poly" id="edge16_Node000012_Node000015" title=" " alt="" coords="983,303,971,345,966,343,978,301"/>
+<area shape="poly" id="edge18_Node000012_Node000016" title=" " alt="" coords="945,301,619,363,618,358,944,295"/>
+<area shape="poly" id="edge13_Node000013_Node000009" title=" " alt="" coords="1037,385,925,428,923,423,1035,380"/>
+<area shape="poly" id="edge14_Node000013_Node000010" title=" " alt="" coords="1029,383,1017,385,868,406,720,422,486,441,486,436,720,417,868,401,1016,380,1028,378"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="1102,380,1235,424,1233,429,1100,385"/>
+<area shape="poly" id="edge27_Node000018_Node000009" title=" " alt="" coords="1199,216,1168,270,1156,304,1150,332,1140,358,1117,385,1071,413,1020,431,969,441,925,445,925,439,968,435,1018,426,1069,408,1114,381,1135,356,1145,330,1151,302,1164,268,1194,213"/>
+<area shape="poly" id="edge24_Node000018_Node000012" title=" " alt="" coords="1175,217,1027,274,1025,269,1173,212"/>
+<area shape="poly" id="edge26_Node000018_Node000014" title=" " alt="" coords="1218,212,1239,236,1259,268,1272,308,1280,348,1285,417,1280,417,1275,349,1267,309,1254,270,1235,240,1214,216"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="1178,277,1245,302"/>
+<area shape="poly" id="edge25_Node000018_Node000019" title=" " alt="" coords="1207,214,1212,263,1206,263,1202,214"/>
+<area shape="poly" id="edge37_Node000023_Node000008" title=" " alt="" coords="212,381,259,420,256,424,209,385"/>
+<area shape="poly" id="edge38_Node000023_Node000009" title=" " alt="" coords="289,379,301,380,839,435,838,440,300,385,288,384"/>
+<area shape="poly" id="edge39_Node000023_Node000010" title=" " alt="" coords="234,380,374,424,373,429,232,385"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="include/pacs/di/service_interfaces.hpp" name="include/pacs/di/service_interfaces.hpp">
+<area shape="rect" id="Node000001" title="Service interface aliases for dependency injection." alt="" coords="70,5,241,45"/>
+<area shape="rect" id="Node000002" href="$service__registration_8hpp.html" title="ServiceContainer registration module for PACS services." alt="" coords="70,93,241,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,59,158,93,153,93,153,59"/>
+<area shape="rect" id="Node000003" href="$test__support_8hpp.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,181,153,221"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="100,55,78,72,60,95,54,116,56,139,71,180,66,182,51,140,49,116,56,92,74,68,97,50"/>
+<area shape="rect" id="Node000004" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="95,269,287,295"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="214,50,237,68,255,92,264,117,265,143,260,169,251,194,226,239,203,271,199,268,222,236,246,192,255,168,259,143,258,118,250,95,233,72,210,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="131,146,98,183,94,179,127,142"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="165,146,191,269,186,270,160,147"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,227,176,267,173,271,116,231"/>
+</map>

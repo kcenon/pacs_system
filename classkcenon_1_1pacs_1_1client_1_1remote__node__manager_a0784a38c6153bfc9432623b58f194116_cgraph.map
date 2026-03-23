@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::client::remote_node_manager::update_node" name="kcenon::pacs::client::remote_node_manager::update_node">
+<area shape="rect" id="Node000001" title="Update an existing remote node." alt="" coords="5,22,187,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="235,29,380,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,47,221,47,221,52,187,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="268,30,265,20,272,10,286,5,307,3,332,6,345,13,343,18,330,11,307,8,287,10,275,15,271,21,273,28"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::web::metadata_service::get_frame_info" name="kcenon::pacs::web::metadata_service::get_frame_info">
+<area shape="rect" id="Node000001" title="Get frame information for an instance." alt="" coords="5,62,173,117"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1web_1_1frame__info.html#ae8223f29739b45ead9c5dc14434b5ce8" title="Create an error result." alt="" coords="221,5,372,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,61,217,47,219,52,175,66"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1web_1_1frame__info.html#a9bf7a0e61f31d60ce6fd83c86d20bac9" title="Create a success result." alt="" coords="221,69,372,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,87,207,87,207,92,174,92"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="225,133,368,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="175,113,219,127,217,132,173,118"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="420,133,632,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="368,151,406,151,406,156,368,156"/>
+</map>

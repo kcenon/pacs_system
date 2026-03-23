@@ -1,0 +1,25 @@
+<map id="include/pacs/web/thumbnail_service.hpp" name="include/pacs/web/thumbnail_service.hpp">
+<area shape="rect" id="Node000001" title="Thumbnail generation service for DICOM images." alt="" coords="423,5,627,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="424,42,269,64,86,96,85,91,268,59,423,37"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,163,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="423,47,177,96,176,90,422,42"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,93,274,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="455,48,288,92,287,87,454,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="299,93,376,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="481,48,379,90,377,85,479,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="400,93,464,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="504,48,458,86,455,82,501,44"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="488,93,563,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="528,46,528,79,523,79,523,46"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="587,93,701,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="556,43,617,84,614,88,553,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="725,93,784,119"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="581,43,713,88,711,93,579,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="809,93,906,119"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="605,43,796,88,795,93,604,48"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="930,93,1054,119"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="628,41,917,89,916,95,627,46"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1078,93,1141,119"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="628,32,827,54,944,70,1065,91,1064,96,944,75,826,59,627,38"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="include/pacs/services/storage_scp.hpp" name="include/pacs/services/storage_scp.hpp">
+<area shape="rect" id="Node000001" title="DICOM Storage SCP service (C&#45;STORE handler)" alt="" coords="305,5,466,45"/>
+<area shape="rect" id="Node000002" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="5,93,136,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,51,137,97,136,92,303,46"/>
+<area shape="rect" id="Node000003" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="160,101,395,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="353,56,294,102,291,98,349,52"/>
+<area shape="rect" id="Node000004" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="419,93,571,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="422,52,472,91,469,95,419,56"/>
+<area shape="rect" id="Node000005" href="$storage__scu_8cpp.html" title="Implementation of the Storage SCU service." alt="" coords="595,93,747,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="462,47,609,91,607,96,460,52"/>
+</map>

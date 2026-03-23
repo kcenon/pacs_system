@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::client::prefetch_rule" name="kcenon::pacs::client::prefetch_rule">
+<area shape="rect" id="Node000001" title="Rule defining when and how to prefetch DICOM data." alt="" coords="147,441,300,681"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="205,148,284,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,213,278,237,288,287,291,327,287,367,278,418,276,426,271,425,273,417,281,367,285,327,283,287,273,238,263,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="63,287,242,353"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="219,215,200,239,178,275,174,272,196,236,214,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,5,310,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,99,247,148,242,148,242,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="152,353,152,384,157,417,159,425,154,426,151,418,147,384,147,353"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="64,226,70,251,83,269,99,285,96,289,78,273,65,253,58,227"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

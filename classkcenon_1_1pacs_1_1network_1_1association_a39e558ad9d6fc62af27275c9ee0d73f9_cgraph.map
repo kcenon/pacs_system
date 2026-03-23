@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::network::association::accept" name="kcenon::pacs::network::association::accept">
+<area shape="rect" id="Node000001" title="Accept an incoming SCP association." alt="" coords="5,53,173,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7a248e63aa4c3004790316536ac86011" title="Build presentation context map from accepted contexts." alt="" coords="225,5,393,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,55,211,48,212,53,174,60"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1association.html#af26180c5943154974e63f126a177c9d3" title="Negotiate presentation contexts for SCP." alt="" coords="221,84,396,139"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="174,85,208,91,207,96,173,90"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a1cdb498e148231c8d7e682a041728c90" title="Constructs a transfer_syntax from a UID string." alt="" coords="444,5,635,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="393,30,430,30,430,35,393,35"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a2e62a7fa09112312b2b375fe76141dd6" title="Returns the Transfer Syntax UID." alt="" coords="683,13,857,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="635,30,669,30,669,35,635,35"/>
+</map>

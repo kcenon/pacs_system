@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::workflow::task_scheduler::save_tasks" name="kcenon::pacs::workflow::task_scheduler::save_tasks">
+<area shape="rect" id="Node000001" title="Save all tasks to persistence storage." alt="" coords="5,69,215,109"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="286,5,473,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,67,281,46,282,51,196,72"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#abd042eec47c77c840bb6c7b1b3158ea9" title="Log an error&#45;level message." alt="" coords="286,69,473,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,87,272,87,272,92,215,92"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a5f08485629050d7dcc5e86801137bfbc" title="Serialize tasks to JSON." alt="" coords="263,133,496,173"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="196,107,282,128,281,133,194,112"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="544,37,731,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="473,34,531,41,530,47,473,40"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="473,75,530,68,531,73,473,80"/>
+</map>

@@ -1,0 +1,30 @@
+<map id="include/pacs/network/detail/accept_worker.hpp" name="include/pacs/network/detail/accept_worker.hpp">
+<area shape="rect" id="Node000001" title="Worker thread for accepting incoming DICOM connections." alt="" coords="816,5,1004,45"/>
+<area shape="rect" id="Node000002" href="$dicom__server_8hpp.html" title="Multi&#45;threaded DICOM server for handling multiple associations." alt="" coords="742,93,902,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="882,57,843,95,840,91,879,53"/>
+<area shape="rect" id="Node000013" href="$accept__worker_8cpp.html" title="Implementation of the accept_worker class." alt="" coords="926,93,1073,133"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="942,53,981,91,978,95,938,57"/>
+<area shape="rect" id="Node000003" href="$service__interfaces_8hpp.html" title="Service interface aliases for dependency injection." alt="" coords="70,181,241,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="729,126,511,150,253,184,241,186,240,181,252,179,510,144,728,121"/>
+<area shape="rect" id="Node000007" href="$network__adapter_8cpp.html" title="Implementation of network_adapter for network_system integration." alt="" coords="265,181,438,221"/>
+<area shape="poly" id="edge9_Node000002_Node000007" title=" " alt="" coords="729,134,452,184,439,186,438,181,451,179,728,129"/>
+<area shape="rect" id="Node000008" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="463,189,696,214"/>
+<area shape="poly" id="edge10_Node000002_Node000008" title=" " alt="" coords="757,140,613,191,611,186,755,135"/>
+<area shape="rect" id="Node000009" href="$association_8cpp.html" title="DICOM Association implementation." alt="" coords="721,189,923,214"/>
+<area shape="poly" id="edge11_Node000002_Node000009" title=" " alt="" coords="825,147,825,188,819,188,819,147"/>
+<area shape="rect" id="Node000010" href="$dicom__server_8cpp.html" title="DICOM Server implementation." alt="" coords="947,189,1163,214"/>
+<area shape="poly" id="edge12_Node000002_Node000010" title=" " alt="" coords="887,136,1025,186,1023,191,885,141"/>
+<area shape="rect" id="Node000011" href="$association__endpoints_8cpp.html" title="DICOM Association API endpoints implementation." alt="" coords="1187,181,1406,221"/>
+<area shape="poly" id="edge13_Node000002_Node000011" title=" " alt="" coords="916,131,1188,179,1187,184,915,136"/>
+<area shape="rect" id="Node000012" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="1431,181,1621,221"/>
+<area shape="poly" id="edge14_Node000002_Node000012" title=" " alt="" coords="916,131,1058,148,1169,156,1279,163,1418,179,1431,180,1430,186,1418,184,1278,169,1168,161,1057,153,915,136"/>
+<area shape="rect" id="Node000004" href="$service__registration_8hpp.html" title="ServiceContainer registration module for PACS services." alt="" coords="70,269,241,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="158,235,158,269,153,269,153,235"/>
+<area shape="rect" id="Node000005" href="$test__support_8hpp.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,357,153,397"/>
+<area shape="poly" id="edge7_Node000003_Node000005" title=" " alt="" coords="100,231,78,248,60,271,54,292,56,315,71,356,66,358,51,316,49,292,56,268,74,244,97,226"/>
+<area shape="rect" id="Node000006" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="95,445,287,471"/>
+<area shape="poly" id="edge8_Node000003_Node000006" title=" " alt="" coords="214,226,237,244,255,268,264,293,265,319,260,345,251,370,226,415,203,447,199,444,222,412,246,368,255,344,259,319,258,294,250,271,233,248,210,231"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="131,322,98,359,94,355,127,318"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="165,322,191,445,186,446,160,323"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="119,403,176,443,173,447,116,407"/>
+</map>

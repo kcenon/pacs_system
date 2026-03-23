@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::sop_classes::get_waveform_sop_class_info" name="kcenon::pacs::services::sop_classes::get_waveform_sop_class_info">
+<area shape="rect" id="Node000001" title="Get information about a specific Waveform SOP Class." alt="" coords="771,45,981,100"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa80eaf0cb73722b7e250a3b180302b5d" title="Check if a SOP Class UID is a Waveform Storage SOP Class." alt="" coords="507,5,707,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="757,58,707,50,708,45,758,52"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#acf2cb7daf23b86866983faabb7033011" title=" " alt="" coords="492,84,723,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="757,92,723,97,722,92,757,87"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a5acfdda71531aa8e9de74c2dd2d2536d" title=" " alt="" coords="223,84,444,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="478,114,444,114,444,109,478,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#ab16e4fd88324719f13c61bbd5f0a2d3b" title=" " alt="" coords="5,84,175,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="209,114,175,114,175,109,209,109"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="include/pacs/network/pipeline/jobs/storage_query_exec_job.hpp" name="include/pacs/network/pipeline/jobs/storage_query_exec_job.hpp">
+<area shape="rect" id="Node000001" title="Storage and query execution job for Stage 4 of the pipeline." alt="" coords="311,5,473,60"/>
+<area shape="rect" id="Node000002" href="$response__encode__job_8hpp.html" title="Response encoding job for Stage 5 of the pipeline." alt="" coords="109,108,281,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="330,68,247,110,245,106,328,64"/>
+<area shape="rect" id="Node000004" href="$storage__query__exec__job_8cpp.html" title="Implementation of storage/query execution job." alt="" coords="200,211,387,265"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="368,73,346,109,322,163,304,211,299,209,317,161,342,107,363,70"/>
+<area shape="rect" id="Node000005" href="$pipeline__adapter_8hpp.html" title="Adapter for integrating pipeline with existing DICOM components." alt="" coords="356,115,575,155"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="421,70,453,113,449,116,417,73"/>
+<area shape="rect" id="Node000007" href="$dimse__process__job_8cpp.html" title="Implementation of DIMSE process job." alt="" coords="599,115,807,155"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="486,62,645,113,644,118,485,67"/>
+<area shape="rect" id="Node000003" href="$response__encode__job_8cpp.html" title="Implementation of response encode job." alt="" coords="5,211,176,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="159,174,120,212,116,209,156,170"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="232,171,269,209,266,212,228,175"/>
+<area shape="rect" id="Node000006" href="$pipeline__adapter_8cpp.html" title="Implementation of pipeline adapter." alt="" coords="411,218,573,258"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="476,168,490,217,484,219,471,169"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="include/pacs/storage/sync_conflict_repository.hpp" name="include/pacs/storage/sync_conflict_repository.hpp">
+<area shape="rect" id="Node000001" title="Repository for sync conflict records using base_repository pattern." alt="" coords="5,5,215,45"/>
+<area shape="rect" id="Node000002" href="$sync__conflict__repository_8cpp.html" title="Implementation of sync_conflict_repository using base_repository pattern." alt="" coords="19,93,201,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,59,113,93,107,93,107,59"/>
+</map>

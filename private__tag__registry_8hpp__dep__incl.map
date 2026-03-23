@@ -1,0 +1,7 @@
+<map id="include/pacs/core/private_tag_registry.hpp" name="include/pacs/core/private_tag_registry.hpp">
+<area shape="rect" id="Node000001" title="Registry of vendor&#45;specific private tag definitions." alt="" coords="90,5,275,45"/>
+<area shape="rect" id="Node000002" href="$dicom__file_8cpp.html" title="Implementation of DICOM Part 10 file handling." alt="" coords="5,101,176,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,57,105,102,102,98,151,53"/>
+<area shape="rect" id="Node000003" href="$private__tag__registry_8cpp.html" title="Implementation of vendor&#45;specific private tag registry." alt="" coords="201,93,351,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,53,257,91,254,95,212,57"/>
+</map>

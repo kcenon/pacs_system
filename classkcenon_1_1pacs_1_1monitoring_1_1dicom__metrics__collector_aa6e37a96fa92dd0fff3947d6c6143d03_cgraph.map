@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::dicom_metrics_collector::collect_association_metrics" name="kcenon::pacs::monitoring::dicom_metrics_collector::collect_association_metrics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,216,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#acbc5540ffe955472022386121b12d0a3" title="Get association counters." alt="" coords="264,5,469,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,74,287,47,289,52,201,79"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#ae3d9751822284bd8a94aae63810ca347" title="Create a metric with common tags." alt="" coords="269,69,465,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,101,255,101,255,107,216,107"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="273,163,460,218"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="193,129,273,156,272,161,191,134"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/audit_endpoints.hpp" name="include/pacs/web/endpoints/audit_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Audit log API endpoints for REST server." alt="" coords="93,5,295,45"/>
+<area shape="rect" id="Node000002" href="$audit__endpoints_8cpp.html" title="Audit log API endpoints implementation." alt="" coords="5,93,183,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,56,118,95,114,91,160,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="207,101,381,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="228,52,282,98,278,102,225,56"/>
+</map>

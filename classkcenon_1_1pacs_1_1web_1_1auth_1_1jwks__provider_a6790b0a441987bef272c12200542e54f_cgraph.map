@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::auth::jwks_provider::get_key" name="kcenon::pacs::web::auth::jwks_provider::get_key">
+<area shape="rect" id="Node000001" title="Get a key by Key ID (kid)" alt="" coords="5,45,156,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwks__provider.html#a257ccb2584c1407b0bccaebc2b813505" title="Check if the cache has expired." alt="" coords="204,5,355,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,55,190,48,191,53,157,60"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwks__provider.html#a73f83292a97bbaa099da82cb359585d2" title=" " alt="" coords="204,84,355,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,85,191,91,190,97,156,90"/>
+</map>

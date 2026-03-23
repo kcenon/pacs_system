@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::auth::jwt_validator::has_any_scope" name="kcenon::pacs::web::auth::jwt_validator::has_any_scope">
+<area shape="rect" id="Node000001" title="Check if token has any of the specified scopes." alt="" coords="241,5,392,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a401ee911751d87ca73893876176ee752" title="Check if the request has any of the required scopes." alt="" coords="5,5,193,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,35,194,35,194,30,227,30"/>
+</map>

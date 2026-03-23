@@ -1,0 +1,29 @@
+<map id="kcenon::pacs::web::endpoints::register_measurement_endpoints_impl" name="kcenon::pacs::web::endpoints::register_measurement_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,321,232,376"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ac6a0827845a780679571fec52511153f" title=" " alt="" coords="299,5,493,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,320,146,267,177,200,221,130,248,98,278,69,285,64,288,68,282,73,252,101,226,133,182,203,151,269,131,322"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#adfe698f13628ed7ba49def041e61ce32" title=" " alt="" coords="299,84,493,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,319,192,240,233,195,278,156,299,143,302,147,282,160,236,199,197,243,139,323"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a26e560631c6587652af5b9193acd4fe0" title=" " alt="" coords="560,149,755,204"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="139,319,164,290,197,257,235,225,279,201,346,179,415,167,484,163,546,163,546,169,484,168,416,173,347,184,281,206,238,230,200,261,168,293,143,323"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a2e87cf4c196123e22e66a1df657070b8" title=" " alt="" coords="299,215,493,269"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="190,319,310,272,312,277,192,324"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ab6c0c5a083844fdb10cd2b7ef97254af" title=" " alt="" coords="560,228,755,283"/>
+<area shape="poly" id="edge15_Node000001_Node000007" title=" " alt="" coords="232,327,512,279,546,273,547,278,512,285,232,333"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="321,369,471,409"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="232,362,308,373,307,379,232,368"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="321,457,471,497"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="180,374,340,448,338,453,178,379"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1storage.html#a11405c5a73f4568a6255cdcd1db4f1b5" title="Parse string to measurement_type." alt="" coords="299,521,493,576"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="143,374,201,440,239,476,281,506,293,513,290,518,279,511,236,480,197,444,139,378"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a465a36e682ae58a6ce914acf19986114" title=" " alt="" coords="299,600,493,655"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="134,375,155,421,187,478,230,536,255,563,282,587,288,591,285,596,278,591,251,567,226,540,183,481,150,424,129,377"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ac54f703383daa568ff696050382fc94f" title=" " alt="" coords="280,679,512,719"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="128,376,145,436,175,515,195,556,220,596,249,633,282,665,288,670,285,674,278,669,245,637,215,599,191,558,170,517,140,438,123,377"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ad50dbd799b41b5b9bdea88784afb848c" title=" " alt="" coords="803,189,997,244"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="755,190,790,196,789,201,754,195"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="494,244,546,247,546,252,494,250"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="754,237,789,232,790,237,755,242"/>
+<area shape="poly" id="edge9_Node000008_Node000008" title=" " alt="" coords="348,369,345,359,352,350,370,344,396,342,426,345,443,352,441,357,425,350,396,347,371,349,355,354,350,360,353,367"/>
+<area shape="poly" id="edge11_Node000009_Node000009" title=" " alt="" coords="348,457,345,447,352,438,370,432,396,430,426,433,443,440,441,445,425,438,396,435,371,437,355,442,350,448,353,455"/>
+</map>

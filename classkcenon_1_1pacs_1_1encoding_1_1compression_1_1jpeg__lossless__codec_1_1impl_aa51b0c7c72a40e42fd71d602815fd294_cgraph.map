@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::encode" name="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::encode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,163,213,217"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#af21cca3efbe89a9e7e99d1165310d471" title=" " alt="" coords="267,84,475,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,160,265,140,267,145,202,165"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#a3731ce9c577a4b1fa09dfc85187c2342" title="Calculates the size of uncompressed pixel data in bytes." alt="" coords="261,163,480,217"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="214,187,248,187,248,193,214,193"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a4b0c4f9847dd7317110d31a692751a35" title=" " alt="" coords="267,242,475,311"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="193,215,255,235,253,240,192,220"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#aa9b467510f41173e9c97c88bbbf6934a" title=" " alt="" coords="528,5,736,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="461,81,526,62,528,67,463,86"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a9cf2ce5a1f9eee995b3d03631d762381" title=" " alt="" coords="528,84,736,139"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="475,109,514,109,514,114,475,114"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a384a45a94d5c7ee49ee8cf373f7a26a0" title=" " alt="" coords="528,163,736,217"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="463,136,528,156,526,161,461,141"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding.html#abad7698c2a7c3d83d076fcde6c681071" title="Writes a 16&#45;bit value in big&#45;endian byte order." alt="" coords="784,91,959,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="717,58,798,85,796,90,715,63"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="736,109,770,109,770,114,736,114"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="715,160,796,133,798,138,717,165"/>
+</map>

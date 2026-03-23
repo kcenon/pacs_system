@@ -1,0 +1,9 @@
+<map id="include/pacs/services/sop_classes/seg_storage.hpp" name="include/pacs/services/sop_classes/seg_storage.hpp">
+<area shape="rect" id="Node000001" title="Segmentation (SEG) Storage SOP Classes." alt="" coords="180,5,395,45"/>
+<area shape="rect" id="Node000002" href="$sop__class__registry_8cpp.html" title="Implementation of SOP Class Registry." alt="" coords="5,93,172,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,53,133,96,131,91,230,48"/>
+<area shape="rect" id="Node000003" href="$seg__storage_8cpp.html" title="Implementation of Segmentation Storage SOP Classes." alt="" coords="197,93,378,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="290,59,290,93,285,93,285,59"/>
+<area shape="rect" id="Node000004" href="$seg__iod__validator_8cpp.html" title="Implementation of Segmentation IOD Validator." alt="" coords="402,93,570,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="345,48,444,91,441,96,342,53"/>
+</map>

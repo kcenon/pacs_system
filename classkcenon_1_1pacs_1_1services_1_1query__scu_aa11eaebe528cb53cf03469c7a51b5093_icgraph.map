@@ -1,0 +1,42 @@
+<map id="kcenon::pacs::services::query_scu::next_message_id" name="kcenon::pacs::services::query_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="1004,306,1223,346"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#affeebdf961dc7a1b901bca0a3af1eb5a" title="Perform a C&#45;FIND query with raw dataset." alt="" coords="771,274,940,314"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="990,313,940,307,941,302,991,308"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a230353bdad68c87d147f297322aeb92a" title="Perform a streaming C&#45;FIND query for large result sets." alt="" coords="755,338,956,378"/>
+<area shape="poly" id="edge22_Node000001_Node000018" title=" " alt="" coords="991,344,957,348,956,343,990,339"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a89adec499884fb6ef98ed3ca268ed14e" title=" " alt="" coords="527,5,689,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="838,263,817,220,787,170,750,118,705,73,687,61,690,57,708,69,754,115,792,167,822,218,843,260"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a1a1126856819f04bbfe30dd363a1aabf" title=" " alt="" coords="528,84,688,139"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="827,265,774,208,741,179,705,152,685,141,688,136,708,148,744,175,778,205,831,261"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a6fdbaec62abf03f4bcc744ee9a2c13eb" title=" " alt="" coords="528,163,688,217"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="795,271,706,232,675,220,677,215,708,228,797,266"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a4fafaf28d151347fa31eec6f5bfee20b" title="Query for instances within a series." alt="" coords="509,242,707,282"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="756,284,706,277,707,272,757,279"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a4fa261b2b206b4ca315b72cadef04cea" title="Query for patients." alt="" coords="514,306,702,346"/>
+<area shape="poly" id="edge12_Node000002_Node000011" title=" " alt="" coords="757,309,702,317,702,311,757,304"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#add307183e4dcfb256eb06876cee213b6" title="Query for series within a study." alt="" coords="521,370,695,410"/>
+<area shape="poly" id="edge14_Node000002_Node000012" title=" " alt="" coords="771,321,756,328,732,344,708,360,679,372,677,367,705,356,729,340,753,324,769,317"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a5a9cb1d2d19b5e3fc5fef6b096b50697" title="Query for studies." alt="" coords="517,434,699,474"/>
+<area shape="poly" id="edge16_Node000002_Node000013" title=" " alt="" coords="763,323,757,328,739,351,733,375,727,399,709,424,691,436,688,432,705,420,722,397,728,373,735,349,753,324,759,319"/>
+<area shape="rect" id="Node000015" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#ae33853d503f1c29ba65602be841313ef" title=" " alt="" coords="521,500,695,555"/>
+<area shape="poly" id="edge19_Node000002_Node000015" title=" " alt="" coords="761,324,757,328,742,347,735,366,732,405,730,446,723,467,709,488,692,502,689,498,705,484,718,464,725,445,727,405,730,365,737,345,753,324,757,320"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#acd8de41a0c6c011d49f906aa819bcfdc" title=" " alt="" coords="267,84,427,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="515,63,428,90,426,85,514,58"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="15,84,175,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="253,114,175,114,175,109,253,109"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="514,114,427,114,427,109,514,109"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="514,165,426,138,428,133,515,159"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="232,321,461,376"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="533,289,510,297,429,324,428,319,508,291,532,284"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,329,184,369"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="218,351,184,351,184,346,218,346"/>
+<area shape="poly" id="edge13_Node000011_Node000009" title=" " alt="" coords="500,338,462,341,461,336,500,333"/>
+<area shape="poly" id="edge15_Node000012_Node000009" title=" " alt="" coords="507,377,461,369,462,364,507,371"/>
+<area shape="poly" id="edge18_Node000013_Node000009" title=" " alt="" coords="528,432,508,424,403,379,406,374,510,420,530,427"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a93d047266e4b059206949fa9e24625cc" title="Query remote PACS for prior studies." alt="" coords="259,424,434,479"/>
+<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="503,456,434,455,434,450,503,450"/>
+<area shape="rect" id="Node000016" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#a4277e4dde0f6b4bd13ec5e668e887bd5" title=" " alt="" coords="265,503,428,557"/>
+<area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="507,531,428,532,428,527,507,526"/>
+<area shape="rect" id="Node000017" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#aee3c5e85edb11a0357d0743e61cf9142" title=" " alt="" coords="13,503,176,557"/>
+<area shape="poly" id="edge21_Node000016_Node000017" title=" " alt="" coords="251,533,176,533,176,527,251,527"/>
+</map>

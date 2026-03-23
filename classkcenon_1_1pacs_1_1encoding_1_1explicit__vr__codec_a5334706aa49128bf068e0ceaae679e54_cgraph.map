@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::encoding::explicit_vr_codec::encode_sequence_item" name="kcenon::pacs::encoding::explicit_vr_codec::encode_sequence_item">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,96,204,151"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#ad857a6afb532aa97c96b502d9b07194e" title="Encode a dataset to bytes using Explicit VR Little Endian." alt="" coords="252,131,451,171"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,132,239,136,238,141,204,137"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#ad58654db0026730b98e3e95164281a61" title="Encode a single element to bytes." alt="" coords="499,185,697,240"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="433,169,486,182,484,187,432,174"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#a75426e4905024d6a7b0b2043a2cbf298" title=" " alt="" coords="745,5,944,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="620,183,674,127,707,97,744,70,754,64,757,69,747,75,711,101,677,131,624,187"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="747,85,943,125"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="646,183,744,134,763,127,765,132,746,139,648,188"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a0212259ad8f724cb49f3fb5591c3b9c2" title="Check if this element is a sequence." alt="" coords="769,149,920,204"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="697,196,755,187,756,192,698,201"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa93dadfa5db49533c0cc1dcc8bc8923b" title="Pads data to even length as required by DICOM." alt="" coords="757,229,932,269"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="698,225,744,231,743,237,697,230"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a6138cd831e5dd4fd443cc4ce3f1283b4" title="Get the raw data bytes." alt="" coords="745,293,944,333"/>
+<area shape="poly" id="edge11_Node000003_Node000010" title=" " alt="" coords="655,238,746,278,766,286,764,291,744,283,653,243"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="765,357,925,397"/>
+<area shape="poly" id="edge12_Node000003_Node000011" title=" " alt="" coords="625,238,678,291,711,318,747,342,759,349,757,354,744,347,708,323,674,295,621,242"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="769,421,921,461"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="615,239,636,277,666,322,703,367,747,407,757,413,755,418,744,411,699,371,662,325,632,280,610,242"/>
+<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="745,47,218,112,218,107,745,42"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af5d554755e5a71cf427553bccecd8c83" title="Get mutable access to sequence items." alt="" coords="992,13,1237,53"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="944,30,978,30,978,35,944,35"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1encoding.html#af0f969e116f011c48e151d32eb372b93" title="Retrieves comprehensive metadata for a VR type." alt="" coords="1027,229,1202,269"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="932,246,1014,246,1014,251,932,251"/>
+<area shape="poly" id="edge10_Node000009_Node000009" title=" " alt="" coords="1065,229,1062,219,1070,210,1088,204,1115,202,1146,205,1163,212,1161,217,1145,210,1115,207,1089,209,1073,214,1067,220,1070,227"/>
+</map>

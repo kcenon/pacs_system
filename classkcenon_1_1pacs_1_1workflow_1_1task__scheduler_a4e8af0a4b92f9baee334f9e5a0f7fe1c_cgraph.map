@@ -1,0 +1,44 @@
+<map id="kcenon::pacs::workflow::task_scheduler::task_scheduler" name="kcenon::pacs::workflow::task_scheduler::task_scheduler">
+<area shape="rect" id="Node000001" title="Construct task scheduler." alt="" coords="5,124,180,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aa2466283d2ea9b12543c8c0cc5b1a2a1" title="Schedule archive task." alt="" coords="228,5,423,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,121,227,69,239,63,241,68,229,74,138,126"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#adb042537f5b9c331f2c59b4350ea1aa7" title="Schedule cleanup task." alt="" coords="228,84,423,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,134,214,128,215,133,181,139"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a84e1380e16f9f7cf09e3642842edde5a" title="Schedule verification task." alt="" coords="228,163,423,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,163,215,169,214,174,180,168"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#afa4a842d854fa691b1d9e0cbdd933abe" title="Start the scheduler service." alt="" coords="238,242,413,282"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="137,177,181,203,229,228,246,235,244,240,227,232,178,207,134,181"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="1280,199,1467,239"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="413,255,987,230,1266,220,1266,225,987,235,413,261"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aa2e1b4663729c1fe309d3dfd4bfaf3c7" title="Background thread main loop." alt="" coords="471,361,663,401"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="368,280,514,352,511,357,366,285"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="1537,375,1724,415"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1463,237,1491,250,1526,276,1559,305,1609,363,1605,366,1555,309,1523,280,1488,255,1461,242"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="1280,551,1467,591"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="598,399,664,442,757,497,869,551,928,573,987,590,1059,601,1132,603,1203,599,1266,591,1267,596,1203,604,1132,609,1058,607,986,595,926,578,867,556,755,502,661,447,595,403"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a0f7a9db624730bd7771ea546748a6218" title="Execute a single scheduler cycle." alt="" coords="711,361,939,401"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="663,378,697,378,697,383,663,383"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="1464,549,1488,537,1523,512,1555,483,1605,425,1609,428,1559,486,1527,516,1491,542,1466,554"/>
+<area shape="poly" id="edge22_Node000010_Node000006" title=" " alt="" coords="848,359,907,314,945,291,986,273,1057,251,1130,235,1202,225,1266,220,1266,225,1202,231,1131,241,1058,256,988,278,948,296,910,319,851,363"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aa8f99a231d585d6a2ba63c36d1d3a158" title="Calculate next run time for a schedule." alt="" coords="1001,317,1195,372"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="938,363,987,357,987,362,939,368"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a2b2083732d3658e6072b1e200d31b9ac" title="Execute a single task." alt="" coords="987,397,1209,437"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="939,393,974,398,973,403,938,398"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#abab83a011fa6dddee2a05ff84f7a000c" title="Increment a counter metric." alt="" coords="1257,264,1489,319"/>
+<area shape="poly" id="edge21_Node000010_Node000014" title=" " alt="" coords="858,358,916,328,986,303,1051,291,1118,284,1244,281,1244,286,1118,289,1052,296,987,309,918,333,860,363"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aaf710ed329f38851f87463d12af1b6f0" title="Record task execution." alt="" coords="1009,461,1187,516"/>
+<area shape="poly" id="edge23_Node000010_Node000017" title=" " alt="" coords="873,398,988,446,1008,454,1006,459,986,451,871,403"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a2757715d5bcc9207c386a6bdf107d186" title="Update statistics after execution." alt="" coords="988,541,1208,581"/>
+<area shape="poly" id="edge24_Node000010_Node000018" title=" " alt="" coords="844,399,904,462,944,497,988,526,1001,533,998,538,985,531,941,501,900,466,841,403"/>
+<area shape="poly" id="edge17_Node000012_Node000006" title=" " alt="" coords="1191,394,1208,383,1220,367,1227,351,1231,318,1234,285,1242,267,1255,251,1266,242,1269,246,1259,255,1246,270,1240,286,1236,319,1232,353,1225,370,1211,387,1194,399"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="1190,434,1211,448,1229,471,1236,494,1242,516,1259,537,1269,544,1266,549,1256,541,1238,519,1231,496,1224,473,1208,452,1187,439"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#abd042eec47c77c840bb6c7b1b3158ea9" title="Log an error&#45;level message." alt="" coords="1280,407,1467,447"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1210,418,1267,421,1266,426,1209,424"/>
+<area shape="poly" id="edge16_Node000012_Node000014" title=" " alt="" coords="1185,394,1208,382,1223,370,1231,357,1240,343,1256,329,1267,323,1269,327,1259,333,1244,346,1236,360,1226,373,1211,387,1187,399"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#a9d6865c3dab62c93fe82bb007972b4bb" title="Record a histogram sample." alt="" coords="1270,472,1477,527"/>
+<area shape="poly" id="edge18_Node000012_Node000015" title=" " alt="" coords="1166,434,1210,447,1270,465,1268,471,1209,453,1165,439"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aaff5178e810748aa34eebf2c3e2dff5e" title="Log a warning&#45;level message." alt="" coords="1280,343,1467,383"/>
+<area shape="poly" id="edge19_Node000012_Node000016" title=" " alt="" coords="1201,394,1266,381,1267,387,1202,399"/>
+<area shape="poly" id="edge15_Node000013_Node000007" title=" " alt="" coords="1467,413,1523,406,1524,411,1467,418"/>
+<area shape="poly" id="edge20_Node000016_Node000007" title=" " alt="" coords="1467,372,1524,379,1523,385,1467,378"/>
+</map>

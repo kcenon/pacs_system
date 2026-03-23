@@ -1,0 +1,31 @@
+<map id="include/pacs/di/ilogger.hpp" name="include/pacs/di/ilogger.hpp">
+<area shape="rect" id="Node000001" title="Logger interface for dependency injection." alt="" coords="564,5,759,31"/>
+<area shape="rect" id="Node000002" href="$logger__adapter_8hpp.html" title="Adapter for DICOM audit logging using logger_system." alt="" coords="514,79,686,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="654,32,625,69,621,66,650,29"/>
+<area shape="rect" id="Node000006" href="$format_8hpp.html" title="Compatibility header providing kcenon::pacs::compat::format as an alias for std::format." alt="" coords="5,167,187,192"/>
+<area shape="poly" id="edge14_Node000001_Node000006" title=" " alt="" coords="621,33,150,166,149,160,620,28"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="843,167,920,192"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="679,29,855,156,852,160,676,33"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="945,167,1042,192"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="688,28,792,76,959,158,957,163,790,81,686,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="661,167,728,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="625,117,671,155,668,160,621,121"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="752,167,819,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="645,116,747,159,745,164,643,121"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="211,167,301,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="518,121,315,167,314,162,517,116"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="514,116,183,167,182,162,514,111"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="231,240,289,265"/>
+<area shape="poly" id="edge12_Node000002_Node000008" title=" " alt="" coords="515,118,440,138,365,169,319,200,283,232,279,228,316,195,363,164,438,133,513,113"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="377,167,463,192"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="558,121,460,164,458,159,556,116"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="488,167,539,192"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="581,121,538,159,535,155,577,117"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="668,116,830,161,829,166,667,121"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="563,167,637,192"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="603,119,603,153,597,153,597,119"/>
+<area shape="poly" id="edge13_Node000002_Node000013" title=" " alt="" coords="687,115,931,163,930,168,686,120"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="63,240,129,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="99,192,99,226,93,226,93,192"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="123,190,222,232,220,237,121,194"/>
+</map>

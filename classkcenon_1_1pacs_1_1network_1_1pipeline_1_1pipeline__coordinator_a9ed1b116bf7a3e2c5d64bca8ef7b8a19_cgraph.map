@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_coordinator::pipeline_coordinator" name="kcenon::pacs::network::pipeline::pipeline_coordinator::pipeline_coordinator">
+<area shape="rect" id="Node000001" title="Construct coordinator with custom configuration." alt="" coords="5,5,173,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__metrics.html#a46d2ba671f3d2d9a1a449a35b2eb1825" title="Mark the start time for throughput calculation." alt="" coords="221,13,416,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,37,208,37,208,43,174,43"/>
+</map>

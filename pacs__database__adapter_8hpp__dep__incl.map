@@ -1,0 +1,48 @@
+<map id="include/pacs/storage/pacs_database_adapter.hpp" name="include/pacs/storage/pacs_database_adapter.hpp">
+<area shape="rect" id="Node000001" title="Unified database adapter for PACS system." alt="" coords="837,5,1044,45"/>
+<area shape="rect" id="Node000002" href="$database__cursor_8hpp.html" title="Database cursor for streaming query results." alt="" coords="126,101,329,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="824,43,409,96,329,107,329,102,408,91,823,38"/>
+<area shape="rect" id="Node000004" href="$database__metrics__service_8hpp.html" title="Database monitoring and metrics service." alt="" coords="421,93,583,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="839,51,583,105,582,100,838,46"/>
+<area shape="rect" id="Node000008" href="$base__repository_8hpp.html" title="Generic base repository for CRUD operations." alt="" coords="1229,101,1385,141"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="1029,46,1234,98,1233,103,1027,51"/>
+<area shape="rect" id="Node000023" href="$pacs__database__adapter_8cpp.html" title="Implementation of PACS database adapter." alt="" coords="1410,101,1605,141"/>
+<area shape="poly" id="edge23_Node000001_Node000023" title=" " alt="" coords="1058,38,1219,61,1397,91,1432,98,1431,103,1396,96,1218,66,1057,44"/>
+<area shape="rect" id="Node000003" href="$database__cursor_8cpp.html" title="Implementation of database cursor for streaming query results." alt="" coords="5,203,164,243"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="191,151,113,205,110,201,188,146"/>
+<area shape="rect" id="Node000005" href="$metrics__endpoints_8hpp.html" title="Database metrics REST API endpoints." alt="" coords="189,203,391,243"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="436,156,331,205,329,201,433,151"/>
+<area shape="rect" id="Node000006" href="$metrics__endpoints_8cpp.html" title="Database metrics REST API endpoints implementation." alt="" coords="263,299,456,339"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="477,161,375,300,371,297,473,158"/>
+<area shape="rect" id="Node000007" href="$database__metrics__service_8cpp.html" title="Database monitoring and metrics service implementation." alt="" coords="465,203,688,243"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="532,158,565,201,560,204,528,161"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="314,253,347,297,343,300,310,256"/>
+<area shape="rect" id="Node000009" href="$prefetch__history__repository_8hpp.html" title="Repository for prefetch history records using base_repository pattern." alt="" coords="712,203,943,243"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="1216,144,918,206,917,201,1215,138"/>
+<area shape="rect" id="Node000011" href="$prefetch__rule__repository_8hpp.html" title="Repository for prefetch rules using base_repository pattern." alt="" coords="967,203,1178,243"/>
+<area shape="poly" id="edge11_Node000008_Node000011" title=" " alt="" coords="1252,149,1118,206,1116,201,1250,144"/>
+<area shape="rect" id="Node000013" href="$recent__study__repository_8hpp.html" title="Repository for recent study records using base_repository pattern." alt="" coords="1203,203,1412,243"/>
+<area shape="poly" id="edge13_Node000008_Node000013" title=" " alt="" coords="1310,155,1310,203,1305,203,1305,155"/>
+<area shape="rect" id="Node000015" href="$sync__config__repository_8hpp.html" title="Repository for sync config records using base_repository pattern." alt="" coords="1436,203,1637,243"/>
+<area shape="poly" id="edge15_Node000008_Node000015" title=" " alt="" coords="1364,144,1495,201,1493,206,1362,149"/>
+<area shape="rect" id="Node000017" href="$sync__conflict__repository_8hpp.html" title="Repository for sync conflict records using base_repository pattern." alt="" coords="1661,203,1871,243"/>
+<area shape="poly" id="edge17_Node000008_Node000017" title=" " alt="" coords="1384,142,1399,145,1524,171,1649,193,1683,201,1682,206,1648,199,1523,176,1397,151,1383,147"/>
+<area shape="rect" id="Node000019" href="$sync__history__repository_8hpp.html" title="Repository for sync history records using base_repository pattern." alt="" coords="1895,203,2101,243"/>
+<area shape="poly" id="edge19_Node000008_Node000019" title=" " alt="" coords="1381,141,1398,145,1533,165,1640,172,1746,177,1882,193,1921,201,1920,206,1882,199,1746,182,1639,177,1533,170,1398,151,1380,147"/>
+<area shape="rect" id="Node000021" href="$viewer__state__record__repository_8hpp.html" title="Repository for viewer state records using base_repository pattern." alt="" coords="2131,196,2289,251"/>
+<area shape="poly" id="edge21_Node000008_Node000021" title=" " alt="" coords="1380,141,1398,145,1506,161,1598,169,1756,170,1914,171,2006,178,2114,193,2131,197,2130,202,2114,199,2006,184,1913,177,1756,176,1598,174,1506,166,1398,151,1378,147"/>
+<area shape="rect" id="Node000010" href="$prefetch__history__repository_8cpp.html" title="Implementation of prefetch_history_repository using base_repository pattern." alt="" coords="741,299,913,339"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="830,257,830,299,825,299,825,257"/>
+<area shape="rect" id="Node000012" href="$prefetch__rule__repository_8cpp.html" title="Implementation of prefetch_rule_repository using base_repository pattern." alt="" coords="997,299,1149,339"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="1075,257,1075,299,1070,299,1070,257"/>
+<area shape="rect" id="Node000014" href="$recent__study__repository_8cpp.html" title="Implementation of recent_study_repository using base_repository pattern." alt="" coords="1226,299,1389,339"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="1310,257,1310,299,1305,299,1305,257"/>
+<area shape="rect" id="Node000016" href="$sync__config__repository_8cpp.html" title="Implementation of sync_config_repository using base_repository pattern." alt="" coords="1449,299,1624,339"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="1539,257,1539,299,1534,299,1534,257"/>
+<area shape="rect" id="Node000018" href="$sync__conflict__repository_8cpp.html" title="Implementation of sync_conflict_repository using base_repository pattern." alt="" coords="1675,299,1857,339"/>
+<area shape="poly" id="edge18_Node000017_Node000018" title=" " alt="" coords="1769,257,1769,299,1763,299,1763,257"/>
+<area shape="rect" id="Node000020" href="$sync__history__repository_8cpp.html" title="Implementation of sync_history_repository using base_repository pattern." alt="" coords="1904,299,2084,339"/>
+<area shape="poly" id="edge20_Node000019_Node000020" title=" " alt="" coords="1999,257,1997,299,1992,298,1994,257"/>
+<area shape="rect" id="Node000022" href="$viewer__state__record__repository_8cpp.html" title="Implementation of viewer_state_record_repository using base_repository pattern." alt="" coords="2109,299,2317,339"/>
+<area shape="poly" id="edge22_Node000021_Node000022" title=" " alt="" coords="2214,264,2215,299,2209,299,2208,265"/>
+</map>

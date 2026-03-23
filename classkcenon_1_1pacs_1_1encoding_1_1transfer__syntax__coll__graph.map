@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::encoding::transfer_syntax" name="kcenon::pacs::encoding::transfer_syntax">
+<area shape="rect" id="Node000001" title="Represents a DICOM Transfer Syntax." alt="" coords="5,277,212,1197"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="214,653,224,666,232,685,239,737,235,779,224,808,219,807,230,778,233,737,227,686,220,669,210,656"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="69,135,148,200"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="111,200,111,261,106,261,106,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="43,5,174,85"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="111,99,111,134,106,134,106,99"/>
+</map>

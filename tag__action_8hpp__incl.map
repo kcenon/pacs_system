@@ -1,0 +1,30 @@
+<map id="include/pacs/security/tag_action.hpp" name="include/pacs/security/tag_action.hpp">
+<area shape="rect" id="Node000001" title="Tag action definitions for DICOM de&#45;identification." alt="" coords="417,5,575,45"/>
+<area shape="rect" id="Node000002" href="$dicom__tag_8hpp.html" title="DICOM Tag representation (Group, Element pairs)" alt="" coords="224,93,408,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="454,48,356,90,354,85,452,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" id="edge10_Node000001_Node000004" title=" " alt="" coords="417,38,302,59,239,75,178,96,117,127,66,161,63,156,114,123,176,91,238,70,301,54,416,33"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="97,167,183,192"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="417,35,368,42,316,54,263,71,213,96,180,124,156,156,152,153,176,121,211,91,261,66,314,48,367,37,416,29"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="395,167,469,192"/>
+<area shape="poly" id="edge12_Node000001_Node000006" title=" " alt="" coords="490,47,445,155,440,153,485,45"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="493,167,552,192"/>
+<area shape="poly" id="edge13_Node000001_Node000007" title=" " alt="" coords="502,45,521,153,516,153,497,46"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="577,167,674,192"/>
+<area shape="poly" id="edge14_Node000001_Node000008" title=" " alt="" coords="513,44,574,117,607,154,603,158,570,120,509,47"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="584,93,651,119"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="527,43,589,84,587,88,524,48"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="675,93,743,119"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="548,43,666,86,664,91,546,48"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="767,93,830,119"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="571,43,755,90,753,95,569,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="291,167,370,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="321,118,328,153,323,154,316,120"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="272,121,86,169,85,164,271,116"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="289,121,183,164,181,159,287,116"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="336,116,403,157,400,162,333,121"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="350,116,481,161,479,166,348,121"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="366,116,564,161,563,166,365,121"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="207,167,267,192"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="305,121,262,159,258,156,302,117"/>
+</map>

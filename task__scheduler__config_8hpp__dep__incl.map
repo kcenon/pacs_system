@@ -1,0 +1,9 @@
+<map id="include/pacs/workflow/task_scheduler_config.hpp" name="include/pacs/workflow/task_scheduler_config.hpp">
+<area shape="rect" id="Node000001" title="Configuration for task scheduler service." alt="" coords="155,5,353,45"/>
+<area shape="rect" id="Node000002" href="$task__scheduler_8hpp.html" title="Task scheduler service for automated PACS operations." alt="" coords="171,93,337,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,59,257,93,251,93,251,59"/>
+<area shape="rect" id="Node000003" href="$pacs-workflow_8cppm.html" title="C++20 module partition for DICOM workflow types." alt="" coords="5,181,244,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,143,145,183,142,179,210,138"/>
+<area shape="rect" id="Node000004" href="$task__scheduler_8cpp.html" title="Implementation of task scheduler service for automated PACS operations." alt="" coords="269,181,501,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="299,138,367,179,364,183,296,143"/>
+</map>

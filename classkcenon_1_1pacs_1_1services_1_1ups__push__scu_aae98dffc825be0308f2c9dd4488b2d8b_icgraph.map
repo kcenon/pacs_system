@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::ups_push_scu::next_message_id" name="kcenon::pacs::services::ups_push_scu::next_message_id">
+<area shape="rect" id="Node000001" title=" " alt="" coords="268,133,511,173"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a9b2227149bcf70e824cced64747d696a" title="Change UPS workitem state (N&#45;ACTION Type 1)" alt="" coords="5,5,220,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="345,128,286,93,219,60,187,48,189,43,221,55,289,89,347,123"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#af5b16152021eaed8a1ecab96ed31871f" title="Create a new UPS workitem on the remote SCP (N&#45;CREATE)" alt="" coords="28,69,197,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="288,133,197,111,198,106,290,128"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#ad257b41db9b355354ca10f09a47eab8b" title="Retrieve UPS workitem attributes from remote SCP (N&#45;GET)" alt="" coords="28,133,197,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="254,156,197,156,197,151,254,151"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a11fdc2b132c1ca0103d62eed96cbdd7c" title="Request cancellation of a UPS workitem (N&#45;ACTION Type 3)" alt="" coords="24,198,201,253"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="299,179,202,205,201,200,298,174"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a6d59d6b83ee50674ed42b819f38923c9" title="Modify an existing UPS workitem (N&#45;SET)" alt="" coords="28,277,197,317"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="353,184,293,226,221,266,188,280,186,275,219,262,290,221,350,179"/>
+</map>

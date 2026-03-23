@@ -1,0 +1,36 @@
+<map id="include/pacs/client/job_types.hpp" name="include/pacs/client/job_types.hpp">
+<area shape="rect" id="Node000001" title="Job types and structures for asynchronous DICOM operations." alt="" coords="935,5,1078,45"/>
+<area shape="rect" id="Node000002" href="$job__manager_8hpp.html" title="Job manager for asynchronous DICOM operations." alt="" coords="730,93,873,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="950,53,847,96,845,91,948,48"/>
+<area shape="rect" id="Node000007" href="$jobs__endpoints_8cpp.html" title="Job management REST API and WebSocket endpoints implementation." alt="" coords="1127,181,1297,221"/>
+<area shape="poly" id="edge19_Node000001_Node000007" title=" " alt="" coords="1041,52,1191,179,1188,183,1038,56"/>
+<area shape="rect" id="Node000009" href="$routing__types_8hpp.html" title="Routing types and structures for auto&#45;forwarding DICOM images." alt="" coords="1431,93,1574,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1092,39,1432,97,1431,102,1091,44"/>
+<area shape="rect" id="Node000014" href="$job__repository_8hpp.html" title="Repository for job persistence using base_repository pattern." alt="" coords="266,93,422,133"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="922,40,423,105,422,99,921,35"/>
+<area shape="rect" id="Node000003" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="246,189,442,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="717,133,406,191,405,186,716,128"/>
+<area shape="rect" id="Node000004" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="732,181,871,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="804,147,804,181,799,181,799,147"/>
+<area shape="rect" id="Node000005" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="1344,269,1475,309"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="760,143,738,162,721,181,714,201,716,210,722,219,735,228,757,235,826,246,916,253,1018,257,1215,262,1332,267,1344,269,1343,274,1332,272,1214,267,1018,263,916,258,825,251,756,240,733,232,718,223,711,212,709,201,717,179,735,158,757,139"/>
+<area shape="rect" id="Node000006" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="895,189,1102,214"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="858,136,973,186,971,191,856,141"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="887,130,1127,180,1126,185,886,135"/>
+<area shape="rect" id="Node000008" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="466,181,657,221"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="737,140,615,184,613,179,735,135"/>
+<area shape="rect" id="Node000010" href="$routing__manager_8hpp.html" title="Routing manager for automatic DICOM image forwarding." alt="" coords="1517,181,1681,221"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1536,141,1579,179,1576,183,1533,145"/>
+<area shape="rect" id="Node000011" href="$routing__endpoints_8cpp.html" title="Routing rule management REST API endpoints implementation." alt="" coords="1563,269,1754,309"/>
+<area shape="poly" id="edge15_Node000009_Node000011" title=" " alt="" coords="1588,120,1618,128,1647,140,1674,157,1696,180,1703,203,1700,228,1689,251,1676,271,1672,268,1685,248,1695,226,1698,203,1691,183,1670,161,1645,145,1616,133,1587,125"/>
+<area shape="rect" id="Node000012" href="$routing__repository_8hpp.html" title="Repository for routing rule persistence using base_repository pattern." alt="" coords="1321,181,1492,221"/>
+<area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="1473,145,1430,183,1426,179,1469,141"/>
+<area shape="poly" id="edge10_Node000010_Node000005" title=" " alt="" coords="1546,229,1452,272,1450,267,1544,225"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="1622,231,1648,268,1643,271,1618,234"/>
+<area shape="poly" id="edge13_Node000012_Node000005" title=" " alt="" coords="1410,235,1411,269,1406,269,1405,235"/>
+<area shape="rect" id="Node000013" href="$routing__repository_8cpp.html" title="Implementation of the routing repository for rule persistence." alt="" coords="1176,269,1320,309"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1361,230,1284,272,1281,267,1359,226"/>
+<area shape="poly" id="edge17_Node000014_Node000003" title=" " alt="" coords="347,147,347,188,341,188,341,147"/>
+<area shape="rect" id="Node000015" href="$job__repository_8cpp.html" title="Implementation of the job repository for job persistence." alt="" coords="5,189,221,214"/>
+<area shape="poly" id="edge18_Node000014_Node000015" title=" " alt="" coords="282,141,145,191,143,186,280,136"/>
+</map>

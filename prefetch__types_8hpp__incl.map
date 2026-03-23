@@ -1,0 +1,11 @@
+<map id="include/pacs/client/prefetch_types.hpp" name="include/pacs/client/prefetch_types.hpp">
+<area shape="rect" id="Node000001" title="Types and structures for prefetch manager." alt="" coords="101,5,251,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,48,72,89,70,84,142,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="97,93,167,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="168,47,148,83,143,80,163,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="192,93,251,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="189,44,210,80,205,83,185,47"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="275,93,338,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="209,43,277,84,274,88,206,48"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="include/pacs/storage/pacs_database_adapter.hpp" name="include/pacs/storage/pacs_database_adapter.hpp">
+<area shape="rect" id="Node000001" title="Unified database adapter for PACS system." alt="" coords="455,5,661,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="458,48,207,95,206,89,457,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="218,101,285,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="472,48,387,69,297,96,291,98,289,93,296,91,386,64,471,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="309,101,375,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="510,48,388,96,383,98,381,93,386,91,508,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="399,101,490,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="534,48,473,94,469,90,531,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="515,101,601,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="561,46,561,87,555,87,555,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="626,101,677,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="581,44,630,89,627,93,577,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="701,101,778,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="599,43,704,92,702,97,597,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="802,101,861,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="634,43,710,64,791,91,796,93,794,98,789,96,709,69,633,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="885,101,948,126"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="662,41,765,62,873,91,880,93,878,98,872,96,764,67,661,46"/>
+</map>

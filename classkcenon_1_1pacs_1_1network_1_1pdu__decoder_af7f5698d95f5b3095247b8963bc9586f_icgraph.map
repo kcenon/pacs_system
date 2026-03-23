@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::pdu_decoder::peek_pdu_type" name="kcenon::pacs::network::pdu_decoder::peek_pdu_type">
+<area shape="rect" id="Node000001" title="Get the PDU type from buffer without full decoding." alt="" coords="707,13,927,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1de6f1a790a073ccd311d427618fa7c3" title="Process accumulated buffer for complete PDUs." alt="" coords="477,5,659,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="693,35,659,35,659,30,693,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a7fdebfd5cd1481667fd9d96071e44056" title="Handle data received from session." alt="" coords="228,5,429,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="464,35,430,35,430,30,464,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a20b3f39bcb4fc5a1fbbc79579ca8033f" title="Feed received data to the handler." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,35,180,35,180,30,214,30"/>
+</map>

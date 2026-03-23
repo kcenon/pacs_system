@@ -1,0 +1,27 @@
+<map id="src/storage/migration_runner.cpp" name="src/storage/migration_runner.cpp">
+<area shape="rect" id="Node000001" title="Implementation of database schema migration runner." alt="" coords="633,5,795,45"/>
+<area shape="rect" id="Node000002" href="$migration__runner_8hpp.html" title="Database schema migration runner." alt="" coords="435,93,607,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="673,48,577,90,575,85,670,43"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="675,101,753,126"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="717,46,717,87,711,87,711,46"/>
+<area shape="rect" id="Node000011" href="$format_8hpp.html" title="Compatibility header providing kcenon::pacs::compat::format as an alias for std::format." alt="" coords="799,101,981,126"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="754,43,856,92,853,97,751,48"/>
+<area shape="rect" id="Node000003" href="$migration__record_8hpp.html" title="Migration record structure for schema version tracking." alt="" coords="5,189,167,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="435,134,157,189,156,183,434,129"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="175,269,234,295"/>
+<area shape="poly" id="edge7_Node000002_Node000004" title=" " alt="" coords="435,127,316,149,265,164,232,183,220,199,213,218,207,256,202,255,208,216,215,197,228,179,262,160,314,144,434,122"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="243,181,431,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="481,136,390,178,388,173,479,131"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="455,189,541,214"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="518,134,507,176,502,175,513,133"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="566,189,643,214"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="541,132,585,177,582,180,537,135"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="668,189,765,214"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="565,131,679,181,677,186,563,136"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="789,189,852,214"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="606,131,689,152,778,179,783,181,782,186,776,184,688,157,605,136"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="105,212,177,259,174,264,102,216"/>
+<area shape="poly" id="edge13_Node000011_Node000004" title=" " alt="" coords="894,126,891,174,882,201,865,223,830,238,767,249,590,267,396,277,248,282,248,277,396,272,590,261,767,244,828,233,862,219,877,198,886,173,888,126"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="927,189,994,214"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="902,124,944,176,940,179,897,128"/>
+</map>

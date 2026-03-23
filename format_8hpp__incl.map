@@ -1,0 +1,7 @@
+<map id="include/pacs/compat/format.hpp" name="include/pacs/compat/format.hpp">
+<area shape="rect" id="Node000001" title="Compatibility header providing kcenon::pacs::compat::format as an alias for std::format." alt="" coords="5,5,161,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="7,93,74,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,47,56,83,51,80,71,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="98,93,157,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="96,44,116,80,112,83,92,47"/>
+</map>

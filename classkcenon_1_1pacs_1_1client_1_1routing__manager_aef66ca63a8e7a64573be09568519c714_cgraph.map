@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::client::routing_manager::update_rule" name="kcenon::pacs::client::routing_manager::update_rule">
+<area shape="rect" id="Node000001" title="Update an existing routing rule." alt="" coords="5,29,232,69"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="280,29,425,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,47,266,47,266,52,232,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="309,30,307,20,314,10,329,5,353,3,380,6,394,13,392,18,378,11,353,8,330,10,317,15,312,21,314,28"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::client::job_manager::impl::complete_job" name="kcenon::pacs::client::job_manager::impl::complete_job">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,84,165,139"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#af8c72d7d3e771befaca6d9109487b46a" title=" " alt="" coords="213,5,373,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,81,207,62,209,67,159,86"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#addc159a2dd92e1b5efaa1eff170fefb7" title=" " alt="" coords="213,84,373,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,109,199,109,199,114,165,114"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a3023b4ee476e60b7c0298e11ab1c6e82" title=" " alt="" coords="213,163,373,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="159,136,209,155,207,160,158,141"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1client.html#a2224cefe2f1791fceebbc935eb2d567e" title="Check if job status is a terminal state." alt="" coords="421,170,572,210"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="373,187,407,187,407,193,373,193"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="include/pacs/services/cache/streaming_query_handler.hpp" name="include/pacs/services/cache/streaming_query_handler.hpp">
+<area shape="rect" id="Node000001" title="Streaming query handler for memory&#45;efficient C&#45;FIND processing." alt="" coords="128,5,307,60"/>
+<area shape="rect" id="Node000002" href="$pacs-services-cache_8cppm.html" title="C++20 module partition for query caching." alt="" coords="5,108,200,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,71,128,110,124,106,173,67"/>
+<area shape="rect" id="Node000003" href="$streaming__query__handler_8cpp.html" title="Implementation of streaming query handler." alt="" coords="224,108,443,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="263,67,312,106,308,110,259,71"/>
+</map>

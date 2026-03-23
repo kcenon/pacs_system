@@ -1,0 +1,26 @@
+<map id="src/storage/key_image_repository.cpp" name="src/storage/key_image_repository.cpp">
+<area shape="rect" id="Node000001" title="Implementation of the key image repository." alt="" coords="383,5,553,45"/>
+<area shape="rect" id="Node000002" href="$key__image__repository_8hpp.html" title="Repository for key image persistence using base_repository pattern." alt="" coords="302,93,482,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="453,47,420,85,416,81,449,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="196,269,263,295"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="383,31,293,41,243,51,191,66,141,85,94,111,52,143,17,183,8,203,13,220,29,235,54,247,118,264,182,274,182,279,117,270,52,252,26,239,9,223,3,203,12,180,48,139,91,107,139,81,190,61,241,46,292,36,383,25"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="507,101,581,126"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="487,44,526,88,522,92,483,47"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="606,101,685,126"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="508,43,610,92,608,97,506,48"/>
+<area shape="rect" id="Node000003" href="$key__image__record_8hpp.html" title="Key image record data structures for database operations." alt="" coords="499,181,679,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="436,131,535,173,533,178,434,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="475,269,549,295"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="408,132,498,257,493,260,403,135"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="624,269,683,295"/>
+<area shape="poly" id="edge8_Node000002_Node000006" title=" " alt="" coords="483,129,617,157,669,170,694,179,702,200,699,221,689,242,676,260,672,257,684,239,694,220,697,200,690,183,668,175,616,162,481,134"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="27,181,215,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="333,136,194,180,193,175,332,131"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="239,189,337,214"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="370,136,315,181,311,177,367,132"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="361,189,423,214"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="395,134,395,175,389,175,389,134"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="504,224,277,273,276,268,502,219"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="572,223,535,261,531,258,569,220"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="607,220,637,257,633,260,603,223"/>
+</map>

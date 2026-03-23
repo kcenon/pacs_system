@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/jobs_endpoints.hpp" name="include/pacs/web/endpoints/jobs_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Job management REST API and WebSocket endpoints." alt="" coords="88,5,291,45"/>
+<area shape="rect" id="Node000002" href="$jobs__endpoints_8cpp.html" title="Job management REST API and WebSocket endpoints implementation." alt="" coords="5,93,176,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,56,114,95,111,91,156,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="201,101,375,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,53,276,98,273,102,220,57"/>
+</map>

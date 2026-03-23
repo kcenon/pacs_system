@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/study_endpoints.hpp" name="include/pacs/web/endpoints/study_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Study API endpoints for REST server." alt="" coords="94,5,297,45"/>
+<area shape="rect" id="Node000002" href="$study__endpoints_8cpp.html" title="Study API endpoints implementation." alt="" coords="5,93,185,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,56,119,95,116,91,161,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="209,101,384,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="230,52,284,98,281,102,226,56"/>
+</map>

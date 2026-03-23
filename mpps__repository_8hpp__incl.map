@@ -1,0 +1,22 @@
+<map id="include/pacs/storage/mpps_repository.hpp" name="include/pacs/storage/mpps_repository.hpp">
+<area shape="rect" id="Node000001" title="Repository for MPPS lifecycle persistence using base_repository pattern." alt="" coords="282,5,443,45"/>
+<area shape="rect" id="Node000002" href="$mpps__record_8hpp.html" title="MPPS (Modality Performed Procedure Step) record data structures." alt="" coords="53,101,275,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="320,48,204,98,202,93,318,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,181,80,207"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="282,35,213,42,141,54,80,72,58,83,43,95,35,112,32,130,37,168,32,169,27,130,30,110,39,92,55,78,79,67,140,49,212,37,281,29"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="235,181,293,207"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="354,47,280,171,275,168,349,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="325,181,387,207"/>
+<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="365,46,360,168,354,168,359,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="401,93,589,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="393,43,456,84,453,88,391,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="613,101,691,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="436,43,602,91,610,93,608,98,601,96,435,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="715,101,813,126"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="444,38,567,60,703,91,716,94,715,99,702,96,566,66,443,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="131,181,197,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="167,126,167,167,161,167,161,126"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="148,128,73,176,70,172,145,124"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="180,124,240,171,237,175,177,128"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="193,124,317,174,315,179,191,128"/>
+</map>

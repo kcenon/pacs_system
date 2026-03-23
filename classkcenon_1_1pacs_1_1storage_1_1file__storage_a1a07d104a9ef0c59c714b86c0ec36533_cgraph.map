@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::storage::file_storage::file_storage" name="kcenon::pacs::storage::file_storage::file_storage">
+<area shape="rect" id="Node000001" title="Construct file storage with configuration." alt="" coords="5,5,169,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#a669e1cc4fe95acc7c5484acd0b346979" title="Rebuild the internal index from filesystem." alt="" coords="217,13,420,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,30,204,30,204,35,170,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="468,13,611,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="420,30,454,30,454,35,420,35"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="659,13,871,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="611,30,645,30,645,35,611,35"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::security::tag_action_record" name="kcenon::pacs::security::tag_action_record">
+<area shape="rect" id="Node000001" title="Record of an action performed on a tag." alt="" coords="56,527,215,627"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="5,135,161,435"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,434,123,502,125,510,120,511,118,503,106,435"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="185,252,264,317"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,318,161,503,158,512,153,510,155,502,212,317"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="159,5,290,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="227,100,227,252,222,252,222,100"/>
+</map>

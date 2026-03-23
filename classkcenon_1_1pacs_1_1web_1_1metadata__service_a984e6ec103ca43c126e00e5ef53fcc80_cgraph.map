@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::web::metadata_service::read_dicom_tags" name="kcenon::pacs::web::metadata_service::read_dicom_tags">
+<area shape="rect" id="Node000001" title="Read DICOM dataset from file." alt="" coords="5,30,181,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a37d6398f04d723ff5662c85e904accc1" title="Check if this is a private tag." alt="" coords="229,5,400,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,42,215,37,216,42,182,47"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="243,69,386,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="182,67,230,74,229,80,181,73"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="483,5,625,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,23,469,23,469,28,400,28"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="448,69,660,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="386,87,434,87,434,92,386,92"/>
+</map>

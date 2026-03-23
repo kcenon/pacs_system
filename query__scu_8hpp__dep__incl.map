@@ -1,0 +1,21 @@
+<map id="include/pacs/services/query_scu.hpp" name="include/pacs/services/query_scu.hpp">
+<area shape="rect" id="Node000001" title="DICOM Query SCU service (C&#45;FIND sender)" alt="" coords="483,5,644,45"/>
+<area shape="rect" id="Node000002" href="$retrieve__scu_8hpp.html" title="DICOM Retrieve SCU service (C&#45;MOVE/C&#45;GET sender)" alt="" coords="223,93,384,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="494,52,361,96,359,91,492,47"/>
+<area shape="rect" id="Node000003" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="5,189,201,214"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="469,32,409,39,343,50,276,69,213,96,181,117,152,143,113,190,109,187,148,140,177,113,210,91,274,64,342,45,409,33,469,27"/>
+<area shape="rect" id="Node000005" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="405,181,604,221"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="496,54,470,71,451,95,446,117,453,139,468,161,485,179,481,183,463,164,448,142,441,117,446,92,467,68,493,49"/>
+<area shape="rect" id="Node000006" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="460,101,667,126"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="566,59,566,100,561,100,561,59"/>
+<area shape="rect" id="Node000007" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="691,101,926,126"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="631,47,777,98,775,103,629,52"/>
+<area shape="rect" id="Node000008" href="$query__scu_8cpp.html" title="Implementation of the Query SCU service." alt="" coords="951,93,1091,133"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="658,40,939,91,951,93,950,99,937,96,657,45"/>
+<area shape="rect" id="Node000009" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="1115,93,1305,133"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="658,34,863,58,1104,91,1115,92,1114,98,1103,96,862,64,657,39"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="248,141,131,191,129,186,246,136"/>
+<area shape="rect" id="Node000004" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="226,181,381,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="306,147,306,181,301,181,301,147"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="361,136,462,179,460,184,359,141"/>
+</map>

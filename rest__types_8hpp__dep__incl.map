@@ -1,0 +1,51 @@
+<map id="include/pacs/web/rest_types.hpp" name="include/pacs/web/rest_types.hpp">
+<area shape="rect" id="Node000001" title="Common types and utilities for REST API." alt="" coords="2550,5,2713,45"/>
+<area shape="rect" id="Node000002" href="$pacs-web_8cppm.html" title="C++20 module partition for REST API and DICOMweb." alt="" coords="5,101,212,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2536,30,2076,36,1407,48,726,68,440,81,225,96,170,103,170,98,224,91,440,76,725,63,1407,43,2076,31,2536,25"/>
+<area shape="rect" id="Node000003" href="$oauth2__middleware_8cpp.html" title="Implementation of OAuth 2.0 middleware for DICOMweb endpoints." alt="" coords="237,93,391,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="2536,30,2106,34,1489,45,863,65,601,79,404,96,392,98,391,92,403,91,601,74,862,60,1489,40,2106,29,2536,25"/>
+<area shape="rect" id="Node000004" href="$annotation__endpoints_8cpp.html" title="Annotation API endpoints implementation." alt="" coords="416,93,631,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="2536,28,2221,29,1754,36,1205,56,921,73,644,96,631,97,631,92,643,91,921,68,1205,51,1754,31,2221,23,2536,23"/>
+<area shape="rect" id="Node000005" href="$association__endpoints_8cpp.html" title="DICOM Association API endpoints implementation." alt="" coords="655,93,874,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="2536,29,2256,31,1848,40,1372,60,1126,76,886,96,875,97,874,92,886,91,1126,71,1371,55,1848,35,2255,26,2536,24"/>
+<area shape="rect" id="Node000006" href="$audit__endpoints_8cpp.html" title="Audit log API endpoints implementation." alt="" coords="899,93,1076,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="2536,29,2285,31,1926,39,1511,59,1298,75,1089,96,1077,98,1076,92,1088,91,1297,70,1511,54,1926,34,2285,25,2536,24"/>
+<area shape="rect" id="Node000007" href="$dicomweb__endpoints_8cpp.html" title="DICOMweb (WADO&#45;RS) API endpoints implementation." alt="" coords="1101,93,1311,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="2536,31,2319,36,2019,47,1674,66,1324,96,1312,97,1311,92,1323,91,1673,61,2018,42,2319,31,2536,25"/>
+<area shape="rect" id="Node000008" href="$jobs__endpoints_8cpp.html" title="Job management REST API and WebSocket endpoints implementation." alt="" coords="1335,93,1506,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="2537,31,2349,36,2096,47,1809,67,1518,96,1506,98,1506,92,1518,91,1808,61,2096,42,2349,31,2536,26"/>
+<area shape="rect" id="Node000009" href="$key__image__endpoints_8cpp.html" title="Key image API endpoints implementation." alt="" coords="1530,93,1698,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="2536,32,2173,52,1942,70,1710,96,1699,98,1698,92,1710,91,1942,65,2172,46,2536,27"/>
+<area shape="rect" id="Node000010" href="$measurement__endpoints_8cpp.html" title="Measurement API endpoints implementation." alt="" coords="1722,93,1957,133"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="2536,38,2280,62,1969,96,1957,97,1956,92,1968,91,2279,57,2536,32"/>
+<area shape="rect" id="Node000011" href="$metadata__endpoints_8cpp.html" title="Metadata REST API endpoints implementation." alt="" coords="1981,93,2188,133"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="2536,44,2200,96,2189,98,2188,92,2199,91,2536,39"/>
+<area shape="rect" id="Node000012" href="$metrics__endpoints_8cpp.html" title="Database metrics REST API endpoints implementation." alt="" coords="2212,93,2405,133"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="2548,51,2380,96,2379,91,2547,46"/>
+<area shape="rect" id="Node000013" href="$patient__endpoints_8cpp.html" title="Patient API endpoints implementation." alt="" coords="2429,93,2620,133"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="2599,56,2550,95,2547,91,2595,52"/>
+<area shape="rect" id="Node000014" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="2644,93,2835,133"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="2668,52,2717,91,2714,95,2664,56"/>
+<area shape="rect" id="Node000015" href="$routing__endpoints_8cpp.html" title="Routing rule management REST API endpoints implementation." alt="" coords="2859,93,3049,133"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="2716,46,2884,91,2883,96,2714,51"/>
+<area shape="rect" id="Node000016" href="$security__endpoints_8cpp.html" title="Security API endpoints implementation." alt="" coords="3073,93,3269,133"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="2727,38,3062,91,3073,93,3073,98,3062,96,2726,44"/>
+<area shape="rect" id="Node000017" href="$series__endpoints_8cpp.html" title="Series API endpoints implementation." alt="" coords="3293,93,3476,133"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="2726,31,2978,54,3282,91,3293,92,3293,98,3282,96,2978,60,2726,37"/>
+<area shape="rect" id="Node000018" href="$storage__commitment__endpoints_8cpp.html" title="DICOMweb Storage Commitment REST endpoint implementation." alt="" coords="3501,93,3711,133"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="2727,29,3064,51,3276,68,3489,91,3501,92,3500,97,3488,96,3275,74,3063,56,2726,34"/>
+<area shape="rect" id="Node000019" href="$study__endpoints_8cpp.html" title="Study API endpoints implementation." alt="" coords="3736,93,3916,133"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="2727,26,2911,32,3159,44,3440,63,3724,91,3736,92,3736,98,3723,96,3439,68,3159,49,2911,37,2727,31"/>
+<area shape="rect" id="Node000020" href="$system__endpoints_8cpp.html" title="System API endpoints implementation." alt="" coords="3941,93,4133,133"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="2727,25,2942,30,3240,40,3582,60,3929,91,3941,92,3940,97,3928,96,3582,65,3240,46,2942,35,2726,30"/>
+<area shape="rect" id="Node000021" href="$thumbnail__endpoints_8cpp.html" title="Thumbnail REST API endpoints implementation." alt="" coords="4157,93,4367,133"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="2726,24,2973,28,3325,38,3731,58,3940,72,4145,91,4157,92,4156,97,4144,96,3940,78,3731,63,3324,43,2973,33,2726,30"/>
+<area shape="rect" id="Node000022" href="$viewer__state__endpoints_8cpp.html" title="Viewer state API endpoints implementation." alt="" coords="4392,93,4580,133"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="2727,23,3008,24,3417,31,3893,52,4139,69,4380,91,4392,92,4392,97,4379,96,4139,74,3893,57,3416,37,3008,29,2727,28"/>
+<area shape="rect" id="Node000023" href="$wado__uri__endpoints_8cpp.html" title="WADO&#45;URI (Web Access to DICOM Objects — URI&#45;based) endpoint implementation." alt="" coords="4605,93,4783,133"/>
+<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="2727,25,3650,45,4194,64,4421,77,4593,91,4605,92,4604,97,4592,96,4421,82,4194,70,3649,50,2727,31"/>
+<area shape="rect" id="Node000024" href="$worklist__endpoints_8cpp.html" title="Worklist API endpoints implementation." alt="" coords="4808,93,5004,133"/>
+<area shape="poly" id="edge23_Node000001_Node000024" title=" " alt="" coords="2727,25,3145,32,3743,44,4350,64,4604,76,4796,91,4808,92,4807,97,4795,96,4603,82,4350,69,3743,50,3145,37,2727,31"/>
+<area shape="rect" id="Node000025" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="5028,101,5203,126"/>
+<area shape="poly" id="edge24_Node000001_Node000025" title=" " alt="" coords="2727,25,3183,29,3846,40,4521,60,4804,74,5017,91,5064,98,5063,103,5016,96,4803,79,4521,65,3846,46,3183,35,2727,30"/>
+</map>

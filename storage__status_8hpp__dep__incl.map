@@ -1,0 +1,20 @@
+<map id="include/pacs/services/storage_status.hpp" name="include/pacs/services/storage_status.hpp">
+<area shape="rect" id="Node000001" title="Storage SCP status codes for C&#45;STORE operations." alt="" coords="397,5,558,45"/>
+<area shape="rect" id="Node000002" href="$storage__scp_8hpp.html" title="DICOM Storage SCP service (C&#45;STORE handler)" alt="" coords="278,93,439,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="441,56,386,95,383,91,438,51"/>
+<area shape="rect" id="Node000004" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="336,189,571,214"/>
+<area shape="poly" id="edge10_Node000001_Node000004" title=" " alt="" coords="475,60,458,189,452,188,470,59"/>
+<area shape="rect" id="Node000007" href="$storage__scu_8hpp.html" title="DICOM Storage SCU service (C&#45;STORE sender)" alt="" coords="565,93,726,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="527,49,610,91,607,96,525,54"/>
+<area shape="rect" id="Node000003" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="181,181,312,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="324,144,273,183,270,179,321,140"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="392,141,442,186,438,190,388,145"/>
+<area shape="rect" id="Node000005" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="5,181,157,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="286,140,143,184,141,179,284,135"/>
+<area shape="rect" id="Node000006" href="$storage__scu_8cpp.html" title="Implementation of the Storage SCU service." alt="" coords="595,181,747,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="441,134,603,179,602,184,440,140"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="592,141,480,191,478,186,590,137"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="657,146,668,180,663,182,652,147"/>
+<area shape="rect" id="Node000008" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="771,189,967,214"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="708,136,840,186,839,191,706,141"/>
+</map>

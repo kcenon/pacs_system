@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::storage::index_database::get_storage_stats" name="kcenon::pacs::storage::index_database::get_storage_stats">
+<area shape="rect" id="Node000001" title="Get storage statistics." alt="" coords="5,94,169,149"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#ac5e7c440c5ab9469008abae9abeee7d5" title="Get total instance count." alt="" coords="217,5,456,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,91,216,55,239,47,241,52,218,60,139,96"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a0adfdc0a330342b10ceeb6f4b4161426" title="Get total patient count." alt="" coords="221,69,452,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,108,207,103,208,109,170,113"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a6d0c2b1a19fa685e86c544c2ba91ac31" title="Get total series count." alt="" coords="225,133,448,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="170,129,212,135,212,140,169,134"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a23f0df2554f635a113cbd1ba416d487b" title="Get total study count." alt="" coords="227,197,447,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,146,218,183,241,191,239,196,216,188,137,151"/>
+</map>

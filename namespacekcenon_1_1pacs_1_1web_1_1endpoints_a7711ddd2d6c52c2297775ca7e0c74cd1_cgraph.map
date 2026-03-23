@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::web::endpoints::register_system_endpoints_impl" name="kcenon::pacs::web::endpoints::register_system_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,66,189,121"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="237,29,388,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,72,223,65,224,70,190,77"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web.html#afb727937f516358f97153f5337486476" title="Create success response with optional message." alt="" coords="237,117,388,157"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="190,110,224,117,223,122,189,115"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="273,30,270,20,277,10,291,5,313,3,338,6,351,13,349,18,336,11,313,8,292,10,280,15,275,21,278,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="273,118,270,108,277,98,291,93,313,91,338,94,351,101,349,106,336,99,313,96,292,98,280,103,275,109,278,116"/>
+</map>

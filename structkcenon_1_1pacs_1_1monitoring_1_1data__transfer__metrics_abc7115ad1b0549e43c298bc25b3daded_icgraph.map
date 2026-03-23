@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::data_transfer_metrics::add_bytes_sent" name="kcenon::pacs::monitoring::data_transfer_metrics::add_bytes_sent">
+<area shape="rect" id="Node000001" title="Record bytes sent." alt="" coords="247,41,433,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#aa374d61ca55b8791a0cdaa193abe131e" title="Record bytes sent over the network." alt="" coords="9,5,195,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,55,195,49,196,44,233,50"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a06abb52682efb38c502207a006402a45" title="Record a C&#45;GET operation." alt="" coords="5,85,199,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,87,199,93,198,87,233,82"/>
+</map>

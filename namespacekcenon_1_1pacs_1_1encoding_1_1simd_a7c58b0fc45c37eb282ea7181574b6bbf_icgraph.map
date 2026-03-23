@@ -1,0 +1,130 @@
+<map id="kcenon::pacs::encoding::simd::get_features" name="kcenon::pacs::encoding::simd::get_features">
+<area shape="rect" id="Node000001" title="Get cached SIMD features (singleton pattern)" alt="" coords="2289,341,2464,381"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a8f54a6e8661f7c74097a93bce9e995ba" title="Check if AVX is available." alt="" coords="2067,149,2241,189"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2354,331,2307,267,2275,233,2240,204,2219,192,2222,187,2243,199,2279,229,2311,263,2358,328"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6033b8c73db95ad59f315d9dfcc47139" title="Check if AVX2 is available." alt="" coords="2067,437,2241,477"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="2318,389,2202,440,2200,435,2316,384"/>
+<area shape="rect" id="Node000044" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#aa7d7423e2872ecead6d9f54ea61a6327" title="Check if AVX&#45;512F is available." alt="" coords="2067,341,2241,381"/>
+<area shape="poly" id="edge54_Node000001_Node000044" title=" " alt="" coords="2276,364,2241,364,2241,359,2276,359"/>
+<area shape="rect" id="Node000045" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a12ef5e6498437704490c7d49e9e11f4e" title="Check if NEON is available." alt="" coords="2067,277,2241,317"/>
+<area shape="poly" id="edge56_Node000001_Node000045" title=" " alt="" coords="2292,340,2223,320,2225,315,2294,335"/>
+<area shape="rect" id="Node000046" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a16e8ab0257871a39c5fe5dbcbd0c4a7c" title="Check if SSE2 is available." alt="" coords="2067,213,2241,253"/>
+<area shape="poly" id="edge65_Node000001_Node000046" title=" " alt="" coords="2339,335,2293,301,2240,268,2214,256,2217,251,2243,263,2296,296,2343,331"/>
+<area shape="rect" id="Node000047" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#afa6a5c3dd05922083ca258cae7784d59" title="Check if SSE4.1 is available." alt="" coords="2067,772,2241,812"/>
+<area shape="poly" id="edge72_Node000001_Node000047" title=" " alt="" coords="2376,395,2367,470,2346,567,2329,619,2306,671,2278,719,2243,762,2228,774,2225,770,2239,758,2274,716,2302,668,2324,617,2341,566,2362,469,2371,395"/>
+<area shape="rect" id="Node000048" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a75897377c534bc5623c9a62858917125" title="Check if SSSE3 is available." alt="" coords="2067,708,2241,748"/>
+<area shape="poly" id="edge73_Node000001_Node000048" title=" " alt="" coords="2358,395,2170,709,2165,706,2354,392"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a81db8d7d54394641c9cc5833faaa8231" title="Apply window/level transformation to 16&#45;bit unsigned grayscale data." alt="" coords="1773,5,2016,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2100,432,2080,415,2064,395,2044,347,2038,302,2041,259,2049,218,2055,179,2055,139,2044,100,2017,59,2004,48,2007,44,2021,56,2049,98,2060,139,2060,179,2054,219,2047,260,2043,302,2049,346,2069,392,2084,411,2104,428"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a4487d0438cb9cd29ae52728a83859214" title="Apply window/level transformation to 16&#45;bit signed grayscale data." alt="" coords="1793,70,1996,125"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="2101,432,2081,415,2064,395,2048,359,2041,324,2042,292,2046,261,2049,231,2047,201,2038,170,2017,139,1995,121,1998,117,2021,136,2043,168,2052,200,2054,231,2051,261,2047,292,2047,324,2053,357,2069,392,2085,411,2104,428"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#af2cca9893dde15b61317a14b3e46e0f2" title="Apply window/level transformation to 8&#45;bit grayscale data." alt="" coords="1777,149,2012,189"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="2102,432,2082,415,2064,395,2051,368,2045,342,2045,293,2046,270,2043,248,2034,226,2017,203,2002,192,2005,187,2021,199,2039,223,2048,247,2051,270,2050,293,2050,341,2056,366,2069,392,2085,411,2105,427"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a690f0427ae0bd8a8ae06b5eb69b340a9" title="Convert interleaved RGB to planar format using best available SIMD." alt="" coords="1807,701,1982,755"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="2145,491,2127,536,2101,589,2065,643,2020,690,1984,711,1981,706,2017,686,2061,640,2096,587,2122,534,2140,489"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c79ede23913f8f5074a6961e45a020" title="Invert 16&#45;bit monochrome pixels." alt="" coords="1774,213,2015,253"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="2104,432,2083,415,2065,395,2054,377,2048,359,2043,327,2038,297,2030,282,2017,267,2000,256,2004,251,2020,263,2034,279,2043,295,2049,326,2053,358,2058,374,2069,392,2087,411,2107,428"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a074c91d6dc1d34132c3134d216da67a9" title="Invert 8&#45;bit monochrome pixels (MONOCHROME1 &lt;&#45;&gt; MONOCHROME2)" alt="" coords="1778,277,2011,317"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="2108,431,2065,395,2050,377,2042,361,2033,346,2017,332,1996,320,1998,315,2020,327,2037,342,2047,358,2055,374,2069,391,2112,427"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a0bf922ee7c2841bbb7a3326492cd119a" title="Merge high and low byte planes into 16&#45;bit data." alt="" coords="1783,844,2006,884"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="2143,492,2069,697,2059,737,2055,771,2045,802,2021,834,2004,846,2001,842,2017,830,2041,800,2050,770,2054,736,2064,695,2138,490"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a0ad8104b8e94beef59a21145847c32b2" title="Get optimal vector width in bytes for current CPU." alt="" coords="1789,341,2000,381"/>
+<area shape="poly" id="edge14_Node000003_Node000015" title=" " alt="" coords="2102,433,2018,396,1981,384,1983,379,2020,391,2104,429"/>
+<area shape="rect" id="Node000016" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a8c132b4b16ed05833f93c4d9d07fb932" title="Convert planar RGB to interleaved format using best available SIMD." alt="" coords="1771,780,2019,820"/>
+<area shape="poly" id="edge15_Node000003_Node000016" title=" " alt="" coords="2145,492,2091,642,2056,719,2038,748,2020,769,2000,782,1997,778,2017,765,2034,745,2051,716,2086,640,2140,490"/>
+<area shape="rect" id="Node000017" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a90e8d6795e86be4e8157f3e3a0f4146c" title="Convert RGB to YCbCr color space (ITU&#45;R BT.601)" alt="" coords="1802,469,1987,509"/>
+<area shape="poly" id="edge17_Node000003_Node000017" title=" " alt="" coords="2054,472,1988,481,1987,475,2053,467"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#ab4935a56e85c3e2f2b85bbcb0b93eab9" title="Split 16&#45;bit data into high and low byte planes." alt="" coords="1807,622,1982,677"/>
+<area shape="poly" id="edge18_Node000003_Node000018" title=" " alt="" coords="2135,491,2087,552,2055,584,2020,612,1984,630,1981,625,2017,607,2052,580,2083,548,2130,487"/>
+<area shape="rect" id="Node000019" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a91c69fbd13ffab681ee91a1647cb4460" title="Swap bytes in 16&#45;bit words using best available SIMD." alt="" coords="1790,1020,1999,1060"/>
+<area shape="poly" id="edge20_Node000003_Node000019" title=" " alt="" coords="2141,491,2105,583,2069,697,2061,741,2059,779,2063,848,2063,881,2057,914,2044,948,2021,986,1998,1007,1972,1022,1969,1018,1995,1003,2017,982,2040,946,2052,913,2057,881,2057,849,2054,779,2056,740,2064,695,2100,581,2136,489"/>
+<area shape="rect" id="Node000034" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a003331548250847e06a9ce09b900de24" title="Swap bytes in 32&#45;bit words using best available SIMD." alt="" coords="1790,557,1999,597"/>
+<area shape="poly" id="edge40_Node000003_Node000034" title=" " alt="" coords="2100,486,2020,524,1941,560,1939,555,2018,519,2098,481"/>
+<area shape="rect" id="Node000040" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a869b54363374fad7a167722fc0187d25" title="Swap bytes in 64&#45;bit words using best available SIMD." alt="" coords="1790,932,1999,972"/>
+<area shape="poly" id="edge48_Node000003_Node000040" title=" " alt="" coords="2142,491,2107,583,2069,697,2059,755,2057,803,2050,848,2039,872,2021,898,1997,919,1970,934,1967,930,1994,915,2017,894,2034,869,2044,847,2052,802,2054,754,2064,695,2102,581,2137,489"/>
+<area shape="rect" id="Node000043" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6c95440ef4ec429e565ac06bdb4c183a" title="Convert YCbCr to RGB color space (ITU&#45;R BT.601)" alt="" coords="1802,405,1987,445"/>
+<area shape="poly" id="edge53_Node000003_Node000043" title=" " alt="" coords="2053,448,1987,439,1988,434,2054,442"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#aac26e9f5220ad1869ab20e4f0f48bd65" title=" " alt="" coords="1540,691,1723,746"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1794,727,1723,725,1723,719,1794,722"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#a1e34d04599ef9972bf0d9b4a822a6fda" title=" " alt="" coords="1309,691,1492,746"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="1527,721,1492,721,1492,716,1527,716"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#a03db817c5565e35ea99ad29eed67eb73" title=" " alt="" coords="1540,774,1723,829"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1796,843,1722,826,1723,820,1797,838"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#a620eaabbcc80b4d2f80ded71b6bad4ef" title=" " alt="" coords="1309,774,1492,829"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1527,804,1492,804,1492,799,1527,799"/>
+<area shape="poly" id="edge16_Node000016_Node000013" title=" " alt="" coords="1757,803,1723,804,1723,798,1757,798"/>
+<area shape="poly" id="edge19_Node000018_Node000008" title=" " alt="" coords="1795,678,1723,697,1722,692,1794,673"/>
+<area shape="poly" id="edge21_Node000019_Node000019" title=" " alt="" coords="1939,1008,1923,1001,1895,999,1870,1001,1854,1005,1849,1011,1852,1019,1847,1020,1844,1010,1852,1001,1869,995,1895,993,1925,996,1941,1003"/>
+<area shape="rect" id="Node000020" href="$namespacekcenon_1_1pacs_1_1encoding.html#a75ae36b1a7d4edf0c29c04e5bd9b416a" title="Swaps bytes in&#45;place for OW (Other Word) data." alt="" coords="1544,1020,1719,1060"/>
+<area shape="poly" id="edge22_Node000019_Node000020" title=" " alt="" coords="1777,1043,1719,1043,1719,1037,1777,1037"/>
+<area shape="rect" id="Node000021" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa63e78a640e97ad646260749e68da061" title="Swaps bytes for AT (Attribute Tag) data." alt="" coords="1313,1124,1488,1164"/>
+<area shape="poly" id="edge23_Node000020_Node000021" title=" " alt="" coords="1584,1069,1493,1114,1463,1126,1461,1122,1491,1110,1582,1064"/>
+<area shape="rect" id="Node000022" href="$namespacekcenon_1_1pacs_1_1encoding.html#aca21c310801fd7050f0bf13fbdb72bb7" title="Swaps bytes for SS (Signed Short) value in raw data." alt="" coords="1313,996,1488,1036"/>
+<area shape="poly" id="edge24_Node000020_Node000022" title=" " alt="" coords="1530,1032,1488,1028,1489,1022,1531,1027"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1encoding.html#a4d43ffb558c09f344f93360066e5cc55" title="Swaps bytes for US (Unsigned Short) value in raw data." alt="" coords="1313,1060,1488,1100"/>
+<area shape="poly" id="edge25_Node000020_Node000023" title=" " alt="" coords="1531,1060,1489,1067,1488,1062,1530,1055"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a3f3f3e89fe288d6c26788fb9d6b37449" title="Convert element value from little&#45;endian to big&#45;endian." alt="" coords="1313,853,1489,907"/>
+<area shape="poly" id="edge26_Node000020_Node000024" title=" " alt="" coords="1578,1015,1538,986,1523,969,1514,953,1505,938,1490,922,1472,910,1475,905,1494,918,1510,934,1519,950,1528,965,1542,982,1581,1011"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a9b2550400450c89cec5a3613844d3453" title="Encode a single element to bytes." alt="" coords="1078,787,1261,842"/>
+<area shape="poly" id="edge27_Node000024_Node000025" title=" " alt="" coords="1298,854,1260,843,1262,838,1300,849"/>
+<area shape="rect" id="Node000029" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a3065568a0ef937629863b6ac2a88b674" title="Convert element value from big&#45;endian to little&#45;endian." alt="" coords="1077,918,1261,973"/>
+<area shape="poly" id="edge32_Node000024_Node000029" title=" " alt="" coords="1300,911,1262,922,1261,917,1299,906"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#ac504200a4a2da374f6c63bd50119cc9a" title="Encode a dataset to bytes using Explicit VR Big Endian." alt="" coords="850,722,1026,777"/>
+<area shape="poly" id="edge28_Node000025_Node000026" title=" " alt="" coords="1064,788,1025,777,1027,772,1066,783"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a3bd1acb700467fd491b03c02b5de046a" title=" " alt="" coords="571,722,799,777"/>
+<area shape="poly" id="edge29_Node000026_Node000027" title=" " alt="" coords="836,752,799,752,799,747,836,747"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#aaf549c5d0b1db439a347ea0f749f6a0e" title=" " alt="" coords="313,755,504,810"/>
+<area shape="poly" id="edge30_Node000027_Node000028" title=" " alt="" coords="557,767,505,774,504,769,557,762"/>
+<area shape="poly" id="edge31_Node000028_Node000025" title=" " alt="" coords="518,785,1078,808,1078,814,518,790"/>
+<area shape="rect" id="Node000030" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a7fc7807941c90086306d2dda512dde5f" title="Decode a single element from bytes." alt="" coords="847,918,1029,973"/>
+<area shape="poly" id="edge33_Node000029_Node000030" title=" " alt="" coords="1063,948,1030,948,1030,943,1063,943"/>
+<area shape="rect" id="Node000033" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a7f22500529c2f9331720002349de4694" title=" " alt="" coords="5,969,247,1023"/>
+<area shape="poly" id="edge39_Node000029_Node000033" title=" " alt="" coords="1074,979,1030,988,923,1001,814,1010,599,1017,403,1014,247,1007,247,1002,403,1009,599,1012,814,1004,923,996,1029,983,1073,974"/>
+<area shape="rect" id="Node000031" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a62c82058a1c6544e99d14f572fe55fb2" title="Decode bytes to a dataset using Explicit VR Big Endian." alt="" coords="597,853,773,907"/>
+<area shape="poly" id="edge34_Node000030_Node000031" title=" " alt="" coords="833,921,772,905,774,900,834,916"/>
+<area shape="rect" id="Node000032" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#adb63ab221a9279dae68a5bd9e90152fe" title=" " alt="" coords="295,903,523,958"/>
+<area shape="poly" id="edge38_Node000030_Node000032" title=" " alt="" coords="833,945,523,936,523,931,833,940"/>
+<area shape="poly" id="edge35_Node000031_Node000032" title=" " alt="" coords="584,901,523,912,522,907,583,896"/>
+<area shape="poly" id="edge36_Node000032_Node000033" title=" " alt="" coords="282,963,245,971,244,966,281,957"/>
+<area shape="poly" id="edge37_Node000033_Node000030" title=" " alt="" coords="260,985,846,948,847,954,261,990"/>
+<area shape="poly" id="edge41_Node000034_Node000034" title=" " alt="" coords="1939,546,1923,539,1895,536,1870,538,1854,543,1849,549,1852,556,1847,558,1844,548,1852,538,1869,533,1895,531,1925,534,1941,541"/>
+<area shape="rect" id="Node000035" href="$namespacekcenon_1_1pacs_1_1encoding.html#aeff50fa6aa0b69173e68b56ec36bc2be" title="Swaps bytes in&#45;place for OL (Other Long) data." alt="" coords="1544,559,1719,599"/>
+<area shape="poly" id="edge42_Node000034_Node000035" title=" " alt="" coords="1777,581,1719,581,1719,576,1777,575"/>
+<area shape="poly" id="edge47_Node000035_Node000024" title=" " alt="" coords="1599,610,1569,642,1542,680,1532,703,1527,724,1523,763,1518,801,1509,821,1494,842,1480,854,1476,850,1490,838,1504,818,1513,800,1518,762,1521,723,1527,701,1538,677,1565,639,1595,606"/>
+<area shape="rect" id="Node000036" href="$namespacekcenon_1_1pacs_1_1encoding.html#a0f2def42290088e3667fd471a69eb448" title="Swaps bytes for FL (Float) value in raw data." alt="" coords="1313,496,1488,536"/>
+<area shape="poly" id="edge43_Node000035_Node000036" title=" " alt="" coords="1543,558,1474,539,1476,533,1545,552"/>
+<area shape="rect" id="Node000037" href="$namespacekcenon_1_1pacs_1_1encoding.html#afc5b8d097b928acbb98b5423a1616e22" title="Swaps bytes in&#45;place for OF (Other Float) data." alt="" coords="1313,560,1488,600"/>
+<area shape="poly" id="edge44_Node000035_Node000037" title=" " alt="" coords="1530,582,1488,582,1488,577,1530,577"/>
+<area shape="rect" id="Node000038" href="$namespacekcenon_1_1pacs_1_1encoding.html#abdc792a4697acd6d4c5cba30e0a11653" title="Swaps bytes for SL (Signed Long) value in raw data." alt="" coords="1313,624,1488,664"/>
+<area shape="poly" id="edge45_Node000035_Node000038" title=" " alt="" coords="1547,605,1473,626,1471,621,1546,600"/>
+<area shape="rect" id="Node000039" href="$namespacekcenon_1_1pacs_1_1encoding.html#a37b2bb6301bde6e4b4ab8d0c9fd1e8ce" title="Swaps bytes for UL (Unsigned Long) value in raw data." alt="" coords="1313,432,1488,472"/>
+<area shape="poly" id="edge46_Node000035_Node000039" title=" " alt="" coords="1592,552,1545,519,1491,486,1464,475,1466,470,1493,482,1548,514,1596,548"/>
+<area shape="poly" id="edge49_Node000040_Node000040" title=" " alt="" coords="1939,920,1923,913,1895,911,1870,913,1854,917,1849,923,1852,931,1847,932,1844,922,1852,913,1869,907,1895,905,1925,908,1941,915"/>
+<area shape="rect" id="Node000041" href="$namespacekcenon_1_1pacs_1_1encoding.html#a49b8055816e3d6480701e292a07be7dc" title="Swaps bytes in&#45;place for OD (Other Double) data." alt="" coords="1544,932,1719,972"/>
+<area shape="poly" id="edge50_Node000040_Node000041" title=" " alt="" coords="1777,955,1719,955,1719,949,1777,949"/>
+<area shape="poly" id="edge52_Node000041_Node000024" title=" " alt="" coords="1553,930,1488,910,1489,905,1555,925"/>
+<area shape="rect" id="Node000042" href="$namespacekcenon_1_1pacs_1_1encoding.html#a9583b3f2de0f4ee1274ce93477209693" title="Swaps bytes for FD (Double) value in raw data." alt="" coords="1313,932,1488,972"/>
+<area shape="poly" id="edge51_Node000041_Node000042" title=" " alt="" coords="1530,955,1488,955,1488,949,1530,949"/>
+<area shape="poly" id="edge55_Node000044_Node000015" title=" " alt="" coords="2053,364,2000,364,2000,359,2053,359"/>
+<area shape="poly" id="edge57_Node000045_Node000004" title=" " alt="" coords="2068,270,2065,267,2047,240,2039,213,2039,186,2041,160,2044,134,2043,109,2035,84,2017,59,2002,47,2005,43,2021,55,2040,82,2048,108,2049,134,2047,160,2044,186,2045,212,2052,238,2069,264,2072,267"/>
+<area shape="poly" id="edge58_Node000045_Node000005" title=" " alt="" coords="2069,271,2065,267,2052,251,2045,234,2040,201,2036,170,2029,155,2017,139,1995,123,1998,119,2020,135,2034,152,2041,168,2046,201,2050,232,2056,248,2069,264,2073,267"/>
+<area shape="poly" id="edge59_Node000045_Node000006" title=" " alt="" coords="2073,273,2065,267,2049,251,2041,234,2032,218,2017,203,1996,192,1998,187,2020,199,2037,215,2045,232,2053,248,2068,263,2076,268"/>
+<area shape="poly" id="edge60_Node000045_Node000010" title=" " alt="" coords="2058,277,1976,256,1977,251,2060,271"/>
+<area shape="poly" id="edge61_Node000045_Node000011" title=" " alt="" coords="2053,300,2012,300,2012,295,2053,295"/>
+<area shape="poly" id="edge62_Node000045_Node000015" title=" " alt="" coords="2060,323,1977,344,1976,339,2058,318"/>
+<area shape="poly" id="edge63_Node000045_Node000017" title=" " alt="" coords="2073,327,2069,331,2056,347,2050,362,2046,395,2042,427,2034,443,2020,459,1989,478,1986,474,2017,455,2030,440,2037,425,2041,394,2045,361,2052,344,2065,328,2069,323"/>
+<area shape="poly" id="edge64_Node000045_Node000043" title=" " alt="" coords="2076,326,2068,331,2053,347,2045,363,2037,380,2020,396,1989,411,1986,407,2017,391,2032,376,2041,361,2049,344,2065,327,2073,322"/>
+<area shape="poly" id="edge66_Node000046_Node000004" title=" " alt="" coords="2069,207,2065,203,2051,184,2044,165,2041,129,2038,93,2031,76,2017,59,2001,48,2004,43,2021,55,2035,73,2043,92,2046,128,2049,164,2056,182,2069,200,2072,203"/>
+<area shape="poly" id="edge67_Node000046_Node000005" title=" " alt="" coords="2073,209,2065,203,2049,187,2040,170,2032,155,2017,139,1995,126,1998,122,2020,135,2037,151,2045,168,2053,184,2068,199,2076,204"/>
+<area shape="poly" id="edge68_Node000046_Node000006" title=" " alt="" coords="2058,213,1976,192,1977,187,2060,207"/>
+<area shape="poly" id="edge69_Node000046_Node000010" title=" " alt="" coords="2053,236,2016,236,2016,231,2053,231"/>
+<area shape="poly" id="edge70_Node000046_Node000011" title=" " alt="" coords="2060,259,1977,280,1976,275,2058,254"/>
+<area shape="poly" id="edge71_Node000046_Node000015" title=" " alt="" coords="2076,262,2068,267,2053,283,2045,299,2037,316,2020,331,1998,343,1996,339,2017,327,2032,312,2041,297,2049,280,2065,263,2073,258"/>
+<area shape="poly" id="edge74_Node000048_Node000007" title=" " alt="" coords="2053,731,1982,731,1982,725,2053,725"/>
+<area shape="poly" id="edge75_Node000048_Node000012" title=" " alt="" coords="2076,757,2068,762,2053,780,2046,798,2037,816,2020,834,1999,846,1996,842,2017,830,2033,813,2041,796,2049,777,2065,758,2072,753"/>
+<area shape="poly" id="edge76_Node000048_Node000016" title=" " alt="" coords="2072,754,2019,769,1971,782,1970,777,2018,764,2070,749"/>
+<area shape="poly" id="edge77_Node000048_Node000018" title=" " alt="" coords="2073,706,1981,678,1983,673,2075,701"/>
+<area shape="poly" id="edge78_Node000048_Node000019" title=" " alt="" coords="2072,759,2069,762,2051,790,2043,817,2042,844,2044,871,2047,898,2046,927,2039,956,2021,986,1998,1007,1970,1022,1968,1017,1994,1003,2017,982,2034,954,2041,926,2042,899,2039,871,2036,844,2037,816,2046,787,2065,758,2068,755"/>
+<area shape="poly" id="edge79_Node000048_Node000034" title=" " alt="" coords="2124,699,2077,654,2048,631,2017,612,1990,600,1993,595,2020,607,2051,627,2081,650,2128,696"/>
+<area shape="poly" id="edge80_Node000048_Node000040" title=" " alt="" coords="2072,758,2069,762,2056,778,2049,795,2045,828,2041,862,2034,880,2021,898,1995,919,1967,934,1964,929,1992,914,2017,894,2029,877,2036,861,2039,827,2044,793,2051,776,2065,758,2069,754"/>
+</map>

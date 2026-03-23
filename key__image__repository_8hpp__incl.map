@@ -1,0 +1,19 @@
+<map id="include/pacs/storage/key_image_repository.hpp" name="include/pacs/storage/key_image_repository.hpp">
+<area shape="rect" id="Node000001" title="Repository for key image persistence using base_repository pattern." alt="" coords="249,5,445,45"/>
+<area shape="rect" id="Node000002" href="$key__image__record_8hpp.html" title="Key image record data structures for database operations." alt="" coords="63,93,243,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="305,48,209,90,207,85,303,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,181,80,207"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="249,39,190,48,132,60,83,76,65,85,53,95,43,111,39,130,40,168,35,168,33,129,38,109,49,92,62,81,81,71,130,55,189,42,248,34"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="231,181,289,207"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="337,47,310,95,273,170,269,167,306,92,333,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="319,93,507,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="364,44,392,81,388,84,359,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="531,101,629,126"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="399,43,537,94,535,99,397,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="653,101,715,126"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="445,41,541,62,642,91,648,93,646,98,641,96,540,68,444,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="120,181,187,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="156,134,156,167,151,167,151,134"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="128,136,72,175,69,171,125,131"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="181,131,234,171,231,175,178,136"/>
+</map>

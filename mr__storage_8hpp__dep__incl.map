@@ -1,0 +1,7 @@
+<map id="include/pacs/services/sop_classes/mr_storage.hpp" name="include/pacs/services/sop_classes/mr_storage.hpp">
+<area shape="rect" id="Node000001" title="MR Image Storage SOP Classes." alt="" coords="89,5,300,45"/>
+<area shape="rect" id="Node000002" href="$mr__storage_8cpp.html" title="Implementation of MR Image Storage SOP Class utilities." alt="" coords="5,93,187,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,56,120,95,116,91,161,52"/>
+<area shape="rect" id="Node000003" href="$mr__iod__validator_8cpp.html" title="Implementation of MR Image IOD Validator." alt="" coords="211,93,379,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,52,274,91,271,95,225,56"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="include/pacs/services/storage_commitment_scp.hpp" name="include/pacs/services/storage_commitment_scp.hpp">
+<area shape="rect" id="Node000001" title="DICOM Storage Commitment Push Model SCP service." alt="" coords="5,5,228,45"/>
+<area shape="rect" id="Node000002" href="$storage__commitment__scp_8cpp.html" title="Implementation of Storage Commitment Push Model SCP service." alt="" coords="32,93,201,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,59,119,93,114,93,114,59"/>
+</map>

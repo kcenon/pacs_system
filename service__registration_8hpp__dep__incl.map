@@ -1,0 +1,8 @@
+<map id="include/pacs/di/service_registration.hpp" name="include/pacs/di/service_registration.hpp">
+<area shape="rect" id="Node000001" title="ServiceContainer registration module for PACS services." alt="" coords="50,5,221,45"/>
+<area shape="rect" id="Node000002" href="$test__support_8hpp.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,93,153,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,58,94,95,89,92,113,56"/>
+<area shape="rect" id="Node000003" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="39,181,231,207"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="155,57,167,93,170,113,167,134,157,161,145,182,141,180,153,158,162,133,165,113,162,94,150,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,143,129,179,125,183,99,146"/>
+</map>

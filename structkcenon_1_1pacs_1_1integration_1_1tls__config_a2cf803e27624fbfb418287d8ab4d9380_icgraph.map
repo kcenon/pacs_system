@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration::tls_config::is_valid" name="kcenon::pacs::integration::tls_config::is_valid">
+<area shape="rect" id="Node000001" title="Check if TLS configuration is valid." alt="" coords="571,69,757,109"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1network__adapter.html#ae4e20da720d4b85a2eb43f4ed6b8886d" title=" " alt="" coords="305,37,503,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="557,79,503,72,504,67,557,74"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1network__adapter.html#a75da222418b6d2404a549887764e932d" title="Create a DICOM server using network_system." alt="" coords="285,101,523,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="557,105,523,109,523,104,557,100"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1DicomNetworkService.html#a38945cd81925c55f7a4c394d3140b7d1" title="Connect to a remote DICOM peer." alt="" coords="5,5,237,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="291,47,237,41,238,36,291,42"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1network__adapter.html#aa64187fa1dffb0d793c7aa4373c17b68" title="Connect to a remote DICOM peer (simplified overload)" alt="" coords="22,69,221,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="291,73,221,81,220,75,291,67"/>
+</map>

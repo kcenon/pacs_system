@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::job_manager::job_manager" name="kcenon::pacs::client::job_manager::job_manager">
+<area shape="rect" id="Node000001" title="Construct a job manager with custom configuration." alt="" coords="5,37,213,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a3185bcd96bcd8d9f7520b8106677cc30" title="Get current configuration." alt="" coords="261,5,424,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,40,247,36,248,41,214,46"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1di.html#a01ed2d5e51632e2000e83f89cff202d4" title="Get a shared null logger instance." alt="" coords="263,69,422,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,69,250,74,250,79,213,74"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::client::job_manager::resume_job" name="kcenon::pacs::client::job_manager::resume_job">
+<area shape="rect" id="Node000001" title="Resume a paused job." alt="" coords="5,29,204,69"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="252,29,397,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,47,238,47,238,52,204,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="284,30,281,20,288,10,302,5,325,3,350,6,364,13,362,18,349,11,325,8,304,10,291,15,286,21,289,28"/>
+</map>

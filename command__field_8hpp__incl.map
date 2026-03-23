@@ -1,0 +1,7 @@
+<map id="include/pacs/network/dimse/command_field.hpp" name="include/pacs/network/dimse/command_field.hpp">
+<area shape="rect" id="Node000001" title="DIMSE command field enumeration." alt="" coords="5,5,204,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="18,93,85,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,47,69,83,65,80,90,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="109,93,207,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="120,44,144,80,140,83,115,47"/>
+</map>

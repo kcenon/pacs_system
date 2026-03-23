@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::dicom_service_collector::collect_operation_metrics" name="kcenon::pacs::monitoring::dicom_service_collector::collect_operation_metrics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="240,5,439,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#ac7b93a38494c90ee23869424038f5459" title="Collect current DIMSE service metrics." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,35,192,35,192,30,226,30"/>
+</map>

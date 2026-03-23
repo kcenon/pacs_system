@@ -1,0 +1,9 @@
+<map id="include/pacs/network/pipeline/jobs/receive_network_io_job.hpp" name="include/pacs/network/pipeline/jobs/receive_network_io_job.hpp">
+<area shape="rect" id="Node000001" title="Network I/O receive job for Stage 1 of the pipeline." alt="" coords="142,5,303,60"/>
+<area shape="rect" id="Node000002" href="$pipeline__adapter_8hpp.html" title="Adapter for integrating pipeline with existing DICOM components." alt="" coords="5,115,224,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,71,137,117,133,113,182,68"/>
+<area shape="rect" id="Node000004" href="$receive__network__io__job_8cpp.html" title="Implementation of network I/O receive job." alt="" coords="248,108,413,163"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="263,68,304,106,301,110,259,72"/>
+<area shape="rect" id="Node000003" href="$pipeline__adapter_8cpp.html" title="Implementation of pipeline adapter." alt="" coords="34,211,195,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,169,117,211,112,211,112,169"/>
+</map>

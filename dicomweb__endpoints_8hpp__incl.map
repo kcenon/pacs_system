@@ -1,0 +1,17 @@
+<map id="include/pacs/web/endpoints/dicomweb_endpoints.hpp" name="include/pacs/web/endpoints/dicomweb_endpoints.hpp">
+<area shape="rect" id="Node000001" title="DICOMweb (WADO&#45;RS) API endpoints for REST server." alt="" coords="221,5,424,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="255,48,86,94,84,89,254,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,173,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="279,48,176,90,174,85,277,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="197,93,272,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="303,48,260,86,256,82,300,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="296,93,349,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="325,46,325,79,320,79,320,46"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="373,93,432,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="344,44,383,82,379,85,340,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="457,93,554,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="367,43,467,85,465,90,365,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="578,93,641,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="392,43,566,90,564,95,391,48"/>
+</map>

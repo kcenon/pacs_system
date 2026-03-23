@@ -1,0 +1,5 @@
+<map id="include/pacs/encoding/simd/simd_windowing.hpp" name="include/pacs/encoding/simd/simd_windowing.hpp">
+<area shape="rect" id="Node000001" title="SIMD optimizations for window/level (VOI LUT) application." alt="" coords="25,5,224,45"/>
+<area shape="rect" id="Node000002" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="5,93,244,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,59,127,93,122,93,122,59"/>
+</map>

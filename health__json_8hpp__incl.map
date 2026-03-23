@@ -1,0 +1,23 @@
+<map id="include/pacs/monitoring/health_json.hpp" name="include/pacs/monitoring/health_json.hpp">
+<area shape="rect" id="Node000001" title="JSON serialization for health check data structures." alt="" coords="275,5,453,45"/>
+<area shape="rect" id="Node000002" href="$health__status_8hpp.html" title="Health status data structures for PACS system monitoring." alt="" coords="155,93,293,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="332,48,258,89,256,84,329,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="275,48,209,68,144,96,98,126,61,159,58,155,95,122,141,91,207,63,273,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="408,167,467,192"/>
+<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="359,46,352,81,353,100,358,117,376,140,400,158,397,162,373,144,354,120,348,101,347,80,354,45"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="368,93,429,119"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="375,44,390,79,385,82,370,47"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="453,93,528,119"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="396,43,462,84,459,88,393,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="552,93,627,119"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="419,43,544,86,543,91,417,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="195,121,82,164,81,159,193,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,167,163,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="210,121,157,160,154,156,207,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="187,167,261,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="227,119,227,153,221,153,221,119"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="259,116,396,161,394,167,257,121"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="286,167,383,192"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="243,116,306,157,303,161,240,121"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::pipeline::dimse_process_job" name="kcenon::pacs::network::pipeline::dimse_process_job">
+<area shape="rect" id="Node000001" title="Job for processing DIMSE messages." alt="" coords="5,328,212,743"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__job__base.html" title="Base class for all pipeline jobs." alt="" coords="25,5,192,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,294,111,328,106,328,106,294"/>
+</map>

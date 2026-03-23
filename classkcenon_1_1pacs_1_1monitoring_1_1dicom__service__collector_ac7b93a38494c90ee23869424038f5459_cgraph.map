@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::dicom_service_collector::collect" name="kcenon::pacs::monitoring::dicom_service_collector::collect">
+<area shape="rect" id="Node000001" title="Collect current DIMSE service metrics." alt="" coords="5,45,192,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#a454450c19bcdded825a8772e2f38be2e" title=" " alt="" coords="240,5,439,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,55,226,49,227,54,192,60"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="246,84,433,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="192,85,233,92,232,97,192,90"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#a0e006c79ca854e3afdec1cc5d70315a3" title=" " alt="" coords="487,5,673,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="439,30,473,30,473,35,439,35"/>
+</map>

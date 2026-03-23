@@ -1,0 +1,45 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::set_affected_sop_class_uid" name="kcenon::pacs::network::dimse::dimse_message::set_affected_sop_class_uid">
+<area shape="rect" id="Node000001" title="Set the Affected SOP Class UID." alt="" coords="257,594,464,649"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a6ee8d2ae5c684829b158e88c11d8634d" title="Create a C&#45;ECHO request message." alt="" coords="14,29,201,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,581,353,481,346,417,334,348,315,277,288,207,253,141,207,83,193,71,196,67,211,79,258,138,293,204,320,275,339,346,351,416,359,480,363,580"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a8bc40cf7587e43eca40112263e47f8ce" title="Create a C&#45;ECHO response message." alt="" coords="11,117,204,157"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="355,580,346,495,322,385,303,328,278,271,247,218,207,171,192,159,195,155,211,167,251,215,283,268,308,326,328,384,351,494,360,580"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a891391eee55f557a6c6f168ff4123563" title="Create a C&#45;FIND request message." alt="" coords="18,205,197,245"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="351,581,337,511,311,425,292,380,268,336,241,295,208,259,191,248,194,243,211,255,245,292,273,333,297,377,316,423,342,510,356,580"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a75830195eec0d90814c18a4505ef226c" title="Create a C&#45;FIND response message." alt="" coords="14,293,201,333"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="345,582,327,528,298,465,258,402,234,373,208,347,190,336,193,331,211,343,238,369,263,399,303,463,332,526,350,580"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#abc6839efe3dd629e44f0d15c67be1517" title="Create a C&#45;STORE request message." alt="" coords="13,381,201,421"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="335,583,283,508,248,469,208,436,186,424,189,419,211,431,252,465,287,505,340,580"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#aa4c4a47176dccde8475c6dbda2a3f0b8" title="Create a C&#45;STORE response message." alt="" coords="10,469,205,509"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="312,588,263,555,208,524,180,512,182,507,210,519,266,550,315,583"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a1e827b723f58deb7878bec7c8454ece1" title="Create an N&#45;ACTION response message." alt="" coords="6,557,209,597"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="243,604,209,598,209,592,244,598"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a3601a47100e3fab498da07c0740b45ec" title="Create an N&#45;CREATE request message." alt="" coords="9,645,206,685"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="244,644,207,651,206,646,243,639"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#aa81f050485043725695748452e5c0ec4" title="Create an N&#45;CREATE response message." alt="" coords="5,733,209,773"/>
+<area shape="poly" id="edge17_Node000001_Node000010" title=" " alt="" coords="296,657,148,736,145,731,294,653"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#ad3f644303e58b2b32da6535c94667553" title="Create an N&#45;DELETE response message." alt="" coords="5,821,209,861"/>
+<area shape="poly" id="edge19_Node000001_Node000011" title=" " alt="" coords="332,661,279,724,211,787,153,824,150,819,208,783,275,720,328,658"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#aa5d014b759946c52108b00fe01abda8a" title="Create an N&#45;EVENT&#45;REPORT request message." alt="" coords="21,910,194,965"/>
+<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="345,662,293,764,255,822,211,875,188,895,163,912,160,908,185,891,207,871,251,819,288,762,340,660"/>
+<area shape="rect" id="Node000013" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a46117d12bf65ec0353ca4616d2fe0b12" title="Create an N&#45;EVENT&#45;REPORT response message." alt="" coords="21,1013,194,1067"/>
+<area shape="poly" id="edge23_Node000001_Node000013" title=" " alt="" coords="353,662,335,728,307,810,266,897,240,939,211,978,190,998,167,1015,164,1010,187,994,207,974,236,936,261,895,302,808,330,726,348,661"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#aefd2321ca83408ddb2766361bee73769" title="Create an N&#45;GET response message." alt="" coords="15,1116,199,1156"/>
+<area shape="poly" id="edge25_Node000001_Node000014" title=" " alt="" coords="358,663,346,747,321,856,301,915,277,973,247,1029,211,1080,188,1102,161,1118,159,1114,185,1098,207,1077,243,1026,272,971,296,913,315,854,341,746,353,662"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a1c967137c0648f28167057644a91e184" title="Create an N&#45;SET response message." alt="" coords="16,1204,199,1244"/>
+<area shape="poly" id="edge27_Node000001_Node000015" title=" " alt="" coords="361,663,353,762,345,825,331,894,312,966,286,1038,253,1107,211,1170,189,1191,164,1206,161,1202,186,1186,207,1166,249,1104,281,1036,307,965,326,893,339,824,348,761,356,663"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="151,18,135,11,107,8,83,10,68,15,63,21,65,28,60,30,57,20,65,10,82,5,107,3,137,6,153,13"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="151,106,135,99,107,96,83,98,68,103,63,109,65,116,60,118,57,108,65,98,82,93,107,91,137,94,153,101"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="151,194,135,187,107,184,83,186,68,191,63,197,65,204,60,206,57,196,65,186,82,181,107,179,137,182,153,189"/>
+<area shape="poly" id="edge8_Node000005_Node000005" title=" " alt="" coords="151,282,135,275,107,272,83,274,68,279,63,285,65,292,60,294,57,284,65,274,82,269,107,267,137,270,153,277"/>
+<area shape="poly" id="edge10_Node000006_Node000006" title=" " alt="" coords="151,370,135,363,107,360,83,362,68,367,63,373,65,380,60,382,57,372,65,362,82,357,107,355,137,358,153,365"/>
+<area shape="poly" id="edge12_Node000007_Node000007" title=" " alt="" coords="151,458,135,451,107,448,83,450,68,455,63,461,65,468,60,470,57,460,65,450,82,445,107,443,137,446,153,453"/>
+<area shape="poly" id="edge14_Node000008_Node000008" title=" " alt="" coords="151,546,135,539,107,536,83,538,68,543,63,549,65,556,60,558,57,548,65,538,82,533,107,531,137,534,153,541"/>
+<area shape="poly" id="edge16_Node000009_Node000009" title=" " alt="" coords="151,634,135,627,107,624,83,626,68,631,63,637,65,644,60,646,57,636,65,626,82,621,107,619,137,622,153,629"/>
+<area shape="poly" id="edge18_Node000010_Node000010" title=" " alt="" coords="151,722,135,715,107,712,83,714,68,719,63,725,65,732,60,734,57,724,65,714,82,709,107,707,137,710,153,717"/>
+<area shape="poly" id="edge20_Node000011_Node000011" title=" " alt="" coords="151,810,135,803,107,800,83,802,68,807,63,813,65,820,60,822,57,812,65,802,82,797,107,795,137,798,153,805"/>
+<area shape="poly" id="edge22_Node000012_Node000012" title=" " alt="" coords="150,899,134,892,107,889,85,891,70,895,63,902,63,910,58,910,58,900,67,891,84,885,107,883,136,886,152,894"/>
+<area shape="poly" id="edge24_Node000013_Node000013" title=" " alt="" coords="150,1002,134,994,107,991,85,993,70,998,63,1004,63,1013,58,1013,58,1002,67,994,84,988,107,986,136,989,152,997"/>
+<area shape="poly" id="edge26_Node000014_Node000014" title=" " alt="" coords="151,1104,135,1097,107,1095,83,1097,68,1101,63,1107,65,1115,60,1116,57,1106,65,1097,82,1091,107,1089,137,1092,153,1099"/>
+<area shape="poly" id="edge28_Node000015_Node000015" title=" " alt="" coords="151,1192,135,1185,107,1183,83,1185,68,1189,63,1195,65,1203,60,1204,57,1194,65,1185,82,1179,107,1177,137,1180,153,1187"/>
+</map>

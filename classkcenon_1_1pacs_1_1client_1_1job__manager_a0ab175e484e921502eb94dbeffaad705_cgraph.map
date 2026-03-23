@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::client::job_manager::delete_job" name="kcenon::pacs::client::job_manager::delete_job">
+<area shape="rect" id="Node000001" title="Delete a job." alt="" coords="5,35,196,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a10d1bb904da5b97af9fe9bb6d1b222c8" title="Cancel a job." alt="" coords="244,5,436,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,40,230,36,231,41,197,46"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="484,35,629,75"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="196,54,244,55,436,55,470,54,470,59,436,60,244,60,196,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="437,36,471,40,470,46,436,41"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="516,35,514,25,520,16,535,10,557,8,582,11,596,18,593,23,580,16,557,13,536,15,523,20,519,26,521,34"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::association::abort" name="kcenon::pacs::network::association::abort">
+<area shape="rect" id="Node000001" title="Abort the association immediately." alt="" coords="455,13,623,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#aa761dc665e84b67b914c1543ef075122" title="Handle a single association (runs in worker thread)" alt="" coords="236,5,407,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="441,35,407,35,407,30,441,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a63cb1f068d62f92ebe93ddd26dc23233" title="Simulate an incoming association request (for in&#45;memory testing)." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="222,35,188,35,188,30,222,30"/>
+</map>

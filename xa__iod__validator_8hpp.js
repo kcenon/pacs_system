@@ -1,0 +1,28 @@
+var xa__iod__validator_8hpp =
+[
+    [ "kcenon::pacs::services::validation::xa_validation_options", "structkcenon_1_1pacs_1_1services_1_1validation_1_1xa__validation__options.html", "structkcenon_1_1pacs_1_1services_1_1validation_1_1xa__validation__options" ],
+    [ "kcenon::pacs::services::validation::xa_iod_validator", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator" ],
+    [ "has_qca_calibration", "xa__iod__validator_8hpp.html#a8ede58a538e5cefc7d7c460072c9fd74", null ],
+    [ "is_valid_xa_dataset", "xa__iod__validator_8hpp.html#a370eed04cf556b79238cf22b8a1a9f54", null ],
+    [ "validate_xa_iod", "xa__iod__validator_8hpp.html#acabeff18a85e3a115c2d7912948f26d8", null ],
+    [ "cine_rate", "xa__iod__validator_8hpp.html#af8f2aa9a3340bf0fbbf9d8ad7b4f83b3", null ],
+    [ "distance_source_to_detector", "xa__iod__validator_8hpp.html#ac626f0923309dfc8ec49618b87b3ebcf", null ],
+    [ "distance_source_to_patient", "xa__iod__validator_8hpp.html#a17b0f314c0c17e7dee3f1ab7cfe3ae86", null ],
+    [ "exposure_time", "xa__iod__validator_8hpp.html#a882b0137d259614565622f25266df974", null ],
+    [ "field_of_view_dimensions", "xa__iod__validator_8hpp.html#afdca4602c4658d1b1746ef87c7e3cae9", null ],
+    [ "field_of_view_shape", "xa__iod__validator_8hpp.html#a882ef70a02ea9454661bfd44d8f80edf", null ],
+    [ "frame_time", "xa__iod__validator_8hpp.html#ad1a75974afdad77763399eee779db16c", null ],
+    [ "frame_time_vector", "xa__iod__validator_8hpp.html#adfa0993e767c8c16588cd409db942afc", null ],
+    [ "grid", "xa__iod__validator_8hpp.html#a63cde41d5ed2231fef501e4aad3e14b1", null ],
+    [ "imager_pixel_spacing", "xa__iod__validator_8hpp.html#a598bf5db80955e34ac5b15e64c2bdd29", null ],
+    [ "intensifier_size", "xa__iod__validator_8hpp.html#ad6fb4b181f13256704d535f1283aa03b", null ],
+    [ "kvp", "xa__iod__validator_8hpp.html#a980d1218a3f049cc6795e891cc6beb6f", null ],
+    [ "number_of_frames", "xa__iod__validator_8hpp.html#a1d0978abc7305e082a841af485c5abe3", null ],
+    [ "positioner_motion", "xa__iod__validator_8hpp.html#a9805fd3b66829352fc576d16d6e7c5cd", null ],
+    [ "positioner_primary_angle", "xa__iod__validator_8hpp.html#a69f7f3855b8b9e107bbdb28b8f108476", null ],
+    [ "positioner_primary_angle_increment", "xa__iod__validator_8hpp.html#a47b1949962ae33a38548782871f183df", null ],
+    [ "positioner_secondary_angle", "xa__iod__validator_8hpp.html#a1f460ea7e03392a1a62bc4b17b8cd518", null ],
+    [ "positioner_secondary_angle_increment", "xa__iod__validator_8hpp.html#aea7a5d19a0907b8655717106134f0135", null ],
+    [ "recommended_display_frame_rate", "xa__iod__validator_8hpp.html#a28aadef89970727c299eff4f34161ab0", null ],
+    [ "xray_tube_current", "xa__iod__validator_8hpp.html#a17d9a231ae65598c9b03626d55b94e11", null ]
+];

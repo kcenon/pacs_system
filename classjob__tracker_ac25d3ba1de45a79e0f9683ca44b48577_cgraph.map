@@ -1,0 +1,7 @@
+<map id="job_tracker::update_status" name="job_tracker::update_status">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,49,152,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#abab83a011fa6dddee2a05ff84f7a000c" title="Increment a counter metric." alt="" coords="212,5,444,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,56,198,49,199,54,152,61"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#a4af90da2821682faff7257af36f88abb" title="Record a timing measurement." alt="" coords="200,85,456,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,77,187,82,186,87,152,82"/>
+</map>

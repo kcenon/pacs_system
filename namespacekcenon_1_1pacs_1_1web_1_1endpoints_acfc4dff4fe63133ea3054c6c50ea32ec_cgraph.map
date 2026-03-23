@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::web::endpoints::register_jobs_endpoints_impl" name="kcenon::pacs::web::endpoints::register_jobs_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,126,168,181"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1client.html#af86d26f85a083f878347cc6ac1562f80" title="Parse job_priority from string." alt="" coords="216,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,124,162,89,215,55,228,48,231,53,217,60,165,93,120,128"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1client.html#a61fc650154e420b0f4b74c48b28250bb" title="Parse job_status from string." alt="" coords="220,69,399,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,127,225,111,227,116,169,133"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1client.html#a435968f7c89faf491af86f7a72a95912" title="Parse job_type from string." alt="" coords="225,133,393,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="168,151,211,151,211,156,168,156"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="234,221,385,261"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="157,178,246,214,244,219,155,183"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="234,309,385,349"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="116,179,162,224,218,271,261,300,258,304,214,275,158,228,112,183"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="268,222,265,212,272,202,287,197,309,195,335,198,349,205,347,210,334,203,309,200,288,202,275,207,271,213,273,220"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="268,310,265,300,272,290,287,285,309,283,335,286,349,293,347,298,334,291,309,288,288,290,275,295,271,301,273,308"/>
+</map>

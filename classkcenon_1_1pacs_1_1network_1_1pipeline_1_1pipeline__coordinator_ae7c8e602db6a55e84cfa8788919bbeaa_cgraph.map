@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_coordinator::submit_task" name="kcenon::pacs::network::pipeline::pipeline_coordinator::submit_task">
+<area shape="rect" id="Node000001" title="Submit a raw function to a stage (for simple tasks)" alt="" coords="5,22,196,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="244,29,389,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,47,230,47,230,52,196,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="276,30,274,20,280,10,295,5,317,3,342,6,356,13,353,18,340,11,317,8,296,10,283,15,279,21,281,28"/>
+</map>

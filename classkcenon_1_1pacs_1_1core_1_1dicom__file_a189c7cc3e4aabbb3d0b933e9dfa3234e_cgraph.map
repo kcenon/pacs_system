@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::core::dicom_file::save" name="kcenon::pacs::core::dicom_file::save">
+<area shape="rect" id="Node000001" title="Save the DICOM file to disk." alt="" coords="5,29,148,69"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="196,29,341,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,47,182,47,182,52,149,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="232,30,230,20,236,11,249,5,269,3,291,6,304,13,301,17,290,11,269,8,250,10,239,15,235,21,238,28"/>
+</map>

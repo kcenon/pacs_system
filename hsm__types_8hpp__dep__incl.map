@@ -1,0 +1,16 @@
+<map id="include/pacs/storage/hsm_types.hpp" name="include/pacs/storage/hsm_types.hpp">
+<area shape="rect" id="Node000001" title="Types for Hierarchical Storage Management (HSM)" alt="" coords="185,5,341,45"/>
+<area shape="rect" id="Node000002" href="$hsm__migration__service_8hpp.html" title="Background migration service for Hierarchical Storage Management." alt="" coords="391,181,598,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="301,51,355,91,471,179,468,183,352,95,298,56"/>
+<area shape="rect" id="Node000003" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="5,277,235,302"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="221,55,196,74,174,95,143,135,125,182,119,234,121,276,116,277,114,234,120,181,138,132,170,92,193,70,218,51"/>
+<area shape="rect" id="Node000005" href="$hsm__storage_8hpp.html" title="Hierarchical Storage Management (HSM) for multi&#45;tier DICOM storage." alt="" coords="185,93,341,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="265,59,265,93,260,93,260,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,227,170,279,169,274,399,222"/>
+<area shape="rect" id="Node000004" href="$hsm__migration__service_8cpp.html" title="Implementation of background migration service for HSM." alt="" coords="397,269,593,309"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="497,235,497,269,492,269,492,235"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="327,136,445,179,443,184,325,141"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="199,142,171,160,147,183,135,207,127,232,123,277,117,276,122,231,130,205,143,180,168,155,196,137"/>
+<area shape="rect" id="Node000006" href="$hsm__storage_8cpp.html" title="Implementation of Hierarchical Storage Management for multi&#45;tier storage." alt="" coords="158,189,367,214"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="265,147,265,188,260,188,260,147"/>
+</map>

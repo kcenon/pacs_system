@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::atna_audit_logger::build_user_authentication" name="kcenon::pacs::security::atna_audit_logger::build_user_authentication">
+<area shape="rect" id="Node000001" title="Build User Authentication audit message (login/logout)" alt="" coords="220,5,407,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a0766101d18d5ef7cbae3a3103c56c488" title="Audit a User Authentication event." alt="" coords="5,5,172,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,35,172,35,172,30,206,30"/>
+</map>

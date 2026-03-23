@@ -1,0 +1,7 @@
+<map id="include/pacs/web/endpoints/worklist_endpoints.hpp" name="include/pacs/web/endpoints/worklist_endpoints.hpp">
+<area shape="rect" id="Node000001" title="Worklist API endpoints for REST server." alt="" coords="106,5,309,45"/>
+<area shape="rect" id="Node000002" href="$worklist__endpoints_8cpp.html" title="Worklist API endpoints implementation." alt="" coords="5,93,201,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,56,128,95,125,91,172,52"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="225,101,400,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="243,52,300,98,296,102,240,56"/>
+</map>

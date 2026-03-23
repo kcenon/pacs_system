@@ -1,0 +1,16 @@
+<map id="include/pacs/encoding/compression/codec_factory.hpp" name="include/pacs/encoding/compression/codec_factory.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="317,5,548,45"/>
+<area shape="rect" id="Node000002" href="$service__registration_8hpp.html" title="ServiceContainer registration module for PACS services." alt="" coords="50,93,221,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="355,52,201,96,200,91,354,47"/>
+<area shape="rect" id="Node000005" href="$dicom__file_8cpp.html" title="Implementation of DICOM Part 10 file handling." alt="" coords="245,101,415,126"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="401,56,346,102,342,98,398,52"/>
+<area shape="rect" id="Node000006" href="$codec__factory_8cpp.html" title=" " alt="" coords="440,93,631,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="468,52,514,91,511,95,464,56"/>
+<area shape="rect" id="Node000007" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="655,101,893,126"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="521,46,729,98,728,103,520,51"/>
+<area shape="rect" id="Node000003" href="$test__support_8hpp.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,181,153,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,146,94,183,89,180,113,144"/>
+<area shape="rect" id="Node000004" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="39,269,231,295"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="155,145,167,181,170,201,167,222,157,249,145,270,141,268,153,246,162,221,165,201,162,182,150,147"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,231,129,267,125,271,99,234"/>
+</map>

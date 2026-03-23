@@ -1,0 +1,30 @@
+<map id="kcenon::pacs::monitoring::dicom_metrics_collector::do_collect" name="kcenon::pacs::monitoring::dicom_metrics_collector::do_collect">
+<area shape="rect" id="Node000001" title="Collect all DICOM metrics." alt="" coords="5,209,195,263"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#aa6e37a96fa92dd0fff3947d6c6143d03" title=" " alt="" coords="243,51,453,106"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,206,178,160,241,115,251,110,254,114,244,120,181,165,130,210"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#af335cbb6b7469b54d80b0b510d688dd2" title=" " alt="" coords="253,209,443,263"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="195,233,240,233,240,239,195,239"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#a3e9005b295fb607da783aad1c8ec35b1" title=" " alt="" coords="253,366,443,421"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="130,262,181,307,244,352,254,358,251,362,241,357,178,312,127,266"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#a685b28b031b224c56d7f1fab3e45c091" title=" " alt="" coords="253,287,443,342"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="188,261,249,280,247,286,186,266"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#a4ab0353275180140e849c11c556fa0f5" title=" " alt="" coords="253,130,443,185"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="186,206,247,186,249,192,188,211"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#acbc5540ffe955472022386121b12d0a3" title="Get association counters." alt="" coords="501,5,707,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="453,54,494,46,495,51,454,59"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#ae3d9751822284bd8a94aae63810ca347" title="Create a metric with common tags." alt="" coords="506,69,702,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="454,86,493,90,492,96,453,92"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="511,227,697,282"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="440,104,455,115,473,140,480,165,486,189,503,213,508,217,505,221,499,216,481,191,475,167,469,143,451,119,437,108"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="429,206,452,194,466,183,476,172,500,149,508,144,510,148,503,153,479,175,470,187,455,198,432,211"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="443,240,497,244,497,250,443,246"/>
+<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="431,364,452,352,476,332,500,310,536,287,539,291,503,314,480,336,455,357,433,368"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#a866e23fd5ce54a1a15930cd6cd0b5ad3" title=" " alt="" coords="509,324,699,393"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="443,378,495,371,496,376,443,383"/>
+<area shape="poly" id="edge13_Node000009_Node000005" title=" " alt="" coords="442,290,497,277,498,282,444,295"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="443,328,496,337,495,343,442,334"/>
+<area shape="poly" id="edge15_Node000010_Node000004" title=" " alt="" coords="442,135,492,125,493,130,443,140"/>
+<area shape="poly" id="edge16_Node000010_Node000005" title=" " alt="" coords="425,182,454,194,522,220,520,225,452,198,423,187"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a15873f4a2ed8d209437505cdab89b772" title="Get data transfer metrics." alt="" coords="511,163,697,203"/>
+<area shape="poly" id="edge17_Node000010_Node000011" title=" " alt="" coords="443,164,497,169,496,175,443,169"/>
+</map>

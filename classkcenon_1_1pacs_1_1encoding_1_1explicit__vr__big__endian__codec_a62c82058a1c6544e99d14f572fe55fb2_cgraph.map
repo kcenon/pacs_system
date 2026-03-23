@@ -1,0 +1,74 @@
+<map id="kcenon::pacs::encoding::explicit_vr_big_endian_codec::decode" name="kcenon::pacs::encoding::explicit_vr_big_endian_codec::decode">
+<area shape="rect" id="Node000001" title="Decode bytes to a dataset using Explicit VR Big Endian." alt="" coords="5,144,181,199"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a7fc7807941c90086306d2dda512dde5f" title="Decode a single element from bytes." alt="" coords="229,235,412,289"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,196,240,227,238,232,162,201"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding.html#ac4f5c3944a501fff782dfdc5cd10cfff" title="Reads a 16&#45;bit value from big&#45;endian bytes." alt="" coords="1043,27,1218,67"/>
+<area shape="poly" id="edge45_Node000001_Node000005" title=" " alt="" coords="166,142,229,121,372,78,485,48,600,28,749,11,872,3,926,5,995,11,1049,22,1048,27,994,17,926,10,872,8,750,17,601,33,486,54,374,83,230,126,168,147"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="235,407,406,447"/>
+<area shape="poly" id="edge43_Node000001_Node000026" title=" " alt="" coords="121,197,294,395,290,398,117,201"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a7f22500529c2f9331720002349de4694" title=" " alt="" coords="460,189,701,244"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="412,244,446,238,447,243,412,249"/>
+<area shape="poly" id="edge41_Node000002_Node000005" title=" " alt="" coords="340,233,390,176,423,147,459,121,529,86,604,61,682,43,760,32,836,27,908,26,1030,32,1030,37,907,31,836,32,760,37,683,48,606,66,531,91,461,126,426,151,394,180,344,236"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding.html#a1fd95bfd0d3625f0a35359675c2a5ae2" title="Reads a 32&#45;bit value from big&#45;endian bytes." alt="" coords="1043,175,1218,215"/>
+<area shape="poly" id="edge42_Node000002_Node000006" title=" " alt="" coords="413,281,531,301,678,314,757,315,837,311,917,301,994,282,1022,271,1050,256,1096,222,1099,227,1052,261,1025,276,995,287,918,306,838,316,757,321,677,319,530,306,412,286"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a3065568a0ef937629863b6ac2a88b674" title="Convert element value from big&#45;endian to little&#45;endian." alt="" coords="780,348,964,403"/>
+<area shape="poly" id="edge37_Node000002_Node000007" title=" " alt="" coords="373,287,415,306,461,322,539,341,620,354,766,369,766,374,619,359,538,346,459,327,413,311,371,292"/>
+<area shape="rect" id="Node000024" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa6eb56fd1ffc16dd50fb102224dcae6d" title="Parses a two&#45;character string to a vr_type." alt="" coords="493,418,668,458"/>
+<area shape="poly" id="edge38_Node000002_Node000024" title=" " alt="" coords="354,288,403,330,461,373,525,410,522,414,459,378,400,334,350,292"/>
+<area shape="rect" id="Node000025" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="483,482,679,522"/>
+<area shape="poly" id="edge40_Node000002_Node000025" title=" " alt="" coords="343,288,414,394,435,435,444,452,462,468,472,475,469,479,458,472,440,455,430,438,410,397,339,291"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#adb63ab221a9279dae68a5bd9e90152fe" title=" " alt="" coords="758,52,986,107"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="640,187,700,156,724,140,748,124,778,110,780,114,751,128,727,144,703,160,643,192"/>
+<area shape="poly" id="edge34_Node000003_Node000005" title=" " alt="" coords="701,194,843,162,919,141,994,116,1041,95,1084,72,1086,77,1043,100,996,121,921,146,844,167,702,199"/>
+<area shape="poly" id="edge35_Node000003_Node000006" title=" " alt="" coords="701,209,1029,197,1029,202,702,215"/>
+<area shape="poly" id="edge8_Node000003_Node000007" title=" " alt="" coords="634,242,810,339,807,343,631,247"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af5d554755e5a71cf427553bccecd8c83" title="Get mutable access to sequence items." alt="" coords="749,233,995,273"/>
+<area shape="poly" id="edge36_Node000003_Node000023" title=" " alt="" coords="702,229,736,233,735,239,701,234"/>
+<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="758,93,460,126,195,160,195,155,460,121,757,88"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="758,99,614,130,536,152,461,179,414,203,372,229,369,225,412,198,459,174,535,147,613,124,757,94"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="986,63,1029,57,1030,63,987,68"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="935,105,1074,167,1072,172,933,109"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a3f3f3e89fe288d6c26788fb9d6b37449" title="Convert element value from little&#45;endian to big&#45;endian." alt="" coords="1043,348,1219,403"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="964,373,1029,373,1029,378,964,378"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1encoding.html#a49b8055816e3d6480701e292a07be7dc" title="Swaps bytes in&#45;place for OD (Other Double) data." alt="" coords="1267,279,1441,319"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="1211,346,1281,321,1283,326,1213,351"/>
+<area shape="rect" id="Node000017" href="$namespacekcenon_1_1pacs_1_1encoding.html#aeff50fa6aa0b69173e68b56ec36bc2be" title="Swaps bytes in&#45;place for OL (Other Long) data." alt="" coords="1267,355,1441,395"/>
+<area shape="poly" id="edge22_Node000008_Node000017" title=" " alt="" coords="1219,373,1253,373,1253,378,1219,378"/>
+<area shape="rect" id="Node000020" href="$namespacekcenon_1_1pacs_1_1encoding.html#a75ae36b1a7d4edf0c29c04e5bd9b416a" title="Swaps bytes in&#45;place for OW (Other Word) data." alt="" coords="1267,431,1441,471"/>
+<area shape="poly" id="edge28_Node000008_Node000020" title=" " alt="" coords="1213,400,1283,425,1281,430,1211,405"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a869b54363374fad7a167722fc0187d25" title="Swap bytes in 64&#45;bit words using best available SIMD." alt="" coords="1489,267,1699,307"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="1441,292,1475,291,1476,296,1441,298"/>
+<area shape="poly" id="edge21_Node000010_Node000010" title=" " alt="" coords="1549,268,1547,258,1554,249,1570,243,1594,241,1622,244,1637,251,1635,256,1620,249,1594,246,1571,248,1557,253,1552,259,1554,266"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6033b8c73db95ad59f315d9dfcc47139" title="Check if AVX2 is available." alt="" coords="1755,291,1930,331"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="1699,295,1742,299,1742,304,1699,300"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a75897377c534bc5623c9a62858917125" title="Check if SSSE3 is available." alt="" coords="1755,355,1930,395"/>
+<area shape="poly" id="edge17_Node000010_Node000015" title=" " alt="" coords="1667,305,1700,317,1748,341,1766,348,1764,353,1746,346,1698,322,1665,310"/>
+<area shape="rect" id="Node000016" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd_1_1detail.html#a68e3ed9a85146dc88c7b7e82358dd354" title=" " alt="" coords="1747,212,1939,267"/>
+<area shape="poly" id="edge20_Node000010_Node000016" title=" " alt="" coords="1697,265,1733,258,1734,263,1698,270"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a7c58b0fc45c37eb282ea7181574b6bbf" title="Get cached SIMD features (singleton pattern)" alt="" coords="1987,279,2161,319"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="1930,304,1973,302,1973,307,1931,310"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25232bbf012acb7d93bf3eb6ed813914" title="Check if a specific feature is set." alt="" coords="1987,367,2161,407"/>
+<area shape="poly" id="edge15_Node000011_Node000014" title=" " alt="" coords="1906,329,2000,361,1998,366,1904,334"/>
+<area shape="rect" id="Node000013" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c5b859f9c8a8af24c8150f90171eb7" title="Detect available SIMD features at runtime." alt="" coords="2209,279,2384,319"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="2162,297,2196,297,2196,302,2162,302"/>
+<area shape="poly" id="edge16_Node000014_Node000014" title=" " alt="" coords="2033,368,2030,358,2037,349,2052,343,2074,341,2100,344,2114,351,2112,356,2098,349,2074,346,2053,348,2040,353,2035,359,2038,366"/>
+<area shape="poly" id="edge18_Node000015_Node000012" title=" " alt="" coords="1904,353,1998,321,2000,326,1906,358"/>
+<area shape="poly" id="edge19_Node000015_Node000014" title=" " alt="" coords="1931,377,1973,380,1973,385,1930,383"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a003331548250847e06a9ce09b900de24" title="Swap bytes in 32&#45;bit words using best available SIMD." alt="" coords="1489,355,1699,395"/>
+<area shape="poly" id="edge23_Node000017_Node000018" title=" " alt="" coords="1441,373,1476,373,1476,378,1441,378"/>
+<area shape="poly" id="edge24_Node000018_Node000011" title=" " alt="" coords="1672,353,1751,332,1752,337,1673,358"/>
+<area shape="poly" id="edge25_Node000018_Node000015" title=" " alt="" coords="1699,373,1742,373,1742,378,1699,378"/>
+<area shape="poly" id="edge27_Node000018_Node000018" title=" " alt="" coords="1549,356,1547,346,1554,337,1570,331,1594,329,1622,332,1637,339,1635,344,1620,337,1594,334,1571,336,1557,341,1552,347,1554,354"/>
+<area shape="rect" id="Node000019" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd_1_1detail.html#a9094cdfd3c3023b60417cbdfff36b63f" title=" " alt="" coords="1747,420,1939,475"/>
+<area shape="poly" id="edge26_Node000018_Node000019" title=" " alt="" coords="1665,393,1735,414,1734,419,1663,398"/>
+<area shape="rect" id="Node000021" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a91c69fbd13ffab681ee91a1647cb4460" title="Swap bytes in 16&#45;bit words using best available SIMD." alt="" coords="1489,443,1699,483"/>
+<area shape="poly" id="edge29_Node000020_Node000021" title=" " alt="" coords="1441,453,1476,455,1475,460,1441,458"/>
+<area shape="poly" id="edge30_Node000021_Node000011" title=" " alt="" coords="1641,441,1670,425,1697,405,1711,389,1720,373,1729,357,1745,341,1754,336,1757,340,1748,346,1733,361,1724,376,1716,392,1700,409,1673,430,1644,446"/>
+<area shape="poly" id="edge31_Node000021_Node000015" title=" " alt="" coords="1648,441,1746,405,1767,397,1769,402,1748,410,1649,446"/>
+<area shape="poly" id="edge33_Node000021_Node000021" title=" " alt="" coords="1549,444,1547,434,1554,425,1570,419,1594,417,1622,420,1637,427,1635,432,1620,425,1594,422,1571,424,1557,429,1552,435,1554,442"/>
+<area shape="rect" id="Node000022" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd_1_1detail.html#ac49dc968ce533a2876f756ae7ab662dd" title=" " alt="" coords="1747,499,1939,553"/>
+<area shape="poly" id="edge32_Node000021_Node000022" title=" " alt="" coords="1675,481,1734,496,1733,501,1673,486"/>
+<area shape="poly" id="edge39_Node000024_Node000024" title=" " alt="" coords="533,419,530,408,538,399,555,393,581,391,611,394,627,402,625,406,609,399,581,397,556,399,540,404,535,409,538,417"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="501,546,661,586"/>
+<area shape="poly" id="edge44_Node000026_Node000027" title=" " alt="" coords="344,446,395,489,427,512,461,532,488,543,486,548,459,537,424,517,392,493,341,450"/>
+</map>

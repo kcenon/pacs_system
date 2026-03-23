@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::web::dicomweb::parse_accept_header" name="kcenon::pacs::web::dicomweb::parse_accept_header">
+<area shape="rect" id="Node000001" title="Parse Accept header into structured format." alt="" coords="483,29,665,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="614,18,600,11,574,8,553,10,539,15,532,21,533,29,527,29,527,19,536,10,551,5,574,3,601,6,617,14"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="232,29,435,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="469,59,435,59,435,54,469,54"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,37,184,77"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="218,59,184,59,184,54,218,54"/>
+</map>

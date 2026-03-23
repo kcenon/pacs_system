@@ -1,0 +1,9 @@
+<map id="include/pacs/compat/time.hpp" name="include/pacs/compat/time.hpp">
+<area shape="rect" id="Node000001" title="Compatibility header for cross&#45;platform time functions." alt="" coords="295,5,451,45"/>
+<area shape="rect" id="Node000002" href="$audit__repository_8cpp.html" title="Implementation of the audit repository." alt="" coords="5,101,235,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="306,52,155,103,153,98,304,47"/>
+<area shape="rect" id="Node000003" href="$index__database_8cpp.html" title="Implementation of PACS index database." alt="" coords="259,101,487,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="376,59,376,100,371,100,371,59"/>
+<area shape="rect" id="Node000004" href="$worklist__repository_8cpp.html" title="Implementation of the worklist repository." alt="" coords="511,93,662,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="434,48,541,91,539,96,432,53"/>
+</map>

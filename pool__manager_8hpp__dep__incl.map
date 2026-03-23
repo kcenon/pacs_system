@@ -1,0 +1,7 @@
+<map id="include/pacs/core/pool_manager.hpp" name="include/pacs/core/pool_manager.hpp">
+<area shape="rect" id="Node000001" title="Centralized object pool management for DICOM objects." alt="" coords="133,5,300,45"/>
+<area shape="rect" id="Node000002" href="$pool__manager_8cpp.html" title="Implementation of centralized object pool management." alt="" coords="5,93,201,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,55,122,95,119,91,177,51"/>
+<area shape="rect" id="Node000003" href="$pacs-core_8cppm.html" title="C++20 module partition for DICOM core types." alt="" coords="226,93,434,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="257,51,315,91,312,95,254,55"/>
+</map>

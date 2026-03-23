@@ -1,0 +1,29 @@
+<map id="include/pacs/storage/sync_repository.hpp" name="include/pacs/storage/sync_repository.hpp">
+<area shape="rect" id="Node000001" title="Repository for sync persistence." alt="" coords="521,5,677,45"/>
+<area shape="rect" id="Node000002" href="$sync__types_8hpp.html" title="Types and structures for bidirectional DICOM synchronization." alt="" coords="263,101,460,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="547,48,407,99,405,94,546,43"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="395,181,469,207"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="581,48,455,174,451,170,578,44"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="493,181,552,207"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="592,47,536,170,531,168,588,45"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="577,181,674,207"/>
+<area shape="poly" id="edge14_Node000001_Node000009" title=" " alt="" coords="604,45,624,167,619,168,599,46"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="698,181,761,207"/>
+<area shape="poly" id="edge15_Node000001_Node000010" title=" " alt="" coords="614,44,678,132,711,169,707,173,674,135,609,47"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="687,93,875,133"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="640,43,730,85,728,90,638,48"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="900,101,977,126"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="677,39,778,62,889,91,897,94,896,99,887,96,777,67,676,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="314,129,86,184,85,178,313,124"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,181,167,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="329,129,179,179,178,174,327,123"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="192,181,259,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="343,128,259,177,256,172,340,124"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="283,181,370,207"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="359,127,340,170,335,168,354,125"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="374,124,414,169,410,173,370,128"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="386,124,488,173,486,178,384,128"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="400,123,575,175,573,180,399,129"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="423,123,685,178,684,184,422,129"/>
+</map>

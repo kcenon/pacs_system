@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::web::dicomweb::instance_record_to_dicom_json" name="kcenon::pacs::web::dicomweb::instance_record_to_dicom_json">
+<area shape="rect" id="Node000001" title="Convert an instance record to DicomJSON format for QIDO&#45;RS response." alt="" coords="483,29,683,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="624,18,609,11,583,8,560,10,546,15,540,21,540,29,534,29,535,19,543,10,559,5,583,3,611,6,627,14"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="232,29,435,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="469,59,435,59,435,54,469,54"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,37,184,77"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="218,59,184,59,184,54,218,54"/>
+</map>

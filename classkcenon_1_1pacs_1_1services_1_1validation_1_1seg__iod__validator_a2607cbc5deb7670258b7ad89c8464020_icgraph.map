@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::validate_single_segment" name="kcenon::pacs::services::validation::seg_iod_validator::validate_single_segment">
+<area shape="rect" id="Node000001" title=" " alt="" coords="749,38,944,107"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a9a27df45e09a2b7438113abc505e01d3" title=" " alt="" coords="489,38,701,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="736,75,702,75,702,70,736,70"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a9cc3938f8ab49df6f491abf98762504a" title="Validate a DICOM dataset against SEG IOD." alt="" coords="247,5,417,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,57,416,48,417,43,476,52"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a9d569b6f86f3bbf24b43c016c2ddbd3b" title="Validate segment sequence completeness." alt="" coords="223,84,441,139"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="476,93,442,98,441,93,475,88"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a74c19eea811465d44a121c7cda329931" title="Validate a SEG dataset with default options." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="234,35,175,35,175,30,234,30"/>
+</map>

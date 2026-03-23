@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::retrieve_scp::get_move_destination" name="kcenon::pacs::services::retrieve_scp::get_move_destination">
+<area shape="rect" id="Node000001" title="Get the Move Destination AE title from the request." alt="" coords="5,5,188,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a41497da33d6221d8af6239c948026fab" title="Get mutable reference to the command set." alt="" coords="236,5,420,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,30,222,30,222,35,188,35"/>
+</map>

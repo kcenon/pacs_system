@@ -1,0 +1,21 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1compression__codec.html" title="Abstract base class for image compression codecs." alt="" coords="5,261,255,301"/>
+<area shape="rect" id="Node000001" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1frame__deflate__codec.html" title="Frame&#45;level Deflate codec implementation (Supplement 244)." alt="" coords="303,5,560,45"/>
+<area shape="poly" id="edge7_Node000000_Node000001" title=" " alt="" coords="145,248,169,204,204,152,248,99,301,55,324,43,327,48,304,60,252,103,208,155,174,207,149,251"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1hevc__codec.html" title="HEVC/H.265 codec implementation for video&#45;encoded multi&#45;frame DICOM." alt="" coords="333,69,530,109"/>
+<area shape="poly" id="edge8_Node000000_Node000002" title=" " alt="" coords="154,249,216,183,257,148,301,119,331,106,334,111,304,124,260,153,220,187,158,253"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1htj2k__codec.html" title="High&#45;Throughput JPEG 2000 (HTJ2K) codec implementation." alt="" coords="332,133,531,173"/>
+<area shape="poly" id="edge9_Node000000_Node000003" title=" " alt="" coords="172,252,232,216,302,183,337,171,339,176,304,188,234,221,174,256"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html" title="JPEG 2000 codec implementation supporting both lossless and lossy modes." alt="" coords="318,197,545,237"/>
+<area shape="poly" id="edge10_Node000000_Node000004" title=" " alt="" coords="238,256,336,235,337,240,239,261"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec.html" title="JPEG Baseline (Process 1) codec implementation." alt="" coords="303,261,559,301"/>
+<area shape="poly" id="edge11_Node000000_Node000005" title=" " alt="" coords="268,279,303,279,303,284,268,284"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec.html" title="JPEG Lossless (Process 14, Selection Value 1) codec implementation." alt="" coords="305,325,558,365"/>
+<area shape="poly" id="edge12_Node000000_Node000006" title=" " alt="" coords="239,302,337,323,336,328,238,307"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html" title="JPEG&#45;LS codec implementation supporting both lossless and near&#45;lossless modes." alt="" coords="325,389,537,429"/>
+<area shape="poly" id="edge13_Node000000_Node000007" title=" " alt="" coords="174,306,234,342,304,375,339,387,337,392,302,380,232,346,172,311"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html" title="JPEG XL codec implementation (Supplement 232)." alt="" coords="328,453,535,493"/>
+<area shape="poly" id="edge14_Node000000_Node000008" title=" " alt="" coords="158,310,220,376,260,410,304,439,331,451,328,456,301,444,257,414,216,380,154,314"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec.html" title="DICOM RLE Lossless codec implementation." alt="" coords="340,517,523,557"/>
+<area shape="poly" id="edge15_Node000000_Node000009" title=" " alt="" coords="149,312,174,356,208,408,252,460,304,503,341,520,339,525,301,508,248,463,204,411,169,359,145,315"/>
+</map>

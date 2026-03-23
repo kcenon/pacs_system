@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::remote_node_manager::config" name="kcenon::pacs::client::remote_node_manager::config">
+<area shape="rect" id="Node000001" title="Get the current configuration." alt="" coords="235,45,416,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a7744aa1cdda26440572c8dc8b67b5b30" title="Acquire an association from the pool." alt="" coords="5,5,187,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,57,187,51,187,46,222,52"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a49481d59516248a5ea079c55ec3668b4" title="Construct a remote node manager." alt="" coords="5,84,187,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,93,187,99,187,93,221,88"/>
+</map>

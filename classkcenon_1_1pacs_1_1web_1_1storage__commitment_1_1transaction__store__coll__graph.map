@@ -1,0 +1,31 @@
+<map id="kcenon::pacs::web::storage_commitment::transaction_store" name="kcenon::pacs::web::storage_commitment::transaction_store">
+<area shape="rect" id="Node000001" title="In&#45;memory store for commitment transactions." alt="" coords="33,1049,196,1224"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="29,899,113,965"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,964,95,1033,90,1034,75,965"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="137,877,418,987"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,989,197,1038,192,1034,232,985"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="49,135,127,200"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="60,202,42,226,25,253,13,284,8,316,8,748,11,762,20,777,52,807,97,838,148,868,146,872,94,843,48,812,16,780,6,764,3,749,3,316,8,282,20,251,37,223,56,199"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1web_1_1storage__commitment_1_1commitment__transaction.html" title="A storage commitment transaction record." alt="" coords="188,680,367,815"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="87,200,84,308,89,374,103,439,125,501,154,561,219,665,215,668,150,564,120,503,97,441,84,375,79,308,82,200"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1services_1_1sop__reference.html" title="Reference to a SOP Instance in a commitment request." alt="" coords="153,277,314,357"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="121,198,185,264,182,267,117,202"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="23,5,153,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="91,99,91,134,85,134,85,99"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="280,815,280,861,275,861,275,815"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="205,471,350,566"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="280,566,280,663,275,663,275,566"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="245,357,266,455,261,456,239,358"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="505,285,626,350"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="491,330,427,348,395,363,367,383,357,396,352,409,349,424,341,441,319,473,315,470,336,439,344,422,347,408,352,394,364,379,392,359,425,343,490,324"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="402,464,638,573"/>
+<area shape="poly" id="edge13_Node000011_Node000009" title=" " alt="" coords="558,364,535,465,530,463,552,363"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="615,135,638,200"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="617,180,598,200,581,225,570,269,564,268,576,223,594,196,613,177"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="734,285,861,350"/>
+<area shape="poly" id="edge16_Node000012_Node000010" title=" " alt="" coords="640,179,716,251,742,272,739,277,713,255,636,183"/>
+<area shape="poly" id="edge12_Node000006_Node000011" title=" " alt="" coords="499,575,474,618,442,658,414,682,383,702,380,697,410,677,438,654,470,615,495,572"/>
+<area shape="poly" id="edge14_Node000003_Node000012" title=" " alt="" coords="794,365,786,402,773,441,735,514,688,582,636,646,579,705,521,758,464,805,363,879,360,875,461,801,517,754,575,701,632,642,684,579,731,511,768,439,781,401,789,363"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="786,135,809,200"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="800,200,800,268,795,268,795,200"/>
+</map>

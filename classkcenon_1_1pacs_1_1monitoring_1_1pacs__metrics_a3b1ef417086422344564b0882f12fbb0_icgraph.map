@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::pacs_metrics::get_counter" name="kcenon::pacs::monitoring::pacs_metrics::get_counter">
+<area shape="rect" id="Node000001" title="Get operation counter for a specific DIMSE operation." alt="" coords="255,41,456,81"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a42a0088c8ed3e545e697d4868b0e8dcc" title="Get mutable operation counter for a specific DIMSE operation." alt="" coords="5,5,207,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="241,47,207,43,207,37,241,42"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a63048292b8aaa2f20f815544952af9f1" title="Record a generic DIMSE operation." alt="" coords="13,70,199,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="241,80,200,87,199,81,241,75"/>
+</map>

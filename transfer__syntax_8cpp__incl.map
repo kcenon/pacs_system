@@ -1,0 +1,19 @@
+<map id="src/encoding/transfer_syntax.cpp" name="src/encoding/transfer_syntax.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="379,5,537,45"/>
+<area shape="rect" id="Node000002" href="$transfer__syntax_8hpp.html" title=" " alt="" coords="221,93,391,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,48,352,89,350,84,423,43"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="415,101,501,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="461,46,461,87,455,87,455,46"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="525,101,581,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="481,44,531,89,528,93,477,48"/>
+<area shape="rect" id="Node000003" href="$byte__order_8hpp.html" title=" " alt="" coords="5,181,153,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="257,136,143,179,141,174,255,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="178,189,253,214"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="288,136,240,181,236,177,284,132"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="277,189,335,214"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="309,134,309,175,303,175,303,134"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="360,189,457,214"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="330,132,386,177,382,181,327,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="481,189,544,214"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="354,131,471,179,476,181,474,186,469,184,352,136"/>
+</map>

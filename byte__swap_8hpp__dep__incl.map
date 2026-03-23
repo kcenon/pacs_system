@@ -1,0 +1,7 @@
+<map id="include/pacs/encoding/byte_swap.hpp" name="include/pacs/encoding/byte_swap.hpp">
+<area shape="rect" id="Node000001" title="Byte swapping utilities for endianness conversion." alt="" coords="138,5,305,45"/>
+<area shape="rect" id="Node000002" href="$explicit__vr__big__endian__codec_8cpp.html" title="Implementation of Explicit VR Big Endian encoder/decoder." alt="" coords="5,93,197,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,56,129,95,126,91,182,51"/>
+<area shape="rect" id="Node000003" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="222,101,461,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,51,327,98,324,103,258,56"/>
+</map>

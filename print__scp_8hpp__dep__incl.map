@@ -1,0 +1,9 @@
+<map id="include/pacs/services/print_scp.hpp" name="include/pacs/services/print_scp.hpp">
+<area shape="rect" id="Node000001" title="DICOM Print Management SCP service (PS3.4 Annex H)" alt="" coords="91,5,252,45"/>
+<area shape="rect" id="Node000002" href="$print__scu_8hpp.html" title="DICOM Print Management SCU service (PS3.4 Annex H)" alt="" coords="5,93,167,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,57,107,95,103,91,141,53"/>
+<area shape="rect" id="Node000004" href="$print__scp_8cpp.html" title="Implementation of the Print Management SCP service (PS3.4 Annex H)" alt="" coords="191,93,325,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="202,53,241,91,237,95,198,57"/>
+<area shape="rect" id="Node000003" href="$print__scu_8cpp.html" title="Implementation of the Print Management SCU service (PS3.4 Annex H)" alt="" coords="19,181,153,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,147,89,181,83,181,83,147"/>
+</map>

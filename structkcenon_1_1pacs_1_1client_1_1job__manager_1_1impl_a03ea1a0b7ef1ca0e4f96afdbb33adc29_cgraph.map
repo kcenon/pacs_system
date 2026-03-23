@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::client::job_manager::impl::execute_store_job" name="kcenon::pacs::client::job_manager::impl::execute_store_job">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,163,165,217"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__progress.html#aebcd8d8b5c0e8e70d459949a5897f54a" title="Calculate completion percentage from item counts." alt="" coords="213,5,393,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,161,154,115,212,69,219,65,222,69,215,74,158,119,113,165"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a46309fb960bec6076acd0dd6e1bb63fa" title=" " alt="" coords="223,84,383,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,160,214,141,215,146,163,165"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a7f31993fd18603e90b611fe6ddfe842d" title=" " alt="" coords="223,163,383,217"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="166,187,210,187,210,193,166,193"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a0b26b245a7ae420eda5300099cf7ec93" title=" " alt="" coords="223,241,383,296"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="163,215,215,234,214,239,161,220"/>
+<area shape="rect" id="Node000010" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a7a749d2c848ee009c4cb70cb03ecd676" title=" " alt="" coords="223,320,383,375"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="113,215,158,261,215,306,222,311,219,315,212,311,154,265,109,219"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#af8c72d7d3e771befaca6d9109487b46a" title=" " alt="" coords="441,5,601,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="379,81,432,62,433,67,381,86"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#addc159a2dd92e1b5efaa1eff170fefb7" title=" " alt="" coords="441,84,601,139"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="384,109,428,109,428,114,384,114"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a3023b4ee476e60b7c0298e11ab1c6e82" title=" " alt="" coords="441,163,601,217"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="381,136,433,156,432,161,379,141"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1client.html#a2224cefe2f1791fceebbc935eb2d567e" title="Check if job status is a terminal state." alt="" coords="649,170,800,210"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="601,187,635,187,635,193,601,193"/>
+<area shape="rect" id="Node000011" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a44e1ee6fde91919f2fdb9254779005e1" title=" " alt="" coords="441,320,601,375"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="384,345,428,345,428,350,384,350"/>
+</map>

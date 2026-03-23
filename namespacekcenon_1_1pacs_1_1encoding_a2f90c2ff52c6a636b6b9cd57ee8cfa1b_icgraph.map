@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::fixed_length" name="kcenon::pacs::encoding::fixed_length">
+<area shape="rect" id="Node000001" title="Gets the fixed size of a VR if applicable." alt="" coords="228,91,403,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a2a3a337471b5afc15c77e9f764450e45" title="Decode a dataset from Explicit VR Big Endian format." alt="" coords="17,5,169,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,89,168,62,170,57,246,84"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a9a85c5108450869d8893c2ead8348e4d" title="Encode a dataset using Explicit VR Big Endian." alt="" coords="17,84,169,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,114,169,114,169,109,214,109"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding.html#afcc0b2677f39370c9a655c92a338f233" title="Checks if a VR has a fixed length." alt="" coords="5,163,180,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="241,138,156,166,155,161,239,133"/>
+</map>

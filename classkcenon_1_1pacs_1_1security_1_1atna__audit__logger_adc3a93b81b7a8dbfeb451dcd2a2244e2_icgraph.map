@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::atna_audit_logger::build_query" name="kcenon::pacs::security::atna_audit_logger::build_query">
+<area shape="rect" id="Node000001" title="Build Query audit message (C&#45;FIND, QIDO&#45;RS)" alt="" coords="220,13,451,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a4d61be4a91902ac14e823955635edd98" title="Audit a C&#45;FIND (Query) event." alt="" coords="5,5,172,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,35,172,35,172,30,206,30"/>
+</map>

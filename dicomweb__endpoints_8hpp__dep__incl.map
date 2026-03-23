@@ -1,0 +1,11 @@
+<map id="include/pacs/web/endpoints/dicomweb_endpoints.hpp" name="include/pacs/web/endpoints/dicomweb_endpoints.hpp">
+<area shape="rect" id="Node000001" title="DICOMweb (WADO&#45;RS) API endpoints for REST server." alt="" coords="350,5,553,45"/>
+<area shape="rect" id="Node000002" href="$pacs-web_8cppm.html" title="C++20 module partition for REST API and DICOMweb." alt="" coords="5,101,212,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,51,155,103,154,98,362,46"/>
+<area shape="rect" id="Node000003" href="$dicomweb__endpoints_8cpp.html" title="DICOMweb (WADO&#45;RS) API endpoints implementation." alt="" coords="237,93,447,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="418,56,368,95,365,91,415,52"/>
+<area shape="rect" id="Node000004" href="$wado__uri__endpoints_8cpp.html" title="WADO&#45;URI (Web Access to DICOM Objects — URI&#45;based) endpoint implementation." alt="" coords="471,93,650,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="488,52,538,91,535,95,485,56"/>
+<area shape="rect" id="Node000005" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="675,101,849,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="533,46,721,98,720,103,532,52"/>
+</map>

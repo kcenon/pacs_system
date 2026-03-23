@@ -1,0 +1,31 @@
+<map id="kcenon::pacs::network::association::build_context_map" name="kcenon::pacs::network::association::build_context_map">
+<area shape="rect" id="Node000001" title="Build presentation context map from accepted contexts." alt="" coords="1467,124,1635,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a39e558ad9d6fc62af27275c9ee0d73f9" title="Accept an incoming SCP association." alt="" coords="1251,95,1419,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1453,138,1418,132,1419,127,1453,132"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a511cee48045239577b7833f0b0df74d5" title="Process received A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="1251,160,1419,215"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1453,170,1419,176,1418,171,1453,165"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a6b0ad065cb9652fcc2ebd9a21f458861" title="Handle A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="984,8,1203,63"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1260,93,1176,65,1177,60,1261,88"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a63cb1f068d62f92ebe93ddd26dc23233" title="Simulate an incoming association request (for in&#45;memory testing)." alt="" coords="1002,88,1185,143"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="1237,118,1185,118,1185,113,1237,113"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#afff61fcb536357d6009ca730c3547bea" title="Process a complete PDU." alt="" coords="734,5,909,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="970,37,909,36,909,31,970,31"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1de6f1a790a073ccd311d427618fa7c3" title="Process accumulated buffer for complete PDUs." alt="" coords="477,5,659,60"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="720,35,659,35,659,30,720,30"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a7fdebfd5cd1481667fd9d96071e44056" title="Handle data received from session." alt="" coords="228,5,429,60"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="464,35,430,35,430,30,464,30"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a20b3f39bcb4fc5a1fbbc79579ca8033f" title="Feed received data to the handler." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="214,35,180,35,180,30,214,30"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a5c1540b1e9c3ee78b9557140a17af42e" title="Initiate an SCU association to a remote SCP." alt="" coords="1009,170,1177,210"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1237,191,1178,192,1178,186,1237,186"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a7744aa1cdda26440572c8dc8b67b5b30" title="Acquire an association from the pool." alt="" coords="731,84,912,139"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="1010,169,911,140,913,135,1011,164"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae943766ff6e20c22bd4df3fe973e4e8a" title="Prefetch a single study via C&#45;MOVE." alt="" coords="734,163,909,217"/>
+<area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="995,193,909,193,909,187,995,187"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a93d047266e4b059206949fa9e24625cc" title="Query remote PACS for prior studies." alt="" coords="734,241,909,296"/>
+<area shape="poly" id="edge12_Node000010_Node000013" title=" " alt="" coords="1011,216,910,246,908,241,1010,211"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="707,320,936,375"/>
+<area shape="poly" id="edge13_Node000010_Node000014" title=" " alt="" coords="1062,221,1006,267,937,311,913,322,911,317,935,306,1003,262,1058,217"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="479,327,657,367"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="693,350,657,350,657,345,693,345"/>
+</map>

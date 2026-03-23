@@ -1,0 +1,8 @@
+<map id="include/pacs/monitoring/collectors/dicom_service_collector.hpp" name="include/pacs/monitoring/collectors/dicom_service_collector.hpp">
+<area shape="rect" id="Node000001" title="DICOM DIMSE Service metrics collector." alt="" coords="64,5,251,60"/>
+<area shape="rect" id="Node000002" href="$pacs__monitor_8hpp.html" title="Unified PACS monitoring with IMonitor interface integration." alt="" coords="5,108,184,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,73,110,109,105,106,130,70"/>
+<area shape="rect" id="Node000003" href="$pacs-monitoring_8cppm.html" title="C++20 module partition for system monitoring." alt="" coords="32,196,283,221"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="185,71,199,108,201,129,199,149,186,176,170,197,166,194,181,173,193,147,196,128,194,109,180,73"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,157,150,194,146,197,116,161"/>
+</map>

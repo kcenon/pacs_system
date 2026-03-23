@@ -1,0 +1,20 @@
+<map id="kcenon::pacs::services::retrieve_scu::perform_get" name="kcenon::pacs::services::retrieve_scu::perform_get">
+<area shape="rect" id="Node000001" title="Internal C&#45;GET implementation." alt="" coords="1121,91,1320,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a773ca88f41bd9d30ee899c140efe2bbe" title="Perform a C&#45;GET operation with raw dataset." alt="" coords="904,91,1073,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1107,114,1073,114,1073,109,1107,109"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a027e7deaf6e070bf225a041fcc3b6edf" title="Retrieve a single instance by SOP Instance UID." alt="" coords="665,5,835,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="914,90,833,63,834,58,915,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a18b40be58bf8a06ebe49541fda6cebb0" title="Retrieve a series by Series Instance UID." alt="" coords="665,84,835,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="890,114,835,114,835,109,890,109"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a52b043a657f11e3702c45daf444dcbb3" title="Retrieve a study by Study Instance UID." alt="" coords="644,163,856,203"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="909,138,818,166,816,161,908,133"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a095befda2fd63841cfc331d77375c95f" title=" " alt="" coords="429,84,589,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="652,114,589,114,589,109,652,109"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#acd8de41a0c6c011d49f906aa819bcfdc" title=" " alt="" coords="213,84,373,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="415,114,374,114,374,109,415,109"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="5,84,165,139"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="200,114,166,114,166,109,200,109"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="669,162,588,138,590,133,670,157"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae943766ff6e20c22bd4df3fe973e4e8a" title="Prefetch a single study via C&#45;MOVE." alt="" coords="421,163,596,217"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="631,189,596,190,596,185,630,184"/>
+</map>

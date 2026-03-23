@@ -1,0 +1,31 @@
+<map id="include/pacs/encoding/simd/simd_config.hpp" name="include/pacs/encoding/simd/simd_config.hpp">
+<area shape="rect" id="Node000001" title="SIMD configuration and CPU feature detection." alt="" coords="407,5,575,45"/>
+<area shape="rect" id="Node000002" href="$simd__photometric_8hpp.html" title="SIMD optimizations for photometric interpretation conversions." alt="" coords="661,181,869,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="534,51,736,179,734,183,531,55"/>
+<area shape="rect" id="Node000003" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="312,365,551,390"/>
+<area shape="poly" id="edge19_Node000001_Node000003" title=" " alt="" coords="590,34,702,54,760,69,813,89,856,113,873,128,885,143,893,161,896,180,893,201,883,223,868,245,853,262,819,282,731,312,676,331,619,346,514,367,513,362,618,341,674,326,729,307,817,278,849,257,864,242,878,220,888,199,891,180,888,162,881,146,869,131,853,118,810,93,758,74,701,59,589,39"/>
+<area shape="rect" id="Node000004" href="$simd__rle_8hpp.html" title="SIMD optimizations for RLE codec operations." alt="" coords="469,181,636,221"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="513,56,530,92,544,140,552,181,547,182,539,141,525,94,508,59"/>
+<area shape="rect" id="Node000006" href="$simd__types_8hpp.html" title="Platform&#45;specific SIMD type definitions and wrappers." alt="" coords="348,93,515,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="472,58,447,95,442,92,468,55"/>
+<area shape="rect" id="Node000007" href="$simd__utils_8hpp.html" title="Common SIMD utility functions." alt="" coords="5,181,172,221"/>
+<area shape="poly" id="edge17_Node000001_Node000007" title=" " alt="" coords="423,52,308,96,208,142,125,184,123,179,206,137,306,91,421,47"/>
+<area shape="rect" id="Node000010" href="$simd__windowing_8hpp.html" title="SIMD optimizations for window/level (VOI LUT) application." alt="" coords="196,181,395,221"/>
+<area shape="poly" id="edge18_Node000001_Node000010" title=" " alt="" coords="405,53,370,71,339,95,324,115,313,139,301,182,296,180,308,137,319,113,335,91,367,66,403,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="754,235,731,275,714,295,696,311,662,332,625,347,551,367,550,362,624,342,659,327,692,307,711,291,726,272,749,233"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="627,225,654,243,675,268,683,290,675,311,649,330,608,345,511,367,510,362,607,340,646,325,671,308,677,290,670,271,650,247,624,230"/>
+<area shape="rect" id="Node000005" href="$rle__codec_8cpp.html" title=" " alt="" coords="469,269,660,309"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="560,235,565,269,559,269,555,235"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="518,134,692,179,691,184,517,139"/>
+<area shape="poly" id="edge16_Node000006_Node000003" title=" " alt="" coords="434,147,434,364,429,364,429,147"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="471,139,527,179,524,183,468,143"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="344,139,164,184,163,179,342,134"/>
+<area shape="poly" id="edge14_Node000006_Node000010" title=" " alt="" coords="391,143,327,184,324,179,388,139"/>
+<area shape="poly" id="edge13_Node000007_Node000003" title=" " alt="" coords="145,224,237,267,413,362,410,367,234,272,143,229"/>
+<area shape="rect" id="Node000008" href="$byte__swap_8hpp.html" title="Byte swapping utilities for endianness conversion." alt="" coords="57,269,224,309"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="109,232,131,268,127,271,105,234"/>
+<area shape="poly" id="edge12_Node000008_Node000003" title=" " alt="" coords="218,311,393,362,392,367,217,316"/>
+<area shape="rect" id="Node000009" href="$explicit__vr__big__endian__codec_8cpp.html" title="Implementation of Explicit VR Big Endian encoder/decoder." alt="" coords="45,357,237,397"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="143,323,143,357,138,357,138,323"/>
+<area shape="poly" id="edge15_Node000010_Node000003" title=" " alt="" coords="321,231,424,363,420,366,316,234"/>
+</map>

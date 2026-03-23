@@ -1,0 +1,24 @@
+<map id="include/pacs/client/sync_types.hpp" name="include/pacs/client/sync_types.hpp">
+<area shape="rect" id="Node000001" title="Types and structures for bidirectional DICOM synchronization." alt="" coords="467,5,609,45"/>
+<area shape="rect" id="Node000002" href="$sync__manager_8hpp.html" title="Sync manager for bidirectional DICOM data synchronization." alt="" coords="464,93,612,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="541,59,541,93,535,93,535,59"/>
+<area shape="rect" id="Node000004" href="$sync__config__repository_8hpp.html" title="Repository for sync config records using base_repository pattern." alt="" coords="5,93,207,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="454,46,201,96,200,91,453,41"/>
+<area shape="rect" id="Node000006" href="$sync__conflict__repository_8hpp.html" title="Repository for sync conflict records using base_repository pattern." alt="" coords="231,93,440,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="482,53,381,96,379,91,480,48"/>
+<area shape="rect" id="Node000008" href="$sync__history__repository_8hpp.html" title="Repository for sync history records using base_repository pattern." alt="" coords="860,93,1067,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="624,41,871,91,870,96,623,46"/>
+<area shape="rect" id="Node000010" href="$sync__repository_8hpp.html" title="Repository for sync persistence." alt="" coords="636,93,792,133"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="590,49,677,91,674,96,588,54"/>
+<area shape="rect" id="Node000003" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="435,189,641,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="541,147,541,188,535,188,535,147"/>
+<area shape="rect" id="Node000005" href="$sync__config__repository_8cpp.html" title="Implementation of sync_config_repository using base_repository pattern." alt="" coords="19,181,193,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="109,147,109,181,103,181,103,147"/>
+<area shape="rect" id="Node000007" href="$sync__conflict__repository_8cpp.html" title="Implementation of sync_conflict_repository using base_repository pattern." alt="" coords="228,181,411,221"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="332,147,325,182,320,181,327,146"/>
+<area shape="rect" id="Node000009" href="$sync__history__repository_8cpp.html" title="Implementation of sync_history_repository using base_repository pattern." alt="" coords="917,181,1097,221"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="982,145,1000,180,995,182,977,147"/>
+<area shape="poly" id="edge10_Node000010_Node000003" title=" " alt="" coords="664,142,563,191,560,186,662,137"/>
+<area shape="rect" id="Node000011" href="$sync__repository_8cpp.html" title="Implementation of the sync repository for sync persistence." alt="" coords="666,189,893,214"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="739,143,772,187,768,190,735,146"/>
+</map>

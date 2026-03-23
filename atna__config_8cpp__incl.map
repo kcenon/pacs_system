@@ -1,0 +1,30 @@
+<map id="src/security/atna_config.cpp" name="src/security/atna_config.cpp">
+<area shape="rect" id="Node000001" title="Implementation of ATNA audit configuration management." alt="" coords="646,5,849,31"/>
+<area shape="rect" id="Node000002" href="$atna__config_8hpp.html" title="Configuration management for ATNA audit logging." alt="" coords="483,79,625,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="720,33,614,76,612,71,718,28"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="649,86,734,111"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="741,32,710,76,705,73,737,29"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="758,86,849,111"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="758,29,789,73,785,76,753,32"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="873,86,947,111"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="772,28,875,78,873,83,770,33"/>
+<area shape="rect" id="Node000003" href="$atna__syslog__transport_8hpp.html" title="Syslog transport for ATNA audit messages (RFC 5424/5425/5426)" alt="" coords="279,167,474,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="513,121,416,164,414,159,510,116"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="482,240,541,265"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="551,120,521,227,516,226,546,118"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="549,167,647,192"/>
+<area shape="poly" id="edge10_Node000002_Node000010" title=" " alt="" coords="567,118,587,153,582,156,562,120"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="671,167,733,192"/>
+<area shape="poly" id="edge11_Node000002_Node000011" title=" " alt="" coords="591,116,669,158,667,162,588,121"/>
+<area shape="rect" id="Node000004" href="$result_8hpp.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="123,240,276,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="349,194,242,237,240,232,347,190"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="301,240,367,265"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="372,194,350,230,346,227,367,191"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="391,240,458,265"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="387,191,412,227,407,230,382,194"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="400,190,478,231,476,236,397,194"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,313,193,353"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="186,268,136,307,133,303,183,263"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="218,313,383,353"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="216,263,267,303,264,307,213,268"/>
+</map>

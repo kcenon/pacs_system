@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::services::ups_watch_scu::subscribe" name="kcenon::pacs::services::ups_watch_scu::subscribe">
+<area shape="rect" id="Node000001" title="Subscribe to UPS workitem events (N&#45;ACTION Type 3)" alt="" coords="5,185,204,225"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a03f3861af77f3295802b4a34da17d283" title=" " alt="" coords="252,177,421,232"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,202,238,202,238,207,205,207"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="487,5,658,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="358,175,405,123,435,95,468,70,478,64,481,69,471,75,439,99,409,127,361,179"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a82750b07c0240f829d3b8f060d81503a" title="Check if association is established and ready for DIMSE." alt="" coords="470,85,675,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="385,175,468,134,488,127,490,132,470,139,387,179"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1services_1_1ups__result.html#a4fcf2c4c6d0b5cae9771ad743735dc99" title="Check if the operation was successful." alt="" coords="485,149,660,189"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="421,189,471,181,472,187,422,194"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#aa82347bf73c5f78e4a637567bd373e68" title=" " alt="" coords="488,213,657,268"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="422,215,475,223,474,228,421,220"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1association.html#ac110e6ef4ad511fc13481475bd5ef79a" title="Receive a DIMSE message." alt="" coords="469,293,676,333"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="382,230,470,277,491,285,489,290,468,282,380,235"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="477,357,668,397"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="359,231,406,287,437,317,471,342,482,349,479,353,468,347,433,321,402,291,355,234"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="732,309,900,364"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="668,358,718,350,719,355,669,364"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="724,388,908,443"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="669,389,711,396,710,401,668,394"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="956,395,1145,435"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="908,413,943,413,943,418,908,418"/>
+</map>

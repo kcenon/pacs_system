@@ -1,0 +1,26 @@
+var mr__iod__validator_8hpp =
+[
+    [ "kcenon::pacs::services::validation::mr_validation_options", "structkcenon_1_1pacs_1_1services_1_1validation_1_1mr__validation__options.html", "structkcenon_1_1pacs_1_1services_1_1validation_1_1mr__validation__options" ],
+    [ "kcenon::pacs::services::validation::mr_iod_validator", "classkcenon_1_1pacs_1_1services_1_1validation_1_1mr__iod__validator.html", "classkcenon_1_1pacs_1_1services_1_1validation_1_1mr__iod__validator" ],
+    [ "is_valid_mr_dataset", "mr__iod__validator_8hpp.html#a47720c30d378a4a6c99fb5d23ea9ef8e", null ],
+    [ "validate_mr_iod", "mr__iod__validator_8hpp.html#afe5f6d62055025b3f7d0eb05557bca25", null ],
+    [ "echo_time", "mr__iod__validator_8hpp.html#a024d5f4d881dcdb4e4335726ce158faf", null ],
+    [ "echo_train_length", "mr__iod__validator_8hpp.html#a59255a2a14d3c59444dfb235290a6abc", null ],
+    [ "flip_angle", "mr__iod__validator_8hpp.html#a8e1de687e05f0cd16760e4e1fb15e2b5", null ],
+    [ "image_orientation_patient", "mr__iod__validator_8hpp.html#ae7591c12c27019fafbfdce60eab99428", null ],
+    [ "image_position_patient", "mr__iod__validator_8hpp.html#aae4f8b380471c3d7bb958459aee820e5", null ],
+    [ "inversion_time", "mr__iod__validator_8hpp.html#a619969131b5ac2fc585fe2c061999c75", null ],
+    [ "magnetic_field_strength", "mr__iod__validator_8hpp.html#a36aae4baa81a0185911837ed4af853a6", null ],
+    [ "mr_acquisition_type", "mr__iod__validator_8hpp.html#a22bd6068ea8108621d8bfb5310864fa8", null ],
+    [ "number_of_phase_encoding_steps", "mr__iod__validator_8hpp.html#a6518e648be15eaf457461f1915494250", null ],
+    [ "percent_phase_fov", "mr__iod__validator_8hpp.html#aa038cfa6ac142e4bb31c348679034a3e", null ],
+    [ "percent_sampling", "mr__iod__validator_8hpp.html#a4a6b6a4a20f28c825846ad7b3f68dd96", null ],
+    [ "pixel_bandwidth", "mr__iod__validator_8hpp.html#ab21ddf2ffe7f8bd4cf62a7161afc91f5", null ],
+    [ "repetition_time", "mr__iod__validator_8hpp.html#a61684c9d3912653a0e74d1a90bf8617e", null ],
+    [ "sar", "mr__iod__validator_8hpp.html#ac5368909a2c9ec501d3665ac42a4377c", null ],
+    [ "scan_options", "mr__iod__validator_8hpp.html#a9513e8799e8b561f945e809157345b7b", null ],
+    [ "scanning_sequence", "mr__iod__validator_8hpp.html#ad3a0efdb97ec4903e5cf40683b395bdc", null ],
+    [ "sequence_variant", "mr__iod__validator_8hpp.html#ad2a922ad4f98da8bb18606a6dbaedc4c", null ],
+    [ "slice_thickness", "mr__iod__validator_8hpp.html#a21fdb004bb4bb66a122e2103dd074563", null ],
+    [ "spacing_between_slices", "mr__iod__validator_8hpp.html#acd9e8daaddaf0f16f40e7d36e45a665d", null ]
+];

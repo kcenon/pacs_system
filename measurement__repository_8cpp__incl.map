@@ -1,0 +1,26 @@
+<map id="src/storage/measurement_repository.cpp" name="src/storage/measurement_repository.cpp">
+<area shape="rect" id="Node000001" title="Implementation of the measurement repository." alt="" coords="377,5,567,45"/>
+<area shape="rect" id="Node000002" href="$measurement__repository_8hpp.html" title="Repository for measurement persistence using base_repository pattern." alt="" coords="292,93,492,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="456,47,421,85,417,81,452,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="203,269,269,295"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="378,31,287,42,237,52,187,67,138,87,92,112,51,144,17,183,8,204,14,221,30,236,56,248,123,265,189,274,188,280,122,271,54,253,27,240,9,224,3,204,12,180,48,140,89,108,136,82,185,62,236,47,286,37,377,26"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="516,101,591,126"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="492,44,535,89,531,92,488,47"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="615,101,694,126"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="513,43,619,92,617,97,511,48"/>
+<area shape="rect" id="Node000003" href="$measurement__record_8hpp.html" title="Measurement record data structures for database operations." alt="" coords="499,181,699,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,131,542,174,540,179,436,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="481,269,556,295"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="409,132,504,257,500,260,404,135"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="637,269,696,295"/>
+<area shape="poly" id="edge8_Node000002_Node000006" title=" " alt="" coords="493,130,634,157,687,170,713,179,721,200,717,222,705,243,691,261,687,257,701,240,712,220,715,201,709,183,686,175,632,163,492,135"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="27,181,215,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="333,136,195,180,193,175,332,131"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="239,189,337,214"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="371,136,315,181,312,177,367,132"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="361,189,423,214"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="395,134,395,175,389,175,389,134"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="512,224,283,273,282,268,511,219"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="581,223,542,261,539,258,578,220"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="617,220,650,257,646,260,613,223"/>
+</map>

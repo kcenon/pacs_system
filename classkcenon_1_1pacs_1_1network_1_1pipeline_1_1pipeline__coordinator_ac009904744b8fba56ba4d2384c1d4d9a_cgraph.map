@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_coordinator::start" name="kcenon::pacs::network::pipeline::pipeline_coordinator::start">
+<area shape="rect" id="Node000001" title="Start the pipeline." alt="" coords="5,42,173,97"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1pipeline.html#a8ab98b2e6c1f1962f34e7399cb4dfa0e" title="Get the human&#45;readable name of a pipeline stage." alt="" coords="221,5,420,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,51,207,44,208,49,174,56"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="248,93,393,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,83,235,94,234,100,173,88"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="278,94,275,84,282,74,297,69,321,67,347,70,362,77,360,82,346,75,321,72,299,74,285,79,280,85,283,92"/>
+</map>

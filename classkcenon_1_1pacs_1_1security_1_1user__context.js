@@ -1,0 +1,25 @@
+var classkcenon_1_1pacs_1_1security_1_1user__context =
+[
+    [ "clock", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a006c63b2177798c3de58bb3351f26809", null ],
+    [ "time_point", "classkcenon_1_1pacs_1_1security_1_1user__context.html#ad2e38a7c1a1695aee3bedc8e675e619b", null ],
+    [ "user_context", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a35de66a67f6ba3f18f5a235aa3bdb4e9", null ],
+    [ "anonymous_context", "classkcenon_1_1pacs_1_1security_1_1user__context.html#aa90e95163459a47b6e5c8c29c1df230e", null ],
+    [ "created_at", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a13c4e69dfb176e771841cfdff0f8ccd6", null ],
+    [ "has_role", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a97b27c6b61558d1c94053e7b1a86b6f0", null ],
+    [ "is_valid", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a418b2f5ad52c980768d851b07352b396", null ],
+    [ "last_activity", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a21be418e78191d3980e0c686d377f192", null ],
+    [ "session_id", "classkcenon_1_1pacs_1_1security_1_1user__context.html#ac8c2db56da6dcc6259d5e5c1672a7c8a", null ],
+    [ "set_source_ae_title", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a9c67e6532bc8261372162485d9d0d785", null ],
+    [ "set_source_ip", "classkcenon_1_1pacs_1_1security_1_1user__context.html#adca1bc6cfadd8c358dc5fbf5fab8a3e8", null ],
+    [ "source_ae_title", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a00864002acca60b2dd77ef93ac4e9d32", null ],
+    [ "source_ip", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a0ed2704b7bb5fc6466c47fb0d02b9d2d", null ],
+    [ "system_context", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a62eae4f3351fc2a394282bfd87c987df", null ],
+    [ "touch", "classkcenon_1_1pacs_1_1security_1_1user__context.html#ad93515911d6381a06c343494ef364d90", null ],
+    [ "user", "classkcenon_1_1pacs_1_1security_1_1user__context.html#ae87bb1feabb279313adfbbd8f74c6115", null ],
+    [ "created_at_", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a7fa69226b08c00bd700d098fd7996172", null ],
+    [ "last_activity_", "classkcenon_1_1pacs_1_1security_1_1user__context.html#ad397ac452d428d78d55d6c9e28d468d2", null ],
+    [ "session_id_", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a9e06d3dd31a7d28721b4c581dea63607", null ],
+    [ "source_ae_title_", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a4f70a4c80438bd28f5a9464e2111633a", null ],
+    [ "source_ip_", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a995580fc823219bc368cdd44151e73b1", null ],
+    [ "user_", "classkcenon_1_1pacs_1_1security_1_1user__context.html#a07a42f27eaf674a8fbafb56e5c982a73", null ]
+];

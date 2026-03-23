@@ -1,0 +1,16 @@
+<map id="include/pacs/network/server_config.hpp" name="include/pacs/network/server_config.hpp">
+<area shape="rect" id="Node000001" title="DICOM Server configuration structures." alt="" coords="100,5,260,45"/>
+<area shape="rect" id="Node000002" href="$pdu__types_8hpp.html" title=" " alt="" coords="76,93,284,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,46,183,79,177,79,177,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="122,48,86,67,57,95,44,123,41,153,35,152,39,122,52,92,83,63,119,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="105,167,164,192"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="124,48,91,67,66,95,63,112,70,128,85,144,103,157,100,162,81,148,66,131,58,112,62,92,88,63,121,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="194,167,257,192"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="239,43,272,63,298,92,302,112,294,131,279,148,260,162,257,157,275,144,290,128,297,112,294,95,269,67,236,48"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="359,93,425,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="232,43,349,86,347,91,230,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="158,121,75,163,73,158,156,116"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="175,120,152,157,147,154,170,118"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="190,118,213,154,208,157,185,120"/>
+</map>

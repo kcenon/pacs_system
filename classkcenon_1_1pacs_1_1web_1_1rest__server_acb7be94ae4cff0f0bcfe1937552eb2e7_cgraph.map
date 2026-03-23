@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::web::rest_server::start" name="kcenon::pacs::web::rest_server::start">
+<area shape="rect" id="Node000001" title="Start the server (blocking)" alt="" coords="5,73,156,113"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a7711ddd2d6c52c2297775ca7e0c74cd1" title=" " alt="" coords="204,66,388,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,91,190,91,190,96,156,96"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="436,29,587,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="388,72,422,65,423,70,389,77"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web.html#afb727937f516358f97153f5337486476" title="Create success response with optional message." alt="" coords="436,117,587,157"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="389,110,423,117,422,122,388,115"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="471,30,469,20,475,10,490,5,511,3,536,6,550,13,547,18,535,11,511,8,491,10,479,15,474,21,476,28"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="471,118,469,108,475,98,490,93,511,91,536,94,550,101,547,106,535,99,511,96,491,98,479,103,474,109,476,116"/>
+</map>

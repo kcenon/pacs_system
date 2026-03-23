@@ -1,0 +1,42 @@
+<map id="include/pacs/workflow/auto_prefetch_service.hpp" name="include/pacs/workflow/auto_prefetch_service.hpp">
+<area shape="rect" id="Node000001" title="Automatic prefetch service for prior studies." alt="" coords="479,5,678,45"/>
+<area shape="rect" id="Node000002" href="$prefetch__config_8hpp.html" title="Configuration for automatic prefetch service." alt="" coords="314,101,464,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="538,48,428,98,425,93,536,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="57,181,124,207"/>
+<area shape="poly" id="edge14_Node000001_Node000003" title=" " alt="" coords="479,34,345,42,200,55,77,73,36,84,15,95,9,104,8,112,15,132,33,155,55,172,52,177,29,159,11,135,3,113,4,102,11,91,34,79,76,68,199,50,345,37,478,29"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="420,181,507,207"/>
+<area shape="poly" id="edge16_Node000001_Node000005" title=" " alt="" coords="567,47,481,172,477,169,563,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="148,181,222,207"/>
+<area shape="poly" id="edge19_Node000001_Node000006" title=" " alt="" coords="479,36,430,43,378,55,326,72,277,96,254,112,233,132,202,171,198,168,229,128,251,108,274,91,324,67,377,50,429,38,478,31"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="532,181,574,207"/>
+<area shape="poly" id="edge21_Node000001_Node000007" title=" " alt="" coords="578,46,559,168,554,167,573,45"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="246,181,305,207"/>
+<area shape="poly" id="edge22_Node000001_Node000008" title=" " alt="" coords="479,42,374,64,331,78,303,95,291,111,284,130,278,168,273,167,279,128,286,109,299,91,329,74,373,59,478,37"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="599,181,662,207"/>
+<area shape="poly" id="edge24_Node000001_Node000009" title=" " alt="" coords="587,45,625,168,620,169,582,47"/>
+<area shape="rect" id="Node000010" href="$worklist__record_8hpp.html" title="Modality Worklist (MWL) record data structures." alt="" coords="26,93,187,133"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="479,47,207,96,201,97,200,92,206,91,478,42"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="641,101,708,126"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="601,44,652,89,649,93,598,48"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="732,101,875,126"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="629,43,762,93,760,98,627,48"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="900,101,977,126"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="678,42,780,63,888,91,898,94,896,99,887,96,779,68,677,47"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1001,101,1065,126"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="678,33,826,54,909,70,990,91,997,93,996,98,988,96,908,76,825,60,677,39"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="1090,101,1152,126"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="678,29,865,49,972,67,1078,91,1085,93,1084,98,1076,96,971,72,864,54,678,35"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="1177,101,1241,126"/>
+<area shape="poly" id="edge23_Node000001_Node000016" title=" " alt="" coords="678,27,781,33,903,44,1035,63,1166,91,1174,93,1172,98,1164,96,1034,68,903,49,780,38,678,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="346,129,138,183,136,178,345,123"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="329,181,396,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="388,127,373,169,368,168,383,125"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="402,124,445,170,441,173,398,128"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="360,128,228,179,226,174,358,124"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="414,124,520,174,518,179,412,128"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="374,128,305,176,302,171,371,124"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="425,123,586,176,585,181,423,129"/>
+<area shape="poly" id="edge10_Node000010_Node000003" title=" " alt="" coords="105,134,98,168,93,167,100,133"/>
+<area shape="poly" id="edge11_Node000010_Node000006" title=" " alt="" coords="127,132,165,170,162,173,123,135"/>
+<area shape="poly" id="edge12_Node000010_Node000008" title=" " alt="" coords="148,131,239,173,237,178,146,136"/>
+</map>

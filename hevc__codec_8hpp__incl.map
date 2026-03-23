@@ -1,0 +1,36 @@
+<map id="include/pacs/encoding/compression/hevc_codec.hpp" name="include/pacs/encoding/compression/hevc_codec.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="427,5,645,45"/>
+<area shape="rect" id="Node000002" href="$compression__codec_8hpp.html" title=" " alt="" coords="435,93,637,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="539,46,539,79,533,79,533,46"/>
+<area shape="rect" id="Node000003" href="$image__params_8hpp.html" title=" " alt="" coords="51,181,253,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="452,136,250,181,249,176,451,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,277,72,302"/>
+<area shape="poly" id="edge14_Node000002_Node000004" title=" " alt="" coords="435,124,195,147,93,164,58,173,41,183,31,201,28,222,33,263,28,264,22,222,26,199,37,179,56,168,91,158,194,141,434,119"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="120,277,179,302"/>
+<area shape="poly" id="edge17_Node000002_Node000005" title=" " alt="" coords="448,136,382,156,317,184,292,202,267,224,185,272,182,268,264,219,288,198,315,179,381,151,447,131"/>
+<area shape="rect" id="Node000006" href="$transfer__syntax_8hpp.html" title=" " alt="" coords="328,181,499,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="510,136,453,176,450,171,507,131"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="475,277,573,302"/>
+<area shape="poly" id="edge18_Node000002_Node000009" title=" " alt="" coords="537,134,528,263,523,263,532,133"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="597,277,659,302"/>
+<area shape="poly" id="edge19_Node000002_Node000010" title=" " alt="" coords="548,132,618,263,613,265,544,135"/>
+<area shape="rect" id="Node000011" href="$result_8hpp.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="625,189,778,214"/>
+<area shape="poly" id="edge11_Node000002_Node000011" title=" " alt="" coords="574,131,669,180,666,185,571,136"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="803,189,880,214"/>
+<area shape="poly" id="edge15_Node000002_Node000014" title=" " alt="" coords="616,131,791,179,800,182,799,187,790,184,615,136"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="904,189,957,214"/>
+<area shape="poly" id="edge16_Node000002_Node000015" title=" " alt="" coords="638,124,761,145,828,160,893,179,898,181,896,186,891,184,826,165,760,150,637,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="128,224,67,270,63,266,125,219"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="154,222,153,263,147,263,149,222"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="343,224,269,246,192,272,187,274,185,269,190,267,268,240,341,219"/>
+<area shape="rect" id="Node000007" href="$byte__order_8hpp.html" title=" " alt="" coords="203,269,351,309"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="385,224,320,264,317,260,382,219"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="376,277,451,302"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="416,222,416,263,411,263,411,222"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="440,219,499,266,496,270,436,224"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="463,219,585,267,590,269,588,274,583,272,461,224"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="683,269,871,309"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="714,212,753,257,749,261,710,216"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="896,269,1061,309"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="740,212,905,263,904,268,738,217"/>
+</map>
