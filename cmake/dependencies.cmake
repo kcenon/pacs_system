@@ -22,7 +22,12 @@ if(APPLE AND NOT ICU_ROOT)
     endif()
 endif()
 
-find_package(ICU REQUIRED COMPONENTS uc data)
+# Try CONFIG mode first (vcpkg provides ICUConfig.cmake),
+# then fall back to MODULE mode (system ICU via CMake's FindICU.cmake)
+find_package(ICU CONFIG QUIET COMPONENTS uc data)
+if(NOT ICU_FOUND)
+    find_package(ICU REQUIRED COMPONENTS uc data)
+endif()
 message(STATUS "Found ICU: ${ICU_VERSION}")
 
 # SQLite3 (for storage module)
