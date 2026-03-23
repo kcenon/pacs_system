@@ -152,7 +152,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
