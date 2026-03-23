@@ -27,7 +27,7 @@ Native and fetched dependencies
 - OpenJPH: BSD-2-Clause
 - fmt: MIT
 - Catch2: BSL-1.0
-- iconv: LGPL-2.1 (dynamic link required)
+- ICU: Unicode-3.0
 - libpng: libpng-2.0
 
 Optional SDKs
