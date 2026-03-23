@@ -38,11 +38,8 @@
 #include <array>
 #include <cstring>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <iconv.h>
-#endif
+#include <unicode/ucnv.h>
+#include <unicode/utypes.h>
 
 namespace kcenon::pacs::encoding {
 
@@ -354,94 +351,17 @@ const character_set_info* find_by_escape_sequence(
     return nullptr;
 }
 
-#ifdef _WIN32
-
-// Windows: use MultiByteToWideChar + WideCharToMultiByte
-std::string iconv_convert(std::string_view input,
-                          const character_set_info& charset) {
-    // Determine Windows code page
-    UINT code_page = CP_ACP;
-    if (charset.encoding_name == "EUC-KR") {
-        code_page = 949;
-    } else if (charset.encoding_name == "ISO-2022-JP") {
-        code_page = 50220;
-    } else if (charset.encoding_name == "GB2312") {
-        code_page = 936;
-    } else if (charset.encoding_name == "GB18030") {
-        code_page = 54936;
-    } else if (charset.encoding_name == "ISO-8859-1") {
-        code_page = 28591;
-    } else if (charset.encoding_name == "ISO-8859-2") {
-        code_page = 28592;
-    } else if (charset.encoding_name == "ISO-8859-5") {
-        code_page = 28595;
-    } else if (charset.encoding_name == "ISO-8859-6") {
-        code_page = 28596;
-    } else if (charset.encoding_name == "ISO-8859-7") {
-        code_page = 28597;
-    } else if (charset.encoding_name == "ISO-8859-8") {
-        code_page = 28598;
-    } else if (charset.encoding_name == "TIS-620") {
-        code_page = 874;
-    } else if (charset.encoding_name == "JIS_X0201") {
-        code_page = 50222;
-    } else if (charset.encoding_name == "ASCII" ||
-               charset.encoding_name == "UTF-8") {
-        return std::string(input);
-    }
-
-    // ISO-2022-JP is stateful: code page 50220 expects escape sequences.
-    // Re-wrap raw JIS bytes with ESC $ B ... ESC ( B for proper decoding.
-    std::string wrapped_input;
-    if (charset.encoding_name == "ISO-2022-JP") {
-        wrapped_input.append(charset.escape_sequence);
-        wrapped_input.append(input);
-        wrapped_input.append(esc_ir_6);
-    }
-    const auto& actual_data = (charset.encoding_name == "ISO-2022-JP")
-        ? std::string_view(wrapped_input) : input;
-
-    // Convert to wide char
-    int wide_len = MultiByteToWideChar(
-        code_page, 0, actual_data.data(), static_cast<int>(actual_data.size()),
-        nullptr, 0);
-    if (wide_len <= 0) {
-        return std::string(input);  // fallback
-    }
-
-    std::wstring wide(static_cast<size_t>(wide_len), L'\0');
-    MultiByteToWideChar(
-        code_page, 0, actual_data.data(), static_cast<int>(actual_data.size()),
-        wide.data(), wide_len);
-
-    // Convert wide char to UTF-8
-    int utf8_len = WideCharToMultiByte(
-        CP_UTF8, 0, wide.data(), wide_len, nullptr, 0, nullptr, nullptr);
-    if (utf8_len <= 0) {
-        return std::string(input);  // fallback
-    }
-
-    std::string result(static_cast<size_t>(utf8_len), '\0');
-    WideCharToMultiByte(
-        CP_UTF8, 0, wide.data(), wide_len,
-        result.data(), utf8_len, nullptr, nullptr);
-
-    return result;
-}
-
-#else
-
-// POSIX: use iconv
-std::string iconv_convert(std::string_view input,
-                          const character_set_info& charset) {
+// ICU-based encoding conversion: source encoding → UTF-8
+std::string icu_convert_to_utf8(std::string_view input,
+                                const character_set_info& charset) {
     if (charset.encoding_name == "ASCII" ||
         charset.encoding_name == "UTF-8") {
         return std::string(input);
     }
 
-    // ISO-2022-JP is a stateful encoding: iconv expects escape sequences
+    // ISO-2022-JP is a stateful encoding: ICU expects escape sequences
     // in the input. Since split_by_escape_sequences strips them, we must
-    // re-wrap the raw JIS bytes before calling iconv.
+    // re-wrap the raw JIS bytes before calling ucnv_convert.
     std::string wrapped_input;
     if (charset.encoding_name == "ISO-2022-JP") {
         wrapped_input.append(charset.escape_sequence);
@@ -452,160 +372,61 @@ std::string iconv_convert(std::string_view input,
         ? std::string_view(wrapped_input)
         : input;
 
-    iconv_t cd = iconv_open("UTF-8", charset.encoding_name.data());
-    if (cd == reinterpret_cast<iconv_t>(-1)) {
-        // Encoding not supported on this platform, return raw bytes
-        return std::string(input);
-    }
-
-    // iconv requires non-const input pointer
-    std::string input_buf(actual_input);
-    char* in_ptr = input_buf.data();
-    size_t in_left = input_buf.size();
-
     // Allocate output buffer (UTF-8 can be up to 4x the input size)
-    size_t out_size = actual_input.size() * 4 + 4;
-    std::string output(out_size, '\0');
-    char* out_ptr = output.data();
-    size_t out_left = out_size;
+    auto out_size = static_cast<int32_t>(actual_input.size() * 4 + 4);
+    std::string output(static_cast<size_t>(out_size), '\0');
 
-    size_t result = iconv(cd, &in_ptr, &in_left, &out_ptr, &out_left);
-    iconv_close(cd);
+    UErrorCode status = U_ZERO_ERROR;
+    int32_t result_len = ucnv_convert(
+        "UTF-8", charset.encoding_name.data(),
+        output.data(), out_size,
+        actual_input.data(), static_cast<int32_t>(actual_input.size()),
+        &status);
 
-    if (result == static_cast<size_t>(-1)) {
+    if (U_FAILURE(status)) {
         // Conversion failed, return raw bytes
         return std::string(input);
     }
 
-    output.resize(out_size - out_left);
+    output.resize(static_cast<size_t>(result_len));
     return output;
 }
 
-#endif
-
-#ifdef _WIN32
-
-std::string iconv_reverse_convert(std::string_view utf8_input,
+// ICU-based encoding conversion: UTF-8 → target encoding
+std::string icu_convert_from_utf8(std::string_view utf8_input,
                                    const character_set_info& charset) {
     if (charset.encoding_name == "ASCII" ||
         charset.encoding_name == "UTF-8") {
         return std::string(utf8_input);
     }
 
-    UINT code_page = CP_ACP;
-    if (charset.encoding_name == "EUC-KR") {
-        code_page = 949;
-    } else if (charset.encoding_name == "ISO-2022-JP") {
-        code_page = 50220;
-    } else if (charset.encoding_name == "GB2312") {
-        code_page = 936;
-    } else if (charset.encoding_name == "GB18030") {
-        code_page = 54936;
-    } else if (charset.encoding_name == "ISO-8859-1") {
-        code_page = 28591;
-    } else if (charset.encoding_name == "ISO-8859-2") {
-        code_page = 28592;
-    } else if (charset.encoding_name == "ISO-8859-5") {
-        code_page = 28595;
-    } else if (charset.encoding_name == "ISO-8859-6") {
-        code_page = 28596;
-    } else if (charset.encoding_name == "ISO-8859-7") {
-        code_page = 28597;
-    } else if (charset.encoding_name == "ISO-8859-8") {
-        code_page = 28598;
-    } else if (charset.encoding_name == "TIS-620") {
-        code_page = 874;
-    } else if (charset.encoding_name == "JIS_X0201") {
-        code_page = 50222;
-    }
+    auto out_size = static_cast<int32_t>(utf8_input.size() * 4 + 4);
+    std::string output(static_cast<size_t>(out_size), '\0');
 
-    // UTF-8 to wide char
-    int wide_len = MultiByteToWideChar(
-        CP_UTF8, 0, utf8_input.data(), static_cast<int>(utf8_input.size()),
-        nullptr, 0);
-    if (wide_len <= 0) {
+    UErrorCode status = U_ZERO_ERROR;
+    int32_t result_len = ucnv_convert(
+        charset.encoding_name.data(), "UTF-8",
+        output.data(), out_size,
+        utf8_input.data(), static_cast<int32_t>(utf8_input.size()),
+        &status);
+
+    if (U_FAILURE(status)) {
         return std::string(utf8_input);
     }
 
-    std::wstring wide(static_cast<size_t>(wide_len), L'\0');
-    MultiByteToWideChar(
-        CP_UTF8, 0, utf8_input.data(), static_cast<int>(utf8_input.size()),
-        wide.data(), wide_len);
+    output.resize(static_cast<size_t>(result_len));
 
-    // Wide char to target encoding
-    int target_len = WideCharToMultiByte(
-        code_page, 0, wide.data(), wide_len, nullptr, 0, nullptr, nullptr);
-    if (target_len <= 0) {
-        return std::string(utf8_input);
-    }
-
-    std::string result(static_cast<size_t>(target_len), '\0');
-    WideCharToMultiByte(
-        code_page, 0, wide.data(), wide_len,
-        result.data(), target_len, nullptr, nullptr);
-
-    // ISO-2022-JP: Windows code page 50220 includes escape sequences in output.
-    // Strip them since encode_from_utf8() adds its own.
-    if (charset.encoding_name == "ISO-2022-JP" && result.size() >= 6) {
-        auto esc_prefix = charset.escape_sequence;
-        auto esc_suffix = esc_ir_6;
-        bool has_prefix = (result.size() >= esc_prefix.size() &&
-            std::string_view(result).substr(0, esc_prefix.size()) == esc_prefix);
-        bool has_suffix = (result.size() >= esc_suffix.size() &&
-            std::string_view(result).substr(
-                result.size() - esc_suffix.size()) == esc_suffix);
-        if (has_prefix && has_suffix) {
-            result = result.substr(
-                esc_prefix.size(),
-                result.size() - esc_prefix.size() - esc_suffix.size());
-        }
-    }
-
-    return result;
-}
-
-#else
-
-std::string iconv_reverse_convert(std::string_view utf8_input,
-                                   const character_set_info& charset) {
-    if (charset.encoding_name == "ASCII" ||
-        charset.encoding_name == "UTF-8") {
-        return std::string(utf8_input);
-    }
-
-    iconv_t cd = iconv_open(charset.encoding_name.data(), "UTF-8");
-    if (cd == reinterpret_cast<iconv_t>(-1)) {
-        return std::string(utf8_input);
-    }
-
-    std::string input_copy(utf8_input);
-    char* in_ptr = input_copy.data();
-    size_t in_left = input_copy.size();
-
-    size_t out_size = utf8_input.size() * 4 + 4;
-    std::string output(out_size, '\0');
-    char* out_ptr = output.data();
-    size_t out_left = out_size;
-
-    size_t result = iconv(cd, &in_ptr, &in_left, &out_ptr, &out_left);
-    iconv_close(cd);
-
-    if (result == static_cast<size_t>(-1)) {
-        return std::string(utf8_input);
-    }
-
-    output.resize(out_size - out_left);
-
-    // ISO-2022-JP is stateful: iconv output includes escape sequences
+    // ISO-2022-JP is stateful: ICU output includes escape sequences
     // (ESC $ B ... ESC ( B). Since encode_from_utf8() adds its own escape
-    // sequences, strip the iconv-generated ones to avoid duplication.
+    // sequences, strip the ICU-generated ones to avoid duplication.
     if (charset.encoding_name == "ISO-2022-JP" && output.size() >= 6) {
         auto esc_prefix = charset.escape_sequence;
         auto esc_suffix = esc_ir_6;
         bool has_prefix = (output.size() >= esc_prefix.size() &&
-            output.substr(0, esc_prefix.size()) == esc_prefix);
+            std::string_view(output).substr(0, esc_prefix.size()) == esc_prefix);
         bool has_suffix = (output.size() >= esc_suffix.size() &&
-            output.substr(output.size() - esc_suffix.size()) == esc_suffix);
+            std::string_view(output).substr(
+                output.size() - esc_suffix.size()) == esc_suffix);
         if (has_prefix && has_suffix) {
             output = output.substr(
                 esc_prefix.size(),
@@ -615,8 +436,6 @@ std::string iconv_reverse_convert(std::string_view utf8_input,
 
     return output;
 }
-
-#endif
 
 }  // anonymous namespace
 
@@ -806,7 +625,7 @@ std::string convert_to_utf8(
         return std::string(text);
     }
 
-    return iconv_convert(text, charset);
+    return icu_convert_to_utf8(text, charset);
 }
 
 std::string decode_to_utf8(
@@ -900,7 +719,7 @@ std::string convert_from_utf8(
         return std::string(utf8_text);
     }
 
-    return iconv_reverse_convert(utf8_text, charset);
+    return icu_convert_from_utf8(utf8_text, charset);
 }
 
 std::string encode_from_utf8(

@@ -80,7 +80,7 @@ struct character_set_info {
     std::string_view iso_ir;           ///< ISO-IR designation (e.g., "ISO-IR 149")
     bool uses_code_extensions;         ///< true if ISO 2022 escape sequences are used
     std::string_view escape_sequence;  ///< Raw escape sequence bytes (empty if none)
-    std::string_view encoding_name;    ///< Platform encoding name for iconv (e.g., "EUC-KR")
+    std::string_view encoding_name;    ///< ICU converter name (e.g., "EUC-KR")
     bool is_multi_byte;               ///< true if characters can be multi-byte
 };
 
@@ -224,7 +224,7 @@ struct text_segment {
  * @param charset The character set of the source bytes
  * @return UTF-8 encoded string
  *
- * Uses platform iconv for encoding conversion. Falls back to
+ * Uses ICU (ucnv_convert) for encoding conversion. Falls back to
  * raw bytes if conversion fails.
  */
 [[nodiscard]] std::string convert_to_utf8(

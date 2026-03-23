@@ -45,7 +45,7 @@
 | SOUP-015 | [OpenJPH](https://github.com/aous72/OpenJPH) | Aous Naman | 0.18.2 | BSD-2-Clause | HTJ2K (High Throughput JPEG 2000) codec | B | None |
 | SOUP-016 | [fmt](https://github.com/fmtlib/fmt) | Victor Zverovich | 10.2.1 | MIT | String formatting library | A | None |
 | SOUP-017 | [Catch2](https://github.com/catchorg/Catch2) | Catch2 Authors | v3.4.0 | BSL-1.0 | Unit test framework (test only) | A | None |
-| SOUP-018 | [iconv](https://www.gnu.org/software/libiconv/) | GNU Project | System-provided | LGPL-2.1 | Character set conversion (DICOM Specific Character Set) | B | Dynamic linking required for LGPL compliance |
+| SOUP-018 | [ICU](https://icu.unicode.org/) | Unicode Consortium | vcpkg baseline | Unicode-3.0 | Character set conversion (DICOM Specific Character Set) | B | None |
 | SOUP-019 | [libpng](http://www.libpng.org/) | PNG Development Group | System-provided | libpng-2.0 | PNG image output | A | None |
 
 ### Optional Cloud SDKs (Disabled by Default)
@@ -114,10 +114,9 @@ When updating any SOUP dependency:
 | BSL-1.0 | No | Include license text |
 | Apache-2.0 | No | Include license text and NOTICE when required |
 | Public Domain | No | Preserve provenance |
-| LGPL-2.1 | Weak | Dynamic linking required (see #879) |
+| Unicode-3.0 | No | Include copyright notice |
 | libpng-2.0 | No | Include copyright notice |
 | IJG | No | Include copyright notice |
 
 > **GPL contamination**: None detected. All dependencies are permissively licensed.
-> **LGPL note**: iconv (SOUP-018) uses LGPL-2.1; dynamic linking compliance verified in #879.
 > **Distribution note**: the product-level third-party inventory is maintained in [LICENSE-THIRD-PARTY](../LICENSE-THIRD-PARTY).
