@@ -14,14 +14,14 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         storage  PACS_BUILD_STORAGE
         aws      PACS_WITH_AWS_SDK
         azure    PACS_WITH_AZURE_SDK
+        testing  PACS_BUILD_TESTS
+        testing  PACS_BUILD_BENCHMARKS
 )
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
-        -DPACS_BUILD_TESTS=OFF
         -DPACS_BUILD_EXAMPLES=OFF
-        -DPACS_BUILD_BENCHMARKS=OFF
         -DPACS_BUILD_SAMPLES=OFF
         -DPACS_WITH_COMMON_SYSTEM=ON
         -DPACS_WITH_CONTAINER_SYSTEM=ON
