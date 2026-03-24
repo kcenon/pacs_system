@@ -1,6 +1,6 @@
 {
   "name": "kcenon-pacs-system",
-  "version": "0.1.0",
+  "version-semver": "0.1.0",
   "port-version": 5,
   "description": "Modern C++20 PACS (Picture Archiving and Communication System) built on the kcenon ecosystem",
   "homepage": "https://github.com/kcenon/pacs_system",
