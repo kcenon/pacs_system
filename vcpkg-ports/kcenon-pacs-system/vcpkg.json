@@ -1,7 +1,7 @@
 {
   "name": "kcenon-pacs-system",
   "version": "0.1.0",
-  "port-version": 4,
+  "port-version": 5,
   "description": "Modern C++20 PACS (Picture Archiving and Communication System) built on the kcenon ecosystem",
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
@@ -85,6 +85,19 @@
         {
           "name": "crow",
           "version>=": "1.2.1"
+        }
+      ]
+    },
+    "testing": {
+      "description": "Build unit tests and benchmarks",
+      "dependencies": [
+        {
+          "name": "gtest",
+          "version>=": "1.14.0",
+          "features": ["gmock"]
+        },
+        {
+          "name": "benchmark"
         }
       ]
     }
