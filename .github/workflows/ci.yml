@@ -38,20 +38,23 @@ jobs:
             compiler: gcc
             cc: gcc
             cxx: g++
+            triplet: x64-linux
           - os: ubuntu-24.04
             compiler: clang
             cc: clang
             cxx: clang++
+            triplet: x64-linux
           # macOS: use explicit /usr/bin paths to ensure Apple Clang (Xcode)
           # is used instead of Homebrew LLVM Clang, which lacks std::format
           - os: macos-14
             compiler: clang
             cc: /usr/bin/clang
             cxx: /usr/bin/clang++
+            triplet: arm64-osx
           # Windows 2022 with MSVC for cross-platform compatibility
-          # Uses vcpkg for dependency management
           - os: windows-2022
             compiler: msvc
+            triplet: x64-windows
 
     steps:
     - name: Checkout pacs_system
@@ -85,24 +88,104 @@ jobs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Setup vcpkg (Windows)
-      if: runner.os == 'Windows'
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+    - name: Check architecture (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        if [ "$(uname -m)" = "aarch64" ]; then
+          echo "VCPKG_FORCE_SYSTEM_BINARIES=arm" >> $GITHUB_ENV
+        fi
 
-    - name: Install dependencies (Windows)
-      if: runner.os == 'Windows'
+    - name: Setup vcpkg
+      uses: kcenon/common_system/.github/actions/setup-vcpkg@main
+      with:
+        extra-cache-key: 'pacs-system'
+        manifest-dir: 'pacs_system'
+
+    - name: Cache vcpkg installed
+      uses: actions/cache@v4
+      id: vcpkg-installed
+      with:
+        path: ${{ github.workspace }}/pacs_system/vcpkg_installed
+        key: ${{ runner.os }}-${{ matrix.compiler }}-vcpkg-installed-${{ matrix.triplet }}-${{ hashFiles('pacs_system/vcpkg.json', 'pacs_system/vcpkg-configuration.json') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.compiler }}-vcpkg-installed-${{ matrix.triplet }}-
+
+    - name: Install dependencies with vcpkg (Unix)
+      if: runner.os != 'Windows' && steps.vcpkg-installed.outputs.cache-hit != 'true'
+      id: vcpkg_install_unix
+      continue-on-error: true
+      run: |
+        ${{ env.VCPKG_ROOT }}/vcpkg install --x-manifest-root=pacs_system --x-install-root=${{ github.workspace }}/pacs_system/vcpkg_installed --triplet ${{ matrix.triplet }}
+
+    - name: Install dependencies with vcpkg (Windows)
+      if: runner.os == 'Windows' && steps.vcpkg-installed.outputs.cache-hit != 'true'
+      id: vcpkg_install_windows
+      continue-on-error: true
       shell: pwsh
       run: |
-        # Install dependencies via vcpkg
-        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
+        ${{ env.VCPKG_ROOT }}\vcpkg install --x-manifest-root=pacs_system --x-install-root=${{ github.workspace }}\pacs_system\vcpkg_installed --triplet ${{ matrix.triplet }}
 
-    - name: Configure CMake (Unix)
-      if: runner.os != 'Windows'
+    - name: Build application (vcpkg - Unix)
+      if: runner.os != 'Windows' && steps.vcpkg_install_unix.outcome != 'failure'
+      id: build_vcpkg_unix
+      continue-on-error: true
       working-directory: pacs_system
       run: |
-        cmake -B build \
+        rm -rf build
+        mkdir -p build
+        cd build
+
+        cmake .. \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=OFF \
+          -DPACS_BUILD_STORAGE=ON \
+          -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" \
+          -DCMAKE_C_COMPILER=${{ matrix.cc }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+
+        cmake --build . --parallel
+        ctest --output-on-failure --timeout 120
+
+    - name: Build application (vcpkg - Windows)
+      if: runner.os == 'Windows' && steps.vcpkg_install_windows.outcome != 'failure'
+      id: build_vcpkg_windows
+      continue-on-error: true
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
+        New-Item -ItemType Directory -Path build
+        cd build
+
+        cmake .. `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=OFF `
+          -DPACS_BUILD_STORAGE=ON `
+          -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" `
+          -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
+          -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+
+        cmake --build . --config Release --parallel
+        ctest -C Release --output-on-failure --timeout 120
+
+    - name: Build application (fallback - Unix)
+      if: runner.os != 'Windows' && (steps.vcpkg_install_unix.outcome == 'failure' || steps.build_vcpkg_unix.outcome != 'success')
+      working-directory: pacs_system
+      run: |
+        echo "vcpkg build failed. Falling back to system libraries..."
+        rm -rf build
+        mkdir -p build
+        cd build
+
+        cmake .. \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
@@ -113,14 +196,20 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.cc }} \
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
-    - name: Configure CMake (Windows)
-      if: runner.os == 'Windows'
+        cmake --build . --parallel
+        ctest --output-on-failure --timeout 120 || echo "Some tests failed"
+
+    - name: Build application (fallback - Windows)
+      if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
       working-directory: pacs_system
       shell: pwsh
       run: |
-        # Use literal "Release" instead of $env:BUILD_TYPE to avoid Ninja rule generation issues
-        # where PowerShell variable syntax ends up as literal string in generated .ninja files
-        cmake -B build `
+        Write-Host "vcpkg build failed. Falling back to system libraries..."
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
+        New-Item -ItemType Directory -Path build
+        cd build
+
+        cmake .. `
           -G Ninja `
           -DCMAKE_BUILD_TYPE=Release `
           -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
@@ -129,17 +218,11 @@ jobs:
           -DPACS_BUILD_EXAMPLES=OFF `
           -DPACS_BUILD_STORAGE=ON `
           -DVCPKG_MANIFEST_MODE=OFF `
-          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+          -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
+          -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
 
-    - name: Build
-      working-directory: pacs_system
-      run: cmake --build build --parallel
-
-    - name: Run tests
-      working-directory: pacs_system
-      run: |
-        cd build
-        ctest --output-on-failure --timeout 120 || echo "Some tests failed"
+        cmake --build . --config Release --parallel
+        ctest -C Release --output-on-failure --timeout 120 || Write-Host "Some tests failed"
 
     - name: Upload test results
       if: always()
