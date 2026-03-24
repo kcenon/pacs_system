@@ -112,17 +112,21 @@ jobs:
 
     - name: Install dependencies with vcpkg (Unix)
       if: runner.os != 'Windows' && steps.vcpkg-installed.outputs.cache-hit != 'true'
+      id: vcpkg_install_unix
+      continue-on-error: true
       run: |
         ${{ env.VCPKG_ROOT }}/vcpkg install --x-manifest-root=pacs_system --x-install-root=${{ github.workspace }}/pacs_system/vcpkg_installed --triplet ${{ matrix.triplet }}
 
     - name: Install dependencies with vcpkg (Windows)
       if: runner.os == 'Windows' && steps.vcpkg-installed.outputs.cache-hit != 'true'
+      id: vcpkg_install_windows
+      continue-on-error: true
       shell: pwsh
       run: |
         ${{ env.VCPKG_ROOT }}\vcpkg install --x-manifest-root=pacs_system --x-install-root=${{ github.workspace }}\pacs_system\vcpkg_installed --triplet ${{ matrix.triplet }}
 
     - name: Build application (vcpkg - Unix)
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && steps.vcpkg_install_unix.outcome != 'failure'
       id: build_vcpkg_unix
       continue-on-error: true
       working-directory: pacs_system
@@ -147,7 +151,7 @@ jobs:
         ctest --output-on-failure --timeout 120
 
     - name: Build application (vcpkg - Windows)
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && steps.vcpkg_install_windows.outcome != 'failure'
       id: build_vcpkg_windows
       continue-on-error: true
       working-directory: pacs_system
@@ -173,7 +177,7 @@ jobs:
         ctest -C Release --output-on-failure --timeout 120
 
     - name: Build application (fallback - Unix)
-      if: runner.os != 'Windows' && steps.build_vcpkg_unix.outcome != 'success'
+      if: runner.os != 'Windows' && (steps.vcpkg_install_unix.outcome == 'failure' || steps.build_vcpkg_unix.outcome != 'success')
       working-directory: pacs_system
       run: |
         echo "vcpkg build failed. Falling back to system libraries..."
@@ -196,7 +200,7 @@ jobs:
         ctest --output-on-failure --timeout 120 || echo "Some tests failed"
 
     - name: Build application (fallback - Windows)
-      if: runner.os == 'Windows' && steps.build_vcpkg_windows.outcome != 'success'
+      if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
       working-directory: pacs_system
       shell: pwsh
       run: |
