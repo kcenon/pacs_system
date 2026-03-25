@@ -11,11 +11,14 @@ vcpkg_from_github(
 
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
-        storage  PACS_BUILD_STORAGE
-        aws      PACS_WITH_AWS_SDK
-        azure    PACS_WITH_AZURE_SDK
-        testing  PACS_BUILD_TESTS
-        testing  PACS_BUILD_BENCHMARKS
+        storage   PACS_BUILD_STORAGE
+        codecs    PACS_BUILD_CODECS
+        ssl       PACS_WITH_OPENSSL
+        rest-api  PACS_WITH_REST_API
+        aws       PACS_WITH_AWS_SDK
+        azure     PACS_WITH_AZURE_SDK
+        testing   PACS_BUILD_TESTS
+        testing   PACS_BUILD_BENCHMARKS
 )
 
 vcpkg_cmake_configure(
