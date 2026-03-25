@@ -143,14 +143,14 @@ install(TARGETS ${PACS_SYSTEM_INSTALL_TARGETS}
 )
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pacs_systemConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfig.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pacs_system-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_system-config.cmake"
     INSTALL_DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_system-config-version.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
@@ -162,8 +162,8 @@ install(EXPORT pacs_system-targets
 )
 
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/pacs_systemConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_system-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/pacs_system-config-version.cmake"
     DESTINATION ${PACS_SYSTEM_CMAKE_INSTALL_DIR}
 )
 
