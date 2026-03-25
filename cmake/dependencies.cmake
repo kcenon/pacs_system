@@ -69,6 +69,7 @@ if(PACS_BUILD_STORAGE)
     endif()
 endif()
 
+if(PACS_BUILD_CODECS)
 # libjpeg-turbo (for JPEG compression codecs)
 message(STATUS "")
 message(STATUS "=== Finding libjpeg-turbo (for JPEG compression) ===")
@@ -265,25 +266,40 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
             SYMBOLIC)
     endif()
 endif()
-
-# OpenSSL (for digital signatures - Issue #191)
-message(STATUS "")
-message(STATUS "=== Finding OpenSSL (for digital signatures) ===")
-
-find_package(OpenSSL QUIET)
-
-if(OpenSSL_FOUND)
-    message(STATUS "Found system OpenSSL: ${OPENSSL_VERSION}")
-    set(PACS_OPENSSL_FOUND TRUE)
 else()
-    message(WARNING
-        "OpenSSL not found!\n"
-        "Digital signature features will be disabled.\n"
-        "\n"
-        "To enable digital signatures, install OpenSSL:\n"
-        "  - Ubuntu: sudo apt install libssl-dev\n"
-        "  - macOS: brew install openssl@3\n"
-        "  - Windows: vcpkg install openssl:x64-windows")
+    message(STATUS "")
+    message(STATUS "=== Image codecs disabled (PACS_BUILD_CODECS=OFF) ===")
+    set(PACS_JPEG_FOUND FALSE)
+    set(PACS_PNG_FOUND FALSE)
+    set(PACS_JPEG2000_FOUND FALSE)
+    set(PACS_JPEGLS_FOUND FALSE)
+    set(PACS_HTJ2K_FOUND FALSE)
+endif()
+
+if(PACS_WITH_OPENSSL)
+    # OpenSSL (for digital signatures - Issue #191)
+    message(STATUS "")
+    message(STATUS "=== Finding OpenSSL (for digital signatures) ===")
+
+    find_package(OpenSSL QUIET)
+
+    if(OpenSSL_FOUND)
+        message(STATUS "Found system OpenSSL: ${OPENSSL_VERSION}")
+        set(PACS_OPENSSL_FOUND TRUE)
+    else()
+        message(WARNING
+            "OpenSSL not found!\n"
+            "Digital signature features will be disabled.\n"
+            "\n"
+            "To enable digital signatures, install OpenSSL:\n"
+            "  - Ubuntu: sudo apt install libssl-dev\n"
+            "  - macOS: brew install openssl@3\n"
+            "  - Windows: vcpkg install openssl:x64-windows")
+        set(PACS_OPENSSL_FOUND FALSE)
+    endif()
+else()
+    message(STATUS "")
+    message(STATUS "=== OpenSSL disabled (PACS_WITH_OPENSSL=OFF) ===")
     set(PACS_OPENSSL_FOUND FALSE)
 endif()
 
@@ -717,53 +733,58 @@ if(PACS_WITH_NETWORK_SYSTEM)
     endif()
 endif()
 
-# Crow Web Framework (for REST API - Issue #194)
-message(STATUS "")
-option(PACS_FETCH_CROW "Fetch Crow web framework via FetchContent (disable for vcpkg builds)" ON)
+if(PACS_WITH_REST_API)
+    # Crow Web Framework (for REST API - Issue #194)
+    message(STATUS "")
+    option(PACS_FETCH_CROW "Fetch Crow web framework via FetchContent (disable for vcpkg builds)" ON)
 
-if(PACS_FETCH_CROW)
-    message(STATUS "=== Fetching Crow Web Framework (for REST API) ===")
+    if(PACS_FETCH_CROW)
+        message(STATUS "=== Fetching Crow Web Framework (for REST API) ===")
 
-    # Crow requires Asio. The network_system already fetched standalone ASIO.
-    # Point Crow to use the same ASIO headers.
-    if(DEFINED CACHE{network_system_asio_SOURCE_DIR})
-        set(ASIO_INCLUDE_DIR "${network_system_asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
-        message(STATUS "  Using ASIO from network_system: ${ASIO_INCLUDE_DIR}")
-    elseif(EXISTS "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include")
-        set(ASIO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include" CACHE PATH "" FORCE)
-        message(STATUS "  Using ASIO from build deps: ${ASIO_INCLUDE_DIR}")
-    else()
-        # Fallback: fetch standalone ASIO for Crow
-        message(STATUS "  Fetching standalone ASIO for Crow...")
+        # Crow requires Asio. The network_system already fetched standalone ASIO.
+        # Point Crow to use the same ASIO headers.
+        if(DEFINED CACHE{network_system_asio_SOURCE_DIR})
+            set(ASIO_INCLUDE_DIR "${network_system_asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+            message(STATUS "  Using ASIO from network_system: ${ASIO_INCLUDE_DIR}")
+        elseif(EXISTS "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include")
+            set(ASIO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/network_system_asio-src/asio/include" CACHE PATH "" FORCE)
+            message(STATUS "  Using ASIO from build deps: ${ASIO_INCLUDE_DIR}")
+        else()
+            # Fallback: fetch standalone ASIO for Crow
+            message(STATUS "  Fetching standalone ASIO for Crow...")
+            FetchContent_Declare(
+                asio
+                GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+                GIT_TAG asio-1-30-2
+                GIT_SHALLOW TRUE
+            )
+            FetchContent_MakeAvailable(asio)
+            set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
+        endif()
+
         FetchContent_Declare(
-            asio
-            GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-            GIT_TAG asio-1-30-2
+            Crow
+            GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
+            GIT_TAG v1.3.1  # Pinned release; compatible with ASIO 1.30+ io_context (IEC 62304 §8.1.2)
             GIT_SHALLOW TRUE
         )
-        FetchContent_MakeAvailable(asio)
-        set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include" CACHE PATH "" FORCE)
-    endif()
-
-    FetchContent_Declare(
-        Crow
-        GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-        GIT_TAG v1.3.1  # Pinned release; compatible with ASIO 1.30+ io_context (IEC 62304 §8.1.2)
-        GIT_SHALLOW TRUE
-    )
-    set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(CROW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
-    set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(Crow)
-    message(STATUS "  [OK] Crow (v1.3.1) fetched")
-else()
-    find_package(Crow CONFIG QUIET)
-    if(Crow_FOUND)
-        message(STATUS "  [OK] Crow found via find_package")
+        set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(CROW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
+        set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(Crow)
+        message(STATUS "  [OK] Crow (v1.3.1) fetched")
     else()
-        message(STATUS "  [SKIP] Crow not found and PACS_FETCH_CROW=OFF")
+        find_package(Crow CONFIG QUIET)
+        if(Crow_FOUND)
+            message(STATUS "  [OK] Crow found via find_package")
+        else()
+            message(STATUS "  [SKIP] Crow not found and PACS_FETCH_CROW=OFF")
+        endif()
     endif()
+else()
+    message(STATUS "")
+    message(STATUS "=== REST API disabled (PACS_WITH_REST_API=OFF) ===")
 endif()
 
 ##################################################

@@ -1,7 +1,7 @@
 {
   "name": "kcenon-pacs-system",
   "version-semver": "0.1.0",
-  "port-version": 5,
+  "port-version": 6,
   "description": "Modern C++20 PACS (Picture Archiving and Communication System) built on the kcenon ecosystem",
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
@@ -10,6 +10,8 @@
     "kcenon-common-system",
     "kcenon-container-system",
     "kcenon-network-system",
+    "kcenon-thread-system",
+    "icu",
     {
       "name": "vcpkg-cmake",
       "host": true

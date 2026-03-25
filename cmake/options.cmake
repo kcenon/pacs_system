@@ -38,6 +38,9 @@ option(PACS_WITH_AZURE_SDK "Enable Azure SDK integration for Blob storage" OFF)
 option(PACS_USE_MOCK_S3 "Use mock S3 client instead of AWS SDK (testing only)" OFF)
 option(PACS_WARNINGS_AS_ERRORS "Treat warnings as errors (disable in CI if dependency warnings occur)" ON)
 option(PACS_BUILD_MODULES "Build C++20 module version of pacs_system" OFF)
+option(PACS_BUILD_CODECS "Enable image compression codecs (JPEG, PNG, JPEG2000, JPEG-LS, HTJ2K)" ON)
+option(PACS_WITH_OPENSSL "Enable OpenSSL for digital signatures and TLS" ON)
+option(PACS_WITH_REST_API "Enable DICOMweb REST API via Crow HTTP framework" ON)
 
 # Prevent mock S3 from being used in Release builds
 if(PACS_USE_MOCK_S3 AND CMAKE_BUILD_TYPE STREQUAL "Release")
