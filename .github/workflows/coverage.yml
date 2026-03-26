@@ -101,7 +101,7 @@ jobs:
         lcov --list coverage.info || echo "No coverage records to display"
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         files: ./pacs_system/build/coverage.info
         flags: unittests
