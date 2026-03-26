@@ -11,6 +11,7 @@
     "kcenon-common-system",
     "kcenon-container-system",
     "kcenon-network-system",
+    "kcenon-thread-system",
     "icu"
   ],
   "overrides": [
