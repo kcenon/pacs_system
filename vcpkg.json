@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "kcenon-pacs-system",
   "version-semver": "0.1.0",
-  "port-version": 0,
+  "port-version": 6,
   "description": "Modern C++20 PACS implementation for DICOM medical imaging",
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
