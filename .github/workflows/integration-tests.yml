@@ -249,7 +249,7 @@ jobs:
           || echo "Some unit tests failed"
 
     - name: Upload Unit Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: unit-test-results-${{ matrix.os }}
@@ -654,7 +654,7 @@ jobs:
         PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/examples/integration_tests/test_data/certs
 
     - name: Upload Integration Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: integration-test-results-${{ matrix.os }}
@@ -924,7 +924,7 @@ jobs:
       timeout-minutes: 5
 
     - name: Upload Stability Smoke Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: stability-smoke-results-${{ matrix.os }}
@@ -1080,7 +1080,7 @@ jobs:
         PACS_STABILITY_QUERY_RATE: 2.0
 
     - name: Upload Stress Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: stress-test-results
