@@ -53,7 +53,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
 | **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer | ✅ Complete |
 
-**Test Coverage**: 1,980+ tests passing across 141+ test files
+**Test Coverage**: 1,980+ tests passing across 141+ test files | [![codecov](https://codecov.io/gh/kcenon/pacs_system/branch/main/graph/badge.svg)](https://codecov.io/gh/kcenon/pacs_system)
 
 > For detailed feature lists per phase, see [Features](docs/FEATURES.md).
 
