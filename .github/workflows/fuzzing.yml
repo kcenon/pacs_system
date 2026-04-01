@@ -1,0 +1,189 @@
+# Fuzzing Workflow for PACS System DICOM Parsing
+#
+# Runs libFuzzer-based fuzz targets with AddressSanitizer to detect
+# memory safety issues in DICOM parsing components. Targets:
+#   - DICOM Part 10 file parser (dicom_file::from_bytes)
+#   - Implicit VR Little Endian codec
+#   - Explicit VR Little Endian codec
+#   - PDU (Protocol Data Unit) network protocol decoder
+#   - RLE Lossless compression codec
+#
+# Each target runs for a configurable duration (default 120 seconds)
+# with a 4 KB max input length to keep execution fast in CI.
+#
+# Based on kcenon ecosystem CI patterns (sanitizers.yml, ci.yml)
+
+name: Fuzzing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run nightly at 03:00 UTC for extended fuzzing coverage
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      fuzz_duration:
+        description: 'Fuzzing duration per target in seconds'
+        required: false
+        default: '120'
+
+# Ensure only one workflow runs per branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Default fuzzing duration (seconds per target)
+  # Schedule runs get 600s for deeper exploration; PR/push runs get 120s
+  FUZZ_DURATION_DEFAULT: ${{ github.event_name == 'schedule' && '600' || '120' }}
+
+jobs:
+  fuzz:
+    name: ${{ matrix.target }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - fuzz_dicom_file_parser
+          - fuzz_implicit_vr_codec
+          - fuzz_explicit_vr_codec
+          - fuzz_pdu_decoder
+          - fuzz_rle_codec
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build clang lld \
+          libsqlite3-dev libssl-dev libfmt-dev \
+          libjpeg-turbo8-dev libicu-dev
+
+    - name: Configure CMake with fuzzing and ASan
+      working-directory: pacs_system
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=OFF \
+          -DPACS_BUILD_EXAMPLES=OFF \
+          -DPACS_BUILD_FUZZ_TARGETS=ON \
+          -DPACS_BUILD_STORAGE=OFF
+
+    - name: Build fuzz target
+      working-directory: pacs_system
+      run: |
+        cmake --build build --target ${{ matrix.target }} --parallel
+
+    - name: Determine fuzzing duration
+      id: duration
+      run: |
+        if [ -n "${{ github.event.inputs.fuzz_duration }}" ]; then
+          echo "seconds=${{ github.event.inputs.fuzz_duration }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "seconds=${{ env.FUZZ_DURATION_DEFAULT }}" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run fuzzer
+      working-directory: pacs_system
+      run: |
+        mkdir -p fuzz_corpus/${{ matrix.target }}
+        mkdir -p fuzz_artifacts/${{ matrix.target }}
+
+        # Copy seed corpus into the working corpus directory
+        if ls fuzz/seed_corpus/*.bin 1>/dev/null 2>&1; then
+          cp fuzz/seed_corpus/*.bin fuzz_corpus/${{ matrix.target }}/
+        fi
+
+        # Run libFuzzer with:
+        #   -max_total_time  : wall-clock time limit
+        #   -max_len=4096    : cap input size to keep execution fast
+        #   -print_final_stats=1 : summary at end
+        #   -artifact_prefix : where to write crash/timeout inputs
+        ./build/bin/${{ matrix.target }} \
+          fuzz_corpus/${{ matrix.target }} \
+          -max_total_time=${{ steps.duration.outputs.seconds }} \
+          -max_len=4096 \
+          -print_final_stats=1 \
+          -artifact_prefix=fuzz_artifacts/${{ matrix.target }}/
+      env:
+        ASAN_OPTIONS: "halt_on_error=1 detect_leaks=1 symbolize=1"
+
+    - name: Check for crash artifacts
+      if: failure()
+      run: |
+        echo "## Fuzzing Crash Report: ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -d pacs_system/fuzz_artifacts/${{ matrix.target }} ]; then
+          count=$(find pacs_system/fuzz_artifacts/${{ matrix.target }} -type f | wc -l)
+          echo "Found $count crash artifact(s)" >> $GITHUB_STEP_SUMMARY
+          for f in pacs_system/fuzz_artifacts/${{ matrix.target }}/*; do
+            echo "- \`$(basename "$f")\` ($(wc -c < "$f") bytes)" >> $GITHUB_STEP_SUMMARY
+          done
+        else
+          echo "No artifact directory found" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Upload crash artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: fuzz-crashes-${{ matrix.target }}
+        path: pacs_system/fuzz_artifacts/
+        retention-days: 30
+        if-no-files-found: ignore
+
+    - name: Upload corpus
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: fuzz-corpus-${{ matrix.target }}
+        path: pacs_system/fuzz_corpus/${{ matrix.target }}/
+        retention-days: 7
+        if-no-files-found: ignore
+
+  fuzz-summary:
+    name: Fuzzing Summary
+    needs: fuzz
+    runs-on: ubuntu-24.04
+    if: always()
+
+    steps:
+    - name: Generate summary
+      run: |
+        echo "# Fuzzing Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Fuzz Targets" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Target | Component | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| fuzz_dicom_file_parser | DICOM Part 10 File Parser | ${{ contains(needs.fuzz.result, 'success') && 'PASS' || 'CHECK' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| fuzz_implicit_vr_codec | Implicit VR LE Codec | ${{ contains(needs.fuzz.result, 'success') && 'PASS' || 'CHECK' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| fuzz_explicit_vr_codec | Explicit VR LE Codec | ${{ contains(needs.fuzz.result, 'success') && 'PASS' || 'CHECK' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| fuzz_pdu_decoder | PDU Network Protocol Decoder | ${{ contains(needs.fuzz.result, 'success') && 'PASS' || 'CHECK' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| fuzz_rle_codec | RLE Lossless Compression | ${{ contains(needs.fuzz.result, 'success') && 'PASS' || 'CHECK' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Crash artifacts (if any) are available in the workflow artifacts." >> $GITHUB_STEP_SUMMARY
