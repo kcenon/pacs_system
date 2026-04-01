@@ -118,7 +118,7 @@ jobs:
         echo "All dependencies verified for BSD-3-Clause license compatibility." >> security_report.md
 
     - name: Upload security report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: security-report
@@ -163,7 +163,7 @@ jobs:
         npm audit --omit=dev --audit-level=high 2>&1 || echo "::warning::npm audit found high/critical vulnerabilities"
 
     - name: Upload npm audit report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: npm-security-report
@@ -228,7 +228,7 @@ jobs:
         cat dicom_security_report.md
 
     - name: Upload DICOM security report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: dicom-security-report
