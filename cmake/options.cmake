@@ -27,6 +27,7 @@ option(PACS_BUILD_TESTS "Build unit tests" ON)
 option(PACS_BUILD_EXAMPLES "Build examples" OFF)
 option(PACS_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(PACS_BUILD_SAMPLES "Build developer samples" OFF)
+option(PACS_BUILD_FUZZ_TARGETS "Build libFuzzer-based fuzz targets (requires Clang)" OFF)
 
 # Dependency integration options
 option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
