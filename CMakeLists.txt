@@ -48,4 +48,9 @@ include(cmake/install.cmake)
 include(cmake/testing.cmake)
 include(cmake/examples.cmake)
 include(cmake/warnings.cmake)
+
+if(PACS_BUILD_FUZZ_TARGETS)
+    add_subdirectory(fuzz)
+endif()
+
 include(cmake/summary.cmake)
