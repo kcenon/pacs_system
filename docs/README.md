@@ -3,7 +3,7 @@
 > **SSOT**: This file is the single source of truth for the documentation index
 > of **pacs_system**.
 
-Total documents: **72**
+Total documents: **73**
 
 ## Document Index
 
@@ -74,13 +74,14 @@ Total documents: **72**
 | 63 | PAC-SECU-002 | Security Module Documentation | [SECURITY.md](./SECURITY.md) | Released |
 | 64 | PAC-ADR-001 | ADR-001: Integrate database_system for Database Abstraction | [ADR-001-database-system-integration.md](./adr/ADR-001-database-system-integration.md) | Released |
 | 65 | PAC-ADR-002 | ADR-002: Define PACS Storage Port Segmentation | [ADR-002-pacs-storage-port-segmentation.md](./adr/ADR-002-pacs-storage-port-segmentation.md) | Released |
-| 66 | PAC-PROJ-001 | 변경 이력 - PACS System | [CHANGELOG.kr.md](./CHANGELOG.kr.md) | Released |
-| 67 | PAC-PROJ-002 | Changelog - PACS System | [CHANGELOG.md](./CHANGELOG.md) | Released |
-| 68 | PAC-PROJ-003 | Documentation Statistics Automation | [DOCUMENTATION_STATISTICS.md](./DOCUMENTATION_STATISTICS.md) | Released |
-| 69 | PAC-PROJ-004 | 프로젝트 구조 - PACS 시스템 | [PROJECT_STRUCTURE.kr.md](./PROJECT_STRUCTURE.kr.md) | Released |
-| 70 | PAC-PROJ-005 | Project Structure - PACS System | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Released |
-| 71 | PAC-PROJ-006 | SOUP List &mdash; pacs_system | [SOUP.md](./SOUP.md) | Released |
-| 72 | PAC-PROJ-007 | Contributing to PACS System | [CONTRIBUTING.md](./contributing/CONTRIBUTING.md) | Released |
+| 66 | PAC-ADR-003 | ADR-003: DICOM Layer Separation Architecture | [ADR-003-dicom-layer-separation.md](./adr/ADR-003-dicom-layer-separation.md) | Accepted |
+| 67 | PAC-PROJ-001 | 변경 이력 - PACS System | [CHANGELOG.kr.md](./CHANGELOG.kr.md) | Released |
+| 68 | PAC-PROJ-002 | Changelog - PACS System | [CHANGELOG.md](./CHANGELOG.md) | Released |
+| 69 | PAC-PROJ-003 | Documentation Statistics Automation | [DOCUMENTATION_STATISTICS.md](./DOCUMENTATION_STATISTICS.md) | Released |
+| 70 | PAC-PROJ-004 | 프로젝트 구조 - PACS 시스템 | [PROJECT_STRUCTURE.kr.md](./PROJECT_STRUCTURE.kr.md) | Released |
+| 71 | PAC-PROJ-005 | Project Structure - PACS System | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Released |
+| 72 | PAC-PROJ-006 | SOUP List &mdash; pacs_system | [SOUP.md](./SOUP.md) | Released |
+| 73 | PAC-PROJ-007 | Contributing to PACS System | [CONTRIBUTING.md](./contributing/CONTRIBUTING.md) | Released |
 
 ## Documents by Category
 
@@ -192,12 +193,13 @@ Total documents: **72**
 | PAC-SECU-001 | SDS - Security Module | [SDS_SECURITY.md](./SDS_SECURITY.md) | Released |
 | PAC-SECU-002 | Security Module Documentation | [SECURITY.md](./SECURITY.md) | Released |
 
-### Architecture Decision Records (2)
+### Architecture Decision Records (3)
 
 | doc_id | Topic | Document | Status |
 |--------|-------|----------|--------|
 | PAC-ADR-001 | ADR-001: Integrate database_system for Database Abstraction | [ADR-001-database-system-integration.md](./adr/ADR-001-database-system-integration.md) | Released |
 | PAC-ADR-002 | ADR-002: Define PACS Storage Port Segmentation | [ADR-002-pacs-storage-port-segmentation.md](./adr/ADR-002-pacs-storage-port-segmentation.md) | Released |
+| PAC-ADR-003 | ADR-003: DICOM Layer Separation Architecture | [ADR-003-dicom-layer-separation.md](./adr/ADR-003-dicom-layer-separation.md) | Accepted |
 
 ### Project (7)
 
