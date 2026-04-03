@@ -25,8 +25,8 @@ set(SAMPLE_SOURCES
 
 # Header files (for IDE visibility)
 set(SAMPLE_HEADERS
-    config_loader.hpp
-    production_pacs.hpp
+    config_loader.h
+    production_pacs.h
 )
 
 # Create executable

@@ -22,14 +22,14 @@
 #undef DELETE
 #endif
 
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/storage/index_database.hpp"
-#include "pacs/web/auth/oauth2_middleware.hpp"
-#include "pacs/web/endpoints/dicomweb_endpoints.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/endpoints/wado_uri_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/web/auth/oauth2_middleware.h"
+#include "kcenon/pacs/web/endpoints/dicomweb_endpoints.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/endpoints/wado_uri_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <cstdlib>
 #include <filesystem>

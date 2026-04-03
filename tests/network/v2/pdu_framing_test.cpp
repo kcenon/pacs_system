@@ -10,10 +10,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/pdu_encoder.hpp"
-#include "pacs/network/pdu_decoder.hpp"
-#include "pacs/network/pdu_types.hpp"
-#include "pacs/network/v2/dicom_association_handler.hpp"
+#include "kcenon/pacs/network/pdu_encoder.h"
+#include "kcenon/pacs/network/pdu_decoder.h"
+#include "kcenon/pacs/network/pdu_types.h"
+#include "kcenon/pacs/network/v2/dicom_association_handler.h"
 
 #include <algorithm>
 #include <cstdint>

@@ -9,12 +9,12 @@
  * @see Issue #531 - Implement query_scu Library (C-FIND SCU)
  */
 
-#include "pacs/services/query_scu.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
+#include "kcenon/pacs/services/query_scu.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 
 namespace kcenon::pacs::services {
 

@@ -24,12 +24,12 @@
 #undef DELETE
 #endif
 
-#include "pacs/client/job_manager.hpp"
-#include "pacs/client/job_types.hpp"
-#include "pacs/web/endpoints/jobs_endpoints.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/client/job_types.h"
+#include "kcenon/pacs/web/endpoints/jobs_endpoints.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <chrono>
 #include <mutex>

@@ -7,7 +7,7 @@
  * @brief Implementation of RAII memory-mapped file I/O
  */
 
-#include "pacs/core/memory_mapped_file.hpp"
+#include "kcenon/pacs/core/memory_mapped_file.h"
 
 #if defined(_WIN32)
     #ifndef WIN32_LEAN_AND_MEAN

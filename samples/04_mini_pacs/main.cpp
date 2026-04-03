@@ -20,9 +20,9 @@
  * @see DICOM PS3.4 - Storage, Query/Retrieve, Worklist, MPPS Service Classes
  */
 
-#include "mini_pacs.hpp"
-#include "console_utils.hpp"
-#include "signal_handler.hpp"
+#include "mini_pacs.h"
+#include "console_utils.h"
+#include "signal_handler.h"
 
 #include <iostream>
 #include <string>

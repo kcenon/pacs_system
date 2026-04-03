@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/web/endpoints/wado_uri_endpoints.hpp"
+#include "kcenon/pacs/web/endpoints/wado_uri_endpoints.h"
 
 using namespace kcenon::pacs::web::wado_uri;
 

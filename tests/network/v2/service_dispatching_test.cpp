@@ -10,10 +10,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/v2/dicom_association_handler.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/services/scp_service.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/network/v2/dicom_association_handler.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/scp_service.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <map>
 #include <memory>

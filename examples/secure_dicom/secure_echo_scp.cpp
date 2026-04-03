@@ -17,10 +17,10 @@
  *   secure_echo_scp 2762 MY_PACS --cert server.crt --key server.key --ca ca.crt
  */
 
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/services/verification_scp.hpp"
-#include "pacs/integration/network_adapter.hpp"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/verification_scp.h"
+#include "kcenon/pacs/integration/network_adapter.h"
 
 #include <atomic>
 #include <chrono>

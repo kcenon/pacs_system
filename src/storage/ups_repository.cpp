@@ -9,7 +9,7 @@
  * @see Issue #915 - Extract UPS lifecycle and subscription repository
  */
 
-#include "pacs/storage/ups_repository.hpp"
+#include "kcenon/pacs/storage/ups_repository.h"
 
 #include <algorithm>
 #include <chrono>
@@ -17,7 +17,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

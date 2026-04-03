@@ -9,10 +9,10 @@
 // IMPORTANT: Include Crow FIRST before any PACS headers
 #include "crow.h"
 
-#include <pacs/web/auth/jwks_provider.hpp>
-#include <pacs/web/auth/jwt_validator.hpp>
-#include <pacs/web/auth/oauth2_config.hpp>
-#include <pacs/web/auth/oauth2_middleware.hpp>
+#include <kcenon/pacs/web/auth/jwks_provider.h>
+#include <kcenon/pacs/web/auth/jwt_validator.h>
+#include <kcenon/pacs/web/auth/oauth2_config.h>
+#include <kcenon/pacs/web/auth/oauth2_middleware.h>
 
 #include <catch2/catch_test_macros.hpp>
 

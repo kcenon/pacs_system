@@ -9,7 +9,7 @@
  * @see Issue #829 - Add Ophthalmic SOP Class registration and storage definition
  */
 
-#include "pacs/services/sop_classes/ophthalmic_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/ophthalmic_storage.h"
 
 namespace kcenon::pacs::services::sop_classes {
 

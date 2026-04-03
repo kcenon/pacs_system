@@ -7,11 +7,11 @@
  * @brief Implementation of Explicit VR Big Endian encoder/decoder
  */
 
-#include "pacs/encoding/explicit_vr_big_endian_codec.hpp"
+#include "kcenon/pacs/encoding/explicit_vr_big_endian_codec.h"
 
-#include <pacs/encoding/byte_swap.hpp>
-#include <pacs/encoding/vr_info.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/encoding/byte_swap.h>
+#include <kcenon/pacs/encoding/vr_info.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <cstring>
 

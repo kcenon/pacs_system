@@ -10,9 +10,9 @@
  * @see Issue #718 - Add MR Image IOD Validator
  */
 
-#include "pacs/services/validation/mr_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/mr_storage.hpp"
+#include "kcenon/pacs/services/validation/mr_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/mr_storage.h"
 
 namespace kcenon::pacs::services::validation {
 

@@ -12,12 +12,12 @@
  * - AWS SDK client (PACS_WITH_AWS_SDK): production S3 operations
  */
 
-#include <pacs/storage/s3_storage.hpp>
+#include <kcenon/pacs/storage/s3_storage.h>
 
-#include <pacs/core/dicom_file.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/transfer_syntax.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/transfer_syntax.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <algorithm>
 #include <set>

@@ -7,8 +7,8 @@
  * @brief Implementation of the AI result handler
  */
 
-#include "pacs/ai/ai_result_handler.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/ai/ai_result_handler.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <algorithm>
 #include <map>

@@ -5,7 +5,7 @@
  * @see Issue #211 - Implement health check endpoint
  */
 
-#include <pacs/monitoring/health_json.hpp>
+#include <kcenon/pacs/monitoring/health_json.h>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>

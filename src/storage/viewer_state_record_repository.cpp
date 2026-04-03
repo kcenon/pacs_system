@@ -10,7 +10,7 @@
  * @see Issue #607 - Phase 2: Base Repository Pattern Implementation
  */
 
-#include "pacs/storage/viewer_state_record_repository.hpp"
+#include "kcenon/pacs/storage/viewer_state_record_repository.h"
 
 #include <chrono>
 #include <cstdio>

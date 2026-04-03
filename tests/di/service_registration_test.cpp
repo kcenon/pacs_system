@@ -5,8 +5,8 @@
  * @see Issue #312 - ServiceContainer based DI Integration
  */
 
-#include <pacs/di/service_registration.hpp>
-#include <pacs/di/test_support.hpp>
+#include <kcenon/pacs/di/service_registration.h>
+#include <kcenon/pacs/di/test_support.h>
 
 #include <catch2/catch_test_macros.hpp>
 

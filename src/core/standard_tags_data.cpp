@@ -15,8 +15,8 @@
  * @see DICOM PS3.6 - Data Dictionary
  */
 
-#include "pacs/core/tag_info.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/core/tag_info.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 #include <array>
 #include <span>

@@ -11,8 +11,8 @@
  * @see Issue #852 - Implement OAuth 2.0 authorization for DICOMweb endpoints
  */
 
-#include "pacs/web/auth/jwks_provider.hpp"
-#include "pacs/web/auth/jwt_validator.hpp"
+#include "kcenon/pacs/web/auth/jwks_provider.h"
+#include "kcenon/pacs/web/auth/jwt_validator.h"
 
 #include <crow/json.h>
 

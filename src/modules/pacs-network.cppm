@@ -37,22 +37,22 @@ module;
 #include <vector>
 
 // PACS network headers - Core
-#include <pacs/network/association.hpp>
-#include <pacs/network/pdu_encoder.hpp>
-#include <pacs/network/pdu_decoder.hpp>
-#include <pacs/network/pdu_types.hpp>
-#include <pacs/network/pdu_buffer_pool.hpp>
-#include <pacs/network/server_config.hpp>
-#include <pacs/network/dicom_server.hpp>
+#include <kcenon/pacs/network/association.h>
+#include <kcenon/pacs/network/pdu_encoder.h>
+#include <kcenon/pacs/network/pdu_decoder.h>
+#include <kcenon/pacs/network/pdu_types.h>
+#include <kcenon/pacs/network/pdu_buffer_pool.h>
+#include <kcenon/pacs/network/server_config.h>
+#include <kcenon/pacs/network/dicom_server.h>
 
 // PACS network headers - V2 implementation
-#include <pacs/network/v2/dicom_association_handler.hpp>
-#include <pacs/network/v2/dicom_server_v2.hpp>
+#include <kcenon/pacs/network/v2/dicom_association_handler.h>
+#include <kcenon/pacs/network/v2/dicom_server_v2.h>
 
 // PACS network headers - DIMSE (basic)
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
 
 export module kcenon.pacs:network;
 

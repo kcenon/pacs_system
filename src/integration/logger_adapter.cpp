@@ -7,7 +7,7 @@
  * @brief Implementation of DICOM audit logging adapter
  */
 
-#include <pacs/integration/logger_adapter.hpp>
+#include <kcenon/pacs/integration/logger_adapter.h>
 
 #ifdef PACS_WITH_LOGGER_SYSTEM
 #include <kcenon/common/interfaces/logger_interface.h>

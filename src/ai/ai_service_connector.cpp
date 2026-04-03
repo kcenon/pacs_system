@@ -7,10 +7,10 @@
  * @brief Implementation of AI service connector
  */
 
-#include <pacs/ai/ai_service_connector.hpp>
+#include <kcenon/pacs/ai/ai_service_connector.h>
 
-#include <pacs/integration/logger_adapter.hpp>
-#include <pacs/integration/monitoring_adapter.hpp>
+#include <kcenon/pacs/integration/logger_adapter.h>
+#include <kcenon/pacs/integration/monitoring_adapter.h>
 
 // Platform-specific socket headers for HTTP client
 #ifdef _WIN32

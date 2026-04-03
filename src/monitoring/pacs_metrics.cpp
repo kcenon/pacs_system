@@ -9,7 +9,7 @@
  * @see Issue #210 - [Quick Win] feat(monitoring): Implement operation metrics collection
  */
 
-#include "pacs/monitoring/pacs_metrics.hpp"
+#include "kcenon/pacs/monitoring/pacs_metrics.h"
 
 #include <iomanip>
 #include <sstream>

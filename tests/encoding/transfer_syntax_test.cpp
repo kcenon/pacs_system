@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/encoding/transfer_syntax.hpp"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 
 using namespace kcenon::pacs::encoding;
 

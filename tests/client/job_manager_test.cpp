@@ -6,11 +6,11 @@
  * @see Issue #554 - Part 3: Job Execution and Tests
  */
 
-#include <pacs/client/job_manager.hpp>
-#include <pacs/client/job_types.hpp>
-#include <pacs/client/remote_node_manager.hpp>
-#include <pacs/storage/job_repository.hpp>
-#include <pacs/di/ilogger.hpp>
+#include <kcenon/pacs/client/job_manager.h>
+#include <kcenon/pacs/client/job_types.h>
+#include <kcenon/pacs/client/remote_node_manager.h>
+#include <kcenon/pacs/storage/job_repository.h>
+#include <kcenon/pacs/di/ilogger.h>
 
 #include <catch2/catch_test_macros.hpp>
 

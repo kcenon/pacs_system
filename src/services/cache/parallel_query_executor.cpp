@@ -9,11 +9,11 @@
  * @see Issue #190 - Parallel query executor
  */
 
-#include <pacs/services/cache/parallel_query_executor.hpp>
+#include <kcenon/pacs/services/cache/parallel_query_executor.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/storage/index_database.h>
 
 #include <kcenon/common/patterns/result.h>
 

@@ -9,7 +9,7 @@
  * @see Issue #162 - Implement dicom_server_v2 using network_system messaging_server
  */
 
-#include "pacs/network/v2/dicom_server_v2.hpp"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 
 #include <algorithm>
 #include <sstream>

@@ -7,9 +7,9 @@
  * @brief Implementation of Nuclear Medicine Image IOD Validator
  */
 
-#include "pacs/services/validation/nm_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/nm_storage.hpp"
+#include "kcenon/pacs/services/validation/nm_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/nm_storage.h"
 
 #include <sstream>
 

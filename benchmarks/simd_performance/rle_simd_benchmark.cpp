@@ -9,10 +9,10 @@
  * @see Issue #313 - Apply SIMD Optimization (Image Processing)
  */
 
-#include "simd_benchmark_common.hpp"
+#include "simd_benchmark_common.h"
 
-#include "pacs/encoding/simd/simd_config.hpp"
-#include "pacs/encoding/simd/simd_rle.hpp"
+#include "kcenon/pacs/encoding/simd/simd_config.h"
+#include "kcenon/pacs/encoding/simd/simd_rle.h"
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>

@@ -10,8 +10,8 @@
  * @see Issue #313 - Apply SIMD Optimization (Image Processing)
  */
 
-#include "simd_benchmark_common.hpp"
-#include "pacs/encoding/simd/simd_windowing.hpp"
+#include "simd_benchmark_common.h"
+#include "kcenon/pacs/encoding/simd/simd_windowing.h"
 
 #include <iostream>
 #include <vector>

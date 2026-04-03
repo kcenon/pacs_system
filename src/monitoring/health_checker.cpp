@@ -9,9 +9,9 @@
  * @see Issue #211 - Implement health check endpoint
  */
 
-#include <pacs/monitoring/health_checker.hpp>
-#include <pacs/storage/file_storage.hpp>
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/monitoring/health_checker.h>
+#include <kcenon/pacs/storage/file_storage.h>
+#include <kcenon/pacs/storage/index_database.h>
 
 #include <filesystem>
 #include <fstream>

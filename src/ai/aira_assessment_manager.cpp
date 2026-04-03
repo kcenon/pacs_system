@@ -7,8 +7,8 @@
  * @brief Implementation of IHE AIRA Assessment Manager Actor
  */
 
-#include "pacs/ai/aira_assessment_manager.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/ai/aira_assessment_manager.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <algorithm>
 

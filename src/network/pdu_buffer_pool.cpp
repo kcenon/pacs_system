@@ -7,8 +7,8 @@
  * @brief Implementation of PDU buffer pooling
  */
 
-#include <pacs/network/pdu_buffer_pool.hpp>
-#include <pacs/network/pdu_decoder.hpp>
+#include <kcenon/pacs/network/pdu_buffer_pool.h>
+#include <kcenon/pacs/network/pdu_decoder.h>
 
 namespace kcenon::pacs::network {
 

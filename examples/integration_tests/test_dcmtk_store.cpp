@@ -12,14 +12,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "dcmtk_tool.hpp"
-#include "test_fixtures.hpp"
+#include "dcmtk_tool.h"
+#include "test_fixtures.h"
 
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/encoding/transfer_syntax.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/storage_scp.hpp"
-#include "pacs/services/storage_scu.hpp"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/services/storage_scu.h"
 
 #include <atomic>
 #include <filesystem>

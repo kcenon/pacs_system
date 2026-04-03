@@ -10,11 +10,11 @@
  * @see Issue #720 - Implement N-GET SCP/SCU service
  */
 
-#include "pacs/services/n_get_scu.hpp"
+#include "kcenon/pacs/services/n_get_scu.h"
 
-#include "pacs/core/result.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 
 namespace kcenon::pacs::services {
 

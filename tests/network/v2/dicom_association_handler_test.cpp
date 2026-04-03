@@ -5,9 +5,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/v2/dicom_association_handler.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/network/pdu_types.hpp"
+#include "kcenon/pacs/network/v2/dicom_association_handler.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/network/pdu_types.h"
 
 #include <atomic>
 #include <chrono>

@@ -7,7 +7,7 @@
  * @brief Implementation of centralized object pool management
  */
 
-#include <pacs/core/pool_manager.hpp>
+#include <kcenon/pacs/core/pool_manager.h>
 
 namespace kcenon::pacs::core {
 

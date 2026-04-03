@@ -7,9 +7,9 @@
  * @brief Implementation of Segmentation IOD Validator
  */
 
-#include "pacs/services/validation/seg_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/seg_storage.hpp"
+#include "kcenon/pacs/services/validation/seg_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/seg_storage.h"
 
 #include <sstream>
 

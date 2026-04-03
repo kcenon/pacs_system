@@ -11,7 +11,7 @@
  * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
  */
 
-#include "pacs/storage/node_repository.hpp"
+#include "kcenon/pacs/storage/node_repository.h"
 
 #include <chrono>
 #include <cstring>

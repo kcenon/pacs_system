@@ -5,9 +5,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <atomic>
 #include <chrono>

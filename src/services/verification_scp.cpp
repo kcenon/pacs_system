@@ -7,10 +7,10 @@
  * @brief Implementation of the Verification SCP service
  */
 
-#include "pacs/services/verification_scp.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
+#include "kcenon/pacs/services/verification_scp.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 
 namespace kcenon::pacs::services {
 

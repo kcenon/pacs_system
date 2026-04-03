@@ -13,14 +13,14 @@
  * @see Issue #643 - Update migration_runner to use pacs_database_adapter
  */
 
-#include <pacs/storage/migration_runner.hpp>
+#include <kcenon/pacs/storage/migration_runner.h>
 
 #include <sqlite3.h>
 
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include <pacs/storage/pacs_database_adapter.hpp>
+#include <kcenon/pacs/storage/pacs_database_adapter.h>
 #endif
 
 namespace kcenon::pacs::storage {

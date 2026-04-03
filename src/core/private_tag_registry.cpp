@@ -7,7 +7,7 @@
  * @brief Implementation of vendor-specific private tag registry
  */
 
-#include <pacs/core/private_tag_registry.hpp>
+#include <kcenon/pacs/core/private_tag_registry.h>
 
 namespace kcenon::pacs::core {
 

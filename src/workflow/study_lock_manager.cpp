@@ -7,7 +7,7 @@
  * @brief Implementation of study lock manager
  */
 
-#include "pacs/workflow/study_lock_manager.hpp"
+#include "kcenon/pacs/workflow/study_lock_manager.h"
 
 #include <kcenon/common/patterns/result.h>
 

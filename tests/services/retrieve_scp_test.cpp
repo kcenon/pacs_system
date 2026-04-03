@@ -3,12 +3,12 @@
  * @brief Unit tests for Retrieve SCP service (C-MOVE/C-GET)
  */
 
-#include <pacs/services/retrieve_scp.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/retrieve_scp.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

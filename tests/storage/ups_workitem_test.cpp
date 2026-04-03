@@ -6,8 +6,8 @@
  * Validates UPS state machine transitions per PS3.4 Annex CC.
  */
 
-#include <pacs/storage/index_database.hpp>
-#include <pacs/services/sop_class_registry.hpp>
+#include <kcenon/pacs/storage/index_database.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
 
 #include <catch2/catch_test_macros.hpp>
 

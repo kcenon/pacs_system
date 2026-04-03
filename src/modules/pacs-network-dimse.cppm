@@ -26,15 +26,15 @@ module;
 #include <vector>
 
 // PACS DIMSE headers
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
-#include <pacs/network/dimse/n_action.hpp>
-#include <pacs/network/dimse/n_create.hpp>
-#include <pacs/network/dimse/n_delete.hpp>
-#include <pacs/network/dimse/n_event_report.hpp>
-#include <pacs/network/dimse/n_get.hpp>
-#include <pacs/network/dimse/n_set.hpp>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/network/dimse/n_action.h>
+#include <kcenon/pacs/network/dimse/n_create.h>
+#include <kcenon/pacs/network/dimse/n_delete.h>
+#include <kcenon/pacs/network/dimse/n_event_report.h>
+#include <kcenon/pacs/network/dimse/n_get.h>
+#include <kcenon/pacs/network/dimse/n_set.h>
 
 export module kcenon.pacs:network_dimse;
 

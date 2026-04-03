@@ -10,9 +10,9 @@
  * @see Issue #848 - Add CT For Processing SOP Classes
  */
 
-#include "pacs/services/validation/ct_processing_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/ct_storage.hpp"
+#include "kcenon/pacs/services/validation/ct_processing_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/ct_storage.h"
 
 namespace kcenon::pacs::services::validation {
 

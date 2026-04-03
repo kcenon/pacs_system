@@ -16,8 +16,8 @@
  *   xa_minimal.dcm  - Minimal XA image
  */
 
-#include "test_fixtures.hpp"
-#include "pacs/core/dicom_file.hpp"
+#include "test_fixtures.h"
+#include "kcenon/pacs/core/dicom_file.h"
 
 #include <filesystem>
 #include <iostream>

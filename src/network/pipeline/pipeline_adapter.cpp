@@ -10,8 +10,8 @@
  * @see Issue #523 - Phase 6: Integration
  */
 
-#include <pacs/network/pipeline/pipeline_adapter.hpp>
-#include <pacs/network/pipeline/jobs/dimse_process_job.hpp>
+#include <kcenon/pacs/network/pipeline/pipeline_adapter.h>
+#include <kcenon/pacs/network/pipeline/jobs/dimse_process_job.h>
 
 #include <chrono>
 

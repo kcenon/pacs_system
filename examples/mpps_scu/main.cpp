@@ -21,9 +21,9 @@
  *   mpps_scu localhost 11112 RIS_SCP set --mpps-uid 1.2.3... --status COMPLETED
  */
 
-#include "pacs/services/mpps_scu.hpp"
+#include "kcenon/pacs/services/mpps_scu.h"
 
-#include "pacs/network/association.hpp"
+#include "kcenon/pacs/network/association.h"
 
 #include <chrono>
 #include <cstdlib>

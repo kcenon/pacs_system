@@ -10,8 +10,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/client/job_types.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/client/job_types.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 using namespace kcenon::pacs::client;
 using namespace kcenon::pacs::web;

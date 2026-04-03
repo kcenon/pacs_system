@@ -7,11 +7,11 @@
  * @brief Implementation of the Remote Node Manager
  */
 
-#include "pacs/client/remote_node_manager.hpp"
-#include "pacs/storage/node_repository.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
+#include "kcenon/pacs/client/remote_node_manager.h"
+#include "kcenon/pacs/storage/node_repository.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 
 #include <atomic>
 #include <condition_variable>

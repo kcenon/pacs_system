@@ -5,7 +5,7 @@
  * @note These tests require PACS_WITH_DATABASE_SYSTEM to be defined.
  */
 
-#include "pacs/storage/sqlite_security_storage.hpp"
+#include "kcenon/pacs/storage/sqlite_security_storage.h"
 
 // Only compile tests when PACS_WITH_DATABASE_SYSTEM is defined
 #ifdef PACS_WITH_DATABASE_SYSTEM

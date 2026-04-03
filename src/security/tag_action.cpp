@@ -9,8 +9,8 @@
  * @copyright Copyright (c) 2025
  */
 
-#include "pacs/security/tag_action.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/security/tag_action.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 namespace kcenon::pacs::security::hipaa_identifiers {
 

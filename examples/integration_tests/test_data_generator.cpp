@@ -5,9 +5,9 @@
  * @see Issue #137 - Test Fixtures Extension
  */
 
-#include "test_data_generator.hpp"
+#include "test_data_generator.h"
 
-#include "pacs/core/dicom_element.hpp"
+#include "kcenon/pacs/core/dicom_element.h"
 
 #include <algorithm>
 #include <atomic>

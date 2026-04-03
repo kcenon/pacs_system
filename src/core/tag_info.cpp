@@ -7,7 +7,7 @@
  * @brief Implementation of tag_info and value_multiplicity
  */
 
-#include "pacs/core/tag_info.hpp"
+#include "kcenon/pacs/core/tag_info.h"
 
 #include <charconv>
 #include <sstream>

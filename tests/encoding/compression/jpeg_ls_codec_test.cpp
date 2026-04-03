@@ -1,11 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
-#include <pacs/core/result.hpp>
+#include <kcenon/pacs/core/result.h>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/encoding/compression/jpeg_ls_codec.hpp"
-#include "pacs/encoding/compression/codec_factory.hpp"
-#include "pacs/encoding/compression/image_params.hpp"
+#include "kcenon/pacs/encoding/compression/jpeg_ls_codec.h"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
+#include "kcenon/pacs/encoding/compression/image_params.h"
 
 #include <algorithm>
 #include <cmath>

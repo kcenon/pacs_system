@@ -3,11 +3,11 @@
  * @brief Unit tests for Storage Commitment Push Model SCU service
  */
 
-#include <pacs/services/storage_commitment_scu.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/core/result.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
+#include <kcenon/pacs/services/storage_commitment_scu.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/core/result.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
 
 #include <catch2/catch_test_macros.hpp>
 

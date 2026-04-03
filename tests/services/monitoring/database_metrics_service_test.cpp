@@ -6,8 +6,8 @@
  * @license MIT
  */
 
-#include "pacs/services/monitoring/database_metrics_service.hpp"
-#include "pacs/storage/pacs_database_adapter.hpp"
+#include "kcenon/pacs/services/monitoring/database_metrics_service.h"
+#include "kcenon/pacs/storage/pacs_database_adapter.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

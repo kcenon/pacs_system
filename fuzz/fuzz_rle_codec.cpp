@@ -8,7 +8,7 @@
 // - Malformed run-length encoded byte sequences
 // - Buffer overflows from incorrect segment lengths
 
-#include <pacs/encoding/compression/rle_codec.hpp>
+#include <kcenon/pacs/encoding/compression/rle_codec.h>
 
 #include <cstdint>
 #include <span>

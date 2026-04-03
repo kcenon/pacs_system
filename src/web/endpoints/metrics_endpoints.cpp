@@ -14,12 +14,12 @@
 // declaration conflicts
 #include "crow.h"
 
-#include "pacs/services/monitoring/database_metrics_service.hpp"
-#include "pacs/web/auth/oauth2_middleware.hpp"
-#include "pacs/web/endpoints/metrics_endpoints.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/services/monitoring/database_metrics_service.h"
+#include "kcenon/pacs/web/auth/oauth2_middleware.h"
+#include "kcenon/pacs/web/endpoints/metrics_endpoints.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

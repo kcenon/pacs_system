@@ -20,9 +20,9 @@
  *   echo_scu --repeat 10 --repeat-delay 1000 localhost 11112
  */
 
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <chrono>
 #include <cstdlib>

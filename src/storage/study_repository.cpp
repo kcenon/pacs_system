@@ -10,7 +10,7 @@
  * @see Issue #912 - Part 1: Extract patient and study metadata repositories
  */
 
-#include "pacs/storage/study_repository.hpp"
+#include "kcenon/pacs/storage/study_repository.h"
 
 #include <chrono>
 #include <ctime>
@@ -21,7 +21,7 @@
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
 #include <database/query_builder.h>
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 namespace kcenon::pacs::storage {
 
@@ -650,8 +650,8 @@ auto study_repository::select_columns() const -> std::vector<std::string> {
 // Legacy SQLite Implementation
 // =============================================================================
 
-#include <pacs/compat/format.hpp>
-#include <pacs/core/result.hpp>
+#include <kcenon/pacs/compat/format.h>
+#include <kcenon/pacs/core/result.h>
 #include <sqlite3.h>
 
 namespace kcenon::pacs::storage {

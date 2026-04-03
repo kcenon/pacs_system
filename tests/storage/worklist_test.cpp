@@ -5,8 +5,8 @@
  * Tests CRUD operations for the worklist table as specified in DES-DB-006.
  */
 
-#include <pacs/storage/index_database.hpp>
-#include <pacs/storage/worklist_record.hpp>
+#include <kcenon/pacs/storage/index_database.h>
+#include <kcenon/pacs/storage/worklist_record.h>
 
 #include <catch2/catch_test_macros.hpp>
 

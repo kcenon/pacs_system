@@ -8,12 +8,12 @@
 #include <array>
 #include <cstdint>
 
-#include "pacs/security/anonymizer.hpp"
-#include "pacs/security/anonymization_profile.hpp"
-#include "pacs/security/tag_action.hpp"
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/security/anonymizer.h"
+#include "kcenon/pacs/security/anonymization_profile.h"
+#include "kcenon/pacs/security/tag_action.h"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 using namespace kcenon::pacs::security;
 using namespace kcenon::pacs::core;

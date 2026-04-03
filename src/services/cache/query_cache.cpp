@@ -7,7 +7,7 @@
  * @brief Implementation of DICOM query result cache
  */
 
-#include <pacs/services/cache/query_cache.hpp>
+#include <kcenon/pacs/services/cache/query_cache.h>
 
 #include <algorithm>
 #include <mutex>

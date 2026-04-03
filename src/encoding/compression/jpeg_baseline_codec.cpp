@@ -2,9 +2,9 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
+#include "kcenon/pacs/encoding/compression/jpeg_baseline_codec.h"
 
-#include <pacs/core/result.hpp>
+#include <kcenon/pacs/core/result.h>
 
 #include <algorithm>
 #include <csetjmp>

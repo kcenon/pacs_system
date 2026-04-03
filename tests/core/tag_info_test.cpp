@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/core/tag_info.hpp"
+#include "kcenon/pacs/core/tag_info.h"
 
 using namespace kcenon::pacs::core;
 

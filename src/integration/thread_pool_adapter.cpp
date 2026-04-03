@@ -9,7 +9,7 @@
  * @see Issue #405 - Replace Singleton Pattern with Dependency Injection
  */
 
-#include <pacs/integration/thread_pool_adapter.hpp>
+#include <kcenon/pacs/integration/thread_pool_adapter.h>
 
 #include <kcenon/thread/core/thread_pool.h>
 #include <kcenon/thread/core/thread_worker.h>

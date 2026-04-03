@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/monitoring/pacs_metrics.hpp"
+#include "kcenon/pacs/monitoring/pacs_metrics.h"
 
 #include <chrono>
 #include <string>

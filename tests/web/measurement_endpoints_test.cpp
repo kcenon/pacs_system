@@ -12,10 +12,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/measurement_record.hpp"
-#include "pacs/storage/measurement_repository.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/measurement_record.h"
+#include "kcenon/pacs/storage/measurement_repository.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 using namespace kcenon::pacs::storage;
 using namespace kcenon::pacs::web;

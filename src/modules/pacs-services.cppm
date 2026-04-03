@@ -31,17 +31,17 @@ module;
 #include <vector>
 
 // PACS services headers
-#include <pacs/services/scp_service.hpp>
-#include <pacs/services/storage_scp.hpp>
-#include <pacs/services/query_scp.hpp>
-#include <pacs/services/retrieve_scp.hpp>
-#include <pacs/services/verification_scp.hpp>
-#include <pacs/services/mpps_scp.hpp>
-#include <pacs/services/worklist_scp.hpp>
-#include <pacs/services/storage_scu.hpp>
-#include <pacs/services/query_scu.hpp>
-#include <pacs/services/sop_class_registry.hpp>
-#include <pacs/services/storage_status.hpp>
+#include <kcenon/pacs/services/scp_service.h>
+#include <kcenon/pacs/services/storage_scp.h>
+#include <kcenon/pacs/services/query_scp.h>
+#include <kcenon/pacs/services/retrieve_scp.h>
+#include <kcenon/pacs/services/verification_scp.h>
+#include <kcenon/pacs/services/mpps_scp.h>
+#include <kcenon/pacs/services/worklist_scp.h>
+#include <kcenon/pacs/services/storage_scu.h>
+#include <kcenon/pacs/services/query_scu.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
+#include <kcenon/pacs/services/storage_status.h>
 
 export module kcenon.pacs:services;
 

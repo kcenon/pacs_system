@@ -7,9 +7,9 @@
  * @brief Implementation of DICOM Data Element
  */
 
-#include <pacs/core/dicom_element.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/result.hpp>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/result.h>
 
 #include <algorithm>
 #include <charconv>

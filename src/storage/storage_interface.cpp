@@ -7,7 +7,7 @@
  * @brief Default implementations for storage_interface batch operations
  */
 
-#include <pacs/storage/storage_interface.hpp>
+#include <kcenon/pacs/storage/storage_interface.h>
 
 namespace kcenon::pacs::storage {
 

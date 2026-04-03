@@ -3,13 +3,13 @@
  * @brief Unit tests for UPS Query SCP service (C-FIND for workitems)
  */
 
-#include <pacs/services/ups/ups_query_scp.hpp>
-#include <pacs/services/ups/ups_push_scp.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/ups/ups_query_scp.h>
+#include <kcenon/pacs/services/ups/ups_push_scp.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

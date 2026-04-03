@@ -20,12 +20,12 @@
 #undef DELETE
 #endif
 
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/web/endpoints/association_endpoints.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/web/endpoints/association_endpoints.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <sstream>
 

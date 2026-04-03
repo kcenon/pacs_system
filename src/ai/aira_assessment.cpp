@@ -7,9 +7,9 @@
  * @brief Implementation of IHE AIRA Assessment Creator Actor
  */
 
-#include "pacs/ai/aira_assessment.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/ai/aira_assessment.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 #include <chrono>
 #include <random>

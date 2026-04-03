@@ -6,9 +6,9 @@
  * @see Issue #530 - PACS Client System Support (Parent Epic)
  */
 
-#include <pacs/client/sync_manager.hpp>
-#include <pacs/client/sync_types.hpp>
-#include <pacs/di/ilogger.hpp>
+#include <kcenon/pacs/client/sync_manager.h>
+#include <kcenon/pacs/client/sync_types.h>
+#include <kcenon/pacs/di/ilogger.h>
 
 #include <catch2/catch_test_macros.hpp>
 

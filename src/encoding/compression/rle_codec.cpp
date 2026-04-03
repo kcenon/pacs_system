@@ -2,9 +2,9 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/encoding/compression/rle_codec.hpp"
-#include "pacs/encoding/simd/simd_rle.hpp"
-#include <pacs/core/result.hpp>
+#include "kcenon/pacs/encoding/compression/rle_codec.h"
+#include "kcenon/pacs/encoding/simd/simd_rle.h"
+#include <kcenon/pacs/core/result.h>
 
 #include <algorithm>
 #include <array>

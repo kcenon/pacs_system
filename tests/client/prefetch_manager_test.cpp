@@ -5,9 +5,9 @@
  * @see Issue #541 - Implement Prefetch Manager for Proactive Data Loading
  */
 
-#include <pacs/client/prefetch_manager.hpp>
-#include <pacs/client/prefetch_types.hpp>
-#include <pacs/di/ilogger.hpp>
+#include <kcenon/pacs/client/prefetch_manager.h>
+#include <kcenon/pacs/client/prefetch_types.h>
+#include <kcenon/pacs/di/ilogger.h>
 
 #include <catch2/catch_test_macros.hpp>
 

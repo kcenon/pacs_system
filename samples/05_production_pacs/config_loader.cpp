@@ -3,7 +3,7 @@
  * @brief Implementation of YAML configuration loader
  */
 
-#include "config_loader.hpp"
+#include "config_loader.h"
 
 #include <algorithm>
 #include <cctype>

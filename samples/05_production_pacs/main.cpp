@@ -24,10 +24,10 @@
  * @see DICOM PS3.4 - Service Class Specifications
  */
 
-#include "production_pacs.hpp"
-#include "config_loader.hpp"
-#include "console_utils.hpp"
-#include "signal_handler.hpp"
+#include "production_pacs.h"
+#include "config_loader.h"
+#include "console_utils.h"
+#include "signal_handler.h"
 
 #include <iostream>
 #include <string>

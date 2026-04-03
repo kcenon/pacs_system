@@ -7,10 +7,10 @@
  * @brief Implementation of Implicit VR Little Endian encoder/decoder
  */
 
-#include "pacs/encoding/implicit_vr_codec.hpp"
+#include "kcenon/pacs/encoding/implicit_vr_codec.h"
 
-#include <pacs/core/dicom_dictionary.hpp>
-#include <pacs/encoding/vr_info.hpp>
+#include <kcenon/pacs/core/dicom_dictionary.h>
+#include <kcenon/pacs/encoding/vr_info.h>
 
 #include <cstring>
 

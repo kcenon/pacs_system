@@ -5,9 +5,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/association.hpp"
-#include "pacs/network/pdu_types.hpp"
-#include "pacs/core/result.hpp"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/pdu_types.h"
+#include "kcenon/pacs/core/result.h"
 
 using namespace kcenon::pacs::network;
 

@@ -14,7 +14,7 @@
  * @see Issue #154 - Establish performance baseline benchmarks for thread migration
  */
 
-#include "benchmark_common.hpp"
+#include "benchmark_common.h"
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>

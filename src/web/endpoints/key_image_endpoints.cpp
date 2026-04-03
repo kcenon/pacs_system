@@ -23,13 +23,13 @@
 #undef DELETE
 #endif
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/key_image_record.hpp"
-#include "pacs/storage/key_image_repository.hpp"
-#include "pacs/web/endpoints/key_image_endpoints.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/key_image_record.h"
+#include "kcenon/pacs/storage/key_image_repository.h"
+#include "kcenon/pacs/web/endpoints/key_image_endpoints.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <chrono>
 #include <iomanip>

@@ -3,12 +3,12 @@
  * @brief Unit tests for Storage Commitment Push Model SCP service
  */
 
-#include <pacs/services/storage_commitment_scp.hpp>
-#include <pacs/services/storage_commitment_types.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
+#include <kcenon/pacs/services/storage_commitment_scp.h>
+#include <kcenon/pacs/services/storage_commitment_types.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
 
 #include <catch2/catch_test_macros.hpp>
 

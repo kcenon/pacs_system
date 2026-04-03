@@ -3,10 +3,10 @@
  * @brief Unit tests for MPPS (Modality Performed Procedure Step) SCU service
  */
 
-#include <pacs/services/mpps_scu.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
+#include <kcenon/pacs/services/mpps_scu.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
 
 #include <catch2/catch_test_macros.hpp>
 

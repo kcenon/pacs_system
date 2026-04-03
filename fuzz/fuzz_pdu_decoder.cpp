@@ -9,7 +9,7 @@
 // - Corrupt presentation context data
 // - Invalid P-DATA-TF presentation data values
 
-#include <pacs/network/pdu_decoder.hpp>
+#include <kcenon/pacs/network/pdu_decoder.h>
 
 #include <cstdint>
 #include <span>

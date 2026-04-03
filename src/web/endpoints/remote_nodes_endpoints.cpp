@@ -21,17 +21,17 @@
 #undef DELETE
 #endif
 
-#include "pacs/client/job_manager.hpp"
-#include "pacs/client/remote_node.hpp"
-#include "pacs/client/remote_node_manager.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/services/query_scu.hpp"
-#include "pacs/web/endpoints/remote_nodes_endpoints.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/client/remote_node.h"
+#include "kcenon/pacs/client/remote_node_manager.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/query_scu.h"
+#include "kcenon/pacs/web/endpoints/remote_nodes_endpoints.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <chrono>
 #include <sstream>

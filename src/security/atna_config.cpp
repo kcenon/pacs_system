@@ -3,7 +3,7 @@
  * @brief Implementation of ATNA audit configuration management
  */
 
-#include "pacs/security/atna_config.hpp"
+#include "kcenon/pacs/security/atna_config.h"
 
 #include <algorithm>
 #include <filesystem>

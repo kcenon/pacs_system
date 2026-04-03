@@ -3,10 +3,10 @@
  * @brief Implementation of Mini PACS class
  */
 
-#include "mini_pacs.hpp"
+#include "mini_pacs.h"
 
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <chrono>
 #include <iomanip>

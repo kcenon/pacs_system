@@ -30,14 +30,14 @@ module;
 #include <vector>
 
 // PACS cache headers
-#include <pacs/services/cache/simple_lru_cache.hpp>
-#include <pacs/services/cache/query_cache.hpp>
-#include <pacs/services/cache/parallel_query_executor.hpp>
-#include <pacs/services/cache/streaming_query_handler.hpp>
+#include <kcenon/pacs/services/cache/simple_lru_cache.h>
+#include <kcenon/pacs/services/cache/query_cache.h>
+#include <kcenon/pacs/services/cache/parallel_query_executor.h>
+#include <kcenon/pacs/services/cache/streaming_query_handler.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include <pacs/services/cache/database_cursor.hpp>
-#include <pacs/services/cache/query_result_stream.hpp>
+#include <kcenon/pacs/services/cache/database_cursor.h>
+#include <kcenon/pacs/services/cache/query_result_stream.h>
 #endif
 
 export module kcenon.pacs:services_cache;

@@ -15,14 +15,14 @@
  * 4. Save and load DICOM Part 10 files
  */
 
-#include "console_utils.hpp"
+#include "console_utils.h"
 
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_file.hpp>
-#include <pacs/core/dicom_tag.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/transfer_syntax.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/dicom_tag.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/transfer_syntax.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <iomanip>
 #include <iostream>
