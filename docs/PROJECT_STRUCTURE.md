@@ -519,9 +519,9 @@ option(BUILD_DOCS "Build documentation" OFF)
 # Find ecosystem dependencies
 find_package(CommonSystem REQUIRED)
 find_package(ContainerSystem REQUIRED)
-find_package(NetworkSystem REQUIRED)
-find_package(ThreadSystem REQUIRED)
-find_package(LoggerSystem REQUIRED)
+find_package(network_system REQUIRED)
+find_package(thread_system REQUIRED)
+find_package(logger_system REQUIRED)
 find_package(MonitoringSystem REQUIRED)
 
 # Add subdirectories

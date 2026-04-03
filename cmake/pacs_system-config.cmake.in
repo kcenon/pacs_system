@@ -8,7 +8,7 @@ find_dependency(container_system CONFIG REQUIRED)
 find_dependency(network_system CONFIG REQUIRED)
 
 if(@PACS_SYSTEM_WITH_THREAD_SYSTEM@)
-    find_dependency(ThreadSystem CONFIG REQUIRED)
+    find_dependency(thread_system CONFIG REQUIRED)
 endif()
 
 if(@PACS_SYSTEM_WITH_LOGGER_SYSTEM@)
