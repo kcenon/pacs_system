@@ -223,23 +223,23 @@ target_link_libraries(pacs_network
 )
 
 # Link network_system (Tier 4) - DICOM PDU/Association
-if(TARGET NetworkSystem)
+if(TARGET network_system)
     pacs_link_external_dependency(
         pacs_network
         PUBLIC
-        NetworkSystem
-        NetworkSystem::NetworkSystem
+        network_system
+        network_system::network_system
     )
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
 endif()
 
 # Link thread_system (Tier 1) - for accept_worker
-if(TARGET ThreadSystem)
+if(TARGET thread_system)
     pacs_link_external_dependency(
         pacs_network
         PUBLIC
-        ThreadSystem
-        ThreadSystem::thread_base
+        thread_system
+        thread_system::thread_base
     )
     target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
 elseif(TARGET thread_base)
@@ -247,7 +247,7 @@ elseif(TARGET thread_base)
         pacs_network
         PUBLIC
         thread_base
-        ThreadSystem::thread_base
+        thread_system::thread_base
     )
     target_compile_definitions(pacs_network PUBLIC PACS_NETWORK_WITH_THREAD_SYSTEM)
     # CRITICAL: Explicitly add thread_system include directories
@@ -839,7 +839,7 @@ else()
 endif()
 
 # Integration library (requires container_system and logger_system via network_system)
-if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
+if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
     # Define integration library sources
     set(PACS_INTEGRATION_SOURCES
         src/integration/container_adapter.cpp
@@ -877,36 +877,36 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     )
 
     # Link logger_system (REQUIRED for logger_adapter)
-    if(TARGET LoggerSystem)
+    if(TARGET logger_system)
         pacs_link_external_dependency(
             pacs_integration
             PUBLIC
-            LoggerSystem
-            LoggerSystem::LoggerSystem
+            logger_system
+            logger_system::logger_system
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_LOGGER_SYSTEM)
-        message(STATUS "    - logger_adapter: ON (LoggerSystem)")
+        message(STATUS "    - logger_adapter: ON (logger_system)")
     else()
-        message(WARNING "    - logger_adapter: OFF (LoggerSystem target not found)")
+        message(WARNING "    - logger_adapter: OFF (logger_system target not found)")
     endif()
 
     # Link thread_system (REQUIRED for thread_pool_adapter)
-    # thread_system creates 'thread_base' as main target (legacy build) or 'ThreadSystem' (new build)
-    if(TARGET ThreadSystem)
+    # thread_system creates 'thread_base' as main target (legacy build) or 'thread_system' (new build)
+    if(TARGET thread_system)
         pacs_link_external_dependency(
             pacs_integration
             PUBLIC
-            ThreadSystem
-            ThreadSystem::thread_base
+            thread_system
+            thread_system::thread_base
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
-        message(STATUS "    - thread_pool_adapter: ON (ThreadSystem)")
+        message(STATUS "    - thread_pool_adapter: ON (thread_system)")
     elseif(TARGET thread_base)
         pacs_link_external_dependency(
             pacs_integration
             PUBLIC
             thread_base
-            ThreadSystem::thread_base
+            thread_system::thread_base
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
         message(STATUS "    - thread_pool_adapter: ON (thread_base)")
@@ -916,12 +916,12 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
             pacs_integration
             PUBLIC
             pacs_thread_system_headers
-            ThreadSystem::thread_base
+            thread_system::thread_base
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_THREAD_SYSTEM)
         message(WARNING "    - thread_pool_adapter: ON (headers only - linking may fail)")
     else()
-        message(WARNING "    - thread_pool_adapter: OFF (ThreadSystem/thread_base target not found)")
+        message(WARNING "    - thread_pool_adapter: OFF (thread_system/thread_base target not found)")
     endif()
 
     # CRITICAL: Inherit thread_system compile definitions for ABI compatibility
@@ -949,17 +949,17 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET NetworkSystem)
     endif()
 
     # Link network_system (REQUIRED for network_adapter)
-    if(TARGET NetworkSystem)
+    if(TARGET network_system)
         pacs_link_external_dependency(
             pacs_integration
             PUBLIC
-            NetworkSystem
-            NetworkSystem::NetworkSystem
+            network_system
+            network_system::network_system
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_NETWORK_SYSTEM)
-        message(STATUS "    - network_adapter: ON (NetworkSystem)")
+        message(STATUS "    - network_adapter: ON (network_system)")
     else()
-        message(WARNING "    - network_adapter: OFF (NetworkSystem target not found)")
+        message(WARNING "    - network_adapter: OFF (network_system target not found)")
     endif()
 
     # Link monitoring_system (for monitoring_adapter)
