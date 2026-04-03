@@ -21,10 +21,10 @@
 |----|------|-------------|----------------------|---------|---------------------|-------------|-----------------|
 | SOUP-001 | [common_system](https://github.com/kcenon/common_system) | kcenon | `47be5fd2` | BSD-3-Clause | Result&lt;T&gt; pattern, error handling primitives | B | None |
 | SOUP-002 | [container_system](https://github.com/kcenon/container_system) | kcenon | `0b95a0c1` | BSD-3-Clause | DICOM data serialization containers | B | None |
-| SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `3ea6fd55` | BSD-3-Clause | Thread pool, async task scheduling | B | None |
-| SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `66a00ccc` | BSD-3-Clause | Structured logging infrastructure | A | None |
-| SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `0b562ea3` | BSD-3-Clause | Performance metrics collection | A | None |
-| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `c70026ab` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | None |
+| SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `db8d36f1` | BSD-3-Clause | Thread pool, async task scheduling | B | None |
+| SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `f119ecd6` | BSD-3-Clause | Structured logging infrastructure | A | None |
+| SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `221bf3d2` | BSD-3-Clause | Performance metrics collection | A | None |
+| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `093691d9` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | None |
 | SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `b90b0f3b` | BSD-3-Clause | SQL query builder, database abstraction | B | None |
 
 > **Note**: kcenon libraries are pinned by commit SHA (no release tags available).

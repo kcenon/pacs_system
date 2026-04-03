@@ -451,7 +451,7 @@ if(PACS_BUILD_TESTS)
     endif()
 
     # Concurrency tests (Issue #337 - Lock-free structure stress tests)
-    if(TARGET thread_base OR TARGET ThreadSystem)
+    if(TARGET thread_base OR TARGET thread_system)
         add_executable(concurrency_tests
             tests/concurrency/lockfree_stress_test.cpp
         )
@@ -460,8 +460,8 @@ if(PACS_BUILD_TESTS)
                 Catch2::Catch2WithMain
         )
         # Link thread_system for lockfree_queue
-        if(TARGET ThreadSystem)
-            target_link_libraries(concurrency_tests PRIVATE ThreadSystem)
+        if(TARGET thread_system)
+            target_link_libraries(concurrency_tests PRIVATE thread_system)
         elseif(TARGET thread_base)
             target_link_libraries(concurrency_tests PRIVATE thread_base)
         endif()

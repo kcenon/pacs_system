@@ -25,28 +25,28 @@
       "name": "thread_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../thread_system",
-      "version": "3ea6fd55704f70b880b13da190064ddbce70dda8",
+      "version": "db8d36f15cf2dfb679474b20cb47160494a6c8be",
       "license": "BSD-3-Clause"
     },
     {
       "name": "logger_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../logger_system",
-      "version": "66a00ccce9917a65179e1c42707af9f32d22361f",
+      "version": "f119ecd698fb5a8b25dd730647b9d038034aad5a",
       "license": "BSD-3-Clause"
     },
     {
       "name": "monitoring_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../monitoring_system",
-      "version": "0b562ea3c60a8a51da77a1847d87efba3d99ef64",
+      "version": "221bf3d2645a2bfd54b07fd84b1c24c2e32d754f",
       "license": "BSD-3-Clause"
     },
     {
       "name": "network_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../network_system",
-      "version": "c70026ab057e72a84a5031f24d2009f9ee641743",
+      "version": "093691d9523265d672880e2cb7c0ea0e4463a8f8",
       "license": "BSD-3-Clause"
     },
     {

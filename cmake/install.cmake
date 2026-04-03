@@ -59,12 +59,12 @@ if(TARGET monitoring_system OR PACS_MONITORING_SYSTEM_INCLUDE_DIR)
 endif()
 
 set(PACS_SYSTEM_WITH_THREAD_SYSTEM FALSE)
-if(TARGET ThreadSystem OR TARGET thread_base OR PACS_THREAD_SYSTEM_INCLUDE_DIR)
+if(TARGET thread_system OR TARGET thread_base OR PACS_THREAD_SYSTEM_INCLUDE_DIR)
     set(PACS_SYSTEM_WITH_THREAD_SYSTEM TRUE)
 endif()
 
 set(PACS_SYSTEM_WITH_LOGGER_SYSTEM FALSE)
-if(TARGET LoggerSystem)
+if(TARGET logger_system)
     set(PACS_SYSTEM_WITH_LOGGER_SYSTEM TRUE)
 endif()
 
@@ -172,9 +172,9 @@ foreach(_pacs_non_exportable_dep
     pacs_common_system_headers
     pacs_thread_system_headers
     pacs_monitoring_system_headers
-    NetworkSystem
+    network_system
     thread_base
-    LoggerSystem
+    logger_system
     monitoring_system
     Crow
 )
