@@ -9,14 +9,14 @@
  * @see Issue #914 - Extract MPPS lifecycle repository
  */
 
-#include "pacs/storage/mpps_repository.hpp"
+#include "kcenon/pacs/storage/mpps_repository.h"
 
 #include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
 
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

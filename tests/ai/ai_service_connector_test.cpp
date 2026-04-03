@@ -3,9 +3,9 @@
  * @brief Unit tests for ai_service_connector
  */
 
-#include <pacs/ai/ai_service_connector.hpp>
-#include <pacs/integration/logger_adapter.hpp>
-#include <pacs/integration/monitoring_adapter.hpp>
+#include <kcenon/pacs/ai/ai_service_connector.h>
+#include <kcenon/pacs/integration/logger_adapter.h>
+#include <kcenon/pacs/integration/monitoring_adapter.h>
 
 #include <catch2/catch_test_macros.hpp>
 

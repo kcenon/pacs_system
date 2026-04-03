@@ -22,13 +22,13 @@
  *   worklist_scu --modality CT --date 20241215 localhost 11112
  */
 
-#include "worklist_result_formatter.hpp"
+#include "worklist_result_formatter.h"
 
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/services/worklist_scp.hpp"
-#include "pacs/services/worklist_scu.hpp"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/services/worklist_scp.h"
+#include "kcenon/pacs/services/worklist_scu.h"
 
 #include <chrono>
 #include <cstdlib>

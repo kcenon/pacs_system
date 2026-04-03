@@ -5,10 +5,10 @@
  * Tests CRUD operations for the patients table as specified in DES-DB-001.
  */
 
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/storage/index_database.h>
 
 #include <catch2/catch_test_macros.hpp>
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 #include <algorithm>
 #include <filesystem>

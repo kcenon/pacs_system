@@ -7,9 +7,9 @@
  * @brief DICOM association handler implementation for network_system integration
  */
 
-#include "pacs/network/v2/dicom_association_handler.hpp"
-#include "pacs/network/pdu_encoder.hpp"
-#include "pacs/network/pdu_decoder.hpp"
+#include "kcenon/pacs/network/v2/dicom_association_handler.h"
+#include "kcenon/pacs/network/pdu_encoder.h"
+#include "kcenon/pacs/network/pdu_decoder.h"
 
 #include <span>
 #include <sstream>

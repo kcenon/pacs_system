@@ -2,10 +2,10 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/encoding/compression/hevc_codec.hpp"
-#include "pacs/encoding/compression/codec_factory.hpp"
-#include "pacs/encoding/compression/image_params.hpp"
-#include "pacs/encoding/transfer_syntax.hpp"
+#include "kcenon/pacs/encoding/compression/hevc_codec.h"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
+#include "kcenon/pacs/encoding/compression/image_params.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 
 #include <vector>
 

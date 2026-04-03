@@ -7,7 +7,7 @@
  * @brief Implementation of background migration service for HSM
  */
 
-#include <pacs/storage/hsm_migration_service.hpp>
+#include <kcenon/pacs/storage/hsm_migration_service.h>
 
 #include <algorithm>
 

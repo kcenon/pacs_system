@@ -9,7 +9,7 @@
  * @see Issue #711 - Storage Commitment database tracking
  */
 
-#include "pacs/storage/commitment_repository.hpp"
+#include "kcenon/pacs/storage/commitment_repository.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

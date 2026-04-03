@@ -7,7 +7,7 @@
  * @brief Implementation of PACS monitoring adapter
  */
 
-#include <pacs/integration/monitoring_adapter.hpp>
+#include <kcenon/pacs/integration/monitoring_adapter.h>
 
 #include <kcenon/monitoring/core/performance_monitor.h>
 #include <kcenon/monitoring/tracing/distributed_tracer.h>

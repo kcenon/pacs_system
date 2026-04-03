@@ -20,13 +20,13 @@
  *   find_scu -S -k "0008,0060=CT" -k "0008,0020=20240101-20241231" pacs.example.com 104
  */
 
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_tag.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/query_scp.hpp"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/query_scp.h"
 
 #include <algorithm>
 #include <chrono>

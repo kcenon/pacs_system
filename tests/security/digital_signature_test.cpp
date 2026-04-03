@@ -7,13 +7,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/security/certificate.hpp"
-#include "pacs/security/digital_signature.hpp"
-#include "pacs/security/signature_types.hpp"
+#include "kcenon/pacs/security/certificate.h"
+#include "kcenon/pacs/security/digital_signature.h"
+#include "kcenon/pacs/security/signature_types.h"
 
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 using namespace kcenon::pacs::security;
 using namespace kcenon::pacs::core;

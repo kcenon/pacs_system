@@ -9,11 +9,11 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "pacs/monitoring/collectors/dicom_association_collector.hpp"
-#include "pacs/monitoring/collectors/dicom_metrics_collector.hpp"
-#include "pacs/monitoring/collectors/dicom_service_collector.hpp"
-#include "pacs/monitoring/collectors/dicom_storage_collector.hpp"
-#include "pacs/monitoring/pacs_monitor.hpp"
+#include "kcenon/pacs/monitoring/collectors/dicom_association_collector.h"
+#include "kcenon/pacs/monitoring/collectors/dicom_metrics_collector.h"
+#include "kcenon/pacs/monitoring/collectors/dicom_service_collector.h"
+#include "kcenon/pacs/monitoring/collectors/dicom_storage_collector.h"
+#include "kcenon/pacs/monitoring/pacs_monitor.h"
 
 #include <chrono>
 #include <string>

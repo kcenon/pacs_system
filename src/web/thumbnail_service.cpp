@@ -11,13 +11,13 @@
  * @license MIT
  */
 
-#include "pacs/web/thumbnail_service.hpp"
+#include "kcenon/pacs/web/thumbnail_service.h"
 
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_element.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_element.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/storage/index_database.h"
 
 #include <algorithm>
 #include <cmath>

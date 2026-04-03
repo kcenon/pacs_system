@@ -11,17 +11,17 @@
  * with prepared statements.
  */
 
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/storage/index_database.h>
 
-#include <pacs/core/result.hpp>
-#include <pacs/storage/audit_repository.hpp>
-#include <pacs/storage/instance_repository.hpp>
-#include <pacs/storage/mpps_repository.hpp>
-#include <pacs/storage/patient_repository.hpp>
-#include <pacs/storage/series_repository.hpp>
-#include <pacs/storage/study_repository.hpp>
-#include <pacs/storage/ups_repository.hpp>
-#include <pacs/storage/worklist_repository.hpp>
+#include <kcenon/pacs/core/result.h>
+#include <kcenon/pacs/storage/audit_repository.h>
+#include <kcenon/pacs/storage/instance_repository.h>
+#include <kcenon/pacs/storage/mpps_repository.h>
+#include <kcenon/pacs/storage/patient_repository.h>
+#include <kcenon/pacs/storage/series_repository.h>
+#include <kcenon/pacs/storage/study_repository.h>
+#include <kcenon/pacs/storage/ups_repository.h>
+#include <kcenon/pacs/storage/worklist_repository.h>
 #include <sqlite3.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
@@ -32,8 +32,8 @@
 #include <chrono>
 #include <ctime>
 #include <filesystem>
-#include <pacs/compat/format.hpp>
-#include <pacs/compat/time.hpp>
+#include <kcenon/pacs/compat/format.h>
+#include <kcenon/pacs/compat/time.h>
 #include <iomanip>
 #include <set>
 #include <sstream>

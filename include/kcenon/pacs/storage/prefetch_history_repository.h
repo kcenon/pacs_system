@@ -1,0 +1,88 @@
+// BSD 3-Clause License
+// Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
+// See the LICENSE file in the project root for full license information.
+
+/**
+ * @file prefetch_history_repository.h
+ * @brief Repository for prefetch history records using base_repository pattern
+ *
+ * @see Issue #610 - Phase 4: Repository Migrations
+ * @author kcenon
+ * @since 1.0.0
+ */
+
+#pragma once
+
+#include "kcenon/pacs/storage/base_repository.h"
+#include "kcenon/pacs/client/prefetch_types.h"
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+namespace kcenon::pacs::storage {
+
+/**
+ * @brief Repository for prefetch history records using base_repository pattern
+ */
+class prefetch_history_repository
+    : public base_repository<client::prefetch_history, int64_t> {
+public:
+    explicit prefetch_history_repository(
+        std::shared_ptr<pacs_database_adapter> db);
+
+    [[nodiscard]] auto find_by_patient(
+        std::string_view patient_id,
+        size_t limit = 100) -> list_result_type;
+
+    [[nodiscard]] auto find_by_study(std::string_view study_uid)
+        -> list_result_type;
+
+    [[nodiscard]] auto find_by_rule(
+        std::string_view rule_id,
+        size_t limit = 100) -> list_result_type;
+
+    [[nodiscard]] auto find_by_status(
+        std::string_view status,
+        size_t limit = 100) -> list_result_type;
+
+    [[nodiscard]] auto find_recent(size_t limit = 100) -> list_result_type;
+
+    [[nodiscard]] auto is_study_prefetched(std::string_view study_uid)
+        -> Result<bool>;
+
+    [[nodiscard]] auto count_by_status_on_current_date(
+        std::string_view status) -> Result<size_t>;
+
+    [[nodiscard]] auto update_status(
+        int64_t pk,
+        std::string_view status) -> VoidResult;
+
+    [[nodiscard]] auto cleanup_old(std::chrono::hours max_age)
+        -> Result<size_t>;
+
+protected:
+    [[nodiscard]] auto map_row_to_entity(const database_row& row) const
+        -> client::prefetch_history override;
+
+    [[nodiscard]] auto entity_to_row(const client::prefetch_history& entity) const
+        -> std::map<std::string, database_value> override;
+
+    [[nodiscard]] auto get_pk(const client::prefetch_history& entity) const
+        -> int64_t override;
+
+    [[nodiscard]] auto has_pk(const client::prefetch_history& entity) const
+        -> bool override;
+
+    [[nodiscard]] auto select_columns() const
+        -> std::vector<std::string> override;
+
+private:
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+};
+
+}  // namespace kcenon::pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

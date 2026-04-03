@@ -7,8 +7,8 @@
  * @brief Implementation of Label Map Segmentation IOD Validator
  */
 
-#include "pacs/services/validation/label_map_seg_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/services/validation/label_map_seg_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <sstream>
 

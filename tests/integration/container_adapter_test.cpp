@@ -3,7 +3,7 @@
  * @brief Unit tests for container_adapter
  */
 
-#include <pacs/integration/container_adapter.hpp>
+#include <kcenon/pacs/integration/container_adapter.h>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>

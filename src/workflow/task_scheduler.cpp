@@ -7,12 +7,12 @@
  * @brief Implementation of task scheduler service for automated PACS operations
  */
 
-#include "pacs/workflow/task_scheduler.hpp"
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/file_storage.hpp"
-#include "pacs/integration/logger_adapter.hpp"
-#include "pacs/integration/monitoring_adapter.hpp"
-#include "pacs/integration/executor_adapter.hpp"
+#include "kcenon/pacs/workflow/task_scheduler.h"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/file_storage.h"
+#include "kcenon/pacs/integration/logger_adapter.h"
+#include "kcenon/pacs/integration/monitoring_adapter.h"
+#include "kcenon/pacs/integration/executor_adapter.h"
 
 #include <kcenon/common/interfaces/executor_interface.h>
 

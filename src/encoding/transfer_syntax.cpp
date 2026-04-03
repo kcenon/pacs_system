@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/encoding/transfer_syntax.hpp"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 
 #include <algorithm>
 #include <array>

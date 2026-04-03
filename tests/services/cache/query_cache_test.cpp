@@ -3,7 +3,7 @@
  * @brief Unit tests for query_cache class
  */
 
-#include <pacs/services/cache/query_cache.hpp>
+#include <kcenon/pacs/services/cache/query_cache.h>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>

@@ -9,13 +9,13 @@
  * @see Issue #190 - Parallel query executor
  */
 
-#include <pacs/services/cache/parallel_query_executor.hpp>
+#include <kcenon/pacs/services/cache/parallel_query_executor.h>
 
 // Only compile tests when PACS_WITH_DATABASE_SYSTEM is defined
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/storage/index_database.h>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>

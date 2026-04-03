@@ -3,12 +3,12 @@
  * @brief Unit tests for X-Ray Angiographic Storage SOP Classes and IOD Validator
  */
 
-#include <pacs/services/sop_classes/xa_storage.hpp>
-#include <pacs/services/validation/xa_iod_validator.hpp>
-#include <pacs/services/sop_class_registry.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/sop_classes/xa_storage.h>
+#include <kcenon/pacs/services/validation/xa_iod_validator.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -9,7 +9,7 @@
  * @copyright Copyright (c) 2025
  */
 
-#include <pacs/security/access_control_manager.hpp>
+#include <kcenon/pacs/security/access_control_manager.h>
 
 namespace kcenon::pacs::security {
 

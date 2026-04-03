@@ -8,12 +8,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/patient_record.hpp"
-#include "pacs/storage/series_record.hpp"
-#include "pacs/storage/study_record.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/patient_record.h"
+#include "kcenon/pacs/storage/series_record.h"
+#include "kcenon/pacs/storage/study_record.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 using namespace kcenon::pacs::storage;
 using namespace kcenon::pacs::web;

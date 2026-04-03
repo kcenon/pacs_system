@@ -7,9 +7,9 @@
  * @brief Implementation of network_adapter for network_system integration
  */
 
-#include <pacs/integration/network_adapter.hpp>
-#include <pacs/integration/dicom_session.hpp>
-#include <pacs/network/dicom_server.hpp>
+#include <kcenon/pacs/integration/network_adapter.h>
+#include <kcenon/pacs/integration/dicom_session.h>
+#include <kcenon/pacs/network/dicom_server.h>
 
 #include <kcenon/network/facade/tcp_facade.h>
 

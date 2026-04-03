@@ -5,9 +5,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/dataset_charset.hpp>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/dataset_charset.h>
 
 #include <algorithm>
 #include <vector>

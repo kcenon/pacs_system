@@ -29,9 +29,9 @@ module;
 #include <vector>
 
 // PACS workflow headers
-#include <pacs/workflow/task_scheduler.hpp>
-#include <pacs/workflow/auto_prefetch_service.hpp>
-#include <pacs/workflow/study_lock_manager.hpp>
+#include <kcenon/pacs/workflow/task_scheduler.h>
+#include <kcenon/pacs/workflow/auto_prefetch_service.h>
+#include <kcenon/pacs/workflow/study_lock_manager.h>
 
 export module kcenon.pacs:workflow;
 

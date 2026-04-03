@@ -7,11 +7,11 @@
  * @brief Implementation of streaming query handler
  */
 
-#include "pacs/services/cache/streaming_query_handler.hpp"
+#include "kcenon/pacs/services/cache/streaming_query_handler.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/storage/index_database.h"
 
 namespace kcenon::pacs::services {
 

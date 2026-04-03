@@ -6,10 +6,10 @@
  * like cleanup, archiving, and verification.
  */
 
-#include <pacs/workflow/task_scheduler.hpp>
-#include <pacs/workflow/task_scheduler_config.hpp>
+#include <kcenon/pacs/workflow/task_scheduler.h>
+#include <kcenon/pacs/workflow/task_scheduler_config.h>
 
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/storage/index_database.h>
 
 #include <catch2/catch_test_macros.hpp>
 

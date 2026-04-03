@@ -3,11 +3,11 @@
  * @brief Unit tests for UPS (Unified Procedure Step) Push SCP service
  */
 
-#include <pacs/services/ups/ups_push_scp.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
-#include <pacs/storage/ups_workitem.hpp>
+#include <kcenon/pacs/services/ups/ups_push_scp.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/storage/ups_workitem.h>
 
 #include <catch2/catch_test_macros.hpp>
 

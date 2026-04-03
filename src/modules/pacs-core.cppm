@@ -39,16 +39,16 @@ module;
 #include <vector>
 
 // PACS core headers
-#include <pacs/core/dicom_tag.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/core/tag_info.hpp>
-#include <pacs/core/dicom_dictionary.hpp>
-#include <pacs/core/dicom_element.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_file.hpp>
-#include <pacs/core/pool_manager.hpp>
-#include <pacs/core/events.hpp>
-#include <pacs/core/result.hpp>
+#include <kcenon/pacs/core/dicom_tag.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/core/tag_info.h>
+#include <kcenon/pacs/core/dicom_dictionary.h>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/pool_manager.h>
+#include <kcenon/pacs/core/events.h>
+#include <kcenon/pacs/core/result.h>
 
 export module kcenon.pacs:core;
 

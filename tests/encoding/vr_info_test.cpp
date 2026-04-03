@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/encoding/vr_info.hpp"
+#include "kcenon/pacs/encoding/vr_info.h"
 
 #include <cstring>
 

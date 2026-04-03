@@ -7,11 +7,11 @@
  * @brief DIMSE message implementation
  */
 
-#include <pacs/network/dimse/dimse_message.hpp>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
 
-#include <pacs/encoding/implicit_vr_codec.hpp>
-#include <pacs/encoding/explicit_vr_codec.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/encoding/implicit_vr_codec.h>
+#include <kcenon/pacs/encoding/explicit_vr_codec.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <stdexcept>
 

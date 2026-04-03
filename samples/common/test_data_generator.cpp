@@ -3,12 +3,12 @@
  * @brief Implementation of test data generation utilities
  */
 
-#include "test_data_generator.hpp"
+#include "test_data_generator.h"
 
-#include <pacs/core/dicom_file.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/transfer_syntax.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/transfer_syntax.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <chrono>
 #include <cmath>

@@ -10,8 +10,8 @@
  * @see Issue #521 - Phase 4: Execution Jobs
  */
 
-#include <pacs/network/pipeline/jobs/storage_query_exec_job.hpp>
-#include <pacs/network/pipeline/jobs/response_encode_job.hpp>
+#include <kcenon/pacs/network/pipeline/jobs/storage_query_exec_job.h>
+#include <kcenon/pacs/network/pipeline/jobs/response_encode_job.h>
 
 #include <chrono>
 

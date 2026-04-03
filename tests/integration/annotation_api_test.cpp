@@ -16,12 +16,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/storage/annotation_record.hpp"
-#include "pacs/storage/annotation_repository.hpp"
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/storage/annotation_record.h"
+#include "kcenon/pacs/storage/annotation_repository.h"
+#include "kcenon/pacs/storage/index_database.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include "pacs/storage/pacs_database_adapter.hpp"
+#include "kcenon/pacs/storage/pacs_database_adapter.h"
 #endif
 
 #include <chrono>

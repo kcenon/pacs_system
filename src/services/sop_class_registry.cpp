@@ -7,20 +7,20 @@
  * @brief Implementation of SOP Class Registry
  */
 
-#include "pacs/services/sop_class_registry.hpp"
-#include "pacs/services/storage_commitment_types.hpp"
-#include "pacs/services/sop_classes/dx_storage.hpp"
-#include "pacs/services/sop_classes/nm_storage.hpp"
-#include "pacs/services/sop_classes/pet_storage.hpp"
-#include "pacs/services/sop_classes/rt_storage.hpp"
-#include "pacs/services/sop_classes/seg_storage.hpp"
-#include "pacs/services/sop_classes/sr_storage.hpp"
-#include "pacs/services/sop_classes/us_storage.hpp"
-#include "pacs/services/sop_classes/wsi_storage.hpp"
-#include "pacs/services/sop_classes/xa_storage.hpp"
-#include "pacs/services/sop_classes/ophthalmic_storage.hpp"
-#include "pacs/services/sop_classes/parametric_map_storage.hpp"
-#include "pacs/services/sop_classes/waveform_storage.hpp"
+#include "kcenon/pacs/services/sop_class_registry.h"
+#include "kcenon/pacs/services/storage_commitment_types.h"
+#include "kcenon/pacs/services/sop_classes/dx_storage.h"
+#include "kcenon/pacs/services/sop_classes/nm_storage.h"
+#include "kcenon/pacs/services/sop_classes/pet_storage.h"
+#include "kcenon/pacs/services/sop_classes/rt_storage.h"
+#include "kcenon/pacs/services/sop_classes/seg_storage.h"
+#include "kcenon/pacs/services/sop_classes/sr_storage.h"
+#include "kcenon/pacs/services/sop_classes/us_storage.h"
+#include "kcenon/pacs/services/sop_classes/wsi_storage.h"
+#include "kcenon/pacs/services/sop_classes/xa_storage.h"
+#include "kcenon/pacs/services/sop_classes/ophthalmic_storage.h"
+#include "kcenon/pacs/services/sop_classes/parametric_map_storage.h"
+#include "kcenon/pacs/services/sop_classes/waveform_storage.h"
 
 #include <algorithm>
 

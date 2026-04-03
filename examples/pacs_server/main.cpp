@@ -20,8 +20,8 @@
  *   --help                  Show help message
  */
 
-#include "config.hpp"
-#include "server_app.hpp"
+#include "config.h"
+#include "server_app.h"
 
 #include <atomic>
 #include <csignal>

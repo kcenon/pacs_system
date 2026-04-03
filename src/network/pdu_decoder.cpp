@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/network/pdu_decoder.hpp"
+#include "kcenon/pacs/network/pdu_decoder.h"
 
 #include <algorithm>
 #include <cstring>

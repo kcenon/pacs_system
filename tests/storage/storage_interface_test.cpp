@@ -5,7 +5,7 @@
  * Tests the storage_interface contract using a mock implementation.
  */
 
-#include <pacs/storage/storage_interface.hpp>
+#include <kcenon/pacs/storage/storage_interface.h>
 
 #include <catch2/catch_test_macros.hpp>
 

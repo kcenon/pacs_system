@@ -7,11 +7,11 @@
  * @brief DICOM Server implementation
  */
 
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/pdu_encoder.hpp"
-#include "pacs/network/pdu_decoder.hpp"
-#include "pacs/integration/thread_pool_adapter.hpp"
-#include "pacs/core/events.hpp"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/pdu_encoder.h"
+#include "kcenon/pacs/network/pdu_decoder.h"
+#include "kcenon/pacs/integration/thread_pool_adapter.h"
+#include "kcenon/pacs/core/events.h"
 
 #include <kcenon/common/patterns/event_bus.h>
 

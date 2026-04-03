@@ -9,7 +9,7 @@
  * @see Issue #610 - Phase 4: Repository Migrations
  */
 
-#include "pacs/storage/prefetch_history_repository.hpp"
+#include "kcenon/pacs/storage/prefetch_history_repository.h"
 
 #include <chrono>
 #include <cstdio>

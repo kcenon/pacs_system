@@ -19,16 +19,16 @@
  *   move_scu -aem WORKSTATION -L STUDY -k "0020,000D=1.2.840..." localhost 11112
  */
 
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/transfer_syntax.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/retrieve_scp.hpp"
-#include "pacs/services/storage_scp.hpp"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/retrieve_scp.h"
+#include "kcenon/pacs/services/storage_scp.h"
 
 #include <algorithm>
 #include <atomic>

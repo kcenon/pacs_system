@@ -12,7 +12,7 @@
  * @see Issue #650 - Part 2: Migrate annotation, routing, node repositories
  */
 
-#include "pacs/storage/routing_repository.hpp"
+#include "kcenon/pacs/storage/routing_repository.h"
 
 #include <chrono>
 #include <cstring>

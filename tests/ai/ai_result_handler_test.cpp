@@ -3,11 +3,11 @@
  * @brief Unit tests for AI result handler
  */
 
-#include <pacs/ai/ai_result_handler.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
-#include <pacs/storage/storage_interface.hpp>
+#include <kcenon/pacs/ai/ai_result_handler.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
+#include <kcenon/pacs/storage/storage_interface.h>
 
 #include <catch2/catch_test_macros.hpp>
 

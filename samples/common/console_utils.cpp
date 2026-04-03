@@ -3,10 +3,10 @@
  * @brief Implementation of console output utilities
  */
 
-#include "console_utils.hpp"
+#include "console_utils.h"
 
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <algorithm>
 #include <cstdlib>

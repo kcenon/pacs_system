@@ -13,7 +13,7 @@
 #include <thread>
 #include <vector>
 
-#include "pacs/workflow/study_lock_manager.hpp"
+#include "kcenon/pacs/workflow/study_lock_manager.h"
 
 using namespace kcenon::pacs::workflow;
 using namespace std::chrono_literals;

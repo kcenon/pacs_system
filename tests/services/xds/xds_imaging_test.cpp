@@ -3,12 +3,12 @@
  * @brief Unit tests for IHE XDS-I.b Imaging Document Source and Consumer
  */
 
-#include <pacs/services/xds/imaging_document_source.hpp>
-#include <pacs/services/xds/imaging_document_consumer.hpp>
-#include <pacs/services/sop_classes/sr_storage.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/xds/imaging_document_source.h>
+#include <kcenon/pacs/services/xds/imaging_document_consumer.h>
+#include <kcenon/pacs/services/sop_classes/sr_storage.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

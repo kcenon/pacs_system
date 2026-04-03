@@ -15,14 +15,14 @@
  * 4. TLS-secured store/query workflow
  */
 
-#include "test_fixtures.hpp"
+#include "test_fixtures.h"
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/integration/network_adapter.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/integration/network_adapter.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <filesystem>
 #include <thread>
@@ -723,7 +723,7 @@ TEST_CASE("TLS configuration validation", "[tls][config]") {
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
 
-#include "pacs/network/v2/dicom_server_v2.hpp"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 
 namespace {
 

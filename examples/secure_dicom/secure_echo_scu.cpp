@@ -17,10 +17,10 @@
  *   secure_echo_scu localhost 2762 PACS_SCP --cert client.crt --key client.key --ca ca.crt
  */
 
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/verification_scp.hpp"
-#include "pacs/integration/network_adapter.hpp"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/verification_scp.h"
+#include "kcenon/pacs/integration/network_adapter.h"
 
 #include <chrono>
 #include <cstdlib>

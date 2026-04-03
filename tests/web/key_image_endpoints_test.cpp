@@ -12,13 +12,13 @@
  * @license MIT
  */
 
-#include "pacs/storage/key_image_record.hpp"
-#include "pacs/storage/key_image_repository.hpp"
+#include "kcenon/pacs/storage/key_image_record.h"
+#include "kcenon/pacs/storage/key_image_repository.h"
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 using namespace kcenon::pacs::storage;
 using namespace kcenon::pacs::web;

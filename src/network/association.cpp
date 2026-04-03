@@ -7,9 +7,9 @@
  * @brief DICOM Association implementation
  */
 
-#include "pacs/network/association.hpp"
-#include "pacs/network/pdu_encoder.hpp"
-#include "pacs/network/dicom_server.hpp"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/pdu_encoder.h"
+#include "kcenon/pacs/network/dicom_server.h"
 
 #include <algorithm>
 #include <sstream>

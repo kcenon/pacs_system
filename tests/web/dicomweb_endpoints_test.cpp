@@ -12,10 +12,10 @@
 #include <thread>
 #include <vector>
 
-#include "pacs/web/endpoints/dicomweb_endpoints.hpp"
-#include "pacs/storage/study_record.hpp"
-#include "pacs/storage/series_record.hpp"
-#include "pacs/storage/instance_record.hpp"
+#include "kcenon/pacs/web/endpoints/dicomweb_endpoints.h"
+#include "kcenon/pacs/storage/study_record.h"
+#include "kcenon/pacs/storage/series_record.h"
+#include "kcenon/pacs/storage/instance_record.h"
 
 using namespace kcenon::pacs::web;
 using namespace kcenon::pacs::web::dicomweb;

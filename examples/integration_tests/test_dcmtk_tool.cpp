@@ -9,7 +9,7 @@
  * @see Issue #449 - DCMTK Interoperability Test Automation Epic
  */
 
-#include "dcmtk_tool.hpp"
+#include "dcmtk_tool.h"
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -9,8 +9,8 @@
  * @see Issue #313 - Apply SIMD Optimization (Image Processing)
  */
 
-#include "simd_benchmark_common.hpp"
-#include "pacs/encoding/simd/simd_photometric.hpp"
+#include "simd_benchmark_common.h"
+#include "kcenon/pacs/encoding/simd/simd_photometric.h"
 
 #include <iostream>
 #include <vector>

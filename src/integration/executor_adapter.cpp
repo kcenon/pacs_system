@@ -9,9 +9,9 @@
  * @see Issue #487 - Integrate IExecutor interface for workflow pipeline execution
  */
 
-#include <pacs/integration/executor_adapter.hpp>
-#include <pacs/integration/thread_pool_interface.hpp>
-#include <pacs/integration/logger_adapter.hpp>
+#include <kcenon/pacs/integration/executor_adapter.h>
+#include <kcenon/pacs/integration/thread_pool_interface.h>
+#include <kcenon/pacs/integration/logger_adapter.h>
 
 #include <kcenon/thread/core/thread_pool.h>
 #include <kcenon/thread/core/thread_worker.h>

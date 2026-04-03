@@ -7,9 +7,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/pipeline/pipeline_coordinator.hpp"
-#include "pacs/network/pipeline/pipeline_job_types.hpp"
-#include "pacs/core/result.hpp"
+#include "kcenon/pacs/network/pipeline/pipeline_coordinator.h"
+#include "kcenon/pacs/network/pipeline/pipeline_job_types.h"
+#include "kcenon/pacs/core/result.h"
 
 #include <atomic>
 #include <chrono>

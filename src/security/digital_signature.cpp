@@ -9,10 +9,10 @@
  * @copyright Copyright (c) 2025
  */
 
-#include "pacs/security/digital_signature.hpp"
+#include "kcenon/pacs/security/digital_signature.h"
 
-#include <pacs/core/dicom_element.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <openssl/bio.h>
 #include <openssl/err.h>

@@ -3,8 +3,8 @@
  * @brief Unit tests for Radiation Therapy (RT) Storage SOP Classes
  */
 
-#include <pacs/services/sop_classes/rt_storage.hpp>
-#include <pacs/services/sop_class_registry.hpp>
+#include <kcenon/pacs/services/sop_classes/rt_storage.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
 
 #include <catch2/catch_test_macros.hpp>
 

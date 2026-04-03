@@ -7,12 +7,12 @@
  * @brief Implementation of DICOM Part 10 file handling
  */
 
-#include "pacs/core/dicom_file.hpp"
+#include "kcenon/pacs/core/dicom_file.h"
 
-#include "pacs/core/dicom_dictionary.hpp"
-#include "pacs/core/memory_mapped_file.hpp"
-#include "pacs/core/private_tag_registry.hpp"
-#include "pacs/encoding/compression/codec_factory.hpp"
+#include "kcenon/pacs/core/dicom_dictionary.h"
+#include "kcenon/pacs/core/memory_mapped_file.h"
+#include "kcenon/pacs/core/private_tag_registry.h"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
 
 #include <algorithm>
 #include <cstring>

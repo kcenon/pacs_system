@@ -13,13 +13,13 @@
  * 3. Stop Echo SCP
  */
 
-#include "test_fixtures.hpp"
+#include "test_fixtures.h"
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <thread>
 

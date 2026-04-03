@@ -17,12 +17,12 @@
  *   query_scu localhost 11112 PACS_SCP --level STUDY --patient-name "DOE^*"
  */
 
-#include "query_builder.hpp"
-#include "result_formatter.hpp"
+#include "query_builder.h"
+#include "result_formatter.h"
 
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/query_scp.hpp"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/query_scp.h"
 
 #include <chrono>
 #include <cstdlib>

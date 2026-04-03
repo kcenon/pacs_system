@@ -9,7 +9,7 @@
 // - Nested sequences with undefined length
 // - Oversized value length fields
 
-#include <pacs/core/dicom_file.hpp>
+#include <kcenon/pacs/core/dicom_file.h>
 
 #include <cstdint>
 #include <span>

@@ -15,21 +15,21 @@
  * @see Issue #134 - Integration Test Enhancement Epic
  */
 
-#include "test_fixtures.hpp"
+#include "test_fixtures.h"
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/mpps_scp.hpp"
-#include "pacs/services/query_scp.hpp"
-#include "pacs/services/retrieve_scp.hpp"
-#include "pacs/services/storage_scp.hpp"
-#include "pacs/services/storage_scu.hpp"
-#include "pacs/services/verification_scp.hpp"
-#include "pacs/services/worklist_scp.hpp"
-#include "pacs/storage/file_storage.hpp"
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/mpps_scp.h"
+#include "kcenon/pacs/services/query_scp.h"
+#include "kcenon/pacs/services/retrieve_scp.h"
+#include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/services/storage_scu.h"
+#include "kcenon/pacs/services/verification_scp.h"
+#include "kcenon/pacs/services/worklist_scp.h"
+#include "kcenon/pacs/storage/file_storage.h"
+#include "kcenon/pacs/storage/index_database.h"
 
 #include <atomic>
 #include <future>

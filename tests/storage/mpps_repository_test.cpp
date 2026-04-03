@@ -10,11 +10,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <pacs/storage/migration_runner.hpp>
-#include <pacs/storage/mpps_repository.hpp>
+#include <kcenon/pacs/storage/migration_runner.h>
+#include <kcenon/pacs/storage/mpps_repository.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include <pacs/storage/pacs_database_adapter.hpp>
+#include <kcenon/pacs/storage/pacs_database_adapter.h>
 #else
 #include <sqlite3.h>
 #endif

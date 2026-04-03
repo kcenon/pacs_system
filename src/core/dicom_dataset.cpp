@@ -7,7 +7,7 @@
  * @brief Implementation of DICOM Dataset
  */
 
-#include <pacs/core/dicom_dataset.hpp>
+#include <kcenon/pacs/core/dicom_dataset.h>
 
 namespace kcenon::pacs::core {
 

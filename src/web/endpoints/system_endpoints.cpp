@@ -14,16 +14,16 @@
 // declaration conflicts
 #include "crow.h"
 
-#include "pacs/security/access_control_manager.hpp"
-#include "pacs/security/user.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/security/access_control_manager.h"
+#include "kcenon/pacs/security/user.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #ifdef PACS_WITH_MONITORING
-#include "pacs/monitoring/health_checker.hpp"
-#include "pacs/monitoring/health_json.hpp"
-#include "pacs/monitoring/pacs_metrics.hpp"
+#include "kcenon/pacs/monitoring/health_checker.h"
+#include "kcenon/pacs/monitoring/health_json.h"
+#include "kcenon/pacs/monitoring/pacs_metrics.h"
 #endif
 
 #include <sstream>

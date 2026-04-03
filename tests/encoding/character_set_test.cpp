@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/encoding/character_set.hpp"
+#include "kcenon/pacs/encoding/character_set.h"
 
 #include <cstring>
 

@@ -7,12 +7,12 @@
  * @brief Implementation of the Storage SCU service
  */
 
-#include "pacs/services/storage_scu.hpp"
-#include "pacs/services/storage_scp.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
+#include "kcenon/pacs/services/storage_scu.h"
+#include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 
 #include <algorithm>
 #include <array>

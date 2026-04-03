@@ -3,7 +3,7 @@
  * @brief Implementation of the ATNA audit message generator
  */
 
-#include "pacs/security/atna_audit_logger.hpp"
+#include "kcenon/pacs/security/atna_audit_logger.h"
 
 #include <ctime>
 #include <iomanip>

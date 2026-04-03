@@ -2,16 +2,16 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/encoding/compression/codec_factory.hpp"
-#include "pacs/encoding/compression/frame_deflate_codec.hpp"
-#include "pacs/encoding/compression/hevc_codec.hpp"
-#include "pacs/encoding/compression/htj2k_codec.hpp"
-#include "pacs/encoding/compression/jpeg_baseline_codec.hpp"
-#include "pacs/encoding/compression/jpeg_lossless_codec.hpp"
-#include "pacs/encoding/compression/jpeg2000_codec.hpp"
-#include "pacs/encoding/compression/jpeg_ls_codec.hpp"
-#include "pacs/encoding/compression/jpegxl_codec.hpp"
-#include "pacs/encoding/compression/rle_codec.hpp"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
+#include "kcenon/pacs/encoding/compression/frame_deflate_codec.h"
+#include "kcenon/pacs/encoding/compression/hevc_codec.h"
+#include "kcenon/pacs/encoding/compression/htj2k_codec.h"
+#include "kcenon/pacs/encoding/compression/jpeg_baseline_codec.h"
+#include "kcenon/pacs/encoding/compression/jpeg_lossless_codec.h"
+#include "kcenon/pacs/encoding/compression/jpeg2000_codec.h"
+#include "kcenon/pacs/encoding/compression/jpeg_ls_codec.h"
+#include "kcenon/pacs/encoding/compression/jpegxl_codec.h"
+#include "kcenon/pacs/encoding/compression/rle_codec.h"
 
 #include <array>
 

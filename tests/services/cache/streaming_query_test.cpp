@@ -7,18 +7,18 @@
  *       adapter API from database_system.
  */
 
-#include <pacs/services/cache/database_cursor.hpp>
+#include <kcenon/pacs/services/cache/database_cursor.h>
 
 // Only compile tests when PACS_WITH_DATABASE_SYSTEM is defined
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <pacs/services/cache/query_result_stream.hpp>
-#include <pacs/services/cache/streaming_query_handler.hpp>
-#include <pacs/services/query_scp.hpp>
-#include <pacs/storage/index_database.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/cache/query_result_stream.h>
+#include <kcenon/pacs/services/cache/streaming_query_handler.h>
+#include <kcenon/pacs/services/query_scp.h>
+#include <kcenon/pacs/storage/index_database.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

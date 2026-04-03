@@ -3,7 +3,7 @@
  * @brief Configuration management implementation for PACS Server sample
  */
 
-#include "config.hpp"
+#include "config.h"
 
 #include <cstring>
 #include <iostream>

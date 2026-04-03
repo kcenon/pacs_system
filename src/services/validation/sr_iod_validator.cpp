@@ -7,9 +7,9 @@
  * @brief Implementation of Structured Report IOD Validator
  */
 
-#include "pacs/services/validation/sr_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/sr_storage.hpp"
+#include "kcenon/pacs/services/validation/sr_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/sr_storage.h"
 
 #include <sstream>
 

@@ -17,7 +17,7 @@
  *   db_browser pacs.db vacuum
  */
 
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/storage/index_database.h"
 
 #include <algorithm>
 #include <filesystem>

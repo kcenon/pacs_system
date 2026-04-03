@@ -36,34 +36,34 @@ module;
 #include <vector>
 
 // PACS storage headers - Core interfaces
-#include <pacs/storage/storage_interface.hpp>
-#include <pacs/storage/file_storage.hpp>
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/storage/storage_interface.h>
+#include <kcenon/pacs/storage/file_storage.h>
+#include <kcenon/pacs/storage/index_database.h>
 
 // Cloud storage backends
-#include <pacs/storage/s3_storage.hpp>
-#include <pacs/storage/azure_blob_storage.hpp>
+#include <kcenon/pacs/storage/s3_storage.h>
+#include <kcenon/pacs/storage/azure_blob_storage.h>
 
 // Hierarchical Storage Management
-#include <pacs/storage/hsm_types.hpp>
-#include <pacs/storage/hsm_storage.hpp>
-#include <pacs/storage/hsm_migration_service.hpp>
+#include <kcenon/pacs/storage/hsm_types.h>
+#include <kcenon/pacs/storage/hsm_storage.h>
+#include <kcenon/pacs/storage/hsm_migration_service.h>
 
 // Database migration
-#include <pacs/storage/migration_record.hpp>
-#include <pacs/storage/migration_runner.hpp>
+#include <kcenon/pacs/storage/migration_record.h>
+#include <kcenon/pacs/storage/migration_runner.h>
 
 // Record types
-#include <pacs/storage/patient_record.hpp>
-#include <pacs/storage/study_record.hpp>
-#include <pacs/storage/series_record.hpp>
-#include <pacs/storage/instance_record.hpp>
-#include <pacs/storage/mpps_record.hpp>
-#include <pacs/storage/worklist_record.hpp>
-#include <pacs/storage/audit_record.hpp>
+#include <kcenon/pacs/storage/patient_record.h>
+#include <kcenon/pacs/storage/study_record.h>
+#include <kcenon/pacs/storage/series_record.h>
+#include <kcenon/pacs/storage/instance_record.h>
+#include <kcenon/pacs/storage/mpps_record.h>
+#include <kcenon/pacs/storage/worklist_record.h>
+#include <kcenon/pacs/storage/audit_record.h>
 
 // Security storage
-#include <pacs/storage/sqlite_security_storage.hpp>
+#include <kcenon/pacs/storage/sqlite_security_storage.h>
 
 export module kcenon.pacs:storage;
 

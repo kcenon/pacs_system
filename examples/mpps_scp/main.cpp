@@ -17,14 +17,14 @@
  *   mpps_scp 11112 MY_MPPS --output-file ./mpps.json
  */
 
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/services/mpps_scp.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/mpps_scp.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <atomic>
 #include <chrono>

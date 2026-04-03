@@ -10,13 +10,13 @@
  * @see Issue #530 - PACS Client System Support (Parent Epic)
  */
 
-#include "pacs/client/routing_manager.hpp"
-#include "pacs/client/job_manager.hpp"
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_tag.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/storage_scp.hpp"
-#include "pacs/storage/routing_repository.hpp"
+#include "kcenon/pacs/client/routing_manager.h"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/storage/routing_repository.h"
 
 #include <algorithm>
 #include <cctype>

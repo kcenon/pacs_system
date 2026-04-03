@@ -10,8 +10,8 @@
  * @see Issue #519 - Phase 2: Network I/O Jobs
  */
 
-#include <pacs/network/pipeline/jobs/receive_network_io_job.hpp>
-#include <pacs/network/pipeline/jobs/pdu_decode_job.hpp>
+#include <kcenon/pacs/network/pipeline/jobs/receive_network_io_job.h>
+#include <kcenon/pacs/network/pipeline/jobs/pdu_decode_job.h>
 
 #include <chrono>
 

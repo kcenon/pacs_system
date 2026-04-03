@@ -11,7 +11,7 @@
  * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
  */
 
-#include "pacs/storage/prefetch_repository.hpp"
+#include "kcenon/pacs/storage/prefetch_repository.h"
 
 #include <chrono>
 #include <cstring>

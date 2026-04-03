@@ -3,7 +3,7 @@
  * @brief Implementation of the ATNA service auditor facade
  */
 
-#include "pacs/security/atna_service_auditor.hpp"
+#include "kcenon/pacs/security/atna_service_auditor.h"
 
 namespace kcenon::pacs::security {
 

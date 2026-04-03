@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/security/uid_mapping.hpp"
+#include "kcenon/pacs/security/uid_mapping.h"
 
 #include <thread>
 #include <vector>

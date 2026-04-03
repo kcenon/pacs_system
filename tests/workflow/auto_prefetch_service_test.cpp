@@ -6,11 +6,11 @@
  * based on worklist queries.
  */
 
-#include <pacs/workflow/auto_prefetch_service.hpp>
-#include <pacs/workflow/prefetch_config.hpp>
+#include <kcenon/pacs/workflow/auto_prefetch_service.h>
+#include <kcenon/pacs/workflow/prefetch_config.h>
 
-#include <pacs/storage/index_database.hpp>
-#include <pacs/storage/worklist_record.hpp>
+#include <kcenon/pacs/storage/index_database.h>
+#include <kcenon/pacs/storage/worklist_record.h>
 
 #include <catch2/catch_test_macros.hpp>
 

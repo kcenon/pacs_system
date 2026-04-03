@@ -10,7 +10,7 @@
  * @see Issue #848 - Add CT For Processing SOP Classes
  */
 
-#include "pacs/services/sop_classes/ct_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/ct_storage.h"
 
 namespace kcenon::pacs::services::sop_classes {
 

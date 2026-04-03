@@ -6,12 +6,12 @@
  * @see Issue #834 - Add Parametric Map IOD validator
  */
 
-#include <pacs/services/validation/parametric_map_iod_validator.hpp>
-#include <pacs/services/sop_classes/parametric_map_storage.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_element.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/validation/parametric_map_iod_validator.h>
+#include <kcenon/pacs/services/sop_classes/parametric_map_storage.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

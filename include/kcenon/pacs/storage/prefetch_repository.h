@@ -1,0 +1,482 @@
+// BSD 3-Clause License
+// Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
+// See the LICENSE file in the project root for full license information.
+
+/**
+ * @file prefetch_repository.h
+ * @brief Repository for prefetch rule and history persistence
+ *
+ * This file provides the prefetch_repository class for persisting prefetch rules
+ * and history records in the database. Supports CRUD operations and
+ * statistics tracking.
+ *
+ * When compiled with PACS_WITH_DATABASE_SYSTEM, uses pacs_database_adapter
+ * for database operations. Otherwise, uses direct SQLite access.
+ *
+ * @see Issue #541 - Implement Prefetch Manager for Proactive Data Loading
+ * @see Issue #530 - PACS Client System Support (Parent Epic)
+ * @see Issue #651 - Part 4: Migrate sync, viewer_state, prefetch repositories
+ * @author kcenon
+ * @since 1.0.0
+ */
+
+#pragma once
+
+#include "kcenon/pacs/client/prefetch_types.h"
+
+#include <kcenon/common/patterns/result.h>
+
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#ifdef PACS_WITH_DATABASE_SYSTEM
+
+#include "kcenon/pacs/storage/pacs_database_adapter.h"
+
+namespace kcenon::pacs::storage {
+
+/// Result type alias
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+/// Void result type alias
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Query options for listing prefetch rules
+ */
+struct prefetch_rule_query_options {
+    std::optional<bool> enabled_only;              ///< Filter by enabled status
+    std::optional<client::prefetch_trigger> trigger;  ///< Filter by trigger type
+    size_t limit{100};                             ///< Maximum results
+    size_t offset{0};                              ///< Result offset for pagination
+};
+
+/**
+ * @brief Query options for listing prefetch history
+ */
+struct prefetch_history_query_options {
+    std::optional<std::string> patient_id;         ///< Filter by patient
+    std::optional<std::string> rule_id;            ///< Filter by rule
+    std::optional<std::string> status;             ///< Filter by status
+    size_t limit{100};                             ///< Maximum results
+    size_t offset{0};                              ///< Result offset for pagination
+};
+
+/**
+ * @brief Repository for prefetch persistence using pacs_database_adapter
+ *
+ * Provides database operations for storing and retrieving prefetch rules
+ * and history records. Uses pacs_database_adapter for database operations.
+ *
+ * Thread Safety:
+ * - This class is NOT thread-safe. External synchronization is required
+ *   for concurrent access.
+ *
+ * @example
+ * @code
+ * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
+ * db->connect();
+ * auto repo = prefetch_repository(db);
+ *
+ * // Save a rule
+ * client::prefetch_rule rule;
+ * rule.rule_id = generate_uuid();
+ * rule.name = "CT Prior Studies";
+ * rule.trigger = client::prefetch_trigger::prior_studies;
+ * rule.source_node_ids = {"archive-pacs"};
+ * repo.save_rule(rule);
+ *
+ * // Find a rule
+ * auto found = repo.find_rule_by_id(rule.rule_id);
+ * if (found) {
+ *     std::cout << "Name: " << found->name << std::endl;
+ * }
+ *
+ * // Record history
+ * client::prefetch_history history;
+ * history.patient_id = "PATIENT123";
+ * history.study_uid = "1.2.3.4.5";
+ * history.source_node_id = "archive-pacs";
+ * history.status = "completed";
+ * repo.save_history(history);
+ * @endcode
+ */
+class prefetch_repository {
+public:
+    // =========================================================================
+    // Construction / Destruction
+    // =========================================================================
+
+    /**
+     * @brief Construct repository with pacs_database_adapter
+     *
+     * @param db Shared pointer to database adapter (must be connected)
+     */
+    explicit prefetch_repository(std::shared_ptr<pacs_database_adapter> db);
+
+    /**
+     * @brief Destructor
+     */
+    ~prefetch_repository();
+
+    // Non-copyable, movable
+    prefetch_repository(const prefetch_repository&) = delete;
+    auto operator=(const prefetch_repository&) -> prefetch_repository& = delete;
+    prefetch_repository(prefetch_repository&&) noexcept;
+    auto operator=(prefetch_repository&&) noexcept -> prefetch_repository&;
+
+    // =========================================================================
+    // Rule CRUD Operations
+    // =========================================================================
+
+    /**
+     * @brief Save a prefetch rule
+     *
+     * If the rule already exists (by rule_id), updates it.
+     * Otherwise, inserts a new record.
+     *
+     * @param rule The rule to save
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto save_rule(const client::prefetch_rule& rule) -> VoidResult;
+
+    /**
+     * @brief Find a rule by its unique ID
+     *
+     * @param rule_id The rule ID to search for
+     * @return Optional containing the rule if found
+     */
+    [[nodiscard]] auto find_rule_by_id(std::string_view rule_id) const
+        -> std::optional<client::prefetch_rule>;
+
+    /**
+     * @brief Find a rule by primary key
+     *
+     * @param pk The primary key
+     * @return Optional containing the rule if found
+     */
+    [[nodiscard]] auto find_rule_by_pk(int64_t pk) const
+        -> std::optional<client::prefetch_rule>;
+
+    /**
+     * @brief List rules with query options
+     *
+     * @param options Query options for filtering and pagination
+     * @return Vector of matching rules
+     */
+    [[nodiscard]] auto find_rules(const prefetch_rule_query_options& options = {}) const
+        -> std::vector<client::prefetch_rule>;
+
+    /**
+     * @brief Find all enabled rules
+     *
+     * @return Vector of enabled rules
+     */
+    [[nodiscard]] auto find_enabled_rules() const
+        -> std::vector<client::prefetch_rule>;
+
+    /**
+     * @brief Delete a rule by ID
+     *
+     * @param rule_id The rule ID to delete
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> VoidResult;
+
+    /**
+     * @brief Check if a rule exists
+     *
+     * @param rule_id The rule ID to check
+     * @return true if the rule exists
+     */
+    [[nodiscard]] auto rule_exists(std::string_view rule_id) const -> bool;
+
+    // =========================================================================
+    // Rule Statistics
+    // =========================================================================
+
+    /**
+     * @brief Increment triggered count for a rule
+     *
+     * Also updates last_triggered timestamp.
+     *
+     * @param rule_id The rule ID to update
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto increment_triggered(std::string_view rule_id) -> VoidResult;
+
+    /**
+     * @brief Increment studies prefetched count for a rule
+     *
+     * @param rule_id The rule ID to update
+     * @param count Number of studies to add (default: 1)
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto increment_studies_prefetched(
+        std::string_view rule_id, size_t count = 1) -> VoidResult;
+
+    /**
+     * @brief Enable a rule
+     *
+     * @param rule_id The rule ID to enable
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto enable_rule(std::string_view rule_id) -> VoidResult;
+
+    /**
+     * @brief Disable a rule
+     *
+     * @param rule_id The rule ID to disable
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto disable_rule(std::string_view rule_id) -> VoidResult;
+
+    // =========================================================================
+    // History Operations
+    // =========================================================================
+
+    /**
+     * @brief Save a prefetch history record
+     *
+     * @param history The history record to save
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto save_history(const client::prefetch_history& history) -> VoidResult;
+
+    /**
+     * @brief Find history records with query options
+     *
+     * @param options Query options for filtering and pagination
+     * @return Vector of matching history records
+     */
+    [[nodiscard]] auto find_history(const prefetch_history_query_options& options = {}) const
+        -> std::vector<client::prefetch_history>;
+
+    /**
+     * @brief Check if a study has been prefetched
+     *
+     * @param study_uid Study Instance UID to check
+     * @return true if the study has been prefetched
+     */
+    [[nodiscard]] auto is_study_prefetched(std::string_view study_uid) const -> bool;
+
+    /**
+     * @brief Get count of prefetches completed today
+     *
+     * @return Number of completed prefetches today
+     */
+    [[nodiscard]] auto count_completed_today() const -> size_t;
+
+    /**
+     * @brief Get count of prefetches failed today
+     *
+     * @return Number of failed prefetches today
+     */
+    [[nodiscard]] auto count_failed_today() const -> size_t;
+
+    /**
+     * @brief Update history status
+     *
+     * @param study_uid Study Instance UID
+     * @param status New status
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto update_history_status(
+        std::string_view study_uid,
+        std::string_view status) -> VoidResult;
+
+    /**
+     * @brief Cleanup old history records
+     *
+     * @param max_age Maximum age of records to keep
+     * @return Number of deleted records or error
+     */
+    [[nodiscard]] auto cleanup_old_history(std::chrono::hours max_age)
+        -> Result<size_t>;
+
+    // =========================================================================
+    // Statistics
+    // =========================================================================
+
+    /**
+     * @brief Get total rule count
+     *
+     * @return Number of rules in the repository
+     */
+    [[nodiscard]] auto rule_count() const -> size_t;
+
+    /**
+     * @brief Get enabled rule count
+     *
+     * @return Number of enabled rules
+     */
+    [[nodiscard]] auto enabled_rule_count() const -> size_t;
+
+    /**
+     * @brief Get total history count
+     *
+     * @return Number of history records
+     */
+    [[nodiscard]] auto history_count() const -> size_t;
+
+    // =========================================================================
+    // Database Information
+    // =========================================================================
+
+    /**
+     * @brief Check if the database connection is valid
+     *
+     * @return true if the database handle is valid
+     */
+    [[nodiscard]] auto is_valid() const noexcept -> bool;
+
+    /**
+     * @brief Initialize database tables
+     *
+     * Creates the prefetch_rules and prefetch_history tables if they don't exist.
+     *
+     * @return VoidResult indicating success or error
+     */
+    [[nodiscard]] auto initialize_tables() -> VoidResult;
+
+private:
+    // =========================================================================
+    // Private Implementation
+    // =========================================================================
+
+    [[nodiscard]] auto map_row_to_rule(const database_row& row) const
+        -> client::prefetch_rule;
+    [[nodiscard]] auto map_row_to_history(const database_row& row) const
+        -> client::prefetch_history;
+    [[nodiscard]] static auto serialize_modalities(
+        const std::vector<std::string>& modalities) -> std::string;
+    [[nodiscard]] static auto deserialize_modalities(
+        std::string_view json) -> std::vector<std::string>;
+    [[nodiscard]] static auto serialize_node_ids(
+        const std::vector<std::string>& node_ids) -> std::string;
+    [[nodiscard]] static auto deserialize_node_ids(
+        std::string_view json) -> std::vector<std::string>;
+    [[nodiscard]] auto parse_timestamp(const std::string& str) const
+        -> std::chrono::system_clock::time_point;
+    [[nodiscard]] auto format_timestamp(
+        std::chrono::system_clock::time_point tp) const -> std::string;
+
+    std::shared_ptr<pacs_database_adapter> db_;
+};
+
+}  // namespace kcenon::pacs::storage
+
+#else  // !PACS_WITH_DATABASE_SYSTEM
+
+// =============================================================================
+// Legacy SQLite Interface
+// =============================================================================
+
+struct sqlite3;
+
+namespace kcenon::pacs::storage {
+
+/// Result type alias
+template <typename T>
+using Result = kcenon::common::Result<T>;
+
+/// Void result type alias
+using VoidResult = kcenon::common::VoidResult;
+
+/**
+ * @brief Query options for listing prefetch rules
+ */
+struct prefetch_rule_query_options {
+    std::optional<bool> enabled_only;
+    std::optional<client::prefetch_trigger> trigger;
+    size_t limit{100};
+    size_t offset{0};
+};
+
+/**
+ * @brief Query options for listing prefetch history
+ */
+struct prefetch_history_query_options {
+    std::optional<std::string> patient_id;
+    std::optional<std::string> rule_id;
+    std::optional<std::string> status;
+    size_t limit{100};
+    size_t offset{0};
+};
+
+/**
+ * @brief Repository for prefetch persistence (legacy SQLite interface)
+ */
+class prefetch_repository {
+public:
+    explicit prefetch_repository(sqlite3* db);
+    ~prefetch_repository();
+
+    prefetch_repository(const prefetch_repository&) = delete;
+    auto operator=(const prefetch_repository&) -> prefetch_repository& = delete;
+    prefetch_repository(prefetch_repository&&) noexcept;
+    auto operator=(prefetch_repository&&) noexcept -> prefetch_repository&;
+
+    // Rule Operations
+    [[nodiscard]] auto save_rule(const client::prefetch_rule& rule) -> VoidResult;
+    [[nodiscard]] auto find_rule_by_id(std::string_view rule_id) const
+        -> std::optional<client::prefetch_rule>;
+    [[nodiscard]] auto find_rule_by_pk(int64_t pk) const
+        -> std::optional<client::prefetch_rule>;
+    [[nodiscard]] auto find_rules(const prefetch_rule_query_options& options = {}) const
+        -> std::vector<client::prefetch_rule>;
+    [[nodiscard]] auto find_enabled_rules() const
+        -> std::vector<client::prefetch_rule>;
+    [[nodiscard]] auto remove_rule(std::string_view rule_id) -> VoidResult;
+    [[nodiscard]] auto rule_exists(std::string_view rule_id) const -> bool;
+
+    // Rule Statistics
+    [[nodiscard]] auto increment_triggered(std::string_view rule_id) -> VoidResult;
+    [[nodiscard]] auto increment_studies_prefetched(
+        std::string_view rule_id, size_t count = 1) -> VoidResult;
+    [[nodiscard]] auto enable_rule(std::string_view rule_id) -> VoidResult;
+    [[nodiscard]] auto disable_rule(std::string_view rule_id) -> VoidResult;
+
+    // History Operations
+    [[nodiscard]] auto save_history(const client::prefetch_history& history) -> VoidResult;
+    [[nodiscard]] auto find_history(const prefetch_history_query_options& options = {}) const
+        -> std::vector<client::prefetch_history>;
+    [[nodiscard]] auto is_study_prefetched(std::string_view study_uid) const -> bool;
+    [[nodiscard]] auto count_completed_today() const -> size_t;
+    [[nodiscard]] auto count_failed_today() const -> size_t;
+    [[nodiscard]] auto update_history_status(
+        std::string_view study_uid, std::string_view status) -> VoidResult;
+    [[nodiscard]] auto cleanup_old_history(std::chrono::hours max_age)
+        -> Result<size_t>;
+
+    // Statistics
+    [[nodiscard]] auto rule_count() const -> size_t;
+    [[nodiscard]] auto enabled_rule_count() const -> size_t;
+    [[nodiscard]] auto history_count() const -> size_t;
+
+    // Database Information
+    [[nodiscard]] auto is_valid() const noexcept -> bool;
+    [[nodiscard]] auto initialize_tables() -> VoidResult;
+
+private:
+    [[nodiscard]] auto parse_rule_row(void* stmt) const -> client::prefetch_rule;
+    [[nodiscard]] auto parse_history_row(void* stmt) const -> client::prefetch_history;
+    [[nodiscard]] static auto serialize_modalities(
+        const std::vector<std::string>& modalities) -> std::string;
+    [[nodiscard]] static auto deserialize_modalities(
+        std::string_view json) -> std::vector<std::string>;
+    [[nodiscard]] static auto serialize_node_ids(
+        const std::vector<std::string>& node_ids) -> std::string;
+    [[nodiscard]] static auto deserialize_node_ids(
+        std::string_view json) -> std::vector<std::string>;
+
+    sqlite3* db_{nullptr};
+};
+
+}  // namespace kcenon::pacs::storage
+
+#endif  // PACS_WITH_DATABASE_SYSTEM

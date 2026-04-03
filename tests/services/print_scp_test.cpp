@@ -3,11 +3,11 @@
  * @brief Unit tests for Print Management SCP service (PS3.4 Annex H)
  */
 
-#include <pacs/services/print_scp.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
-#include <pacs/services/sop_class_registry.hpp>
+#include <kcenon/pacs/services/print_scp.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
 
 #include <catch2/catch_test_macros.hpp>
 

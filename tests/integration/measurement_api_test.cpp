@@ -17,15 +17,15 @@
  * @license MIT
  */
 
-#include "pacs/storage/measurement_record.hpp"
-#include "pacs/storage/measurement_repository.hpp"
+#include "kcenon/pacs/storage/measurement_record.h"
+#include "kcenon/pacs/storage/measurement_repository.h"
 
 // Only compile legacy SQLite tests when PACS_WITH_DATABASE_SYSTEM is NOT defined
 #ifndef PACS_WITH_DATABASE_SYSTEM
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/storage/index_database.h"
 
 #include <chrono>
 #include <cmath>

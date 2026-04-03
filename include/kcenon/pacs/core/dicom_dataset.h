@@ -1,0 +1,453 @@
+// BSD 3-Clause License
+// Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
+// See the LICENSE file in the project root for full license information.
+
+/**
+ * @file dicom_dataset.h
+ * @brief DICOM Dataset - ordered collection of Data Elements
+ *
+ * This file provides the dicom_dataset class which represents an ordered
+ * collection of DICOM Data Elements as specified in DICOM PS3.5.
+ *
+ * @see DICOM PS3.5 Section 7.1 - Data Set
+ * @author kcenon
+ * @since 1.0.0
+ */
+
+#pragma once
+
+#include "dicom_element.h"
+#include "dicom_tag.h"
+
+#include <kcenon/pacs/encoding/vr_type.h>
+
+#include <initializer_list>
+#include <map>
+#include <optional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <type_traits>
+
+namespace kcenon::pacs::core {
+
+/**
+ * @brief Represents a DICOM Dataset (ordered collection of Data Elements)
+ *
+ * A DICOM Dataset is an ordered collection of Data Elements, where each
+ * element is uniquely identified by its tag. Elements are stored in
+ * ascending tag order as required by the DICOM standard.
+ *
+ * Thread Safety: This class is NOT thread-safe. External synchronization
+ * is required for concurrent access.
+ *
+ * @example
+ * @code
+ * dicom_dataset ds;
+ *
+ * // Set string values
+ * ds.set_string(tags::patient_name, encoding::vr_type::PN, "DOE^JOHN");
+ * ds.set_string(tags::patient_id, encoding::vr_type::LO, "12345");
+ *
+ * // Set numeric values
+ * ds.set_numeric<uint16_t>(tags::rows, encoding::vr_type::US, 512);
+ *
+ * // Access values
+ * std::string name = ds.get_string(tags::patient_name);
+ * uint16_t rows = ds.get_numeric<uint16_t>(tags::rows).value_or(0);
+ *
+ * // Iterate over elements
+ * for (const auto& [tag, element] : ds) {
+ *     std::cout << tag.to_string() << ": " << element.as_string() << "\n";
+ * }
+ * @endcode
+ */
+class dicom_dataset {
+public:
+    /// Storage type for elements (ordered by tag)
+    using storage_type = std::map<dicom_tag, dicom_element>;
+
+    /// Iterator type
+    using iterator = storage_type::iterator;
+
+    /// Const iterator type
+    using const_iterator = storage_type::const_iterator;
+
+    // ========================================================================
+    // Construction
+    // ========================================================================
+
+    /**
+     * @brief Default constructor - creates an empty dataset
+     */
+    dicom_dataset() = default;
+
+    /**
+     * @brief Copy constructor
+     */
+    dicom_dataset(const dicom_dataset&) = default;
+
+    /**
+     * @brief Move constructor
+     */
+    dicom_dataset(dicom_dataset&&) noexcept = default;
+
+    /**
+     * @brief Copy assignment
+     */
+    auto operator=(const dicom_dataset&) -> dicom_dataset& = default;
+
+    /**
+     * @brief Move assignment
+     */
+    auto operator=(dicom_dataset&&) noexcept -> dicom_dataset& = default;
+
+    /**
+     * @brief Default destructor
+     */
+    ~dicom_dataset() = default;
+
+    // ========================================================================
+    // Element Access
+    // ========================================================================
+
+    /**
+     * @brief Check if the dataset contains an element with the given tag
+     * @param tag The DICOM tag to check
+     * @return true if an element with this tag exists
+     */
+    [[nodiscard]] auto contains(dicom_tag tag) const noexcept -> bool;
+
+    /**
+     * @brief Get a pointer to the element with the given tag
+     * @param tag The DICOM tag to look up
+     * @return Pointer to the element, or nullptr if not found
+     */
+    [[nodiscard]] auto get(dicom_tag tag) noexcept -> dicom_element*;
+
+    /**
+     * @brief Get a const pointer to the element with the given tag
+     * @param tag The DICOM tag to look up
+     * @return Const pointer to the element, or nullptr if not found
+     */
+    [[nodiscard]] auto get(dicom_tag tag) const noexcept -> const dicom_element*;
+
+    // ========================================================================
+    // Convenience Accessors
+    // ========================================================================
+
+    /**
+     * @brief Get the string value of an element
+     * @param tag The DICOM tag to look up
+     * @param default_value Value to return if element not found
+     * @return The element's string value, or default_value if not found
+     */
+    [[nodiscard]] auto get_string(dicom_tag tag,
+                                  std::string_view default_value = "") const
+        -> std::string;
+
+    /**
+     * @brief Get the numeric value of an element
+     * @tparam T The numeric type to return
+     * @param tag The DICOM tag to look up
+     * @return Optional containing the value, or nullopt if not found/conversion fails
+     */
+    template <typename T>
+        requires std::is_arithmetic_v<T>
+    [[nodiscard]] auto get_numeric(dicom_tag tag) const -> std::optional<T>;
+
+    // ========================================================================
+    // Sequence Access
+    // ========================================================================
+
+    /**
+     * @brief Check if the dataset contains a sequence element with the given tag
+     * @param tag The DICOM tag to check
+     * @return true if an element with this tag exists and is a sequence (VR = SQ)
+     */
+    [[nodiscard]] auto has_sequence(dicom_tag tag) const noexcept -> bool;
+
+    /**
+     * @brief Get read-only access to sequence items for a given tag
+     * @param tag The DICOM tag of the sequence element
+     * @return Pointer to the sequence items vector, or nullptr if not found or not a sequence
+     *
+     * @example
+     * @code
+     * // Access Performed Series Sequence (0040,0340)
+     * if (const auto* series = dataset.get_sequence(tags::performed_series_sequence)) {
+     *     for (const auto& item : *series) {
+     *         auto series_uid = item.get_string(tags::series_instance_uid);
+     *     }
+     * }
+     * @endcode
+     */
+    [[nodiscard]] auto get_sequence(dicom_tag tag) const noexcept
+        -> const std::vector<dicom_dataset>*;
+
+    /**
+     * @brief Get mutable access to sequence items for a given tag
+     * @param tag The DICOM tag of the sequence element
+     * @return Pointer to the sequence items vector, or nullptr if not found or not a sequence
+     */
+    [[nodiscard]] auto get_sequence(dicom_tag tag) noexcept
+        -> std::vector<dicom_dataset>*;
+
+    /**
+     * @brief Insert or create a sequence element with the given tag
+     * @param tag The DICOM tag for the sequence
+     * @return Reference to the sequence items vector (creates empty sequence if not exists)
+     *
+     * If an element with the tag already exists and is not a sequence, it will be
+     * replaced with an empty sequence.
+     */
+    [[nodiscard]] auto get_or_create_sequence(dicom_tag tag)
+        -> std::vector<dicom_dataset>&;
+
+    // ========================================================================
+    // Private Tag Access
+    // ========================================================================
+
+    /**
+     * @brief Get the Private Creator identification string for a private data element
+     *
+     * Looks up the Private Creator element (gggg,00xx) for a given private data
+     * element (gggg,xxyy) and returns its string value.
+     *
+     * @param private_data_tag A private data element tag
+     * @return The creator identification string, or nullopt if not found
+     */
+    [[nodiscard]] auto get_private_creator(dicom_tag private_data_tag) const
+        -> std::optional<std::string>;
+
+    /**
+     * @brief Get all private data elements belonging to a specific creator
+     *
+     * Searches the given group for a Private Creator element matching creator_id,
+     * then returns all data elements in that creator's block.
+     *
+     * @param creator_id The Private Creator identification string (e.g. "SIEMENS CSA HEADER")
+     * @param group The private group number (must be odd)
+     * @return Vector of pointers to matching data elements (empty if none found)
+     */
+    [[nodiscard]] auto get_private_block(std::string_view creator_id,
+                                          uint16_t group) const
+        -> std::vector<const dicom_element*>;
+
+    /**
+     * @brief Insert a private data element with automatic creator management
+     *
+     * Automatically ensures the corresponding Private Creator element exists.
+     * If the creator already owns a block in the given group, reuses that block.
+     * Otherwise, allocates the next available slot.
+     *
+     * Per DICOM PS3.5 §7.8.1, Private Creator elements are placed at
+     * (gggg,00xx) and data elements at (gggg,xxyy).
+     *
+     * @param creator_id Private Creator identification (e.g. "SIEMENS CSA HEADER")
+     * @param group Odd group number (e.g. 0x0009)
+     * @param element_offset Offset within the block (0x00-0xFF)
+     * @param vr Value Representation for the data element
+     * @param value The element value
+     * @return The actual tag assigned, or nullopt if allocation failed
+     */
+    auto set_private_element(std::string_view creator_id, uint16_t group,
+                             uint8_t element_offset, encoding::vr_type vr,
+                             std::string_view value) -> std::optional<dicom_tag>;
+
+    /**
+     * @brief Remove all private data elements and their creator for a given creator
+     *
+     * Removes both the Private Creator element and all associated data elements
+     * in the specified group.
+     *
+     * @param creator_id The Private Creator identification string
+     * @param group The private group number (must be odd)
+     * @return Number of elements removed (including the creator)
+     */
+    auto remove_private_block(std::string_view creator_id, uint16_t group)
+        -> size_t;
+
+    /**
+     * @brief Remove orphaned Private Creator elements that have no data elements
+     * @return Number of orphaned creators removed
+     */
+    auto cleanup_orphaned_creators() -> size_t;
+
+    /**
+     * @brief Validate private tag relationships in this dataset
+     *
+     * Checks that every private data element has a corresponding Private Creator
+     * element and returns tags that are missing their creator.
+     *
+     * @return Vector of private data element tags missing their Private Creator
+     */
+    [[nodiscard]] auto validate_private_tags() const -> std::vector<dicom_tag>;
+
+    // ========================================================================
+    // Modification
+    // ========================================================================
+
+    /**
+     * @brief Insert or replace an element in the dataset
+     * @param element The element to insert (copied or moved)
+     *
+     * If an element with the same tag already exists, it will be replaced.
+     * Use std::move() when passing the element to avoid unnecessary copies.
+     */
+    void insert(dicom_element element);
+
+    /**
+     * @brief Set a string value for the given tag
+     * @param tag The DICOM tag
+     * @param vr The value representation
+     * @param value The string value
+     *
+     * Creates a new element or updates an existing one.
+     */
+    void set_string(dicom_tag tag, encoding::vr_type vr, std::string_view value);
+
+    /**
+     * @brief Set a numeric value for the given tag
+     * @tparam T The numeric type
+     * @param tag The DICOM tag
+     * @param vr The value representation
+     * @param value The numeric value
+     */
+    template <typename T>
+        requires std::is_arithmetic_v<T>
+    void set_numeric(dicom_tag tag, encoding::vr_type vr, T value);
+
+    /**
+     * @brief Remove an element from the dataset
+     * @param tag The tag of the element to remove
+     * @return true if an element was removed, false if not found
+     */
+    auto remove(dicom_tag tag) -> bool;
+
+    /**
+     * @brief Remove all elements from the dataset
+     */
+    void clear() noexcept;
+
+    // ========================================================================
+    // Iteration
+    // ========================================================================
+
+    /**
+     * @brief Get iterator to the first element
+     * @return Iterator to the beginning
+     */
+    [[nodiscard]] auto begin() noexcept -> iterator;
+
+    /**
+     * @brief Get iterator past the last element
+     * @return Iterator to the end
+     */
+    [[nodiscard]] auto end() noexcept -> iterator;
+
+    /**
+     * @brief Get const iterator to the first element
+     * @return Const iterator to the beginning
+     */
+    [[nodiscard]] auto begin() const noexcept -> const_iterator;
+
+    /**
+     * @brief Get const iterator past the last element
+     * @return Const iterator to the end
+     */
+    [[nodiscard]] auto end() const noexcept -> const_iterator;
+
+    /**
+     * @brief Get const iterator to the first element
+     * @return Const iterator to the beginning
+     */
+    [[nodiscard]] auto cbegin() const noexcept -> const_iterator;
+
+    /**
+     * @brief Get const iterator past the last element
+     * @return Const iterator to the end
+     */
+    [[nodiscard]] auto cend() const noexcept -> const_iterator;
+
+    // ========================================================================
+    // Size Operations
+    // ========================================================================
+
+    /**
+     * @brief Get the number of elements in the dataset
+     * @return The element count
+     */
+    [[nodiscard]] auto size() const noexcept -> size_t;
+
+    /**
+     * @brief Check if the dataset is empty
+     * @return true if no elements are present
+     */
+    [[nodiscard]] auto empty() const noexcept -> bool;
+
+    // ========================================================================
+    // Utility Operations
+    // ========================================================================
+
+    /**
+     * @brief Create a copy containing only the specified tags
+     * @param tags List of tags to include in the copy
+     * @return A new dataset containing only the specified elements
+     */
+    [[nodiscard]] auto copy_with_tags(std::initializer_list<dicom_tag> tags) const
+        -> dicom_dataset;
+
+    /**
+     * @brief Create a copy containing only the specified tags
+     * @param tags Span of tags to include in the copy
+     * @return A new dataset containing only the specified elements
+     */
+    [[nodiscard]] auto copy_with_tags(std::span<const dicom_tag> tags) const
+        -> dicom_dataset;
+
+    /**
+     * @brief Merge elements from another dataset
+     * @param other The dataset to merge from
+     *
+     * Elements from 'other' will overwrite existing elements with the same tag.
+     */
+    void merge(const dicom_dataset& other);
+
+    /**
+     * @brief Merge elements from another dataset (move version)
+     * @param other The dataset to merge from (moved)
+     */
+    void merge(dicom_dataset&& other);
+
+private:
+    storage_type elements_;
+};
+
+// ============================================================================
+// Template Implementations
+// ============================================================================
+
+template <typename T>
+    requires std::is_arithmetic_v<T>
+auto dicom_dataset::get_numeric(dicom_tag tag) const -> std::optional<T> {
+    const auto* elem = get(tag);
+    if (elem == nullptr) {
+        return std::nullopt;
+    }
+
+    auto result = elem->as_numeric<T>();
+    if (result.is_ok()) {
+        return result.value();
+    }
+    return std::nullopt;
+}
+
+template <typename T>
+    requires std::is_arithmetic_v<T>
+void dicom_dataset::set_numeric(dicom_tag tag, encoding::vr_type vr, T value) {
+    insert(dicom_element::from_numeric<T>(tag, vr, value));
+}
+
+}  // namespace kcenon::pacs::core
+

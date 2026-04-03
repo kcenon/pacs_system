@@ -7,9 +7,9 @@
  * @brief Implementation of Hierarchical Storage Management for multi-tier storage
  */
 
-#include <pacs/storage/hsm_storage.hpp>
+#include <kcenon/pacs/storage/hsm_storage.h>
 
-#include <pacs/core/dicom_tag_constants.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
 
 #include <algorithm>
 #include <chrono>

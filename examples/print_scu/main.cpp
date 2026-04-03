@@ -21,9 +21,9 @@
  *   print_scu localhost 10400 PRINTER status
  */
 
-#include "pacs/services/print_scu.hpp"
+#include "kcenon/pacs/services/print_scu.h"
 
-#include "pacs/network/association.hpp"
+#include "kcenon/pacs/network/association.h"
 
 #include <chrono>
 #include <cstdlib>

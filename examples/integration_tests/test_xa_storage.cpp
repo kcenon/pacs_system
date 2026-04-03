@@ -6,8 +6,8 @@
  * Covers Issue #135 scenarios.
  */
 
-#include "test_fixtures.hpp"
-#include "pacs/storage/file_storage.hpp"
+#include "test_fixtures.h"
+#include "kcenon/pacs/storage/file_storage.h"
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 

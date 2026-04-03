@@ -21,10 +21,10 @@
  *   store_scu --progress --report-file transfer.log localhost 11112 *.dcm
  */
 
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/services/storage_scu.hpp"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/services/storage_scu.h"
 
 #include <algorithm>
 #include <chrono>

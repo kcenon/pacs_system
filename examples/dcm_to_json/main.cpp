@@ -17,11 +17,11 @@
  *   dcm_to_json image.dcm --bulk-data exclude --no-pixel
  */
 
-#include "pacs/core/dicom_dictionary.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/transfer_syntax.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/core/dicom_dictionary.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 #include <algorithm>
 #include <cstdint>

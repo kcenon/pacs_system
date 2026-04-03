@@ -7,9 +7,9 @@
  * @brief Implementation of X-Ray Angiographic Image IOD Validator
  */
 
-#include "pacs/services/validation/xa_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/xa_storage.hpp"
+#include "kcenon/pacs/services/validation/xa_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/xa_storage.h"
 
 #include <sstream>
 

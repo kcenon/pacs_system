@@ -7,7 +7,7 @@
  * @brief Implementation of Segmentation Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/seg_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/seg_storage.h"
 
 #include <algorithm>
 #include <array>

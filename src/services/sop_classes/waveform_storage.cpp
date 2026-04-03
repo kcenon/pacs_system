@@ -7,7 +7,7 @@
  * @brief Implementation of Waveform Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/waveform_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/waveform_storage.h"
 
 #include <algorithm>
 #include <array>

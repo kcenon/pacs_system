@@ -7,14 +7,14 @@
  * @brief Implementation of the Query SCP service
  */
 
-#include "pacs/services/query_scp.hpp"
+#include "kcenon/pacs/services/query_scp.h"
 
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/core/events.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
-#include "pacs/security/atna_service_auditor.hpp"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/events.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
+#include "kcenon/pacs/security/atna_service_auditor.h"
 
 #include <kcenon/common/patterns/event_bus.h>
 

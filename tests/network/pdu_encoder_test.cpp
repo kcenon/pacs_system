@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/pdu_encoder.hpp"
-#include "pacs/network/pdu_types.hpp"
+#include "kcenon/pacs/network/pdu_encoder.h"
+#include "kcenon/pacs/network/pdu_types.h"
 
 using namespace kcenon::pacs::network;
 

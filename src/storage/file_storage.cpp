@@ -7,11 +7,11 @@
  * @brief Implementation of filesystem-based DICOM storage
  */
 
-#include <pacs/storage/file_storage.hpp>
+#include <kcenon/pacs/storage/file_storage.h>
 
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/transfer_syntax.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/transfer_syntax.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <algorithm>
 #include <chrono>

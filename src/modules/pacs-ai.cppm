@@ -29,8 +29,8 @@ module;
 
 // PACS AI headers (feature-gated)
 #ifdef KCENON_WITH_AI
-#include <pacs/ai/ai_service_connector.hpp>
-#include <pacs/ai/ai_result_handler.hpp>
+#include <kcenon/pacs/ai/ai_service_connector.h>
+#include <kcenon/pacs/ai/ai_result_handler.h>
 #endif
 
 export module kcenon.pacs:ai;

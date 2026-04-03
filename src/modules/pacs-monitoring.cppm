@@ -34,18 +34,18 @@ module;
 #include <vector>
 
 // PACS monitoring headers
-#include <pacs/monitoring/pacs_monitor.hpp>
-#include <pacs/monitoring/health_checker.hpp>
-#include <pacs/monitoring/health_status.hpp>
-#include <pacs/monitoring/health_json.hpp>
-#include <pacs/monitoring/pacs_metrics.hpp>
+#include <kcenon/pacs/monitoring/pacs_monitor.h>
+#include <kcenon/pacs/monitoring/health_checker.h>
+#include <kcenon/pacs/monitoring/health_status.h>
+#include <kcenon/pacs/monitoring/health_json.h>
+#include <kcenon/pacs/monitoring/pacs_metrics.h>
 
 // PACS metric collectors (CRTP-based)
-#include <pacs/monitoring/collectors/dicom_collector_base.hpp>
-#include <pacs/monitoring/collectors/dicom_metrics_collector.hpp>
-#include <pacs/monitoring/collectors/dicom_association_collector.hpp>
-#include <pacs/monitoring/collectors/dicom_service_collector.hpp>
-#include <pacs/monitoring/collectors/dicom_storage_collector.hpp>
+#include <kcenon/pacs/monitoring/collectors/dicom_collector_base.h>
+#include <kcenon/pacs/monitoring/collectors/dicom_metrics_collector.h>
+#include <kcenon/pacs/monitoring/collectors/dicom_association_collector.h>
+#include <kcenon/pacs/monitoring/collectors/dicom_service_collector.h>
+#include <kcenon/pacs/monitoring/collectors/dicom_storage_collector.h>
 
 export module kcenon.pacs:monitoring;
 

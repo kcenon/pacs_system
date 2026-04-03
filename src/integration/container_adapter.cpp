@@ -7,10 +7,10 @@
  * @brief Implementation of DICOM to container_system value adapter
  */
 
-#include <pacs/integration/container_adapter.hpp>
+#include <kcenon/pacs/integration/container_adapter.h>
 
 #include <charconv>
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 #include <sstream>
 
 namespace kcenon::pacs::integration {

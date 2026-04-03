@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <pacs/encoding/byte_swap.hpp>
+#include <kcenon/pacs/encoding/byte_swap.h>
 
 #include <cstring>
 

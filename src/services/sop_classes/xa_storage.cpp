@@ -7,7 +7,7 @@
  * @brief Implementation of X-Ray Angiographic Image Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/xa_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/xa_storage.h"
 
 #include <algorithm>
 #include <array>

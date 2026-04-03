@@ -9,8 +9,8 @@
  * @see Issue #517 - Implement typed_thread_pool-based I/O Pipeline
  */
 
-#include <pacs/network/pipeline/pipeline_coordinator.hpp>
-#include <pacs/integration/thread_pool_adapter.hpp>
+#include <kcenon/pacs/network/pipeline/pipeline_coordinator.h>
+#include <kcenon/pacs/integration/thread_pool_adapter.h>
 
 #include <chrono>
 

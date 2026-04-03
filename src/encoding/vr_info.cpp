@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/encoding/vr_info.hpp"
+#include "kcenon/pacs/encoding/vr_info.h"
 
 #include <algorithm>
 #include <array>

@@ -36,10 +36,10 @@ module;
 #include <vector>
 
 // PACS DI headers
-#include <pacs/di/ilogger.hpp>
-#include <pacs/di/service_interfaces.hpp>
-#include <pacs/di/service_registration.hpp>
-#include <pacs/di/test_support.hpp>
+#include <kcenon/pacs/di/ilogger.h>
+#include <kcenon/pacs/di/service_interfaces.h>
+#include <kcenon/pacs/di/service_registration.h>
+#include <kcenon/pacs/di/test_support.h>
 
 export module kcenon.pacs:di;
 

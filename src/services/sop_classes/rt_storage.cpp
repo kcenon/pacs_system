@@ -7,7 +7,7 @@
  * @brief Implementation of Radiation Therapy Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/rt_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/rt_storage.h"
 
 #include <algorithm>
 #include <array>

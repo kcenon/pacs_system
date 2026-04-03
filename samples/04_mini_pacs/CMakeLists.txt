@@ -22,7 +22,7 @@ set(SAMPLE_SOURCES
 
 # Header files (for IDE visibility)
 set(SAMPLE_HEADERS
-    mini_pacs.hpp
+    mini_pacs.h
 )
 
 # Create executable
