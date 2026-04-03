@@ -12,7 +12,7 @@
  * @see Issue #606 - Phase 1: Foundation - PACS Database Adapter
  */
 
-#include <pacs/storage/pacs_database_adapter.hpp>
+#include <kcenon/pacs/storage/pacs_database_adapter.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
@@ -20,7 +20,7 @@
 
 #include <array>
 #include <chrono>
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 namespace kcenon::pacs::storage {
 

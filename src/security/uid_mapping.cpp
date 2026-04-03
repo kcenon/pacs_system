@@ -9,7 +9,7 @@
  * @copyright Copyright (c) 2025
  */
 
-#include "pacs/security/uid_mapping.hpp"
+#include "kcenon/pacs/security/uid_mapping.h"
 
 #include <chrono>
 #include <random>

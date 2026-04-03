@@ -11,7 +11,7 @@
  * @see Issue #609 - Phase 3-2: Cursor & Security Storage Migration
  */
 
-#include "pacs/services/cache/database_cursor.hpp"
+#include "kcenon/pacs/services/cache/database_cursor.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

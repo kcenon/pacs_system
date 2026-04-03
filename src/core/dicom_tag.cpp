@@ -7,7 +7,7 @@
  * @brief Implementation of dicom_tag class methods
  */
 
-#include "pacs/core/dicom_tag.hpp"
+#include "kcenon/pacs/core/dicom_tag.h"
 
 #include <array>
 #include <charconv>

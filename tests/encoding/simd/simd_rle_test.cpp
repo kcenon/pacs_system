@@ -1,8 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 
-#include "pacs/encoding/simd/simd_rle.hpp"
-#include "pacs/encoding/simd/simd_config.hpp"
+#include "kcenon/pacs/encoding/simd/simd_rle.h"
+#include "kcenon/pacs/encoding/simd/simd_config.h"
 
 #include <algorithm>
 #include <numeric>

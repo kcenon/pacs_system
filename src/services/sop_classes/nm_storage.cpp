@@ -7,7 +7,7 @@
  * @brief Implementation of Nuclear Medicine Image Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/nm_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/nm_storage.h"
 
 #include <algorithm>
 #include <array>

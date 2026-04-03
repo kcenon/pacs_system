@@ -9,13 +9,13 @@
  * @see Issue #533 - Implement worklist_scu Library (MWL SCU)
  */
 
-#include "pacs/services/worklist_scu.hpp"
-#include "pacs/services/worklist_scp.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
+#include "kcenon/pacs/services/worklist_scu.h"
+#include "kcenon/pacs/services/worklist_scp.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 
 #include <chrono>
 #include <ctime>

@@ -3,14 +3,14 @@
  * @brief Implementation of the UPS Watch SCP service
  */
 
-#include "pacs/services/ups/ups_watch_scp.hpp"
+#include "kcenon/pacs/services/ups/ups_watch_scp.h"
 
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/core/result.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/network/dimse/command_field.hpp"
-#include "pacs/network/dimse/status_codes.hpp"
-#include "pacs/services/ups/ups_push_scp.hpp"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/network/dimse/command_field.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
+#include "kcenon/pacs/services/ups/ups_push_scp.h"
 
 namespace kcenon::pacs::services {
 

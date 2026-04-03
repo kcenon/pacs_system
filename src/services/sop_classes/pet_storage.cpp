@@ -7,7 +7,7 @@
  * @brief Implementation of PET Image Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/pet_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/pet_storage.h"
 
 #include <algorithm>
 #include <array>

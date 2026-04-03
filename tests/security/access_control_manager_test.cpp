@@ -8,10 +8,10 @@
 
 #include <thread>
 
-#include "pacs/security/access_control_manager.hpp"
-#include "pacs/security/user_context.hpp"
-#include "pacs/security/role.hpp"
-#include "pacs/security/security_storage_interface.hpp"
+#include "kcenon/pacs/security/access_control_manager.h"
+#include "kcenon/pacs/security/user_context.h"
+#include "kcenon/pacs/security/role.h"
+#include "kcenon/pacs/security/security_storage_interface.h"
 
 using namespace kcenon::pacs::security;
 

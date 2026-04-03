@@ -7,7 +7,7 @@
  * @brief Implementation of Digital X-Ray (DX) Image Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/dx_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/dx_storage.h"
 
 #include <algorithm>
 #include <array>

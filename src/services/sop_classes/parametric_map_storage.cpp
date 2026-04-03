@@ -9,7 +9,7 @@
  * @see Issue #833 - Add Parametric Map Storage SOP Class registration
  */
 
-#include "pacs/services/sop_classes/parametric_map_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/parametric_map_storage.h"
 
 #include <array>
 

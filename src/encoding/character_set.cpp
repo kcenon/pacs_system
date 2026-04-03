@@ -7,7 +7,7 @@
  * @brief Implementation of DICOM Character Set registry, ISO 2022 parser, and decoder
  */
 
-#include "pacs/encoding/character_set.hpp"
+#include "kcenon/pacs/encoding/character_set.h"
 
 #include <algorithm>
 #include <array>

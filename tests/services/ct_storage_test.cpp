@@ -5,7 +5,7 @@
  * @see Issue #717 - Add CT Image IOD Validator
  */
 
-#include <pacs/services/sop_classes/ct_storage.hpp>
+#include <kcenon/pacs/services/sop_classes/ct_storage.h>
 
 #include <catch2/catch_test_macros.hpp>
 

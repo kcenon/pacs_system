@@ -9,15 +9,15 @@
  * @see Issue #915 - Extract audit lifecycle repository
  */
 
-#include "pacs/storage/audit_repository.hpp"
+#include "kcenon/pacs/storage/audit_repository.h"
 
 #include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
 
-#include <pacs/compat/format.hpp>
-#include <pacs/compat/time.hpp>
+#include <kcenon/pacs/compat/format.h>
+#include <kcenon/pacs/compat/time.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

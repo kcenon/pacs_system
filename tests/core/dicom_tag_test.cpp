@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "pacs/core/dicom_tag.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/core/dicom_tag.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 using namespace kcenon::pacs::core;
 

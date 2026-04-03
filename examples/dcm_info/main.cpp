@@ -18,9 +18,9 @@
  *   dcm_info ./dicom_folder/ --recursive
  */
 
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/transfer_syntax.hpp"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 
 #include <algorithm>
 #include <filesystem>

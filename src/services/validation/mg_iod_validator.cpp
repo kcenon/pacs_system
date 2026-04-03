@@ -7,9 +7,9 @@
  * @brief Implementation of Digital Mammography X-Ray Image IOD Validator
  */
 
-#include "pacs/services/validation/mg_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/mg_storage.hpp"
+#include "kcenon/pacs/services/validation/mg_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/mg_storage.h"
 
 #include <sstream>
 

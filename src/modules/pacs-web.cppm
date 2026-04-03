@@ -29,10 +29,10 @@ module;
 #include <vector>
 
 // PACS web headers
-#include <pacs/web/rest_server.hpp>
-#include <pacs/web/rest_config.hpp>
-#include <pacs/web/rest_types.hpp>
-#include <pacs/web/endpoints/dicomweb_endpoints.hpp>
+#include <kcenon/pacs/web/rest_server.h>
+#include <kcenon/pacs/web/rest_config.h>
+#include <kcenon/pacs/web/rest_types.h>
+#include <kcenon/pacs/web/endpoints/dicomweb_endpoints.h>
 
 export module kcenon.pacs:web;
 

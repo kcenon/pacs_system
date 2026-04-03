@@ -12,11 +12,11 @@
  * @see Issue #607 - Phase 2: Base Repository Pattern Implementation
  */
 
-#include <pacs/storage/base_repository.hpp>
+#include <kcenon/pacs/storage/base_repository.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <pacs/storage/pacs_database_adapter.hpp>
+#include <kcenon/pacs/storage/pacs_database_adapter.h>
 
 #include <catch2/catch_test_macros.hpp>
 

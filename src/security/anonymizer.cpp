@@ -9,8 +9,8 @@
  * @copyright Copyright (c) 2025
  */
 
-#include "pacs/security/anonymizer.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/security/anonymizer.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <algorithm>
 #include <array>

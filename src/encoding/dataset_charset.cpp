@@ -7,9 +7,9 @@
  * @brief Implementation of character set-aware dataset string access
  */
 
-#include "pacs/encoding/dataset_charset.hpp"
+#include "kcenon/pacs/encoding/dataset_charset.h"
 
-#include <pacs/core/dicom_tag_constants.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
 
 namespace kcenon::pacs::encoding {
 

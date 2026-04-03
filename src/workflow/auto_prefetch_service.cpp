@@ -7,15 +7,15 @@
  * @brief Implementation of automatic prefetch service for prior studies
  */
 
-#include "pacs/workflow/auto_prefetch_service.hpp"
-#include "pacs/storage/index_database.hpp"
-#include "pacs/integration/logger_adapter.hpp"
-#include "pacs/integration/monitoring_adapter.hpp"
-#include "pacs/integration/executor_adapter.hpp"
-#include "pacs/network/association.hpp"
-#include "pacs/services/query_scu.hpp"
-#include "pacs/services/retrieve_scu.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/workflow/auto_prefetch_service.h"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/integration/logger_adapter.h"
+#include "kcenon/pacs/integration/monitoring_adapter.h"
+#include "kcenon/pacs/integration/executor_adapter.h"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/services/query_scu.h"
+#include "kcenon/pacs/services/retrieve_scu.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <kcenon/common/interfaces/executor_interface.h>
 

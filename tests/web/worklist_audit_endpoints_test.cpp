@@ -8,11 +8,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/storage/audit_record.hpp"
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/worklist_record.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/storage/audit_record.h"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/worklist_record.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 using namespace kcenon::pacs::storage;
 using namespace kcenon::pacs::web;

@@ -12,11 +12,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "dcmtk_tool.hpp"
-#include "test_fixtures.hpp"
+#include "dcmtk_tool.h"
+#include "test_fixtures.h"
 
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/verification_scp.hpp"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/verification_scp.h"
 
 #include <future>
 #include <thread>

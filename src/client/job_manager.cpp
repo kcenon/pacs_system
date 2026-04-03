@@ -11,16 +11,16 @@
  * @see Issue #554 - Part 3: Job Execution and Tests
  */
 
-#include "pacs/client/job_manager.hpp"
-#include "pacs/client/remote_node_manager.hpp"
-#include "pacs/storage/job_repository.hpp"
-#include "pacs/services/query_scu.hpp"
-#include "pacs/services/retrieve_scu.hpp"
-#include "pacs/services/storage_scu.hpp"
-#include "pacs/storage/index_database.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/client/remote_node_manager.h"
+#include "kcenon/pacs/storage/job_repository.h"
+#include "kcenon/pacs/services/query_scu.h"
+#include "kcenon/pacs/services/retrieve_scu.h"
+#include "kcenon/pacs/services/storage_scu.h"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 #include <algorithm>
 #include <atomic>

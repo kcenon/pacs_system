@@ -3,12 +3,12 @@
  * @brief Unit tests for Radiation Therapy IOD Validators
  */
 
-#include <pacs/services/validation/rt_iod_validator.hpp>
-#include <pacs/services/sop_classes/rt_storage.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_element.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/validation/rt_iod_validator.h>
+#include <kcenon/pacs/services/sop_classes/rt_storage.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

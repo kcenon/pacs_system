@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/web/metadata_service.hpp"
+#include "kcenon/pacs/web/metadata_service.h"
 
 using namespace kcenon::pacs::web;
 

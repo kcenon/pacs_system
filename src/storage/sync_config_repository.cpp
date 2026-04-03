@@ -10,7 +10,7 @@
  * @see Issue #607 - Phase 2: Base Repository Pattern Implementation
  */
 
-#include "pacs/storage/sync_config_repository.hpp"
+#include "kcenon/pacs/storage/sync_config_repository.h"
 
 #include <chrono>
 #include <cstdio>

@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/security/tls_policy.hpp"
+#include "kcenon/pacs/security/tls_policy.h"
 
 using namespace kcenon::pacs::security;
 

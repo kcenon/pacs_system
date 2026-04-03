@@ -3,10 +3,10 @@
  * @brief Implementation of production-grade PACS
  */
 
-#include "production_pacs.hpp"
-#include "console_utils.hpp"
+#include "production_pacs.h"
+#include "console_utils.h"
 
-#include <pacs/web/rest_config.hpp>
+#include <kcenon/pacs/web/rest_config.h>
 
 #include <fstream>
 #include <iomanip>

@@ -10,17 +10,17 @@
  * @see Issue #530 - PACS Client System Support (Parent Epic)
  */
 
-#include "pacs/client/prefetch_manager.hpp"
-#include "pacs/client/job_manager.hpp"
-#include "pacs/client/remote_node_manager.hpp"
+#include "kcenon/pacs/client/prefetch_manager.h"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/client/remote_node_manager.h"
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include "pacs/storage/prefetch_history_repository.hpp"
-#include "pacs/storage/prefetch_rule_repository.hpp"
+#include "kcenon/pacs/storage/prefetch_history_repository.h"
+#include "kcenon/pacs/storage/prefetch_rule_repository.h"
 #endif
-#include "pacs/storage/prefetch_repository.hpp"
-#include "pacs/services/worklist_scu.hpp"
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/storage/prefetch_repository.h"
+#include "kcenon/pacs/services/worklist_scu.h"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <algorithm>
 #include <atomic>

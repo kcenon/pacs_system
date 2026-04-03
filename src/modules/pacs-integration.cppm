@@ -34,13 +34,13 @@ module;
 #include <vector>
 
 // PACS integration headers
-#include <pacs/integration/logger_adapter.hpp>
-#include <pacs/integration/thread_pool_adapter.hpp>
-#include <pacs/integration/executor_adapter.hpp>
-#include <pacs/integration/network_adapter.hpp>
-#include <pacs/integration/container_adapter.hpp>
-#include <pacs/integration/dicom_session.hpp>
-#include <pacs/integration/monitoring_adapter.hpp>
+#include <kcenon/pacs/integration/logger_adapter.h>
+#include <kcenon/pacs/integration/thread_pool_adapter.h>
+#include <kcenon/pacs/integration/executor_adapter.h>
+#include <kcenon/pacs/integration/network_adapter.h>
+#include <kcenon/pacs/integration/container_adapter.h>
+#include <kcenon/pacs/integration/dicom_session.h>
+#include <kcenon/pacs/integration/monitoring_adapter.h>
 
 export module kcenon.pacs:integration;
 

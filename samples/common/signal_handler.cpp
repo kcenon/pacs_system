@@ -3,7 +3,7 @@
  * @brief Implementation of cross-platform signal handling
  */
 
-#include "signal_handler.hpp"
+#include "signal_handler.h"
 
 #include <iostream>
 

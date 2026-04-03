@@ -17,11 +17,11 @@
  *   dcm_conv ./input_dir/ ./output_dir/ --recursive --implicit
  */
 
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/compression/codec_factory.hpp"
-#include "pacs/encoding/compression/compression_codec.hpp"
-#include "pacs/encoding/transfer_syntax.hpp"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
+#include "kcenon/pacs/encoding/compression/compression_codec.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 
 #include <algorithm>
 #include <chrono>

@@ -6,7 +6,7 @@
  * Validates MPPS state machine transitions and N-CREATE/N-SET behavior.
  */
 
-#include <pacs/storage/index_database.hpp>
+#include <kcenon/pacs/storage/index_database.h>
 
 #include <catch2/catch_test_macros.hpp>
 

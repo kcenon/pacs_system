@@ -7,8 +7,8 @@
  * @brief Implementation of IHE XDS-I.b Imaging Document Consumer Actor
  */
 
-#include "pacs/services/xds/imaging_document_consumer.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/services/xds/imaging_document_consumer.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <algorithm>
 #include <sstream>

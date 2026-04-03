@@ -10,11 +10,11 @@
  * @license MIT
  */
 
-#include "pacs/web/endpoints/security_endpoints.hpp"
-#include "pacs/security/access_control_manager.hpp"
-#include "pacs/security/role.hpp"
-#include "pacs/security/user.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/web/endpoints/security_endpoints.h"
+#include "kcenon/pacs/security/access_control_manager.h"
+#include "kcenon/pacs/security/role.h"
+#include "kcenon/pacs/security/user.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 namespace kcenon::pacs::web::endpoints {
 

@@ -23,17 +23,17 @@
 #undef DELETE
 #endif
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/viewer_state_record.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/viewer_state_record.h"
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include "pacs/storage/recent_study_repository.hpp"
-#include "pacs/storage/viewer_state_record_repository.hpp"
+#include "kcenon/pacs/storage/recent_study_repository.h"
+#include "kcenon/pacs/storage/viewer_state_record_repository.h"
 #endif
-#include "pacs/storage/viewer_state_repository.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/endpoints/viewer_state_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/storage/viewer_state_repository.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/endpoints/viewer_state_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <chrono>
 #include <iomanip>

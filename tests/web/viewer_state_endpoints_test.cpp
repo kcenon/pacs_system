@@ -11,17 +11,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/storage/migration_runner.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/migration_runner.h"
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include "pacs/storage/pacs_database_adapter.hpp"
-#include "pacs/storage/recent_study_repository.hpp"
-#include "pacs/storage/viewer_state_record_repository.hpp"
+#include "kcenon/pacs/storage/pacs_database_adapter.h"
+#include "kcenon/pacs/storage/recent_study_repository.h"
+#include "kcenon/pacs/storage/viewer_state_record_repository.h"
 #else
-#include "pacs/storage/viewer_state_record.hpp"
-#include "pacs/storage/viewer_state_repository.hpp"
+#include "kcenon/pacs/storage/viewer_state_record.h"
+#include "kcenon/pacs/storage/viewer_state_repository.h"
 #endif
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <chrono>
 #include <filesystem>

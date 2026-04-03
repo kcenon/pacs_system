@@ -8,7 +8,7 @@
 // - Truncated data elements
 // - Recursive/nested sequence structures
 
-#include <pacs/encoding/implicit_vr_codec.hpp>
+#include <kcenon/pacs/encoding/implicit_vr_codec.h>
 
 #include <cstdint>
 #include <span>

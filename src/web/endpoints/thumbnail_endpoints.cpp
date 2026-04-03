@@ -21,12 +21,12 @@
 #undef DELETE
 #endif
 
-#include "pacs/storage/index_database.hpp"
-#include "pacs/web/endpoints/system_endpoints.hpp"
-#include "pacs/web/endpoints/thumbnail_endpoints.hpp"
-#include "pacs/web/rest_config.hpp"
-#include "pacs/web/rest_types.hpp"
-#include "pacs/web/thumbnail_service.hpp"
+#include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/web/endpoints/system_endpoints.h"
+#include "kcenon/pacs/web/endpoints/thumbnail_endpoints.h"
+#include "kcenon/pacs/web/rest_config.h"
+#include "kcenon/pacs/web/rest_types.h"
+#include "kcenon/pacs/web/thumbnail_service.h"
 
 #include <memory>
 #include <sstream>

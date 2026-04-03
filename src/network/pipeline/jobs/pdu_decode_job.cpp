@@ -10,8 +10,8 @@
  * @see Issue #520 - Phase 3: Protocol Handling Jobs
  */
 
-#include <pacs/network/pipeline/jobs/pdu_decode_job.hpp>
-#include <pacs/network/pipeline/jobs/dimse_process_job.hpp>
+#include <kcenon/pacs/network/pipeline/jobs/pdu_decode_job.h>
+#include <kcenon/pacs/network/pipeline/jobs/dimse_process_job.h>
 
 #include <chrono>
 

@@ -5,13 +5,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_element.hpp>
-#include <pacs/core/dicom_tag.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/core/result.hpp>
-#include <pacs/encoding/implicit_vr_codec.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_tag.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/core/result.h>
+#include <kcenon/pacs/encoding/implicit_vr_codec.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <cstring>
 

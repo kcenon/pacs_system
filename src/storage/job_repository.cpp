@@ -12,13 +12,13 @@
  * @see Issue #649 - Part 1: Migrate job_repository
  */
 
-#include "pacs/storage/job_repository.hpp"
+#include "kcenon/pacs/storage/job_repository.h"
 
 #include <chrono>
 #include <cstring>
 #include <sstream>
 
-#include <pacs/compat/format.hpp>
+#include <kcenon/pacs/compat/format.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

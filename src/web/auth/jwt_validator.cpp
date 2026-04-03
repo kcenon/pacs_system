@@ -10,7 +10,7 @@
  * @see Issue #860 - Add OAuth 2.0 configuration and JWT token validation core
  */
 
-#include "pacs/web/auth/jwt_validator.hpp"
+#include "kcenon/pacs/web/auth/jwt_validator.h"
 
 #include <algorithm>
 #include <array>

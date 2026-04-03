@@ -17,12 +17,12 @@
  *   retrieve_scu localhost 11112 PACS_SCP --mode get --study-uid "1.2.3.4.5"
  */
 
-#include "pacs/network/association.hpp"
-#include "pacs/network/dimse/dimse_message.hpp"
-#include "pacs/services/retrieve_scp.hpp"
-#include "pacs/services/storage_scp.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
+#include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/services/retrieve_scp.h"
+#include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <atomic>
 #include <chrono>

@@ -10,7 +10,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/web/endpoints/storage_commitment_endpoints.hpp"
+#include "kcenon/pacs/web/endpoints/storage_commitment_endpoints.h"
 
 using namespace kcenon::pacs::web::storage_commitment;
 using namespace kcenon::pacs::services;

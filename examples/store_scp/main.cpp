@@ -17,13 +17,13 @@
  *   store_scp 11112 MY_PACS --storage-dir ./received --accept "CT,MR,US"
  */
 
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_file.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/network/dicom_server.hpp"
-#include "pacs/network/server_config.hpp"
-#include "pacs/services/storage_scp.hpp"
-#include "pacs/storage/file_storage.hpp"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/storage/file_storage.h"
 
 #include <atomic>
 #include <chrono>

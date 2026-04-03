@@ -8,7 +8,7 @@
 // - Unknown or private VR types
 // - Truncated elements and corrupt length fields
 
-#include <pacs/encoding/explicit_vr_codec.hpp>
+#include <kcenon/pacs/encoding/explicit_vr_codec.h>
 
 #include <cstdint>
 #include <span>

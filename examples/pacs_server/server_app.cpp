@@ -3,10 +3,10 @@
  * @brief PACS Server application implementation
  */
 
-#include "server_app.hpp"
+#include "server_app.h"
 
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/storage_status.hpp"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/storage_status.h"
 
 #include <chrono>
 #include <filesystem>

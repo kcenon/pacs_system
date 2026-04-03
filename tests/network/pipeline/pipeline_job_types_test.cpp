@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/network/pipeline/pipeline_job_types.hpp"
+#include "kcenon/pacs/network/pipeline/pipeline_job_types.h"
 
 using namespace kcenon::pacs::network::pipeline;
 

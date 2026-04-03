@@ -18,13 +18,13 @@
  * @see DICOM PS3.8 - Network Communication Support
  */
 
-#include "console_utils.hpp"
-#include "signal_handler.hpp"
+#include "console_utils.h"
+#include "signal_handler.h"
 
-#include <pacs/network/dicom_server.hpp>
-#include <pacs/network/server_config.hpp>
-#include <pacs/network/association.hpp>
-#include <pacs/services/verification_scp.hpp>
+#include <kcenon/pacs/network/dicom_server.h>
+#include <kcenon/pacs/network/server_config.h>
+#include <kcenon/pacs/network/association.h>
+#include <kcenon/pacs/services/verification_scp.h>
 
 #include <atomic>
 #include <chrono>

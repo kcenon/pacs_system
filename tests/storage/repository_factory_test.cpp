@@ -12,22 +12,22 @@
 
 #include <chrono>
 
-#include <pacs/storage/repository_factory.hpp>
+#include <kcenon/pacs/storage/repository_factory.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <pacs/storage/migration_runner.hpp>
-#include <pacs/storage/pacs_database_adapter.hpp>
-#include <pacs/storage/prefetch_repository.hpp>
-#include <pacs/storage/prefetch_rule_repository.hpp>
-#include <pacs/storage/recent_study_repository.hpp>
-#include <pacs/storage/viewer_state_record.hpp>
-#include <pacs/storage/viewer_state_record_repository.hpp>
-#include <pacs/storage/viewer_state_repository.hpp>
-#include <pacs/storage/sync_config_repository.hpp>
-#include <pacs/storage/sync_repository.hpp>
-#include <pacs/client/prefetch_types.hpp>
-#include <pacs/client/sync_types.hpp>
+#include <kcenon/pacs/storage/migration_runner.h>
+#include <kcenon/pacs/storage/pacs_database_adapter.h>
+#include <kcenon/pacs/storage/prefetch_repository.h>
+#include <kcenon/pacs/storage/prefetch_rule_repository.h>
+#include <kcenon/pacs/storage/recent_study_repository.h>
+#include <kcenon/pacs/storage/viewer_state_record.h>
+#include <kcenon/pacs/storage/viewer_state_record_repository.h>
+#include <kcenon/pacs/storage/viewer_state_repository.h>
+#include <kcenon/pacs/storage/sync_config_repository.h>
+#include <kcenon/pacs/storage/sync_repository.h>
+#include <kcenon/pacs/client/prefetch_types.h>
+#include <kcenon/pacs/client/sync_types.h>
 
 using namespace kcenon::pacs::storage;
 using namespace kcenon::pacs::client;

@@ -6,10 +6,10 @@
  * Uses the mock S3 client for testing without AWS SDK dependency.
  */
 
-#include <pacs/storage/s3_storage.hpp>
+#include <kcenon/pacs/storage/s3_storage.h>
 
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

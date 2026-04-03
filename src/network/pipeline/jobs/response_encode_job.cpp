@@ -10,8 +10,8 @@
  * @see Issue #522 - Phase 5: Response Jobs
  */
 
-#include <pacs/network/pipeline/jobs/response_encode_job.hpp>
-#include <pacs/network/pipeline/jobs/send_network_io_job.hpp>
+#include <kcenon/pacs/network/pipeline/jobs/response_encode_job.h>
+#include <kcenon/pacs/network/pipeline/jobs/send_network_io_job.h>
 
 #include <chrono>
 

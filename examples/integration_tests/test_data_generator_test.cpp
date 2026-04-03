@@ -8,7 +8,7 @@
  * @see Issue #137 - Test Fixtures Extension
  */
 
-#include "test_data_generator.hpp"
+#include "test_data_generator.h"
 
 #include <catch2/catch_test_macros.hpp>
 

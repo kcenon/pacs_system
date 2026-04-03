@@ -12,13 +12,13 @@
  * @see Issue #642 - Migrate database_cursor to unified implementation
  */
 
-#include "pacs/services/cache/query_result_stream.hpp"
+#include "kcenon/pacs/services/cache/query_result_stream.h"
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/storage/index_database.hpp"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/storage/index_database.h"
 
 #include <sstream>
 

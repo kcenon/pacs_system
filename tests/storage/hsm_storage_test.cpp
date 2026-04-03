@@ -6,14 +6,14 @@
  * DICOM storage with automatic migration.
  */
 
-#include <pacs/storage/hsm_migration_service.hpp>
-#include <pacs/storage/hsm_storage.hpp>
-#include <pacs/storage/hsm_types.hpp>
+#include <kcenon/pacs/storage/hsm_migration_service.h>
+#include <kcenon/pacs/storage/hsm_storage.h>
+#include <kcenon/pacs/storage/hsm_types.h>
 
-#include <pacs/storage/file_storage.hpp>
+#include <kcenon/pacs/storage/file_storage.h>
 
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

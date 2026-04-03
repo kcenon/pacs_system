@@ -1,5 +1,5 @@
 /**
- * @file query_builder.hpp
+ * @file query_builder.h
  * @brief DICOM Query Dataset Builder
  *
  * Provides a fluent interface for building C-FIND query datasets
@@ -12,10 +12,10 @@
 #ifndef QUERY_SCU_QUERY_BUILDER_HPP
 #define QUERY_SCU_QUERY_BUILDER_HPP
 
-#include "pacs/core/dicom_dataset.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/encoding/vr_type.hpp"
-#include "pacs/services/query_scp.hpp"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/services/query_scp.h"
 
 #include <string>
 #include <string_view>

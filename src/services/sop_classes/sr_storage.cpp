@@ -7,7 +7,7 @@
  * @brief Implementation of Structured Report Storage SOP Classes
  */
 
-#include "pacs/services/sop_classes/sr_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/sr_storage.h"
 
 #include <algorithm>
 #include <array>

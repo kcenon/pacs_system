@@ -2,9 +2,9 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/encoding/compression/frame_deflate_codec.hpp"
-#include "pacs/encoding/compression/codec_factory.hpp"
-#include "pacs/encoding/compression/image_params.hpp"
+#include "kcenon/pacs/encoding/compression/frame_deflate_codec.h"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
+#include "kcenon/pacs/encoding/compression/image_params.h"
 
 #include <algorithm>
 #include <numeric>

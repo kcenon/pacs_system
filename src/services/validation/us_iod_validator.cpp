@@ -7,9 +7,9 @@
  * @brief Implementation of Ultrasound Image IOD Validator
  */
 
-#include "pacs/services/validation/us_iod_validator.hpp"
-#include "pacs/core/dicom_tag_constants.hpp"
-#include "pacs/services/sop_classes/us_storage.hpp"
+#include "kcenon/pacs/services/validation/us_iod_validator.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/services/sop_classes/us_storage.h"
 
 #include <sstream>
 

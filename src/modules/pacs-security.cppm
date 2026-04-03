@@ -31,17 +31,17 @@ module;
 #include <vector>
 
 // PACS security headers
-#include <pacs/security/access_control_manager.hpp>
-#include <pacs/security/user.hpp>
-#include <pacs/security/role.hpp>
-#include <pacs/security/permission.hpp>
-#include <pacs/security/user_context.hpp>
-#include <pacs/security/certificate.hpp>
-#include <pacs/security/digital_signature.hpp>
-#include <pacs/security/signature_types.hpp>
-#include <pacs/security/anonymizer.hpp>
-#include <pacs/security/uid_mapping.hpp>
-#include <pacs/security/security_storage_interface.hpp>
+#include <kcenon/pacs/security/access_control_manager.h>
+#include <kcenon/pacs/security/user.h>
+#include <kcenon/pacs/security/role.h>
+#include <kcenon/pacs/security/permission.h>
+#include <kcenon/pacs/security/user_context.h>
+#include <kcenon/pacs/security/certificate.h>
+#include <kcenon/pacs/security/digital_signature.h>
+#include <kcenon/pacs/security/signature_types.h>
+#include <kcenon/pacs/security/anonymizer.h>
+#include <kcenon/pacs/security/uid_mapping.h>
+#include <kcenon/pacs/security/security_storage_interface.h>
 
 export module kcenon.pacs:security;
 

@@ -30,15 +30,15 @@ module;
 #include <vector>
 
 // PACS validation headers
-#include <pacs/services/validation/dx_iod_validator.hpp>
-#include <pacs/services/validation/mg_iod_validator.hpp>
-#include <pacs/services/validation/nm_iod_validator.hpp>
-#include <pacs/services/validation/pet_iod_validator.hpp>
-#include <pacs/services/validation/rt_iod_validator.hpp>
-#include <pacs/services/validation/seg_iod_validator.hpp>
-#include <pacs/services/validation/sr_iod_validator.hpp>
-#include <pacs/services/validation/us_iod_validator.hpp>
-#include <pacs/services/validation/xa_iod_validator.hpp>
+#include <kcenon/pacs/services/validation/dx_iod_validator.h>
+#include <kcenon/pacs/services/validation/mg_iod_validator.h>
+#include <kcenon/pacs/services/validation/nm_iod_validator.h>
+#include <kcenon/pacs/services/validation/pet_iod_validator.h>
+#include <kcenon/pacs/services/validation/rt_iod_validator.h>
+#include <kcenon/pacs/services/validation/seg_iod_validator.h>
+#include <kcenon/pacs/services/validation/sr_iod_validator.h>
+#include <kcenon/pacs/services/validation/us_iod_validator.h>
+#include <kcenon/pacs/services/validation/xa_iod_validator.h>
 
 export module kcenon.pacs:services_validation;
 

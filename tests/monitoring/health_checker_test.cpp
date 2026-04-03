@@ -5,7 +5,7 @@
  * @see Issue #211 - Implement health check endpoint
  */
 
-#include <pacs/monitoring/health_checker.hpp>
+#include <kcenon/pacs/monitoring/health_checker.h>
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -13,7 +13,7 @@
  * @copyright Copyright (c) 2025
  */
 
-#include <pacs/storage/sqlite_security_storage.hpp>
+#include <kcenon/pacs/storage/sqlite_security_storage.h>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 

@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/web/thumbnail_service.hpp"
+#include "kcenon/pacs/web/thumbnail_service.h"
 
 using namespace kcenon::pacs::web;
 

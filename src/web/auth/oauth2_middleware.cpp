@@ -13,13 +13,13 @@
 // IMPORTANT: Include Crow FIRST before any PACS headers
 #include "crow.h"
 
-#include "pacs/web/auth/oauth2_middleware.hpp"
+#include "kcenon/pacs/web/auth/oauth2_middleware.h"
 
-#include "pacs/security/access_control_manager.hpp"
-#include "pacs/security/role.hpp"
-#include "pacs/security/user.hpp"
-#include "pacs/security/user_context.hpp"
-#include "pacs/web/rest_types.hpp"
+#include "kcenon/pacs/security/access_control_manager.h"
+#include "kcenon/pacs/security/role.h"
+#include "kcenon/pacs/security/user.h"
+#include "kcenon/pacs/security/user_context.h"
+#include "kcenon/pacs/web/rest_types.h"
 
 #include <string>
 

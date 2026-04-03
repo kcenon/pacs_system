@@ -8,7 +8,7 @@
 #include <chrono>
 #include <thread>
 
-#include "pacs/core/events.hpp"
+#include "kcenon/pacs/core/events.h"
 #include <kcenon/common/patterns/event_bus.h>
 
 using namespace kcenon::pacs::events;

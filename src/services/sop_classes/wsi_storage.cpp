@@ -9,7 +9,7 @@
  * @see Issue #825 - Add WSI SOP Class registration and storage definition
  */
 
-#include "pacs/services/sop_classes/wsi_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/wsi_storage.h"
 
 namespace kcenon::pacs::services::sop_classes {
 

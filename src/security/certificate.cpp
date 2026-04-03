@@ -9,7 +9,7 @@
  * @copyright Copyright (c) 2025
  */
 
-#include "pacs/security/certificate.hpp"
+#include "kcenon/pacs/security/certificate.h"
 
 #include <openssl/bio.h>
 #include <openssl/err.h>

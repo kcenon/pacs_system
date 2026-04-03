@@ -7,7 +7,7 @@
  * @brief Implementation of Digital Mammography X-Ray Image Storage utilities
  */
 
-#include "pacs/services/sop_classes/mg_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/mg_storage.h"
 
 #include <algorithm>
 #include <array>

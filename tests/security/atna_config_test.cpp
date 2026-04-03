@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "pacs/security/atna_config.hpp"
+#include "kcenon/pacs/security/atna_config.h"
 
 #include <string>
 

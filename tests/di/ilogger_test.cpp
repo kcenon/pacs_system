@@ -6,15 +6,15 @@
  * @see Issue #347 - Add ILogger Unit Tests
  */
 
-#include <pacs/di/ilogger.hpp>
-#include <pacs/di/service_registration.hpp>
-#include <pacs/services/verification_scp.hpp>
-#include <pacs/services/storage_scp.hpp>
-#include <pacs/services/storage_scu.hpp>
-#include <pacs/services/query_scp.hpp>
-#include <pacs/services/retrieve_scp.hpp>
-#include <pacs/services/worklist_scp.hpp>
-#include <pacs/services/mpps_scp.hpp>
+#include <kcenon/pacs/di/ilogger.h>
+#include <kcenon/pacs/di/service_registration.h>
+#include <kcenon/pacs/services/verification_scp.h>
+#include <kcenon/pacs/services/storage_scp.h>
+#include <kcenon/pacs/services/storage_scu.h>
+#include <kcenon/pacs/services/query_scp.h>
+#include <kcenon/pacs/services/retrieve_scp.h>
+#include <kcenon/pacs/services/worklist_scp.h>
+#include <kcenon/pacs/services/mpps_scp.h>
 
 #include <catch2/catch_test_macros.hpp>
 

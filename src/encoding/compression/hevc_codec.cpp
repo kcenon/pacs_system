@@ -2,8 +2,8 @@
 // Copyright (c) 2021-2025, 🍀☀🌕🌥 🌊
 // See the LICENSE file in the project root for full license information.
 
-#include "pacs/encoding/compression/hevc_codec.hpp"
-#include <pacs/core/result.hpp>
+#include "kcenon/pacs/encoding/compression/hevc_codec.h"
+#include <kcenon/pacs/core/result.h>
 
 namespace kcenon::pacs::encoding::compression {
 

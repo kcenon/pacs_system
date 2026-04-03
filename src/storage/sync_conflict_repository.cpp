@@ -9,7 +9,7 @@
  * @see Issue #610 - Phase 4: Repository Migrations
  */
 
-#include "pacs/storage/sync_conflict_repository.hpp"
+#include "kcenon/pacs/storage/sync_conflict_repository.h"
 
 #include <chrono>
 #include <cstdio>

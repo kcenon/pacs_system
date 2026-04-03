@@ -7,8 +7,8 @@
  * @brief Implementation of dicom_dictionary class
  */
 
-#include "pacs/core/dicom_dictionary.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/core/dicom_dictionary.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 #include <algorithm>
 

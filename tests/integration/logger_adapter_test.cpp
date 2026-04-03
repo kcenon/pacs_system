@@ -3,7 +3,7 @@
  * @brief Unit tests for logger_adapter
  */
 
-#include <pacs/integration/logger_adapter.hpp>
+#include <kcenon/pacs/integration/logger_adapter.h>
 
 #include <catch2/catch_test_macros.hpp>
 

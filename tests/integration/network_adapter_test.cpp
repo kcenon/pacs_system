@@ -3,10 +3,10 @@
  * @brief Unit tests for network_adapter and dicom_session
  */
 
-#include <pacs/integration/network_adapter.hpp>
-#include <pacs/integration/dicom_session.hpp>
-#include <pacs/network/server_config.hpp>
-#include <pacs/network/dicom_server.hpp>
+#include <kcenon/pacs/integration/network_adapter.h>
+#include <kcenon/pacs/integration/dicom_session.h>
+#include <kcenon/pacs/network/server_config.h>
+#include <kcenon/pacs/network/dicom_server.h>
 
 #include <catch2/catch_test_macros.hpp>
 

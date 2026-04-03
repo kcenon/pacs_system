@@ -13,8 +13,8 @@
  * @see Issue #756 - Automated CLI Tool Testing (Epic)
  */
 
-#include <pacs/core/dicom_file.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
 
 #include <catch2/catch_test_macros.hpp>
 

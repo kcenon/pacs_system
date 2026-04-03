@@ -7,7 +7,7 @@
  * @brief Implementation of dicom_session for DICOM PDU communication
  */
 
-#include <pacs/integration/dicom_session.hpp>
+#include <kcenon/pacs/integration/dicom_session.h>
 
 #include <kcenon/network/interfaces/i_session.h>
 #include <kcenon/network/session/session.h>

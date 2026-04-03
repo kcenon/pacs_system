@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 using namespace kcenon::pacs::encoding;
 

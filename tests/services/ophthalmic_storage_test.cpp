@@ -5,8 +5,8 @@
  * @see Issue #829 - Add Ophthalmic SOP Class registration and storage definition
  */
 
-#include <pacs/services/sop_classes/ophthalmic_storage.hpp>
-#include <pacs/services/sop_class_registry.hpp>
+#include <kcenon/pacs/services/sop_classes/ophthalmic_storage.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
 
 #include <catch2/catch_test_macros.hpp>
 

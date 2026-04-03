@@ -9,7 +9,7 @@
  * @see Issue #718 - Add MR Image IOD Validator
  */
 
-#include "pacs/services/sop_classes/mr_storage.hpp"
+#include "kcenon/pacs/services/sop_classes/mr_storage.h"
 
 namespace kcenon::pacs::services::sop_classes {
 

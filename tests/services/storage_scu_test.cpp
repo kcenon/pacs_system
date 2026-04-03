@@ -3,14 +3,14 @@
  * @brief Unit tests for Storage SCU service
  */
 
-#include <pacs/services/storage_scu.hpp>
-#include <pacs/services/storage_scp.hpp>
-#include <pacs/services/storage_status.hpp>
-#include <pacs/network/dimse/command_field.hpp>
-#include <pacs/network/dimse/dimse_message.hpp>
-#include <pacs/network/dimse/status_codes.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/services/storage_scu.h>
+#include <kcenon/pacs/services/storage_scp.h>
+#include <kcenon/pacs/services/storage_status.h>
+#include <kcenon/pacs/network/dimse/command_field.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 

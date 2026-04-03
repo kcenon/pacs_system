@@ -3,9 +3,9 @@
  * @brief Unit tests for Storage Commitment types and SOP class registration
  */
 
-#include <pacs/services/storage_commitment_types.hpp>
-#include <pacs/services/sop_class_registry.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
+#include <kcenon/pacs/services/storage_commitment_types.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
 
 #include <catch2/catch_test_macros.hpp>
 

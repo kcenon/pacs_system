@@ -5,8 +5,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "pacs/core/dicom_dictionary.hpp"
-#include "pacs/encoding/vr_type.hpp"
+#include "kcenon/pacs/core/dicom_dictionary.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 
 using namespace kcenon::pacs::core;
 using kcenon::pacs::encoding::vr_type;

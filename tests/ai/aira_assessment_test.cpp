@@ -3,11 +3,11 @@
  * @brief Unit tests for IHE AIRA AI Result Assessment
  */
 
-#include <pacs/ai/aira_assessment.hpp>
-#include <pacs/ai/aira_assessment_manager.hpp>
-#include <pacs/core/dicom_dataset.hpp>
-#include <pacs/core/dicom_tag_constants.hpp>
-#include <pacs/encoding/vr_type.hpp>
+#include <kcenon/pacs/ai/aira_assessment.h>
+#include <kcenon/pacs/ai/aira_assessment_manager.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 
