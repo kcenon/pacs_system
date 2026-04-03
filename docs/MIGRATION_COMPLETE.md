@@ -10,6 +10,8 @@ category: "MIGR"
 
 # Thread System Migration Complete
 
+> **SSOT**: This document is the single source of truth for **Thread System Migration Complete**.
+
 **Version:** 0.1.0.0
 **Date:** 2025-12-07
 **Related Issue:** #153 - Epic: Migrate from std::thread to thread_system/network_system

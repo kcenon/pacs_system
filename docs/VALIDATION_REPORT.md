@@ -10,6 +10,8 @@ category: "QUAL"
 
 # PACS System Validation Report
 
+> **SSOT**: This document is the single source of truth for **PACS System Validation Report**.
+
 > **Report Version:** 0.1.3.0
 > **Report Date:** 2026-02-08
 > **Language:** **English** | [한국어](VALIDATION_REPORT.kr.md)

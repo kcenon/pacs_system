@@ -10,6 +10,8 @@ category: "ADR"
 
 # ADR-001: Integrate database_system for Database Abstraction
 
+> **SSOT**: This document is the single source of truth for **ADR-001: Integrate database_system for Database Abstraction**.
+
 > **Status:** Accepted
 > **Date:** 2025-12-31
 > **Decision Makers:** pacs_system core team

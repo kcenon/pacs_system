@@ -10,6 +10,8 @@ category: "PROJ"
 
 # Project Structure - PACS System
 
+> **SSOT**: This document is the single source of truth for **Project Structure - PACS System**.
+
 > **Version:** 0.1.3.0
 > **Last Updated:** 2025-12-13
 > **Language:** **English** | [한국어](PROJECT_STRUCTURE.kr.md)

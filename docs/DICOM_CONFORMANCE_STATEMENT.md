@@ -10,6 +10,8 @@ category: "INTR"
 
 # DICOM Conformance Statement
 
+> **SSOT**: This document is the single source of truth for **DICOM Conformance Statement**.
+
 ## PACS System
 
 **Implementation Name**: PACS_SYSTEM_001

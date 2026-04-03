@@ -10,6 +10,8 @@ category: "GUID"
 
 # PACS 시스템 구현 분석
 
+> **SSOT**: This document is the single source of truth for **PACS 시스템 구현 분석**.
+
 > **언어:** [English](PACS_IMPLEMENTATION_ANALYSIS.md) | **한국어**
 
 ## 1. 개요

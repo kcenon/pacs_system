@@ -10,6 +10,8 @@ category: "PROJ"
 
 # Changelog - PACS System
 
+> **SSOT**: This document is the single source of truth for **Changelog - PACS System**.
+
 > **Language:** **English** | [한국어](CHANGELOG.kr.md)
 
 All notable changes to the PACS System project will be documented in this file.

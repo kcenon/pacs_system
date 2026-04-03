@@ -10,6 +10,8 @@ category: "QUAL"
 
 # Thread System Stability Verification Report
 
+> **SSOT**: This document is the single source of truth for **Thread System Stability Verification Report**.
+
 **Issue**: #155 - Verify thread_system stability and jthread support
 **Date**: 2024-12-04
 **Last Updated**: 2025-12-21 (Windows CI timeout fix for integration tests)

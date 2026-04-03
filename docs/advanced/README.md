@@ -10,6 +10,8 @@ category: "GUID"
 
 # PACS System Advanced Topics
 
+> **SSOT**: This document is the single source of truth for **PACS System Advanced Topics**.
+
 This directory contains advanced documentation for PACS System covering detailed design specifications and specialized topics.
 
 ## Software Design Specifications (SDS)

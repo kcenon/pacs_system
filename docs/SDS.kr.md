@@ -10,6 +10,8 @@ category: "GUID"
 
 # 소프트웨어 설계 명세서 (SDS) - PACS 시스템
 
+> **SSOT**: This document is the single source of truth for **소프트웨어 설계 명세서 (SDS) - PACS 시스템**.
+
 > **버전:** 0.2.0
 > **최종 수정일:** 2026-02-08
 > **언어:** [English](SDS.md) | **한국어**

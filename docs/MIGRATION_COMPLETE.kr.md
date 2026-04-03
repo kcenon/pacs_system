@@ -10,6 +10,8 @@ category: "MIGR"
 
 # 스레드 시스템 마이그레이션 완료
 
+> **SSOT**: This document is the single source of truth for **스레드 시스템 마이그레이션 완료**.
+
 **버전:** 0.1.0.0
 **날짜:** 2025-12-07
 **관련 이슈:** #153 - Epic: std::thread에서 thread_system/network_system으로 마이그레이션

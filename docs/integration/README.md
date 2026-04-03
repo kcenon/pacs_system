@@ -10,6 +10,8 @@ category: "GUID"
 
 # PACS System Integration Guide
 
+> **SSOT**: This document is the single source of truth for **PACS System Integration Guide**.
+
 This directory contains integration documentation for using PACS System with the kcenon ecosystem and external systems.
 
 ## Ecosystem Dependencies

@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Compression Codecs Module
 
+> **SSOT**: This document is the single source of truth for **SDS - Compression Codecs Module**.
+
 > **Version:** 1.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-03

@@ -10,6 +10,8 @@ category: "MIGR"
 
 # Thread Pool Migration Guide
 
+> **SSOT**: This document is the single source of truth for **Thread Pool Migration Guide**.
+
 This guide explains how to migrate from the deprecated `thread_adapter` singleton pattern to the new `thread_pool_adapter` with dependency injection.
 
 ## Overview

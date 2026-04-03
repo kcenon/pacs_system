@@ -10,6 +10,8 @@ category: "PERF"
 
 # database_system Performance Guide
 
+> **SSOT**: This document is the single source of truth for **database_system Performance Guide**.
+
 > **Version:** 1.0.0
 > **Last Updated:** 2025-12-31
 > **Context:** pacs_system database optimization

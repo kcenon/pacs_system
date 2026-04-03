@@ -10,6 +10,8 @@ category: "QUAL"
 
 # PACS System Verification Report
 
+> **SSOT**: This document is the single source of truth for **PACS System Verification Report**.
+
 > **Report Version:** 0.1.6.1
 > **Report Date:** 2026-02-12
 > **Language:** **English** | [한국어](VERIFICATION_REPORT.kr.md)

@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Component Design Specifications
 
+> **SSOT**: This document is the single source of truth for **SDS - Component Design Specifications**.
+
 > **Version:** 0.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-02-08

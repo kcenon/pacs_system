@@ -10,6 +10,8 @@ category: "PERF"
 
 # PACS System Performance Benchmarks
 
+> **SSOT**: This document is the single source of truth for **PACS System Performance Benchmarks**.
+
 > **Language:** **English** | [한국어](BENCHMARKS.kr.md)
 
 **Last Updated**: 2026-03-18

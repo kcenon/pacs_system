@@ -10,6 +10,8 @@ category: "API"
 
 # CLI Reference
 
+> **SSOT**: This document is the single source of truth for **CLI Reference**.
+
 > **Language:** **English** | [한국어](CLI_REFERENCE.kr.md)
 
 Complete documentation for all 32 CLI tools included in the PACS System. For a quick overview, see the [README](../README.md#cli-tools--examples).

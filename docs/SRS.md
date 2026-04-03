@@ -10,6 +10,8 @@ category: "GUID"
 
 # Software Requirements Specification - PACS System
 
+> **SSOT**: This document is the single source of truth for **Software Requirements Specification - PACS System**.
+
 > **Version:** 0.1.3.2
 > **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](SRS.kr.md)

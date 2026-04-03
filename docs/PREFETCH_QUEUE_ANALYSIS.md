@@ -10,6 +10,8 @@ category: "GUID"
 
 # Prefetch Queue Lock-free Analysis Report
 
+> **SSOT**: This document is the single source of truth for **Prefetch Queue Lock-free Analysis Report**.
+
 ## Issue Reference
 - **Issue**: [#338](https://github.com/kcenon/pacs_system/issues/338) - Apply lock-free queue to prefetch service
 - **Parent Issue**: [#314](https://github.com/kcenon/pacs_system/issues/314) - Apply Lock-free Structures
