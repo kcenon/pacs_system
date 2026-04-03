@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-QUAL-002"
+doc_title: "PACS System Production Quality"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "QUAL"
+---
+
 # PACS System Production Quality
 
 > **Language:** **English** | [한국어](PRODUCTION_QUALITY.kr.md)

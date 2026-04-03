@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-005"
+doc_title: "Prefetch Queue Lock-free Analysis Report"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # Prefetch Queue Lock-free Analysis Report
 
 ## Issue Reference

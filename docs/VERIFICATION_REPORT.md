@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-QUAL-007"
+doc_title: "PACS System Verification Report"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "QUAL"
+---
+
 # PACS System Verification Report
 
 > **Report Version:** 0.1.6.1

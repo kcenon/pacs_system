@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-PROJ-001"
+doc_title: "변경 이력 - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "PROJ"
+---
+
 # 변경 이력 - PACS System
 
 > **언어:** [English](CHANGELOG.md) | **한국어**

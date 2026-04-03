@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-030"
+doc_title: "PACS System Advanced Topics"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # PACS System Advanced Topics
 
 This directory contains advanced documentation for PACS System covering detailed design specifications and specialized topics.

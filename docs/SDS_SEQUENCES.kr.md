@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-021"
+doc_title: "SDS - 시퀀스 다이어그램"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - 시퀀스 다이어그램
 
 > **버전:** 0.1.1

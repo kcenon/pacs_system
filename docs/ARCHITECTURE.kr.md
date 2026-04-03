@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-ARCH-001"
+doc_title: "아키텍처 문서 - PACS 시스템"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "ARCH"
+---
+
 # 아키텍처 문서 - PACS 시스템
 
 > **버전:** 0.1.4.0

@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-API-004"
+doc_title: "CLI Reference"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "API"
+---
+
 # CLI Reference
 
 > **Language:** **English** | [한국어](CLI_REFERENCE.kr.md)

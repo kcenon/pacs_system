@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-004"
+doc_title: "Product Requirements Document - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # Product Requirements Document - PACS System
 
 > **Version:** 0.2.0.0

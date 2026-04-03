@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-PROJ-003"
+doc_title: "Documentation Statistics Automation"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "PROJ"
+---
+
 # Documentation Statistics Automation
 
 This document describes the automated documentation statistics system that keeps README.md metrics in sync with actual codebase measurements.
