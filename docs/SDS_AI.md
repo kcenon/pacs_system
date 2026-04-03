@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-008"
+doc_title: "SDS - AI Service Module"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - AI Service Module
 
 > **Version:** 2.0.0

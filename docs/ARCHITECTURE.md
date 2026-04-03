@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-ARCH-002"
+doc_title: "Architecture Documentation - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "ARCH"
+---
+
 # Architecture Documentation - PACS System
 
 > **Version:** 0.1.4.0

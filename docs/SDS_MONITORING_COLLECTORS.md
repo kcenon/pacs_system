@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-019"
+doc_title: "SDS - Monitoring Collectors Module"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Monitoring Collectors Module
 
 > **Version:** 2.1.0

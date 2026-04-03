@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-MIGR-001"
+doc_title: "스레드 시스템 마이그레이션 완료"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "MIGR"
+---
+
 # 스레드 시스템 마이그레이션 완료
 
 **버전:** 0.1.0.0

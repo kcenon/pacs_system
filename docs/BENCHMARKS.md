@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-PERF-002"
+doc_title: "PACS System Performance Benchmarks"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "PERF"
+---
+
 # PACS System Performance Benchmarks
 
 > **Language:** **English** | [한국어](BENCHMARKS.kr.md)

@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-MIGR-003"
+doc_title: "Thread Pool Migration Guide"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "MIGR"
+---
+
 # Thread Pool Migration Guide
 
 This guide explains how to migrate from the deprecated `thread_adapter` singleton pattern to the new `thread_pool_adapter` with dependency injection.

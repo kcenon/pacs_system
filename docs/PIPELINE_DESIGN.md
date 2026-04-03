@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-ARCH-003"
+doc_title: "Pipeline Design Documentation"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "ARCH"
+---
+
 # Pipeline Design Documentation
 
 **Version:** 1.0.0

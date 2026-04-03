@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-032"
+doc_title: "PACS System Integration Guide"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # PACS System Integration Guide
 
 This directory contains integration documentation for using PACS System with the kcenon ecosystem and external systems.

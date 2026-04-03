@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-028"
+doc_title: "소프트웨어 요구사항 명세서 - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # 소프트웨어 요구사항 명세서 - PACS System
 
 > **버전:** 0.1.3.2

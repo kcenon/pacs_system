@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-API-003"
+doc_title: "CLI 레퍼런스"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "API"
+---
+
 # CLI 레퍼런스
 
 > **언어:** [English](CLI_REFERENCE.md) | **한국어**

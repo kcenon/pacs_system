@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-009"
+doc_title: "SDS - Client Module"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Client Module
 
 > **Version:** 1.0.0

@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-033"
+doc_title: "PACS System Performance Documentation"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # PACS System Performance Documentation
 
 This directory contains performance-related documentation for PACS System.

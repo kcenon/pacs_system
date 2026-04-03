@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-QUAL-004"
+doc_title: "PACS 시스템 검증 보고서 (Validation Report)"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "QUAL"
+---
+
 # PACS 시스템 검증 보고서 (Validation Report)
 
 > **보고서 버전:** 0.1.3.0

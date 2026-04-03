@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-API-005"
+doc_title: "database_system API Reference"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "API"
+---
+
 # database_system API Reference
 
 > **Version:** 1.0.0

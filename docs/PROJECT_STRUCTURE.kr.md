@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-PROJ-004"
+doc_title: "프로젝트 구조 - PACS 시스템"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "PROJ"
+---
+
 # 프로젝트 구조 - PACS 시스템
 
 > **버전:** 0.1.3.0

@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-ADR-002"
+doc_title: "ADR-002: Define PACS Storage Port Segmentation"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "ADR"
+---
+
 # ADR-002: Define PACS Storage Port Segmentation
 
 > **Status:** Accepted

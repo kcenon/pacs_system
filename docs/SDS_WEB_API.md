@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-026"
+doc_title: "SDS - Web/REST API Module Design Specification"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Web/REST API Module Design Specification
 
 > **Version:** 2.0.0

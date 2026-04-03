@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-001"
+doc_title: "PACS 시스템 구현 분석"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # PACS 시스템 구현 분석
 
 > **언어:** [English](PACS_IMPLEMENTATION_ANALYSIS.md) | **한국어**

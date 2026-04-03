@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-014"
+doc_title: "SDS - 데이터베이스 설계"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - 데이터베이스 설계
 
 > **버전:** 0.1.1

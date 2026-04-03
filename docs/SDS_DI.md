@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-016"
+doc_title: "SDS - Dependency Injection Module"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Dependency Injection Module
 
 > **Version:** 1.1.0
