@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-INTR-001"
+doc_title: "DICOM Conformance Statement"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "INTR"
+---
+
 # DICOM Conformance Statement
 
 ## PACS System

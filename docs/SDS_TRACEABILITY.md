@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-025"
+doc_title: "SDS - Requirements Traceability Matrix"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Requirements Traceability Matrix
 
 > **Version:** 3.0.0

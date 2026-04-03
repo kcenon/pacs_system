@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-020"
+doc_title: "SDS - Network V2 Module"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Network V2 Module
 
 > **Version:** 2.0.0

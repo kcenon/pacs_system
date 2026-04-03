@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-PROJ-007"
+doc_title: "Contributing to PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "PROJ"
+---
+
 # Contributing to PACS System
 
 **Version:** 0.1.0.0

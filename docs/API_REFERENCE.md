@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-API-002"
+doc_title: "API Reference - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "API"
+---
+
 # API Reference - PACS System
 
 > **Version:** 0.1.5.0

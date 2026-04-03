@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-SECU-002"
+doc_title: "Security Module Documentation"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "SECU"
+---
+
 # Security Module Documentation
 
 > **Version:** 0.1.1.0

@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-010"
+doc_title: "SDS - Cloud Storage Backends Module"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - Cloud Storage Backends Module
 
 > **Version:** 1.0.0

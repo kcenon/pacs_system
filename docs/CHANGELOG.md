@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-PROJ-002"
+doc_title: "Changelog - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "PROJ"
+---
+
 # Changelog - PACS System
 
 > **Language:** **English** | [한국어](CHANGELOG.kr.md)

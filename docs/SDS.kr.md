@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-006"
+doc_title: "소프트웨어 설계 명세서 (SDS) - PACS 시스템"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # 소프트웨어 설계 명세서 (SDS) - PACS 시스템
 
 > **버전:** 0.2.0

@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-029"
+doc_title: "Software Requirements Specification - PACS System"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # Software Requirements Specification - PACS System
 
 > **Version:** 0.1.3.2

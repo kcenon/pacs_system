@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-GUID-017"
+doc_title: "SDS - 인터페이스 명세서"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
 # SDS - 인터페이스 명세서
 
 > **버전:** 0.1.2

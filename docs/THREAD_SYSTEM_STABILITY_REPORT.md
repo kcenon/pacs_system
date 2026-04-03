@@ -1,3 +1,13 @@
+---
+doc_id: "PAC-QUAL-003"
+doc_title: "Thread System Stability Verification Report"
+doc_version: "1.0.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "QUAL"
+---
+
 # Thread System Stability Verification Report
 
 **Issue**: #155 - Verify thread_system stability and jthread support
