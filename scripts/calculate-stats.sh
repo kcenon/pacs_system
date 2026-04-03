@@ -36,7 +36,7 @@ calculate_stats() {
     local doc_files
     local workflow_files
 
-    header_files=$(find include -name '*.hpp' -type f 2>/dev/null | wc -l | tr -d ' ')
+    header_files=$(find include -name '*.h' -type f 2>/dev/null | wc -l | tr -d ' ')
     source_files=$(find src -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     example_dirs=$(find examples -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
@@ -50,7 +50,7 @@ calculate_stats() {
     local example_loc
     local total_loc
 
-    header_loc=$(find include -name '*.hpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+    header_loc=$(find include -name '*.h' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     source_loc=$(find src -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     test_loc=$(find tests -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     example_loc=$(find examples -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
@@ -133,13 +133,13 @@ export_raw_stats() {
     local header_files source_files test_files example_dirs doc_files workflow_files
     local header_loc source_loc test_loc example_loc total_loc test_cases
 
-    header_files=$(find include -name '*.hpp' -type f 2>/dev/null | wc -l | tr -d ' ')
+    header_files=$(find include -name '*.h' -type f 2>/dev/null | wc -l | tr -d ' ')
     source_files=$(find src -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     example_dirs=$(find examples -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
     workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
-    header_loc=$(find include -name '*.hpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+    header_loc=$(find include -name '*.h' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     source_loc=$(find src -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     test_loc=$(find tests -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     example_loc=$(find examples -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
