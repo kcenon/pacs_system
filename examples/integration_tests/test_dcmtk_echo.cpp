@@ -37,7 +37,7 @@ TEST_CASE("C-ECHO: pacs_system SCP with DCMTK echoscu", "[dcmtk][interop][echo]"
     }
 
     // Skip if real TCP DICOM connections are not supported yet
-    // See test_fixtures.hpp supports_real_tcp_dicom() for details
+    // See test_fixtures.h supports_real_tcp_dicom() for details
     if (!supports_real_tcp_dicom()) {
         SKIP("pacs_system does not support real TCP DICOM connections yet - "
              "accept_worker closes connections immediately. See Issue #XXX.");

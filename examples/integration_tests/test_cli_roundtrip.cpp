@@ -40,7 +40,7 @@ namespace fs = std::filesystem;
 namespace {
 
 // ============================================================================
-// Lightweight process execution (no test_fixtures.hpp dependency)
+// Lightweight process execution (no test_fixtures.h dependency)
 // ============================================================================
 
 struct cli_result {
