@@ -10,6 +10,8 @@ category: "MIGR"
 
 # database_system Migration Guide
 
+> **SSOT**: This document is the single source of truth for **database_system Migration Guide**.
+
 > **Version:** 1.0.1
 > **Last Updated:** 2026-01-01
 > **Related Epic:** [#418](https://github.com/kcenon/pacs_system/issues/418)

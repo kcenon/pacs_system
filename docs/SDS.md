@@ -10,6 +10,8 @@ category: "GUID"
 
 # Software Design Specification (SDS) - PACS System
 
+> **SSOT**: This document is the single source of truth for **Software Design Specification (SDS) - PACS System**.
+
 > **Version:** 0.2.0
 > **Last Updated:** 2026-02-08
 > **Language:** **English** | [한국어](SDS.kr.md)

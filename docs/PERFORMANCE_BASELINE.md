@@ -10,6 +10,8 @@ category: "PERF"
 
 # Performance Baseline for Thread Migration
 
+> **SSOT**: This document is the single source of truth for **Performance Baseline for Thread Migration**.
+
 **Version:** 0.1.0.0
 **Date:** 2024-12-04
 **Related Issue:** #154 - Establish performance baseline benchmarks for thread migration

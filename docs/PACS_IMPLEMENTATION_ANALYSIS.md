@@ -10,6 +10,8 @@ category: "GUID"
 
 # PACS System Implementation Analysis
 
+> **SSOT**: This document is the single source of truth for **PACS System Implementation Analysis**.
+
 > **Language:** **English** | [한국어](PACS_IMPLEMENTATION_ANALYSIS.kr.md)
 
 ## 1. Overview

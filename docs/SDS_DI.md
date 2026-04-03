@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Dependency Injection Module
 
+> **SSOT**: This document is the single source of truth for **SDS - Dependency Injection Module**.
+
 > **Version:** 1.1.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-05

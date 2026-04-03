@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - 인터페이스 명세서
 
+> **SSOT**: This document is the single source of truth for **SDS - 인터페이스 명세서**.
+
 > **버전:** 0.1.2
 > **상위 문서:** [SDS.kr.md](SDS.kr.md)
 > **최종 수정일:** 2025-12-07

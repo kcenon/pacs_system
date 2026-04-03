@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Services Cache Module
 
+> **SSOT**: This document is the single source of truth for **SDS - Services Cache Module**.
+
 > **Version:** 1.1.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-05

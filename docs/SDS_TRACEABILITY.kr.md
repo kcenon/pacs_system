@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - 요구사항 추적성 매트릭스
 
+> **SSOT**: This document is the single source of truth for **SDS - 요구사항 추적성 매트릭스**.
+
 > **버전:** 0.1.3
 > **상위 문서:** [SDS.kr.md](SDS.kr.md)
 > **최종 수정일:** 2026-02-07

@@ -10,6 +10,8 @@ category: "PROJ"
 
 # 프로젝트 구조 - PACS 시스템
 
+> **SSOT**: This document is the single source of truth for **프로젝트 구조 - PACS 시스템**.
+
 > **버전:** 0.1.3.0
 > **최종 수정일:** 2025-12-20
 > **언어:** [English](PROJECT_STRUCTURE.md) | **한국어**

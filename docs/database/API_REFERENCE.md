@@ -10,6 +10,8 @@ category: "API"
 
 # database_system API Reference
 
+> **SSOT**: This document is the single source of truth for **database_system API Reference**.
+
 > **Version:** 1.0.0
 > **Last Updated:** 2025-12-31
 > **Context:** pacs_system integration

@@ -10,6 +10,8 @@ category: "SECU"
 
 # Security Module Documentation
 
+> **SSOT**: This document is the single source of truth for **Security Module Documentation**.
+
 > **Version:** 0.1.1.0
 > **Last Updated:** 2025-12-11
 > **Language:** **English**

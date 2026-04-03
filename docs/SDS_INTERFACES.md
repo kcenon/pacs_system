@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Interface Specifications
 
+> **SSOT**: This document is the single source of truth for **SDS - Interface Specifications**.
+
 > **Version:** 0.1.3
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2025-12-07

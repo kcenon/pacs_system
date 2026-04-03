@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Network V2 Module
 
+> **SSOT**: This document is the single source of truth for **SDS - Network V2 Module**.
+
 > **Version:** 2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-05

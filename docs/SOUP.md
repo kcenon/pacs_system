@@ -10,6 +10,8 @@ category: "PROJ"
 
 # SOUP List &mdash; pacs_system
 
+> **SSOT**: This document is the single source of truth for **SOUP List &mdash; pacs_system**.
+
 > **Software of Unknown Provenance (SOUP) Register per IEC 62304:2006+AMD1:2015 &sect;8.1.2**
 >
 > This document is the authoritative reference for all external software dependencies.

@@ -10,6 +10,8 @@ category: "PERF"
 
 # Performance Results After Thread Migration
 
+> **SSOT**: This document is the single source of truth for **Performance Results After Thread Migration**.
+
 **Version:** 0.1.0.0
 **Date:** 2024-12-05
 **Related Issue:** #160 - Performance testing and optimization after thread migration

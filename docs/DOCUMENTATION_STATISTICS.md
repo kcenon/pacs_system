@@ -10,6 +10,8 @@ category: "PROJ"
 
 # Documentation Statistics Automation
 
+> **SSOT**: This document is the single source of truth for **Documentation Statistics Automation**.
+
 This document describes the automated documentation statistics system that keeps README.md metrics in sync with actual codebase measurements.
 
 ## Overview

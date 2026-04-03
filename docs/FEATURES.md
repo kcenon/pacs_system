@@ -10,6 +10,8 @@ category: "FEAT"
 
 # PACS System Features
 
+> **SSOT**: This document is the single source of truth for **PACS System Features**.
+
 > **Version:** 0.2.0.0
 > **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](FEATURES.kr.md)
