@@ -10,6 +10,8 @@ category: "GUID"
 
 # 소프트웨어 요구사항 명세서 - PACS System
 
+> **SSOT**: This document is the single source of truth for **소프트웨어 요구사항 명세서 - PACS System**.
+
 > **버전:** 0.1.3.2
 > **최종 수정:** 2026-02-09
 > **언어:** [English](SRS.md) | **한국어**

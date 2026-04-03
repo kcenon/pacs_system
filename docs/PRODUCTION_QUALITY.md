@@ -10,6 +10,8 @@ category: "QUAL"
 
 # PACS System Production Quality
 
+> **SSOT**: This document is the single source of truth for **PACS System Production Quality**.
+
 > **Language:** **English** | [한국어](PRODUCTION_QUALITY.kr.md)
 
 **Last Updated**: 2026-03-18

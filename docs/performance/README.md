@@ -10,6 +10,8 @@ category: "GUID"
 
 # PACS System Performance Documentation
 
+> **SSOT**: This document is the single source of truth for **PACS System Performance Documentation**.
+
 This directory contains performance-related documentation for PACS System.
 
 ## Documents

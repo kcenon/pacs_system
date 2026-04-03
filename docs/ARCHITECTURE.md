@@ -10,6 +10,8 @@ category: "ARCH"
 
 # Architecture Documentation - PACS System
 
+> **SSOT**: This document is the single source of truth for **Architecture Documentation - PACS System**.
+
 > **Version:** 0.1.4.0
 > **Last Updated:** 2026-02-09
 > **Language:** **English** | [한국어](ARCHITECTURE.kr.md)

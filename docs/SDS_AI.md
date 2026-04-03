@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - AI Service Module
 
+> **SSOT**: This document is the single source of truth for **SDS - AI Service Module**.
+
 > **Version:** 2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-01-05

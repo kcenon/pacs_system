@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Sequence Diagrams
 
+> **SSOT**: This document is the single source of truth for **SDS - Sequence Diagrams**.
+
 > **Version:** 0.1.1
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2025-12-04

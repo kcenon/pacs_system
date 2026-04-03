@@ -10,6 +10,8 @@ category: "ARCH"
 
 # 아키텍처 문서 - PACS 시스템
 
+> **SSOT**: This document is the single source of truth for **아키텍처 문서 - PACS 시스템**.
+
 > **버전:** 0.1.4.0
 > **최종 수정일:** 2026-02-09
 > **언어:** [English](ARCHITECTURE.md) | **한국어**

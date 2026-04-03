@@ -10,6 +10,8 @@ category: "ADR"
 
 # ADR-002: Define PACS Storage Port Segmentation
 
+> **SSOT**: This document is the single source of truth for **ADR-002: Define PACS Storage Port Segmentation**.
+
 > **Status:** Accepted
 > **Date:** 2026-03-10
 > **Decision Makers:** pacs_system core team

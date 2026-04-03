@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Database Design
 
+> **SSOT**: This document is the single source of truth for **SDS - Database Design**.
+
 > **Version:** 0.2.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-02-08

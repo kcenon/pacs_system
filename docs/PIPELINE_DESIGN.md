@@ -10,6 +10,8 @@ category: "ARCH"
 
 # Pipeline Design Documentation
 
+> **SSOT**: This document is the single source of truth for **Pipeline Design Documentation**.
+
 **Version:** 1.0.0
 **Date:** 2025-01-08
 **Related Issue:** #517 - Implement typed_thread_pool-based I/O Pipeline for DICOM Operations

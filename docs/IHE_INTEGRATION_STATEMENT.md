@@ -10,6 +10,8 @@ category: "INTR"
 
 # IHE Integration Statement
 
+> **SSOT**: This document is the single source of truth for **IHE Integration Statement**.
+
 ## PACS System
 
 **Product Name**: PACS System

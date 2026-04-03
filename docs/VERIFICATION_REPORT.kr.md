@@ -10,6 +10,8 @@ category: "QUAL"
 
 # PACS 시스템 검증 보고서
 
+> **SSOT**: This document is the single source of truth for **PACS 시스템 검증 보고서**.
+
 > **보고서 버전:** 0.1.6.0
 > **보고서 일자:** 2026-02-08
 > **언어:** [English](VERIFICATION_REPORT.md) | **한국어**

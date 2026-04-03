@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - Web/REST API Module Design Specification
 
+> **SSOT**: This document is the single source of truth for **SDS - Web/REST API Module Design Specification**.
+
 > **Version:** 2.0.0
 > **Parent Document:** [SDS.md](SDS.md)
 > **Last Updated:** 2026-02-08

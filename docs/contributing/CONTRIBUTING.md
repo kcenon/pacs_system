@@ -10,6 +10,8 @@ category: "PROJ"
 
 # Contributing to PACS System
 
+> **SSOT**: This document is the single source of truth for **Contributing to PACS System**.
+
 **Version:** 0.1.0.0
 **Last Updated:** 2026-03-18
 

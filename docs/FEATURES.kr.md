@@ -10,6 +10,8 @@ category: "FEAT"
 
 # PACS 시스템 기능
 
+> **SSOT**: This document is the single source of truth for **PACS 시스템 기능**.
+
 > **버전:** 0.2.0.0
 > **최종 수정일:** 2026-02-09
 > **언어:** [English](FEATURES.md) | **한국어**

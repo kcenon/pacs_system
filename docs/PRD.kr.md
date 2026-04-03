@@ -10,6 +10,8 @@ category: "GUID"
 
 # 제품 요구사항 정의서 - PACS 시스템
 
+> **SSOT**: This document is the single source of truth for **제품 요구사항 정의서 - PACS 시스템**.
+
 > **버전:** 0.2.0.0
 > **최종 수정일:** 2026-02-08
 > **언어:** [English](PRD.md) | **한국어**

@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - 시퀀스 다이어그램
 
+> **SSOT**: This document is the single source of truth for **SDS - 시퀀스 다이어그램**.
+
 > **버전:** 0.1.1
 > **상위 문서:** [SDS.kr.md](SDS.kr.md)
 > **최종 수정일:** 2025-12-04

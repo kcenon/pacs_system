@@ -10,6 +10,8 @@ category: "GUID"
 
 # SDS - 데이터베이스 설계
 
+> **SSOT**: This document is the single source of truth for **SDS - 데이터베이스 설계**.
+
 > **버전:** 0.1.1
 > **상위 문서:** [SDS.kr.md](SDS.kr.md)
 > **최종 수정일:** 2025-12-04

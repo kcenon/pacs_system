@@ -10,6 +10,8 @@ category: "API"
 
 # API 참조 - PACS 시스템
 
+> **SSOT**: This document is the single source of truth for **API 참조 - PACS 시스템**.
+
 > **버전:** 0.1.4.0
 > **최종 수정일:** 2025-12-08
 > **언어:** [English](API_REFERENCE.md) | **한국어**
