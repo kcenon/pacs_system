@@ -65,7 +65,7 @@ Total documents: **74**
 | 54 | PAC-INTR-002 | IHE Integration Statement | [IHE_INTEGRATION_STATEMENT.md](./IHE_INTEGRATION_STATEMENT.md) | Released |
 | 55 | PAC-QUAL-001 | PACS System 프로덕션 품질 | [PRODUCTION_QUALITY.kr.md](./PRODUCTION_QUALITY.kr.md) | Released |
 | 56 | PAC-QUAL-002 | PACS System Production Quality | [PRODUCTION_QUALITY.md](./PRODUCTION_QUALITY.md) | Released |
-| 57 | PAC-QUAL-002 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
+| 57 | PAC-QUAL-008 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
 | 59 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
 | 59 | PAC-QUAL-004 | PACS 시스템 검증 보고서 (Validation Report) | [VALIDATION_REPORT.kr.md](./VALIDATION_REPORT.kr.md) | Released |
 | 60 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
@@ -181,7 +181,7 @@ Total documents: **74**
 |--------|-------|----------|--------|
 | PAC-QUAL-001 | PACS System 프로덕션 품질 | [PRODUCTION_QUALITY.kr.md](./PRODUCTION_QUALITY.kr.md) | Released |
 | PAC-QUAL-002 | PACS System Production Quality | [PRODUCTION_QUALITY.md](./PRODUCTION_QUALITY.md) | Released |
-| PAC-QUAL-002 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
+| PAC-QUAL-008 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
 | PAC-QUAL-004 | PACS 시스템 검증 보고서 (Validation Report) | [VALIDATION_REPORT.kr.md](./VALIDATION_REPORT.kr.md) | Released |
 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
