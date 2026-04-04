@@ -3,7 +3,7 @@
 > **SSOT**: This file is the single source of truth for the documentation index
 > of **pacs_system**.
 
-Total documents: **73**
+Total documents: **74**
 
 ## Document Index
 
@@ -65,23 +65,24 @@ Total documents: **73**
 | 54 | PAC-INTR-002 | IHE Integration Statement | [IHE_INTEGRATION_STATEMENT.md](./IHE_INTEGRATION_STATEMENT.md) | Released |
 | 55 | PAC-QUAL-001 | PACS System 프로덕션 품질 | [PRODUCTION_QUALITY.kr.md](./PRODUCTION_QUALITY.kr.md) | Released |
 | 56 | PAC-QUAL-002 | PACS System Production Quality | [PRODUCTION_QUALITY.md](./PRODUCTION_QUALITY.md) | Released |
-| 57 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
-| 58 | PAC-QUAL-004 | PACS 시스템 검증 보고서 (Validation Report) | [VALIDATION_REPORT.kr.md](./VALIDATION_REPORT.kr.md) | Released |
-| 59 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
-| 60 | PAC-QUAL-006 | PACS 시스템 검증 보고서 | [VERIFICATION_REPORT.kr.md](./VERIFICATION_REPORT.kr.md) | Released |
-| 61 | PAC-QUAL-007 | PACS System Verification Report | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) | Released |
-| 62 | PAC-SECU-001 | SDS - Security Module | [SDS_SECURITY.md](./SDS_SECURITY.md) | Released |
-| 63 | PAC-SECU-002 | Security Module Documentation | [SECURITY.md](./SECURITY.md) | Released |
-| 64 | PAC-ADR-001 | ADR-001: Integrate database_system for Database Abstraction | [ADR-001-database-system-integration.md](./adr/ADR-001-database-system-integration.md) | Released |
-| 65 | PAC-ADR-002 | ADR-002: Define PACS Storage Port Segmentation | [ADR-002-pacs-storage-port-segmentation.md](./adr/ADR-002-pacs-storage-port-segmentation.md) | Released |
-| 66 | PAC-ADR-003 | ADR-003: DICOM Layer Separation Architecture | [ADR-003-dicom-layer-separation.md](./adr/ADR-003-dicom-layer-separation.md) | Accepted |
-| 67 | PAC-PROJ-001 | 변경 이력 - PACS System | [CHANGELOG.kr.md](./CHANGELOG.kr.md) | Released |
-| 68 | PAC-PROJ-002 | Changelog - PACS System | [CHANGELOG.md](./CHANGELOG.md) | Released |
-| 69 | PAC-PROJ-003 | Documentation Statistics Automation | [DOCUMENTATION_STATISTICS.md](./DOCUMENTATION_STATISTICS.md) | Released |
-| 70 | PAC-PROJ-004 | 프로젝트 구조 - PACS 시스템 | [PROJECT_STRUCTURE.kr.md](./PROJECT_STRUCTURE.kr.md) | Released |
-| 71 | PAC-PROJ-005 | Project Structure - PACS System | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Released |
-| 72 | PAC-PROJ-006 | SOUP List &mdash; pacs_system | [SOUP.md](./SOUP.md) | Released |
-| 73 | PAC-PROJ-007 | Contributing to PACS System | [CONTRIBUTING.md](./contributing/CONTRIBUTING.md) | Released |
+| 57 | PAC-QUAL-002 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
+| 59 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
+| 59 | PAC-QUAL-004 | PACS 시스템 검증 보고서 (Validation Report) | [VALIDATION_REPORT.kr.md](./VALIDATION_REPORT.kr.md) | Released |
+| 60 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
+| 61 | PAC-QUAL-006 | PACS 시스템 검증 보고서 | [VERIFICATION_REPORT.kr.md](./VERIFICATION_REPORT.kr.md) | Released |
+| 62 | PAC-QUAL-007 | PACS System Verification Report | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) | Released |
+| 63 | PAC-SECU-001 | SDS - Security Module | [SDS_SECURITY.md](./SDS_SECURITY.md) | Released |
+| 64 | PAC-SECU-002 | Security Module Documentation | [SECURITY.md](./SECURITY.md) | Released |
+| 65 | PAC-ADR-001 | ADR-001: Integrate database_system for Database Abstraction | [ADR-001-database-system-integration.md](./adr/ADR-001-database-system-integration.md) | Released |
+| 66 | PAC-ADR-002 | ADR-002: Define PACS Storage Port Segmentation | [ADR-002-pacs-storage-port-segmentation.md](./adr/ADR-002-pacs-storage-port-segmentation.md) | Released |
+| 67 | PAC-ADR-003 | ADR-003: DICOM Layer Separation Architecture | [ADR-003-dicom-layer-separation.md](./adr/ADR-003-dicom-layer-separation.md) | Accepted |
+| 68 | PAC-PROJ-001 | 변경 이력 - PACS System | [CHANGELOG.kr.md](./CHANGELOG.kr.md) | Released |
+| 69 | PAC-PROJ-002 | Changelog - PACS System | [CHANGELOG.md](./CHANGELOG.md) | Released |
+| 70 | PAC-PROJ-003 | Documentation Statistics Automation | [DOCUMENTATION_STATISTICS.md](./DOCUMENTATION_STATISTICS.md) | Released |
+| 71 | PAC-PROJ-004 | 프로젝트 구조 - PACS 시스템 | [PROJECT_STRUCTURE.kr.md](./PROJECT_STRUCTURE.kr.md) | Released |
+| 72 | PAC-PROJ-005 | Project Structure - PACS System | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Released |
+| 73 | PAC-PROJ-006 | SOUP List &mdash; pacs_system | [SOUP.md](./SOUP.md) | Released |
+| 74 | PAC-PROJ-007 | Contributing to PACS System | [CONTRIBUTING.md](./contributing/CONTRIBUTING.md) | Released |
 
 ## Documents by Category
 
@@ -174,12 +175,13 @@ Total documents: **73**
 | PAC-INTR-001 | DICOM Conformance Statement | [DICOM_CONFORMANCE_STATEMENT.md](./DICOM_CONFORMANCE_STATEMENT.md) | Released |
 | PAC-INTR-002 | IHE Integration Statement | [IHE_INTEGRATION_STATEMENT.md](./IHE_INTEGRATION_STATEMENT.md) | Released |
 
-### Quality (7)
+### Quality (8)
 
 | doc_id | Topic | Document | Status |
 |--------|-------|----------|--------|
 | PAC-QUAL-001 | PACS System 프로덕션 품질 | [PRODUCTION_QUALITY.kr.md](./PRODUCTION_QUALITY.kr.md) | Released |
 | PAC-QUAL-002 | PACS System Production Quality | [PRODUCTION_QUALITY.md](./PRODUCTION_QUALITY.md) | Released |
+| PAC-QUAL-002 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
 | PAC-QUAL-004 | PACS 시스템 검증 보고서 (Validation Report) | [VALIDATION_REPORT.kr.md](./VALIDATION_REPORT.kr.md) | Released |
 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
