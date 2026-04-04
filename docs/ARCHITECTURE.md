@@ -33,6 +33,22 @@ category: "ARCH"
 
 ---
 
+## Overview
+
+> **Cross-reference**:
+> [API Reference](./API_REFERENCE.md) — DICOM service and network APIs
+> [Benchmarks](./BENCHMARKS.md) — DICOM transfer and processing performance
+> [CLI Reference](./CLI_REFERENCE.md) — Command-line interface documentation
+
+> **Ecosystem reference**:
+> [common_system API](https://github.com/kcenon/common_system/blob/main/docs/API_REFERENCE.md) — Result&lt;T&gt; and IExecutor interfaces
+> [network_system Architecture](https://github.com/kcenon/network_system/blob/main/docs/ARCHITECTURE.md) — TCP/TLS transport layer for DICOM
+> [container_system API](https://github.com/kcenon/container_system/blob/main/docs/API_REFERENCE.md) — Data serialization for DICOM datasets
+> [thread_system Architecture](https://github.com/kcenon/thread_system/blob/main/docs/ARCHITECTURE.md) — Thread pool for concurrent DICOM operations
+> [logger_system Architecture](https://github.com/kcenon/logger_system/blob/main/docs/ARCHITECTURE.md) — Logging infrastructure for diagnostics
+
+---
+
 ## Design Philosophy
 
 The PACS System is designed around four fundamental principles:
@@ -1004,6 +1020,35 @@ int main() {
 - CMake 3.28 or later
 - Clang 16+, GCC 14+, or MSVC 2022 17.4+
 - C++20 standard enabled
+
+---
+
+## Ecosystem Dependencies
+
+pacs_system sits at **Tier 5** in the kcenon ecosystem, the highest-level application.
+
+```mermaid
+graph TD
+    A[common_system] --> B[thread_system]
+    A --> C[container_system]
+    B --> D[logger_system]
+    B --> E[monitoring_system]
+    D --> F[database_system]
+    E --> F
+    F --> G[network_system]
+    G --> H[pacs_system]
+
+    style H fill:#f9f,stroke:#333,stroke-width:3px
+```
+
+> **Ecosystem reference**:
+> [common_system](https://github.com/kcenon/common_system) — Tier 0: Result&lt;T&gt;, IExecutor
+> [container_system](https://github.com/kcenon/container_system) — Tier 1: DICOM data serialization
+> [thread_system](https://github.com/kcenon/thread_system) — Tier 1: Concurrency (via network_system)
+> [logger_system](https://github.com/kcenon/logger_system) — Tier 2: Logging (via network_system)
+> [monitoring_system](https://github.com/kcenon/monitoring_system) — Tier 3: Observability (optional)
+> [network_system](https://github.com/kcenon/network_system) — Tier 4: TCP/TLS transport for DICOM
+> [database_system](https://github.com/kcenon/database_system) — Tier 3: Database abstraction (optional)
 
 ---
 
