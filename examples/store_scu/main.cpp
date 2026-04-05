@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Store SCU - DICOM Image Sender (dcmtk-style)
+ * @example store_scu/main.cpp
  *
  * A command-line utility for sending DICOM files to a remote SCP (PACS server).
  * Provides dcmtk-compatible interface with extended features including batch

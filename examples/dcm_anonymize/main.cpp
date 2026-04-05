@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Anonymize - De-identification Utility
+ * @example dcm_anonymize/main.cpp
  *
  * A command-line utility for DICOM de-identification/anonymization compliant
  * with DICOM PS3.15 (Security Profiles). Supports multiple anonymization

@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief MPPS SCU - Modality Performed Procedure Step Client
+ * @example mpps_scu/main.cpp
  *
  * A command-line utility for reporting procedure status to an MPPS SCP (RIS).
  * Uses the mpps_scu library class for N-CREATE and N-SET operations.

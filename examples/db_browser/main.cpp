@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Database Browser - PACS Index Viewer
+ * @example db_browser/main.cpp
  *
  * A command-line utility for inspecting PACS index database, viewing
  * indexed patients, studies, series, instances, and performing maintenance.

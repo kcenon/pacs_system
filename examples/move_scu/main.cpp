@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief move_scu - DICOM C-MOVE SCU utility (dcmtk-compatible)
+ * @example move_scu/main.cpp
  *
  * A command-line utility for retrieving DICOM objects from a PACS by requesting
  * the SCP to send them to a specified destination. Provides dcmtk-compatible

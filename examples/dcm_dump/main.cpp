@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Dump - File Inspection Utility
+ * @example dcm_dump/main.cpp
  *
  * A command-line utility for inspecting DICOM file contents, displaying
  * tag information, transfer syntax, and metadata.

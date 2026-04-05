@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Echo SCP - DICOM Connectivity Test Server
+ * @example echo_scp/main.cpp
  *
  * A simple command-line server for testing DICOM network connectivity.
  * Responds to C-ECHO requests from remote SCUs (equivalent to a "ping server").

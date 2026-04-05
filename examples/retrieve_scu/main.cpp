@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Retrieve SCU - DICOM C-MOVE/C-GET Client
+ * @example retrieve_scu/main.cpp
  *
  * A command-line utility for retrieving DICOM studies from a remote SCP.
  * Supports both C-MOVE (transfer to destination) and C-GET (direct retrieval).

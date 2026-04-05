@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Modify - Tag Modification Utility
+ * @example dcm_modify/main.cpp
  *
  * A command-line utility for modifying DICOM tag values, similar to dcmtk's
  * dcmodify. Supports tag insertion, modification, deletion, and UID

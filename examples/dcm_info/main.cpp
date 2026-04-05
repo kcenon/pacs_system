@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Info - File Summary Utility
+ * @example dcm_info/main.cpp
  *
  * A command-line utility for displaying summary information of DICOM files,
  * providing a quick overview of patient, study, series, and image metadata.

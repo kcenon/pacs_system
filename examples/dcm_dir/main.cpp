@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Directory (DICOMDIR) Creation and Management Utility
+ * @example dcm_dir/main.cpp
  *
  * A command-line utility for creating, listing, verifying, and updating
  * DICOMDIR files as specified in DICOM PS3.3 and PS3.10.
