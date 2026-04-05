@@ -114,7 +114,9 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = ./include \
                          ./src \
-                         ./README.md
+                         ./README.md \
+                         ./docs/mainpage.dox \
+                         ./examples
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
@@ -125,7 +127,8 @@ FILE_PATTERNS          = *.c \
                          *.hh \
                          *.hpp \
                          *.tpp \
-                         *.md
+                         *.md \
+                         *.dox
 RECURSIVE              = YES
 EXCLUDE                = ./build \
                          ./build_simple \
@@ -149,7 +152,7 @@ IMAGE_PATH             =
 INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
-USE_MDFILE_AS_MAINPAGE = README.md
+USE_MDFILE_AS_MAINPAGE =
 
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
@@ -176,7 +179,16 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_COLORSTYLE        = AUTO_LIGHT
+HTML_HEADER            = docs/header.html
+HTML_EXTRA_STYLESHEET  = docs/doxygen-awesome-css/doxygen-awesome.css \
+                         docs/doxygen-awesome-css/doxygen-awesome-sidebar-only.css \
+                         docs/custom.css
+HTML_EXTRA_FILES       = docs/doxygen-awesome-css/doxygen-awesome-darkmode-toggle.js \
+                         docs/doxygen-awesome-css/doxygen-awesome-fragment-copy-button.js \
+                         docs/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
+                         docs/doxygen-awesome-css/doxygen-awesome-interactive-toc.js
+HTML_COPY_CLIPBOARD    = NO
+HTML_COLORSTYLE        = LIGHT
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80

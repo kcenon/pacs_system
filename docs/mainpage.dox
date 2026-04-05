@@ -1,0 +1,222 @@
+/**
+@mainpage PACS System
+
+@tableofcontents
+
+@section overview System Overview
+
+PACS System is a modern C++20 PACS (Picture Archiving and Communication System)
+library for medical imaging. It implements the DICOM standard from scratch with
+zero external DICOM library dependency, providing complete SOP class support,
+transfer syntax handling, and DICOMweb services.
+
+Built on the kcenon ecosystem infrastructure (networking, threading, logging,
+containers), PACS System delivers a layered architecture of 12 library targets
+covering the full DICOM pipeline from tag-level data handling through network
+services to cloud storage and AI integration.
+
+@section features Key Features
+
+| Category | Feature | Description |
+|----------|---------|-------------|
+| **Core** | DICOM Part 10 I/O | Native file read/write with full VR support |
+| **Core** | 12 Library Targets | Layered architecture from core to integration |
+| **Encoding** | Transfer Syntaxes | Implicit/Explicit VR, JPEG, JPEG 2000, HTJ2K, JPEG-LS, RLE, HEVC |
+| **Network** | DIMSE Services | C-ECHO, C-STORE, C-FIND, C-MOVE, C-GET, N-CREATE, N-SET |
+| **Network** | Association Management | Full DICOM Upper Layer state machine |
+| **Web** | DICOMweb | WADO-RS, STOW-RS, QIDO-RS via Crow REST framework |
+| **Storage** | Multi-Backend | SQLite indexing, file storage, AWS S3, Azure Blob |
+| **AI** | AI Integration | AI service connector with SR/SEG result handling |
+| **Monitoring** | Prometheus Metrics | Health checks and Prometheus-compatible metrics export |
+| **Security** | RBAC | Role-based access control and PS3.15 anonymization |
+| **Security** | TLS | OpenSSL-based secure DICOM associations (BCP 195) |
+| **Workflow** | Task Management | Auto prefetch, task scheduler, study lock |
+
+@section architecture Architecture Diagram
+
+The 12 libraries are organized in layers. Higher layers depend on lower layers,
+but never the reverse.
+
+@dot
+digraph architecture {
+    rankdir=TB;
+    node [shape=box, style="filled,rounded", fontname="Helvetica", fontsize=11];
+    edge [color="#555555"];
+
+    subgraph cluster_core {
+        label="Core Layer";
+        style="dashed";
+        color="#1a73e8";
+        fontcolor="#1a73e8";
+        pacs_core     [label="pacs_core\nTags, elements, datasets,\nPart 10 file I/O, dictionary", fillcolor="#e8f0fe"];
+        pacs_encoding [label="pacs_encoding\nVR types, transfer syntaxes,\ncompression codecs", fillcolor="#e8f0fe"];
+        pacs_security [label="pacs_security\nRBAC, anonymization,\ndigital signatures, TLS", fillcolor="#e8f0fe"];
+    }
+
+    subgraph cluster_network {
+        label="Network Layer";
+        style="dashed";
+        color="#34a853";
+        fontcolor="#34a853";
+        pacs_network  [label="pacs_network\nPDU encode/decode,\nassociation state machine, DIMSE", fillcolor="#e6f4ea"];
+        pacs_client   [label="pacs_client\nJob/routing/sync/prefetch\nremote node management", fillcolor="#e6f4ea"];
+        pacs_services [label="pacs_services\nSCP/SCU implementations,\nSOP class registry, IOD validators", fillcolor="#e6f4ea"];
+    }
+
+    subgraph cluster_application {
+        label="Application Layer";
+        style="dashed";
+        color="#ea8600";
+        fontcolor="#ea8600";
+        pacs_storage     [label="pacs_storage\nFile storage, SQLite indexing,\ncloud (S3/Azure), HSM", fillcolor="#fef7e0"];
+        pacs_ai          [label="pacs_ai\nAI service connector,\nresult handler (SR/SEG)", fillcolor="#fef7e0"];
+        pacs_monitoring  [label="pacs_monitoring\nHealth checks,\nPrometheus metrics", fillcolor="#fef7e0"];
+        pacs_workflow    [label="pacs_workflow\nAuto prefetch, task scheduler,\nstudy lock", fillcolor="#fef7e0"];
+    }
+
+    subgraph cluster_interface {
+        label="Interface Layer";
+        style="dashed";
+        color="#9334e6";
+        fontcolor="#9334e6";
+        pacs_web         [label="pacs_web\nREST API (Crow),\nDICOMweb (WADO/STOW/QIDO)", fillcolor="#f3e8fd"];
+        pacs_integration [label="pacs_integration\nAdapters to\nkcenon ecosystem", fillcolor="#f3e8fd"];
+    }
+
+    pacs_encoding -> pacs_core;
+    pacs_security -> pacs_core;
+    pacs_network  -> pacs_encoding;
+    pacs_network  -> pacs_security;
+    pacs_client   -> pacs_network;
+    pacs_services -> pacs_network;
+    pacs_storage  -> pacs_services;
+    pacs_ai       -> pacs_services;
+    pacs_monitoring -> pacs_services;
+    pacs_workflow -> pacs_storage;
+    pacs_workflow -> pacs_client;
+    pacs_web      -> pacs_services;
+    pacs_web      -> pacs_storage;
+    pacs_integration -> pacs_web;
+    pacs_integration -> pacs_workflow;
+    pacs_integration -> pacs_ai;
+    pacs_integration -> pacs_monitoring;
+}
+@enddot
+
+@section quickstart Quick Start
+
+A minimal example reading a DICOM file and extracting patient information:
+
+@code{.cpp}
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+
+#include <iostream>
+
+int main() {
+    // Read a DICOM Part 10 file
+    auto result = kcenon::pacs::core::dicom_file::read("image.dcm");
+    if (!result.is_ok()) {
+        std::cerr << "Failed to read: " << result.error().message << "\n";
+        return 1;
+    }
+
+    auto& file = result.value();
+    auto& dataset = file.dataset();
+
+    // Extract patient metadata
+    auto patient_name = dataset.get_string(kcenon::pacs::core::tags::patient_name);
+    auto study_date   = dataset.get_string(kcenon::pacs::core::tags::study_date);
+
+    std::cout << "Patient: " << patient_name.value_or("(unknown)") << "\n";
+    std::cout << "Study:   " << study_date.value_or("(unknown)") << "\n";
+
+    return 0;
+}
+@endcode
+
+@section installation Installation
+
+@subsection install_fetchcontent CMake FetchContent (Recommended)
+
+@code{.cmake}
+include(FetchContent)
+FetchContent_Declare(
+    pacs_system
+    GIT_REPOSITORY https://github.com/kcenon/pacs_system.git
+    GIT_TAG        v0.1.0
+)
+FetchContent_MakeAvailable(pacs_system)
+
+target_link_libraries(your_target PRIVATE
+    kcenon::pacs_core
+    kcenon::pacs_encoding
+    kcenon::pacs_services
+)
+@endcode
+
+@note PACS System requires DCMTK-compatible libraries and ICU for character set
+support. SQLite3 >= 3.45.1 is needed for storage features. Optional codec
+libraries (libjpeg-turbo, OpenJPEG, CharLS, OpenJPH) enable additional transfer
+syntax support.
+
+@subsection install_vcpkg vcpkg
+
+@code{.bash}
+vcpkg install kcenon-pacs-system
+@endcode
+
+@code{.cmake}
+find_package(pacs_system CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE kcenon::pacs_core)
+@endcode
+
+@section modules Module Overview
+
+| Module | Directory | Description |
+|--------|-----------|-------------|
+| **pacs_core** | `core/` | Tags, elements, datasets, Part 10 file I/O, DICOM dictionary |
+| **pacs_encoding** | `encoding/` | VR types, transfer syntaxes, compression codecs (JPEG, JPEG 2000, HTJ2K, JPEG-LS, RLE) |
+| **pacs_security** | `security/` | RBAC, PS3.15 anonymization, digital signatures, TLS profiles |
+| **pacs_network** | `network/` | PDU encode/decode, association state machine, DIMSE pipeline |
+| **pacs_client** | `client/` | Job management, routing, synchronization, prefetch, remote node management |
+| **pacs_services** | `services/` | SCP/SCU implementations, SOP class registry, IOD validators |
+| **pacs_storage** | `storage/` | File storage, SQLite indexing, cloud backends (AWS S3, Azure Blob), HSM |
+| **pacs_ai** | `ai/` | AI service connector, SR/SEG result handler |
+| **pacs_monitoring** | `monitoring/` | Health checks, Prometheus-compatible metrics export |
+| **pacs_workflow** | `workflow/` | Auto prefetch, task scheduler, study lock |
+| **pacs_web** | `web/` | REST API via Crow, DICOMweb (WADO-RS, STOW-RS, QIDO-RS) |
+| **pacs_integration** | `integration/` | Adapters bridging PACS to the kcenon ecosystem |
+
+@section examples Examples
+
+| Example | Source | Description |
+|---------|--------|-------------|
+| dcm_extract | @ref dcm_extract | Extract pixel data from DICOM files to JPEG, PNG, or raw binary |
+| dcm_conv | @ref dcm_conv | Convert DICOM files between transfer syntaxes |
+| img_to_dcm | @ref img_to_dcm | Encapsulate standard images (JPEG, PNG) into DICOM Part 10 files |
+| query_scu | @ref query_scu | Query a PACS server using C-FIND at Patient/Study/Series level |
+| dcm_dump | @ref dcm_dump | Dump DICOM file metadata as human-readable text |
+| dcm_info | @ref dcm_info | Display summary information for a DICOM file |
+| echo_scu | @ref echo_scu | Verify DICOM association with C-ECHO |
+| store_scu | @ref store_scu | Send DICOM files to a PACS server via C-STORE |
+| find_scu | @ref find_scu | Query remote PACS with C-FIND |
+| pacs_server | @ref pacs_server | Full PACS server with SCP services |
+
+@section related Related Systems
+
+PACS System is the highest-level application (Tier 5) in the kcenon ecosystem.
+It depends on the following systems:
+
+| System | Tier | Role | Repository |
+|--------|------|------|------------|
+| common_system | 0 | Result\<T\>, IExecutor, patterns | https://github.com/kcenon/common_system |
+| container_system | 1 | DICOM serialization support | https://github.com/kcenon/container_system |
+| thread_system | 1 | Thread pools, async execution | https://github.com/kcenon/thread_system |
+| logger_system | 2 | Structured logging | https://github.com/kcenon/logger_system |
+| monitoring_system | 2 | Metrics collection | https://github.com/kcenon/monitoring_system |
+| database_system | 3 | Database abstractions | https://github.com/kcenon/database_system |
+| network_system | 4 | TCP/TLS, async networking | https://github.com/kcenon/network_system |
+
+*/

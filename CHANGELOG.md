@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Modernize Doxygen with doxygen-awesome-css theme, dark mode toggle, and standardized mainpage ([#1066](https://github.com/kcenon/pacs_system/issues/1066))
+
 ### Performance
 
 - Implement memory-mapped I/O for DICOM file loading ([#989](https://github.com/kcenon/pacs_system/issues/989))
