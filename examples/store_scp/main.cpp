@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Storage SCP - DICOM Image Receiver
+ * @example store_scp/main.cpp
  *
  * A command-line server for receiving and storing DICOM images from modalities.
  * Supports hierarchical file storage with optional database indexing.

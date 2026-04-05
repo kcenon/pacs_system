@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Query SCU - DICOM C-FIND Client
+ * @example query_scu/main.cpp
  *
  * A command-line utility for searching DICOM studies on a remote SCP.
  * Supports all query levels (PATIENT, STUDY, SERIES, IMAGE) and

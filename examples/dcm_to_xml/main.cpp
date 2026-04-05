@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM to XML Converter - DICOM Native XML PS3.19
+ * @example dcm_to_xml/main.cpp
  *
  * A command-line utility for converting DICOM files to XML format
  * following the DICOM Native XML representation standard (PS3.19).

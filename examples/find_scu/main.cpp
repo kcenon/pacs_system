@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief find_scu - DICOM C-FIND SCU utility (dcmtk-compatible)
+ * @example find_scu/main.cpp
  *
  * A command-line utility for querying PACS for patient, study, series, or
  * instance information. Provides dcmtk-compatible interface with -P/-S/-W

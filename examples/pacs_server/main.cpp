@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Entry point for PACS Server sample application
+ * @example pacs_server/main.cpp
  *
  * A complete DICOM archive server demonstrating all PACS functionality
  * including storage, query/retrieve, worklist, and MPPS services.
