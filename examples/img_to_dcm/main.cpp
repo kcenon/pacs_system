@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Image to DICOM - Image Conversion Utility
+ * @example img_to_dcm/main.cpp
  *
  * A command-line utility for converting regular image files (JPEG, PNG)
  * to DICOM format using the Secondary Capture SOP Class.

@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM to JSON Converter - DICOM PS3.18 JSON Representation
+ * @example dcm_to_json/main.cpp
  *
  * A command-line utility for converting DICOM files to JSON format
  * following the DICOM PS3.18 JSON representation standard.

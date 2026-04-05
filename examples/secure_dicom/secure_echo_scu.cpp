@@ -1,6 +1,7 @@
 /**
  * @file secure_echo_scu.cpp
  * @brief Secure Echo SCU - TLS-secured DICOM Connectivity Test Client
+ * @example secure_dicom/secure_echo_scu.cpp
  *
  * A secure DICOM client demonstrating TLS 1.2/1.3 configuration for
  * encrypted DICOM communication. This sample shows proper certificate

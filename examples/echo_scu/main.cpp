@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Echo SCU - DICOM Connectivity Test Client (dcmtk-style)
+ * @example echo_scu/main.cpp
  *
  * A command-line utility for testing DICOM network connectivity
  * using the C-ECHO service (equivalent to "ping" for DICOM).

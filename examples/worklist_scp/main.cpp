@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Modality Worklist SCP - DICOM Worklist Server
+ * @example worklist_scp/main.cpp
  *
  * A command-line server for handling Modality Worklist C-FIND requests.
  * Provides scheduled procedure step information to modality devices.

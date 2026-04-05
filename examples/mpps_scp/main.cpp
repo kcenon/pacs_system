@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief MPPS SCP - DICOM Modality Performed Procedure Step Server
+ * @example mpps_scp/main.cpp
  *
  * A command-line server for handling MPPS N-CREATE and N-SET requests.
  * Receives procedure status updates from modality devices.

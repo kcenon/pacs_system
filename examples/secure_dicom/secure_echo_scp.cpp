@@ -1,6 +1,7 @@
 /**
  * @file secure_echo_scp.cpp
  * @brief Secure Echo SCP - TLS-secured DICOM Connectivity Test Server
+ * @example secure_dicom/secure_echo_scp.cpp
  *
  * A secure DICOM server demonstrating TLS 1.2/1.3 configuration for
  * encrypted DICOM communication. This sample shows proper certificate

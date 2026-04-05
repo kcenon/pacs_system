@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Print SCU - DICOM Print Management Client
+ * @example print_scu/main.cpp
  *
  * A command-line utility for sending print requests to a Print SCP.
  * Supports Film Session management, Film Box creation, Image Box pixel

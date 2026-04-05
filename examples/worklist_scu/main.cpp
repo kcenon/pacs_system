@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Worklist SCU - Modality Worklist Query Client
+ * @example worklist_scu/main.cpp
  *
  * A command-line utility for querying scheduled procedures from a
  * Modality Worklist SCP. Supports filtering by modality, date, station,

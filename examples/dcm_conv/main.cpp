@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Conversion - Transfer Syntax Conversion Utility
+ * @example dcm_conv/main.cpp
  *
  * A command-line utility for converting DICOM files between different
  * Transfer Syntaxes, including compressed and uncompressed formats.

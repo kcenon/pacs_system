@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief get_scu - DICOM C-GET SCU utility (dcmtk-compatible)
+ * @example get_scu/main.cpp
  *
  * A command-line utility for retrieving DICOM objects directly from a PACS.
  * Unlike C-MOVE, C-GET retrieves objects directly to the requesting SCU

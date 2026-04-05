@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Query/Retrieve SCP - DICOM Query/Retrieve Server
+ * @example qr_scp/main.cpp
  *
  * A command-line server for handling DICOM Query/Retrieve operations.
  * Supports C-FIND for querying and C-MOVE/C-GET for retrieving DICOM images.

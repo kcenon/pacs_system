@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief DICOM Extract - Pixel Data Extraction Utility
+ * @example dcm_extract/main.cpp
  *
  * A command-line utility for extracting pixel data from DICOM files
  * to standard image formats (RAW, JPEG, PNG) or raw binary data.

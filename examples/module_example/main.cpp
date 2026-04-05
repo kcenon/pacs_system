@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief C++20 module usage example for pacs_system
+ * @example module_example/main.cpp
  *
  * This example demonstrates how to use pacs_system with C++20 modules.
  * Build with -DPACS_BUILD_MODULES=ON to enable module support.
