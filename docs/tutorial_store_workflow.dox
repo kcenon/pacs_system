@@ -1,0 +1,80 @@
+/**
+@page tutorial_store_workflow Tutorial: C-STORE Workflow
+
+@tableofcontents
+
+@section store_goal Goal
+
+Set up a minimal DICOM store server (SCP) and a matching client (SCU) that sends a DICOM file to it.
+
+@section store_scp Step 1: Run a C-STORE SCP (Storage Provider)
+
+The SCP listens on a TCP port, accepts DICOM associations, receives incoming objects, and writes them to storage.
+
+@code{.cpp}
+#include <pacs/services/store_scp.h>
+#include <pacs/storage/file_storage.h>
+
+using namespace pacs;
+
+int main() {
+    auto storage = std::make_shared<storage::file_storage>("./dicom_store");
+
+    services::store_scp_config config;
+    config.ae_title = "PACS_STORE";
+    config.port = 11112;
+
+    services::store_scp scp(config, storage);
+    scp.set_on_received([](const core::dataset& ds) {
+        auto sop_uid = ds.get_string(tags::sop_instance_uid);
+        std::cout << "Received: " << sop_uid.value_or("?") << std::endl;
+    });
+
+    scp.run();  // blocks, listening
+}
+@endcode
+
+@section store_scu Step 2: Send a file from a C-STORE SCU (Storage User)
+
+@code{.cpp}
+#include <pacs/services/store_scu.h>
+#include <pacs/core/part10_reader.h>
+
+int main(int argc, char** argv) {
+    core::part10_reader reader;
+    auto dataset = reader.read(argv[1]).value();
+
+    services::store_scu_config config;
+    config.peer_ae_title = "PACS_STORE";
+    config.peer_host = "localhost";
+    config.peer_port = 11112;
+    config.calling_ae_title = "MY_WORKSTATION";
+
+    services::store_scu scu(config);
+    auto result = scu.send(dataset);
+    if (result.is_ok()) {
+        std::cout << "Stored successfully\n";
+    } else {
+        std::cerr << "Store failed: " << result.error().message << "\n";
+    }
+}
+@endcode
+
+@section store_negotiation Association Negotiation
+
+Before any DIMSE command flows, the SCU and SCP negotiate an association. The SCU proposes presentation contexts (SOP class + acceptable transfer syntaxes), and the SCP accepts or rejects each.
+
+pacs_system's association state machine handles this automatically. You only interact with it if you need to debug failures (see @ref troubleshooting "Troubleshooting").
+
+@section store_mistakes Common Mistakes
+
+- **Wrong AE title.** The SCP rejects associations with an unexpected Called AE Title.
+- **SOP class not supported.** The SCP's presentation context list must include the SOP class of the object being sent.
+- **Transfer syntax mismatch.** If the SCU proposes only JPEG 2000 and the SCP supports only Implicit VR, negotiation fails.
+
+@section store_next Next Steps
+
+- @ref tutorial_query_retrieve "Tutorial: Query/Retrieve"
+- `examples/store_scp/` and `examples/store_scu/` for runnable demos
+
+*/
