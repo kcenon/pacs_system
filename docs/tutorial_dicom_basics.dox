@@ -1,0 +1,93 @@
+/**
+@page tutorial_dicom_basics Tutorial: DICOM Fundamentals
+
+@tableofcontents
+
+@section dicom_goal Goal
+
+Understand DICOM concepts well enough to navigate pacs_system's API: SOP classes, transfer syntaxes, UIDs, and the four-level hierarchy (Patient/Study/Series/Image).
+
+@section dicom_what What is DICOM?
+
+DICOM (Digital Imaging and Communications in Medicine) is the standard for medical imaging data exchange. Unlike JPEG or PNG, a DICOM file bundles the pixels with rich metadata: patient identity, modality (CT, MR, US, etc.), acquisition parameters, and administrative information.
+
+pacs_system implements the DICOM standard from scratch with no external DICOM library — every byte of the wire format and file format is handled by code you can read and modify.
+
+@section dicom_sop SOP Classes
+
+A SOP (Service-Object Pair) class combines an object type with a service operation. For example:
+
+- **CT Image Storage** — CT scan pixel data + C-STORE service = "I can send/receive CT images"
+- **Patient Root Query/Retrieve** — Patient hierarchy + C-FIND/C-MOVE = "I can search and fetch by patient"
+
+Each SOP class is identified by a unique UID (e.g., `1.2.840.10008.5.1.4.1.1.2` for CT Image Storage). pacs_system supports 27 SOP classes covering CT, MR, US, XA, NM, PET, RT, SR, SEG, MG, CR, SC storage plus Query/Retrieve, MWL, MPPS, Storage Commitment, Print, and UPS.
+
+@section dicom_ts Transfer Syntaxes
+
+A transfer syntax specifies how data is encoded on the wire: byte order, VR representation, and compression.
+
+- **Implicit VR Little Endian** (`1.2.840.10008.1.2`) — default, uncompressed
+- **Explicit VR Little Endian** (`1.2.840.10008.1.2.1`) — more robust, uncompressed
+- **JPEG Baseline** — lossy compression for 8-bit images
+- **JPEG Lossless** — lossless compression
+- **JPEG 2000** — modern lossless/lossy
+- **HTJ2K** — high-throughput JPEG 2000
+- **RLE Lossless** — simple lossless
+
+The receiver advertises which syntaxes it accepts during association negotiation; the sender picks one of the accepted syntaxes for each presentation context.
+
+@section dicom_uid UIDs
+
+A UID (Unique Identifier) is a globally unique dotted-numeric string. DICOM uses UIDs for:
+
+- **SOP Class UIDs** — identify what kind of object/service
+- **Transfer Syntax UIDs** — identify the encoding
+- **Study/Series/SOP Instance UIDs** — identify specific patient data
+
+pacs_system provides `uid_generator` to create valid UIDs rooted at your organization's prefix.
+
+@section dicom_hierarchy Patient/Study/Series/Image Hierarchy
+
+Every DICOM object belongs to a four-level hierarchy:
+
+@code
+Patient (John Smith)
+  └── Study (2026-04-01 abdominal CT)
+        └── Series (axial, 3mm slices)
+              └── Image (slice 1 of 64)
+              └── Image (slice 2 of 64)
+              └── ...
+@endcode
+
+Query/Retrieve services operate at any level: find all studies for a patient, retrieve all images in a series, etc.
+
+@section dicom_read Read your first DICOM file
+
+@code{.cpp}
+#include <pacs/core/dataset.h>
+#include <pacs/core/part10_reader.h>
+
+int main(int argc, char** argv) {
+    pacs::core::part10_reader reader;
+    auto result = reader.read(argv[1]);
+    if (result.is_error()) {
+        std::cerr << "Read failed: " << result.error().message << std::endl;
+        return 1;
+    }
+
+    auto dataset = result.value();
+    auto patient_name = dataset.get_string(pacs::tags::patient_name);
+    auto modality = dataset.get_string(pacs::tags::modality);
+
+    std::cout << "Patient: " << patient_name.value_or("UNKNOWN") << "\n"
+              << "Modality: " << modality.value_or("UNKNOWN") << std::endl;
+}
+@endcode
+
+@section dicom_next Next Steps
+
+- @ref tutorial_store_workflow "Tutorial: C-STORE Workflow"
+- @ref tutorial_query_retrieve "Tutorial: Query/Retrieve"
+- @ref tutorial_cli_tools "Tutorial: CLI Tools"
+
+*/

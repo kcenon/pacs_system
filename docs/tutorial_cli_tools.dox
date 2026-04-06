@@ -1,0 +1,78 @@
+/**
+@page tutorial_cli_tools Tutorial: CLI Tools
+
+@tableofcontents
+
+@section cli_goal Goal
+
+Use pacs_system's bundled command-line tools for common DICOM operations without writing code: inspection, conversion, anonymization, and query/retrieve.
+
+@section cli_info dcm_info — Quick file summary
+
+```
+dcm_info patient001.dcm
+```
+
+Prints a human-readable summary: patient name, study date, modality, transfer syntax, and image dimensions. Use this for sanity-checking files.
+
+@section cli_dump dcm_dump — Full metadata dump
+
+```
+dcm_dump patient001.dcm > dump.txt
+```
+
+Dumps every tag and value to stdout. Useful for debugging vendor-specific quirks or verifying that private tags are being written correctly.
+
+@section cli_conv dcm_conv — Transfer syntax conversion
+
+```
+dcm_conv --to explicit_vr_le input.dcm output.dcm
+dcm_conv --to jpeg2000_lossless input.dcm output.dcm
+```
+
+Re-encodes the pixel data to a different transfer syntax without touching other metadata. Use for compatibility with older receivers or to save space via lossless compression.
+
+@section cli_anon dcm_anonymize — De-identification
+
+```
+dcm_anonymize --profile basic input.dcm output.dcm
+```
+
+Removes or replaces patient-identifying tags per DICOM PS3.15 profiles. The `basic` profile covers Safe Harbor de-identification; other profiles include retention options for research scenarios.
+
+@warning Always verify the output with `dcm_dump` before sharing anonymized files — misconfigured profiles may leave identifying information in private tags.
+
+@section cli_query query_scu — Remote query
+
+```
+query_scu --host pacs.example.com --port 11112 \
+          --called-ae REMOTE_PACS --calling-ae MY_TOOL \
+          --level study --patient-id 12345
+```
+
+Performs a C-FIND query against a remote PACS and prints matching studies. Handy for ad-hoc troubleshooting without writing a client.
+
+@section cli_more More tools
+
+pacs_system ships with 28+ CLI examples. See the `examples/` directory for the full list:
+
+- `dcm_extract` — extract pixel data to JPEG/PNG
+- `dcm_modify` — edit tags in place
+- `dcm_dir` — create DICOMDIR media
+- `dcm_to_json` / `json_to_dcm` — JSON round-trip
+- `echo_scu` / `echo_scp` — test connectivity
+- `store_scu` / `store_scp` — storage services
+- `worklist_scu` / `worklist_scp` — modality worklist
+
+@section cli_mistakes Common Mistakes
+
+- **Forgetting --called-ae.** Most servers reject associations with a default or empty called AE title. Always specify the expected AE title of the remote.
+- **Firewall blocks DICOM port.** Default DICOM port is 104 (privileged) or 11112 (unprivileged). Check both ends of the connection.
+- **Anonymization profile mismatch.** The `basic` profile is conservative; research studies often need the `retain-longitudinal-temporal-information` option to keep dates relative.
+
+@section cli_next Next Steps
+
+- @ref faq "FAQ"
+- @ref troubleshooting "Troubleshooting"
+
+*/

@@ -1,0 +1,96 @@
+/**
+@page tutorial_query_retrieve Tutorial: Query/Retrieve
+
+@tableofcontents
+
+@section qr_goal Goal
+
+Query a remote PACS for studies matching criteria (C-FIND), then retrieve the matching objects (C-MOVE or C-GET).
+
+@section qr_find Step 1: C-FIND query
+
+C-FIND searches the remote PACS and returns matching records — not the pixel data. You specify the query level (Patient, Study, Series, or Image) and fill in tags you want to match and tags you want to receive.
+
+@code{.cpp}
+#include <pacs/services/find_scu.h>
+
+services::find_scu_config config;
+config.peer_ae_title = "REMOTE_PACS";
+config.peer_host = "pacs.example.com";
+config.peer_port = 11112;
+config.query_level = services::query_level::study;
+
+services::find_scu scu(config);
+
+core::dataset query;
+query.set(tags::patient_id, "12345");
+query.set(tags::study_date, "20260301-20260406");  // range
+query.set(tags::modalities_in_study, "CT");
+query.set(tags::study_instance_uid, "");  // wanted in response
+
+auto results = scu.query(query);
+for (const auto& match : results.value()) {
+    std::cout << "Study: " << match.get_string(tags::study_instance_uid).value()
+              << " Date: " << match.get_string(tags::study_date).value_or("?")
+              << std::endl;
+}
+@endcode
+
+@section qr_move Step 2: C-MOVE retrieval
+
+C-MOVE tells the remote PACS to push matched objects to a destination AE. The destination can be your local C-STORE SCP (see @ref tutorial_store_workflow) or any other registered SCP.
+
+@code{.cpp}
+#include <pacs/services/move_scu.h>
+
+services::move_scu_config config;
+config.peer_ae_title = "REMOTE_PACS";
+config.peer_host = "pacs.example.com";
+config.peer_port = 11112;
+config.destination_ae = "MY_LOCAL_STORE";
+
+services::move_scu scu(config);
+
+core::dataset request;
+request.set(tags::study_instance_uid, "1.2.3.4.5.6.7");
+
+auto result = scu.move(request);
+std::cout << "Moved " << result.value().completed << " objects" << std::endl;
+@endcode
+
+@section qr_get Step 3: C-GET alternative
+
+C-GET fetches objects back over the same association — no separate C-STORE SCP required. Simpler for one-off retrievals, but not all servers support it.
+
+@code{.cpp}
+#include <pacs/services/get_scu.h>
+
+services::get_scu scu(config);
+scu.set_on_received([](const core::dataset& ds) {
+    // Handle each incoming object
+    save_to_disk(ds);
+});
+auto result = scu.get(request);
+@endcode
+
+@section qr_levels Query Hierarchy Levels
+
+Query level determines what unit is returned:
+
+- **Patient**: one row per patient
+- **Study**: one row per study (typical for worklists)
+- **Series**: one row per series (drill-down)
+- **Image**: one row per image/instance (rarely used due to volume)
+
+@section qr_mistakes Common Mistakes
+
+- **Missing required tags.** Each query level has required matching keys. Omitting `patient_root_q_r` patient-level's `patient_id` causes the query to be rejected.
+- **Wildcard in wrong place.** `*` matches anything; `?` matches one character. But date/time fields don't support wildcards — use ranges like `20260301-20260406`.
+- **C-MOVE destination unknown.** The remote PACS must have your destination AE registered, or the move fails with "unknown move destination".
+
+@section qr_next Next Steps
+
+- @ref tutorial_cli_tools "Tutorial: CLI Tools" — one-liner queries via `query_scu`
+- `examples/find_scu/` and `examples/move_scu/`
+
+*/
