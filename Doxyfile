@@ -116,6 +116,12 @@ INPUT                  = ./include \
                          ./src \
                          ./README.md \
                          ./docs/mainpage.dox \
+                         ./docs/tutorial_dicom_basics.dox \
+                         ./docs/tutorial_store_workflow.dox \
+                         ./docs/tutorial_query_retrieve.dox \
+                         ./docs/tutorial_cli_tools.dox \
+                         ./docs/faq.dox \
+                         ./docs/troubleshooting.dox \
                          ./examples
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \

@@ -204,6 +204,17 @@ target_link_libraries(your_target PRIVATE kcenon::pacs_core)
 | find_scu | @ref find_scu | Query remote PACS with C-FIND |
 | pacs_server | @ref pacs_server | Full PACS server with SCP services |
 
+@section learning_resources Learning Resources
+
+New to pacs_system? Start here:
+
+- @ref tutorial_dicom_basics "Tutorial: DICOM Fundamentals"
+- @ref tutorial_store_workflow "Tutorial: C-STORE Workflow"
+- @ref tutorial_query_retrieve "Tutorial: Query/Retrieve"
+- @ref tutorial_cli_tools "Tutorial: CLI Tools"
+- @ref faq "Frequently Asked Questions"
+- @ref troubleshooting "Troubleshooting Guide"
+
 @section related Related Systems
 
 PACS System is the highest-level application (Tier 5) in the kcenon ecosystem.

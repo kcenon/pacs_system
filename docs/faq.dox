@@ -1,0 +1,91 @@
+/**
+@page faq Frequently Asked Questions
+
+@tableofcontents
+
+@section faq_sop SOP Class Support
+
+@subsection faq_supported_sop Which SOP classes are supported?
+
+27 SOP classes covering the major clinical workflows: CT, MR, US, XA, NM, PET, RT, SR (Structured Report), SEG (Segmentation), MG (Mammography), CR (Computed Radiography), SC (Secondary Capture), Patient/Study Root Q/R, Modality Worklist, MPPS, Storage Commitment, Print, UPS, PIR, XDS-I.b. See README for the full list.
+
+@subsection faq_add_sop How do I add a new SOP class?
+
+Derive from `services::sop_class_base`, register the UID with `sop_class_registry`, and implement the service callbacks. Existing SOP class implementations in `sources/services/` serve as templates.
+
+@section faq_ts Transfer Syntax Questions
+
+@subsection faq_ts_add How do I add a new transfer syntax?
+
+Implement a codec that satisfies the `codec_interface` — `encode()` produces encoded bytes from pixel data, `decode()` reverses it. Register via `codec_registry::add(uid, factory)`. The existing JPEG, JPEG 2000, HTJ2K, JPEG-LS, and RLE codecs show the pattern.
+
+@subsection faq_ts_compat What if the receiver doesn't support my transfer syntax?
+
+During association negotiation, the SCU proposes all supported transfer syntaxes per presentation context. The SCP picks one it can handle. If there's no overlap, the presentation context is rejected and the SCU must either convert on the fly (see `dcm_conv`) or abort.
+
+@section faq_security Security Questions
+
+@subsection faq_tls How do I enable TLS for DICOM connections?
+
+Set `tls_enabled = true` in the association config and provide certificate paths:
+
+@code{.cpp}
+config.tls_enabled = true;
+config.tls_cert = "/etc/pacs/cert.pem";
+config.tls_key = "/etc/pacs/key.pem";
+config.tls_ca = "/etc/pacs/ca.pem";
+@endcode
+
+See `examples/secure_dicom/` for a full working example.
+
+@subsection faq_audit Does pacs_system support audit logging?
+
+Yes — audit events are emitted via logger_system's structured log sinks. Every C-STORE, C-FIND, C-MOVE, and login event produces a structured record suitable for SIEM ingestion.
+
+@section faq_integration Integration Questions
+
+@subsection faq_hospital_pacs How do I integrate with a hospital PACS?
+
+1. Coordinate AE titles, IP, port with the hospital's imaging IT team.
+2. Register your AE at the hospital PACS and vice versa.
+3. Agree on SOP classes and transfer syntaxes.
+4. Test with `echo_scu` (simplest) before attempting store or query.
+5. Verify audit logs match the hospital's compliance requirements.
+
+@subsection faq_dicomweb DICOMweb services?
+
+Yes — pacs_system ships with `pacs_web` library supporting WADO-RS (retrieve), STOW-RS (store), and QIDO-RS (query) via the Crow REST framework. See the `pacs_web/` module.
+
+@section faq_storage Storage Questions
+
+@subsection faq_storage_backends What storage backends are available?
+
+- **File storage** — local filesystem, one file per object (default)
+- **SQLite indexing** — metadata index for fast Q/R
+- **AWS S3** — cloud blob storage (optional, `PACS_WITH_AWS_SDK`)
+- **Azure Blob** — cloud blob storage (optional, `PACS_WITH_AZURE_SDK`)
+- **HSM** — hierarchical storage management integration hooks
+
+@section faq_perf Performance Questions
+
+@subsection faq_perf_tuning How do I tune for high-throughput ingestion?
+
+1. Use async storage (`file_storage` with write-behind buffering).
+2. Increase the network thread pool (`network_system` settings).
+3. Enable pipeline mode in the DIMSE handler — multiple DIMSE commands per association.
+4. Use a lock-free job queue for incoming objects (default in release builds).
+5. See `docs/performance/` for benchmark data.
+
+@section faq_ai AI Integration
+
+@subsection faq_ai_service How does AI integration work?
+
+`pacs_ai` provides an `ai_service_connector` that forwards DICOM objects to an AI endpoint and receives results as SR (Structured Report) or SEG (Segmentation) objects. The results are then stored alongside the source objects and made retrievable via Q/R.
+
+@section faq_conformance Conformance Testing
+
+@subsection faq_conformance_test How do I run conformance tests?
+
+pacs_system's test suite includes DCMTK interop tests that verify wire-level compatibility with the reference DCMTK implementation. Run `ctest -R dcmtk` to execute them. For formal conformance, use a third-party validator like DVTk.
+
+*/

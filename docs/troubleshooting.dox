@@ -1,0 +1,78 @@
+/**
+@page troubleshooting Troubleshooting Guide
+
+@tableofcontents
+
+@section ts_association Association Rejection
+
+**Symptom**: SCU receives `A-ASSOCIATE-RJ` during connect, no DIMSE commands ever flow.
+
+**Common causes**:
+
+1. **Wrong Called AE Title.** The server checks the Called AE Title and rejects mismatches. Verify with the remote admin — the default AE title `ANY-SCP` is rarely valid in production.
+2. **Wrong Calling AE Title.** Many servers maintain an allowlist of known peers. Ask the remote to register your Calling AE Title.
+3. **No matching presentation contexts.** The SCU proposed SOP classes or transfer syntaxes the SCP doesn't accept. Use `dcmtk`'s `echoscu -v` or our `echo_scu --verbose` to see the negotiation details.
+4. **TLS mismatch.** If one side requires TLS and the other doesn't, you see a connection abort before DICOM-level association. Check TLS config on both ends.
+
+@section ts_ts_mismatch Transfer Syntax Mismatch
+
+**Symptom**: `dcm_info` shows one transfer syntax, but C-STORE fails with "no matching presentation context".
+
+**Cause**: The SCU proposed the file's actual transfer syntax, but the SCP only accepts a different one.
+
+**Fix**: Convert the file first with `dcm_conv --to explicit_vr_le input.dcm converted.dcm`, then send. Or configure the SCP to accept the original syntax.
+
+@section ts_incomplete Incomplete DICOM Files
+
+**Symptom**: `dcm_info` reports "unexpected end of file" or "invalid tag".
+
+**Causes**:
+
+1. **Transfer was aborted mid-stream** and the file is truncated. Compare file size with the expected size.
+2. **Missing File Meta Information header.** Part 10 files must start with a 128-byte preamble followed by "DICM" magic. Files without it aren't valid Part 10.
+3. **Implicit-VR data being read as Explicit-VR.** The transfer syntax in the File Meta header determines how the dataset is parsed. If the header lies about the syntax, parsing fails.
+
+Use `dcm_dump --raw` to inspect the first few tags without full parsing.
+
+@section ts_network Network Connectivity
+
+**Symptom**: `echo_scu` times out or connection refused.
+
+**Checks**:
+
+1. `telnet <host> <port>` — does the port even respond? If not, firewall or routing.
+2. Is the server actually listening? `netstat -an | grep <port>` on the server.
+3. Are you hitting the right port? DICOM commonly uses 104 (privileged) or 11112 (unprivileged).
+4. Is there a reverse proxy stripping DICOM traffic? Some SSL terminators corrupt DIMSE.
+5. On macOS, the firewall prompts for incoming connections on new listeners — click Allow.
+
+@section ts_storage_commit Storage Commitment Failures
+
+**Symptom**: Storage Commitment N-ACTION returns, but the subsequent N-EVENT-REPORT never arrives or reports failure.
+
+**Causes**:
+
+1. The destination AE for N-EVENT-REPORT is unreachable. The SCP tries to push the result back and fails silently.
+2. The SOP instances were never fully persisted before the commitment query ran.
+3. The SCU and SCP disagree on the list of objects being committed — ensure SOP instance UIDs match byte-for-byte.
+
+@section ts_build Build Issues
+
+**Symptom**: "ICU not found" or "SQLite not found" during CMake configuration.
+
+**Fix**: pacs_system requires ICU for charset encoding and SQLite3 ≥ 3.45.1 for the storage index. Install via your package manager:
+
+```
+# Ubuntu/Debian
+sudo apt install libicu-dev libsqlite3-dev
+
+# macOS
+brew install icu4c sqlite3
+
+# vcpkg
+vcpkg install icu sqlite3
+```
+
+Windows builds should use the vcpkg preset to ensure ICU and SQLite are available.
+
+*/
