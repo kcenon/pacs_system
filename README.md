@@ -29,6 +29,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - [Project Status](#project-status)
 - [Architecture](#architecture)
 - [DICOM Conformance](#dicom-conformance)
+- [vcpkg Features](#vcpkg-features)
 - [Getting Started](#getting-started)
 - [CLI Tools & Examples](#cli-tools--examples)
 - [Ecosystem Dependencies](#ecosystem-dependencies)
@@ -142,6 +143,31 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | RLE Lossless | 1.2.840.10008.1.2.5 | ✅ Complete |
 
 > For the full DICOM Conformance Statement, see [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md).
+
+---
+
+## vcpkg Features
+
+```bash
+vcpkg install kcenon-pacs-system[feature1,feature2,...]
+```
+
+| Feature | Default | Description | Pulls In | Prerequisites |
+|---------|:-------:|-------------|----------|---------------|
+| aws | off | AWS S3 integration for cloud-based PACS storage | aws-sdk-cpp (S3) | -- |
+| azure | off | Azure Blob storage integration for cloud-based PACS storage | azure-storage-blobs-cpp | -- |
+| codecs | off | Image compression codecs (JPEG, JPEG 2000, HTJ2K, JPEG-LS, PNG) | libjpeg-turbo, openjpeg, charls, openjph, libpng | -- |
+| rest-api | off | DICOMweb REST API via Crow HTTP framework | crow | -- |
+| ssl | off | TLS/SSL support for secure DICOM associations | openssl | -- |
+| storage | off | SQLite3-based PACS storage and indexing | sqlite3 | -- |
+| testing | off | Unit tests and benchmarks | gtest, benchmark | -- |
+
+### Feature Selection Guidance
+
+- **Minimal install**: `vcpkg install kcenon-pacs-system`
+- **Production with TLS**: `vcpkg install kcenon-pacs-system[storage,ssl]`
+- **Full imaging pipeline**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,rest-api]`
+- **Cloud deployment (AWS)**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,aws,rest-api]`
 
 ---
 
