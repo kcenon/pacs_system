@@ -1,13 +1,23 @@
 The package kcenon-pacs-system provides CMake targets:
 
     find_package(pacs_system CONFIG REQUIRED)
+
+    # Core targets (always available)
     target_link_libraries(main PRIVATE
-        pacs_system::core
-        pacs_system::encoding
-        pacs_system::network
-        pacs_system::client
-        pacs_system::services
-        pacs_system::security
+        pacs_system::core           # Tags, elements, datasets, Part 10 file I/O, dictionary
+        pacs_system::encoding       # VR types, transfer syntaxes, compression codecs
+        pacs_system::network        # PDU encode/decode, association state machine, DIMSE
+        pacs_system::client         # Job/routing/sync/prefetch/remote node management
+        pacs_system::services       # SCP/SCU implementations, SOP class registry
+        pacs_system::security       # RBAC, anonymization, digital signatures, TLS
+        pacs_system::integration    # Adapters to kcenon ecosystem (container, logger, network)
     )
 
-Available features: storage, codecs, ssl, aws, azure, rest-api
+    # Optional targets (require enabling the corresponding vcpkg feature)
+    target_link_libraries(main PRIVATE
+        pacs_system::storage        # [storage]  SQLite3-based PACS storage and indexing
+        pacs_system::ai             # [storage]  AI service connector, result handler (SR/SEG)
+        pacs_system::monitoring     # [storage]  Health checks, Prometheus metrics
+        pacs_system::workflow       # [storage]  Auto prefetch, task scheduler, study lock
+        pacs_system::web            # [rest-api] DICOMweb REST API (WADO/STOW/QIDO) via Crow
+    )
