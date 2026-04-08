@@ -7,17 +7,21 @@
 #include <kcenon/pacs/core/result.h>
 
 #include <algorithm>
-#include <csetjmp>
-#include <cstdio>
 #include <stdexcept>
 
-// libjpeg-turbo headers
+// libjpeg-turbo headers (only when JPEG codec is enabled)
+#ifdef PACS_WITH_JPEG_CODEC
+#include <csetjmp>
+#include <cstdio>
 #include <jpeglib.h>
 #include <jerror.h>
+#endif
 
 namespace kcenon::pacs::encoding::compression {
 
 namespace {
+
+#ifdef PACS_WITH_JPEG_CODEC
 
 /**
  * @brief Custom error handler for libjpeg that uses exceptions.
@@ -111,7 +115,7 @@ private:
     jpeg_error_handler jerr_{};
 };
 
-// Helper function for creating codec errors
+// Helper function for creating codec results
 codec_result make_compression_error(const std::string& message) {
     return kcenon::pacs::pacs_error<compression_result>(
         kcenon::pacs::error_codes::compression_error, message);
@@ -125,6 +129,8 @@ codec_result make_decompression_error(const std::string& message) {
 codec_result make_compression_ok(std::vector<uint8_t> data, const image_params& params) {
     return kcenon::pacs::ok<compression_result>(compression_result{std::move(data), params});
 }
+
+#endif  // PACS_WITH_JPEG_CODEC
 
 }  // namespace
 
@@ -142,7 +148,14 @@ public:
         std::span<const uint8_t> pixel_data,
         const image_params& params,
         const compression_options& options) const {
-
+#ifndef PACS_WITH_JPEG_CODEC
+        (void)pixel_data;
+        (void)params;
+        (void)options;
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::compression_error,
+            "JPEG Baseline codec not available: libjpeg-turbo not found at build time");
+#else
         if (pixel_data.empty()) {
             return make_compression_error("Empty pixel data");
         }
@@ -250,12 +263,19 @@ public:
         image_params output_params = params;
 
         return make_compression_ok(std::move(result), output_params);
+#endif  // PACS_WITH_JPEG_CODEC
     }
 
     [[nodiscard]] codec_result decode(
         std::span<const uint8_t> compressed_data,
         const image_params& params) const {
-
+#ifndef PACS_WITH_JPEG_CODEC
+        (void)compressed_data;
+        (void)params;
+        return kcenon::pacs::pacs_error<compression_result>(
+            kcenon::pacs::error_codes::decompression_error,
+            "JPEG Baseline codec not available: libjpeg-turbo not found at build time");
+#else
         if (compressed_data.empty()) {
             return make_decompression_error("Empty compressed data");
         }
@@ -336,6 +356,7 @@ public:
         }
 
         return make_compression_ok(std::move(output), output_params);
+#endif  // PACS_WITH_JPEG_CODEC
     }
 };
 
