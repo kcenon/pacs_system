@@ -127,10 +127,9 @@ foreach(_bridge_mapping IN LISTS PACS_EXPORT_BRIDGE_MAPPINGS)
     )
 endforeach()
 
-install(DIRECTORY include/pacs
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY include/kcenon/pacs
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kcenon
     FILES_MATCHING
-    PATTERN "*.h"
     PATTERN "*.h"
 )
 
