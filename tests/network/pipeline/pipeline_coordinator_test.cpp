@@ -192,7 +192,7 @@ TEST_CASE("pipeline_coordinator lifecycle", "[network][pipeline][coordinator]") 
 
 TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinator]") {
     pipeline_config config;
-    config.net_io_workers = 2;
+    config.net_io_workers = 1;
     config.protocol_workers = 1;
     config.execution_workers = 1;
     config.encode_workers = 1;
@@ -229,9 +229,9 @@ TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinato
             pipeline_stage::network_receive, std::move(job));
         REQUIRE(result.is_ok());
 
-        // Wait for execution with timeout (Windows MSVC CI requires more time)
+        // Wait for execution with timeout (Windows MSVC CI needs margin under CTest 60s limit)
 #ifdef _WIN32
-        constexpr auto timeout = std::chrono::seconds(60);
+        constexpr auto timeout = std::chrono::seconds(30);
 #else
         constexpr auto timeout = std::chrono::seconds(10);
 #endif
@@ -252,9 +252,9 @@ TEST_CASE("pipeline_coordinator job submission", "[network][pipeline][coordinato
             });
         REQUIRE(result.is_ok());
 
-        // Windows MSVC CI requires more time
+        // Windows MSVC CI needs margin under CTest 60s limit
 #ifdef _WIN32
-        constexpr auto timeout = std::chrono::seconds(60);
+        constexpr auto timeout = std::chrono::seconds(30);
 #else
         constexpr auto timeout = std::chrono::seconds(10);
 #endif
@@ -336,9 +336,9 @@ TEST_CASE("pipeline_coordinator callbacks", "[network][pipeline][coordinator]") 
             pipeline_stage::network_receive, std::move(job));
         REQUIRE(result.is_ok());
 
-        // Windows MSVC CI requires more time
+        // Windows MSVC CI needs margin under CTest 60s limit
 #ifdef _WIN32
-        constexpr auto timeout = std::chrono::seconds(60);
+        constexpr auto timeout = std::chrono::seconds(30);
 #else
         constexpr auto timeout = std::chrono::seconds(10);
 #endif

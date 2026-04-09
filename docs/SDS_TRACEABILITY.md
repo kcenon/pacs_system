@@ -25,7 +25,7 @@ category: "GUID"
 - [3. SRS to SDS Traceability](#3-srs-to-sds-traceability)
 - [4. Complete Traceability Chain](#4-complete-traceability-chain)
 - [5. SDS to Implementation Traceability](#5-sds-to-implementation-traceability)
-- [6. SDS to Test Traceability](#6-sds-to-test-traceability)
+- [6. SDS to Test Traceability](#6-sds-to-test-traceability-verification)
 - [7. Coverage Analysis](#7-coverage-analysis)
 
 ---
