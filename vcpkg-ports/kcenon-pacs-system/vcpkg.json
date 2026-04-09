@@ -1,7 +1,7 @@
 {
   "name": "kcenon-pacs-system",
   "version-semver": "0.1.0",
-  "port-version": 6,
+  "port-version": 9,
   "description": "Modern C++20 PACS (Picture Archiving and Communication System) built on the kcenon ecosystem",
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
@@ -9,9 +9,14 @@
   "dependencies": [
     "kcenon-common-system",
     "kcenon-container-system",
+    "kcenon-logger-system",
     "kcenon-network-system",
     "kcenon-thread-system",
     "icu",
+    {
+      "name": "libjpeg-turbo",
+      "version>=": "3.0.2"
+    },
     {
       "name": "vcpkg-cmake",
       "host": true
