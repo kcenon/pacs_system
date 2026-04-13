@@ -961,7 +961,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
         # via a symlink in its build directory; propagate that include path
         if(EXISTS "${CMAKE_BINARY_DIR}/network_system_build/internal_include")
             target_include_directories(pacs_integration SYSTEM PUBLIC
-                "${CMAKE_BINARY_DIR}/network_system_build/internal_include")
+                $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/network_system_build/internal_include>)
         endif()
         message(STATUS "    - network_adapter: ON (network_system)")
     else()
