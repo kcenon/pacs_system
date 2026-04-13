@@ -957,6 +957,12 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             network_system::network_system
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_NETWORK_SYSTEM)
+        # network_system internal headers (secure_tcp_socket.h etc.) are exposed
+        # via a symlink in its build directory; propagate that include path
+        if(EXISTS "${CMAKE_BINARY_DIR}/network_system_build/internal_include")
+            target_include_directories(pacs_integration SYSTEM PUBLIC
+                "${CMAKE_BINARY_DIR}/network_system_build/internal_include")
+        endif()
         message(STATUS "    - network_adapter: ON (network_system)")
     else()
         message(WARNING "    - network_adapter: OFF (network_system target not found)")
