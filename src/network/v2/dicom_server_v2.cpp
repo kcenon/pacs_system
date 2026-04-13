@@ -136,7 +136,11 @@ Result<std::monostate> dicom_server_v2::start() {
         kcenon::network::facade::tcp_facade::server_config srv_cfg;
         srv_cfg.server_id = config_.ae_title;
         srv_cfg.port = config_.port;
-        server_ = facade.create_server(srv_cfg);
+        auto server_result = facade.create_server(srv_cfg);
+        if (server_result.is_err()) {
+            throw std::runtime_error("Failed to create server");
+        }
+        server_ = std::move(server_result.value());
 
         // Set up server-level callbacks
         server_->set_connection_callback(
