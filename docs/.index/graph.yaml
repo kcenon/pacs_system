@@ -1,0 +1,131 @@
+# PACS System Change Impact Graph — when X changes, review Y.
+_meta: {schema: "1.0.0", generated: "2026-04-12"}
+
+cascade:
+  PAC-PRD-001:
+    targets:
+      - {doc: PAC-SRS-001, why: "SRS derives from PRD"}
+      - {doc: PAC-ARCH-001, why: "Architecture reflects product scope"}
+      - {doc: PAC-VAL,     why: "Validation criteria trace to intended use"}
+
+  PAC-SRS-001:
+    targets:
+      - {doc: PAC-SDS-001,  why: "SDS allocates SRS to software items"}
+      - {doc: PAC-SDS-TRC,  why: "SDS traceability maps SRS"}
+      - {doc: PAC-TRACE,    why: "Top-level traceability matrix"}
+      - {doc: PAC-VERIF,    why: "Verification test cases trace SRS"}
+      - {doc: PAC-VAL,      why: "Validation trace"}
+      - {doc: PAC-SRS-KR,   why: "Korean mirror"}
+
+  PAC-ARCH-001:
+    targets:
+      - {doc: PAC-SDS-001,  why: "SDS elaborates architecture"}
+      - {doc: PAC-SDS-COMP, why: "Components derive from architecture"}
+      - {doc: PAC-SDS-IF,   why: "Interfaces follow architecture boundaries"}
+      - {doc: PAC-PROJ-001, why: "Directory mirrors architecture"}
+      - {doc: PAC-ARCH-KR,  why: "Korean mirror"}
+
+  PAC-SDS-001:
+    targets:
+      - {doc: PAC-SDS-COMP, why: "Components detail main SDS"}
+      - {doc: PAC-SDS-IF,   why: "Interfaces detail main SDS"}
+      - {doc: PAC-SDS-SEQ,  why: "Sequences illustrate SDS flows"}
+      - {doc: PAC-SDS-TRC,  why: "Traceability tracks all SDS sections"}
+      - {doc: PAC-SDS-KR,   why: "Korean mirror"}
+
+  PAC-SDS-COMP:
+    targets:
+      - {doc: PAC-SDS-IF,     why: "Components expose interfaces"}
+      - {doc: PAC-SDS-DI,     why: "DI wires components"}
+      - {doc: PAC-SDS-COMP-KR, why: "Korean mirror"}
+
+  PAC-SDS-IF:
+    targets:
+      - {doc: PAC-API-CORE,   why: "Core API reflects SDS interfaces"}
+      - {doc: PAC-API-NET,    why: "Network API"}
+      - {doc: PAC-API-SEC,    why: "Security API"}
+      - {doc: PAC-API-SVC,    why: "Services API"}
+      - {doc: PAC-API-WEB,    why: "Web API"}
+      - {doc: PAC-SDS-IF-KR,  why: "Korean mirror"}
+
+  PAC-SDS-NET:
+    targets:
+      - {doc: PAC-API-NET,    why: "Network API"}
+      - {doc: PAC-DICOM,      why: "DICOM conformance depends on network"}
+
+  PAC-SDS-WF:
+    targets:
+      - {doc: PAC-SDS-SEQ,    why: "Sequences realize workflow"}
+      - {doc: PAC-DICOM,      why: "DICOM workflow (C-STORE/C-MOVE etc.)"}
+      - {doc: PAC-IHE,        why: "IHE profiles define workflow"}
+
+  PAC-SDS-SEC:
+    targets:
+      - {doc: PAC-API-SEC,    why: "Security API"}
+      - {doc: PAC-SEC,        why: "Security statement"}
+
+  PAC-SDS-DB:
+    targets:
+      - {doc: PAC-SDS-CACHE,  why: "Cache layer fronts DB"}
+      - {doc: PAC-SDS-DB-KR,  why: "Korean mirror"}
+
+  PAC-SDS-MON:
+    targets:
+      - {doc: PAC-SDS-CACHE, why: "Monitoring observes cache"}
+
+  PAC-API-CORE:
+    targets:
+      - {doc: PAC-API-QR,    why: "Quick reference"}
+      - {doc: PAC-API-KR,    why: "Korean mirror (full)"}
+      - {doc: PAC-CLI-001,   why: "CLI invokes core API"}
+      - {doc: PAC-FEAT-001,  why: "Features reference API"}
+
+  PAC-DICOM:
+    targets:
+      - {doc: PAC-IHE,       why: "IHE profiles require DICOM conformance"}
+      - {doc: PAC-SRS-001,   why: "DICOM compliance feeds SRS-INTF/SRS-DATA"}
+      - {doc: PAC-SDS-NET,   why: "Network layer realizes DICOM"}
+
+  PAC-VERIF:
+    targets:
+      - {doc: PAC-VAL,       why: "Validation references verification results"}
+      - {doc: PAC-TRACE,     why: "Traceability matrix tracks TC mapping"}
+      - {doc: PAC-VERIF-KR,  why: "Korean mirror"}
+
+  PAC-VAL:
+    targets:
+      - {doc: PAC-VAL-KR,    why: "Korean mirror"}
+
+  PAC-THR-MIG:
+    targets:
+      - {doc: PAC-THR-STAB, why: "Stability report follows migration"}
+
+korean_pairs:
+  - {en: PAC-CHG-001,     kr: PAC-CHG-KR}
+  - {en: PAC-PRD-001,     kr: PAC-PRD-KR}
+  - {en: PAC-SRS-001,     kr: PAC-SRS-KR}
+  - {en: PAC-ARCH-001,    kr: PAC-ARCH-KR}
+  - {en: PAC-PROJ-001,    kr: PAC-PROJ-KR}
+  - {en: PAC-SDS-001,     kr: PAC-SDS-KR}
+  - {en: PAC-SDS-COMP,    kr: PAC-SDS-COMP-KR}
+  - {en: PAC-SDS-IF,      kr: PAC-SDS-IF-KR}
+  - {en: PAC-SDS-SEQ,     kr: PAC-SDS-SEQ-KR}
+  - {en: PAC-SDS-TRC,     kr: PAC-SDS-TRC-KR}
+  - {en: PAC-SDS-DB,      kr: PAC-SDS-DB-KR}
+  - {en: PAC-FEAT-001,    kr: PAC-FEAT-KR}
+  - {en: PAC-CLI-001,     kr: PAC-CLI-KR}
+  - {en: PAC-VAL,         kr: PAC-VAL-KR}
+  - {en: PAC-VERIF,       kr: PAC-VERIF-KR}
+  - {en: PAC-IMPL,        kr: PAC-IMPL-KR}
+  - {en: PAC-MIG,         kr: PAC-MIG-KR}
+  - {en: PAC-QUAL-001,    kr: PAC-QUAL-KR}
+  - {en: PAC-BENCH,       kr: PAC-BENCH-KR}
+
+external_deps:
+  - {source: common_system,    target: PAC-ARCH-001, why: "pacs_system depends on common_system (tier 0)"}
+  - {source: thread_system,    target: PAC-ARCH-001, why: "pacs_system uses thread pool"}
+  - {source: logger_system,    target: PAC-SDS-SEC,  why: "Audit logging depends on logger"}
+  - {source: container_system, target: PAC-SDS-IF,   why: "Container types used in interfaces"}
+  - {source: monitoring_system, target: PAC-SDS-MON, why: "Monitoring collectors"}
+  - {source: database_system,  target: PAC-SDS-DB,   why: "DB abstraction layer"}
+  - {source: network_system,   target: PAC-SDS-NET,  why: "Network protocols and facades"}

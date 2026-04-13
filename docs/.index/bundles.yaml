@@ -1,0 +1,179 @@
+# PACS System Document Bundles — load a bundle to get all context for a feature.
+_meta: {schema: "1.0.0", generated: "2026-04-12"}
+
+# ============================================================================
+# Top-level / quickstart
+# ============================================================================
+quickstart:
+  name: "Quickstart"
+  files: [README.md, GETTING_STARTED.md, API_QUICK_REFERENCE.md]
+
+pacs-core:
+  name: "PACS Core Overview"
+  desc: "High-level entry point for understanding PACS"
+  files: [README.md, ARCHITECTURE.md, FEATURES.md, DICOM_CONFORMANCE_STATEMENT.md]
+
+# ============================================================================
+# Requirements bundles
+# ============================================================================
+requirements:
+  name: "Software Requirements"
+  files: [SRS.md, PRD.md, TRACEABILITY.md]
+
+product:
+  name: "Product Requirements (PRD)"
+  files: [PRD.md, SRS.md]
+
+# ============================================================================
+# Architecture / design bundles
+# ============================================================================
+architecture:
+  name: "Architecture"
+  desc: "Top-level architecture + project structure"
+  files: [ARCHITECTURE.md, PROJECT_STRUCTURE.md, SDS.md, PIPELINE_DESIGN.md]
+
+components:
+  name: "Components (SDS)"
+  files: [SDS_COMPONENTS.md, SDS.md, SDS_INTERFACES.md]
+
+interfaces:
+  name: "Interfaces (SDS)"
+  files: [SDS_INTERFACES.md, API_REFERENCE_CORE.md, SDS_COMPONENTS.md]
+
+sequences:
+  name: "Sequence Diagrams"
+  files: [SDS_SEQUENCES.md, SDS_WORKFLOW.md]
+
+pipeline:
+  name: "Pipeline Design"
+  files: [PIPELINE_DESIGN.md, SDS_WORKFLOW.md, SDS_COMPONENTS.md]
+
+di:
+  name: "Dependency Injection"
+  files: [SDS_DI.md, SDS_COMPONENTS.md]
+
+# ============================================================================
+# DICOM / medical / workflow bundles
+# ============================================================================
+dicom:
+  name: "DICOM Subsystem"
+  desc: "Conformance, network, workflow"
+  files: [DICOM_CONFORMANCE_STATEMENT.md, SDS_NETWORK_V2.md, SDS_WORKFLOW.md, API_REFERENCE_NETWORK.md]
+
+ihe:
+  name: "IHE Integration"
+  files: [IHE_INTEGRATION_STATEMENT.md, DICOM_CONFORMANCE_STATEMENT.md, SDS_WORKFLOW.md]
+
+workflow:
+  name: "Clinical Workflow"
+  files: [SDS_WORKFLOW.md, SDS_SEQUENCES.md, IHE_INTEGRATION_STATEMENT.md]
+
+client-viewer:
+  name: "Client Viewer"
+  files: [SDS_CLIENT.md, SDS_WEB_API.md, API_REFERENCE_WEB.md]
+
+# ============================================================================
+# API / CLI bundles
+# ============================================================================
+api-core:
+  name: "Core API Reference"
+  files: [API_REFERENCE_CORE.md, API_REFERENCE_SERVICES.md, API_QUICK_REFERENCE.md]
+
+network-api:
+  name: "Network API"
+  files: [API_REFERENCE_NETWORK.md, SDS_NETWORK_V2.md]
+
+services-api:
+  name: "Services API"
+  files: [API_REFERENCE_SERVICES.md, SDS_COMPONENTS.md]
+
+web-api:
+  name: "Web API (REST)"
+  files: [API_REFERENCE_WEB.md, SDS_WEB_API.md]
+
+cli:
+  name: "CLI Reference"
+  files: [CLI_REFERENCE.md]
+
+# ============================================================================
+# Feature / subsystem bundles
+# ============================================================================
+security:
+  name: "Security"
+  desc: "Design, API, and compliance statement"
+  files: [SDS_SECURITY.md, API_REFERENCE_SECURITY.md, SECURITY.md]
+
+database:
+  name: "Database Layer"
+  files: [SDS_DATABASE.md, SDS_SERVICES_CACHE.md]
+
+cache:
+  name: "Cache Layer"
+  files: [SDS_SERVICES_CACHE.md, SDS_DATABASE.md]
+
+ai:
+  name: "AI Integration"
+  files: [SDS_AI.md]
+
+cloud-storage:
+  name: "Cloud Storage"
+  files: [SDS_CLOUD_STORAGE.md, SDS_COMPRESSION.md]
+
+compression:
+  name: "Compression"
+  files: [SDS_COMPRESSION.md, SDS_CLOUD_STORAGE.md]
+
+monitoring:
+  name: "Monitoring Collectors"
+  files: [SDS_MONITORING_COLLECTORS.md, SDS_SERVICES_CACHE.md]
+
+prefetch:
+  name: "Prefetch Queue"
+  files: [PREFETCH_QUEUE_ANALYSIS.md, SDS_WORKFLOW.md]
+
+# ============================================================================
+# V&V bundles
+# ============================================================================
+validation:
+  name: "Validation Report"
+  files: [VALIDATION_REPORT.md, TRACEABILITY.md]
+
+verification:
+  name: "Verification Report"
+  files: [VERIFICATION_REPORT.md, TRACEABILITY.md]
+
+traceability:
+  name: "Traceability"
+  desc: "Top-level traceability matrix and SDS traceability"
+  files: [TRACEABILITY.md, SDS_TRACEABILITY.md]
+
+compliance:
+  name: "Regulatory Compliance"
+  desc: "DICOM, IHE, security statement, SOUP"
+  files: [DICOM_CONFORMANCE_STATEMENT.md, IHE_INTEGRATION_STATEMENT.md, SECURITY.md, SOUP.md]
+
+# ============================================================================
+# Performance / quality bundles
+# ============================================================================
+performance:
+  name: "Performance"
+  files: [BENCHMARKS.md, PERFORMANCE_BASELINE.md, PERFORMANCE_RESULTS.md]
+
+quality:
+  name: "Production Quality"
+  files: [PRODUCTION_QUALITY.md]
+
+# ============================================================================
+# Analysis / migration bundles
+# ============================================================================
+analysis:
+  name: "Implementation Analysis"
+  files: [PACS_IMPLEMENTATION_ANALYSIS.md, PREFETCH_QUEUE_ANALYSIS.md]
+
+migration:
+  name: "Migration"
+  files: [MIGRATION_COMPLETE.md, THREAD_POOL_MIGRATION.md, CHANGELOG.md]
+
+threading:
+  name: "Thread Subsystem"
+  files: [THREAD_POOL_MIGRATION.md, THREAD_SYSTEM_STABILITY_REPORT.md]
