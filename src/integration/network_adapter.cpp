@@ -79,16 +79,16 @@ network_adapter::connect(const connection_config& config) {
         }
         client_cfg.verify_certificate = config.tls.verify_peer;
 
-        auto client_raw = facade.create_client(client_cfg);
         // Handle both old API (returns shared_ptr) and new API (returns Result<shared_ptr>)
-        std::shared_ptr<kcenon::network::interfaces::i_protocol_client> client;
-        if constexpr (requires { client_raw.is_err(); }) {
-            if (client_raw.is_err()) {
-                return Result<session_ptr>(error_info("Connection failed: could not create client"));
+        auto client = [](auto raw) -> std::shared_ptr<kcenon::network::interfaces::i_protocol_client> {
+            if constexpr (requires { raw.is_err(); raw.value(); }) {
+                return raw.is_err() ? nullptr : std::move(raw.value());
+            } else {
+                return std::move(raw);
             }
-            client = std::move(client_raw.value());
-        } else {
-            client = std::move(client_raw);
+        }(facade.create_client(client_cfg));
+        if (!client) {
+            return Result<session_ptr>(error_info("Connection failed: could not create client"));
         }
 
         // Set up promise/future for synchronous connection
