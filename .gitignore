@@ -56,3 +56,6 @@ third_party/
 # cache
 .cache/
 .npm-cache/
+
+# Private keys (regenerate via generate_test_certs.sh)
+examples/integration_tests/test_data/certs/*.key
