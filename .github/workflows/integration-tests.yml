@@ -506,7 +506,7 @@ jobs:
       run: |
         if [ -f "./examples/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
           chmod +x ./examples/integration_tests/test_data/certs/generate_test_certs.sh
-          ./examples/integration_tests/test_data/certs/generate_test_certs.sh
+          ./examples/integration_tests/test_data/certs/generate_test_certs.sh ./examples/integration_tests/test_data/certs
         fi
 
     - name: Generate TLS Test Certificates (Windows)
