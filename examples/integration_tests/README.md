@@ -230,7 +230,7 @@ The `test_tls_integration.cpp` provides comprehensive C++ tests for TLS-secured 
 
 ```bash
 # Generate test certificates (run once, required before TLS tests)
-./examples/integration_tests/test_data/certs/generate_test_certs.sh ./examples/integration_tests/test_data/certs
+./examples/integration_tests/test_data/certs/generate_test_certs.sh
 
 # Run TLS integration tests
 PACS_TEST_CERT_DIR=./examples/integration_tests/test_data/certs \
