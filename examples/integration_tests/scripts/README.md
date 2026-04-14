@@ -60,4 +60,4 @@ Example:
 ## See Also
 
 - [Integration Tests README](../README.md) - Full documentation
-- [Test Fixtures](../test_fixtures.hpp) - C++ utilities
+- [Test Fixtures](../test_fixtures.h) - C++ utilities

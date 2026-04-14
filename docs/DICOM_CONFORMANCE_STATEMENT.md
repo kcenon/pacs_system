@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-INTR-001"
 doc_title: "DICOM Conformance Statement"
-doc_version: "1.0.0"
+doc_version: "0.1.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -815,6 +815,18 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | HTJ2K Codec | Requires OpenJPH library at build time (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
 | Print Management | Fully implemented (SCP + SCU) | Section 3.7 |
+
+---
+
+## See Also
+
+The following non-normative references may help integrators locate upstream requirements and implementation details. They do not modify any conformance claim in this statement.
+
+- [PRD.md](PRD.md) — FR-1 DICOM Services, FR-3 Storage, FR-8 Query/Retrieve conformance requirements
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Overall system architecture context
+- [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) — DIMSE implementation details for the SOP classes above
+- [SDS_SEQUENCES.md](SDS_SEQUENCES.md) — C-STORE/C-FIND/C-MOVE sequence diagrams
+- [IHE_INTEGRATION_STATEMENT.md](IHE_INTEGRATION_STATEMENT.md) — IHE profile conformance (companion document)
 
 ---
 

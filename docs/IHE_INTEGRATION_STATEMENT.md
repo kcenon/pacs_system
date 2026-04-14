@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-INTR-002"
 doc_title: "IHE Integration Statement"
-doc_version: "1.0.0"
+doc_version: "0.1.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"

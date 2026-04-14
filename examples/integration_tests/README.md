@@ -943,9 +943,9 @@ When adding new binary tests:
 
 ## Related Documentation
 
-- [PACS System Architecture](../../docs/architecture.md)
-- [DICOM Protocol Guide](../../docs/dicom-protocol.md)
-- [Library Integration Tests](../tests/README.md)
+- [PACS System Architecture](../../docs/ARCHITECTURE.md)
+- [DICOM Conformance Statement](../../docs/DICOM_CONFORMANCE_STATEMENT.md)
+- [Library Unit & Integration Tests](../../tests/)
 
 ## License
 

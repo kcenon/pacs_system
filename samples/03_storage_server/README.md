@@ -250,6 +250,6 @@ Proceed to **Level 4: Mini PACS** to learn:
 
 ## Related Documentation
 
-- [DICOM PS3.4 Section B - Storage Service Class](http://dicom.nema.org/medical/dicom/current/output/chtml/part04/chapter_B.html)
-- [DICOM PS3.7 Section 9.1.1 - C-STORE Service](http://dicom.nema.org/medical/dicom/current/output/chtml/part07/sect_9.html)
+- [DICOM PS3.4 Section B - Storage Service Class](https://dicom.nema.org/medical/dicom/current/output/chtml/part04/chapter_B.html)
+- [DICOM PS3.7 Section 9.1.1 - C-STORE Service](https://dicom.nema.org/medical/dicom/current/output/chtml/part07/sect_9.html)
 - [SQLite Documentation](https://www.sqlite.org/docs.html)
