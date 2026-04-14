@@ -57,43 +57,10 @@ jobs:
       with:
         path: pacs_system
 
-    # Checkout required dependency systems (kcenon ecosystem)
-    - name: Checkout common_system (Tier 0)
-      uses: actions/checkout@v4
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
       with:
-        repository: kcenon/common_system
-        path: common_system
-
-    - name: Checkout container_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/container_system
-        path: container_system
-
-    - name: Checkout thread_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/thread_system
-        path: thread_system
-
-    - name: Checkout logger_system (Tier 2)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/logger_system
-        path: logger_system
-
-    - name: Checkout monitoring_system (Tier 3)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/monitoring_system
-        path: monitoring_system
-
-    - name: Checkout network_system (Tier 4)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/network_system
-        ref: main
-        path: network_system
+        patch-werror: 'true'
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -140,62 +107,6 @@ jobs:
       shell: pwsh
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
-
-    - name: Patch dependency CMake files to remove -Werror (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
-        # This is necessary because dependencies use -Werror which causes
-        # build failures with newer GCC versions due to stricter warnings
-        #
-        # The kcenon ecosystem uses target_compile_options() with -Werror,
-        # which cannot be overridden by CMAKE_COMPILE_WARNING_AS_ERROR or CXXFLAGS.
-        # Direct patching of CMake files is required.
-
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-
-            # Find all CMake files and patch various forms of -Werror
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              # Check if file contains -Werror before patching
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                # Remove all forms of -Werror (with backup for both macOS and Linux)
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-
-            # Verify patch was applied
-            remaining=$(find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f -exec grep -l '\-Werror' {} \; 2>/dev/null || true)
-            if [ -n "$remaining" ]; then
-              echo "  WARNING: -Werror still found in: $remaining"
-            else
-              echo "  OK: No -Werror remaining in $repo"
-            fi
-          fi
-        done
-
-    - name: Patch dependency CMake files to remove -Werror (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
-        foreach ($repo in $repos) {
-          if (Test-Path $repo) {
-            Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
-              $content = Get-Content $_.FullName -Raw
-              if ($content -match '-Werror|/WX') {
-                Write-Host "  Patching: $($_.FullName)"
-                $content = $content -replace '"-Werror[^"]*"', ''
-                $content = $content -replace '-Werror[^ )"]*', ''
-                $content = $content -replace '/WX', ''
-                Set-Content $_.FullName -Value $content
-              }
-            }
-          }
-        }
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
@@ -285,42 +196,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout common_system (Tier 0)
-      uses: actions/checkout@v4
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
       with:
-        repository: kcenon/common_system
-        path: common_system
-
-    - name: Checkout container_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/container_system
-        path: container_system
-
-    - name: Checkout thread_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/thread_system
-        path: thread_system
-
-    - name: Checkout logger_system (Tier 2)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/logger_system
-        path: logger_system
-
-    - name: Checkout monitoring_system (Tier 3)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/monitoring_system
-        path: monitoring_system
-
-    - name: Checkout network_system (Tier 4)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/network_system
-        ref: main
-        path: network_system
+        patch-werror: 'true'
 
     # Cache Homebrew packages (macOS) - significant speedup
     - name: Cache Homebrew packages (macOS)
@@ -404,62 +283,6 @@ jobs:
       shell: pwsh
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
-
-    - name: Patch dependency CMake files to remove -Werror (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
-        # This is necessary because dependencies use -Werror which causes
-        # build failures with newer GCC versions due to stricter warnings
-        #
-        # The kcenon ecosystem uses target_compile_options() with -Werror,
-        # which cannot be overridden by CMAKE_COMPILE_WARNING_AS_ERROR or CXXFLAGS.
-        # Direct patching of CMake files is required.
-
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-
-            # Find all CMake files and patch various forms of -Werror
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              # Check if file contains -Werror before patching
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                # Remove all forms of -Werror (with backup for both macOS and Linux)
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-
-            # Verify patch was applied
-            remaining=$(find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f -exec grep -l '\-Werror' {} \; 2>/dev/null || true)
-            if [ -n "$remaining" ]; then
-              echo "  WARNING: -Werror still found in: $remaining"
-            else
-              echo "  OK: No -Werror remaining in $repo"
-            fi
-          fi
-        done
-
-    - name: Patch dependency CMake files to remove -Werror (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
-        foreach ($repo in $repos) {
-          if (Test-Path $repo) {
-            Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
-              $content = Get-Content $_.FullName -Raw
-              if ($content -match '-Werror|/WX') {
-                Write-Host "  Patching: $($_.FullName)"
-                $content = $content -replace '"-Werror[^"]*"', ''
-                $content = $content -replace '-Werror[^ )"]*', ''
-                $content = $content -replace '/WX', ''
-                Set-Content $_.FullName -Value $content
-              }
-            }
-          }
-        }
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
@@ -689,42 +512,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout common_system (Tier 0)
-      uses: actions/checkout@v4
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
       with:
-        repository: kcenon/common_system
-        path: common_system
-
-    - name: Checkout container_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/container_system
-        path: container_system
-
-    - name: Checkout thread_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/thread_system
-        path: thread_system
-
-    - name: Checkout logger_system (Tier 2)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/logger_system
-        path: logger_system
-
-    - name: Checkout monitoring_system (Tier 3)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/monitoring_system
-        path: monitoring_system
-
-    - name: Checkout network_system (Tier 4)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/network_system
-        ref: main
-        path: network_system
+        patch-werror: 'true'
 
     - name: Install dependencies (Ubuntu)
       if: runner.os == 'Linux'
@@ -771,62 +562,6 @@ jobs:
       shell: pwsh
       run: |
         vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
-
-    - name: Patch dependency CMake files to remove -Werror (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
-        # This is necessary because dependencies use -Werror which causes
-        # build failures with newer GCC versions due to stricter warnings
-        #
-        # The kcenon ecosystem uses target_compile_options() with -Werror,
-        # which cannot be overridden by CMAKE_COMPILE_WARNING_AS_ERROR or CXXFLAGS.
-        # Direct patching of CMake files is required.
-
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-
-            # Find all CMake files and patch various forms of -Werror
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              # Check if file contains -Werror before patching
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                # Remove all forms of -Werror (with backup for both macOS and Linux)
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-
-            # Verify patch was applied
-            remaining=$(find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f -exec grep -l '\-Werror' {} \; 2>/dev/null || true)
-            if [ -n "$remaining" ]; then
-              echo "  WARNING: -Werror still found in: $remaining"
-            else
-              echo "  OK: No -Werror remaining in $repo"
-            fi
-          fi
-        done
-
-    - name: Patch dependency CMake files to remove -Werror (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        $repos = @('common_system', 'container_system', 'thread_system', 'logger_system', 'monitoring_system', 'network_system')
-        foreach ($repo in $repos) {
-          if (Test-Path $repo) {
-            Write-Host "=== Patching $repo ==="
-            Get-ChildItem -Path $repo -Recurse -Depth 10 -Include "CMakeLists.txt","*.cmake" -ErrorAction SilentlyContinue | ForEach-Object {
-              $content = Get-Content $_.FullName -Raw
-              if ($content -match '-Werror|/WX') {
-                Write-Host "  Patching: $($_.FullName)"
-                $content = $content -replace '"-Werror[^"]*"', ''
-                $content = $content -replace '-Werror[^ )"]*', ''
-                $content = $content -replace '/WX', ''
-                Set-Content $_.FullName -Value $content
-              }
-            }
-          }
-        }
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
@@ -947,42 +682,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout common_system (Tier 0)
-      uses: actions/checkout@v4
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
       with:
-        repository: kcenon/common_system
-        path: common_system
-
-    - name: Checkout container_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/container_system
-        path: container_system
-
-    - name: Checkout thread_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/thread_system
-        path: thread_system
-
-    - name: Checkout logger_system (Tier 2)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/logger_system
-        path: logger_system
-
-    - name: Checkout monitoring_system (Tier 3)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/monitoring_system
-        path: monitoring_system
-
-    - name: Checkout network_system (Tier 4)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/network_system
-        ref: main
-        path: network_system
+        patch-werror: 'true'
 
     - name: Install dependencies
       run: |
@@ -994,40 +697,6 @@ jobs:
           libjpeg-turbo8-dev \
           ninja-build \
           cmake
-
-    - name: Patch dependency CMake files to remove -Werror
-      run: |
-        # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
-        # This is necessary because dependencies use -Werror which causes
-        # build failures with newer GCC versions due to stricter warnings
-        #
-        # The kcenon ecosystem uses target_compile_options() with -Werror,
-        # which cannot be overridden by CMAKE_COMPILE_WARNING_AS_ERROR or CXXFLAGS.
-        # Direct patching of CMake files is required.
-
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-
-            # Find all CMake files and patch various forms of -Werror
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              # Check if file contains -Werror before patching
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                # Remove all forms of -Werror (with backup for both macOS and Linux)
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-
-            # Verify patch was applied
-            remaining=$(find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f -exec grep -l '\-Werror' {} \; 2>/dev/null || true)
-            if [ -n "$remaining" ]; then
-              echo "  WARNING: -Werror still found in: $remaining"
-            else
-              echo "  OK: No -Werror remaining in $repo"
-            fi
-          fi
-        done
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -1110,42 +779,10 @@ jobs:
       with:
         path: pacs_system
 
-    - name: Checkout common_system (Tier 0)
-      uses: actions/checkout@v4
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
       with:
-        repository: kcenon/common_system
-        path: common_system
-
-    - name: Checkout container_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/container_system
-        path: container_system
-
-    - name: Checkout thread_system (Tier 1)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/thread_system
-        path: thread_system
-
-    - name: Checkout logger_system (Tier 2)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/logger_system
-        path: logger_system
-
-    - name: Checkout monitoring_system (Tier 3)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/monitoring_system
-        path: monitoring_system
-
-    - name: Checkout network_system (Tier 4)
-      uses: actions/checkout@v4
-      with:
-        repository: kcenon/network_system
-        ref: main
-        path: network_system
+        patch-werror: 'true'
 
     - name: Install dependencies
       run: |
@@ -1159,40 +796,6 @@ jobs:
           cmake \
           netcat-openbsd \
           lsof
-
-    - name: Patch dependency CMake files to remove -Werror
-      run: |
-        # Remove -Werror from all CMake files (*.cmake and CMakeLists.txt)
-        # This is necessary because dependencies use -Werror which causes
-        # build failures with newer GCC versions due to stricter warnings
-        #
-        # The kcenon ecosystem uses target_compile_options() with -Werror,
-        # which cannot be overridden by CMAKE_COMPILE_WARNING_AS_ERROR or CXXFLAGS.
-        # Direct patching of CMake files is required.
-
-        for repo in common_system container_system thread_system logger_system monitoring_system network_system; do
-          if [ -d "$repo" ]; then
-            echo "=== Patching $repo ==="
-
-            # Find all CMake files and patch various forms of -Werror
-            find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f | while read -r file; do
-              # Check if file contains -Werror before patching
-              if grep -q '\-Werror' "$file" 2>/dev/null; then
-                echo "  Patching: $file"
-                # Remove all forms of -Werror (with backup for both macOS and Linux)
-                sed -i.bak -e 's/"-Werror[^"]*"//g' -e 's/-Werror[^ )"]*//' "$file"
-              fi
-            done
-
-            # Verify patch was applied
-            remaining=$(find "$repo" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -type f -exec grep -l '\-Werror' {} \; 2>/dev/null || true)
-            if [ -n "$remaining" ]; then
-              echo "  WARNING: -Werror still found in: $remaining"
-            else
-              echo "  OK: No -Werror remaining in $repo"
-            fi
-          fi
-        done
 
     - name: Configure CMake
       working-directory: pacs_system
