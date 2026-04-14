@@ -79,11 +79,10 @@ network_adapter::connect(const connection_config& config) {
         }
         client_cfg.verify_certificate = config.tls.verify_peer;
 
-        auto client_result = facade.create_client(client_cfg);
-        if (client_result.is_err()) {
-            return Result<session_ptr>(error_info("Connection failed: " + client_result.error().message));
+        auto client = facade.create_client(client_cfg);
+        if (!client) {
+            return Result<session_ptr>(error_info("Connection failed: unable to create client"));
         }
-        auto client = client_result.value();
 
         // Set up promise/future for synchronous connection
         std::promise<std::error_code> connect_promise;
