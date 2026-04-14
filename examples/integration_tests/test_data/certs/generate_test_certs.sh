@@ -11,7 +11,7 @@
 # Usage:
 #   ./generate_test_certs.sh [output_directory]
 #
-# Default output: current directory
+# Default output: script's own directory
 #
 # @see Issue #141 - TLS Integration Tests
 #
@@ -19,7 +19,8 @@
 set -e
 
 # Configuration
-CERT_DIR="${1:-.}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CERT_DIR="${1:-$SCRIPT_DIR}"
 DAYS_VALID=365
 KEY_SIZE=2048
 CA_KEY_SIZE=4096

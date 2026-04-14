@@ -35,6 +35,14 @@ cd build
 ctest --output-on-failure
 ```
 
+### TLS Integration Tests
+
+TLS test certificates are not stored in version control. Generate them before running TLS integration tests:
+
+```bash
+./examples/integration_tests/test_data/certs/generate_test_certs.sh
+```
+
 ## Development Workflow
 
 1. Fork the repository

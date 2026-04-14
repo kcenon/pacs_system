@@ -229,7 +229,7 @@ The `test_tls_integration.cpp` provides comprehensive C++ tests for TLS-secured 
 ### Running TLS Tests
 
 ```bash
-# Generate test certificates (run once)
+# Generate test certificates (run once, required before TLS tests)
 ./examples/integration_tests/test_data/certs/generate_test_certs.sh
 
 # Run TLS integration tests

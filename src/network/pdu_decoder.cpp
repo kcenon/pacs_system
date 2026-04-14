@@ -77,6 +77,9 @@ uint32_t pdu_decoder::read_uint32_be(std::span<const uint8_t> data, size_t offse
 }
 
 std::string pdu_decoder::read_ae_title(std::span<const uint8_t> data, size_t offset) {
+    if (offset + AE_TITLE_LENGTH > data.size()) {
+        return {};
+    }
     std::string ae_title(reinterpret_cast<const char*>(data.data() + offset),
                          AE_TITLE_LENGTH);
     // Trim trailing spaces
@@ -91,6 +94,9 @@ std::string pdu_decoder::read_ae_title(std::span<const uint8_t> data, size_t off
 
 std::string pdu_decoder::read_uid(std::span<const uint8_t> data, size_t offset,
                                    size_t length) {
+    if (offset + length > data.size()) {
+        return {};
+    }
     std::string uid(reinterpret_cast<const char*>(data.data() + offset), length);
     // Trim trailing nulls and spaces
     while (!uid.empty() && (uid.back() == '\0' || uid.back() == ' ')) {
