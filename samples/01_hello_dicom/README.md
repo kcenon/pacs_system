@@ -124,6 +124,6 @@ Proceed to **Level 2: Echo Server** to learn DICOM networking concepts including
 
 ## Related Documentation
 
-- [DICOM PS3.5 - Data Structures](http://dicom.nema.org/medical/dicom/current/output/chtml/part05/PS3.5.html)
-- [DICOM PS3.6 - Data Dictionary](http://dicom.nema.org/medical/dicom/current/output/chtml/part06/PS3.6.html)
-- [DICOM PS3.10 - Media Storage](http://dicom.nema.org/medical/dicom/current/output/chtml/part10/PS3.10.html)
+- [DICOM PS3.5 - Data Structures](https://dicom.nema.org/medical/dicom/current/output/chtml/part05/PS3.5.html)
+- [DICOM PS3.6 - Data Dictionary](https://dicom.nema.org/medical/dicom/current/output/chtml/part06/PS3.6.html)
+- [DICOM PS3.10 - Media Storage](https://dicom.nema.org/medical/dicom/current/output/chtml/part10/PS3.10.html)

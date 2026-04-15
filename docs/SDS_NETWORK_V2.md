@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-GUID-020"
 doc_title: "SDS - Network V2 Module"
-doc_version: "1.0.0"
+doc_version: "2.0.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -915,6 +915,15 @@ private:
 | `accept_unknown_calling_ae` | bool | true | Accept unlisted AE titles |
 | `implementation_class_uid` | string | (generated) | Implementation Class UID |
 | `implementation_version_name` | string | "PACS_V2" | Implementation Version |
+
+---
+
+## See Also
+
+- [PRD.md](PRD.md) — FR-2 Network Protocol requirements
+- [SRS.md](SRS.md) — R-2.x Network/Association requirements
+- [DICOM_CONFORMANCE_STATEMENT.md](DICOM_CONFORMANCE_STATEMENT.md) — Conformance claims for the DIMSE implementation described here
+- [SDS_SEQUENCES.md](SDS_SEQUENCES.md) — C-STORE/C-FIND/C-MOVE sequence diagrams that use this network layer
 
 ---
 

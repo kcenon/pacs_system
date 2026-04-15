@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-GUID-022"
 doc_title: "SDS - Sequence Diagrams"
-doc_version: "1.0.0"
+doc_version: "0.1.1"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -693,6 +693,14 @@ category: "GUID"
      │                     │ Release resources   │
      │                     │                     │
 ```
+
+---
+
+## See Also
+
+- [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) — Network/association state machine used by the sequences above
+- [DICOM_CONFORMANCE_STATEMENT.md](DICOM_CONFORMANCE_STATEMENT.md) — Conformance claims for C-STORE, C-FIND, C-MOVE as sequenced here
+- [SDS.md](SDS.md) — Parent SDS index
 
 ---
 

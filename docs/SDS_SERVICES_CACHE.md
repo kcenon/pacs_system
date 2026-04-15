@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-GUID-023"
 doc_title: "SDS - Services Cache Module"
-doc_version: "1.0.0"
+doc_version: "1.1.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"

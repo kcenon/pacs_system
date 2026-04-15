@@ -168,6 +168,6 @@ Proceed to **Level 3: Storage Server** to learn:
 
 ## Related Documentation
 
-- [DICOM PS3.7 - Message Exchange](http://dicom.nema.org/medical/dicom/current/output/chtml/part07/PS3.7.html)
-- [DICOM PS3.8 - Network Communication](http://dicom.nema.org/medical/dicom/current/output/chtml/part08/PS3.8.html)
-- [DICOM PS3.4 Section A.4 - Verification Service](http://dicom.nema.org/medical/dicom/current/output/chtml/part04/sect_A.4.html)
+- [DICOM PS3.7 - Message Exchange](https://dicom.nema.org/medical/dicom/current/output/chtml/part07/PS3.7.html)
+- [DICOM PS3.8 - Network Communication](https://dicom.nema.org/medical/dicom/current/output/chtml/part08/PS3.8.html)
+- [DICOM PS3.4 Section A.4 - Verification Service](https://dicom.nema.org/medical/dicom/current/output/chtml/part04/sect_A.4.html)

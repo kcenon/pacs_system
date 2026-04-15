@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-GUID-025"
 doc_title: "SDS - Requirements Traceability Matrix"
-doc_version: "1.0.0"
+doc_version: "3.0.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -1588,6 +1588,21 @@ When a requirement changes, use this checklist:
 | DES-DB-005 | mpps table |
 | DES-DB-006 | worklist table |
 | DES-DB-007 | schema_version table |
+
+---
+
+## See Also — Upstream Requirement Documents
+
+This traceability matrix traces from the following upstream requirement sources:
+
+- [PRD.md](PRD.md) — Product Requirements (FR-x, NFR-x, IR-x) that rows 2.x reference
+- [SRS.md](SRS.md) — Software Requirements (R-x.x) that rows 3.x reference
+- [FEATURES.md](FEATURES.md) — Feature-level documentation whose implementation maps to DES-xxx IDs
+
+Downstream (validation / verification):
+
+- [VALIDATION_REPORT.md](VALIDATION_REPORT.md) — SRS → System Test validation
+- All SDS module files (SDS_*.md) referenced inline throughout Sections 2-6
 
 ---
 

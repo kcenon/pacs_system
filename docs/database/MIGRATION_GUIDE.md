@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-MIGR-004"
 doc_title: "database_system Migration Guide"
-doc_version: "1.0.0"
+doc_version: "1.0.1"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
