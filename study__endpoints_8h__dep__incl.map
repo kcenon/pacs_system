@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/study_endpoints.h" name="include/kcenon/pacs/web/endpoints/study_endpoints.h">
+<area shape="rect" id="Node000001" title="Study API endpoints for REST server." alt="" coords="115,5,276,60"/>
+<area shape="rect" id="Node000002" href="$study__endpoints_8cpp.html" title="Study API endpoints implementation." alt="" coords="5,108,185,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,72,117,110,114,106,155,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="209,115,384,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,68,286,113,282,117,232,71"/>
+</map>

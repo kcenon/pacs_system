@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::ai::ai_assessment" name="kcenon::pacs::ai::ai_assessment">
+<area shape="rect" id="Node000001" title="Complete assessment of an AI result." alt="" coords="5,449,149,669"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1ai_1_1assessed__result__reference.html" title="Reference to the AI result being assessed." alt="" coords="197,307,384,387"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="253,389,163,477,159,473,249,385"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="38,135,117,200"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="77,201,71,307,72,433,67,433,65,307,72,200"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,198,233,294,230,298,114,202"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="12,5,143,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="80,99,80,134,75,134,75,99"/>
+</map>

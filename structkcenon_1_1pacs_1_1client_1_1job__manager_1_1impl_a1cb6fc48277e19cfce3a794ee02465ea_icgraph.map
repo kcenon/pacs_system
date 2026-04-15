@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::client::job_manager::impl::save_job" name="kcenon::pacs::client::job_manager::impl::save_job">
+<area shape="rect" id="Node000001" title=" " alt="" coords="217,163,377,217"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a0f0bee2cd16d6d96d90f3b072f26e893" title="Create a prefetch job." alt="" coords="5,5,169,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,154,217,113,168,74,150,62,152,58,171,69,221,109,263,150"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a89976ac2eb11a89defcf98af08f624bb" title="Create a query job (C&#45;FIND)" alt="" coords="5,84,169,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="210,160,160,141,162,136,212,155"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a12271cc347a66ab06005cdc20ade3fc2" title="Create a retrieve job (C&#45;MOVE/C&#45;GET)" alt="" coords="5,163,169,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="203,193,169,193,169,187,203,187"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a67c76b2adb5c7aa3f15779e8f8ece628" title="Create a store job (C&#45;STORE)" alt="" coords="5,241,169,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="212,225,162,244,160,239,210,220"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a7f634d4c236b7ede9296c84d6fd2b376" title="Create a sync job." alt="" coords="5,320,169,375"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="263,230,220,270,171,310,150,322,147,318,168,305,217,266,259,226"/>
+</map>

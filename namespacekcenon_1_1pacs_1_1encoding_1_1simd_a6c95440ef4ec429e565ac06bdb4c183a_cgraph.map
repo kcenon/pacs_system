@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::simd::ycbcr_to_rgb_8bit" name="kcenon::pacs::encoding::simd::ycbcr_to_rgb_8bit">
+<area shape="rect" id="Node000001" title="Convert YCbCr to RGB color space (ITU&#45;R BT.601)" alt="" coords="5,69,191,109"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6033b8c73db95ad59f315d9dfcc47139" title="Check if AVX2 is available." alt="" coords="239,69,413,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,87,225,87,225,92,191,92"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a12ef5e6498437704490c7d49e9e11f4e" title="Check if NEON is available." alt="" coords="239,5,413,45"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="169,67,240,47,241,52,171,72"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd_1_1detail.html#a7cde9365826bed59a1dcdd68fe7d741e" title="Scalar YCbCr to RGB conversion (ITU&#45;R BT.601)" alt="" coords="239,134,413,189"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="163,107,227,127,226,132,161,112"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a7c58b0fc45c37eb282ea7181574b6bbf" title="Get cached SIMD features (singleton pattern)" alt="" coords="461,5,636,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="396,67,465,47,466,52,397,72"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25232bbf012acb7d93bf3eb6ed813914" title="Check if a specific feature is set." alt="" coords="461,69,636,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="414,87,448,87,448,92,414,92"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c5b859f9c8a8af24c8150f90171eb7" title="Detect available SIMD features at runtime." alt="" coords="684,5,859,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="636,23,670,23,670,28,636,28"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="414,23,448,23,448,28,414,28"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="397,43,466,63,465,68,396,48"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::predictor" name="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::predictor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="773,45,981,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a1cf7d0d991fede095196f62035806553" title=" " alt="" coords="517,5,725,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="760,57,725,52,726,46,760,52"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec.html#a58f6ce2baba3592941eb2618721d082a" title="Gets the current predictor selection value." alt="" coords="517,84,725,139"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="760,93,726,98,725,93,760,88"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a31187704bb6d7a24c2bfa8532eb5050e" title=" " alt="" coords="261,5,469,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="504,35,469,35,469,30,504,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec.html#a251d0190db81afe3bb56e7ffaa57e077" title="Decompresses JPEG Lossless data." alt="" coords="5,5,213,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="248,35,213,35,213,30,248,30"/>
+</map>

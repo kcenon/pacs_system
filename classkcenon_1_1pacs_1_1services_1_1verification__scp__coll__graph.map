@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::verification_scp" name="kcenon::pacs::services::verification_scp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="30,1128,219,1288"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html" title=" " alt="" coords="30,779,219,1079"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,1092,127,1128,122,1128,122,1092"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="38,636,211,716"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="127,716,127,762,122,762,122,716"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,133,180,559"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="116,559,122,620,117,620,111,559"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="205,313,354,379"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="266,392,235,471,195,560,152,637,147,634,190,557,230,469,261,390"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="268,5,291,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="282,71,282,297,277,297,277,71"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="include/kcenon/pacs/integration/monitoring_adapter.h" name="include/kcenon/pacs/integration/monitoring_adapter.h">
+<area shape="rect" id="Node000001" title="Adapter for PACS performance metrics and distributed tracing." alt="" coords="509,5,681,60"/>
+<area shape="rect" id="Node000002" href="$ai__service__connector_8cpp.html" title="Implementation of AI service connector." alt="" coords="5,115,229,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="495,56,177,118,176,113,494,51"/>
+<area shape="rect" id="Node000003" href="$monitoring__adapter_8cpp.html" title="Implementation of PACS monitoring adapter." alt="" coords="254,108,445,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="514,67,400,110,398,106,512,62"/>
+<area shape="rect" id="Node000004" href="$pacs-integration_8cppm.html" title="C++20 module partition for external system adapters." alt="" coords="469,115,720,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="597,74,597,115,592,115,592,74"/>
+<area shape="rect" id="Node000005" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="745,108,943,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="678,62,795,105,793,110,677,67"/>
+<area shape="rect" id="Node000006" href="$task__scheduler_8cpp.html" title="Implementation of task scheduler service for automated PACS operations." alt="" coords="968,115,1200,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="695,50,1024,113,1023,118,694,56"/>
+</map>

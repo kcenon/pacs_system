@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_mg_for_processing_sop_class" name="kcenon::pacs::services::sop_classes::is_mg_for_processing_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a For Processing mammography SOP Class." alt="" coords="5,5,185,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a64efa29793987aa03e5cf3f1064b911d" title="Get information about a specific Mammography SOP Class." alt="" coords="233,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,30,220,30,220,35,186,35"/>
+</map>

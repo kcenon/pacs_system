@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::services::worklist_scu::query_today" name="kcenon::pacs::services::worklist_scu::query_today">
+<area shape="rect" id="Node000001" title="Query today&#39;s worklist for a station." alt="" coords="5,49,205,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#a8f85c9d39d4388b2ed73d0704d4bb80c" title="Get today&#39;s date in DICOM format (YYYYMMDD)" alt="" coords="253,5,473,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,50,239,44,240,49,206,55"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#a87beae0e1f801a8dcca34995311b930b" title="Perform a MWL C&#45;FIND query with typed keys." alt="" coords="279,93,448,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,84,266,94,265,99,205,89"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="318,94,315,84,323,74,339,69,363,67,392,70,407,77,405,82,390,75,363,72,340,74,326,79,321,85,323,92"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#aa3e7bdfaddb57bde4dcf49e6a5c7e07c" title="Build query dataset from typed keys." alt="" coords="521,86,691,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="448,111,508,111,508,116,448,116"/>
+</map>

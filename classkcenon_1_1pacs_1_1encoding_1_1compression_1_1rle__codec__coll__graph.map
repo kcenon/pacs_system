@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::compression::rle_codec" name="kcenon::pacs::encoding::compression::rle_codec">
+<area shape="rect" id="Node000001" title="DICOM RLE Lossless codec implementation." alt="" coords="243,928,417,1408"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1compression__codec.html" title="Abstract base class for image compression codecs." alt="" coords="5,405,247,865"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,877,245,939,240,941,217,879"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="271,603,389,668"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="333,668,333,912,327,912,327,668"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="243,183,401,263"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="326,277,332,602,327,602,320,277"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="426,588,637,683"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="530,683,515,786,501,846,483,905,458,964,428,1022,423,1019,453,962,478,903,496,845,510,785,525,682"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html" title="PIMPL implementation for rle_codec." alt="" coords="425,133,637,313"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="534,313,534,572,529,572,529,313"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="661,191,810,256"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="716,269,557,589,552,587,711,267"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="724,5,747,71"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="738,71,738,174,733,174,733,71"/>
+</map>

@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::check_type2_attribute" name="kcenon::pacs::services::validation::mg_iod_validator::check_type2_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="864,163,1080,217"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a45890325e4bc1d5bd2e382ee3e142f55" title=" " alt="" coords="533,5,816,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="930,155,877,113,815,74,789,62,791,58,817,69,881,108,934,151"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a56d990ba0fd92bc37f6723a5ab90b58d" title=" " alt="" coords="563,84,786,139"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="854,162,778,141,779,136,856,157"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a1827f3e849d176b0a46502e32ce8789b" title=" " alt="" coords="554,163,795,217"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="850,193,795,193,795,187,850,187"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a28b6e74b2d3ba1881f3660395328c43d" title=" " alt="" coords="555,241,794,296"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="856,223,779,244,778,239,854,218"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a91e261f4fd4d61e361a80b21fe739c1c" title=" " alt="" coords="567,320,783,375"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="933,229,880,271,817,310,784,324,782,319,815,305,877,266,930,224"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a859ef51cff42cdebc4edb77faa2d36ce" title="Validate a DICOM dataset against Mammography IOD." alt="" coords="269,163,485,217"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="548,67,535,74,499,94,465,118,409,165,405,161,461,114,496,90,532,69,546,63"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#adde89309bf8c455c11e0a48caaf3a8ff" title="Validate a For Presentation mammography dataset." alt="" coords="5,84,221,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="271,161,205,141,207,136,273,156"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#ad38a597d74ba274c931575bc4ee44921" title="Validate a For Processing mammography dataset." alt="" coords="5,163,221,217"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="256,193,221,193,221,187,256,187"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a0c87754194885095a7ec341cc132551e" title="Validate a mammography dataset with default options." alt="" coords="29,241,198,296"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="273,224,199,246,198,241,271,219"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="558,145,482,165,481,160,557,140"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="541,193,485,193,485,187,541,187"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="557,240,481,220,482,215,558,235"/>
+<area shape="poly" id="edge13_Node000010_Node000003" title=" " alt="" coords="553,319,532,310,496,289,462,265,406,220,410,215,465,261,499,285,535,305,555,314"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_watch_scu::parse_event_dataset" name="kcenon::pacs::services::ups_watch_scu::parse_event_dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,177,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="225,5,380,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,30,212,30,212,35,178,35"/>
+</map>

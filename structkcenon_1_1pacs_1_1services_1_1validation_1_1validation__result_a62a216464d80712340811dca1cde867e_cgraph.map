@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::validation_result::summary" name="kcenon::pacs::services::validation::validation_result::summary">
+<area shape="rect" id="Node000001" title="Get a formatted summary string." alt="" coords="5,45,175,100"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1validation_1_1validation__result.html#a7c30024de61a6f8982ce0d56a5470394" title="Get count of errors." alt="" coords="223,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,54,209,48,210,53,175,60"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1services_1_1validation_1_1validation__result.html#ab5c10f98f392474de4fdba3b52384204" title="Get count of warnings." alt="" coords="223,84,392,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,85,210,91,209,97,174,90"/>
+</map>

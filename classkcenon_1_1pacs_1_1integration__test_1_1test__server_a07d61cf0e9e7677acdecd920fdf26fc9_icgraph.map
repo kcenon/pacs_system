@@ -1,0 +1,37 @@
+<map id="kcenon::pacs::integration_test::test_server::port" name="kcenon::pacs::integration_test::test_server::port">
+<area shape="rect" id="Node000001" title=" " alt="" coords="617,343,804,383"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#af5b68b253e9d55fe5f82c1fa5ab5bc83" title="Check if a port is listening (inline implementation)" alt="" coords="383,336,569,391"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="604,366,570,366,570,361,604,361"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d1a995756db5730d6e83c249ca26ca" title="Start the server and wait for it to be ready." alt="" coords="148,343,335,383"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="369,366,335,366,335,361,369,361"/>
+<area shape="rect" id="Node000004" href="$test__connectivity_8cpp.html#aa9aa4dc6b7863da737e026a38b517ddd" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="231,330,215,271,189,195,150,115,126,78,98,44,84,33,87,29,102,40,130,75,155,113,194,193,220,269,236,329"/>
+<area shape="rect" id="Node000005" href="$test__connectivity_8cpp.html#a2a13f62ef8f7cc99bc6f6956785a5bfc" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="228,331,210,280,182,218,145,152,98,93,83,82,87,78,102,89,150,149,187,215,215,278,233,329"/>
+<area shape="rect" id="Node000006" href="$test__dcmtk__echo_8cpp.html#a0bb669f58b0f1a1445e3cb53b774fd1d" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="224,331,203,290,175,240,140,189,98,143,83,132,86,127,102,139,144,185,180,237,208,287,228,329"/>
+<area shape="rect" id="Node000007" href="$test__dcmtk__echo_8cpp.html#abfb471914a5909b0264efb1018bb2d69" title=" " alt="" coords="5,153,100,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="218,333,168,264,135,226,98,192,81,181,84,177,102,188,139,223,172,261,222,330"/>
+<area shape="rect" id="Node000008" href="$test__dcmtk__echo_8cpp.html#aaaa908d116516b6071938b3b7e6db132" title=" " alt="" coords="5,203,100,228"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="209,336,159,289,98,242,80,231,83,226,102,237,162,285,213,332"/>
+<area shape="rect" id="Node000009" href="$test__dcmtk__find_8cpp.html#a9ed528cfbdb68dfe87ef4466937591e2" title=" " alt="" coords="5,252,100,277"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="190,339,99,291,78,280,80,275,101,286,192,335"/>
+<area shape="rect" id="Node000010" href="$test__dcmtk__find_8cpp.html#a551fae934531045bd5d340e9f2ce9a97" title=" " alt="" coords="5,301,100,327"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="150,342,100,329,101,324,152,337"/>
+<area shape="rect" id="Node000011" href="$test__dcmtk__find_8cpp.html#a808607403304e3b7a6fb40561cb24236" title=" " alt="" coords="5,351,100,376"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="134,366,100,366,100,361,134,361"/>
+<area shape="rect" id="Node000012" href="$test__dcmtk__find_8cpp.html#a80b3b85c7a17bd8ce6229687cb28065b" title=" " alt="" coords="5,400,100,425"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="152,390,101,403,100,398,150,384"/>
+<area shape="rect" id="Node000013" href="$test__dcmtk__find_8cpp.html#a1cee04edbe418b8a1fe2e61f8c401b6b" title=" " alt="" coords="5,449,100,475"/>
+<area shape="poly" id="edge12_Node000003_Node000013" title=" " alt="" coords="191,392,79,452,77,447,189,387"/>
+<area shape="rect" id="Node000014" href="$test__dcmtk__move_8cpp.html#ab8b1a6ba89c6ec6ea70aa7ceebb375b9" title=" " alt="" coords="5,499,100,524"/>
+<area shape="poly" id="edge13_Node000003_Node000014" title=" " alt="" coords="212,395,162,441,102,488,81,501,78,496,98,484,158,437,208,391"/>
+<area shape="rect" id="Node000015" href="$test__dcmtk__move_8cpp.html#ae6858896c6529e5f4e8dc3ad1fc561e4" title=" " alt="" coords="5,548,100,573"/>
+<area shape="poly" id="edge14_Node000003_Node000015" title=" " alt="" coords="222,397,171,465,138,503,102,537,83,550,80,546,98,533,134,499,167,462,218,393"/>
+<area shape="rect" id="Node000016" href="$test__connectivity_8cpp.html#a1109067f3781e9440a1227335020122c" title=" " alt="" coords="5,597,100,623"/>
+<area shape="poly" id="edge15_Node000003_Node000016" title=" " alt="" coords="228,397,179,488,144,540,102,587,84,599,81,595,98,583,140,537,175,485,223,395"/>
+<area shape="rect" id="Node000017" href="$test__connectivity_8cpp.html#a6515941f8cf148f0048aa6a6e3a3bdf7" title=" " alt="" coords="5,647,100,672"/>
+<area shape="poly" id="edge16_Node000003_Node000017" title=" " alt="" coords="233,397,214,448,187,510,149,576,102,636,85,649,82,644,98,632,145,573,182,508,209,446,228,395"/>
+<area shape="rect" id="Node000018" href="$test__connectivity_8cpp.html#a92028cad78a2c3dc6f56fc2ba29b2287" title=" " alt="" coords="5,696,100,721"/>
+<area shape="poly" id="edge17_Node000003_Node000018" title=" " alt="" coords="236,397,220,457,193,532,154,612,130,650,102,685,86,698,83,694,98,681,126,647,150,610,188,530,214,455,230,396"/>
+</map>

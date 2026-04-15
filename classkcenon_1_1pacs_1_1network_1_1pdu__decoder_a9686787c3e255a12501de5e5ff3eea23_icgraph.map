@@ -1,0 +1,54 @@
+<map id="kcenon::pacs::network::pdu_decoder::read_uint32_be" name="kcenon::pacs::network::pdu_decoder::read_uint32_be">
+<area shape="rect" id="Node000001" title="Read a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1917,140,2139,180"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#afd145eb73eeb8182004e862125a70688" title="Decode a P&#45;DATA&#45;TF PDU." alt="" coords="1217,43,1385,98"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1970,137,1921,119,1869,104,1738,83,1605,72,1484,68,1385,70,1385,64,1484,63,1606,66,1738,77,1870,99,1923,114,1972,132"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a1e8b1daebb984f5c7cf3da931f66c91e" title="Decode User Information sub&#45;items." alt="" coords="1689,190,1857,245"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1926,186,1857,201,1856,196,1925,180"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#af222f7bc86bfedd75aba6d09c06db4de" title="Check if a complete PDU is available in the buffer." alt="" coords="1676,113,1869,153"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="1904,150,1869,146,1870,141,1904,144"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#acc5535c405be98be76cd656e82bbc2d0" title="Validate PDU header and extract length." alt="" coords="1453,279,1628,334"/>
+<area shape="poly" id="edge33_Node000001_Node000015" title=" " alt="" coords="1992,190,1937,227,1870,260,1809,279,1745,292,1628,306,1628,301,1744,287,1807,273,1868,255,1934,223,1989,186"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a62fee0be01724f5e8026355f624fd965" title="Decode any PDU from bytes." alt="" coords="955,287,1123,327"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1206,105,1198,111,1181,130,1172,147,1164,167,1150,190,1105,244,1063,288,1059,284,1101,241,1146,186,1159,164,1167,145,1176,126,1194,107,1203,101"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#af344252fdb845b0c4bec16292ec8fc90" title="Handle P&#45;DATA&#45;TF PDU." alt="" coords="939,43,1138,98"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="1203,73,1138,73,1138,68,1203,68"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#afff61fcb536357d6009ca730c3547bea" title="Process a complete PDU." alt="" coords="707,43,881,98"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="926,73,881,73,881,68,926,68"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1de6f1a790a073ccd311d427618fa7c3" title="Process accumulated buffer for complete PDUs." alt="" coords="477,11,659,66"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="693,59,658,54,659,49,693,54"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a7fdebfd5cd1481667fd9d96071e44056" title="Handle data received from session." alt="" coords="228,11,429,66"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="464,41,430,41,430,36,464,36"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a20b3f39bcb4fc5a1fbbc79579ca8033f" title="Feed received data to the handler." alt="" coords="5,11,180,66"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="214,41,180,41,180,36,214,36"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a0d06b134a1faee6f3fd463c2b8a385ea" title="Decode variable items from ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="1457,201,1625,255"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1675,224,1625,227,1625,221,1675,219"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a3320c0e594a8643df44c1b7578d86697" title="Decode an A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="1217,201,1385,255"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="1443,231,1385,231,1385,225,1443,225"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a3bd152610bd4e5bf841c80f014e6a941" title="Decode an A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="1217,122,1385,177"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="1443,199,1384,179,1385,174,1444,194"/>
+<area shape="poly" id="edge11_Node000011_Node000003" title=" " alt="" coords="1205,260,1107,289,1105,284,1203,254"/>
+<area shape="poly" id="edge13_Node000012_Node000003" title=" " alt="" coords="1208,185,1197,190,1122,240,1064,288,1061,284,1119,236,1195,186,1205,180"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a6b0ad065cb9652fcc2ebd9a21f458861" title="Handle A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="929,122,1148,177"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1203,152,1148,152,1148,147,1203,147"/>
+<area shape="poly" id="edge15_Node000013_Node000005" title=" " alt="" coords="939,120,879,101,881,96,941,115"/>
+<area shape="poly" id="edge19_Node000014_Node000002" title=" " alt="" coords="1662,121,1384,84,1385,79,1663,116"/>
+<area shape="poly" id="edge20_Node000014_Node000006" title=" " alt="" coords="1715,110,1635,79,1534,45,1419,19,1360,11,1302,8,1037,8,834,16,659,31,659,26,834,11,1037,3,1302,3,1361,6,1420,13,1535,40,1637,74,1717,105"/>
+<area shape="poly" id="edge17_Node000014_Node000011" title=" " alt="" coords="1663,152,1454,191,1386,207,1384,202,1453,185,1662,147"/>
+<area shape="poly" id="edge18_Node000014_Node000012" title=" " alt="" coords="1662,140,1453,147,1385,149,1385,144,1453,141,1662,134"/>
+<area shape="poly" id="edge21_Node000014_Node000015" title=" " alt="" coords="1702,162,1678,179,1662,202,1655,224,1647,246,1630,270,1615,281,1612,277,1626,266,1643,244,1650,222,1657,199,1674,175,1699,158"/>
+<area shape="poly" id="edge28_Node000015_Node000002" title=" " alt="" coords="1453,272,1451,270,1437,249,1430,228,1427,188,1425,150,1418,131,1403,111,1383,95,1387,91,1407,107,1422,128,1430,148,1433,188,1435,227,1442,246,1455,266,1457,269"/>
+<area shape="poly" id="edge24_Node000015_Node000011" title=" " alt="" coords="1443,277,1384,258,1385,253,1444,272"/>
+<area shape="poly" id="edge27_Node000015_Node000012" title=" " alt="" coords="1456,273,1451,270,1435,249,1427,229,1420,209,1404,190,1383,177,1386,172,1407,186,1424,206,1432,227,1440,246,1455,266,1459,269"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a8c63443fd9a222b29952f38376d405ad" title="Decode an A&#45;ABORT PDU." alt="" coords="1196,437,1405,477"/>
+<area shape="poly" id="edge22_Node000015_Node000016" title=" " alt="" coords="1507,346,1462,389,1407,428,1381,440,1379,435,1404,423,1458,384,1503,342"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#ae77175ddceba814728f0c970595d16e1" title="Decode an A&#45;ASSOCIATE&#45;RJ PDU." alt="" coords="1217,502,1385,557"/>
+<area shape="poly" id="edge25_Node000015_Node000017" title=" " alt="" coords="1522,347,1475,420,1443,458,1407,491,1386,504,1384,500,1404,487,1440,454,1471,417,1517,345"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a464518bcab19f63981f612bebebdcafc" title="Decode an A&#45;RELEASE&#45;RP PDU." alt="" coords="1217,279,1385,334"/>
+<area shape="poly" id="edge29_Node000015_Node000018" title=" " alt="" coords="1440,309,1385,309,1385,304,1440,304"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#ace161c0013a0c3178fd3fedf79a2484b" title="Decode an A&#45;RELEASE&#45;RQ PDU." alt="" coords="1217,358,1385,413"/>
+<area shape="poly" id="edge31_Node000015_Node000019" title=" " alt="" coords="1444,341,1385,360,1384,355,1443,336"/>
+<area shape="poly" id="edge23_Node000016_Node000003" title=" " alt="" coords="1210,435,1195,428,1155,404,1118,378,1060,329,1063,325,1121,374,1158,400,1197,423,1212,430"/>
+<area shape="poly" id="edge26_Node000017_Node000003" title=" " alt="" coords="1203,497,1194,491,1148,452,1107,407,1050,329,1055,326,1111,403,1151,448,1198,487,1206,493"/>
+<area shape="poly" id="edge30_Node000018_Node000003" title=" " alt="" coords="1203,309,1123,309,1123,304,1203,304"/>
+<area shape="poly" id="edge32_Node000019_Node000003" title=" " alt="" coords="1203,359,1105,329,1107,324,1205,354"/>
+</map>

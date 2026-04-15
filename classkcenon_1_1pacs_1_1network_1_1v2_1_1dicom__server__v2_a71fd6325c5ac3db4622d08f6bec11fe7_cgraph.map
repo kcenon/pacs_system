@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::check_idle_timeouts" name="kcenon::pacs::network::v2::dicom_server_v2::check_idle_timeouts">
+<area shape="rect" id="Node000001" title="Check for idle timeouts on handlers." alt="" coords="5,5,173,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a8159156565dc36aa4583fdfb281632f3" title="Find handler by session ID." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,30,208,30,208,35,174,35"/>
+</map>

@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::network::pdu_decoder::decode_associate_ac" name="kcenon::pacs::network::pdu_decoder::decode_associate_ac">
+<area shape="rect" id="Node000001" title="Decode an A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="5,197,173,252"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a0d06b134a1faee6f3fd463c2b8a385ea" title="Decode variable items from ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="241,56,409,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,195,265,115,268,120,137,199"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a64cf1569f52a4efe60b62161683a14e1" title="Read a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="717,103,939,143"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="173,211,703,138,704,143,174,216"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#af222f7bc86bfedd75aba6d09c06db4de" title="Check if a complete PDU is available in the buffer." alt="" coords="476,211,669,251"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="174,223,462,227,462,232,174,228"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a8b9bcffecdc2396bb3492246cc243be6" title="Read an AE Title (16 bytes, space&#45;trimmed)." alt="" coords="221,342,428,382"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="120,250,166,290,223,328,236,334,234,339,220,332,163,294,117,254"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#acc5535c405be98be76cd656e82bbc2d0" title="Validate PDU header and extract length." alt="" coords="237,263,412,317"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="174,245,224,259,223,265,173,250"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a1e8b1daebb984f5c7cf3da931f66c91e" title="Decode User Information sub&#45;items." alt="" coords="489,31,657,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,72,475,65,475,71,409,77"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a99fc0ff0bd6ecafe758b6216c1e7c862" title="Read a UID string (trim trailing null/space padding)." alt="" coords="739,6,917,46"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="374,53,422,32,475,15,540,6,606,3,726,9,726,14,606,8,540,11,477,21,424,37,376,58"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="409,88,476,94,704,112,703,117,476,99,409,93"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="656,45,725,36,726,41,657,50"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="657,77,737,97,736,103,656,82"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a9686787c3e255a12501de5e5ff3eea23" title="Read a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="717,211,939,251"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="616,83,788,201,785,206,613,88"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="670,229,704,229,704,234,670,234"/>
+<area shape="poly" id="edge14_Node000009_Node000006" title=" " alt="" coords="412,284,534,275,669,261,724,251,725,257,670,266,534,281,412,289"/>
+<area shape="poly" id="edge13_Node000009_Node000007" title=" " alt="" coords="412,267,474,252,475,257,413,272"/>
+</map>

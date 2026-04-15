@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::example::pacs_server_app::stop" name="kcenon::pacs::example::pacs_server_app::stop">
+<area shape="rect" id="Node000001" title="Stop the server gracefully." alt="" coords="249,53,424,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#af33643314f2364e06d72814a5e385d18" title="Request shutdown." alt="" coords="5,5,201,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,58,201,52,202,47,236,53"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a7e29b29b90c17b216092d9a22e657043" title="Destructor &#45; stops server if running." alt="" coords="9,84,197,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,92,198,98,197,93,235,87"/>
+</map>

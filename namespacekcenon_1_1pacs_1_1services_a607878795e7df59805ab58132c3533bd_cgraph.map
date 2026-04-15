@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::services::get_storage_modality" name="kcenon::pacs::services::get_storage_modality">
+<area shape="rect" id="Node000001" title="Get the modality for a storage SOP Class." alt="" coords="5,65,177,105"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a0e987f9a196d36f50bd8df197c6343b7" title="Get information about a SOP Class." alt="" coords="225,5,395,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,62,211,53,212,59,177,67"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#abde698eac88ad2162ff5046143984358" title="Get the singleton instance." alt="" coords="225,108,395,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,102,213,110,212,115,177,107"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="267,108,267,98,275,89,289,83,310,81,335,84,349,92,346,97,333,90,310,87,291,89,278,93,272,100,272,108"/>
+</map>

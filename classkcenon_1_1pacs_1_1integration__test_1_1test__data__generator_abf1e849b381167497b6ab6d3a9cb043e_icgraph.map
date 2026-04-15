@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::integration_test::test_data_generator::ct" name="kcenon::pacs::integration_test::test_data_generator::ct">
+<area shape="rect" id="Node000001" title="Generate a CT Image dataset." alt="" coords="240,112,453,152"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ac209e818312e3f4dba03608163d9e9f9" title=" " alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="294,108,191,60,160,48,162,43,193,55,296,103"/>
+<area shape="rect" id="Node000003" href="$test__multimodal__workflow_8cpp.html#a5cd28cacc44c0519382761e5fc9304f0" title=" " alt="" coords="51,70,146,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,112,145,95,147,89,233,107"/>
+<area shape="rect" id="Node000004" href="$test__multimodal__workflow_8cpp.html#a87323ec8920a06c0f358307f36e4b879" title=" " alt="" coords="51,119,146,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,135,146,135,146,129,226,129"/>
+<area shape="rect" id="Node000005" href="$test__stability_8cpp.html#a838e097a6cdc8d1aab555bc9e10d8434" title=" " alt="" coords="51,169,146,194"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="233,157,147,175,145,169,232,152"/>
+<area shape="rect" id="Node000006" href="$test__multimodal__workflow_8cpp.html#acba6fc8ba176c71c8fd34f42b18d9e79" title=" " alt="" coords="51,218,146,243"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="297,161,193,208,147,222,146,217,191,203,295,156"/>
+</map>

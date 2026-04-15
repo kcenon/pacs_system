@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/web/endpoints/wado_uri_endpoints.h" name="include/kcenon/pacs/web/endpoints/wado_uri_endpoints.h">
+<area shape="rect" id="Node000001" title="WADO&#45;URI (Web Access to DICOM Objects — URI&#45;based) API endpoints." alt="" coords="53,5,213,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,80,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,62,67,100,63,96,104,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="104,108,163,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="136,60,136,94,131,94,131,60"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,108,285,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="166,58,213,97,210,101,163,62"/>
+</map>

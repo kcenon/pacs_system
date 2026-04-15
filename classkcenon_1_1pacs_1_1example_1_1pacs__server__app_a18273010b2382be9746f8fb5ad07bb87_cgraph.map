@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::example::pacs_server_app::handle_retrieve" name="kcenon::pacs::example::pacs_server_app::handle_retrieve">
+<area shape="rect" id="Node000001" title="Handle C&#45;MOVE/C&#45;GET retrieve." alt="" coords="5,41,196,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="244,5,399,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,50,230,45,231,50,197,56"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="250,85,393,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="197,82,237,88,236,93,196,87"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="447,85,659,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="393,102,433,102,433,107,393,107"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="707,85,852,125"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="659,102,693,102,693,107,659,107"/>
+</map>

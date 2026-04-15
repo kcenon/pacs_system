@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::network::pdu_buffer_pool::get" name="kcenon::pacs::network::pdu_buffer_pool::get">
+<area shape="rect" id="Node000001" title="Get the global PDU buffer pool instance." alt="" coords="247,101,415,141"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network.html#aa582e815d2c477a13832a4efda3d1210" title="Create a pooled p_data_tf_pdu." alt="" coords="9,5,195,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="278,97,198,60,166,48,168,43,200,55,281,93"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1network.html#a7be472ff45412c0a987ab3b5e1d0a5b4" title="Create a pooled byte buffer." alt="" coords="5,69,199,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,110,198,105,199,100,234,105"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1network.html#ad8151eff9fc3ffa8c10a4e876ec03acb" title="Create a pooled byte buffer with initial size." alt="" coords="5,133,199,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="234,138,199,142,198,137,233,132"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1network.html#ae2f4cab1de63e4f3600e6fc8b2bedd44" title="Create a pooled presentation_data_value." alt="" coords="18,197,186,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="281,150,200,188,168,200,166,195,198,183,278,145"/>
+</map>

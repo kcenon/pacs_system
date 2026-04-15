@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_ls_codec::transfer_syntax_uid" name="kcenon::pacs::encoding::compression::jpeg_ls_codec::transfer_syntax_uid">
+<area shape="rect" id="Node000001" title="Returns the Transfer Syntax UID supported by this codec." alt="" coords="5,5,209,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a2664ed0c7eed3287372901a2cf1f257e" title="Checks if this codec is configured for lossless mode." alt="" coords="257,5,447,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,30,244,30,244,35,210,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec_1_1impl.html#af2436b197bfc5ecf69095c2e2fbe3441" title=" " alt="" coords="495,5,721,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="447,30,481,30,481,35,447,35"/>
+</map>

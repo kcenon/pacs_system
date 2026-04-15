@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::start_tool_background" name="kcenon::pacs::integration_test::dcmtk_tool::start_tool_background">
+<area shape="rect" id="Node000001" title="Start a DCMTK tool in background." alt="" coords="5,45,192,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="240,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,54,226,48,227,54,192,59"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a8cd6d97c1cc75c4c41d9c9ab4f64f348" title=" " alt="" coords="240,84,427,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,85,227,91,226,96,192,91"/>
+</map>

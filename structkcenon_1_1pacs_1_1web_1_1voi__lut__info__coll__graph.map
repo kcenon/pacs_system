@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::web::voi_lut_info" name="kcenon::pacs::web::voi_lut_info">
+<area shape="rect" id="Node000001" title="VOI LUT information from DICOM." alt="" coords="173,419,315,559"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="333,148,411,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="396,213,405,236,418,281,425,318,422,355,405,396,391,416,373,433,332,460,329,455,369,429,386,413,400,393,417,353,420,319,412,283,400,238,391,215"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="187,276,365,341"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="346,215,327,239,309,264,304,261,323,236,342,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="307,5,437,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="375,99,375,148,369,148,369,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,276,163,341"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="97,340,108,367,125,393,161,429,157,433,121,396,104,370,92,342"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="78,148,199,213"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="95,225,88,238,83,257,82,276,77,276,78,256,83,236,90,223"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="182,221,212,250,240,274,236,278,209,254,178,225"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="127,13,150,78"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="141,78,141,131,136,131,136,78"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="257,343,248,366,242,402,237,402,243,365,253,341"/>
+</map>

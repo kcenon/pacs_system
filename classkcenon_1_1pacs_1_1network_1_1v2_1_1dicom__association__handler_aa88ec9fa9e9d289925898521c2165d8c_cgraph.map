@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::calling_ae" name="kcenon::pacs::network::v2::dicom_association_handler::calling_ae">
+<area shape="rect" id="Node000001" title="Get the calling AE title." alt="" coords="5,5,180,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a83150b77d9eb2b424ec2a38297ed3c68" title="Get calling AE title." alt="" coords="228,13,407,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,30,214,30,214,35,180,35"/>
+</map>

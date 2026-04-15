@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::certificate::is_expired" name="kcenon::pacs::security::certificate::is_expired">
+<area shape="rect" id="Node000001" title="Check if the certificate has expired." alt="" coords="5,5,176,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1certificate.html#adb5369379af44e8a9ff964cb10ca3ef0" title="Get the not&#45;after date." alt="" coords="224,5,391,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,23,210,23,210,28,177,28"/>
+</map>

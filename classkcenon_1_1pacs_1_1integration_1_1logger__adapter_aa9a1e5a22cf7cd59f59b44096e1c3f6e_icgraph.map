@@ -1,0 +1,64 @@
+<map id="kcenon::pacs::integration::logger_adapter::info" name="kcenon::pacs::integration::logger_adapter::info">
+<area shape="rect" id="Node000001" title="Log an info&#45;level message." alt="" coords="1015,729,1201,769"/>
+<area shape="rect" id="Node000002" href="$classai__service__connector_1_1impl.html#a58f8d10ffbaec3ba53a3d33764e713da" title=" " alt="" coords="776,5,935,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1102,716,1089,574,1063,377,1045,277,1023,185,996,110,981,81,965,59,951,47,934,39,936,34,954,43,969,56,985,78,1001,108,1028,183,1050,275,1069,376,1094,574,1107,715"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a35e67befad155900ef28ca630099a01f" title="Cancel a scheduled task." alt="" coords="749,69,962,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1101,716,1087,586,1059,408,1041,318,1019,236,993,169,979,143,965,123,951,112,954,108,969,119,984,140,998,166,1024,234,1046,317,1065,407,1092,585,1106,715"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a5eb9808e9d6ee718e8fa1dfc48dad383" title="Create archive task callback." alt="" coords="767,134,944,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1100,716,1082,601,1053,447,1034,369,1013,299,990,241,965,202,942,185,946,180,969,198,995,239,1018,297,1039,368,1058,446,1087,600,1105,715"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#af9af3aaad3d0df8dad1cb6bd618ac5c8" title="Create cleanup task callback." alt="" coords="767,213,944,267"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1104,716,1098,629,1090,574,1078,513,1061,451,1037,389,1005,332,965,281,943,264,946,260,969,277,1009,329,1041,387,1066,449,1084,512,1096,573,1103,629,1109,715"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a38430f59081981641d67be5553a4a59d" title="Create verification task callback." alt="" coords="767,291,944,346"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1102,716,1091,643,1068,547,1051,497,1028,447,999,400,965,359,943,343,946,339,968,355,1004,397,1033,444,1056,495,1074,546,1097,642,1107,715"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a5bef4089bc04286caa45fcc6a2057ea4" title="Execute a single prefetch cycle." alt="" coords="768,370,943,425"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1097,717,1082,659,1055,587,1017,512,993,477,965,446,939,427,942,423,968,442,997,474,1022,509,1060,585,1087,658,1102,715"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ad54ce309500c14050bebc65f7fb21acb" title="Start the prefetch service (alias for enable)" alt="" coords="237,403,411,458"/>
+<area shape="poly" id="edge23_Node000001_Node000009" title=" " alt="" coords="1095,717,1079,669,1052,611,1015,555,992,530,965,509,936,498,883,487,733,467,411,439,412,434,734,462,884,482,937,493,968,504,995,526,1019,551,1057,609,1084,667,1101,715"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a0f7a9db624730bd7771ea546748a6218" title="Execute a single scheduler cycle." alt="" coords="468,551,696,591"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1094,717,1076,674,1049,625,1012,577,990,557,965,541,924,524,879,515,834,512,788,515,702,531,633,553,631,548,701,526,787,510,833,507,880,509,925,519,968,536,993,553,1016,574,1053,622,1081,672,1099,715"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#afa4a842d854fa691b1d9e0cbdd933abe" title="Start the scheduler service." alt="" coords="5,579,180,619"/>
+<area shape="poly" id="edge24_Node000001_Node000013" title=" " alt="" coords="1074,722,1025,686,996,669,966,656,920,647,842,638,623,623,180,604,180,599,623,618,842,633,921,642,967,651,999,664,1028,681,1077,718"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a2b2083732d3658e6072b1e200d31b9ac" title="Execute a single task." alt="" coords="744,551,967,591"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="1081,720,1031,665,999,636,965,612,927,593,930,588,968,607,1003,632,1034,661,1085,716"/>
+<area shape="rect" id="Node000015" href="$classai__service__connector_1_1impl.html#a440f3da2672f5738ad6c9301b2171736" title=" " alt="" coords="776,665,935,705"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="1014,728,934,708,935,703,1016,723"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#acc6303dfd5fc8f51c1fda82a4fc94bca" title="Load tasks from persistence storage." alt="" coords="752,729,959,769"/>
+<area shape="poly" id="edge16_Node000001_Node000016" title=" " alt="" coords="1001,752,959,752,959,747,1001,747"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a3300b33af1bbce79635bab6e426e72e4" title="Pause a scheduled task." alt="" coords="750,793,961,833"/>
+<area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="1016,775,935,796,934,791,1014,770"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae943766ff6e20c22bd4df3fe973e4e8a" title="Prefetch a single study via C&#45;MOVE." alt="" coords="768,858,943,913"/>
+<area shape="poly" id="edge18_Node000001_Node000018" title=" " alt="" coords="1073,780,1024,814,968,848,940,860,938,855,965,843,1021,810,1069,775"/>
+<area shape="rect" id="Node000019" href="$classai__service__connector_1_1impl.html#a77c3f292340f461d6e075a402345b87d" title=" " alt="" coords="763,937,947,977"/>
+<area shape="poly" id="edge19_Node000001_Node000019" title=" " alt="" coords="1092,783,1042,855,1008,893,968,926,943,940,941,935,965,922,1004,889,1038,852,1087,780"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aba790d5aade0acd8764a94976f340344" title="Resume a paused task." alt="" coords="745,1001,965,1041"/>
+<area shape="poly" id="edge20_Node000001_Node000020" title=" " alt="" coords="1099,783,1081,830,1053,886,1016,943,994,969,968,991,949,1003,946,999,965,987,990,965,1012,940,1049,883,1076,828,1094,781"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a0f922cf60d2eed26e7e77049ea257006" title="Schedule a task with full definition." alt="" coords="758,1065,953,1105"/>
+<area shape="poly" id="edge21_Node000001_Node000021" title=" " alt="" coords="1103,783,1089,842,1063,915,1045,953,1024,990,998,1025,968,1055,951,1067,948,1063,965,1051,994,1022,1019,988,1041,951,1058,913,1084,840,1098,782"/>
+<area shape="rect" id="Node000022" href="$classai__service__connector_1_1impl.html#a441112cbaf5e75f1fdcc98ad70addef9" title=" " alt="" coords="776,1129,935,1169"/>
+<area shape="poly" id="edge22_Node000001_Node000022" title=" " alt="" coords="1106,783,1096,853,1072,944,1054,991,1031,1038,1003,1081,968,1119,936,1139,933,1134,965,1115,999,1078,1027,1035,1049,989,1067,942,1090,852,1101,783"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ac9a19e291fe35aa7077aaea2f5fcfc81" title="Stop the prefetch service (alias for disable)" alt="" coords="750,1193,961,1233"/>
+<area shape="poly" id="edge25_Node000001_Node000023" title=" " alt="" coords="1109,783,1101,864,1081,971,1063,1029,1039,1085,1008,1137,968,1183,953,1195,949,1191,965,1179,1003,1134,1034,1082,1058,1027,1075,970,1096,863,1103,783"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#af11d33df676fcd02cd5df49ea8574dfe" title="Stop the scheduler service." alt="" coords="768,1257,943,1297"/>
+<area shape="poly" id="edge28_Node000001_Node000026" title=" " alt="" coords="1110,783,1107,875,1100,934,1089,999,1071,1066,1046,1131,1012,1193,968,1247,945,1264,942,1260,965,1243,1008,1190,1041,1129,1066,1064,1084,998,1095,933,1101,874,1105,783"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#af15f0bb6eb9647d7e2594e689e392bb2" title="Trigger immediate execution of a task." alt="" coords="748,1321,963,1361"/>
+<area shape="poly" id="edge30_Node000001_Node000028" title=" " alt="" coords="1105,784,1089,901,1060,1059,1041,1138,1020,1211,996,1270,969,1311,953,1323,950,1319,965,1308,991,1268,1015,1209,1036,1137,1055,1058,1083,900,1100,783"/>
+<area shape="rect" id="Node000029" href="$classai__service__connector_1_1impl.html#a592cec99127529cd2aab8c03ae232daa" title=" " alt="" coords="760,1385,951,1425"/>
+<area shape="poly" id="edge31_Node000001_Node000029" title=" " alt="" coords="1106,784,1092,913,1064,1090,1046,1180,1024,1262,998,1329,984,1355,969,1375,953,1388,949,1384,965,1371,979,1352,993,1327,1019,1260,1040,1179,1059,1089,1086,913,1101,783"/>
+<area shape="rect" id="Node000030" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a7ff5101d122f33d4fdea8903541d8800" title="Update task schedule." alt="" coords="765,1450,946,1505"/>
+<area shape="poly" id="edge32_Node000001_Node000030" title=" " alt="" coords="1107,783,1093,924,1067,1119,1048,1219,1026,1311,1000,1386,985,1416,969,1439,948,1456,944,1452,965,1436,980,1413,995,1384,1021,1309,1043,1218,1062,1118,1088,923,1101,783"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a0cd2744aa7e941d97e632716a1d411a7" title="Background thread main loop." alt="" coords="495,370,669,425"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="755,400,670,400,670,395,755,395"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="482,413,412,422,411,417,481,408"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a049b14fc80b664ef700d1f9069c3423a" title="Enable the prefetch service." alt="" coords="5,403,180,458"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="223,433,180,433,180,428,223,428"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aa2e1b4663729c1fe309d3dfd4bfaf3c7" title="Background thread main loop." alt="" coords="228,551,420,591"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="454,573,420,573,420,568,454,568"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="215,587,181,591,180,585,214,581"/>
+<area shape="poly" id="edge14_Node000014_Node000011" title=" " alt="" coords="730,573,696,573,696,568,730,568"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a2d55959c4efd94f4d7e5de4361e9268d" title="Disable/stop the prefetch service." alt="" coords="495,1107,669,1162"/>
+<area shape="poly" id="edge26_Node000023_Node000024" title=" " alt="" coords="771,1192,669,1162,670,1157,773,1187"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a98bca1e7a5ce6c04561bd8d1e9b51285" title="Destructor &#45; ensures graceful shutdown." alt="" coords="489,1186,675,1241"/>
+<area shape="poly" id="edge27_Node000023_Node000025" title=" " alt="" coords="736,1216,675,1216,675,1211,736,1211"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a8e0090db3ef6578eae33be6c9e9a0d64" title="Destructor &#45; ensures graceful shutdown." alt="" coords="495,1265,669,1319"/>
+<area shape="poly" id="edge29_Node000026_Node000027" title=" " alt="" coords="755,1285,670,1290,669,1285,754,1280"/>
+</map>

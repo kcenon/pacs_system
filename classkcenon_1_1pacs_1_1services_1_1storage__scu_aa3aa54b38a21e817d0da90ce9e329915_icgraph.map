@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::storage_scu::collect_dicom_files" name="kcenon::pacs::services::storage_scu::collect_dicom_files">
+<area shape="rect" id="Node000001" title="Collect DICOM files from a directory." alt="" coords="268,5,437,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#ac75eb05e5a427a5bb06233d04c5cfb8f" title="Store all DICOM files in a directory." alt="" coords="5,13,220,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,35,220,35,220,30,254,30"/>
+</map>

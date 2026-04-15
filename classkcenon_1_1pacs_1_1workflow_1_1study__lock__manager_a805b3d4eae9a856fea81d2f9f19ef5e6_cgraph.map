@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::study_lock_manager::lock" name="kcenon::pacs::workflow::study_lock_manager::lock">
+<area shape="rect" id="Node000001" title="Acquire a lock of specific type on a study." alt="" coords="5,5,205,45"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1workflow.html#ad36b159481f1b0fe0cfa1cbaab357d45" title="Convert lock_type to string." alt="" coords="253,5,428,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,23,239,23,239,28,205,28"/>
+</map>

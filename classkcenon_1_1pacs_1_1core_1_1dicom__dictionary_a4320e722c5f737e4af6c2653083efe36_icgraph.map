@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_dictionary::initialize_standard_tags" name="kcenon::pacs::core::dicom_dictionary::initialize_standard_tags">
+<area shape="rect" id="Node000001" title="Initialize the dictionary with standard PS3.6 tags." alt="" coords="203,5,380,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dictionary.html#adf99db1428c85b6cddbf59a524665a66" title="Private constructor &#45; initializes with standard tags." alt="" coords="5,5,155,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,35,155,35,155,30,188,30"/>
+</map>

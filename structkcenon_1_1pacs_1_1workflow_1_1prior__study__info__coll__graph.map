@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::workflow::prior_study_info" name="kcenon::pacs::workflow::prior_study_info">
+<area shape="rect" id="Node000001" title="Prior study information." alt="" coords="104,441,272,541"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="179,148,258,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,213,238,254,245,306,245,362,236,418,233,427,228,426,231,417,240,362,239,306,233,255,225,214"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="47,295,204,360"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="200,215,157,282,152,279,196,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="153,5,284,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,99,221,148,216,148,216,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="134,359,151,416,154,426,149,428,145,418,129,361"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,107,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="55,227,60,251,72,273,89,293,85,296,68,276,55,253,50,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="45,13,67,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="59,78,59,131,53,131,53,78"/>
+</map>

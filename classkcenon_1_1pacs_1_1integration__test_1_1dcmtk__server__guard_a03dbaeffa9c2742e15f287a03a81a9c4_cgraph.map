@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration_test::dcmtk_server_guard::is_running" name="kcenon::pacs::integration_test::dcmtk_server_guard::is_running">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,200,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#add120561f327e18f19a9600de38d3fce" title="Check if process is running." alt="" coords="248,5,443,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,30,234,30,234,35,200,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a04721ea04dd5fe5390809534b6ea1c9d" title="Check if a process is still running." alt="" coords="491,5,677,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,30,477,30,477,35,443,35"/>
+</map>

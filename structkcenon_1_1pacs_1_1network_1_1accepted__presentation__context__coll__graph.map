@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::accepted_presentation_context" name="kcenon::pacs::network::accepted_presentation_context">
+<area shape="rect" id="Node000001" title="Accepted presentation context after negotiation." alt="" coords="5,277,183,461"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="55,135,133,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,200,97,261,91,261,91,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="29,5,159,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,99,97,134,91,134,91,99"/>
+</map>

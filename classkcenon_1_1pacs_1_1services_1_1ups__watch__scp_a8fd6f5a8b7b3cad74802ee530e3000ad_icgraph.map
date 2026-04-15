@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_watch_scp::handle_n_action" name="kcenon::pacs::services::ups_watch_scp::handle_n_action">
+<area shape="rect" id="Node000001" title=" " alt="" coords="233,5,413,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a9936acb1aee80557d80ad9ef56daa7b4" title="Handle an incoming DIMSE message." alt="" coords="5,5,185,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,35,185,35,185,30,219,30"/>
+</map>

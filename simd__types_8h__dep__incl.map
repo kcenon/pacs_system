@@ -1,0 +1,24 @@
+<map id="include/kcenon/pacs/encoding/simd/simd_types.h" name="include/kcenon/pacs/encoding/simd/simd_types.h">
+<area shape="rect" id="Node000001" title="Platform&#45;specific SIMD type definitions and wrappers." alt="" coords="193,5,350,60"/>
+<area shape="rect" id="Node000002" href="$simd__photometric_8h.html" title="SIMD optimizations for photometric interpretation conversions." alt="" coords="34,211,192,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,69,187,88,166,110,150,134,137,161,121,211,116,209,132,159,145,132,162,106,183,84,208,65"/>
+<area shape="rect" id="Node000003" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="184,321,423,346"/>
+<area shape="poly" id="edge13_Node000001_Node000003" title=" " alt="" coords="192,68,117,105,81,128,49,153,25,179,11,207,10,235,24,264,51,282,93,297,199,318,198,323,92,302,48,287,20,267,5,236,6,205,21,176,46,149,78,124,115,101,190,63"/>
+<area shape="rect" id="Node000004" href="$simd__rle_8h.html" title="SIMD optimizations for RLE codec operations." alt="" coords="175,115,368,155"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="274,74,274,115,269,115,269,74"/>
+<area shape="rect" id="Node000006" href="$simd__utils_8h.html" title="Common SIMD utility functions." alt="" coords="417,108,574,163"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="343,63,438,106,436,110,341,68"/>
+<area shape="rect" id="Node000009" href="$simd__windowing_8h.html" title="SIMD optimizations for window/level (VOI LUT) application." alt="" coords="630,108,788,163"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="364,52,631,113,630,119,363,58"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="180,269,282,318,279,323,178,274"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="263,169,254,215,254,240,258,264,274,295,294,319,290,322,270,298,253,266,248,241,249,215,258,168"/>
+<area shape="rect" id="Node000005" href="$rle__codec_8cpp.html" title=" " alt="" coords="267,218,458,258"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="300,164,347,216,343,220,296,167"/>
+<area shape="poly" id="edge10_Node000006_Node000003" title=" " alt="" coords="500,177,494,223,485,246,472,267,451,287,426,303,373,323,371,318,424,298,448,283,468,264,481,244,489,222,495,176"/>
+<area shape="rect" id="Node000007" href="$byte__swap_8h.html" title="Byte swapping utilities for endianness conversion." alt="" coords="533,218,704,258"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="540,170,597,216,594,220,537,174"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="542,264,343,323,342,318,541,259"/>
+<area shape="rect" id="Node000008" href="$explicit__vr__big__endian__codec_8cpp.html" title="Implementation of Explicit VR Big Endian encoder/decoder." alt="" coords="522,313,714,353"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="621,272,621,313,616,313,616,272"/>
+<area shape="poly" id="edge12_Node000009_Node000003" title=" " alt="" coords="727,175,732,198,733,222,729,246,718,267,703,276,679,284,605,299,423,323,422,318,605,294,677,279,701,271,714,263,724,244,728,222,726,199,721,176"/>
+</map>

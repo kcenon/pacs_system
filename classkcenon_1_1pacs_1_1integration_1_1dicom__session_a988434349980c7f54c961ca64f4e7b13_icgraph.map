@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration::dicom_session::on_data_received" name="kcenon::pacs::integration::dicom_session::on_data_received">
+<area shape="rect" id="Node000001" title="Handle incoming data from network." alt="" coords="252,84,439,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#aa4ddd886cd7a3b455119e69226982f96" title="Construct a DICOM session wrapping a messaging_session." alt="" coords="11,5,198,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,82,188,63,190,58,249,77"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a3bf0831948966b7659c897544026023f" title="Construct a DICOM session wrapping a secure_session." alt="" coords="11,84,198,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,114,198,114,198,109,239,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a8afb814de3a28f7c16cd608e38aa4cf0" title="Feed received data from external source." alt="" coords="5,163,204,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="241,145,173,166,172,161,239,140"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::security::user_context" name="kcenon::pacs::security::user_context">
+<area shape="rect" id="Node000001" title="Represents the security context for a user session." alt="" coords="5,561,176,961"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1security_1_1User.html" title="Represents a user in the system." alt="" coords="179,419,338,499"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,501,186,595,182,592,234,498"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="49,276,127,341"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="89,341,85,419,85,544,80,544,80,419,83,341"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,340,178,393,195,406,191,411,174,397,117,343"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="23,133,153,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,227,91,276,85,276,85,227"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="187,276,330,341"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="261,342,261,402,256,402,256,342"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="198,141,319,206"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="261,220,261,276,256,276,256,220"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="247,5,270,71"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="261,71,261,124,256,124,256,71"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="worklist_cli::worklist_result_formatter::extract_item" name="worklist_cli::worklist_result_formatter::extract_item">
+<area shape="rect" id="Node000001" title="Extract worklist item data from dataset." alt="" coords="5,13,232,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="280,5,435,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,30,266,30,266,35,232,35"/>
+</map>

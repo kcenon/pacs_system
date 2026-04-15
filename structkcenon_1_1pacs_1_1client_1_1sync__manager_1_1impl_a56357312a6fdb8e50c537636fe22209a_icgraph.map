@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::client::sync_manager::impl::store_last_result" name="kcenon::pacs::client::sync_manager::impl::store_last_result">
+<area shape="rect" id="Node000001" title=" " alt="" coords="723,62,885,117"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#a4277e4dde0f6b4bd13ec5e668e887bd5" title=" " alt="" coords="512,62,675,117"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="709,92,675,92,675,87,709,87"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a5d34ca4803b6221cccf601eaeff9e24c" title="Perform a full sync for a configuration." alt="" coords="245,5,435,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="498,77,390,48,392,43,499,72"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a6804ea719fe2575eb8557cc491627174" title="Perform an incremental sync for a configuration." alt="" coords="216,69,464,109"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="499,92,464,92,464,87,499,87"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#aee3c5e85edb11a0357d0743e61cf9142" title=" " alt="" coords="259,134,421,189"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="500,119,422,141,421,136,498,114"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a1a723163cf8cba558c552f1e2a7b920a" title="Start sync immediately for a configuration." alt="" coords="241,213,439,253"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="559,129,517,167,465,202,435,216,432,211,463,198,513,163,556,125"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="450,41,518,59,517,65,448,46"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a1621e3e7f21909ac773537e2598b5374" title="Start the sync scheduler." alt="" coords="5,134,168,189"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="245,164,168,164,168,159,245,159"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/security/atna_service_auditor.h" name="include/kcenon/pacs/security/atna_service_auditor.h">
+<area shape="rect" id="Node000001" title="High&#45;level facade for ATNA audit logging in DICOM services." alt="" coords="201,5,367,60"/>
+<area shape="rect" id="Node000002" href="$atna__service__auditor_8cpp.html" title="Implementation of the ATNA service auditor facade." alt="" coords="5,108,189,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,68,136,110,134,105,218,64"/>
+<area shape="rect" id="Node000003" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="214,108,354,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="287,74,287,108,281,108,281,74"/>
+<area shape="rect" id="Node000004" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="379,108,531,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="345,64,421,106,419,110,343,69"/>
+</map>

@@ -1,0 +1,26 @@
+<map id="include/kcenon/pacs/storage/node_repository.h" name="include/kcenon/pacs/storage/node_repository.h">
+<area shape="rect" id="Node000001" title="Repository for remote PACS node persistence using base_repository pattern." alt="" coords="380,5,575,45"/>
+<area shape="rect" id="Node000002" href="$remote__node_8h.html" title="Remote PACS node data structures for client operations." alt="" coords="195,93,338,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="432,48,326,91,324,86,430,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="299,181,373,207"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="463,47,357,173,352,169,459,44"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="397,181,456,207"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="474,46,437,169,432,168,469,45"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="481,181,578,207"/>
+<area shape="poly" id="edge12_Node000001_Node000008" title=" " alt="" coords="484,45,507,133,521,168,516,170,501,134,478,46"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="515,93,703,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="508,43,570,84,567,88,505,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="728,101,805,126"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="551,43,717,91,725,93,723,98,715,96,550,48"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="830,101,893,126"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="575,38,692,59,818,91,825,93,823,98,817,96,691,64,575,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,136,86,179,84,174,211,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,181,163,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="235,136,163,177,160,172,232,131"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="187,181,274,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="260,135,244,170,239,167,256,132"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="285,132,318,169,314,172,281,135"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="306,131,392,173,390,178,304,136"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="330,131,479,175,477,180,329,136"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::client::sync_manager::full_sync" name="kcenon::pacs::client::sync_manager::full_sync">
+<area shape="rect" id="Node000001" title="Perform a full sync for a configuration." alt="" coords="723,77,913,117"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#a4277e4dde0f6b4bd13ec5e668e887bd5" title=" " alt="" coords="512,70,675,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="709,109,675,109,675,103,709,104"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="689,86,723,86,723,91,689,91"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a6804ea719fe2575eb8557cc491627174" title="Perform an incremental sync for a configuration." alt="" coords="216,5,464,45"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="498,70,463,60,420,48,421,43,465,55,500,65"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#aee3c5e85edb11a0357d0743e61cf9142" title=" " alt="" coords="259,70,421,125"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="499,100,421,100,421,95,499,95"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a1a723163cf8cba558c552f1e2a7b920a" title="Start sync immediately for a configuration." alt="" coords="241,149,439,189"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="500,128,465,139,417,152,416,147,463,133,498,123"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a1621e3e7f21909ac773537e2598b5374" title="Start the sync scheduler." alt="" coords="5,70,168,125"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="245,100,168,100,168,95,245,95"/>
+</map>

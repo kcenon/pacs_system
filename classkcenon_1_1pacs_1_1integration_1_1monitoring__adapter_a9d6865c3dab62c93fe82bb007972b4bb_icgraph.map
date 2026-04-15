@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::integration::monitoring_adapter::record_histogram" name="kcenon::pacs::integration::monitoring_adapter::record_histogram">
+<area shape="rect" id="Node000001" title="Record a histogram sample." alt="" coords="1015,41,1221,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a5bef4089bc04286caa45fcc6a2057ea4" title="Execute a single prefetch cycle." alt="" coords="768,5,943,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1001,55,942,47,943,42,1002,50"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a2b2083732d3658e6072b1e200d31b9ac" title="Execute a single task." alt="" coords="744,85,967,125"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1002,87,967,92,967,87,1001,82"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a0cd2744aa7e941d97e632716a1d411a7" title="Background thread main loop." alt="" coords="495,5,669,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="755,35,670,35,670,30,755,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ad54ce309500c14050bebc65f7fb21acb" title="Start the prefetch service (alias for enable)" alt="" coords="237,5,411,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="481,35,411,35,411,30,481,30"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a049b14fc80b664ef700d1f9069c3423a" title="Enable the prefetch service." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="223,35,180,35,180,30,223,30"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a0f7a9db624730bd7771ea546748a6218" title="Execute a single scheduler cycle." alt="" coords="468,85,696,125"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="730,107,696,107,696,102,730,102"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aa2e1b4663729c1fe309d3dfd4bfaf3c7" title="Background thread main loop." alt="" coords="228,85,420,125"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="454,107,420,107,420,102,454,102"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#afa4a842d854fa691b1d9e0cbdd933abe" title="Start the scheduler service." alt="" coords="5,85,180,125"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="214,107,180,107,180,102,214,102"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_ls_codec::decode" name="kcenon::pacs::encoding::compression::jpeg_ls_codec::decode">
+<area shape="rect" id="Node000001" title="Decompresses JPEG&#45;LS data." alt="" coords="5,5,180,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec_1_1impl.html#a994017293299b199638d70d53e968c0a" title=" " alt="" coords="228,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,30,214,30,214,35,180,35"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="451,13,596,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="403,30,437,30,437,35,403,35"/>
+</map>

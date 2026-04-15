@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::storage::index_database::open" name="kcenon::pacs::storage::index_database::open">
+<area shape="rect" id="Node000001" title="Open or create a database with default configuration." alt="" coords="589,13,763,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#af43f9650079cf9a4e743b5329f8f7883" title="Set up database." alt="" coords="359,5,541,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="575,35,542,35,542,30,575,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#ac657526064bff8edebcd2ed378728cef" title="Initialize all components." alt="" coords="108,13,311,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="345,35,311,35,311,30,345,30"/>
+<area shape="rect" id="Node000004" href="$pacs__server_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="5,20,60,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="94,35,60,35,60,30,94,30"/>
+</map>

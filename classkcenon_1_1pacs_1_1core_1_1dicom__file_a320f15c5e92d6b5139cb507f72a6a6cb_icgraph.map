@@ -1,0 +1,41 @@
+<map id="kcenon::pacs::core::dicom_file::open" name="kcenon::pacs::core::dicom_file::open">
+<area shape="rect" id="Node000001" title="Open and read a DICOM file from disk." alt="" coords="852,419,995,459"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#a139a59da9ec9db15a2eb0cf4ca407e79" title="Find DICOM datasets matching query criteria." alt="" coords="621,5,785,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="919,405,913,333,895,241,880,192,860,144,835,99,802,59,783,46,787,41,806,55,839,96,865,141,885,190,901,239,918,333,924,405"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#aa46019f94673aee984feed9bf744120c" title="Get frame information for an instance." alt="" coords="619,70,787,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="915,405,904,348,884,277,850,203,828,168,802,138,786,125,789,121,806,134,833,165,855,200,889,275,909,347,920,404"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a44be7b348819c150ee33b2346899ffe0" title="Get sorted instances for a series." alt="" coords="619,149,787,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="910,406,895,364,872,314,841,263,802,218,785,206,789,201,806,214,846,260,877,311,900,362,915,405"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#aa9ef10c50afc961ebf3d361e47499129" title="Get storage statistics." alt="" coords="602,228,803,268"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="904,408,863,344,835,311,802,282,782,270,785,266,806,278,839,307,867,341,908,405"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#ac0aa10679c52c6f7a3b2e3b7cdab7242" title="Get VOI LUT info from an instance." alt="" coords="619,293,787,347"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="883,412,845,386,803,361,779,350,781,345,805,356,848,382,886,408"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a18273010b2382be9746f8fb5ad07bb87" title="Handle C&#45;MOVE/C&#45;GET retrieve." alt="" coords="607,371,798,426"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="838,426,798,419,799,413,839,421"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#a06d0b963b6ce7031f828045348e6c1f5" title="Import DICOM files from a directory." alt="" coords="621,450,785,505"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="839,456,786,466,785,460,838,451"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a984e6ec103ca43c126e00e5ef53fcc80" title="Read DICOM dataset from file." alt="" coords="615,529,791,583"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="885,469,805,518,779,531,776,526,803,514,882,464"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#a669e1cc4fe95acc7c5484acd0b346979" title="Rebuild the internal index from filesystem." alt="" coords="601,608,804,648"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="908,472,867,535,838,568,806,597,782,610,779,606,802,592,834,565,862,532,903,470"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#a01ac7ac3c2635c86b316cb87e016d75d" title="Retrieve a DICOM dataset by SOP Instance UID." alt="" coords="620,672,785,712"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="915,473,901,516,878,567,846,618,806,662,787,674,784,670,802,658,842,615,873,564,896,514,910,471"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a4d87386aaaca5bc0c41c5872f4e024cb" title="Store a DICOM file." alt="" coords="615,736,791,776"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="920,473,909,528,888,595,854,665,832,697,806,726,789,738,786,734,802,722,828,694,850,663,883,593,904,526,915,472"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#af9fdb6504eb593565ef51d7fce5fc264" title="Verify storage integrity." alt="" coords="621,801,785,855"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="922,473,914,538,894,623,879,667,860,711,836,753,806,790,787,805,783,801,802,786,831,750,855,709,874,665,889,621,909,538,917,472"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#af8c937446245978e0ade9fe9466d028d" title="Get navigation info for an instance." alt="" coords="378,149,546,203"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="605,179,546,179,546,173,605,173"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a1ed05ed60c0709ef5bbd46b56c213669" title="Set up DICOM server." alt="" coords="371,371,553,426"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="594,401,554,401,554,396,594,396"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#ac657526064bff8edebcd2ed378728cef" title="Initialize all components." alt="" coords="114,379,317,419"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="357,401,317,401,317,396,357,396"/>
+<area shape="rect" id="Node000011" href="$pacs__server_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="5,386,60,411"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="101,401,60,401,60,396,101,396"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#afa87b349fcc99cdace18e47346519fa1" title="Get selective metadata for an instance." alt="" coords="378,529,546,583"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="601,559,546,559,546,553,601,553"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#af2734cf396a75e6ed6bd85822fd1490c" title="Store multiple DICOM files." alt="" coords="371,736,553,776"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="601,759,554,759,554,753,601,753"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#ac75eb05e5a427a5bb06233d04c5cfb8f" title="Store all DICOM files in a directory." alt="" coords="108,736,323,776"/>
+<area shape="poly" id="edge18_Node000018_Node000019" title=" " alt="" coords="357,759,323,759,323,753,357,753"/>
+</map>

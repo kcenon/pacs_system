@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::is_valid_label_map_seg_dataset" name="kcenon::pacs::services::validation::is_valid_label_map_seg_dataset">
+<area shape="rect" id="Node000001" title="Quick check if a dataset is a valid Label Map Segmentation object." alt="" coords="5,34,188,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1label__map__seg__iod__validator.html#a5072aeb2a38246f847c4f293809d2f41" title="Quick check if dataset has minimum required attributes." alt="" coords="236,34,468,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,59,222,59,222,64,188,64"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="516,5,705,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="468,43,502,38,503,43,469,48"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="533,70,688,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="469,75,520,82,519,87,468,80"/>
+</map>

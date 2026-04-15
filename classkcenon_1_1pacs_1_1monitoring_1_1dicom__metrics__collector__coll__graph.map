@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::monitoring::dicom_metrics_collector" name="kcenon::pacs::monitoring::dicom_metrics_collector">
+<area shape="rect" id="Node000001" title="CRTP&#45;based unified DICOM metrics collector." alt="" coords="635,1333,844,1863"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html" title=" " alt="" coords="353,876,555,1271"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="564,1271,637,1404,632,1406,560,1274"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="344,276,423,341"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="404,340,414,365,418,391,419,419,447,859,441,860,414,419,413,392,409,366,399,342"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html" title="CRTP base class for DICOM metric collectors." alt="" coords="215,419,405,813"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="356,343,342,366,329,403,324,402,337,364,351,340"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="318,133,449,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="386,227,386,276,381,276,381,227"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="556,276,640,341"/>
+<area shape="poly" id="edge12_Node000001_Node000005" title=" " alt="" coords="638,340,671,375,696,418,717,490,733,583,744,694,751,816,756,1074,753,1317,747,1317,751,1074,746,816,739,694,728,584,712,491,692,420,667,378,635,343"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="597,342,569,541,547,676,522,814,512,861,507,859,517,813,542,676,564,540,591,341"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="557,327,517,344,477,368,446,393,418,423,414,420,442,389,474,363,514,340,554,322"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,276,188,341"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="87,343,61,429,48,486,39,549,34,616,37,684,50,750,75,812,98,849,127,884,159,915,194,943,267,990,339,1026,337,1031,265,995,191,947,155,919,123,887,94,853,70,815,45,752,32,685,29,616,33,549,43,485,56,428,82,341"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="131,340,164,376,197,417,207,431,203,434,193,420,160,379,127,344"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="34,141,159,206"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="99,220,99,276,94,276,94,220"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="85,5,108,71"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="99,71,99,124,94,124,94,71"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="238,826,244,851,265,892,292,929,322,964,354,994,350,998,318,967,288,933,261,894,240,853,232,828"/>
+<area shape="rect" id="Node000010" href="$structkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__snapshot.html" title="Snapshot of all DICOM metrics at a point in time." alt="" coords="777,933,973,1213"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="842,1214,815,1318,810,1316,837,1213"/>
+</map>

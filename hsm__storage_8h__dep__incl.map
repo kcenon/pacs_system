@@ -1,0 +1,12 @@
+<map id="include/kcenon/pacs/storage/hsm_storage.h" name="include/kcenon/pacs/storage/hsm_storage.h">
+<area shape="rect" id="Node000001" title="Hierarchical Storage Management (HSM) for multi&#45;tier DICOM storage." alt="" coords="159,5,334,45"/>
+<area shape="rect" id="Node000002" href="$hsm__migration__service_8h.html" title="Background migration service for Hierarchical Storage Management." alt="" coords="158,93,335,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="249,59,249,93,244,93,244,59"/>
+<area shape="rect" id="Node000003" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="5,203,235,229"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="193,54,168,72,148,95,134,123,126,153,122,203,117,203,121,152,129,121,143,92,165,68,190,50"/>
+<area shape="rect" id="Node000005" href="$hsm__storage_8cpp.html" title="Implementation of Hierarchical Storage Management for multi&#45;tier storage." alt="" coords="359,108,569,133"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="304,48,438,105,436,110,302,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="202,158,137,205,134,201,199,154"/>
+<area shape="rect" id="Node000004" href="$hsm__migration__service_8cpp.html" title="Implementation of background migration service for HSM." alt="" coords="259,196,455,236"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="290,155,337,194,333,198,287,159"/>
+</map>

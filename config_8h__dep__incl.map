@@ -1,0 +1,12 @@
+<map id="examples/pacs_server/config.h" name="examples/pacs_server/config.h">
+<area shape="rect" id="Node000001" title="Configuration management for PACS Server sample." alt="" coords="127,5,295,45"/>
+<area shape="rect" id="Node000002" href="$config_8cpp.html" title="Configuration management implementation for PACS Server sample." alt="" coords="5,93,173,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,55,118,95,115,91,171,51"/>
+<area shape="rect" id="Node000003" href="$pacs__server_2main_8cpp.html" title="Entry point for PACS Server sample application." alt="" coords="127,181,295,221"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,59,213,181,208,181,208,59"/>
+<area shape="rect" id="Node000004" href="$server__app_8h.html" title="PACS Server application class." alt="" coords="248,93,416,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,51,307,91,304,95,247,55"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="296,143,239,183,236,179,293,139"/>
+<area shape="rect" id="Node000005" href="$server__app_8cpp.html" title="PACS Server application implementation." alt="" coords="319,181,487,221"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="358,142,389,179,385,183,354,146"/>
+</map>

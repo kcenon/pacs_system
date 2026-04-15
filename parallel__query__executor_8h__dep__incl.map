@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/services/cache/parallel_query_executor.h" name="include/kcenon/pacs/services/cache/parallel_query_executor.h">
+<area shape="rect" id="Node000001" title="Parallel query executor for concurrent query processing." alt="" coords="127,5,302,60"/>
+<area shape="rect" id="Node000002" href="$pacs-services-cache_8cppm.html" title="C++20 module partition for query caching." alt="" coords="5,108,200,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,71,127,110,124,106,170,67"/>
+<area shape="rect" id="Node000003" href="$parallel__query__executor_8cpp.html" title="Implementation of parallel query executor." alt="" coords="224,108,432,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,67,307,106,303,110,256,71"/>
+</map>

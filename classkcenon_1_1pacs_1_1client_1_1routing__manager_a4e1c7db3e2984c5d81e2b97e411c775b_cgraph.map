@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::routing_manager::routing_manager" name="kcenon::pacs::client::routing_manager::routing_manager">
+<area shape="rect" id="Node000001" title="Construct a routing manager with default configuration." alt="" coords="5,5,200,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a78c0950244b645531e2a600d6b1b1983" title="Load rules from repository into cache." alt="" coords="248,13,464,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,30,234,30,234,35,200,35"/>
+</map>

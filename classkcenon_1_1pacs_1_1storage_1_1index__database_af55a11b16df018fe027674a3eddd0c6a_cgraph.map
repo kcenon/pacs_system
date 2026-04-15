@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::storage::index_database::get_storage_stats" name="kcenon::pacs::storage::index_database::get_storage_stats">
+<area shape="rect" id="Node000001" title="Get storage statistics." alt="" coords="5,126,169,181"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#ac5e7c440c5ab9469008abae9abeee7d5" title="Get total instance count." alt="" coords="217,5,456,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,124,162,88,216,55,233,48,235,52,219,60,165,92,120,128"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="264,69,409,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,130,250,109,252,114,170,135"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a0adfdc0a330342b10ceeb6f4b4161426" title="Get total patient count." alt="" coords="221,133,452,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,151,208,151,208,156,169,156"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a6d0c2b1a19fa685e86c544c2ba91ac31" title="Get total series count." alt="" coords="225,197,448,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="170,172,246,191,244,196,169,177"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a23f0df2554f635a113cbd1ba416d487b" title="Get total study count." alt="" coords="227,261,447,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="120,179,165,214,219,247,235,254,233,259,216,252,162,219,117,183"/>
+</map>

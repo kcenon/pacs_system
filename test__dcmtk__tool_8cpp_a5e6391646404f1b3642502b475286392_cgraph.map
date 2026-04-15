@@ -1,0 +1,15 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,45,100,70"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="165,5,352,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,47,152,39,152,45,101,53"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a0ba3666d382f01405d049345ff04d5a3" title="Check if DCMTK is available on the system." alt="" coords="148,69,369,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="101,62,135,67,134,73,100,67"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="422,5,609,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,23,408,23,408,28,352,28"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a378d43429576cb453524cdadfd31def8" title="Run a DCMTK tool and capture output." alt="" coords="417,69,613,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="370,87,404,87,404,92,370,92"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="670,26,857,81"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="613,72,656,66,657,71,614,78"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a39b86a50ebcefb7a9bfe2c9fbd37c0de" title="Run a process and wait for completion." alt="" coords="661,105,865,145"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="614,101,648,106,648,111,613,106"/>
+</map>

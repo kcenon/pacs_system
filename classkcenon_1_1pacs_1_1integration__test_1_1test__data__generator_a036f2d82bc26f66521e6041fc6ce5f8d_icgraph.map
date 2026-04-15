@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration_test::test_data_generator::us_cine" name="kcenon::pacs::integration_test::test_data_generator::us_cine">
+<area shape="rect" id="Node000001" title="Generate a multi&#45;frame US cine dataset." alt="" coords="240,5,433,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ae4d3d32f5818e7568073cb8a8aa8b9c0" title=" " alt="" coords="5,13,192,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,35,192,35,192,30,227,30"/>
+</map>

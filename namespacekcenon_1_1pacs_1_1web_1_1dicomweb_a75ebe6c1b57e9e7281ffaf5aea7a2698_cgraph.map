@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::dicomweb::validate_instance" name="kcenon::pacs::web::dicomweb::validate_instance">
+<area shape="rect" id="Node000001" title="Validate a DICOM instance for STOW&#45;RS storage." alt="" coords="5,53,217,93"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1web_1_1dicomweb_1_1validation__result.html#ab3f3147e35886c48fd610602f1db9d6a" title=" " alt="" coords="265,5,428,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,52,252,46,252,51,218,57"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1web_1_1dicomweb_1_1validation__result.html#a1dc71cfa86221803b09ecf6d5ff481ad" title=" " alt="" coords="265,84,428,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,87,252,93,252,98,217,93"/>
+</map>

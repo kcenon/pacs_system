@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration_test::background_process_guard::~background_process_guard" name="kcenon::pacs::integration_test::background_process_guard::~background_process_guard">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,268,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#a04a3de5fddd9ac8d135540cba1b23d56" title="Stop the process." alt="" coords="316,5,511,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,30,302,30,302,35,268,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a6b0e200728163221c8f4c470992849a5" title="Stop a background process." alt="" coords="559,5,745,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="511,30,545,30,545,35,511,35"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#adc71a10b0361fa760bbd2b4209299f2c" title=" " alt="" coords="793,5,980,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="745,30,780,30,780,35,745,35"/>
+</map>

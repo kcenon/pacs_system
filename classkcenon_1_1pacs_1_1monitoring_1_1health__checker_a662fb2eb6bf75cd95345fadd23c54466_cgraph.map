@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::monitoring::health_checker::get_status" name="kcenon::pacs::monitoring::health_checker::get_status">
+<area shape="rect" id="Node000001" title="Get cached status or perform check if stale." alt="" coords="5,91,209,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#a707ed853554bec16411eb04eb87d5ed4" title="Perform a full health check." alt="" coords="257,91,444,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,109,243,109,243,114,209,114"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#a61207efe8a05d1e639b55fbb5bc223e7" title="Check database connectivity." alt="" coords="531,5,717,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="420,89,516,61,518,66,422,94"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#ac2a61cffa64c29bb0dd4ceddc7fe7d32" title="Check storage availability." alt="" coords="531,84,717,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="444,109,517,109,517,114,444,114"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#aba63e4b25c99bddb760638a73a9fa9d9" title="Run all custom checks." alt="" coords="492,163,756,203"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="424,129,493,147,531,157,529,162,491,153,423,134"/>
+</map>

@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::services::ups_watch_scp" name="kcenon::pacs::services::ups_watch_scp">
+<area shape="rect" id="Node000001" title="UPS Watch SCP service for subscription and event notification." alt="" coords="258,1179,458,1653"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html" title=" " alt="" coords="190,829,379,1129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="315,1142,321,1178,315,1179,309,1143"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="193,636,366,716"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="283,716,284,813,279,813,277,716"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,133,180,559"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,536,195,557,239,621,235,624,190,560,178,539"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="205,313,354,379"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="282,392,282,636,277,636,277,392"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="348,5,371,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="354,72,294,298,289,297,348,70"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="378,313,503,379"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="373,62,386,94,415,202,435,296,430,298,410,203,381,96,368,64"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="358,740,513,805"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="434,806,391,1163,386,1162,429,805"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="443,392,438,740,433,740,437,392"/>
+</map>

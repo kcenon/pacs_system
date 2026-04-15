@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dicom_server::get_statistics" name="kcenon::pacs::network::dicom_server::get_statistics">
+<area shape="rect" id="Node000001" title="Get server statistics." alt="" coords="5,13,219,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#ac1d596966e5f7952384b3164da56fe1a" title="Get number of active associations." alt="" coords="267,5,435,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,30,253,30,253,35,219,35"/>
+</map>

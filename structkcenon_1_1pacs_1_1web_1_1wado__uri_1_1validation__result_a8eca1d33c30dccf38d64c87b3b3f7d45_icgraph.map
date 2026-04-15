@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::web::wado_uri::validation_result::error" name="kcenon::pacs::web::wado_uri::validation_result::error">
+<area shape="rect" id="Node000001" title=" " alt="" coords="707,5,861,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1wado__uri.html#a8796523282be3272d7e183399893f9c7" title="Validate a WADO&#45;URI request." alt="" coords="475,5,659,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="693,35,659,35,659,30,693,30"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a7625b0fe64556787b852f9bd32ff5f62" title=" " alt="" coords="232,5,427,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="461,35,427,35,427,30,461,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,13,184,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="219,35,184,35,184,30,219,30"/>
+</map>

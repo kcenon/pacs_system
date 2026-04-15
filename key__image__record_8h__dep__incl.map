@@ -1,0 +1,10 @@
+<map id="include/kcenon/pacs/storage/key_image_record.h" name="include/kcenon/pacs/storage/key_image_record.h">
+<area shape="rect" id="Node000001" title="Key image record data structures for database operations." alt="" coords="101,5,311,45"/>
+<area shape="rect" id="Node000002" href="$key__image__repository_8h.html" title="Repository for key image persistence using base_repository pattern." alt="" coords="12,93,245,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,57,148,95,144,91,178,54"/>
+<area shape="rect" id="Node000004" href="$key__image__endpoints_8cpp.html" title="Key image API endpoints implementation." alt="" coords="199,181,367,221"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="235,54,260,92,276,139,284,181,279,182,271,140,256,95,231,57"/>
+<area shape="rect" id="Node000003" href="$key__image__repository_8cpp.html" title="Implementation of the key image repository." alt="" coords="5,181,175,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,147,101,182,96,180,112,145"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="176,138,251,179,248,184,173,142"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::validation_finding" name="kcenon::pacs::services::validation::validation_finding">
+<area shape="rect" id="Node000001" title="Single validation finding." alt="" coords="55,512,216,607"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="5,135,161,435"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,434,123,487,125,495,120,496,118,489,108,436"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="185,252,264,317"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,319,158,497,153,496,212,317"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="159,5,290,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="227,100,227,252,222,252,222,100"/>
+</map>

@@ -1,0 +1,35 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,278,100,303"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#af578639aece7b74f23d6bc1649a8cdbf" title="Start C&#45;ECHO SCP (echoscp) server." alt="" coords="161,203,357,243"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,275,183,245,185,250,93,280"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#a04a3de5fddd9ac8d135540cba1b23d56" title="Stop the process." alt="" coords="418,263,613,318"/>
+<area shape="poly" id="edge17_Node000001_Node000006" title=" " alt="" coords="100,288,405,288,405,293,100,293"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="165,336,352,376"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="95,301,183,329,181,334,93,306"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a0ba3666d382f01405d049345ff04d5a3" title="Check if DCMTK is available on the system." alt="" coords="148,91,369,131"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="63,276,99,236,146,189,214,137,217,141,150,193,103,239,67,279"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#add120561f327e18f19a9600de38d3fce" title="Check if process is running." alt="" coords="161,401,356,455"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="66,302,100,343,123,366,149,386,160,392,157,397,147,390,120,370,96,347,61,306"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ad5b53a9a3951e6959fe7dfd40a38b97f" title="Start a DCMTK tool in background." alt="" coords="422,106,609,161"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="316,200,422,163,424,168,318,205"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="336,240,406,259,404,264,334,245"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a8d5c12453d31f7731ffd8f53b5c9a69a" title="Wait for a port to be listening." alt="" coords="422,185,609,239"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="357,216,408,214,408,219,357,221"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="670,70,857,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="608,117,656,110,657,115,609,122"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a8cd6d97c1cc75c4c41d9c9ab4f64f348" title=" " alt="" coords="670,149,857,203"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="609,147,657,155,656,160,608,152"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a6b0e200728163221c8f4c470992849a5" title="Stop a background process." alt="" coords="670,263,857,318"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="613,288,656,288,656,293,613,293"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#adc71a10b0361fa760bbd2b4209299f2c" title=" " alt="" coords="913,263,1100,318"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="857,288,899,288,899,293,857,293"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="422,343,609,383"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="352,356,408,357,408,363,352,361"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a378d43429576cb453524cdadfd31def8" title="Run a DCMTK tool and capture output." alt="" coords="417,41,613,81"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="363,88,403,80,404,85,364,93"/>
+<area shape="poly" id="edge13_Node000013_Node000004" title=" " alt="" coords="614,73,657,79,656,84,613,78"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a39b86a50ebcefb7a9bfe2c9fbd37c0de" title="Run a process and wait for completion." alt="" coords="661,5,865,45"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="613,44,648,39,648,45,614,50"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a04721ea04dd5fe5390809534b6ea1c9d" title="Check if a process is still running." alt="" coords="422,407,609,462"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="356,428,408,429,408,435,356,433"/>
+</map>

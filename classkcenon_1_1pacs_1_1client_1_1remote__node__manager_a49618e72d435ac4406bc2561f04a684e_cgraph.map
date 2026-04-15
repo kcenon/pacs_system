@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::client::remote_node_manager::verify_node" name="kcenon::pacs::client::remote_node_manager::verify_node">
+<area shape="rect" id="Node000001" title="Verify a node&#39;s connectivity synchronously." alt="" coords="5,30,187,85"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="499,5,645,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,27,234,15,300,8,366,7,485,13,485,18,366,12,300,14,235,20,178,33"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1remote__node__manager_1_1impl.html#a0b0c283a1f2559b5371185555d2b533b" title=" " alt="" coords="243,30,425,85"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,55,230,55,230,60,187,60"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1remote__node__manager_1_1impl.html#a08d248c52e0389224638402a32213b12" title=" " alt="" coords="235,109,433,163"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="180,82,239,102,237,107,179,87"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="425,43,485,34,486,40,425,48"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1remote__node__manager_1_1impl.html#a35578b589d454812cd94e5e171aed888" title=" " alt="" coords="481,101,663,171"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="433,133,467,133,467,139,433,139"/>
+</map>

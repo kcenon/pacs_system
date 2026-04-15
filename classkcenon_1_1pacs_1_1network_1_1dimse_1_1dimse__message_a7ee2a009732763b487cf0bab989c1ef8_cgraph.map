@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::set_dataset" name="kcenon::pacs::network::dimse::dimse_message::set_dataset">
+<area shape="rect" id="Node000001" title="Set the data set for this message." alt="" coords="5,111,189,165"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#aa145290d190e72d67ef5546f9f7ab3c8" title="Update the CommandDataSetType field based on dataset presence." alt="" coords="237,111,421,165"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,135,223,135,223,141,190,141"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a14d8dfdfe13a0430e72142e8896fb95a" title="Set a numeric value for the given tag." alt="" coords="469,111,624,165"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="422,135,456,135,456,141,422,141"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af2974ceb4e12d5316062638ca0abd9f8" title="Create an element from a numeric value." alt="" coords="672,75,843,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="624,122,658,116,659,122,625,127"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="672,154,843,194"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="625,149,659,154,658,160,624,154"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ac014eeea6bc5ca8b452041039ca9d4f8" title="Set the value from a numeric value." alt="" coords="891,5,1050,60"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="841,72,877,60,879,65,843,77"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="891,150,1051,190"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="844,127,895,143,893,148,842,132"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="895,85,1047,125"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="843,100,881,101,881,106,843,106"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="843,170,877,169,877,174,843,175"/>
+</map>

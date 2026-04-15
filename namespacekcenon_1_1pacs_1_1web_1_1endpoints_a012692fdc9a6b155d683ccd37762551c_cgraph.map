@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::web::endpoints::register_storage_commitment_endpoints_impl" name="kcenon::pacs::web::endpoints::register_storage_commitment_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,103,281,158"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="357,5,507,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,101,328,55,351,47,353,52,330,60,211,106"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#a334169758e50b70874d0453cb1d74e8a" title=" " alt="" coords="329,70,535,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="281,112,315,108,316,113,282,117"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#aeda55b0e6f2cee7f58a496a089b00085" title="Serialize a commitment transaction to DICOM JSON." alt="" coords="583,169,753,223"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="282,145,569,181,568,186,281,150"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#aa88f84cd6de4626298c0048c9507e4c9" title="Serialize a list of transactions to DICOM JSON array." alt="" coords="347,201,517,255"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="226,156,339,194,337,199,224,161"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="811,140,962,180"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="753,179,798,172,798,177,754,185"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#aae5be6b80b3735a7d979ec7b06d87111" title="Convert transaction state to string." alt="" coords="801,205,972,259"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="754,207,788,213,787,218,753,213"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="517,214,569,207,569,212,518,219"/>
+</map>

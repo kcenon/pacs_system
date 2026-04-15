@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/ups_repository.h" name="include/kcenon/pacs/storage/ups_repository.h">
+<area shape="rect" id="Node000001" title="Repository for UPS lifecycle and subscription persistence." alt="" coords="151,5,336,45"/>
+<area shape="rect" id="Node000002" href="$index__database_8cpp.html" title="Implementation of PACS index database." alt="" coords="5,93,233,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,55,139,95,136,91,200,51"/>
+<area shape="rect" id="Node000003" href="$ups__repository_8cpp.html" title="Implementation of the UPS repository." alt="" coords="258,93,477,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="286,51,351,91,348,95,284,55"/>
+</map>

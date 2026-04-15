@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::network::association::process_associate_ac" name="kcenon::pacs::network::association::process_associate_ac">
+<area shape="rect" id="Node000001" title="Process received A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="725,124,893,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a5c1540b1e9c3ee78b9557140a17af42e" title="Initiate an SCU association to a remote SCP." alt="" coords="509,131,677,171"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="711,154,678,154,678,149,711,149"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a7744aa1cdda26440572c8dc8b67b5b30" title="Acquire an association from the pool." alt="" coords="256,5,437,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="551,126,508,99,460,74,434,63,436,58,462,69,511,95,554,121"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae943766ff6e20c22bd4df3fe973e4e8a" title="Prefetch a single study via C&#45;MOVE." alt="" coords="259,84,434,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="495,138,434,128,434,123,496,133"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a93d047266e4b059206949fa9e24625cc" title="Query remote PACS for prior studies." alt="" coords="259,163,434,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="496,169,434,179,434,174,495,164"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="232,241,461,296"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="552,181,463,231,433,244,431,239,460,226,549,176"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,249,184,289"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="218,271,184,271,184,266,218,266"/>
+</map>

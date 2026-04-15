@@ -1,0 +1,39 @@
+<map id="kcenon::pacs::services::query_scp" name="kcenon::pacs::services::query_scp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="418,1905,613,2305"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html" title=" " alt="" coords="191,1543,381,1843"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="378,1854,420,1929,416,1931,374,1856"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="70,1290,243,1370"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="172,1369,222,1518,225,1526,220,1528,217,1520,167,1371"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,650,180,1075"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="88,1075,97,1156,113,1218,134,1274,129,1276,108,1219,91,1156,82,1076"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="211,830,361,895"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="279,910,267,953,249,1004,224,1056,193,1104,184,1112,175,1116,167,1120,160,1128,146,1168,142,1212,144,1253,150,1289,144,1290,139,1254,137,1211,141,1167,156,1125,164,1116,172,1112,181,1108,189,1101,220,1053,244,1002,262,952,274,908"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="553,1645,726,1740"/>
+<area shape="poly" id="edge20_Node000007_Node000005" title=" " alt="" coords="289,909,296,1226,306,1389,314,1446,323,1479,353,1506,415,1549,564,1643,561,1648,412,1554,350,1511,318,1481,309,1447,301,1389,291,1227,284,909"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="327,13,349,78"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="337,78,330,148,305,532,291,814,285,813,299,531,325,148,332,78"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="339,148,465,213"/>
+<area shape="poly" id="edge16_Node000015_Node000006" title=" " alt="" coords="352,69,382,132,377,134,347,72"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="628,1741,583,1891,578,1889,623,1739"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html" title="High&#45;level facade for emitting ATNA audit events from DICOM services." alt="" coords="677,1180,863,1480"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="718,1481,664,1630,659,1629,713,1479"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="904,148,983,213"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="985,207,998,221,1007,236,1014,260,1014,280,1007,326,1007,548,1005,722,997,805,982,893,956,991,918,1104,898,1149,874,1193,869,1190,893,1147,913,1102,951,989,976,892,992,805,1000,722,1002,548,1002,325,1008,280,1009,261,1002,238,993,224,981,211"/>
+<area shape="rect" id="Node000012" href="$structkcenon_1_1pacs_1_1security_1_1syslog__transport__config.html" title="Configuration for the Syslog transport." alt="" coords="618,349,794,509"/>
+<area shape="poly" id="edge12_Node000012_Node000009" title=" " alt="" coords="914,215,891,239,795,339,791,335,887,235,910,212"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="878,5,1009,85"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="946,99,946,148,941,148,941,99"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html" title="Sends ATNA audit messages via Syslog protocol." alt="" coords="706,623,903,1103"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="790,1103,785,1164,780,1163,784,1103"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="747,509,755,533,774,606,769,607,750,534,742,510"/>
+<area shape="rect" id="Node000013" href="$structkcenon_1_1pacs_1_1security_1_1atna__syslog__transport_1_1tls__context.html" title=" " alt="" coords="819,382,985,477"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="894,477,865,607,860,605,889,476"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="439,397,594,462"/>
+<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="519,462,518,861,518,1694,518,1889,513,1889,513,1694,513,861,514,462"/>
+<area shape="poly" id="edge19_Node000008_Node000014" title=" " alt="" coords="525,462,537,533,544,620,545,696,538,825,538,887,544,950,561,1021,591,1102,605,1126,621,1142,639,1157,660,1178,669,1189,665,1193,656,1182,636,1161,617,1146,601,1129,586,1104,556,1022,539,951,533,887,533,825,540,696,539,621,531,534,520,462"/>
+<area shape="poly" id="edge14_Node000011_Node000014" title=" " alt="" coords="545,460,598,532,607,551,613,567,619,582,632,597,646,605,659,608,674,611,689,621,696,628,693,632,686,625,672,616,658,613,644,610,628,601,615,584,608,569,602,553,593,535,541,464"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="461,221,472,236,492,277,506,320,518,396,512,397,501,321,487,279,468,239,457,225"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="333,533,479,599"/>
+<area shape="poly" id="edge18_Node000016_Node000015" title=" " alt="" coords="404,227,405,325,408,533,403,533,399,325,399,227"/>
+<area shape="poly" id="edge17_Node000008_Node000016" title=" " alt="" coords="404,599,398,692,397,754,400,822,408,893,424,966,447,1036,480,1101,496,1122,513,1134,559,1153,586,1161,610,1163,633,1166,659,1178,666,1182,663,1186,657,1182,631,1171,609,1168,585,1167,557,1159,510,1139,493,1126,476,1104,442,1038,419,967,403,894,395,822,392,754,392,692,399,599"/>
+</map>

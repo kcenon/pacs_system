@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::validation::is_for_processing_dx" name="kcenon::pacs::services::validation::is_for_processing_dx">
+<area shape="rect" id="Node000001" title="Check if dataset is a For Processing DX image." alt="" coords="5,77,244,117"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="292,5,481,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,75,299,46,301,52,199,80"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="309,70,464,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,95,296,95,296,100,244,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a374ea5c692c4b7eab5471dbedcaea6a8" title="Check if a SOP Class UID is a For Processing SOP Class." alt="" coords="299,149,474,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="193,115,287,143,286,149,191,120"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#ab1f72eae5f3ab599f5de19c4bba4a8dc" title="Get information about a specific DX SOP Class." alt="" coords="529,149,699,203"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="474,173,516,173,516,179,474,179"/>
+</map>

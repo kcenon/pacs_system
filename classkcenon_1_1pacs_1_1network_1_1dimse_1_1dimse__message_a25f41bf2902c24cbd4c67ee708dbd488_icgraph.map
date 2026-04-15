@@ -1,0 +1,55 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::affected_sop_class_uid" name="kcenon::pacs::network::dimse::dimse_message::affected_sop_class_uid">
+<area shape="rect" id="Node000001" title="Get the Affected SOP Class UID." alt="" coords="767,569,951,624"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a02a67ca34386a6ee33de7f6102643024" title="Dispatch message to appropriate service." alt="" coords="521,5,702,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="856,556,852,459,845,398,834,331,816,263,792,195,759,131,717,74,701,61,704,57,721,71,764,129,797,193,822,261,839,330,851,397,857,459,861,555"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scp.html#ab6b6a499444ae506fd621e39357dbcb5" title="Handle a C&#45;GET request." alt="" coords="509,85,713,125"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="855,555,848,469,840,415,828,357,811,298,787,240,756,186,717,139,702,127,705,123,721,135,760,183,792,238,816,296,833,356,846,414,854,468,860,555"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scp.html#ac3015e1242926261481fe6e52c0d9a69" title="Handle a C&#45;MOVE request." alt="" coords="527,149,696,204"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="851,556,839,484,816,394,798,347,776,301,749,257,717,219,695,202,698,198,720,215,753,254,781,298,803,345,821,392,844,483,856,555"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1query__scp.html#ab8559adec5737a7e22b05a6908b66151" title="Handle an incoming DIMSE message (C&#45;FIND&#45;RQ)" alt="" coords="504,229,719,269"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="848,557,834,496,809,422,791,384,771,347,746,313,717,283,700,271,703,267,720,279,750,309,775,344,796,382,814,420,839,494,853,555"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1storage__scp.html#a7a449b12c3ea4d90b58c3a3a1ae3470a" title="Handle an incoming DIMSE message (C&#45;STORE&#45;RQ)" alt="" coords="527,293,696,348"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="841,557,822,512,795,460,760,407,717,361,695,347,698,342,720,357,765,404,800,457,827,510,846,555"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1ups__query__scp.html#a764fbf87384783e4198e1c252892ae72" title="Handle an incoming DIMSE message." alt="" coords="522,372,701,427"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="830,559,781,498,751,467,717,440,698,429,701,425,720,436,754,463,785,495,834,556"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scp.html#a06527274016601c93fa26235856cdb90" title="Handle an incoming DIMSE message (MWL C&#45;FIND&#45;RQ)" alt="" coords="527,451,696,505"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="801,564,718,519,692,508,694,503,720,514,804,560"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#a563d7cb4bf1449bdf811f8ee6fcc6ac0" title=" " alt="" coords="527,608,696,663"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="753,616,697,625,696,619,753,611"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scp.html#a8cee03cc71f4f6034b607453093f4b1a" title=" " alt="" coords="512,529,711,584"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="753,582,710,575,711,570,754,577"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scp.html#a22ce07bc2b388e9579a09d6b2a68cce7" title="Handle N&#45;CREATE request." alt="" coords="506,973,717,1013"/>
+<area shape="poly" id="edge16_Node000001_Node000016" title=" " alt="" coords="856,638,844,708,820,795,803,841,781,885,753,926,720,963,704,975,701,970,717,959,749,923,776,882,798,839,815,794,839,707,851,637"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#a73df21e589456a3660ed2b0508b0fb4f" title=" " alt="" coords="527,687,696,741"/>
+<area shape="poly" id="edge18_Node000001_Node000018" title=" " alt="" coords="802,633,720,676,691,689,689,684,718,672,799,629"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scp.html#a1e609d3c05bdd21f6651450988bd28d6" title=" " alt="" coords="525,1101,697,1156"/>
+<area shape="poly" id="edge20_Node000001_Node000019" title=" " alt="" coords="860,638,855,729,847,787,835,849,817,914,793,977,761,1037,721,1091,699,1107,696,1103,717,1087,757,1034,788,975,812,912,830,848,842,786,849,729,855,638"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#a3e7d964619344e63c1b1393c31e22752" title=" " alt="" coords="527,765,696,820"/>
+<area shape="poly" id="edge22_Node000001_Node000021" title=" " alt="" coords="834,637,785,697,754,728,720,755,698,768,695,763,717,750,751,724,781,693,829,634"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#a9e3ed3f7cd9bf9f119acb9c84ac177b3" title=" " alt="" coords="519,845,703,885"/>
+<area shape="poly" id="edge24_Node000001_Node000022" title=" " alt="" coords="846,638,828,683,801,736,765,788,720,833,699,847,696,842,717,829,761,785,796,733,823,681,841,636"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scp.html#ab660c57a67503c3a586dc2dd5755f3a7" title="Handle N&#45;SET request." alt="" coords="517,1037,706,1077"/>
+<area shape="poly" id="edge26_Node000001_Node000023" title=" " alt="" coords="859,638,851,719,829,823,812,878,788,932,758,982,721,1027,705,1039,701,1034,717,1023,754,979,783,930,807,876,824,822,845,718,853,637"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#a2c4a4d558fb086ec768a6e1289149672" title=" " alt="" coords="520,909,703,949"/>
+<area shape="poly" id="edge28_Node000001_Node000024" title=" " alt="" coords="852,638,837,696,811,766,773,837,749,870,720,899,703,911,700,906,717,895,745,867,769,835,806,764,832,695,847,637"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a754c35a6829affe02f040bc42bb09d4f" title="Process incoming DIMSE messages." alt="" coords="236,13,456,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="507,35,456,35,456,30,507,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a63cb1f068d62f92ebe93ddd26dc23233" title="Simulate an incoming association request (for in&#45;memory testing)." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="222,35,188,35,188,30,222,30"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scp.html#a2043cee96792795804e8c79326152310" title="Handle an incoming DIMSE message (C&#45;MOVE&#45;RQ or C&#45;GET&#45;RQ)" alt="" coords="261,113,431,168"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="496,123,431,132,430,127,495,118"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="513,166,431,155,431,149,513,161"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#ad9dabbee1679fdcd7e53afd09c798542" title="Handle an incoming DIMSE&#45;N message." alt="" coords="243,773,449,813"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="516,671,505,676,430,726,371,774,368,770,427,722,503,672,514,666"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scp.html#a2668da7a1dae0e47ff178238ce895ba6" title="Handle an incoming DIMSE message." alt="" coords="247,529,445,584"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="498,559,445,559,445,554,498,554"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scp.html#a95f0763926f699e8cbf17423bf9715c0" title="Handle an incoming DIMSE message (N&#45;CREATE&#45;RQ or N&#45;SET&#45;RQ)" alt="" coords="239,1005,453,1045"/>
+<area shape="poly" id="edge17_Node000016_Node000017" title=" " alt="" coords="493,1010,453,1014,452,1009,492,1004"/>
+<area shape="poly" id="edge19_Node000018_Node000013" title=" " alt="" coords="514,745,415,775,414,770,513,740"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scp.html#afc21b24b4519b10017d5eded3e6b876d" title="Handle an incoming DIMSE message." alt="" coords="260,1101,432,1156"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="512,1131,432,1131,432,1126,512,1126"/>
+<area shape="poly" id="edge23_Node000021_Node000013" title=" " alt="" coords="513,795,449,795,449,790,513,790"/>
+<area shape="poly" id="edge25_Node000022_Node000013" title=" " alt="" coords="523,844,420,815,421,810,525,838"/>
+<area shape="poly" id="edge27_Node000023_Node000017" title=" " alt="" coords="503,1046,453,1040,453,1035,503,1041"/>
+<area shape="poly" id="edge29_Node000024_Node000013" title=" " alt="" coords="520,906,503,899,429,857,371,815,374,811,432,852,505,894,522,901"/>
+</map>

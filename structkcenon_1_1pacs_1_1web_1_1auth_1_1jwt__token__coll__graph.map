@@ -1,0 +1,20 @@
+<map id="kcenon::pacs::web::auth::jwt_token" name="kcenon::pacs::web::auth::jwt_token">
+<area shape="rect" id="Node000001" title="Decoded JWT token with raw segments for signature verification." alt="" coords="108,681,251,761"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__header.html" title="Decoded JWT header (JOSE header)" alt="" coords="5,395,148,475"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,475,83,543,90,581,102,618,115,643,132,667,128,670,111,646,97,620,85,583,78,544,73,475"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="211,148,289,213"/>
+<area shape="poly" id="edge10_Node000001_Node000003" title=" " alt="" coords="238,215,205,295,189,345,178,395,170,467,168,540,175,665,170,665,163,541,165,467,173,394,184,343,200,293,233,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="211,192,166,209,145,222,127,239,106,271,92,307,84,344,80,379,75,378,79,343,87,306,101,269,123,236,142,218,164,204,210,187"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__claims.html" title="Decoded JWT claims (payload)" alt="" coords="248,499,391,619"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="261,213,282,295,303,394,315,482,310,483,298,395,277,296,256,214"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="383,305,562,371"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="291,204,337,235,392,279,412,294,409,298,388,283,334,239,288,209"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="185,5,315,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="253,99,253,148,247,148,247,99"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="270,620,226,671,222,667,266,617"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="453,373,372,487,368,484,448,369"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="412,148,533,213"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="475,227,475,305,470,305,470,227"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="461,13,484,78"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="475,78,475,131,470,131,470,78"/>
+</map>

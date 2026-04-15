@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::rest_server::set_config" name="kcenon::pacs::web::rest_server::set_config">
+<area shape="rect" id="Node000001" title="Update configuration (requires restart to apply)" alt="" coords="5,5,175,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a8c269fd6ea9e564f686ac8e3175d7785" title="Get current configuration." alt="" coords="223,5,373,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,23,209,23,209,28,175,28"/>
+</map>

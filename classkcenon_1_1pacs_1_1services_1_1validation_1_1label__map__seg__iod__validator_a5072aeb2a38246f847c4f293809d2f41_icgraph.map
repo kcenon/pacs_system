@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::label_map_seg_iod_validator::quick_check" name="kcenon::pacs::services::validation::label_map_seg_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required attributes." alt="" coords="236,5,468,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a03a1b3d535f39efbaa33f791b2222099" title="Quick check if a dataset is a valid Label Map Segmentation object." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,35,188,35,188,30,222,30"/>
+</map>

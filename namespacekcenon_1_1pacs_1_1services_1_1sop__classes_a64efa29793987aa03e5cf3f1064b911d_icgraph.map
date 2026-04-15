@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::services::sop_classes::get_mg_sop_class_info" name="kcenon::pacs::services::sop_classes::get_mg_sop_class_info">
+<area shape="rect" id="Node000001" title="Get information about a specific Mammography SOP Class." alt="" coords="1096,124,1265,179"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a6a901295537a160bd476e68f771fd718" title="Check if a SOP Class UID is a breast tomosynthesis SOP Class." alt="" coords="845,5,1040,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1125,118,1047,74,1021,62,1024,58,1049,69,1128,114"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a4ee2745716651208c263438589c3e187" title="Check if a SOP Class UID is a For Presentation mammography SOP Class." alt="" coords="852,84,1033,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1082,137,1033,129,1034,124,1083,132"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aeae0b713f3032d62c5b51ea05f7a768d" title="Check if a SOP Class UID is a For Processing mammography SOP Class." alt="" coords="853,163,1033,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1083,170,1033,178,1033,173,1082,165"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a94f5c7d4c86aac0ffbde5c218e49c194" title="Check if a SOP Class UID is a Mammography Storage SOP Class." alt="" coords="837,241,1048,296"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1126,188,1049,231,1021,244,1019,239,1047,226,1124,184"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a42ea9cd32e1492198ad5320abbe0abb8" title="Check if dataset is a For Presentation mammography image." alt="" coords="533,91,789,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="838,114,790,114,790,109,838,109"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ac6c71386ad727caa7a97b097a5710ea9" title="Check if dataset is a For Processing mammography image." alt="" coords="539,170,783,210"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="839,193,784,193,784,187,839,187"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#ab8ba941464647a336e79721f749275ab" title=" " alt="" coords="545,241,778,296"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="824,271,778,271,778,266,824,266"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a859ef51cff42cdebc4edb77faa2d36ce" title="Validate a DICOM dataset against Mammography IOD." alt="" coords="269,241,485,296"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="531,271,486,271,486,266,531,266"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#adde89309bf8c455c11e0a48caaf3a8ff" title="Validate a For Presentation mammography dataset." alt="" coords="5,163,221,217"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="271,240,205,220,207,215,273,235"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#ad38a597d74ba274c931575bc4ee44921" title="Validate a For Processing mammography dataset." alt="" coords="5,241,221,296"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="256,271,221,271,221,266,256,266"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a0c87754194885095a7ec341cc132551e" title="Validate a mammography dataset with default options." alt="" coords="29,320,198,375"/>
+<area shape="poly" id="edge11_Node000009_Node000012" title=" " alt="" coords="273,303,199,325,198,320,271,297"/>
+</map>

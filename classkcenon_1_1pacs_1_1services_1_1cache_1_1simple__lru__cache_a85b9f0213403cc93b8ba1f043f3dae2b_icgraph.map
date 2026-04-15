@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::cache::simple_lru_cache::remove_entry" name="kcenon::pacs::services::cache::simple_lru_cache::remove_entry">
+<area shape="rect" id="Node000001" title=" " alt="" coords="272,34,461,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1cache_1_1simple__lru__cache.html#aea9f42dc867b946c0f5b0fae516337cd" title="Retrieve a value from the cache." alt="" coords="5,5,224,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,49,224,44,225,38,259,43"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1cache_1_1simple__lru__cache.html#a5e66d789bd660229419e87511a4cbf8f" title="Remove a specific entry from the cache." alt="" coords="20,70,209,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,79,210,86,209,81,258,74"/>
+</map>

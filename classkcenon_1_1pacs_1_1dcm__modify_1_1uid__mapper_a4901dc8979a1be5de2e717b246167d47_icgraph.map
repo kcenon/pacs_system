@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::dcm_modify::uid_mapper::map" name="kcenon::pacs::dcm_modify::uid_mapper::map">
+<area shape="rect" id="Node000001" title="Get or create a replacement UID for the original UID." alt="" coords="517,5,712,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1dcm__modify_1_1anonymizer.html#ab4d3020bc050f48e943eb6b463acaa59" title=" " alt="" coords="248,5,469,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="504,28,470,28,470,23,504,23"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1dcm__modify_1_1anonymizer.html#a383849a6a6975592be3ff30bd56b5f5f" title="Anonymize a DICOM dataset in place." alt="" coords="5,5,200,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="234,28,200,28,200,23,234,23"/>
+</map>

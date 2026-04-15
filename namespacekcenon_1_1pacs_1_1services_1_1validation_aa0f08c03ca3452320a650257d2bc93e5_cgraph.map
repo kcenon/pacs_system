@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::is_heightmap_segmentation" name="kcenon::pacs::services::validation::is_heightmap_segmentation">
+<area shape="rect" id="Node000001" title="Check if dataset is a heightmap segmentation." alt="" coords="5,34,196,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="244,5,433,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,44,230,39,231,44,196,50"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="261,70,416,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,73,248,81,247,86,196,78"/>
+</map>

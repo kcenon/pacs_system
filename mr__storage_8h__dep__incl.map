@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/services/sop_classes/mr_storage.h" name="include/kcenon/pacs/services/sop_classes/mr_storage.h">
+<area shape="rect" id="Node000001" title="MR Image Storage SOP Classes." alt="" coords="113,5,276,60"/>
+<area shape="rect" id="Node000002" href="$mr__storage_8cpp.html" title="Implementation of MR Image Storage SOP Class utilities." alt="" coords="5,108,187,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,71,118,110,114,106,155,68"/>
+<area shape="rect" id="Node000003" href="$mr__iod__validator_8cpp.html" title="Implementation of MR Image IOD Validator." alt="" coords="211,108,379,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,68,276,106,273,110,231,72"/>
+</map>

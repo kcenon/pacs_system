@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::touch" name="kcenon::pacs::network::v2::dicom_association_handler::touch">
+<area shape="rect" id="Node000001" title="Update last activity timestamp." alt="" coords="477,45,652,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a7fdebfd5cd1481667fd9d96071e44056" title="Handle data received from session." alt="" coords="228,5,429,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="463,58,429,52,430,47,464,53"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a0d85c42e32ba04ace0cb05762def3285" title="Start processing the session." alt="" coords="241,84,416,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="464,92,417,100,416,94,463,87"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a20b3f39bcb4fc5a1fbbc79579ca8033f" title="Feed received data to the handler." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,35,180,35,180,30,214,30"/>
+</map>

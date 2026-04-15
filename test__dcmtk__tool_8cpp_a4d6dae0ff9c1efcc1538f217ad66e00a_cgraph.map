@@ -1,0 +1,14 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,56,100,81"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a0ba3666d382f01405d049345ff04d5a3" title="Check if DCMTK is available on the system." alt="" coords="148,17,369,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,59,134,53,135,59,101,64"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#abab0724f21c053d177731180efe0a358" title="Get DCMTK version string." alt="" coords="163,81,354,121"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="101,73,150,81,149,86,100,79"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a378d43429576cb453524cdadfd31def8" title="Run a DCMTK tool and capture output." alt="" coords="417,49,613,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="370,48,404,52,404,57,369,53"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="670,5,857,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="613,52,656,46,657,51,614,57"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a39b86a50ebcefb7a9bfe2c9fbd37c0de" title="Run a process and wait for completion." alt="" coords="661,85,865,125"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="614,80,648,85,648,91,613,86"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="354,86,403,80,404,85,355,91"/>
+</map>

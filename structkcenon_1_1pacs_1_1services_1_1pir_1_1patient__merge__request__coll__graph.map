@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::pir::patient_merge_request" name="kcenon::pacs::services::pir::patient_merge_request">
+<area shape="rect" id="Node000001" title="Request to merge two patients." alt="" coords="5,277,204,397"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="65,135,144,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,200,107,261,102,261,102,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="39,5,170,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,99,107,134,102,134,102,99"/>
+</map>

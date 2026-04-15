@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_tag::is_private_creator" name="kcenon::pacs::core::dicom_tag::is_private_creator">
+<area shape="rect" id="Node000001" title="Check if this is a private creator tag." alt="" coords="205,5,376,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a0b83f0c3a7281eb2d54e465c99e12503" title="Get the data element range owned by this Private Creator tag." alt="" coords="5,5,157,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,35,157,35,157,30,192,30"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::routing_manager::route" name="kcenon::pacs::client::routing_manager::route">
+<area shape="rect" id="Node000001" title="Route a DICOM dataset based on matching rules." alt="" coords="244,13,427,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a006909e16f412d1f7e521e1006c1dca0" title="Attach to a Storage SCP for automatic routing." alt="" coords="5,5,196,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,35,196,35,196,30,230,30"/>
+</map>

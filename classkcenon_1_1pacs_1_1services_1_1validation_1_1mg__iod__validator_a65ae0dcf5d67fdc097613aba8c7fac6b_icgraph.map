@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::check_view_position_validity" name="kcenon::pacs::services::validation::mg_iod_validator::check_view_position_validity">
+<area shape="rect" id="Node000001" title=" " alt="" coords="876,124,1097,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a61fcef600c4338a1ed2cfd76a0588d8b" title=" " alt="" coords="533,84,828,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="862,138,828,133,829,128,863,132"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a8143a1ecca736bbdcb621d799c2bddcf" title="Validate mammography view position." alt="" coords="573,163,789,217"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="863,170,789,179,788,174,862,164"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a859ef51cff42cdebc4edb77faa2d36ce" title="Validate a DICOM dataset against Mammography IOD." alt="" coords="269,84,485,139"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="519,114,486,114,486,109,519,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#adde89309bf8c455c11e0a48caaf3a8ff" title="Validate a For Presentation mammography dataset." alt="" coords="5,5,221,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="271,83,205,63,207,58,273,78"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#ad38a597d74ba274c931575bc4ee44921" title="Validate a For Processing mammography dataset." alt="" coords="5,84,221,139"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="256,114,221,114,221,109,256,109"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a0c87754194885095a7ec341cc132551e" title="Validate a mammography dataset with default options." alt="" coords="29,163,198,217"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="273,145,199,167,198,162,271,140"/>
+</map>

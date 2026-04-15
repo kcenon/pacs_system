@@ -1,0 +1,35 @@
+<map id="kcenon::pacs::di::test::MockNetwork" name="kcenon::pacs::di::test::MockNetwork">
+<area shape="rect" id="Node000001" title="Mock network service for testing." alt="" coords="213,999,395,1253"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1IDicomNetwork.html" title="Network service interface for DICOM communication." alt="" coords="5,696,179,936"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,946,219,997,215,1000,179,949"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="203,783,287,849"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="254,849,279,982,274,983,249,850"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="523,493,709,573"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="614,574,600,653,573,758,554,814,531,871,503,926,470,976,441,1011,410,1043,406,1039,437,1007,466,973,499,923,526,869,549,812,568,756,595,652,609,573"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="854,276,1005,356"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="874,358,688,486,685,482,871,354"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="674,148,753,213"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="754,204,854,265,851,270,752,209"/>
+<area shape="rect" id="Node000014" href="$structkcenon_1_1pacs_1_1network_1_1server__config.html" title=" " alt="" coords="288,433,499,633"/>
+<area shape="poly" id="edge14_Node000014_Node000006" title=" " alt="" coords="716,214,713,247,707,284,694,323,673,358,655,376,637,389,601,404,561,415,514,435,512,430,559,410,599,399,635,384,652,372,669,354,689,321,701,283,708,246,711,214"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="281,283,460,349"/>
+<area shape="poly" id="edge16_Node000015_Node000006" title=" " alt="" coords="675,200,468,280,466,275,673,195"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="648,5,779,85"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="716,99,716,148,711,148,711,99"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="861,148,998,213"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="932,227,932,276,927,276,927,227"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="859,13,890,78"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="869,78,868,101,873,123,879,134,874,136,868,125,863,101,864,78"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="967,13,998,78"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="974,79,956,125,952,134,947,132,951,123,969,77"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="219,148,341,213"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="355,190,435,208,469,221,491,235,502,251,507,265,508,293,505,322,511,355,527,393,547,429,588,492,584,495,542,432,522,395,505,357,500,322,502,293,502,266,497,253,487,239,467,226,434,214,354,195"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="312,769,475,863"/>
+<area shape="poly" id="edge18_Node000013_Node000011" title=" " alt="" coords="256,227,237,265,221,310,210,359,211,409,222,474,234,524,252,572,278,632,318,705,361,767,356,770,314,707,274,635,247,574,229,525,216,475,205,410,205,359,215,309,232,263,251,224"/>
+<area shape="poly" id="edge17_Node000015_Node000011" title=" " alt="" coords="277,226,284,251,295,267,311,281,307,285,291,271,279,253,272,228"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="269,13,291,78"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="283,78,283,131,277,131,277,78"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="383,864,348,983,343,982,377,863"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="396,633,396,752,391,752,391,633"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="377,349,384,417,379,417,371,349"/>
+</map>

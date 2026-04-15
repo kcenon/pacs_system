@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_watch_scu::parse_event_dataset" name="kcenon::pacs::services::ups_watch_scu::parse_event_dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="233,5,405,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#adc57fdcd6c0966c303eb74b1f6a3964b" title="Handle an N&#45;EVENT&#45;REPORT&#45;RQ received from the SCP." alt="" coords="5,5,185,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,35,185,35,185,30,219,30"/>
+</map>

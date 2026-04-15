@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::core::dicom_file::parse_meta_information" name="kcenon::pacs::core::dicom_file::parse_meta_information">
+<area shape="rect" id="Node000001" title="Parse file meta information from raw data." alt="" coords="5,94,152,149"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa6eb56fd1ffc16dd50fb102224dcae6d" title="Parses a two&#45;character string to a vr_type." alt="" coords="211,5,385,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,92,199,55,217,48,219,52,201,60,128,96"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="200,69,396,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,108,186,103,187,108,153,113"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="213,133,383,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,129,200,136,199,142,152,135"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="225,197,371,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="128,146,201,183,219,190,217,195,199,188,126,151"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="444,133,604,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="384,151,430,151,430,156,384,156"/>
+</map>

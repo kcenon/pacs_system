@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ai::error_info" name="kcenon::pacs::ai::error_info">
+<area shape="rect" id="Node000001" title="Simple error info for fallback when common_system is unavailable." alt="" coords="5,277,196,383"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="61,135,140,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,200,103,261,98,261,98,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="35,5,166,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,99,103,134,98,134,98,99"/>
+</map>

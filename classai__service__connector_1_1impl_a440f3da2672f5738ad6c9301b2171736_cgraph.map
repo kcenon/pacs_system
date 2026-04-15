@@ -1,0 +1,14 @@
+<map id="ai_service_connector::impl::initialize" name="ai_service_connector::impl::initialize">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,164,109"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="235,5,422,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,67,238,46,240,51,162,72"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#ac0ffafa706da2682d25515e0aff58748" title="Set a gauge metric value." alt="" coords="212,133,445,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="162,107,240,127,238,132,161,112"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aaff5178e810748aa34eebf2c3e2dff5e" title="Log a warning&#45;level message." alt="" coords="235,69,422,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="164,87,221,87,221,92,164,92"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="497,33,684,73"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="422,33,484,39,483,45,422,38"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#a4662765f89d99725fb277e933509bdd3" title=" " alt="" coords="493,126,688,181"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="446,151,480,151,480,156,446,156"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="422,74,483,65,484,71,423,79"/>
+</map>

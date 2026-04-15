@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::health_checker::get_status" name="kcenon::pacs::monitoring::health_checker::get_status">
+<area shape="rect" id="Node000001" title="Get cached status or perform check if stale." alt="" coords="244,5,448,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#a90a28f4f06b6842bb4c3327298dcfe0a" title="Perform a readiness check." alt="" coords="5,5,196,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,28,196,28,196,23,230,23"/>
+</map>

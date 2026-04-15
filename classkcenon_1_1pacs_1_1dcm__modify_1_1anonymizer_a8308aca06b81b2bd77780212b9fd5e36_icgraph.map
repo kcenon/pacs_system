@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::dcm_modify::anonymizer::anonymize_patient_info" name="kcenon::pacs::dcm_modify::anonymizer::anonymize_patient_info">
+<area shape="rect" id="Node000001" title=" " alt="" coords="248,5,443,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1dcm__modify_1_1anonymizer.html#a383849a6a6975592be3ff30bd56b5f5f" title="Anonymize a DICOM dataset in place." alt="" coords="5,13,200,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,35,200,35,200,30,234,30"/>
+</map>

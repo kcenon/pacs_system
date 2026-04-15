@@ -1,0 +1,56 @@
+<map id="kcenon::pacs::integration_test::TEST_CASE" name="kcenon::pacs::integration_test::TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,265,192,305"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#abf1e849b381167497b6ab6d3a9cb043e" title="Generate a CT Image dataset." alt="" coords="240,265,453,305"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,282,226,282,226,287,192,287"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#abf544f41d7442edf21e2d20a89261f69" title="Add common image pixel module attributes." alt="" coords="501,48,697,103"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="361,263,418,195,457,156,500,120,519,107,522,112,503,124,461,160,422,199,365,266"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="769,179,924,233"/>
+<area shape="poly" id="edge31_Node000002_Node000010" title=" " alt="" coords="364,262,420,210,458,183,500,163,533,155,566,150,634,150,699,158,757,172,756,177,698,164,634,155,567,155,534,160,502,169,461,188,424,214,368,266"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#aedba42b3d9e8d9b7538318375f31ba60" title="Add common patient module attributes." alt="" coords="503,179,696,233"/>
+<area shape="poly" id="edge17_Node000002_Node000016" title=" " alt="" coords="411,262,497,235,499,240,413,267"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a841a0a20c6a2822c495cc5f4052cc319" title="Generate pixel data for single&#45;frame image." alt="" coords="503,480,696,535"/>
+<area shape="poly" id="edge19_Node000002_Node000017" title=" " alt="" coords="365,303,422,373,461,414,503,452,530,471,527,475,500,456,457,418,418,377,361,307"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a010b375cc29f3dab412e0b00944626f0" title="Add common series module attributes." alt="" coords="503,257,696,312"/>
+<area shape="poly" id="edge22_Node000002_Node000019" title=" " alt="" coords="454,282,489,282,489,287,454,287"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a19d21ca1bbd639142b28219cc0c60653" title="Generate a unique UID for testing." alt="" coords="750,257,943,312"/>
+<area shape="poly" id="edge30_Node000002_Node000020" title=" " alt="" coords="413,302,502,321,599,329,697,321,742,312,743,318,698,326,599,334,501,326,412,307"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a5ab977ef182ac41639c324f8b21d77d2" title="Add common study module attributes." alt="" coords="503,388,696,443"/>
+<area shape="poly" id="edge25_Node000002_Node000021" title=" " alt="" coords="385,303,503,366,529,380,527,384,500,371,382,307"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a14d8dfdfe13a0430e72142e8896fb95a" title="Set a numeric value for the given tag." alt="" coords="769,75,924,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="698,83,756,90,755,95,697,89"/>
+<area shape="poly" id="edge10_Node000003_Node000010" title=" " alt="" coords="660,100,699,120,788,169,786,174,696,124,658,105"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af2974ceb4e12d5316062638ca0abd9f8" title="Create an element from a numeric value." alt="" coords="996,75,1167,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="925,99,982,99,982,105,925,105"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="996,154,1167,194"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="925,123,1003,147,1002,153,924,128"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ac014eeea6bc5ca8b452041039ca9d4f8" title="Set the value from a numeric value." alt="" coords="1215,5,1374,60"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1165,72,1201,60,1203,65,1167,77"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="1215,150,1375,190"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="1168,127,1219,143,1217,148,1166,132"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="1219,85,1371,125"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="1167,100,1205,101,1205,106,1167,106"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="1167,170,1201,169,1201,174,1167,175"/>
+<area shape="poly" id="edge16_Node000010_Node000009" title=" " alt="" coords="924,193,982,185,983,190,925,198"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="996,219,1167,273"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="925,217,983,227,982,232,924,222"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="1215,219,1374,273"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="1167,243,1202,243,1202,249,1167,249"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="1423,219,1597,273"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="1375,243,1409,243,1409,249,1375,249"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="1645,226,1820,266"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="1598,243,1632,243,1632,249,1598,249"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="1868,226,2043,266"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="1820,243,1854,243,1854,249,1820,249"/>
+<area shape="poly" id="edge18_Node000016_Node000010" title=" " alt="" coords="696,203,755,203,755,209,696,209"/>
+<area shape="poly" id="edge20_Node000017_Node000009" title=" " alt="" coords="696,510,769,511,842,507,906,497,929,489,946,479,971,448,980,416,980,383,974,348,968,313,965,277,973,241,994,204,997,201,1001,204,998,208,978,243,971,278,973,313,979,347,985,382,986,416,976,450,950,483,932,494,907,502,843,513,769,516,696,515"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#aa6976dcb0aeb1c56b9b6fb7cf813d46c" title="Set the raw value data." alt="" coords="745,545,948,585"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="697,527,747,539,746,544,696,532"/>
+<area shape="poly" id="edge24_Node000019_Node000010" title=" " alt="" coords="685,255,755,232,757,237,687,260"/>
+<area shape="poly" id="edge23_Node000019_Node000020" title=" " alt="" coords="696,282,736,282,736,287,696,287"/>
+<area shape="poly" id="edge29_Node000021_Node000010" title=" " alt="" coords="632,386,664,356,695,322,709,300,717,281,726,262,744,243,756,234,759,238,747,247,730,265,722,283,714,303,699,325,668,360,635,390"/>
+<area shape="poly" id="edge28_Node000021_Node000020" title=" " alt="" coords="663,386,696,367,719,344,744,321,752,316,755,321,747,325,723,348,699,371,666,390"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#af140ce80867d4cd5efd2d8cfc2aa54ea" title="Get current date in DICOM DA format (YYYYMMDD)" alt="" coords="750,336,943,391"/>
+<area shape="poly" id="edge26_Node000021_Node000022" title=" " alt="" coords="696,392,736,384,737,389,697,398"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#aee3d084314a4a455da63c5b540496c9e" title="Get current time in DICOM TM format (HHMMSS)" alt="" coords="750,415,943,469"/>
+<area shape="poly" id="edge27_Node000021_Node000023" title=" " alt="" coords="697,423,737,427,736,433,696,428"/>
+</map>

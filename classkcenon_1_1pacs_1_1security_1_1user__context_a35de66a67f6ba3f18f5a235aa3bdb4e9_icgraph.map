@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::security::user_context::user_context" name="kcenon::pacs::security::user_context::user_context">
+<area shape="rect" id="Node000001" title="Construct a user context." alt="" coords="252,53,459,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1user__context.html#aa90e95163459a47b6e5c8c29c1df230e" title="Create an anonymous context with minimal permissions." alt="" coords="5,5,204,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,57,204,51,205,46,239,51"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1user__context.html#a62eae4f3351fc2a394282bfd87c987df" title="Create a system context for internal operations." alt="" coords="19,84,190,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,93,191,101,190,96,238,88"/>
+</map>

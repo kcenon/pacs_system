@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::storage::annotation_record" name="kcenon::pacs::storage::annotation_record">
+<area shape="rect" id="Node000001" title="Annotation record from the database." alt="" coords="5,475,161,635"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="44,135,123,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,200,78,292,78,412,80,458,75,459,73,412,73,292,78,200"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1storage_1_1annotation__style.html" title="Style information for annotations." alt="" coords="211,292,367,412"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="121,198,212,279,208,283,117,202"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="18,5,149,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="86,99,86,134,81,134,81,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="230,414,175,468,171,464,226,410"/>
+</map>

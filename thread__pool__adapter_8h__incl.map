@@ -1,0 +1,24 @@
+<map id="include/kcenon/pacs/integration/thread_pool_adapter.h" name="include/kcenon/pacs/integration/thread_pool_adapter.h">
+<area shape="rect" id="Node000001" title="Concrete implementation of thread_pool_interface using kcenon::thread." alt="" coords="283,5,438,60"/>
+<area shape="rect" id="Node000002" href="$thread__pool__interface_8h.html" title="Abstract interface for thread pool operations." alt="" coords="195,108,375,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="341,62,311,99,306,96,337,59"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,196,76,221"/>
+<area shape="poly" id="edge9_Node000001_Node000004" title=" " alt="" coords="289,63,237,84,185,110,120,151,67,190,64,185,117,146,182,106,235,80,287,58"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="399,115,477,141"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="385,59,421,103,417,106,381,62"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="501,115,565,141"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="410,58,501,106,498,111,408,62"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="101,196,167,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="250,150,170,192,167,187,247,146"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="227,151,90,194,89,189,225,145"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="192,196,279,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="275,150,252,186,248,183,270,147"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="303,196,365,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="299,147,322,183,317,186,294,150"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="389,196,447,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="318,146,388,187,385,191,315,150"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="471,196,535,221"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="338,146,459,189,457,194,336,151"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="560,196,652,221"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="362,145,547,190,546,196,361,151"/>
+</map>

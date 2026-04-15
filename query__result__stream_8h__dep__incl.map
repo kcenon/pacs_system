@@ -1,0 +1,16 @@
+<map id="include/kcenon/pacs/services/cache/query_result_stream.h" name="include/kcenon/pacs/services/cache/query_result_stream.h">
+<area shape="rect" id="Node000001" title="Streaming query results with pagination support." alt="" coords="357,5,520,60"/>
+<area shape="rect" id="Node000002" href="$parallel__query__executor_8h.html" title="Parallel query executor for concurrent query processing." alt="" coords="143,108,318,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="373,68,286,110,284,106,371,63"/>
+<area shape="rect" id="Node000005" href="$streaming__query__handler_8h.html" title="Streaming query handler for memory&#45;efficient C&#45;FIND processing." alt="" coords="343,108,535,163"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="441,74,441,108,436,108,436,74"/>
+<area shape="rect" id="Node000007" href="$query__result__stream_8cpp.html" title="Implementation of streaming query results with pagination." alt="" coords="559,115,745,155"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="508,63,613,113,611,118,505,68"/>
+<area shape="rect" id="Node000003" href="$pacs-services-cache_8cppm.html" title="C++20 module partition for query caching." alt="" coords="237,211,432,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="272,170,315,209,312,213,269,174"/>
+<area shape="rect" id="Node000004" href="$parallel__query__executor_8cpp.html" title="Implementation of parallel query executor." alt="" coords="5,211,213,251"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="187,173,135,213,132,208,184,169"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="401,174,357,213,354,209,397,170"/>
+<area shape="rect" id="Node000006" href="$streaming__query__handler_8cpp.html" title="Implementation of streaming query handler." alt="" coords="456,211,675,251"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="487,169,541,208,538,213,484,173"/>
+</map>

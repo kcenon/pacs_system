@@ -1,0 +1,25 @@
+var pet__iod__validator_8cpp =
+[
+    [ "is_valid_pet_dataset", "pet__iod__validator_8cpp.html#a22708f1a35f8febc42960d82ac849400", null ],
+    [ "validate_pet_iod", "pet__iod__validator_8cpp.html#aba2a63f27fbb2fc81ec3a02688361424", null ],
+    [ "attenuation_correction_method", "pet__iod__validator_8cpp.html#ad10f6b32ea236c5de5612164b40f0a12", null ],
+    [ "counts_source", "pet__iod__validator_8cpp.html#a4e5fd0665c8d6139e415fe0811499e34", null ],
+    [ "decay_correction", "pet__iod__validator_8cpp.html#a39789cd417730faaf9c80436f65adec5", null ],
+    [ "decay_factor", "pet__iod__validator_8cpp.html#a528836dcaca207a0519a64ba29d849b0", null ],
+    [ "frame_of_reference_uid", "pet__iod__validator_8cpp.html#a84d6129c33ed7390af8a88a19980b5c0", null ],
+    [ "frame_reference_time", "pet__iod__validator_8cpp.html#a8b897c3883c9c2cfb2ac9af30adc06ce", null ],
+    [ "image_orientation_patient", "pet__iod__validator_8cpp.html#afb452c5c6df3ae9faaebc7b143727ade", null ],
+    [ "image_position_patient", "pet__iod__validator_8cpp.html#a1c650aa930011b4fc43574274dd19c7f", null ],
+    [ "image_type", "pet__iod__validator_8cpp.html#a5903f49cef218b5768e6051eb4dc1adc", null ],
+    [ "pixel_spacing", "pet__iod__validator_8cpp.html#aaaaba4c59874033b6a41d75d6cc081b1", null ],
+    [ "position_reference_indicator", "pet__iod__validator_8cpp.html#a674abb186a237b77a3358766627cea16", null ],
+    [ "radionuclide_half_life", "pet__iod__validator_8cpp.html#a06c1a3bf43c7ee0e1444fe19f9610568", null ],
+    [ "radionuclide_total_dose", "pet__iod__validator_8cpp.html#aabc0999cbb1fb05c1999150014b7b4ce", null ],
+    [ "radiopharmaceutical_info_sequence", "pet__iod__validator_8cpp.html#a52f2b218e16844e3555d10fc6f6900b4", null ],
+    [ "randoms_correction_method", "pet__iod__validator_8cpp.html#a038772ea42105a406e0eff89ce5a3b9f", null ],
+    [ "reconstruction_method", "pet__iod__validator_8cpp.html#aed11ce88923ec4f613b7380086a4fa87", null ],
+    [ "rescale_slope", "pet__iod__validator_8cpp.html#a54057c621717892fb6ad97faebee8034", null ],
+    [ "series_type", "pet__iod__validator_8cpp.html#a8f36e5a444458b74d8a4d3cd3326c135", null ],
+    [ "slice_thickness", "pet__iod__validator_8cpp.html#a34029a2717029594144a56161907c06e", null ],
+    [ "units", "pet__iod__validator_8cpp.html#ace20e02ac7128b79b302bc026490140d", null ]
+];

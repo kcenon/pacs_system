@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::client::sync_repositories" name="kcenon::pacs::client::sync_repositories">
+<area shape="rect" id="Node000001" title=" " alt="" coords="242,419,385,499"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,276,192,356"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,354,242,407,239,412,157,359"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="239,133,388,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,189,190,204,156,225,134,249,117,277,112,274,130,246,153,221,187,199,225,184"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="216,276,411,356"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="316,212,316,276,311,276,311,212"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="435,276,627,356"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="402,181,444,197,482,221,504,246,519,274,515,277,499,249,478,225,441,201,400,186"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="302,5,325,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="316,71,316,117,311,117,311,71"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="316,356,316,402,311,402,311,356"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="472,359,389,412,386,407,469,354"/>
+</map>

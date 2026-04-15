@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::services::validation::label_map_seg_iod_validator::validate_segment_sequence" name="kcenon::pacs::services::validation::label_map_seg_iod_validator::validate_segment_sequence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,16,211,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="512,5,701,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,23,258,16,383,10,499,14,498,19,383,16,259,21,211,29"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="284,31,439,71"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="211,48,270,48,270,53,211,53"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1label__map__seg__iod__validator.html#ac1886c0590122027491bcd6633f8e74e" title=" " alt="" coords="259,95,464,164"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="212,80,246,91,245,96,210,85"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="443,92,545,48,547,53,445,97"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="529,102,684,157"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="464,127,515,127,515,132,464,132"/>
+</map>

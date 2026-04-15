@@ -1,0 +1,9 @@
+<map id="worklist_cli::worklist_result_formatter::format_csv" name="worklist_cli::worklist_result_formatter::format_csv">
+<area shape="rect" id="Node000001" title="Format results as CSV." alt="" coords="5,37,221,77"/>
+<area shape="rect" id="Node000002" href="$classworklist__cli_1_1worklist__result__formatter.html#a7765cf4158609749c8d6272d31764844" title="Escape string for CSV output." alt="" coords="273,5,492,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,42,259,37,260,43,222,47"/>
+<area shape="rect" id="Node000003" href="$classworklist__cli_1_1worklist__result__formatter.html#aac9fbc413e56d977b3920e5e78bfe280" title="Extract worklist item data from dataset." alt="" coords="269,69,496,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,68,256,72,255,77,221,73"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="544,62,699,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="496,87,530,87,530,92,496,92"/>
+</map>

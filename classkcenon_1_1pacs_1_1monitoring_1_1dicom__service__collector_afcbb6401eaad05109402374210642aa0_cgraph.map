@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::dicom_service_collector::get_metric_types" name="kcenon::pacs::monitoring::dicom_service_collector::get_metric_types">
+<area shape="rect" id="Node000001" title="Get supported metric types." alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1monitoring.html#ad2335ef3bbc51a064374da9e18c8abb4" title="Convert health level to string representation." alt="" coords="240,13,427,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+</map>

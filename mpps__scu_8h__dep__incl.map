@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/services/mpps_scu.h" name="include/kcenon/pacs/services/mpps_scu.h">
+<area shape="rect" id="Node000001" title="DICOM MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="149,5,310,45"/>
+<area shape="rect" id="Node000002" href="$mpps__scu_2main_8cpp.html" title="MPPS SCU &#45; Modality Performed Procedure Step Client." alt="" coords="5,93,224,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,55,133,95,130,91,189,51"/>
+<area shape="rect" id="Node000003" href="$mpps__scu_8cpp.html" title="Implementation of the MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="248,93,443,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="270,51,330,91,327,95,267,55"/>
+</map>

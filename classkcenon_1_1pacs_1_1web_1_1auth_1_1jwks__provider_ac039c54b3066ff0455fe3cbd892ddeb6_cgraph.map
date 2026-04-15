@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::auth::jwks_provider::refresh" name="kcenon::pacs::web::auth::jwks_provider::refresh">
+<area shape="rect" id="Node000001" title="Force refresh keys from the configured JWKS URL." alt="" coords="5,5,156,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwks__provider.html#a73f83292a97bbaa099da82cb359585d2" title=" " alt="" coords="204,5,355,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,30,190,30,190,35,156,35"/>
+</map>

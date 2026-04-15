@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::print_scu::find_print_context" name="kcenon::pacs::services::print_scu::find_print_context">
+<area shape="rect" id="Node000001" title="Find an accepted presentation context for a print SOP class." alt="" coords="5,5,175,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="223,5,393,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,30,209,30,209,35,175,35"/>
+</map>

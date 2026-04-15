@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/viewer_state_repository.h" name="include/kcenon/pacs/storage/viewer_state_repository.h">
+<area shape="rect" id="Node000001" title="Repository for viewer state persistence." alt="" coords="103,5,265,60"/>
+<area shape="rect" id="Node000002" href="$viewer__state__repository_8cpp.html" title="Implementation of the viewer state repository." alt="" coords="5,108,165,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,71,107,110,103,106,144,68"/>
+<area shape="rect" id="Node000003" href="$viewer__state__endpoints_8cpp.html" title="Viewer state API endpoints implementation." alt="" coords="190,108,378,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,68,266,106,262,110,221,72"/>
+</map>
