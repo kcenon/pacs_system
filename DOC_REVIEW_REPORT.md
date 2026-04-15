@@ -177,4 +177,66 @@ docs/database/MIGRATION_GUIDE.md        fm=1.0.0  inline=1.0.1
 
 ---
 
+## Post-Fix Re-Validation (2026-04-15)
+
+**Re-run date**: 2026-04-15 (KST)
+**Branch**: `feature/docs-fix-2026-04-15`
+**Fix commit**: `4af12bb5` — "docs: fix 4 broken links, 31 version-metadata syncs, 11 cross-reference gaps"
+**Scope**: Phase 1 ONLY (Anchors & Links). Phase 2/3 not re-executed.
+**Files scanned**: 105 markdown files (was 104 at baseline; +1 is `DOC_REVIEW_REPORT.md` itself, committed by the fix).
+**Total anchors registered**: 3,703 (GitHub-style slug, duplicate-suffix aware, fenced code + HTML comments excluded).
+**Inline-code handling**: Multi-backtick spans (e.g. `` `...` ``) are now blanked before link extraction to avoid false positives on example snippets.
+
+### Before / After
+
+| Metric | Baseline (2026-04-14) | Post-Fix (2026-04-15) | Delta |
+|---|---|---|---|
+| Files scanned | 104 | 105 | +1 (review report added) |
+| Total anchors | — | 3,703 | — |
+| Broken intra-file `](#anchor)` refs | 0 | 0 | 0 |
+| Broken inter-file refs | 4 | 0 | -4 (all fixed) |
+| **Phase 1 Must-Fix items open** | **4** | **0** | **-4** |
+
+### Verified Fixes (Phase 1)
+
+| # | Location | Original Issue | Post-Fix State |
+|---|---|---|---|
+| 1 | `examples/integration_tests/README.md:946` | `../../docs/architecture.md` (lowercase) | Now `../../docs/ARCHITECTURE.md`. Resolves case-sensitively. |
+| 2 | `examples/integration_tests/README.md:947` | `../../docs/dicom-protocol.md` (nonexistent) | Now `../../docs/DICOM_CONFORMANCE_STATEMENT.md`. Target exists. |
+| 3 | `examples/integration_tests/README.md:948` | `../tests/README.md` (wrong depth) | Now `../../tests/` (directory link to valid path). |
+| 4 | `examples/integration_tests/scripts/README.md:63` | `../test_fixtures.hpp` (wrong ext) | Now `../test_fixtures.h`. Header exists. |
+
+### YAML Frontmatter Sync Spot-Check
+
+A sample of 10 of the 31 docs flagged in Must-Fix #7 was re-read and `doc_version` compared to the inline `**Version:**` field:
+
+| File | frontmatter `doc_version` | inline `**Version:**` | Status |
+|---|---|---|---|
+| `docs/API_REFERENCE.md` | `0.1.5.0` | `0.1.5.0` | MATCH |
+| `docs/ARCHITECTURE.md` | `0.1.4.0` | `0.1.4.0` | MATCH |
+| `docs/DICOM_CONFORMANCE_STATEMENT.md` | `0.1.0` | `0.1.0` | MATCH |
+| `docs/PRD.md` | `0.2.0.0` | `0.2.0.0` | MATCH |
+| `docs/SDS.md` | `0.2.0` | `0.2.0` | MATCH |
+| `docs/SDS_AI.md` | `2.0.0` | `2.0.0` | MATCH |
+| `docs/SDS_NETWORK_V2.md` | `2.0.0` | `2.0.0` | MATCH |
+| `docs/SDS_TRACEABILITY.md` | `3.0.0` | `3.0.0` | MATCH |
+| `docs/SRS.md` | `0.1.3.2` | `0.1.3.2` | MATCH |
+| `docs/database/MIGRATION_GUIDE.md` | `1.0.1` | `1.0.1` | MATCH |
+
+**Spot-check result**: 10 / 10 MATCH. No residual frontmatter/inline drift observed in the sampled set. This is consistent with the fix commit's description "YAML frontmatter doc_version synced with inline Version across 31 SSOT docs." (Note: cross-doc SSOT contradiction resolution itself — Must-Fix #7 — is Phase 3, and the full 31-doc re-audit is out of scope for this Phase 1 re-run; the spot-check is informational only.)
+
+### Residual Items
+
+None for Phase 1. All four baseline Must-Fix inter-file links are resolved and no new inter-file or intra-file breakage is observed.
+
+### Regressions
+
+None. The re-scan produced zero broken intra-file `](#anchor)` references and zero broken inter-file references across all 3,703 anchors and the 105-file walk. No previously-valid link was invalidated by the fix commit.
+
+### Verdict
+
+**PASS** — Phase 1 regression-free. All four baseline Phase 1 Must-Fix items are closed by commit `4af12bb5`. The re-scan detected zero regressions and zero residuals in the anchors-and-links surface. Phase 2 / Phase 3 items remain out of scope for this re-validation and are unchanged from the baseline report.
+
+---
+
 *End of report.*
