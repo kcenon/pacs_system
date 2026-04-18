@@ -325,13 +325,13 @@ VoidResult audit_key_manager::load_from_env() {
         audit_cipher_key k;
         k.key_id = id;
         auto r1 = decode_key(key_val, k.data_key.data(), k.data_key.size());
-        if (!r1) {
+        if (!r1.is_ok()) {
             return pacs_void_error(
                 kcenon::common::error::codes::common_errors::invalid_argument,
                 "failed to decode " + key_env);
         }
         auto r2 = decode_key(mac_val, k.mac_key.data(), k.mac_key.size());
-        if (!r2) {
+        if (!r2.is_ok()) {
             return pacs_void_error(
                 kcenon::common::error::codes::common_errors::invalid_argument,
                 "failed to decode " + mac_env);
@@ -389,7 +389,7 @@ bool hmac_sha256(const std::uint8_t* key,
 Result<std::string> audit_log_cipher::encrypt_record(
     const std::string& plaintext) const {
     auto key_r = keys_.active();
-    if (!key_r) {
+    if (!key_r.is_ok()) {
         return pacs_error<std::string>(
             kcenon::common::error::codes::common_errors::not_found,
             "no active audit encryption key");
@@ -641,7 +641,7 @@ Result<std::string> audit_log_cipher::decrypt_record(
 
 VoidResult audit_log_cipher::verify_record(const std::string& encoded) const {
     auto r = decrypt_record(encoded);
-    if (!r) return VoidResult(r.error());
+    if (!r.is_ok()) return VoidResult(r.error());
     return kcenon::common::ok();
 }
 

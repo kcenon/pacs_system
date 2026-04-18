@@ -40,7 +40,8 @@ audit_cipher_key make_test_key(const std::string& id, std::uint8_t seed) {
 
 TEST_CASE("base64 round trip with various lengths",
           "[security][audit_cipher]") {
-    for (std::size_t n : {0u, 1u, 2u, 3u, 4u, 5u, 16u, 31u, 32u, 64u, 100u}) {
+    const std::array<std::size_t, 11> lengths{0, 1, 2, 3, 4, 5, 16, 31, 32, 64, 100};
+    for (std::size_t n : lengths) {
         std::vector<std::uint8_t> buf(n);
         for (std::size_t i = 0; i < n; ++i) {
             buf[i] = static_cast<std::uint8_t>((i * 17u + 3u) & 0xFFu);
@@ -100,51 +101,52 @@ TEST_CASE("audit_key_manager registers, activates and looks up keys",
 
     // First registered key becomes active automatically
     auto act = mgr.active();
-    REQUIRE(act);
+    REQUIRE(act.is_ok());
     CHECK(act.value().key_id == "kA");
 
     auto r = mgr.set_active("kB");
-    REQUIRE(r);
-    CHECK(mgr.active().value().key_id == "kB");
+    REQUIRE(r.is_ok());
+    auto act2 = mgr.active();
+    REQUIRE(act2.is_ok());
+    CHECK(act2.value().key_id == "kB");
 
     CHECK(mgr.find("kB") != nullptr);
     CHECK(mgr.find("missing") == nullptr);
 
     auto bad = mgr.set_active("missing");
-    CHECK_FALSE(bad);
+    CHECK_FALSE(bad.is_ok());
 
     mgr.forget("kB");
     CHECK(mgr.size() == 1);
     // After forgetting the active key, no active key is set
-    CHECK_FALSE(mgr.active());
+    CHECK_FALSE(mgr.active().is_ok());
 }
 
 TEST_CASE("audit_key_manager::decode_key accepts hex and base64",
           "[security][audit_cipher]") {
     std::array<std::uint8_t, 32> buf{};
 
-    // 32 bytes of 0xAB as hex
-    const std::string hex(64, 'a');  // invalid hex letter set actually 'a'=10
-    // Build proper hex input
+    // 32 bytes of 0xAB as hex (64 hex chars)
     std::string hex_input;
     hex_input.reserve(64);
     for (int i = 0; i < 32; ++i) hex_input.append("ab");
     REQUIRE(audit_key_manager::decode_key(hex_input,
-                                          buf.data(), buf.size()));
+                                          buf.data(), buf.size()).is_ok());
     for (auto b : buf) CHECK(b == 0xab);
 
     // Same 32 bytes as base64
     std::string b64 = detail::base64_encode(buf.data(), buf.size());
     std::array<std::uint8_t, 32> out{};
-    REQUIRE(audit_key_manager::decode_key(b64, out.data(), out.size()));
+    REQUIRE(audit_key_manager::decode_key(b64,
+                                          out.data(), out.size()).is_ok());
     CHECK(out == buf);
 
     // Wrong length
     CHECK_FALSE(audit_key_manager::decode_key("deadbeef",
-                                              buf.data(), buf.size()));
+                                              buf.data(), buf.size()).is_ok());
     // Garbage
     CHECK_FALSE(audit_key_manager::decode_key("$$$$",
-                                              buf.data(), buf.size()));
+                                              buf.data(), buf.size()).is_ok());
 }
 
 // =============================================================================
@@ -161,14 +163,14 @@ TEST_CASE("audit_log_cipher round-trips plaintext",
 
     const std::string pt = "<AuditMessage>payload-123</AuditMessage>";
     auto enc = cipher.encrypt_record(pt);
-    REQUIRE(enc);
+    REQUIRE(enc.is_ok());
     const std::string& record = enc.value();
 
     CHECK(audit_log_cipher::looks_encrypted(record));
     CHECK(record.find(pt) == std::string::npos);  // not plaintext
 
     auto dec = cipher.decrypt_record(record);
-    REQUIRE(dec);
+    REQUIRE(dec.is_ok());
     CHECK(dec.value() == pt);
 }
 
@@ -181,8 +183,8 @@ TEST_CASE("audit_log_cipher produces different IVs for identical plaintext",
     const std::string pt = "same payload";
     auto r1 = cipher.encrypt_record(pt);
     auto r2 = cipher.encrypt_record(pt);
-    REQUIRE(r1);
-    REQUIRE(r2);
+    REQUIRE(r1.is_ok());
+    REQUIRE(r2.is_ok());
     CHECK(r1.value() != r2.value());
 }
 
@@ -193,7 +195,7 @@ TEST_CASE("audit_log_cipher rejects tampered ciphertext",
     audit_log_cipher cipher(mgr);
 
     auto enc = cipher.encrypt_record("tamper me");
-    REQUIRE(enc);
+    REQUIRE(enc.is_ok());
     std::string rec = enc.value();
 
     // Flip a ciphertext byte. Layout: tag|ver|id|iv|CT|tag|hmac
@@ -212,7 +214,7 @@ TEST_CASE("audit_log_cipher rejects tampered ciphertext",
     rec[ct_start] = (rec[ct_start] == 'A' ? 'B' : 'A');
 
     auto dec = cipher.decrypt_record(rec);
-    CHECK_FALSE(dec);
+    CHECK_FALSE(dec.is_ok());
 }
 
 TEST_CASE("audit_log_cipher rejects tampered HMAC",
@@ -222,7 +224,7 @@ TEST_CASE("audit_log_cipher rejects tampered HMAC",
     audit_log_cipher cipher(mgr);
 
     auto enc = cipher.encrypt_record("hmac guard");
-    REQUIRE(enc);
+    REQUIRE(enc.is_ok());
     std::string rec = enc.value();
 
     // Flip last char of record (part of the HMAC)
@@ -232,7 +234,7 @@ TEST_CASE("audit_log_cipher rejects tampered HMAC",
     last = (last == 'A' ? 'B' : 'A');
 
     auto dec = cipher.decrypt_record(rec);
-    CHECK_FALSE(dec);
+    CHECK_FALSE(dec.is_ok());
 }
 
 TEST_CASE("audit_log_cipher rejects unknown key id",
@@ -242,7 +244,7 @@ TEST_CASE("audit_log_cipher rejects unknown key id",
     audit_log_cipher writer(mgr);
 
     auto enc = writer.encrypt_record("x");
-    REQUIRE(enc);
+    REQUIRE(enc.is_ok());
 
     // Fresh manager without the "writer" key
     audit_key_manager other;
@@ -250,7 +252,7 @@ TEST_CASE("audit_log_cipher rejects unknown key id",
     audit_log_cipher reader(other);
 
     auto dec = reader.decrypt_record(enc.value());
-    CHECK_FALSE(dec);
+    CHECK_FALSE(dec.is_ok());
 }
 
 TEST_CASE("audit_log_cipher supports key rotation",
@@ -261,13 +263,13 @@ TEST_CASE("audit_log_cipher supports key rotation",
     mgr.register_key(make_test_key("v1", 0x40));
     audit_log_cipher cipher(mgr);
     auto old_rec = cipher.encrypt_record("legacy message");
-    REQUIRE(old_rec);
+    REQUIRE(old_rec.is_ok());
 
     // Phase 2: rotate to v2, keep v1 for decryption of historical records
     mgr.register_key(make_test_key("v2", 0x50));
-    REQUIRE(mgr.set_active("v2"));
+    REQUIRE(mgr.set_active("v2").is_ok());
     auto new_rec = cipher.encrypt_record("post-rotation message");
-    REQUIRE(new_rec);
+    REQUIRE(new_rec.is_ok());
 
     // Sanity: new records embed v2
     CHECK(new_rec.value().find("|v2|") != std::string::npos);
@@ -275,21 +277,21 @@ TEST_CASE("audit_log_cipher supports key rotation",
 
     // Both still decrypt
     auto old_pt = cipher.decrypt_record(old_rec.value());
-    REQUIRE(old_pt);
+    REQUIRE(old_pt.is_ok());
     CHECK(old_pt.value() == "legacy message");
 
     auto new_pt = cipher.decrypt_record(new_rec.value());
-    REQUIRE(new_pt);
+    REQUIRE(new_pt.is_ok());
     CHECK(new_pt.value() == "post-rotation message");
 
     // Phase 3: retire v1 — historical records become undecryptable
     mgr.forget("v1");
     auto lost = cipher.decrypt_record(old_rec.value());
-    CHECK_FALSE(lost);
+    CHECK_FALSE(lost.is_ok());
 
     // But v2 still works
     auto still = cipher.decrypt_record(new_rec.value());
-    REQUIRE(still);
+    REQUIRE(still.is_ok());
     CHECK(still.value() == "post-rotation message");
 }
 
@@ -299,10 +301,10 @@ TEST_CASE("audit_log_cipher rejects malformed records",
     mgr.register_key(make_test_key("k1", 0x09));
     audit_log_cipher cipher(mgr);
 
-    CHECK_FALSE(cipher.decrypt_record(""));
-    CHECK_FALSE(cipher.decrypt_record("not-a-record"));
-    CHECK_FALSE(cipher.decrypt_record("PACSAUDIT|v1|k1|AA|BB|CC"));
-    CHECK_FALSE(cipher.decrypt_record("PACSAUDIT|v0|k1|AA|BB|CC|DD"));
+    CHECK_FALSE(cipher.decrypt_record("").is_ok());
+    CHECK_FALSE(cipher.decrypt_record("not-a-record").is_ok());
+    CHECK_FALSE(cipher.decrypt_record("PACSAUDIT|v1|k1|AA|BB|CC").is_ok());
+    CHECK_FALSE(cipher.decrypt_record("PACSAUDIT|v0|k1|AA|BB|CC|DD").is_ok());
 }
 
 TEST_CASE("audit_log_cipher fails gracefully without an active key",
@@ -311,7 +313,7 @@ TEST_CASE("audit_log_cipher fails gracefully without an active key",
     audit_log_cipher cipher(mgr);
 
     auto enc = cipher.encrypt_record("anything");
-    CHECK_FALSE(enc);
+    CHECK_FALSE(enc.is_ok());
 }
 
 TEST_CASE("audit_log_cipher tolerates trailing newline",
@@ -321,10 +323,10 @@ TEST_CASE("audit_log_cipher tolerates trailing newline",
     audit_log_cipher cipher(mgr);
 
     auto enc = cipher.encrypt_record("with newline");
-    REQUIRE(enc);
+    REQUIRE(enc.is_ok());
     std::string with_nl = enc.value() + "\n";
     auto dec = cipher.decrypt_record(with_nl);
-    REQUIRE(dec);
+    REQUIRE(dec.is_ok());
     CHECK(dec.value() == "with newline");
 }
 
@@ -335,8 +337,8 @@ TEST_CASE("verify_record returns ok for valid records",
     audit_log_cipher cipher(mgr);
 
     auto enc = cipher.encrypt_record("verifiable");
-    REQUIRE(enc);
-    CHECK(cipher.verify_record(enc.value()));
+    REQUIRE(enc.is_ok());
+    CHECK(cipher.verify_record(enc.value()).is_ok());
 }
 
 #endif  // PACS_WITH_DIGITAL_SIGNATURES
