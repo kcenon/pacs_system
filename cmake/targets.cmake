@@ -866,6 +866,17 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
     )
+    # Issue #1097: network_system's public header secure_session.h includes
+    # "kcenon/network/internal/tcp/secure_tcp_socket.h", which resolves via a
+    # build-time symlink at ${network_system_BINARY_DIR}/internal_include. That
+    # directory is only attached as PRIVATE to network_system's own target, so
+    # dicom_session.cpp fails to compile without it being exposed here too.
+    if(TARGET network_system)
+        target_include_directories(pacs_integration
+            PRIVATE
+                $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/network_system_build/internal_include>
+        )
+    endif()
     # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
     target_compile_options(pacs_integration PRIVATE
         $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
