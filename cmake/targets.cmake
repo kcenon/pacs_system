@@ -468,6 +468,11 @@ set(PACS_SECURITY_SOURCES
     src/security/tls_policy.cpp
 )
 
+# Audit log cipher (Issue #1102) - compiles without OpenSSL as a stub
+list(APPEND PACS_SECURITY_SOURCES
+    src/security/audit_log_cipher.cpp
+)
+
 # Digital signature sources (requires OpenSSL - Issue #191)
 if(PACS_OPENSSL_FOUND)
     list(APPEND PACS_SECURITY_SOURCES

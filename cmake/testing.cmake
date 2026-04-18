@@ -223,6 +223,7 @@ if(PACS_BUILD_TESTS)
         tests/security/atna_service_auditor_test.cpp
         tests/security/atna_config_test.cpp
         tests/security/tls_policy_test.cpp
+        tests/security/audit_log_cipher_test.cpp
     )
 
     # Add digital signature tests if OpenSSL is available (Issue #191)
