@@ -79,7 +79,12 @@ network_adapter::connect(const connection_config& config) {
         }
         client_cfg.verify_certificate = config.tls.verify_peer;
 
-        auto client = facade.create_client(client_cfg);
+        auto client_result = facade.create_client(client_cfg);
+        if (client_result.is_err()) {
+            return Result<session_ptr>(error_info(
+                "Connection failed: " + client_result.error().message));
+        }
+        auto client = client_result.value();
         if (!client) {
             return Result<session_ptr>(error_info("Connection failed: unable to create client"));
         }
