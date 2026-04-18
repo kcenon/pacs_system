@@ -647,6 +647,258 @@ TEST_CASE("pdu_decoder error handling", "[network][pdu_decoder]") {
 }
 
 // ============================================================================
+// Regression Tests: Bounds Checks on Length-Prefixed Reads
+// ============================================================================
+//
+// These tests cover defensive bounds checks added in response to issue #1098.
+// Each test constructs a synthetic PDU whose declared length field is
+// inconsistent with the bytes that follow (e.g., an item whose declared
+// length is smaller than the fixed header the item is supposed to contain,
+// or a nested TLV whose stated size would require reading past the outer
+// buffer). The decoder must return an error cleanly instead of reading
+// out of bounds.
+//
+// Byte sequences below are constructed by hand from the public DICOM PS3.8
+// Upper Layer Protocol format; no fuzzer artifact is embedded.
+
+namespace {
+
+// Helper: build a minimum-sized A-ASSOCIATE-RQ fixed header followed by
+// caller-supplied variable-items bytes. The outer PDU length field is set
+// to reflect the full body.
+std::vector<uint8_t> make_associate_rq_with_items(
+    const std::vector<uint8_t>& variable_items) {
+    std::vector<uint8_t> buf;
+    // Reserve space: 6 (PDU header) + 68 (ASSOCIATE header) + items
+    const uint32_t body_len = 68u + static_cast<uint32_t>(variable_items.size());
+    buf.reserve(6 + body_len);
+
+    // PDU header: type 0x01, reserved 0x00, 4-byte big-endian length
+    buf.push_back(0x01);
+    buf.push_back(0x00);
+    buf.push_back(static_cast<uint8_t>((body_len >> 24) & 0xFF));
+    buf.push_back(static_cast<uint8_t>((body_len >> 16) & 0xFF));
+    buf.push_back(static_cast<uint8_t>((body_len >> 8) & 0xFF));
+    buf.push_back(static_cast<uint8_t>(body_len & 0xFF));
+
+    // ASSOCIATE fixed header (68 bytes):
+    //   2 bytes protocol version (0x0001)
+    //   2 bytes reserved
+    //   16 bytes called AE title (spaces)
+    //   16 bytes calling AE title (spaces)
+    //   32 bytes reserved
+    buf.push_back(0x00);
+    buf.push_back(0x01);        // protocol version = 1
+    buf.push_back(0x00);
+    buf.push_back(0x00);        // reserved
+    for (int i = 0; i < 16; ++i) buf.push_back(' ');   // called AE
+    for (int i = 0; i < 16; ++i) buf.push_back(' ');   // calling AE
+    for (int i = 0; i < 32; ++i) buf.push_back(0x00);  // reserved
+
+    // Variable items
+    buf.insert(buf.end(), variable_items.begin(), variable_items.end());
+    return buf;
+}
+
+// Same for A-ASSOCIATE-AC (PDU type 0x02).
+std::vector<uint8_t> make_associate_ac_with_items(
+    const std::vector<uint8_t>& variable_items) {
+    auto buf = make_associate_rq_with_items(variable_items);
+    buf[0] = 0x02;  // flip type to AC
+    return buf;
+}
+
+}  // namespace
+
+TEST_CASE("pdu_decoder regression: length-prefixed bounds checks",
+          "[network][pdu_decoder][security]") {
+
+    SECTION("presentation context RQ with item_length=0 is rejected cleanly") {
+        // Item header declares a presentation-context-RQ (type 0x20) whose
+        // length field is 0. Before the fix, the decoder would still read
+        // data[pos] as the context id, crossing outside the item body.
+        std::vector<uint8_t> items = {
+            0x20, 0x00,       // type = PC-RQ, reserved
+            0x00, 0x00        // item length = 0 (no body)
+        };
+        auto bytes = make_associate_rq_with_items(items);
+        auto result = pdu_decoder::decode_associate_rq(bytes);
+        // The decoder must either return an error or succeed with zero
+        // presentation contexts. It must never read past the declared
+        // item body. Because decode_variable_items swallows errors inside
+        // decode_associate_rq, we accept either outcome here and rely on
+        // ASAN/UBSan in CI to flag the invalid read if the bounds check
+        // regresses.
+        if (result.is_ok()) {
+            CHECK(result.value().presentation_contexts.empty());
+        } else {
+            CHECK(result.is_err());
+        }
+    }
+
+    SECTION("presentation context RQ with item_length=1 is rejected cleanly") {
+        // item_length = 1 leaves no room for the reserved+sub-items portion
+        // after the context_id. Decoder must treat the item as malformed
+        // rather than indexing past its body.
+        std::vector<uint8_t> items = {
+            0x20, 0x00,
+            0x00, 0x01,
+            0x05              // stray byte inside the item body
+        };
+        auto bytes = make_associate_rq_with_items(items);
+        auto result = pdu_decoder::decode_associate_rq(bytes);
+        if (result.is_ok()) {
+            CHECK(result.value().presentation_contexts.empty());
+        } else {
+            CHECK(result.is_err());
+        }
+    }
+
+    SECTION("presentation context AC with item_length=2 is rejected cleanly") {
+        // AC body needs 4 bytes (id + reserved + result + reserved) before
+        // any sub-items. item_length = 2 leaves data[pos+2] out of the
+        // declared body and would cause a read past the TLV bounds.
+        std::vector<uint8_t> items = {
+            0x21, 0x00,
+            0x00, 0x02,
+            0x01, 0x00        // only id + one reserved byte inside body
+        };
+        auto bytes = make_associate_ac_with_items(items);
+        auto result = pdu_decoder::decode_associate_ac(bytes);
+        if (result.is_ok()) {
+            CHECK(result.value().presentation_contexts.empty());
+        } else {
+            CHECK(result.is_err());
+        }
+    }
+
+    SECTION("nested sub-item length exceeding outer PC body is ignored") {
+        // Construct a presentation-context-RQ whose inner abstract-syntax
+        // sub-item declares a length larger than the outer PC body. The
+        // decoder should stop processing the inner sub-items without
+        // reading past pc_end.
+        std::vector<uint8_t> items = {
+            0x20, 0x00,
+            0x00, 0x08,       // outer PC body = 8 bytes
+            0x01,             // context id
+            0x00, 0x00, 0x00, // reserved
+            // inner TLV: abstract syntax with length = 0xFFFF
+            0x30, 0x00,
+            0xFF, 0xFF
+        };
+        auto bytes = make_associate_rq_with_items(items);
+        auto result = pdu_decoder::decode_associate_rq(bytes);
+        REQUIRE(result.is_ok());
+        // Inner sub-item was dropped; PC parsed with no abstract syntax.
+        REQUIRE(result.value().presentation_contexts.size() == 1);
+        CHECK(result.value().presentation_contexts[0].abstract_syntax.empty());
+    }
+
+    SECTION("variable item declared length exceeding outer buffer is rejected") {
+        // Outer item declares length 0x40 but only a few bytes follow.
+        // decode_variable_items must return buffer_overflow.
+        std::vector<uint8_t> items = {
+            0x10, 0x00,
+            0x00, 0x40,       // item length far beyond what follows
+            0x01, 0x02, 0x03
+        };
+        auto bytes = make_associate_rq_with_items(items);
+        // PDU-header length field is consistent (the outer length equals
+        // ASSOCIATE_HEADER + items.size()), so validate_pdu_header passes.
+        // The inner variable-items decoder should reject the oversized item.
+        auto result = pdu_decoder::decode_associate_rq(bytes);
+        // decode_associate_rq silently ignores variable-items errors, so the
+        // top-level result is ok with no contexts. The important assertion
+        // is that no out-of-bounds read occurs (verified under ASAN in CI).
+        if (result.is_ok()) {
+            CHECK(result.value().presentation_contexts.empty());
+            CHECK(result.value().user_info.implementation_class_uid.empty());
+        } else {
+            CHECK(result.is_err());
+        }
+    }
+
+    SECTION("P-DATA-TF PDV item length exceeding PDU body is rejected") {
+        // PDV item_length = 0x100 but PDU body only has 10 bytes left.
+        std::vector<uint8_t> bytes = {
+            0x04, 0x00,                   // P-DATA-TF, reserved
+            0x00, 0x00, 0x00, 0x0A,       // PDU length = 10
+            0x00, 0x00, 0x01, 0x00,       // PDV length = 256 (exceeds body)
+            0x01, 0x00,                   // context id + control (partial)
+            0xAA, 0xBB, 0xCC, 0xDD
+        };
+        auto result = pdu_decoder::decode_p_data_tf(bytes);
+        CHECK(result.is_err());
+    }
+
+    SECTION("P-DATA-TF PDV item length of 1 (< minimum 2) is rejected") {
+        // The PDV body must contain at least context_id + control (2 bytes).
+        std::vector<uint8_t> bytes = {
+            0x04, 0x00,
+            0x00, 0x00, 0x00, 0x05,       // PDU length = 5
+            0x00, 0x00, 0x00, 0x01,       // PDV length = 1
+            0x01                          // stray byte
+        };
+        auto result = pdu_decoder::decode_p_data_tf(bytes);
+        CHECK(result.is_err());
+    }
+
+    SECTION("SCP/SCU role selection with oversized UID length is rejected") {
+        // User-information sub-item 0x54 where the inner uid_length field
+        // is larger than the sub-item's remaining bytes. Encoded path must
+        // skip the role rather than read past sub_length.
+        //
+        // Build: User Info (0x50) containing only a role-selection (0x54)
+        // sub-item with uid_length = 0xFFFF but sub_length = 4.
+        std::vector<uint8_t> user_info_body = {
+            0x54, 0x00,
+            0x00, 0x04,       // sub_length = 4 (just enough for the header)
+            0xFF, 0xFF,       // uid_length = 65535 (attacker-declared)
+            0x01, 0x00        // scu/scp role bytes (logically present but
+                              // unreachable given the declared uid_length)
+        };
+        std::vector<uint8_t> items;
+        items.push_back(0x50);
+        items.push_back(0x00);
+        items.push_back(static_cast<uint8_t>(
+            (user_info_body.size() >> 8) & 0xFF));
+        items.push_back(static_cast<uint8_t>(user_info_body.size() & 0xFF));
+        items.insert(items.end(), user_info_body.begin(), user_info_body.end());
+
+        auto bytes = make_associate_rq_with_items(items);
+        auto result = pdu_decoder::decode_associate_rq(bytes);
+        REQUIRE(result.is_ok());
+        // Role was dropped; no out-of-bounds read occurred.
+        CHECK(result.value().user_info.role_selections.empty());
+    }
+
+    SECTION("SCP/SCU role selection with odd uid_length near uint16 max") {
+        // Guard against uint16_t wrap when computing padded_uid_length
+        // (odd uid_length + 1). Even though bounds checks will reject the
+        // payload, the padding computation must not overflow and produce
+        // a misleadingly small value.
+        std::vector<uint8_t> user_info_body = {
+            0x54, 0x00,
+            0x00, 0x04,       // sub_length = 4
+            0xFF, 0xFF        // uid_length = 65535 (odd, max uint16)
+            // no role bytes -> declared size 4 is respected
+        };
+        std::vector<uint8_t> items;
+        items.push_back(0x50);
+        items.push_back(0x00);
+        items.push_back(static_cast<uint8_t>(
+            (user_info_body.size() >> 8) & 0xFF));
+        items.push_back(static_cast<uint8_t>(user_info_body.size() & 0xFF));
+        items.insert(items.end(), user_info_body.begin(), user_info_body.end());
+
+        auto bytes = make_associate_rq_with_items(items);
+        auto result = pdu_decoder::decode_associate_rq(bytes);
+        REQUIRE(result.is_ok());
+        CHECK(result.value().user_info.role_selections.empty());
+    }
+}
+
+// ============================================================================
 // pdu_decode_error to_string Tests
 // ============================================================================
 
