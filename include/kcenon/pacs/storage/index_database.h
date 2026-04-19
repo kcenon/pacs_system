@@ -141,7 +141,12 @@ public:
      * Opens an existing database or creates a new one at the specified path.
      * Automatically runs pending migrations.
      *
-     * @param db_path Path to the database file, or ":memory:" for in-memory DB
+     * @param db_path Path to the database file, or ":memory:" for in-memory DB.
+     *                When compiled with PACS_WITH_DATABASE_SYSTEM, ":memory:"
+     *                is silently redirected to a unique temporary file so the
+     *                database_system SQLite backend can attach to it; WAL mode
+     *                (if requested via @p config.wal_mode) is enabled on that
+     *                rewritten path, and the temp file is removed on close.
      * @param config Configuration options for database behavior
      * @return Result containing the database instance or error
      */
