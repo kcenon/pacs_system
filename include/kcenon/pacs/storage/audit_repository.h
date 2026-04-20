@@ -156,18 +156,18 @@ public:
     audit_repository(audit_repository&&) noexcept;
     auto operator=(audit_repository&&) noexcept -> audit_repository&;
 
-    /// @copydoc kcenon::pacs::storage::audit_repository::add_audit_log
+    /// @brief Append a new audit record
     [[nodiscard]] auto add_audit_log(const audit_record& record)
         -> Result<int64_t>;
-    /// @copydoc kcenon::pacs::storage::audit_repository::query_audit_log
+    /// @brief Query audit records using a structured filter
     [[nodiscard]] auto query_audit_log(const audit_query& query) const
         -> Result<std::vector<audit_record>>;
-    /// @copydoc kcenon::pacs::storage::audit_repository::find_audit_by_pk
+    /// @brief Look up a single audit record by primary key
     [[nodiscard]] auto find_audit_by_pk(int64_t pk) const
         -> std::optional<audit_record>;
-    /// @copydoc kcenon::pacs::storage::audit_repository::audit_count
+    /// @brief Total number of audit records currently stored
     [[nodiscard]] auto audit_count() const -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::audit_repository::cleanup_old_audit_logs
+    /// @brief Delete audit records older than the specified age
     [[nodiscard]] auto cleanup_old_audit_logs(std::chrono::hours age)
         -> Result<size_t>;
 

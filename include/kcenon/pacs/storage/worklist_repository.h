@@ -209,37 +209,37 @@ public:
     worklist_repository(worklist_repository&&) noexcept;
     auto operator=(worklist_repository&&) noexcept -> worklist_repository&;
 
-    /// @copydoc kcenon::pacs::storage::worklist_repository::add_worklist_item
+    /// @brief Insert a new worklist item; returns the new primary key
     [[nodiscard]] auto add_worklist_item(const worklist_item& item)
         -> Result<int64_t>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::update_worklist_status
+    /// @brief Update SPS status for a worklist item identified by (step_id, accession)
     [[nodiscard]] auto update_worklist_status(std::string_view step_id,
                                               std::string_view accession_no,
                                               std::string_view new_status)
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::query_worklist
+    /// @brief Query worklist items matching a structured filter
     [[nodiscard]] auto query_worklist(const worklist_query& query) const
         -> Result<std::vector<worklist_item>>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::find_worklist_item
+    /// @brief Look up a single worklist item by (step_id, accession)
     [[nodiscard]] auto find_worklist_item(std::string_view step_id,
                                           std::string_view accession_no) const
         -> std::optional<worklist_item>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::find_worklist_by_pk
+    /// @brief Look up a worklist item by database primary key
     [[nodiscard]] auto find_worklist_by_pk(int64_t pk) const
         -> std::optional<worklist_item>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::delete_worklist_item
+    /// @brief Delete a worklist item by (step_id, accession)
     [[nodiscard]] auto delete_worklist_item(std::string_view step_id,
                                             std::string_view accession_no)
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::cleanup_old_worklist_items
+    /// @brief Remove worklist items older than the given age
     [[nodiscard]] auto cleanup_old_worklist_items(std::chrono::hours age)
         -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::cleanup_worklist_items_before
+    /// @brief Remove worklist items scheduled before an absolute time point
     [[nodiscard]] auto cleanup_worklist_items_before(
         std::chrono::system_clock::time_point before) -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::worklist_count()
+    /// @brief Total number of worklist items currently stored
     [[nodiscard]] auto worklist_count() const -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::worklist_repository::worklist_count(std::string_view)
+    /// @brief Number of worklist items in a specific SPS status
     [[nodiscard]] auto worklist_count(std::string_view status) const
         -> Result<size_t>;
 

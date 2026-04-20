@@ -223,7 +223,7 @@ public:
     mpps_repository(mpps_repository&&) noexcept;
     auto operator=(mpps_repository&&) noexcept -> mpps_repository&;
 
-    /// @copydoc kcenon::pacs::storage::mpps_repository::create_mpps(std::string_view,std::string_view,std::string_view,std::string_view,std::string_view,std::string_view)
+    /// @brief Create a new MPPS record in IN_PROGRESS state (inline fields)
     [[nodiscard]] auto create_mpps(std::string_view mpps_uid,
                                    std::string_view station_ae = "",
                                    std::string_view modality = "",
@@ -231,36 +231,36 @@ public:
                                    std::string_view accession_no = "",
                                    std::string_view start_datetime = "")
         -> Result<int64_t>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::create_mpps(const mpps_record&)
+    /// @brief Create a new MPPS record from a populated value object
     [[nodiscard]] auto create_mpps(const mpps_record& record) -> Result<int64_t>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::update_mpps(std::string_view,std::string_view,std::string_view,std::string_view)
+    /// @brief Apply an MPPS status transition (N-SET)
     [[nodiscard]] auto update_mpps(std::string_view mpps_uid,
                                    std::string_view new_status,
                                    std::string_view end_datetime = "",
                                    std::string_view performed_series = "")
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::update_mpps(const mpps_record&)
+    /// @brief Persist all fields from an MPPS record
     [[nodiscard]] auto update_mpps(const mpps_record& record) -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::find_mpps
+    /// @brief Look up an MPPS record by MPPS SOP Instance UID
     [[nodiscard]] auto find_mpps(std::string_view mpps_uid) const
         -> std::optional<mpps_record>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::find_mpps_by_pk
+    /// @brief Look up an MPPS record by database primary key
     [[nodiscard]] auto find_mpps_by_pk(int64_t pk) const
         -> std::optional<mpps_record>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::list_active_mpps
+    /// @brief List non-terminal MPPS records for a station AE
     [[nodiscard]] auto list_active_mpps(std::string_view station_ae) const
         -> Result<std::vector<mpps_record>>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::find_mpps_by_study
+    /// @brief Find all MPPS records referencing a Study Instance UID
     [[nodiscard]] auto find_mpps_by_study(std::string_view study_uid) const
         -> Result<std::vector<mpps_record>>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::search_mpps
+    /// @brief Search MPPS records using a structured query
     [[nodiscard]] auto search_mpps(const mpps_query& query) const
         -> Result<std::vector<mpps_record>>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::delete_mpps
+    /// @brief Delete an MPPS record by MPPS SOP Instance UID
     [[nodiscard]] auto delete_mpps(std::string_view mpps_uid) -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::mpps_count()
+    /// @brief Total number of MPPS records currently stored
     [[nodiscard]] auto mpps_count() const -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::mpps_repository::mpps_count(std::string_view)
+    /// @brief Number of MPPS records in a specific status
     [[nodiscard]] auto mpps_count(std::string_view status) const
         -> Result<size_t>;
 

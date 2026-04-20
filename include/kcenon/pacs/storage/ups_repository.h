@@ -234,42 +234,42 @@ public:
     ups_repository(ups_repository&&) noexcept;
     auto operator=(ups_repository&&) noexcept -> ups_repository&;
 
-    /// @copydoc kcenon::pacs::storage::ups_repository::create_ups_workitem
+    /// @brief Insert a new UPS work item (N-CREATE)
     [[nodiscard]] auto create_ups_workitem(const ups_workitem& workitem)
         -> Result<int64_t>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::update_ups_workitem
+    /// @brief Persist all fields of a UPS work item (N-SET)
     [[nodiscard]] auto update_ups_workitem(const ups_workitem& workitem)
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::ups_repository::change_ups_state
+    /// @brief Change the UPS Procedure Step State (N-ACTION Change State)
     [[nodiscard]] auto change_ups_state(std::string_view workitem_uid,
                                         std::string_view new_state,
                                         std::string_view transaction_uid = "")
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::ups_repository::find_ups_workitem
+    /// @brief Look up a UPS work item by SOP Instance UID
     [[nodiscard]] auto find_ups_workitem(std::string_view workitem_uid) const
         -> std::optional<ups_workitem>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::search_ups_workitems
+    /// @brief Search UPS work items with a structured query
     [[nodiscard]] auto search_ups_workitems(const ups_workitem_query& query) const
         -> Result<std::vector<ups_workitem>>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::delete_ups_workitem
+    /// @brief Delete a UPS work item by SOP Instance UID
     [[nodiscard]] auto delete_ups_workitem(std::string_view workitem_uid)
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::ups_repository::ups_workitem_count()
+    /// @brief Total number of UPS work items currently stored
     [[nodiscard]] auto ups_workitem_count() const -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::ups_workitem_count(std::string_view)
+    /// @brief Number of UPS work items in a specific state
     [[nodiscard]] auto ups_workitem_count(std::string_view state) const
         -> Result<size_t>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::subscribe_ups
+    /// @brief Register a UPS subscription (N-ACTION Subscribe)
     [[nodiscard]] auto subscribe_ups(const ups_subscription& subscription)
         -> Result<int64_t>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::unsubscribe_ups
+    /// @brief Remove a UPS subscription (N-ACTION Unsubscribe)
     [[nodiscard]] auto unsubscribe_ups(std::string_view subscriber_ae,
                                        std::string_view workitem_uid = "")
         -> VoidResult;
-    /// @copydoc kcenon::pacs::storage::ups_repository::get_ups_subscriptions
+    /// @brief List every subscription owned by a subscriber AE
     [[nodiscard]] auto get_ups_subscriptions(std::string_view subscriber_ae) const
         -> Result<std::vector<ups_subscription>>;
-    /// @copydoc kcenon::pacs::storage::ups_repository::get_ups_subscribers
+    /// @brief List subscriber AEs that should be notified for a work item
     [[nodiscard]] auto get_ups_subscribers(std::string_view workitem_uid) const
         -> Result<std::vector<std::string>>;
 
