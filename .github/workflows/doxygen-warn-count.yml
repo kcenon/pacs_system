@@ -1,10 +1,10 @@
 name: Doxygen Warning Count
 
 # Counts Doxygen warnings on every PR so the API-reference quality is
-# visible in review. Fails the job if the count regresses significantly
-# (> 500) so we never suddenly lose hundreds of annotated symbols. The
+# visible in review. Fails the job if the count regresses above the
+# current baseline (> 160) so we ratchet down as gaps are filled. The
 # strict <5 target from #1103 will be enforced in a follow-up PR once
-# the current baseline is measured and gaps are filled.
+# the annotation gaps in include/kcenon/pacs/** are closed.
 
 on:
   push:
@@ -72,7 +72,7 @@ jobs:
       - name: Enforce regression floor
         run: |
           COUNT=${{ steps.run.outputs.count }}
-          FLOOR=500
+          FLOOR=160
           if [ "$COUNT" -gt "$FLOOR" ]; then
             echo "::error::Doxygen warning count ($COUNT) exceeds regression floor ($FLOOR)."
             echo "Inspect the uploaded doxygen-warnings artifact and address the new warnings"
