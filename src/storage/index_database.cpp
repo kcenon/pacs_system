@@ -200,8 +200,12 @@ auto index_database::open(std::string_view db_path, const index_config& config)
             rc, "Failed to enable foreign keys", "storage");
     }
 
-    // Configure WAL mode for better concurrency (except for in-memory DB)
-    if (config.wal_mode && db_path != ":memory:") {
+    // Configure WAL mode for better concurrency (except for in-memory DB).
+    // Gate on effective_path, not the caller-supplied db_path: under
+    // PACS_WITH_DATABASE_SYSTEM, ":memory:" is rewritten to a temp file so
+    // database_system's SQLite backend can attach, and that rewritten file
+    // both needs and benefits from WAL.
+    if (config.wal_mode && effective_path != ":memory:") {
         rc = sqlite3_exec(db, "PRAGMA journal_mode = WAL;", nullptr, nullptr,
                           nullptr);
         if (rc != SQLITE_OK) {
@@ -221,8 +225,9 @@ auto index_database::open(std::string_view db_path, const index_config& config)
             rc, "Failed to set cache size", "storage");
     }
 
-    // Configure memory-mapped I/O
-    if (config.mmap_enabled && db_path != ":memory:") {
+    // Configure memory-mapped I/O. Use effective_path for the same reason
+    // as the WAL gate above.
+    if (config.mmap_enabled && effective_path != ":memory:") {
         auto mmap_sql = kcenon::pacs::compat::format("PRAGMA mmap_size = {};", config.mmap_size);
         rc = sqlite3_exec(db, mmap_sql.c_str(), nullptr, nullptr, nullptr);
         if (rc != SQLITE_OK) {
