@@ -116,6 +116,7 @@ INPUT                  = ./include \
                          ./src \
                          ./README.md \
                          ./docs/mainpage.dox \
+                         ./docs/groups.dox \
                          ./docs/tutorial_dicom_basics.dox \
                          ./docs/tutorial_store_workflow.dox \
                          ./docs/tutorial_query_retrieve.dox \

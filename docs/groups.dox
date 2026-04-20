@@ -1,0 +1,80 @@
+/**
+ * @defgroup core Core
+ * @brief DICOM primitives: tags, elements, datasets, Part 10 file I/O, dictionary.
+ *
+ * The `pacs_core` module is the foundation of the library. It owns the in-memory
+ * representation of DICOM data (dicom_dataset, dicom_element, dicom_tag) and
+ * the Part 10 file format reader/writer. Every higher-level module consumes
+ * types defined here.
+ *
+ * Header prefix: `kcenon/pacs/core/`
+ *
+ * Key entry points:
+ *   - @ref kcenon::pacs::core::dicom_dataset — DICOM Information Object
+ *   - @ref kcenon::pacs::core::dicom_element — Single tag/VR/value triple
+ *   - @ref kcenon::pacs::core::dicom_file    — Part 10 file reader/writer
+ */
+
+/**
+ * @defgroup network Network
+ * @brief DICOM Upper Layer: association state machine, PDU codec, DIMSE pipeline.
+ *
+ * The `pacs_network` module implements the TCP/TLS transport and DICOM
+ * protocol layers: Upper Layer state machine, PDU encoding/decoding,
+ * DIMSE command dispatch, and the networking pipeline that hands off
+ * requests to SCP service implementations in `pacs_services`.
+ *
+ * Header prefix: `kcenon/pacs/network/`
+ *
+ * Key entry points:
+ *   - @ref kcenon::pacs::network::association — Association state machine
+ *   - @ref kcenon::pacs::network::dicom_server — Server acceptor
+ */
+
+/**
+ * @defgroup security Security
+ * @brief Authentication, authorization, anonymization, TLS, and audit logging.
+ *
+ * The `pacs_security` module covers PS3.15 anonymization, RBAC, digital
+ * signatures, TLS configuration (BCP 195), and the at-rest encrypted
+ * audit log (ISO 27799, HIPAA §164.312(b)).
+ *
+ * Header prefix: `kcenon/pacs/security/`
+ *
+ * Key entry points:
+ *   - @ref kcenon::pacs::security::audit_key_manager — Audit log key management
+ *   - @ref kcenon::pacs::security::uid_mapping — UID pseudonymization
+ */
+
+/**
+ * @defgroup storage Storage
+ * @brief File/cloud storage back-ends and SQLite index database.
+ *
+ * The `pacs_storage` module manages where DICOM instances live on disk or
+ * in cloud object stores (file, S3, Azure Blob, HSM), and the SQLite-backed
+ * index that supports Query/Retrieve workloads.
+ *
+ * Header prefix: `kcenon/pacs/storage/`
+ *
+ * Key entry points:
+ *   - @ref kcenon::pacs::storage::storage_interface — Back-end abstraction
+ *   - @ref kcenon::pacs::storage::index_database    — SQLite index
+ *   - @ref kcenon::pacs::storage::file_storage      — Local file backend
+ */
+
+/**
+ * @defgroup web Web
+ * @brief REST, DICOMweb (WADO/STOW/QIDO), OAuth2, and metadata endpoints.
+ *
+ * The `pacs_web` module exposes the HTTP surface of the system: the
+ * DICOMweb services (WADO-RS, STOW-RS, QIDO-RS, WADO-URI) built on top of
+ * the Crow framework, JWT/OAuth2 authentication middleware, and
+ * administrative REST endpoints.
+ *
+ * Header prefix: `kcenon/pacs/web/`
+ *
+ * Key entry points:
+ *   - @ref kcenon::pacs::web::rest_server      — Main REST server
+ *   - @ref kcenon::pacs::web::metadata_service — DICOMweb metadata
+ *   - @ref kcenon::pacs::web::jwt_validator    — JWT signature validation
+ */

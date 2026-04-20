@@ -467,12 +467,13 @@ int main() {
 
 ## Documentation
 
+- 🌐 [API Reference (Doxygen)](https://kcenon.github.io/pacs_system/) — Hosted Doxygen output (generated from `include/kcenon/pacs/**`)
 - 📋 [Implementation Analysis](docs/PACS_IMPLEMENTATION_ANALYSIS.md) - Detailed implementation strategy
 - 📋 [Product Requirements](docs/PRD.md) - Product Requirements Document
 - 🏗️ [Architecture Guide](docs/ARCHITECTURE.md) - System architecture
 - ⚡ [Features](docs/FEATURES.md) - Feature specifications
 - 📁 [Project Structure](docs/PROJECT_STRUCTURE.md) - Directory structure
-- 🔧 [API Reference](docs/API_REFERENCE.md) - API documentation
+- 🔧 [API Reference (narrative)](docs/API_REFERENCE.md) - High-level API walkthrough
 - 🖥️ [CLI Reference](docs/CLI_REFERENCE.md) - CLI tools documentation
 - 📄 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) - DICOM conformance
 - 🏥 [IHE Integration Statement](docs/IHE_INTEGRATION_STATEMENT.md) - IHE profile conformance (XDS-I.b, AIRA, PIR)
