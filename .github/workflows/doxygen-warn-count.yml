@@ -1,0 +1,82 @@
+name: Doxygen Warning Count
+
+# Counts Doxygen warnings on every PR so the API-reference quality is
+# visible in review. Fails the job if the count regresses significantly
+# (> 500) so we never suddenly lose hundreds of annotated symbols. The
+# strict <5 target from #1103 will be enforced in a follow-up PR once
+# the current baseline is measured and gaps are filled.
+
+on:
+  push:
+    branches: [ main, develop, phase-* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  count-doxygen-warnings:
+    name: Doxygen warning count
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Run Doxygen and capture warnings
+        id: run
+        run: |
+          set -o pipefail
+          # Separate stdout and stderr so we count only actual warnings,
+          # not progress output. Doxygen emits warnings on stderr.
+          doxygen Doxyfile 2> doxygen.warn > doxygen.log || true
+
+          # Match "warning:" lines (the WARN_FORMAT in Doxyfile prefixes
+          # file:line but always includes "warning:" per Doxygen convention).
+          COUNT=$(grep -cE "warning:" doxygen.warn || true)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "Doxygen warnings: $COUNT"
+
+      - name: Write job summary
+        run: |
+          COUNT=${{ steps.run.outputs.count }}
+          {
+            echo "## Doxygen API Reference Quality"
+            echo ""
+            echo "**Warning count: ${COUNT}**"
+            echo ""
+            echo "### Top 30 warnings"
+            echo '```'
+            head -30 doxygen.warn || echo "(no warnings)"
+            echo '```'
+            echo ""
+            echo "### Targets"
+            echo "- Current regression floor (this workflow): **500**"
+            echo "- Issue #1103 eventual target: **< 5** — tracked for a follow-up PR"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload warning log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-warnings
+          path: |
+            doxygen.warn
+            doxygen.log
+          retention-days: 14
+
+      - name: Enforce regression floor
+        run: |
+          COUNT=${{ steps.run.outputs.count }}
+          FLOOR=500
+          if [ "$COUNT" -gt "$FLOOR" ]; then
+            echo "::error::Doxygen warning count ($COUNT) exceeds regression floor ($FLOOR)."
+            echo "Inspect the uploaded doxygen-warnings artifact and address the new warnings"
+            echo "before merging. The long-term target per #1103 is < 5."
+            exit 1
+          fi
+          echo "Doxygen warning count $COUNT within regression floor ($FLOOR)."
