@@ -12,7 +12,9 @@
  * after rotation.
  *
  * Record format (ASCII, single line, terminated by '\n'):
+ * @verbatim
  *   PACSAUDIT|v1|<key_id>|<iv_b64>|<ciphertext_b64>|<tag_b64>|<hmac_b64>
+ * @endverbatim
  *
  * Where:
  *   - v1 is the format version tag
@@ -163,7 +165,8 @@ public:
      *   - base64 (standard alphabet, padding required) of N bytes
      *
      * @param encoded the encoded string
-     * @param out destination buffer; must be exactly `N` bytes
+     * @param out destination buffer; must be exactly @p out_size bytes
+     * @param out_size size of the destination buffer; must equal the key length N
      * @return VoidResult success or decode error
      */
     [[nodiscard]] static VoidResult decode_key(

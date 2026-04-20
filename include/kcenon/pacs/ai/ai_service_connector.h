@@ -397,7 +397,7 @@ public:
      *
      * @param job_id The job identifier to wait for
      * @param timeout Maximum time to wait
-     * @param status_callback Optional callback for status updates
+     * @param callback Optional status_callback for status updates
      * @return Result containing final status on completion
      */
     [[nodiscard]] static auto wait_for_completion(

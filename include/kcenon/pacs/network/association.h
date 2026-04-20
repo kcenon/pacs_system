@@ -508,7 +508,10 @@ public:
 
     /**
      * @brief Process received A-RELEASE-RQ.
-     * @return A-RELEASE-RP PDU to send
+     *
+     * Transitions the association into Sta13 and enqueues an A-RELEASE-RP
+     * PDU for the sender. No return value; errors are surfaced via the
+     * association state machine.
      */
     void process_release_rq();
 

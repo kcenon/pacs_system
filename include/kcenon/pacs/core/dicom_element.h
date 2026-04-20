@@ -330,6 +330,8 @@ private:
     /**
      * @brief Remove DICOM padding from a string value
      * @param str The padded string
+     * @param vr Value Representation of the source element, used to select
+     *           the trim policy (trailing-space vs trailing-NUL)
      * @return String with padding removed
      */
     [[nodiscard]] static auto remove_padding(std::string_view str,
