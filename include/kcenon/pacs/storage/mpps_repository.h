@@ -6,7 +6,14 @@
  * @file mpps_repository.h
  * @brief Repository for MPPS lifecycle persistence using base_repository pattern
  *
+ * Persists Modality Performed Procedure Step (MPPS) records defined by
+ * DICOM PS3.4 Annex F. MPPS reports the IN_PROGRESS, COMPLETED, and
+ * DISCONTINUED phases of a study performed by an acquisition modality.
+ *
  * @see Issue #914 - Part 3: Extract MPPS and worklist lifecycle repositories
+ * @see DICOM PS3.4 Annex F - Modality Performed Procedure Step Service Class
+ * @author kcenon
+ * @since 1.0.0
  */
 
 #pragma once
@@ -27,8 +34,22 @@
 
 namespace kcenon::pacs::storage {
 
+/**
+ * @brief Persistence for Modality Performed Procedure Step (MPPS) records
+ *
+ * Backed by the database_system abstraction. Supports the full MPPS
+ * lifecycle: N-CREATE to open a record in IN_PROGRESS state, N-SET to
+ * transition to COMPLETED or DISCONTINUED, plus lookups by MPPS UID,
+ * study UID, and station AE title.
+ *
+ * **Thread Safety:** Not thread-safe. External synchronization is required.
+ */
 class mpps_repository : public base_repository<mpps_record, int64_t> {
 public:
+    /**
+     * @brief Construct an MPPS repository bound to a database adapter
+     * @param db Shared database adapter; must be connected before calls
+     */
     explicit mpps_repository(std::shared_ptr<pacs_database_adapter> db);
     ~mpps_repository() override = default;
 
@@ -37,6 +58,19 @@ public:
     mpps_repository(mpps_repository&&) noexcept = default;
     auto operator=(mpps_repository&&) noexcept -> mpps_repository& = default;
 
+    /**
+     * @brief Create a new MPPS record in IN_PROGRESS state (N-CREATE)
+     *
+     * Convenience overload that accepts the most common fields inline.
+     *
+     * @param mpps_uid SOP Instance UID for the MPPS (0008,0018); must be unique
+     * @param station_ae Station AE Title of the acquisition modality
+     * @param modality DICOM modality code (e.g., "CT", "MR", "US")
+     * @param study_uid Study Instance UID referenced by this step
+     * @param accession_no Accession Number from the scheduled procedure
+     * @param start_datetime Performed Procedure Step Start Date/Time (DICOM DT)
+     * @return Result with the database primary key, or error
+     */
     [[nodiscard]] auto create_mpps(std::string_view mpps_uid,
                                    std::string_view station_ae = "",
                                    std::string_view modality = "",
@@ -44,25 +78,98 @@ public:
                                    std::string_view accession_no = "",
                                    std::string_view start_datetime = "")
         -> Result<int64_t>;
+
+    /**
+     * @brief Create a new MPPS record from a fully populated value object
+     * @param record Full MPPS record; primary key is ignored on insert
+     * @return Result with the database primary key, or error
+     */
     [[nodiscard]] auto create_mpps(const mpps_record& record) -> Result<int64_t>;
+
+    /**
+     * @brief Apply an MPPS status transition (N-SET)
+     *
+     * Typical transitions: IN_PROGRESS -> COMPLETED or IN_PROGRESS ->
+     * DISCONTINUED. Once the record reaches a terminal state, further
+     * status updates are rejected by the service layer.
+     *
+     * @param mpps_uid MPPS SOP Instance UID identifying the record
+     * @param new_status Target status ("COMPLETED" or "DISCONTINUED")
+     * @param end_datetime Performed Procedure Step End Date/Time, optional
+     * @param performed_series Serialized Performed Series Sequence, optional
+     * @return VoidResult indicating success or error
+     */
     [[nodiscard]] auto update_mpps(std::string_view mpps_uid,
                                    std::string_view new_status,
                                    std::string_view end_datetime = "",
                                    std::string_view performed_series = "")
         -> VoidResult;
+
+    /**
+     * @brief Persist all fields from an MPPS record (full update)
+     * @param record MPPS record with the new field values
+     * @return VoidResult indicating success or error
+     */
     [[nodiscard]] auto update_mpps(const mpps_record& record) -> VoidResult;
+
+    /**
+     * @brief Look up an MPPS record by MPPS SOP Instance UID
+     * @param mpps_uid MPPS UID
+     * @return Record if present, std::nullopt otherwise
+     */
     [[nodiscard]] auto find_mpps(std::string_view mpps_uid)
         -> std::optional<mpps_record>;
+
+    /**
+     * @brief Look up an MPPS record by database primary key
+     * @param pk Database primary key
+     * @return Record if present, std::nullopt otherwise
+     */
     [[nodiscard]] auto find_mpps_by_pk(int64_t pk)
         -> std::optional<mpps_record>;
+
+    /**
+     * @brief List currently active (non-terminal) MPPS records for a station
+     * @param station_ae Station AE Title filter
+     * @return Result containing active records or a database error
+     */
     [[nodiscard]] auto list_active_mpps(std::string_view station_ae)
         -> Result<std::vector<mpps_record>>;
+
+    /**
+     * @brief Find all MPPS records referencing a given Study Instance UID
+     * @param study_uid Study Instance UID
+     * @return Result containing matching records or a database error
+     */
     [[nodiscard]] auto find_mpps_by_study(std::string_view study_uid)
         -> Result<std::vector<mpps_record>>;
+
+    /**
+     * @brief Search MPPS records using a structured query
+     * @param query Multi-field query (status, modality, date range, etc.)
+     * @return Result containing matching records or a database error
+     */
     [[nodiscard]] auto search_mpps(const mpps_query& query)
         -> Result<std::vector<mpps_record>>;
+
+    /**
+     * @brief Delete an MPPS record by MPPS SOP Instance UID
+     * @param mpps_uid MPPS UID
+     * @return VoidResult, or error if the record did not exist
+     */
     [[nodiscard]] auto delete_mpps(std::string_view mpps_uid) -> VoidResult;
+
+    /**
+     * @brief Total number of MPPS records currently stored
+     * @return Result containing the row count
+     */
     [[nodiscard]] auto mpps_count() -> Result<size_t>;
+
+    /**
+     * @brief Number of MPPS records in a specific status
+     * @param status Status value to filter on
+     * @return Result containing the filtered row count
+     */
     [[nodiscard]] auto mpps_count(std::string_view status) -> Result<size_t>;
 
 protected:
@@ -96,8 +203,18 @@ using Result = kcenon::common::Result<T>;
 
 using VoidResult = kcenon::common::VoidResult;
 
+/**
+ * @brief Legacy direct-SQLite fallback when database_system is disabled
+ *
+ * Exposes the same API surface as the database_system-backed variant.
+ * Used only when PACS_WITH_DATABASE_SYSTEM is not defined at build time.
+ */
 class mpps_repository {
 public:
+    /**
+     * @brief Construct repository bound to a raw sqlite3 handle
+     * @param db Non-owning pointer to an open sqlite3 connection
+     */
     explicit mpps_repository(sqlite3* db);
     ~mpps_repository();
 
@@ -106,6 +223,7 @@ public:
     mpps_repository(mpps_repository&&) noexcept;
     auto operator=(mpps_repository&&) noexcept -> mpps_repository&;
 
+    /// @copydoc kcenon::pacs::storage::mpps_repository::create_mpps(std::string_view,std::string_view,std::string_view,std::string_view,std::string_view,std::string_view)
     [[nodiscard]] auto create_mpps(std::string_view mpps_uid,
                                    std::string_view station_ae = "",
                                    std::string_view modality = "",
@@ -113,25 +231,36 @@ public:
                                    std::string_view accession_no = "",
                                    std::string_view start_datetime = "")
         -> Result<int64_t>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::create_mpps(const mpps_record&)
     [[nodiscard]] auto create_mpps(const mpps_record& record) -> Result<int64_t>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::update_mpps(std::string_view,std::string_view,std::string_view,std::string_view)
     [[nodiscard]] auto update_mpps(std::string_view mpps_uid,
                                    std::string_view new_status,
                                    std::string_view end_datetime = "",
                                    std::string_view performed_series = "")
         -> VoidResult;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::update_mpps(const mpps_record&)
     [[nodiscard]] auto update_mpps(const mpps_record& record) -> VoidResult;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::find_mpps
     [[nodiscard]] auto find_mpps(std::string_view mpps_uid) const
         -> std::optional<mpps_record>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::find_mpps_by_pk
     [[nodiscard]] auto find_mpps_by_pk(int64_t pk) const
         -> std::optional<mpps_record>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::list_active_mpps
     [[nodiscard]] auto list_active_mpps(std::string_view station_ae) const
         -> Result<std::vector<mpps_record>>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::find_mpps_by_study
     [[nodiscard]] auto find_mpps_by_study(std::string_view study_uid) const
         -> Result<std::vector<mpps_record>>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::search_mpps
     [[nodiscard]] auto search_mpps(const mpps_query& query) const
         -> Result<std::vector<mpps_record>>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::delete_mpps
     [[nodiscard]] auto delete_mpps(std::string_view mpps_uid) -> VoidResult;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::mpps_count()
     [[nodiscard]] auto mpps_count() const -> Result<size_t>;
+    /// @copydoc kcenon::pacs::storage::mpps_repository::mpps_count(std::string_view)
     [[nodiscard]] auto mpps_count(std::string_view status) const
         -> Result<size_t>;
 
