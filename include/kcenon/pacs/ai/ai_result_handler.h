@@ -232,7 +232,7 @@ using pre_store_validator = std::function<bool(
  * Thread Safety: This class is NOT thread-safe. External synchronization
  * is required for concurrent access.
  *
- * @example
+ * @par Example:
  * @code
  * // Create handler with storage and database
  * auto handler = ai_result_handler::create(storage, database);

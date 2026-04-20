@@ -142,7 +142,7 @@ private:
  * Uses a thread-local instance per thread to eliminate contention,
  * with each thread maintaining its own independent pool.
  *
- * @example
+ * @par Example:
  * @code
  * // Acquire a pooled element
  * auto elem = pool_manager::get().acquire_element(tag, vr);

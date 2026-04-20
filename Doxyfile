@@ -278,7 +278,8 @@ SKIP_FUNCTION_MACROS   = YES
 # Configuration options related to external references
 #---------------------------------------------------------------------------
 ALIASES                = "thread_safety=@par Thread Safety:^^" \
-                         "performance=@par Performance:^^"
+                         "performance=@par Performance:^^" \
+                         "license=@par License:^^"
 TAGFILES               =
 GENERATE_TAGFILE       =
 ALLEXTERNALS           = NO

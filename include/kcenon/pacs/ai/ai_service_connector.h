@@ -276,7 +276,7 @@ struct model_info {
  *
  * Thread Safety: All methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Initialize the connector
  * ai_service_config config;

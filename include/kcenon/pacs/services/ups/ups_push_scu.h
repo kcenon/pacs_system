@@ -204,7 +204,7 @@ struct ups_push_scu_config {
  *  |<---------------------------------------|
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * ups_push_scu scu;
  *

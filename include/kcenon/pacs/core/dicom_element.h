@@ -51,7 +51,7 @@ class dicom_dataset;
  * - Sequences (SQ) containing nested datasets
  * - Value Multiplicity (VM > 1) with backslash-separated values
  *
- * @example
+ * @par Example:
  * @code
  * // Create from string
  * auto name = dicom_element::from_string(tags::patient_name, vr_type::PN, "DOE^JOHN");

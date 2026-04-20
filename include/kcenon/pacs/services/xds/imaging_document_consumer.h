@@ -181,7 +181,7 @@ struct imaging_document_consumer_config {
  * 3. Extract image references from the KOS document
  * 4. Retrieve images via WADO-RS using build_wado_rs_url()
  *
- * @example
+ * @par Example:
  * @code
  * imaging_document_consumer_config config;
  * config.registry_url = "https://xds-registry.example.com/services/iti18";

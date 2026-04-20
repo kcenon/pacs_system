@@ -80,7 +80,7 @@ struct health_checker_config {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Create and configure the health checker
  * health_checker_config config;

@@ -135,7 +135,7 @@ using progress_callback =
  * - Writes require exclusive lock for index updates
  * - S3 operations themselves are thread-safe
  *
- * @example
+ * @par Example:
  * @code
  * cloud_storage_config config;
  * config.bucket_name = "my-dicom-bucket";

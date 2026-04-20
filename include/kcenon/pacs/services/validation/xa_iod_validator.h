@@ -166,7 +166,7 @@ struct xa_validation_options {
  * - Cine Module (C) - for multi-frame XA
  * - XA Calibration Module (C) - for quantitative analysis
  *
- * @example
+ * @par Example:
  * @code
  * xa_iod_validator validator;
  * auto result = validator.validate(dataset);

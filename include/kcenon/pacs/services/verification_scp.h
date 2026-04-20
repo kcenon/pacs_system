@@ -57,7 +57,7 @@ inline constexpr std::string_view verification_sop_class_uid = "1.2.840.10008.1.
  *  │                                      │
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * verification_scp scp;
  *

@@ -257,7 +257,7 @@ private:
  * Manages the DICOM association state machine, presentation context
  * negotiation, and DIMSE message exchange per PS3.8.
  *
- * @example SCU Usage
+ * @par Example: SCU Usage
  * @code
  * association_config config;
  * config.calling_ae_title = "MY_SCU";

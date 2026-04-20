@@ -328,7 +328,7 @@ struct ups_subscription {
  * Empty fields are not included in the query filter.
  * Used for UPS C-FIND operations.
  *
- * @example
+ * @par Example:
  * @code
  * ups_workitem_query query;
  * query.state = "SCHEDULED";

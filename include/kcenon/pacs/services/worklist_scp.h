@@ -59,7 +59,7 @@ inline constexpr std::string_view worklist_find_sop_class_uid =
  * @param calling_ae The calling AE title of the requesting modality
  * @return Vector of matching worklist item datasets (empty if no matches)
  *
- * @example Handler Implementation
+ * @par Example: Handler Implementation
  * @code
  * worklist_handler handler = [&database](
  *     const dicom_dataset& query,
@@ -173,7 +173,7 @@ using worklist_cancel_check = std::function<bool()>;
  * | >(0040,0007) | ScheduledProcedureStepDescription | Step description |
  * | >(0040,0009) | ScheduledProcedureStepID | Step ID |
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * worklist_scp scp;
  *

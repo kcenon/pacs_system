@@ -156,7 +156,7 @@ struct pmap_validation_options {
  * - Common Instance Reference Module (M)
  * - SOP Common Module (M)
  *
- * @example
+ * @par Example:
  * @code
  * parametric_map_iod_validator validator;
  * auto result = validator.validate(dataset);

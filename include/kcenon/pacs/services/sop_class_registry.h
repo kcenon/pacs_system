@@ -98,7 +98,7 @@ struct sop_class_info {
  * across all service types. Supports filtering by category, modality,
  * and other criteria.
  *
- * @example
+ * @par Example:
  * @code
  * sop_class_registry registry;
  *

@@ -94,7 +94,7 @@ struct instance_record {
  * Supports wildcard matching using '*' for prefix/suffix matching.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * instance_query query;
  * query.series_uid = "1.2.840.123456.1";  // Exact series match

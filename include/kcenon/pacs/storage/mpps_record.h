@@ -191,7 +191,7 @@ struct mpps_record {
  *
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * mpps_query query;
  * query.station_ae = "CT_SCANNER_1";

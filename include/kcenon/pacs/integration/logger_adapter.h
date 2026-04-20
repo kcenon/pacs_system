@@ -161,7 +161,7 @@ struct logger_config {
  *
  * Thread Safety: All methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Initialize the logger
  * logger_config config;

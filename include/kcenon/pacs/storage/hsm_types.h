@@ -88,7 +88,7 @@ enum class storage_tier {
  * Defines the rules for automatic migration between storage tiers.
  * Instances are migrated based on their age (time since last access or storage).
  *
- * @example
+ * @par Example:
  * @code
  * tier_policy policy;
  * policy.hot_to_warm = std::chrono::days{30};   // Move to warm after 30 days

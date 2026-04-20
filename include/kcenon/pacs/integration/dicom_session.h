@@ -147,7 +147,7 @@ struct pdu_data {
  * Thread Safety: All public methods are thread-safe. The underlying
  * network operations are serialized through network_system's I/O context.
  *
- * @example
+ * @par Example:
  * @code
  * // Sending an A-ASSOCIATE-RQ
  * std::vector<uint8_t> associate_rq_data = encode_associate_rq(rq);

@@ -72,7 +72,7 @@ struct service_metric {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * dicom_service_collector collector;
  * collector.initialize({});

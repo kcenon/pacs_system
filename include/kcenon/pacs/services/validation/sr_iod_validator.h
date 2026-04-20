@@ -102,7 +102,7 @@ struct sr_validation_options {
  * ### Comprehensive SR Additional Modules
  * - SCOORD/SCOORD3D support
  *
- * @example
+ * @par Example:
  * @code
  * sr_iod_validator validator;
  * auto result = validator.validate(dataset);

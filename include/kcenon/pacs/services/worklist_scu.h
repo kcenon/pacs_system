@@ -304,7 +304,7 @@ using worklist_streaming_callback = std::function<bool(const worklist_item&)>;
  *  |<---------------------------------------|
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * // Establish association with MWL presentation context
  * association_config config;
@@ -338,7 +338,7 @@ using worklist_streaming_callback = std::function<bool(const worklist_item&)>;
  * assoc.release();
  * @endcode
  *
- * @example Streaming Query for Large Worklists
+ * @par Example: Streaming Query for Large Worklists
  * @code
  * worklist_scu scu;
  * worklist_query_keys keys;

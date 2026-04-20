@@ -82,7 +82,7 @@ namespace kcenon::pacs::network::v2 {
  * 2. No changes needed to service registration or callbacks
  * 3. Feature flag: `PACS_USE_NETWORK_SYSTEM_SERVER` (when available)
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * server_config config;
  * config.ae_title = "MY_PACS";

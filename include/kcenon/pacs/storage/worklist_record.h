@@ -201,7 +201,7 @@ struct worklist_item {
  * Used for MWL C-FIND operations. Empty fields are not included in the filter.
  * Only items with status 'SCHEDULED' are returned by default.
  *
- * @example
+ * @par Example:
  * @code
  * worklist_query query;
  * query.station_ae = "CT_SCANNER_1";

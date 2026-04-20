@@ -36,7 +36,7 @@ namespace kcenon::pacs::services {
  * Each derived class handles specific SOP Classes and their corresponding
  * DIMSE operations.
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * class verification_scp : public scp_service {
  * public:

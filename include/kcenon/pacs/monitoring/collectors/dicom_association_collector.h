@@ -64,7 +64,7 @@ struct association_metric {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * dicom_association_collector collector;
  * collector.initialize({});

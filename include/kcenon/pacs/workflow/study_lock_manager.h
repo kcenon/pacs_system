@@ -309,7 +309,7 @@ namespace lock_error {
  * 2. Exclusive locks block new shared locks
  * 3. Shared locks can coexist with other shared locks
  *
- * @example
+ * @par Example:
  * @code
  * study_lock_manager_config config;
  * config.default_timeout = std::chrono::minutes{30};

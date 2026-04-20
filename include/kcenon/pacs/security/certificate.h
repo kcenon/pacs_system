@@ -42,7 +42,7 @@ class private_key_impl;
  *
  * Thread Safety: This class is thread-safe for read operations.
  *
- * @example
+ * @par Example:
  * @code
  * auto cert_result = certificate::load_from_pem("/path/to/cert.pem");
  * if (cert_result.is_ok()) {
@@ -226,7 +226,7 @@ private:
  *
  * Thread Safety: This class is thread-safe for read operations.
  *
- * @example
+ * @par Example:
  * @code
  * auto key_result = private_key::load_from_pem("/path/to/key.pem", "password");
  * if (key_result.is_ok()) {

@@ -71,7 +71,7 @@ struct sync_repositories {
  * - All public methods are thread-safe
  * - Uses shared_mutex for config access
  *
- * @example
+ * @par Example:
  * @code
  * // Create manager with dependencies
  * auto sync_repo = std::make_shared<sync_repository>(db);

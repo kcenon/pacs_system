@@ -43,7 +43,7 @@ namespace kcenon::pacs::core {
  * This class supports reading and writing DICOM files with automatic
  * handling of the file structure and Transfer Syntax negotiation.
  *
- * @example
+ * @par Example:
  * @code
  * // Reading a DICOM file
  * auto result = dicom_file::open("image.dcm");

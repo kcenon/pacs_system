@@ -75,7 +75,7 @@ struct patient_record {
  * Supports wildcard matching using '*' for prefix/suffix matching.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * patient_query query;
  * query.patient_name = "Doe*";  // Match names starting with "Doe"
