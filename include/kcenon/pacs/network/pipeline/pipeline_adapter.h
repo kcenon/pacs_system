@@ -70,7 +70,7 @@ struct session_context {
  * - Network send/receive callbacks
  * - Graceful shutdown coordination
  *
- * @example
+ * @par Example:
  * @code
  * // Create and configure adapter
  * pipeline_config config;

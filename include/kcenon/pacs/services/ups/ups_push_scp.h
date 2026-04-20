@@ -152,7 +152,7 @@ using ups_request_cancel_handler = std::function<network::Result<std::monostate>
  *  │◄──────────────────────────────────────│
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * ups_push_scp scp;
  *

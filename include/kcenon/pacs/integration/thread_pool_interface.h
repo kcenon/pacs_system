@@ -84,7 +84,7 @@ struct thread_pool_config {
  * - All methods must be thread-safe in concrete implementations
  * - Concurrent task submission is allowed
  *
- * @example
+ * @par Example:
  * @code
  * // Using dependency injection
  * class my_service {

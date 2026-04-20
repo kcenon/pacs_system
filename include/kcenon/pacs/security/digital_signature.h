@@ -44,7 +44,7 @@ namespace kcenon::pacs::security {
  *
  * Thread Safety: Static methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Sign a dataset
  * auto cert = certificate::load_from_pem("signer.pem").value();

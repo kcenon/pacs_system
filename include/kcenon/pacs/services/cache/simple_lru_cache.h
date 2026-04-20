@@ -145,7 +145,7 @@ struct cache_stats {
  * @tparam Hash Hash function for keys (defaults to std::hash<Key>)
  * @tparam KeyEqual Equality comparison for keys (defaults to std::equal_to<Key>)
  *
- * @example
+ * @par Example:
  * @code
  * // Create a cache for query results
  * cache_config config;
@@ -389,7 +389,7 @@ public:
      * @param pred The predicate function; entries where pred(key, value) returns true are removed
      * @return Number of entries removed
      *
-     * @example
+     * @par Example:
      * @code
      * // Invalidate all entries with keys starting with "PATIENT:"
      * cache.invalidate_if([](const std::string& key, const auto&) {

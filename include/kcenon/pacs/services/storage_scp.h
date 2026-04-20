@@ -136,7 +136,7 @@ using post_store_handler = std::function<void(
  *  │                                      │
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * storage_scp_config config;
  * config.accepted_sop_classes = {"1.2.840.10008.5.1.4.1.1.2"};  // CT
@@ -214,7 +214,7 @@ public:
      *
      * @param handler The post-store callback function
      *
-     * @example Cache invalidation on storage
+     * @par Example: Cache invalidation on storage
      * @code
      * storage_scp scp{config};
      * scp.set_post_store_handler([](const auto& dataset,

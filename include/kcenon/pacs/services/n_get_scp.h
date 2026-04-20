@@ -83,7 +83,7 @@ using n_get_handler = std::function<network::Result<core::dicom_dataset>(
  *  |<-----------------------------------|
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * n_get_scp scp;
  *

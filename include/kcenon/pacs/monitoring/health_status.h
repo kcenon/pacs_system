@@ -199,7 +199,7 @@ struct version_info {
  * Thread Safety: Read operations are thread-safe. Write operations require
  * external synchronization.
  *
- * @example
+ * @par Example:
  * @code
  * health_status status;
  * status.level = health_level::healthy;

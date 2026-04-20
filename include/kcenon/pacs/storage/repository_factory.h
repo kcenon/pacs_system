@@ -138,7 +138,7 @@ struct compatibility_repository_set {
  * - Use external synchronization (mutex)
  * - Pre-initialize all repositories before sharing
  *
- * @example
+ * @par Example:
  * @code
  * // Create database adapter
  * auto db = std::make_shared<pacs_database_adapter>("pacs.db");

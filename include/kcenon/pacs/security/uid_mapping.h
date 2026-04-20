@@ -39,7 +39,7 @@ namespace kcenon::pacs::security {
  *
  * Thread Safety: This class is thread-safe for concurrent access.
  *
- * @example
+ * @par Example:
  * @code
  * uid_mapping mapping;
  *

@@ -177,7 +177,7 @@ private:
  * is required for concurrent access. Consider using a connection pool or
  * mutex for multi-threaded applications.
  *
- * @example
+ * @par Example:
  * @code
  * // Create adapter for SQLite database
  * pacs_database_adapter db("/path/to/pacs.db");
@@ -295,7 +295,7 @@ public:
      *
      * @return Query builder instance
      *
-     * @example
+     * @par Example:
      * @code
      * auto builder = db.create_query_builder();
      * builder.select({"patient_id", "patient_name"})
@@ -405,7 +405,7 @@ public:
      * @return Success if function succeeds and transaction commits, error
      * otherwise
      *
-     * @example
+     * @par Example:
      * @code
      * auto result = db.transaction([&]() -> VoidResult {
      *     auto r1 = db.insert("INSERT INTO patients ...");
@@ -489,7 +489,7 @@ private:
  * If commit() is not called before destruction, the transaction is
  * automatically rolled back.
  *
- * @example
+ * @par Example:
  * @code
  * {
  *     scoped_transaction tx(db);

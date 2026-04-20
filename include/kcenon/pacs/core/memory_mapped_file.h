@@ -29,7 +29,7 @@ namespace kcenon::pacs::core {
  * Maps a file into the process address space for zero-copy reading.
  * Move-only; unmaps automatically on destruction.
  *
- * @example
+ * @par Example:
  * @code
  * auto result = memory_mapped_file::open("image.dcm");
  * if (result.is_ok()) {

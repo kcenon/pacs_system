@@ -166,7 +166,7 @@ struct prefetch_request {
  * └─────────────────────────┘
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * // Configure prefetch service
  * prefetch_service_config config;

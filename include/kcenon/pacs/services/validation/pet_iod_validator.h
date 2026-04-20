@@ -97,7 +97,7 @@ struct pet_validation_options {
  * - Attenuation correction method
  * - Scatter correction method
  *
- * @example
+ * @par Example:
  * @code
  * pet_iod_validator validator;
  * auto result = validator.validate(dataset);

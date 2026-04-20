@@ -197,7 +197,7 @@ struct connection_config {
  * Thread Safety: All public methods are thread-safe and can be called
  * from any thread.
  *
- * @example
+ * @par Example:
  * @code
  * // Create a DICOM server
  * network::server_config config;
@@ -271,7 +271,7 @@ public:
      * @param config Connection configuration
      * @return Result containing session on success, or error message
      *
-     * @example
+     * @par Example:
      * @code
      * connection_config config{"192.168.1.100", 104};
      * config.timeout = std::chrono::seconds{5};
@@ -313,7 +313,7 @@ public:
      * @param config TLS configuration to validate and apply
      * @return Result indicating success or validation error
      *
-     * @example
+     * @par Example:
      * @code
      * tls_config tls;
      * tls.enabled = true;

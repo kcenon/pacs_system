@@ -31,7 +31,7 @@ namespace kcenon::pacs::network {
  *
  * Defines all configurable parameters for a DICOM server instance.
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * server_config config;
  * config.ae_title = "MY_PACS";

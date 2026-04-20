@@ -33,7 +33,7 @@ namespace kcenon::pacs::network::pipeline {
  *
  * Stage 6 of the pipeline. Sends encoded PDU bytes to the network.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<send_network_io_job>(session_id, pdu_data, on_complete);
  * coordinator.submit_to_stage(pipeline_stage::network_send, std::move(job));

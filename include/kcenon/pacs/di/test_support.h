@@ -47,7 +47,7 @@ namespace kcenon::pacs::di::test {
  *
  * Thread Safety: All methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * auto mock_storage = std::make_shared<MockStorage>();
  *
@@ -266,7 +266,7 @@ private:
  * Provides a fluent interface for constructing service containers
  * configured with mock implementations for testing.
  *
- * @example
+ * @par Example:
  * @code
  * auto mock_storage = std::make_shared<MockStorage>();
  * auto container = TestContainerBuilder()

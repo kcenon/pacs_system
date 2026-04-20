@@ -100,7 +100,7 @@ struct service_result {
  * Stage 4 of the pipeline. Executes the actual DICOM operations
  * with blocking I/O allowed for database and file system access.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<storage_query_exec_job>(request, store_handler);
  * coordinator.submit_to_stage(pipeline_stage::storage_query_exec, std::move(job));

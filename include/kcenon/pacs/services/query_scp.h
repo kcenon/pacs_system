@@ -170,7 +170,7 @@ using cancel_check = std::function<bool()>;
  *  │◄─────────────────────────────────────│
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * query_scp scp;
  *

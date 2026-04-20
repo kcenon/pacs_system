@@ -104,7 +104,7 @@ enum class jwt_error {
  * Provides JWT decoding, claim validation, and signature verification.
  * Signature verification requires OpenSSL (PACS_WITH_DIGITAL_SIGNATURES).
  *
- * @example
+ * @par Example:
  * @code
  * oauth2_config config;
  * config.issuer = "https://auth.example.com";

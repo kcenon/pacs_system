@@ -216,7 +216,7 @@ namespace kcenon::pacs::monitoring {
  * @param status The health status to convert
  * @return JSON representation
  *
- * @example
+ * @par Example:
  * @code
  * health_status status;
  * status.level = health_level::healthy;

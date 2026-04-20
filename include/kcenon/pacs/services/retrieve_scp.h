@@ -208,7 +208,7 @@ using retrieve_cancel_check = std::function<bool()>;
  *     │◄───────────────────────────────│
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * retrieve_scp scp;
  *

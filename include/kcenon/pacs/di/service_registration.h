@@ -82,7 +82,7 @@ struct registration_config {
  * @param config Optional registration configuration
  * @return VoidResult indicating success or registration error
  *
- * @example
+ * @par Example:
  * @code
  * kcenon::common::di::service_container container;
  * auto result = kcenon::pacs::di::register_services(container);
@@ -287,7 +287,7 @@ template<typename TLogger>
  * @param config Optional registration configuration
  * @return Shared pointer to configured service container
  *
- * @example
+ * @par Example:
  * @code
  * auto container = kcenon::pacs::di::create_container();
  * auto storage = container->resolve<kcenon::pacs::di::IDicomStorage>().value();

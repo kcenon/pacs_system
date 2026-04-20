@@ -88,7 +88,7 @@ struct study_record {
  * Supports wildcard matching using '*' for prefix/suffix matching.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * study_query query;
  * query.patient_id = "12345";     // Exact patient match

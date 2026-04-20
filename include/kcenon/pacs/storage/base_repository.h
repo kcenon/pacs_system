@@ -61,7 +61,7 @@ using database_value = database::core::database_value;
  * @tparam Entity The domain entity type to be persisted
  * @tparam PrimaryKey The primary key type (default: int64_t)
  *
- * @example
+ * @par Example:
  * @code
  * // Define a domain entity
  * struct Patient {
@@ -192,7 +192,7 @@ public:
      * @param value Value to compare against
      * @return Result containing matching entities or error
      *
-     * @example
+     * @par Example:
      * @code
      * // Find patients with specific patient_id
      * auto result = repo.find_where("patient_id", "=", "P001");
@@ -303,7 +303,7 @@ public:
      * @param func Function to execute within transaction
      * @return Result from the function or transaction error
      *
-     * @example
+     * @par Example:
      * @code
      * auto result = repo.in_transaction([&]() -> VoidResult {
      *     auto r1 = repo.insert(entity1);

@@ -11,8 +11,10 @@
  * so existing call sites continue to work without modification.
  *
  * Usage:
- *   #include <kcenon/pacs/compat/format.h>
- *   auto s = kcenon::pacs::compat::format("Hello, {}!", name);
+ * @code
+ * #include <kcenon/pacs/compat/format.h>
+ * auto s = kcenon::pacs::compat::format("Hello, {}!", name);
+ * @endcode
  *
  * @author kcenon
  * @since 1.0.0

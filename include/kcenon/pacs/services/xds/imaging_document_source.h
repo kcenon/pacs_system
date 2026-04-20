@@ -236,7 +236,7 @@ struct imaging_document_source_config {
  * 2. Optionally customize the document metadata
  * 3. Call publish_document() to submit to the XDS registry
  *
- * @example
+ * @par Example:
  * @code
  * imaging_document_source_config config;
  * config.registry_url = "https://xds-registry.example.com/services/iti41";

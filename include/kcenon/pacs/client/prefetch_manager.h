@@ -80,7 +80,7 @@ struct prefetch_repositories {
  * - All public methods are thread-safe
  * - Background threads handle monitoring and scheduling
  *
- * @example
+ * @par Example:
  * @code
  * // Create manager with dependencies
  * auto prefetch_repo = std::make_shared<prefetch_repository>(db);

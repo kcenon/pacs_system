@@ -144,7 +144,7 @@ struct mg_validation_options {
  *    - Validated against typical range (50-200 N)
  *    - Warning if outside normal range
  *
- * @example
+ * @par Example:
  * @code
  * mg_iod_validator validator;
  * auto result = validator.validate(dataset);

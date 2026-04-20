@@ -102,7 +102,7 @@ struct cached_query_result {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Create the cache
  * query_cache_config config;
@@ -203,7 +203,7 @@ public:
      * @param prefix The key prefix to match
      * @return Number of entries removed
      *
-     * @example
+     * @par Example:
      * @code
      * // Invalidate all PATIENT level queries
      * cache.invalidate_by_prefix("PATIENT:");
@@ -229,7 +229,7 @@ public:
      * @param pred Predicate function; entries where pred returns true are removed
      * @return Number of entries removed
      *
-     * @example
+     * @par Example:
      * @code
      * // Invalidate entries with too many results
      * cache.invalidate_if([](const auto&, const cached_query_result& r) {

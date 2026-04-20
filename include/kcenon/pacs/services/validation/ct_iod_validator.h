@@ -143,7 +143,7 @@ struct ct_validation_options {
  * - CT Image Module (M)
  * - SOP Common Module (M)
  *
- * @example
+ * @par Example:
  * @code
  * ct_iod_validator validator;
  * auto result = validator.validate(dataset);

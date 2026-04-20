@@ -99,7 +99,7 @@ struct dimse_request {
  * Stage 3 of the pipeline. Processes DIMSE messages and routes
  * them to the storage/query execution stage.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<dimse_process_job>(decoded_pdu, on_request);
  * coordinator.submit_to_stage(pipeline_stage::dimse_process, std::move(job));

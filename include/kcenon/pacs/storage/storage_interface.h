@@ -70,7 +70,7 @@ struct storage_statistics {
  * - Concurrent reads are allowed
  * - Writes must be atomic
  *
- * @example
+ * @par Example:
  * @code
  * // Using a concrete implementation (e.g., file_storage)
  * std::unique_ptr<storage_interface> storage =

@@ -76,7 +76,7 @@ struct prefetch_history_query_options {
  * - This class is NOT thread-safe. External synchronization is required
  *   for concurrent access.
  *
- * @example
+ * @par Example:
  * @code
  * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
  * db->connect();

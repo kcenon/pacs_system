@@ -284,7 +284,7 @@ struct retrieve_scu_config {
  *  |<-----------------------------------|
  * ```
  *
- * @example Basic C-MOVE Usage
+ * @par Example: Basic C-MOVE Usage
  * @code
  * // Establish association
  * association_config config;
@@ -311,7 +311,7 @@ struct retrieve_scu_config {
  * assoc.release();
  * @endcode
  *
- * @example C-MOVE with Progress Tracking
+ * @par Example: C-MOVE with Progress Tracking
  * @code
  * retrieve_scu scu;
  * scu.set_move_destination("WORKSTATION");
@@ -327,7 +327,7 @@ struct retrieve_scu_config {
  *     });
  * @endcode
  *
- * @example C-GET with Instance Callback
+ * @par Example: C-GET with Instance Callback
  * @code
  * retrieve_scu_config cfg;
  * cfg.mode = retrieve_mode::c_get;

@@ -113,7 +113,7 @@ class pipeline_job_base;
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Create coordinator with custom configuration
  * pipeline_config config;

@@ -96,7 +96,7 @@ using VoidResult = kcenon::common::VoidResult;
  * is required for concurrent access. Consider using a connection pool
  * for multi-threaded applications.
  *
- * @example
+ * @par Example:
  * @code
  * // Open or create database
  * auto db_result = index_database::open(":memory:");
@@ -791,7 +791,7 @@ public:
      * @param before Time point; items scheduled before this are eligible for deletion
      * @return Result containing the number of deleted items or error
      *
-     * @example
+     * @par Example:
      * @code
      * // Delete items scheduled before 2024-01-01 00:00:00 UTC
      * std::tm tm = {};

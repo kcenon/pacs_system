@@ -101,7 +101,7 @@ struct dx_validation_options {
  * - DX Positioning Module (required if view position is specified)
  * - VOI LUT Module (For Presentation images)
  *
- * @example
+ * @par Example:
  * @code
  * dx_iod_validator validator;
  * auto result = validator.validate(dataset);

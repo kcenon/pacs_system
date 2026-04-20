@@ -62,7 +62,7 @@ class remote_node_manager;
  * - All public methods are thread-safe
  * - Callbacks are invoked from worker threads
  *
- * @example
+ * @par Example:
  * @code
  * // Create manager with dependencies
  * auto job_repo = std::make_shared<job_repository>(db);
