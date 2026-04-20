@@ -76,5 +76,5 @@
  * Key entry points:
  *   - @ref kcenon::pacs::web::rest_server      — Main REST server
  *   - @ref kcenon::pacs::web::metadata_service — DICOMweb metadata
- *   - @ref kcenon::pacs::web::jwt_validator    — JWT signature validation
+ *   - @ref kcenon::pacs::web::auth::jwt_validator — JWT signature validation
  */
