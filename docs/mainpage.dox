@@ -193,16 +193,16 @@ target_link_libraries(your_target PRIVATE kcenon::pacs_core)
 
 | Example | Source | Description |
 |---------|--------|-------------|
-| dcm_extract | @ref dcm_extract | Extract pixel data from DICOM files to JPEG, PNG, or raw binary |
-| dcm_conv | @ref dcm_conv | Convert DICOM files between transfer syntaxes |
-| img_to_dcm | @ref img_to_dcm | Encapsulate standard images (JPEG, PNG) into DICOM Part 10 files |
-| query_scu | @ref query_scu | Query a PACS server using C-FIND at Patient/Study/Series level |
-| dcm_dump | @ref dcm_dump | Dump DICOM file metadata as human-readable text |
-| dcm_info | @ref dcm_info | Display summary information for a DICOM file |
-| echo_scu | @ref echo_scu | Verify DICOM association with C-ECHO |
-| store_scu | @ref store_scu | Send DICOM files to a PACS server via C-STORE |
-| find_scu | @ref find_scu | Query remote PACS with C-FIND |
-| pacs_server | @ref pacs_server | Full PACS server with SCP services |
+| dcm_extract | `examples/dcm_extract/main.cpp` | Extract pixel data from DICOM files to JPEG, PNG, or raw binary |
+| dcm_conv | `examples/dcm_conv/main.cpp` | Convert DICOM files between transfer syntaxes |
+| img_to_dcm | `examples/img_to_dcm/main.cpp` | Encapsulate standard images (JPEG, PNG) into DICOM Part 10 files |
+| query_scu | `examples/query_scu/main.cpp` | Query a PACS server using C-FIND at Patient/Study/Series level |
+| dcm_dump | `examples/dcm_dump/main.cpp` | Dump DICOM file metadata as human-readable text |
+| dcm_info | `examples/dcm_info/main.cpp` | Display summary information for a DICOM file |
+| echo_scu | `examples/echo_scu/main.cpp` | Verify DICOM association with C-ECHO |
+| store_scu | `examples/store_scu/main.cpp` | Send DICOM files to a PACS server via C-STORE |
+| find_scu | `examples/find_scu/main.cpp` | Query remote PACS with C-FIND |
+| pacs_server | `examples/pacs_server/main.cpp` | Full PACS server with SCP services |
 
 @section learning_resources Learning Resources
 

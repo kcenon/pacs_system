@@ -107,6 +107,7 @@ struct pacs_server_config {
      * @brief Parse configuration from command line arguments
      *
      * Supported options:
+     * @code{.unparsed}
      *   --port <port>           Port to listen on (default: 11112)
      *   --ae-title <title>      AE title (default: MY_PACS)
      *   --storage-dir <path>    Storage directory (default: ./archive)
@@ -114,6 +115,7 @@ struct pacs_server_config {
      *   --log-level <level>     Log level (default: info)
      *   --max-associations <n>  Max concurrent associations (default: 50)
      *   --help                  Show help message
+     * @endcode
      *
      * @param argc Argument count
      * @param argv Argument vector

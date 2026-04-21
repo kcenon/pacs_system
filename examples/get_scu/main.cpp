@@ -13,11 +13,13 @@
  * @see DICOM PS3.7 Section 9.1.4 - C-GET Service
  * @see https://support.dcmtk.org/docs/getscu.html
  *
+ * @code{.unparsed}
  * Usage:
  *   get_scu [options] <peer> <port>
  *
  * Example:
  *   get_scu -L STUDY -k "0020,000D=1.2.840..." -od ./downloads localhost 11112
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

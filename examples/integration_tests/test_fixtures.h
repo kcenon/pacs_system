@@ -143,7 +143,8 @@ inline std::chrono::milliseconds dcmtk_server_ready_timeout() {
  *       this function returns false.
  *
  * @see accept_worker.cpp - "association doesn't support real network I/O yet"
- * @see Issue #XXX - Real TCP DICOM connection support (TODO: create issue)
+ * @note Real TCP DICOM connection support is tracked as a separate issue
+ *       (TODO: create issue for real TCP DICOM connection).
  */
 inline bool supports_real_tcp_dicom() {
     // Currently, pacs_system does not support real TCP connections

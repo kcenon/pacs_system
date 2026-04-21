@@ -10,6 +10,7 @@
  * @see DICOM PS3.4 Annex H - Print Management Service Class
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
  *
+ * @code{.unparsed}
  * Usage:
  *   print_scu <host> <port> <called_ae> <command> [options]
  *
@@ -20,6 +21,7 @@
  * Examples:
  *   print_scu localhost 10400 PRINTER print --copies 1 --priority HIGH
  *   print_scu localhost 10400 PRINTER status
+ * @endcode
  */
 
 #include "kcenon/pacs/services/print_scu.h"

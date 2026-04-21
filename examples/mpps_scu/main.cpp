@@ -10,6 +10,7 @@
  * @see DICOM PS3.4 Section F - MPPS SOP Class
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
  *
+ * @code{.unparsed}
  * Usage:
  *   mpps_scu <host> <port> <called_ae> <command> [options]
  *
@@ -20,6 +21,7 @@
  * Examples:
  *   mpps_scu localhost 11112 RIS_SCP create --patient-id P001 --modality CT
  *   mpps_scu localhost 11112 RIS_SCP set --mpps-uid 1.2.3... --status COMPLETED
+ * @endcode
  */
 
 #include "kcenon/pacs/services/mpps_scu.h"

@@ -9,12 +9,14 @@
  * @see Issue #381 - worklist_scp: Implement Modality Worklist SCP utility
  * @see DICOM PS3.4 Section K - Basic Worklist Management Service Class
  *
+ * @code{.unparsed}
  * Usage:
  *   worklist_scp <port> <ae_title> --worklist-file <path> [options]
  *
  * Examples:
  *   worklist_scp 11112 MY_WORKLIST --worklist-file ./worklist.json
  *   worklist_scp 11112 MY_WORKLIST --worklist-dir ./worklist_data
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

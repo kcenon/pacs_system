@@ -11,11 +11,13 @@
  * @see DICOM PS3.7 Section 9.1.3 - C-MOVE Service
  * @see DICOM PS3.7 Section 9.1.4 - C-GET Service
  *
+ * @code{.unparsed}
  * Usage:
  *   retrieve_scu <host> <port> <called_ae> [options]
  *
  * Example:
  *   retrieve_scu localhost 11112 PACS_SCP --mode get --study-uid "1.2.3.4.5"
+ * @endcode
  */
 
 #include "kcenon/pacs/network/association.h"

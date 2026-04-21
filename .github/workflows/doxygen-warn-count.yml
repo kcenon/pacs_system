@@ -2,9 +2,10 @@ name: Doxygen Warning Count
 
 # Counts Doxygen warnings on every PR so the API-reference quality is
 # visible in review. Fails the job if the count regresses above the
-# current baseline (> 160) so we ratchet down as gaps are filled. The
+# current regression floor so we ratchet down as gaps are filled. The
 # strict <5 target from #1103 will be enforced in a follow-up PR once
-# the annotation gaps in include/kcenon/pacs/** are closed.
+# the remaining structural issues (ai_service_connector.cpp pimpl docs
+# and annotation_repository overload disambiguation) are cleaned up.
 
 on:
   push:
@@ -55,7 +56,7 @@ jobs:
             echo '```'
             echo ""
             echo "### Targets"
-            echo "- Current regression floor (this workflow): **500**"
+            echo "- Current regression floor (this workflow): **40**"
             echo "- Issue #1103 eventual target: **< 5** — tracked for a follow-up PR"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -72,7 +73,7 @@ jobs:
       - name: Enforce regression floor
         run: |
           COUNT=${{ steps.run.outputs.count }}
-          FLOOR=160
+          FLOOR=40
           if [ "$COUNT" -gt "$FLOOR" ]; then
             echo "::error::Doxygen warning count ($COUNT) exceeds regression floor ($FLOOR)."
             echo "Inspect the uploaded doxygen-warnings artifact and address the new warnings"

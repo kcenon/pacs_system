@@ -9,11 +9,13 @@
  * @see Issue #99 - Echo SCU/SCP Sample
  * @see DICOM PS3.7 Section 9.1 - C-ECHO Service
  *
+ * @code{.unparsed}
  * Usage:
  *   echo_scp <port> <ae_title>
  *
  * Example:
  *   echo_scp 11112 MY_PACS
+ * @endcode
  */
 
 #include "kcenon/pacs/network/dicom_server.h"

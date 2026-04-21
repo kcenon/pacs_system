@@ -8,6 +8,7 @@
  *
  * @see Issue #109 - Database Browser Sample
  *
+ * @code{.unparsed}
  * Usage:
  *   db_browser <database> <command> [options]
  *
@@ -16,6 +17,7 @@
  *   db_browser pacs.db studies --patient-id "12345"
  *   db_browser pacs.db stats
  *   db_browser pacs.db vacuum
+ * @endcode
  */
 
 #include "kcenon/pacs/storage/index_database.h"

@@ -10,6 +10,7 @@
  * @see Issue #284 - dcm_anonymize: Implement DICOM anonymization utility
  * @see DICOM PS3.15 Annex E - Attribute Confidentiality Profiles
  *
+ * @code{.unparsed}
  * Usage:
  *   dcm_anonymize [options] <input> [output]
  *
@@ -17,6 +18,7 @@
  *   dcm_anonymize patient.dcm anonymous.dcm
  *   dcm_anonymize --profile hipaa_safe_harbor patient.dcm anonymized.dcm
  *   dcm_anonymize --recursive -o anonymized/ ./originals/
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dictionary.h"

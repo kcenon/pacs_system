@@ -9,6 +9,7 @@
  * @see Issue #101 - Storage SCP Sample
  * @see DICOM PS3.4 Section B - Storage Service Class
  *
+ * @code{.unparsed}
  * Usage:
  *   store_scp <port> <ae_title> [options]
  *
@@ -16,6 +17,7 @@
  *   store_scp 11112 MY_PACS --storage-dir ./received
  *   store_scp 11112 MY_PACS --storage-dir ./received --index-db ./pacs.db
  *   store_scp 11112 MY_PACS --storage-dir ./received --accept "CT,MR,US"
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

@@ -9,6 +9,7 @@
  * @see Issue #280 - dcm_conv: Transfer Syntax conversion utility
  * @see DICOM PS3.5 Section 10 - Transfer Syntax
  *
+ * @code{.unparsed}
  * Usage:
  *   dcm_conv <input> <output> [options]
  *
@@ -16,6 +17,7 @@
  *   dcm_conv image.dcm converted.dcm --explicit
  *   dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 90
  *   dcm_conv ./input_dir/ ./output_dir/ --recursive --implicit
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_file.h"

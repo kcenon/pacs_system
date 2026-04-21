@@ -114,7 +114,6 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = ./include \
                          ./src \
-                         ./README.md \
                          ./docs/mainpage.dox \
                          ./docs/groups.dox \
                          ./docs/tutorial_dicom_basics.dox \
@@ -149,7 +148,8 @@ EXCLUDE_PATTERNS       = */CMakeFiles/* \
                          */_deps/* \
                          */node_modules/* \
                          */build/* \
-                         */build_simple/*
+                         */build_simple/* \
+                         */integration_tests/README.md
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           = ./examples
 EXAMPLE_PATTERNS       = *.cpp \
@@ -194,7 +194,8 @@ HTML_EXTRA_FILES       = docs/doxygen-awesome-css/doxygen-awesome-darkmode-toggl
                          docs/doxygen-awesome-css/doxygen-awesome-fragment-copy-button.js \
                          docs/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
                          docs/doxygen-awesome-css/doxygen-awesome-interactive-toc.js
-HTML_COPY_CLIPBOARD    = NO
+# HTML_COPY_CLIPBOARD is not supported by all Doxygen versions; copy-to-clipboard
+# is provided instead via doxygen-awesome-fragment-copy-button.js in header.html.
 HTML_COLORSTYLE        = LIGHT
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
@@ -311,7 +312,7 @@ GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
 DOT_IMAGE_FORMAT       = png
 INTERACTIVE_SVG        = NO
-DOT_GRAPH_MAX_NODES    = 50
+DOT_GRAPH_MAX_NODES    = 300
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES

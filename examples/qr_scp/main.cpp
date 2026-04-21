@@ -9,12 +9,14 @@
  * @see Issue #380 - qr_scp: Implement Query/Retrieve SCP utility
  * @see DICOM PS3.4 Section C - Query/Retrieve Service Class
  *
+ * @code{.unparsed}
  * Usage:
  *   qr_scp <port> <ae_title> --storage-dir <path> [options]
  *
  * Examples:
  *   qr_scp 11112 MY_PACS --storage-dir ./dicom --index-db ./pacs.db
  *   qr_scp 11112 MY_PACS --storage-dir ./dicom --peer VIEWER:192.168.1.10:11113
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

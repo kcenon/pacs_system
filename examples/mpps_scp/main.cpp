@@ -10,12 +10,14 @@
  * @see DICOM PS3.4 Section F - MPPS SOP Class
  * @see DICOM PS3.7 Section 10 - DIMSE-N Services
  *
+ * @code{.unparsed}
  * Usage:
  *   mpps_scp <port> <ae_title> [options]
  *
  * Examples:
  *   mpps_scp 11112 MY_MPPS --output-dir ./mpps_records
  *   mpps_scp 11112 MY_MPPS --output-file ./mpps.json
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

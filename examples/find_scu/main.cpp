@@ -13,12 +13,14 @@
  * @see DICOM PS3.7 Section 9.1.2 - C-FIND Service
  * @see https://support.dcmtk.org/docs/findscu.html
  *
+ * @code{.unparsed}
  * Usage:
  *   find_scu [options] <peer> <port>
  *
  * Example:
  *   find_scu -P -L STUDY -k "0010,0010=Smith*" localhost 11112
  *   find_scu -S -k "0008,0060=CT" -k "0008,0020=20240101-20241231" pacs.example.com 104
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

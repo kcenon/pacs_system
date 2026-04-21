@@ -12,6 +12,7 @@
  * @see DICOM PS3.7 Section 9.1 - C-ECHO Service
  * @see https://support.dcmtk.org/docs/echoscu.html
  *
+ * @code{.unparsed}
  * Usage:
  *   echo_scu [options] <peer> <port>
  *
@@ -19,6 +20,7 @@
  *   echo_scu localhost 11112
  *   echo_scu -aet MYSCU -aec PACS localhost 11112
  *   echo_scu --repeat 10 --repeat-delay 1000 localhost 11112
+ * @endcode
  */
 
 #include "kcenon/pacs/network/association.h"
