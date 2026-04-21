@@ -394,6 +394,20 @@ if(PACS_BUILD_TESTS)
         pacs_link_database_deps(pacs_integration_tests)
     endif()
 
+    # XDS-I.b Gazelle-style registry integration test (Issue #1115)
+    # Exercises the full ITI-41 / ITI-43 round trip against an in-process
+    # mock registry, asserting metadata parity (entry_uuid, unique_id,
+    # patient ID CX form, MIME type) between submit and retrieve.
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/integration/services/xds)
+    add_executable(xds_gazelle_integration_tests
+        tests/integration/services/xds/xds_gazelle_roundtrip_test.cpp
+    )
+    target_link_libraries(xds_gazelle_integration_tests
+        PRIVATE
+            pacs_services
+            Catch2::Catch2WithMain
+    )
+
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
     # (Issue #309 - Full Adoption of ILogger Interface)
     if(TARGET pacs_integration AND TARGET pacs_storage)
@@ -567,6 +581,16 @@ if(PACS_BUILD_TESTS)
     # (CI uses --exclude-regex "integration::" for unit tests)
     if(TARGET pacs_integration_tests)
         catch_discover_tests(pacs_integration_tests
+            TEST_PREFIX "integration::"
+            PROPERTIES LABELS "integration"
+        )
+    endif()
+
+    # XDS-I.b Gazelle-style registry integration test (Issue #1115).
+    # Uses the same "integration::" TEST_PREFIX so the test is excluded
+    # from unit-test runs but still discovered by CI integration labels.
+    if(TARGET xds_gazelle_integration_tests)
+        catch_discover_tests(xds_gazelle_integration_tests
             TEST_PREFIX "integration::"
             PROPERTIES LABELS "integration"
         )
