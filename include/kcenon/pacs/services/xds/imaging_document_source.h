@@ -24,9 +24,12 @@
 #include "kcenon/pacs/core/dicom_dataset.h"
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
+
+namespace kcenon::pacs::security { class atna_service_auditor; }
 
 namespace kcenon::pacs::services::xds {
 
@@ -309,15 +312,32 @@ public:
      *
      * Performs the ITI-41 (Provide and Register Document Set-b) transaction
      * to publish the KOS document and its metadata to the configured
-     * XDS registry/repository.
+     * XDS registry/repository. When an ATNA audit handler is installed,
+     * an Export audit event is emitted for both success and failure paths.
      *
      * @param kos_dataset The KOS dataset to publish
      * @param entry The document entry metadata
+     * @param is_imaging true for RAD-68 (Provide and Register Imaging
+     *   Document Set), false for ITI-41 (Provide and Register Document
+     *   Set-b). Controls the transaction code recorded in the ATNA audit.
      * @return Publication result
      */
     [[nodiscard]] publication_result publish_document(
         const core::dicom_dataset& kos_dataset,
-        const xds_document_entry& entry) const;
+        const xds_document_entry& entry,
+        bool is_imaging = true) const;
+
+    /**
+     * @brief Install an ATNA audit handler for XDS-I.b transactions
+     *
+     * When set, an audit event is emitted for each publish_document()
+     * call (ITI-41 or RAD-68) on both success and failure paths. Passing
+     * nullptr disables auditing for this source.
+     *
+     * @param auditor Shared pointer to an ATNA service auditor
+     */
+    void set_audit_handler(
+        std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor);
 
     /**
      * @brief Get current configuration.
@@ -333,6 +353,7 @@ public:
 
 private:
     imaging_document_source_config config_;
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor_;
 
     /// Generate a new UID for KOS instances
     [[nodiscard]] std::string generate_uid() const;

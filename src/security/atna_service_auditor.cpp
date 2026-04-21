@@ -138,6 +138,128 @@ void atna_service_auditor::audit_security_alert(
 }
 
 // =============================================================================
+// IHE XDS-I.b Transaction Audit Methods
+// =============================================================================
+
+namespace {
+
+/// Event type codes that identify the specific XDS-I.b transaction
+/// within a generic Export / DICOM Instances Transferred event.
+const atna_coded_value xds_event_type_iti_41{
+    "ITI-41", "IHE Transactions", "Provide and Register Document Set-b"};
+const atna_coded_value xds_event_type_rad_68{
+    "RAD-68", "IHE Transactions", "Provide and Register Imaging Document Set"};
+const atna_coded_value xds_event_type_iti_43{
+    "ITI-43", "IHE Transactions", "Retrieve Document Set"};
+const atna_coded_value xds_event_type_rad_69{
+    "RAD-69", "IHE Transactions", "Retrieve Imaging Document Set"};
+
+/// Object ID type code for SOP Instance UID participant objects
+const atna_coded_value sop_instance_uid_type{
+    "110181", "DCM", "SOP Instance UID"};
+
+/// Append SOP Instance UID references as participant objects
+void append_sop_instance_objects(
+    atna_audit_message& msg,
+    const std::vector<std::string>& sop_instance_uids) {
+    for (const auto& uid : sop_instance_uids) {
+        if (uid.empty()) continue;
+        atna_participant_object obj;
+        obj.object_type = atna_object_type::system_object;
+        obj.object_role = atna_object_role::report;
+        obj.object_id_type_code = sop_instance_uid_type;
+        obj.object_id = uid;
+        msg.participant_objects.push_back(std::move(obj));
+    }
+}
+
+}  // namespace
+
+void atna_service_auditor::audit_xds_provide_and_register(
+    xds_source_transaction transaction,
+    const std::string& source_ae,
+    const std::string& dest_ae,
+    const std::string& study_uid,
+    const std::string& patient_id,
+    const std::vector<std::string>& sop_instance_uids,
+    bool success) {
+
+    if (!enabled_.load(std::memory_order_relaxed)) {
+        return;
+    }
+
+    auto outcome = success ? atna_event_outcome::success
+                           : atna_event_outcome::serious_failure;
+
+    // XDS-I.b Provide and Register is an Export event (DCM 110106) —
+    // the local actor is sending a document set to a remote registry.
+    auto msg = atna_audit_logger::build_export(
+        audit_source_id_,
+        source_ae,   // user (the local source actor)
+        "",          // user IP (not available at service level)
+        dest_ae,     // destination identifier (remote registry)
+        study_uid,
+        patient_id,
+        outcome);
+
+    // Tag the event with the specific IHE transaction code so consumers
+    // of the audit log can differentiate ITI-41 from RAD-68.
+    msg.event_type_codes.push_back(
+        transaction == xds_source_transaction::iti_41
+            ? xds_event_type_iti_41
+            : xds_event_type_rad_68);
+
+    // Add SOP Instance UID references if provided (required for RAD-68,
+    // optional but recommended for ITI-41).
+    append_sop_instance_objects(msg, sop_instance_uids);
+
+    send_audit(msg);
+}
+
+void atna_service_auditor::audit_xds_retrieve(
+    xds_consumer_transaction transaction,
+    const std::string& source_ae,
+    const std::string& dest_ae,
+    const std::string& study_uid,
+    const std::string& patient_id,
+    const std::vector<std::string>& sop_instance_uids,
+    bool success) {
+
+    if (!enabled_.load(std::memory_order_relaxed)) {
+        return;
+    }
+
+    auto outcome = success ? atna_event_outcome::success
+                           : atna_event_outcome::serious_failure;
+
+    // XDS-I.b Retrieve Document Set is an Import event
+    // (DICOM Instances Transferred with is_import=true) — the local
+    // actor is receiving a document set from a remote repository.
+    auto msg = atna_audit_logger::build_dicom_instances_transferred(
+        audit_source_id_,
+        source_ae,
+        "",          // source IP (not available at service level)
+        dest_ae,
+        "",          // destination IP (not available at service level)
+        study_uid,
+        patient_id,
+        true,        // is_import (consumer is receiving)
+        outcome);
+
+    // Tag the event with the specific IHE transaction code so consumers
+    // of the audit log can differentiate ITI-43 from RAD-69.
+    msg.event_type_codes.push_back(
+        transaction == xds_consumer_transaction::iti_43
+            ? xds_event_type_iti_43
+            : xds_event_type_rad_69);
+
+    // Add SOP Instance UID references if provided.
+    append_sop_instance_objects(msg, sop_instance_uids);
+
+    send_audit(msg);
+}
+
+// =============================================================================
 // Enable / Disable
 // =============================================================================
 

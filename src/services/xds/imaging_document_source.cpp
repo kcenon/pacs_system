@@ -10,6 +10,7 @@
 #include "kcenon/pacs/services/xds/imaging_document_source.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/security/atna_service_auditor.h"
 #include "kcenon/pacs/services/sop_classes/sr_storage.h"
 
 #include <algorithm>
@@ -239,25 +240,91 @@ xds_submission_set imaging_document_source::build_submission_set(
     return set;
 }
 
+namespace {
+
+/// Extract all Referenced SOP Instance UIDs from the KOS evidence sequence
+std::vector<std::string> collect_sop_instance_uids(
+    const core::dicom_dataset& kos_dataset) {
+    std::vector<std::string> uids;
+    const auto* evidence_elem =
+        kos_dataset.get(kos_tags::current_requested_procedure_evidence_sequence);
+    if (!evidence_elem || !evidence_elem->is_sequence()) {
+        return uids;
+    }
+    for (const auto& study_item : evidence_elem->sequence_items()) {
+        const auto* series_elem =
+            study_item.get(kos_tags::referenced_series_sequence);
+        if (!series_elem || !series_elem->is_sequence()) continue;
+        for (const auto& series_item : series_elem->sequence_items()) {
+            const auto* sop_elem =
+                series_item.get(kos_tags::referenced_sop_sequence);
+            if (!sop_elem || !sop_elem->is_sequence()) continue;
+            for (const auto& sop_item : sop_elem->sequence_items()) {
+                auto uid = sop_item.get_string(kos_tags::referenced_sop_instance_uid);
+                if (!uid.empty()) uids.push_back(std::move(uid));
+            }
+        }
+    }
+    return uids;
+}
+
+}  // namespace
+
 publication_result imaging_document_source::publish_document(
-    [[maybe_unused]] const core::dicom_dataset& kos_dataset,
-    [[maybe_unused]] const xds_document_entry& entry) const {
+    const core::dicom_dataset& kos_dataset,
+    const xds_document_entry& entry,
+    bool is_imaging) const {
 
     publication_result result;
 
+    // Build audit fields once; used for both success and failure paths.
+    auto study_uid = kos_dataset.get_string(core::tags::study_instance_uid);
+    auto patient_id = kos_dataset.get_string(core::tags::patient_id);
+    auto sop_instance_uids = collect_sop_instance_uids(kos_dataset);
+    const auto transaction =
+        is_imaging
+            ? security::atna_service_auditor::xds_source_transaction::rad_68
+            : security::atna_service_auditor::xds_source_transaction::iti_41;
+
     if (config_.registry_url.empty()) {
         result.error_message = "XDS registry URL not configured";
+        if (auditor_) {
+            auditor_->audit_xds_provide_and_register(
+                transaction,
+                config_.source_oid,
+                config_.registry_url,   // empty when unconfigured
+                study_uid,
+                patient_id,
+                sop_instance_uids,
+                false);
+        }
         return result;
     }
 
-    // NOTE: Actual HTTP POST to the XDS registry/repository (ITI-41)
+    // NOTE: Actual HTTP POST to the XDS registry/repository (ITI-41 / RAD-68)
     // would be implemented here using the network layer.
-    // The ITI-41 transaction uses SOAP/MTOM encoding.
+    // The ITI-41 / RAD-68 transactions use SOAP/MTOM encoding.
     // For now, return success to indicate the interface is operational.
     result.success = true;
     result.document_entry_uuid = entry.entry_uuid;
 
+    if (auditor_) {
+        auditor_->audit_xds_provide_and_register(
+            transaction,
+            config_.source_oid,
+            config_.registry_url,
+            study_uid,
+            patient_id,
+            sop_instance_uids,
+            true);
+    }
+
     return result;
+}
+
+void imaging_document_source::set_audit_handler(
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor) {
+    auditor_ = std::move(auditor);
 }
 
 const imaging_document_source_config&

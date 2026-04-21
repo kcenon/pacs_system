@@ -19,8 +19,10 @@
 #include "atna_syslog_transport.h"
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace kcenon::pacs::security {
 
@@ -64,7 +66,7 @@ public:
     atna_service_auditor(const syslog_transport_config& config,
                          std::string audit_source_id);
 
-    ~atna_service_auditor() = default;
+    virtual ~atna_service_auditor() = default;
 
     // Non-copyable, movable
     atna_service_auditor(const atna_service_auditor&) = delete;
@@ -123,6 +125,82 @@ public:
      */
     void audit_security_alert(const std::string& user_id,
                               const std::string& alert_description);
+
+    // =========================================================================
+    // IHE XDS-I.b Transaction Audit Methods
+    // =========================================================================
+
+    /**
+     * @brief XDS-I.b source-side transaction identifier
+     *
+     * Used by audit_xds_provide_and_register() to distinguish between
+     * ITI-41 (general document set) and RAD-68 (imaging document set)
+     * transactions.
+     */
+    enum class xds_source_transaction : uint8_t {
+        iti_41,   ///< ITI-41 Provide and Register Document Set-b
+        rad_68    ///< RAD-68 Provide and Register Imaging Document Set
+    };
+
+    /**
+     * @brief XDS-I.b consumer-side transaction identifier
+     *
+     * Used by audit_xds_retrieve() to distinguish between ITI-43
+     * (general document retrieval) and RAD-69 (imaging document
+     * retrieval) transactions.
+     */
+    enum class xds_consumer_transaction : uint8_t {
+        iti_43,   ///< ITI-43 Retrieve Document Set
+        rad_69    ///< RAD-69 Retrieve Imaging Document Set
+    };
+
+    /**
+     * @brief Audit an XDS-I.b Provide and Register Document Set transaction
+     *
+     * Emits an Export (DCM 110106) audit event for source-side XDS
+     * transactions (ITI-41 / RAD-68). The transaction identifier is
+     * recorded as an event type code to distinguish ITI-41 from RAD-68.
+     *
+     * @param transaction Transaction identifier (ITI-41 or RAD-68)
+     * @param source_ae Local source participant (AE / device identifier)
+     * @param dest_ae Remote destination participant (XDS registry/repository)
+     * @param study_uid Study Instance UID (the study being provided)
+     * @param patient_id Patient ID (optional, empty if unavailable)
+     * @param sop_instance_uids Referenced SOP Instance UIDs (may be empty for ITI-41)
+     * @param success Whether the transaction succeeded
+     */
+    virtual void audit_xds_provide_and_register(
+        xds_source_transaction transaction,
+        const std::string& source_ae,
+        const std::string& dest_ae,
+        const std::string& study_uid,
+        const std::string& patient_id,
+        const std::vector<std::string>& sop_instance_uids,
+        bool success);
+
+    /**
+     * @brief Audit an XDS-I.b Retrieve Document Set transaction
+     *
+     * Emits an Import (DCM 110107, via DICOM Instances Transferred) audit
+     * event for consumer-side XDS transactions (ITI-43 / RAD-69). The
+     * transaction identifier is recorded as an event type code.
+     *
+     * @param transaction Transaction identifier (ITI-43 or RAD-69)
+     * @param source_ae Remote source participant (XDS repository)
+     * @param dest_ae Local destination participant (this consumer)
+     * @param study_uid Study Instance UID (the study being retrieved)
+     * @param patient_id Patient ID (optional, empty if unavailable)
+     * @param sop_instance_uids Referenced SOP Instance UIDs (may be empty)
+     * @param success Whether the transaction succeeded
+     */
+    virtual void audit_xds_retrieve(
+        xds_consumer_transaction transaction,
+        const std::string& source_ae,
+        const std::string& dest_ae,
+        const std::string& study_uid,
+        const std::string& patient_id,
+        const std::vector<std::string>& sop_instance_uids,
+        bool success);
 
     // =========================================================================
     // Enable / Disable
