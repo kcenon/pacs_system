@@ -23,9 +23,12 @@
 #include "kcenon/pacs/core/dicom_dataset.h"
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
+
+namespace kcenon::pacs::security { class atna_service_auditor; }
 
 namespace kcenon::pacs::services::xds {
 
@@ -222,14 +225,33 @@ public:
     /**
      * @brief Retrieve a specific document from the XDS repository.
      *
-     * Performs an ITI-43 (Retrieve Document Set) to fetch a
-     * KOS document identified by the document reference.
+     * Performs an ITI-43 (Retrieve Document Set) or RAD-69 (Retrieve
+     * Imaging Document Set) transaction to fetch a KOS document
+     * identified by the document reference. When an ATNA audit handler
+     * is installed, an Import audit event is emitted for both success
+     * and failure paths.
      *
      * @param doc_ref The document reference from a registry query
+     * @param is_imaging true for RAD-69 (Retrieve Imaging Document Set),
+     *   false for ITI-43 (Retrieve Document Set). Controls the
+     *   transaction code recorded in the ATNA audit.
      * @return Retrieval result with the KOS dataset
      */
     [[nodiscard]] document_retrieval_result retrieve_document(
-        const document_reference& doc_ref) const;
+        const document_reference& doc_ref,
+        bool is_imaging = true) const;
+
+    /**
+     * @brief Install an ATNA audit handler for XDS-I.b transactions
+     *
+     * When set, an audit event is emitted for each retrieve_document()
+     * call (ITI-43 or RAD-69) on both success and failure paths. Passing
+     * nullptr disables auditing for this consumer.
+     *
+     * @param auditor Shared pointer to an ATNA service auditor
+     */
+    void set_audit_handler(
+        std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor);
 
     /**
      * @brief Extract image references from a KOS dataset.
@@ -273,6 +295,7 @@ public:
 
 private:
     imaging_document_consumer_config config_;
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor_;
 };
 
 }  // namespace kcenon::pacs::services::xds

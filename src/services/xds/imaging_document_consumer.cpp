@@ -9,6 +9,7 @@
 
 #include "kcenon/pacs/services/xds/imaging_document_consumer.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/security/atna_service_auditor.h"
 
 #include <algorithm>
 #include <sstream>
@@ -58,21 +59,53 @@ registry_query_result imaging_document_consumer::query_registry(
 }
 
 document_retrieval_result imaging_document_consumer::retrieve_document(
-    [[maybe_unused]] const document_reference& doc_ref) const {
+    const document_reference& doc_ref,
+    bool is_imaging) const {
 
     document_retrieval_result result;
 
+    const auto transaction =
+        is_imaging
+            ? security::atna_service_auditor::xds_consumer_transaction::rad_69
+            : security::atna_service_auditor::xds_consumer_transaction::iti_43;
+
     if (config_.repository_url.empty()) {
         result.error_message = "XDS repository URL not configured";
+        if (auditor_) {
+            auditor_->audit_xds_retrieve(
+                transaction,
+                doc_ref.repository_unique_id,  // remote source
+                config_.repository_url,        // local destination (empty)
+                doc_ref.unique_id,             // document/study identifier
+                doc_ref.patient_id,
+                {doc_ref.unique_id},           // SOP-level reference
+                false);
+        }
         return result;
     }
 
-    // NOTE: Actual SOAP/MTOM request to the XDS repository (ITI-43)
+    // NOTE: Actual SOAP/MTOM request to the XDS repository (ITI-43 / RAD-69)
     // would be implemented here. The response contains the KOS
     // document as an MTOM attachment.
     result.success = true;
 
+    if (auditor_) {
+        auditor_->audit_xds_retrieve(
+            transaction,
+            doc_ref.repository_unique_id,
+            config_.repository_url,
+            doc_ref.unique_id,
+            doc_ref.patient_id,
+            {doc_ref.unique_id},
+            true);
+    }
+
     return result;
+}
+
+void imaging_document_consumer::set_audit_handler(
+    std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor) {
+    auditor_ = std::move(auditor);
 }
 
 document_retrieval_result imaging_document_consumer::extract_references(

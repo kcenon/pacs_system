@@ -9,8 +9,13 @@
 #include <kcenon/pacs/core/dicom_dataset.h>
 #include <kcenon/pacs/core/dicom_tag_constants.h>
 #include <kcenon/pacs/encoding/vr_type.h>
+#include <kcenon/pacs/security/atna_service_auditor.h>
+#include <kcenon/pacs/security/atna_syslog_transport.h>
 
 #include <catch2/catch_test_macros.hpp>
+
+#include <algorithm>
+#include <memory>
 
 using namespace kcenon::pacs::services::xds;
 using namespace kcenon::pacs::services::sop_classes;
@@ -347,4 +352,232 @@ TEST_CASE("KOS round-trip: create and extract references", "[services][xds][roun
             ref.sop_instance_uid);
         CHECK(it != extract_result.referenced_instance_uids.end());
     }
+}
+
+// ============================================================================
+// ATNA Audit Emission Tests (Issue #1114)
+// ============================================================================
+
+namespace {
+
+/// Captured shape of an XDS audit event emitted by the spy auditor.
+struct captured_xds_audit {
+    enum class kind { provide_and_register, retrieve };
+    kind event_kind{kind::provide_and_register};
+    std::string event_id;           // transaction code (ITI-41/RAD-68/ITI-43/RAD-69)
+    std::string source_participant;
+    std::string destination_participant;
+    std::string study_uid;
+    std::string patient_id;
+    std::vector<std::string> sop_instance_uids;
+    bool success{false};
+};
+
+/// Test spy that captures XDS-I.b audit calls without sending to syslog.
+///
+/// Uses the standard atna_service_auditor constructor with a harmless
+/// transport config, then overrides the virtual audit methods so no
+/// network traffic is produced.
+class xds_audit_spy final : public kcenon::pacs::security::atna_service_auditor {
+public:
+    xds_audit_spy()
+        : atna_service_auditor(
+              kcenon::pacs::security::syslog_transport_config{},
+              "TEST_PACS") {}
+
+    void audit_xds_provide_and_register(
+        xds_source_transaction transaction,
+        const std::string& source_ae,
+        const std::string& dest_ae,
+        const std::string& study_uid,
+        const std::string& patient_id,
+        const std::vector<std::string>& sop_instance_uids,
+        bool success) override {
+        captured_xds_audit c;
+        c.event_kind = captured_xds_audit::kind::provide_and_register;
+        c.event_id = transaction == xds_source_transaction::iti_41
+                         ? "ITI-41"
+                         : "RAD-68";
+        c.source_participant = source_ae;
+        c.destination_participant = dest_ae;
+        c.study_uid = study_uid;
+        c.patient_id = patient_id;
+        c.sop_instance_uids = sop_instance_uids;
+        c.success = success;
+        events.push_back(std::move(c));
+    }
+
+    void audit_xds_retrieve(
+        xds_consumer_transaction transaction,
+        const std::string& source_ae,
+        const std::string& dest_ae,
+        const std::string& study_uid,
+        const std::string& patient_id,
+        const std::vector<std::string>& sop_instance_uids,
+        bool success) override {
+        captured_xds_audit c;
+        c.event_kind = captured_xds_audit::kind::retrieve;
+        c.event_id = transaction == xds_consumer_transaction::iti_43
+                         ? "ITI-43"
+                         : "RAD-69";
+        c.source_participant = source_ae;
+        c.destination_participant = dest_ae;
+        c.study_uid = study_uid;
+        c.patient_id = patient_id;
+        c.sop_instance_uids = sop_instance_uids;
+        c.success = success;
+        events.push_back(std::move(c));
+    }
+
+    std::vector<captured_xds_audit> events;
+};
+
+imaging_document_source make_source_with_registry() {
+    imaging_document_source_config config;
+    config.registry_url = "https://xds.example.com/iti41";
+    config.source_oid = "1.2.3.4.5.6.7.8.9";
+    return imaging_document_source{config};
+}
+
+imaging_document_source make_source_without_registry() {
+    imaging_document_source_config config;
+    config.source_oid = "1.2.3.4.5.6.7.8.9";  // registry_url intentionally empty
+    return imaging_document_source{config};
+}
+
+document_reference make_doc_ref() {
+    document_reference ref;
+    ref.unique_id = "1.2.3.4.5.6.7.200";          // also serves as SOP Instance UID
+    ref.repository_unique_id = "1.2.3.4.5.6.7.99";
+    ref.entry_uuid = "urn:uuid:00000000-0000-0000-0000-000000000001";
+    ref.patient_id = "12345";
+    ref.class_code = "IMG";
+    ref.type_code = "KOS";
+    return ref;
+}
+
+}  // namespace
+
+TEST_CASE("ATNA audit emitted for ITI-41 provide-and-register (success)",
+          "[services][xds][atna]") {
+    auto spy = std::make_shared<xds_audit_spy>();
+    auto source = make_source_with_registry();
+    source.set_audit_handler(spy);
+
+    auto references = create_sample_references();
+    auto patient = create_patient_demographics();
+    auto kos_result = source.create_kos_document(
+        "1.2.3.4.5.6.7.200", references, patient);
+    REQUIRE(kos_result.success);
+
+    auto entry = source.build_document_entry(kos_result.kos_dataset.value());
+    auto pub_result = source.publish_document(
+        kos_result.kos_dataset.value(), entry, /*is_imaging=*/false);
+
+    REQUIRE(pub_result.success);
+    REQUIRE(spy->events.size() == 1);
+
+    const auto& ev = spy->events.front();
+    CHECK(ev.event_kind == captured_xds_audit::kind::provide_and_register);
+    CHECK(ev.event_id == "ITI-41");
+    CHECK_FALSE(ev.source_participant.empty());
+    CHECK_FALSE(ev.destination_participant.empty());
+    CHECK(ev.study_uid == "1.2.3.4.5.6.7.200");
+    CHECK(ev.patient_id == "12345");
+    CHECK_FALSE(ev.sop_instance_uids.empty());
+    CHECK(ev.success);
+}
+
+TEST_CASE("ATNA audit emitted for RAD-68 provide-and-register (failure path)",
+          "[services][xds][atna]") {
+    auto spy = std::make_shared<xds_audit_spy>();
+    auto source = make_source_without_registry();  // forces failure
+    source.set_audit_handler(spy);
+
+    auto references = create_sample_references();
+    auto patient = create_patient_demographics();
+    auto kos_result = source.create_kos_document(
+        "1.2.3.4.5.6.7.200", references, patient);
+    REQUIRE(kos_result.success);
+
+    auto entry = source.build_document_entry(kos_result.kos_dataset.value());
+    auto pub_result = source.publish_document(
+        kos_result.kos_dataset.value(), entry, /*is_imaging=*/true);
+
+    CHECK_FALSE(pub_result.success);
+    REQUIRE(spy->events.size() == 1);
+
+    const auto& ev = spy->events.front();
+    CHECK(ev.event_kind == captured_xds_audit::kind::provide_and_register);
+    CHECK(ev.event_id == "RAD-68");
+    CHECK_FALSE(ev.source_participant.empty());
+    CHECK(ev.study_uid == "1.2.3.4.5.6.7.200");
+    CHECK(ev.patient_id == "12345");
+    // RAD-68 must carry SOP Instance UIDs from the KOS evidence sequence
+    CHECK(ev.sop_instance_uids.size() == 3);
+    CHECK_FALSE(ev.success);
+}
+
+TEST_CASE("ATNA audit emitted for ITI-43 retrieve document set (success)",
+          "[services][xds][atna]") {
+    auto spy = std::make_shared<xds_audit_spy>();
+    imaging_document_consumer_config config;
+    config.repository_url = "https://xds.example.com/iti43";
+    imaging_document_consumer consumer{config};
+    consumer.set_audit_handler(spy);
+
+    auto result = consumer.retrieve_document(make_doc_ref(), /*is_imaging=*/false);
+
+    CHECK(result.success);
+    REQUIRE(spy->events.size() == 1);
+
+    const auto& ev = spy->events.front();
+    CHECK(ev.event_kind == captured_xds_audit::kind::retrieve);
+    CHECK(ev.event_id == "ITI-43");
+    CHECK_FALSE(ev.source_participant.empty());
+    CHECK_FALSE(ev.destination_participant.empty());
+    CHECK(ev.study_uid == "1.2.3.4.5.6.7.200");
+    CHECK(ev.patient_id == "12345");
+    CHECK_FALSE(ev.sop_instance_uids.empty());
+    CHECK(ev.success);
+}
+
+TEST_CASE("ATNA audit emitted for RAD-69 retrieve imaging document set (failure)",
+          "[services][xds][atna]") {
+    auto spy = std::make_shared<xds_audit_spy>();
+    imaging_document_consumer consumer;  // no repository_url configured
+    consumer.set_audit_handler(spy);
+
+    auto result = consumer.retrieve_document(make_doc_ref(), /*is_imaging=*/true);
+
+    CHECK_FALSE(result.success);
+    REQUIRE(spy->events.size() == 1);
+
+    const auto& ev = spy->events.front();
+    CHECK(ev.event_kind == captured_xds_audit::kind::retrieve);
+    CHECK(ev.event_id == "RAD-69");
+    CHECK_FALSE(ev.source_participant.empty());
+    CHECK(ev.study_uid == "1.2.3.4.5.6.7.200");
+    CHECK(ev.patient_id == "12345");
+    CHECK_FALSE(ev.sop_instance_uids.empty());
+    CHECK_FALSE(ev.success);
+}
+
+TEST_CASE("no audit emitted when audit handler is not installed",
+          "[services][xds][atna]") {
+    // Source without auditor: should not crash, no events captured.
+    auto source = make_source_with_registry();
+    auto references = create_sample_references();
+    auto patient = create_patient_demographics();
+    auto kos_result = source.create_kos_document(
+        "1.2.3.4.5.6.7.200", references, patient);
+    REQUIRE(kos_result.success);
+    auto entry = source.build_document_entry(kos_result.kos_dataset.value());
+    CHECK(source.publish_document(kos_result.kos_dataset.value(), entry).success);
+
+    // Consumer without auditor: should not crash either.
+    imaging_document_consumer_config cc;
+    cc.repository_url = "https://xds.example.com/iti43";
+    imaging_document_consumer consumer{cc};
+    CHECK(consumer.retrieve_document(make_doc_ref()).success);
 }
