@@ -37,6 +37,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - [Documentation](#documentation)
 - [Performance](#performance)
 - [Code Statistics](#code-statistics)
+- [Compliance](#compliance)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
@@ -548,6 +549,17 @@ cmake --build build --target run_full_benchmarks
 | **Last Updated** | 2026-04-09 |
 
 <!-- STATS_END -->
+
+---
+
+## Compliance
+
+`pacs_system` provides technical primitives that healthcare organizations may use as part of an Information Security Management System (ISMS). The library is not itself certified; adopters integrate it and supply the organizational controls (policy, training, incident response, business-continuity planning).
+
+- [ISO 27799 Control Mapping](docs/compliance/iso-27799.md) — how ATNA audit trail, audit log encryption, TLS policy, access control, and anonymization map to ISO 27799:2016 clauses 7.4–7.7
+- [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) — ISO 12052 / DICOM 2023e services, SOP classes, and transfer syntaxes implemented
+
+The ecosystem-level index at [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/develop/docs/compliance/ISO_OVERVIEW.md) lists all ISO standards the kcenon systems touch.
 
 ---
 
