@@ -9,6 +9,7 @@
  * @see Issue #387 - dcm_extract: DICOM pixel data extractor
  * @see DICOM PS3.5 Section 8 - Pixel Data Encoding
  *
+ * @code{.unparsed}
  * Usage:
  *   dcm_extract <input> [output] [options]
  *
@@ -17,6 +18,7 @@
  *   dcm_extract image.dcm output.jpg --jpeg   # Extract to JPEG
  *   dcm_extract image.dcm --info              # Show pixel data info only
  *   dcm_extract ./dicom/ ./images/ --recursive --jpeg
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

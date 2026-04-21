@@ -11,11 +11,13 @@
  * @see DICOM PS3.15 - Security and System Management Profiles
  * @see DICOM PS3.7 Section 9.1 - C-ECHO Service
  *
+ * @code{.unparsed}
  * Usage:
  *   secure_echo_scp <port> <ae_title> --cert <cert> --key <key> [options]
  *
  * Example:
  *   secure_echo_scp 2762 MY_PACS --cert server.crt --key server.key --ca ca.crt
+ * @endcode
  */
 
 #include "kcenon/pacs/network/dicom_server.h"

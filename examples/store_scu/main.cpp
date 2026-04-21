@@ -13,6 +13,7 @@
  * @see DICOM PS3.7 Section 9.1.1 - C-STORE Service
  * @see https://support.dcmtk.org/docs/storescu.html
  *
+ * @code{.unparsed}
  * Usage:
  *   store_scu [options] <peer> <port> <dcmfile-in> [dcmfile-in...]
  *
@@ -20,6 +21,7 @@
  *   store_scu localhost 11112 image.dcm
  *   store_scu -aet MYSCU -aec PACS localhost 11112 ./dicom_folder/ -r
  *   store_scu --progress --report-file transfer.log localhost 11112 *.dcm
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_file.h"

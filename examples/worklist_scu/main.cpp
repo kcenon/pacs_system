@@ -16,11 +16,13 @@
  * @see DICOM PS3.4 Section K - Basic Worklist Management Service Class
  * @see DICOM PS3.7 Section 9.1.2 - C-FIND Service
  *
+ * @code{.unparsed}
  * Usage:
  *   worklist_scu [options] <host> <port>
  *
  * Example:
  *   worklist_scu --modality CT --date 20241215 localhost 11112
+ * @endcode
  */
 
 #include "worklist_result_formatter.h"

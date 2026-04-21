@@ -8,6 +8,7 @@
  *
  * @see Issue #106 - Full PACS Server Sample
  *
+ * @code{.unparsed}
  * Usage:
  *   pacs_server [OPTIONS]
  *
@@ -19,6 +20,7 @@
  *   --log-level <level>     Log level (default: info)
  *   --max-associations <n>  Max concurrent associations (default: 50)
  *   --help                  Show help message
+ * @endcode
  */
 
 #include "config.h"

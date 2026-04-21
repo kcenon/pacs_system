@@ -10,6 +10,7 @@
  * @see Parent Issue #278 - DICOM File Utilities Implementation
  * @see DICOM PS3.10 - Media Storage and File Format
  *
+ * @code{.unparsed}
  * Usage:
  *   dcm_info <path> [options]
  *
@@ -17,6 +18,7 @@
  *   dcm_info image.dcm
  *   dcm_info image.dcm --format json
  *   dcm_info ./dicom_folder/ --recursive
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_file.h"

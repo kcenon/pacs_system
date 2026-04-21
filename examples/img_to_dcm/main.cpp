@@ -9,6 +9,7 @@
  * @see Issue #386 - img_to_dcm: Image to DICOM converter
  * @see DICOM PS3.3 Section A.8 - Secondary Capture Image IOD
  *
+ * @code{.unparsed}
  * Usage:
  *   img_to_dcm <input> <output> [options]
  *
@@ -16,6 +17,7 @@
  *   img_to_dcm photo.jpg output.dcm
  *   img_to_dcm photo.jpg output.dcm --patient-name "DOE^JOHN"
  *   img_to_dcm ./images/ ./dicom/ --recursive
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

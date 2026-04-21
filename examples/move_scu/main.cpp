@@ -13,11 +13,13 @@
  * @see DICOM PS3.7 Section 9.1.3 - C-MOVE Service
  * @see https://support.dcmtk.org/docs/movescu.html
  *
+ * @code{.unparsed}
  * Usage:
  *   move_scu [options] <peer> <port>
  *
  * Example:
  *   move_scu -aem WORKSTATION -L STUDY -k "0020,000D=1.2.840..." localhost 11112
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dataset.h"

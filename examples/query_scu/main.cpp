@@ -11,11 +11,13 @@
  * @see DICOM PS3.4 Section C - Query/Retrieve Service Class
  * @see DICOM PS3.7 Section 9.1.2 - C-FIND Service
  *
+ * @code{.unparsed}
  * Usage:
  *   query_scu <host> <port> <called_ae> [options]
  *
  * Example:
  *   query_scu localhost 11112 PACS_SCP --level STUDY --patient-name "DOE^*"
+ * @endcode
  */
 
 #include "query_builder.h"

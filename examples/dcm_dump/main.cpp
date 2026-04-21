@@ -9,6 +9,7 @@
  * @see Issue #107 - DICOM Dump Sample
  * @see DICOM PS3.10 - Media Storage and File Format
  *
+ * @code{.unparsed}
  * Usage:
  *   dcm_dump <path> [options]
  *
@@ -18,6 +19,7 @@
  *   dcm_dump image.dcm --pixel-info
  *   dcm_dump image.dcm --format json
  *   dcm_dump ./dicom_folder/ --recursive --summary
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dictionary.h"

@@ -11,11 +11,13 @@
  * @see DICOM PS3.15 - Security and System Management Profiles
  * @see DICOM PS3.7 Section 9.1 - C-ECHO Service
  *
+ * @code{.unparsed}
  * Usage:
  *   secure_echo_scu <host> <port> <called_ae> --cert <cert> --key <key> [options]
  *
  * Example:
  *   secure_echo_scu localhost 2762 PACS_SCP --cert client.crt --key client.key --ca ca.crt
+ * @endcode
  */
 
 #include "kcenon/pacs/network/association.h"

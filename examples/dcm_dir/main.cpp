@@ -10,6 +10,7 @@
  * @see DICOM PS3.3 - Basic Directory Information Object Definition
  * @see DICOM PS3.10 - Media Storage and File Format
  *
+ * @code{.unparsed}
  * Usage:
  *   dcm_dir <command> [options] <arguments>
  *
@@ -18,6 +19,7 @@
  *   list      Display DICOMDIR contents
  *   verify    Validate DICOMDIR
  *   update    Update existing DICOMDIR (add/remove files)
+ * @endcode
  */
 
 #include "kcenon/pacs/core/dicom_dictionary.h"
