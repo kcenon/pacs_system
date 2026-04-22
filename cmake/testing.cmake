@@ -408,6 +408,38 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    # IHE XDS.b Document Source (ITI-41) tests (Issue #1128)
+    # Only defined when the pacs_ihe_xds target was created (requires pugixml,
+    # libcurl, and OpenSSL). Tests reach into internal headers under
+    # src/ihe/xds/common/ for the envelope / signer / packager layers, plus
+    # the public document_source.h for the end-to-end orchestrator.
+    if(TARGET pacs_ihe_xds)
+        file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/ihe/xds)
+        add_executable(pacs_ihe_xds_tests
+            tests/ihe/xds/soap_envelope_test.cpp
+            tests/ihe/xds/wss_signer_test.cpp
+            tests/ihe/xds/mtom_packager_test.cpp
+            tests/ihe/xds/document_source_test.cpp
+        )
+        target_link_libraries(pacs_ihe_xds_tests
+            PRIVATE
+                pacs_ihe_xds
+                OpenSSL::SSL
+                OpenSSL::Crypto
+                Catch2::Catch2WithMain
+        )
+        if(TARGET pugixml::pugixml)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml::pugixml)
+        elseif(TARGET pugixml::static)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml::static)
+        elseif(TARGET pugixml::shared)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml::shared)
+        elseif(TARGET pugixml)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml)
+        endif()
+        message(STATUS "  [OK] pacs_ihe_xds_tests: ON (ITI-41)")
+    endif()
+
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
     # (Issue #309 - Full Adoption of ILogger Interface)
     if(TARGET pacs_integration AND TARGET pacs_storage)
@@ -593,6 +625,13 @@ if(PACS_BUILD_TESTS)
         catch_discover_tests(xds_gazelle_integration_tests
             TEST_PREFIX "integration::"
             PROPERTIES LABELS "integration"
+        )
+    endif()
+
+    # IHE XDS.b ITI-41 unit tests (Issue #1128).
+    if(TARGET pacs_ihe_xds_tests)
+        catch_discover_tests(pacs_ihe_xds_tests
+            PROPERTIES LABELS "unit"
         )
     endif()
 
