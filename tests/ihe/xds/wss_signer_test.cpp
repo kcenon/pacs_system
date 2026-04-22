@@ -140,6 +140,20 @@ TEST_CASE("WS-Security signer produces a signature verifiable by OpenSSL",
     const std::string sig_b64 = sig_value_node.text().get();
     REQUIRE(!sig_b64.empty());
 
+    // MAJOR-2: the emitted signature must advertise the project-local
+    // canonicalization URI, not exc-c14n, until a follow-up issue lands
+    // real exc-c14n. Regressing this would resurrect the honesty bug.
+    static constexpr const char* kKcenonC14nUri =
+        "urn:kcenon:xds:c14n:pugixml-format-raw-v1";
+    auto c14n = signed_info.child("ds:CanonicalizationMethod");
+    REQUIRE(c14n);
+    REQUIRE(std::string(c14n.attribute("Algorithm").value()) == kKcenonC14nUri);
+    for (auto ref : signed_info.children("ds:Reference")) {
+        auto xform = ref.child("ds:Transforms").child("ds:Transform");
+        REQUIRE(std::string(xform.attribute("Algorithm").value()) ==
+                kKcenonC14nUri);
+    }
+
     struct xml_string_writer : pugi::xml_writer {
         std::string out;
         void write(const void* data, std::size_t size) override {

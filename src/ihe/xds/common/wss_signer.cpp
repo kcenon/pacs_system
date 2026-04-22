@@ -6,14 +6,34 @@
  * @file wss_signer.cpp
  * @brief OpenSSL-backed WS-Security XML-DSig signer.
  *
- * Implementation note on canonicalization: this signer serializes
- * referenced nodes (the Timestamp and Body) with pugixml's format_raw,
- * which produces deterministic UTF-8 XML with no whitespace perturbation.
- * Because the envelope declares every namespace on <soap:Envelope> at
- * build time, every descendant inherits the same prefix bindings, so the
- * output matches exc-c14n for this specific document shape. A full
- * namespace-rewriting exc-c14n implementation is tracked under a separate
- * sibling issue.
+ * Canonicalization policy
+ * -----------------------
+ * This signer does NOT implement Exclusive XML Canonicalization
+ * (http://www.w3.org/2001/10/xml-exc-c14n#). It serializes referenced
+ * nodes with pugixml's format_raw, which produces deterministic UTF-8
+ * XML with no whitespace perturbation. Because the envelope built by
+ * soap_envelope.cpp declares every namespace on <soap:Envelope> at build
+ * time, every descendant inherits the same prefix bindings, so the byte
+ * stream is stable under our own verifier. It is NOT interoperable with
+ * a strict exc-c14n implementation (IHE Gazelle, .NET WIF, Apache CXF),
+ * which would require namespace rewriting and attribute ordering.
+ *
+ * The advertised CanonicalizationMethod / Transform Algorithm URIs in
+ * the emitted <ds:Signature> are therefore the project-local identifier
+ *
+ *     urn:kcenon:xds:c14n:pugixml-format-raw-v1
+ *
+ * NOT the exc-c14n URI. This is deliberate: advertising exc-c14n while
+ * emitting something else would silently produce signatures that look
+ * valid to our own test (EVP_DigestVerify over the same serializer) but
+ * fail in any third-party verifier. The project-local URI makes
+ * non-interoperable callers fail loudly at Algorithm check instead.
+ *
+ * Full exc-c14n + Apache CXF / Gazelle round-trip verification is
+ * tracked as a follow-up issue and must land before production use
+ * against a real XDS.b registry.
+ *
+ * Addresses review finding MAJOR-2 (Option A - honest URI).
  */
 
 #include "wss_signer.h"
@@ -231,10 +251,15 @@ kcenon::common::Result<bool> sign_envelope(built_envelope& env,
     auto signature = security.append_child("ds:Signature");
     signature.append_attribute("xmlns:ds") = "http://www.w3.org/2000/09/xmldsig#";
 
+    // Project-local canonicalization identifier. See the canonicalization
+    // policy section at the top of this file. Do not substitute the
+    // exc-c14n URI until the signer actually implements exc-c14n.
+    static constexpr const char* kKcenonC14nUri =
+        "urn:kcenon:xds:c14n:pugixml-format-raw-v1";
+
     auto signed_info = signature.append_child("ds:SignedInfo");
     auto c14n_method = signed_info.append_child("ds:CanonicalizationMethod");
-    c14n_method.append_attribute("Algorithm") =
-        "http://www.w3.org/2001/10/xml-exc-c14n#";
+    c14n_method.append_attribute("Algorithm") = kKcenonC14nUri;
     auto sig_method = signed_info.append_child("ds:SignatureMethod");
     sig_method.append_attribute("Algorithm") =
         "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
@@ -245,8 +270,7 @@ kcenon::common::Result<bool> sign_envelope(built_envelope& env,
         ref.append_attribute("URI") = ("#" + uri).c_str();
         auto transforms = ref.append_child("ds:Transforms");
         auto xform = transforms.append_child("ds:Transform");
-        xform.append_attribute("Algorithm") =
-            "http://www.w3.org/2001/10/xml-exc-c14n#";
+        xform.append_attribute("Algorithm") = kKcenonC14nUri;
         auto digest_method = ref.append_child("ds:DigestMethod");
         digest_method.append_attribute("Algorithm") =
             "http://www.w3.org/2001/04/xmlenc#sha256";

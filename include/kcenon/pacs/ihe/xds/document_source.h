@@ -17,6 +17,16 @@
  *  - Consumer (#1129), Registry Query (#1130), and ATNA wiring (#1131) are
  *    siblings and intentionally not exposed here.
  *
+ * Interoperability caveat: the WS-Security signature produced by submit()
+ * advertises the project-local canonicalization URI
+ * "urn:kcenon:xds:c14n:pugixml-format-raw-v1", NOT exc-c14n
+ * (http://www.w3.org/2001/10/xml-exc-c14n#). The signature is
+ * self-verifiable and bit-reproducible, but it is not interoperable with
+ * a third-party exc-c14n verifier until a follow-up issue lands full
+ * namespace-rewriting canonicalization. Production deployments against a
+ * real IHE Gazelle / Apache CXF / .NET WIF registry must wait for that
+ * follow-up.
+ *
  * @see IHE ITI TF-2a §3.41
  * @see Issue #1128
  */
