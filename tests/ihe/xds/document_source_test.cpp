@@ -234,3 +234,25 @@ TEST_CASE("document_source surfaces HTTP errors",
     REQUIRE(r.error().code ==
             static_cast<int>(error_code::transport_http_error));
 }
+
+TEST_CASE("document_source rejects oversize registry responses",
+          "[ihe][xds][iti41][e2e]") {
+    // Exercise the belt-and-suspenders cap inside parse_registry_response.
+    // The libcurl write callback enforces the same 8 MiB limit in the real
+    // transport path, but this test skips libcurl via the transport
+    // override so we assert the defensive parser-side guard directly.
+    scoped_transport_override guard(
+        [](const detail::transport_request&)
+            -> kcenon::common::Result<detail::http_response> {
+            detail::http_response r;
+            r.status_code = 200;
+            r.body.assign(static_cast<std::size_t>(8 * 1024 * 1024) + 1, 'A');
+            return r;
+        });
+
+    document_source ds(make_opts(), make_signing());
+    auto r = ds.submit(make_submission());
+    REQUIRE(r.is_err());
+    REQUIRE(r.error().code ==
+            static_cast<int>(error_code::transport_response_too_large));
+}

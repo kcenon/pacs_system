@@ -44,11 +44,26 @@ transport_override& override_fn() {
     return fn;
 }
 
+// Response-size cap. Registers should answer with a small ebRS
+// RegistryResponse (typically < 100 KiB even with a long error list).
+// 8 MiB is a generous upper bound that also fits comfortably inside the
+// pugixml parse we do downstream.
+constexpr std::size_t kMaxResponseBytes = 8 * 1024 * 1024;
+
+struct response_sink {
+    std::string buffer;
+    bool oversize{false};
+};
+
 std::size_t write_callback(char* ptr, std::size_t size, std::size_t nmemb,
                            void* userdata) {
     const std::size_t total = size * nmemb;
-    auto* out = static_cast<std::string*>(userdata);
-    out->append(ptr, total);
+    auto* sink = static_cast<response_sink*>(userdata);
+    if (sink->buffer.size() + total > kMaxResponseBytes) {
+        sink->oversize = true;
+        return 0;
+    }
+    sink->buffer.append(ptr, total);
     return total;
 }
 
@@ -125,7 +140,7 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
         headers.reset(raw);
     }
 
-    std::string response_body;
+    response_sink response;
 
     curl_easy_setopt(curl.get(), CURLOPT_URL, opts.endpoint.c_str());
     curl_easy_setopt(curl.get(), CURLOPT_POST, 1L);
@@ -135,7 +150,7 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
     curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE_LARGE,
                      static_cast<curl_off_t>(body.size()));
     curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response_body);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
     curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl.get(), CURLOPT_NOSIGNAL, 1L);
 
@@ -165,6 +180,18 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
 
     const CURLcode rc = curl_easy_perform(curl.get());
     if (rc != CURLE_OK) {
+        // write_callback returned 0 once the response exceeded
+        // kMaxResponseBytes, which libcurl surfaces as CURLE_WRITE_ERROR.
+        // Promote that specific case to a dedicated error code so callers
+        // can distinguish DoS protection from other transport failures.
+        if (rc == CURLE_WRITE_ERROR && response.oversize) {
+            return kcenon::common::make_error<http_response>(
+                static_cast<int>(error_code::transport_response_too_large),
+                "registry response exceeds " +
+                    std::to_string(kMaxResponseBytes) +
+                    " byte cap; transfer aborted",
+                std::string(error_source));
+        }
         const bool tls =
             rc == CURLE_PEER_FAILED_VERIFICATION || rc == CURLE_SSL_CONNECT_ERROR ||
             rc == CURLE_SSL_CERTPROBLEM || rc == CURLE_SSL_CIPHER ||
@@ -182,7 +209,7 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
 
     http_response out;
     curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &out.status_code);
-    out.body = std::move(response_body);
+    out.body = std::move(response.buffer);
 
     if (out.status_code < 200 || out.status_code >= 300) {
         return kcenon::common::make_error<http_response>(

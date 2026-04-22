@@ -97,8 +97,23 @@ public:
     }
 
 private:
+    // Belt-and-suspenders cap. The HTTP layer already enforces 8 MiB via
+    // the write callback, so any response reaching us here is already
+    // bounded. This defensive check survives future refactors that might
+    // add a non-libcurl transport path without a size cap.
+    static constexpr std::size_t kMaxRegistryResponseBytes =
+        8 * 1024 * 1024;
+
     kcenon::common::Result<submit_response> parse_registry_response(
         const std::string& body, const std::string& submission_set_uid) {
+        if (body.size() > kMaxRegistryResponseBytes) {
+            return kcenon::common::make_error<submit_response>(
+                static_cast<int>(error_code::transport_response_too_large),
+                "RegistryResponse exceeds 8 MiB cap (" +
+                    std::to_string(body.size()) + " bytes) - rejected to "
+                    "bound pugixml memory footprint",
+                std::string(error_source));
+        }
         pugi::xml_document doc;
         auto parse = doc.load_buffer(body.data(), body.size(),
                                      pugi::parse_default, pugi::encoding_utf8);

@@ -59,6 +59,7 @@ enum class error_code : int {
     transport_http_error = 94,
     transport_timeout = 95,
     transport_invalid_response = 96,
+    transport_response_too_large = 97,
 
     // --- registry response (100-109) ---
     registry_failure_response = 100,
