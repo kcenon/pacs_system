@@ -9,6 +9,8 @@
 
 #include "retrieve_response_parser.h"
 
+#include "../common/wss_signer.h"
+
 #include <pugixml.hpp>
 
 #include <string>
@@ -204,11 +206,17 @@ kcenon::common::Result<document_response> parse_retrieve_response(
             "Document element has neither xop:Include nor inline content",
             std::string(error_source));
     }
-    // Defer base64 decoding to a shared helper is overkill for the
-    // fallback path; the MTOM path is the production expectation. Emit the
-    // bytes as-is and let the caller decide whether to decode. Document is
-    // an opaque payload to the consumer in either case.
-    out.content.assign(inline_b64.begin(), inline_b64.end());
+    // Decode the inline base64 so document_response.content has the
+    // same "already-decoded binary bytes" semantics regardless of
+    // whether the repository used MTOM or inline-base64 framing. Review
+    // Minor-1 fix: avoid divergent caller expectations.
+    out.content = base64_decode_bytes(inline_b64);
+    if (out.content.empty()) {
+        return kcenon::common::make_error<document_response>(
+            static_cast<int>(error_code::consumer_response_document_not_found),
+            "inline Document base64 decode failed or yielded empty bytes",
+            std::string(error_source));
+    }
     return out;
 }
 

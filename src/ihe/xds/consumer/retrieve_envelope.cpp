@@ -132,11 +132,9 @@ kcenon::common::Result<built_envelope> build_iti43_envelope(
     auto rq = body.append_child("xdsb:RetrieveDocumentSetRequest");
     auto doc_req = rq.append_child("xdsb:DocumentRequest");
 
-    if (!req.home_community_id.empty()) {
-        doc_req.append_child("xdsb:HomeCommunityId")
-            .text()
-            .set(req.home_community_id.c_str());
-    }
+    // TODO(#1129-follow-up): emit xdsb:HomeCommunityId here when XCA
+    // Cross-Community Access support lands. ITI-43 intra-community
+    // retrieve (the scope of this PR) omits the element.
     doc_req.append_child("xdsb:RepositoryUniqueId")
         .text()
         .set(req.repository_unique_id.c_str());

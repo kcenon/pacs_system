@@ -104,14 +104,15 @@ struct submit_response {
  * echo it back so the repository knows which of its stored documents is
  * being requested.
  *
- * home_community_id is the optional XCA affinity-domain identifier. For
- * intra-community retrieve (the common case) it is empty and the Consumer
- * omits the homeCommunityId attribute from the request.
+ * TODO(#1129-follow-up): add a home_community_id field back when XCA
+ * Cross-Community Access (ITI-39 / XCA.b-Retrieve) is implemented. The
+ * Consumer's retrieve() public API is intra-community only today; the
+ * XCA follow-up will also plumb this field through retrieve_envelope
+ * and surface a wider overload.
  */
 struct retrieve_request {
     std::string document_unique_id;
     std::string repository_unique_id;
-    std::string home_community_id;
 };
 
 /**

@@ -41,9 +41,7 @@ constexpr const char* kSoapContentType =
 class document_consumer::impl {
 public:
     impl(http_options opts, signing_material signing)
-        : opts_(std::move(opts)), signing_(std::move(signing)) {
-        opts_.soap_action = kIti43SoapAction;
-    }
+        : opts_(std::move(opts)), signing_(std::move(signing)) {}
 
     kcenon::common::Result<document_response> retrieve(
         const std::string& document_unique_id,
@@ -82,8 +80,16 @@ public:
                 sign_result.error());
         }
 
+        // Per-call copy: the ITI-43 SOAP action is specific to this
+        // transaction and must not mutate the shared opts_ member, so
+        // other transaction types - if this Consumer later grows more
+        // retrieve variants - cannot pick up a stale action from a
+        // previous call. This also preserves whatever the caller set.
+        http_options call_opts = opts_;
+        call_opts.soap_action = kIti43SoapAction;
+
         auto http_result =
-            detail::http_post(opts_, kSoapContentType, env.xml);
+            detail::http_post(call_opts, kSoapContentType, env.xml);
         if (http_result.is_err()) {
             return kcenon::common::make_error<document_response>(
                 http_result.error());
