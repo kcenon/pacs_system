@@ -49,6 +49,7 @@
 
 #include <pugixml.hpp>
 
+#include <cstring>
 #include <cstdio>
 #include <memory>
 #include <string>
