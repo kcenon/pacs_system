@@ -49,4 +49,25 @@ kcenon::common::Result<bool> sign_envelope(built_envelope& env,
                                            std::string_view key_pem,
                                            std::string_view key_password);
 
+/**
+ * @brief Verify the WS-Security signature of a previously signed envelope.
+ *
+ * Reparses @p signed_xml, locates the ds:Signature in wsse:Security,
+ * decodes the BinarySecurityToken into an X.509 public key, re-digests
+ * Body and Timestamp with the same pugixml format_raw serializer used for
+ * signing, and calls EVP_DigestVerify against the SignedInfo bytes.
+ *
+ * Honest-URI policy: the CanonicalizationMethod and every Transform
+ * Algorithm URI inside SignedInfo MUST equal
+ * "urn:kcenon:xds:c14n:pugixml-format-raw-v1". If any Algorithm advertises
+ * exc-c14n or any other URI, verification is refused with
+ * consumer_signature_verification_failed rather than silently digesting a
+ * mismatched byte stream. This mirrors the signer's behavior.
+ *
+ * Returns consumer_signature_missing if the envelope carries no
+ * ds:Signature element; consumer_signature_verification_failed on any
+ * other mismatch (digest, signature, algorithm, KeyInfo shape).
+ */
+kcenon::common::Result<bool> verify_envelope(std::string_view signed_xml);
+
 }  // namespace kcenon::pacs::ihe::xds::detail

@@ -130,6 +130,40 @@ std::string base64_encode(const unsigned char* data, std::size_t len) {
     return std::string(bptr->data, bptr->length);
 }
 
+// Strip any whitespace (CR/LF/space/tab) the BST text may carry - the
+// signer emits a single-line base64 string but a real registry will often
+// wrap to 64 or 76 columns. OpenSSL's BIO_f_base64 decoder requires clean
+// input or BIO_FLAGS_BASE64_NO_NL; stripping is simpler and avoids
+// heuristics about which flag to use.
+std::string strip_b64_whitespace(std::string_view s) {
+    std::string out;
+    out.reserve(s.size());
+    for (const char c : s) {
+        if (c != '\r' && c != '\n' && c != ' ' && c != '\t') {
+            out.push_back(c);
+        }
+    }
+    return out;
+}
+
+std::vector<unsigned char> base64_decode(std::string_view b64_in) {
+    const std::string cleaned = strip_b64_whitespace(b64_in);
+    if (cleaned.empty()) return {};
+    bio_ptr b64(BIO_new(BIO_f_base64()));
+    if (!b64) return {};
+    BIO* mem =
+        BIO_new_mem_buf(cleaned.data(), static_cast<int>(cleaned.size()));
+    if (!mem) return {};
+    BIO* chain = BIO_push(b64.release(), mem);
+    bio_ptr owner(chain);
+    BIO_set_flags(owner.get(), BIO_FLAGS_BASE64_NO_NL);
+    std::vector<unsigned char> out(cleaned.size());
+    const int n = BIO_read(owner.get(), out.data(), static_cast<int>(out.size()));
+    if (n <= 0) return {};
+    out.resize(static_cast<std::size_t>(n));
+    return out;
+}
+
 std::vector<unsigned char> cert_to_der(X509* cert) {
     int len = i2d_X509(cert, nullptr);
     if (len <= 0) return {};
@@ -335,6 +369,237 @@ kcenon::common::Result<bool> sign_envelope(built_envelope& env,
     doc.save(w, "", pugi::format_raw | pugi::format_no_declaration,
              pugi::encoding_utf8);
     env.xml = R"(<?xml version="1.0" encoding="UTF-8"?>)" + w.out;
+    return true;
+}
+
+namespace {
+
+// Project-local canonicalization identifier shared with sign_envelope. The
+// two must stay in sync - any divergence would silently accept signatures
+// with a different byte stream.
+constexpr const char* kKcenonC14nUri =
+    "urn:kcenon:xds:c14n:pugixml-format-raw-v1";
+
+// The ds:SignedInfo Reference uses "#<wsu:Id>" as its URI attribute. Strip
+// the leading '#' so we can match it against the actual id values emitted
+// on wsu:Timestamp and soap:Body.
+std::string strip_uri_fragment(const char* uri) {
+    if (uri == nullptr) return {};
+    if (uri[0] == '#') return std::string(uri + 1);
+    return std::string(uri);
+}
+
+// pugixml's XPath evaluator has no way to bind the wsu namespace prefix
+// for a `@wsu:Id` predicate without a registered xpath_variable_set, so
+// walk the tree manually. The envelope is small (headers + a single body
+// referenced from the Signature); a linear walk is fast.
+struct wsu_id_walker : pugi::xml_tree_walker {
+    std::string needle;
+    pugi::xml_node match;
+    bool for_each(pugi::xml_node& n) override {
+        const auto attr = n.attribute("wsu:Id");
+        if (!attr.empty() && attr.as_string() == needle) {
+            match = n;
+            return false;
+        }
+        return true;
+    }
+};
+
+pugi::xml_node find_by_wsu_id(pugi::xml_node root, const std::string& id) {
+    wsu_id_walker w;
+    w.needle = id;
+    root.traverse(w);
+    return w.match;
+}
+
+}  // namespace
+
+kcenon::common::Result<bool> verify_envelope(std::string_view signed_xml) {
+    if (signed_xml.empty()) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "signed envelope is empty", std::string(error_source));
+    }
+
+    pugi::xml_document doc;
+    auto parse = doc.load_buffer(signed_xml.data(), signed_xml.size(),
+                                 pugi::parse_default, pugi::encoding_utf8);
+    if (!parse) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            std::string("failed to reparse signed envelope: ") +
+                parse.description(),
+            std::string(error_source));
+    }
+
+    auto envelope = doc.child("soap:Envelope");
+    auto header = envelope.child("soap:Header");
+    auto security = header.child("wsse:Security");
+    auto signature = security.child("ds:Signature");
+    auto bst = security.child("wsse:BinarySecurityToken");
+
+    if (!envelope || !header || !security) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "envelope lacks WS-Security scaffolding",
+            std::string(error_source));
+    }
+    if (!signature) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(error_code::consumer_signature_missing),
+            "envelope has no ds:Signature element",
+            std::string(error_source));
+    }
+    if (!bst) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "envelope has no wsse:BinarySecurityToken",
+            std::string(error_source));
+    }
+
+    // Enforce honest-URI policy on every Algorithm attribute within
+    // SignedInfo before trusting the digests.
+    auto signed_info = signature.child("ds:SignedInfo");
+    if (!signed_info) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "Signature has no SignedInfo", std::string(error_source));
+    }
+    auto c14n = signed_info.child("ds:CanonicalizationMethod");
+    if (!c14n ||
+        std::string(c14n.attribute("Algorithm").as_string()) != kKcenonC14nUri) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "CanonicalizationMethod is not the kcenon project-local URI",
+            std::string(error_source));
+    }
+
+    // Load public key from BST.
+    const std::string bst_b64 = strip_b64_whitespace(bst.text().as_string());
+    const auto der = base64_decode(bst_b64);
+    if (der.empty()) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "BinarySecurityToken base64 decode failed",
+            std::string(error_source));
+    }
+    const unsigned char* der_ptr = der.data();
+    x509_ptr cert(d2i_X509(nullptr, &der_ptr, static_cast<long>(der.size())));
+    if (!cert) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "d2i_X509 failed on BinarySecurityToken",
+            std::string(error_source));
+    }
+    pkey_ptr pkey(X509_get_pubkey(cert.get()));
+    if (!pkey) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "X509_get_pubkey failed", std::string(error_source));
+    }
+
+    // Recompute digests for every Reference in SignedInfo and compare
+    // against the advertised DigestValue.
+    for (auto ref = signed_info.child("ds:Reference"); ref;
+         ref = ref.next_sibling("ds:Reference")) {
+        for (auto xform = ref.child("ds:Transforms").child("ds:Transform");
+             xform; xform = xform.next_sibling("ds:Transform")) {
+            if (std::string(xform.attribute("Algorithm").as_string()) !=
+                kKcenonC14nUri) {
+                return kcenon::common::make_error<bool>(
+                    static_cast<int>(
+                        error_code::consumer_signature_verification_failed),
+                    "Reference Transform is not the kcenon project-local URI",
+                    std::string(error_source));
+            }
+        }
+        const std::string uri = strip_uri_fragment(
+            ref.attribute("URI").as_string());
+        if (uri.empty()) {
+            return kcenon::common::make_error<bool>(
+                static_cast<int>(
+                    error_code::consumer_signature_verification_failed),
+                "Reference URI is empty", std::string(error_source));
+        }
+        auto target = find_by_wsu_id(envelope, uri);
+        if (!target) {
+            return kcenon::common::make_error<bool>(
+                static_cast<int>(
+                    error_code::consumer_signature_verification_failed),
+                "Reference target not found: " + uri,
+                std::string(error_source));
+        }
+        const std::string bytes = serialize_subtree(target);
+        const std::string want_digest = sha256_base64(bytes);
+        const std::string have_digest = strip_b64_whitespace(
+            ref.child("ds:DigestValue").text().as_string());
+        if (want_digest != have_digest) {
+            return kcenon::common::make_error<bool>(
+                static_cast<int>(
+                    error_code::consumer_signature_verification_failed),
+                "DigestValue mismatch for reference: " + uri,
+                std::string(error_source));
+        }
+    }
+
+    // Verify the signature over SignedInfo.
+    const std::string signed_info_bytes = serialize_subtree(signed_info);
+    if (signed_info_bytes.empty()) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "serialized SignedInfo is empty", std::string(error_source));
+    }
+    const auto sig_bytes = base64_decode(
+        signature.child("ds:SignatureValue").text().as_string());
+    if (sig_bytes.empty()) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "SignatureValue base64 decode failed",
+            std::string(error_source));
+    }
+
+    md_ctx_ptr md(EVP_MD_CTX_new());
+    if (!md) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "EVP_MD_CTX_new failed", std::string(error_source));
+    }
+    if (EVP_DigestVerifyInit(md.get(), nullptr, EVP_sha256(), nullptr,
+                             pkey.get()) != 1) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "EVP_DigestVerifyInit failed", std::string(error_source));
+    }
+    if (EVP_DigestVerifyUpdate(md.get(), signed_info_bytes.data(),
+                               signed_info_bytes.size()) != 1) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "EVP_DigestVerifyUpdate failed", std::string(error_source));
+    }
+    const int verdict =
+        EVP_DigestVerifyFinal(md.get(), sig_bytes.data(), sig_bytes.size());
+    if (verdict != 1) {
+        return kcenon::common::make_error<bool>(
+            static_cast<int>(
+                error_code::consumer_signature_verification_failed),
+            "EVP_DigestVerifyFinal rejected the signature",
+            std::string(error_source));
+    }
     return true;
 }
 
