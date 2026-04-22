@@ -516,6 +516,74 @@ else()
     message(STATUS "  [OK] pacs_security: ON (without digital signatures)")
 endif()
 
+# IHE XDS.b library (Issue #1128 - Document Source / ITI-41)
+# Built only when pugixml, libcurl, and OpenSSL are all available; otherwise
+# the target is skipped and consumers that depend on it gate on TARGET pacs_ihe_xds.
+if(PACS_PUGIXML_FOUND AND PACS_CURL_FOUND AND PACS_OPENSSL_FOUND)
+    add_library(pacs_ihe_xds
+        src/ihe/xds/common/soap_envelope.cpp
+        src/ihe/xds/common/wss_signer.cpp
+        src/ihe/xds/common/mtom_packager.cpp
+        src/ihe/xds/common/http_client.cpp
+        src/ihe/xds/document_source.cpp
+    )
+    target_include_directories(pacs_ihe_xds
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_ihe_xds
+        PUBLIC pacs_core pacs_security
+    )
+
+    # Link common_system (Tier 0) for Result<T>
+    if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+        pacs_link_external_dependency(
+            pacs_ihe_xds
+            PUBLIC
+            pacs_common_system_headers
+            kcenon::common_system
+        )
+        target_compile_definitions(pacs_ihe_xds PUBLIC
+            KCENON_HAS_COMMON_SYSTEM=1
+            PACS_WITH_COMMON_SYSTEM=1
+        )
+    endif()
+
+    # pugixml (some vcpkg / system setups export pugixml::pugixml, others
+    # export a bare pugixml target or a pugixml::static alias)
+    if(TARGET pugixml::pugixml)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml::pugixml)
+    elseif(TARGET pugixml::shared)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml::shared)
+    elseif(TARGET pugixml::static)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml::static)
+    elseif(TARGET pugixml)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml)
+    else()
+        message(FATAL_ERROR "pugixml library target not found despite PACS_PUGIXML_FOUND")
+    endif()
+
+    # libcurl
+    if(TARGET CURL::libcurl)
+        target_link_libraries(pacs_ihe_xds PRIVATE CURL::libcurl)
+    else()
+        target_link_libraries(pacs_ihe_xds PRIVATE ${CURL_LIBRARIES})
+        target_include_directories(pacs_ihe_xds PRIVATE ${CURL_INCLUDE_DIRS})
+    endif()
+
+    # OpenSSL - needed for WS-Security XML-DSig signing. pacs_security exposes
+    # OpenSSL transitively when digital signatures are enabled, but we link
+    # directly so an accidental removal of the transitive edge does not
+    # silently break WS-Security signing.
+    target_link_libraries(pacs_ihe_xds PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+    target_compile_definitions(pacs_ihe_xds PUBLIC PACS_WITH_IHE_XDS=1)
+
+    message(STATUS "  [OK] pacs_ihe_xds: ON (Document Source / ITI-41)")
+else()
+    message(STATUS "  [--] pacs_ihe_xds: OFF (requires pugixml, libcurl, OpenSSL)")
+endif()
+
 # Storage library
 if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
