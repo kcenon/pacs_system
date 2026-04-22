@@ -67,21 +67,6 @@ std::size_t write_callback(char* ptr, std::size_t size, std::size_t nmemb,
     return total;
 }
 
-std::size_t read_callback(char* buffer, std::size_t size, std::size_t nmemb,
-                          void* userdata) {
-    struct read_state {
-        const std::string* body;
-        std::size_t offset;
-    };
-    auto* state = static_cast<read_state*>(userdata);
-    const std::size_t capacity = size * nmemb;
-    const std::size_t remaining = state->body->size() - state->offset;
-    const std::size_t to_copy = remaining < capacity ? remaining : capacity;
-    std::memcpy(buffer, state->body->data() + state->offset, to_copy);
-    state->offset += to_copy;
-    return to_copy;
-}
-
 }  // namespace
 
 void set_http_transport_override(transport_override fn) {
@@ -119,6 +104,17 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
             return fn_copy(req);
         }
     }
+
+    // libcurl 7.84+ auto-inits on first curl_easy_init, but that implicit
+    // path is not thread-safe. Call curl_global_init once per process
+    // under a std::once_flag so concurrent first-use from different
+    // threads does not race. curl_global_cleanup is deliberately NOT
+    // paired here - libcurl documents that a single init for process
+    // lifetime is the supported pattern.
+    static std::once_flag s_curl_once;
+    std::call_once(s_curl_once, [] {
+        (void)curl_global_init(CURL_GLOBAL_DEFAULT);
+    });
 
     curl_ptr curl(curl_easy_init());
     if (!curl) {
@@ -175,8 +171,6 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
         curl_easy_setopt(curl.get(), CURLOPT_SSLKEY,
                          opts.client_private_key_path.c_str());
     }
-
-    (void)read_callback;  // kept for future streamed upload path
 
     const CURLcode rc = curl_easy_perform(curl.get());
     if (rc != CURLE_OK) {
