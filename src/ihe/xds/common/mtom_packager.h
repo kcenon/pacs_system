@@ -61,4 +61,36 @@ struct packaged_mtom {
 kcenon::common::Result<packaged_mtom> package_mtom(
     const std::string& envelope_xml, const std::vector<mtom_part>& parts);
 
+/**
+ * @brief Result of parsing an inbound multipart/related MTOM response.
+ *
+ * root_xml is the SOAP envelope that constitutes the root part (the one
+ * whose Content-ID matches the start parameter or, when absent, the first
+ * part). parts is every attachment, keyed on the bare content-id with the
+ * angle brackets stripped.
+ */
+struct parsed_mtom {
+    std::string root_xml;
+    std::vector<mtom_part> parts;
+};
+
+/**
+ * @brief Parse a multipart/related MTOM response body.
+ *
+ * Extracts the boundary from the first encountered "--<boundary>" marker
+ * inside @p body - Content-Type header sniffing is intentionally avoided
+ * because the caller has already committed the bytes to an in-memory
+ * std::string, and the 8 MiB response cap in http_client bounds the walk.
+ * The body is split into parts, each part is stripped of its headers, and
+ * the Content-ID of the first part is treated as the root envelope.
+ *
+ * Non-SOAP responses (the repository returned plain SOAP with no MTOM
+ * multipart framing) are detected and returned with root_xml set to the
+ * whole body and parts empty, so the caller can still invoke the signer
+ * and response parser uniformly. This matches the fallback behavior of
+ * Apache CXF repositories that omit MTOM when no attachments are present.
+ */
+kcenon::common::Result<parsed_mtom> parse_mtom_response(
+    const std::string& body);
+
 }  // namespace kcenon::pacs::ihe::xds::detail
