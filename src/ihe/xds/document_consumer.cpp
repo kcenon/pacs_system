@@ -97,7 +97,7 @@ public:
         }
         auto mtom = parsed.value();
 
-        auto verify = detail::verify_envelope(mtom.root_xml);
+        auto verify = detail::verify_envelope_integrity(mtom.root_xml);
         if (verify.is_err()) {
             return kcenon::common::make_error<document_response>(
                 verify.error());

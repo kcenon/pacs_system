@@ -95,9 +95,18 @@ public:
      * Sequence: validate identifiers -> build xdsb:RetrieveDocumentSetRequest
      * SOAP envelope -> WS-Security sign Timestamp+Body -> POST plain SOAP
      * (no outbound MTOM parts) over HTTPS -> receive multipart/related
-     * MTOM response -> parse root envelope and attachment parts -> verify
-     * response signature -> locate the DocumentResponse matching the
-     * requested uid and resolve its xop:Include to the attachment bytes.
+     * MTOM response -> parse root envelope and attachment parts ->
+     * verify_envelope_integrity on the response -> locate the
+     * DocumentResponse matching the requested uid and resolve its
+     * xop:Include to the attachment bytes.
+     *
+     * TRUST CAVEAT: the response signature check is integrity-only - it
+     * binds the payload to the cert embedded in the response's BST, but
+     * does NOT validate that cert against a trust anchor. An on-path
+     * attacker who can serve any valid X.509 cert will pass this check.
+     * Full trust-chain validation is deferred to the Gazelle conformance
+     * integration (#1131). Callers relying on retrieve() for authenticity
+     * must not treat a successful Result as signer-authenticated.
      *
      * All failure modes surface as typed error_code values; the function
      * never throws across the API boundary. A Registry-reported Failure

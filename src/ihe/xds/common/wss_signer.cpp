@@ -59,6 +59,13 @@ namespace kcenon::pacs::ihe::xds::detail {
 
 namespace {
 
+// Project-local canonicalization identifier. See the canonicalization
+// policy section at the top of this file. Single-source to prevent
+// drift between sign_envelope and verify_envelope - any divergence
+// would silently accept signatures with a different byte stream.
+constexpr const char* kKcenonC14nUri =
+    "urn:kcenon:xds:c14n:pugixml-format-raw-v1";
+
 struct bio_deleter {
     void operator()(BIO* bio) const noexcept {
         if (bio) BIO_free_all(bio);
@@ -286,12 +293,6 @@ kcenon::common::Result<bool> sign_envelope(built_envelope& env,
     auto signature = security.append_child("ds:Signature");
     signature.append_attribute("xmlns:ds") = "http://www.w3.org/2000/09/xmldsig#";
 
-    // Project-local canonicalization identifier. See the canonicalization
-    // policy section at the top of this file. Do not substitute the
-    // exc-c14n URI until the signer actually implements exc-c14n.
-    static constexpr const char* kKcenonC14nUri =
-        "urn:kcenon:xds:c14n:pugixml-format-raw-v1";
-
     auto signed_info = signature.append_child("ds:SignedInfo");
     auto c14n_method = signed_info.append_child("ds:CanonicalizationMethod");
     c14n_method.append_attribute("Algorithm") = kKcenonC14nUri;
@@ -374,12 +375,6 @@ kcenon::common::Result<bool> sign_envelope(built_envelope& env,
 
 namespace {
 
-// Project-local canonicalization identifier shared with sign_envelope. The
-// two must stay in sync - any divergence would silently accept signatures
-// with a different byte stream.
-constexpr const char* kKcenonC14nUri =
-    "urn:kcenon:xds:c14n:pugixml-format-raw-v1";
-
 // The ds:SignedInfo Reference uses "#<wsu:Id>" as its URI attribute. Strip
 // the leading '#' so we can match it against the actual id values emitted
 // on wsu:Timestamp and soap:Body.
@@ -415,7 +410,8 @@ pugi::xml_node find_by_wsu_id(pugi::xml_node root, const std::string& id) {
 
 }  // namespace
 
-kcenon::common::Result<bool> verify_envelope(std::string_view signed_xml) {
+kcenon::common::Result<bool> verify_envelope_integrity(
+    std::string_view signed_xml) {
     if (signed_xml.empty()) {
         return kcenon::common::make_error<bool>(
             static_cast<int>(
@@ -491,6 +487,12 @@ kcenon::common::Result<bool> verify_envelope(std::string_view signed_xml) {
             "BinarySecurityToken base64 decode failed",
             std::string(error_source));
     }
+
+    // SECURITY NOTE: the X.509 we are about to pull out of the BST is
+    // used only to recover a public key for EVP_DigestVerify; it is NOT
+    // validated against a trust anchor. See the Doxygen on
+    // verify_envelope_integrity for the deferral and tracking issue.
+
     const unsigned char* der_ptr = der.data();
     x509_ptr cert(d2i_X509(nullptr, &der_ptr, static_cast<long>(der.size())));
     if (!cert) {
@@ -601,6 +603,16 @@ kcenon::common::Result<bool> verify_envelope(std::string_view signed_xml) {
             std::string(error_source));
     }
     return true;
+}
+
+std::vector<std::uint8_t> base64_decode_bytes(std::string_view b64) {
+    const auto raw = base64_decode(b64);
+    std::vector<std::uint8_t> out;
+    out.reserve(raw.size());
+    for (const unsigned char c : raw) {
+        out.push_back(static_cast<std::uint8_t>(c));
+    }
+    return out;
 }
 
 }  // namespace kcenon::pacs::ihe::xds::detail
