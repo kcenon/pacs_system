@@ -155,10 +155,51 @@ kcenon::common::Result<packaged_mtom> package_mtom(
 
 namespace {
 
-// Locate the MIME boundary in a body. The first "--" followed by at least
-// one non-whitespace byte and terminated by CR/LF (or the end of the part
-// separator "--") is the boundary. Returns the boundary *without* leading
-// "--".
+// Extract the boundary= parameter from a Content-Type header. Handles
+// both quoted (boundary="abc") and unquoted (boundary=abc) forms, and
+// stops at the next ';' or whitespace. Returns the boundary value
+// *without* the surrounding quotes.
+std::string extract_boundary_from_header(std::string_view header) {
+    if (header.empty()) return {};
+    constexpr std::string_view kName = "boundary=";
+    std::size_t pos = std::string::npos;
+    for (std::size_t i = 0; i + kName.size() <= header.size(); ++i) {
+        bool match = true;
+        for (std::size_t j = 0; j < kName.size(); ++j) {
+            const char c = header[i + j];
+            const char lc =
+                (c >= 'A' && c <= 'Z') ? static_cast<char>(c + 32) : c;
+            if (lc != kName[j]) {
+                match = false;
+                break;
+            }
+        }
+        if (match) {
+            pos = i + kName.size();
+            break;
+        }
+    }
+    if (pos == std::string::npos) return {};
+    if (pos < header.size() && header[pos] == '"') {
+        ++pos;
+        const auto end = header.find('"', pos);
+        if (end == std::string::npos) return {};
+        return std::string(header.substr(pos, end - pos));
+    }
+    std::size_t end = pos;
+    while (end < header.size() && header[end] != ';' &&
+           header[end] != ' ' && header[end] != '\t' &&
+           header[end] != '\r' && header[end] != '\n') {
+        ++end;
+    }
+    return std::string(header.substr(pos, end - pos));
+}
+
+// Locate the MIME boundary in a body by sniffing. Fallback when the
+// Content-Type header was absent or malformed. The first "--" followed
+// by at least one non-whitespace byte and terminated by CR/LF (or the
+// end of the part separator "--") is the boundary. Returns the boundary
+// *without* leading "--".
 std::string detect_boundary(const std::string& body) {
     const auto pos = body.find("--");
     if (pos == std::string::npos) return {};
@@ -214,7 +255,7 @@ std::string strip_cid_brackets(std::string_view raw) {
 }  // namespace
 
 kcenon::common::Result<parsed_mtom> parse_mtom_response(
-    const std::string& body) {
+    const std::string& content_type_header, const std::string& body) {
     parsed_mtom out;
 
     if (body.empty()) {
@@ -241,11 +282,19 @@ kcenon::common::Result<parsed_mtom> parse_mtom_response(
         }
     }
 
-    const std::string boundary = detect_boundary(body);
+    // Prefer the Content-Type header's boundary parameter - this is the
+    // authoritative source per RFC 2387. The body-sniffing fallback in
+    // detect_boundary only runs when the header was absent or missing a
+    // boundary parameter, which happens in closed test harnesses that
+    // bypass libcurl via the transport override.
+    std::string boundary = extract_boundary_from_header(content_type_header);
+    if (boundary.empty()) {
+        boundary = detect_boundary(body);
+    }
     if (boundary.empty()) {
         return kcenon::common::make_error<parsed_mtom>(
             static_cast<int>(error_code::consumer_response_mtom_malformed),
-            "no MIME boundary detected in response body",
+            "no MIME boundary detected in response body or Content-Type",
             std::string(error_source));
     }
 

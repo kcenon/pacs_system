@@ -77,20 +77,22 @@ struct parsed_mtom {
 /**
  * @brief Parse a multipart/related MTOM response body.
  *
- * Extracts the boundary from the first encountered "--<boundary>" marker
- * inside @p body - Content-Type header sniffing is intentionally avoided
- * because the caller has already committed the bytes to an in-memory
- * std::string, and the 8 MiB response cap in http_client bounds the walk.
- * The body is split into parts, each part is stripped of its headers, and
- * the Content-ID of the first part is treated as the root envelope.
+ * Prefers the boundary parameter from @p content_type_header when it is
+ * non-empty and carries a `boundary="..."` (or bare `boundary=...`)
+ * attribute. Falls back to sniffing the first `--<boundary>` marker in
+ * @p body when the header is absent or malformed. The 8 MiB response cap
+ * in http_client.cpp bounds the walk in either path.
  *
- * Non-SOAP responses (the repository returned plain SOAP with no MTOM
+ * The body is split into parts, each part is stripped of its headers, and
+ * the first encountered part is treated as the root envelope.
+ *
+ * Non-MTOM responses (the repository returned plain SOAP with no
  * multipart framing) are detected and returned with root_xml set to the
  * whole body and parts empty, so the caller can still invoke the signer
  * and response parser uniformly. This matches the fallback behavior of
  * Apache CXF repositories that omit MTOM when no attachments are present.
  */
 kcenon::common::Result<parsed_mtom> parse_mtom_response(
-    const std::string& body);
+    const std::string& content_type_header, const std::string& body);
 
 }  // namespace kcenon::pacs::ihe::xds::detail

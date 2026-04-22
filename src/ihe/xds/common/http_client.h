@@ -26,9 +26,15 @@ namespace kcenon::pacs::ihe::xds::detail {
 
 /**
  * @brief HTTP response captured from a POST call.
+ *
+ * content_type carries the response Content-Type header verbatim
+ * (including any boundary=... parameter for multipart/related bodies).
+ * Empty when the server omitted the header. MTOM response parsers
+ * should prefer this over sniffing the body when both are available.
  */
 struct http_response {
     long status_code{0};
+    std::string content_type;
     std::string body;
 };
 

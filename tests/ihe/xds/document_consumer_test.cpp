@@ -257,6 +257,7 @@ TEST_CASE("document_consumer happy path returns document bytes",
             captured_action = req.soap_action;
             detail::http_response r;
             r.status_code = 200;
+            r.content_type = content_type;
             r.body = mtom_body;
             return r;
         });
@@ -407,6 +408,7 @@ TEST_CASE("document_consumer reports not_found when no DocumentResponse "
             -> kcenon::common::Result<detail::http_response> {
             detail::http_response r;
             r.status_code = 200;
+            r.content_type = content_type;
             r.body = mtom_body;
             return r;
         });
@@ -444,6 +446,7 @@ TEST_CASE("document_consumer rejects tampered response (signature mismatch)",
             -> kcenon::common::Result<detail::http_response> {
             detail::http_response r;
             r.status_code = 200;
+            r.content_type = content_type;
             r.body = mtom_body;
             return r;
         });
@@ -522,3 +525,4 @@ TEST_CASE("document_consumer rejects oversize responses",
             static_cast<int>(error_code::consumer_response_mtom_malformed);
     REQUIRE(ok);
 }
+

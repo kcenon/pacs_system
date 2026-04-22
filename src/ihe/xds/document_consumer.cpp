@@ -90,7 +90,8 @@ public:
         }
         auto response = http_result.value();
 
-        auto parsed = detail::parse_mtom_response(response.body);
+        auto parsed =
+            detail::parse_mtom_response(response.content_type, response.body);
         if (parsed.is_err()) {
             return kcenon::common::make_error<document_response>(
                 parsed.error());

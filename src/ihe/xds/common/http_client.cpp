@@ -11,9 +11,11 @@
 
 #include <curl/curl.h>
 
+#include <cstddef>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace kcenon::pacs::ihe::xds::detail {
@@ -52,6 +54,7 @@ constexpr std::size_t kMaxResponseBytes = 8 * 1024 * 1024;
 
 struct response_sink {
     std::string buffer;
+    std::string content_type;
     bool oversize{false};
 };
 
@@ -64,6 +67,37 @@ std::size_t write_callback(char* ptr, std::size_t size, std::size_t nmemb,
         return 0;
     }
     sink->buffer.append(ptr, total);
+    return total;
+}
+
+// Case-insensitive "Content-Type:" header extraction. libcurl calls this
+// once per response header line including the trailing CR/LF. We copy
+// the value portion (without the header name / whitespace / CR/LF) into
+// the sink so parse_mtom_response can authoritatively read the boundary
+// parameter instead of sniffing the body.
+std::size_t header_callback(char* ptr, std::size_t size, std::size_t nmemb,
+                            void* userdata) {
+    const std::size_t total = size * nmemb;
+    auto* sink = static_cast<response_sink*>(userdata);
+    constexpr std::string_view kName = "content-type:";
+    if (total < kName.size()) return total;
+    for (std::size_t i = 0; i < kName.size(); ++i) {
+        const char c = ptr[i];
+        const char lc =
+            (c >= 'A' && c <= 'Z') ? static_cast<char>(c + 32) : c;
+        if (lc != kName[i]) return total;
+    }
+    std::size_t start = kName.size();
+    while (start < total && (ptr[start] == ' ' || ptr[start] == '\t')) {
+        ++start;
+    }
+    std::size_t end = total;
+    while (end > start &&
+           (ptr[end - 1] == '\r' || ptr[end - 1] == '\n' ||
+            ptr[end - 1] == ' ' || ptr[end - 1] == '\t')) {
+        --end;
+    }
+    sink->content_type.assign(ptr + start, end - start);
     return total;
 }
 
@@ -147,6 +181,8 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
                      static_cast<curl_off_t>(body.size()));
     curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &response);
     curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl.get(), CURLOPT_NOSIGNAL, 1L);
 
@@ -203,6 +239,7 @@ kcenon::common::Result<http_response> http_post(const http_options& opts,
 
     http_response out;
     curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &out.status_code);
+    out.content_type = std::move(response.content_type);
     out.body = std::move(response.buffer);
 
     if (out.status_code < 200 || out.status_code >= 300) {
