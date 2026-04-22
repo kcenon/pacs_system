@@ -420,6 +420,7 @@ if(PACS_BUILD_TESTS)
             tests/ihe/xds/wss_signer_test.cpp
             tests/ihe/xds/mtom_packager_test.cpp
             tests/ihe/xds/document_source_test.cpp
+            tests/ihe/xds/document_consumer_test.cpp
         )
         target_link_libraries(pacs_ihe_xds_tests
             PRIVATE
@@ -437,7 +438,7 @@ if(PACS_BUILD_TESTS)
         elseif(TARGET pugixml)
             target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml)
         endif()
-        message(STATUS "  [OK] pacs_ihe_xds_tests: ON (ITI-41)")
+        message(STATUS "  [OK] pacs_ihe_xds_tests: ON (ITI-41 + ITI-43)")
     endif()
 
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
