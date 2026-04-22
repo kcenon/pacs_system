@@ -12,7 +12,13 @@
     "kcenon-container-system",
     "kcenon-network-system",
     "kcenon-thread-system",
-    "icu"
+    "icu",
+    "pugixml",
+    {
+      "name": "curl",
+      "default-features": false,
+      "features": ["openssl"]
+    }
   ],
   "overrides": [
     { "name": "sqlite3", "version": "3.45.3" },
@@ -25,7 +31,9 @@
     { "name": "crow", "version": "1.2.1" },
     { "name": "gtest", "version": "1.17.0" },
     { "name": "benchmark", "version": "1.9.5" },
-    { "name": "asio", "version": "1.30.2" }
+    { "name": "asio", "version": "1.30.2" },
+    { "name": "pugixml", "version": "1.14" },
+    { "name": "curl", "version": "8.11.0" }
   ],
   "features": {
     "storage": {
