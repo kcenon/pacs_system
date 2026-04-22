@@ -64,13 +64,25 @@ enum class error_code : int {
     // --- registry response (100-109) ---
     registry_failure_response = 100,
     registry_partial_success = 101,
+
+    // --- Consumer / ITI-43 (110-119) ---
+    consumer_retrieve_missing_document_id = 110,
+    consumer_retrieve_missing_repository_id = 111,
+    consumer_response_missing_mtom_root = 112,
+    consumer_response_mtom_malformed = 113,
+    consumer_response_document_not_found = 114,
+    consumer_signature_verification_failed = 115,
+    consumer_signature_missing = 116,
 };
 
 /**
  * @brief Short identifier used as the "source" field of make_error.
  *
  * Kept as a single constexpr view so callers grepping logs see one tag.
+ * Historical value was "ihe.xds.document_source" (Issue #1128). Generalized
+ * to "ihe.xds" in Issue #1129 when the Document Consumer landed; both actors
+ * share the tag so logs filter cleanly on a single prefix.
  */
-inline constexpr std::string_view error_source = "ihe.xds.document_source";
+inline constexpr std::string_view error_source = "ihe.xds";
 
 }  // namespace kcenon::pacs::ihe::xds

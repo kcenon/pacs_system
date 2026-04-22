@@ -21,6 +21,7 @@ category: "INTR"
 |---|---|---|
 | Imaging Document **Source** actor | **Implemented** | `src/services/xds/imaging_document_source.cpp` (346 LOC), `include/kcenon/pacs/services/xds/imaging_document_source.h` |
 | Document **Source** actor (ITI-41, pure XDS.b peer path) | **Implemented** | `src/ihe/xds/document_source.cpp`, `include/kcenon/pacs/ihe/xds/document_source.h`, transport stack in `src/ihe/xds/common/` (pugixml + libcurl); see [#1128](https://github.com/kcenon/pacs_system/issues/1128) |
+| Document **Consumer** actor (ITI-43, pure XDS.b peer path) | **Implemented** | `src/ihe/xds/document_consumer.cpp`, `include/kcenon/pacs/ihe/xds/document_consumer.h`, retrieve helpers in `src/ihe/xds/consumer/` (`retrieve_envelope`, `retrieve_response_parser`); reuses `src/ihe/xds/common/` transport stack; see [#1129](https://github.com/kcenon/pacs_system/issues/1129) |
 | Imaging Document **Consumer** actor (incl. Registry Stored Query) | **Implemented** | `src/services/xds/imaging_document_consumer.cpp` (174 LOC), `include/kcenon/pacs/services/xds/imaging_document_consumer.h` |
 | ATNA audit records for XDS transactions | **Missing** | `grep -l "atna\|audit" src/services/xds/*.cpp` returns nothing; ATNA infrastructure exists in `src/security/atna_*` but is not wired into XDS transactions |
 | Gazelle-style registry integration test | **Missing** | No integration fixture against a test registry; existing `tests/services/xds/xds_imaging_test.cpp` is unit-level (Catch2, mocked registry) |

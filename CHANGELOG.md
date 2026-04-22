@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - IHE XDS.b Document Source actor (ITI-41) at `src/ihe/xds/` with pugixml + libcurl transport stack ([#1128](https://github.com/kcenon/pacs_system/issues/1128))
+- IHE XDS.b Document Consumer actor (ITI-43) at `src/ihe/xds/` with retrieve envelope builder and MTOM/XOP response parser ([#1129](https://github.com/kcenon/pacs_system/issues/1129))
 
 ### Changed
 
