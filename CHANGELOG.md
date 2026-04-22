@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- IHE XDS.b Document Source actor (ITI-41) at `src/ihe/xds/` with pugixml + libcurl transport stack ([#1128](https://github.com/kcenon/pacs_system/issues/1128))
+
 ### Changed
 
 - Remove committed `.key` files from version control; regenerate via `generate_test_certs.sh` in CI and local development ([#1092](https://github.com/kcenon/pacs_system/issues/1092))
