@@ -91,4 +91,45 @@ struct submit_response {
     std::string submission_set_unique_id;
 };
 
+/**
+ * @brief ITI-43 RetrieveDocumentSet request target.
+ *
+ * document_unique_id is the XDSDocumentEntry.uniqueId of the document to
+ * retrieve (without the "cid:" or "urn:oid:" prefix; the wire format used
+ * in the XDS.b request is the raw OID/UID string).
+ *
+ * repository_unique_id is the Document Repository's sourceId (OID) that
+ * holds the document; the registry tracks this as the
+ * XDSDocumentEntry.repositoryUniqueId slot value and the Consumer must
+ * echo it back so the repository knows which of its stored documents is
+ * being requested.
+ *
+ * home_community_id is the optional XCA affinity-domain identifier. For
+ * intra-community retrieve (the common case) it is empty and the Consumer
+ * omits the homeCommunityId attribute from the request.
+ */
+struct retrieve_request {
+    std::string document_unique_id;
+    std::string repository_unique_id;
+    std::string home_community_id;
+};
+
+/**
+ * @brief ITI-43 RetrieveDocumentSet response payload.
+ *
+ * mime_type is echoed from the MTOM part's Content-Type header. content
+ * holds the retrieved document bytes decoded from the multipart/related
+ * attachment. registry_response_status is the ebRS status echoed from the
+ * response envelope; document_consumer::retrieve already maps non-Success
+ * to a typed error, so receiving a document_response implies the registry
+ * reported Success.
+ */
+struct document_response {
+    std::string registry_response_status;
+    std::string document_unique_id;
+    std::string repository_unique_id;
+    std::string mime_type;
+    std::vector<std::uint8_t> content;
+};
+
 }  // namespace kcenon::pacs::ihe::xds
