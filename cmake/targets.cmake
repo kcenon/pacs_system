@@ -516,8 +516,8 @@ else()
     message(STATUS "  [OK] pacs_security: ON (without digital signatures)")
 endif()
 
-# IHE XDS.b library (Issues #1128 / #1129 - Document Source ITI-41
-# and Document Consumer ITI-43)
+# IHE XDS.b library (Issues #1128 / #1129 / #1130 - Document Source ITI-41,
+# Document Consumer ITI-43, Registry Query ITI-18)
 # Built only when pugixml, libcurl, and OpenSSL are all available; otherwise
 # the target is skipped and consumers that depend on it gate on TARGET pacs_ihe_xds.
 if(PACS_PUGIXML_FOUND AND PACS_CURL_FOUND AND PACS_OPENSSL_FOUND)
@@ -530,6 +530,9 @@ if(PACS_PUGIXML_FOUND AND PACS_CURL_FOUND AND PACS_OPENSSL_FOUND)
         src/ihe/xds/consumer/retrieve_envelope.cpp
         src/ihe/xds/consumer/retrieve_response_parser.cpp
         src/ihe/xds/document_consumer.cpp
+        src/ihe/xds/registry_query/query_envelope.cpp
+        src/ihe/xds/registry_query/query_response_parser.cpp
+        src/ihe/xds/registry_query.cpp
     )
     target_include_directories(pacs_ihe_xds
         PUBLIC
