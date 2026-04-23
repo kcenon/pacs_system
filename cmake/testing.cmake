@@ -408,11 +408,12 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
-    # IHE XDS.b Document Source (ITI-41) tests (Issue #1128)
+    # IHE XDS.b Document Source / Consumer / Registry Query tests
+    # (Issues #1128 / #1129 / #1130)
     # Only defined when the pacs_ihe_xds target was created (requires pugixml,
     # libcurl, and OpenSSL). Tests reach into internal headers under
     # src/ihe/xds/common/ for the envelope / signer / packager layers, plus
-    # the public document_source.h for the end-to-end orchestrator.
+    # the public headers for the end-to-end orchestrators.
     if(TARGET pacs_ihe_xds)
         file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/ihe/xds)
         add_executable(pacs_ihe_xds_tests
@@ -421,6 +422,7 @@ if(PACS_BUILD_TESTS)
             tests/ihe/xds/mtom_packager_test.cpp
             tests/ihe/xds/document_source_test.cpp
             tests/ihe/xds/document_consumer_test.cpp
+            tests/ihe/xds/registry_query_test.cpp
         )
         target_link_libraries(pacs_ihe_xds_tests
             PRIVATE
@@ -438,7 +440,7 @@ if(PACS_BUILD_TESTS)
         elseif(TARGET pugixml)
             target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml)
         endif()
-        message(STATUS "  [OK] pacs_ihe_xds_tests: ON (ITI-41 + ITI-43)")
+        message(STATUS "  [OK] pacs_ihe_xds_tests: ON (ITI-18 + ITI-41 + ITI-43)")
     endif()
 
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
