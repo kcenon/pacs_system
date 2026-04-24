@@ -300,6 +300,14 @@ const atna_syslog_transport& atna_service_auditor::transport() const noexcept {
     return transport_;
 }
 
+void atna_service_auditor::submit_audit_message(
+    const atna_audit_message& message) {
+    if (!enabled_.load(std::memory_order_relaxed)) {
+        return;
+    }
+    send_audit(message);
+}
+
 // =============================================================================
 // Private Helpers
 // =============================================================================

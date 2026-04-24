@@ -5,18 +5,258 @@
 /**
  * @file xds_audit_events.cpp
  * @brief Implementation of the XDS.b audit event sinks.
+ *
+ * RFC 3881 / DICOM PS3.15 A.5 / IHE ITI TF-2 event code mapping used
+ * here (aligned with the reviewer's Task-2 checklist):
+ *
+ *   ITI-18 RegistryStoredQuery
+ *     EventID         DCM 110112 Query
+ *     EventAction     E (Execute)
+ *     EventTypeCode   urn:ihe:iti:2007:RegistryStoredQuery
+ *                     (code system "IHETransactions")
+ *
+ *   ITI-41 Provide and Register Document Set-b (Source-side)
+ *     EventID         DCM 110106 Export
+ *     EventAction     C (Create)
+ *     EventTypeCode   ITI-41 (code system "IHETransactions")
+ *
+ *   ITI-43 Retrieve Document Set (Consumer-side)
+ *     EventID         DCM 110107 Import
+ *     EventAction     R (Read)
+ *     EventTypeCode   ITI-43 (code system "IHETransactions")
+ *
+ * Messages are built by free functions (build_iti18/41/43_audit_message)
+ * so the integration tests can assert the exact codes without spinning
+ * up a syslog transport. The atna_sink delegates to those builders and
+ * routes the result through atna_service_auditor::submit_audit_message
+ * so emission stays serialized and the enabled-flag / statistics path
+ * is shared with every other audit method (reviewer cross-cut §3).
  */
 
 #include "kcenon/pacs/security/xds_audit_events.h"
 
 #include "kcenon/pacs/security/atna_service_auditor.h"
 
+#include <chrono>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace kcenon::pacs::security {
+
+namespace {
+
+// -----------------------------------------------------------------------------
+// RFC 3881 coded-value constants
+// -----------------------------------------------------------------------------
+
+// EventID values the reviewer's Task-2 checklist pins per transaction.
+// DCM 110107 Import is not in atna_event_ids (only Export 110106 is), so
+// both are declared here to keep the vocabulary in one place.
+const atna_coded_value kEventIdExport{
+    "110106", "DCM", "Export"};
+const atna_coded_value kEventIdImport{
+    "110107", "DCM", "Import"};
+const atna_coded_value kEventIdQuery{
+    "110112", "DCM", "Query"};
+
+// EventTypeCodes - code system "IHETransactions" per IHE ITI TF-2a
+// Audit Trail Profile. The ITI-18 code uses the full URN form the
+// reviewer specified; ITI-41/43 use the short transaction label that
+// matches the existing atna_service_auditor convention.
+const atna_coded_value kEventTypeIti18{
+    "urn:ihe:iti:2007:RegistryStoredQuery",
+    "IHETransactions",
+    "Registry Stored Query"};
+const atna_coded_value kEventTypeIti41{
+    "ITI-41", "IHETransactions",
+    "Provide and Register Document Set-b"};
+const atna_coded_value kEventTypeIti43{
+    "ITI-43", "IHETransactions", "Retrieve Document Set"};
+
+// Object ID type codes for participant objects.
+const atna_coded_value kXdsDocumentUniqueIdType{
+    "urn:ihe:iti:xds:2013:uniqueId", "IHE XDS Metadata",
+    "XDSDocumentEntry.uniqueId"};
+const atna_coded_value kXdsEntryUuidType{
+    "urn:ihe:iti:xds:2013:entryUUID", "IHE XDS Metadata",
+    "XDSDocumentEntry.entryUUID"};
+const atna_coded_value kXdsSubmissionSetUidType{
+    "urn:ihe:iti:xds:2013:submissionSet.uniqueId", "IHE XDS Metadata",
+    "XDSSubmissionSet.uniqueId"};
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+atna_active_participant make_participant(const std::string& user_id,
+                                         bool is_requestor,
+                                         const atna_coded_value& role) {
+    atna_active_participant p;
+    p.user_id = user_id;
+    p.user_is_requestor = is_requestor;
+    p.network_access_point_type = atna_network_access_type::machine_name;
+    p.role_id_codes.push_back(role);
+    return p;
+}
+
+void attach_failure_detail(atna_audit_message& msg,
+                           const std::string& description) {
+    if (description.empty()) return;
+    atna_object_detail d;
+    d.type = "FailureDescription";
+    d.value = description;
+    if (msg.participant_objects.empty()) {
+        atna_participant_object synth;
+        synth.object_type = atna_object_type::system_object;
+        synth.object_role = atna_object_role::report;
+        synth.object_id_type_code = kXdsDocumentUniqueIdType;
+        synth.object_id = "(no object context)";
+        synth.object_details.push_back(std::move(d));
+        msg.participant_objects.push_back(std::move(synth));
+    } else {
+        msg.participant_objects.back().object_details.push_back(std::move(d));
+    }
+}
+
+}  // namespace
+
+// -----------------------------------------------------------------------------
+// Message builders (public, testing surface)
+// -----------------------------------------------------------------------------
+
+atna_audit_message build_iti41_audit_message(
+    const std::string& audit_source_id, const xds_iti41_event& e,
+    const std::string& local_participant_id) {
+    atna_audit_message msg;
+    msg.event_id = kEventIdExport;
+    msg.event_action = atna_event_action::create;  // 'C'
+    msg.event_date_time = std::chrono::system_clock::now();
+    msg.event_outcome = e.outcome;
+    msg.event_type_codes.push_back(kEventTypeIti41);
+    msg.audit_source.audit_source_id = audit_source_id;
+
+    const std::string source =
+        local_participant_id.empty() ? e.source_id : local_participant_id;
+    msg.active_participants.push_back(
+        make_participant(source, true, atna_role_ids::source));
+    msg.active_participants.push_back(make_participant(
+        e.destination_endpoint, false, atna_role_ids::destination));
+
+    if (!e.submission_set_unique_id.empty()) {
+        atna_participant_object ss;
+        ss.object_type = atna_object_type::system_object;
+        ss.object_role = atna_object_role::report;
+        ss.object_id_type_code = kXdsSubmissionSetUidType;
+        ss.object_id = e.submission_set_unique_id;
+        msg.participant_objects.push_back(std::move(ss));
+    }
+    for (const auto& uid : e.document_unique_ids) {
+        if (uid.empty()) continue;
+        atna_participant_object d;
+        d.object_type = atna_object_type::system_object;
+        d.object_role = atna_object_role::report;
+        d.object_id_type_code = kXdsDocumentUniqueIdType;
+        d.object_id = uid;
+        msg.participant_objects.push_back(std::move(d));
+    }
+    if (!e.patient_id.empty()) {
+        atna_participant_object p;
+        p.object_type = atna_object_type::person;
+        p.object_role = atna_object_role::patient;
+        p.object_id_type_code = atna_object_id_types::patient_number;
+        p.object_id = e.patient_id;
+        msg.participant_objects.push_back(std::move(p));
+    }
+    attach_failure_detail(msg, e.failure_description);
+    return msg;
+}
+
+atna_audit_message build_iti43_audit_message(
+    const std::string& audit_source_id, const xds_iti43_event& e,
+    const std::string& local_participant_id) {
+    atna_audit_message msg;
+    msg.event_id = kEventIdImport;
+    msg.event_action = atna_event_action::read;  // 'R'
+    msg.event_date_time = std::chrono::system_clock::now();
+    msg.event_outcome = e.outcome;
+    msg.event_type_codes.push_back(kEventTypeIti43);
+    msg.audit_source.audit_source_id = audit_source_id;
+
+    const std::string consumer =
+        local_participant_id.empty() ? e.consumer_id : local_participant_id;
+    // Consumer side: the local actor is the requestor pulling from a
+    // remote repository. Source role = remote repository (not
+    // requestor), destination role = local consumer (requestor).
+    msg.active_participants.push_back(
+        make_participant(e.source_endpoint, false, atna_role_ids::source));
+    msg.active_participants.push_back(
+        make_participant(consumer, true, atna_role_ids::destination));
+
+    if (!e.document_unique_id.empty()) {
+        atna_participant_object d;
+        d.object_type = atna_object_type::system_object;
+        d.object_role = atna_object_role::report;
+        d.object_id_type_code = kXdsDocumentUniqueIdType;
+        d.object_id = e.document_unique_id;
+        msg.participant_objects.push_back(std::move(d));
+    }
+    if (!e.repository_unique_id.empty()) {
+        atna_participant_object r;
+        r.object_type = atna_object_type::system_object;
+        r.object_role = atna_object_role::resource;
+        r.object_id_type_code = atna_object_id_types::node_id;
+        r.object_id = e.repository_unique_id;
+        msg.participant_objects.push_back(std::move(r));
+    }
+    attach_failure_detail(msg, e.failure_description);
+    return msg;
+}
+
+atna_audit_message build_iti18_audit_message(
+    const std::string& audit_source_id, const xds_iti18_event& e,
+    const std::string& local_participant_id) {
+    atna_audit_message msg;
+    msg.event_id = kEventIdQuery;
+    msg.event_action = atna_event_action::execute;  // 'E'
+    msg.event_date_time = std::chrono::system_clock::now();
+    msg.event_outcome = e.outcome;
+    msg.event_type_codes.push_back(kEventTypeIti18);
+    msg.audit_source.audit_source_id = audit_source_id;
+
+    const std::string caller =
+        local_participant_id.empty() ? e.querier_id : local_participant_id;
+    msg.active_participants.push_back(
+        make_participant(caller, true, atna_role_ids::source));
+    msg.active_participants.push_back(make_participant(
+        e.registry_endpoint, false, atna_role_ids::destination));
+
+    if (e.query_kind == xds_iti18_event::kind::find_documents &&
+        !e.patient_id.empty()) {
+        atna_participant_object p;
+        p.object_type = atna_object_type::person;
+        p.object_role = atna_object_role::patient;
+        p.object_id_type_code = atna_object_id_types::patient_number;
+        p.object_id = e.patient_id;
+        msg.participant_objects.push_back(std::move(p));
+    }
+    for (const auto& u : e.document_uuids) {
+        if (u.empty()) continue;
+        atna_participant_object obj;
+        obj.object_type = atna_object_type::system_object;
+        obj.object_role = atna_object_role::query;
+        obj.object_id_type_code = kXdsEntryUuidType;
+        obj.object_id = u;
+        msg.participant_objects.push_back(std::move(obj));
+    }
+    attach_failure_detail(msg, e.failure_description);
+    return msg;
+}
+
+// -----------------------------------------------------------------------------
+// Sinks
+// -----------------------------------------------------------------------------
 
 namespace {
 
@@ -27,11 +267,6 @@ public:
     void on_iti18_query(const xds_iti18_event&) override {}
 };
 
-// Concrete sink that forwards each XDS.b event to an atna_service_auditor.
-// The auditor already knows how to turn transaction context into well-formed
-// RFC 3881 audit messages with the right DCM event codes (Export for ITI-41,
-// DICOM Instances Transferred for ITI-43, Query for ITI-18) and already owns
-// the syslog transport plus statistics counters, so this sink is pure glue.
 class atna_sink : public xds_audit_sink {
 public:
     atna_sink(atna_service_auditor& auditor, std::string local_participant_id)
@@ -39,73 +274,16 @@ public:
           local_participant_id_(std::move(local_participant_id)) {}
 
     void on_iti41_submit(const xds_iti41_event& e) override {
-        const std::string source =
-            local_participant_id_.empty() ? e.source_id : local_participant_id_;
-        // ITI-41 is a source-side XDS transaction: the existing facade
-        // method emits the DCM 110106 Export event tagged with the
-        // ITI-41 transaction code. study_uid has no natural value at
-        // the XDS layer, so we pass the submission set UID as a stable
-        // grouping key that auditors can correlate across multiple
-        // documents in one submission.
-        auditor_->audit_xds_provide_and_register(
-            atna_service_auditor::xds_source_transaction::iti_41,
-            source,
-            e.destination_endpoint,
-            e.submission_set_unique_id,
-            e.patient_id,
-            e.document_unique_ids,
-            e.outcome == atna_event_outcome::success);
+        auditor_->submit_audit_message(build_iti41_audit_message(
+            auditor_->audit_source_id(), e, local_participant_id_));
     }
-
     void on_iti43_retrieve(const xds_iti43_event& e) override {
-        const std::string dest =
-            local_participant_id_.empty() ? e.consumer_id
-                                          : local_participant_id_;
-        // ITI-43 is a consumer-side XDS transaction: the facade method
-        // emits DCM 110104 "DICOM Instances Transferred" with is_import
-        // true, tagged with the ITI-43 transaction code. Use the
-        // document unique id as the per-transaction object reference.
-        std::vector<std::string> refs;
-        if (!e.document_unique_id.empty()) {
-            refs.push_back(e.document_unique_id);
-        }
-        auditor_->audit_xds_retrieve(
-            atna_service_auditor::xds_consumer_transaction::iti_43,
-            e.source_endpoint,
-            dest,
-            /*study_uid=*/"",
-            /*patient_id=*/"",
-            refs,
-            e.outcome == atna_event_outcome::success);
+        auditor_->submit_audit_message(build_iti43_audit_message(
+            auditor_->audit_source_id(), e, local_participant_id_));
     }
-
     void on_iti18_query(const xds_iti18_event& e) override {
-        // ITI-18 is a registry metadata query. atna_service_auditor has
-        // no XDS-specific query method, so we route through the generic
-        // audit_query facade which emits DCM 110112. The query_level
-        // string captures the FindDocuments / GetDocuments distinction
-        // plus the query keys so an auditor can reconstruct the query
-        // context without pulling the wire body.
-        std::string query_level;
-        if (e.query_kind == xds_iti18_event::kind::find_documents) {
-            query_level = "ITI-18 FindDocuments PatientID=" + e.patient_id;
-        } else {
-            query_level = "ITI-18 GetDocuments UUIDs=";
-            bool first = true;
-            for (const auto& u : e.document_uuids) {
-                if (!first) query_level += ',';
-                first = false;
-                query_level += u;
-            }
-        }
-        const std::string caller =
-            local_participant_id_.empty() ? e.querier_id
-                                          : local_participant_id_;
-        auditor_->audit_query(
-            caller,
-            e.registry_endpoint,
-            query_level,
-            e.outcome == atna_event_outcome::success);
+        auditor_->submit_audit_message(build_iti18_audit_message(
+            auditor_->audit_source_id(), e, local_participant_id_));
     }
 
 private:

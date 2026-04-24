@@ -53,9 +53,15 @@
 #include <vector>
 
 using namespace kcenon::pacs::ihe::xds;
+using kcenon::pacs::security::atna_event_action;
 using kcenon::pacs::security::atna_event_outcome;
+using kcenon::pacs::security::build_iti18_audit_message;
+using kcenon::pacs::security::build_iti41_audit_message;
+using kcenon::pacs::security::build_iti43_audit_message;
 using kcenon::pacs::security::recording_xds_audit_sink;
 using kcenon::pacs::security::xds_iti18_event;
+using kcenon::pacs::security::xds_iti41_event;
+using kcenon::pacs::security::xds_iti43_event;
 
 namespace {
 
@@ -605,4 +611,109 @@ TEST_CASE("ITI-18 emits a failure audit event for slot-literal injection",
     REQUIRE(sink->events().size() == 1);
     CHECK(sink->events()[0].iti18.outcome ==
           atna_event_outcome::serious_failure);
+}
+
+// =============================================================================
+// RFC 3881 vocabulary conformance (reviewer Task-2 / AC4)
+//
+// These cases assert that the atna_sink message builders produce the
+// exact EventID / EventAction / EventTypeCode vocabulary the reviewer
+// pinned in their gap analysis. They hit the build_*_audit_message
+// functions directly so the assertions do not depend on a syslog
+// transport being reachable.
+// =============================================================================
+
+TEST_CASE("ITI-41 audit message uses DCM 110106 Export action C",
+          "[ihe][xds][atna][integration][iti41][rfc3881]") {
+    xds_iti41_event ev;
+    ev.source_id = "1.2.276.0.7230010.3.0.3.6.1";
+    ev.destination_endpoint = kIti41Endpoint;
+    ev.patient_id = kPatientId;
+    ev.submission_set_unique_id = "1.2.3.4.5";
+    ev.document_unique_ids = {kDocUid};
+    ev.outcome = atna_event_outcome::success;
+
+    const auto msg =
+        build_iti41_audit_message("PACS_TEST_SRC", ev, "1.2.276.0.7230010.3.0.3.6.1");
+
+    CHECK(msg.event_id.code == "110106");
+    CHECK(msg.event_id.code_system_name == "DCM");
+    CHECK(msg.event_id.display_name == "Export");
+    CHECK(msg.event_action == atna_event_action::create);
+
+    REQUIRE(msg.event_type_codes.size() == 1);
+    CHECK(msg.event_type_codes[0].code == "ITI-41");
+    CHECK(msg.event_type_codes[0].code_system_name == "IHETransactions");
+
+    CHECK(msg.event_outcome == atna_event_outcome::success);
+    CHECK(msg.audit_source.audit_source_id == "PACS_TEST_SRC");
+}
+
+TEST_CASE("ITI-43 audit message uses DCM 110107 Import action R",
+          "[ihe][xds][atna][integration][iti43][rfc3881]") {
+    xds_iti43_event ev;
+    ev.consumer_id = "1.2.276.0.7230010.3.0.3.6.4";
+    ev.source_endpoint = kIti43Endpoint;
+    ev.document_unique_id = kDocUid;
+    ev.repository_unique_id = kRepoUid;
+    ev.outcome = atna_event_outcome::serious_failure;
+    ev.failure_description = "simulated";
+
+    const auto msg =
+        build_iti43_audit_message("PACS_TEST_CON", ev,
+                                  "1.2.276.0.7230010.3.0.3.6.4");
+
+    CHECK(msg.event_id.code == "110107");
+    CHECK(msg.event_id.code_system_name == "DCM");
+    CHECK(msg.event_id.display_name == "Import");
+    CHECK(msg.event_action == atna_event_action::read);
+
+    REQUIRE(msg.event_type_codes.size() == 1);
+    CHECK(msg.event_type_codes[0].code == "ITI-43");
+    CHECK(msg.event_type_codes[0].code_system_name == "IHETransactions");
+
+    CHECK(msg.event_outcome == atna_event_outcome::serious_failure);
+
+    // Failure description must land somewhere in the participant
+    // objects so an auditor can recover it without the Result<T>.
+    bool saw_failure_detail = false;
+    for (const auto& po : msg.participant_objects) {
+        for (const auto& d : po.object_details) {
+            if (d.type == "FailureDescription" && d.value == "simulated") {
+                saw_failure_detail = true;
+            }
+        }
+    }
+    CHECK(saw_failure_detail);
+}
+
+TEST_CASE("ITI-18 audit message uses DCM 110112 Query action E with "
+          "IHETransactions event type",
+          "[ihe][xds][atna][integration][iti18][rfc3881]") {
+    xds_iti18_event ev;
+    ev.querier_id = "WORKSTATION_01";
+    ev.registry_endpoint = kIti18Endpoint;
+    ev.query_kind = xds_iti18_event::kind::find_documents;
+    ev.patient_id = kPatientId;
+    ev.outcome = atna_event_outcome::success;
+
+    const auto msg =
+        build_iti18_audit_message("PACS_TEST_QRY", ev, "WORKSTATION_01");
+
+    CHECK(msg.event_id.code == "110112");
+    CHECK(msg.event_id.code_system_name == "DCM");
+    CHECK(msg.event_id.display_name == "Query");
+    CHECK(msg.event_action == atna_event_action::execute);
+
+    REQUIRE(msg.event_type_codes.size() == 1);
+    CHECK(msg.event_type_codes[0].code ==
+          "urn:ihe:iti:2007:RegistryStoredQuery");
+    CHECK(msg.event_type_codes[0].code_system_name == "IHETransactions");
+
+    // Patient object is present for FindDocuments queries.
+    bool saw_patient = false;
+    for (const auto& po : msg.participant_objects) {
+        if (po.object_id == kPatientId) saw_patient = true;
+    }
+    CHECK(saw_patient);
 }

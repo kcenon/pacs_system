@@ -188,6 +188,35 @@ private:
     std::vector<captured_event> events_;
 };
 
+// =============================================================================
+// Message-Build Helpers (testing surface)
+// =============================================================================
+
+/**
+ * @brief Build the RFC 3881 audit message for a given XDS.b event.
+ *
+ * Exposed so the integration tests can assert the exact event code /
+ * action / EventTypeCode against the IHE ATNA checklist without
+ * needing to spin up a syslog transport. Production code emits these
+ * via the atna_sink + atna_service_auditor::submit_audit_message path
+ * instead of calling these helpers directly.
+ *
+ * @param audit_source_id Value for AuditSourceIdentification/@code.
+ * @param event Transaction context captured by the XDS.b actor.
+ * @return Fully populated atna_audit_message ready for
+ *         atna_audit_logger::to_xml or submit_audit_message.
+ * @see Issue #1131
+ */
+[[nodiscard]] atna_audit_message build_iti41_audit_message(
+    const std::string& audit_source_id, const xds_iti41_event& event,
+    const std::string& local_participant_id = "");
+[[nodiscard]] atna_audit_message build_iti43_audit_message(
+    const std::string& audit_source_id, const xds_iti43_event& event,
+    const std::string& local_participant_id = "");
+[[nodiscard]] atna_audit_message build_iti18_audit_message(
+    const std::string& audit_source_id, const xds_iti18_event& event,
+    const std::string& local_participant_id = "");
+
 }  // namespace kcenon::pacs::security
 
 #endif  // PACS_SECURITY_XDS_AUDIT_EVENTS_HPP
