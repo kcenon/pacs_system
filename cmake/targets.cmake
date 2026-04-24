@@ -530,6 +530,9 @@ if(PACS_PUGIXML_FOUND AND PACS_CURL_FOUND AND PACS_OPENSSL_FOUND)
         src/ihe/xds/consumer/retrieve_envelope.cpp
         src/ihe/xds/consumer/retrieve_response_parser.cpp
         src/ihe/xds/document_consumer.cpp
+        src/ihe/xds/registry_query/query_envelope.cpp
+        src/ihe/xds/registry_query/query_response_parser.cpp
+        src/ihe/xds/registry_query.cpp
     )
     target_include_directories(pacs_ihe_xds
         PUBLIC

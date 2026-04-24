@@ -133,4 +133,90 @@ struct document_response {
     std::vector<std::uint8_t> content;
 };
 
+/**
+ * @brief Optional creation-time window for ITI-18 FindDocuments queries.
+ *
+ * When @ref creation_time_from or @ref creation_time_to is non-empty the
+ * Registry Query actor emits the corresponding
+ * $XDSDocumentEntryCreationTimeFrom / $XDSDocumentEntryCreationTimeTo slot.
+ * Both fields are DTM-formatted (YYYYMMDDHHMMSS) and the registry treats
+ * the range as inclusive on both ends. Empty strings disable that bound.
+ *
+ * status_values is the list of XDSDocumentEntry status URNs to match.
+ * When empty, the actor defaults to "Approved" (the conformant FindDocuments
+ * behavior for most deployments). Callers that need Deprecated documents or
+ * multi-status queries populate this list explicitly.
+ */
+struct registry_query_options {
+    std::string creation_time_from;
+    std::string creation_time_to;
+    std::vector<std::string> status_values;
+};
+
+/**
+ * @brief ITI-18 RegistryStoredQuery request target.
+ *
+ * Exactly one of @ref patient_id or @ref document_uuids is populated; the
+ * Registry Query actor dispatches to FindDocuments
+ * (urn:uuid:14d4debf-8f97-4251-9a1e-a3a9d68b2a6f) when patient_id is set and
+ * to GetDocuments (urn:uuid:5737b14c-8a1a-4539-b659-e03a34a5e1e4) when
+ * document_uuids is non-empty. Callers pick the variant via the
+ * registry_query::find_documents / get_documents overloads; this shared
+ * struct keeps the wire builder single-path.
+ *
+ * patient_id follows the same XDS affinity-domain CX form as
+ * submission_set::patient_id ("id^^^&assigningAuthority&ISO").
+ *
+ * document_uuids carries urn:uuid: entry UUIDs; the actor wraps them in the
+ * ('...','...') list literal that the ebRIM StoredQuery slot accepts.
+ */
+struct registry_query_request {
+    std::string patient_id;
+    std::vector<std::string> document_uuids;
+    registry_query_options options;
+};
+
+/**
+ * @brief One XDSDocumentEntry extracted from an AdhocQueryResponse.
+ *
+ * Slots reflect the ebRIM ExtrinsicObject attributes the registry echoes.
+ * Fields are filled best-effort: repositories that omit a slot leave the
+ * corresponding string empty. Callers needing strict conformance should
+ * validate critical fields (unique_id, repository_unique_id) are non-empty.
+ *
+ * size_bytes is parsed from the $XDSDocumentEntrySize slot. Zero indicates
+ * either an omitted slot or a document of unknown size; callers cannot
+ * distinguish the two from this field alone.
+ */
+struct registry_document_entry {
+    std::string entry_uuid;
+    std::string unique_id;
+    std::string repository_unique_id;
+    std::string home_community_id;
+    std::string patient_id;
+    std::string mime_type;
+    std::string status;
+    std::string creation_time;
+    std::string title;
+    std::string author_person;
+    std::string format_code;
+    std::string class_code;
+    std::string type_code;
+    std::string hash;
+    std::uint64_t size_bytes{0};
+};
+
+/**
+ * @brief ITI-18 RegistryStoredQueryResponse payload.
+ *
+ * entries carries one registry_document_entry per matching document. An
+ * empty list on a Success status means the query was well-formed but no
+ * documents match the criteria - callers should branch on entries.empty()
+ * rather than treating no-results as an error.
+ */
+struct registry_query_result {
+    std::string registry_response_status;
+    std::vector<registry_document_entry> entries;
+};
+
 }  // namespace kcenon::pacs::ihe::xds
