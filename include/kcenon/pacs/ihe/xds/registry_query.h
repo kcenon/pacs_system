@@ -40,6 +40,10 @@
 #include <string>
 #include <vector>
 
+namespace kcenon::pacs::security {
+class xds_audit_sink;
+}  // namespace kcenon::pacs::security
+
 namespace kcenon::pacs::ihe::xds {
 
 /**
@@ -127,6 +131,20 @@ public:
      */
     kcenon::common::Result<registry_query_result> get_documents(
         const std::vector<std::string>& uuids);
+
+    /**
+     * @brief Install an ATNA audit sink.
+     *
+     * When set, find_documents() and get_documents() each emit one audit
+     * event per invocation - success or failure - carrying the query
+     * kind, query keys (patient_id or uuid list), registry endpoint,
+     * and the outcome code.
+     *
+     * @see kcenon::pacs::security::xds_audit_sink
+     * @see Issue #1131
+     */
+    void set_audit_sink(
+        std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink);
 
 private:
     class impl;

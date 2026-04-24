@@ -41,6 +41,10 @@
 #include <memory>
 #include <string>
 
+namespace kcenon::pacs::security {
+class xds_audit_sink;
+}  // namespace kcenon::pacs::security
+
 namespace kcenon::pacs::ihe::xds {
 
 /**
@@ -112,6 +116,22 @@ public:
      * submission set unique id.
      */
     kcenon::common::Result<submit_response> submit(const submission_set& s);
+
+    /**
+     * @brief Install an ATNA audit sink.
+     *
+     * When set, submit() emits exactly one audit event per invocation -
+     * success or failure - carrying the submission_set unique id, patient
+     * id, registry endpoint, and the outcome code. A null sink (the
+     * default) disables emission. The sink is shared ownership so the
+     * same sink instance can be installed on multiple actors feeding a
+     * single auditor.
+     *
+     * @see kcenon::pacs::security::xds_audit_sink
+     * @see Issue #1131
+     */
+    void set_audit_sink(
+        std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink);
 
 private:
     class impl;

@@ -14,6 +14,8 @@
 #include "common/soap_envelope.h"
 #include "common/wss_signer.h"
 
+#include "kcenon/pacs/security/xds_audit_events.h"
+
 #include <pugixml.hpp>
 
 #include <chrono>
@@ -45,7 +47,26 @@ public:
     impl(http_options opts, signing_material signing)
         : opts_(std::move(opts)), signing_(std::move(signing)) {}
 
+    void set_audit_sink(
+        std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink) {
+        audit_sink_ = std::move(sink);
+    }
+
     kcenon::common::Result<submit_response> submit(const submission_set& s) {
+        // Collect document unique ids up-front so an audit event can
+        // reference them even when submission fails before the wire
+        // payload is built.
+        std::vector<std::string> document_uids;
+        document_uids.reserve(s.documents.size());
+        for (const auto& d : s.documents) {
+            document_uids.push_back(d.unique_id);
+        }
+
+        auto do_audit = [&](const kcenon::common::Result<submit_response>& r) {
+            audit(s, document_uids, r);
+            return r;
+        };
+
         std::vector<std::string> cids;
         cids.reserve(s.documents.size());
         for (std::size_t i = 0; i < s.documents.size(); ++i) {
@@ -54,8 +75,8 @@ public:
 
         auto env_result = detail::build_iti41_envelope(s, cids);
         if (env_result.is_err()) {
-            return kcenon::common::make_error<submit_response>(
-                env_result.error());
+            return do_audit(kcenon::common::make_error<submit_response>(
+                env_result.error()));
         }
         auto env = env_result.value();
 
@@ -63,8 +84,8 @@ public:
             env, signing_.certificate_pem, signing_.private_key_pem,
             signing_.private_key_password);
         if (sign_result.is_err()) {
-            return kcenon::common::make_error<submit_response>(
-                sign_result.error());
+            return do_audit(kcenon::common::make_error<submit_response>(
+                sign_result.error()));
         }
 
         std::vector<detail::mtom_part> parts;
@@ -79,21 +100,21 @@ public:
 
         auto mtom_result = detail::package_mtom(env.xml, parts);
         if (mtom_result.is_err()) {
-            return kcenon::common::make_error<submit_response>(
-                mtom_result.error());
+            return do_audit(kcenon::common::make_error<submit_response>(
+                mtom_result.error()));
         }
         auto mtom = mtom_result.value();
 
         auto http_result =
             detail::http_post(opts_, mtom.content_type, mtom.body);
         if (http_result.is_err()) {
-            return kcenon::common::make_error<submit_response>(
-                http_result.error());
+            return do_audit(kcenon::common::make_error<submit_response>(
+                http_result.error()));
         }
         auto response = http_result.value();
 
-        return parse_registry_response(response.body,
-                                       s.submission_set_unique_id);
+        return do_audit(parse_registry_response(response.body,
+                                                s.submission_set_unique_id));
     }
 
 private:
@@ -170,8 +191,29 @@ private:
             std::string(error_source));
     }
 
+    void audit(const submission_set& s,
+               const std::vector<std::string>& document_uids,
+               const kcenon::common::Result<submit_response>& r) {
+        if (!audit_sink_) return;
+        kcenon::pacs::security::xds_iti41_event e;
+        e.source_id = s.source_id;
+        e.destination_endpoint = opts_.endpoint;
+        e.patient_id = s.patient_id;
+        e.submission_set_unique_id = s.submission_set_unique_id;
+        e.document_unique_ids = document_uids;
+        if (r.is_ok()) {
+            e.outcome = kcenon::pacs::security::atna_event_outcome::success;
+        } else {
+            e.outcome =
+                kcenon::pacs::security::atna_event_outcome::serious_failure;
+            e.failure_description = r.error().message;
+        }
+        audit_sink_->on_iti41_submit(e);
+    }
+
     http_options opts_;
     signing_material signing_;
+    std::shared_ptr<kcenon::pacs::security::xds_audit_sink> audit_sink_;
 };
 
 document_source::document_source(http_options opts, signing_material signing)
@@ -185,6 +227,11 @@ document_source::~document_source() = default;
 kcenon::common::Result<submit_response> document_source::submit(
     const submission_set& s) {
     return impl_->submit(s);
+}
+
+void document_source::set_audit_sink(
+    std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink) {
+    impl_->set_audit_sink(std::move(sink));
 }
 
 }  // namespace kcenon::pacs::ihe::xds

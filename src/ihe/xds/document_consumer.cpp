@@ -16,6 +16,9 @@
 #include "consumer/retrieve_envelope.h"
 #include "consumer/retrieve_response_parser.h"
 
+#include "kcenon/pacs/security/xds_audit_events.h"
+
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -43,22 +46,33 @@ public:
     impl(http_options opts, signing_material signing)
         : opts_(std::move(opts)), signing_(std::move(signing)) {}
 
+    void set_audit_sink(
+        std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink) {
+        audit_sink_ = std::move(sink);
+    }
+
     kcenon::common::Result<document_response> retrieve(
         const std::string& document_unique_id,
         const std::string& repository_unique_id) {
+        auto do_audit =
+            [&](const kcenon::common::Result<document_response>& r) {
+                audit(document_unique_id, repository_unique_id, r);
+                return r;
+            };
+
         if (document_unique_id.empty()) {
-            return kcenon::common::make_error<document_response>(
+            return do_audit(kcenon::common::make_error<document_response>(
                 static_cast<int>(
                     error_code::consumer_retrieve_missing_document_id),
                 "retrieve: document_unique_id is empty",
-                std::string(error_source));
+                std::string(error_source)));
         }
         if (repository_unique_id.empty()) {
-            return kcenon::common::make_error<document_response>(
+            return do_audit(kcenon::common::make_error<document_response>(
                 static_cast<int>(
                     error_code::consumer_retrieve_missing_repository_id),
                 "retrieve: repository_unique_id is empty",
-                std::string(error_source));
+                std::string(error_source)));
         }
 
         retrieve_request req;
@@ -67,8 +81,8 @@ public:
 
         auto env_result = detail::build_iti43_envelope(req);
         if (env_result.is_err()) {
-            return kcenon::common::make_error<document_response>(
-                env_result.error());
+            return do_audit(kcenon::common::make_error<document_response>(
+                env_result.error()));
         }
         auto env = env_result.value();
 
@@ -76,8 +90,8 @@ public:
             env, signing_.certificate_pem, signing_.private_key_pem,
             signing_.private_key_password);
         if (sign_result.is_err()) {
-            return kcenon::common::make_error<document_response>(
-                sign_result.error());
+            return do_audit(kcenon::common::make_error<document_response>(
+                sign_result.error()));
         }
 
         // Per-call copy: the ITI-43 SOAP action is specific to this
@@ -91,32 +105,51 @@ public:
         auto http_result =
             detail::http_post(call_opts, kSoapContentType, env.xml);
         if (http_result.is_err()) {
-            return kcenon::common::make_error<document_response>(
-                http_result.error());
+            return do_audit(kcenon::common::make_error<document_response>(
+                http_result.error()));
         }
         auto response = http_result.value();
 
         auto parsed =
             detail::parse_mtom_response(response.content_type, response.body);
         if (parsed.is_err()) {
-            return kcenon::common::make_error<document_response>(
-                parsed.error());
+            return do_audit(kcenon::common::make_error<document_response>(
+                parsed.error()));
         }
         auto mtom = parsed.value();
 
         auto verify = detail::verify_envelope_integrity(mtom.root_xml);
         if (verify.is_err()) {
-            return kcenon::common::make_error<document_response>(
-                verify.error());
+            return do_audit(kcenon::common::make_error<document_response>(
+                verify.error()));
         }
 
-        return detail::parse_retrieve_response(mtom.root_xml, mtom.parts,
-                                               req);
+        return do_audit(detail::parse_retrieve_response(
+            mtom.root_xml, mtom.parts, req));
     }
 
 private:
+    void audit(const std::string& document_unique_id,
+               const std::string& repository_unique_id,
+               const kcenon::common::Result<document_response>& r) {
+        if (!audit_sink_) return;
+        kcenon::pacs::security::xds_iti43_event e;
+        e.source_endpoint = opts_.endpoint;
+        e.document_unique_id = document_unique_id;
+        e.repository_unique_id = repository_unique_id;
+        if (r.is_ok()) {
+            e.outcome = kcenon::pacs::security::atna_event_outcome::success;
+        } else {
+            e.outcome =
+                kcenon::pacs::security::atna_event_outcome::serious_failure;
+            e.failure_description = r.error().message;
+        }
+        audit_sink_->on_iti43_retrieve(e);
+    }
+
     http_options opts_;
     signing_material signing_;
+    std::shared_ptr<kcenon::pacs::security::xds_audit_sink> audit_sink_;
 };
 
 document_consumer::document_consumer(http_options opts,
@@ -133,6 +166,11 @@ kcenon::common::Result<document_response> document_consumer::retrieve(
     const std::string& document_unique_id,
     const std::string& repository_unique_id) {
     return impl_->retrieve(document_unique_id, repository_unique_id);
+}
+
+void document_consumer::set_audit_sink(
+    std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink) {
+    impl_->set_audit_sink(std::move(sink));
 }
 
 }  // namespace kcenon::pacs::ihe::xds

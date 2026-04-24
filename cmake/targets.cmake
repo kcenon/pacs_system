@@ -466,6 +466,7 @@ set(PACS_SECURITY_SOURCES
     src/security/atna_service_auditor.cpp
     src/security/atna_config.cpp
     src/security/tls_policy.cpp
+    src/security/xds_audit_events.cpp
 )
 
 # Audit log cipher (Issue #1102) - compiles without OpenSSL as a stub
