@@ -255,6 +255,29 @@ public:
      */
     [[nodiscard]] const atna_syslog_transport& transport() const noexcept;
 
+    // =========================================================================
+    // Pre-built Message Emission
+    // =========================================================================
+
+    /**
+     * @brief Emit a pre-built RFC 3881 audit message.
+     *
+     * Allows callers with their own transaction-specific event code and
+     * EventTypeCode vocabulary (e.g., the XDS.b actors under
+     * xds_audit_events.h) to route a fully-formed message through the
+     * auditor's serialized transport and statistics path instead of
+     * opening a second socket. Respects the enabled() flag and updates
+     * the same events_sent/events_failed counters as the high-level
+     * audit_* methods.
+     *
+     * Thread safety: safe to call concurrently - delegation is through
+     * the same private send_audit() path as all other audit_* methods.
+     *
+     * @param message The audit message to serialize and send.
+     * @see Issue #1131
+     */
+    void submit_audit_message(const atna_audit_message& message);
+
 private:
     // =========================================================================
     // Private Helpers

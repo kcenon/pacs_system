@@ -15,6 +15,9 @@
 #include "registry_query/query_envelope.h"
 #include "registry_query/query_response_parser.h"
 
+#include "kcenon/pacs/security/xds_audit_events.h"
+
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -75,83 +78,105 @@ public:
     impl(http_options opts, signing_material signing)
         : opts_(std::move(opts)), signing_(std::move(signing)) {}
 
+    void set_audit_sink(
+        std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink) {
+        audit_sink_ = std::move(sink);
+    }
+
     kcenon::common::Result<registry_query_result> find_documents(
         const std::string& patient_id,
         const registry_query_options& options) {
+        auto do_audit =
+            [&](const kcenon::common::Result<registry_query_result>& r) {
+                audit_find(patient_id, r);
+                return r;
+            };
+
         if (patient_id.empty()) {
-            return kcenon::common::make_error<registry_query_result>(
+            return do_audit(kcenon::common::make_error<registry_query_result>(
                 static_cast<int>(
                     error_code::registry_query_missing_patient_id),
                 "find_documents: patient_id is empty",
-                std::string(error_source));
+                std::string(error_source)));
         }
         if (contains_slot_literal_metachar(patient_id)) {
-            return kcenon::common::make_error<registry_query_result>(
+            return do_audit(kcenon::common::make_error<registry_query_result>(
                 static_cast<int>(
                     error_code::registry_query_invalid_patient_id),
                 "find_documents: patient_id contains a character that is "
                 "not legal inside an ebRIM StoredQuery slot literal "
                 "('(),\\' or control character)",
-                std::string(error_source));
+                std::string(error_source)));
         }
         for (const auto& s : options.status_values) {
             if (contains_slot_literal_metachar(s)) {
-                return kcenon::common::make_error<registry_query_result>(
-                    static_cast<int>(
-                        error_code::registry_query_invalid_patient_id),
-                    "find_documents: options.status_values contains a "
-                    "slot-literal metacharacter",
-                    std::string(error_source));
+                return do_audit(
+                    kcenon::common::make_error<registry_query_result>(
+                        static_cast<int>(
+                            error_code::registry_query_invalid_patient_id),
+                        "find_documents: options.status_values contains a "
+                        "slot-literal metacharacter",
+                        std::string(error_source)));
             }
         }
         if (contains_slot_literal_metachar(options.creation_time_from) ||
             contains_slot_literal_metachar(options.creation_time_to)) {
-            return kcenon::common::make_error<registry_query_result>(
+            return do_audit(kcenon::common::make_error<registry_query_result>(
                 static_cast<int>(
                     error_code::registry_query_invalid_patient_id),
                 "find_documents: options.creation_time_* contains a "
                 "slot-literal metacharacter",
-                std::string(error_source));
+                std::string(error_source)));
         }
 
         registry_query_request req;
         req.patient_id = patient_id;
         req.options = options;
 
-        return execute(req, detail::stored_query_kind::find_documents);
+        return do_audit(
+            execute(req, detail::stored_query_kind::find_documents));
     }
 
     kcenon::common::Result<registry_query_result> get_documents(
         const std::vector<std::string>& uuids) {
+        auto do_audit =
+            [&](const kcenon::common::Result<registry_query_result>& r) {
+                audit_get(uuids, r);
+                return r;
+            };
+
         if (uuids.empty()) {
-            return kcenon::common::make_error<registry_query_result>(
+            return do_audit(kcenon::common::make_error<registry_query_result>(
                 static_cast<int>(
                     error_code::registry_query_empty_uuid_list),
                 "get_documents: uuids is empty",
-                std::string(error_source));
+                std::string(error_source)));
         }
         for (const auto& u : uuids) {
             if (u.empty()) {
-                return kcenon::common::make_error<registry_query_result>(
-                    static_cast<int>(
-                        error_code::registry_query_missing_document_uuid),
-                    "get_documents: uuids contains an empty element",
-                    std::string(error_source));
+                return do_audit(
+                    kcenon::common::make_error<registry_query_result>(
+                        static_cast<int>(
+                            error_code::registry_query_missing_document_uuid),
+                        "get_documents: uuids contains an empty element",
+                        std::string(error_source)));
             }
             if (contains_slot_literal_metachar(u)) {
-                return kcenon::common::make_error<registry_query_result>(
-                    static_cast<int>(
-                        error_code::registry_query_missing_document_uuid),
-                    "get_documents: uuids contains an element with a "
-                    "slot-literal metacharacter",
-                    std::string(error_source));
+                return do_audit(
+                    kcenon::common::make_error<registry_query_result>(
+                        static_cast<int>(
+                            error_code::registry_query_missing_document_uuid),
+                        "get_documents: uuids contains an element with a "
+                        "slot-literal metacharacter",
+                        std::string(error_source)));
             }
         }
 
         registry_query_request req;
         req.document_uuids = uuids;
 
-        return execute(req, detail::stored_query_kind::get_documents);
+        return do_audit(
+            execute(req, detail::stored_query_kind::get_documents));
     }
 
 private:
@@ -203,8 +228,45 @@ private:
         return detail::parse_query_response(response.body);
     }
 
+    void audit_find(const std::string& patient_id,
+                    const kcenon::common::Result<registry_query_result>& r) {
+        if (!audit_sink_) return;
+        kcenon::pacs::security::xds_iti18_event e;
+        e.registry_endpoint = opts_.endpoint;
+        e.query_kind =
+            kcenon::pacs::security::xds_iti18_event::kind::find_documents;
+        e.patient_id = patient_id;
+        if (r.is_ok()) {
+            e.outcome = kcenon::pacs::security::atna_event_outcome::success;
+        } else {
+            e.outcome =
+                kcenon::pacs::security::atna_event_outcome::serious_failure;
+            e.failure_description = r.error().message;
+        }
+        audit_sink_->on_iti18_query(e);
+    }
+
+    void audit_get(const std::vector<std::string>& uuids,
+                   const kcenon::common::Result<registry_query_result>& r) {
+        if (!audit_sink_) return;
+        kcenon::pacs::security::xds_iti18_event e;
+        e.registry_endpoint = opts_.endpoint;
+        e.query_kind =
+            kcenon::pacs::security::xds_iti18_event::kind::get_documents;
+        e.document_uuids = uuids;
+        if (r.is_ok()) {
+            e.outcome = kcenon::pacs::security::atna_event_outcome::success;
+        } else {
+            e.outcome =
+                kcenon::pacs::security::atna_event_outcome::serious_failure;
+            e.failure_description = r.error().message;
+        }
+        audit_sink_->on_iti18_query(e);
+    }
+
     http_options opts_;
     signing_material signing_;
+    std::shared_ptr<kcenon::pacs::security::xds_audit_sink> audit_sink_;
 };
 
 registry_query::registry_query(http_options opts, signing_material signing)
@@ -223,6 +285,11 @@ kcenon::common::Result<registry_query_result> registry_query::find_documents(
 kcenon::common::Result<registry_query_result> registry_query::get_documents(
     const std::vector<std::string>& uuids) {
     return impl_->get_documents(uuids);
+}
+
+void registry_query::set_audit_sink(
+    std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink) {
+    impl_->set_audit_sink(std::move(sink));
 }
 
 }  // namespace kcenon::pacs::ihe::xds

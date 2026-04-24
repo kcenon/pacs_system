@@ -43,6 +43,10 @@
 #include <memory>
 #include <string>
 
+namespace kcenon::pacs::security {
+class xds_audit_sink;
+}  // namespace kcenon::pacs::security
+
 namespace kcenon::pacs::ihe::xds {
 
 /**
@@ -116,6 +120,19 @@ public:
     kcenon::common::Result<document_response> retrieve(
         const std::string& document_unique_id,
         const std::string& repository_unique_id);
+
+    /**
+     * @brief Install an ATNA audit sink.
+     *
+     * When set, retrieve() emits exactly one audit event per invocation
+     * - success or failure - carrying the requested document uid,
+     * repository uid, source endpoint, and the outcome code.
+     *
+     * @see kcenon::pacs::security::xds_audit_sink
+     * @see Issue #1131
+     */
+    void set_audit_sink(
+        std::shared_ptr<kcenon::pacs::security::xds_audit_sink> sink);
 
 private:
     class impl;
