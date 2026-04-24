@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - IHE XDS.b Document Source actor (ITI-41) at `src/ihe/xds/` with pugixml + libcurl transport stack ([#1128](https://github.com/kcenon/pacs_system/issues/1128))
 - IHE XDS.b Document Consumer actor (ITI-43) at `src/ihe/xds/` with retrieve envelope builder and MTOM/XOP response parser ([#1129](https://github.com/kcenon/pacs_system/issues/1129))
+- IHE XDS.b Registry Query actor (ITI-18) at `src/ihe/xds/` with FindDocuments and GetDocuments stored queries against a conformant XDS.b Document Registry ([#1130](https://github.com/kcenon/pacs_system/issues/1130))
 
 ### Changed
 

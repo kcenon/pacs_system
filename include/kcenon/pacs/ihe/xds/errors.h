@@ -73,6 +73,15 @@ enum class error_code : int {
     consumer_response_document_not_found = 114,
     consumer_signature_verification_failed = 115,
     consumer_signature_missing = 116,
+
+    // --- Registry Query / ITI-18 (120-129) ---
+    registry_query_missing_patient_id = 120,
+    registry_query_missing_document_uuid = 121,
+    registry_query_empty_uuid_list = 122,
+    registry_query_invalid_patient_id = 123,
+    registry_query_response_malformed = 124,
+    registry_query_signature_verification_failed = 125,
+    registry_query_signature_missing = 126,
 };
 
 /**
