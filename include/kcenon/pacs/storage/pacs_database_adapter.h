@@ -34,9 +34,9 @@
 #include <vector>
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-#include <database/database_types.h>
-#include <database/integrated/unified_database_system.h>
-#include <database/query_builder.h>
+#include <kcenon/database/database_types.h>
+#include <kcenon/database/integrated/unified_database_system.h>
+#include <kcenon/database/query_builder.h>
 #endif
 
 namespace kcenon::pacs::storage {
