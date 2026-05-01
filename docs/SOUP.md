@@ -37,7 +37,7 @@ category: "PROJ"
 | SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `f119ecd6` | BSD-3-Clause | Structured logging infrastructure | A | None |
 | SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `221bf3d2` | BSD-3-Clause | Performance metrics collection | A | None |
 | SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `093691d9` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | None |
-| SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `b90b0f3b` | BSD-3-Clause | SQL query builder, database abstraction | B | None |
+| SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `593a18a7` | BSD-3-Clause | SQL query builder, database abstraction | B | None |
 
 > **Note**: kcenon libraries are pinned by commit SHA (no release tags available).
 > CI clones are managed by `.github/actions/checkout-kcenon-deps/action.yml`.
