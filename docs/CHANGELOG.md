@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Documentation standardization (Doxyfile, README, ecosystem docs)
 
+### Documentation
+- Confirm canonical namespace is `kcenon::pacs::` across all source, with no remaining `pacs_system::` references; record ecosystem alignment ([#1138](https://github.com/kcenon/pacs_system/issues/1138))
+
 ---
 
 ## [0.2.0] - 2026-02-09
