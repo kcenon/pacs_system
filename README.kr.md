@@ -150,6 +150,10 @@ cmake --build build
 | `PACS_WITH_AWS_SDK` | OFF | AWS S3 클라우드 스토리지 |
 | `PACS_WITH_AZURE_SDK` | OFF | Azure 클라우드 스토리지 |
 
+### 테스트 프레임워크 (Testing Framework)
+
+`pacs_system` uses **Catch2 v3.4.0** for its unit test corpus, which differs from the kcenon ecosystem default of **GoogleTest**. The pre-existing test corpus relies on Catch2 idioms (`TEST_CASE`, `SECTION`), and migration is intentionally out of scope for the directory-structure standardization work. See [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md#per-system-conventions) for the full rationale and tracking issue [#1141](https://github.com/kcenon/pacs_system/issues/1141).
+
 ---
 
 ## 아키텍처
