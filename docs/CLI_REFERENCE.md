@@ -525,7 +525,7 @@ TLS-secured DICOM connectivity testing with support for TLS 1.2/1.3 and mutual T
 
 ```bash
 # Generate test certificates first
-cd examples/secure_dicom
+cd tools/secure_dicom
 ./generate_certs.sh
 
 # Start secure server (TLS)
@@ -883,7 +883,7 @@ Full PACS server example with configuration.
 
 ```bash
 # Run with configuration
-./build/examples/pacs_server/pacs_server --config pacs_server.yaml
+./build/tools/pacs_server/pacs_server --config pacs_server.yaml
 ```
 
 **Sample Configuration** (`pacs_server.yaml`):

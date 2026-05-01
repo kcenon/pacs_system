@@ -1,89 +1,94 @@
 ##################################################
-# Examples
+# CLI Tools
+#
+# Builds 32 standalone CLI utility binaries (DICOM file tools, network SCU/SCP
+# clients/servers, storage tools). Sources live under tools/ after the layout
+# consolidation in #1139. The CMake option name PACS_BUILD_EXAMPLES is preserved
+# for backward compatibility with existing CI workflows and downstream consumers.
 ##################################################
 
 if(PACS_BUILD_EXAMPLES)
     message(STATUS "")
-    message(STATUS "=== Building Examples ===")
+    message(STATUS "=== Building CLI Tools ===")
 
     # DCM Dump - DICOM file inspection utility (no network dependencies)
-    add_subdirectory(examples/dcm_dump)
+    add_subdirectory(tools/dcm_dump)
     message(STATUS "  [OK] dcm_dump: DICOM file inspection utility")
 
     # DCM Info - DICOM file summary utility (no network dependencies)
-    add_subdirectory(examples/dcm_info)
+    add_subdirectory(tools/dcm_info)
     message(STATUS "  [OK] dcm_info: DICOM file summary utility")
 
     # DCM Conv - Transfer Syntax conversion utility (no network dependencies)
-    add_subdirectory(examples/dcm_conv)
+    add_subdirectory(tools/dcm_conv)
     message(STATUS "  [OK] dcm_conv: Transfer Syntax conversion utility")
 
     # DCM Modify - DICOM tag modification utility (no network dependencies)
-    add_subdirectory(examples/dcm_modify)
+    add_subdirectory(tools/dcm_modify)
     message(STATUS "  [OK] dcm_modify: DICOM tag modification utility")
 
     # DCM to JSON - DICOM to JSON conversion utility (DICOM PS3.18)
-    add_subdirectory(examples/dcm_to_json)
+    add_subdirectory(tools/dcm_to_json)
     message(STATUS "  [OK] dcm_to_json: DICOM to JSON conversion utility")
 
     # JSON to DCM - JSON to DICOM conversion utility (DICOM PS3.18)
-    add_subdirectory(examples/json_to_dcm)
+    add_subdirectory(tools/json_to_dcm)
     message(STATUS "  [OK] json_to_dcm: JSON to DICOM conversion utility")
 
     # DCM to XML - DICOM to XML conversion utility (DICOM Native XML PS3.19)
-    add_subdirectory(examples/dcm_to_xml)
+    add_subdirectory(tools/dcm_to_xml)
     message(STATUS "  [OK] dcm_to_xml: DICOM to XML conversion utility")
 
     # XML to DCM - XML to DICOM conversion utility (DICOM Native XML PS3.19)
-    add_subdirectory(examples/xml_to_dcm)
+    add_subdirectory(tools/xml_to_dcm)
     message(STATUS "  [OK] xml_to_dcm: XML to DICOM conversion utility")
 
     # DCM Anonymize - DICOM de-identification utility (PS3.15)
-    add_subdirectory(examples/dcm_anonymize)
+    add_subdirectory(tools/dcm_anonymize)
     message(STATUS "  [OK] dcm_anonymize: DICOM de-identification utility")
 
     # DCM Dir - DICOMDIR creation/management utility (PS3.10)
-    add_subdirectory(examples/dcm_dir)
+    add_subdirectory(tools/dcm_dir)
     message(STATUS "  [OK] dcm_dir: DICOMDIR creation/management utility")
 
     # Img to DCM - Image to DICOM conversion utility
-    add_subdirectory(examples/img_to_dcm)
+    add_subdirectory(tools/img_to_dcm)
     message(STATUS "  [OK] img_to_dcm: Image to DICOM conversion utility")
 
     # DCM Extract - DICOM pixel data extraction utility
-    add_subdirectory(examples/dcm_extract)
+    add_subdirectory(tools/dcm_extract)
     message(STATUS "  [OK] dcm_extract: DICOM pixel data extraction utility")
 
-    # Echo SCU/SCP samples - basic connectivity test
+    # Echo SCU/SCP - basic connectivity test
     if(TARGET pacs_integration)
-        add_subdirectory(examples/echo_scu)
-        add_subdirectory(examples/echo_scp)
+        add_subdirectory(tools/echo_scu)
+        add_subdirectory(tools/echo_scp)
         message(STATUS "  [OK] echo_scu: DICOM connectivity test client")
         message(STATUS "  [OK] echo_scp: DICOM connectivity test server")
     else()
         message(STATUS "  [--] echo_scu/scp: OFF (requires pacs_integration)")
     endif()
 
-    # Secure Echo SCU/SCP samples - TLS-secured connectivity test
+    # Secure Echo SCU/SCP - TLS-secured connectivity test
     if(TARGET pacs_integration)
-        add_subdirectory(examples/secure_dicom)
+        add_subdirectory(tools/secure_dicom)
         message(STATUS "  [OK] secure_echo_scu: TLS-secured DICOM client")
         message(STATUS "  [OK] secure_echo_scp: TLS-secured DICOM server")
     else()
         message(STATUS "  [--] secure_dicom: OFF (requires pacs_integration)")
     endif()
 
-    # Store SCU sample - DICOM image sender
+    # Store SCU - DICOM image sender
     if(TARGET pacs_integration)
-        add_subdirectory(examples/store_scu)
+        add_subdirectory(tools/store_scu)
         message(STATUS "  [OK] store_scu: DICOM image sender")
     else()
         message(STATUS "  [--] store_scu: OFF (requires pacs_integration)")
     endif()
 
-    # Query SCU sample - DICOM C-FIND client
+    # Query SCU - DICOM C-FIND client
     if(TARGET pacs_integration)
-        add_subdirectory(examples/query_scu)
+        add_subdirectory(tools/query_scu)
         message(STATUS "  [OK] query_scu: DICOM C-FIND client")
     else()
         message(STATUS "  [--] query_scu: OFF (requires pacs_integration)")
@@ -91,15 +96,15 @@ if(PACS_BUILD_EXAMPLES)
 
     # find_scu - dcmtk-compatible C-FIND SCU utility
     if(TARGET pacs_integration)
-        add_subdirectory(examples/find_scu)
+        add_subdirectory(tools/find_scu)
         message(STATUS "  [OK] find_scu: dcmtk-compatible C-FIND SCU utility")
     else()
         message(STATUS "  [--] find_scu: OFF (requires pacs_integration)")
     endif()
 
-    # Retrieve SCU sample - DICOM C-MOVE/C-GET client
+    # Retrieve SCU - DICOM C-MOVE/C-GET client
     if(TARGET pacs_integration)
-        add_subdirectory(examples/retrieve_scu)
+        add_subdirectory(tools/retrieve_scu)
         message(STATUS "  [OK] retrieve_scu: DICOM C-MOVE/C-GET client")
     else()
         message(STATUS "  [--] retrieve_scu: OFF (requires pacs_integration)")
@@ -107,7 +112,7 @@ if(PACS_BUILD_EXAMPLES)
 
     # move_scu - dcmtk-compatible C-MOVE SCU utility
     if(TARGET pacs_integration)
-        add_subdirectory(examples/move_scu)
+        add_subdirectory(tools/move_scu)
         message(STATUS "  [OK] move_scu: dcmtk-compatible C-MOVE SCU utility")
     else()
         message(STATUS "  [--] move_scu: OFF (requires pacs_integration)")
@@ -115,39 +120,39 @@ if(PACS_BUILD_EXAMPLES)
 
     # get_scu - dcmtk-compatible C-GET SCU utility
     if(TARGET pacs_integration)
-        add_subdirectory(examples/get_scu)
+        add_subdirectory(tools/get_scu)
         message(STATUS "  [OK] get_scu: dcmtk-compatible C-GET SCU utility")
     else()
         message(STATUS "  [--] get_scu: OFF (requires pacs_integration)")
     endif()
 
-    # Worklist SCU sample - Modality Worklist Query client
+    # Worklist SCU - Modality Worklist Query client
     if(TARGET pacs_integration)
-        add_subdirectory(examples/worklist_scu)
+        add_subdirectory(tools/worklist_scu)
         message(STATUS "  [OK] worklist_scu: Modality Worklist query client")
     else()
         message(STATUS "  [--] worklist_scu: OFF (requires pacs_integration)")
     endif()
 
-    # MPPS SCU sample - Modality Performed Procedure Step client
+    # MPPS SCU - Modality Performed Procedure Step client
     if(TARGET pacs_integration)
-        add_subdirectory(examples/mpps_scu)
+        add_subdirectory(tools/mpps_scu)
         message(STATUS "  [OK] mpps_scu: MPPS N-CREATE/N-SET client")
     else()
         message(STATUS "  [--] mpps_scu: OFF (requires pacs_integration)")
     endif()
 
-    # Print SCU sample - Print Management client
+    # Print SCU - Print Management client
     if(TARGET pacs_integration)
-        add_subdirectory(examples/print_scu)
+        add_subdirectory(tools/print_scu)
         message(STATUS "  [OK] print_scu: Print Management client")
     else()
         message(STATUS "  [--] print_scu: OFF (requires pacs_integration)")
     endif()
 
-    # Store SCP sample - DICOM image receiver
+    # Store SCP - DICOM image receiver
     if(TARGET pacs_storage AND TARGET pacs_integration)
-        add_subdirectory(examples/store_scp)
+        add_subdirectory(tools/store_scp)
         message(STATUS "  [OK] store_scp: DICOM image receiver")
     else()
         message(STATUS "  [--] store_scp: OFF (requires pacs_storage and pacs_integration)")
@@ -155,7 +160,7 @@ if(PACS_BUILD_EXAMPLES)
 
     # Query/Retrieve SCP - DICOM Q/R server (C-FIND, C-MOVE, C-GET)
     if(TARGET pacs_storage AND TARGET pacs_integration)
-        add_subdirectory(examples/qr_scp)
+        add_subdirectory(tools/qr_scp)
         message(STATUS "  [OK] qr_scp: DICOM Query/Retrieve server")
     else()
         message(STATUS "  [--] qr_scp: OFF (requires pacs_storage and pacs_integration)")
@@ -163,7 +168,7 @@ if(PACS_BUILD_EXAMPLES)
 
     # Modality Worklist SCP - DICOM MWL server
     if(TARGET pacs_integration)
-        add_subdirectory(examples/worklist_scp)
+        add_subdirectory(tools/worklist_scp)
         message(STATUS "  [OK] worklist_scp: Modality Worklist server")
     else()
         message(STATUS "  [--] worklist_scp: OFF (requires pacs_integration)")
@@ -171,7 +176,7 @@ if(PACS_BUILD_EXAMPLES)
 
     # MPPS SCP - DICOM Modality Performed Procedure Step server
     if(TARGET pacs_integration)
-        add_subdirectory(examples/mpps_scp)
+        add_subdirectory(tools/mpps_scp)
         message(STATUS "  [OK] mpps_scp: MPPS N-CREATE/N-SET server")
     else()
         message(STATUS "  [--] mpps_scp: OFF (requires pacs_integration)")
@@ -179,15 +184,15 @@ if(PACS_BUILD_EXAMPLES)
 
     # Database Browser - PACS index database viewer
     if(TARGET pacs_storage)
-        add_subdirectory(examples/db_browser)
+        add_subdirectory(tools/db_browser)
         message(STATUS "  [OK] db_browser: PACS index database viewer")
     else()
         message(STATUS "  [--] db_browser: OFF (requires pacs_storage)")
     endif()
 
-    # PACS Server example requires all modules
+    # PACS Server requires all modules
     if(TARGET pacs_storage AND TARGET pacs_integration)
-        add_subdirectory(examples/pacs_server)
+        add_subdirectory(tools/pacs_server)
         message(STATUS "  [OK] pacs_server: Complete DICOM archive")
     else()
         message(STATUS "  [--] pacs_server: OFF (requires pacs_storage and pacs_integration)")
@@ -195,14 +200,14 @@ if(PACS_BUILD_EXAMPLES)
 
     # Integration Test Suite - End-to-end workflow tests
     if(TARGET pacs_storage AND TARGET pacs_integration AND TARGET Catch2::Catch2WithMain)
-        add_subdirectory(examples/integration_tests)
+        add_subdirectory(tools/integration_tests)
         message(STATUS "  [OK] pacs_integration_e2e: End-to-end workflow tests")
     else()
         message(STATUS "  [--] pacs_integration_e2e: OFF (requires pacs_storage, pacs_integration, and Catch2)")
     endif()
 
     # C++20 Module Example (Issue #507)
-    add_subdirectory(examples/module_example)
+    add_subdirectory(tools/module_example)
     if(PACS_BUILD_MODULES AND TARGET pacs_system_modules)
         message(STATUS "  [OK] module_example: C++20 module usage demonstration")
     else()

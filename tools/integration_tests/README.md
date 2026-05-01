@@ -14,7 +14,7 @@ Binary integration tests complement library-level tests by verifying:
 ## Directory Structure
 
 ```
-examples/integration_tests/
+tools/integration_tests/
 ├── README.md                        # This file
 ├── CMakeLists.txt                   # Build configuration
 ├── main.cpp                         # Test main entry point
@@ -90,7 +90,7 @@ The tests expect these binaries in `build/bin/`:
 Run all binary integration tests:
 
 ```bash
-cd examples/integration_tests/scripts
+cd tools/integration_tests/scripts
 ./run_all_binary_tests.sh
 ```
 
@@ -230,10 +230,10 @@ The `test_tls_integration.cpp` provides comprehensive C++ tests for TLS-secured 
 
 ```bash
 # Generate test certificates (run once, required before TLS tests)
-./examples/integration_tests/test_data/certs/generate_test_certs.sh
+./tools/integration_tests/test_data/certs/generate_test_certs.sh
 
 # Run TLS integration tests
-PACS_TEST_CERT_DIR=./examples/integration_tests/test_data/certs \
+PACS_TEST_CERT_DIR=./tools/integration_tests/test_data/certs \
     ./build/bin/pacs_integration_e2e "[tls]"
 
 # Run specific TLS test scenarios

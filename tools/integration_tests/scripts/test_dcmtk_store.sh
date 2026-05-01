@@ -28,7 +28,7 @@ TESTS_FAILED=0
 # Find project root and build directory
 PROJECT_ROOT="$(find_project_root "$SCRIPT_DIR")"
 BUILD_DIR="${PROJECT_ROOT}/build"
-TEST_DATA_DIR="${PROJECT_ROOT}/examples/integration_tests/test_data"
+TEST_DATA_DIR="${PROJECT_ROOT}/tools/integration_tests/test_data"
 
 # Cleanup function
 cleanup() {

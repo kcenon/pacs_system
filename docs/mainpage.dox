@@ -189,20 +189,20 @@ target_link_libraries(your_target PRIVATE kcenon::pacs_core)
 | **pacs_web** | `web/` | REST API via Crow, DICOMweb (WADO-RS, STOW-RS, QIDO-RS) |
 | **pacs_integration** | `integration/` | Adapters bridging PACS to the kcenon ecosystem |
 
-@section examples Examples
+@section examples CLI Tools
 
-| Example | Source | Description |
-|---------|--------|-------------|
-| dcm_extract | `examples/dcm_extract/main.cpp` | Extract pixel data from DICOM files to JPEG, PNG, or raw binary |
-| dcm_conv | `examples/dcm_conv/main.cpp` | Convert DICOM files between transfer syntaxes |
-| img_to_dcm | `examples/img_to_dcm/main.cpp` | Encapsulate standard images (JPEG, PNG) into DICOM Part 10 files |
-| query_scu | `examples/query_scu/main.cpp` | Query a PACS server using C-FIND at Patient/Study/Series level |
-| dcm_dump | `examples/dcm_dump/main.cpp` | Dump DICOM file metadata as human-readable text |
-| dcm_info | `examples/dcm_info/main.cpp` | Display summary information for a DICOM file |
-| echo_scu | `examples/echo_scu/main.cpp` | Verify DICOM association with C-ECHO |
-| store_scu | `examples/store_scu/main.cpp` | Send DICOM files to a PACS server via C-STORE |
-| find_scu | `examples/find_scu/main.cpp` | Query remote PACS with C-FIND |
-| pacs_server | `examples/pacs_server/main.cpp` | Full PACS server with SCP services |
+| Tool | Source | Description |
+|------|--------|-------------|
+| dcm_extract | `tools/dcm_extract/main.cpp` | Extract pixel data from DICOM files to JPEG, PNG, or raw binary |
+| dcm_conv | `tools/dcm_conv/main.cpp` | Convert DICOM files between transfer syntaxes |
+| img_to_dcm | `tools/img_to_dcm/main.cpp` | Encapsulate standard images (JPEG, PNG) into DICOM Part 10 files |
+| query_scu | `tools/query_scu/main.cpp` | Query a PACS server using C-FIND at Patient/Study/Series level |
+| dcm_dump | `tools/dcm_dump/main.cpp` | Dump DICOM file metadata as human-readable text |
+| dcm_info | `tools/dcm_info/main.cpp` | Display summary information for a DICOM file |
+| echo_scu | `tools/echo_scu/main.cpp` | Verify DICOM association with C-ECHO |
+| store_scu | `tools/store_scu/main.cpp` | Send DICOM files to a PACS server via C-STORE |
+| find_scu | `tools/find_scu/main.cpp` | Query remote PACS with C-FIND |
+| pacs_server | `tools/pacs_server/main.cpp` | Full PACS server with SCP services |
 
 @section learning_resources Learning Resources
 

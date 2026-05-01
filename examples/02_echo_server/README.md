@@ -1,10 +1,10 @@
 # Level 2: Echo Server
 
-A DICOM Echo Server (Verification SCP) sample demonstrating network communication fundamentals. This builds on Level 1 concepts and introduces DICOM networking.
+A DICOM Echo Server (Verification SCP) tutorial demonstrating network communication fundamentals. This builds on Level 1 concepts and introduces DICOM networking.
 
 ## Learning Objectives
 
-By completing this sample, you will understand:
+By completing this tutorial, you will understand:
 
 - **Server Configuration** - AE Title, port, timeouts, PDU size
 - **Association Management** - Connection states, negotiation flow
@@ -16,23 +16,23 @@ By completing this sample, you will understand:
 
 - Completed Level 1: Hello DICOM
 - C++20 compatible compiler (GCC 11+, Clang 14+, MSVC 2022+)
-- pacs_system library built with samples enabled
+- pacs_system library built with tutorials enabled
 - DCMTK installed (for testing with `echoscu`)
 
 ## Build & Run
 
 ```bash
-# Configure with samples enabled
+# Configure with tutorials enabled
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 
-# Build this sample
+# Build this tutorial
 cmake --build build --target sample_02_echo_server
 
 # Run the server (default port 11112)
-./build/samples/echo_server
+./build/examples/echo_server
 
 # Or specify a custom port
-./build/samples/echo_server 11113
+./build/examples/echo_server 11113
 ```
 
 ## Testing
@@ -142,7 +142,7 @@ server.on_error([](const std::string& error) {
 lsof -i :11112
 
 # Or use a different port
-./build/samples/echo_server 11113
+./build/examples/echo_server 11113
 ```
 
 ### Connection Refused

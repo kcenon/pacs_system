@@ -43,9 +43,9 @@ Build Types:
 Features:
   --tests              Build and run tests (build only by default)
   --no-tests           Don't build tests
-  --examples           Build examples
+  --examples           Build CLI utility binaries (sources under tools/)
   --benchmarks         Build benchmarks
-  --samples            Build developer samples
+  --samples            Build developer tutorials (sources under examples/)
   --storage            Build storage module (default: ON)
   --no-storage         Disable storage module
   --itk                Build ITK integration adapter
@@ -216,7 +216,7 @@ echo "  Build Type:        ${BUILD_TYPE}"
 echo "  Build Directory:   ${BUILD_DIR}"
 echo "  Parallel Jobs:     ${JOBS}"
 echo "  Build Tests:       ${BUILD_TESTS}"
-echo "  Build Examples:    ${BUILD_EXAMPLES}"
+echo "  Build Tools:       ${BUILD_EXAMPLES}"
 echo "  Build Storage:     ${BUILD_STORAGE}"
 echo "  Warnings as Errors:${WARNINGS_AS_ERRORS}"
 if [ -n "${SANITIZER}" ]; then

@@ -1,10 +1,10 @@
 # Level 3: Storage Server
 
-A DICOM Storage Server (Storage SCP) sample demonstrating image reception, file storage, and database indexing. This builds on Level 2 concepts and introduces the core PACS archiving functionality.
+A DICOM Storage Server (Storage SCP) tutorial demonstrating image reception, file storage, and database indexing. This builds on Level 2 concepts and introduces the core PACS archiving functionality.
 
 ## Learning Objectives
 
-By completing this sample, you will understand:
+By completing this tutorial, you will understand:
 
 - **Storage SCP** - Handling C-STORE requests from modalities
 - **File Storage** - Organizing DICOM files in hierarchical directories
@@ -16,34 +16,34 @@ By completing this sample, you will understand:
 
 - Completed Level 2: Echo Server
 - C++20 compatible compiler (GCC 11+, Clang 14+, MSVC 2022+)
-- pacs_system library built with samples enabled
+- pacs_system library built with tutorials enabled
 - DCMTK installed (for testing with `storescu`)
 
 ## Build & Run
 
 ```bash
-# Configure with samples enabled
+# Configure with tutorials enabled
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 
-# Build this sample
+# Build this tutorial
 cmake --build build --target sample_03_storage_server
 
 # Run the server (default port 11112)
-./build/samples/storage_server
+./build/examples/storage_server
 
 # Or specify a custom port
-./build/samples/storage_server 11113
+./build/examples/storage_server 11113
 ```
 
 ## Testing
 
 ### Generate Test Data
 
-First, create a test DICOM file using the Level 1 sample:
+First, create a test DICOM file using the Level 1 tutorial:
 
 ```bash
-# Run Level 1 sample to generate hello_dicom_output.dcm
-./build/samples/hello_dicom
+# Run Level 1 tutorial to generate hello_dicom_output.dcm
+./build/examples/hello_dicom
 ```
 
 ### Send Images to Storage Server

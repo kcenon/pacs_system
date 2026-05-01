@@ -1,4 +1,4 @@
-# samples/04_mini_pacs/CMakeLists.txt
+# examples/04_mini_pacs/CMakeLists.txt
 # Level 4: Mini PACS - Complete DICOM server with all services
 #
 # This sample demonstrates integrating all DICOM services:
@@ -65,5 +65,5 @@ endif()
 
 # Set output directory
 set_target_properties(${SAMPLE_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/samples"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
 )

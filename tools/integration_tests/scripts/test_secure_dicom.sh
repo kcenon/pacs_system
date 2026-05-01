@@ -23,7 +23,7 @@ BUILD_DIR="${1:-${PROJECT_ROOT}/build}"
 # Binaries
 SECURE_ECHO_SCP="${BUILD_DIR}/bin/secure_echo_scp"
 SECURE_ECHO_SCU="${BUILD_DIR}/bin/secure_echo_scu"
-CERT_GENERATOR="${PROJECT_ROOT}/examples/secure_dicom/generate_certs.sh"
+CERT_GENERATOR="${PROJECT_ROOT}/tools/secure_dicom/generate_certs.sh"
 
 # Test parameters
 TEST_PORT=41203

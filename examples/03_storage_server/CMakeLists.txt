@@ -1,4 +1,4 @@
-# samples/03_storage_server/CMakeLists.txt
+# examples/03_storage_server/CMakeLists.txt
 # Level 3: Storage Server - DICOM image reception and archiving
 
 add_executable(sample_03_storage_server
@@ -18,7 +18,7 @@ target_compile_features(sample_03_storage_server PRIVATE cxx_std_20)
 # Set output properties
 set_target_properties(sample_03_storage_server PROPERTIES
     OUTPUT_NAME "storage_server"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/samples"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
 )
 
 # Add alias for consistent naming

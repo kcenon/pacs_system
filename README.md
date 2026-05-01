@@ -282,12 +282,27 @@ auto value = std::max(x, y);
 
 ## CLI Tools & Examples
 
-The project includes 32 example applications. Build them with:
+The project ships two complementary subtrees (see [#1139](https://github.com/kcenon/pacs_system/issues/1139)):
+
+- `tools/` — 32 standalone CLI utility binaries
+- `examples/` — 5 progressive tutorials (`01_hello_dicom` through `05_production_pacs`)
+
+Build the CLI tools:
 
 ```bash
 cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
 cmake --build build
 ```
+
+Build the tutorials:
+
+```bash
+cmake -S . -B build -DPACS_BUILD_SAMPLES=ON
+cmake --build build
+```
+
+> The CMake option names (`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`) are
+> preserved for backward compatibility with existing CI and downstream consumers.
 
 ### Tool Summary
 
@@ -412,7 +427,8 @@ pacs_system/
 ├── include/pacs/         # Public headers (222 files)
 ├── src/                  # Source implementations (148 files)
 ├── tests/                # Test suites (141+ files, 1,980+ tests)
-├── examples/             # Example applications (32 apps)
+├── examples/             # Tutorials (5 progressive learning steps)
+├── tools/                # CLI utility binaries (32 apps)
 ├── docs/                 # Documentation (57 files)
 └── CMakeLists.txt        # Build configuration (v0.2.0)
 ```
@@ -533,20 +549,20 @@ cmake --build build --target run_full_benchmarks
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 282 files |
-| **Source Files** | 204 files |
-| **Header LOC** | ~76800 lines |
-| **Source LOC** | ~110100 lines |
-| **Example LOC** | ~35700 lines |
-| **Test LOC** | ~85300 lines |
-| **Total LOC** | ~307800 lines |
-| **Test Files** | 180 files |
-| **Test Cases** | 2584+ tests |
-| **Example Programs** | 32 apps |
-| **Documentation** | 83 markdown files |
-| **CI/CD Workflows** | 14 workflows |
+| **Header Files** | 290 files |
+| **Source Files** | 217 files |
+| **Header LOC** | ~78700 lines |
+| **Source LOC** | ~114700 lines |
+| **Example LOC** | ~4100 lines |
+| **Test LOC** | ~89100 lines |
+| **Total LOC** | ~286500 lines |
+| **Test Files** | 189 files |
+| **Test Cases** | 2657+ tests |
+| **Example Programs** | 6 apps |
+| **Documentation** | 87 markdown files |
+| **CI/CD Workflows** | 15 workflows |
 | **Version** | 0.1.0 |
-| **Last Updated** | 2026-04-09 |
+| **Last Updated** | 2026-05-01 |
 
 <!-- STATS_END -->
 

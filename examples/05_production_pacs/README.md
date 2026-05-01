@@ -1,10 +1,10 @@
 # Level 5: Production PACS
 
-A production-grade PACS sample demonstrating enterprise features including TLS security, role-based access control (RBAC), automatic anonymization, REST API, and health monitoring.
+A production-grade PACS tutorial demonstrating enterprise features including TLS security, role-based access control (RBAC), automatic anonymization, REST API, and health monitoring.
 
 ## Learning Objectives
 
-After completing this sample, you will understand:
+After completing this tutorial, you will understand:
 
 1. **Configuration Management** - YAML-based server configuration
 2. **TLS Security** - Secure DICOM communication
@@ -55,8 +55,8 @@ After completing this sample, you will understand:
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 cmake --build build
 
-# The executable will be in build/samples/
-./build/samples/production_pacs
+# The executable will be in build/examples/
+./build/examples/production_pacs
 ```
 
 ## Configuration
@@ -68,7 +68,7 @@ The Production PACS uses YAML configuration files for flexible deployment.
 If no configuration file is provided, the server uses sensible defaults:
 
 ```bash
-./build/samples/production_pacs
+./build/examples/production_pacs
 ```
 
 ### Custom Configuration
@@ -76,7 +76,7 @@ If no configuration file is provided, the server uses sensible defaults:
 Specify a configuration file as the first argument:
 
 ```bash
-./build/samples/production_pacs /path/to/config.yaml
+./build/examples/production_pacs /path/to/config.yaml
 ```
 
 ### Configuration File Format
@@ -295,7 +295,7 @@ curl -s http://localhost:8080/api/v1/patients | jq .
 ## File Structure
 
 ```
-samples/05_production_pacs/
+examples/05_production_pacs/
 ├── CMakeLists.txt           # Build configuration
 ├── config/
 │   ├── pacs_config.yaml     # Default configuration
