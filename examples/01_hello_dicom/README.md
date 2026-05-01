@@ -1,10 +1,10 @@
 # Level 1: Hello DICOM
 
-An introductory sample demonstrating fundamental DICOM concepts. This is the entry point for developers new to DICOM and pacs_system.
+An introductory tutorial demonstrating fundamental DICOM concepts. This is the entry point for developers new to DICOM and pacs_system.
 
 ## Learning Objectives
 
-By completing this sample, you will understand:
+By completing this tutorial, you will understand:
 
 - **DICOM Tags** - (Group, Element) structure and standard tag constants
 - **Value Representations (VR)** - Data types in DICOM (PN, DA, UI, US, etc.)
@@ -14,24 +14,24 @@ By completing this sample, you will understand:
 ## Prerequisites
 
 - C++20 compatible compiler (GCC 11+, Clang 14+, MSVC 2022+)
-- pacs_system library built with samples enabled
+- pacs_system library built with tutorials enabled
 
 ## Build & Run
 
 ```bash
-# Configure with samples enabled
+# Configure with tutorials enabled
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 
-# Build this sample
+# Build this tutorial
 cmake --build build --target sample_01_hello_dicom
 
-# Run the sample
-./build/samples/hello_dicom
+# Run the tutorial
+./build/examples/hello_dicom
 ```
 
-## Sample Output
+## Tutorial Output
 
-The sample will:
+The tutorial will:
 
 1. Demonstrate DICOM tag creation and parsing
 2. Build a dataset with patient and study information

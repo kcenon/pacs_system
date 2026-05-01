@@ -327,9 +327,9 @@ jobs:
       if: runner.os != 'Windows'
       working-directory: pacs_system
       run: |
-        if [ -f "./examples/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
-          chmod +x ./examples/integration_tests/test_data/certs/generate_test_certs.sh
-          ./examples/integration_tests/test_data/certs/generate_test_certs.sh
+        if [ -f "./tools/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
+          chmod +x ./tools/integration_tests/test_data/certs/generate_test_certs.sh
+          ./tools/integration_tests/test_data/certs/generate_test_certs.sh
         fi
 
     - name: Generate TLS Test Certificates (Windows)
@@ -423,7 +423,7 @@ jobs:
             || echo "Some integration tests failed"
         fi
       env:
-        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/examples/integration_tests/test_data/certs
+        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
 
     - name: Run Integration Tests (Windows)
       if: runner.os == 'Windows'
@@ -474,7 +474,7 @@ jobs:
           ctest --output-on-failure --timeout 120 --output-junit integration-test-results.xml --tests-regex "integration::"
         }
       env:
-        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/examples/integration_tests/test_data/certs
+        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
 
     - name: Upload Integration Test Results
       uses: actions/upload-artifact@v7
@@ -820,15 +820,15 @@ jobs:
     - name: Make Scripts Executable
       working-directory: pacs_system
       run: |
-        if [ -d "./examples/integration_tests/scripts" ]; then
-          chmod +x ./examples/integration_tests/scripts/*.sh
+        if [ -d "./tools/integration_tests/scripts" ]; then
+          chmod +x ./tools/integration_tests/scripts/*.sh
         fi
 
     - name: Run Binary Integration Tests
       working-directory: pacs_system
       run: |
-        if [ -f "./examples/integration_tests/scripts/run_all_binary_tests.sh" ]; then
-          cd examples/integration_tests/scripts
+        if [ -f "./tools/integration_tests/scripts/run_all_binary_tests.sh" ]; then
+          cd tools/integration_tests/scripts
           ./run_all_binary_tests.sh -v ../../../build || echo "Some binary tests failed"
         else
           echo "Binary integration test scripts not found"

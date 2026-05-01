@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Documentation standardization (Doxyfile, README, ecosystem docs)
+- Consolidate directory layout: `samples/` renamed to `examples/` (5 progressive tutorials) and `examples/` renamed to `tools/` (32 CLI utility binaries) so that the role split matches the ecosystem standard. CMake option names (`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`) are preserved for backward compatibility ([#1139](https://github.com/kcenon/pacs_system/issues/1139))
+
+### BREAKING
+- Downstream consumers that referenced the old paths (`samples/...` for tutorials or `examples/...` for the CLI utilities) must update to the new locations: tutorials are now under `examples/`, and CLI utility sources live under `tools/`. Build outputs for tutorials moved from `${CMAKE_BINARY_DIR}/samples` to `${CMAKE_BINARY_DIR}/examples` ([#1139](https://github.com/kcenon/pacs_system/issues/1139))
 
 ### Documentation
 - Confirm canonical namespace is `kcenon::pacs::` across all source, with no remaining `pacs_system::` references; record ecosystem alignment ([#1138](https://github.com/kcenon/pacs_system/issues/1138))

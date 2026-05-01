@@ -15,7 +15,7 @@ sending images (C-STORE), and accessing DICOMweb endpoints.
 - [Querying a Remote PACS (C-FIND)](#querying-a-remote-pacs-c-find)
 - [Sending Images to a PACS (C-STORE)](#sending-images-to-a-pacs-c-store)
 - [DICOMweb WADO-RS Retrieval](#dicomweb-wado-rs-retrieval)
-- [Running the Examples](#running-the-examples)
+- [Running the CLI Tools](#running-the-cli-tools)
 - [Next Steps](#next-steps)
 
 ---
@@ -83,7 +83,8 @@ target_link_libraries(my_app PRIVATE pacs_core pacs_encoding)
 | Option | Default | Description |
 |---|---|---|
 | `PACS_BUILD_TESTS` | ON | Build Catch2 unit tests |
-| `PACS_BUILD_EXAMPLES` | OFF | Build 32 example programs |
+| `PACS_BUILD_EXAMPLES` | OFF | Build 32 CLI utility binaries (sources under `tools/`) |
+| `PACS_BUILD_SAMPLES` | OFF | Build 5 progressive tutorials (sources under `examples/`) |
 | `PACS_BUILD_STORAGE` | ON | Build storage module (requires SQLite3) |
 | `PACS_BUILD_CODECS` | ON | Build compression codecs |
 | `PACS_WITH_OPENSSL` | ON | Enable TLS support |
@@ -140,8 +141,8 @@ int main() {
 
 Link against: `pacs_core`, `pacs_encoding`
 
-> **See also:** [dcm_info](../examples/dcm_info/) and
-> [dcm_dump](../examples/dcm_dump/) for complete CLI implementations.
+> **See also:** [dcm_info](../tools/dcm_info/) and
+> [dcm_dump](../tools/dcm_dump/) for complete CLI implementations.
 
 ---
 
@@ -191,7 +192,7 @@ int main() {
 }
 ```
 
-> **See also:** [dcm_dump](../examples/dcm_dump/) for a full tag browser with
+> **See also:** [dcm_dump](../tools/dcm_dump/) for a full tag browser with
 > filtering and JSON output.
 
 ---
@@ -276,8 +277,8 @@ int main() {
 
 Link against: `pacs_core`, `pacs_encoding`, `pacs_network`, `pacs_services`
 
-> **See also:** [query_scu](../examples/query_scu/) and
-> [find_scu](../examples/find_scu/) for full CLI implementations with
+> **See also:** [query_scu](../tools/query_scu/) and
+> [find_scu](../tools/find_scu/) for full CLI implementations with
 > table/JSON/CSV output.
 
 ---
@@ -359,8 +360,8 @@ int main() {
 
 Link against: `pacs_core`, `pacs_encoding`, `pacs_network`
 
-> **See also:** [store_scu](../examples/store_scu/) for batch sending with
-> progress display and [store_scp](../examples/store_scp/) for the receiver side.
+> **See also:** [store_scu](../tools/store_scu/) for batch sending with
+> progress display and [store_scp](../tools/store_scp/) for the receiver side.
 
 ---
 
@@ -400,21 +401,24 @@ curl -X POST \
      "http://localhost:8080/stow-rs/studies"
 ```
 
-> **See also:** The [pacs_server](../examples/pacs_server/) example for a
+> **See also:** The [pacs_server](../tools/pacs_server/) tool for a
 > complete server with DICOMweb support.
 
 ---
 
-## Running the Examples
+## Running the CLI Tools
 
-Build the examples with:
+Build the CLI tools (sources under `tools/`) with:
 
 ```bash
 cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
 cmake --build build
 ```
 
-### Example Programs by Category
+> Note: the historical option name `PACS_BUILD_EXAMPLES` is preserved for
+> backward compatibility — toggling it now builds the CLI tools under `tools/`.
+
+### Tool Programs by Category
 
 #### File Utilities
 | Example | Description |

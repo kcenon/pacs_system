@@ -1,4 +1,4 @@
-# samples/01_hello_dicom/CMakeLists.txt
+# examples/01_hello_dicom/CMakeLists.txt
 # Level 1: Hello DICOM - Introduction to DICOM fundamentals
 
 add_executable(sample_01_hello_dicom
@@ -17,7 +17,7 @@ target_compile_features(sample_01_hello_dicom PRIVATE cxx_std_20)
 # Set output properties
 set_target_properties(sample_01_hello_dicom PROPERTIES
     OUTPUT_NAME "hello_dicom"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/samples"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
 )
 
 # Add alias for consistent naming

@@ -84,10 +84,12 @@ jobs:
         }
 
         # Remove coverage for external/test/example code
+        # examples/ = tutorials, tools/ = CLI utilities (#1139 layout)
         lcov --remove coverage.info \
           '/usr/*' \
           '*/tests/*' \
           '*/examples/*' \
+          '*/tools/*' \
           '*/build/_deps/*' \
           '*/common_system/*' \
           '*/container_system/*' \

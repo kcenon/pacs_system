@@ -17,6 +17,7 @@ on:
       - 'include/**'
       - 'tests/**'
       - 'examples/**'
+      - 'tools/**'
       - 'docs/**'
       - '.github/workflows/**'
   pull_request:
@@ -26,6 +27,7 @@ on:
       - 'include/**'
       - 'tests/**'
       - 'examples/**'
+      - 'tools/**'
       - 'docs/**'
       - '.github/workflows/**'
   workflow_dispatch:

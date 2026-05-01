@@ -36,7 +36,7 @@ config.tls_key = "/etc/pacs/key.pem";
 config.tls_ca = "/etc/pacs/ca.pem";
 @endcode
 
-See `examples/secure_dicom/` for a full working example.
+See `tools/secure_dicom/` for a full working example.
 
 @subsection faq_audit Does pacs_system support audit logging?
 

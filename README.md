@@ -282,12 +282,27 @@ auto value = std::max(x, y);
 
 ## CLI Tools & Examples
 
-The project includes 32 example applications. Build them with:
+The project ships two complementary subtrees (see [#1139](https://github.com/kcenon/pacs_system/issues/1139)):
+
+- `tools/` — 32 standalone CLI utility binaries
+- `examples/` — 5 progressive tutorials (`01_hello_dicom` through `05_production_pacs`)
+
+Build the CLI tools:
 
 ```bash
 cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
 cmake --build build
 ```
+
+Build the tutorials:
+
+```bash
+cmake -S . -B build -DPACS_BUILD_SAMPLES=ON
+cmake --build build
+```
+
+> The CMake option names (`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`) are
+> preserved for backward compatibility with existing CI and downstream consumers.
 
 ### Tool Summary
 
@@ -412,7 +427,8 @@ pacs_system/
 ├── include/pacs/         # Public headers (222 files)
 ├── src/                  # Source implementations (148 files)
 ├── tests/                # Test suites (141+ files, 1,980+ tests)
-├── examples/             # Example applications (32 apps)
+├── examples/             # Tutorials (5 progressive learning steps)
+├── tools/                # CLI utility binaries (32 apps)
 ├── docs/                 # Documentation (57 files)
 └── CMakeLists.txt        # Build configuration (v0.2.0)
 ```

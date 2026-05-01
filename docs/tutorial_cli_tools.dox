@@ -54,7 +54,7 @@ Performs a C-FIND query against a remote PACS and prints matching studies. Handy
 
 @section cli_more More tools
 
-pacs_system ships with 28+ CLI examples. See the `examples/` directory for the full list:
+pacs_system ships with 28+ CLI tools. See the `tools/` directory for the full list:
 
 - `dcm_extract` — extract pixel data to JPEG/PNG
 - `dcm_modify` — edit tags in place

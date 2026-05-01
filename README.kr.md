@@ -141,7 +141,8 @@ cmake --build build
 | 옵션 | 기본값 | 설명 |
 |------|--------|------|
 | `PACS_BUILD_TESTS` | ON | Catch2 단위 테스트 |
-| `PACS_BUILD_EXAMPLES` | OFF | 32개 예제 프로그램 |
+| `PACS_BUILD_EXAMPLES` | OFF | 32개 CLI 유틸리티 (tools/) |
+| `PACS_BUILD_SAMPLES` | OFF | 5단계 튜토리얼 (examples/) |
 | `PACS_BUILD_STORAGE` | ON | SQLite3 스토리지 |
 | `PACS_BUILD_CODECS` | ON | 압축 코덱 |
 | `PACS_WITH_OPENSSL` | ON | TLS/SSL 지원 |

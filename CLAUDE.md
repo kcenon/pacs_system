@@ -41,8 +41,9 @@ cd build && ctest --output-on-failure --timeout 120
 
 Key CMake options:
 - `PACS_BUILD_TESTS` (ON) — Catch2 v3.4.0 unit tests
-- `PACS_BUILD_EXAMPLES` (OFF) — 32 example programs
-- `PACS_BUILD_BENCHMARKS` (OFF), `PACS_BUILD_SAMPLES` (OFF)
+- `PACS_BUILD_EXAMPLES` (OFF) — 32 CLI utility binaries (sources under `tools/`)
+- `PACS_BUILD_SAMPLES` (OFF) — 5 progressive tutorials (sources under `examples/`)
+- `PACS_BUILD_BENCHMARKS` (OFF)
 - `PACS_BUILD_STORAGE` (ON) — Requires SQLite3
 - `PACS_BUILD_CODECS` (ON) — JPEG, JPEG2000, JPEG-LS, HTJ2K, RLE
 - `PACS_WITH_OPENSSL` (ON), `PACS_WITH_REST_API` (ON)

@@ -75,6 +75,6 @@ pacs_system's association state machine handles this automatically. You only int
 @section store_next Next Steps
 
 - @ref tutorial_query_retrieve "Tutorial: Query/Retrieve"
-- `examples/store_scp/` and `examples/store_scu/` for runnable demos
+- `tools/store_scp/` and `tools/store_scu/` for runnable demos
 
 */

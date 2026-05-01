@@ -233,8 +233,16 @@ pacs_system/
 │       ├── sample_mr.dcm
 │       └── sample_cr.dcm
 │
-├── examples/                   # 예제 애플리케이션 및 CLI 유틸리티
+├── examples/                   # 5단계 개발자 튜토리얼
 │   ├── CMakeLists.txt
+│   ├── common/                 # 튜토리얼 공용 유틸리티
+│   ├── 01_hello_dicom/         # Level 1: DICOM 파일 기본 조작
+│   ├── 02_echo_server/         # Level 2: C-ECHO SCP/SCU
+│   ├── 03_storage_server/      # Level 3: C-STORE SCP/SCU
+│   ├── 04_mini_pacs/           # Level 4: Query/Retrieve 포함 PACS
+│   └── 05_production_pacs/     # Level 5: 프로덕션 기능
+│
+├── tools/                      # 32개 CLI 유틸리티 바이너리
 │   ├── echo_scu/               # C-ECHO SCU (검증)
 │   │   └── main.cpp
 │   ├── store_scu/              # C-STORE SCU (저장)

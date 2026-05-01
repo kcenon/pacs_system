@@ -91,6 +91,6 @@ Query level determines what unit is returned:
 @section qr_next Next Steps
 
 - @ref tutorial_cli_tools "Tutorial: CLI Tools" — one-liner queries via `query_scu`
-- `examples/find_scu/` and `examples/move_scu/`
+- `tools/find_scu/` and `tools/move_scu/`
 
 */

@@ -35,7 +35,7 @@ set(PACS_SYSTEM_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/pacs_system")
 #   targets.cmake      - PACS library targets and source file lists
 #   install.cmake      - Install rules, export configuration
 #   testing.cmake      - Test targets and CTest registration
-#   examples.cmake     - Example binaries, benchmarks, CLI smoke tests
+#   examples.cmake     - CLI tool binaries (under tools/), benchmarks, smoke tests
 #   warnings.cmake     - Apply compiler warnings to all PACS targets
 #   summary.cmake      - Build configuration summary output
 ##################################################
