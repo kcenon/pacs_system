@@ -33,8 +33,8 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <database/core/database_backend.h>
-#include <database/database_types.h>
+#include <kcenon/database/core/database_backend.h>
+#include <kcenon/database/database_types.h>
 
 namespace kcenon::pacs::storage {
 

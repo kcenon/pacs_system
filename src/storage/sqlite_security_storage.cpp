@@ -17,7 +17,7 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <database/query_builder.h>
+#include <kcenon/database/query_builder.h>
 
 #include <variant>
 

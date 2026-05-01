@@ -12,8 +12,8 @@
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
-#include <database/query_builder/value_formatter.h>
-#include <database/database_types.h>
+#include <kcenon/database/query_builder/value_formatter.h>
+#include <kcenon/database/database_types.h>
 
 #include <string>
 
