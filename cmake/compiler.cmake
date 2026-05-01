@@ -9,8 +9,11 @@
 # are defined to apply warnings ONLY to pacs_system's own targets.
 ##################################################
 
-# Define warning flags for later application to pacs targets only
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+# Define warning flags for later application to pacs targets only.
+# Match the canonical compiler-id list used by the ecosystem template
+# (common_system/cmake/template/warnings.cmake): include AppleClang
+# explicitly even though `Clang` regex already matches it, for clarity.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU|AppleClang")
     set(PACS_WARNING_FLAGS -Wall -Wextra -Wpedantic)
     if(PACS_WARNINGS_AS_ERRORS)
         list(APPEND PACS_WARNING_FLAGS -Werror)
