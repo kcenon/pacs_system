@@ -1,4 +1,5 @@
 # Testing
+# Test framework: Catch2 (ecosystem exception -- see docs/ECOSYSTEM.md and #1141).
 if(PACS_BUILD_TESTS)
     enable_testing()
 

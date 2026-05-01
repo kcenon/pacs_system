@@ -243,6 +243,10 @@ ctest --output-on-failure
 
 **Test Results**: 1,980+ tests passing across 141+ test files (Core, Encoding, Network, Services, Storage, Security, Web, Workflow, Client, AI, Monitoring, Integration)
 
+### Testing Framework
+
+`pacs_system` uses **Catch2 v3.4.0** for its unit test corpus, which differs from the kcenon ecosystem default of **GoogleTest**. The pre-existing test corpus relies on Catch2 idioms (`TEST_CASE`, `SECTION`), and migration is intentionally out of scope for the directory-structure standardization work. See [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md#per-system-conventions) for the full rationale and tracking issue [#1141](https://github.com/kcenon/pacs_system/issues/1141).
+
 ### Build Options
 
 ```cmake
