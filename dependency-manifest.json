@@ -18,7 +18,7 @@
       "name": "container_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../container_system",
-      "version": "0b95a0c10edf53315581b7f3fa458f0193e8c039",
+      "version": "fa56dc5ed77df9cea2dce1bebd4aec75bd91916d",
       "license": "BSD-3-Clause"
     },
     {

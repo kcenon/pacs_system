@@ -32,7 +32,7 @@ category: "PROJ"
 | ID | Name | Manufacturer | Version (Commit SHA) | License | Usage in pacs_system | Safety Class | Known Anomalies |
 |----|------|-------------|----------------------|---------|---------------------|-------------|-----------------|
 | SOUP-001 | [common_system](https://github.com/kcenon/common_system) | kcenon | `47be5fd2` | BSD-3-Clause | Result&lt;T&gt; pattern, error handling primitives | B | None |
-| SOUP-002 | [container_system](https://github.com/kcenon/container_system) | kcenon | `0b95a0c1` | BSD-3-Clause | DICOM data serialization containers | B | None |
+| SOUP-002 | [container_system](https://github.com/kcenon/container_system) | kcenon | `fa56dc5e` | BSD-3-Clause | DICOM data serialization containers | B | None |
 | SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `db8d36f1` | BSD-3-Clause | Thread pool, async task scheduling | B | None |
 | SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `f119ecd6` | BSD-3-Clause | Structured logging infrastructure | A | None |
 | SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `221bf3d2` | BSD-3-Clause | Performance metrics collection | A | None |
