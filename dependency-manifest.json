@@ -39,7 +39,7 @@
       "name": "monitoring_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../monitoring_system",
-      "version": "221bf3d2645a2bfd54b07fd84b1c24c2e32d754f",
+      "version": "da708abbb46d428dfee9373dbd57962ad8ea846d",
       "license": "BSD-3-Clause"
     },
     {
