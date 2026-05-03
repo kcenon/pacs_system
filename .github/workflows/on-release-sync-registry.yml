@@ -5,7 +5,57 @@ on:
     types: [published]
 
 jobs:
+  verify-archive:
+    name: Verify release archive SHA512
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify SHA512 against actual GitHub archive
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Independent SHA512 verification against the released archive.
+          # The reusable sync workflow at kcenon/common_system already performs
+          # this check internally (see kcenon/common_system#675, PR #676), but
+          # repeating it here on the caller side guards against drift if the
+          # reusable workflow changes or is repointed in the future.
+          # Reference: kcenon/pacs_system#1152, EPIC kcenon/common_system#674.
+          set -euo pipefail
+          ARCHIVE_URL="https://github.com/${REPO}/archive/refs/tags/${TAG}.tar.gz"
+          VERIFY_FILE="$(mktemp)"
+
+          echo "Fetching ${ARCHIVE_URL} for SHA512 verification..."
+          # Download to a file (not piped into sha512sum) so a fetch failure
+          # cannot silently produce the empty-input hash cf83e1357eefb8bdf...
+          if ! curl -fsSL --retry 3 --retry-delay 2 -o "${VERIFY_FILE}" "${ARCHIVE_URL}"; then
+            echo "::error::Failed to download release archive: ${ARCHIVE_URL}"
+            rm -f "${VERIFY_FILE}"
+            exit 1
+          fi
+
+          ARCHIVE_SIZE=$(stat -c %s "${VERIFY_FILE}" 2>/dev/null || stat -f %z "${VERIFY_FILE}")
+          if [ "${ARCHIVE_SIZE}" -lt 1024 ]; then
+            echo "::error::Downloaded archive is suspiciously small (${ARCHIVE_SIZE} bytes)"
+            rm -f "${VERIFY_FILE}"
+            exit 1
+          fi
+
+          ACTUAL_SHA=$(sha512sum "${VERIFY_FILE}" | awk '{print $1}')
+          rm -f "${VERIFY_FILE}"
+
+          # Empty-input SHA-512 sentinel guard.
+          EMPTY_SHA="cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+          if [ "${ACTUAL_SHA}" = "${EMPTY_SHA}" ]; then
+            echo "::error::Computed SHA512 matches the empty-input constant; download likely failed."
+            exit 1
+          fi
+
+          echo "SHA512 of ${ARCHIVE_URL}:"
+          echo "  ${ACTUAL_SHA}"
+          echo "Archive size: ${ARCHIVE_SIZE} bytes"
+
   sync:
+    needs: verify-archive
     uses: kcenon/common_system/.github/workflows/sync-vcpkg-registry.yml@main
     with:
       port-name: kcenon-pacs-system
