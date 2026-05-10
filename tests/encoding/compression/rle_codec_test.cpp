@@ -650,3 +650,65 @@ TEST_CASE("rle_codec move semantics", "[encoding][compression][rle]") {
         REQUIRE(codec2.transfer_syntax_uid() == "1.2.840.10008.1.2.5");
     }
 }
+
+// Regression test for Issue #1157 (zero-throw verification in public API paths).
+//
+// Before #1157, decode_rle_segment() threw std::runtime_error on a malformed
+// segment. Because decode_rle_segment is invoked from rle_codec::decode_frame()
+// which advertises a Result<T> contract, the throw would escape the public
+// Result<T> API and surface as an exception to consumers.
+//
+// After #1157, decode_rle_segment returns Result<vector<uint8_t>> and the
+// caller propagates the error through the Result<T> chain. This test crafts a
+// malformed RLE segment that would have previously thrown and asserts that
+// rle_codec::decode() returns a clean Result error without throwing.
+TEST_CASE("rle_codec malformed segment returns Result error not exception",
+          "[encoding][compression][rle][issue-1157]") {
+    rle_codec codec;
+
+    image_params params;
+    params.width = 4;
+    params.height = 4;
+    params.bits_allocated = 8;
+    params.bits_stored = 8;
+    params.high_bit = 7;
+    params.samples_per_pixel = 1;
+    params.pixel_representation = 0;
+    params.planar_configuration = 0;
+    // photometric defaults to monochrome2 in image_params
+
+    SECTION("insufficient literal data triggers Result error not throw") {
+        // Build a minimal RLE frame with one segment whose literal-run header
+        // claims more bytes than the segment actually carries. Pre-#1157 this
+        // path threw std::runtime_error("RLE decode: insufficient literal
+        // data"); post-#1157 it must surface as a Result error.
+        std::vector<uint8_t> compressed;
+        // Header: 16 little-endian uint32 fields = 64 bytes
+        // [0] num_segments = 1
+        // [1] offsets[0] = 64
+        // [2..15] zeros
+        compressed.resize(64, 0);
+        compressed[0] = 1;            // num_segments low byte
+        compressed[4] = 64;           // offsets[0] low byte
+        // Segment payload: one literal-run control byte requesting 8 bytes,
+        // followed by only 1 byte. This used to throw at rle_codec.cpp:132.
+        compressed.push_back(0x07);   // literal control: copy next 8 bytes
+        compressed.push_back(0xAA);   // ...but only 1 byte follows
+        std::span<const uint8_t> compressed_span(compressed);
+
+        // The decode entry point must NOT throw. It must return a Result with
+        // is_err() == true and a non-empty error message.
+        codec_result result = [&]() {
+            try {
+                return codec.decode(compressed_span, params);
+            } catch (...) {
+                FAIL("decode() must not throw - Result<T> contract is "
+                     "violated if any throw escapes the public API");
+                throw;
+            }
+        }();
+
+        REQUIRE(result.is_err());
+        REQUIRE_FALSE(result.error().message.empty());
+    }
+}
