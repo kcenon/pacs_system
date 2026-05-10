@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Audited public and internal source for `[[deprecated]]` markers ahead of v1.0 freeze; no deprecated APIs were found, so no symbols were removed in this audit. Inventory recorded in [`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md) ([#1160](https://github.com/kcenon/pacs_system/issues/1160))
+
 ### Added
 
 - IHE XDS.b Document Source actor (ITI-41) at `src/ihe/xds/` with pugixml + libcurl transport stack ([#1128](https://github.com/kcenon/pacs_system/issues/1128))
