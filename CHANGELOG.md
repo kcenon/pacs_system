@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- API freeze for v1.0: enumerate the 290-header public surface under `include/kcenon/pacs/` in `docs/v1.0-api-surface.md`; confirm zero `[[deprecated]]` symbols and no experimental staging area; mark `network/detail/accept_worker.h` as the only implementation-detail header outside the v1.0 stability promise ([#1156](https://github.com/kcenon/pacs_system/issues/1156))
 - Remove committed `.key` files from version control; regenerate via `generate_test_certs.sh` in CI and local development ([#1092](https://github.com/kcenon/pacs_system/issues/1092))
 - Consolidate directory layout: `samples/` renamed to `examples/` (5 progressive tutorials) and `examples/` renamed to `tools/` (32 CLI utility binaries) so that the role split matches the ecosystem standard. CMake option names (`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`) are preserved for backward compatibility ([#1139](https://github.com/kcenon/pacs_system/issues/1139))
 - Align `cmake/*.cmake` modules with the canonical ecosystem template at `common_system/cmake/template`; pacs-specific modules (`pacs_system-config.cmake.in`, `summary.cmake`) and intentional design divergences are documented in `cmake/DEVIATIONS.md`, and the aligned template version is recorded in `cmake/VERSION` ([#1140](https://github.com/kcenon/pacs_system/issues/1140))
