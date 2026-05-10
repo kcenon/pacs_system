@@ -70,6 +70,14 @@ foreach(_compat_target core encoding network client services security storage ai
     endif()
 endforeach()
 
+# Umbrella alias for the legacy README spelling kcenon::pacs_system.
+# pacs_system::pacs_system is the canonical v1.0 target; this alias is
+# preserved so downstream consumers that hard-coded the old spelling keep
+# building against installed packages.
+if(TARGET pacs_system::pacs_system AND NOT TARGET kcenon::pacs_system)
+    add_library(kcenon::pacs_system ALIAS pacs_system::pacs_system)
+endif()
+
 set(pacs_system_FOUND TRUE)
 set(PACS_SYSTEM_FOUND TRUE)
 
@@ -78,7 +86,12 @@ set(PACS_SYSTEM_VERSION "${pacs_system_VERSION}")
 set(pacs_system_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
 set(PACS_SYSTEM_INCLUDE_DIRS "${pacs_system_INCLUDE_DIRS}")
 
-set(pacs_system_LIBRARIES
+# Canonical aggregate target for v1.0 consumers.
+set(pacs_system_LIBRARIES pacs_system::pacs_system)
+set(PACS_SYSTEM_LIBRARIES "${pacs_system_LIBRARIES}")
+
+# Component list for fine-grained linking (kept for backward compatibility).
+set(pacs_system_COMPONENT_LIBRARIES
     pacs_system::core
     pacs_system::encoding
     pacs_system::network
@@ -89,10 +102,10 @@ set(pacs_system_LIBRARIES
 
 foreach(_optional_target storage ai monitoring workflow web integration)
     if(TARGET pacs_system::${_optional_target})
-        list(APPEND pacs_system_LIBRARIES pacs_system::${_optional_target})
+        list(APPEND pacs_system_COMPONENT_LIBRARIES pacs_system::${_optional_target})
     endif()
 endforeach()
 
-set(PACS_SYSTEM_LIBRARIES "${pacs_system_LIBRARIES}")
+set(PACS_SYSTEM_COMPONENT_LIBRARIES "${pacs_system_COMPONENT_LIBRARIES}")
 
 check_required_components(pacs_system)

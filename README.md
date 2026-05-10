@@ -262,11 +262,43 @@ PACS_BUILD_STORAGE (ON)            # Build storage module
 vcpkg install kcenon-pacs-system
 ```
 
-In your `CMakeLists.txt`:
+### CMake Integration
+
+After installing pacs_system (via `cmake --install`, vcpkg, or another package
+manager), downstream projects depend on it through the canonical CMake target
+`pacs_system::pacs_system`:
+
 ```cmake
-find_package(pacs_system CONFIG REQUIRED)
-target_link_libraries(your_target PRIVATE kcenon::pacs_system)
+find_package(pacs_system 1.0 REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
 ```
+
+`pacs_system::pacs_system` is an aggregate INTERFACE target that pulls in every
+required and built optional sub-component, so a single `target_link_libraries`
+call is enough for typical consumers.
+
+For fine-grained control, link individual components instead. The available
+component targets are:
+
+| Component | Target | Provides |
+|-----------|--------|----------|
+| Core | `pacs_system::core` | Tags, datasets, Part 10 file I/O |
+| Encoding | `pacs_system::encoding` | VR types, transfer syntaxes, codecs |
+| Network | `pacs_system::network` | PDU, association, DIMSE |
+| Client | `pacs_system::client` | Job/routing/sync/prefetch managers |
+| Services | `pacs_system::services` | SCP/SCU implementations |
+| Security | `pacs_system::security` | RBAC, anonymization, signatures, TLS |
+| Storage | `pacs_system::storage` | File storage, SQLite, S3/Azure (optional) |
+| AI | `pacs_system::ai` | AI service connector (optional) |
+| Monitoring | `pacs_system::monitoring` | Health checks, metrics (optional) |
+| Workflow | `pacs_system::workflow` | Auto prefetch, scheduling (optional) |
+| Web | `pacs_system::web` | REST API, DICOMweb (optional) |
+| Integration | `pacs_system::integration` | Ecosystem adapters (optional) |
+
+The legacy spelling `kcenon::pacs_system` is preserved as an alias for
+backward compatibility but new code should use `pacs_system::pacs_system`.
 
 ### Windows Development Notes
 
