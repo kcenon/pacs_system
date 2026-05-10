@@ -109,12 +109,16 @@ void encode_rle_segment(std::span<const uint8_t> input, std::vector<uint8_t>& ou
 /**
  * @brief Decodes a single RLE segment.
  *
+ * Returns a Result<T> rather than throwing, so callers can propagate decode
+ * errors through the public Result<T> API without exception escape.
+ *
  * @param input RLE encoded data for this segment
  * @param expected_size Expected output size in bytes
- * @return Decoded byte array
- * @throws std::runtime_error if decoding fails
+ * @return Result containing decoded byte array on success, or an error_info
+ *         describing the malformed segment on failure.
  */
-std::vector<uint8_t> decode_rle_segment(std::span<const uint8_t> input, size_t expected_size) {
+kcenon::common::Result<std::vector<uint8_t>> decode_rle_segment(
+    std::span<const uint8_t> input, size_t expected_size) {
     std::vector<uint8_t> output;
     output.reserve(expected_size);
 
@@ -129,14 +133,18 @@ std::vector<uint8_t> decode_rle_segment(std::span<const uint8_t> input, size_t e
             // Literal: copy next (control + 1) bytes
             size_t count = static_cast<size_t>(control) + 1;
             if (pos + count > size) {
-                throw std::runtime_error("RLE decode: insufficient literal data");
+                return kcenon::pacs::pacs_error<std::vector<uint8_t>>(
+                    kcenon::pacs::error_codes::decompression_error,
+                    "RLE decode: insufficient literal data");
             }
             output.insert(output.end(), input.begin() + pos, input.begin() + pos + count);
             pos += count;
         } else if (control != -128) {
             // Run: repeat next byte (1 - control) times
             if (pos >= size) {
-                throw std::runtime_error("RLE decode: missing replicate byte");
+                return kcenon::pacs::pacs_error<std::vector<uint8_t>>(
+                    kcenon::pacs::error_codes::decompression_error,
+                    "RLE decode: missing replicate byte");
             }
             size_t count = static_cast<size_t>(1 - control);
             uint8_t value = input[pos];
@@ -148,7 +156,7 @@ std::vector<uint8_t> decode_rle_segment(std::span<const uint8_t> input, size_t e
         // control == -128 is a no-op
     }
 
-    return output;
+    return kcenon::pacs::ok<std::vector<uint8_t>>(std::move(output));
 }
 
 /**
@@ -438,7 +446,13 @@ private:
         for (uint32_t i = 0; i < num_segments; ++i) {
             std::span<const uint8_t> segment_data(
                 compressed_data.data() + offsets[i], sizes[i]);
-            decoded_segments[i] = decode_rle_segment(segment_data, pixels_per_frame);
+            auto segment_result = decode_rle_segment(segment_data, pixels_per_frame);
+            if (segment_result.is_err()) {
+                return kcenon::pacs::pacs_error<compression_result>(
+                    kcenon::pacs::error_codes::decompression_error,
+                    "Segment " + std::to_string(i) + ": " + segment_result.error().message);
+            }
+            decoded_segments[i] = std::move(segment_result.value());
 
             if (decoded_segments[i].size() != pixels_per_frame) {
                 return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, 
