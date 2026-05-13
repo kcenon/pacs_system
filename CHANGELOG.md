@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- Add v1.0.0 migration guide at [`docs/migration/0.x-to-1.0.md`](docs/migration/0.x-to-1.0.md): every breaking change between the 0.1.0 baseline and the 1.0.0 freeze documented with before/after snippets, an end-to-end `Result<T>` migration walkthrough, and an upgrade self-audit checklist. Linked from README "Upgrading" ([#1162](https://github.com/kcenon/pacs_system/issues/1162))
 - Modernize Doxygen with doxygen-awesome-css theme, dark mode toggle, and standardized mainpage ([#1066](https://github.com/kcenon/pacs_system/issues/1066))
 - Confirm canonical namespace is `kcenon::pacs::` across all source, with no remaining `pacs_system::` references; record ecosystem alignment ([#1138](https://github.com/kcenon/pacs_system/issues/1138))
 - Document Catch2 test framework retention as an explicit ecosystem exception in README, `docs/ECOSYSTEM.md`, and the master EPIC ([#1141](https://github.com/kcenon/pacs_system/issues/1141))
