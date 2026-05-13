@@ -245,7 +245,7 @@ ctest --output-on-failure
 
 ### Testing Framework
 
-`pacs_system` uses **Catch2 v3.4.0** for its unit test corpus, which differs from the kcenon ecosystem default of **GoogleTest**. The pre-existing test corpus relies on Catch2 idioms (`TEST_CASE`, `SECTION`), and migration is intentionally out of scope for the directory-structure standardization work. See [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md#per-system-conventions) for the full rationale and tracking issue [#1141](https://github.com/kcenon/pacs_system/issues/1141).
+`pacs_system` uses **Catch2 v3.4.0** for its unit test corpus, which differs from the kcenon ecosystem default of **GoogleTest**. The pre-existing test corpus relies on Catch2 idioms (`TEST_CASE`, `SECTION`), and migration is intentionally out of scope for the directory-structure standardization work. See [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md) (section "Per-system conventions") for the full rationale and tracking issue [#1141](https://github.com/kcenon/pacs_system/issues/1141).
 
 ### Build Options
 
@@ -531,6 +531,9 @@ int main() {
 - 📄 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) - DICOM conformance
 - 🏥 [IHE Integration Statement](docs/IHE_INTEGRATION_STATEMENT.md) - IHE profile conformance (XDS-I.b, AIRA, PIR)
 - 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - Thread system migration summary
+
+**Upgrading:**
+- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - Every breaking change between the 0.1.0 baseline and the 1.0.0 API freeze, with before/after snippets, a `Result<T>` migration walkthrough, and a self-audit checklist.
 
 **Database Integration:**
 - 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system integration guide
