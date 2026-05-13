@@ -1,7 +1,10 @@
 # Code Coverage Workflow for PACS System
-# Generates code coverage reports using lcov and uploads to Codecov
+# Generates code coverage reports using lcov and uploads to Codecov.
+# Computes line/branch coverage, posts a PR comment, and enforces the
+# v1.0 contract threshold of >=70% line coverage (advisory until v1.0
+# release; configurable via PACS_COVERAGE_THRESHOLD env var below).
 #
-# Based on messaging_system coverage patterns
+# Based on messaging_system coverage patterns. See issue #1159.
 
 name: Code Coverage
 
@@ -16,6 +19,18 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# v1.0 contract: >= 70% line coverage. Set higher to enforce stricter floor.
+env:
+  PACS_COVERAGE_THRESHOLD: '70'
+  # When 'true', a coverage value below the threshold fails the workflow.
+  # When 'false', the workflow only annotates the PR. Default false to give
+  # the project time to climb to threshold without blocking unrelated PRs.
+  PACS_COVERAGE_ENFORCE: 'false'
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   coverage:
@@ -42,7 +57,7 @@ jobs:
         sudo apt install -y libsqlite3-dev libssl-dev libfmt-dev
         sudo apt install -y libgtest-dev libgmock-dev
         sudo apt install -y libjpeg-turbo8-dev
-        sudo apt install -y lcov
+        sudo apt install -y lcov bc
 
     - name: Configure CMake with coverage
       working-directory: pacs_system
@@ -101,6 +116,134 @@ jobs:
 
         # Display coverage summary
         lcov --list coverage.info || echo "No coverage records to display"
+
+    - name: Compute coverage percentages
+      id: cov_summary
+      working-directory: pacs_system/build
+      run: |
+        # Extract overall line and branch coverage from lcov summary.
+        # lcov --summary output looks like:
+        #   lines......: 72.4% (1234 of 1700 lines)
+        #   branches...: 58.1% (456 of 785 branches)
+        if [ ! -s coverage.info ]; then
+          echo "coverage.info missing or empty - skipping"
+          echo "lines_pct=0" >> "$GITHUB_OUTPUT"
+          echo "branches_pct=0" >> "$GITHUB_OUTPUT"
+          echo "lines_hit=0" >> "$GITHUB_OUTPUT"
+          echo "lines_total=0" >> "$GITHUB_OUTPUT"
+          echo "branches_hit=0" >> "$GITHUB_OUTPUT"
+          echo "branches_total=0" >> "$GITHUB_OUTPUT"
+          echo "available=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        SUMMARY=$(lcov --summary coverage.info 2>&1 || true)
+        echo "$SUMMARY"
+
+        LINES_LINE=$(echo "$SUMMARY" | grep -E '^\s*lines' | head -n1 || true)
+        BRANCH_LINE=$(echo "$SUMMARY" | grep -E '^\s*branches' | head -n1 || true)
+
+        # Robust extraction: grab first percentage and the "X of Y" pair.
+        LINES_PCT=$(echo "$LINES_LINE" | grep -oE '[0-9]+(\.[0-9]+)?%' | head -n1 | tr -d '%' || echo "0")
+        BRANCH_PCT=$(echo "$BRANCH_LINE" | grep -oE '[0-9]+(\.[0-9]+)?%' | head -n1 | tr -d '%' || echo "0")
+        LINES_HIT=$(echo "$LINES_LINE" | grep -oE '[0-9]+ of [0-9]+' | head -n1 | awk '{print $1}' || echo "0")
+        LINES_TOTAL=$(echo "$LINES_LINE" | grep -oE '[0-9]+ of [0-9]+' | head -n1 | awk '{print $3}' || echo "0")
+        BRANCH_HIT=$(echo "$BRANCH_LINE" | grep -oE '[0-9]+ of [0-9]+' | head -n1 | awk '{print $1}' || echo "0")
+        BRANCH_TOTAL=$(echo "$BRANCH_LINE" | grep -oE '[0-9]+ of [0-9]+' | head -n1 | awk '{print $3}' || echo "0")
+
+        : "${LINES_PCT:=0}"
+        : "${BRANCH_PCT:=0}"
+        : "${LINES_HIT:=0}"
+        : "${LINES_TOTAL:=0}"
+        : "${BRANCH_HIT:=0}"
+        : "${BRANCH_TOTAL:=0}"
+
+        echo "Line coverage:   ${LINES_PCT}% (${LINES_HIT} of ${LINES_TOTAL})"
+        echo "Branch coverage: ${BRANCH_PCT}% (${BRANCH_HIT} of ${BRANCH_TOTAL})"
+
+        echo "lines_pct=${LINES_PCT}" >> "$GITHUB_OUTPUT"
+        echo "branches_pct=${BRANCH_PCT}" >> "$GITHUB_OUTPUT"
+        echo "lines_hit=${LINES_HIT}" >> "$GITHUB_OUTPUT"
+        echo "lines_total=${LINES_TOTAL}" >> "$GITHUB_OUTPUT"
+        echo "branches_hit=${BRANCH_HIT}" >> "$GITHUB_OUTPUT"
+        echo "branches_total=${BRANCH_TOTAL}" >> "$GITHUB_OUTPUT"
+        echo "available=true" >> "$GITHUB_OUTPUT"
+
+    - name: Post coverage summary to PR
+      if: github.event_name == 'pull_request' && steps.cov_summary.outputs.available == 'true'
+      uses: actions/github-script@v7
+      env:
+        LINES_PCT: ${{ steps.cov_summary.outputs.lines_pct }}
+        BRANCHES_PCT: ${{ steps.cov_summary.outputs.branches_pct }}
+        LINES_HIT: ${{ steps.cov_summary.outputs.lines_hit }}
+        LINES_TOTAL: ${{ steps.cov_summary.outputs.lines_total }}
+        BRANCHES_HIT: ${{ steps.cov_summary.outputs.branches_hit }}
+        BRANCHES_TOTAL: ${{ steps.cov_summary.outputs.branches_total }}
+        THRESHOLD: ${{ env.PACS_COVERAGE_THRESHOLD }}
+        ENFORCE: ${{ env.PACS_COVERAGE_ENFORCE }}
+      with:
+        script: |
+          const lines = process.env.LINES_PCT || '0';
+          const branches = process.env.BRANCHES_PCT || '0';
+          const linesHit = process.env.LINES_HIT || '0';
+          const linesTotal = process.env.LINES_TOTAL || '0';
+          const branchesHit = process.env.BRANCHES_HIT || '0';
+          const branchesTotal = process.env.BRANCHES_TOTAL || '0';
+          const threshold = parseFloat(process.env.THRESHOLD || '70');
+          const enforce = (process.env.ENFORCE || 'false') === 'true';
+          const linesNum = parseFloat(lines);
+          const status = linesNum >= threshold ? 'PASS' : 'BELOW THRESHOLD';
+          const enforceNote = enforce ? '(enforced)' : '(advisory)';
+
+          const body = [
+            '## Code Coverage Report',
+            '',
+            '| Metric | Coverage | Hit / Total |',
+            '|--------|----------|-------------|',
+            `| Line coverage   | ${lines}% | ${linesHit} / ${linesTotal} |`,
+            `| Branch coverage | ${branches}% | ${branchesHit} / ${branchesTotal} |`,
+            '',
+            `**v1.0 threshold**: line coverage must be >= ${threshold}% ${enforceNote}.`,
+            `**Status**: ${status}`,
+            '',
+            '_Source: lcov summary from `coverage.info`. See workflow artifacts for the full report. (#1159)_',
+          ].join('\n');
+
+          const marker = '<!-- pacs-coverage-comment -->';
+          const finalBody = `${marker}\n${body}`;
+
+          const { owner, repo } = context.repo;
+          const issue_number = context.issue.number;
+          const existing = await github.paginate(github.rest.issues.listComments, {
+            owner, repo, issue_number, per_page: 100,
+          });
+          const prior = existing.find(c => (c.body || '').startsWith(marker));
+          if (prior) {
+            await github.rest.issues.updateComment({ owner, repo, comment_id: prior.id, body: finalBody });
+          } else {
+            await github.rest.issues.createComment({ owner, repo, issue_number, body: finalBody });
+          }
+
+    - name: Enforce coverage threshold
+      if: steps.cov_summary.outputs.available == 'true'
+      working-directory: pacs_system/build
+      env:
+        LINES_PCT: ${{ steps.cov_summary.outputs.lines_pct }}
+        THRESHOLD: ${{ env.PACS_COVERAGE_THRESHOLD }}
+        ENFORCE: ${{ env.PACS_COVERAGE_ENFORCE }}
+      run: |
+        echo "Line coverage: ${LINES_PCT}% (threshold: ${THRESHOLD}%)"
+        # Use awk to compare floating-point percentages reliably.
+        BELOW=$(awk -v a="${LINES_PCT}" -v b="${THRESHOLD}" 'BEGIN { print (a+0 < b+0) ? 1 : 0 }')
+        if [ "${BELOW}" = "1" ]; then
+          echo "::warning::Line coverage ${LINES_PCT}% is below v1.0 threshold ${THRESHOLD}% (issue #1159)."
+          if [ "${ENFORCE}" = "true" ]; then
+            echo "::error::Coverage enforcement is enabled (PACS_COVERAGE_ENFORCE=true). Failing job."
+            exit 1
+          fi
+        else
+          echo "Line coverage meets v1.0 threshold."
+        fi
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v6
