@@ -56,9 +56,11 @@ The v1.0 contract freezes the public header surface under `include/kcenon/pacs/`
 and [`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md) for the
 pre-freeze deprecation audit.
 
-Upgrading from 0.x? See the [CHANGELOG](CHANGELOG.md) for the 0.x → 1.0 change set including the
-`samples/` → `examples/` and `examples/` → `tools/` directory relocation (#1139) and the
-`pacs_system::pacs_system` CMake contract (#1158).
+Upgrading from 0.x? Start with the [0.x → 1.0 Migration Guide](docs/migration/0.x-to-1.0.md)
+for the full upgrade walkthrough (include paths, namespaces, CMake contract, `Result<T>` migration,
+and the directory relocation), and consult the [CHANGELOG](CHANGELOG.md) for the underlying change
+set including the `samples/` → `examples/` and `examples/` → `tools/` directory relocation (#1139)
+and the `pacs_system::pacs_system` CMake contract (#1158).
 
 | Phase | Scope | Status |
 |-------|-------|--------|
