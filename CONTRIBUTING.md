@@ -46,12 +46,12 @@ TLS test certificates are not stored in version control. Generate them before ru
 ## Development Workflow
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
+2. Branch from `develop` (the integration branch) — `git checkout develop && git pull && git checkout -b feature/your-feature`
 3. Make your changes
 4. Run tests and ensure they pass
 5. Commit your changes (see commit message guidelines below)
 6. Push to your fork (`git push origin feature/your-feature`)
-7. Open a Pull Request
+7. Open a Pull Request targeting `develop`. Releases to `main` are cut by maintainers via a separate `develop` -> `main` PR.
 
 ### Commit Message Guidelines
 
@@ -120,13 +120,17 @@ All code contributions must include tests:
 
 ### Writing Tests
 
-Use Google Test framework:
+Use Catch2 v3 (the project-wide test framework — note this differs from the kcenon
+ecosystem default of Google Test; see [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md) and
+[#1141](https://github.com/kcenon/pacs_system/issues/1141)):
 
 ```cpp
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
-TEST(ComponentTest, BasicFunctionality) {
-    // Test implementation
+TEST_CASE("Component: basic functionality", "[component]") {
+    SECTION("default state") {
+        // Test implementation
+    }
 }
 ```
 
