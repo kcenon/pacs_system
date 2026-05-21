@@ -85,7 +85,7 @@ test_pacs_scp_dcmtk_scu() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 10; then
         log_fail "Failed to start pacs_system echo server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         return 1
     fi
@@ -94,10 +94,10 @@ test_pacs_scp_dcmtk_scu() {
     log_info "Running DCMTK echoscu..."
     if run_echoscu localhost "$PACS_PORT" "$PACS_AE"; then
         log_pass "C-ECHO successful: DCMTK echoscu -> pacs_system SCP"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "C-ECHO failed: DCMTK echoscu -> pacs_system SCP"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -130,7 +130,7 @@ test_pacs_scp_multiple_echoes() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 10; then
         log_fail "Failed to start pacs_system echo server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         return 1
     fi
@@ -147,10 +147,10 @@ test_pacs_scp_multiple_echoes() {
 
     if $all_passed; then
         log_pass "Multiple C-ECHO successful (5/5)"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "Multiple C-ECHO failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     kill "$server_pid" 2>/dev/null || true
@@ -176,7 +176,7 @@ test_dcmtk_scp_pacs_scu() {
 
     if [[ -z "$scp_pid" ]]; then
         log_fail "Failed to start DCMTK storescp"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         cleanup_dcmtk_temp_dir "$temp_dir"
         return 1
     fi
@@ -198,10 +198,10 @@ test_dcmtk_scp_pacs_scu() {
     log_info "Running pacs_system echo_scu..."
     if "$echo_scu_bin" localhost "$DCMTK_PORT" "$DCMTK_AE"; then
         log_pass "C-ECHO successful: pacs_system echo_scu -> DCMTK SCP"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "C-ECHO failed: pacs_system echo_scu -> DCMTK SCP"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -215,6 +215,11 @@ test_dcmtk_scp_pacs_scu() {
 test_dcmtk_baseline() {
     log_info "=== Test C: DCMTK echoscp <- DCMTK echoscu (baseline) ==="
 
+    if ! command -v echoscp &>/dev/null; then
+        log_warn "echoscp not available in this DCMTK package, skipping baseline test"
+        return 77
+    fi
+
     # Find available port
     local port
     port=$(find_available_port 41118)
@@ -226,7 +231,7 @@ test_dcmtk_baseline() {
 
     if [[ -z "$scp_pid" ]]; then
         log_fail "Failed to start DCMTK echoscp"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         return 1
     fi
 
@@ -234,10 +239,10 @@ test_dcmtk_baseline() {
     log_info "Running DCMTK echoscu..."
     if run_echoscu localhost "$port" "BASELINE_SCP"; then
         log_pass "Baseline C-ECHO successful: DCMTK echoscu -> DCMTK echoscp"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "Baseline C-ECHO failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -262,10 +267,10 @@ test_connection_error() {
     log_info "Testing echoscu to non-existent server..."
     if ! run_echoscu localhost "$port" "NONEXISTENT" "ECHOSCU" 5; then
         log_pass "Connection error handled correctly (echoscu failed as expected)"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "echoscu should have failed for non-existent server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 }
 
@@ -287,11 +292,11 @@ main() {
     register_dcmtk_cleanup
 
     # Run tests
-    test_dcmtk_baseline
-    test_pacs_scp_dcmtk_scu
-    test_pacs_scp_multiple_echoes
-    test_dcmtk_scp_pacs_scu
-    test_connection_error
+    test_dcmtk_baseline || true
+    test_pacs_scp_dcmtk_scu || true
+    test_pacs_scp_multiple_echoes || true
+    test_dcmtk_scp_pacs_scu || true
+    test_connection_error || true
 
     # Summary
     log_info "========================================"

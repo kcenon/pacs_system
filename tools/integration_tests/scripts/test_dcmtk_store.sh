@@ -122,7 +122,7 @@ test_pacs_scp_dcmtk_scu() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
         log_fail "Failed to start pacs_system server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         cleanup_dcmtk_temp_dir "$storage_dir"
         cleanup_dcmtk_temp_dir "$input_dir"
@@ -135,14 +135,14 @@ test_pacs_scp_dcmtk_scu() {
         # Verify file was stored
         if verify_received_dicom "$storage_dir" 1; then
             log_pass "C-STORE successful: DCMTK storescu -> pacs_system SCP"
-            ((TESTS_PASSED++))
+            ((++TESTS_PASSED))
         else
             log_fail "C-STORE completed but no files stored"
-            ((TESTS_FAILED++))
+            ((++TESTS_FAILED))
         fi
     else
         log_fail "C-STORE failed: DCMTK storescu -> pacs_system SCP"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -174,7 +174,7 @@ test_dcmtk_scp_pacs_scu() {
 
     if [[ -z "$scp_pid" ]]; then
         log_fail "Failed to start DCMTK storescp"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         cleanup_dcmtk_temp_dir "$storage_dir"
         cleanup_dcmtk_temp_dir "$input_dir"
         return 1
@@ -209,14 +209,14 @@ test_dcmtk_scp_pacs_scu() {
         # Verify file was stored
         if verify_received_dicom "$storage_dir" 1; then
             log_pass "C-STORE successful: pacs_system store_scu -> DCMTK storescp"
-            ((TESTS_PASSED++))
+            ((++TESTS_PASSED))
         else
             log_fail "C-STORE completed but no files received"
-            ((TESTS_FAILED++))
+            ((++TESTS_FAILED))
         fi
     else
         log_fail "C-STORE failed: pacs_system store_scu -> DCMTK storescp"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -247,7 +247,7 @@ test_dcmtk_baseline() {
 
     if [[ -z "$scp_pid" ]]; then
         log_fail "Failed to start DCMTK storescp"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         cleanup_dcmtk_temp_dir "$storage_dir"
         cleanup_dcmtk_temp_dir "$input_dir"
         return 1
@@ -269,14 +269,14 @@ test_dcmtk_baseline() {
         sleep 1
         if verify_received_dicom "$storage_dir" 1; then
             log_pass "Baseline C-STORE successful: DCMTK storescu -> DCMTK storescp"
-            ((TESTS_PASSED++))
+            ((++TESTS_PASSED))
         else
             log_fail "Baseline C-STORE completed but no files received"
-            ((TESTS_FAILED++))
+            ((++TESTS_FAILED))
         fi
     else
         log_fail "Baseline C-STORE failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -306,7 +306,7 @@ test_multiple_files() {
 
     if [[ -z "$scp_pid" ]]; then
         log_fail "Failed to start DCMTK storescp"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         cleanup_dcmtk_temp_dir "$storage_dir"
         cleanup_dcmtk_temp_dir "$input_dir"
         return 1
@@ -337,14 +337,14 @@ test_multiple_files() {
         stored_count=$(count_dicom_files "$storage_dir")
         if [[ "$stored_count" -ge "${#files[@]}" ]]; then
             log_pass "Multiple file C-STORE successful ($stored_count files)"
-            ((TESTS_PASSED++))
+            ((++TESTS_PASSED))
         else
             log_fail "Expected ${#files[@]} files, got $stored_count"
-            ((TESTS_FAILED++))
+            ((++TESTS_FAILED))
         fi
     else
         log_fail "Multiple file C-STORE failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -371,10 +371,10 @@ main() {
     register_dcmtk_cleanup
 
     # Run tests
-    test_dcmtk_baseline
-    test_pacs_scp_dcmtk_scu
-    test_dcmtk_scp_pacs_scu
-    test_multiple_files
+    test_dcmtk_baseline || true
+    test_pacs_scp_dcmtk_scu || true
+    test_dcmtk_scp_pacs_scu || true
+    test_multiple_files || true
 
     # Summary
     log_info "========================================"

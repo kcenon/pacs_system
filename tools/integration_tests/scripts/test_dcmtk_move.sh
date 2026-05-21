@@ -104,7 +104,7 @@ test_pacs_scp_dcmtk_movescu() {
 
     if [[ -z "$dest_pid" ]]; then
         log_fail "Failed to start DCMTK storescp destination"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         cleanup_dcmtk_temp_dir "$dest_dir"
         cleanup_dcmtk_temp_dir "$input_dir"
         return 1
@@ -140,7 +140,7 @@ test_pacs_scp_dcmtk_movescu() {
 
     if ! wait_for_port "127.0.0.1" "$MOVE_PORT" 15; then
         log_fail "Failed to start pacs_system server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         stop_storescp "$dest_pid"
         cleanup_dcmtk_temp_dir "$dest_dir"
@@ -171,14 +171,14 @@ test_pacs_scp_dcmtk_movescu() {
         # Verify file was received at destination
         if verify_received_dicom "$dest_dir" 1; then
             log_pass "C-MOVE successful: DCMTK movescu -> pacs_system SCP"
-            ((TESTS_PASSED++))
+            ((++TESTS_PASSED))
         else
             log_fail "C-MOVE completed but no files received at destination"
-            ((TESTS_FAILED++))
+            ((++TESTS_FAILED))
         fi
     else
         log_fail "C-MOVE failed: DCMTK movescu -> pacs_system SCP"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -209,10 +209,10 @@ test_connection_error() {
     if ! run_movescu localhost "$port" "NONEXISTENT" "DEST" "STUDY" \
         "PatientID=" 10; then
         log_pass "Connection error handled correctly (movescu failed as expected)"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "movescu should have failed for non-existent server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 }
 
@@ -246,9 +246,9 @@ main() {
     register_dcmtk_cleanup
 
     # Run tests
-    test_pacs_scp_dcmtk_movescu
-    test_connection_error
-    test_dcmtk_baseline
+    test_pacs_scp_dcmtk_movescu || true
+    test_connection_error || true
+    test_dcmtk_baseline || true
 
     # Summary
     log_info "========================================"
