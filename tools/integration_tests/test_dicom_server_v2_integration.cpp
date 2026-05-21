@@ -757,9 +757,10 @@ TEST_CASE("dicom_server_v2 API compatibility with v1", "[v2][migration][api]") {
         auto stats_v1 = server_v1.get_statistics();
         auto stats_v2 = server_v2.get_statistics();
 
-        // Both should have processed at least one association from previous section
-        CHECK(stats_v1.total_associations >= 0);
-        CHECK(stats_v2.total_associations >= 0);
+        // Each Catch2 section runs independently, so this section has not opened
+        // any associations yet.
+        CHECK(stats_v1.total_associations == 0);
+        CHECK(stats_v2.total_associations == 0);
     }
 
     server_v1.stop();

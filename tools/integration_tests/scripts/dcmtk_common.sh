@@ -216,24 +216,30 @@ start_storescp() {
     local output_dir="$3"
     local timeout="${4:-10}"
 
+    if ! command -v storescp &>/dev/null; then
+        log_warn "storescp not found; skipping DCMTK storescp startup" >&2
+        return 77
+    fi
+
     mkdir -p "${output_dir}"
 
-    log_info "Starting storescp: ${ae_title} on port ${port}"
+    log_info "Starting storescp: ${ae_title} on port ${port}" >&2
 
+    local log_file="${output_dir}/storescp-${port}.log"
     storescp \
         -aet "${ae_title}" \
         -od "${output_dir}" \
-        "${port}" &
+        "${port}" >"${log_file}" 2>&1 &
     local pid=$!
 
     DCMTK_SERVER_PIDS+=("${pid}")
 
     if wait_for_port "127.0.0.1" "${port}" "${timeout}"; then
-        log_pass "storescp started (PID: ${pid})"
+        log_pass "storescp started (PID: ${pid})" >&2
         echo "${pid}"
         return 0
     else
-        log_fail "storescp failed to start within ${timeout}s"
+        log_fail "storescp failed to start within ${timeout}s" >&2
         kill "${pid}" 2>/dev/null
         return 1
     fi
@@ -248,21 +254,27 @@ start_echoscp() {
     local ae_title="$2"
     local timeout="${3:-10}"
 
-    log_info "Starting echoscp: ${ae_title} on port ${port}"
+    if ! command -v echoscp &>/dev/null; then
+        log_warn "echoscp not found; skipping DCMTK echoscp startup" >&2
+        return 77
+    fi
 
+    log_info "Starting echoscp: ${ae_title} on port ${port}" >&2
+
+    local log_file="${TMPDIR:-/tmp}/echoscp-${port}.log"
     echoscp \
         -aet "${ae_title}" \
-        "${port}" &
+        "${port}" >"${log_file}" 2>&1 &
     local pid=$!
 
     DCMTK_SERVER_PIDS+=("${pid}")
 
     if wait_for_port "127.0.0.1" "${port}" "${timeout}"; then
-        log_pass "echoscp started (PID: ${pid})"
+        log_pass "echoscp started (PID: ${pid})" >&2
         echo "${pid}"
         return 0
     else
-        log_fail "echoscp failed to start within ${timeout}s"
+        log_fail "echoscp failed to start within ${timeout}s" >&2
         kill "${pid}" 2>/dev/null
         return 1
     fi

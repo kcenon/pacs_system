@@ -71,7 +71,7 @@ test_pacs_scp_dcmtk_scu() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
         log_fail "Failed to start pacs_system server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         return 1
     fi
@@ -81,10 +81,10 @@ test_pacs_scp_dcmtk_scu() {
     if run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
         "PatientID=" "StudyInstanceUID="; then
         log_pass "C-FIND successful: DCMTK findscu -> pacs_system SCP"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "C-FIND failed: DCMTK findscu -> pacs_system SCP"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     # Cleanup
@@ -113,7 +113,7 @@ test_query_levels() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
         log_fail "Failed to start pacs_system server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         return 1
     fi
@@ -138,10 +138,10 @@ test_query_levels() {
 
     if $all_passed; then
         log_pass "Multiple query levels test passed"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "Multiple query levels test failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     kill "$server_pid" 2>/dev/null || true
@@ -168,7 +168,7 @@ test_wildcard_query() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
         log_fail "Failed to start pacs_system server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         return 1
     fi
@@ -178,10 +178,10 @@ test_wildcard_query() {
     if run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
         "PatientName=SMITH*" "StudyInstanceUID="; then
         log_pass "Wildcard query successful"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "Wildcard query failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     kill "$server_pid" 2>/dev/null || true
@@ -208,7 +208,7 @@ test_date_range_query() {
 
     if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
         log_fail "Failed to start pacs_system server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
         kill "$server_pid" 2>/dev/null || true
         return 1
     fi
@@ -218,10 +218,10 @@ test_date_range_query() {
     if run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
         "StudyDate=20231201-20240131" "StudyInstanceUID="; then
         log_pass "Date range query successful"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "Date range query failed"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 
     kill "$server_pid" 2>/dev/null || true
@@ -247,10 +247,10 @@ test_connection_error() {
     if ! run_findscu localhost "$port" "NONEXISTENT" "STUDY" \
         "PatientID=" 5; then
         log_pass "Connection error handled correctly (findscu failed as expected)"
-        ((TESTS_PASSED++))
+        ((++TESTS_PASSED))
     else
         log_fail "findscu should have failed for non-existent server"
-        ((TESTS_FAILED++))
+        ((++TESTS_FAILED))
     fi
 }
 
@@ -272,11 +272,11 @@ main() {
     register_dcmtk_cleanup
 
     # Run tests
-    test_pacs_scp_dcmtk_scu
-    test_query_levels
-    test_wildcard_query
-    test_date_range_query
-    test_connection_error
+    test_pacs_scp_dcmtk_scu || true
+    test_query_levels || true
+    test_wildcard_query || true
+    test_date_range_query || true
+    test_connection_error || true
 
     # Summary
     log_info "========================================"
