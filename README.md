@@ -46,14 +46,28 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ## Project Status
 
-**Current Phase**: ✅ Phase 4 Complete - Advanced Services & Production Hardening
+**Current Version**: 1.0.0 — Stable Public API
+**Project Phase**: Phase 4 Complete — Advanced Services & Production Hardening
+
+The v1.0 contract freezes the public header surface under `include/kcenon/pacs/`, the
+`pacs_system::pacs_system` aggregate CMake target, and the documented Doxygen API. See
+[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md) for the frozen header inventory,
+[`docs/v1.0-throw-policy.md`](docs/v1.0-throw-policy.md) for the exception/Result<T> contract,
+and [`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md) for the
+pre-freeze deprecation audit.
+
+Upgrading from 0.x? Start with the [0.x → 1.0 Migration Guide](docs/migration/0.x-to-1.0.md)
+for the full upgrade walkthrough (include paths, namespaces, CMake contract, `Result<T>` migration,
+and the directory relocation), and consult the [CHANGELOG](CHANGELOG.md) for the underlying change
+set including the `samples/` → `examples/` and `examples/` → `tools/` directory relocation (#1139)
+and the `pacs_system::pacs_system` CMake contract (#1158).
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | ✅ Complete |
-| **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | ✅ Complete |
-| **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
-| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer | ✅ Complete |
+| **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | Complete |
+| **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | Complete |
+| **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | Complete |
+| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer | Complete |
 
 **Test Coverage**: 1,980+ tests passing across 141+ test files | [![codecov](https://codecov.io/gh/kcenon/pacs_system/branch/main/graph/badge.svg)](https://codecov.io/gh/kcenon/pacs_system)
 
@@ -73,6 +87,9 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
 │       └─────────────┼───────────┼───────────┼──────────────┘        │
 │  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
+│  │  IHE Actors (XDS.b Source / Consumer / Registry Query + ATNA) │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
 │  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commit/Print) │  │
 │  └──────────────────────────────┬────────────────────────────────┘  │
 │  ┌──────────────────────────────▼────────────────────────────────┐  │
@@ -87,7 +104,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  │   S3/Azure) │  │   Prefetch/RemoteNode) │  │   Metrics)      │  │
 │  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
 ├─────────┼────────────────────────────────────────────────────────────┤
-│         │             Integration Adapters                           │
+│         │             Integration Adapters + DI                      │
 │  container │ network │ thread │ logger │ monitoring                  │
 ├─────────┼────────────────────────────────────────────────────────────┤
 │         │              kcenon Ecosystem                               │
@@ -443,30 +460,36 @@ This project leverages the following kcenon ecosystem components:
 
 ## Project Structure
 
+Public headers live under `include/kcenon/pacs/<module>/`. The legacy `include/pacs/...`
+path was retired; all consumers should `#include <kcenon/pacs/...>`.
+
 | Module | Location | Description |
 |--------|----------|-------------|
-| **Core** | `include/pacs/core/` | DICOM tags, elements, datasets, Part 10 file I/O, tag dictionary |
-| **Encoding** | `include/pacs/encoding/` | VR types, transfer syntaxes, compression codecs (JPEG, JP2K, JPLS, RLE) |
-| **Network** | `include/pacs/network/` | PDU encoding/decoding, association state machine, DIMSE protocol |
-| **Services** | `include/pacs/services/` | SCP/SCU implementations, SOP class registry, IOD validators |
-| **Storage** | `include/pacs/storage/` | File storage, SQLite indexing, cloud storage (S3/Azure), HSM |
-| **Security** | `include/pacs/security/` | RBAC, anonymization (PS3.15), digital signatures, TLS |
-| **Monitoring** | `include/pacs/monitoring/` | Health checks, Prometheus metrics |
-| **Web** | `include/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
-| **Client** | `include/pacs/client/` | Job, routing, sync, prefetch, remote node management |
-| **Workflow** | `include/pacs/workflow/` | Auto prefetch, task scheduler, study lock manager |
-| **AI** | `include/pacs/ai/` | AI service connector, result handler (SR/SEG) |
-| **Integration** | `include/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring) |
+| **Core** | `include/kcenon/pacs/core/` | DICOM tags, elements, datasets, Part 10 file I/O, tag dictionary |
+| **Encoding** | `include/kcenon/pacs/encoding/` | VR types, transfer syntaxes, compression codecs (JPEG, JP2K, JPLS, RLE) |
+| **Network** | `include/kcenon/pacs/network/` | PDU encoding/decoding, association state machine, DIMSE protocol |
+| **Services** | `include/kcenon/pacs/services/` | SCP/SCU implementations, SOP class registry, IOD validators |
+| **Storage** | `include/kcenon/pacs/storage/` | File storage, SQLite indexing, cloud storage (S3/Azure), HSM |
+| **Security** | `include/kcenon/pacs/security/` | RBAC, anonymization (PS3.15), digital signatures, TLS |
+| **Monitoring** | `include/kcenon/pacs/monitoring/` | Health checks, Prometheus metrics |
+| **Web** | `include/kcenon/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
+| **Client** | `include/kcenon/pacs/client/` | Job, routing, sync, prefetch, remote node management |
+| **Workflow** | `include/kcenon/pacs/workflow/` | Auto prefetch, task scheduler, study lock manager |
+| **AI** | `include/kcenon/pacs/ai/` | AI service connector, result handler (SR/SEG) |
+| **Integration** | `include/kcenon/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring) |
+| **IHE** | `include/kcenon/pacs/ihe/` | IHE actors (XDS.b Document Source/Consumer, Registry Query, ATNA audit) |
+| **DI** | `include/kcenon/pacs/di/` | Dependency injection utilities for service composition |
+| **Compat** | `include/kcenon/pacs/compat/` | Compatibility shims for cross-platform and legacy include paths |
 
 ```
 pacs_system/
-├── include/pacs/         # Public headers (222 files)
-├── src/                  # Source implementations (148 files)
-├── tests/                # Test suites (141+ files, 1,980+ tests)
+├── include/kcenon/pacs/  # Public headers (290 files)
+├── src/                  # Source implementations (217 files)
+├── tests/                # Test suites (189 files, 2,657+ tests)
 ├── examples/             # Tutorials (5 progressive learning steps)
 ├── tools/                # CLI utility binaries (32 apps)
-├── docs/                 # Documentation (57 files)
-└── CMakeLists.txt        # Build configuration (v0.2.0)
+├── docs/                 # Documentation (87 markdown files)
+└── CMakeLists.txt        # Build configuration (v1.0.0)
 ```
 
 > For the full file-level directory tree, see [Project Structure](docs/PROJECT_STRUCTURE.md).
@@ -600,8 +623,8 @@ cmake --build build --target run_full_benchmarks
 | **Example Programs** | 6 apps |
 | **Documentation** | 87 markdown files |
 | **CI/CD Workflows** | 15 workflows |
-| **Version** | 0.1.0 |
-| **Last Updated** | 2026-05-01 |
+| **Version** | 1.0.0 |
+| **Last Updated** | 2026-05-13 |
 
 <!-- STATS_END -->
 
