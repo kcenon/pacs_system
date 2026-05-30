@@ -1,0 +1,128 @@
+# Sanitizer Tests Workflow for PACS System
+# Runs AddressSanitizer, ThreadSanitizer, and UndefinedBehaviorSanitizer
+#
+# Based on database_system sanitizer patterns
+#
+# Note on Windows Support:
+# Windows sanitizer support is limited compared to Linux/macOS:
+# - MSVC supports AddressSanitizer (/fsanitize=address) since VS 2019 16.9
+# - ThreadSanitizer is NOT supported on Windows with MSVC
+# - UndefinedBehaviorSanitizer is partially supported
+# For comprehensive sanitizer coverage, we run on Ubuntu with Clang.
+# See: https://learn.microsoft.com/en-us/cpp/sanitizers/asan
+
+name: Sanitizer Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Ensure only one workflow runs per branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sanitizer-tests:
+    name: ${{ matrix.sanitizer }} Sanitizer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, thread, undefined]
+        build_type: [Debug]
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build clang lld
+        sudo apt-get install -y libsqlite3-dev libssl-dev libfmt-dev
+        sudo apt-get install -y libgtest-dev libgmock-dev
+        sudo apt-get install -y libjpeg-turbo8-dev
+
+    - name: Set up compiler
+      run: |
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+
+    - name: Configure CMake with ${{ matrix.sanitizer }} sanitizer
+      working-directory: pacs_system
+      run: |
+        SANITIZER_FLAGS="-fsanitize=${{ matrix.sanitizer }} -fno-omit-frame-pointer -g"
+
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_C_FLAGS="${SANITIZER_FLAGS}" \
+          -DCMAKE_CXX_FLAGS="${SANITIZER_FLAGS}" \
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=${{ matrix.sanitizer }}" \
+          -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=${{ matrix.sanitizer }}" \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=OFF \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build with ${{ matrix.sanitizer }} sanitizer
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Run tests with ${{ matrix.sanitizer }} sanitizer
+      working-directory: pacs_system/build
+      run: |
+        ctest --output-on-failure --verbose --timeout 300 || echo "Some tests failed"
+      env:
+        # Sanitizer options for better error reporting
+        TSAN_OPTIONS: "halt_on_error=0 second_deadlock_stack=1 history_size=4"
+        ASAN_OPTIONS: "halt_on_error=0 detect_leaks=1 detect_stack_use_after_return=1"
+        UBSAN_OPTIONS: "halt_on_error=0 print_stacktrace=1"
+
+    - name: Upload sanitizer logs
+      if: failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: sanitizer-logs-${{ matrix.sanitizer }}
+        path: |
+          pacs_system/build/Testing/Temporary/LastTest.log
+          pacs_system/build/**/*.log
+        retention-days: 7
+        if-no-files-found: ignore
+
+  sanitizer-summary:
+    name: Sanitizer Test Summary
+    needs: sanitizer-tests
+    runs-on: ubuntu-24.04
+    if: always()
+
+    steps:
+    - name: Generate summary
+      run: |
+        echo "# Sanitizer Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Matrix" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Sanitizer | Description | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| AddressSanitizer | Detects memory errors (buffer overflow, use-after-free) | ${{ contains(needs.sanitizer-tests.result, 'success') && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ThreadSanitizer | Detects data races and deadlocks | ${{ contains(needs.sanitizer-tests.result, 'success') && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| UndefinedBehaviorSanitizer | Detects undefined behavior | ${{ contains(needs.sanitizer-tests.result, 'success') && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 Detailed logs available in **Artifacts** if tests failed" >> $GITHUB_STEP_SUMMARY

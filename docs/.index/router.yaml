@@ -1,0 +1,96 @@
+# PACS System Query Router — match query to minimum document set.
+_meta: {schema: "1.0.0", generated: "2026-04-12"}
+
+# ============================================================================
+# Identifier routes (exact pattern -> document + section)
+# ============================================================================
+id_routes:
+  SRS:
+    pattern: "SRS-{CAT}-{NNN}"
+    file: SRS.md
+    also: [SDS_TRACEABILITY.md, TRACEABILITY.md]
+
+  SDS:
+    pattern: "SDS-{CAT}"
+    file: SDS.md
+    also:
+      - SDS_COMPONENTS.md
+      - SDS_INTERFACES.md
+      - SDS_TRACEABILITY.md
+
+  TC:
+    pattern: "TC-{CAT}-{NNN}"
+    file: VERIFICATION_REPORT.md
+    also: [VALIDATION_REPORT.md, TRACEABILITY.md]
+
+  DICOM_SOP:
+    pattern: "1.2.840.10008.*"
+    file: DICOM_CONFORMANCE_STATEMENT.md
+
+# ============================================================================
+# Intent routes (keyword -> bundle for topic-based queries)
+# ============================================================================
+intent_routes:
+  # Medical / DICOM domain
+  - {keywords: [dicom, dimse, c-store, c-find, c-move, c-echo, sop, 의료 영상, 디콤], bundle: dicom}
+  - {keywords: [ihe, scheduled workflow, profile, actor, transaction], bundle: ihe}
+  - {keywords: [modality, worklist, mwl, mpps], bundle: workflow}
+  - {keywords: [viewer, client, ui, viewport, 뷰어], bundle: client-viewer}
+  - {keywords: [pacs, archive, storage, 아카이브], bundle: pacs-core}
+
+  # Architecture / design
+  - {keywords: [architecture, design, 아키텍처], bundle: architecture}
+  - {keywords: [component, module, service, 컴포넌트], bundle: components}
+  - {keywords: [interface, api contract, 인터페이스], bundle: interfaces}
+  - {keywords: [sequence, flow, interaction, 시퀀스], bundle: sequences}
+  - {keywords: [workflow, state machine, 워크플로우], bundle: workflow}
+  - {keywords: [pipeline, data flow, 파이프라인], bundle: pipeline}
+  - {keywords: [di, dependency injection, ioc, 의존성], bundle: di}
+
+  # API / CLI
+  - {keywords: [api, reference, 레퍼런스], bundle: api-core}
+  - {keywords: [cli, command line, tool, 명령어], bundle: cli}
+  - {keywords: [web api, rest, http, 웹 api], bundle: web-api}
+  - {keywords: [network api, dimse api], bundle: network-api}
+  - {keywords: [services, service layer], bundle: services-api}
+
+  # Specific features
+  - {keywords: [security, auth, encryption, audit, 보안], bundle: security}
+  - {keywords: [database, schema, 데이터베이스], bundle: database}
+  - {keywords: [ai, ml, machine learning, 인공지능], bundle: ai}
+  - {keywords: [cloud, s3, storage, 클라우드], bundle: cloud-storage}
+  - {keywords: [compression, jpeg2000, rle, 압축], bundle: compression}
+  - {keywords: [monitoring, metrics, collector, 모니터링], bundle: monitoring}
+  - {keywords: [cache, caching, 캐시], bundle: cache}
+  - {keywords: [prefetch, 프리페치], bundle: prefetch}
+
+  # Requirements
+  - {keywords: [requirement, srs, spec, 요구사항], bundle: requirements}
+  - {keywords: [prd, product, vision, 제품], bundle: product}
+
+  # V&V / compliance
+  - {keywords: [validation, validate, 유효성], bundle: validation}
+  - {keywords: [verification, verify, test report, 검증], bundle: verification}
+  - {keywords: [traceability, trace, matrix, 추적성], bundle: traceability}
+  - {keywords: [conformance, compliance, regulatory, standard, 준수, 규제], bundle: compliance}
+
+  # Performance / quality
+  - {keywords: [benchmark, performance, latency, 성능], bundle: performance}
+  - {keywords: [quality, 품질], bundle: quality}
+
+  # Migration / analysis
+  - {keywords: [migration, upgrade, legacy, 마이그레이션], bundle: migration}
+  - {keywords: [analysis, analyze, 분석], bundle: analysis}
+  - {keywords: [thread, threading, stability, 스레드], bundle: threading}
+
+fallback:
+  primary: PAC-DOC-IDX
+  secondary: [PAC-DOC-INT, PAC-API-QR]
+  note: "Start at the Documentation Registry, then internal index and API quick reference."
+
+skip:
+  - ECOSYSTEM.md                 # 31 lines, pointer-only
+  - API_REFERENCE.md             # 34 lines, index-only
+  - CHANGELOG.md                 # 59 lines, minimal
+  - CHANGELOG.kr.md
+  - DOCUMENTATION_STATISTICS.md  # meta, rarely useful for content queries

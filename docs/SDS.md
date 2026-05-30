@@ -1,0 +1,733 @@
+---
+doc_id: "PAC-GUID-007"
+doc_title: "Software Design Specification (SDS) - PACS System"
+doc_version: "0.2.0"
+doc_date: "2026-04-04"
+doc_status: "Released"
+project: "pacs_system"
+category: "GUID"
+---
+
+# Software Design Specification (SDS) - PACS System
+
+> **SSOT**: This document is the single source of truth for **Software Design Specification (SDS) - PACS System**.
+
+> **Version:** 0.2.0
+> **Last Updated:** 2026-02-08
+> **Language:** **English** | [한국어](SDS.kr.md)
+> **Status:** Complete
+
+---
+
+## Document Information
+
+| Item | Description |
+|------|-------------|
+| Document ID | PACS-SDS-001 |
+| Project | PACS System |
+| Author | kcenon@naver.com |
+| Reviewers | - |
+| Approval Date | - |
+
+### Related Documents
+
+| Document | ID | Version |
+|----------|-----|---------|
+| Product Requirements Document | [PRD](PRD.md) | 0.2.0.0 |
+| Software Requirements Specification | [SRS](SRS.md) | 0.1.3.2 |
+| Architecture Documentation | [ARCHITECTURE](ARCHITECTURE.md) | 0.1.4.0 |
+| API Reference | [API_REFERENCE](API_REFERENCE.md) | 0.1.1.0 |
+
+### Document Structure
+
+This SDS is organized into multiple files for maintainability:
+
+| File | Description |
+|------|-------------|
+| **SDS.md** (this file) | Overview, design principles, module summary |
+| [SDS_COMPONENTS.md](SDS_COMPONENTS.md) | Detailed component designs |
+| [SDS_INTERFACES.md](SDS_INTERFACES.md) | Interface specifications |
+| [SDS_DATABASE.md](SDS_DATABASE.md) | Database schema design |
+| [SDS_SEQUENCES.md](SDS_SEQUENCES.md) | Sequence diagrams |
+| [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | Requirements traceability matrix |
+| [SDS_SECURITY.md](SDS_SECURITY.md) | Security module design (RBAC, Anonymization, Digital Signatures) |
+| [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | Cloud storage backends (S3, Azure, HSM) |
+| [SDS_WORKFLOW.md](SDS_WORKFLOW.md) | Workflow module (Auto Prefetch, Task Scheduler, Study Lock) |
+| [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md) | Query caching, LRU, streaming queries |
+| [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) | Network V2 with messaging_server integration |
+| [SDS_DI.md](SDS_DI.md) | Dependency Injection module |
+| [SDS_AI.md](SDS_AI.md) | AI Service integration module |
+| [SDS_CLIENT.md](SDS_CLIENT.md) | Client module (Job, Routing, Sync, Prefetch, Remote Node) |
+| [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) | Monitoring collectors plugin architecture |
+
+### Document Versioning Policy
+
+The SDS document family uses **independent versioning** with a compatibility matrix (Option B):
+
+- **Format**: All SDS documents use **3-digit semantic versioning** (`MAJOR.MINOR.PATCH`)
+  - `MAJOR`: Breaking structural changes or complete rewrites
+  - `MINOR`: New sections, significant content additions
+  - `PATCH`: Corrections, clarifications, minor updates
+- **Independence**: Each sub-document maintains its own version number, reflecting its individual revision history
+- **Compatibility**: The matrix below tracks which sub-document versions are compatible with this parent SDS version
+- **Cross-references**: When referencing another SDS document, always cite the specific version from the matrix
+
+### SDS Document Family Version Matrix
+
+| Sub-Document | Current Version | Last Updated | Status |
+|-------------|----------------|--------------|--------|
+| [SDS_COMPONENTS.md](SDS_COMPONENTS.md) | 0.2.0 | 2026-02-08 | Active |
+| [SDS_INTERFACES.md](SDS_INTERFACES.md) | 0.1.3 | 2025-12-07 | Active |
+| [SDS_DATABASE.md](SDS_DATABASE.md) | 0.2.0 | 2026-02-08 | Active |
+| [SDS_SEQUENCES.md](SDS_SEQUENCES.md) | 0.1.1 | 2025-12-04 | Active |
+| [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) | 3.0.0 | 2026-02-08 | Active |
+| [SDS_SECURITY.md](SDS_SECURITY.md) | 1.0.0 | 2026-01-03 | Active |
+| [SDS_CLOUD_STORAGE.md](SDS_CLOUD_STORAGE.md) | 1.0.0 | 2026-01-04 | Active |
+| [SDS_WORKFLOW.md](SDS_WORKFLOW.md) | 1.0.0 | 2026-01-04 | Active |
+| [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md) | 1.1.0 | 2026-01-05 | Active |
+| [SDS_NETWORK_V2.md](SDS_NETWORK_V2.md) | 2.0.0 | 2026-01-05 | Active |
+| [SDS_DI.md](SDS_DI.md) | 1.1.0 | 2026-01-05 | Active |
+| [SDS_AI.md](SDS_AI.md) | 2.0.0 | 2026-01-05 | Active |
+| [SDS_CLIENT.md](SDS_CLIENT.md) | 1.0.0 | 2026-02-08 | Active |
+| [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md) | 2.1.0 | 2026-01-05 | Active |
+| [SDS_WEB_API.md](SDS_WEB_API.md) | 2.0.0 | 2026-02-08 | Active |
+| [SDS_COMPRESSION.md](SDS_COMPRESSION.md) | 1.0.0 | 2026-01-03 | Active |
+
+---
+
+## Table of Contents
+
+- [1. Introduction](#1-introduction)
+- [2. Design Overview](#2-design-overview)
+- [3. Design Principles](#3-design-principles)
+- [4. Module Summary](#4-module-summary)
+- [5. Design Constraints](#5-design-constraints)
+- [6. Design Decisions](#6-design-decisions)
+- [7. Quality Attributes](#7-quality-attributes)
+
+---
+
+## 1. Introduction
+
+### 1.1 Purpose
+
+This Software Design Specification (SDS) document describes the detailed software design for the PACS (Picture Archiving and Communication System) System. It translates the requirements defined in the SRS into a comprehensive software architecture and component design that can be directly implemented.
+
+### 1.2 Scope
+
+This document covers:
+
+- Detailed design of all software modules
+- Component interfaces and interactions
+- Data structures and database schema
+- Sequence diagrams for key operations
+- Design patterns and conventions
+- Traceability to requirements
+
+### 1.3 Definitions and Acronyms
+
+| Term | Definition |
+|------|------------|
+| SDS | Software Design Specification |
+| PRD | Product Requirements Document |
+| SRS | Software Requirements Specification |
+| DICOM | Digital Imaging and Communications in Medicine |
+| PDU | Protocol Data Unit |
+| DIMSE | DICOM Message Service Element |
+| VR | Value Representation |
+| SOP | Service-Object Pair |
+| SCU | Service Class User |
+| SCP | Service Class Provider |
+| UID | Unique Identifier |
+| RAII | Resource Acquisition Is Initialization |
+
+### 1.4 Design Identifier Convention
+
+Design specifications use the following ID format:
+
+```
+DES-<MODULE>-<NUMBER>
+
+Where:
+- DES: Design Specification prefix
+- MODULE: Module identifier (CORE, ENC, NET, SVC, STOR, INT, DB, SEC)
+- NUMBER: 3-digit sequential number
+```
+
+**Module Identifiers:**
+
+| Module ID | Module Name | Description |
+|-----------|-------------|-------------|
+| CORE | Core Module | DICOM data structures |
+| ENC | Encoding Module | VR encoding/decoding |
+| NET | Network Module | DICOM network protocol |
+| SVC | Services Module | DICOM service implementations |
+| STOR | Storage Module | Storage backend |
+| INT | Interface Module | Ecosystem integration |
+| DB | Database Module | Index database design |
+| SEC | Security Module | RBAC, anonymization, digital signatures |
+| CACHE | Cache Module | Query caching and streaming |
+| AI | AI Module | AI service integration |
+| CLI | Client Module | Client-side orchestration |
+| DI | DI Module | Dependency injection |
+| MON | Monitoring Module | Metrics collectors |
+
+---
+
+## 2. Design Overview
+
+### 2.1 System Context
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              External Systems                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │
+│  │  Modalities  │  │   Viewers    │  │     RIS      │  │  Other PACS     │ │
+│  │  (CT, MR..)  │  │  (Workstns)  │  │   Systems    │  │    Servers      │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘ │
+│         │                 │                 │                    │          │
+│         │    DICOM        │    DICOM        │    HL7/DICOM       │  DICOM   │
+│         │    C-STORE      │    C-FIND       │    Worklist        │  C-MOVE  │
+│         ▼                 ▼                 ▼                    ▼          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                           ┌─────────────────────┐                           │
+│                           │                     │                           │
+│                           │    PACS System      │                           │
+│                           │                     │                           │
+│                           │  ┌───────────────┐  │                           │
+│                           │  │  Storage SCP  │  │                           │
+│                           │  │  Query SCP    │  │                           │
+│                           │  │  Worklist SCP │  │                           │
+│                           │  │  MPPS SCP     │  │                           │
+│                           │  └───────────────┘  │                           │
+│                           │                     │                           │
+│                           └──────────┬──────────┘                           │
+│                                      │                                      │
+│                                      ▼                                      │
+│                           ┌─────────────────────┐                           │
+│                           │   Storage Backend   │                           │
+│                           │  (Files + Index DB) │                           │
+│                           └─────────────────────┘                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 Architectural Layers
+
+The PACS System follows a layered architecture:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Layer 6: Application                          │
+│            (PACS Server, CLI Tools, Examples)                    │
+│                                                                  │
+│  Traces to: FR-3.x (Services), NFR-1 (Performance)              │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                    Layer 5: Services                             │
+│       (Storage SCP/SCU, Query SCP/SCU, Worklist, MPPS)          │
+│                                                                  │
+│  Traces to: SRS-SVC-xxx (Service Requirements)                  │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                    Layer 4: Protocol                             │
+│              (DIMSE Messages, Association Manager)               │
+│                                                                  │
+│  Traces to: SRS-NET-xxx (Network Requirements)                  │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                    Layer 3: Network                              │
+│                    (PDU Encoder/Decoder)                         │
+│                                                                  │
+│  Traces to: FR-2.1, FR-2.2 (PDU Types, State Machine)           │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                    Layer 2: Core                                 │
+│         (DICOM Element, Dataset, File, Dictionary)               │
+│                                                                  │
+│  Traces to: SRS-CORE-xxx (Core Requirements)                    │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                    Layer 1: Encoding                             │
+│            (VR Types, Transfer Syntax, Codecs)                   │
+│                                                                  │
+│  Traces to: FR-1.2 (VR Types), FR-1.3 (Transfer Syntax)         │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                    Layer 0: Integration                          │
+│     (container_adapter, network_adapter, thread_adapter)         │
+│                                                                  │
+│  Traces to: IR-1.x through IR-5.x (Integration Requirements)    │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                  Ecosystem Foundation                            │
+│  (common_system, container_system, network_system, thread_system)│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 2.3 Module Dependencies
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Module Dependencies                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                    ┌───────────────┐                                        │
+│                    │   services    │                                        │
+│                    │               │                                        │
+│                    │ • storage_scp │                                        │
+│                    │ • query_scp   │                                        │
+│                    │ • worklist    │                                        │
+│                    │ • mpps        │                                        │
+│                    └───────┬───────┘                                        │
+│                            │                                                │
+│              ┌─────────────┼─────────────┐                                  │
+│              │             │             │                                  │
+│              ▼             ▼             ▼                                  │
+│       ┌──────────┐  ┌──────────┐  ┌──────────┐                             │
+│       │ network  │  │ storage  │  │   core   │                             │
+│       │          │  │          │  │          │                             │
+│       │ • pdu    │  │ • file   │  │ • element│                             │
+│       │ • dimse  │  │ • index  │  │ • dataset│                             │
+│       │ • assoc  │  │          │  │ • file   │                             │
+│       └────┬─────┘  └────┬─────┘  └────┬─────┘                             │
+│            │             │             │                                    │
+│            └─────────────┼─────────────┘                                    │
+│                          │                                                  │
+│                          ▼                                                  │
+│                   ┌──────────┐                                              │
+│                   │ encoding │                                              │
+│                   │          │                                              │
+│                   │ • vr     │                                              │
+│                   │ • ts     │                                              │
+│                   │ • codec  │                                              │
+│                   └────┬─────┘                                              │
+│                        │                                                    │
+│                        ▼                                                    │
+│                 ┌─────────────┐                                             │
+│                 │ integration │                                             │
+│                 │             │                                             │
+│                 │ • container │                                             │
+│                 │ • network   │                                             │
+│                 │ • thread    │                                             │
+│                 └─────────────┘                                             │
+│                        │                                                    │
+│                        ▼                                                    │
+│         ┌──────────────────────────────┐                                    │
+│         │     Ecosystem Libraries      │                                    │
+│         │  common | container | network│                                    │
+│         │  thread | logger | monitoring│                                    │
+│         └──────────────────────────────┘                                    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. Design Principles
+
+### 3.1 Ecosystem-First Design
+
+**Principle:** Leverage existing kcenon ecosystem components rather than implementing from scratch.
+
+| Ecosystem Component | PACS Usage | Design Rationale |
+|---------------------|------------|------------------|
+| `common_system::Result<T>` | Error handling | Consistent error propagation |
+| `container_system::value` | VR value storage | Type-safe value handling |
+| `network_system::messaging_server` | DICOM server | Proven async I/O |
+| `thread_system::thread_pool` | Worker pool | Lock-free job processing |
+| `logger_system` | Audit logging | HIPAA compliance |
+
+**Traces to:** IR-1 through IR-5 (Integration Requirements)
+
+### 3.2 Zero External DICOM Dependencies
+
+**Principle:** Implement all DICOM functionality using ecosystem components only.
+
+**Rationale:**
+- No GPL/LGPL licensing concerns
+- Complete implementation control
+- Optimized ecosystem integration
+- Full transparency and auditability
+
+**Traces to:** PRD Design Philosophy §3
+
+### 3.3 DICOM Standard Compliance
+
+**Principle:** Follow DICOM PS3.x specifications precisely.
+
+| Standard | Compliance Area |
+|----------|-----------------|
+| PS3.5 | Data structures and encoding |
+| PS3.6 | Data dictionary |
+| PS3.7 | Message exchange |
+| PS3.8 | Network communication |
+
+**Traces to:** PRD Design Philosophy §2
+
+### 3.4 Production-Grade Quality
+
+**Principle:** Maintain ecosystem-level quality standards.
+
+| Quality Metric | Target | Verification |
+|----------------|--------|--------------|
+| RAII Grade | A | Code review, static analysis |
+| Memory Leaks | Zero | AddressSanitizer |
+| Data Races | Zero | ThreadSanitizer |
+| Test Coverage | ≥80% | Coverage reports |
+| API Documentation | Complete | Doxygen |
+
+**Traces to:** NFR-2 (Reliability), NFR-4 (Maintainability)
+
+---
+
+## 4. Module Summary
+
+### 4.1 Core Module (pacs_core)
+
+**Purpose:** Fundamental DICOM data structures
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to |
+|-----------|-----------|-------------|-----------|
+| `dicom_tag` | DES-CORE-001 | Tag representation (Group, Element) | SRS-CORE-001 |
+| `dicom_element` | DES-CORE-002 | Data Element (Tag, VR, Value) | SRS-CORE-003 |
+| `dicom_dataset` | DES-CORE-003 | Ordered element collection | SRS-CORE-005 |
+| `dicom_file` | DES-CORE-004 | Part 10 file handling | SRS-CORE-006 |
+| `dicom_dictionary` | DES-CORE-005 | Tag metadata lookup | SRS-CORE-008 |
+
+### 4.2 Encoding Module (pacs_encoding)
+
+**Purpose:** VR encoding and Transfer Syntax handling
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to |
+|-----------|-----------|-------------|-----------|
+| `vr_type` | DES-ENC-001 | 34 VR type enumeration | SRS-CORE-002 |
+| `vr_info` | DES-ENC-002 | VR metadata utilities | SRS-CORE-002 |
+| `transfer_syntax` | DES-ENC-003 | Transfer Syntax handling | SRS-CORE-007 |
+| `implicit_vr_codec` | DES-ENC-004 | Implicit VR encoder/decoder | SRS-CORE-007 |
+| `explicit_vr_codec` | DES-ENC-005 | Explicit VR encoder/decoder | SRS-CORE-007 |
+
+### 4.3 Network Module (pacs_network)
+
+**Purpose:** DICOM network protocol implementation
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to |
+|-----------|-----------|-------------|-----------|
+| `pdu_encoder` | DES-NET-001 | PDU serialization | SRS-NET-001 |
+| `pdu_decoder` | DES-NET-002 | PDU deserialization | SRS-NET-001 |
+| `dimse_message` | DES-NET-003 | DIMSE message handling | SRS-NET-002 |
+| `association` | DES-NET-004 | Association state machine | SRS-NET-003 |
+| `dicom_server` | DES-NET-005 | Multi-association server | SRS-NET-004 |
+
+### 4.4 Services Module (pacs_services)
+
+**Purpose:** DICOM service implementations
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `verification_scp` | DES-SVC-001 | C-ECHO handler | SRS-SVC-001 | ✅ |
+| `storage_scp` | DES-SVC-002 | C-STORE receiver | SRS-SVC-002 | ✅ |
+| `storage_scu` | DES-SVC-003 | C-STORE sender | SRS-SVC-003 | ✅ |
+| `query_scp` | DES-SVC-004 | C-FIND handler | SRS-SVC-004 | ✅ |
+| `retrieve_scp` | DES-SVC-005 | C-MOVE/C-GET handler | SRS-SVC-005 | ✅ |
+| `worklist_scp` | DES-SVC-006 | MWL C-FIND handler | SRS-SVC-006 | ✅ |
+| `mpps_scp` | DES-SVC-007 | N-CREATE/N-SET handler | SRS-SVC-007 | ✅ |
+| `dimse_n_encoder` | DES-SVC-008 | N-GET/N-ACTION/N-EVENT/N-DELETE | SRS-SVC-008 | ✅ |
+| `ultrasound_storage` | DES-SVC-009 | US/US-MF SOP classes | SRS-SVC-009 | ✅ |
+| `xa_storage` | DES-SVC-010 | XA/XRF SOP classes | SRS-SVC-010 | ✅ |
+
+### 4.5 Storage Module (pacs_storage)
+
+**Purpose:** Persistent storage backend
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to |
+|-----------|-----------|-------------|-----------|
+| `storage_interface` | DES-STOR-001 | Abstract storage API | SRS-STOR-001 |
+| `file_storage` | DES-STOR-002 | Filesystem implementation | SRS-STOR-002 |
+| `index_database` | DES-STOR-003 | SQLite index | SRS-STOR-002 |
+
+### 4.6 Integration Module (pacs_integration)
+
+**Purpose:** Ecosystem component adapters
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `container_adapter` | DES-INT-001 | VR to container mapping | IR-1 | ✅ |
+| `network_adapter` | DES-INT-002 | TCP/TLS via network_system | IR-2 | ✅ |
+| `thread_adapter` | DES-INT-003 | Job processing, thread pool | IR-3 | ✅ |
+| `accept_worker` | DES-INT-003a | TCP socket bind/listen/accept (thread_base) | IR-3 | ✅ (v1.2.0) |
+| `logger_adapter` | DES-INT-004 | Audit logging | IR-4 | ✅ |
+| `monitoring_adapter` | DES-INT-005 | Performance metrics | IR-5 | ✅ |
+
+### 4.7 Network V2 Module (pacs_network_v2) - Optional
+
+**Purpose:** network_system-based DICOM server implementation
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `dicom_server_v2` | DES-NET-006 | messaging_server-based DICOM server | SRS-INT-003 | ✅ |
+| `dicom_association_handler` | DES-NET-007 | Per-session PDU framing and dispatching | SRS-INT-003 | ✅ |
+
+### 4.8 Workflow Module (pacs_workflow)
+
+**Purpose:** Workflow automation services
+
+**Reference:** [SDS_WORKFLOW.md](SDS_WORKFLOW.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `auto_prefetch_service` | DES-WKF-001 | Automatic prior study prefetching | SRS-WKF-001 | ✅ |
+| `prefetch_config` | DES-WKF-002 | Prefetch configuration | SRS-WKF-001 | ✅ |
+| `task_scheduler` | DES-WKF-003 | Scheduled task execution | SRS-WKF-002 | ✅ |
+| `task_scheduler_config` | DES-WKF-004 | Scheduler configuration | SRS-WKF-002 | ✅ |
+| `study_lock_manager` | DES-WKF-005 | Concurrent access control | SRS-WKF-001 | ✅ |
+
+### 4.9 Services Cache Module (pacs_services_cache)
+
+**Purpose:** Query caching and streaming for performance optimization
+
+**Reference:** [SDS_SERVICES_CACHE.md](SDS_SERVICES_CACHE.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `query_cache` | DES-CACHE-001 | Result caching with TTL | SRS-PERF-003 | ✅ |
+| `simple_lru_cache` | DES-CACHE-002 | LRU eviction policy | SRS-PERF-005 | ✅ |
+| `streaming_query_handler` | DES-CACHE-003 | Memory-efficient query processing | SRS-SVC-004 | ✅ |
+| `parallel_query_executor` | DES-CACHE-004 | Multi-threaded query execution | SRS-PERF-002 | ✅ |
+| `database_cursor` | DES-CACHE-005 | Database cursor abstraction | SRS-STOR-002 | ✅ |
+| `query_result_stream` | DES-CACHE-006 | Iterator-based result streaming | SRS-SVC-004 | ✅ |
+
+### 4.10 AI Service Module (pacs_ai)
+
+**Purpose:** External AI/ML service integration
+
+**Reference:** [SDS_AI.md](SDS_AI.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `ai_service_connector` | DES-AI-001 | REST client for AI services | SRS-AI-001 | ✅ |
+| `ai_result_handler` | DES-AI-002 | DICOM SR/SC/SEG output | SRS-AI-001 | ✅ |
+
+### 4.11 Dependency Injection Module (pacs_di)
+
+**Purpose:** Service abstraction and test support
+
+**Reference:** [SDS_DI.md](SDS_DI.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `service_interfaces` | DES-DI-001 | Abstract service interfaces | SRS-MAINT-005 | ✅ |
+| `service_registration` | DES-DI-002 | Service factory and registry | SRS-MAINT-005 | ✅ |
+| `ilogger` | DES-DI-003 | Logger interface abstraction | SRS-INT-005 | ✅ |
+| `test_support` | DES-DI-004 | Mock injection utilities | SRS-MAINT-001 | ✅ |
+
+### 4.12 Monitoring Collectors Module (pacs_monitoring)
+
+**Purpose:** PACS-specific metrics collection for monitoring_system
+
+**Reference:** [SDS_MONITORING_COLLECTORS.md](SDS_MONITORING_COLLECTORS.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `dicom_association_collector` | DES-MON-001 | Connection and state metrics | SRS-INT-006 | ✅ |
+| `dicom_storage_collector` | DES-MON-002 | File system and database stats | SRS-INT-006 | ✅ |
+| `dicom_service_collector` | DES-MON-003 | DIMSE operation counters | SRS-INT-006 | ✅ |
+
+### 4.13 Client Module (pacs_client)
+
+**Purpose:** Client-side orchestration for distributed DICOM operations
+
+**Reference:** [SDS_CLIENT.md](SDS_CLIENT.md)
+
+**Key Components:**
+
+| Component | Design ID | Description | Traces to | Status |
+|-----------|-----------|-------------|-----------|--------|
+| `job_manager` | DES-CLI-001 | Async job queue with priority and workers | FR-10.1 | ✅ |
+| `routing_manager` | DES-CLI-002 | Rule-based auto-forwarding | FR-10.2 | ✅ |
+| `sync_manager` | DES-CLI-003 | Bidirectional sync with conflict resolution | FR-10.3 | ✅ |
+| `prefetch_manager` | DES-CLI-004 | Proactive data loading (worklist, priors) | FR-10.5 | ✅ |
+| `remote_node_manager` | DES-CLI-005 | Connection pooling and health monitoring | FR-10.4 | ✅ |
+
+---
+
+## 5. Design Constraints
+
+### 5.1 Technical Constraints
+
+| Constraint | Description | Impact |
+|------------|-------------|--------|
+| C++20 Required | Use of concepts, ranges, coroutines | Minimum compiler versions |
+| No External DICOM | DCMTK, GDCM prohibited | Full internal implementation |
+| Ecosystem Versions | Specific ecosystem library versions | Dependency management |
+| DICOM Conformance | PS3.x compliance mandatory | Implementation complexity |
+
+### 5.2 Resource Constraints
+
+| Resource | Constraint | Design Decision |
+|----------|------------|-----------------|
+| Memory | Large images (up to 2GB) | Streaming processing, memory mapping |
+| Threads | Limited thread count | Thread pool with configurable size |
+| Storage | Potentially millions of files | Hierarchical directory structure |
+| Network | Multiple concurrent associations | Async I/O, connection pooling |
+
+### 5.3 Interface Constraints
+
+| Interface | Constraint | Source |
+|-----------|------------|--------|
+| DICOM Port | Default 11112, configurable | DICOM standard |
+| PDU Size | Max 131072 bytes default | PS3.8 |
+| AE Title | Max 16 characters | PS3.5 |
+| UID | Max 64 characters | PS3.5 |
+
+---
+
+## 6. Design Decisions
+
+### 6.1 Key Design Decisions
+
+| Decision ID | Decision | Rationale | Alternatives Considered |
+|-------------|----------|-----------|------------------------|
+| DD-001 | Use `std::map` for dataset elements | Tag ordering required by DICOM | `std::unordered_map` (faster but unordered) |
+| DD-002 | SQLite for index database | Embedded, ACID, zero-config | PostgreSQL (overkill), custom (risky) |
+| DD-003 | Hierarchical file storage | Natural DICOM hierarchy | Flat (UID naming collision risk) |
+| DD-004 | Result<T> for error handling | Ecosystem consistency | Exceptions (performance overhead) |
+| DD-005 | Async I/O via ASIO | Proven scalability | select/poll (less portable) |
+| DD-006 | Thread pool for DIMSE | Decouple I/O from processing | Per-association threads (resource heavy) |
+| DD-007 | Combined `uint32_t` for DicomTag | Single comparison, optimal hashing | Two `uint16_t` fields (extra comparison) |
+| DD-008 | Raw buffer (`vector<uint8_t>`) for DicomElement | Direct wire-format, zero-copy encoding | `std::variant` (type conversion overhead) |
+
+### 6.2 Technology Choices
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| C++ | 20 | Implementation language |
+| GCC | 13+ | Linux compiler (std::format required) |
+| Clang/Apple Clang | 15+ | macOS compiler |
+| MSVC | 2022+ (v17.x) | Windows compiler |
+| CMake | 3.20+ | Build system |
+| SQLite | 3.36+ | Index database |
+| ASIO | (via network_system) | Async networking |
+| database_system | (optional) | SQL injection protection via query builder |
+| Google Test | 1.11+ | Unit testing |
+| Google Benchmark | 1.6+ | Performance testing |
+
+---
+
+## 7. Quality Attributes
+
+### 7.1 Performance Targets
+
+| Metric | Target | Design Solution | Traces to |
+|--------|--------|-----------------|-----------|
+| C-STORE throughput | ≥50 images/sec | Async I/O, thread pool | NFR-1.1 |
+| C-FIND latency | <100ms (1000 studies) | Indexed queries | NFR-1.2 |
+| Concurrent associations | ≥100 | Async multiplexing | NFR-1.3 |
+| Memory per association | <10MB | Streaming, pooling | NFR-1.4 |
+
+### 7.2 Reliability Targets
+
+| Metric | Target | Design Solution | Traces to |
+|--------|--------|-----------------|-----------|
+| Uptime | 99.9% | Graceful degradation | NFR-2.1 |
+| Data integrity | Zero loss | Atomic transactions | NFR-2.2 |
+| Error recovery | Automatic | Retry mechanisms | NFR-2.3 |
+| Connection recovery | Automatic | Association re-establishment | NFR-2.4 |
+| Transaction safety | ACID | Atomic file write (temp + rename) | NFR-2.5 |
+
+### 7.3 Scalability Targets
+
+| Metric | Target | Design Solution | Traces to |
+|--------|--------|-----------------|-----------|
+| Horizontal scaling | Supported | Multiple instances | NFR-3.1 |
+| Image capacity | ≥1M studies | Hierarchical storage | NFR-3.2 |
+| Throughput scaling | ≥80% efficiency | Thread pool scaling | NFR-3.3 |
+| Queue capacity | ≥10K jobs | Async job queue | NFR-3.4 |
+
+### 7.4 Security Targets
+
+| Metric | Target | Design Solution | Traces to |
+|--------|--------|-----------------|-----------|
+| Transport | TLS 1.2/1.3 | network_system TLS | NFR-4.1 |
+| Access control | AE whitelist | Configuration-based | NFR-4.2 |
+| Audit logging | Complete | logger_system | NFR-4.3 |
+| Input validation | 100% | PDU/DIMSE validation layer | NFR-4.4 |
+| Memory safety | Zero leaks | RAII, AddressSanitizer CI | NFR-4.5 |
+
+### 7.5 Maintainability Targets
+
+| Metric | Target | Design Solution | Traces to |
+|--------|--------|-----------------|-----------|
+| Test coverage | ≥80% | Comprehensive test suite | NFR-5.1 |
+| Documentation | Complete | Doxygen + guides | NFR-5.2 |
+| Static analysis | Clean | clang-tidy integration | NFR-5.3 |
+| Thread safety | Verified | shared_mutex, ThreadSanitizer CI | NFR-5.4 |
+| Modular design | Low coupling | Interface-driven DI (pacs_di) | NFR-5.5 |
+
+---
+
+## References
+
+1. DICOM Standard PS3.1-PS3.20
+2. [PRD - Product Requirements Document](PRD.md)
+3. [SRS - Software Requirements Specification](SRS.md)
+4. [ARCHITECTURE - Architecture Documentation](ARCHITECTURE.md)
+5. [API_REFERENCE - API Reference](API_REFERENCE.md)
+6. kcenon Ecosystem Documentation
+
+---
+
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0.0 | 2025-11-30 | kcenon | Initial release |
+| 1.1.0 | 2025-12-04 | kcenon | Updated component status, added transfer syntax details |
+| 1.2.0 | 2025-12-07 | kcenon | Added: DES-SVC-008~010 (DIMSE-N, Ultrasound, XA), DES-INT-003a (accept_worker), DES-NET-006~007 (Network V2); Updated thread_adapter design for thread_system migration |
+| 1.3.0 | 2026-01-02 | kcenon | Updated accept_worker: Implemented TCP socket bind/listen/accept replacing placeholder implementation |
+| 1.4.0 | 2026-01-04 | kcenon | Added: Cache Module (DES-CACHE-001~006), AI Module (DES-AI-001~002), DI Module (DES-DI-001~004), Monitoring Module (DES-MON-001~003); Added module IDs: CACHE, AI, DI, MON |
+| 2.0.0 | 2026-02-08 | kcenon | Added: Client Module (DES-CLI-001~005) with SDS_CLIENT.md; Added CLI module ID; Updated SDS_WEB_API.md with 10 new endpoints (DES-WEB-013~022); Updated SDS_TRACEABILITY.md with 28 new DES entries; Added 11 storage repositories (DES-STOR-010~020); Added DB monitoring (DES-MON-007) |
+| 2.1.0 | 2026-02-09 | raphaelshin | Added: Compiler versions and database_system to technology stack for Issue #674. |
+| 2.1.1 | 2026-02-12 | raphaelshin | Fixed: SRS version cross-reference 0.1.3.0 → 0.1.3.2; Added SRS-INT-011 traceability for Issue #688. |
+| 2.2.0 | 2026-02-12 | raphaelshin | Normalized SDS family versioning to 3-digit semver; Added versioning policy and compatibility matrix for Issue #689. |
+
+---
+
+*Document Version: 0.2.0*
+*Created: 2025-11-30*
+*Updated: 2026-02-12*
+*Author: kcenon@naver.com*

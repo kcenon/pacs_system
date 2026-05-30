@@ -1,0 +1,84 @@
+// BSD 3-Clause License
+// Copyright (c) 2025, 🍀☀🌕🌥 🌊
+// See the LICENSE file in the project root for full license information.
+
+/**
+ * @file pacs-services.cppm
+ * @brief C++20 module partition for DICOM SCP services.
+ *
+ * This module partition exports service-related types:
+ * - scp_service: Abstract SCP base
+ * - storage_scp: C-STORE handler
+ * - query_scp: C-FIND handler
+ * - retrieval_scp: C-MOVE/C-GET handler
+ * - verification_scp: C-ECHO handler
+ * - mpps_scp: MPPS handler
+ * - worklist_scp: Modality Worklist handler
+ *
+ * Part of the kcenon.pacs module.
+ */
+
+module;
+
+// Standard library imports
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
+// PACS services headers
+#include <kcenon/pacs/services/scp_service.h>
+#include <kcenon/pacs/services/storage_scp.h>
+#include <kcenon/pacs/services/query_scp.h>
+#include <kcenon/pacs/services/retrieve_scp.h>
+#include <kcenon/pacs/services/verification_scp.h>
+#include <kcenon/pacs/services/mpps_scp.h>
+#include <kcenon/pacs/services/worklist_scp.h>
+#include <kcenon/pacs/services/storage_scu.h>
+#include <kcenon/pacs/services/query_scu.h>
+#include <kcenon/pacs/services/sop_class_registry.h>
+#include <kcenon/pacs/services/storage_status.h>
+
+export module kcenon.pacs:services;
+
+// ============================================================================
+// Re-export pacs::services namespace
+// ============================================================================
+
+export namespace pacs::services {
+
+// SCP base
+using pacs::services::scp_service;
+
+// SCP implementations
+using pacs::services::storage_scp;
+using pacs::services::storage_scp_config;
+using pacs::services::duplicate_policy;
+using pacs::services::query_scp;
+using pacs::services::retrieval_scp;
+using pacs::services::verification_scp;
+using pacs::services::mpps_scp;
+using pacs::services::worklist_scp;
+
+// SCU implementations
+using pacs::services::storage_scu;
+using pacs::services::query_scu;
+using pacs::services::query_scu_config;
+using pacs::services::query_model;
+using pacs::services::query_result;
+using pacs::services::patient_query_keys;
+using pacs::services::study_query_keys;
+using pacs::services::series_query_keys;
+using pacs::services::instance_query_keys;
+
+// Registry
+using pacs::services::sop_class_registry;
+
+// Status
+using pacs::services::storage_status;
+
+} // namespace pacs::services

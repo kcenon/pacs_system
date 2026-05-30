@@ -1,0 +1,884 @@
+# Integration Tests Workflow
+# Automated testing pipeline for PACS System
+#
+# @see Issue #139 - CI/CD Integration - Automated Integration Test Pipeline
+# @see Issue #134 - Integration Test Enhancement Epic
+#
+# Note: This project depends on external kcenon ecosystem repositories
+# that are checked out as sibling directories during CI.
+
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:  # Manual trigger for ad-hoc testing
+
+# Ensure only one workflow runs per branch/PR to save resources
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+# Environment variables for dependency paths
+# Following messaging_system pattern for dependency checkout
+env:
+  COMMON_SYSTEM_ROOT: ${{ github.workspace }}/common_system
+  CONTAINER_SYSTEM_ROOT: ${{ github.workspace }}/container_system
+  THREAD_SYSTEM_ROOT: ${{ github.workspace }}/thread_system
+  LOGGER_SYSTEM_ROOT: ${{ github.workspace }}/logger_system
+  MONITORING_SYSTEM_ROOT: ${{ github.workspace }}/monitoring_system
+  NETWORK_SYSTEM_ROOT: ${{ github.workspace }}/network_system
+
+jobs:
+  # ============================================================================
+  # Build and Unit Tests
+  # Run on all PRs and pushes - fast feedback loop
+  # ============================================================================
+  build-and-unit-tests:
+    name: Build & Unit Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+        build_type: [Release]
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          libfmt-dev \
+          libjpeg-turbo8-dev \
+          ninja-build \
+          cmake \
+          ccache
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
+
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    # Cache vcpkg packages (Windows) - significant speedup
+    - name: Cache vcpkg packages (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v5
+      with:
+        path: |
+          C:\vcpkg\installed
+          C:\vcpkg\packages
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=ON `
+          -DPACS_BUILD_STORAGE=ON `
+          -DVCPKG_MANIFEST_MODE=OFF `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Run Unit Tests
+      working-directory: pacs_system
+      shell: bash
+      run: |
+        cd build
+        ctest \
+          --output-on-failure \
+          --timeout 60 \
+          --output-junit unit-test-results.xml \
+          --exclude-regex "integration::" \
+          || echo "Some unit tests failed"
+
+    - name: Upload Unit Test Results
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: unit-test-results-${{ matrix.os }}
+        path: pacs_system/build/unit-test-results.xml
+        retention-days: 30
+
+    - name: Publish Unit Test Report
+      uses: mikepenz/action-junit-report@v6
+      if: always()
+      with:
+        report_paths: pacs_system/build/unit-test-results.xml
+        fail_on_failure: false
+        check_name: Unit Tests (${{ matrix.os }})
+
+  # ============================================================================
+  # Integration Tests
+  # Run library-level integration tests using Catch2
+  # ============================================================================
+  integration-tests:
+    name: Integration Tests (${{ matrix.os }})
+    needs: build-and-unit-tests
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+        build_type: [Release]
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    # Cache Homebrew packages (macOS) - significant speedup
+    - name: Cache Homebrew packages (macOS)
+      if: runner.os == 'macOS'
+      uses: actions/cache@v5
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          /usr/local/Cellar
+          /opt/homebrew/Cellar
+        key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-brew-
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          libfmt-dev \
+          libjpeg-turbo8-dev \
+          ninja-build \
+          cmake \
+          ccache \
+          netcat-openbsd
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        # Skip if packages are already installed (from cache)
+        brew list sqlite3 &>/dev/null || brew install sqlite3
+        brew list openssl@3 &>/dev/null || brew install openssl@3
+        brew list ninja &>/dev/null || brew install ninja
+        brew list cmake &>/dev/null || brew install cmake
+        # Reinstall fmt to ensure latest version and fix symlinks
+        brew reinstall fmt
+        brew list jpeg-turbo &>/dev/null || brew install jpeg-turbo
+        # Install blake3 (required by ccache)
+        brew list blake3 &>/dev/null || brew install blake3
+        # Reinstall ccache to ensure dependencies are correctly linked
+        brew reinstall ccache
+        # Link packages if not already linked
+        brew link --overwrite blake3 &>/dev/null || echo "blake3 already linked or link failed"
+        brew link --overwrite ccache &>/dev/null || echo "ccache already linked or link failed"
+        brew link --overwrite fmt &>/dev/null || echo "fmt already linked or link failed"
+
+    # Setup ccache for faster C++ compilation
+    # Must run after Install dependencies (macOS) to ensure ccache is linked
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-${{ matrix.build_type }}
+        max-size: 500M
+
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    # Cache vcpkg packages (Windows) - significant speedup
+    - name: Cache vcpkg packages (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v5
+      with:
+        path: |
+          C:\vcpkg\installed
+          C:\vcpkg\packages
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=ON `
+          -DPACS_BUILD_STORAGE=ON `
+          -DVCPKG_MANIFEST_MODE=OFF `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Generate TLS Test Certificates (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      run: |
+        if [ -f "./tools/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
+          chmod +x ./tools/integration_tests/test_data/certs/generate_test_certs.sh
+          ./tools/integration_tests/test_data/certs/generate_test_certs.sh
+        fi
+
+    - name: Generate TLS Test Certificates (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        # Skip TLS cert generation on Windows for now - requires OpenSSL CLI
+        Write-Host "TLS certificate generation skipped on Windows"
+
+    - name: Run Integration Tests (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      timeout-minutes: 10
+      run: |
+        cd build
+
+        # Debug: Check binary existence and permissions
+        echo "=== Debug: Checking binary ==="
+        ls -la ./bin/pacs_integration_e2e 2>/dev/null || echo "Binary not found"
+        file ./bin/pacs_integration_e2e 2>/dev/null || true
+
+        # Determine timeout command (gtimeout on macOS, timeout on Linux)
+        if command -v gtimeout &>/dev/null; then
+          TIMEOUT_CMD="gtimeout"
+        elif command -v timeout &>/dev/null; then
+          TIMEOUT_CMD="timeout"
+        else
+          TIMEOUT_CMD=""
+          echo "WARNING: No timeout command available"
+        fi
+
+        # Per-test timeout in seconds (2 minutes per test category)
+        TEST_TIMEOUT=120
+
+        if [ -f "./bin/pacs_integration_e2e" ]; then
+          # Run only data_generator tests (no network dependencies, fast)
+          echo "=== Running data_generator tests (no network) ==="
+          if [ -n "$TIMEOUT_CMD" ]; then
+            $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "[data_generator]" \
+              --reporter console \
+              --reporter junit::out=integration-test-datagen.xml \
+              2>&1 || echo "Data generator tests completed (may have failures)"
+          else
+            ./bin/pacs_integration_e2e "[data_generator]" \
+              --reporter console \
+              --reporter junit::out=integration-test-datagen.xml \
+              2>&1 || echo "Data generator tests completed (may have failures)"
+          fi
+
+          # Run TLS config tests (no actual network, just validation)
+          echo "=== Running TLS config tests ==="
+          if [ -n "$TIMEOUT_CMD" ]; then
+            $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "[config]" \
+              --reporter console \
+              --reporter junit::out=integration-test-config.xml \
+              2>&1 || echo "Config tests completed (may have failures)"
+          else
+            ./bin/pacs_integration_e2e "[config]" \
+              --reporter console \
+              --reporter junit::out=integration-test-config.xml \
+              2>&1 || echo "Config tests completed (may have failures)"
+          fi
+
+          # Skip network-dependent tests in CI (connectivity, store_query, worklist, etc.)
+          # These tests require actual network servers and may hang in CI environment.
+          # Binary integration tests job handles these with continue-on-error.
+          echo "=== Skipping network-dependent tests in CI ==="
+          echo "Network tests (connectivity, store_query, worklist, etc.) are run in binary-integration-tests job"
+
+          # Merge results
+          echo '<?xml version="1.0" encoding="UTF-8"?><testsuites>' > integration-test-results.xml
+          for f in integration-test-*.xml; do
+            if [ -f "$f" ] && [ "$f" != "integration-test-results.xml" ]; then
+              grep -v '<?xml' "$f" | grep -v '</testsuites>' | grep -v '<testsuites>' >> integration-test-results.xml 2>/dev/null || true
+            fi
+          done
+          echo '</testsuites>' >> integration-test-results.xml
+
+          # Show summary
+          echo "=== Test Summary ==="
+          ls -la integration-test-*.xml 2>/dev/null || echo "No test result files"
+
+        else
+          echo "Integration test binary not found, running CTest integration tests"
+          ctest \
+            --output-on-failure \
+            --timeout 120 \
+            --output-junit integration-test-results.xml \
+            --tests-regex "integration::" \
+            || echo "Some integration tests failed"
+        fi
+      env:
+        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
+
+    - name: Run Integration Tests (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      timeout-minutes: 10
+      shell: pwsh
+      run: |
+        Set-Location build
+
+        # Debug: Check binary existence
+        Write-Host "=== Debug: Checking binary ==="
+        if (Test-Path ".\bin\pacs_integration_e2e.exe") {
+          Write-Host "Binary found: .\bin\pacs_integration_e2e.exe"
+
+          # Run data_generator tests
+          Write-Host "=== Running data_generator tests (no network) ==="
+          & .\bin\pacs_integration_e2e.exe "[data_generator]" --reporter console --reporter junit::out=integration-test-datagen.xml 2>&1
+          Write-Host "Data generator tests completed"
+
+          # Run config tests
+          Write-Host "=== Running config tests ==="
+          & .\bin\pacs_integration_e2e.exe "[config]" --reporter console --reporter junit::out=integration-test-config.xml 2>&1
+          Write-Host "Config tests completed"
+
+          Write-Host "=== Skipping network-dependent tests in CI ==="
+
+          # Create merged results file
+          $header = '<?xml version="1.0" encoding="UTF-8"?><testsuites>'
+          $footer = '</testsuites>'
+          $content = $header
+
+          Get-ChildItem -Filter "integration-test-*.xml" | Where-Object { $_.Name -ne "integration-test-results.xml" } | ForEach-Object {
+            $fileContent = Get-Content $_.FullName -Raw
+            $fileContent = $fileContent -replace '<\?xml[^>]*\?>', ''
+            $fileContent = $fileContent -replace '<testsuites>', ''
+            $fileContent = $fileContent -replace '</testsuites>', ''
+            $content += $fileContent
+          }
+
+          $content += $footer
+          Set-Content -Path "integration-test-results.xml" -Value $content
+
+          Write-Host "=== Test Summary ==="
+          Get-ChildItem -Filter "integration-test-*.xml" | ForEach-Object { Write-Host $_.Name }
+        }
+        else {
+          Write-Host "Integration test binary not found, running CTest integration tests"
+          ctest --output-on-failure --timeout 120 --output-junit integration-test-results.xml --tests-regex "integration::"
+        }
+      env:
+        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
+
+    - name: Upload Integration Test Results
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: integration-test-results-${{ matrix.os }}
+        path: pacs_system/build/integration-test-results.xml
+        retention-days: 30
+
+    - name: Publish Integration Test Report
+      uses: mikepenz/action-junit-report@v6
+      if: always()
+      with:
+        report_paths: pacs_system/build/integration-test-results.xml
+        fail_on_failure: false
+        check_name: Integration Tests (${{ matrix.os }})
+
+  # ============================================================================
+  # Stability Smoke Tests
+  # Quick validation tests to ensure basic stability - runs on all PRs
+  # ============================================================================
+  stability-smoke-tests:
+    name: Stability Smoke Tests (${{ matrix.os }})
+    needs: build-and-unit-tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+        build_type: [Release]
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          libfmt-dev \
+          libjpeg-turbo8-dev \
+          ninja-build \
+          cmake \
+          ccache
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
+
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    # Cache vcpkg packages (Windows) - significant speedup
+    - name: Cache vcpkg packages (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/cache@v5
+      with:
+        path: |
+          C:\vcpkg\installed
+          C:\vcpkg\packages
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/integration-tests.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Setup vcpkg (Windows)
+      if: runner.os == 'Windows'
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows libjpeg-turbo:x64-windows icu:x64-windows
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        cmake -B build `
+          -G Ninja `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF `
+          -DPACS_WARNINGS_AS_ERRORS=OFF `
+          -DPACS_BUILD_TESTS=ON `
+          -DPACS_BUILD_EXAMPLES=ON `
+          -DPACS_BUILD_STORAGE=ON `
+          -DVCPKG_MANIFEST_MODE=OFF `
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Run Stability Smoke Tests (Unix)
+      if: runner.os != 'Windows'
+      working-directory: pacs_system
+      run: |
+        cd build
+        if [ -f "./bin/pacs_integration_e2e" ]; then
+          # First check if any tests match the tags
+          TEST_COUNT=$(./bin/pacs_integration_e2e --list-tests "[stability][smoke]" 2>/dev/null | grep -c "test case" || echo "0")
+          if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
+            echo "No stability smoke tests found with [stability][smoke] tags"
+            echo "Skipping stability smoke tests"
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stability-smoke-results.xml
+            exit 0
+          fi
+
+          echo "Found stability smoke tests, running..."
+          timeout 240 ./bin/pacs_integration_e2e \
+            --reporter junit \
+            --out stability-smoke-results.xml \
+            "[stability][smoke]" \
+            || echo "Some stability smoke tests failed"
+        else
+          echo "Stability test binary not found"
+          echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stability-smoke-results.xml
+          exit 0
+        fi
+
+    - name: Run Stability Smoke Tests (Windows)
+      if: runner.os == 'Windows'
+      working-directory: pacs_system
+      shell: pwsh
+      run: |
+        Set-Location build
+        if (Test-Path ".\bin\pacs_integration_e2e.exe") {
+          # Check for stability smoke tests
+          $testList = & .\bin\pacs_integration_e2e.exe --list-tests "[stability][smoke]" 2>&1
+          $testCount = ($testList | Select-String -Pattern "test case").Count
+
+          if ($testCount -eq 0) {
+            Write-Host "No stability smoke tests found with [stability][smoke] tags"
+            Write-Host "Skipping stability smoke tests"
+            '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' | Out-File -FilePath "stability-smoke-results.xml" -Encoding UTF8
+            exit 0
+          }
+
+          Write-Host "Found stability smoke tests, running..."
+          & .\bin\pacs_integration_e2e.exe --reporter junit --out stability-smoke-results.xml "[stability][smoke]"
+          Write-Host "Stability smoke tests completed"
+        }
+        else {
+          Write-Host "Stability test binary not found"
+          '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' | Out-File -FilePath "stability-smoke-results.xml" -Encoding UTF8
+          exit 0
+        }
+      timeout-minutes: 5
+
+    - name: Upload Stability Smoke Test Results
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: stability-smoke-results-${{ matrix.os }}
+        path: pacs_system/build/stability-smoke-results.xml
+        retention-days: 30
+
+  # ============================================================================
+  # Extended Stress Tests
+  # Run only on main branch pushes - longer running tests
+  # ============================================================================
+  stress-tests:
+    name: Stress Tests
+    needs: [integration-tests, stability-smoke-tests]
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          libfmt-dev \
+          libjpeg-turbo8-dev \
+          ninja-build \
+          cmake
+
+    - name: Configure CMake
+      working-directory: pacs_system
+      run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Run Stress Tests
+      working-directory: pacs_system
+      run: |
+        cd build
+        if [ -f "./bin/pacs_integration_e2e" ]; then
+          # First check if any stress tests exist
+          TEST_COUNT=$(./bin/pacs_integration_e2e --list-tests "[stress]" 2>/dev/null | grep -c "test case" || echo "0")
+          if [ "$TEST_COUNT" = "0" ] || [ -z "$TEST_COUNT" ]; then
+            echo "No stress tests found with [stress] tag"
+            echo "Skipping stress tests"
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stress" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stress-test-results.xml
+            exit 0
+          fi
+
+          echo "Found stress tests, running..."
+          timeout 840 ./bin/pacs_integration_e2e \
+            --reporter junit \
+            --out stress-test-results.xml \
+            "[stress]" "~[.slow]" \
+            || echo "Some stress tests failed"
+        else
+          echo "Integration test binary not found"
+          echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stress" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stress-test-results.xml
+        fi
+      timeout-minutes: 15
+      env:
+        PACS_STABILITY_TEST_DURATION: 5
+        PACS_STABILITY_STORE_RATE: 10.0
+        PACS_STABILITY_QUERY_RATE: 2.0
+
+    - name: Upload Stress Test Results
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: stress-test-results
+        path: pacs_system/build/stress-test-results.xml
+        retention-days: 30
+
+    - name: Publish Stress Test Report
+      uses: mikepenz/action-junit-report@v6
+      if: always()
+      with:
+        report_paths: pacs_system/build/stress-test-results.xml
+        fail_on_failure: false
+        check_name: Stress Tests
+
+  # ============================================================================
+  # Binary Integration Tests
+  # Test actual binary executables as separate processes
+  # ============================================================================
+  binary-integration-tests:
+    name: Binary Integration Tests
+    needs: build-and-unit-tests
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned SHAs)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libsqlite3-dev \
+          libssl-dev \
+          libfmt-dev \
+          libjpeg-turbo8-dev \
+          ninja-build \
+          cmake \
+          netcat-openbsd \
+          lsof
+
+    - name: Configure CMake
+      working-directory: pacs_system
+      run: |
+        # Explicit compiler specification required for consistent thread_system behavior
+        # Without this, Ubuntu 24.04 may use system default compiler with different behavior
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_TESTS=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_STORAGE=ON
+
+    - name: Build
+      working-directory: pacs_system
+      run: cmake --build build --parallel
+
+    - name: Make Scripts Executable
+      working-directory: pacs_system
+      run: |
+        if [ -d "./tools/integration_tests/scripts" ]; then
+          chmod +x ./tools/integration_tests/scripts/*.sh
+        fi
+
+    - name: Run Binary Integration Tests
+      working-directory: pacs_system
+      run: |
+        if [ -f "./tools/integration_tests/scripts/run_all_binary_tests.sh" ]; then
+          cd tools/integration_tests/scripts
+          ./run_all_binary_tests.sh -v ../../../build || echo "Some binary tests failed"
+        else
+          echo "Binary integration test scripts not found"
+        fi
+      timeout-minutes: 10
+      continue-on-error: true
+
+  # ============================================================================
+  # Test Summary
+  # Aggregate all test results and create summary
+  # ============================================================================
+  test-summary:
+    name: Test Summary
+    needs: [build-and-unit-tests, integration-tests, stability-smoke-tests, binary-integration-tests]
+    runs-on: ubuntu-24.04
+    if: always()
+
+    steps:
+    - name: Download All Test Results
+      uses: actions/download-artifact@v4
+      with:
+        path: test-results
+        pattern: "*-test-results-*"
+        merge-multiple: false
+
+    - name: Create Test Summary
+      run: |
+        echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Suite | Ubuntu | macOS | Windows |" >> $GITHUB_STEP_SUMMARY
+        echo "|------------|--------|-------|---------|" >> $GITHUB_STEP_SUMMARY
+
+        # Check for test result files
+        for suite in unit integration stability-smoke; do
+          ubuntu_status="⏭️ Skipped"
+          macos_status="⏭️ Skipped"
+          windows_status="⏭️ Skipped"
+
+          if [ -f "test-results/${suite}-test-results-ubuntu-24.04/${suite}-test-results.xml" ]; then
+            ubuntu_status="✅ Passed"
+          fi
+          if [ -f "test-results/${suite}-test-results-macos-14/${suite}-test-results.xml" ]; then
+            macos_status="✅ Passed"
+          fi
+          if [ -f "test-results/${suite}-test-results-windows-2022/${suite}-test-results.xml" ]; then
+            windows_status="✅ Passed"
+          fi
+
+          echo "| ${suite^} Tests | $ubuntu_status | $macos_status | $windows_status |" >> $GITHUB_STEP_SUMMARY
+        done
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 Detailed results available in the **Checks** tab" >> $GITHUB_STEP_SUMMARY

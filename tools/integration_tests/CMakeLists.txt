@@ -1,0 +1,162 @@
+# Integration Test Suite
+# End-to-End workflow tests for PACS system
+#
+# @see Issue #111 - Integration Test Suite
+# @see Issue #450 - DCMTK Process Launcher and Test Utilities
+# @see Issue #451 - C-ECHO Bidirectional Interoperability Test with DCMTK
+# @see Issue #452 - C-STORE Bidirectional Interoperability Test with DCMTK
+# @see Issue #453 - C-FIND Interoperability Test with DCMTK
+# @see Issue #454 - C-MOVE Interoperability Test with DCMTK
+
+# Ensure test-results output directory exists for JUnit XML reporters
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/test-results)
+
+add_executable(pacs_integration_e2e
+    main.cpp
+    test_connectivity.cpp
+    test_store_query.cpp
+    test_worklist_mpps.cpp
+    test_stress.cpp
+    test_error_recovery.cpp
+    test_xa_storage.cpp
+    test_multimodal_workflow.cpp
+    test_tls_integration.cpp
+    test_stability.cpp
+    test_data_generator.cpp
+    test_data_generator_test.cpp
+    test_dicom_server_v2_integration.cpp
+    test_dcmtk_tool.cpp
+    test_dcmtk_echo.cpp
+    test_dcmtk_store.cpp
+    test_dcmtk_find.cpp
+    test_dcmtk_move.cpp
+)
+
+target_include_directories(pacs_integration_e2e
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+# Link required PACS libraries
+target_link_libraries(pacs_integration_e2e
+    PRIVATE
+        pacs_core
+        pacs_encoding
+        pacs_network
+        pacs_services
+        pacs_storage
+        pacs_integration
+        Catch2::Catch2WithMain
+        Threads::Threads
+)
+
+# Set C++20 standard
+target_compile_features(pacs_integration_e2e PRIVATE cxx_std_20)
+
+# Register tests with CTest
+# @see Issue #139 - CI/CD Integration
+include(Catch)
+catch_discover_tests(pacs_integration_e2e
+    TEST_PREFIX "integration::"
+    REPORTER junit
+    OUTPUT_DIR ${CMAKE_BINARY_DIR}/test-results
+    OUTPUT_PREFIX integration_
+    OUTPUT_SUFFIX .xml
+    PROPERTIES
+        LABELS "integration"
+        TIMEOUT 300
+)
+
+# Copy test data files
+file(GLOB TEST_DATA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test_data/*")
+if(TEST_DATA_FILES)
+    file(COPY ${TEST_DATA_FILES}
+         DESTINATION ${CMAKE_BINARY_DIR}/bin/test_data)
+endif()
+
+# Test data generator utility
+# @see Issue #136 - Binary Integration Test Scripts
+add_executable(generate_test_data
+    generate_test_data.cpp
+)
+
+target_include_directories(generate_test_data
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(generate_test_data
+    PRIVATE
+        pacs_core
+        pacs_encoding
+        pacs_network
+        pacs_services
+        pacs_storage
+        pacs_integration
+        Threads::Threads
+)
+
+target_compile_features(generate_test_data PRIVATE cxx_std_20)
+
+# Custom target to generate test data
+add_custom_target(generate_binary_test_data
+    COMMAND generate_test_data ${CMAKE_CURRENT_SOURCE_DIR}/test_data
+    DEPENDS generate_test_data
+    COMMENT "Generating DICOM test data files..."
+)
+
+# CLI Round-trip Integrity Tests
+# @see Issue #759 - Add Catch2 round-trip integrity tests for conversion CLIs
+add_executable(pacs_cli_roundtrip
+    test_cli_roundtrip.cpp
+)
+
+target_include_directories(pacs_cli_roundtrip
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(pacs_cli_roundtrip
+    PRIVATE
+        pacs_core
+        pacs_encoding
+        Catch2::Catch2WithMain
+        Threads::Threads
+)
+
+target_compile_features(pacs_cli_roundtrip PRIVATE cxx_std_20)
+
+target_compile_definitions(pacs_cli_roundtrip PRIVATE
+    CLI_BINARY_DIR="$<TARGET_FILE_DIR:dcm_dump>"
+    CLI_TEST_DATA_DIR="${CMAKE_BINARY_DIR}/bin/test_data"
+)
+
+catch_discover_tests(pacs_cli_roundtrip
+    TEST_PREFIX "roundtrip::"
+    PROPERTIES
+        LABELS "cli;roundtrip"
+        TIMEOUT 60
+)
+
+# CLI File Utility Functional Tests
+# @see Issue #758 - Add shell script functional tests for file utility CLIs
+if(UNIX)
+    add_test(
+        NAME "cli_functional::file_utilities"
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/test_cli_tools.sh
+                ${CMAKE_BINARY_DIR}
+    )
+    set_tests_properties("cli_functional::file_utilities" PROPERTIES
+        LABELS "cli;functional"
+        TIMEOUT 120
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()
+
+# Install target (optional)
+install(TARGETS pacs_integration_e2e generate_test_data
+    RUNTIME DESTINATION bin/tests
+)

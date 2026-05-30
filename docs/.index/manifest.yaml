@@ -1,0 +1,158 @@
+# PACS System Document Manifest — read this FIRST, then load only needed sections.
+# PACS is the largest system: medical imaging, DICOM, compliance, SRS/SDS/validation.
+_meta: {schema: "1.0.0", generated: "2026-04-12", docs: 72, project: "pacs_system", tier: 4, domain: "medical"}
+
+# ============================================================================
+# Top-level index
+# ============================================================================
+core:
+  - {id: PAC-DOC-IDX,  file: README.md,      title: "Project README",           keywords: [index, overview, pacs, dicom], lines: 220}
+  - {id: PAC-DOC-INT,  file: index.md,       title: "Docs Internal Index",      keywords: [index, internal, toc], lines: 136}
+  - {id: PAC-DOC-STAT, file: DOCUMENTATION_STATISTICS.md, title: "Documentation Statistics", keywords: [stats, meta], lines: 205}
+  - {id: PAC-GS-001,   file: GETTING_STARTED.md,         title: "Getting Started", keywords: [getting-started, tutorial], lines: 468}
+  - {id: PAC-CHG-001,  file: CHANGELOG.md,               title: "Changelog",       keywords: [changelog], lines: 59}
+  - {id: PAC-CHG-KR,   file: CHANGELOG.kr.md,            title: "변경 이력 (한국어)", keywords: [changelog, korean], lines: 59, mirrors: PAC-CHG-001}
+
+# ============================================================================
+# Requirements (PRD / SRS)
+# ============================================================================
+requirements:
+  - {id: PAC-PRD-001, file: PRD.md,                 title: "Product Requirements Document",    keywords: [prd, product, vision, scope, requirements], lines: 1125}
+  - {id: PAC-PRD-KR,  file: PRD.kr.md,              title: "제품 요구사항 문서 (한국어)",            keywords: [prd, korean], lines: 1118, mirrors: PAC-PRD-001}
+  - {id: PAC-SRS-001, file: SRS.md,                 title: "Software Requirements Spec",        keywords: [srs, requirements, functional, non-functional], lines: 2176}
+  - {id: PAC-SRS-KR,  file: SRS.kr.md,              title: "소프트웨어 요구사항 명세서 (한국어)",       keywords: [srs, korean], lines: 1822, mirrors: PAC-SRS-001}
+
+# ============================================================================
+# Architecture (top-level)
+# ============================================================================
+architecture:
+  - {id: PAC-ARCH-001, file: ARCHITECTURE.md,      title: "Architecture",              keywords: [architecture, layered, services], lines: 1070}
+  - {id: PAC-ARCH-KR,  file: ARCHITECTURE.kr.md,   title: "아키텍처 (한국어)",            keywords: [architecture, korean], lines: 867, mirrors: PAC-ARCH-001}
+  - {id: PAC-PROJ-001, file: PROJECT_STRUCTURE.md, title: "Project Structure",         keywords: [structure, directory], lines: 646}
+  - {id: PAC-PROJ-KR,  file: PROJECT_STRUCTURE.kr.md, title: "프로젝트 구조 (한국어)",     keywords: [structure, korean], lines: 644, mirrors: PAC-PROJ-001}
+  - {id: PAC-PIPE,     file: PIPELINE_DESIGN.md,   title: "Pipeline Design",           keywords: [pipeline, dataflow, design], lines: 566}
+
+# ============================================================================
+# Software Design Specification (SDS) — decomposed into 15 documents
+# ============================================================================
+sds:
+  - {id: PAC-SDS-001,  file: SDS.md,                        title: "SDS — Main",                keywords: [sds, design, main], lines: 733}
+  - {id: PAC-SDS-KR,   file: SDS.kr.md,                     title: "SDS — 메인 (한국어)",         keywords: [sds, korean], lines: 684, mirrors: PAC-SDS-001}
+  - {id: PAC-SDS-COMP, file: SDS_COMPONENTS.md,             title: "SDS — Components",          keywords: [sds, components], lines: 1789}
+  - {id: PAC-SDS-COMP-KR, file: SDS_COMPONENTS.kr.md,       title: "SDS — 컴포넌트 (한국어)",     keywords: [sds, components, korean], lines: 909, mirrors: PAC-SDS-COMP}
+  - {id: PAC-SDS-IF,   file: SDS_INTERFACES.md,             title: "SDS — Interfaces",          keywords: [sds, interfaces, api, contracts], lines: 1875}
+  - {id: PAC-SDS-IF-KR, file: SDS_INTERFACES.kr.md,         title: "SDS — 인터페이스 (한국어)",    keywords: [sds, interfaces, korean], lines: 923, mirrors: PAC-SDS-IF}
+  - {id: PAC-SDS-SEQ,  file: SDS_SEQUENCES.md,              title: "SDS — Sequences",           keywords: [sds, sequences, flows], lines: 701}
+  - {id: PAC-SDS-SEQ-KR, file: SDS_SEQUENCES.kr.md,         title: "SDS — 시퀀스 (한국어)",        keywords: [sds, sequences, korean], lines: 699, mirrors: PAC-SDS-SEQ}
+  - {id: PAC-SDS-WF,   file: SDS_WORKFLOW.md,               title: "SDS — Workflow",            keywords: [sds, workflow, dicom, state-machine], lines: 1606}
+  - {id: PAC-SDS-SEC,  file: SDS_SECURITY.md,               title: "SDS — Security",            keywords: [sds, security, auth, encryption, audit], lines: 1511}
+  - {id: PAC-SDS-TRC,  file: SDS_TRACEABILITY.md,           title: "SDS — Traceability",        keywords: [sds, traceability, srs-mapping], lines: 1613}
+  - {id: PAC-SDS-TRC-KR, file: SDS_TRACEABILITY.kr.md,      title: "SDS — 추적성 (한국어)",        keywords: [sds, traceability, korean], lines: 763, mirrors: PAC-SDS-TRC}
+  - {id: PAC-SDS-DB,   file: SDS_DATABASE.md,               title: "SDS — Database",            keywords: [sds, database, schema], lines: 1007}
+  - {id: PAC-SDS-DB-KR, file: SDS_DATABASE.kr.md,           title: "SDS — 데이터베이스 (한국어)",    keywords: [sds, database, korean], lines: 832, mirrors: PAC-SDS-DB}
+  - {id: PAC-SDS-DI,   file: SDS_DI.md,                     title: "SDS — Dependency Injection", keywords: [sds, di, ioc], lines: 892}
+  - {id: PAC-SDS-AI,   file: SDS_AI.md,                     title: "SDS — AI Integration",      keywords: [sds, ai, ml, integration], lines: 917}
+  - {id: PAC-SDS-CLI,  file: SDS_CLIENT.md,                 title: "SDS — Client",              keywords: [sds, client, viewer], lines: 813}
+  - {id: PAC-SDS-CLD,  file: SDS_CLOUD_STORAGE.md,          title: "SDS — Cloud Storage",       keywords: [sds, cloud, storage, s3], lines: 1020}
+  - {id: PAC-SDS-CMP,  file: SDS_COMPRESSION.md,            title: "SDS — Compression",         keywords: [sds, compression, jpeg2000, rle], lines: 1071}
+  - {id: PAC-SDS-WEB,  file: SDS_WEB_API.md,                title: "SDS — Web API",             keywords: [sds, web, rest, api], lines: 1516}
+  - {id: PAC-SDS-NET,  file: SDS_NETWORK_V2.md,             title: "SDS — Network v2",          keywords: [sds, network, protocol, dimse], lines: 924}
+  - {id: PAC-SDS-MON,  file: SDS_MONITORING_COLLECTORS.md,  title: "SDS — Monitoring Collectors", keywords: [sds, monitoring, collectors, metrics], lines: 1112}
+  - {id: PAC-SDS-CACHE, file: SDS_SERVICES_CACHE.md,        title: "SDS — Services Cache",      keywords: [sds, cache, services], lines: 808}
+
+# ============================================================================
+# API / CLI Reference (decomposed)
+# ============================================================================
+api:
+  - {id: PAC-API-IDX,  file: API_REFERENCE.md,           title: "API Reference (index)",      keywords: [api, index], lines: 34}
+  - {id: PAC-API-KR,   file: API_REFERENCE.kr.md,        title: "API 참조 (한국어, full)",      keywords: [api, korean], lines: 4050}
+  - {id: PAC-API-CORE, file: API_REFERENCE_CORE.md,      title: "API Reference — Core",       keywords: [api, core], lines: 1100}
+  - {id: PAC-API-NET,  file: API_REFERENCE_NETWORK.md,   title: "API Reference — Network",    keywords: [api, network, dicom, dimse], lines: 545}
+  - {id: PAC-API-SEC,  file: API_REFERENCE_SECURITY.md,  title: "API Reference — Security",   keywords: [api, security, auth], lines: 1229}
+  - {id: PAC-API-SVC,  file: API_REFERENCE_SERVICES.md,  title: "API Reference — Services",   keywords: [api, services], lines: 2004}
+  - {id: PAC-API-WEB,  file: API_REFERENCE_WEB.md,       title: "API Reference — Web",        keywords: [api, web, rest], lines: 1228}
+  - {id: PAC-API-QR,   file: API_QUICK_REFERENCE.md,     title: "API Quick Reference",        keywords: [api, cheatsheet], lines: 371}
+  - {id: PAC-CLI-001,  file: CLI_REFERENCE.md,           title: "CLI Reference",              keywords: [cli, commands, tools], lines: 982}
+  - {id: PAC-CLI-KR,   file: CLI_REFERENCE.kr.md,        title: "CLI 참조 (한국어)",            keywords: [cli, korean], lines: 982, mirrors: PAC-CLI-001}
+
+# ============================================================================
+# Features
+# ============================================================================
+features:
+  - {id: PAC-FEAT-001, file: FEATURES.md,                title: "Features",                   keywords: [features, full], lines: 1967}
+  - {id: PAC-FEAT-KR,  file: FEATURES.kr.md,             title: "기능 (한국어)",                keywords: [features, korean], lines: 1521, mirrors: PAC-FEAT-001}
+
+# ============================================================================
+# Medical / Regulatory Compliance
+# ============================================================================
+compliance:
+  - {id: PAC-DICOM,    file: DICOM_CONFORMANCE_STATEMENT.md, title: "DICOM Conformance Statement", keywords: [dicom, conformance, standard, sop-classes], lines: 821}
+  - {id: PAC-IHE,      file: IHE_INTEGRATION_STATEMENT.md,   title: "IHE Integration Statement",   keywords: [ihe, integration, profiles, actors], lines: 248}
+  - {id: PAC-SEC,      file: SECURITY.md,                    title: "Security Statement",          keywords: [security, compliance], lines: 286}
+  - {id: PAC-SOUP,     file: SOUP.md,                        title: "SOUP",                        keywords: [soup, third-party, medical-device], lines: 134}
+
+# ============================================================================
+# Verification / Validation
+# ============================================================================
+verification:
+  - {id: PAC-VAL,      file: VALIDATION_REPORT.md,       title: "Validation Report",          keywords: [validation, report, testing], lines: 1613}
+  - {id: PAC-VAL-KR,   file: VALIDATION_REPORT.kr.md,    title: "유효성 검증 보고서 (한국어)",    keywords: [validation, korean], lines: 1613, mirrors: PAC-VAL}
+  - {id: PAC-VERIF,    file: VERIFICATION_REPORT.md,     title: "Verification Report",        keywords: [verification, report, tests], lines: 643}
+  - {id: PAC-VERIF-KR, file: VERIFICATION_REPORT.kr.md,  title: "검증 보고서 (한국어)",          keywords: [verification, korean], lines: 628, mirrors: PAC-VERIF}
+  - {id: PAC-TRACE,    file: TRACEABILITY.md,            title: "Traceability Matrix",        keywords: [traceability, matrix, srs-tc-mapping], lines: 324}
+
+# ============================================================================
+# Analysis / Migration / Reports
+# ============================================================================
+analysis:
+  - {id: PAC-IMPL,     file: PACS_IMPLEMENTATION_ANALYSIS.md, title: "Implementation Analysis", keywords: [analysis, implementation], lines: 515}
+  - {id: PAC-IMPL-KR,  file: PACS_IMPLEMENTATION_ANALYSIS.kr.md, title: "구현 분석 (한국어)",     keywords: [analysis, korean], lines: 515, mirrors: PAC-IMPL}
+  - {id: PAC-MIG,      file: MIGRATION_COMPLETE.md,      title: "Migration Complete",          keywords: [migration, legacy], lines: 217}
+  - {id: PAC-MIG-KR,   file: MIGRATION_COMPLETE.kr.md,   title: "마이그레이션 완료 (한국어)",     keywords: [migration, korean], lines: 217, mirrors: PAC-MIG}
+  - {id: PAC-THR-MIG,  file: THREAD_POOL_MIGRATION.md,   title: "Thread Pool Migration",        keywords: [thread-pool, migration], lines: 225}
+  - {id: PAC-THR-STAB, file: THREAD_SYSTEM_STABILITY_REPORT.md, title: "Thread System Stability Report", keywords: [thread, stability, report], lines: 658}
+  - {id: PAC-PREF,     file: PREFETCH_QUEUE_ANALYSIS.md, title: "Prefetch Queue Analysis",      keywords: [prefetch, queue, analysis], lines: 119}
+
+# ============================================================================
+# Performance
+# ============================================================================
+performance:
+  - {id: PAC-BENCH,    file: BENCHMARKS.md,              title: "Benchmarks",                 keywords: [benchmarks], lines: 147}
+  - {id: PAC-BENCH-KR, file: BENCHMARKS.kr.md,           title: "벤치마크 (한국어)",            keywords: [benchmarks, korean], lines: 147, mirrors: PAC-BENCH}
+  - {id: PAC-PERF-BASE, file: PERFORMANCE_BASELINE.md,    title: "Performance Baseline",       keywords: [performance, baseline], lines: 237}
+  - {id: PAC-PERF-RES,  file: PERFORMANCE_RESULTS.md,     title: "Performance Results",        keywords: [performance, results], lines: 379}
+
+# ============================================================================
+# Quality
+# ============================================================================
+quality:
+  - {id: PAC-QUAL-001, file: PRODUCTION_QUALITY.md,      title: "Production Quality",         keywords: [quality], lines: 168}
+  - {id: PAC-QUAL-KR,  file: PRODUCTION_QUALITY.kr.md,   title: "프로덕션 품질 (한국어)",        keywords: [quality, korean], lines: 168, mirrors: PAC-QUAL-001}
+
+# ============================================================================
+# Reference
+# ============================================================================
+reference:
+  - {id: PAC-ECO,      file: ECOSYSTEM.md,               title: "Ecosystem",                  keywords: [ecosystem], lines: 31}
+
+# ============================================================================
+# Load patterns — common query strategies
+# ============================================================================
+load_patterns:
+  quick_start:           [PAC-DOC-IDX, PAC-GS-001, PAC-API-QR]
+  requirements_review:   [PAC-PRD-001, PAC-SRS-001]
+  architecture_review:   [PAC-ARCH-001, PAC-PROJ-001, PAC-SDS-001, PAC-SDS-COMP]
+  api_deep:              [PAC-API-CORE, PAC-API-NET, PAC-API-SEC, PAC-API-SVC, PAC-API-WEB]
+  dicom_work:            [PAC-DICOM, PAC-IHE, PAC-API-NET, PAC-SDS-NET, PAC-SDS-WF]
+  security_work:         [PAC-SDS-SEC, PAC-API-SEC, PAC-SEC]
+  database_work:         [PAC-SDS-DB]
+  workflow_work:         [PAC-SDS-WF, PAC-SDS-SEQ]
+  interface_work:        [PAC-SDS-IF, PAC-API-CORE]
+  cloud_work:            [PAC-SDS-CLD, PAC-SDS-CMP]
+  web_api_work:          [PAC-SDS-WEB, PAC-API-WEB]
+  ai_work:               [PAC-SDS-AI]
+  monitoring_work:       [PAC-SDS-MON, PAC-SDS-CACHE]
+  validation_review:     [PAC-VAL, PAC-VERIF, PAC-TRACE, PAC-SDS-TRC]
+  performance_review:    [PAC-PERF-BASE, PAC-PERF-RES, PAC-BENCH]
+  compliance_review:     [PAC-DICOM, PAC-IHE, PAC-SEC, PAC-SOUP]
+  migration_work:        [PAC-MIG, PAC-THR-MIG, PAC-CHG-001]

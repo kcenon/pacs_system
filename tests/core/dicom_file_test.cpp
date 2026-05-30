@@ -1,0 +1,1658 @@
+/**
+ * @file dicom_file_test.cpp
+ * @brief Unit tests for dicom_file class
+ */
+
+#include <catch2/catch_test_macros.hpp>
+
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/core/result.h>
+
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <vector>
+
+using namespace kcenon::pacs::core;
+using namespace kcenon::pacs::encoding;
+
+namespace {
+
+/**
+ * @brief Create a minimal valid DICOM file in memory
+ */
+[[nodiscard]] auto create_minimal_dicom_bytes() -> std::vector<uint8_t> {
+    std::vector<uint8_t> data;
+
+    // 128-byte preamble (zeros)
+    data.resize(128, 0);
+
+    // DICM prefix
+    data.push_back('D');
+    data.push_back('I');
+    data.push_back('C');
+    data.push_back('M');
+
+    // Helper to write uint16 LE
+    auto write_u16 = [&data](uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+
+    // Helper to write uint32 LE
+    auto write_u32 = [&data](uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+
+    // Helper to write string with appropriate padding
+    auto write_string = [&data](std::string_view str, char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        // Pad to even length
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    // === File Meta Information ===
+
+    // (0002,0001) File Meta Information Version - OB, 2 bytes
+    write_u16(0x0002);  // Group
+    write_u16(0x0001);  // Element
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);  // Reserved
+    data.push_back(0x00);
+    write_u32(2);  // Length
+    data.push_back(0x00);
+    data.push_back(0x01);
+
+    // (0002,0002) Media Storage SOP Class UID - UI
+    std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";  // CT Image Storage
+    write_u16(0x0002);
+    write_u16(0x0002);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    // (0002,0003) Media Storage SOP Instance UID - UI
+    std::string_view sop_instance = "1.2.3.4.5.6.7.8.9";
+    write_u16(0x0002);
+    write_u16(0x0003);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // (0002,0010) Transfer Syntax UID - UI
+    std::string_view ts_uid = "1.2.840.10008.1.2.1";  // Explicit VR LE
+    write_u16(0x0002);
+    write_u16(0x0010);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(ts_uid.size() % 2 == 0 ? ts_uid.size() : ts_uid.size() + 1));
+    write_string(ts_uid);
+
+    // (0002,0012) Implementation Class UID - UI
+    std::string_view impl_uid = "1.2.3.4.5";
+    write_u16(0x0002);
+    write_u16(0x0012);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(impl_uid.size() % 2 == 0 ? impl_uid.size() : impl_uid.size() + 1));
+    write_string(impl_uid);
+
+    // === Main Dataset ===
+
+    // (0008,0016) SOP Class UID - UI
+    write_u16(0x0008);
+    write_u16(0x0016);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    // (0008,0018) SOP Instance UID - UI
+    write_u16(0x0008);
+    write_u16(0x0018);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // (0010,0010) Patient Name - PN (space padded)
+    std::string_view patient_name = "DOE^JOHN";
+    write_u16(0x0010);
+    write_u16(0x0010);
+    data.push_back('P');
+    data.push_back('N');
+    write_u16(static_cast<uint16_t>(patient_name.size() % 2 == 0 ? patient_name.size() : patient_name.size() + 1));
+    write_string(patient_name, ' ');
+
+    // (0010,0020) Patient ID - LO (space padded)
+    std::string_view patient_id = "12345";
+    write_u16(0x0010);
+    write_u16(0x0020);
+    data.push_back('L');
+    data.push_back('O');
+    write_u16(static_cast<uint16_t>(patient_id.size() % 2 == 0 ? patient_id.size() : patient_id.size() + 1));
+    write_string(patient_id, ' ');
+
+    return data;
+}
+
+/**
+ * @brief Create test file path in temp directory
+ */
+[[nodiscard]] auto create_temp_file_path(const std::string& name)
+    -> std::filesystem::path {
+    return std::filesystem::temp_directory_path() / name;
+}
+
+}  // namespace
+
+// ============================================================================
+// Reading Tests
+// ============================================================================
+
+TEST_CASE("dicom_file reading from bytes", "[core][dicom_file]") {
+    SECTION("valid DICOM file is parsed correctly") {
+        auto data = create_minimal_dicom_bytes();
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_ok());
+        auto& file = result.value();
+
+        // Check meta information
+        CHECK(file.meta_information().contains(tags::transfer_syntax_uid));
+        CHECK(file.meta_information().contains(tags::media_storage_sop_class_uid));
+
+        // Check main dataset
+        CHECK(file.dataset().get_string(tags::patient_name) == "DOE^JOHN");
+        CHECK(file.dataset().get_string(tags::patient_id) == "12345");
+    }
+
+    SECTION("file too small returns error") {
+        std::vector<uint8_t> data(100, 0);  // Less than 132 bytes
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::invalid_dicom_file);
+    }
+
+    SECTION("missing DICM prefix returns error") {
+        std::vector<uint8_t> data(256, 0);  // Large enough but no DICM
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::missing_dicm_prefix);
+    }
+
+    SECTION("wrong DICM prefix returns error") {
+        auto data = create_minimal_dicom_bytes();
+        // Corrupt the DICM prefix
+        data[128] = 'X';
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::missing_dicm_prefix);
+    }
+}
+
+TEST_CASE("dicom_file reading from file", "[core][dicom_file]") {
+    SECTION("non-existent file returns error") {
+        auto result = dicom_file::open("/nonexistent/path/test.dcm");
+
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::file_not_found);
+    }
+
+    SECTION("valid file is read correctly") {
+        auto data = create_minimal_dicom_bytes();
+        auto temp_path = create_temp_file_path("test_read.dcm");
+
+        // Write test file
+        {
+            std::ofstream file(temp_path, std::ios::binary);
+            file.write(reinterpret_cast<const char*>(data.data()),
+                       static_cast<std::streamsize>(data.size()));
+        }
+
+        auto result = dicom_file::open(temp_path);
+
+        REQUIRE(result.is_ok());
+        CHECK(result.value().dataset().get_string(tags::patient_name) == "DOE^JOHN");
+
+        // Cleanup
+        std::filesystem::remove(temp_path);
+    }
+}
+
+// ============================================================================
+// Creation Tests
+// ============================================================================
+
+TEST_CASE("dicom_file creation", "[core][dicom_file]") {
+    SECTION("create generates correct meta information") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "TEST^PATIENT");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Check meta information was generated
+        CHECK(file.meta_information().contains(tags::file_meta_information_version));
+        CHECK(file.meta_information().contains(tags::media_storage_sop_class_uid));
+        CHECK(file.meta_information().contains(tags::media_storage_sop_instance_uid));
+        CHECK(file.meta_information().contains(tags::transfer_syntax_uid));
+        CHECK(file.meta_information().contains(tags::implementation_class_uid));
+        CHECK(file.meta_information().contains(tags::implementation_version_name));
+
+        // Check values match
+        CHECK(file.meta_information().get_string(tags::media_storage_sop_class_uid) ==
+              "1.2.840.10008.5.1.4.1.1.2");
+        CHECK(file.meta_information().get_string(tags::transfer_syntax_uid) ==
+              "1.2.840.10008.1.2.1");
+    }
+
+    SECTION("create preserves dataset") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+        ds.set_string(tags::patient_id, vr_type::LO, "12345");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        CHECK(file.dataset().get_string(tags::patient_name) == "DOE^JOHN");
+        CHECK(file.dataset().get_string(tags::patient_id) == "12345");
+    }
+}
+
+// ============================================================================
+// Writing Tests
+// ============================================================================
+
+TEST_CASE("dicom_file writing", "[core][dicom_file]") {
+    SECTION("to_bytes produces valid output") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        auto bytes = file.to_bytes();
+
+        // Check minimum size
+        CHECK(bytes.size() >= 132);  // Preamble + DICM
+
+        // Check preamble is zeros
+        for (size_t i = 0; i < 128; ++i) {
+            CHECK(bytes[i] == 0);
+        }
+
+        // Check DICM prefix
+        CHECK(bytes[128] == 'D');
+        CHECK(bytes[129] == 'I');
+        CHECK(bytes[130] == 'C');
+        CHECK(bytes[131] == 'M');
+    }
+
+    SECTION("save creates valid file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "SMITH^JANE");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_write.dcm");
+        auto save_result = file.save(temp_path);
+
+        REQUIRE(save_result.is_ok());
+        CHECK(std::filesystem::exists(temp_path));
+
+        // Cleanup
+        std::filesystem::remove(temp_path);
+    }
+}
+
+// ============================================================================
+// Round-trip Tests
+// ============================================================================
+
+TEST_CASE("dicom_file round-trip", "[core][dicom_file]") {
+    SECTION("create -> to_bytes -> from_bytes preserves data") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+        ds.set_string(tags::patient_id, vr_type::LO, "12345");
+        ds.set_string(tags::study_instance_uid, vr_type::UI, "2.3.4.5.6");
+        ds.set_string(tags::series_instance_uid, vr_type::UI, "3.4.5.6.7");
+
+        auto original = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to bytes and back
+        auto bytes = original.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        // Compare datasets
+        CHECK(restored.dataset().get_string(tags::patient_name) ==
+              original.dataset().get_string(tags::patient_name));
+        CHECK(restored.dataset().get_string(tags::patient_id) ==
+              original.dataset().get_string(tags::patient_id));
+        CHECK(restored.sop_class_uid() == original.sop_class_uid());
+        CHECK(restored.sop_instance_uid() == original.sop_instance_uid());
+    }
+
+    SECTION("save -> open preserves data") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "ROUNDTRIP^TEST");
+        ds.set_string(tags::modality, vr_type::CS, "CT");
+
+        auto original = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_roundtrip.dcm");
+
+        // Save
+        auto save_result = original.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        // Open
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        // Compare
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "ROUNDTRIP^TEST");
+        CHECK(loaded.dataset().get_string(tags::modality) == "CT");
+        CHECK(loaded.transfer_syntax() == transfer_syntax::explicit_vr_little_endian);
+
+        // Cleanup
+        std::filesystem::remove(temp_path);
+    }
+}
+
+// ============================================================================
+// Accessor Tests
+// ============================================================================
+
+TEST_CASE("dicom_file accessors", "[core][dicom_file]") {
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "9.8.7.6.5");
+    ds.set_string(tags::patient_name, vr_type::PN, "TEST^PATIENT");
+
+    auto file = dicom_file::create(
+        std::move(ds),
+        transfer_syntax::explicit_vr_little_endian
+    );
+
+    SECTION("sop_class_uid returns correct value") {
+        CHECK(file.sop_class_uid() == "1.2.840.10008.5.1.4.1.1.2");
+    }
+
+    SECTION("sop_instance_uid returns correct value") {
+        CHECK(file.sop_instance_uid() == "9.8.7.6.5");
+    }
+
+    SECTION("transfer_syntax returns correct value") {
+        auto ts = file.transfer_syntax();
+        CHECK(ts.uid() == "1.2.840.10008.1.2.1");
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());
+    }
+
+    SECTION("meta_information is accessible") {
+        CHECK(file.meta_information().size() >= 5);  // At least 5 required elements
+    }
+
+    SECTION("dataset is accessible and modifiable") {
+        file.dataset().set_string(tags::patient_age, vr_type::AS, "050Y");
+        CHECK(file.dataset().get_string(tags::patient_age) == "050Y");
+    }
+}
+
+// ============================================================================
+// Error Code Tests
+// ============================================================================
+
+TEST_CASE("error codes are used correctly", "[core][dicom_file]") {
+    SECTION("file_not_found error code") {
+        auto result = dicom_file::open("/nonexistent/path/test.dcm");
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::file_not_found);
+        CHECK_FALSE(result.error().message.empty());
+    }
+
+    SECTION("invalid_dicom_file error code") {
+        std::vector<uint8_t> data(100, 0);
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::invalid_dicom_file);
+    }
+
+    SECTION("missing_dicm_prefix error code") {
+        std::vector<uint8_t> data(256, 0);
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::missing_dicm_prefix);
+    }
+}
+
+// ============================================================================
+// Construction Tests
+// ============================================================================
+
+TEST_CASE("dicom_file construction", "[core][dicom_file]") {
+    SECTION("default construction creates empty file") {
+        dicom_file file;
+
+        CHECK(file.meta_information().empty());
+        CHECK(file.dataset().empty());
+    }
+
+    SECTION("copy construction") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.3");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "4.5.6");
+        ds.set_string(tags::patient_name, vr_type::PN, "COPY^TEST");
+
+        auto original = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        dicom_file copy{original};
+
+        CHECK(copy.dataset().get_string(tags::patient_name) == "COPY^TEST");
+        CHECK(original.dataset().get_string(tags::patient_name) == "COPY^TEST");
+    }
+
+    SECTION("move construction") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.3");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "4.5.6");
+        ds.set_string(tags::patient_name, vr_type::PN, "MOVE^TEST");
+
+        auto original = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        dicom_file moved{std::move(original)};
+
+        CHECK(moved.dataset().get_string(tags::patient_name) == "MOVE^TEST");
+    }
+}
+
+// ============================================================================
+// Transfer Syntax Conversion Tests (Issue #280)
+// ============================================================================
+
+TEST_CASE("dicom_file transfer syntax conversion", "[core][dicom_file][conversion]") {
+    SECTION("convert from Explicit VR LE to Implicit VR LE") {
+        // Create original file with Explicit VR LE
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "CONVERT^TEST");
+        ds.set_string(tags::patient_id, vr_type::LO, "CONV123");
+        ds.set_string(tags::modality, vr_type::CS, "CT");
+
+        auto original = dicom_file::create(
+            ds,  // copy, not move
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to Implicit VR LE
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Verify transfer syntax changed
+        CHECK(converted.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(converted.meta_information().get_string(tags::transfer_syntax_uid) ==
+              "1.2.840.10008.1.2");
+
+        // Verify data preserved
+        CHECK(converted.dataset().get_string(tags::patient_name) == "CONVERT^TEST");
+        CHECK(converted.dataset().get_string(tags::patient_id) == "CONV123");
+        CHECK(converted.dataset().get_string(tags::modality) == "CT");
+    }
+
+    SECTION("convert from Implicit VR LE to Explicit VR LE") {
+        // Create original file with Implicit VR LE
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "9.8.7.6.5.4.3.2.1");
+        ds.set_string(tags::patient_name, vr_type::PN, "IMPLICIT^TO^EXPLICIT");
+        ds.set_string(tags::study_description, vr_type::LO, "Test Study");
+
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Convert to Explicit VR LE
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Verify transfer syntax changed
+        CHECK(converted.transfer_syntax() == transfer_syntax::explicit_vr_little_endian);
+
+        // Verify data preserved
+        CHECK(converted.dataset().get_string(tags::patient_name) == "IMPLICIT^TO^EXPLICIT");
+        CHECK(converted.dataset().get_string(tags::study_description) == "Test Study");
+    }
+
+    SECTION("round-trip conversion preserves all data") {
+        // Create original with Explicit VR LE
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.1.1.1.1");
+        ds.set_string(tags::patient_name, vr_type::PN, "ROUNDTRIP^CONVERSION");
+        ds.set_string(tags::patient_id, vr_type::LO, "RT001");
+        ds.set_string(tags::study_instance_uid, vr_type::UI, "2.2.2.2.2");
+        ds.set_string(tags::series_instance_uid, vr_type::UI, "3.3.3.3.3");
+        ds.set_string(tags::modality, vr_type::CS, "MR");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 512);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 512);
+
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to Implicit VR LE
+        auto implicit_file = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Convert back to Explicit VR LE
+        auto back_to_explicit = dicom_file::create(
+            implicit_file.dataset(),
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Verify all data preserved after round-trip
+        CHECK(back_to_explicit.dataset().get_string(tags::patient_name) ==
+              original.dataset().get_string(tags::patient_name));
+        CHECK(back_to_explicit.dataset().get_string(tags::patient_id) ==
+              original.dataset().get_string(tags::patient_id));
+        CHECK(back_to_explicit.dataset().get_string(tags::modality) ==
+              original.dataset().get_string(tags::modality));
+
+        auto orig_rows = original.dataset().get_numeric<uint16_t>(tags::rows);
+        auto conv_rows = back_to_explicit.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(orig_rows.has_value());
+        REQUIRE(conv_rows.has_value());
+        CHECK(*conv_rows == *orig_rows);
+    }
+
+    SECTION("save and reload with different transfer syntax") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "5.5.5.5.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "FILE^CONVERSION");
+
+        // Create with Explicit VR LE
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert and save as Implicit VR LE
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_ts_conversion.dcm");
+        auto save_result = converted.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        // Reload and verify
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        CHECK(loaded.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "FILE^CONVERSION");
+
+        // Cleanup
+        std::filesystem::remove(temp_path);
+    }
+
+    SECTION("convert to Explicit VR Big Endian") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "6.6.6.6.6");
+        ds.set_string(tags::patient_name, vr_type::PN, "BIGENDIAN^TEST");
+
+        auto original = dicom_file::create(
+            ds,
+            transfer_syntax::explicit_vr_little_endian
+        );
+
+        // Convert to Explicit VR Big Endian
+        auto converted = dicom_file::create(
+            original.dataset(),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        CHECK(converted.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+        CHECK(converted.dataset().get_string(tags::patient_name) == "BIGENDIAN^TEST");
+    }
+}
+
+// ============================================================================
+// Implicit VR Little Endian Tests (Issue #460)
+// ============================================================================
+
+TEST_CASE("dicom_file Implicit VR LE round-trip", "[core][dicom_file][implicit_vr]") {
+    SECTION("create and reload Implicit VR LE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+        ds.set_string(tags::patient_name, vr_type::PN, "IMPLICIT^VR^LE^TEST");
+        ds.set_string(tags::patient_id, vr_type::LO, "IMPL001");
+        ds.set_string(tags::modality, vr_type::CS, "CT");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 256);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 256);
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        // Verify transfer syntax
+        CHECK(file.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+
+        // Convert to bytes and back
+        auto bytes = file.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        // Verify data preserved
+        CHECK(restored.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(restored.dataset().get_string(tags::patient_name) == "IMPLICIT^VR^LE^TEST");
+        CHECK(restored.dataset().get_string(tags::patient_id) == "IMPL001");
+        CHECK(restored.dataset().get_string(tags::modality) == "CT");
+
+        auto rows = restored.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 256);
+    }
+
+    SECTION("save and open Implicit VR LE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "9.8.7.6.5.4.3.2.1");
+        ds.set_string(tags::patient_name, vr_type::PN, "IMPLICIT^FILE^TEST");
+        ds.set_string(tags::study_description, vr_type::LO, "Test Study Implicit VR");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::implicit_vr_little_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_implicit_vr_le.dcm");
+        auto save_result = file.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        CHECK(loaded.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "IMPLICIT^FILE^TEST");
+        CHECK(loaded.dataset().get_string(tags::study_description) == "Test Study Implicit VR");
+
+        std::filesystem::remove(temp_path);
+    }
+}
+
+// ============================================================================
+// Explicit VR Big Endian Tests (Issue #460)
+// ============================================================================
+
+TEST_CASE("dicom_file Explicit VR BE round-trip", "[core][dicom_file][big_endian]") {
+    SECTION("create and reload Explicit VR BE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "2.2.2.2.2.2.2.2.2");
+        ds.set_string(tags::patient_name, vr_type::PN, "BIGENDIAN^VR^TEST");
+        ds.set_string(tags::patient_id, vr_type::LO, "BE001");
+        ds.set_string(tags::modality, vr_type::CS, "MR");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 512);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 512);
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        // Verify transfer syntax
+        CHECK(file.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+
+        // Convert to bytes and back
+        auto bytes = file.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        // Verify data preserved
+        CHECK(restored.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+        CHECK(restored.dataset().get_string(tags::patient_name) == "BIGENDIAN^VR^TEST");
+        CHECK(restored.dataset().get_string(tags::patient_id) == "BE001");
+        CHECK(restored.dataset().get_string(tags::modality) == "MR");
+
+        auto rows = restored.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 512);
+    }
+
+    SECTION("save and open Explicit VR BE file") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "3.3.3.3.3.3.3.3.3");
+        ds.set_string(tags::patient_name, vr_type::PN, "BIGENDIAN^FILE^TEST");
+        ds.set_string(tags::study_description, vr_type::LO, "Test Study Big Endian");
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        auto temp_path = create_temp_file_path("test_explicit_vr_be.dcm");
+        auto save_result = file.save(temp_path);
+        REQUIRE(save_result.is_ok());
+
+        auto loaded_result = dicom_file::open(temp_path);
+        REQUIRE(loaded_result.is_ok());
+        auto& loaded = loaded_result.value();
+
+        CHECK(loaded.transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+        CHECK(loaded.dataset().get_string(tags::patient_name) == "BIGENDIAN^FILE^TEST");
+        CHECK(loaded.dataset().get_string(tags::study_description) == "Test Study Big Endian");
+
+        std::filesystem::remove(temp_path);
+    }
+
+    SECTION("numeric values preserved correctly in Big Endian") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "4.4.4.4.4");
+        ds.set_string(tags::patient_name, vr_type::PN, "NUMERIC^TEST");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 1024);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 768);
+        ds.set_numeric<uint16_t>(tags::bits_allocated, vr_type::US, 16);
+        ds.set_numeric<uint16_t>(tags::bits_stored, vr_type::US, 12);
+        ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US, 11);
+
+        auto file = dicom_file::create(
+            std::move(ds),
+            transfer_syntax::explicit_vr_big_endian
+        );
+
+        auto bytes = file.to_bytes();
+        auto restored_result = dicom_file::from_bytes(bytes);
+        REQUIRE(restored_result.is_ok());
+        auto& restored = restored_result.value();
+
+        auto rows = restored.dataset().get_numeric<uint16_t>(tags::rows);
+        auto cols = restored.dataset().get_numeric<uint16_t>(tags::columns);
+        auto bits_alloc = restored.dataset().get_numeric<uint16_t>(tags::bits_allocated);
+        auto bits_stored = restored.dataset().get_numeric<uint16_t>(tags::bits_stored);
+        auto high_bit = restored.dataset().get_numeric<uint16_t>(tags::high_bit);
+
+        REQUIRE(rows.has_value());
+        REQUIRE(cols.has_value());
+        REQUIRE(bits_alloc.has_value());
+        REQUIRE(bits_stored.has_value());
+        REQUIRE(high_bit.has_value());
+
+        CHECK(*rows == 1024);
+        CHECK(*cols == 768);
+        CHECK(*bits_alloc == 16);
+        CHECK(*bits_stored == 12);
+        CHECK(*high_bit == 11);
+    }
+}
+
+// ============================================================================
+// Transfer Syntax Interoperability Tests (Issue #460)
+// ============================================================================
+
+TEST_CASE("dicom_file cross-transfer-syntax conversion", "[core][dicom_file][interop]") {
+    SECTION("Explicit VR LE -> Implicit VR LE -> Explicit VR LE") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "5.5.5.5.5");
+        ds.set_string(tags::patient_name, vr_type::PN, "CROSS^CONVERSION^TEST");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 256);
+
+        // Start with Explicit VR LE
+        auto explicit_le = dicom_file::create(ds, transfer_syntax::explicit_vr_little_endian);
+        auto explicit_le_bytes = explicit_le.to_bytes();
+
+        // Convert to Implicit VR LE
+        auto implicit_le = dicom_file::create(
+            explicit_le.dataset(), transfer_syntax::implicit_vr_little_endian);
+        auto implicit_le_bytes = implicit_le.to_bytes();
+
+        // Load Implicit VR LE
+        auto loaded_implicit = dicom_file::from_bytes(implicit_le_bytes);
+        REQUIRE(loaded_implicit.is_ok());
+
+        // Convert back to Explicit VR LE
+        auto back_to_explicit = dicom_file::create(
+            loaded_implicit.value().dataset(), transfer_syntax::explicit_vr_little_endian);
+        auto final_bytes = back_to_explicit.to_bytes();
+
+        // Load final version
+        auto final_result = dicom_file::from_bytes(final_bytes);
+        REQUIRE(final_result.is_ok());
+
+        CHECK(final_result.value().dataset().get_string(tags::patient_name) ==
+              "CROSS^CONVERSION^TEST");
+        auto rows = final_result.value().dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 256);
+    }
+
+    SECTION("Explicit VR LE -> Explicit VR BE -> Explicit VR LE") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "6.6.6.6.6");
+        ds.set_string(tags::patient_name, vr_type::PN, "ENDIAN^SWAP^TEST");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 128);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 128);
+
+        // Start with Explicit VR LE
+        auto explicit_le = dicom_file::create(ds, transfer_syntax::explicit_vr_little_endian);
+
+        // Convert to Explicit VR BE
+        auto explicit_be = dicom_file::create(
+            explicit_le.dataset(), transfer_syntax::explicit_vr_big_endian);
+        auto be_bytes = explicit_be.to_bytes();
+
+        // Load BE version
+        auto loaded_be = dicom_file::from_bytes(be_bytes);
+        REQUIRE(loaded_be.is_ok());
+        CHECK(loaded_be.value().transfer_syntax() == transfer_syntax::explicit_vr_big_endian);
+
+        // Convert back to LE
+        auto back_to_le = dicom_file::create(
+            loaded_be.value().dataset(), transfer_syntax::explicit_vr_little_endian);
+        auto final_bytes = back_to_le.to_bytes();
+
+        auto final_result = dicom_file::from_bytes(final_bytes);
+        REQUIRE(final_result.is_ok());
+
+        CHECK(final_result.value().dataset().get_string(tags::patient_name) == "ENDIAN^SWAP^TEST");
+        auto rows = final_result.value().dataset().get_numeric<uint16_t>(tags::rows);
+        auto cols = final_result.value().dataset().get_numeric<uint16_t>(tags::columns);
+        REQUIRE(rows.has_value());
+        REQUIRE(cols.has_value());
+        CHECK(*rows == 128);
+        CHECK(*cols == 128);
+    }
+}
+
+// ============================================================================
+// Undefined Length Sequence Tests (Issue #461)
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Create DICOM bytes with an undefined length sequence
+ */
+[[nodiscard]] auto create_dicom_with_undefined_length_sequence() -> std::vector<uint8_t> {
+    std::vector<uint8_t> data;
+
+    // 128-byte preamble (zeros)
+    data.resize(128, 0);
+
+    // DICM prefix
+    data.push_back('D');
+    data.push_back('I');
+    data.push_back('C');
+    data.push_back('M');
+
+    auto write_u16 = [&data](uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+
+    auto write_u32 = [&data](uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+
+    auto write_string = [&data](std::string_view str, char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    // === File Meta Information ===
+
+    // (0002,0001) File Meta Information Version
+    write_u16(0x0002);
+    write_u16(0x0001);
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);
+    data.push_back(0x00);
+    write_u32(2);
+    data.push_back(0x00);
+    data.push_back(0x01);
+
+    // (0002,0002) Media Storage SOP Class UID
+    std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+    write_u16(0x0002);
+    write_u16(0x0002);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    // (0002,0003) Media Storage SOP Instance UID
+    std::string_view sop_instance = "1.2.3.4.5.6.7.8.9";
+    write_u16(0x0002);
+    write_u16(0x0003);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // (0002,0010) Transfer Syntax UID
+    std::string_view ts_uid = "1.2.840.10008.1.2.1";
+    write_u16(0x0002);
+    write_u16(0x0010);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(ts_uid.size() % 2 == 0 ? ts_uid.size() : ts_uid.size() + 1));
+    write_string(ts_uid);
+
+    // (0002,0012) Implementation Class UID
+    std::string_view impl_uid = "1.2.3.4.5";
+    write_u16(0x0002);
+    write_u16(0x0012);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(impl_uid.size() % 2 == 0 ? impl_uid.size() : impl_uid.size() + 1));
+    write_string(impl_uid);
+
+    // === Main Dataset ===
+
+    // (0008,0016) SOP Class UID
+    write_u16(0x0008);
+    write_u16(0x0016);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    // (0008,0018) SOP Instance UID
+    write_u16(0x0008);
+    write_u16(0x0018);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // (0010,0010) Patient Name
+    std::string_view patient_name = "SEQ^TEST";
+    write_u16(0x0010);
+    write_u16(0x0010);
+    data.push_back('P');
+    data.push_back('N');
+    write_u16(static_cast<uint16_t>(patient_name.size() % 2 == 0 ? patient_name.size() : patient_name.size() + 1));
+    write_string(patient_name, ' ');
+
+    // (0008,1115) Referenced Series Sequence - SQ with undefined length
+    write_u16(0x0008);
+    write_u16(0x1115);
+    data.push_back('S');
+    data.push_back('Q');
+    data.push_back(0x00);  // Reserved
+    data.push_back(0x00);
+    write_u32(0xFFFFFFFF);  // Undefined length
+
+    // Item 1 (FFFE,E000)
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    // Item with defined length
+    size_t item_start = data.size();
+    write_u32(0);  // Placeholder for length
+
+    // (0020,000E) Series Instance UID within item
+    std::string_view series_uid = "1.2.3.4.5.6.7";
+    write_u16(0x0020);
+    write_u16(0x000E);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(series_uid.size() % 2 == 0 ? series_uid.size() : series_uid.size() + 1));
+    write_string(series_uid);
+
+    // Update item length
+    uint32_t item_length = static_cast<uint32_t>(data.size() - item_start - 4);
+    data[item_start] = static_cast<uint8_t>(item_length & 0xFF);
+    data[item_start + 1] = static_cast<uint8_t>((item_length >> 8) & 0xFF);
+    data[item_start + 2] = static_cast<uint8_t>((item_length >> 16) & 0xFF);
+    data[item_start + 3] = static_cast<uint8_t>((item_length >> 24) & 0xFF);
+
+    // Sequence Delimitation Item (FFFE,E0DD)
+    write_u16(0xFFFE);
+    write_u16(0xE0DD);
+    write_u32(0);  // Length is always 0
+
+    return data;
+}
+
+/**
+ * @brief Create DICOM bytes with encapsulated pixel data
+ */
+[[nodiscard]] auto create_dicom_with_encapsulated_pixel_data() -> std::vector<uint8_t> {
+    std::vector<uint8_t> data;
+
+    // 128-byte preamble
+    data.resize(128, 0);
+
+    // DICM prefix
+    data.push_back('D');
+    data.push_back('I');
+    data.push_back('C');
+    data.push_back('M');
+
+    auto write_u16 = [&data](uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+
+    auto write_u32 = [&data](uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+
+    auto write_string = [&data](std::string_view str, char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    // === File Meta Information ===
+
+    write_u16(0x0002);
+    write_u16(0x0001);
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);
+    data.push_back(0x00);
+    write_u32(2);
+    data.push_back(0x00);
+    data.push_back(0x01);
+
+    std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+    write_u16(0x0002);
+    write_u16(0x0002);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    std::string_view sop_instance = "1.2.3.4.5.6.7.8.9";
+    write_u16(0x0002);
+    write_u16(0x0003);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    // Transfer Syntax: JPEG 2000 Lossless
+    std::string_view ts_uid = "1.2.840.10008.1.2.4.90";
+    write_u16(0x0002);
+    write_u16(0x0010);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(ts_uid.size() % 2 == 0 ? ts_uid.size() : ts_uid.size() + 1));
+    write_string(ts_uid);
+
+    std::string_view impl_uid = "1.2.3.4.5";
+    write_u16(0x0002);
+    write_u16(0x0012);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(impl_uid.size() % 2 == 0 ? impl_uid.size() : impl_uid.size() + 1));
+    write_string(impl_uid);
+
+    // === Main Dataset ===
+
+    write_u16(0x0008);
+    write_u16(0x0016);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_class.size() % 2 == 0 ? sop_class.size() : sop_class.size() + 1));
+    write_string(sop_class);
+
+    write_u16(0x0008);
+    write_u16(0x0018);
+    data.push_back('U');
+    data.push_back('I');
+    write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
+    write_string(sop_instance);
+
+    std::string_view patient_name = "ENCAP^TEST";
+    write_u16(0x0010);
+    write_u16(0x0010);
+    data.push_back('P');
+    data.push_back('N');
+    write_u16(static_cast<uint16_t>(patient_name.size() % 2 == 0 ? patient_name.size() : patient_name.size() + 1));
+    write_string(patient_name, ' ');
+
+    // Image pixel attributes
+    write_u16(0x0028);
+    write_u16(0x0010);  // Rows
+    data.push_back('U');
+    data.push_back('S');
+    write_u16(2);
+    write_u16(64);
+
+    write_u16(0x0028);
+    write_u16(0x0011);  // Columns
+    data.push_back('U');
+    data.push_back('S');
+    write_u16(2);
+    write_u16(64);
+
+    // (7FE0,0010) Pixel Data - OB with undefined length
+    write_u16(0x7FE0);
+    write_u16(0x0010);
+    data.push_back('O');
+    data.push_back('B');
+    data.push_back(0x00);  // Reserved
+    data.push_back(0x00);
+    write_u32(0xFFFFFFFF);  // Undefined length
+
+    // Basic Offset Table (empty)
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    write_u32(0);  // Empty BOT
+
+    // Fragment 1 - some fake compressed data
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    write_u32(16);  // 16 bytes of "compressed" data
+    for (int i = 0; i < 16; ++i) {
+        data.push_back(static_cast<uint8_t>(i));
+    }
+
+    // Fragment 2
+    write_u16(0xFFFE);
+    write_u16(0xE000);
+    write_u32(8);  // 8 bytes
+    for (int i = 0; i < 8; ++i) {
+        data.push_back(static_cast<uint8_t>(0x80 + i));
+    }
+
+    // Sequence Delimitation Item
+    write_u16(0xFFFE);
+    write_u16(0xE0DD);
+    write_u32(0);
+
+    return data;
+}
+
+}  // namespace
+
+TEST_CASE("dicom_file undefined length sequence parsing", "[core][dicom_file][undefined_length]") {
+    SECTION("parse undefined length sequence") {
+        auto data = create_dicom_with_undefined_length_sequence();
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_ok());
+        auto& file = result.value();
+
+        // Verify basic dataset elements
+        CHECK(file.dataset().get_string(tags::patient_name) == "SEQ^TEST");
+
+        // Verify sequence was parsed
+        dicom_tag referenced_series_seq{0x0008, 0x1115};
+        CHECK(file.dataset().has_sequence(referenced_series_seq));
+
+        auto* seq = file.dataset().get_sequence(referenced_series_seq);
+        REQUIRE(seq != nullptr);
+        REQUIRE(seq->size() == 1);
+
+        // Verify item content
+        auto& item = (*seq)[0];
+        CHECK(item.get_string(tags::series_instance_uid) == "1.2.3.4.5.6.7");
+    }
+}
+
+TEST_CASE("dicom_file encapsulated pixel data parsing", "[core][dicom_file][encapsulated]") {
+    SECTION("parse encapsulated pixel data with undefined length") {
+        auto data = create_dicom_with_encapsulated_pixel_data();
+
+        auto result = dicom_file::from_bytes(data);
+
+        REQUIRE(result.is_ok());
+        auto& file = result.value();
+
+        // Verify basic dataset elements
+        CHECK(file.dataset().get_string(tags::patient_name) == "ENCAP^TEST");
+
+        auto rows = file.dataset().get_numeric<uint16_t>(tags::rows);
+        REQUIRE(rows.has_value());
+        CHECK(*rows == 64);
+
+        // Verify pixel data was captured
+        CHECK(file.dataset().contains(tags::pixel_data));
+
+        const auto* pixel_elem = file.dataset().get(tags::pixel_data);
+        REQUIRE(pixel_elem != nullptr);
+
+        // Pixel data should contain the encapsulated frames
+        // BOT (8 bytes) + Fragment1 (8 + 16) + Fragment2 (8 + 8) = 48 bytes
+        // Note: We don't include the sequence delimitation item in the stored data
+        CHECK(pixel_elem->length() > 0);
+    }
+}
+
+TEST_CASE("dicom_file Item and Sequence Delimitation tags", "[core][dicom_file][delimiters]") {
+    SECTION("delimiter tag constants are correct") {
+        CHECK(tags::item.group() == 0xFFFE);
+        CHECK(tags::item.element() == 0xE000);
+
+        CHECK(tags::item_delimitation_item.group() == 0xFFFE);
+        CHECK(tags::item_delimitation_item.element() == 0xE00D);
+
+        CHECK(tags::sequence_delimitation_item.group() == 0xFFFE);
+        CHECK(tags::sequence_delimitation_item.element() == 0xE0DD);
+    }
+}
+
+// ============================================================================
+// Unknown VR Fallback Tests (Issue #771)
+// ============================================================================
+
+TEST_CASE("dicom_file Explicit VR LE unknown VR fallback", "[core][dicom_file][unknown_vr]") {
+    // Helper lambdas for building raw byte streams
+    auto write_u16 = [](std::vector<uint8_t>& data, uint16_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+    auto write_u32 = [](std::vector<uint8_t>& data, uint32_t val) {
+        data.push_back(static_cast<uint8_t>(val & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+        data.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    };
+    auto write_string = [](std::vector<uint8_t>& data, std::string_view str,
+                           char pad_char = '\0') {
+        for (char c : str) {
+            data.push_back(static_cast<uint8_t>(c));
+        }
+        if (str.size() % 2 != 0) {
+            data.push_back(static_cast<uint8_t>(pad_char));
+        }
+    };
+
+    SECTION("parser continues past element with unknown VR") {
+        std::vector<uint8_t> data;
+
+        // 128-byte preamble + DICM
+        data.resize(128, 0);
+        data.push_back('D');
+        data.push_back('I');
+        data.push_back('C');
+        data.push_back('M');
+
+        // === File Meta Information (Explicit VR LE) ===
+
+        // (0002,0001) File Meta Information Version - OB
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0001);
+        data.push_back('O');
+        data.push_back('B');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 2);
+        data.push_back(0x00);
+        data.push_back(0x01);
+
+        // (0002,0002) Media Storage SOP Class UID - UI
+        std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0002);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        // (0002,0003) Media Storage SOP Instance UID - UI
+        std::string_view sop_inst = "9.9.9.9.9.9.9.8";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0003);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        // (0002,0010) Transfer Syntax UID - Explicit VR LE
+        std::string_view ts_uid = "1.2.840.10008.1.2.1";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0010);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(ts_uid.size() % 2 == 0
+                                                  ? ts_uid.size()
+                                                  : ts_uid.size() + 1));
+        write_string(data, ts_uid);
+
+        // (0002,0012) Implementation Class UID - UI
+        std::string_view impl_uid = "1.2.3.4.5";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0012);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(impl_uid.size() % 2 == 0
+                                                  ? impl_uid.size()
+                                                  : impl_uid.size() + 1));
+        write_string(data, impl_uid);
+
+        // === Main Dataset ===
+
+        // (0008,0016) SOP Class UID - UI (standard element before unknown VR)
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0016);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        // (0008,0018) SOP Instance UID - UI
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0018);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        // (0009,0010) Private Creator - LO (standard element before unknown)
+        std::string_view creator = "TEST_VENDOR";
+        write_u16(data, 0x0009);
+        write_u16(data, 0x0010);
+        data.push_back('L');
+        data.push_back('O');
+        write_u16(data, static_cast<uint16_t>(creator.size() % 2 == 0
+                                                  ? creator.size()
+                                                  : creator.size() + 1));
+        write_string(data, creator, ' ');
+
+        // (0009,1001) Unknown VR "ZZ" - 4 bytes of data
+        // UN-style header: tag(4) + VR(2) + reserved(2) + length32(4) = 12 bytes
+        write_u16(data, 0x0009);
+        write_u16(data, 0x1001);
+        data.push_back('Z');  // Unknown VR
+        data.push_back('Z');
+        data.push_back(0x00);  // Reserved bytes
+        data.push_back(0x00);
+        write_u32(data, 4);  // 4-byte length (32-bit)
+        data.push_back(0xDE);  // Value: 4 bytes of data
+        data.push_back(0xAD);
+        data.push_back(0xBE);
+        data.push_back(0xEF);
+
+        // (0010,0010) Patient Name - PN (standard element AFTER unknown VR)
+        std::string_view patient_name = "AFTER^UNKNOWN";
+        write_u16(data, 0x0010);
+        write_u16(data, 0x0010);
+        data.push_back('P');
+        data.push_back('N');
+        write_u16(data, static_cast<uint16_t>(patient_name.size() % 2 == 0
+                                                  ? patient_name.size()
+                                                  : patient_name.size() + 1));
+        write_string(data, patient_name, ' ');
+
+        // (0010,0020) Patient ID - LO (another element after unknown VR)
+        std::string_view patient_id = "ID771";
+        write_u16(data, 0x0010);
+        write_u16(data, 0x0020);
+        data.push_back('L');
+        data.push_back('O');
+        write_u16(data, static_cast<uint16_t>(patient_id.size() % 2 == 0
+                                                  ? patient_id.size()
+                                                  : patient_id.size() + 1));
+        write_string(data, patient_id, ' ');
+
+        // Parse the crafted byte stream
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_ok());
+        const auto& file = result.value();
+        const auto& ds = file.dataset();
+
+        // Element before unknown VR is preserved
+        CHECK(ds.contains(dicom_tag{0x0009, 0x0010}));
+
+        // Unknown VR element is stored as UN
+        const auto* unknown_elem = ds.get(dicom_tag{0x0009, 0x1001});
+        REQUIRE(unknown_elem != nullptr);
+        CHECK(unknown_elem->vr() == vr_type::UN);
+        CHECK(unknown_elem->length() == 4);
+        auto raw = unknown_elem->raw_data();
+        CHECK(raw[0] == 0xDE);
+        CHECK(raw[1] == 0xAD);
+        CHECK(raw[2] == 0xBE);
+        CHECK(raw[3] == 0xEF);
+
+        // Elements AFTER unknown VR are correctly parsed (not lost)
+        CHECK(ds.get_string(tags::patient_name) == "AFTER^UNKNOWN");
+        CHECK(ds.get_string(tags::patient_id) == "ID771");
+    }
+
+    SECTION("multiple unknown VR elements do not break parsing") {
+        std::vector<uint8_t> data;
+
+        // 128-byte preamble + DICM
+        data.resize(128, 0);
+        data.push_back('D');
+        data.push_back('I');
+        data.push_back('C');
+        data.push_back('M');
+
+        // Minimal File Meta Information
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0001);
+        data.push_back('O');
+        data.push_back('B');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 2);
+        data.push_back(0x00);
+        data.push_back(0x01);
+
+        std::string_view sop_class = "1.2.840.10008.5.1.4.1.1.2";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0002);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        std::string_view sop_inst = "8.8.8.8.8.8.8.8";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0003);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        std::string_view ts_uid = "1.2.840.10008.1.2.1";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0010);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(ts_uid.size() % 2 == 0
+                                                  ? ts_uid.size()
+                                                  : ts_uid.size() + 1));
+        write_string(data, ts_uid);
+
+        std::string_view impl_uid = "1.2.3.4.5";
+        write_u16(data, 0x0002);
+        write_u16(data, 0x0012);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(impl_uid.size() % 2 == 0
+                                                  ? impl_uid.size()
+                                                  : impl_uid.size() + 1));
+        write_string(data, impl_uid);
+
+        // === Main Dataset ===
+
+        // (0008,0016) SOP Class UID
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0016);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_class.size() % 2 == 0
+                                                  ? sop_class.size()
+                                                  : sop_class.size() + 1));
+        write_string(data, sop_class);
+
+        // (0008,0018) SOP Instance UID
+        write_u16(data, 0x0008);
+        write_u16(data, 0x0018);
+        data.push_back('U');
+        data.push_back('I');
+        write_u16(data, static_cast<uint16_t>(sop_inst.size() % 2 == 0
+                                                  ? sop_inst.size()
+                                                  : sop_inst.size() + 1));
+        write_string(data, sop_inst);
+
+        // First unknown VR: (0009,1001) "AA" with 2 bytes
+        write_u16(data, 0x0009);
+        write_u16(data, 0x1001);
+        data.push_back('A');
+        data.push_back('A');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 2);
+        data.push_back(0x01);
+        data.push_back(0x02);
+
+        // Second unknown VR: (0009,1002) "ZZ" with 6 bytes
+        write_u16(data, 0x0009);
+        write_u16(data, 0x1002);
+        data.push_back('Z');
+        data.push_back('Z');
+        data.push_back(0x00);
+        data.push_back(0x00);
+        write_u32(data, 6);
+        data.push_back(0xA0);
+        data.push_back(0xA1);
+        data.push_back(0xA2);
+        data.push_back(0xA3);
+        data.push_back(0xA4);
+        data.push_back(0xA5);
+
+        // (0010,0010) Patient Name AFTER both unknown VRs
+        std::string_view name = "MULTI^UNKNOWN";
+        write_u16(data, 0x0010);
+        write_u16(data, 0x0010);
+        data.push_back('P');
+        data.push_back('N');
+        write_u16(data, static_cast<uint16_t>(name.size() % 2 == 0
+                                                  ? name.size()
+                                                  : name.size() + 1));
+        write_string(data, name, ' ');
+
+        auto result = dicom_file::from_bytes(data);
+        REQUIRE(result.is_ok());
+        const auto& ds = result.value().dataset();
+
+        // Both unknown VR elements stored as UN
+        const auto* elem1 = ds.get(dicom_tag{0x0009, 0x1001});
+        REQUIRE(elem1 != nullptr);
+        CHECK(elem1->vr() == vr_type::UN);
+        CHECK(elem1->length() == 2);
+
+        const auto* elem2 = ds.get(dicom_tag{0x0009, 0x1002});
+        REQUIRE(elem2 != nullptr);
+        CHECK(elem2->vr() == vr_type::UN);
+        CHECK(elem2->length() == 6);
+
+        // Element after unknown VRs is preserved
+        CHECK(ds.get_string(tags::patient_name) == "MULTI^UNKNOWN");
+    }
+}

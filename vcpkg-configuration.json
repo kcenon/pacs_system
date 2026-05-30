@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg-configuration.schema.json",
+  "default-registry": {
+    "kind": "builtin",
+    "baseline": "d90a9b159c08169f39adcd1b0f1ac0ca12c4b96c"
+  },
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/kcenon/vcpkg-registry.git",
+      "baseline": "50d89f5b1962e811dfb779bc46fa3d251db42ce7",
+      "packages": [
+        "kcenon-*"
+      ]
+    }
+  ]
+}
