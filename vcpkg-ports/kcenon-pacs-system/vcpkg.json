@@ -96,13 +96,8 @@
       ]
     },
     "testing": {
-      "description": "Build unit tests and benchmarks",
+      "description": "Build unit tests and benchmarks (Catch2 is fetched via CMake FetchContent; see docs/ECOSYSTEM.md)",
       "dependencies": [
-        {
-          "name": "gtest",
-          "version>=": "1.14.0",
-          "features": ["gmock"]
-        },
         {
           "name": "benchmark"
         }

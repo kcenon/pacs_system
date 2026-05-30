@@ -44,3 +44,9 @@ around it explicitly.
 Downstream tooling (e.g. shared GoogleTest fixture libraries, ecosystem-wide test runners
 that expect `gtest_discover_tests`) should treat `pacs_system` as an explicit exception
 rather than a candidate for automatic inclusion.
+
+Because Catch2 is the actual unit-test framework (fetched via CMake `FetchContent` in
+`cmake/testing.cmake`, with every test target linking `Catch2::Catch2WithMain`), the unused
+`gtest`/`gmock` declaration was removed from `vcpkg.json` (root manifest and the
+`vcpkg-ports/kcenon-pacs-system` port) under [#1179](https://github.com/kcenon/pacs_system/issues/1179).
+No build target references GoogleTest; the `testing` vcpkg feature now pulls only `benchmark`.
