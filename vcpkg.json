@@ -29,7 +29,6 @@
     { "name": "charls", "version": "2.4.2" },
     { "name": "openjph", "version": "0.21.0" },
     { "name": "crow", "version": "1.2.1" },
-    { "name": "gtest", "version": "1.17.0" },
     { "name": "benchmark", "version": "1.9.5" },
     { "name": "asio", "version": "1.30.2" },
     { "name": "pugixml", "version": "1.14" },
@@ -105,13 +104,8 @@
       ]
     },
     "testing": {
-      "description": "Build unit tests and benchmarks",
+      "description": "Build unit tests and benchmarks (Catch2 is fetched via CMake FetchContent; see docs/ECOSYSTEM.md)",
       "dependencies": [
-        {
-          "name": "gtest",
-          "version>=": "1.14.0",
-          "features": ["gmock"]
-        },
         {
           "name": "benchmark"
         }
