@@ -258,6 +258,20 @@ jobs:
             GIT_TAG        v${{ inputs.version }}
           )
           \`\`\`
+
+          ### Release Gates
+
+          This release was verified against the four PACS medical-domain
+          release gates. See
+          [docs/RELEASE_GATES.md](https://github.com/kcenon/pacs_system/blob/v${{ inputs.version }}/docs/RELEASE_GATES.md)
+          for the full gate matrix, exact commands, and workflow names.
+
+          | Gate | CI workflow |
+          |------|-------------|
+          | DICOM conformance | DCMTK Interoperability Tests, Integration Tests |
+          | TLS / ATNA audit logging | CI, Dependency Security Scan |
+          | Anonymization | CI |
+          | Storage / index migration | CI (incl. \`storage_boundary_guard\`) |
           EOF
 
           {

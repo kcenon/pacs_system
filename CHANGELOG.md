@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Formalize the four PACS medical-domain release gates (DICOM conformance, TLS/ATNA audit logging, anonymization, storage/index migration) in `docs/RELEASE_GATES.md`: a gate matrix mapping each gate to its exact Catch2 tag / CTest selector, test source, authoritative conformance doc, and CI-enforcing workflow, plus a pre-release checklist that is followable without reading test source. Linked from `CONTRIBUTING.md` and surfaced as a "Release Gates" section in the generated release notes (`release.yml`) ([#1176](https://github.com/kcenon/pacs_system/issues/1176))
+
 ## [1.0.0] - TBD
 
 ### Added
