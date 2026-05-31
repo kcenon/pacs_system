@@ -141,6 +141,19 @@ Aim for:
 - Critical paths: 100% coverage
 - Error handling: Test failure scenarios
 
+### Release Gates
+
+Before a release, the four medical-domain gates (DICOM conformance,
+TLS/ATNA audit logging, anonymization, storage/index migration) must be
+demonstrably green. Each gate has an exact command or workflow name and is
+followable without reading test source code. See
+[`docs/RELEASE_GATES.md`](docs/RELEASE_GATES.md) for the gate matrix and the
+pre-release checklist. The cheapest pre-flight check needs no build:
+
+```bash
+python3 tests/storage/check_storage_boundary.py "$(pwd)"
+```
+
 ## Pull Requests
 
 ### PR Checklist
