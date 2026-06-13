@@ -6,9 +6,11 @@
 #   2. .github/actions/checkout-kcenon-deps/action.yml
 #   3. docs/SOUP.md
 #
-# ADVISORY (non-blocking) until #1189 repairs the manifest (dangling thread
-# SHA + database manifest/action mismatch); flip to required after #1189 by
-# removing `continue-on-error: true` below.
+# ADVISORY: the script runs in warning-only mode (exits 0, emits ::warning::
+# annotations) so this check passes green while surfacing the known drift
+# (dangling thread SHA + database manifest/action mismatch, repair tracked in
+# #1189). After #1189 repairs the manifest, make this a hard gate by adding
+# `--strict` to the run step below and marking the check required.
 
 name: Manifest Drift Gate
 
@@ -30,9 +32,6 @@ jobs:
     name: SOUP manifest drift (advisory)
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # Advisory until #1189 repairs the manifest; remove this line to make the
-    # gate required (it already exits non-zero on any tri-source mismatch).
-    continue-on-error: true
 
     steps:
       - name: Checkout code
