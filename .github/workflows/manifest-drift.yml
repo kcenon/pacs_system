@@ -1,0 +1,47 @@
+# SOUP/SBOM provenance drift gate (IEC 62304 §8.1.2).
+#
+# Detects drift between the three places this repo records the pinned commit
+# SHA of each internal kcenon ecosystem dependency:
+#   1. dependency-manifest.json
+#   2. .github/actions/checkout-kcenon-deps/action.yml
+#   3. docs/SOUP.md
+#
+# ADVISORY (non-blocking) until #1189 repairs the manifest (dangling thread
+# SHA + database manifest/action mismatch); flip to required after #1189 by
+# removing `continue-on-error: true` below.
+
+name: Manifest Drift Gate
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'dependency-manifest.json'
+      - '.github/actions/checkout-kcenon-deps/action.yml'
+      - 'docs/SOUP.md'
+      - 'scripts/check_manifest_drift.py'
+      - '.github/workflows/manifest-drift.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  manifest-drift:
+    name: SOUP manifest drift (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Advisory until #1189 repairs the manifest; remove this line to make the
+    # gate required (it already exits non-zero on any tri-source mismatch).
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check internal SHA provenance drift
+        run: python3 scripts/check_manifest_drift.py
