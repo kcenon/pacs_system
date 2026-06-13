@@ -4,7 +4,11 @@
 
 message(STATUS "")
 message(STATUS "========================================")
-message(STATUS "PACS System v${PROJECT_VERSION}")
+if(PACS_VERSION_STAGE)
+    message(STATUS "PACS System v${PROJECT_VERSION}-${PACS_VERSION_STAGE} (untagged)")
+else()
+    message(STATUS "PACS System v${PROJECT_VERSION}")
+endif()
 message(STATUS "========================================")
 message(STATUS "")
 message(STATUS "Dependency Chain (Tier 5):")

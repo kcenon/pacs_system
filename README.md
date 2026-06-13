@@ -46,7 +46,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ## Project Status
 
-**Current Version**: 1.0.0 — Stable Public API
+**Current Version**: 1.0.0-rc — release candidate, not yet tagged (v1.0.0 tag pending #1095)
 **Project Phase**: Phase 4 Complete — Advanced Services & Production Hardening
 
 The v1.0 contract freezes the public header surface under `include/kcenon/pacs/`, the
@@ -489,7 +489,7 @@ pacs_system/
 ├── examples/             # Tutorials (5 progressive learning steps)
 ├── tools/                # CLI utility binaries (32 apps)
 ├── docs/                 # Documentation (87 markdown files)
-└── CMakeLists.txt        # Build configuration (v1.0.0)
+└── CMakeLists.txt        # Build configuration (v1.0.0-rc)
 ```
 
 > For the full file-level directory tree, see [Project Structure](docs/PROJECT_STRUCTURE.md).
@@ -623,7 +623,7 @@ cmake --build build --target run_full_benchmarks
 | **Example Programs** | 6 apps |
 | **Documentation** | 87 markdown files |
 | **CI/CD Workflows** | 15 workflows |
-| **Version** | 1.0.0 |
+| **Version** | 1.0.0-rc (untagged) |
 | **Last Updated** | 2026-05-13 |
 
 <!-- STATS_END -->
