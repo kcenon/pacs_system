@@ -6,6 +6,13 @@ project(pacs_system
     LANGUAGES CXX
 )
 
+# Pre-release stage marker. The numeric PROJECT_VERSION (1.0.0) is the target
+# v1.0 API contract, but no v1.0.0 git tag exists yet (highest tag is v0.1.0),
+# so human-facing surfaces append this stage to avoid advertising a released,
+# stable 1.0.0. Bump to a clean 1.0.0 by clearing this marker (set to "") in
+# the same commit that cuts the v1.0.0 git tag (#1095).
+set(PACS_VERSION_STAGE "rc")
+
 ##################################################
 # C++ Standard and Build Configuration
 ##################################################
