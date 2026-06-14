@@ -6,11 +6,12 @@
 #   2. .github/actions/checkout-kcenon-deps/action.yml
 #   3. docs/SOUP.md
 #
-# ADVISORY: the script runs in warning-only mode (exits 0, emits ::warning::
-# annotations) so this check passes green while surfacing the known drift
-# (dangling thread SHA + database manifest/action mismatch, repair tracked in
-# #1189). After #1189 repairs the manifest, make this a hard gate by adding
-# `--strict` to the run step below and marking the check required.
+# STRICT (enforcing): the script runs with --strict and FAILS CI if any of the
+# three provenance sources (dependency-manifest.json, the checkout-kcenon-deps
+# action, docs/SOUP.md) diverge or reference an unresolvable commit. Switched
+# from advisory to strict in #1189 once the manifest was repaired (see
+# docs/compliance/problem-resolution/PR-001-soup-dangling-sha.md).
+# Mark this check "required" in branch protection to complete the gate.
 
 name: Manifest Drift Gate
 
@@ -29,7 +30,7 @@ permissions:
 
 jobs:
   manifest-drift:
-    name: SOUP manifest drift (advisory)
+    name: SOUP manifest drift (strict)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -43,4 +44,4 @@ jobs:
           python-version: '3.12'
 
       - name: Check internal SHA provenance drift
-        run: python3 scripts/check_manifest_drift.py
+        run: python3 scripts/check_manifest_drift.py --strict

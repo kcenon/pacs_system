@@ -184,7 +184,8 @@ def main() -> int:
 
     print("=" * 78)
     print("SOUP/SBOM manifest drift gate -- internal kcenon ecosystem SHAs")
-    print("ADVISORY (non-blocking) until #1189 repairs the manifest.")
+    print("Mode: STRICT (fails on drift)" if "--strict" in sys.argv
+          else "Mode: advisory (warning-only, exit 0)")
     print("=" * 78)
     print("Sources:")
     print(f"  manifest : {MANIFEST_PATH.relative_to(REPO_ROOT)} "

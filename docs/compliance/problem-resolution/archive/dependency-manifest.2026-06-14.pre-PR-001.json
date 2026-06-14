@@ -25,7 +25,7 @@
       "name": "thread_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../thread_system",
-      "version": "6dd5c9e8c224fcd177560623cd7eccad6415f3e4",
+      "version": "db8d36f15cf2dfb679474b20cb47160494a6c8be",
       "license": "BSD-3-Clause"
     },
     {
@@ -53,7 +53,7 @@
       "name": "database_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../database_system",
-      "version": "593a18a7158d5707b8f589c0dae75d6b2ddad931",
+      "version": "b90b0f3bb1e7c9719494724b4c900fd89199e513",
       "license": "BSD-3-Clause"
     }
   ],
