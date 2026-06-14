@@ -21,10 +21,12 @@ runs:
       shell: bash
       env:
         # Pinned commit SHAs for IEC 62304 SOUP traceability
-        # Last verified: 2026-05-01
+        # Last verified: 2026-06-14 (thread_system re-pinned to v1.0.0 tag;
+        # original commit db8d36f1 unrecoverable -- see
+        # docs/compliance/problem-resolution/PR-001-soup-dangling-sha.md)
         COMMON_SYSTEM_SHA: '47be5fd27650f0ebfa2d029ebed35a1c262e55c4'
         CONTAINER_SYSTEM_SHA: 'fa56dc5ed77df9cea2dce1bebd4aec75bd91916d'
-        THREAD_SYSTEM_SHA: 'db8d36f15cf2dfb679474b20cb47160494a6c8be'
+        THREAD_SYSTEM_SHA: '6dd5c9e8c224fcd177560623cd7eccad6415f3e4'
         LOGGER_SYSTEM_SHA: 'f119ecd698fb5a8b25dd730647b9d038034aad5a'
         MONITORING_SYSTEM_SHA: 'da708abbb46d428dfee9373dbd57962ad8ea846d'
         NETWORK_SYSTEM_SHA: '093691d9523265d672880e2cb7c0ea0e4463a8f8'
@@ -52,7 +54,7 @@ runs:
       env:
         COMMON_SYSTEM_SHA: '47be5fd27650f0ebfa2d029ebed35a1c262e55c4'
         CONTAINER_SYSTEM_SHA: 'fa56dc5ed77df9cea2dce1bebd4aec75bd91916d'
-        THREAD_SYSTEM_SHA: 'db8d36f15cf2dfb679474b20cb47160494a6c8be'
+        THREAD_SYSTEM_SHA: '6dd5c9e8c224fcd177560623cd7eccad6415f3e4'
         LOGGER_SYSTEM_SHA: 'f119ecd698fb5a8b25dd730647b9d038034aad5a'
         MONITORING_SYSTEM_SHA: 'da708abbb46d428dfee9373dbd57962ad8ea846d'
         NETWORK_SYSTEM_SHA: '093691d9523265d672880e2cb7c0ea0e4463a8f8'
