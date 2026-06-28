@@ -1,0 +1,23 @@
+<map id="include/kcenon/pacs/services/worklist_scp.h" name="include/kcenon/pacs/services/worklist_scp.h">
+<area shape="rect" id="Node000001" title="DICOM Modality Worklist SCP service (MWL C&#45;FIND handler)" alt="" coords="673,5,851,45"/>
+<area shape="rect" id="Node000002" href="$test__multimodal__workflow_8cpp.html" title="Multi&#45;Modal Clinical Workflow Integration Tests." alt="" coords="5,93,177,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="660,37,443,58,315,75,189,96,178,98,177,93,188,91,315,70,442,53,659,31"/>
+<area shape="rect" id="Node000003" href="$test__worklist__mpps_8cpp.html" title="Scenario 3: Worklist to MPPS Workflow Tests." alt="" coords="201,93,363,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="660,44,525,66,376,96,363,99,362,94,375,91,524,61,660,39"/>
+<area shape="rect" id="Node000004" href="$server__app_8h.html" title="PACS Server application class." alt="" coords="387,101,555,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="691,52,531,103,529,98,690,47"/>
+<area shape="rect" id="Node000007" href="$worklist__scp_2main_8cpp.html" title="Modality Worklist SCP &#45; DICOM Worklist Server." alt="" coords="579,101,750,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="734,57,686,103,682,99,731,53"/>
+<area shape="rect" id="Node000008" href="$worklist__scu_2main_8cpp.html" title="Worklist SCU &#45; Modality Worklist Query Client." alt="" coords="774,101,945,141"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="793,53,842,99,838,103,790,57"/>
+<area shape="rect" id="Node000009" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="969,108,1203,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="841,47,1047,105,1045,110,840,52"/>
+<area shape="rect" id="Node000010" href="$worklist__scp_8cpp.html" title="Implementation of the Modality Worklist SCP service." alt="" coords="1227,101,1382,141"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="864,35,1030,57,1216,91,1245,98,1244,103,1215,96,1029,62,864,40"/>
+<area shape="rect" id="Node000011" href="$worklist__scu_8cpp.html" title="Implementation of the Worklist SCU service." alt="" coords="1406,101,1561,141"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="864,29,1107,49,1251,67,1395,91,1425,98,1424,103,1393,96,1250,72,1107,54,864,34"/>
+<area shape="rect" id="Node000005" href="$pacs__server_2main_8cpp.html" title="Entry point for PACS Server sample application." alt="" coords="291,196,459,236"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="444,152,397,198,393,194,440,148"/>
+<area shape="rect" id="Node000006" href="$server__app_8cpp.html" title="PACS Server application implementation." alt="" coords="483,196,651,236"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="502,148,550,194,546,198,499,152"/>
+</map>

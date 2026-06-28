@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/network/pipeline/pipeline_job_types.h" name="include/kcenon/pacs/network/pipeline/pipeline_job_types.h">
+<area shape="rect" id="Node000001" title="Job type definitions for the 6&#45;stage DICOM I/O pipeline." alt="" coords="5,5,196,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="14,108,81,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,61,64,98,60,95,82,59"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="105,108,203,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="119,59,142,95,137,98,115,61"/>
+</map>

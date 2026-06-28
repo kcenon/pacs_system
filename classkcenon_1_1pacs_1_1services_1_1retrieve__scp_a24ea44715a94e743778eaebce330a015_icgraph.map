@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::retrieve_scp::get_move_destination" name="kcenon::pacs::services::retrieve_scp::get_move_destination">
+<area shape="rect" id="Node000001" title="Get the Move Destination AE title from the request." alt="" coords="440,5,623,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scp.html#ac3015e1242926261481fe6e52c0d9a69" title="Handle a C&#45;MOVE request." alt="" coords="223,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,35,392,35,392,30,427,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scp.html#a2043cee96792795804e8c79326152310" title="Handle an incoming DIMSE message (C&#45;MOVE&#45;RQ or C&#45;GET&#45;RQ)" alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

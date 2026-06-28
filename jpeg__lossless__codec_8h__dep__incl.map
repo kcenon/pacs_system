@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/encoding/compression/jpeg_lossless_codec.h" name="include/kcenon/pacs/encoding/compression/jpeg_lossless_codec.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="229,5,401,60"/>
+<area shape="rect" id="Node000002" href="$codec__factory_8cpp.html" title=" " alt="" coords="5,108,196,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,68,145,110,143,106,242,63"/>
+<area shape="rect" id="Node000003" href="$jpeg__lossless__codec_8cpp.html" title=" " alt="" coords="220,108,411,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="318,74,318,108,313,108,313,74"/>
+<area shape="rect" id="Node000004" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="435,115,673,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="396,63,526,113,524,118,394,68"/>
+</map>

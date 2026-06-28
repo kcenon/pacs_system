@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::sync_manager::compare" name="kcenon::pacs::client::sync_manager::compare">
+<area shape="rect" id="Node000001" title="Compare local and remote data without syncing." alt="" coords="288,5,479,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a20ebd47e1a94da19c66f7034ba00b2b6" title="Compare local and remote data asynchronously." alt="" coords="5,5,240,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="274,28,240,28,240,23,274,23"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::remote_node_manager::start_health_check" name="kcenon::pacs::client::remote_node_manager::start_health_check">
+<area shape="rect" id="Node000001" title="Start the automatic health check scheduler." alt="" coords="235,5,416,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a49481d59516248a5ea079c55ec3668b4" title="Construct a remote node manager." alt="" coords="5,5,187,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,35,187,35,187,30,221,30"/>
+</map>

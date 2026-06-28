@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_coordinator::reset_metrics" name="kcenon::pacs::network::pipeline::pipeline_coordinator::reset_metrics">
+<area shape="rect" id="Node000001" title="Reset all metrics." alt="" coords="5,45,205,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__metrics.html#a46d2ba671f3d2d9a1a449a35b2eb1825" title="Mark the start time for throughput calculation." alt="" coords="253,5,448,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,54,239,48,240,53,206,59"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__metrics.html#adde4fe9ed851b691ce6be819c568e469" title="Reset all metrics." alt="" coords="267,84,435,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,86,253,93,253,99,205,91"/>
+</map>

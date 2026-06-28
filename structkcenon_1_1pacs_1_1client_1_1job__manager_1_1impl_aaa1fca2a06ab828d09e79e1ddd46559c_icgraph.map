@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::client::job_manager::impl::enqueue_job" name="kcenon::pacs::client::job_manager::impl::enqueue_job">
+<area shape="rect" id="Node000001" title=" " alt="" coords="527,77,687,132"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a0c723e0d9c6ebb9cbd04fb7b0d0f0325" title=" " alt="" coords="261,5,479,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="512,79,460,63,461,58,514,74"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#acc5c0a0e3a6f82d965161e0e6c4e9ce2" title="Start a pending job." alt="" coords="280,85,460,125"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="512,107,460,107,460,102,512,102"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="290,149,450,204"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="514,136,451,155,449,150,512,130"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#af18b8d20c1cf86c2e15f08e12fc8218b" title="Construct a job manager with custom configuration." alt="" coords="5,13,213,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="248,35,213,35,213,30,248,30"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a1be8a6262590f3bd54b54d6794f6f3dc" title="Start the worker threads." alt="" coords="33,149,186,204"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="277,179,186,179,186,174,277,174"/>
+</map>

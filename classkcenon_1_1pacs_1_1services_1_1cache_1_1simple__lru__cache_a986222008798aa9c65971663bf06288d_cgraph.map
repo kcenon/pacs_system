@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::cache::simple_lru_cache::hit_rate" name="kcenon::pacs::services::cache::simple_lru_cache::hit_rate">
+<area shape="rect" id="Node000001" title="Get the cache hit rate." alt="" coords="5,5,195,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1cache_1_1cache__stats.html#a5e511023a25b55e89c18d84d2d165a5b" title="Calculate the cache hit rate." alt="" coords="243,5,412,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,30,229,30,229,35,195,35"/>
+</map>

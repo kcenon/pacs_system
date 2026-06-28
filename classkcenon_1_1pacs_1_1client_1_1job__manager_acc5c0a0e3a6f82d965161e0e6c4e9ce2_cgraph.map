@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::client::job_manager::start_job" name="kcenon::pacs::client::job_manager::start_job">
+<area shape="rect" id="Node000001" title="Start a pending job." alt="" coords="5,163,185,203"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#aaa1fca2a06ab828d09e79e1ddd46559c" title=" " alt="" coords="233,5,393,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,161,167,117,232,69,239,65,242,69,235,74,171,121,120,165"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#af8c72d7d3e771befaca6d9109487b46a" title=" " alt="" coords="233,84,393,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,161,219,140,221,145,157,166"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="241,163,386,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,181,227,181,227,186,185,186"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1client.html#a7eb607510a97c772cb2658ca6d63bbde" title="Convert job_type to string representation." alt="" coords="238,227,389,267"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="165,201,233,221,231,226,163,206"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a3023b4ee476e60b7c0298e11ab1c6e82" title=" " alt="" coords="233,292,393,347"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="125,201,175,238,235,277,245,283,242,288,232,282,172,242,122,206"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1client.html#a2224cefe2f1791fceebbc935eb2d567e" title="Check if job status is a terminal state." alt="" coords="441,299,592,339"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="393,317,427,317,427,322,393,322"/>
+</map>

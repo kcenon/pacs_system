@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::thread_pool_interface" name="kcenon::pacs::integration::thread_pool_interface">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,203,365"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html" title="Concrete implementation of thread_pool_interface." alt="" coords="12,413,196,773"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,379,107,413,101,413,101,379"/>
+</map>

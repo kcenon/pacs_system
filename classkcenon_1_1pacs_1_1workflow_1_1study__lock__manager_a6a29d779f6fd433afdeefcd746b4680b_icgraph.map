@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::workflow::study_lock_manager::lock" name="kcenon::pacs::workflow::study_lock_manager::lock">
+<area shape="rect" id="Node000001" title="Acquire an exclusive lock on a study." alt="" coords="228,170,428,210"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#a7d820ca07a1c57b6f756105659efeece" title="Get all currently held locks." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="293,162,241,118,179,74,158,62,161,58,181,69,244,114,297,158"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#ac9e541847731473c53f9ba5670f0c503" title="Get all expired locks." alt="" coords="5,84,180,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="254,168,174,141,176,136,255,163"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#a46931ccb117ba91366bb056eb46db927" title="Get lock manager statistics." alt="" coords="5,163,180,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,193,180,193,180,187,215,187"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#afc69ba83c09c3c2b5dcc34be154425f1" title="Update configuration." alt="" coords="5,241,180,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="255,217,176,244,174,239,254,212"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#a95f6f1bebb16b5c724adb7e31bd19e54" title="Destructor &#45; releases all locks." alt="" coords="5,320,180,375"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="297,221,244,265,181,310,159,322,156,318,179,305,241,261,293,217"/>
+</map>

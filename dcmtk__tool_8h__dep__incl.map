@@ -1,0 +1,13 @@
+<map id="examples/integration_tests/dcmtk_tool.h" name="examples/integration_tests/dcmtk_tool.h">
+<area shape="rect" id="Node000001" title="C++ wrapper for DCMTK command&#45;line tools." alt="" coords="477,5,638,45"/>
+<area shape="rect" id="Node000002" href="$test__dcmtk__echo_8cpp.html" title="C&#45;ECHO (Verification) interoperability tests with DCMTK." alt="" coords="5,93,208,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="463,47,206,96,205,91,462,42"/>
+<area shape="rect" id="Node000003" href="$test__dcmtk__find_8cpp.html" title="C&#45;FIND (Query) interoperability tests with DCMTK." alt="" coords="233,93,429,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="496,53,381,96,379,91,494,48"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__move_8cpp.html" title="C&#45;MOVE (Retrieve) interoperability tests with DCMTK." alt="" coords="453,93,662,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="560,59,560,93,555,93,555,59"/>
+<area shape="rect" id="Node000005" href="$test__dcmtk__store_8cpp.html" title="C&#45;STORE interoperability tests with DCMTK." alt="" coords="687,93,892,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="622,48,739,91,738,96,620,53"/>
+<area shape="rect" id="Node000006" href="$test__dcmtk__tool_8cpp.html" title="Unit tests for DCMTK tool wrapper utilities." alt="" coords="916,93,1113,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="652,42,916,91,915,96,651,47"/>
+</map>

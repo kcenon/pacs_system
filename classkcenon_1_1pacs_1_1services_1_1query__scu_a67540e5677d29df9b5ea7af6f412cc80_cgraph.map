@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::services::query_scu::cancel" name="kcenon::pacs::services::query_scu::cancel">
+<area shape="rect" id="Node000001" title="Send a C&#45;CANCEL request to stop an ongoing query." alt="" coords="5,117,175,157"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="249,5,419,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,114,222,70,241,62,243,67,224,75,131,119"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a0ed5b3f0c7d52cbf237998c0e289a7b3" title="Get SOP Class UID based on current configuration." alt="" coords="223,85,445,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,123,209,118,209,124,175,128"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="261,149,407,189"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="175,145,248,155,247,160,174,150"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="239,213,429,253"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="130,154,224,198,245,206,243,211,222,203,127,159"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services.html#a628b6b2b208f7649c2e3573a21b5ada4" title="Get the FIND SOP Class UID for a query model." alt="" coords="496,85,675,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="445,102,482,102,482,107,445,107"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="501,177,669,232"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="429,219,487,213,488,218,430,225"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="493,256,677,311"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="430,249,480,259,479,265,429,254"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="725,263,915,303"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="678,281,712,281,712,286,678,286"/>
+</map>

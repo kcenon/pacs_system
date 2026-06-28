@@ -1,0 +1,13 @@
+<map id="src/services/sop_classes/ophthalmic_storage.cpp" name="src/services/sop_classes/ophthalmic_storage.cpp">
+<area shape="rect" id="Node000001" title="Implementation of Ophthalmic Storage SOP Class utilities." alt="" coords="85,5,267,45"/>
+<area shape="rect" id="Node000002" href="$ophthalmic__storage_8h.html" title="Ophthalmic Photography and Tomography Storage SOP Classes." alt="" coords="85,93,267,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,45,179,80,173,80,173,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,196,72,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,150,70,191,67,186,133,146"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,196,155,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="163,149,142,185,137,183,158,147"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="179,196,277,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="194,147,216,183,212,186,190,149"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="301,196,363,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="225,146,300,187,298,192,222,150"/>
+</map>

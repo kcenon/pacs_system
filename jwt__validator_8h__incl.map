@@ -1,0 +1,18 @@
+<map id="include/kcenon/pacs/web/auth/jwt_validator.h" name="include/kcenon/pacs/web/auth/jwt_validator.h">
+<area shape="rect" id="Node000001" title="JWT (JSON Web Token) validation for OAuth 2.0." alt="" coords="175,5,361,45"/>
+<area shape="rect" id="Node000002" href="$oauth2__config_8h.html" title="OAuth 2.0 configuration for DICOMweb endpoints." alt="" coords="38,93,205,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,48,167,89,164,84,234,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="175,43,85,64,49,79,27,95,20,112,19,130,29,167,24,169,14,131,15,110,23,92,47,74,83,59,174,38"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="113,181,172,207"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="264,46,246,89,218,135,197,157,174,176,170,172,193,153,214,132,242,86,259,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="239,181,302,207"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="271,46,273,168,268,168,266,46"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="331,101,405,126"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="292,44,346,89,342,93,288,48"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="430,101,527,126"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="315,43,439,93,437,98,313,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,135,63,174,59,170,99,132"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="129,133,138,167,133,168,124,134"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="158,131,238,172,235,177,156,136"/>
+</map>

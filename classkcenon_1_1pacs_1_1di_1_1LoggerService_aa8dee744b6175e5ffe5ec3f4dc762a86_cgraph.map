@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::di::LoggerService::fatal" name="kcenon::pacs::di::LoggerService::fatal">
+<area shape="rect" id="Node000001" title="Log a fatal&#45;level message." alt="" coords="5,5,184,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="232,5,419,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,23,219,23,219,28,184,28"/>
+</map>

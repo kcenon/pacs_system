@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::worklist_scu::next_message_id" name="kcenon::pacs::services::worklist_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="223,41,456,81"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#a3c188772d1b78f13d70441772bfd81c2" title="Perform a MWL C&#45;FIND query with raw dataset." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,45,175,40,175,35,209,40"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#af11e5f4306420be981eddf1cc7a1d950" title="Perform a streaming MWL query for large worklists." alt="" coords="5,70,175,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,83,175,88,175,82,209,78"/>
+</map>

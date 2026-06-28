@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::sync_conflict" name="kcenon::pacs::client::sync_conflict">
+<area shape="rect" id="Node000001" title="Represents a conflict detected during synchronization." alt="" coords="5,292,187,552"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="57,135,135,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,200,99,275,93,275,93,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="31,5,161,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="99,99,99,134,93,134,93,99"/>
+</map>

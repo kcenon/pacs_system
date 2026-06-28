@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::decode" name="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::decode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,89,213,143"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a1cf7d0d991fede095196f62035806553" title=" " alt="" coords="261,121,469,175"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,126,248,131,247,136,213,132"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="555,5,700,45"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="213,95,541,38,542,43,214,100"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a91462709c82b5453ef1cbe8207dad97f" title=" " alt="" coords="517,69,737,139"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,128,503,122,504,127,470,133"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,118,457,86,516,55,540,45,542,50,518,60,459,90,407,123"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a8b1fc7786569cb370e6f2992dd32ca63" title=" " alt="" coords="519,163,735,218"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="470,162,506,168,505,173,469,168"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#ad43bd875986e454c043c23fa454e069d" title=" " alt="" coords="523,242,731,297"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="414,173,518,228,532,234,530,239,516,233,411,178"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding.html#ac4f5c3944a501fff782dfdc5cd10cfff" title="Reads a 16&#45;bit value from big&#45;endian bytes." alt="" coords="540,321,715,361"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="387,174,441,241,478,277,519,307,530,313,528,318,516,312,474,281,438,245,383,177"/>
+</map>

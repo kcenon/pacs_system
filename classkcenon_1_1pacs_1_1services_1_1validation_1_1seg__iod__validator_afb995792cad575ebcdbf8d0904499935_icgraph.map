@@ -1,0 +1,30 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::check_type1_attribute" name="kcenon::pacs::services::validation::seg_iod_validator::check_type1_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="733,332,911,401"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a9f27b055f160b1b5d5209c16a9a17e57" title=" " alt="" coords="453,5,672,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="807,320,790,266,765,205,729,143,708,114,684,89,669,77,672,73,687,85,712,111,734,140,769,202,795,265,812,318"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a575fd047a8f362f592b947fc29455ac1" title=" " alt="" coords="461,99,665,168"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="795,321,749,250,718,214,684,182,664,169,667,165,687,178,722,210,753,247,799,318"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a77b0acf67211cc92cec86d26aca0e1f8" title=" " alt="" coords="461,192,665,261"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="763,326,684,276,660,264,662,259,687,271,766,321"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#ac1a5e2ab9f482abd44beb29c35106d1b" title=" " alt="" coords="465,285,661,355"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="719,351,660,340,661,335,720,346"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#ac48d5412674c09e810f42d36ba6e4068" title=" " alt="" coords="449,379,677,448"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="720,388,678,395,677,390,719,382"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a8efa3e765c2241f743e968d2b9c58efa" title=" " alt="" coords="449,472,677,541"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="766,412,687,462,662,474,660,469,684,458,763,407"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#adcc1a3426a4f711bbc1dd1f6bafb9e8b" title=" " alt="" coords="440,565,685,635"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="799,415,753,487,722,523,687,555,669,567,666,563,684,551,718,520,749,483,795,412"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a339fb6838cf5f99b29ae5a4487019963" title=" " alt="" coords="473,659,652,728"/>
+<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="812,415,795,469,769,531,734,594,712,623,687,649,654,671,651,666,684,645,708,619,729,591,765,529,790,467,807,414"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a9cc3938f8ab49df6f491abf98762504a" title="Validate a DICOM dataset against SEG IOD." alt="" coords="223,339,392,394"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="446,85,442,89,415,117,392,150,356,220,331,287,317,340,312,338,326,286,351,218,387,147,411,114,438,85,442,81"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a74c19eea811465d44a121c7cda329931" title="Validate a SEG dataset with default options." alt="" coords="5,339,175,394"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,369,175,369,175,364,209,364"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="450,176,442,182,403,219,369,262,324,340,319,337,365,259,399,216,438,178,447,172"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="453,270,441,276,389,308,344,341,341,337,386,304,439,271,451,265"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="451,343,393,354,392,349,450,338"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="434,393,392,385,393,379,435,387"/>
+<area shape="poly" id="edge13_Node000009_Node000003" title=" " alt="" coords="451,468,439,462,386,430,341,396,344,392,389,425,441,458,453,464"/>
+<area shape="poly" id="edge15_Node000010_Node000003" title=" " alt="" coords="445,560,438,555,399,517,365,474,319,396,324,393,369,471,403,514,442,551,448,556"/>
+<area shape="poly" id="edge17_Node000011_Node000003" title=" " alt="" coords="459,664,438,649,411,619,387,586,351,515,326,448,312,395,317,394,331,446,356,513,392,583,415,616,442,645,463,660"/>
+</map>

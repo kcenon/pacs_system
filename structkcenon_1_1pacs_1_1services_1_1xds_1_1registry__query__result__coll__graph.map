@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::services::xds::registry_query_result" name="kcenon::pacs::services::xds::registry_query_result">
+<area shape="rect" id="Node000001" title="Result of a registry query." alt="" coords="5,739,167,853"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="123,581,294,676"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,678,140,727,136,724,172,675"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1services_1_1xds_1_1document__reference.html" title="Document reference returned from a registry query." alt="" coords="102,424,289,504"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="201,504,206,564,201,564,196,504"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="59,135,137,200"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="99,201,90,354,86,557,88,722,82,722,81,557,85,354,93,200"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="111,199,180,407,175,409,106,201"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="33,5,163,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="101,99,101,134,95,134,95,99"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="313,431,435,497"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="337,509,288,559,263,583,259,579,284,555,333,505"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="363,135,385,200"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="377,200,377,415,371,415,371,200"/>
+</map>

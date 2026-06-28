@@ -1,0 +1,20 @@
+<map id="include/kcenon/pacs/client/prefetch_types.h" name="include/kcenon/pacs/client/prefetch_types.h">
+<area shape="rect" id="Node000001" title="Types and structures for prefetch manager." alt="" coords="359,5,533,45"/>
+<area shape="rect" id="Node000002" href="$prefetch__manager_8h.html" title="Prefetch manager for proactive DICOM data loading." alt="" coords="5,101,201,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,51,173,103,172,98,363,46"/>
+<area shape="rect" id="Node000004" href="$prefetch__history__repository_8h.html" title="Repository for prefetch history records using base_repository pattern." alt="" coords="467,93,652,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="481,52,529,91,526,95,478,56"/>
+<area shape="rect" id="Node000006" href="$prefetch__repository_8h.html" title="Repository for prefetch rule and history persistence." alt="" coords="226,101,442,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="414,56,358,103,355,99,411,52"/>
+<area shape="rect" id="Node000008" href="$prefetch__rule__repository_8h.html" title="Repository for prefetch rules using base_repository pattern." alt="" coords="677,93,842,148"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="523,47,677,92,676,97,521,52"/>
+<area shape="rect" id="Node000003" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="65,196,203,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="116,153,130,195,125,197,111,154"/>
+<area shape="rect" id="Node000005" href="$prefetch__history__repository_8cpp.html" title="Implementation of prefetch_history_repository using base_repository pattern." alt="" coords="473,196,645,236"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="562,162,562,196,557,196,557,162"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="282,149,176,198,173,194,280,144"/>
+<area shape="rect" id="Node000007" href="$prefetch__repository_8cpp.html" title="Implementation of the prefetch repository for rule and history persistence." alt="" coords="258,196,410,236"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="337,154,337,196,331,196,331,154"/>
+<area shape="rect" id="Node000009" href="$prefetch__rule__repository_8cpp.html" title="Implementation of prefetch_rule_repository using base_repository pattern." alt="" coords="683,196,835,236"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="762,162,762,196,757,196,757,162"/>
+</map>

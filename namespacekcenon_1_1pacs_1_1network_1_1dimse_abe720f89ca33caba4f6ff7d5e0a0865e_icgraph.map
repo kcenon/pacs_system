@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::dimse::is_pending" name="kcenon::pacs::network::dimse::is_pending">
+<area shape="rect" id="Node000001" title="Check if status indicates pending (more results)" alt="" coords="251,69,419,109"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a80566767a728bf488f6c0a8f4b06bc55" title="Check if this is a final status (operation complete)" alt="" coords="20,5,188,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="248,68,176,48,177,43,250,63"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#ad3d2a4dfb904524519866c06505ed751" title="Get the category name for a status code." alt="" coords="13,69,195,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,92,196,92,196,87,237,87"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a6491f7678cc8aa160ddd6536898e9531" title="Get a human&#45;readable description of a status code." alt="" coords="5,133,203,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,116,177,136,176,131,248,110"/>
+</map>

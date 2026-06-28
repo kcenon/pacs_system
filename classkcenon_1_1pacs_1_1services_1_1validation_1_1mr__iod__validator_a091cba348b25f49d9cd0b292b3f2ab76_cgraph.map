@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::mr_iod_validator::check_modality" name="kcenon::pacs::services::validation::mr_iod_validator::check_modality">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,34,219,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="267,5,456,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,43,253,38,254,44,219,49"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="284,70,439,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,74,271,82,270,87,219,79"/>
+</map>

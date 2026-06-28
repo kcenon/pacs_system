@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::label_map_seg_iod_validator::validate_multiframe_functional_groups_module" name="kcenon::pacs::services::validation::label_map_seg_iod_validator::validate_multiframe_functional_groups_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="476,5,757,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1label__map__seg__iod__validator.html#a721eb3a4d95ebc52fb7e53ad6d80c57b" title="Validate a DICOM dataset against Label Map Segmentation IOD." alt="" coords="223,13,428,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="462,43,428,43,428,37,462,37"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a39cbba041504955544bcccc7cdc0aeb2" title="Validate a Label Map Segmentation dataset with default options." alt="" coords="5,13,175,67"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,43,175,43,175,37,209,37"/>
+</map>

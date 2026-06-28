@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::di::ILogger::fatal_fmt" name="kcenon::pacs::di::ILogger::fatal_fmt">
+<area shape="rect" id="Node000001" title="Log a formatted fatal&#45;level message." alt="" coords="5,37,188,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#a2aae028d460330016597c74691e01ce1" title="Log a fatal&#45;level message." alt="" coords="236,5,419,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,42,222,37,223,43,188,47"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#a7096efcafc5bf244ae3ba139ba6084aa" title="Check if a log level is enabled." alt="" coords="236,69,419,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,67,223,72,222,77,188,73"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::pacs_monitor::to_prometheus" name="kcenon::pacs::monitoring::pacs_monitor::to_prometheus">
+<area shape="rect" id="Node000001" title="Export all metrics in Prometheus text format." alt="" coords="5,49,229,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="295,5,482,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,51,281,44,282,49,230,56"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a20dcb4bb0482dbd5fda86a5e19165bc4" title="Export metrics in Prometheus text format." alt="" coords="277,85,500,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="230,81,264,85,263,91,229,86"/>
+</map>

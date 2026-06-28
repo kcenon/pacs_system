@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::integration_test::generate_ct_dataset" name="kcenon::pacs::integration_test::generate_ct_dataset">
+<area shape="rect" id="Node000001" title="Generate a minimal CT image dataset for testing." alt="" coords="148,221,343,261"/>
+<area shape="rect" id="Node000002" href="$test__dcmtk__store_8cpp.html#a0db11938a94f602355af7ed602d273b4" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,210,173,129,138,84,98,44,82,33,85,29,102,40,142,81,178,126,229,207"/>
+<area shape="rect" id="Node000003" href="$test__error__recovery_8cpp.html#a4aa2d297f8a3fd95dac17d127623ac53" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,211,165,153,98,93,81,82,84,78,102,89,169,150,221,208"/>
+<area shape="rect" id="Node000004" href="$test__stress_8cpp.html#af6c6e7d2419130d4208e5b57986dc547" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="205,215,99,143,79,132,81,127,101,138,207,210"/>
+<area shape="rect" id="Node000005" href="$test__store__query_8cpp.html#adff06e0c18274bd662b81c27fbda88b2" title=" " alt="" coords="5,153,100,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="179,218,86,181,87,176,181,213"/>
+<area shape="rect" id="Node000006" href="$test__error__recovery_8cpp.html#a58edea7ec27068495b2cf1d479bceba9" title=" " alt="" coords="5,203,100,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="134,229,100,224,101,219,135,223"/>
+<area shape="rect" id="Node000007" href="$test__error__recovery_8cpp.html#a8ee74506c7c2958aab6db2fb66c908a8" title=" " alt="" coords="5,252,100,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="135,257,101,261,100,256,134,252"/>
+<area shape="rect" id="Node000008" href="$test__store__query_8cpp.html#a2ce5541cef81d06ef586d5bf1b0ed914" title=" " alt="" coords="5,301,100,327"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="181,268,88,304,86,299,179,263"/>
+<area shape="rect" id="Node000009" href="$test__store__query_8cpp.html#a62f23b8ad062de20a8b995d57916bbd1" title=" " alt="" coords="5,351,100,376"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="206,271,101,340,79,353,77,348,99,336,203,266"/>
+<area shape="rect" id="Node000010" href="$test__store__query_8cpp.html#a8cf387aa20e8dce78cb291dc8d9338c8" title=" " alt="" coords="5,400,100,425"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="221,273,168,330,102,389,82,402,79,398,98,385,165,326,217,270"/>
+<area shape="rect" id="Node000011" href="$test__error__recovery_8cpp.html#ac749cda3ffe3b8c21008af0a842d8465" title=" " alt="" coords="5,449,100,475"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="229,274,177,354,142,398,102,439,84,451,81,447,98,435,138,395,173,350,224,271"/>
+</map>

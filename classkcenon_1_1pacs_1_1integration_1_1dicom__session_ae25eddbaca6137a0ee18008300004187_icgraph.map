@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration::dicom_session::on_error" name="kcenon::pacs::integration::dicom_session::on_error">
+<area shape="rect" id="Node000001" title="Handle connection errors." alt="" coords="255,91,443,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#aa4ddd886cd7a3b455119e69226982f96" title="Construct a DICOM session wrapping a messaging_session." alt="" coords="13,5,199,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="272,90,190,63,192,58,274,85"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a3bf0831948966b7659c897544026023f" title="Construct a DICOM session wrapping a secure_session." alt="" coords="13,84,199,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="241,114,199,114,199,109,241,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a4b3e4bc681d228876a32fd5558701517" title="Feed an error from external source." alt="" coords="5,163,207,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="268,138,175,166,173,161,267,133"/>
+</map>

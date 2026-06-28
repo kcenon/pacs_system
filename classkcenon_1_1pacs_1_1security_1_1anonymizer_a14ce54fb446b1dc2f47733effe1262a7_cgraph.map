@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::security::anonymizer::get_hipaa_identifier_tags" name="kcenon::pacs::security::anonymizer::get_hipaa_identifier_tags">
+<area shape="rect" id="Node000001" title="Get a list of HIPAA Safe Harbor identifier tags." alt="" coords="5,163,184,217"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#a4b10cf961b22d3f4ea03614e72b60b8d" title="Get all HIPAA identifier tags." alt="" coords="232,163,399,217"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,187,219,187,219,193,184,193"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#ac81d9f08a74d9d5c17490dfaa5a782ce" title="Tags containing communication identifiers." alt="" coords="447,5,613,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="340,161,387,115,445,69,452,65,455,69,448,74,391,119,344,164"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#aa6ab48510d26fc361b23dbda40844b13" title="Tags containing dates (except year)" alt="" coords="447,84,613,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="390,160,441,141,443,146,392,165"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#ad6fa842db9c27c602db2c6c8a14e88e2" title="Tags containing geographic identifiers." alt="" coords="447,163,613,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="399,187,433,187,433,193,399,193"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#a607f5143ed3f915c78023cb0fc236b27" title="Tags containing names." alt="" coords="447,241,613,296"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="392,215,443,234,441,239,390,220"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#a900ac15978d9cf487020c9d8b9dd5063" title="Tags containing unique identifiers." alt="" coords="447,320,613,375"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="345,216,391,260,448,305,457,311,454,315,445,310,388,264,341,220"/>
+</map>

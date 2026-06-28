@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::auth::jwk_key" name="kcenon::pacs::web::auth::jwk_key">
+<area shape="rect" id="Node000001" title="Represents a single JSON Web Key converted to PEM format." alt="" coords="5,321,148,401"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="37,135,116,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,200,79,305,74,305,74,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="11,5,142,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,99,79,134,74,134,74,99"/>
+</map>

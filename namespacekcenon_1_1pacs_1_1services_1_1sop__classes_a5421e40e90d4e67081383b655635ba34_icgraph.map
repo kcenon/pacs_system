@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::sop_classes::is_valid_segmentation_type" name="kcenon::pacs::services::sop_classes::is_valid_segmentation_type">
+<area shape="rect" id="Node000001" title="Check if segmentation type string is valid." alt="" coords="1048,13,1217,67"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a19f706aeddd41dc3984326608098bb41" title=" " alt="" coords="733,13,1000,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1034,43,1000,43,1000,37,1034,37"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#adcc1a3426a4f711bbc1dd1f6bafb9e8b" title=" " alt="" coords="440,5,685,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="720,43,686,43,686,37,720,37"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a9cc3938f8ab49df6f491abf98762504a" title="Validate a DICOM dataset against SEG IOD." alt="" coords="223,13,392,67"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="426,43,392,43,392,37,426,37"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a74c19eea811465d44a121c7cda329931" title="Validate a SEG dataset with default options." alt="" coords="5,13,175,67"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="209,43,175,43,175,37,209,37"/>
+</map>

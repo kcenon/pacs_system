@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::findscu" name="kcenon::pacs::integration_test::dcmtk_tool::findscu">
+<area shape="rect" id="Node000001" title="Run C&#45;FIND (findscu) client." alt="" coords="148,97,337,137"/>
+<area shape="rect" id="Node000002" href="$test__dcmtk__find_8cpp.html#a9ed528cfbdb68dfe87ef4466937591e2" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,93,99,44,77,33,80,28,101,40,193,88"/>
+<area shape="rect" id="Node000003" href="$test__dcmtk__find_8cpp.html#a10278c4b59c0489e49a1bfccd88bd55e" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,96,99,82,101,77,153,91"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__find_8cpp.html#a551fae934531045bd5d340e9f2ce9a97" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="134,119,100,119,100,114,134,114"/>
+<area shape="rect" id="Node000005" href="$test__dcmtk__find_8cpp.html#a80b3b85c7a17bd8ce6229687cb28065b" title=" " alt="" coords="5,153,100,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="153,143,101,156,99,151,151,138"/>
+<area shape="rect" id="Node000006" href="$test__dcmtk__find_8cpp.html#a1cee04edbe418b8a1fe2e61f8c401b6b" title=" " alt="" coords="5,203,100,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="192,146,79,205,77,200,190,141"/>
+</map>

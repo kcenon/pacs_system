@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/worklist_endpoints.h" name="include/kcenon/pacs/web/endpoints/worklist_endpoints.h">
+<area shape="rect" id="Node000001" title="Worklist API endpoints for REST server." alt="" coords="119,5,296,60"/>
+<area shape="rect" id="Node000002" href="$worklist__endpoints_8cpp.html" title="Worklist API endpoints implementation." alt="" coords="5,108,201,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,72,126,110,123,106,166,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="225,115,400,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="249,67,301,113,298,117,246,71"/>
+</map>

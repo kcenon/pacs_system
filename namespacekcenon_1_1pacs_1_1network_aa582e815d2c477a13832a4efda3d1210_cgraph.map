@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::make_pooled_p_data_tf" name="kcenon::pacs::network::make_pooled_p_data_tf">
+<area shape="rect" id="Node000001" title="Create a pooled p_data_tf_pdu." alt="" coords="5,5,191,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__buffer__pool.html#ad8e2db552ca441c7c3a0143a2cb5e3ce" title="Get the global PDU buffer pool instance." alt="" coords="239,5,407,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,23,225,23,225,28,191,28"/>
+</map>

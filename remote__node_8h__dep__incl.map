@@ -1,0 +1,21 @@
+<map id="include/kcenon/pacs/client/remote_node.h" name="include/kcenon/pacs/client/remote_node.h">
+<area shape="rect" id="Node000001" title="Remote PACS node data structures for client operations." alt="" coords="633,5,797,45"/>
+<area shape="rect" id="Node000002" href="$remote__node__manager_8h.html" title="Remote PACS node manager for client operations." alt="" coords="470,93,625,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="670,55,596,96,593,91,668,50"/>
+<area shape="rect" id="Node000007" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="620,196,811,236"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="718,59,718,195,713,195,713,59"/>
+<area shape="rect" id="Node000008" href="$node__repository_8h.html" title="Repository for remote PACS node persistence using base_repository pattern." alt="" coords="823,101,1018,141"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="770,48,880,98,878,103,768,53"/>
+<area shape="rect" id="Node000003" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="5,203,201,229"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="457,144,159,206,158,201,456,138"/>
+<area shape="rect" id="Node000004" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="226,196,365,236"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="464,155,347,198,345,193,463,150"/>
+<area shape="rect" id="Node000005" href="$remote__node__manager_8cpp.html" title="Implementation of the Remote Node Manager." alt="" coords="835,196,1006,236"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="639,142,846,193,845,199,637,147"/>
+<area shape="rect" id="Node000006" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="389,203,596,229"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="527,162,502,204,497,202,522,159"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="608,152,683,194,680,198,605,157"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="923,154,923,196,918,196,918,154"/>
+<area shape="rect" id="Node000009" href="$node__repository_8cpp.html" title="Implementation of the node repository for remote node persistence." alt="" coords="1031,203,1259,229"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="980,144,1118,201,1116,206,978,148"/>
+</map>

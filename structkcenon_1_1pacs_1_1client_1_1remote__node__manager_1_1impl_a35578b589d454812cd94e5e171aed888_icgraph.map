@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::client::remote_node_manager::impl::notify_status_change" name="kcenon::pacs::client::remote_node_manager::impl::notify_status_change">
+<area shape="rect" id="Node000001" title=" " alt="" coords="947,77,1128,146"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1remote__node__manager_1_1impl.html#a08d248c52e0389224638402a32213b12" title=" " alt="" coords="700,84,899,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="933,114,899,114,899,109,933,109"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a7744aa1cdda26440572c8dc8b67b5b30" title="Acquire an association from the pool." alt="" coords="467,5,649,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="701,82,642,63,643,58,703,77"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1remote__node__manager_1_1impl.html#a8f33bc64047b1de90a34c3737af5d138" title=" " alt="" coords="464,84,652,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="686,114,652,114,652,109,686,109"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a49618e72d435ac4406bc2561f04a684e" title="Verify a node&#39;s connectivity synchronously." alt="" coords="467,163,649,217"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="703,145,643,165,642,160,701,140"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a03771aa52ca89891dc7f7844d71fb98d" title="Start the automatic health check scheduler." alt="" coords="235,84,416,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="450,114,416,114,416,109,450,109"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a49481d59516248a5ea079c55ec3668b4" title="Construct a remote node manager." alt="" coords="5,84,187,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="221,114,187,114,187,109,221,109"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a3263db5079ad314a67d03b558569a98d" title="Verify all nodes asynchronously." alt="" coords="235,163,416,217"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="454,193,416,193,416,187,454,187"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#afe97f16df5d97ba5fa9dcf00bc16f34b" title="Verify a node&#39;s connectivity asynchronously." alt="" coords="235,241,416,296"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="464,224,408,244,406,239,463,219"/>
+</map>

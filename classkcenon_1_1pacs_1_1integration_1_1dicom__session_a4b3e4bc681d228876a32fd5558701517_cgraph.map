@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::dicom_session::feed_error" name="kcenon::pacs::integration::dicom_session::feed_error">
+<area shape="rect" id="Node000001" title="Feed an error from external source." alt="" coords="5,5,207,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#ae25eddbaca6137a0ee18008300004187" title="Handle connection errors." alt="" coords="255,5,443,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,23,241,23,241,28,207,28"/>
+</map>

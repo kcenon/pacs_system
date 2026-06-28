@@ -1,0 +1,26 @@
+var classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec =
+[
+    [ "impl", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec_1_1impl.html", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec_1_1impl" ],
+    [ "jpeg_ls_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a492e6d2581d63e0818931cf8d3009a9d", null ],
+    [ "~jpeg_ls_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a196ecc690b7a3953d6f26e94ebd83c18", null ],
+    [ "jpeg_ls_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a528121c55cc99c1aa4db34ccbe0b2326", null ],
+    [ "jpeg_ls_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#aad6924523dbe441086378a3b83d4f4f1", null ],
+    [ "can_decode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#afd0ad35eaa43650f141cfb0a9c419c8f", null ],
+    [ "can_encode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#af2dc379c32067ee63a4633febd229e99", null ],
+    [ "decode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#ab5bfd2ccd60cad25a04f8e53f259101a", null ],
+    [ "encode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#aa3f876de88df7683abc0a5cf385a1be3", null ],
+    [ "is_lossless_mode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a2664ed0c7eed3287372901a2cf1f257e", null ],
+    [ "is_lossy", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#aef7ef0b97dd973010f6942cae22dc3fe", null ],
+    [ "name", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#abe22267c3a6800c92d203e3749b4a020", null ],
+    [ "near_value", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#aadda6f34370f3dfca84126da17ec97c2", null ],
+    [ "operator=", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a40f0fe9324541c939aeaaee9af4798ec", null ],
+    [ "operator=", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a16b3ca913b4d1ed8126189454a7b18c8", null ],
+    [ "transfer_syntax_uid", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a3f59823275d32c1f9fd9815b765b725b", null ],
+    [ "impl_", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#ac2bc29b05b9a0370f75bbf49caebfb13", null ],
+    [ "kAutoNearValue", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#ae3bfefd1e50b9cc7b47d8e746f7fa19e", null ],
+    [ "kDefaultNearLosslessValue", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#aa3fa5e52326bffce8250ad808508422f", null ],
+    [ "kLosslessNearValue", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#aa08bbc29c6b10af69bf4eca5fea0a408", null ],
+    [ "kMaxNearValue", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a2a1d85b2cce0baf6758a289c137526ae", null ],
+    [ "kTransferSyntaxUIDLossless", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#a9400df57edbb3dd560a4bb1889bb48ac", null ],
+    [ "kTransferSyntaxUIDNearLossless", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__ls__codec.html#af6b3d2969754d7144c887b63ca316ff2", null ]
+];

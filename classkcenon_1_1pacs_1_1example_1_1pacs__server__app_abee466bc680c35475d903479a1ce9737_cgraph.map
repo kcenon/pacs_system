@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::example::pacs_server_app::handle_mpps_set" name="kcenon::pacs::example::pacs_server_app::handle_mpps_set">
+<area shape="rect" id="Node000001" title="Handle MPPS N&#45;SET." alt="" coords="5,5,196,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services.html#aaef4895131b5df1e13f6fe1a3430c7bd" title="Convert mpps_status to DICOM string representation." alt="" coords="244,13,413,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,30,230,30,230,35,196,35"/>
+</map>

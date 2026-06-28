@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/network/dimse/n_get.h" name="include/kcenon/pacs/network/dimse/n_get.h">
+<area shape="rect" id="Node000001" title="N&#45;GET DIMSE service." alt="" coords="15,5,189,45"/>
+<area shape="rect" id="Node000002" href="$pacs-network-dimse_8cppm.html" title="C++20 module partition for DIMSE message types." alt="" coords="5,93,199,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,59,105,93,99,93,99,59"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="worklist_cli::worklist_result_formatter::format_json" name="worklist_cli::worklist_result_formatter::format_json">
+<area shape="rect" id="Node000001" title="Format results as JSON." alt="" coords="5,37,227,77"/>
+<area shape="rect" id="Node000002" href="$classworklist__cli_1_1worklist__result__formatter.html#a034517d2b9b2d7134113204e57a17561" title="Escape string for JSON output." alt="" coords="277,5,499,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,42,263,37,263,43,227,47"/>
+<area shape="rect" id="Node000003" href="$classworklist__cli_1_1worklist__result__formatter.html#aac9fbc413e56d977b3920e5e78bfe280" title="Extract worklist item data from dataset." alt="" coords="275,69,501,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="227,68,262,72,261,77,227,73"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="549,62,704,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="501,87,536,87,536,92,501,92"/>
+</map>

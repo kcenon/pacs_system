@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::wsi_iod_validator::validate_general_series_module" name="kcenon::pacs::services::validation::wsi_iod_validator::validate_general_series_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="440,5,644,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#adb47f5cd69b9efe6f100a965c20c6081" title="Validate a DICOM dataset against WSI IOD." alt="" coords="223,13,392,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,43,392,43,392,37,426,37"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ae077f15a55dc453a0b22cc6be879315b" title="Validate a WSI dataset with default options." alt="" coords="5,13,175,67"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,43,175,43,175,37,209,37"/>
+</map>

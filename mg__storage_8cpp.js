@@ -1,0 +1,27 @@
+var mg__storage_8cpp =
+[
+    [ "create_mg_image_type", "mg__storage_8cpp.html#a6eb71775babc4bfb5fdc8b30c6d58bcc", null ],
+    [ "get_mg_sop_class_info", "mg__storage_8cpp.html#a64efa29793987aa03e5cf3f1064b911d", null ],
+    [ "get_mg_storage_sop_classes", "mg__storage_8cpp.html#a10341566e030a195c9b2c5040ae0afcc", null ],
+    [ "get_mg_transfer_syntaxes", "mg__storage_8cpp.html#ab2cb5476916933e18eec93159ea3610c", null ],
+    [ "get_standard_screening_views", "mg__storage_8cpp.html#a5f14780f3c7c19f87b73a8ac2a0d986a", null ],
+    [ "get_typical_compression_force_range", "mg__storage_8cpp.html#a172ecde95555311c0bd69d02e66a1d03", null ],
+    [ "get_valid_mg_view_positions", "mg__storage_8cpp.html#aab2ea25709b935200e64193632dcf56b", null ],
+    [ "is_breast_tomosynthesis_sop_class", "mg__storage_8cpp.html#a6a901295537a160bd476e68f771fd718", null ],
+    [ "is_magnification_view", "mg__storage_8cpp.html#a97c83166ee9c18875858a60ba06aac76", null ],
+    [ "is_mg_for_presentation_sop_class", "mg__storage_8cpp.html#a4ee2745716651208c263438589c3e187", null ],
+    [ "is_mg_for_processing_sop_class", "mg__storage_8cpp.html#aeae0b713f3032d62c5b51ea05f7a768d", null ],
+    [ "is_mg_storage_sop_class", "mg__storage_8cpp.html#a94f5c7d4c86aac0ffbde5c218e49c194", null ],
+    [ "is_screening_view", "mg__storage_8cpp.html#ad46018825872a299074efe89cd6af487", null ],
+    [ "is_spot_compression_view", "mg__storage_8cpp.html#ad390d3a78b712133206992a678dbce0d", null ],
+    [ "is_valid_breast_laterality", "mg__storage_8cpp.html#aa2c04e1cc443b95c73123c736553fde9", null ],
+    [ "is_valid_compressed_breast_thickness", "mg__storage_8cpp.html#a57fa7e9b5e7915e969145e420d4a3a3b", null ],
+    [ "is_valid_compression_force", "mg__storage_8cpp.html#a48a050964d290ff4cd750c5e42c5a805", null ],
+    [ "is_valid_laterality_view_combination", "mg__storage_8cpp.html#a8d3c12f5cbb574d3484904634b772dbc", null ],
+    [ "parse_breast_laterality", "mg__storage_8cpp.html#aa246cbff9248b5b25f187c5f44ecbd87", null ],
+    [ "parse_mg_view_position", "mg__storage_8cpp.html#a6e490f68e7bb61694ae09923e8ae7683", null ],
+    [ "to_string", "mg__storage_8cpp.html#aeb1d497505889f01ca74c8b51469c5cb", null ],
+    [ "to_string", "mg__storage_8cpp.html#a700a025f4ac360c90efac2df8fde7b7d", null ],
+    [ "to_string", "mg__storage_8cpp.html#acf94a630b0a73e33f816acedf5fe6137", null ],
+    [ "to_string", "mg__storage_8cpp.html#aaec504d77af3f0dadbeefbdee7e4f93b", null ]
+];

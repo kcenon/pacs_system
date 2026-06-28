@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/services/sop_class_registry.h" name="include/kcenon/pacs/services/sop_class_registry.h">
+<area shape="rect" id="Node000001" title="Central registry for all supported SOP Classes." alt="" coords="157,5,312,60"/>
+<area shape="rect" id="Node000002" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="5,115,240,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,71,139,117,135,113,191,67"/>
+<area shape="rect" id="Node000003" href="$sop__class__registry_8cpp.html" title="Implementation of SOP Class Registry." alt="" coords="263,108,430,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="279,67,326,106,322,110,275,71"/>
+</map>

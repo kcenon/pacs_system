@@ -1,0 +1,12 @@
+<map id="include/kcenon/pacs/di/service_interfaces.h" name="include/kcenon/pacs/di/service_interfaces.h">
+<area shape="rect" id="Node000001" title="Service interface aliases for dependency injection." alt="" coords="72,5,245,45"/>
+<area shape="rect" id="Node000002" href="$service__registration_8h.html" title="ServiceContainer registration module for PACS services." alt="" coords="67,93,250,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,59,161,93,156,93,156,59"/>
+<area shape="rect" id="Node000003" href="$test__support_8h.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,181,160,221"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="99,54,75,72,57,95,51,116,54,139,72,180,67,182,49,140,46,116,52,92,72,68,96,50"/>
+<area shape="rect" id="Node000004" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="101,269,293,295"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="221,50,246,68,265,92,274,117,275,143,270,169,260,194,234,239,210,271,206,268,230,236,255,192,265,168,269,143,269,118,260,95,242,72,218,54"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,146,101,183,97,179,131,142"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="169,146,197,269,192,270,164,147"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="123,227,182,267,179,271,120,231"/>
+</map>

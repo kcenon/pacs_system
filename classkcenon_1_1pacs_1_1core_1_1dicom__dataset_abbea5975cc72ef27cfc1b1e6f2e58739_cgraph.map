@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::core::dicom_dataset::merge" name="kcenon::pacs::core::dicom_dataset::merge">
+<area shape="rect" id="Node000001" title="Merge elements from another dataset (move version)" alt="" coords="5,5,181,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="229,5,400,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,23,215,23,215,28,182,28"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="448,5,608,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,23,434,23,434,28,400,28"/>
+</map>

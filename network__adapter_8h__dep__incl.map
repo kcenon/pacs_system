@@ -1,0 +1,24 @@
+<map id="include/kcenon/pacs/integration/network_adapter.h" name="include/kcenon/pacs/integration/network_adapter.h">
+<area shape="rect" id="Node000001" title="Adapter for integrating network_system for DICOM protocol." alt="" coords="565,5,720,60"/>
+<area shape="rect" id="Node000002" href="$test__tls__integration_8cpp.html" title="TLS Integration Tests &#45; Secure DICOM Communication." alt="" coords="5,108,224,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="553,53,222,111,221,105,552,47"/>
+<area shape="rect" id="Node000003" href="$secure__echo__scp_8cpp.html" title="Secure Echo SCP &#45; TLS&#45;secured DICOM Connectivity Test Server." alt="" coords="249,108,429,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="553,64,401,110,399,105,552,59"/>
+<area shape="rect" id="Node000004" href="$secure__echo__scu_8cpp.html" title="Secure Echo SCU &#45; TLS&#45;secured DICOM Connectivity Test Client." alt="" coords="453,108,633,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="606,72,565,110,561,106,602,68"/>
+<area shape="rect" id="Node000005" href="$service__interfaces_8h.html" title="Service interface aliases for dependency injection." alt="" coords="657,108,831,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="683,68,725,106,722,110,680,72"/>
+<area shape="rect" id="Node000009" href="$network__adapter_8cpp.html" title="Implementation of network_adapter for network_system integration." alt="" coords="855,108,1028,148"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="734,60,882,105,880,110,733,65"/>
+<area shape="rect" id="Node000010" href="$pacs-integration_8cppm.html" title="C++20 module partition for external system adapters." alt="" coords="1052,115,1303,141"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="734,47,1112,113,1111,118,733,52"/>
+<area shape="rect" id="Node000006" href="$service__registration_8h.html" title="ServiceContainer registration module for PACS services." alt="" coords="653,196,835,236"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="747,162,747,196,741,196,741,162"/>
+<area shape="rect" id="Node000007" href="$test__support_8h.html" title="Test support utilities for PACS dependency injection." alt="" coords="591,284,745,324"/>
+<area shape="poly" id="edge9_Node000005_Node000007" title=" " alt="" coords="685,157,661,174,642,197,637,219,639,242,658,283,653,285,634,243,631,218,638,195,657,171,681,152"/>
+<area shape="rect" id="Node000008" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="687,372,879,397"/>
+<area shape="poly" id="edge10_Node000005_Node000008" title=" " alt="" coords="807,152,831,171,850,195,859,220,860,246,855,272,845,297,820,342,795,373,791,370,815,339,841,295,850,270,855,245,854,221,846,197,827,174,803,157"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="720,248,687,286,683,282,716,245"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="754,249,783,371,777,373,749,250"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="709,330,767,370,764,374,706,334"/>
+</map>

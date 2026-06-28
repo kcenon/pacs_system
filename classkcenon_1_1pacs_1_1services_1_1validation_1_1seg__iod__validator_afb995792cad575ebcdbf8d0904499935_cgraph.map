@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::check_type1_attribute" name="kcenon::pacs::services::validation::seg_iod_validator::check_type1_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,91,183,160"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="231,5,420,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,88,230,55,248,48,250,53,232,60,161,93"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="248,69,403,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,109,234,101,235,106,184,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="248,134,403,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="184,137,235,145,234,150,183,142"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="244,213,407,253"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="155,158,232,198,251,206,249,211,230,202,152,163"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="468,181,628,221"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="406,219,454,212,455,217,407,224"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="477,245,619,285"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="407,242,464,251,463,256,406,248"/>
+</map>

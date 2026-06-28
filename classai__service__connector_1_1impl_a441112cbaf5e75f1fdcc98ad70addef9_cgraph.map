@@ -1,0 +1,7 @@
+<map id="ai_service_connector::impl::shutdown" name="ai_service_connector::impl::shutdown">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,164,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="212,5,399,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,23,198,23,198,28,164,28"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="447,5,633,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="399,23,433,23,433,28,399,28"/>
+</map>

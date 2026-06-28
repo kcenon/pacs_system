@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::parametric_map_iod_validator::validate" name="kcenon::pacs::services::validation::parametric_map_iod_validator::validate">
+<area shape="rect" id="Node000001" title="Validate a DICOM dataset against Parametric Map IOD." alt="" coords="223,5,433,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#aa40b5a11e7fd197c5852edc164b41257" title="Validate a Parametric Map dataset with default options." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

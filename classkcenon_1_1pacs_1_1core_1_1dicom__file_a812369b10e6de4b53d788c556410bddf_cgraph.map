@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::core::dicom_file::to_bytes" name="kcenon::pacs::core::dicom_file::to_bytes">
+<area shape="rect" id="Node000001" title="Encode the DICOM file to raw bytes." alt="" coords="5,91,167,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a37745a0b6d269df9531819fecd6b49ef" title="Encode a dataset based on its Transfer Syntax." alt="" coords="217,5,369,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,89,207,62,208,67,140,94"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a52311d3952a0b808f945dd2ece4f8742" title="Encode a dataset using Explicit VR Little Endian." alt="" coords="217,84,369,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,109,203,109,203,114,167,114"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a902bf4234bbe69587a323fa5ba91cd88" title="Get the Transfer Syntax of this file." alt="" coords="215,163,371,217"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="140,129,208,155,207,160,138,134"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="419,31,615,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="368,88,427,72,429,78,370,94"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding.html#ae2c4e449332587a5bbd275b365a9e5f8" title="Converts a vr_type to its two&#45;character string representation." alt="" coords="429,95,604,135"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="369,110,415,111,415,116,369,115"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="439,163,594,217"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="371,187,425,187,425,193,371,193"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::movescu" name="kcenon::pacs::integration_test::dcmtk_tool::movescu">
+<area shape="rect" id="Node000001" title="Run C&#45;MOVE (movescu) client." alt="" coords="148,73,351,113"/>
+<area shape="rect" id="Node000002" href="$test__dcmtk__move_8cpp.html#a1a7df4358030d4eb8b26b14b5444c32c" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,70,86,33,88,28,184,65"/>
+<area shape="rect" id="Node000003" href="$test__dcmtk__move_8cpp.html#ada66cd390881d46101ccadbc5f968ec9" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,80,100,76,100,71,134,75"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__move_8cpp.html#aac77386ed4751fdffc2faf778f8001d4" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="134,109,100,114,100,108,134,104"/>
+<area shape="rect" id="Node000005" href="$test__dcmtk__move_8cpp.html#ae6858896c6529e5f4e8dc3ad1fc561e4" title=" " alt="" coords="5,153,100,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="183,120,89,156,87,151,181,115"/>
+</map>

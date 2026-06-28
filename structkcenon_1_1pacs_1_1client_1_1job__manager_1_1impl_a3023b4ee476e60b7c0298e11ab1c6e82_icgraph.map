@@ -1,0 +1,38 @@
+<map id="kcenon::pacs::client::job_manager::impl::update_job_status" name="kcenon::pacs::client::job_manager::impl::update_job_status">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1108,581,1268,635"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a10d1bb904da5b97af9fe9bb6d1b222c8" title="Cancel a job." alt="" coords="865,96,1057,136"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1171,568,1125,437,1093,357,1058,279,1014,199,974,138,978,135,1018,197,1062,276,1098,355,1130,436,1176,566"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a46309fb960bec6076acd0dd6e1bb63fa" title=" " alt="" coords="881,290,1041,345"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1155,571,981,346,985,343,1159,568"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="207,290,367,345"/>
+<area shape="poly" id="edge21_Node000001_Node000006" title=" " alt="" coords="1094,607,838,591,712,576,661,567,622,556,574,535,527,510,440,453,367,394,314,347,318,343,370,390,443,448,530,506,576,530,624,551,662,562,713,571,839,586,1094,602"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a25aaff38a022760ea7e1afca7f5f6eb1" title="Pause a running or queued job." alt="" coords="866,616,1055,656"/>
+<area shape="poly" id="edge18_Node000001_Node000013" title=" " alt="" coords="1094,622,1056,627,1055,622,1094,617"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a457dae00253cd5b46d100428c9ff1d31" title="Resume a paused job." alt="" coords="861,680,1060,720"/>
+<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="1121,644,1061,670,1028,682,1026,677,1059,666,1119,639"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#acc5c0a0e3a6f82d965161e0e6c4e9ce2" title="Start a pending job." alt="" coords="871,744,1051,784"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="1158,648,1115,693,1061,734,1037,746,1035,742,1059,730,1112,689,1154,644"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a0ab175e484e921502eb94dbeffaad705" title="Delete a job." alt="" coords="623,5,813,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="893,94,772,48,773,43,894,89"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#acd8de41a0c6c011d49f906aa819bcfdc" title=" " alt="" coords="415,290,575,345"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="935,280,913,248,885,215,851,184,812,161,761,142,718,135,674,141,624,161,585,187,553,222,528,259,511,291,506,288,524,256,549,219,582,183,621,156,673,136,718,129,762,137,814,156,854,180,889,211,917,245,939,277"/>
+<area shape="poly" id="edge17_Node000004_Node000006" title=" " alt="" coords="940,279,919,241,891,199,855,160,812,130,762,112,720,109,677,116,623,131,579,145,534,163,451,206,378,252,324,292,321,288,375,248,448,202,532,158,577,140,622,125,676,111,720,103,764,107,815,126,859,156,895,196,924,238,945,277"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a89adec499884fb6ef98ed3ca268ed14e" title=" " alt="" coords="637,171,799,226"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="899,285,812,240,787,229,790,224,815,235,902,281"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a1a1126856819f04bbfe30dd363a1aabf" title=" " alt="" coords="638,250,798,305"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="866,305,798,293,799,288,867,299"/>
+<area shape="rect" id="Node000010" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a095befda2fd63841cfc331d77375c95f" title=" " alt="" coords="638,329,798,383"/>
+<area shape="poly" id="edge11_Node000004_Node000010" title=" " alt="" coords="867,335,799,346,798,341,866,330"/>
+<area shape="rect" id="Node000011" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a03ea1a0b7ef1ca0e4f96afdbb33adc29" title=" " alt="" coords="638,407,798,462"/>
+<area shape="poly" id="edge13_Node000004_Node000011" title=" " alt="" coords="899,354,814,397,787,410,785,405,812,392,897,349"/>
+<area shape="rect" id="Node000012" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a6fdbaec62abf03f4bcc744ee9a2c13eb" title=" " alt="" coords="638,486,798,541"/>
+<area shape="poly" id="edge15_Node000004_Node000012" title=" " alt="" coords="933,357,882,417,850,448,815,476,794,488,791,484,812,471,846,444,878,413,929,354"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="401,320,367,320,367,315,401,315"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a1be8a6262590f3bd54b54d6794f6f3dc" title="Start the worker threads." alt="" coords="5,290,159,345"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="193,320,159,320,159,315,193,315"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="635,234,624,240,537,292,534,288,621,235,633,229"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="625,297,575,306,574,300,624,291"/>
+<area shape="poly" id="edge12_Node000010_Node000005" title=" " alt="" coords="624,342,574,334,575,329,625,337"/>
+<area shape="poly" id="edge14_Node000011_Node000005" title=" " alt="" coords="635,404,621,397,536,347,539,342,624,392,638,399"/>
+<area shape="poly" id="edge16_Node000012_Node000005" title=" " alt="" coords="629,481,621,475,586,445,556,410,510,347,515,343,560,407,590,441,624,471,632,477"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::monitoring::metric_value" name="kcenon::pacs::monitoring::metric_value">
+<area shape="rect" id="Node000001" title="Standard metric value structure with type information." alt="" coords="169,463,348,603"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="209,155,287,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="284,220,302,251,313,301,314,352,306,402,295,448,289,446,301,401,308,352,308,301,298,253,279,222"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="127,305,271,400"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="237,222,225,253,215,290,210,288,220,251,232,220"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="183,5,313,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="251,100,251,155,245,155,245,100"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="217,399,233,446,228,448,212,401"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,149,228"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="84,241,90,261,100,280,128,310,125,314,95,283,85,263,79,242"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="38,13,61,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="50,78,53,124,55,132,50,133,48,124,44,78"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="114,13,137,78"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="117,79,99,133,93,131,112,77"/>
+</map>

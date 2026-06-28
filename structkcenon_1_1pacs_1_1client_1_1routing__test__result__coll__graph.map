@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::client::routing_test_result" name="kcenon::pacs::client::routing_test_result">
+<area shape="rect" id="Node000001" title="Result of testing rules against a dataset (dry run)" alt="" coords="258,657,402,737"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="263,135,341,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="343,191,358,205,370,223,371,231,370,239,374,350,381,438,381,525,375,575,363,634,361,643,356,641,358,633,370,574,376,524,376,438,369,351,365,239,366,231,365,225,354,209,339,195"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1routing__action.html" title="Action to perform when a routing rule matches." alt="" coords="163,263,308,423"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="264,188,241,204,223,225,216,247,211,246,218,223,237,200,261,183"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="237,5,367,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="305,99,305,134,299,134,299,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="171,500,321,595"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="275,594,302,642,297,644,270,596"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="242,423,245,484,240,484,237,423"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,310,127,375"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="65,389,70,433,77,455,88,474,105,492,126,507,171,527,169,532,123,511,102,496,84,478,72,457,65,434,60,389"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="55,135,77,200"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="69,200,69,294,63,294,63,200"/>
+</map>

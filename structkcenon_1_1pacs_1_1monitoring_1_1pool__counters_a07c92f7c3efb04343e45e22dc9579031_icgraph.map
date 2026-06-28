@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::pool_counters::reset" name="kcenon::pacs::monitoring::pool_counters::reset">
+<area shape="rect" id="Node000001" title="Reset all counters to zero." alt="" coords="475,5,661,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a2d5c1f94465d4768f3f872221578f30f" title="Reset all metrics to zero." alt="" coords="240,5,427,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,28,427,28,427,23,461,23"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor.html#a2131164e16ec44145e1de3a1e113fc76" title="Reset all metrics." alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,28,192,28,192,23,227,23"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="include/kcenon/pacs/integration/monitoring_adapter.h" name="include/kcenon/pacs/integration/monitoring_adapter.h">
+<area shape="rect" id="Node000001" title="Adapter for PACS performance metrics and distributed tracing." alt="" coords="282,5,454,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,72,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="283,59,86,110,85,105,281,54"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,108,163,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="296,63,175,106,173,101,294,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,108,274,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="327,62,262,103,259,98,325,58"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="299,108,349,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="357,61,339,97,334,94,352,59"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="373,108,451,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="384,59,402,94,397,97,379,61"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="475,108,549,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="413,58,482,99,480,103,411,62"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="573,108,632,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="441,58,561,101,560,106,439,63"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="657,108,754,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="455,53,648,102,647,107,454,58"/>
+</map>

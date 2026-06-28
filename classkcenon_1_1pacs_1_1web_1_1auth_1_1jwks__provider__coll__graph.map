@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::web::auth::jwks_provider" name="kcenon::pacs::web::auth::jwks_provider">
+<area shape="rect" id="Node000001" title=" " alt="" coords="92,621,247,941"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="69,479,269,559"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,559,172,605,167,605,167,559"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1web_1_1auth_1_1jwk__key.html" title="Represents a single JSON Web Key converted to PEM format." alt="" coords="70,321,213,401"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="151,401,162,462,157,463,146,402"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="31,135,110,200"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="67,201,56,266,47,356,46,457,51,508,60,558,72,597,87,636,82,638,67,599,55,559,46,509,41,457,42,356,51,266,61,200"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="85,199,124,305,119,307,80,201"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="73,99,73,134,68,134,68,99"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="237,329,358,394"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="277,407,243,456,220,480,216,477,239,453,273,404"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="286,135,309,200"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="300,200,300,312,295,312,295,200"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="293,486,377,551"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="317,553,258,646,253,643,312,550"/>
+</map>

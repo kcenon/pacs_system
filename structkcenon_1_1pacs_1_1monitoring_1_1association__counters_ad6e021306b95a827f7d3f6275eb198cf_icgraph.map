@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::association_counters::record_rejected" name="kcenon::pacs::monitoring::association_counters::record_rejected">
+<area shape="rect" id="Node000001" title="Record an association being rejected." alt="" coords="240,5,427,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a3d22000f9eef9a785f77d6cc5becd444" title="Record an association being rejected." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,35,192,35,192,30,227,30"/>
+</map>

@@ -1,0 +1,26 @@
+<map id="kcenon::pacs::services::retrieve_scu::get_get_sop_class_uid" name="kcenon::pacs::services::retrieve_scu::get_get_sop_class_uid">
+<area shape="rect" id="Node000001" title="Get GET SOP Class UID based on current configuration." alt="" coords="1569,52,1739,107"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a1415694235b26dc1f37e19d1d1faf775" title="Send a C&#45;CANCEL request to stop an ongoing retrieve." alt="" coords="1337,27,1507,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1555,68,1506,62,1507,56,1556,63"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a44135d15cb7a687b081f1d24e2b37002" title="Internal C&#45;GET implementation." alt="" coords="1323,91,1521,131"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1556,95,1522,100,1521,95,1556,90"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a773ca88f41bd9d30ee899c140efe2bbe" title="Perform a C&#45;GET operation with raw dataset." alt="" coords="1105,91,1275,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1309,114,1275,114,1275,109,1309,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a027e7deaf6e070bf225a041fcc3b6edf" title="Retrieve a single instance by SOP Instance UID." alt="" coords="867,5,1036,60"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1115,90,1034,63,1036,58,1117,85"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a18b40be58bf8a06ebe49541fda6cebb0" title="Retrieve a series by Series Instance UID." alt="" coords="867,84,1036,139"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="1091,114,1036,114,1036,109,1091,109"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a52b043a657f11e3702c45daf444dcbb3" title="Retrieve a study by Study Instance UID." alt="" coords="845,163,1057,203"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="1111,138,1019,166,1018,161,1109,133"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a095befda2fd63841cfc331d77375c95f" title=" " alt="" coords="630,84,790,139"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="853,114,790,114,790,109,853,109"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#acd8de41a0c6c011d49f906aa819bcfdc" title=" " alt="" coords="415,84,575,139"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="616,114,575,114,575,109,616,109"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="207,84,367,139"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="401,114,367,114,367,109,401,109"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a1be8a6262590f3bd54b54d6794f6f3dc" title="Start the worker threads." alt="" coords="5,84,159,139"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="193,114,159,114,159,109,193,109"/>
+<area shape="poly" id="edge11_Node000011_Node000007" title=" " alt="" coords="870,162,789,138,791,133,871,157"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae943766ff6e20c22bd4df3fe973e4e8a" title="Prefetch a single study via C&#45;MOVE." alt="" coords="623,163,797,217"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="832,189,798,190,798,185,832,184"/>
+</map>

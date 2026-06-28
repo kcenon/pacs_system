@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::validate_sop_common_module" name="kcenon::pacs::services::validation::seg_iod_validator::validate_sop_common_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,155,184,224"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#afb995792cad575ebcdbf8d0904499935" title=" " alt="" coords="232,119,409,188"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,172,218,167,219,172,185,178"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="457,5,647,45"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="144,152,185,127,231,104,339,67,443,42,445,47,341,72,233,109,188,132,147,157"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="475,198,629,253"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="184,194,461,216,461,221,184,199"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#ac059c3b5cf7b5a7bb54a9c0a9796b855" title="Check if a SOP Class UID is a SEG Storage SOP Class." alt="" coords="236,270,405,325"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="169,222,252,262,249,267,167,227"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="363,116,407,85,456,55,471,48,473,53,459,60,410,89,366,121"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="475,69,629,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="409,126,465,110,467,116,410,131"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="411,178,462,195,461,200,409,184"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="471,133,633,173"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="410,151,457,151,457,156,410,156"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="695,101,855,141"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="633,139,681,132,682,137,634,144"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="703,165,846,205"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="634,162,690,171,690,176,633,168"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a1881abe4cd710afbd1e9c9fa2de75007" title="Get information about a specific SEG SOP Class." alt="" coords="467,277,637,331"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="406,297,454,298,453,304,406,302"/>
+</map>

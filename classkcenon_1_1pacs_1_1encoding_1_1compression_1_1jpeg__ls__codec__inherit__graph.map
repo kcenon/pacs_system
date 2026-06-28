@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_ls_codec" name="kcenon::pacs::encoding::compression::jpeg_ls_codec">
+<area shape="rect" id="Node000001" title="JPEG&#45;LS codec implementation supporting both lossless and near&#45;lossless modes." alt="" coords="5,513,249,1173"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1compression__codec.html" title="Abstract base class for image compression codecs." alt="" coords="7,5,248,465"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,479,130,513,125,513,125,479"/>
+</map>

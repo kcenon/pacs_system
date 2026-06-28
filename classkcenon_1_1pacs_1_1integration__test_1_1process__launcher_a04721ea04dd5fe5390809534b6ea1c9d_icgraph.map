@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration_test::process_launcher::is_running" name="kcenon::pacs::integration_test::process_launcher::is_running">
+<area shape="rect" id="Node000001" title="Check if a process is still running." alt="" coords="633,37,820,92"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#add120561f327e18f19a9600de38d3fce" title="Check if process is running." alt="" coords="391,37,585,92"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="619,67,585,67,585,62,619,62"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__server__guard.html#a03dbaeffa9c2742e15f287a03a81a9c4" title=" " alt="" coords="148,5,343,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="377,53,343,48,343,43,377,47"/>
+<area shape="rect" id="Node000005" href="$test__dcmtk__tool_8cpp.html#a996a2b404db755df974961b6b1649b6c" title=" " alt="" coords="198,84,293,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="377,82,293,93,293,88,377,77"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__tool_8cpp.html#a36fc130d07293b6b0fe78cd977591864" title=" " alt="" coords="5,20,100,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="134,35,100,35,100,30,134,30"/>
+</map>

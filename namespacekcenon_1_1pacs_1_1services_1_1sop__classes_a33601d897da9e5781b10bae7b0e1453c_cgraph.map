@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_us_multiframe_sop_class" name="kcenon::pacs::services::sop_classes::is_us_multiframe_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a multi&#45;frame US Storage SOP Class." alt="" coords="5,5,235,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a2e8044e634919f084b398c21103ab71e" title="Get information about a specific US SOP Class." alt="" coords="283,5,452,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,30,269,30,269,35,235,35"/>
+</map>

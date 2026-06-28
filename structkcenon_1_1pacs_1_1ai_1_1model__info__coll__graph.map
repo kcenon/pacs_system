@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::ai::model_info" name="kcenon::pacs::ai::model_info">
+<area shape="rect" id="Node000001" title="Information about an available AI model." alt="" coords="103,433,303,499"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="205,148,284,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="262,213,277,254,289,304,292,358,287,385,278,411,270,423,265,420,273,408,282,384,286,358,284,305,272,255,257,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="23,276,202,341"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="213,216,160,266,156,263,210,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,5,310,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,99,247,148,242,148,242,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="108,342,107,375,110,392,116,408,125,421,121,424,112,411,105,394,102,376,103,341"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="65,227,70,251,83,274,79,277,65,253,60,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::remove_handler" name="kcenon::pacs::network::v2::dicom_server_v2::remove_handler">
+<area shape="rect" id="Node000001" title="Remove handler by session ID." alt="" coords="653,84,821,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a39319a4369eab2d82493276a382df3d6" title="Create and register a new handler for a session." alt="" coords="437,12,605,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="641,82,603,69,605,64,643,77"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#abf8ee92d12d45ee968dc0a47acf33ce8" title="Handle disconnection notification." alt="" coords="221,84,389,139"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="640,114,390,114,390,109,640,109"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a007f61853d6fc36f6a624b4f8c2730bb" title="Handle network error." alt="" coords="437,149,605,204"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="641,143,606,154,605,149,639,138"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#af7040892e5e9f48c689e74fcb6e7d452" title="Handle new connection from server." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="423,39,389,38,390,33,423,34"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#ac6bee78f25c0056c75bf82dfcbeec600" title="Start the server." alt="" coords="5,84,173,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="217,67,166,86,164,81,216,62"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="207,114,174,114,174,109,207,109"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="423,176,325,169,221,154,170,141,171,136,222,149,326,164,424,171"/>
+</map>

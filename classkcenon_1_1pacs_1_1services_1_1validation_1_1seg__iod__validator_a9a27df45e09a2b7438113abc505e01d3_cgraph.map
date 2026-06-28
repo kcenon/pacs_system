@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::validate_segment_sequence" name="kcenon::pacs::services::validation::seg_iod_validator::validate_segment_sequence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,32,217,101"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="509,5,699,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,40,265,32,384,23,496,21,496,26,385,28,266,37,218,45"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="285,47,440,87"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,64,271,64,271,69,217,69"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a2607cbc5deb7670258b7ad89c8464020" title=" " alt="" coords="265,111,460,180"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="218,97,253,108,251,113,217,102"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="435,108,459,96,551,49,553,54,461,101,437,113"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="527,102,681,157"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="460,136,513,133,513,138,460,142"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a9474ab90f03725398ec6051d8c8c1477" title="Check if segment algorithm type string is valid." alt="" coords="508,181,700,235"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="461,168,496,177,494,182,459,173"/>
+</map>

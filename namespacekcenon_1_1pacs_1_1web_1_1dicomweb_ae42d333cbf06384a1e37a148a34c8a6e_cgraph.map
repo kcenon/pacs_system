@@ -1,0 +1,29 @@
+<map id="kcenon::pacs::web::dicomweb::render_dicom_image" name="kcenon::pacs::web::dicomweb::render_dicom_image">
+<area shape="rect" id="Node000001" title="Render a DICOM image to JPEG or PNG." alt="" coords="5,179,240,219"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ad0ab0a731106dd2d4aa480d7af2eb692" title="Apply window/level transformation to pixel data." alt="" coords="288,5,517,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,177,203,121,244,89,287,62,316,48,318,53,289,66,247,94,207,125,145,181"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1htj2k__codec.html#a99eaf48794dbe41421aacbc8585747ff" title="Compresses pixel data to HTJ2K format." alt="" coords="571,127,770,182"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,176,288,157,428,147,558,147,558,153,428,153,288,163,195,181"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec.html#a889aeabff901f0a686926434f3c7d144" title="Compresses pixel data to JPEG Baseline format." alt="" coords="297,315,508,370"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="153,217,214,258,289,300,306,308,303,313,287,305,211,262,150,221"/>
+<area shape="rect" id="Node000010" href="$structkcenon_1_1pacs_1_1web_1_1dicomweb_1_1rendered__result.html#aa0eef81eb98a8b3e988df13087334678" title=" " alt="" coords="303,171,502,226"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="240,196,289,196,289,201,240,201"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#a17b157c9362bf0e8a639cbb4c55829b7" title="Extract a single frame from pixel data." alt="" coords="308,251,497,291"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="202,216,311,245,310,250,201,221"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a35d5c0ca5ab34832fbf1c6055ac7d196" title="Parse a DICOM file from raw bytes." alt="" coords="581,63,760,103"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="166,176,223,153,287,132,360,116,433,103,567,87,568,93,434,109,361,121,289,137,225,158,168,181"/>
+<area shape="rect" id="Node000013" href="$structkcenon_1_1pacs_1_1web_1_1dicomweb_1_1rendered__result.html#a460ceefb12cf38ab986589a7dacd305f" title=" " alt="" coords="291,395,514,435"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="139,218,163,253,197,297,240,342,289,380,300,387,298,391,287,385,237,346,193,301,159,256,134,221"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="861,135,1006,175"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="770,152,847,152,847,157,770,157"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec_1_1impl.html#ad3f336cc9b04a9ef2beba8d2de3baa78" title=" " alt="" coords="565,297,776,351"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="508,333,551,330,552,335,508,338"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="702,294,757,250,823,204,871,178,874,183,825,209,760,254,705,298"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#a3731ce9c577a4b1fa09dfc85187c2342" title="Calculates the size of uncompressed pixel data in bytes." alt="" coords="824,218,1043,273"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="762,294,827,274,829,279,763,299"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#ae032d6aad89321385cbc4e6189f757cb" title="Checks if the image is grayscale (single sample per pixel)." alt="" coords="824,297,1043,351"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="776,321,811,321,811,327,776,327"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1encoding_1_1compression_1_1image__params.html#ad712657109234ef246d4c8a4a0f3dbea" title="Validates image parameters for JPEG Baseline compression." alt="" coords="824,375,1043,430"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="763,349,829,369,827,374,762,354"/>
+<area shape="poly" id="edge13_Node000012_Node000004" title=" " alt="" coords="745,100,848,129,847,134,744,105"/>
+</map>

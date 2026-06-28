@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::network::pipeline::storage_query_exec_job" name="kcenon::pacs::network::pipeline::storage_query_exec_job">
+<area shape="rect" id="Node000001" title="Job for executing storage and query operations." alt="" coords="166,756,387,1169"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__job__base.html" title="Base class for all pipeline jobs." alt="" coords="5,419,172,693"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,705,183,755,179,757,155,707"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1network_1_1pipeline_1_1job__context.html" title="Context information attached to pipeline jobs for tracking." alt="" coords="197,446,357,666"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="279,666,279,739,274,739,274,666"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1network_1_1pipeline_1_1dimse__request.html" title="Parsed DIMSE request for service execution." alt="" coords="381,476,567,636"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="438,637,387,742,382,740,433,635"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="357,276,436,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="397,341,397,367,401,394,424,460,419,462,395,395,392,368,391,341"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="331,133,462,213"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="399,227,399,276,394,276,394,227"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="472,276,631,341"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="544,342,507,460,501,459,539,341"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="491,141,612,206"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="554,220,554,276,549,276,549,220"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="540,5,563,71"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="554,71,554,124,549,124,549,71"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::update_command_group_length" name="kcenon::pacs::network::dimse::dimse_message::update_command_group_length">
+<area shape="rect" id="Node000001" title="Calculate and set CommandGroupLength." alt="" coords="237,5,476,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a0f4172d673a0ad077306ef8258e9102e" title="Encode the DIMSE message to bytes." alt="" coords="5,5,189,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,35,189,35,189,30,224,30"/>
+</map>

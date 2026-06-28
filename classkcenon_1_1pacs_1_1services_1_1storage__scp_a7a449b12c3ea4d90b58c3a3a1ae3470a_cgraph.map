@@ -1,0 +1,71 @@
+<map id="kcenon::pacs::services::storage_scp::handle_message" name="kcenon::pacs::services::storage_scp::handle_message">
+<area shape="rect" id="Node000001" title="Handle an incoming DIMSE message (C&#45;STORE&#45;RQ)" alt="" coords="5,745,175,800"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a25f41bf2902c24cbd4c67ee708dbd488" title="Get the Affected SOP Class UID." alt="" coords="232,329,416,384"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,745,100,675,121,582,138,532,159,482,187,435,221,394,223,391,227,395,225,397,191,438,164,484,143,534,126,583,105,676,96,745"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#ae3b687d7cd616157c8de32e2250ed869" title="Get the Affected SOP Instance UID." alt="" coords="223,408,425,463"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="94,745,107,688,131,616,168,539,192,504,221,472,224,469,228,473,225,476,197,507,173,542,136,618,112,690,99,746"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#af8fc4f873ed31b18a1476838ca3cf300" title="Audit a C&#45;STORE (DICOM Instances Transferred) event." alt="" coords="237,487,411,541"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="100,744,118,704,145,655,179,604,221,559,237,547,240,551,224,563,183,607,149,658,123,706,105,746"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="1489,306,1635,346"/>
+<area shape="poly" id="edge32_Node000001_Node000015" title=" " alt="" coords="101,744,120,710,146,670,180,632,221,602,271,580,315,566,356,561,395,561,477,570,581,577,1101,577,1161,570,1252,551,1348,523,1391,506,1425,488,1462,458,1494,423,1541,356,1545,359,1498,427,1466,462,1428,492,1393,511,1350,528,1253,557,1161,575,1101,582,581,582,477,575,395,567,356,566,316,572,273,585,224,607,184,636,150,674,124,713,106,747"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a849b483ac0ad9a1b47791e589239a117" title="Get called AE title." alt="" coords="237,617,411,657"/>
+<area shape="poly" id="edge25_Node000001_Node000021" title=" " alt="" coords="118,743,165,704,221,666,236,659,238,664,224,671,168,708,122,747"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a83150b77d9eb2b424ec2a38297ed3c68" title="Get calling AE title." alt="" coords="235,681,413,721"/>
+<area shape="poly" id="edge26_Node000001_Node000022" title=" " alt="" coords="174,744,244,722,246,727,176,749"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#aeaec0c446957454404fa033695b3d8ca" title="Get the command field." alt="" coords="232,745,416,800"/>
+<area shape="poly" id="edge27_Node000001_Node000023" title=" " alt="" coords="175,770,218,770,218,775,175,775"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#ab4c9149714f2e7dd5e218e0b7964521f" title="Get mutable reference to the data set." alt="" coords="232,824,416,879"/>
+<area shape="poly" id="edge28_Node000001_Node000024" title=" " alt="" coords="173,798,230,817,228,822,171,803"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a9d03833a4d32514833083b3f78617873" title="Check if the message has an associated data set." alt="" coords="232,903,416,957"/>
+<area shape="poly" id="edge29_Node000001_Node000025" title=" " alt="" coords="119,798,165,843,224,888,235,894,233,899,221,892,162,847,115,802"/>
+<area shape="rect" id="Node000026" href="$namespacekcenon_1_1pacs_1_1services.html#a053edc5cf215f4576cee36f570253dd7" title="Check if the status indicates a failure." alt="" coords="239,982,409,1022"/>
+<area shape="poly" id="edge30_Node000001_Node000026" title=" " alt="" coords="105,799,123,837,150,882,183,927,224,967,234,973,231,978,221,971,179,931,145,885,119,839,100,801"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a00d38e98cabc03f34fec6ffc1864e830" title="Get the message ID." alt="" coords="232,1047,416,1101"/>
+<area shape="poly" id="edge31_Node000001_Node000027" title=" " alt="" coords="101,800,116,849,141,911,177,975,199,1005,225,1032,230,1037,226,1041,221,1036,195,1009,173,978,136,913,111,851,96,801"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="229,1126,419,1166"/>
+<area shape="poly" id="edge33_Node000001_Node000028" title=" " alt="" coords="97,800,107,863,129,947,145,992,167,1036,193,1076,225,1112,230,1117,226,1121,221,1116,189,1079,162,1038,141,994,124,949,102,864,91,800"/>
+<area shape="rect" id="Node000032" href="$namespacekcenon_1_1pacs_1_1services.html#aaef4895131b5df1e13f6fe1a3430c7bd" title="Convert mpps_status to DICOM string representation." alt="" coords="239,1190,409,1230"/>
+<area shape="poly" id="edge37_Node000001_Node000032" title=" " alt="" coords="95,800,101,874,121,975,137,1029,159,1082,188,1132,225,1176,230,1181,226,1185,221,1180,184,1135,155,1085,132,1031,115,976,96,875,89,800"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="505,329,659,384"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,354,491,354,491,359,416,359"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="413,405,491,382,492,387,415,410"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1security_1_1atna__audit__logger.html#a0016bb5009f96c2395c7fa5538c2f6c7" title="Build DICOM Instances Transferred audit message (C&#45;STORE, C&#45;MOVE)" alt="" coords="473,408,691,463"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="410,485,478,464,480,469,411,490"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a54c92cf4955c20bbec5f291bca68498c" title="Send an audit message via syslog transport." alt="" coords="499,487,665,541"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="411,511,485,511,485,517,411,517"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ae6bb942a597dd27b78a91b95337397bf" title="Send an RFC 3881 XML audit message via Syslog." alt="" coords="739,258,952,298"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="664,487,689,472,732,434,770,390,824,308,829,311,775,393,736,437,692,476,667,491"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1security_1_1atna__audit__logger.html#a2e06f2ef1590a9d88494a13df22db049" title="Serialize an audit message to RFC 3881 XML." alt="" coords="745,462,945,502"/>
+<area shape="poly" id="edge20_Node000007_Node000017" title=" " alt="" coords="665,501,731,493,732,498,666,507"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#a8219c5e6bc31c83b2c380705cdd6cdd8" title="Format an XML audit message as an RFC 5424 Syslog message." alt="" coords="1005,84,1194,139"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="876,256,1044,144,1047,148,878,260"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#aae3ea7e8c965624d9d588acfb204cfd6" title=" " alt="" coords="1012,216,1187,271"/>
+<area shape="poly" id="edge12_Node000008_Node000012" title=" " alt="" coords="952,261,998,254,999,260,953,266"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ad660667cf888c4cb4b72f550500b2b03" title=" " alt="" coords="1249,345,1424,400"/>
+<area shape="poly" id="edge18_Node000008_Node000016" title=" " alt="" coords="953,294,1199,341,1236,348,1235,354,1198,346,952,299"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#abfedff1ce48210b547f4f34c5216398a" title=" " alt="" coords="1249,5,1424,60"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="1182,81,1240,62,1241,67,1184,86"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#add78b3ddb490992409c0184759b9f7ea" title=" " alt="" coords="1249,84,1424,139"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="1194,109,1235,109,1235,114,1194,114"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ac8e307c718a6de6b13807d1fee888c8d" title="Close the transport connection." alt="" coords="1475,197,1649,252"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="1182,213,1246,199,1336,193,1427,199,1461,203,1461,209,1426,205,1336,198,1247,205,1183,219"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ae382826d55646bfe0cdefe314985af34" title=" " alt="" coords="1249,215,1424,269"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="1187,240,1236,240,1236,245,1187,246"/>
+<area shape="poly" id="edge17_Node000012_Node000015" title=" " alt="" coords="1187,264,1247,278,1367,299,1476,314,1475,319,1366,304,1246,283,1186,270"/>
+<area shape="poly" id="edge15_Node000014_Node000013" title=" " alt="" coords="1424,233,1461,230,1461,235,1424,238"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="1412,267,1496,299,1494,304,1410,272"/>
+<area shape="poly" id="edge19_Node000016_Node000015" title=" " alt="" coords="1424,352,1475,341,1476,346,1425,357"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1security_1_1atna__audit__logger.html#a2966108f55bc4895396d56ceefe792f3" title=" " alt="" coords="1000,356,1199,411"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="897,459,1014,413,1016,418,899,464"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1security_1_1atna__audit__logger.html#a4cbfb758d98d9220d28584606e7c4ed4" title=" " alt="" coords="1247,424,1427,479"/>
+<area shape="poly" id="edge24_Node000017_Node000019" title=" " alt="" coords="945,473,1232,455,1233,460,946,478"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1security_1_1atna__audit__logger.html#a910c9fe7ad798724840a8168914767fc" title=" " alt="" coords="1000,487,1199,541"/>
+<area shape="poly" id="edge23_Node000017_Node000020" title=" " alt="" coords="946,492,987,497,986,502,945,497"/>
+<area shape="poly" id="edge22_Node000018_Node000019" title=" " alt="" coords="1196,408,1234,419,1233,424,1194,413"/>
+<area shape="rect" id="Node000029" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="498,1079,666,1133"/>
+<area shape="poly" id="edge34_Node000028_Node000029" title=" " alt="" coords="419,1129,484,1119,484,1124,420,1134"/>
+<area shape="rect" id="Node000030" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="490,1157,674,1212"/>
+<area shape="poly" id="edge35_Node000028_Node000030" title=" " alt="" coords="420,1158,477,1166,476,1171,419,1163"/>
+<area shape="rect" id="Node000031" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="751,1165,940,1205"/>
+<area shape="poly" id="edge36_Node000030_Node000031" title=" " alt="" coords="674,1182,737,1182,737,1187,674,1187"/>
+</map>

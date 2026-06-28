@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::storage_commitment_scp::handle_n_action" name="kcenon::pacs::services::storage_commitment_scp::handle_n_action">
+<area shape="rect" id="Node000001" title=" " alt="" coords="252,5,451,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scp.html#a2668da7a1dae0e47ff178238ce895ba6" title="Handle an incoming DIMSE message." alt="" coords="5,5,204,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,35,204,35,204,30,238,30"/>
+</map>

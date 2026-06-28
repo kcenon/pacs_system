@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::attribute_identifier_list" name="kcenon::pacs::network::dimse::dimse_message::attribute_identifier_list">
+<area shape="rect" id="Node000001" title="Get the Attribute Identifier List (for N&#45;GET)" alt="" coords="5,5,189,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="237,13,392,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,30,224,30,224,35,190,35"/>
+</map>

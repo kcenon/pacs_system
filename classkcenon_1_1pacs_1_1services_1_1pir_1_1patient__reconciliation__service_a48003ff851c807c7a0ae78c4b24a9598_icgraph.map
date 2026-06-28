@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::pir::patient_reconciliation_service::apply_demographics" name="kcenon::pacs::services::pir::patient_reconciliation_service::apply_demographics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="281,45,500,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1pir_1_1patient__reconciliation__service.html#a4462c967063aaaf94d528a4b913344e3" title="Merge instances from source patient to target patient." alt="" coords="21,5,217,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,57,217,50,218,44,268,52"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1pir_1_1patient__reconciliation__service.html#a99ae29d4630ed346bf485d69a9e68ff7" title="Update patient demographics across all matching instances." alt="" coords="5,84,233,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="268,93,234,98,233,92,267,88"/>
+</map>

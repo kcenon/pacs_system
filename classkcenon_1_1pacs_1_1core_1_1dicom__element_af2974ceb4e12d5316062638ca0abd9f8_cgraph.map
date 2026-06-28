@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::core::dicom_element::from_numeric" name="kcenon::pacs::core::dicom_element::from_numeric">
+<area shape="rect" id="Node000001" title="Create an element from a numeric value." alt="" coords="5,77,176,132"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ac014eeea6bc5ca8b452041039ca9d4f8" title="Set the value from a numeric value." alt="" coords="225,5,383,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,75,211,61,212,66,173,80"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="224,85,384,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,102,210,102,210,107,176,107"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="228,149,380,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="177,128,224,142,222,147,176,133"/>
+</map>

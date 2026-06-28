@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::workflow::task_scheduler::~task_scheduler" name="kcenon::pacs::workflow::task_scheduler::~task_scheduler">
+<area shape="rect" id="Node000001" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,126,180,181"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a446a27a16223f374eb9d48ae445e77f1" title="Save all tasks to persistence storage." alt="" coords="228,85,437,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,133,219,125,220,131,181,139"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#af11d33df676fcd02cd5df49ea8574dfe" title="Stop the scheduler service." alt="" coords="245,165,420,205"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="180,162,232,169,231,175,180,168"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="509,69,695,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="437,96,495,93,495,98,438,102"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#abd042eec47c77c840bb6c7b1b3158ea9" title="Log an error&#45;level message." alt="" coords="509,133,695,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="438,121,495,132,494,137,437,127"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a5f08485629050d7dcc5e86801137bfbc" title="Serialize tasks to JSON." alt="" coords="485,5,719,45"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="395,83,485,55,513,47,514,52,486,60,396,88"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="767,133,953,173"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="684,107,766,127,765,133,683,112"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="696,151,753,151,753,156,696,156"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1workflow.html#ad36b159481f1b0fe0cfa1cbaab357d45" title="Convert lock_type to string." alt="" coords="773,5,947,45"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="719,23,759,23,759,28,719,28"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="509,197,695,237"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="421,193,495,202,494,207,420,198"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="683,195,765,174,766,179,684,200"/>
+</map>

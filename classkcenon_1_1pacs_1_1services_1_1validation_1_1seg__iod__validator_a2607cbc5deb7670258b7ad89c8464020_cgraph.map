@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::validate_single_segment" name="kcenon::pacs::services::validation::seg_iod_validator::validate_single_segment">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,200,132"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="249,5,439,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,66,262,47,264,52,201,71"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="267,70,421,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,95,253,95,253,100,200,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a9474ab90f03725398ec6051d8c8c1477" title="Check if segment algorithm type string is valid." alt="" coords="248,149,440,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="201,126,248,142,246,147,199,132"/>
+</map>

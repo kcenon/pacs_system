@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::xa_calibration_data::magnification_factor" name="kcenon::pacs::services::sop_classes::xa_calibration_data::magnification_factor">
+<area shape="rect" id="Node000001" title="Calculate magnification factor." alt="" coords="275,5,483,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1sop__classes_1_1xa__calibration__data.html#a8584dc21cd88d42cac49132dad015b08" title="Calculate pixel spacing at isocenter." alt="" coords="5,5,227,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="261,35,227,35,227,30,261,30"/>
+</map>

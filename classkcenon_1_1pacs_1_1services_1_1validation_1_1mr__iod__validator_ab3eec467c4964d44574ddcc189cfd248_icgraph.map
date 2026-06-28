@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::mr_iod_validator::validate_patient_module" name="kcenon::pacs::services::validation::mr_iod_validator::validate_patient_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="484,5,697,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mr__iod__validator.html#ae38ad9ac0ab5f6220e7e776280b8f330" title="Validate a DICOM dataset against MR IOD." alt="" coords="223,5,436,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="470,35,436,35,436,30,470,30"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#afe5f6d62055025b3f7d0eb05557bca25" title="Validate an MR dataset with default options." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

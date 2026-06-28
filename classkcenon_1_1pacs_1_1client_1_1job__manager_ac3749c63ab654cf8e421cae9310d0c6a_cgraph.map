@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::job_manager::get_job" name="kcenon::pacs::client::job_manager::get_job">
+<area shape="rect" id="Node000001" title="Get a job by ID." alt="" coords="5,13,176,53"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#af8c72d7d3e771befaca6d9109487b46a" title=" " alt="" coords="224,5,384,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,30,210,30,210,35,176,35"/>
+</map>

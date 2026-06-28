@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::web::endpoints::register_metadata_endpoints_impl" name="kcenon::pacs::web::endpoints::register_metadata_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,204,132"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a72219abb04bb22c1d7007ad7438a089d" title="Get window/level presets for a modality." alt="" coords="252,5,425,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,75,238,61,240,66,195,80"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="263,85,414,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="204,102,250,102,250,107,204,107"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web.html#ab22db72ea360d4dbe6b7263a8e93be52" title="Parse sort order from string." alt="" coords="253,149,424,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="205,129,252,142,251,147,203,134"/>
+</map>

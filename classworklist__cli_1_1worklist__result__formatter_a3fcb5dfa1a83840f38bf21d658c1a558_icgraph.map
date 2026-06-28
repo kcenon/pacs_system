@@ -1,0 +1,7 @@
+<map id="worklist_cli::worklist_result_formatter::format_date" name="worklist_cli::worklist_result_formatter::format_date">
+<area shape="rect" id="Node000001" title="Format DICOM date (YYYYMMDD) for display." alt="" coords="515,5,737,45"/>
+<area shape="rect" id="Node000002" href="$classworklist__cli_1_1worklist__result__formatter.html#a8876822c4610107bd401fa44dd53c127" title="Format results as a human&#45;readable table." alt="" coords="240,5,467,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="501,28,467,28,467,23,501,23"/>
+<area shape="rect" id="Node000003" href="$classworklist__cli_1_1worklist__result__formatter.html#acf8421b90b0e336c6cfb6510668953be" title="Format worklist results." alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="226,28,192,28,192,23,226,23"/>
+</map>

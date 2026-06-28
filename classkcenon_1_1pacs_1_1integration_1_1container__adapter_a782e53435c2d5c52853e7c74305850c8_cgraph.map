@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::container_adapter::maps_to_string" name="kcenon::pacs::integration::container_adapter::maps_to_string">
+<area shape="rect" id="Node000001" title="Check if a VR maps to a string value." alt="" coords="5,5,197,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="245,13,420,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,30,231,30,231,35,198,35"/>
+</map>

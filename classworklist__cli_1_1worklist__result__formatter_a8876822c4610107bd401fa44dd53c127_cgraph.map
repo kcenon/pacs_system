@@ -1,0 +1,13 @@
+<map id="worklist_cli::worklist_result_formatter::format_table" name="worklist_cli::worklist_result_formatter::format_table">
+<area shape="rect" id="Node000001" title="Format results as a human&#45;readable table." alt="" coords="5,109,232,149"/>
+<area shape="rect" id="Node000002" href="$classworklist__cli_1_1worklist__result__formatter.html#aac9fbc413e56d977b3920e5e78bfe280" title="Extract worklist item data from dataset." alt="" coords="280,13,507,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,106,279,62,304,54,305,59,281,67,167,111"/>
+<area shape="rect" id="Node000004" href="$classworklist__cli_1_1worklist__result__formatter.html#a3fcb5dfa1a83840f38bf21d658c1a558" title="Format DICOM date (YYYYMMDD) for display." alt="" coords="282,77,505,117"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="232,113,268,109,269,114,233,118"/>
+<area shape="rect" id="Node000005" href="$classworklist__cli_1_1worklist__result__formatter.html#a16e6d79ba6117e164117d368746d97f0" title="Format DICOM time (HHMMSS) for display." alt="" coords="281,141,505,181"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="233,139,268,143,267,149,232,145"/>
+<area shape="rect" id="Node000006" href="$classworklist__cli_1_1worklist__result__formatter.html#a09d67e3c08a45dbfa492f6159c2030a9" title="Truncate string to max length." alt="" coords="295,205,492,245"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="167,146,281,190,305,198,304,203,279,195,165,151"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="555,5,709,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="507,30,541,30,541,35,507,35"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_adapter::~pipeline_adapter" name="kcenon::pacs::network::pipeline::pipeline_adapter::~pipeline_adapter">
+<area shape="rect" id="Node000001" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,45,212,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__adapter.html#a0d69f2cd52c699e2e1f7d5f3e89cd844" title="Check if the adapter is running." alt="" coords="260,5,428,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,52,246,47,247,52,213,58"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__adapter.html#a30d8a6933fb0a76b50b1e42ffb261b40" title="Stop the pipeline adapter." alt="" coords="260,84,428,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,87,247,93,246,98,212,92"/>
+</map>

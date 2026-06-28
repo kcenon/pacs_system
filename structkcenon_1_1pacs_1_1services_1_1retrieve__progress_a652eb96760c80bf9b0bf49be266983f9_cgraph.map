@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::retrieve_progress::percent" name="kcenon::pacs::services::retrieve_progress::percent">
+<area shape="rect" id="Node000001" title="Get completion percentage." alt="" coords="5,5,207,45"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1retrieve__progress.html#a5e371cfc76a1369bd23bd20041ef216c" title="Get total number of sub&#45;operations." alt="" coords="255,5,437,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,23,241,23,241,28,207,28"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::ophthalmic_iod_validator::check_laterality" name="kcenon::pacs::services::validation::ophthalmic_iod_validator::check_laterality">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,34,232,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="280,5,469,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,43,266,38,267,43,233,48"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="297,70,452,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,75,284,82,283,87,232,80"/>
+</map>

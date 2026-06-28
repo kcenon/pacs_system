@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::monitoring_adapter::register_health_check" name="kcenon::pacs::integration::monitoring_adapter::register_health_check">
+<area shape="rect" id="Node000001" title="Register a health check for a component." alt="" coords="5,5,221,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#aaeafeb23119d44fc25a1a3d86e5e0eff" title=" " alt="" coords="269,5,464,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,30,255,30,255,35,221,35"/>
+</map>

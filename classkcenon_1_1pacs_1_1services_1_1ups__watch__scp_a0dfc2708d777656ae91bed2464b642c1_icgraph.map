@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::ups_watch_scp::dispatch_event" name="kcenon::pacs::services::ups_watch_scp::dispatch_event">
+<area shape="rect" id="Node000001" title=" " alt="" coords="227,91,461,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a2dfd5987606974aa3d0c589da2963bcb" title="Notify subscribers of a cancel request." alt="" coords="5,5,179,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="265,90,178,62,180,57,267,85"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a68b303fcc5d9022fd9a0ebac180659fa" title="Notify subscribers of progress update." alt="" coords="5,84,179,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,114,179,114,179,109,213,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a1c50e3e4790223afc8312ade4d7aca93" title="Notify subscribers of a workitem state change." alt="" coords="5,163,179,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="267,138,180,166,178,160,265,133"/>
+</map>

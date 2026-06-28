@@ -1,0 +1,24 @@
+<map id="kcenon::pacs::services::sop_classes::is_sr_storage_sop_class" name="kcenon::pacs::services::sop_classes::is_sr_storage_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is an SR Storage SOP Class." alt="" coords="1033,124,1236,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#a4b004c16337895ad96af98ce22d37275" title="Quick check if dataset has minimum required attributes." alt="" coords="765,45,972,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1028,123,961,103,963,98,1029,118"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#a66e5acc3a3808ee0c01ae811562af69a" title=" " alt="" coords="752,163,985,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1020,171,986,176,985,170,1019,165"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a7ea307519892130b189969d9782e9c12" title="Quick check if a dataset is a valid SR document." alt="" coords="506,5,675,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="752,59,675,47,676,42,752,53"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#a75e2d200582bf86e64f4028226cdde17" title="Validate a Basic Text SR dataset." alt="" coords="487,84,694,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="757,161,687,141,689,136,759,156"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#ab37230f26995ace8e1144f48729489e7" title="Validate a Comprehensive SR dataset." alt="" coords="486,163,695,217"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="738,193,695,193,695,187,738,187"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#ace41aa477dfe0ec6f18cb451f8489022" title="Validate an Enhanced SR dataset." alt="" coords="487,241,694,296"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="759,224,689,244,687,239,757,219"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#a2f9cfd1993435859997d60737cea9471" title="Validate a Key Object Selection document." alt="" coords="477,320,704,375"/>
+<area shape="poly" id="edge11_Node000004_Node000010" title=" " alt="" coords="826,228,770,270,705,310,678,322,676,317,703,305,767,265,822,224"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#a2029d32c3e0d978cf5779bd4d7ae4516" title="Validate a DICOM dataset against SR IOD." alt="" coords="223,203,429,257"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="493,146,478,152,375,205,373,200,476,148,491,141"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a428290814030e34a1242fd756601aeae" title="Validate an SR dataset with default options." alt="" coords="5,203,175,257"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="209,233,175,233,175,227,209,227"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="473,211,430,217,429,212,472,205"/>
+<area shape="poly" id="edge10_Node000009_Node000006" title=" " alt="" coords="473,254,429,248,430,242,474,249"/>
+<area shape="poly" id="edge12_Node000010_Node000006" title=" " alt="" coords="495,318,476,310,375,260,378,255,478,305,497,313"/>
+</map>

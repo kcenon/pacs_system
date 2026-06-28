@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::compression::htj2k_codec::encode" name="kcenon::pacs::encoding::compression::htj2k_codec::encode">
+<area shape="rect" id="Node000001" title="Compresses pixel data to HTJ2K format." alt="" coords="288,5,487,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ae42d333cbf06384a1e37a148a34c8a6e" title="Render a DICOM image to JPEG or PNG." alt="" coords="5,13,240,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="274,35,240,35,240,30,274,30"/>
+</map>

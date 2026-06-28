@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::services::print_scu" name="kcenon::pacs::services::print_scu">
+<area shape="rect" id="Node000001" title=" " alt="" coords="314,901,482,1241"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="22,646,195,726"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,725,181,796,237,876,306,961,301,964,233,879,177,799,130,728"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,133,180,559"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,559,109,629,103,630,100,559"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="205,313,354,379"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="266,393,235,472,194,560,139,647,135,644,189,557,230,470,261,391"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="348,5,371,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="354,72,294,298,289,297,348,70"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="378,313,503,379"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="373,64,385,94,414,202,434,297,429,298,409,203,379,95,368,66"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1services_1_1print__scu__config.html" title="Configuration for Print SCU service." alt="" coords="593,636,755,736"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="671,737,656,806,642,844,624,879,597,916,565,951,497,1009,493,1005,561,947,593,913,620,876,638,842,651,805,666,736"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="219,653,390,719"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="304,719,302,792,304,835,311,877,313,885,308,886,306,878,299,835,296,792,299,719"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="429,393,402,471,368,560,324,654,319,652,364,558,397,469,424,391"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="414,653,569,719"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="450,392,489,653,484,654,445,393"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="490,719,479,792,462,878,460,886,455,885,457,877,474,791,485,718"/>
+</map>

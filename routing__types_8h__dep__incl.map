@@ -1,0 +1,15 @@
+<map id="include/kcenon/pacs/client/routing_types.h" name="include/kcenon/pacs/client/routing_types.h">
+<area shape="rect" id="Node000001" title="Routing types and structures for auto&#45;forwarding DICOM images." alt="" coords="147,5,313,45"/>
+<area shape="rect" id="Node000002" href="$routing__manager_8h.html" title="Routing manager for automatic DICOM image forwarding." alt="" coords="136,93,324,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,59,233,93,227,93,227,59"/>
+<area shape="rect" id="Node000004" href="$routing__endpoints_8cpp.html" title="Routing rule management REST API endpoints implementation." alt="" coords="5,181,196,221"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="173,54,147,72,126,95,114,116,108,139,103,182,98,181,102,138,110,114,121,92,143,68,170,50"/>
+<area shape="rect" id="Node000005" href="$routing__repository_8h.html" title="Repository for routing rule persistence using base_repository pattern." alt="" coords="349,93,557,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="292,48,405,91,403,96,291,53"/>
+<area shape="rect" id="Node000003" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="225,181,355,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="253,143,279,180,275,183,249,146"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="191,144,131,183,128,179,188,139"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="406,142,327,184,324,179,404,137"/>
+<area shape="rect" id="Node000006" href="$routing__repository_8cpp.html" title="Implementation of the routing repository for rule persistence." alt="" coords="381,181,525,221"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="455,147,455,181,450,181,450,147"/>
+</map>

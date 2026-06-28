@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/security/anonymizer.h" name="include/kcenon/pacs/security/anonymizer.h">
+<area shape="rect" id="Node000001" title="DICOM de&#45;identification/anonymization per PS3.15 Annex E." alt="" coords="257,5,428,45"/>
+<area shape="rect" id="Node000002" href="$dcm__anonymize_2main_8cpp.html" title="DICOM Anonymize &#45; De&#45;identification Utility." alt="" coords="5,93,203,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="278,53,157,96,155,91,276,48"/>
+<area shape="rect" id="Node000003" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="227,101,458,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="345,59,345,100,340,100,340,59"/>
+<area shape="rect" id="Node000004" href="$anonymizer_8cpp.html" title="Implementation of DICOM de&#45;identification/anonymization." alt="" coords="482,101,686,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="409,47,553,98,551,103,407,52"/>
+</map>

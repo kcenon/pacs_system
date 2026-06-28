@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/thumbnail_endpoints.h" name="include/kcenon/pacs/web/endpoints/thumbnail_endpoints.h">
+<area shape="rect" id="Node000001" title="Thumbnail REST API endpoints." alt="" coords="123,5,314,60"/>
+<area shape="rect" id="Node000002" href="$thumbnail__endpoints_8cpp.html" title="Thumbnail REST API endpoints implementation." alt="" coords="5,108,216,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,71,134,110,131,106,176,67"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="241,115,415,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,67,316,113,312,117,258,71"/>
+</map>

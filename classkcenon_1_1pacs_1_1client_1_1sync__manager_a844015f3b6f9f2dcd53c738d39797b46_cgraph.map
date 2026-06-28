@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::sync_manager::is_syncing" name="kcenon::pacs::client::sync_manager::is_syncing">
+<area shape="rect" id="Node000001" title="Check if a sync is currently running for a configuration." alt="" coords="5,13,207,53"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1sync__manager_1_1impl.html#a5e08d7e9624afa4fcf2e32a5a1380c20" title=" " alt="" coords="255,5,417,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,30,241,30,241,35,207,35"/>
+</map>

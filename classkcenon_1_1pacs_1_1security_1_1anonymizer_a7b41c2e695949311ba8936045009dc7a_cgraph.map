@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::anonymizer::get_tag_action" name="kcenon::pacs::security::anonymizer::get_tag_action">
+<area shape="rect" id="Node000001" title="Get the effective action for a tag." alt="" coords="5,5,172,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1security_1_1tag__action__config.html#a8fe0d8e72598f954454e60cc2326ef48" title="Create a keep action config." alt="" coords="220,13,447,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,30,206,30,206,35,172,35"/>
+</map>

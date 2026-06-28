@@ -1,0 +1,22 @@
+<map id="kcenon::pacs::services::print_scp::handle_n_delete" name="kcenon::pacs::services::print_scp::handle_n_delete">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,124,175,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a25f41bf2902c24cbd4c67ee708dbd488" title="Get the Affected SOP Class UID." alt="" coords="232,5,416,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,121,221,69,234,63,236,68,224,74,134,126"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#ae3b687d7cd616157c8de32e2250ed869" title="Get the Affected SOP Instance UID." alt="" coords="223,84,425,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,134,208,128,209,134,175,140"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a00d38e98cabc03f34fec6ffc1864e830" title="Get the message ID." alt="" coords="232,163,416,217"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="175,163,219,170,218,175,174,168"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1print__scp.html#a8f2cd70a2c7b6f4bf46ba61847d72715" title=" " alt="" coords="227,242,421,282"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="134,176,177,202,224,226,244,235,242,240,222,231,174,207,131,181"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="491,45,646,100"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="417,45,478,55,477,60,416,50"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="425,93,477,84,478,90,426,98"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="473,242,664,282"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="422,259,460,259,460,265,422,265"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="720,195,888,249"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="664,243,706,236,707,241,665,248"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="712,273,896,328"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="665,275,699,281,698,286,664,280"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="944,281,1133,321"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="896,298,931,298,931,303,896,303"/>
+</map>

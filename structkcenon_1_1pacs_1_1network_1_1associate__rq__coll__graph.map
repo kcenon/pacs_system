@@ -1,0 +1,29 @@
+<map id="kcenon::pacs::network::associate_rq" name="kcenon::pacs::network::associate_rq">
+<area shape="rect" id="Node000001" title="A&#45;ASSOCIATE&#45;RQ PDU data." alt="" coords="165,823,325,903"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="286,148,365,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="286,186,206,194,160,203,114,217,73,236,39,262,16,294,10,313,8,335,8,714,11,738,21,760,35,779,54,795,100,822,150,840,148,845,97,826,51,800,31,782,16,763,6,740,3,714,3,335,5,312,11,292,35,258,70,232,112,212,158,198,205,189,285,180"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1network_1_1presentation__context__rq.html" title="Presentation Context for A&#45;ASSOCIATE&#45;RQ." alt="" coords="583,503,780,603"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="366,191,404,208,438,236,453,257,461,277,466,315,470,353,477,373,489,394,535,447,588,491,585,495,531,451,484,398,472,375,465,354,461,315,456,278,448,259,434,239,401,213,364,196"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="833,303,1012,369"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="365,183,449,192,562,210,689,236,816,273,859,293,857,298,814,279,688,241,561,215,448,198,365,188"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1network_1_1user__information.html" title="User Information for A&#45;ASSOCIATE&#45;RQ/AC." alt="" coords="165,673,325,753"/>
+<area shape="poly" id="edge12_Node000009_Node000002" title=" " alt="" coords="288,210,252,240,221,277,202,314,193,345,185,420,184,484,193,548,208,607,225,657,220,658,203,609,188,549,179,485,180,420,188,344,197,312,216,275,248,236,284,206"/>
+<area shape="rect" id="Node000011" href="$structkcenon_1_1pacs_1_1network_1_1scp__scu__role__selection.html" title="SCP/SCU Role Selection Sub&#45;item." alt="" coords="231,276,419,396"/>
+<area shape="poly" id="edge15_Node000011_Node000002" title=" " alt="" coords="328,214,328,260,323,260,323,214"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="260,5,391,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="328,99,328,148,323,148,323,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="580,665,783,760"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="581,751,342,832,340,827,579,746"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="684,603,684,649,679,649,679,603"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="889,371,750,494,747,490,885,367"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="862,148,983,213"/>
+<area shape="poly" id="edge10_Node000004_Node000007" title=" " alt="" coords="997,205,1016,218,1029,235,1041,238,1049,240,1057,248,1060,264,1057,292,1047,335,1026,397,1006,442,980,484,948,523,913,559,840,621,769,667,766,663,836,616,910,555,944,520,975,481,1002,440,1022,395,1042,334,1052,291,1055,264,1052,250,1047,244,1040,243,1027,240,1012,222,994,209"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="925,227,925,303,920,303,920,227"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="299,505,455,600"/>
+<area shape="poly" id="edge16_Node000010_Node000007" title=" " alt="" coords="849,192,799,202,746,219,695,244,650,278,638,292,632,306,628,334,625,365,619,381,609,398,575,435,536,467,457,517,454,513,533,463,571,431,605,394,614,378,619,363,623,334,627,305,634,289,646,274,692,239,744,214,798,197,848,187"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="911,13,934,78"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="925,78,925,131,920,131,920,78"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="248,753,248,806,243,806,243,753"/>
+<area shape="poly" id="edge13_Node000009_Node000010" title=" " alt="" coords="340,602,291,661,287,658,336,599"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="344,396,351,419,367,488,361,490,345,421,339,397"/>
+</map>

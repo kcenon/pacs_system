@@ -1,0 +1,51 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,293,100,318"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a1b55c0ffce14ac123fecc48730fb75bb" title=" " alt="" coords="149,5,341,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="52,292,59,248,74,184,102,116,122,84,146,55,151,51,154,55,150,59,126,87,107,118,79,186,64,249,58,293"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__association.html#a64d8e08843113b1eb74d7d9b204b0bd6" title="Connect to a test server." alt="" coords="151,70,338,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="55,292,85,219,112,175,146,135,152,130,156,134,150,139,116,178,90,222,60,294"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1integration__test.html#aa35c5917f13c282c9347caeda53a762a" title="Default timeout for test operations (5s normal, 30s CI)" alt="" coords="399,493,586,533"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="59,318,67,353,84,401,111,449,128,470,150,487,176,502,205,514,266,528,328,532,386,529,386,534,328,537,265,533,203,519,174,507,146,492,125,474,106,452,79,403,62,355,54,319"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="151,213,338,253"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="83,290,147,264,170,256,172,261,149,269,85,295"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#afc3445912b21782404d0bfc6f5447465" title=" " alt="" coords="151,278,338,333"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="100,303,138,303,138,308,100,308"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a6ee8d2ae5c684829b158e88c11d8634d" title="Create a C&#45;ECHO request message." alt="" coords="151,149,338,189"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="60,291,94,246,119,221,146,199,157,193,159,198,150,204,122,225,98,250,64,294"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a86a35eb51b2f903ceb327bf7c9cddf0c" title="Register a service provider." alt="" coords="148,422,341,477"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="65,317,99,360,123,385,150,407,158,413,155,417,146,411,119,389,95,364,61,320"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d1a995756db5730d6e83c249ca26ca" title="Start the server and wait for it to be ready." alt="" coords="151,357,338,397"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="84,316,149,343,169,350,167,355,147,348,82,321"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a75ee2b2bf2c8965f4e855466fe9044b2" title="Stop the server." alt="" coords="151,552,338,592"/>
+<area shape="poly" id="edge25_Node000001_Node000024" title=" " alt="" coords="58,318,66,358,83,415,110,477,128,506,150,531,165,543,161,547,146,535,124,509,105,479,78,417,61,359,53,319"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a15e3ebe94f2cf5e85dd78cc6ffff77e1" title="Check if running in a CI environment." alt="" coords="644,429,831,469"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="569,491,647,470,648,475,571,496"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="399,217,586,257"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="338,232,385,233,385,238,338,238"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a9178996258a459106c732536ea795600" title="Set the Affected SOP Class UID." alt="" coords="389,138,596,193"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="338,165,376,165,376,170,338,170"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="660,138,815,193"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="596,163,646,163,646,168,596,168"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="879,102,1049,157"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="815,150,865,142,866,148,816,156"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="879,181,1049,221"/>
+<area shape="poly" id="edge16_Node000011_Node000017" title=" " alt="" coords="816,175,866,183,865,188,815,180"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="1098,102,1257,157"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1050,127,1085,127,1085,132,1050,132"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="1305,102,1480,157"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1257,127,1292,127,1292,132,1257,132"/>
+<area shape="rect" id="Node000015" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="1528,109,1703,149"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="1480,127,1514,127,1514,132,1480,132"/>
+<area shape="rect" id="Node000016" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="1751,109,1925,149"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="1703,127,1737,127,1737,132,1703,132"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="1097,181,1257,221"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="1050,199,1084,199,1084,204,1050,204"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#af5b68b253e9d55fe5f82c1fa5ab5bc83" title="Check if a port is listening (inline implementation)" alt="" coords="399,350,586,405"/>
+<area shape="poly" id="edge20_Node000020_Node000021" title=" " alt="" coords="338,375,385,375,385,380,338,380"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a9305380a0d7aa02605c8e8d2ef934c96" title="Port listening timeout for pacs_system servers (5s normal, 30s CI)" alt="" coords="390,429,595,469"/>
+<area shape="poly" id="edge23_Node000020_Node000023" title=" " alt="" coords="315,395,411,423,409,428,314,400"/>
+<area shape="poly" id="edge21_Node000021_Node000005" title=" " alt="" coords="587,402,656,423,655,428,585,407"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d61cf0e9e7677acdecd920fdf26fc9" title=" " alt="" coords="644,357,831,397"/>
+<area shape="poly" id="edge22_Node000021_Node000022" title=" " alt="" coords="586,375,630,375,630,380,586,380"/>
+<area shape="poly" id="edge24_Node000023_Node000005" title=" " alt="" coords="596,447,630,447,630,452,596,452"/>
+</map>

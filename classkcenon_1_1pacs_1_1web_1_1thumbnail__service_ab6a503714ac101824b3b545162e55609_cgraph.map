@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::web::thumbnail_service::get_study_thumbnail" name="kcenon::pacs::web::thumbnail_service::get_study_thumbnail">
+<area shape="rect" id="Node000001" title="Get thumbnail for a study (representative image)" alt="" coords="5,89,176,143"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1web_1_1thumbnail__result.html#ae0ef55330c76c12aebb612b3e26d4acb" title="Create an error result." alt="" coords="717,5,888,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,86,223,73,353,53,483,38,703,25,704,30,483,44,353,58,225,79,174,91"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a6aa9dd21f9e1329f2d89849fb1afe583" title="Get thumbnail for a series (representative image)" alt="" coords="233,89,404,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,113,219,113,219,119,177,119"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#adb30d48fc1751b48604f78a426664013" title="Select representative series from study." alt="" coords="224,167,413,222"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="172,141,227,160,225,165,170,146"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="404,97,703,41,704,46,405,103"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a39c07a55df4b5950d270150a88d4e00c" title="Get or generate thumbnail for a specific instance." alt="" coords="471,114,641,169"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="404,122,457,128,457,133,404,128"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#adc5676d753971565d01da3df3c4eb52a" title="Select representative instance from series." alt="" coords="461,193,651,247"/>
+<area shape="poly" id="edge10_Node000003_Node000009" title=" " alt="" coords="389,141,415,152,463,178,477,184,475,189,460,182,412,157,387,146"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="615,112,649,92,673,73,697,55,712,48,714,53,700,60,676,77,652,97,618,116"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a5ff07710700d87ffe40bd860258a0e52" title="Evict least recently used entries to make room." alt="" coords="699,69,906,109"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="641,121,694,110,695,115,642,126"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a69d28c86140b258fdf89e980a3a133fc" title="Generate thumbnail from DICOM file." alt="" coords="699,134,907,189"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="642,146,685,149,685,154,641,151"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a84ea4552568bb2f09671dee0ca9487c5" title="Get MIME type for format." alt="" coords="717,213,888,267"/>
+<area shape="poly" id="edge8_Node000004_Node000007" title=" " alt="" coords="625,166,652,178,700,198,718,205,716,210,698,202,650,182,623,171"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1web_1_1thumbnail__result.html#aba439e17897d565da2930a344062924f" title="Create a success result." alt="" coords="725,292,881,332"/>
+<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="638,167,653,178,670,204,677,230,683,255,690,266,700,278,714,287,710,292,697,282,685,269,678,257,672,231,666,206,649,182,635,171"/>
+</map>

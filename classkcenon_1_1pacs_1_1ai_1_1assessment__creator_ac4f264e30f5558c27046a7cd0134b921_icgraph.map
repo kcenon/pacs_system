@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ai::assessment_creator::assessment_type_to_code" name="kcenon::pacs::ai::assessment_creator::assessment_type_to_code">
+<area shape="rect" id="Node000001" title="Convert assessment_type to DICOM coded value." alt="" coords="528,5,741,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1ai_1_1assessment__creator.html#ad4a02bc66a552c357c867bb3c87180e5" title=" " alt="" coords="267,13,480,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="514,35,480,35,480,30,514,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1ai_1_1assessment__creator.html#a1e45640b1634fe5fb07144f9a51c1cca" title="Create an assessment SR document for an AI result." alt="" coords="5,13,219,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="253,35,219,35,219,30,253,30"/>
+</map>

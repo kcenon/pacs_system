@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::routing_condition" name="kcenon::pacs::client::routing_condition">
+<area shape="rect" id="Node000001" title="A single condition for routing rule evaluation." alt="" coords="5,263,157,403"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="42,135,121,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,200,84,246,79,246,79,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="16,5,147,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="84,99,84,134,79,134,79,99"/>
+</map>

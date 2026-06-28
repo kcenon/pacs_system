@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::association::process_associate_ac" name="kcenon::pacs::network::association::process_associate_ac">
+<area shape="rect" id="Node000001" title="Process received A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="5,41,173,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7a248e63aa4c3004790316536ac86011" title="Build presentation context map from accepted contexts." alt="" coords="225,5,393,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,52,211,46,211,51,174,57"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#aa60a1d5dc866d489a3f2dad28bbd17e8" title="Perform state transition." alt="" coords="221,85,396,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,80,208,86,207,91,173,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7c66fc80fb836cca1ae810daaa70d951" title="Validate state transition." alt="" coords="444,85,668,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="396,102,430,102,430,107,396,107"/>
+</map>

@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['security_5fevent_5ftype_0',['security_event_type',['../namespacekcenon_1_1pacs_1_1integration.html#a6493605eb7968086bd0d92bdad8832d8',1,'kcenon::pacs::integration']]],
+  ['segment_5falgorithm_5ftype_1',['segment_algorithm_type',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a4d209e68b3a11ffa21b962975ba3c106',1,'kcenon::pacs::services::sop_classes']]],
+  ['segment_5fcategory_2',['segment_category',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#af17675a71e814a7d500061ce9df22906',1,'kcenon::pacs::services::sop_classes']]],
+  ['segmentation_5ffractional_5ftype_3',['segmentation_fractional_type',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#ac41c31e61b757414b457917e53744cc8',1,'kcenon::pacs::services::sop_classes']]],
+  ['segmentation_5ftype_4',['segmentation_type',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a9c314a29a642eeff5d8189b5ebd0d8a5',1,'kcenon::pacs::services::sop_classes']]],
+  ['signature_5falgorithm_5',['signature_algorithm',['../namespacekcenon_1_1pacs_1_1security.html#a756cd7fbd0805a1369833dc7a8b73830',1,'kcenon::pacs::security']]],
+  ['signature_5fstatus_6',['signature_status',['../namespacekcenon_1_1pacs_1_1security.html#a4767dc723437645d34c89e99a629d953',1,'kcenon::pacs::security']]],
+  ['simd_5ffeature_7',['simd_feature',['../namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#afe572b36bb65680b3f5a34d3ea812345',1,'kcenon::pacs::encoding::simd']]],
+  ['sop_5fclass_5fcategory_8',['sop_class_category',['../namespacekcenon_1_1pacs_1_1services.html#af8a9e77076f737fc8ea52b20f958d853',1,'kcenon::pacs::services']]],
+  ['sort_5forder_9',['sort_order',['../namespacekcenon_1_1pacs_1_1web.html#a39d675867285758dfd5dac584d22ec88',1,'kcenon::pacs::web']]],
+  ['sr_5fcompletion_5fflag_10',['sr_completion_flag',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a7495ecf74862eb0abbc5f8a88b4fa0c6',1,'kcenon::pacs::services::sop_classes']]],
+  ['sr_5fdocument_5ftype_11',['sr_document_type',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a71ae5291fad9948c65613a1b1ee07cf1',1,'kcenon::pacs::services::sop_classes']]],
+  ['sr_5frelationship_5ftype_12',['sr_relationship_type',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a04bf428b9eacd5955c4d4da13de348d1',1,'kcenon::pacs::services::sop_classes']]],
+  ['sr_5fvalue_5ftype_13',['sr_value_type',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#af87d25d58b47a9bb37dbf4a89446aeff',1,'kcenon::pacs::services::sop_classes']]],
+  ['sr_5fverification_5fflag_14',['sr_verification_flag',['../namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#ab9d64858751e3b34d9b847d6ffb3d9da',1,'kcenon::pacs::services::sop_classes']]],
+  ['storage_5fstatus_15',['storage_status',['../namespacekcenon_1_1pacs_1_1integration.html#a32f6f6d2c1c9679f10186a49692fbd12',1,'kcenon::pacs::integration::storage_status'],['../namespacekcenon_1_1pacs_1_1services.html#a4e9fb551e628baccb4ba72acf1793552',1,'kcenon::pacs::services::storage_status']]],
+  ['storage_5ftier_16',['storage_tier',['../namespacekcenon_1_1pacs_1_1storage.html#abffa7249fdb995e98fb45d167c5e0309',1,'kcenon::pacs::storage']]],
+  ['sync_5fconflict_5ftype_17',['sync_conflict_type',['../namespacekcenon_1_1pacs_1_1client.html#a44ee93942d2966463ce5fbb7066cb28c',1,'kcenon::pacs::client']]],
+  ['sync_5fdirection_18',['sync_direction',['../namespacekcenon_1_1pacs_1_1client.html#a76aa7f015f69ff1a0a19e331720ccc33',1,'kcenon::pacs::client']]],
+  ['syslog_5ffacility_19',['syslog_facility',['../namespacekcenon_1_1pacs_1_1security.html#aa84a62a8c56eca235393d695a934538d',1,'kcenon::pacs::security']]],
+  ['syslog_5fseverity_20',['syslog_severity',['../namespacekcenon_1_1pacs_1_1security.html#a5928ec9094bb1165500f8ea91b8e1c38',1,'kcenon::pacs::security']]],
+  ['syslog_5ftransport_5fprotocol_21',['syslog_transport_protocol',['../namespacekcenon_1_1pacs_1_1security.html#a57b639cca3ce4c68cfbf12f762a6ed92',1,'kcenon::pacs::security']]]
+];

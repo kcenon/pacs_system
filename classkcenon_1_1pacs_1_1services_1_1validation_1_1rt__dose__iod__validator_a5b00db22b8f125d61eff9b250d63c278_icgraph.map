@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::services::validation::rt_dose_iod_validator::check_type2_attribute" name="kcenon::pacs::services::validation::rt_dose_iod_validator::check_type2_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="924,52,1128,121"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#abf6edef66ff6a030d14f2f819923cd34" title=" " alt="" coords="699,5,876,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="910,67,876,60,877,55,911,62"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#afee5ddbc183386e28ac484fe04bb5f1f" title=" " alt="" coords="700,99,875,168"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="911,112,875,119,874,114,910,107"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#aa11086ba78b1edc18da2132d80f16dee" title=" " alt="" coords="476,59,651,114"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="686,64,651,71,650,66,685,59"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__iod__validator.html#a2bade8682e0cd5f31805f0eeaf97e37a" title="Validate an RT dataset (auto&#45;detects type)" alt="" coords="223,19,428,74"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="462,72,428,67,429,61,463,67"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ae7faa4af4dcb8873e499666830c30d6f" title="Validate an RT Dose dataset with default options." alt="" coords="241,98,410,153"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="463,106,411,114,410,109,462,100"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a1be4c1e45ad15c531a2174ce4b67e731" title="Validate any RT dataset (auto&#45;detects type) with default options." alt="" coords="5,19,175,74"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="209,49,175,49,175,44,209,44"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="686,115,650,107,652,102,687,110"/>
+</map>

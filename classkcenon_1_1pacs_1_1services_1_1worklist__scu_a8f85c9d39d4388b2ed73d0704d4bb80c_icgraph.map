@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::worklist_scu::get_today_date" name="kcenon::pacs::services::worklist_scu::get_today_date">
+<area shape="rect" id="Node000001" title="Get today&#39;s date in DICOM format (YYYYMMDD)" alt="" coords="253,5,473,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#af8e170854b1128843505bd4c201b17c6" title="Query today&#39;s worklist for a station." alt="" coords="5,5,205,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,28,206,28,206,23,240,23"/>
+</map>

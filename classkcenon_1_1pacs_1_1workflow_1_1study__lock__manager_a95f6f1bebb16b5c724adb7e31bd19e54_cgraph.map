@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::study_lock_manager::~study_lock_manager" name="kcenon::pacs::workflow::study_lock_manager::~study_lock_manager">
+<area shape="rect" id="Node000001" title="Destructor &#45; releases all locks." alt="" coords="5,5,180,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#a6a29d779f6fd433afdeefcd746b4680b" title="Acquire an exclusive lock on a study." alt="" coords="228,13,428,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,30,214,30,214,35,181,35"/>
+</map>

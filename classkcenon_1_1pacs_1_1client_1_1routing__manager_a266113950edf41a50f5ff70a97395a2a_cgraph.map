@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::routing_manager::get_field_value" name="kcenon::pacs::client::routing_manager::get_field_value">
+<area shape="rect" id="Node000001" title="Get DICOM field value from dataset." alt="" coords="5,5,176,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="224,5,379,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,30,210,30,210,35,176,35"/>
+</map>

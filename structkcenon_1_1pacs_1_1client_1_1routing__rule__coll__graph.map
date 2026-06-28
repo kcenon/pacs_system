@@ -1,0 +1,22 @@
+<map id="kcenon::pacs::client::routing_rule" name="kcenon::pacs::client::routing_rule">
+<area shape="rect" id="Node000001" title="A complete routing rule with conditions and actions." alt="" coords="58,672,206,972"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="88,135,166,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,201,62,229,41,264,24,313,13,356,9,396,9,433,23,511,47,609,60,655,55,657,42,610,18,513,4,434,3,395,8,356,19,312,36,262,58,226,85,197"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1client_1_1routing__condition.html" title="A single condition for routing rule evaluation." alt="" coords="51,273,203,413"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="130,200,130,257,124,257,124,200"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1client_1_1routing__action.html" title="Action to perform when a routing rule matches." alt="" coords="228,263,373,423"/>
+<area shape="poly" id="edge10_Node000009_Node000002" title=" " alt="" coords="168,197,197,222,223,248,219,252,193,226,164,201"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="62,5,192,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="130,99,130,134,124,134,124,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="57,515,208,609"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="135,609,135,656,130,656,130,609"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="131,413,133,498,128,498,126,413"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="406,310,528,375"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="427,388,376,448,365,472,360,482,350,493,317,508,287,511,257,510,221,517,209,522,207,517,219,512,256,505,287,505,315,503,347,488,356,479,360,470,371,445,423,384"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="232,515,382,609"/>
+<area shape="poly" id="edge11_Node000008_Node000006" title=" " alt="" coords="508,384,525,409,537,437,541,466,530,492,500,522,463,542,422,554,383,561,382,556,421,549,461,537,497,517,526,489,535,465,532,439,520,412,504,387"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="456,135,478,200"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="470,200,470,294,464,294,464,200"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="278,611,218,699,213,696,273,608"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="274,423,270,457,273,490,276,499,271,500,268,491,265,457,269,423"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::version" name="kcenon::pacs::integration_test::dcmtk_tool::version">
+<area shape="rect" id="Node000001" title="Get DCMTK version string." alt="" coords="5,49,196,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a378d43429576cb453524cdadfd31def8" title="Run a DCMTK tool and capture output." alt="" coords="244,49,440,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,66,231,66,231,71,196,71"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="497,5,683,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="440,52,483,46,483,51,441,57"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a39b86a50ebcefb7a9bfe2c9fbd37c0de" title="Run a process and wait for completion." alt="" coords="488,85,692,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="441,80,475,85,474,91,440,86"/>
+</map>

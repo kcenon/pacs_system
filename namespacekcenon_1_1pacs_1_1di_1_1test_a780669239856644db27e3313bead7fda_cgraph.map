@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::di::test::create_test_container" name="kcenon::pacs::di::test::create_test_container">
+<area shape="rect" id="Node000001" title="Create a test container with all mock services." alt="" coords="5,91,176,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1test_1_1TestContainerBuilder.html#a0d14902f51fb0d43a10b7360845cc5ea" title="Build the configured container." alt="" coords="224,5,389,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,89,217,62,219,67,147,94"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1test_1_1TestContainerBuilder.html#abc44c6f219ebe60252967a3e5f58eac4" title="Create and use a new mock network." alt="" coords="224,84,389,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,109,210,109,210,114,176,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1di_1_1test_1_1TestContainerBuilder.html#a5dfdfc06841874bbea45bf6a08ddbd56" title="Create and use a new mock storage." alt="" coords="224,163,389,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="147,129,219,155,217,160,145,134"/>
+</map>

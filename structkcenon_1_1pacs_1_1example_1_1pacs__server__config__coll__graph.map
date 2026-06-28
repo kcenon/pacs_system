@@ -1,0 +1,26 @@
+<map id="kcenon::pacs::example::pacs_server_config" name="kcenon::pacs::example::pacs_server_config">
+<area shape="rect" id="Node000001" title="Complete PACS server configuration." alt="" coords="391,721,555,821"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1example_1_1server__network__config.html" title="Server network configuration." alt="" coords="226,415,395,535"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="346,533,441,705,436,708,341,536"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="346,148,425,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="356,215,341,238,327,278,319,319,311,399,306,398,313,319,322,276,336,236,351,212"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1example_1_1storage__config.html" title="Storage configuration." alt="" coords="402,435,566,515"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="399,213,468,418,463,420,394,215"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1example_1_1logging__config.html" title="Logging configuration." alt="" coords="503,291,667,391"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="425,182,457,187,493,197,528,212,558,235,571,253,579,274,574,276,566,256,554,239,525,217,491,202,456,192,424,187"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="5,308,184,373"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="347,194,291,212,232,240,216,253,200,269,158,301,155,296,197,265,212,249,229,235,289,207,345,189"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="320,5,451,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="388,99,388,148,383,148,383,99"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="485,515,478,705,473,705,480,515"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1example_1_1database__config.html" title="Database configuration." alt="" coords="675,559,839,659"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="676,660,607,700,571,720,568,715,604,695,674,655"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="591,391,591,447,586,516,575,589,554,660,528,709,523,706,550,658,570,587,581,515,585,447,585,391"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1example_1_1access__control__config.html" title="Access control configuration." alt="" coords="81,569,245,649"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="178,648,192,673,211,695,249,720,291,738,334,751,376,759,375,765,333,756,289,743,246,724,208,699,187,676,173,650"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="87,374,79,408,74,449,75,492,86,534,100,555,95,558,82,536,70,493,69,449,74,408,82,373"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="34,148,155,213"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="97,227,97,308,92,308,92,227"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="83,13,106,78"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="97,78,97,131,92,131,92,78"/>
+</map>

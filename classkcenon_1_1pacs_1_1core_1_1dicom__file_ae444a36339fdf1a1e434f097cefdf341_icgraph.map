@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::core::dicom_file::create" name="kcenon::pacs::core::dicom_file::create">
+<area shape="rect" id="Node000001" title="Create a new DICOM file from a dataset." alt="" coords="231,77,377,117"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#ab2b8c6e03b91ede164372b2a6df08d92" title="Store a DICOM dataset to filesystem." alt="" coords="12,5,176,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="231,75,152,48,154,43,233,70"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1azure__blob__storage.html#a6b145a3051b2d9e5b8b98b7a2f1f7ac4" title="Store with progress tracking." alt="" coords="12,70,176,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,100,176,100,176,95,216,95"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1s3__storage.html#ab62da52dc238671941e3779b4260a778" title="Store with progress tracking." alt="" coords="5,149,183,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="238,125,169,151,167,146,236,120"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::remote_node_manager::~remote_node_manager" name="kcenon::pacs::client::remote_node_manager::~remote_node_manager">
+<area shape="rect" id="Node000001" title="Destructor &#45; stops health check if running." alt="" coords="5,5,197,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a46bf5f0ae2fd88767d7ed436b1fe4f31" title="Stop the automatic health check scheduler." alt="" coords="245,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,30,232,30,232,35,197,35"/>
+</map>

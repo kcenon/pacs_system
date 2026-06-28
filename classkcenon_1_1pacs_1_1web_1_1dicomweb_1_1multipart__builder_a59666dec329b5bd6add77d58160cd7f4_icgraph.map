@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::web::dicomweb::multipart_builder::content_type_header" name="kcenon::pacs::web::dicomweb::multipart_builder::content_type_header">
+<area shape="rect" id="Node000001" title="Get the Content&#45;Type header value for this multipart response." alt="" coords="483,22,649,91"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#abd79b68448f09c9404939caf93c5dbb1" title=" " alt="" coords="232,29,435,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="469,59,435,59,435,54,469,54"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="372,18,358,11,333,8,313,10,299,15,293,21,293,29,288,29,288,19,296,10,311,5,333,3,360,6,375,14"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,37,184,77"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="218,59,184,59,184,54,218,54"/>
+</map>

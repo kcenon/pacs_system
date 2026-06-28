@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::monitoring::dicom_collector_base::derived" name="kcenon::pacs::monitoring::dicom_collector_base::derived">
+<area shape="rect" id="Node000001" title="Get reference to derived class (CRTP helper)" alt="" coords="240,163,427,217"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#a396bdf438a237674ddc1928d2a1a6596" title="Collect metrics from the data source." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="293,155,246,113,191,74,170,62,173,58,193,69,249,109,297,151"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#a2148460733ff380fc30888250f781986" title="Get supported metric types." alt="" coords="5,84,192,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,161,180,141,182,136,239,156"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#adf32932dc06c6fc411867592586b3b3e" title="Get collector statistics." alt="" coords="5,163,192,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="227,193,192,193,192,187,227,187"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#a1efdc8768b6f50b609a63c20a61b4a1b" title="Initialize the collector with configuration." alt="" coords="5,241,192,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="239,224,182,244,180,239,237,219"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#a6c7a46b643c8c4885e97006fceb3a737" title="Check if the collector is healthy." alt="" coords="5,320,192,375"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="296,229,249,270,193,310,170,322,168,318,191,305,245,266,292,225"/>
+</map>

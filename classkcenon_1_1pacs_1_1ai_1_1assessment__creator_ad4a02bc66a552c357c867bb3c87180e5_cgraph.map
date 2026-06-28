@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::ai::assessment_creator::build_sr_content" name="kcenon::pacs::ai::assessment_creator::build_sr_content">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,91,219,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1ai_1_1assessment__creator.html#ac4f264e30f5558c27046a7cd0134b921" title="Convert assessment_type to DICOM coded value." alt="" coords="267,5,480,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,89,268,61,270,67,180,94"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1ai_1_1assessment__creator.html#a28b59d31c119dd706937158d3f2b07ba" title="Convert assessment_type to human&#45;readable meaning." alt="" coords="267,84,480,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,109,253,109,253,114,219,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="296,163,451,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="180,129,284,160,282,165,178,134"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="528,127,699,181"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="451,176,514,166,515,171,451,181"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="528,206,699,246"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="451,199,515,209,514,214,451,204"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="747,127,906,181"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="699,151,734,151,734,157,699,157"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="955,127,1129,181"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="907,151,941,151,941,157,907,157"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="1177,134,1352,174"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1130,151,1164,151,1164,157,1130,157"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="1400,134,1575,174"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="1352,151,1386,151,1386,157,1352,157"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="747,206,907,246"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="699,223,733,223,733,229,699,229"/>
+</map>

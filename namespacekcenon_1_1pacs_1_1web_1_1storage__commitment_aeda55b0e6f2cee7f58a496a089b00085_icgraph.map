@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::web::storage_commitment::transaction_to_json" name="kcenon::pacs::web::storage_commitment::transaction_to_json">
+<area shape="rect" id="Node000001" title="Serialize a commitment transaction to DICOM JSON." alt="" coords="775,5,945,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a012692fdc9a6b155d683ccd37762551c" title=" " alt="" coords="232,5,508,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="761,29,727,27,556,27,509,29,508,23,556,22,727,22,761,23"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1storage__commitment.html#aa88f84cd6de4626298c0048c9507e4c9" title="Serialize a list of transactions to DICOM JSON array." alt="" coords="556,37,727,92"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="762,50,727,55,727,50,761,44"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,13,184,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,35,184,35,184,30,218,30"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="542,56,508,52,509,46,543,50"/>
+</map>

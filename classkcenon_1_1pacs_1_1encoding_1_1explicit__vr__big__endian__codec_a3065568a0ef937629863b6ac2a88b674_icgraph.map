@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::encoding::explicit_vr_big_endian_codec::from_big_endian" name="kcenon::pacs::encoding::explicit_vr_big_endian_codec::from_big_endian">
+<area shape="rect" id="Node000001" title="Convert element value from big&#45;endian to little&#45;endian." alt="" coords="1025,140,1209,195"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a7fc7807941c90086306d2dda512dde5f" title="Decode a single element from bytes." alt="" coords="795,89,977,144"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1011,147,977,139,978,134,1012,142"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a7f22500529c2f9331720002349de4694" title=" " alt="" coords="5,121,247,176"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="1012,168,247,154,247,148,1012,163"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#a62c82058a1c6544e99d14f572fe55fb2" title="Decode bytes to a dataset using Explicit VR Big Endian." alt="" coords="571,5,747,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="798,87,732,63,734,58,800,82"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__big__endian__codec.html#adb63ab221a9279dae68a5bd9e90152fe" title=" " alt="" coords="295,56,523,111"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="781,112,522,94,523,89,781,107"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="558,56,523,63,522,58,557,51"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="282,115,245,124,244,119,281,110"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="260,140,794,118,795,123,261,146"/>
+</map>

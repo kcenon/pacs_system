@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::web::endpoints::register_key_image_endpoints_impl" name="kcenon::pacs::web::endpoints::register_key_image_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,188,212,243"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1key__image__repository.html#a7bd19a4ab3de938a9b630801c9e913b5" title=" " alt="" coords="279,5,453,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,186,185,128,220,97,259,69,268,64,270,68,261,74,224,101,189,132,134,190"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1key__image__repository.html#a5b51286b307d3067c86885897aba9deb" title=" " alt="" coords="279,84,453,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,185,259,149,278,141,280,146,261,154,174,190"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="291,163,441,203"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="212,200,277,192,277,197,212,205"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="291,227,441,267"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="212,226,277,234,277,239,212,231"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1storage_1_1key__image__repository.html#a6ed99f8f901ed8e63547c1f47717d72b" title=" " alt="" coords="279,292,453,347"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="174,240,261,277,280,285,278,289,259,282,172,245"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1storage_1_1key__image__repository.html#af774b087756428f77d132d1f3b21c50e" title=" " alt="" coords="260,371,472,411"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="134,241,188,299,223,329,261,356,276,364,274,368,259,360,220,334,185,303,130,245"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1key__image__repository.html#a154e488eb83b98ebd6c194062ef75b29" title=" " alt="" coords="520,84,695,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="453,109,507,109,507,114,453,114"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1key__image__repository.html#ad2f74f15b2c6b6ae5c2519bb89654ba8" title=" " alt="" coords="743,84,917,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="695,109,729,109,729,114,695,114"/>
+</map>

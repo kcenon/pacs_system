@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::parametric_map_iod_validator::quick_check" name="kcenon::pacs::services::validation::parametric_map_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required parametric map attributes." alt="" coords="5,70,244,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="300,5,489,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,67,305,46,306,52,229,72"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="317,70,472,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,95,303,95,303,100,244,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a2d4ddf82f3b97d9969e57fed0b3f757c" title="Check if a SOP Class UID is Parametric Map Storage." alt="" coords="292,149,497,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="220,122,288,142,286,147,218,127"/>
+</map>

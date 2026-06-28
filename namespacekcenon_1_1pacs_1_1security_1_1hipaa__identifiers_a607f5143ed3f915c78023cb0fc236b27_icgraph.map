@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::security::hipaa_identifiers::get_name_tags" name="kcenon::pacs::security::hipaa_identifiers::get_name_tags">
+<area shape="rect" id="Node000001" title="Tags containing names." alt="" coords="447,5,613,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#a4b10cf961b22d3f4ea03614e72b60b8d" title="Get all HIPAA identifier tags." alt="" coords="232,5,399,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="433,35,399,35,399,30,433,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1anonymizer.html#a14ce54fb446b1dc2f47733effe1262a7" title="Get a list of HIPAA Safe Harbor identifier tags." alt="" coords="5,5,184,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,35,184,35,184,30,218,30"/>
+</map>

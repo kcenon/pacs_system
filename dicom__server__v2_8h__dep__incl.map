@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/network/v2/dicom_server_v2.h" name="include/kcenon/pacs/network/v2/dicom_server_v2.h">
+<area shape="rect" id="Node000001" title="DICOM server implementation using network_system&#39;s messaging_server." alt="" coords="218,5,445,45"/>
+<area shape="rect" id="Node000002" href="$test__dicom__server__v2__integration_8cpp.html" title="Full integration testing for dicom_server_v2 (network_system migration)" alt="" coords="5,93,191,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="272,53,165,96,163,91,270,48"/>
+<area shape="rect" id="Node000003" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="215,108,448,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="334,59,334,108,329,108,329,59"/>
+<area shape="rect" id="Node000004" href="$dicom__server__v2_8cpp.html" title="DICOM server V2 implementation using network_system&#39;s messaging_server." alt="" coords="473,101,635,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="390,48,510,98,508,103,388,53"/>
+</map>

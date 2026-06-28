@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::di::NullLogger" name="kcenon::pacs::di::NullLogger">
+<area shape="rect" id="Node000001" title="No&#45;op logger implementation for default injection." alt="" coords="5,479,203,704"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="17,5,191,431"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,445,107,479,101,479,101,445"/>
+</map>

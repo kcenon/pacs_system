@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/series_endpoints.h" name="include/kcenon/pacs/web/endpoints/series_endpoints.h">
+<area shape="rect" id="Node000001" title="Series API endpoints for REST server." alt="" coords="116,5,280,60"/>
+<area shape="rect" id="Node000002" href="$series__endpoints_8cpp.html" title="Series API endpoints implementation." alt="" coords="5,108,188,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,72,119,110,115,106,157,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="212,115,387,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,68,288,113,285,117,235,71"/>
+</map>

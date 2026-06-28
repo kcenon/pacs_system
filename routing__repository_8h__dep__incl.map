@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/routing_repository.h" name="include/kcenon/pacs/storage/routing_repository.h">
+<area shape="rect" id="Node000001" title="Repository for routing rule persistence using base_repository pattern." alt="" coords="47,5,255,45"/>
+<area shape="rect" id="Node000002" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="5,93,136,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,57,90,95,86,91,122,54"/>
+<area shape="rect" id="Node000003" href="$routing__repository_8cpp.html" title="Implementation of the routing repository for rule persistence." alt="" coords="160,93,304,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,54,216,91,212,95,176,57"/>
+</map>

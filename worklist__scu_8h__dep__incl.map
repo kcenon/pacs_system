@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/services/worklist_scu.h" name="include/kcenon/pacs/services/worklist_scu.h">
+<area shape="rect" id="Node000001" title="DICOM Modality Worklist SCU service (MWL C&#45;FIND sender)" alt="" coords="181,5,358,45"/>
+<area shape="rect" id="Node000002" href="$worklist__scu_2main_8cpp.html" title="Worklist SCU &#45; Modality Worklist Query Client." alt="" coords="5,93,176,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,54,131,96,129,91,217,49"/>
+<area shape="rect" id="Node000003" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="200,93,339,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,59,272,93,267,93,267,59"/>
+<area shape="rect" id="Node000004" href="$worklist__scu_8cpp.html" title="Implementation of the Worklist SCU service." alt="" coords="363,93,517,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="320,49,404,91,401,96,318,54"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/services/ups/ups_watch_scu.h" name="include/kcenon/pacs/services/ups/ups_watch_scu.h">
+<area shape="rect" id="Node000001" title="DICOM UPS Watch SCU service (subscription client and event receiver)" alt="" coords="5,5,227,45"/>
+<area shape="rect" id="Node000002" href="$ups__watch__scu_8cpp.html" title="Implementation of the UPS Watch SCU service." alt="" coords="39,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,59,119,93,113,93,113,59"/>
+</map>

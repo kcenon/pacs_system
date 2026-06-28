@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::security::atna_syslog_transport::format_syslog_message" name="kcenon::pacs::security::atna_syslog_transport::format_syslog_message">
+<area shape="rect" id="Node000001" title="Format an XML audit message as an RFC 5424 Syslog message." alt="" coords="5,45,195,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#abfedff1ce48210b547f4f34c5216398a" title=" " alt="" coords="243,5,417,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,54,229,48,230,53,196,59"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#add78b3ddb490992409c0184759b9f7ea" title=" " alt="" coords="243,84,417,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,86,230,92,229,97,195,91"/>
+</map>

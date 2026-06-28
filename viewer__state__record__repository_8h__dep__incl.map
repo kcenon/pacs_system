@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/storage/viewer_state_record_repository.h" name="include/kcenon/pacs/storage/viewer_state_record_repository.h">
+<area shape="rect" id="Node000001" title="Repository for viewer state records using base_repository pattern." alt="" coords="28,5,191,60"/>
+<area shape="rect" id="Node000002" href="$viewer__state__record__repository_8cpp.html" title="Implementation of viewer_state_record_repository using base_repository pattern." alt="" coords="5,108,213,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,74,112,108,107,108,107,74"/>
+</map>

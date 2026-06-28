@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::digital_signature::verify_with_trust" name="kcenon::pacs::security::digital_signature::verify_with_trust">
+<area shape="rect" id="Node000001" title="Verify digital signatures with a trusted certificate store." alt="" coords="5,5,189,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1certificate.html#a545471749fa4d902fcd3d3e20999a426" title="Load certificate from DER&#45;encoded bytes." alt="" coords="237,13,435,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,30,224,30,224,35,190,35"/>
+</map>

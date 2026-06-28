@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_dx_for_presentation_sop_class" name="kcenon::pacs::services::sop_classes::is_dx_for_presentation_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a For Presentation SOP Class." alt="" coords="304,5,485,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a5f8f329fa5aa1b4685793618baeb6c87" title="Check if dataset is a For Presentation DX image." alt="" coords="5,13,256,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="290,35,256,35,256,30,290,30"/>
+</map>

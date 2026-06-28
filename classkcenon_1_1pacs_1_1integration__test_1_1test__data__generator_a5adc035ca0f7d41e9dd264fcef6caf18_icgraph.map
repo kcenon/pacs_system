@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration_test::test_data_generator::worklist" name="kcenon::pacs::integration_test::test_data_generator::worklist">
+<area shape="rect" id="Node000001" title="Generate a worklist item dataset." alt="" coords="240,55,433,110"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ae9ca4d27562aaab1f9c15fc88fd061fe" title=" " alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,59,182,48,183,43,227,54"/>
+<area shape="rect" id="Node000003" href="$test__multimodal__workflow_8cpp.html#a5cd28cacc44c0519382761e5fc9304f0" title=" " alt="" coords="51,70,146,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="227,85,146,85,146,80,227,80"/>
+<area shape="rect" id="Node000004" href="$test__multimodal__workflow_8cpp.html#a87323ec8920a06c0f358307f36e4b879" title=" " alt="" coords="51,119,146,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="227,108,147,125,146,120,226,103"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::client::prefetch_manager::impl::get_matching_rules" name="kcenon::pacs::client::prefetch_manager::impl::get_matching_rules">
+<area shape="rect" id="Node000001" title=" " alt="" coords="777,52,964,107"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#aa2e587c3190679010bb3eebeea4f77df" title="Prefetch prior studies for a patient." alt="" coords="519,19,729,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="763,68,729,63,730,58,764,62"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#a4ebbba9ac5844b25e11bf1c6d467f4d3" title="Process worklist items and trigger prefetch." alt="" coords="262,84,469,139"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="764,89,469,107,469,102,763,83"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#a7a149b4490fa3159474c4e66cd8721af" title="Prefetch prior studies asynchronously." alt="" coords="260,5,471,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="505,43,471,41,471,35,505,37"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="506,79,470,88,468,83,505,73"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#adf0e78cc04eeb961afa9d3bf75cf9c47" title="Process worklist items asynchronously." alt="" coords="5,84,212,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="248,114,212,114,212,109,248,109"/>
+</map>
