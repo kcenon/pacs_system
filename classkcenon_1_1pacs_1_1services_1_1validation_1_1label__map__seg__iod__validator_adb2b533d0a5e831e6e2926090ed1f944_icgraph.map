@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::label_map_seg_iod_validator::validate_segment_sequence" name="kcenon::pacs::services::validation::label_map_seg_iod_validator::validate_segment_sequence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="476,42,681,111"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1label__map__seg__iod__validator.html#a721eb3a4d95ebc52fb7e53ad6d80c57b" title="Validate a DICOM dataset against Label Map Segmentation IOD." alt="" coords="223,5,428,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="462,59,428,53,429,48,463,54"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1label__map__seg__iod__validator.html#a12ac262c9d83a9a5f78e59b405e7dc49" title="Validate segment sequence completeness." alt="" coords="223,85,428,154"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="463,99,429,105,428,99,462,94"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a39cbba041504955544bcccc7cdc0aeb2" title="Validate a Label Map Segmentation dataset with default options." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

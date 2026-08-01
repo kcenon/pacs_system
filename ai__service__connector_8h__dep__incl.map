@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/ai/ai_service_connector.h" name="include/kcenon/pacs/ai/ai_service_connector.h">
+<area shape="rect" id="Node000001" title="Connector for external AI inference services." alt="" coords="22,5,213,45"/>
+<area shape="rect" id="Node000002" href="$ai__service__connector_8cpp.html" title="Implementation of AI service connector." alt="" coords="5,93,229,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,59,120,93,115,93,115,59"/>
+</map>

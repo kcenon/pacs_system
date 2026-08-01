@@ -1,0 +1,30 @@
+<map id="include/kcenon/pacs/security/permission.h" name="include/kcenon/pacs/security/permission.h">
+<area shape="rect" id="Node000001" title="Permission definitions for RBAC." alt="" coords="357,5,524,45"/>
+<area shape="rect" id="Node000002" href="$access__control__manager_8h.html" title="Core RBAC logic." alt="" coords="503,93,682,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="485,50,551,91,548,96,482,55"/>
+<area shape="rect" id="Node000009" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="65,211,296,236"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="407,56,198,212,195,208,403,51"/>
+<area shape="rect" id="Node000003" href="$dicom__association__handler_8h.html" title="DICOM association handler for network_system integration." alt="" coords="371,196,595,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="556,160,514,198,510,194,552,156"/>
+<area shape="rect" id="Node000004" href="$dicom__server__v2_8h.html" title="DICOM server implementation using network_system&#39;s messaging_server." alt="" coords="219,299,446,339"/>
+<area shape="poly" id="edge9_Node000002_Node000004" title=" " alt="" coords="490,134,455,143,421,156,389,174,361,198,346,221,338,248,334,299,329,298,333,247,342,219,357,194,386,170,419,151,454,138,489,129"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="491,149,228,213,227,208,489,144"/>
+<area shape="rect" id="Node000010" href="$access__control__manager_8cpp.html" title="Implementation of RBAC logic." alt="" coords="619,203,785,243"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="633,156,683,201,680,205,630,160"/>
+<area shape="rect" id="Node000011" href="$oauth2__middleware_8cpp.html" title="Implementation of OAuth 2.0 middleware for DICOMweb endpoints." alt="" coords="809,203,963,243"/>
+<area shape="poly" id="edge12_Node000002_Node000011" title=" " alt="" coords="683,150,832,201,830,206,681,155"/>
+<area shape="rect" id="Node000012" href="$security__endpoints_8cpp.html" title="Security API endpoints implementation." alt="" coords="988,203,1184,243"/>
+<area shape="poly" id="edge13_Node000002_Node000012" title=" " alt="" coords="696,138,976,193,1009,201,1008,206,975,199,695,143"/>
+<area shape="rect" id="Node000013" href="$system__endpoints_8cpp.html" title="System API endpoints implementation." alt="" coords="1209,203,1401,243"/>
+<area shape="poly" id="edge14_Node000002_Node000013" title=" " alt="" coords="696,128,926,153,1062,171,1197,193,1232,201,1231,206,1196,199,1061,177,926,159,695,134"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="430,260,365,301,362,296,428,256"/>
+<area shape="rect" id="Node000006" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="403,401,636,427"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="493,263,520,401,515,402,488,264"/>
+<area shape="rect" id="Node000008" href="$dicom__association__handler_8cpp.html" title="DICOM association handler implementation for network_system integration." alt="" coords="521,299,707,339"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="533,256,589,296,586,301,529,261"/>
+<area shape="rect" id="Node000005" href="$test__dicom__server__v2__integration_8cpp.html" title="Full integration testing for dicom_server_v2 (network_system migration)" alt="" coords="5,387,191,441"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="273,346,165,389,163,384,271,341"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="384,342,498,399,495,404,381,347"/>
+<area shape="rect" id="Node000007" href="$dicom__server__v2_8cpp.html" title="DICOM server V2 implementation using network_system&#39;s messaging_server." alt="" coords="215,394,378,434"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="323,352,306,395,301,393,318,350"/>
+</map>

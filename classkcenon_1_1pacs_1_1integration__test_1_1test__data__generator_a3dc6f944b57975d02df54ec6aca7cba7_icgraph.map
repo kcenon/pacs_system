@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::integration_test::test_data_generator::add_multiframe_pixel_data" name="kcenon::pacs::integration_test::test_data_generator::add_multiframe_pixel_data">
+<area shape="rect" id="Node000001" title="Generate pixel data for multi&#45;frame image." alt="" coords="481,124,689,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a6e6391ef0d5d1c0b311865b33172c453" title="Generate an Enhanced CT multi&#45;frame dataset." alt="" coords="240,5,433,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="523,120,432,74,407,63,409,58,434,69,525,115"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#ac24b68282b482a36f0d812aeac42d11e" title="Generate an Enhanced MR multi&#45;frame dataset." alt="" coords="240,84,433,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="467,135,433,129,434,124,468,130"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a036f2d82bc26f66521e6041fc6ce5f8d" title="Generate a multi&#45;frame US cine dataset." alt="" coords="240,163,433,217"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="468,172,434,178,433,172,467,167"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#af5f23388af26fc54bbcd4b6a4df08624" title="Generate a multi&#45;frame XA cine dataset." alt="" coords="240,241,433,296"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="522,187,434,231,407,244,404,239,432,226,520,183"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a440224b080af467f0dea37543ad4cbab" title=" " alt="" coords="5,13,192,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,35,192,35,192,30,227,30"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ac4747c23c5ddf0dd540986af0588634b" title=" " alt="" coords="5,91,192,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="227,114,192,114,192,109,227,109"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ae4d3d32f5818e7568073cb8a8aa8b9c0" title=" " alt="" coords="5,170,192,210"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="227,193,192,193,192,187,227,187"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1integration__test.html#aa7f0393dcef191056cd9cb978ccdff6f" title=" " alt="" coords="5,241,192,281"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="226,268,192,266,192,261,227,262"/>
+<area shape="rect" id="Node000010" href="$test__multimodal__workflow_8cpp.html#a5cd28cacc44c0519382761e5fc9304f0" title=" " alt="" coords="51,305,146,331"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="227,294,147,311,146,306,226,289"/>
+</map>

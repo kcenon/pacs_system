@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::pacs_metrics::to_prometheus" name="kcenon::pacs::monitoring::pacs_metrics::to_prometheus">
+<area shape="rect" id="Node000001" title="Export metrics in Prometheus text format." alt="" coords="277,5,500,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor.html#ac070f4fb20d1f9191a01585a26c15c1b" title="Export all metrics in Prometheus text format." alt="" coords="5,5,229,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="264,28,229,28,229,23,264,23"/>
+</map>

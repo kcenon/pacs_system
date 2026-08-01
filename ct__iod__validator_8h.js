@@ -1,0 +1,25 @@
+var ct__iod__validator_8h =
+[
+    [ "kcenon::pacs::services::validation::ct_validation_options", "structkcenon_1_1pacs_1_1services_1_1validation_1_1ct__validation__options.html", "structkcenon_1_1pacs_1_1services_1_1validation_1_1ct__validation__options" ],
+    [ "kcenon::pacs::services::validation::ct_iod_validator", "classkcenon_1_1pacs_1_1services_1_1validation_1_1ct__iod__validator.html", "classkcenon_1_1pacs_1_1services_1_1validation_1_1ct__iod__validator" ],
+    [ "is_valid_ct_dataset", "ct__iod__validator_8h.html#aec786a5cb8d6fc17fc38160b1ce57395", null ],
+    [ "validate_ct_iod", "ct__iod__validator_8h.html#a5fc2567c6a36e3755f5f39213e2331ea", null ],
+    [ "convolution_kernel", "ct__iod__validator_8h.html#ae1497294de093630fdccc403ec6adfe9", null ],
+    [ "data_collection_diameter", "ct__iod__validator_8h.html#a1f8cf395290a859c15016c2a00dcdb50", null ],
+    [ "exposure", "ct__iod__validator_8h.html#a4a26e1f471408eb7fffa316f08172453", null ],
+    [ "exposure_time", "ct__iod__validator_8h.html#a0ae0a2e9581562a3cf0584844ff944ac", null ],
+    [ "filter_type", "ct__iod__validator_8h.html#a57d1bea38f94e05e23fc70ffcdae14c9", null ],
+    [ "focal_spots", "ct__iod__validator_8h.html#a9980960ab91d521aa65809aba71cbe68", null ],
+    [ "gantry_detector_tilt", "ct__iod__validator_8h.html#a20c86bbf090783197a4eb7acdbd16773", null ],
+    [ "generator_power", "ct__iod__validator_8h.html#ae53a7a6b5a9d0f3d4e536178920b6b8b", null ],
+    [ "image_orientation_patient", "ct__iod__validator_8h.html#af70e410aab20ab661c654753bb83bff2", null ],
+    [ "image_position_patient", "ct__iod__validator_8h.html#ad0651f1df19ad8d4118bf0f8da0de5b5", null ],
+    [ "kvp", "ct__iod__validator_8h.html#ae35ea2d83543437bedd948deb42d671a", null ],
+    [ "patient_position", "ct__iod__validator_8h.html#a6b1ddd5541776c7961b1dc3b652e30cb", null ],
+    [ "reconstruction_diameter", "ct__iod__validator_8h.html#a8dd67b7578992f21def910fc5f333a48", null ],
+    [ "rotation_direction", "ct__iod__validator_8h.html#a3859e688d9ec92d39eb1a3606da3b7f9", null ],
+    [ "slice_location", "ct__iod__validator_8h.html#aafc27d84725891b59cd2c9ff6898eda7", null ],
+    [ "slice_thickness", "ct__iod__validator_8h.html#ae2d2ba0e7b1134e8dd1a1fcba08e75cb", null ],
+    [ "table_height", "ct__iod__validator_8h.html#a98d59520bdb9e46534cc3af86e848634", null ],
+    [ "xray_tube_current", "ct__iod__validator_8h.html#acbc87160b1da0c05a2c4f686df4426ea", null ]
+];

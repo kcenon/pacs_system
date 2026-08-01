@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::client::routing_manager::attach_to_storage_scp" name="kcenon::pacs::client::routing_manager::attach_to_storage_scp">
+<area shape="rect" id="Node000001" title="Attach to a Storage SCP for automatic routing." alt="" coords="5,71,196,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#ac4e6b96c23896af5f00fe374070c9f97" title="Detach from the currently attached Storage SCP." alt="" coords="244,5,437,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,70,230,60,231,65,197,75"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1storage__scp.html#abd845ac555f966a925e226e7349dbae9" title=" " alt="" coords="503,5,674,60"/>
+<area shape="poly" id="edge11_Node000001_Node000003" title=" " alt="" coords="196,92,311,84,437,69,489,58,490,63,438,74,312,90,196,98"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a6d568ad6223794fcbcfc2024bcfec45d" title="Route a DICOM dataset based on matching rules." alt="" coords="249,146,432,186"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="197,122,257,140,256,145,195,128"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,30,490,30,490,35,438,35"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#adbcb1eac4eb82b06b5f670fd9d68e7b5" title="Evaluate rules and return with matched rule IDs." alt="" coords="485,84,692,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="431,143,471,135,472,140,433,149"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="1217,77,1372,132"/>
+<area shape="poly" id="edge10_Node000004_Node000008" title=" " alt="" coords="433,172,575,180,759,184,964,175,1068,165,1169,149,1219,134,1221,140,1170,154,1069,170,965,181,759,189,575,186,432,177"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#afafe65aae303778c479a236a9b50bc48" title="Execute routing actions." alt="" coords="489,215,689,269"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="408,184,487,208,485,213,406,189"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a8dd101fc4ef26cb5af1f1714d10515ea" title="Check if a condition matches a dataset." alt="" coords="740,84,931,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="692,109,726,109,726,114,692,114"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a266113950edf41a50f5ff70a97395a2a" title="Get DICOM field value from dataset." alt="" coords="989,5,1159,60"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="918,81,977,62,978,67,920,86"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a414b09558c75f093f7eb69ea4ee3a34f" title="Match a wildcard pattern against a value." alt="" coords="979,84,1169,139"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="931,109,965,109,965,114,931,114"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1159,58,1205,73,1204,78,1158,63"/>
+</map>

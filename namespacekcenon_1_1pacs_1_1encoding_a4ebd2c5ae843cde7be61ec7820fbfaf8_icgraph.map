@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::encoding::is_binary_vr" name="kcenon::pacs::encoding::is_binary_vr">
+<area shape="rect" id="Node000001" title="Checks if a VR is a binary/raw byte type." alt="" coords="245,53,420,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1container__adapter.html#a182f2203cc904c37421550959c3d2070" title="Check if a VR maps to binary data." alt="" coords="5,5,197,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="231,58,197,52,198,47,232,53"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1container__adapter.html#a718183fa22bd71a3e264730318e5accb" title="Convert a DICOM element to a container value." alt="" coords="8,84,195,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,92,195,98,195,93,231,87"/>
+</map>

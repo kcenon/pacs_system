@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::monitoring::pacs_monitor::reset" name="kcenon::pacs::monitoring::pacs_monitor::reset">
+<area shape="rect" id="Node000001" title="Reset all metrics." alt="" coords="5,65,192,105"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="240,22,427,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,68,226,63,227,68,192,74"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a2d5c1f94465d4768f3f872221578f30f" title="Reset all metrics to zero." alt="" coords="240,101,427,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,97,227,102,226,108,192,102"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1monitoring_1_1association__counters.html#a27c387b03cfb125422b2983b4602a93e" title="Reset all counters to zero." alt="" coords="478,5,686,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="395,99,425,86,449,70,473,55,491,47,493,52,476,60,452,75,428,90,397,104"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1monitoring_1_1data__transfer__metrics.html#a8df74d7bad1ec1b8d3b3d2457ca9c514" title="Reset all counters to zero." alt="" coords="475,69,689,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="427,107,461,102,462,108,427,112"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1monitoring_1_1operation__counter.html#a1f2e363e6a01b837665dd779ae2130a5" title="Reset all counters to zero." alt="" coords="487,133,677,173"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="427,131,474,137,473,142,427,136"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1monitoring_1_1pool__counters.html#a07c92f7c3efb04343e45e22dc9579031" title="Reset all counters to zero." alt="" coords="489,197,675,237"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="376,139,476,183,498,191,496,196,474,188,374,144"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::ophthalmic_iod_validator::quick_check" name="kcenon::pacs::services::validation::ophthalmic_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required ophthalmic attributes." alt="" coords="223,5,425,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ad1dab3841338c470bc8034a84f829ffd" title="Quick check if a dataset is a valid ophthalmic image." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

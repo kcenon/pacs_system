@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::detail::accept_worker::do_work" name="kcenon::pacs::network::detail::accept_worker::do_work">
+<area shape="rect" id="Node000001" title="Main work routine &#45; checks for incoming connections." alt="" coords="5,5,175,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1detail_1_1accept__worker.html#a537a033a51d2c289d4b06e4ce175ad9f" title="Generates a unique session ID for new connections." alt="" coords="223,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,30,209,30,209,35,175,35"/>
+</map>

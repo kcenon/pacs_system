@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::pdu_buffer_pool::reset_statistics" name="kcenon::pacs::network::pdu_buffer_pool::reset_statistics">
+<area shape="rect" id="Node000001" title="Reset all statistics." alt="" coords="5,5,180,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1network_1_1pdu__pool__statistics.html#a9eb2473e2d3a8b9809da7be7e3258e6d" title="Reset all statistics." alt="" coords="228,5,396,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,30,214,30,214,35,180,35"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::on_worklist_query" name="kcenon::pacs::workflow::auto_prefetch_service::on_worklist_query">
+<area shape="rect" id="Node000001" title="Handle worklist query event." alt="" coords="228,5,403,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#acde3cb517a8a32be57f124d387ae6a74" title="Trigger prefetch for worklist items." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,35,180,35,180,30,214,30"/>
+</map>

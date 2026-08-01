@@ -1,0 +1,9 @@
+<map id="query_scu::result_formatter::column_def" name="query_scu::result_formatter::column_def">
+<area shape="rect" id="Node000001" title="Column definition for formatting." alt="" coords="64,512,259,592"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,252,110,317"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,317,76,397,85,443,101,487,108,498,103,501,96,489,80,445,71,398,66,318"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,100,73,252,68,252,68,100"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="134,135,290,435"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="186,435,174,497,169,496,181,434"/>
+</map>

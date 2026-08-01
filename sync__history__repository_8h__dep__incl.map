@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/storage/sync_history_repository.h" name="include/kcenon/pacs/storage/sync_history_repository.h">
+<area shape="rect" id="Node000001" title="Repository for sync history records using base_repository pattern." alt="" coords="15,5,176,60"/>
+<area shape="rect" id="Node000002" href="$sync__history__repository_8cpp.html" title="Implementation of sync_history_repository using base_repository pattern." alt="" coords="5,108,185,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,74,98,108,93,108,93,74"/>
+</map>

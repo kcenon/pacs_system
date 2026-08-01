@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::mpps_scu::generate_mpps_uid" name="kcenon::pacs::services::mpps_scu::generate_mpps_uid">
+<area shape="rect" id="Node000001" title="Generate a unique MPPS SOP Instance UID." alt="" coords="440,5,671,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a250040ff0a6286a6b19ce4f35b8e8589" title="Create a new MPPS instance (N&#45;CREATE)" alt="" coords="223,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,28,392,28,392,23,426,23"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a9a71a874fd3b49f6c3689cd522e2df97" title=" " alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,28,175,28,175,23,209,23"/>
+</map>

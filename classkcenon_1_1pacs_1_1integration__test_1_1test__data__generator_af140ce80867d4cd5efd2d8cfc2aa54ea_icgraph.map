@@ -1,0 +1,81 @@
+<map id="kcenon::pacs::integration_test::test_data_generator::current_date" name="kcenon::pacs::integration_test::test_data_generator::current_date">
+<area shape="rect" id="Node000001" title="Get current date in DICOM DA format (YYYYMMDD)" alt="" coords="764,587,957,642"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a5ab977ef182ac41639c324f8b21d77d2" title="Add common study module attributes." alt="" coords="523,587,716,642"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="751,617,716,617,716,612,751,612"/>
+<area shape="rect" id="Node000033" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a89589c1351c13c6ce377895ddd52f619" title=" " alt="" coords="526,667,713,707"/>
+<area shape="poly" id="edge40_Node000001_Node000033" title=" " alt="" coords="756,649,688,669,686,664,755,643"/>
+<area shape="rect" id="Node000034" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a5adc035ca0f7d41e9dd264fcef6caf18" title="Generate a worklist item dataset." alt="" coords="261,122,454,177"/>
+<area shape="poly" id="edge41_Node000001_Node000034" title=" " alt="" coords="831,578,774,500,691,399,588,293,532,243,473,198,439,179,442,174,476,194,535,239,592,289,695,396,778,497,835,575"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#abf1e849b381167497b6ab6d3a9cb043e" title="Generate a CT Image dataset." alt="" coords="251,208,464,248"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="601,575,534,395,498,311,473,266,450,250,453,246,477,262,503,308,539,393,606,573"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a6e6391ef0d5d1c0b311865b33172c453" title="Generate an Enhanced CT multi&#45;frame dataset." alt="" coords="261,547,454,602"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="508,600,454,592,455,587,509,595"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#ac24b68282b482a36f0d812aeac42d11e" title="Generate an Enhanced MR multi&#45;frame dataset." alt="" coords="261,626,454,681"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="509,634,455,642,454,636,508,628"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a12693173420aeeaa71d7eb7a0949901b" title="Generate an intentionally invalid dataset." alt="" coords="261,705,454,759"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="536,651,524,657,500,676,476,694,449,707,447,702,473,690,497,672,521,652,533,646"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a453c11fc05de95bbc2c6da44ab139abf" title="Generate a large dataset for stress testing." alt="" coords="240,784,475,824"/>
+<area shape="poly" id="edge14_Node000002_Node000015" title=" " alt="" coords="529,652,525,656,513,671,507,685,502,714,497,743,489,758,476,773,457,786,454,782,473,769,485,755,492,742,497,713,502,683,509,668,521,653,525,648"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a5c340904edfb064e01e36dc65c64a8e5" title="Generate an MR Image dataset." alt="" coords="248,276,467,316"/>
+<area shape="poly" id="edge16_Node000002_Node000017" title=" " alt="" coords="606,575,590,519,563,453,524,386,500,356,473,330,455,319,458,314,476,326,504,353,529,383,568,451,595,517,611,573"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a70fd76ff7b7ea09c0797066cc96b562c" title="Generate a complete multi&#45;modal patient study." alt="" coords="261,849,454,903"/>
+<area shape="poly" id="edge21_Node000002_Node000019" title=" " alt="" coords="528,653,525,656,510,679,503,701,502,746,501,791,493,814,477,838,456,854,452,850,473,834,488,812,496,790,497,746,497,701,505,677,521,653,524,649"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a86457de41198caeae830d02135688d58" title="Generate a dataset with Unicode patient names." alt="" coords="261,927,454,982"/>
+<area shape="poly" id="edge23_Node000002_Node000021" title=" " alt="" coords="528,653,525,656,505,689,498,722,498,753,502,785,507,817,507,850,498,883,477,916,456,934,452,930,473,913,493,881,501,849,501,818,497,786,493,754,492,721,500,687,521,653,524,649"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#ac96e39abee243e948ca4590ca917a555" title="Generate a single&#45;frame US Image dataset." alt="" coords="249,340,465,380"/>
+<area shape="poly" id="edge25_Node000002_Node000023" title=" " alt="" coords="600,576,581,533,553,484,517,435,473,394,453,382,456,378,476,390,521,432,557,481,585,530,605,573"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#a036f2d82bc26f66521e6041fc6ce5f8d" title="Generate a multi&#45;frame US cine dataset." alt="" coords="261,1006,454,1061"/>
+<area shape="poly" id="edge29_Node000002_Node000025" title=" " alt="" coords="527,653,525,656,510,678,500,700,492,742,495,783,503,825,511,866,513,908,503,951,492,973,477,995,456,1013,453,1009,473,992,488,970,498,949,507,908,505,867,497,826,490,784,487,742,495,698,506,676,521,653,523,650"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#ae8f0883209fb730e20ff649a3b2c38b3" title="Generate a dataset with private tags." alt="" coords="261,1085,454,1139"/>
+<area shape="poly" id="edge31_Node000002_Node000027" title=" " alt="" coords="527,653,525,656,507,684,496,711,489,737,487,763,492,814,503,865,515,916,519,968,516,994,508,1021,496,1048,477,1075,456,1093,452,1089,473,1072,491,1045,503,1019,511,993,513,968,509,917,498,866,487,815,482,763,484,736,491,709,503,681,520,653,523,650"/>
+<area shape="rect" id="Node000029" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#ad2f5abfd8c6c47a3f073f006bf924233" title="Generate a single&#45;frame XA Image dataset." alt="" coords="249,404,466,444"/>
+<area shape="poly" id="edge33_Node000002_Node000029" title=" " alt="" coords="591,578,541,516,509,485,473,458,449,446,452,442,476,454,512,481,545,512,595,575"/>
+<area shape="rect" id="Node000031" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__data__generator.html#af5f23388af26fc54bbcd4b6a4df08624" title="Generate a multi&#45;frame XA cine dataset." alt="" coords="261,469,454,523"/>
+<area shape="poly" id="edge37_Node000002_Node000031" title=" " alt="" coords="561,583,474,537,446,526,448,521,476,532,564,578"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ac209e818312e3f4dba03608163d9e9f9" title=" " alt="" coords="5,69,192,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="263,205,238,190,222,173,214,156,206,139,190,123,171,112,173,107,194,119,210,136,218,154,226,170,242,186,265,200"/>
+<area shape="rect" id="Node000005" href="$test__multimodal__workflow_8cpp.html#a5cd28cacc44c0519382761e5fc9304f0" title=" " alt="" coords="51,298,146,323"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="275,255,241,266,193,288,147,302,145,297,191,283,239,262,273,250"/>
+<area shape="rect" id="Node000006" href="$test__multimodal__workflow_8cpp.html#a87323ec8920a06c0f358307f36e4b879" title=" " alt="" coords="51,134,146,159"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="283,206,239,191,191,173,145,160,147,155,193,168,241,185,285,201"/>
+<area shape="rect" id="Node000007" href="$test__stability_8cpp.html#a838e097a6cdc8d1aab555bc9e10d8434" title=" " alt="" coords="51,183,146,209"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="237,216,146,204,146,199,237,210"/>
+<area shape="rect" id="Node000008" href="$test__multimodal__workflow_8cpp.html#acba6fc8ba176c71c8fd34f42b18d9e79" title=" " alt="" coords="51,347,146,373"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="257,256,242,266,226,283,219,301,210,319,194,337,171,349,147,356,146,351,169,344,190,333,206,316,214,298,222,280,238,262,254,252"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a440224b080af467f0dea37543ad4cbab" title=" " alt="" coords="5,589,192,629"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="247,592,193,599,192,594,246,587"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ac4747c23c5ddf0dd540986af0588634b" title=" " alt="" coords="5,653,192,693"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="247,665,192,669,192,663,246,659"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a2abdf3bc0cba486cf3c1651b4c5ec666" title=" " alt="" coords="5,717,192,757"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="247,737,192,738,192,733,247,732"/>
+<area shape="rect" id="Node000016" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ac881ac073f0e6a91b793ca25a99605bf" title=" " alt="" coords="5,784,192,824"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="226,807,192,807,192,801,226,801"/>
+<area shape="poly" id="edge18_Node000017_Node000005" title=" " alt="" coords="235,306,147,311,146,305,234,300"/>
+<area shape="poly" id="edge19_Node000017_Node000006" title=" " alt="" coords="252,272,238,262,220,239,214,216,207,194,190,173,169,161,146,154,147,149,171,156,194,169,212,191,219,214,225,237,242,258,255,267"/>
+<area shape="poly" id="edge20_Node000017_Node000008" title=" " alt="" coords="263,322,147,351,145,346,262,317"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a931640944915f98e36579313849bb7f5" title=" " alt="" coords="5,233,192,273"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="234,278,192,271,192,266,235,273"/>
+<area shape="rect" id="Node000020" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a5c0d75df87c25de5a9a1072c4a464a07" title=" " alt="" coords="5,856,192,896"/>
+<area shape="poly" id="edge22_Node000019_Node000020" title=" " alt="" coords="247,879,192,879,192,873,247,873"/>
+<area shape="rect" id="Node000022" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ac754992ab3a4621e4c09f23233ee82a6" title=" " alt="" coords="5,935,192,975"/>
+<area shape="poly" id="edge24_Node000021_Node000022" title=" " alt="" coords="247,957,192,957,192,952,247,952"/>
+<area shape="poly" id="edge27_Node000023_Node000005" title=" " alt="" coords="238,340,146,322,147,317,239,335"/>
+<area shape="poly" id="edge28_Node000023_Node000008" title=" " alt="" coords="236,363,146,363,146,357,236,357"/>
+<area shape="rect" id="Node000024" href="$namespacekcenon_1_1pacs_1_1integration__test.html#aab1bed5010a38b4198a5a264d7816359" title=" " alt="" coords="5,397,192,437"/>
+<area shape="poly" id="edge26_Node000023_Node000024" title=" " alt="" coords="254,386,190,400,189,395,253,380"/>
+<area shape="rect" id="Node000026" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ae4d3d32f5818e7568073cb8a8aa8b9c0" title=" " alt="" coords="5,1013,192,1053"/>
+<area shape="poly" id="edge30_Node000025_Node000026" title=" " alt="" coords="247,1036,192,1036,192,1031,247,1031"/>
+<area shape="rect" id="Node000028" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a703a4fd1b8c61483caf3cc31b53bd929" title=" " alt="" coords="5,1092,192,1132"/>
+<area shape="poly" id="edge32_Node000027_Node000028" title=" " alt="" coords="247,1115,192,1115,192,1109,247,1109"/>
+<area shape="poly" id="edge35_Node000029_Node000005" title=" " alt="" coords="249,400,238,394,223,380,214,365,205,350,191,337,169,326,146,319,147,314,171,321,193,332,209,347,218,362,227,376,242,390,252,396"/>
+<area shape="poly" id="edge36_Node000029_Node000008" title=" " alt="" coords="262,403,145,374,147,369,263,398"/>
+<area shape="rect" id="Node000030" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a47395393546bbd570659b2483e26806e" title=" " alt="" coords="5,461,192,501"/>
+<area shape="poly" id="edge34_Node000029_Node000030" title=" " alt="" coords="254,450,190,464,189,459,253,444"/>
+<area shape="poly" id="edge39_Node000031_Node000005" title=" " alt="" coords="247,466,238,458,225,442,218,426,214,395,209,365,203,351,190,337,169,324,145,317,147,312,171,319,194,333,207,348,214,363,219,394,223,425,230,439,242,454,251,462"/>
+<area shape="rect" id="Node000032" href="$namespacekcenon_1_1pacs_1_1integration__test.html#aa7f0393dcef191056cd9cb978ccdff6f" title=" " alt="" coords="5,525,192,565"/>
+<area shape="poly" id="edge38_Node000031_Node000032" title=" " alt="" coords="248,520,193,530,192,525,247,514"/>
+<area shape="poly" id="edge43_Node000034_Node000005" title=" " alt="" coords="258,186,242,198,226,220,219,242,212,265,194,287,171,300,147,308,146,303,169,295,190,283,207,262,214,241,221,218,238,194,254,182"/>
+<area shape="poly" id="edge44_Node000034_Node000006" title=" " alt="" coords="247,151,146,150,146,144,247,146"/>
+<area shape="rect" id="Node000035" href="$namespacekcenon_1_1pacs_1_1integration__test.html#ae9ca4d27562aaab1f9c15fc88fd061fe" title=" " alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge42_Node000034_Node000035" title=" " alt="" coords="299,117,247,88,191,60,161,48,163,43,193,55,250,83,302,113"/>
+</map>

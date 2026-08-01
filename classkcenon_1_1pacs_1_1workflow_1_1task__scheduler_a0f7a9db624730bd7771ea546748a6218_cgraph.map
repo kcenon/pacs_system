@@ -1,0 +1,34 @@
+<map id="kcenon::pacs::workflow::task_scheduler::execute_cycle" name="kcenon::pacs::workflow::task_scheduler::execute_cycle">
+<area shape="rect" id="Node000001" title="Execute a single scheduler cycle." alt="" coords="5,195,233,235"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aa8f99a231d585d6a2ba63c36d1d3a158" title="Calculate next run time for a schedule." alt="" coords="295,35,490,90"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,192,207,151,280,107,307,93,310,98,283,112,210,155,150,197"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a2b2083732d3658e6072b1e200d31b9ac" title="Execute a single task." alt="" coords="281,165,504,205"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,200,268,196,268,201,234,205"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#abab83a011fa6dddee2a05ff84f7a000c" title="Increment a counter metric." alt="" coords="552,341,784,395"/>
+<area shape="poly" id="edge15_Node000001_Node000007" title=" " alt="" coords="234,219,388,235,457,248,505,266,522,280,531,296,539,311,554,326,562,332,559,336,550,330,535,314,526,298,518,283,503,270,456,253,388,240,234,224"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="575,5,761,45"/>
+<area shape="poly" id="edge16_Node000001_Node000009" title=" " alt="" coords="167,192,281,151,344,137,395,131,444,123,503,99,517,89,526,78,536,66,551,55,564,48,567,53,553,60,539,70,530,81,521,93,505,104,446,128,396,137,345,142,282,156,169,197"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#aaf710ed329f38851f87463d12af1b6f0" title="Record task execution." alt="" coords="304,281,481,335"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="180,232,300,274,298,279,178,237"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a2757715d5bcc9207c386a6bdf107d186" title="Update statistics after execution." alt="" coords="283,360,503,400"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="142,233,202,288,241,318,283,344,300,353,298,357,280,349,238,323,198,292,138,237"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="575,197,761,237"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="504,196,561,202,561,208,504,201"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#abd042eec47c77c840bb6c7b1b3158ea9" title="Log an error&#45;level message." alt="" coords="575,69,761,109"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="455,163,503,144,551,119,572,111,574,116,553,124,505,149,457,168"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="477,203,506,222,518,235,525,249,531,275,536,301,543,314,554,326,559,331,556,335,550,330,538,317,531,303,525,277,520,251,513,238,502,226,474,208"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="473,163,502,145,519,123,525,101,532,78,550,55,561,48,564,52,554,59,537,80,530,102,523,126,506,149,476,167"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#a9d6865c3dab62c93fe82bb007972b4bb" title="Record a histogram sample." alt="" coords="565,262,771,317"/>
+<area shape="poly" id="edge11_Node000003_Node000010" title=" " alt="" coords="457,203,505,222,553,247,572,255,570,260,551,252,503,226,455,208"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aaff5178e810748aa34eebf2c3e2dff5e" title="Log a warning&#45;level message." alt="" coords="575,133,761,173"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="504,170,561,163,561,168,504,175"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="836,101,1023,141"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="747,195,783,183,874,145,876,150,785,188,748,200"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="762,98,822,106,822,111,761,103"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#a1545c4eabd7b0c9232fd2b75332fb6d2" title=" " alt="" coords="832,341,1027,395"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="784,365,818,365,818,371,784,371"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="748,43,785,55,876,93,874,98,783,60,747,48"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#ad5620cd60d293f714a840c54aea814a2" title=" " alt="" coords="832,262,1027,317"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="772,287,818,287,818,292,772,292"/>
+<area shape="poly" id="edge14_Node000012_Node000005" title=" " alt="" coords="761,139,822,132,822,137,762,145"/>
+</map>

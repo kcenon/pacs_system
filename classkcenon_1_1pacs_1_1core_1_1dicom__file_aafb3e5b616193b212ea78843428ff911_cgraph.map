@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_file::sop_class_uid" name="kcenon::pacs::core::dicom_file::sop_class_uid">
+<area shape="rect" id="Node000001" title="Get the SOP Class UID." alt="" coords="5,13,200,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="248,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,30,234,30,234,35,200,35"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::network::pipeline::receive_network_io_job" name="kcenon::pacs::network::pipeline::receive_network_io_job">
+<area shape="rect" id="Node000001" title="Job for receiving PDU data from network connections." alt="" coords="181,599,372,992"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__job__base.html" title="Base class for all pipeline jobs." alt="" coords="5,261,172,536"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,547,186,597,181,600,157,550"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1network_1_1pipeline_1_1job__context.html" title="Context information attached to pipeline jobs for tracking." alt="" coords="197,289,357,509"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="279,509,279,582,274,582,274,509"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="381,366,540,431"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="448,433,377,585,373,582,444,430"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="400,133,521,199"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="463,213,463,366,458,366,458,213"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="449,5,472,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="463,71,463,117,458,117,458,71"/>
+</map>

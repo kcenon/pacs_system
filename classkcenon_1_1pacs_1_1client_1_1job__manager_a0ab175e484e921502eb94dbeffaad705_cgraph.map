@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::client::job_manager::delete_job" name="kcenon::pacs::client::job_manager::delete_job">
+<area shape="rect" id="Node000001" title="Delete a job." alt="" coords="5,163,196,203"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a10d1bb904da5b97af9fe9bb6d1b222c8" title="Cancel a job." alt="" coords="244,163,436,203"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,181,230,181,230,186,196,186"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#af8c72d7d3e771befaca6d9109487b46a" title=" " alt="" coords="484,5,644,60"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="162,161,470,60,472,65,164,166"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="491,307,637,347"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="167,201,486,301,485,306,165,206"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,161,416,117,483,69,490,64,493,69,485,74,419,121,366,165"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#addc159a2dd92e1b5efaa1eff170fefb7" title=" " alt="" coords="484,84,644,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="402,161,470,139,471,144,404,166"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="365,202,418,246,485,292,499,299,497,304,483,296,415,250,362,206"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1client.html#a7eb607510a97c772cb2658ca6d63bbde" title="Convert job_type to string representation." alt="" coords="489,163,639,203"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="436,181,475,181,475,186,436,186"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a3023b4ee476e60b7c0298e11ab1c6e82" title=" " alt="" coords="484,228,644,283"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="404,201,471,223,470,228,402,206"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1client.html#a2224cefe2f1791fceebbc935eb2d567e" title="Check if job status is a terminal state." alt="" coords="692,235,843,275"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="644,253,678,253,678,258,644,258"/>
+</map>

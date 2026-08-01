@@ -1,0 +1,35 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::validate_mammography_image_module" name="kcenon::pacs::services::validation::mg_iod_validator::validate_mammography_image_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,179,300,234"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a0a72cd6f2d928dcfdd070826b779a957" title=" " alt="" coords="349,179,568,234"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="300,204,335,204,335,209,300,209"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="630,101,819,141"/>
+<area shape="poly" id="edge18_Node000001_Node000003" title=" " alt="" coords="284,177,348,165,616,130,616,135,348,171,285,182"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="647,245,802,299"/>
+<area shape="poly" id="edge19_Node000001_Node000004" title=" " alt="" coords="275,231,348,244,499,259,634,267,634,272,499,265,348,249,274,237"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#afe2293561168e64f778cb79b7ec887d0" title=" " alt="" coords="351,49,567,103"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="216,177,347,120,380,106,382,111,349,125,218,182"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a65ae0dcf5d67fdc097613aba8c7fac6b" title=" " alt="" coords="348,323,569,378"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="213,232,388,315,386,320,211,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="541,177,617,152,645,143,647,148,618,157,543,182"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="569,231,635,247,634,252,568,236"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa2c04e1cc443b95c73123c736553fde9" title="Check if a laterality value is valid for mammography." alt="" coords="640,166,809,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="568,199,626,196,626,201,568,204"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="567,92,617,100,616,106,566,97"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="499,101,535,131,571,166,585,185,594,201,603,216,619,231,636,242,633,247,616,235,599,219,589,204,581,188,567,170,531,135,495,105"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="643,37,806,77"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="567,66,629,61,630,67,567,71"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="880,5,1040,45"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="806,44,866,35,866,41,806,49"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="889,69,1031,109"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="806,66,875,75,874,80,806,71"/>
+<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="493,321,530,287,567,245,581,220,588,197,597,175,616,153,624,146,628,150,619,157,601,178,593,199,586,222,572,248,534,290,496,325"/>
+<area shape="poly" id="edge13_Node000010_Node000004" title=" " alt="" coords="551,321,634,296,635,301,552,326"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aab2ea25709b935200e64193632dcf56b" title="Get all valid mammography view position strings." alt="" coords="637,323,813,378"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="569,348,623,348,623,353,569,353"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a8d3c12f5cbb574d3484904634b772dbc" title="Check if laterality and view position are consistent." alt="" coords="617,402,832,457"/>
+<area shape="poly" id="edge15_Node000010_Node000012" title=" " alt="" coords="552,376,619,395,618,401,551,381"/>
+<area shape="rect" id="Node000013" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa246cbff9248b5b25f187c5f44ecbd87" title="Parse DICOM laterality string to enum." alt="" coords="625,481,825,535"/>
+<area shape="poly" id="edge16_Node000010_Node000013" title=" " alt="" coords="492,376,549,422,619,467,630,473,627,477,616,472,546,426,489,380"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a6e490f68e7bb61694ae09923e8ae7683" title="Parse DICOM view position string to mammography view enum." alt="" coords="635,559,815,614"/>
+<area shape="poly" id="edge17_Node000010_Node000014" title=" " alt="" coords="477,377,501,415,533,460,573,506,619,546,625,550,622,555,616,550,569,510,529,463,496,417,473,380"/>
+</map>

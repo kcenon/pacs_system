@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_push_scu::build_request_cancel_dataset" name="kcenon::pacs::services::ups_push_scu::build_request_cancel_dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="231,5,413,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a11fdc2b132c1ca0103d62eed96cbdd7c" title="Request cancellation of a UPS workitem (N&#45;ACTION Type 3)" alt="" coords="5,5,183,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,35,183,35,183,30,217,30"/>
+</map>

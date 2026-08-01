@@ -1,0 +1,30 @@
+<map id="include/kcenon/pacs/security/security_storage_interface.h" name="include/kcenon/pacs/security/security_storage_interface.h">
+<area shape="rect" id="Node000001" title="Storage interface for RBAC persistence." alt="" coords="345,5,536,60"/>
+<area shape="rect" id="Node000002" href="$access__control__manager_8h.html" title="Core RBAC logic." alt="" coords="503,108,682,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="493,65,554,106,551,110,490,70"/>
+<area shape="rect" id="Node000009" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="65,225,296,251"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="398,70,197,227,194,223,395,66"/>
+<area shape="rect" id="Node000003" href="$dicom__association__handler_8h.html" title="DICOM association handler for network_system integration." alt="" coords="371,211,595,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="556,174,514,213,510,209,552,170"/>
+<area shape="rect" id="Node000004" href="$dicom__server__v2_8h.html" title="DICOM server implementation using network_system&#39;s messaging_server." alt="" coords="219,313,446,353"/>
+<area shape="poly" id="edge9_Node000002_Node000004" title=" " alt="" coords="490,149,455,158,421,171,389,189,361,212,346,236,338,263,334,313,329,313,333,262,342,234,357,209,386,184,419,166,454,153,489,144"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="491,164,228,228,227,223,489,159"/>
+<area shape="rect" id="Node000010" href="$access__control__manager_8cpp.html" title="Implementation of RBAC logic." alt="" coords="619,218,785,258"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="633,170,683,216,680,220,630,174"/>
+<area shape="rect" id="Node000011" href="$oauth2__middleware_8cpp.html" title="Implementation of OAuth 2.0 middleware for DICOMweb endpoints." alt="" coords="809,218,963,258"/>
+<area shape="poly" id="edge12_Node000002_Node000011" title=" " alt="" coords="683,165,832,215,830,220,681,170"/>
+<area shape="rect" id="Node000012" href="$security__endpoints_8cpp.html" title="Security API endpoints implementation." alt="" coords="988,218,1184,258"/>
+<area shape="poly" id="edge13_Node000002_Node000012" title=" " alt="" coords="696,153,976,208,1009,215,1008,221,975,213,695,158"/>
+<area shape="rect" id="Node000013" href="$system__endpoints_8cpp.html" title="System API endpoints implementation." alt="" coords="1209,218,1401,258"/>
+<area shape="poly" id="edge14_Node000002_Node000013" title=" " alt="" coords="696,143,926,168,1062,186,1197,208,1232,215,1231,221,1196,213,1061,191,926,173,695,148"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="430,275,365,315,362,311,428,270"/>
+<area shape="rect" id="Node000006" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="403,416,636,441"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="493,278,520,415,515,416,488,279"/>
+<area shape="rect" id="Node000008" href="$dicom__association__handler_8cpp.html" title="DICOM association handler implementation for network_system integration." alt="" coords="521,313,707,353"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="533,271,589,311,586,315,529,275"/>
+<area shape="rect" id="Node000005" href="$test__dicom__server__v2__integration_8cpp.html" title="Full integration testing for dicom_server_v2 (network_system migration)" alt="" coords="5,401,191,456"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="273,361,165,404,163,399,271,356"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="384,357,498,414,495,418,381,362"/>
+<area shape="rect" id="Node000007" href="$dicom__server__v2_8cpp.html" title="DICOM server V2 implementation using network_system&#39;s messaging_server." alt="" coords="215,409,378,449"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="323,367,306,410,301,408,318,365"/>
+</map>

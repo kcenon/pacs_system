@@ -1,0 +1,11 @@
+<map id="include/kcenon/pacs/storage/study_record.h" name="include/kcenon/pacs/storage/study_record.h">
+<area shape="rect" id="Node000001" title="Study record data structures for database operations." alt="" coords="89,5,263,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,48,72,89,70,84,142,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,163,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,47,146,83,141,80,162,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,93,261,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="190,44,212,80,207,83,185,47"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="285,93,344,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="211,43,283,84,281,89,208,48"/>
+</map>

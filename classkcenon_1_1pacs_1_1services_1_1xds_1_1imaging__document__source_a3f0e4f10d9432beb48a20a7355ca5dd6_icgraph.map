@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::xds::imaging_document_source::generate_uid" name="kcenon::pacs::services::xds::imaging_document_source::generate_uid">
+<area shape="rect" id="Node000001" title="Generate a new UID for KOS instances." alt="" coords="279,84,465,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#ae7cda42b60aae10be7bcf3ccc4cb53d6" title="Build XDS document entry metadata from a KOS dataset." alt="" coords="5,5,231,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="269,82,206,63,208,58,271,77"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#ad6bf1da742a5dba062e2381044db3ba9" title="Build XDS submission set metadata." alt="" coords="8,84,228,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="265,114,228,114,228,109,265,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#ae34af0b34eb4b4bbd13275d37ed33c0a" title="Create a KOS document from a set of DICOM instance references." alt="" coords="7,163,229,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="271,145,208,165,206,160,269,140"/>
+</map>

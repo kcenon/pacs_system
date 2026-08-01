@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::us_iod_validator::validate_image_pixel_module" name="kcenon::pacs::services::validation::us_iod_validator::validate_image_pixel_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="523,45,748,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1us__iod__validator.html#ad2e569281b517ad34e2549e8f861300f" title="Validate a DICOM dataset against US IOD." alt="" coords="264,45,475,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="509,75,475,75,475,70,509,70"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1us__iod__validator.html#aa2f9a15cedaa88cb3ce26f80ddac2226" title="Validate a multi&#45;frame US dataset." alt="" coords="5,5,216,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="250,57,216,52,216,46,251,52"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#aae277f347aadb5ef8a7129e4d1711daf" title="Validate a US dataset with default options." alt="" coords="26,84,195,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="251,93,196,101,195,96,250,88"/>
+</map>

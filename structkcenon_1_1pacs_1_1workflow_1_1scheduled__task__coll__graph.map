@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::workflow::scheduled_task" name="kcenon::pacs::workflow::scheduled_task">
+<area shape="rect" id="Node000001" title="Scheduled task definition." alt="" coords="106,404,273,684"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="179,148,258,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,214,229,252,216,388,211,387,224,252,222,214"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="47,276,204,341"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="197,215,161,264,156,261,193,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="153,5,284,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,99,221,148,216,148,216,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="137,341,149,387,144,389,131,342"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,107,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="54,227,60,251,78,274,73,277,55,253,49,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="45,13,67,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="59,78,59,131,53,131,53,78"/>
+</map>

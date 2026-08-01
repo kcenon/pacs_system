@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::routing_manager::execute_actions" name="kcenon::pacs::client::routing_manager::execute_actions">
+<area shape="rect" id="Node000001" title="Execute routing actions." alt="" coords="475,5,675,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a6d568ad6223794fcbcfc2024bcfec45d" title="Route a DICOM dataset based on matching rules." alt="" coords="244,13,427,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,35,427,35,427,30,461,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a006909e16f412d1f7e521e1006c1dca0" title="Attach to a Storage SCP for automatic routing." alt="" coords="5,5,196,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="230,35,196,35,196,30,230,30"/>
+</map>

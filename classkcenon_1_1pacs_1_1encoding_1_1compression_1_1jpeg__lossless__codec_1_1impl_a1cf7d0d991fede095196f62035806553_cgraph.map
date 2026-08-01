@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::decode_frame" name="kcenon::pacs::encoding::compression::jpeg_lossless_codec::impl::decode_frame">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,163,213,218"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a91462709c82b5453ef1cbe8207dad97f" title=" " alt="" coords="261,5,481,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,161,198,123,260,84,271,78,274,83,263,89,201,127,148,165"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="299,99,444,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,161,285,140,286,145,210,166"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#a8b1fc7786569cb370e6f2992dd32ca63" title=" " alt="" coords="263,163,479,218"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="214,188,249,188,249,193,214,193"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#ad43bd875986e454c043c23fa454e069d" title=" " alt="" coords="267,242,475,297"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="202,216,267,235,265,240,200,221"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding.html#ac4f5c3944a501fff782dfdc5cd10cfff" title="Reads a 16&#45;bit value from big&#45;endian bytes." alt="" coords="284,321,459,361"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="141,216,195,262,263,306,280,314,278,319,260,310,192,266,138,221"/>
+</map>

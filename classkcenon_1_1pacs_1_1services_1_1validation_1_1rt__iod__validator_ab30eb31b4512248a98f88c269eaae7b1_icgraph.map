@@ -1,0 +1,6 @@
+<map id="kcenon::pacs::services::validation::rt_iod_validator::quick_check" name="kcenon::pacs::services::validation::rt_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required RT attributes." alt="" coords="223,29,428,84"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="364,18,350,11,325,8,304,10,291,15,285,21,285,29,280,29,280,19,288,10,303,5,325,3,352,6,367,14"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a289c600d61731b46d0acf373105ec941" title="Quick check if a dataset is a valid RT object (any type)" alt="" coords="5,29,175,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,59,175,59,175,54,209,54"/>
+</map>

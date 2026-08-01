@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::workflow::task_scheduler::create_verification_callback" name="kcenon::pacs::workflow::task_scheduler::create_verification_callback">
+<area shape="rect" id="Node000001" title="Create verification task callback." alt="" coords="5,94,183,149"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="231,5,417,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,91,230,55,248,48,250,53,232,60,151,96"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#abd042eec47c77c840bb6c7b1b3158ea9" title="Log an error&#45;level message." alt="" coords="231,69,417,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="183,106,217,102,218,107,184,112"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="231,133,417,173"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="184,131,218,136,217,141,183,136"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aaff5178e810748aa34eebf2c3e2dff5e" title="Log a warning&#45;level message." alt="" coords="231,197,417,237"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="151,146,232,183,250,190,248,195,230,188,149,151"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="465,101,652,141"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="386,43,418,55,505,93,503,98,416,60,385,48"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="418,99,452,104,451,109,417,105"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="417,138,451,133,452,139,418,143"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="385,195,416,183,503,145,505,150,418,188,386,200"/>
+</map>

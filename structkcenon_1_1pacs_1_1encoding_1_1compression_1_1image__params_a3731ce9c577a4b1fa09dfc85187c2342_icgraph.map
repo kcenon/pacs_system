@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::compression::image_params::frame_size_bytes" name="kcenon::pacs::encoding::compression::image_params::frame_size_bytes">
+<area shape="rect" id="Node000001" title="Calculates the size of uncompressed pixel data in bytes." alt="" coords="805,84,1024,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec_1_1impl.html#ad3f336cc9b04a9ef2beba8d2de3baa78" title=" " alt="" coords="547,5,757,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="809,82,743,63,745,58,810,77"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec_1_1impl.html#aa51b0c7c72a40e42fd71d602815fd294" title=" " alt="" coords="548,84,756,139"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="792,114,756,114,756,109,792,109"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#a1e34d04599ef9972bf0d9b4a822a6fda" title=" " alt="" coords="561,163,743,217"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="811,145,744,165,743,160,809,140"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec.html#a889aeabff901f0a686926434f3c7d144" title="Compresses pixel data to JPEG Baseline format." alt="" coords="288,5,499,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="533,35,499,35,499,30,533,30"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ae42d333cbf06384a1e37a148a34c8a6e" title="Render a DICOM image to JPEG or PNG." alt="" coords="5,13,240,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="274,35,240,35,240,30,274,30"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__lossless__codec.html#aed889627f0229c8c14e7d3bf023e5219" title="Compresses pixel data to JPEG Lossless format." alt="" coords="289,84,497,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="534,114,497,114,497,109,534,109"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec.html#aa420e9db8e4f67306e6f826573f9d8d7" title="Compresses pixel data to RLE format." alt="" coords="302,163,485,217"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="547,193,485,193,485,187,547,187"/>
+</map>

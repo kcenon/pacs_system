@@ -1,0 +1,19 @@
+<map id="include/kcenon/pacs/web/auth/jwks_provider.h" name="include/kcenon/pacs/web/auth/jwks_provider.h">
+<area shape="rect" id="Node000001" title="JSON Web Key Set (JWKS) provider with key caching." alt="" coords="281,5,473,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="293,48,86,96,85,90,292,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,93,163,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="319,48,176,93,175,88,317,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,93,274,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="343,48,266,89,263,84,341,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="299,93,363,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="368,47,347,83,342,80,364,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="387,93,461,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="391,44,412,80,408,83,386,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="485,93,544,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="412,43,484,84,481,89,409,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="569,93,666,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="436,43,570,87,568,92,434,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="690,93,753,119"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="467,43,677,90,676,96,466,48"/>
+</map>

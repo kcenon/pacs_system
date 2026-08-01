@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration_test::test_counter" name="kcenon::pacs::integration_test::test_counter">
+<area shape="rect" id="Node000001" title="Thread&#45;safe test result counter." alt="" coords="5,419,184,639"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="17,261,172,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,327,97,402,92,402,92,327"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="32,133,157,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,213,97,261,92,261,92,213"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="83,5,106,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="97,71,97,117,92,117,92,71"/>
+</map>

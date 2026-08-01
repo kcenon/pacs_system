@@ -1,0 +1,11 @@
+<map id="include/kcenon/pacs/integration/thread_pool_adapter.h" name="include/kcenon/pacs/integration/thread_pool_adapter.h">
+<area shape="rect" id="Node000001" title="Concrete implementation of thread_pool_interface using kcenon::thread." alt="" coords="368,5,523,60"/>
+<area shape="rect" id="Node000002" href="$thread__pool__adapter_8cpp.html" title="Implementation of thread_pool_adapter." alt="" coords="5,108,168,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="356,60,160,111,158,105,354,55"/>
+<area shape="rect" id="Node000003" href="$pacs-integration_8cppm.html" title="C++20 module partition for external system adapters." alt="" coords="192,115,443,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="400,70,335,117,331,113,397,66"/>
+<area shape="rect" id="Node000004" href="$dicom__server_8cpp.html" title="DICOM Server implementation." alt="" coords="467,115,683,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="494,66,560,113,557,117,491,70"/>
+<area shape="rect" id="Node000005" href="$pipeline__coordinator_8cpp.html" title="Implementation of the pipeline coordinator." alt="" coords="707,108,893,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="537,55,729,105,728,110,535,60"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::worklist_scu::set_config" name="kcenon::pacs::services::worklist_scu::set_config">
+<area shape="rect" id="Node000001" title="Update the SCU configuration." alt="" coords="5,5,191,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#a833d4f44c5d98fbeea17c4a303744554" title="Get the current configuration." alt="" coords="239,5,408,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,23,225,23,225,28,191,28"/>
+</map>

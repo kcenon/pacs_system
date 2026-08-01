@@ -1,0 +1,26 @@
+<map id="src/monitoring/pacs_metrics.cpp" name="src/monitoring/pacs_metrics.cpp">
+<area shape="rect" id="Node000001" title="Implementation of operation metrics collection for PACS DICOM services." alt="" coords="645,5,795,45"/>
+<area shape="rect" id="Node000002" href="$pacs__metrics_8h.html" title="Operation metrics collection for PACS DICOM services." alt="" coords="377,93,556,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="665,48,536,92,534,86,664,43"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="811,181,885,207"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="723,45,728,88,736,111,747,132,773,156,803,173,800,178,769,160,743,135,731,113,723,89,717,46"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="757,101,832,126"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="739,44,778,88,774,92,735,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="377,131,244,153,86,184,85,179,243,148,377,126"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,181,163,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="383,136,177,184,176,178,382,131"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="187,181,253,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="408,136,267,181,266,175,407,131"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="277,181,355,207"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="432,136,352,177,349,172,429,131"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="379,181,443,207"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="455,135,429,172,425,168,451,132"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="467,181,581,207"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="483,132,509,168,505,172,478,135"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="557,129,798,178,797,184,556,135"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="605,181,664,207"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="508,131,599,173,596,178,506,136"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="689,181,786,207"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="532,131,686,175,684,180,531,136"/>
+</map>

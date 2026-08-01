@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::parametric_map_iod_validator::validate_multiframe_dimension_module" name="kcenon::pacs::services::validation::parametric_map_iod_validator::validate_multiframe_dimension_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="481,5,715,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1parametric__map__iod__validator.html#aa15c825356f49836f5df63427317afb5" title="Validate a DICOM dataset against Parametric Map IOD." alt="" coords="223,13,433,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="468,43,433,43,433,37,468,37"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#aa40b5a11e7fd197c5852edc164b41257" title="Validate a Parametric Map dataset with default options." alt="" coords="5,13,175,67"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,43,175,43,175,37,209,37"/>
+</map>

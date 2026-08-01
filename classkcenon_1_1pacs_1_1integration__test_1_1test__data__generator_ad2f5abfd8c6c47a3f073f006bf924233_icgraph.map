@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration_test::test_data_generator::xa" name="kcenon::pacs::integration_test::test_data_generator::xa">
+<area shape="rect" id="Node000001" title="Generate a single&#45;frame XA Image dataset." alt="" coords="240,63,457,103"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a47395393546bbd570659b2483e26806e" title=" " alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,62,186,48,187,43,248,57"/>
+<area shape="rect" id="Node000003" href="$test__multimodal__workflow_8cpp.html#a5cd28cacc44c0519382761e5fc9304f0" title=" " alt="" coords="51,70,146,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,85,146,85,146,80,226,80"/>
+<area shape="rect" id="Node000004" href="$test__multimodal__workflow_8cpp.html#acba6fc8ba176c71c8fd34f42b18d9e79" title=" " alt="" coords="51,119,146,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="234,108,147,125,146,120,233,103"/>
+</map>

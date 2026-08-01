@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/prefetch_repository.h" name="include/kcenon/pacs/storage/prefetch_repository.h">
+<area shape="rect" id="Node000001" title="Repository for prefetch rule and history persistence." alt="" coords="51,5,267,45"/>
+<area shape="rect" id="Node000002" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="5,93,144,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,57,95,95,91,91,129,53"/>
+<area shape="rect" id="Node000003" href="$prefetch__repository_8cpp.html" title="Implementation of the prefetch repository for rule and history persistence." alt="" coords="168,93,320,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,53,227,91,223,95,185,57"/>
+</map>

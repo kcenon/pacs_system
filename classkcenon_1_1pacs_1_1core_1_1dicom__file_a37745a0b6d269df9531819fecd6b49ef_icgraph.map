@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_file::encode_dataset" name="kcenon::pacs::core::dicom_file::encode_dataset">
+<area shape="rect" id="Node000001" title="Encode a dataset based on its Transfer Syntax." alt="" coords="215,5,367,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a812369b10e6de4b53d788c556410bddf" title="Encode the DICOM file to raw bytes." alt="" coords="5,13,167,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,35,167,35,167,30,201,30"/>
+</map>

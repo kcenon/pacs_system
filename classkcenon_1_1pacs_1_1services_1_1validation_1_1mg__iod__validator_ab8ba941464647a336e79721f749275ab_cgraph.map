@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::validate_sop_common_module" name="kcenon::pacs::services::validation::mg_iod_validator::validate_sop_common_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,102,239,157"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#afe2293561168e64f778cb79b7ec887d0" title=" " alt="" coords="287,66,503,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,111,273,107,274,112,239,117"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="551,5,740,45"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="169,99,224,73,286,51,350,37,415,28,537,21,537,26,416,34,351,42,287,56,226,78,172,104"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="568,134,723,189"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="239,134,554,153,554,158,239,139"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a94f5c7d4c86aac0ffbde5c218e49c194" title="Check if a SOP Class UID is a Mammography Storage SOP Class." alt="" coords="289,206,500,261"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="196,154,310,199,308,203,194,159"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="495,63,557,46,559,52,497,69"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="497,118,555,134,554,139,495,123"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="564,69,727,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="503,89,550,88,551,94,503,94"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="788,37,948,77"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="726,75,774,68,775,73,727,80"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="797,101,939,141"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="727,98,784,107,783,112,726,104"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a64efa29793987aa03e5cf3f1064b911d" title="Get information about a specific Mammography SOP Class." alt="" coords="561,213,730,267"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="500,233,547,235,547,240,500,239"/>
+</map>

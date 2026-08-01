@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_adapter::unregister_session" name="kcenon::pacs::network::pipeline::pipeline_adapter::unregister_session">
+<area shape="rect" id="Node000001" title="Unregister a session." alt="" coords="235,13,444,67"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__adapter.html#a550da62f760505662f37eec597d8ad72" title="Handle connection closed event." alt="" coords="5,5,187,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,43,187,43,187,37,221,37"/>
+</map>

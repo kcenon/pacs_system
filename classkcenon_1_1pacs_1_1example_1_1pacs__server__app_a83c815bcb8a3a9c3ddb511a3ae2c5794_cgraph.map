@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::example::pacs_server_app::handle_store" name="kcenon::pacs::example::pacs_server_app::handle_store">
+<area shape="rect" id="Node000001" title="Handle incoming C&#45;STORE request." alt="" coords="5,13,236,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="284,5,439,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,30,270,30,270,35,236,35"/>
+</map>

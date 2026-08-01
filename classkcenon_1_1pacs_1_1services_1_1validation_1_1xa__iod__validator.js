@@ -1,0 +1,27 @@
+var classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator =
+[
+    [ "xa_iod_validator", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a965df44e303a35464e23e03ddcbaaeec", null ],
+    [ "xa_iod_validator", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#aac11f04ad155c47646efb01cc3129cb6", null ],
+    [ "check_modality", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a698143d3c890729231429cc1b5c729e7", null ],
+    [ "check_pixel_data_consistency", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a061aa85dc299833ba7aed27017c30aeb", null ],
+    [ "check_positioner_angles", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a7bf8d4ddbaf2eabbd736a280b2a6cec9", null ],
+    [ "check_type1_attribute", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#add9034a85f0cc248b4ac5b8681c4ddd9", null ],
+    [ "check_type2_attribute", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a4400ebd3f5728d3c685adab97e71faaa", null ],
+    [ "check_xa_photometric", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a8f83c4d7c0f8507ab1c69b3870b2de08", null ],
+    [ "options", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a3c62f9aa191c0d711f6589a61f4d9a81", null ],
+    [ "quick_check", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#aa647cb52c20b11af881ea03e9f4d6ca1", null ],
+    [ "set_options", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a1a198e83e0f4eb7cf64ab8272f43d9cc", null ],
+    [ "validate", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ac6734b73ad8e9138c3615eb72663f93d", null ],
+    [ "validate_calibration", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a0847899b69e7870255018901bae9c390", null ],
+    [ "validate_calibration_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a008a6a3aed334a3709df0166422ebfa3", null ],
+    [ "validate_general_series_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#aadb6894e0596859c150d04bb6eb74278", null ],
+    [ "validate_general_study_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ae0c42d778e74272b49b86fed4b8eb891", null ],
+    [ "validate_image_pixel_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ab0c76848369ce05ad09567e2240ac284", null ],
+    [ "validate_multiframe", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a25f7489aa36216276e4237dadf4efb44", null ],
+    [ "validate_multiframe_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a03d2044625bc7e2cf0680d6c7584a906", null ],
+    [ "validate_patient_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#abba7e353d1f181f3361f63b051de5b72", null ],
+    [ "validate_sop_common_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a3439150877fbd0fe71d9a7f99968cf8f", null ],
+    [ "validate_xa_acquisition_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a8dd496ccc9d18d1b3543477c4a54bee3", null ],
+    [ "validate_xa_image_module", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#afa93101f225197eb5f492ec6981c5d83", null ],
+    [ "options_", "classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#abd3ac5ac17423584e7015978b6f3981b", null ]
+];

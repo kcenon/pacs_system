@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::integration::thread_pool_adapter" name="kcenon::pacs::integration::thread_pool_adapter">
+<area shape="rect" id="Node000001" title="Concrete implementation of thread_pool_interface." alt="" coords="321,713,505,1013"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__interface.html" title=" " alt="" coords="5,291,203,651"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,644,217,649,269,712,323,770,319,774,265,715,213,652,209,647"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="227,431,400,511"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="326,510,374,697,369,698,321,511"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="239,148,388,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="316,227,316,430,311,430,311,227"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="302,13,325,78"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="316,78,316,131,311,131,311,78"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1integration_1_1thread__pool__config.html" title="Configuration options for the thread pool." alt="" coords="424,401,603,541"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="498,541,458,698,453,697,493,540"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="474,148,553,213"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="516,214,516,384,511,384,511,214"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="448,5,579,85"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="516,99,516,148,511,148,511,99"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="627,438,711,503"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="667,504,650,574,636,614,617,652,572,716,519,773,515,770,567,713,612,649,631,612,645,572,662,503"/>
+</map>

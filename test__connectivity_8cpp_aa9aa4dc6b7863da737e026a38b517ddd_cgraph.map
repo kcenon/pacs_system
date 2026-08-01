@@ -1,0 +1,26 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,193,100,218"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a1b55c0ffce14ac123fecc48730fb75bb" title=" " alt="" coords="149,5,341,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,191,87,127,113,89,146,55,154,50,157,54,150,59,117,92,92,130,61,194"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__association.html#a64d8e08843113b1eb74d7d9b204b0bd6" title="Connect to a test server." alt="" coords="151,70,338,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="68,191,103,164,147,135,159,128,162,133,149,140,106,168,71,195"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="151,149,338,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="100,194,137,187,138,192,101,199"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a86a35eb51b2f903ceb327bf7c9cddf0c" title="Register a service provider." alt="" coords="148,214,341,269"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="101,212,135,218,134,223,100,217"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d1a995756db5730d6e83c249ca26ca" title="Start the server and wait for it to be ready." alt="" coords="151,293,338,333"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="69,216,104,246,149,278,165,286,163,290,147,282,100,251,65,220"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a75ee2b2bf2c8965f4e855466fe9044b2" title="Stop the server." alt="" coords="151,357,338,397"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="62,217,93,277,118,313,150,343,157,348,154,353,146,347,114,316,88,280,57,219"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="399,149,585,189"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="338,167,385,167,385,172,338,172"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#af5b68b253e9d55fe5f82c1fa5ab5bc83" title="Check if a port is listening (inline implementation)" alt="" coords="399,322,585,377"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="339,324,385,331,385,336,338,330"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a9305380a0d7aa02605c8e8d2ef934c96" title="Port listening timeout for pacs_system servers (5s normal, 30s CI)" alt="" coords="389,257,595,297"/>
+<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="338,297,375,292,376,297,339,302"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a15e3ebe94f2cf5e85dd78cc6ffff77e1" title="Check if running in a CI environment." alt="" coords="643,261,829,301"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="585,321,650,302,651,308,586,326"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d61cf0e9e7677acdecd920fdf26fc9" title=" " alt="" coords="643,329,829,369"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="586,347,629,347,629,352,586,352"/>
+<area shape="poly" id="edge11_Node000011_Node000009" title=" " alt="" coords="595,276,629,277,629,282,595,282"/>
+</map>

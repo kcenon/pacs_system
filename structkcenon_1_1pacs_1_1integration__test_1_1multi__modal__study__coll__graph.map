@@ -1,0 +1,31 @@
+<map id="kcenon::pacs::integration_test::multi_modal_study" name="kcenon::pacs::integration_test::multi_modal_study">
+<area shape="rect" id="Node000001" title="Represents a complete patient study with multiple modalities." alt="" coords="31,823,209,923"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,408,110,473"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,473,69,557,75,658,87,735,104,806,99,807,82,736,69,659,64,557,66,473"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,133,136,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,227,73,408,68,408,68,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="222,393,367,488"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="270,490,238,549,206,616,169,716,140,807,135,806,164,714,202,614,233,547,265,487"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html" title=" " alt="" coords="485,683,643,1063"/>
+<area shape="poly" id="edge12_Node000008_Node000004" title=" " alt="" coords="322,487,381,589,445,681,478,732,474,735,440,684,376,592,317,490"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html" title=" " alt="" coords="243,1268,389,1548"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="310,1268,293,505,299,505,316,1268"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="397,1125,555,1205"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="452,1207,400,1286,395,1283,448,1204"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="391,291,547,591"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="418,591,413,615,409,633,402,644,385,651,370,652,364,654,359,659,355,689,363,757,387,876,431,1062,448,1110,443,1111,425,1063,382,878,358,758,350,689,355,657,361,649,369,646,384,646,398,640,404,631,408,614,413,590"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="550,576,563,614,572,666,567,667,557,615,545,578"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="509,1064,495,1110,490,1109,504,1062"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="571,408,730,473"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="652,474,645,558,631,659,629,667,624,666,625,658,640,557,647,473"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="526,141,647,206"/>
+<area shape="poly" id="edge16_Node000004_Node000010" title=" " alt="" coords="514,204,445,241,411,265,381,292,344,343,316,395,312,392,339,340,377,289,407,260,442,236,512,199"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="600,219,646,407,640,409,595,220"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="630,5,653,71"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="632,49,609,68,590,96,585,125,579,124,586,94,605,65,628,45"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="705,141,831,206"/>
+<area shape="poly" id="edge15_Node000012_Node000011" title=" " alt="" coords="655,51,705,108,724,127,720,131,701,111,651,55"/>
+<area shape="poly" id="edge13_Node000006_Node000012" title=" " alt="" coords="779,219,796,372,800,477,798,593,786,715,760,838,741,898,718,956,690,1012,657,1064,636,1088,611,1109,557,1139,554,1135,608,1104,632,1084,653,1061,685,1009,713,954,736,896,755,836,780,714,793,593,795,477,790,373,773,220"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="791,5,814,71"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="797,71,783,125,778,124,792,70"/>
+</map>

@@ -1,0 +1,40 @@
+<map id="ai_service_connector::impl" name="ai_service_connector::impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="83,944,255,1224"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,809,89,874"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="47,874,48,897,53,919,76,969,71,971,47,921,42,897,42,874"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="80,424,225,489"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,490,155,739,163,928,157,928,150,739,150,490"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="146,155,271,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="202,235,162,424,157,423,197,234"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="304,13,327,78"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="306,62,265,111,242,143,237,140,261,108,302,58"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="362,593,511,659"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="319,78,327,219,338,309,355,399,385,495,418,577,413,579,380,497,350,401,333,310,322,219,313,78"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="374,148,518,228"/>
+<area shape="poly" id="edge17_Node000015_Node000005" title=" " alt="" coords="329,62,376,122,389,135,385,139,372,126,325,66"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="175,801,327,881"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="240,883,224,929,219,928,235,881"/>
+<area shape="rect" id="Node000007" href="$classhttp__client.html" title="HTTP client for AI service communication." alt="" coords="165,513,338,739"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="254,739,254,785,249,785,249,739"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="407,672,352,740,293,803,289,799,348,737,403,668"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="377,801,523,881"/>
+<area shape="poly" id="edge21_Node000009_Node000008" title=" " alt="" coords="442,672,450,801,445,801,437,673"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="406,884,269,1001,265,997,402,880"/>
+<area shape="rect" id="Node000010" href="$classjob__tracker.html" title="Tracks active inference jobs." alt="" coords="535,553,677,699"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="598,700,584,741,561,779,539,801,535,797,557,776,579,739,593,698"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="365,320,500,385"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="455,384,554,538,549,541,451,387"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="525,305,687,400"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="609,401,609,537,603,537,603,401"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="789,155,868,221"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="811,222,786,258,764,283,736,298,703,307,702,302,734,293,760,279,782,255,806,219"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="711,305,874,400"/>
+<area shape="poly" id="edge19_Node000017_Node000013" title=" " alt="" coords="840,221,844,251,841,282,837,292,832,290,835,281,839,251,835,221"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="763,5,894,85"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="831,100,831,155,826,155,826,100"/>
+<area shape="poly" id="edge15_Node000012_Node000015" title=" " alt="" coords="422,241,420,262,427,280,444,294,463,297,486,297,512,303,525,308,523,313,511,308,485,303,463,303,442,299,423,283,415,262,417,241"/>
+<area shape="poly" id="edge20_Node000017_Node000015" title=" " alt="" coords="532,221,580,250,592,265,605,279,629,290,650,294,673,296,700,303,712,307,710,312,699,308,672,301,650,299,628,295,602,283,588,269,576,254,529,225"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="456,13,479,78"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="465,78,457,132,452,131,460,78"/>
+<area shape="poly" id="edge18_Node000010_Node000017" title=" " alt="" coords="763,402,667,541,663,538,758,399"/>
+</map>

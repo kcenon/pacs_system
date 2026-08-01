@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/patient_endpoints.h" name="include/kcenon/pacs/web/endpoints/patient_endpoints.h">
+<area shape="rect" id="Node000001" title="Patient API endpoints for REST server." alt="" coords="118,5,289,60"/>
+<area shape="rect" id="Node000002" href="$patient__endpoints_8cpp.html" title="Patient API endpoints implementation." alt="" coords="5,108,196,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,72,123,110,120,106,162,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="220,115,395,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="245,68,296,113,292,117,241,71"/>
+</map>

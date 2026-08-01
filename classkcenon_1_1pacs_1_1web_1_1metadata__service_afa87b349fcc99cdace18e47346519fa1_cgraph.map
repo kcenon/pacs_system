@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::web::metadata_service::get_metadata" name="kcenon::pacs::web::metadata_service::get_metadata">
+<area shape="rect" id="Node000001" title="Get selective metadata for an instance." alt="" coords="5,106,173,161"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1web_1_1metadata__response.html#a4eaec31452d1925bd6583098b3a11780" title="Create an error result." alt="" coords="221,5,412,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,103,220,55,237,48,239,53,222,60,134,108"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a78e5da90c961c967322243760ebdc011" title="Get tags for a specific preset." alt="" coords="233,70,401,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,117,219,110,220,115,174,123"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1web_1_1metadata__response.html#a57dd05d19b91686d4aeae594f85ce524" title="Create a success result." alt="" coords="229,149,404,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,144,216,151,215,156,173,149"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a984e6ec103ca43c126e00e5ef53fcc80" title="Read DICOM dataset from file." alt="" coords="229,214,405,269"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="142,158,222,199,237,206,235,211,220,204,140,163"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a37d6398f04d723ff5662c85e904accc1" title="Check if this is a private tag." alt="" coords="460,189,631,229"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="404,226,446,220,447,226,405,232"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="474,253,617,293"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="405,251,461,259,460,264,404,256"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="713,189,856,229"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="631,207,700,207,700,212,631,212"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="679,253,891,293"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="617,271,665,271,665,276,617,276"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="939,253,1084,293"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="891,271,925,271,925,276,891,276"/>
+</map>

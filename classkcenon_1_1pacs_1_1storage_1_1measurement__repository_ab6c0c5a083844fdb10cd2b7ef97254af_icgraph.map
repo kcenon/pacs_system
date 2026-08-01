@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::storage::measurement_repository::search" name="kcenon::pacs::storage::measurement_repository::search">
+<area shape="rect" id="Node000001" title=" " alt="" coords="749,39,944,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a2e87cf4c196123e22e66a1df657070b8" title=" " alt="" coords="507,5,701,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="735,53,701,49,702,43,736,48"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a0b54f0b2e2cc59f3b25a892da94e1230" title=" " alt="" coords="232,39,459,93"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="736,73,701,74,507,74,459,73,459,68,507,69,701,69,736,68"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="494,50,459,54,458,49,493,44"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,46,184,86"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,69,184,69,184,63,218,63"/>
+</map>

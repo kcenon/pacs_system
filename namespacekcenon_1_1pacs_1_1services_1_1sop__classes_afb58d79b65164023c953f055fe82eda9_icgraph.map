@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::sop_classes::get_nm_sop_class_info" name="kcenon::pacs::services::sop_classes::get_nm_sop_class_info">
+<area shape="rect" id="Node000001" title="Get information about a specific NM SOP Class." alt="" coords="1097,45,1267,100"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aad7a52c69ef56df36618679ea5275b6a" title="Check if a SOP Class UID supports multi&#45;frame." alt="" coords="815,5,1049,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1083,60,1049,54,1050,49,1084,54"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aca5cba87c6c54c02e37790f90127a1fc" title="Check if a SOP Class UID is a NM Storage SOP Class." alt="" coords="827,84,1037,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1084,90,1038,98,1037,92,1084,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1nm__iod__validator.html#af151b787a8fc9fad40da91465f0e6dda" title=" " alt="" coords="533,84,767,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="813,114,767,114,767,109,813,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1nm__iod__validator.html#a6cabcbd301aacdae1998da0354c77621" title="Validate a DICOM dataset against NM IOD." alt="" coords="269,84,485,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="520,114,486,114,486,109,520,109"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1nm__iod__validator.html#a108bf9b197dfa6991c9e2c73b9397214" title="Validate a multi&#45;frame NM dataset." alt="" coords="5,44,221,99"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="255,96,221,90,222,85,256,90"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ae7e4020c0745c33faa1bb1b9c7da38b4" title="Validate a NM dataset with default options." alt="" coords="29,123,198,177"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="256,132,199,140,198,135,256,126"/>
+</map>

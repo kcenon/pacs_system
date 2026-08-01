@@ -1,0 +1,11 @@
+<map id="include/kcenon/pacs/security/atna_audit_logger.h" name="include/kcenon/pacs/security/atna_audit_logger.h">
+<area shape="rect" id="Node000001" title="IHE ATNA&#45;compliant audit message generator (RFC 3881 XML format)" alt="" coords="95,5,249,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,72,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,62,69,103,66,98,130,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,108,163,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,61,144,97,139,94,157,59"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,108,245,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="188,59,206,94,201,97,183,61"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="270,108,333,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="213,58,274,98,271,103,210,62"/>
+</map>

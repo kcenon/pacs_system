@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::simd::detail::invert_monochrome_8bit_scalar" name="kcenon::pacs::encoding::simd::detail::invert_monochrome_8bit_scalar">
+<area shape="rect" id="Node000001" title="Scalar 8&#45;bit monochrome inversion (MONOCHROME1 &lt;&#45;&gt; MONOCHROME2)" alt="" coords="287,5,480,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a074c91d6dc1d34132c3134d216da67a9" title="Invert 8&#45;bit monochrome pixels (MONOCHROME1 &lt;&#45;&gt; MONOCHROME2)" alt="" coords="5,13,239,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="273,35,239,35,239,30,273,30"/>
+</map>

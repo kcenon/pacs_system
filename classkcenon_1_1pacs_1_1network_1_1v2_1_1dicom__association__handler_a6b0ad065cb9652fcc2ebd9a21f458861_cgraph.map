@@ -1,0 +1,86 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::handle_associate_rq" name="kcenon::pacs::network::v2::dicom_association_handler::handle_associate_rq">
+<area shape="rect" id="Node000001" title="Handle A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="5,369,224,424"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a39e558ad9d6fc62af27275c9ee0d73f9" title="Accept an incoming SCP association." alt="" coords="292,62,460,102"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,368,139,314,170,245,213,174,240,141,270,112,278,106,281,111,274,116,244,144,217,177,174,248,144,316,126,370"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a8042a19b3e0ad85e435eab1540468463" title="Get all accepted presentation contexts." alt="" coords="291,127,461,181"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="130,368,186,286,225,240,270,199,289,186,292,190,274,203,229,244,190,289,134,371"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a864866bc36d600a70f070bcfb71f124d" title="Close and cleanup." alt="" coords="288,336,464,391"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="224,380,274,374,274,379,225,385"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a698c6d4ad6413b8a6d8be0e35d6852df" title="Get the session identifier." alt="" coords="544,192,719,247"/>
+<area shape="poly" id="edge48_Node000001_Node000007" title=" " alt="" coords="133,367,157,336,189,301,227,268,271,242,336,220,404,209,470,205,530,206,530,211,470,210,404,214,337,226,273,247,230,273,192,305,161,340,137,370"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1c442d6de6ec7f4d7ef08877a8b2cc47" title="Transition to new state." alt="" coords="544,271,719,325"/>
+<area shape="poly" id="edge50_Node000001_Node000008" title=" " alt="" coords="224,421,285,428,351,430,417,421,449,412,479,400,495,387,503,371,511,353,526,336,534,330,537,335,530,340,515,356,508,373,499,390,481,404,450,417,418,426,351,435,285,434,224,426"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a3bd152610bd4e5bf841c80f014e6a941" title="Decode an A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="292,473,460,528"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="185,422,295,466,293,471,183,427"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#aeddb38228e89fc05eea5908dcdae4018" title="Report error through callback." alt="" coords="289,257,463,312"/>
+<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="170,367,271,321,286,315,288,320,273,326,173,372"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a4edc04ba724bffe12f5dc27ba67d74c1" title="Send A&#45;ASSOCIATE&#45;AC response." alt="" coords="272,695,480,749"/>
+<area shape="poly" id="edge25_Node000001_Node000019" title=" " alt="" coords="140,423,346,682,342,685,136,426"/>
+<area shape="rect" id="Node000032" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a365f94b48b89ccecacfefb7ca81a3fe6" title="Send A&#45;ASSOCIATE&#45;RJ response." alt="" coords="275,812,477,867"/>
+<area shape="poly" id="edge44_Node000001_Node000032" title=" " alt="" coords="125,424,144,488,174,575,217,670,244,716,274,759,295,782,319,802,316,806,292,786,270,762,240,719,213,672,169,577,138,489,120,425"/>
+<area shape="rect" id="Node000034" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7cfc8d81b8a944fc6bbddd2950bc9620" title="Force state transition (for testing)." alt="" coords="290,891,462,931"/>
+<area shape="poly" id="edge49_Node000001_Node000034" title=" " alt="" coords="119,424,127,511,135,569,149,632,169,698,195,762,230,823,274,876,280,881,276,885,270,880,226,826,191,765,164,699,144,633,130,570,121,512,114,425"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7a248e63aa4c3004790316536ac86011" title="Build presentation context map from accepted contexts." alt="" coords="547,5,715,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="460,63,533,49,534,54,461,68"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1association.html#af26180c5943154974e63f126a177c9d3" title="Negotiate presentation contexts for SCP." alt="" coords="544,84,719,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="460,89,530,97,530,102,460,94"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="459,334,478,321,493,305,502,289,510,273,526,256,532,252,535,256,530,260,515,276,506,292,498,308,482,325,462,338"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="464,338,530,321,531,326,465,343"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a0d06b134a1faee6f3fd463c2b8a385ea" title="Decode variable items from ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="547,415,715,469"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="459,479,533,462,534,467,461,484"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a64cf1569f52a4efe60b62161683a14e1" title="Read a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1024,437,1245,477"/>
+<area shape="poly" id="edge19_Node000009_Node000013" title=" " alt="" coords="460,493,735,478,1010,462,1011,467,735,483,460,499"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#af222f7bc86bfedd75aba6d09c06db4de" title="Check if a complete PDU is available in the buffer." alt="" coords="783,545,976,585"/>
+<area shape="poly" id="edge16_Node000009_Node000015" title=" " alt="" coords="461,513,528,523,769,552,769,557,528,529,460,518"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a8b9bcffecdc2396bb3492246cc243be6" title="Read an AE Title (16 bytes, space&#45;trimmed)." alt="" coords="528,350,735,390"/>
+<area shape="poly" id="edge18_Node000009_Node000016" title=" " alt="" coords="436,471,478,445,502,422,511,411,527,400,539,393,542,398,529,404,515,415,505,426,482,449,438,475"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#acc5535c405be98be76cd656e82bbc2d0" title="Validate PDU header and extract length." alt="" coords="544,596,719,651"/>
+<area shape="poly" id="edge20_Node000009_Node000017" title=" " alt="" coords="432,526,529,574,558,588,556,593,527,579,429,530"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a1e8b1daebb984f5c7cf3da931f66c91e" title="Decode User Information sub&#45;items." alt="" coords="795,364,963,419"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="715,422,781,409,782,414,716,428"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a99fc0ff0bd6ecafe758b6216c1e7c862" title="Read a UID string (trim trailing null/space padding)." alt="" coords="1046,339,1223,379"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="712,412,733,400,747,387,755,373,765,360,781,349,814,338,847,330,915,323,981,326,1041,334,1040,339,981,331,915,329,848,335,815,343,784,354,769,364,760,376,751,390,736,404,714,417"/>
+<area shape="poly" id="edge15_Node000010_Node000013" title=" " alt="" coords="715,442,1010,450,1010,456,715,447"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="963,378,1032,369,1033,375,964,384"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="964,410,1044,431,1042,436,963,415"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a9686787c3e255a12501de5e5ff3eea23" title="Read a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1024,545,1245,585"/>
+<area shape="poly" id="edge13_Node000011_Node000014" title=" " alt="" coords="922,417,1094,535,1091,539,919,421"/>
+<area shape="poly" id="edge17_Node000015_Node000014" title=" " alt="" coords="976,562,1010,562,1010,567,976,567"/>
+<area shape="poly" id="edge22_Node000017_Node000014" title=" " alt="" coords="719,617,841,609,976,594,1031,585,1032,590,976,599,841,614,719,622"/>
+<area shape="poly" id="edge21_Node000017_Node000015" title=" " alt="" coords="718,600,780,585,781,590,719,605"/>
+<area shape="poly" id="edge24_Node000018_Node000007" title=" " alt="" coords="463,260,530,242,531,248,464,265"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a9bfc3715c9baa480dc746b73eb91d322" title="Build A&#45;ASSOCIATE&#45;AC PDU for sending." alt="" coords="547,675,715,729"/>
+<area shape="poly" id="edge26_Node000019_Node000020" title=" " alt="" coords="480,711,533,707,533,712,480,717"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a80a2ffc0eb95fb3661ae2acca772cb26" title="Encodes an A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="547,753,715,808"/>
+<area shape="poly" id="edge27_Node000019_Node000021" title=" " alt="" coords="481,743,534,756,533,761,479,748"/>
+<area shape="rect" id="Node000031" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#addf91d7f3c19451c6c50f7ea922cebc8" title="Send raw PDU data." alt="" coords="544,832,719,887"/>
+<area shape="poly" id="edge43_Node000019_Node000031" title=" " alt="" coords="417,747,469,782,529,817,544,824,541,829,527,822,466,787,414,752"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#af3e409c490b3d74dba2f3b839f464951" title="Encodes an Application Context item." alt="" coords="795,739,963,793"/>
+<area shape="poly" id="edge28_Node000021_Node000022" title=" " alt="" coords="715,773,782,769,782,774,716,778"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a55abcabd8bf30252d22e8ef8213e1ddf" title="Encodes the common header portion for ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="795,975,963,1029"/>
+<area shape="poly" id="edge31_Node000021_Node000025" title=" " alt="" coords="717,802,737,817,751,836,758,855,762,891,765,926,772,944,785,962,787,964,783,968,781,965,767,946,760,928,756,891,753,856,746,839,733,821,714,807"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa446dadfc32639189fdb6f21ef0d9bcd" title="Encodes a Presentation Context item for A&#45;ASSOCIATE&#45;AC." alt="" coords="785,660,974,715"/>
+<area shape="poly" id="edge35_Node000021_Node000028" title=" " alt="" coords="704,751,792,717,794,722,706,756"/>
+<area shape="rect" id="Node000029" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a769ea854bd70ea06090e748ae7dcdbaa" title="Encodes a User Information item." alt="" coords="795,817,963,872"/>
+<area shape="poly" id="edge38_Node000021_Node000029" title=" " alt="" coords="716,800,782,817,781,822,715,805"/>
+<area shape="rect" id="Node000030" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa369dfad27cf016bffdc8ec99474080d" title="Updates the PDU length field at position 2&#45;5." alt="" coords="795,896,963,951"/>
+<area shape="poly" id="edge42_Node000021_Node000030" title=" " alt="" coords="717,805,736,817,752,834,761,850,769,866,784,881,792,887,789,891,781,885,765,869,756,852,748,837,733,821,714,810"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#adda17a67c78d1fba73085589ea8a13df" title="Writes a UID string." alt="" coords="1044,746,1225,786"/>
+<area shape="poly" id="edge29_Node000022_Node000023" title=" " alt="" coords="963,763,1030,763,1030,769,963,769"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#ac2ab53ad523a5947efac7785165941e6" title="Writes a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1051,813,1219,868"/>
+<area shape="poly" id="edge30_Node000022_Node000024" title=" " alt="" coords="964,788,1038,810,1037,815,963,793"/>
+<area shape="poly" id="edge33_Node000025_Node000024" title=" " alt="" coords="954,972,975,961,999,942,1022,920,1082,874,1086,878,1026,924,1003,946,977,966,956,977"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa4ddd3f35a6314785c4025f83ec1e3ae" title="Writes an AE Title (16 bytes, space&#45;padded)." alt="" coords="1051,1013,1219,1068"/>
+<area shape="poly" id="edge32_Node000025_Node000026" title=" " alt="" coords="964,1012,1038,1023,1037,1029,963,1017"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a072ecc5e4e38fc2897e62ef6d4327d44" title="Writes a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1051,935,1219,989"/>
+<area shape="poly" id="edge34_Node000025_Node000027" title=" " alt="" coords="963,986,1037,975,1038,980,964,992"/>
+<area shape="poly" id="edge36_Node000028_Node000023" title=" " alt="" coords="969,712,1057,739,1055,744,968,717"/>
+<area shape="poly" id="edge37_Node000028_Node000024" title=" " alt="" coords="961,713,978,724,994,743,1002,761,1010,779,1026,796,1040,806,1037,810,1022,800,1006,781,998,763,990,746,974,728,958,717"/>
+<area shape="poly" id="edge39_Node000029_Node000023" title=" " alt="" coords="963,816,1055,788,1057,793,964,821"/>
+<area shape="poly" id="edge40_Node000029_Node000024" title=" " alt="" coords="963,841,1037,840,1037,845,963,846"/>
+<area shape="poly" id="edge41_Node000029_Node000027" title=" " alt="" coords="951,870,977,881,1070,926,1068,931,975,886,949,875"/>
+<area shape="poly" id="edge47_Node000032_Node000031" title=" " alt="" coords="478,845,530,849,530,854,477,850"/>
+<area shape="rect" id="Node000033" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa518c782480adfc4cabbc7d05c5883b9" title="Encodes an A&#45;ASSOCIATE&#45;RJ PDU." alt="" coords="795,1053,963,1108"/>
+<area shape="poly" id="edge45_Node000032_Node000033" title=" " alt="" coords="452,864,481,877,568,920,633,958,698,996,784,1040,797,1045,794,1050,782,1044,695,1001,630,963,565,925,479,882,450,869"/>
+<area shape="poly" id="edge46_Node000033_Node000027" title=" " alt="" coords="954,1051,975,1040,998,1020,1023,1000,1037,992,1039,997,1025,1004,1002,1024,977,1044,956,1055"/>
+</map>

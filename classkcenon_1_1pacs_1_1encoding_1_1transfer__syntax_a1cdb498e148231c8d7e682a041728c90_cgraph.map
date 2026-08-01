@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::transfer_syntax::transfer_syntax" name="kcenon::pacs::encoding::transfer_syntax::transfer_syntax">
+<area shape="rect" id="Node000001" title="Constructs a transfer_syntax from a UID string." alt="" coords="5,5,196,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a2e62a7fa09112312b2b375fe76141dd6" title="Returns the Transfer Syntax UID." alt="" coords="244,13,419,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,30,230,30,230,35,196,35"/>
+</map>

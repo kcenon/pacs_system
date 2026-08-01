@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::core::dicom_tag::dicom_tag" name="kcenon::pacs::core::dicom_tag::dicom_tag">
+<area shape="rect" id="Node000001" title="Construct from group and element numbers." alt="" coords="5,37,180,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="228,5,388,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,42,214,37,215,42,181,47"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="237,69,379,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,68,224,74,223,79,180,73"/>
+</map>

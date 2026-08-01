@@ -1,0 +1,70 @@
+<map id="kcenon::pacs::services::validation::xa_iod_validator::validate" name="kcenon::pacs::services::validation::xa_iod_validator::validate">
+<area shape="rect" id="Node000001" title="Validate a DICOM dataset against XA IOD." alt="" coords="5,293,216,348"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a7bf8d4ddbaf2eabbd736a280b2a6cec9" title=" " alt="" coords="561,5,772,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,292,138,247,169,191,210,135,235,110,263,89,296,71,331,56,405,36,479,26,547,23,548,28,479,31,406,41,333,61,298,76,265,94,238,114,214,138,173,194,143,249,124,294"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a008a6a3aed334a3709df0166422ebfa3" title=" " alt="" coords="559,163,774,217"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="121,292,141,251,172,203,212,157,236,137,263,121,297,106,327,97,355,93,382,93,438,103,506,121,531,133,555,148,572,155,570,160,552,152,529,138,504,126,437,108,382,98,355,98,328,102,299,111,265,126,240,141,216,160,176,206,146,254,126,294"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#aadb6894e0596859c150d04bb6eb74278" title=" " alt="" coords="264,451,505,505"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="142,346,197,392,265,437,277,443,275,448,263,442,194,396,139,350"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ae0c42d778e74272b49b86fed4b8eb891" title=" " alt="" coords="265,372,504,427"/>
+<area shape="poly" id="edge21_Node000001_Node000015" title=" " alt="" coords="207,346,276,365,275,371,206,351"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ab0c76848369ce05ad09567e2240ac284" title=" " alt="" coords="272,136,497,191"/>
+<area shape="poly" id="edge24_Node000001_Node000016" title=" " alt="" coords="139,291,194,245,263,200,275,194,277,199,265,204,197,249,142,295"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#abba7e353d1f181f3361f63b051de5b72" title=" " alt="" coords="279,293,490,348"/>
+<area shape="poly" id="edge28_Node000001_Node000018" title=" " alt="" coords="216,318,265,318,265,323,216,323"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a3439150877fbd0fe71d9a7f99968cf8f" title=" " alt="" coords="268,608,501,663"/>
+<area shape="poly" id="edge30_Node000001_Node000019" title=" " alt="" coords="122,347,140,400,170,466,211,535,237,567,266,595,270,598,267,603,262,599,233,571,207,538,165,469,135,402,117,349"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a8dd496ccc9d18d1b3543477c4a54bee3" title=" " alt="" coords="265,215,505,269"/>
+<area shape="poly" id="edge36_Node000001_Node000022" title=" " alt="" coords="206,291,275,271,276,276,207,296"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#afa93101f225197eb5f492ec6981c5d83" title=" " alt="" coords="279,529,490,584"/>
+<area shape="poly" id="edge38_Node000001_Node000023" title=" " alt="" coords="128,347,150,385,181,430,220,476,266,516,272,520,269,525,262,520,216,480,177,434,146,388,124,350"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="828,305,1017,345"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="766,58,782,70,835,159,907,291,902,294,830,161,778,73,763,62"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="845,84,1000,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="757,58,833,81,831,86,755,63"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="1068,91,1223,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1000,109,1054,109,1054,114,1000,114"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="740,215,781,234,882,295,879,299,779,239,738,220"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="755,160,831,136,833,142,757,165"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a698143d3c890729231429cc1b5c729e7" title=" " alt="" coords="561,451,772,505"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="506,475,548,475,548,481,506,481"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#add9034a85f0cc248b4ac5b8681c4ddd9" title=" " alt="" coords="561,372,772,427"/>
+<area shape="poly" id="edge12_Node000007_Node000010" title=" " alt="" coords="483,448,554,428,556,433,484,453"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a4400ebd3f5728d3c685adab97e71faaa" title=" " alt="" coords="561,293,772,348"/>
+<area shape="poly" id="edge18_Node000007_Node000014" title=" " alt="" coords="487,448,504,437,520,419,527,399,535,379,551,359,559,353,562,357,555,363,539,382,532,401,524,421,507,441,490,453"/>
+<area shape="poly" id="edge10_Node000008_Node000003" title=" " alt="" coords="762,448,778,437,794,419,802,401,810,381,826,361,844,349,847,353,830,365,814,384,807,403,799,422,782,441,765,453"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="845,476,1000,531"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="772,486,832,492,831,497,772,491"/>
+<area shape="poly" id="edge13_Node000010_Node000003" title=" " alt="" coords="760,369,840,346,841,351,762,375"/>
+<area shape="poly" id="edge14_Node000010_Node000009" title=" " alt="" coords="748,424,781,437,852,468,850,473,779,442,746,429"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="841,375,1004,415"/>
+<area shape="poly" id="edge15_Node000010_Node000011" title=" " alt="" coords="772,395,828,394,828,399,772,400"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="1065,407,1225,447"/>
+<area shape="poly" id="edge16_Node000011_Node000012" title=" " alt="" coords="1004,404,1052,411,1052,417,1004,410"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="1074,343,1217,383"/>
+<area shape="poly" id="edge17_Node000011_Node000013" title=" " alt="" coords="1004,381,1060,373,1061,378,1004,386"/>
+<area shape="poly" id="edge19_Node000014_Node000003" title=" " alt="" coords="772,320,814,320,814,326,772,325"/>
+<area shape="poly" id="edge20_Node000014_Node000011" title=" " alt="" coords="762,345,841,369,840,374,760,351"/>
+<area shape="poly" id="edge22_Node000015_Node000010" title=" " alt="" coords="504,397,547,397,547,402,504,402"/>
+<area shape="poly" id="edge23_Node000015_Node000014" title=" " alt="" coords="483,369,554,349,556,354,484,374"/>
+<area shape="poly" id="edge27_Node000016_Node000010" title=" " alt="" coords="493,189,507,200,522,220,530,241,532,281,534,320,541,340,555,359,558,361,554,365,551,362,536,342,529,321,527,281,525,242,518,223,503,204,490,193"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a061aa85dc299833ba7aed27017c30aeb" title=" " alt="" coords="553,84,780,139"/>
+<area shape="poly" id="edge25_Node000016_Node000017" title=" " alt="" coords="497,140,539,132,540,137,498,145"/>
+<area shape="poly" id="edge26_Node000017_Node000004" title=" " alt="" coords="780,109,832,109,832,114,780,114"/>
+<area shape="poly" id="edge29_Node000018_Node000014" title=" " alt="" coords="490,318,547,318,547,323,490,323"/>
+<area shape="poly" id="edge32_Node000019_Node000003" title=" " alt="" coords="476,605,504,594,528,581,552,568,587,557,619,553,674,554,700,553,725,548,751,537,778,516,793,498,800,480,803,442,805,403,812,382,826,362,839,350,843,354,830,365,817,384,810,404,808,442,806,481,798,501,782,520,754,541,727,553,701,558,674,559,619,559,588,563,554,572,530,585,506,599,478,610"/>
+<area shape="poly" id="edge33_Node000019_Node000009" title=" " alt="" coords="473,660,543,674,622,681,663,679,703,674,742,663,779,646,796,631,804,612,811,591,826,568,862,537,866,541,830,572,816,593,809,614,801,634,781,651,744,668,704,679,663,685,622,686,542,680,472,665"/>
+<area shape="poly" id="edge31_Node000019_Node000010" title=" " alt="" coords="490,606,503,595,518,576,525,557,527,518,529,478,537,458,551,438,555,434,559,437,555,441,541,460,534,479,532,518,530,558,522,578,507,599,493,610"/>
+<area shape="rect" id="Node000020" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa7a20949142f2451bc257ee687007c34" title="Check if a SOP Class UID is an XA/XRF Storage SOP Class." alt="" coords="563,712,770,767"/>
+<area shape="poly" id="edge34_Node000019_Node000020" title=" " alt="" coords="461,660,580,705,578,710,459,665"/>
+<area shape="rect" id="Node000021" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a9f8bd8b982e3609e1b989bb143049afd" title="Get information about a specific XA SOP Class." alt="" coords="838,712,1007,767"/>
+<area shape="poly" id="edge35_Node000020_Node000021" title=" " alt="" coords="770,737,824,737,824,742,770,742"/>
+<area shape="poly" id="edge37_Node000022_Node000003" title=" " alt="" coords="505,245,638,256,781,278,854,298,852,303,779,283,637,262,505,250"/>
+<area shape="poly" id="edge39_Node000023_Node000010" title=" " alt="" coords="487,527,504,516,520,497,527,478,535,458,551,437,559,432,562,436,555,441,539,460,532,480,524,500,507,520,490,531"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a8f83c4d7c0f8507ab1c69b3870b2de08" title=" " alt="" coords="561,581,772,636"/>
+<area shape="poly" id="edge40_Node000023_Node000024" title=" " alt="" coords="491,573,549,584,548,589,490,579"/>
+<area shape="poly" id="edge41_Node000024_Node000003" title=" " alt="" coords="755,579,778,560,794,535,801,511,803,487,801,463,800,438,801,413,809,388,826,362,838,350,842,354,830,365,814,390,807,414,805,438,807,462,808,487,807,512,799,538,782,564,759,583"/>
+<area shape="poly" id="edge42_Node000024_Node000009" title=" " alt="" coords="733,579,842,534,844,538,735,584"/>
+<area shape="rect" id="Node000025" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a66914fe52c4f21335c902005cb198d54" title="Check if photometric interpretation is valid for XA." alt="" coords="838,581,1007,636"/>
+<area shape="poly" id="edge43_Node000024_Node000025" title=" " alt="" coords="772,606,824,606,824,611,772,611"/>
+</map>

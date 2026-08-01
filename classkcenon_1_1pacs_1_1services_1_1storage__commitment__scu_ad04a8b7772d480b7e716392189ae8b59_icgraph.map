@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::storage_commitment_scu::build_action_dataset" name="kcenon::pacs::services::storage_commitment_scu::build_action_dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="252,5,451,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scu.html#ac3e39c5cb067b790e68737f5d7b0be1a" title="Send N&#45;ACTION request to commit stored instances." alt="" coords="5,5,204,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,35,204,35,204,30,238,30"/>
+</map>

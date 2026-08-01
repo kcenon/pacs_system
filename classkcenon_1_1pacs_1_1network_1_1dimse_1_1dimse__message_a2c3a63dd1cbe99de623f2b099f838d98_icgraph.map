@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::attribute_identifier_list" name="kcenon::pacs::network::dimse::dimse_message::attribute_identifier_list">
+<area shape="rect" id="Node000001" title="Get the Attribute Identifier List (for N&#45;GET)" alt="" coords="267,5,451,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1n__get__scp.html#a8f3c1ccc22ba586289cdccde0f55a065" title="Handle an incoming N&#45;GET&#45;RQ message." alt="" coords="5,13,219,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="253,35,219,35,219,30,253,30"/>
+</map>

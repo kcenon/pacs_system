@@ -1,0 +1,22 @@
+<map id="include/kcenon/pacs/network/pipeline/jobs/dimse_process_job.h" name="include/kcenon/pacs/network/pipeline/jobs/dimse_process_job.h">
+<area shape="rect" id="Node000001" title="DIMSE processing job for Stage 3 of the pipeline." alt="" coords="673,5,839,60"/>
+<area shape="rect" id="Node000002" href="$storage__query__exec__job_8h.html" title="Storage and query execution job for Stage 4 of the pipeline." alt="" coords="329,108,524,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="660,66,513,111,512,105,659,61"/>
+<area shape="rect" id="Node000007" href="$pipeline__adapter_8cpp.html" title="Implementation of pipeline adapter." alt="" coords="561,321,722,361"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="772,73,783,115,789,165,786,217,780,243,769,267,755,285,738,300,700,323,697,318,735,296,751,281,764,264,775,241,781,216,784,165,778,116,767,74"/>
+<area shape="rect" id="Node000008" href="$dimse__process__job_8cpp.html" title="Implementation of DIMSE process job." alt="" coords="547,218,755,258"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="739,73,663,219,658,217,734,71"/>
+<area shape="rect" id="Node000009" href="$pdu__decode__job_8cpp.html" title="Implementation of PDU decode job." alt="" coords="829,115,1019,155"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="813,65,894,113,891,117,810,69"/>
+<area shape="rect" id="Node000003" href="$response__encode__job_8h.html" title="Response encoding job for Stage 5 of the pipeline." alt="" coords="77,211,256,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="347,170,235,213,233,208,345,165"/>
+<area shape="rect" id="Node000005" href="$storage__query__exec__job_8cpp.html" title="Implementation of storage/query execution job." alt="" coords="200,313,387,368"/>
+<area shape="poly" id="edge8_Node000002_Node000005" title=" " alt="" coords="362,172,339,190,321,212,309,237,301,264,296,313,290,313,296,263,304,235,316,209,336,187,359,168"/>
+<area shape="rect" id="Node000006" href="$pipeline__adapter_8h.html" title="Adapter for integrating pipeline with existing DICOM components." alt="" coords="331,211,522,265"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="429,176,429,211,424,211,424,176"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="499,166,610,215,608,220,496,171"/>
+<area shape="rect" id="Node000004" href="$response__encode__job_8cpp.html" title="Implementation of response encode job." alt="" coords="5,313,176,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="141,278,113,315,108,312,136,275"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="212,272,262,311,259,315,209,276"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="496,269,602,318,600,323,494,274"/>
+</map>

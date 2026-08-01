@@ -1,0 +1,11 @@
+<map id="include/kcenon/pacs/services/sop_classes/sr_storage.h" name="include/kcenon/pacs/services/sop_classes/sr_storage.h">
+<area shape="rect" id="Node000001" title="Structured Report (SR) Storage SOP Classes." alt="" coords="305,5,467,60"/>
+<area shape="rect" id="Node000002" href="$sop__class__registry_8cpp.html" title="Implementation of SOP Class Registry." alt="" coords="5,108,172,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="292,66,150,110,148,105,291,61"/>
+<area shape="rect" id="Node000003" href="$sr__storage_8cpp.html" title="Implementation of Structured Report Storage SOP Classes." alt="" coords="197,108,378,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="350,71,309,110,305,106,346,68"/>
+<area shape="rect" id="Node000004" href="$sr__iod__validator_8cpp.html" title="Implementation of Structured Report IOD Validator." alt="" coords="402,108,570,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="426,68,468,106,464,110,423,72"/>
+<area shape="rect" id="Node000005" href="$imaging__document__source_8cpp.html" title="Implementation of IHE XDS&#45;I.b Imaging Document Source Actor." alt="" coords="595,108,777,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="481,61,626,105,625,110,480,66"/>
+</map>

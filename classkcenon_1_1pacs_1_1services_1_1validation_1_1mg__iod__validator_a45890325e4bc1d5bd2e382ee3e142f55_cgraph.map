@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::validate_dx_anatomy_imaged_module" name="kcenon::pacs::services::validation::mg_iod_validator::validate_dx_anatomy_imaged_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,62,288,117"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a303f90d2a37d4d2d9592a50537664b55" title=" " alt="" coords="336,62,552,117"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="288,87,322,87,322,92,288,92"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="600,5,789,45"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="263,59,336,47,466,33,586,26,586,31,466,38,336,52,264,65"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="367,141,521,195"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="251,114,354,142,353,147,250,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="551,59,602,46,603,51,552,64"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="613,69,776,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="552,87,600,87,600,92,552,92"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="837,37,997,77"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="776,75,824,68,824,73,776,80"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="846,101,989,141"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="776,98,833,107,832,112,776,104"/>
+</map>

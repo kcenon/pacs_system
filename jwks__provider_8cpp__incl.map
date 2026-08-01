@@ -1,0 +1,41 @@
+<map id="src/web/auth/jwks_provider.cpp" name="src/web/auth/jwks_provider.cpp">
+<area shape="rect" id="Node000001" title="Implementation of JWKS key management and JWK&#45;to&#45;PEM conversion." alt="" coords="665,5,891,31"/>
+<area shape="rect" id="Node000002" href="$jwks__provider_8h.html" title="JSON Web Key Set (JWKS) provider with key caching." alt="" coords="481,79,648,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="748,33,630,76,628,71,746,28"/>
+<area shape="rect" id="Node000011" href="$jwt__validator_8h.html" title="JWT (JSON Web Token) validation for OAuth 2.0." alt="" coords="159,79,325,119"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="700,33,340,86,339,81,700,28"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="673,86,769,111"/>
+<area shape="poly" id="edge20_Node000001_Node000013" title=" " alt="" coords="772,32,739,76,735,73,767,29"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="793,86,878,111"/>
+<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="789,29,821,73,817,76,784,32"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="903,86,973,111"/>
+<area shape="poly" id="edge22_Node000001_Node000015" title=" " alt="" coords="802,28,904,78,901,82,800,33"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="998,86,1065,111"/>
+<area shape="poly" id="edge23_Node000001_Node000016" title=" " alt="" coords="824,28,901,49,987,76,994,79,992,84,985,81,899,54,823,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="602,174,669,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="582,117,619,161,615,165,578,121"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="18,255,85,280"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="559,120,534,166,514,190,490,209,438,235,391,250,347,255,304,255,212,250,159,251,99,257,98,252,159,245,212,245,304,250,346,250,390,244,436,230,487,204,510,186,529,163,555,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="744,174,831,199"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="615,116,746,167,744,172,613,121"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="855,174,919,199"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="649,114,744,135,844,164,851,166,849,171,843,169,742,141,648,119"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="279,174,354,199"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="509,121,368,169,361,172,359,167,366,164,507,116"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="109,255,167,280"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="567,119,561,164,551,188,534,209,506,225,467,236,372,247,274,252,198,257,182,260,181,255,198,252,273,246,372,242,466,231,504,220,531,205,546,186,555,163,562,119"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="379,174,476,199"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="536,121,459,169,456,164,533,116"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="211,255,273,280"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="612,116,646,134,675,156,685,168,691,181,691,195,683,208,655,228,613,243,561,254,503,262,384,269,287,270,287,264,384,264,503,256,560,249,611,238,652,224,679,205,685,193,686,182,681,171,672,160,643,139,610,121"/>
+<area shape="poly" id="edge15_Node000011_Node000004" title=" " alt="" coords="159,116,71,138,36,152,15,168,8,186,11,205,21,225,33,242,29,246,16,228,6,207,3,185,11,165,34,148,70,133,158,111"/>
+<area shape="poly" id="edge16_Node000011_Node000007" title=" " alt="" coords="261,117,300,162,296,165,257,121"/>
+<area shape="poly" id="edge17_Node000011_Node000008" title=" " alt="" coords="159,105,123,112,86,124,53,142,27,168,20,186,27,205,37,215,54,226,97,247,94,252,51,231,34,219,22,208,15,186,22,165,50,138,84,119,121,107,158,100"/>
+<area shape="poly" id="edge18_Node000011_Node000009" title=" " alt="" coords="284,116,391,166,389,171,282,121"/>
+<area shape="poly" id="edge19_Node000011_Node000010" title=" " alt="" coords="245,119,245,241,239,241,239,119"/>
+<area shape="rect" id="Node000012" href="$oauth2__config_8h.html" title="OAuth 2.0 configuration for DICOMweb endpoints." alt="" coords="37,167,204,207"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="217,121,160,161,157,157,214,117"/>
+<area shape="poly" id="edge12_Node000012_Node000004" title=" " alt="" coords="106,209,73,246,69,242,102,205"/>
+<area shape="poly" id="edge13_Node000012_Node000008" title=" " alt="" coords="128,206,135,241,130,242,122,207"/>
+<area shape="poly" id="edge14_Node000012_Node000010" title=" " alt="" coords="152,205,214,245,211,249,149,209"/>
+</map>

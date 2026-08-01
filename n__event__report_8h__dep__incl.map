@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/network/dimse/n_event_report.h" name="include/kcenon/pacs/network/dimse/n_event_report.h">
+<area shape="rect" id="Node000001" title="N&#45;EVENT&#45;REPORT DIMSE service." alt="" coords="13,5,191,60"/>
+<area shape="rect" id="Node000002" href="$pacs-network-dimse_8cppm.html" title="C++20 module partition for DIMSE message types." alt="" coords="5,108,199,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,74,105,108,99,108,99,74"/>
+</map>

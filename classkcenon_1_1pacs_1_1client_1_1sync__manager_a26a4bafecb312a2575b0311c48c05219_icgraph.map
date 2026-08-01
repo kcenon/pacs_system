@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::client::sync_manager::config" name="kcenon::pacs::client::sync_manager::config">
+<area shape="rect" id="Node000001" title="Get current manager configuration." alt="" coords="256,117,428,157"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a34fb8cd7759ff9f586a2d2d134841f11" title="Add a new sync configuration." alt="" coords="5,5,208,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="299,112,256,85,207,60,177,48,179,43,209,55,258,80,302,108"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#ade2a2a0a46aedb351b35621845c5447d" title="Construct a sync manager with custom configuration." alt="" coords="25,70,188,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="241,123,188,114,189,109,242,118"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a3913002cbd04ac8cb0c7b6c97b3d3134" title="Construct a sync manager from split repositories with custom configuration." alt="" coords="25,149,188,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="242,156,189,165,188,160,241,151"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a8bf09fb17a9503aa090be7e82d29231b" title="Update an existing sync configuration." alt="" coords="17,227,196,282"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="299,167,209,217,181,230,179,225,207,212,296,162"/>
+</map>

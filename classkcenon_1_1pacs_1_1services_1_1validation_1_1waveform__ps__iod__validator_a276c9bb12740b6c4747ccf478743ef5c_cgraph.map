@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::waveform_ps_iod_validator::validate_general_equipment_module" name="kcenon::pacs::services::validation::waveform_ps_iod_validator::validate_general_equipment_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,216,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1waveform__ps__iod__validator.html#ab347f0e860e2a2e52c3efaba12183e89" title=" " alt="" coords="264,5,447,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,37,250,37,250,43,216,43"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="495,20,684,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="447,37,481,37,481,43,447,43"/>
+</map>

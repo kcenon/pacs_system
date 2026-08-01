@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::services::sop_class_registry" name="kcenon::pacs::services::sop_class_registry">
+<area shape="rect" id="Node000001" title=" " alt="" coords="119,696,316,1191"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="143,524,292,633"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,633,220,679,215,679,215,633"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="31,329,110,395"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,393,174,509,169,512,90,396"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,135,136,215"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="73,228,73,329,68,329,68,228"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1services_1_1sop__class__info.html" title="Complete information about a SOP Class." alt="" coords="135,292,300,432"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="220,432,220,508,215,508,215,432"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="160,142,277,207"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="221,208,221,276,215,276,216,208"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="139,5,298,85"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="221,99,221,142,216,142,216,99"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="324,322,468,402"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="367,415,337,458,302,502,279,526,276,522,298,498,332,455,362,412"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="346,142,369,207"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="361,207,368,267,378,306,373,307,363,269,356,208"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="422,142,445,207"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="430,208,410,306,404,305,424,207"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ai::json_util::extract_string" name="kcenon::pacs::ai::json_util::extract_string">
+<area shape="rect" id="Node000001" title="Simple JSON value extractor (for basic parsing)" alt="" coords="193,23,356,63"/>
+<area shape="rect" id="Node000002" href="$ai__service__connector_8cpp.html#a679419c82b234bac81008e36cccd7fe5" title="Parse model info from JSON." alt="" coords="5,5,145,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,34,145,30,146,24,180,29"/>
+<area shape="rect" id="Node000003" href="$ai__service__connector_8cpp.html#a1adfc6ed77e65a72ab40758f93ff7f70" title="Parse inference status from JSON response." alt="" coords="6,55,145,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,57,145,62,145,56,179,52"/>
+</map>

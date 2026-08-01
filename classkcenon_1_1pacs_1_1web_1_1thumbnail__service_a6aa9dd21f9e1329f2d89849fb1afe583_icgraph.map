@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::thumbnail_service::get_series_thumbnail" name="kcenon::pacs::web::thumbnail_service::get_series_thumbnail">
+<area shape="rect" id="Node000001" title="Get thumbnail for a series (representative image)" alt="" coords="224,5,395,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#ab6a503714ac101824b3b545162e55609" title="Get thumbnail for a study (representative image)" alt="" coords="5,5,176,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,35,176,35,176,30,210,30"/>
+</map>

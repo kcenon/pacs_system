@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::echoscp" name="kcenon::pacs::integration_test::dcmtk_tool::echoscp">
+<area shape="rect" id="Node000001" title="Start C&#45;ECHO SCP (echoscp) server." alt="" coords="148,47,344,87"/>
+<area shape="rect" id="Node000002" href="$test__dcmtk__tool_8cpp.html#a996a2b404db755df974961b6b1649b6c" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,46,100,33,101,27,154,41"/>
+<area shape="rect" id="Node000003" href="$test__dcmtk__echo_8cpp.html#a3e7a1ca4eda1c8ca8c064a12b87e3b13" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,70,100,70,100,65,134,65"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__tool_8cpp.html#a50b527123e22bb2006f44e34bbbc1b8a" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="154,93,101,107,100,102,153,88"/>
+</map>

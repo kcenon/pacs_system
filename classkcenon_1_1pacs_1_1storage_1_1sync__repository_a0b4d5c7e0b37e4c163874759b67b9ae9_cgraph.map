@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::storage::sync_repository::list_unresolved_conflicts" name="kcenon::pacs::storage::sync_repository::list_unresolved_conflicts">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,45,169,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1sync__repository.html#aa7a175a905a541df909462e2c4435af6" title=" " alt="" coords="217,45,393,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,70,204,70,204,75,169,75"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1client.html#a2048bcb72e0543f28d10822da44a70f5" title="Parse conflict_resolution from string." alt="" coords="441,5,592,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="393,53,427,47,428,52,394,59"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1client.html#a97e750caa8b255a62792a9c6e495516b" title="Parse sync_conflict_type from string." alt="" coords="441,84,592,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="394,86,428,93,427,98,393,91"/>
+</map>

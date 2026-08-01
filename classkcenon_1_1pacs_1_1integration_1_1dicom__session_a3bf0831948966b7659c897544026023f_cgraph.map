@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration::dicom_session::dicom_session" name="kcenon::pacs::integration::dicom_session::dicom_session">
+<area shape="rect" id="Node000001" title="Construct a DICOM session wrapping a secure_session." alt="" coords="5,41,192,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a988434349980c7f54c961ca64f4e7b13" title="Handle incoming data from network." alt="" coords="241,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,52,227,46,227,52,193,57"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#ae25eddbaca6137a0ee18008300004187" title="Handle connection errors." alt="" coords="240,85,428,125"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="193,80,227,86,226,91,192,86"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a0cfe63fba7923c8363e8e21a405a7430" title="Process buffered data for complete PDUs." alt="" coords="476,13,705,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="427,30,463,30,463,35,427,35"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a8bda8d45ed8ebd3c6f00bcfc86dd5bf0" title="Parse PDU header from buffer." alt="" coords="753,5,940,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="706,30,740,30,740,35,706,35"/>
+</map>

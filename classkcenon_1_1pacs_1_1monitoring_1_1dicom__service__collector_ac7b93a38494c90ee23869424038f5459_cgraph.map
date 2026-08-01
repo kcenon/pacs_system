@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::monitoring::dicom_service_collector::collect" name="kcenon::pacs::monitoring::dicom_service_collector::collect">
+<area shape="rect" id="Node000001" title="Collect current DIMSE service metrics." alt="" coords="5,81,192,136"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#a454450c19bcdded825a8772e2f38be2e" title=" " alt="" coords="240,41,439,96"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,91,226,85,227,90,192,96"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="246,120,433,175"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="192,121,233,128,232,133,192,126"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#a0e006c79ca854e3afdec1cc5d70315a3" title=" " alt="" coords="487,5,673,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,51,473,46,474,51,439,56"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1monitoring.html#ad2335ef3bbc51a064374da9e18c8abb4" title="Convert health level to string representation." alt="" coords="487,85,673,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="439,81,474,86,473,91,438,86"/>
+</map>

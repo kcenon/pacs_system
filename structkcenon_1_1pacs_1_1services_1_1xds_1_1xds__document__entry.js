@@ -1,0 +1,28 @@
+var structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry =
+[
+    [ "author_institution", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#ad0ece895167ac22207f299e5e97d79a2", null ],
+    [ "author_person", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a9187167d935e2720b5649b6971ba9a17", null ],
+    [ "availability_status", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a8aa9711d59b0925db6094bf583b87e62", null ],
+    [ "class_code", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a49b7f18ed9596266f3197e01a5eb7ff5", null ],
+    [ "class_code_display", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a85b7b3f17a1c9cb9e9c8b069dd60bee1", null ],
+    [ "class_code_scheme", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a49d9c58b208f8274000bc7f5ac3122da", null ],
+    [ "creation_time", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a0b38a2294806e790bb1dfdc640a50e24", null ],
+    [ "entry_uuid", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#ad4defab75e4e71749b80d5d69c96b0ab", null ],
+    [ "facility_type_code", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a68e42124461c65a3c341f45019e8a69d", null ],
+    [ "facility_type_code_scheme", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a4d706191e5f9fc7edece6649e97c16e4", null ],
+    [ "format_code", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a97ce89f00e3b4ab8e2cf85e80193e96e", null ],
+    [ "format_code_scheme", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a1580d7d82037dc86fe377690d407d02e", null ],
+    [ "language_code", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#ac6db27a3afa2cb629c03ff4470a48819", null ],
+    [ "mime_type", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a33a64fa59e1c64bb9165b50916c2dc61", null ],
+    [ "patient_id", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a152fd7a83985695be28950a935ffa4ef", null ],
+    [ "practice_setting_code", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#afa88007bd5ea558751897a9dab3646ea", null ],
+    [ "practice_setting_code_scheme", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#af1d5a1690f7511daf7801e7c000d406e", null ],
+    [ "service_start_time", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a29e8e03d674bd32514255f550487ffcd", null ],
+    [ "service_stop_time", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#adfeb8a8bb3be24b5fde436adf7e793d0", null ],
+    [ "source_patient_id", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a74d7b51de4ca039fbf2579037e305d06", null ],
+    [ "title", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#af0aceecb09774ec17ec3d7f6c7ea9615", null ],
+    [ "type_code", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a6584e4e4835f8af8a12782fce7e02943", null ],
+    [ "type_code_display", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a2559279bc00bd622dd79342ef2b9ebfd", null ],
+    [ "type_code_scheme", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a80437ce98ddef64bd6cfd6516a891c4b", null ],
+    [ "unique_id", "structkcenon_1_1pacs_1_1services_1_1xds_1_1xds__document__entry.html#a685607668ac3184e4e8309d64a96ffdc", null ]
+];

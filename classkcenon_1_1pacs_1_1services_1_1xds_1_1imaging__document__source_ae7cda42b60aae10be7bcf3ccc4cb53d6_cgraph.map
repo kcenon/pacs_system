@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::xds::imaging_document_source::build_document_entry" name="kcenon::pacs::services::xds::imaging_document_source::build_document_entry">
+<area shape="rect" id="Node000001" title="Build XDS document entry metadata from a KOS dataset." alt="" coords="5,45,231,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#a3f0e4f10d9432beb48a20a7355ca5dd6" title="Generate a new UID for KOS instances." alt="" coords="279,5,465,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,52,265,47,266,52,231,58"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="295,84,449,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,87,281,95,281,100,230,92"/>
+</map>

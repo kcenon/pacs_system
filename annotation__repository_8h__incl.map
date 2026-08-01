@@ -1,0 +1,21 @@
+<map id="include/kcenon/pacs/storage/annotation_repository.h" name="include/kcenon/pacs/storage/annotation_repository.h">
+<area shape="rect" id="Node000001" title="Repository for annotation persistence using base_repository pattern." alt="" coords="319,5,473,60"/>
+<area shape="rect" id="Node000002" href="$annotation__record_8h.html" title="Annotation record data structures for database operations." alt="" coords="70,108,226,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="327,63,211,106,210,101,325,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,196,80,221"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="319,43,246,53,168,67,101,86,76,97,59,110,49,126,43,144,42,182,36,182,38,144,44,124,55,106,74,92,99,81,167,61,245,47,318,38"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="220,196,279,221"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="349,62,319,84,293,110,271,147,258,184,253,182,266,145,289,106,316,79,346,58"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="302,108,490,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="399,60,399,94,393,94,393,60"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="515,115,592,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="442,58,523,106,521,111,439,62"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="617,115,714,141"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="473,58,620,108,619,113,471,63"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="738,115,801,141"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="474,44,594,69,727,105,733,108,732,113,726,111,593,74,473,50"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="115,196,181,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="151,148,151,182,145,182,145,148"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="124,150,71,190,68,185,121,146"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="174,146,225,185,222,189,171,150"/>
+</map>

@@ -1,0 +1,35 @@
+<map id="include/kcenon/pacs/services/retrieve_scp.h" name="include/kcenon/pacs/services/retrieve_scp.h">
+<area shape="rect" id="Node000001" title="DICOM Retrieve SCP service (C&#45;MOVE/C&#45;GET handler)" alt="" coords="1126,5,1302,45"/>
+<area shape="rect" id="Node000002" href="$get__scu_2main_8cpp.html" title="get_scu &#45; DICOM C&#45;GET SCU utility (dcmtk&#45;compatible)" alt="" coords="5,108,209,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1112,31,942,36,720,47,471,66,221,96,150,111,149,105,220,91,471,61,720,42,942,31,1112,26"/>
+<area shape="rect" id="Node000003" href="$test__dcmtk__move_8cpp.html" title="C&#45;MOVE (Retrieve) interoperability tests with DCMTK." alt="" coords="233,101,443,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1112,34,816,54,635,72,454,96,416,103,415,98,454,91,635,67,816,49,1112,29"/>
+<area shape="rect" id="Node000004" href="$test__multimodal__workflow_8cpp.html" title="Multi&#45;Modal Clinical Workflow Integration Tests." alt="" coords="467,93,639,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1113,37,899,58,774,75,650,96,640,98,638,93,650,91,774,70,899,53,1112,32"/>
+<area shape="rect" id="Node000005" href="$test__store__query_8cpp.html" title="Scenario 2: Store and Query Workflow Tests." alt="" coords="663,101,861,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1113,48,873,96,840,103,839,98,872,91,1112,43"/>
+<area shape="rect" id="Node000006" href="$move__scu_2main_8cpp.html" title="move_scu &#45; DICOM C&#45;MOVE SCU utility (dcmtk&#45;compatible)" alt="" coords="885,108,1105,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1158,53,1023,110,1021,105,1156,48"/>
+<area shape="rect" id="Node000007" href="$server__app_8h.html" title="PACS Server application class." alt="" coords="1130,101,1298,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1217,59,1217,101,1211,101,1211,59"/>
+<area shape="rect" id="Node000010" href="$qr__scp_2main_8cpp.html" title="Query/Retrieve SCP &#45; DICOM Query/Retrieve Server." alt="" coords="1323,108,1519,133"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1269,48,1396,105,1394,110,1267,53"/>
+<area shape="rect" id="Node000011" href="$retrieve__scu_2main_8cpp.html" title="Retrieve SCU &#45; DICOM C&#45;MOVE/C&#45;GET Client." alt="" coords="1543,101,1714,141"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1316,44,1531,91,1560,98,1559,103,1529,96,1315,49"/>
+<area shape="rect" id="Node000012" href="$retrieve__scu_8h.html" title="DICOM Retrieve SCU service (C&#45;MOVE/C&#45;GET sender)" alt="" coords="1738,101,1914,141"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1316,34,1507,56,1726,91,1759,98,1758,103,1726,96,1507,61,1316,39"/>
+<area shape="rect" id="Node000016" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="1938,108,2173,133"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="1316,30,1592,52,1759,69,1926,91,2006,105,2005,111,1926,96,1758,74,1591,57,1315,35"/>
+<area shape="rect" id="Node000017" href="$retrieve__scp_8cpp.html" title="Implementation of the Retrieve SCP service (C&#45;MOVE/C&#45;GET)" alt="" coords="2197,101,2351,141"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="1316,24,1483,27,1700,37,1942,57,2065,72,2185,91,2217,98,2216,103,2184,96,2064,77,1942,62,1699,42,1483,32,1316,29"/>
+<area shape="rect" id="Node000008" href="$pacs__server_2main_8cpp.html" title="Entry point for PACS Server sample application." alt="" coords="1034,196,1202,236"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1187,152,1139,198,1136,194,1183,148"/>
+<area shape="rect" id="Node000009" href="$server__app_8cpp.html" title="PACS Server application implementation." alt="" coords="1226,196,1394,236"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="1245,148,1292,194,1289,198,1241,152"/>
+<area shape="rect" id="Node000013" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="1528,203,1724,229"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1774,149,1652,206,1650,201,1772,144"/>
+<area shape="rect" id="Node000014" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="1749,196,1903,236"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="1829,154,1829,196,1823,196,1823,154"/>
+<area shape="rect" id="Node000015" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="1928,196,2127,236"/>
+<area shape="poly" id="edge14_Node000012_Node000015" title=" " alt="" coords="1880,144,1988,194,1986,198,1878,149"/>
+</map>

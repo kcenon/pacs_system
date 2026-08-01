@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::tracked_pdu_pool&lt; T &gt;" name="kcenon::pacs::network::tracked_pdu_pool&lt; T &gt;">
+<area shape="rect" id="Node000001" title="Pool wrapper with statistics tracking for PDU buffers." alt="" coords="269,5,444,205"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title=" " alt="" coords="5,290,231,505"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,166,221,196,188,231,169,260,153,291,149,289,164,257,184,228,218,192,256,161"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title=" " alt="" coords="255,283,458,512"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="359,219,359,282,354,282,354,219"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1tracked__pdu__pool.html" title=" " alt="" coords="483,290,711,505"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="457,150,507,184,549,228,567,257,580,289,575,291,562,259,545,231,503,188,454,155"/>
+</map>

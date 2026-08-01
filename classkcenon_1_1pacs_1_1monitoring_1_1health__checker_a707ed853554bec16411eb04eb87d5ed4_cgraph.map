@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::health_checker::check" name="kcenon::pacs::monitoring::health_checker::check">
+<area shape="rect" id="Node000001" title="Perform a full health check." alt="" coords="5,91,192,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#a61207efe8a05d1e639b55fbb5bc223e7" title="Check database connectivity." alt="" coords="279,5,465,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,89,264,61,266,66,170,94"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#ac2a61cffa64c29bb0dd4ceddc7fe7d32" title="Check storage availability." alt="" coords="279,84,465,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,109,265,109,265,114,192,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1health__checker.html#aba63e4b25c99bddb760638a73a9fa9d9" title="Run all custom checks." alt="" coords="240,163,504,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="172,129,241,147,279,157,277,162,239,153,171,134"/>
+</map>

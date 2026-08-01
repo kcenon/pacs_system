@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::simd::detail::apply_window_level_8bit_scalar" name="kcenon::pacs::encoding::simd::detail::apply_window_level_8bit_scalar">
+<area shape="rect" id="Node000001" title="Scalar 8&#45;bit window/level application." alt="" coords="288,5,484,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#af2cca9893dde15b61317a14b3e46e0f2" title="Apply window/level transformation to 8&#45;bit grayscale data." alt="" coords="5,13,240,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="274,35,240,35,240,30,274,30"/>
+</map>

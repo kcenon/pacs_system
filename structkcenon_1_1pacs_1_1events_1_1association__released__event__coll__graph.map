@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::events::association_released_event" name="kcenon::pacs::events::association_released_event">
+<area shape="rect" id="Node000001" title="Event published when a DICOM association is gracefully released." alt="" coords="5,277,208,412"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="67,135,146,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,200,109,261,104,261,104,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="41,5,172,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,99,109,134,104,134,104,99"/>
+</map>

@@ -1,0 +1,31 @@
+<map id="kcenon::pacs::services::worklist_item" name="kcenon::pacs::services::worklist_item">
+<area shape="rect" id="Node000001" title="Parsed worklist item from MWL query response." alt="" coords="58,712,227,921"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,255,110,321"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,321,64,381,61,461,63,552,75,642,90,696,85,697,69,643,58,552,55,461,59,381,64,321"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,99,73,255,68,255,68,99"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html" title=" " alt="" coords="263,148,409,428"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="266,423,255,453,242,505,239,547,235,590,224,643,204,698,199,696,219,642,230,589,233,547,237,504,249,451,261,421"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="554,769,699,864"/>
+<area shape="poly" id="edge12_Node000011_Node000004" title=" " alt="" coords="405,427,461,534,525,641,544,665,597,753,592,756,539,668,520,644,456,536,400,430"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="426,1487,585,1567"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="476,1488,458,1458,443,1425,401,1296,370,1163,347,1028,332,894,324,765,320,645,323,444,328,444,325,645,329,765,338,893,352,1027,375,1162,406,1295,448,1423,463,1455,480,1485"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="374,667,530,967"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="452,967,458,1184,467,1304,481,1424,491,1470,486,1471,476,1424,462,1305,453,1184,447,967"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html" title=" " alt="" coords="536,1044,693,1424"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="513,966,537,1028,532,1030,508,968"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="546,1425,528,1472,523,1470,541,1423"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="723,784,882,849"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="800,850,783,929,769,976,752,1021,704,1110,700,1108,747,1019,764,974,777,928,795,849"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="677,255,798,321"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="751,334,775,452,795,639,804,783,799,784,790,640,769,452,746,335"/>
+<area shape="poly" id="edge13_Node000011_Node000009" title=" " alt="" coords="700,333,659,388,641,419,628,453,617,495,611,538,607,625,612,705,620,769,615,770,607,706,602,625,606,538,612,494,623,451,637,417,655,385,696,330"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="781,13,803,78"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="782,58,760,80,741,110,733,142,729,176,732,238,726,239,724,176,727,141,736,108,756,77,779,54"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="857,255,983,321"/>
+<area shape="poly" id="edge16_Node000012_Node000010" title=" " alt="" coords="806,67,898,240,893,242,801,69"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="628,864,623,1028,618,1028,623,864"/>
+<area shape="poly" id="edge14_Node000005_Node000012" title=" " alt="" coords="926,334,932,446,933,604,923,785,912,877,896,967,868,1107,855,1164,840,1216,820,1266,793,1316,756,1368,707,1426,680,1451,649,1471,586,1503,584,1498,647,1467,677,1446,703,1422,752,1365,789,1313,816,1264,835,1214,850,1163,863,1105,891,966,907,877,918,785,928,604,927,447,921,334"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="942,13,965,78"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="952,78,929,239,924,239,946,78"/>
+</map>

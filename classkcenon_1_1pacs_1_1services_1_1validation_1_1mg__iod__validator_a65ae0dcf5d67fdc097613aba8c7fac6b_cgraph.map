@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::check_view_position_validity" name="kcenon::pacs::services::validation::mg_iod_validator::check_view_position_validity">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,189,227,243"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="287,5,477,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,187,193,121,231,85,273,55,285,49,288,53,276,60,234,90,197,124,140,190"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="305,70,459,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="166,186,274,134,291,126,293,131,276,138,169,191"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aab2ea25709b935200e64193632dcf56b" title="Get all valid mammography view position strings." alt="" coords="294,149,470,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,197,280,189,281,194,227,202"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a8d3c12f5cbb574d3484904634b772dbc" title="Check if laterality and view position are consistent." alt="" coords="275,227,489,282"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="227,229,262,234,261,240,226,235"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa246cbff9248b5b25f187c5f44ecbd87" title="Parse DICOM laterality string to enum." alt="" coords="282,306,482,361"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="171,241,276,291,294,298,291,303,274,296,169,246"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a6e490f68e7bb61694ae09923e8ae7683" title="Parse DICOM view position string to mammography view enum." alt="" coords="292,385,472,439"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="141,242,198,305,236,340,276,370,287,376,284,381,273,374,232,344,195,309,137,246"/>
+</map>

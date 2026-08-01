@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_file::from_bytes" name="kcenon::pacs::core::dicom_file::from_bytes">
+<area shape="rect" id="Node000001" title="Parse a DICOM file from raw bytes." alt="" coords="5,5,184,45"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="232,5,377,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,23,219,23,219,28,185,28"/>
+</map>

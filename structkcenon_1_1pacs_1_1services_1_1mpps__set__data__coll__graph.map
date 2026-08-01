@@ -1,0 +1,20 @@
+<map id="kcenon::pacs::services::mpps_set_data" name="kcenon::pacs::services::mpps_set_data">
+<area shape="rect" id="Node000001" title="Data for N&#45;SET operation (update/complete procedure)" alt="" coords="343,727,504,807"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="365,148,444,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="445,188,492,202,542,227,564,243,582,262,594,285,598,311,598,618,591,652,574,681,549,706,520,726,517,722,546,702,570,678,586,650,593,618,593,312,589,287,577,265,560,247,539,231,490,207,443,193"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1services_1_1performed__series__info.html" title="Information about a performed series for N&#45;SET COMPLETED." alt="" coords="215,427,383,507"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="412,213,416,254,415,303,407,355,388,404,380,416,375,413,384,401,402,354,410,302,411,254,407,214"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="161,280,339,345"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="366,203,338,219,310,239,283,269,279,265,307,235,335,215,364,198"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="339,5,470,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="407,99,407,148,402,148,402,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="204,569,395,664"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="340,662,382,712,378,715,336,666"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="302,507,302,553,297,553,297,507"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="248,346,248,374,254,402,258,412,253,414,249,403,243,374,243,346"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge10_Node000004_Node000007" title=" " alt="" coords="60,227,56,266,55,311,60,357,74,402,103,452,142,497,184,535,226,567,223,571,181,539,138,500,99,455,69,404,55,358,50,311,50,266,55,227"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="124,219,206,277,203,282,121,224"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

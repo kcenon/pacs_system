@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dicom_server::next_association_id" name="kcenon::pacs::network::dicom_server::next_association_id">
+<area shape="rect" id="Node000001" title="Generate unique association ID." alt="" coords="236,5,404,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a63cb1f068d62f92ebe93ddd26dc23233" title="Simulate an incoming association request (for in&#45;memory testing)." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,35,188,35,188,30,222,30"/>
+</map>

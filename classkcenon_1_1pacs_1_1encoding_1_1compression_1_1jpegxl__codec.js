@@ -1,0 +1,26 @@
+var classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec =
+[
+    [ "jpegxl_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#aee4cca5e270d59ed76d12f4f23a070e2", null ],
+    [ "~jpegxl_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ad19dcc53656468661ec9abcd8163fb3d", null ],
+    [ "jpegxl_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a88a226bd4cf90f0b9aa70f76819661dc", null ],
+    [ "jpegxl_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ac12da721081977c3dfb7810c07fdfdda", null ],
+    [ "can_decode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ad10efde90ef168342ac915cfac7d68ec", null ],
+    [ "can_encode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#acdb18515b4f8c90ac805476ff9269a2c", null ],
+    [ "decode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a26a031cb06f4694bd36a7e1de6e1d190", null ],
+    [ "encode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#afd25379a691dc8dad975a95841e6e71f", null ],
+    [ "is_jpeg_recompression_mode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a3d6db7d19b5093938bc5a45e6b6ad437", null ],
+    [ "is_lossless_mode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ac8c2d34ccd199279fe347c0360b4ae92", null ],
+    [ "is_lossy", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ae8b548f28b0d95e1588079c3a2c18edd", null ],
+    [ "name", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a681c40b219627987c5072740f1db5f67", null ],
+    [ "operator=", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#aa87619fad920e67b6c0a24f70881bd36", null ],
+    [ "operator=", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a899dce4ab54009e17951ac2cd23cca44", null ],
+    [ "quality_distance", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a192dd2ef83fb00579141cf3ef1588d21", null ],
+    [ "transfer_syntax_uid", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ac470cd14e01b3dbbc1ff8050b7196fce", null ],
+    [ "jpeg_recompression_", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a34395381b85b1dcbe481178ab8ed1880", null ],
+    [ "kDefaultQualityDistance", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a4a747b46f9cbe74fea8f2b656bbe60f4", null ],
+    [ "kTransferSyntaxUIDJPEGRecompression", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a1adffd8dd5f1157a16bf7674f27fd3ba", null ],
+    [ "kTransferSyntaxUIDLossless", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#aed6bc1975f789ab462e3189c8a8730f4", null ],
+    [ "kTransferSyntaxUIDLossy", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#ab33f7aa64acbd1f6a4584975424af055", null ],
+    [ "lossless_", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a7ec1ff4d805f1549041a506c96c13f37", null ],
+    [ "quality_distance_", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpegxl__codec.html#a2e722770d07b5e0d82c4caed844da55d", null ]
+];

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::web::auth::oauth2_middleware::require_any_scope" name="kcenon::pacs::web::auth::oauth2_middleware::require_any_scope">
+<area shape="rect" id="Node000001" title="Check if the request has any of the required scopes." alt="" coords="5,45,193,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#ac8ed294e0fca77cb40aeb73f5269f28b" title="Check if token has any of the specified scopes." alt="" coords="260,5,411,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,54,246,45,247,50,194,59"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#acbdbc3e48243b43e6062e877f12532cc" title="Set 403 Forbidden response." alt="" coords="241,84,429,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,85,228,91,227,96,193,91"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="477,91,628,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="430,109,464,109,464,114,430,114"/>
+</map>

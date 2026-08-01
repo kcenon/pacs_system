@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::core::dicom_element" name="kcenon::pacs::core::dicom_element">
+<area shape="rect" id="Node000001" title=" " alt="" coords="101,639,259,1019"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="239,1096,398,1176"/>
+<area shape="poly" id="edge9_Node000008_Node000001" title=" " alt="" coords="199,1018,209,1045,223,1071,233,1083,229,1086,219,1073,205,1048,194,1020"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="227,261,383,561"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="263,563,244,623,239,622,258,561"/>
+<area shape="poly" id="edge8_Node000008_Node000002" title=" " alt="" coords="311,561,320,1080,315,1080,305,561"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="45,379,203,444"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,444,155,622,150,622,126,445"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="63,133,185,199"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="127,213,127,379,121,379,121,213"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="95,1581,241,1676"/>
+<area shape="poly" id="edge13_Node000006_Node000004" title=" " alt="" coords="75,210,53,235,34,263,18,301,11,333,9,410,9,1380,12,1409,19,1438,45,1492,80,1540,116,1579,112,1583,76,1543,41,1495,14,1440,7,1410,4,1380,4,410,5,333,13,300,30,260,48,231,71,207"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="218,5,241,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="220,52,178,96,158,122,154,118,174,93,216,49"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="347,133,474,199"/>
+<area shape="poly" id="edge12_Node000009_Node000005" title=" " alt="" coords="242,45,329,107,351,122,348,126,326,112,239,50"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="166,1581,174,1035,180,1035,171,1581"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html" title=" " alt="" coords="227,1239,373,1519"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="230,1518,203,1568,198,1566,225,1515"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="318,1177,315,1222,309,1222,313,1176"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="416,212,422,350,422,550,417,665,407,784,392,903,369,1019,357,1060,341,1097,336,1094,352,1058,364,1018,386,902,402,783,412,665,417,550,417,350,411,212"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="399,5,422,71"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="413,71,413,117,408,117,408,71"/>
+</map>

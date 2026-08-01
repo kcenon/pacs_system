@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::certificate::not_before" name="kcenon::pacs::security::certificate::not_before">
+<area shape="rect" id="Node000001" title="Get the not&#45;before date." alt="" coords="220,5,393,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1certificate.html#a6507d099cc37fee11bcf8746292c8beb" title="Check if the certificate is currently valid." alt="" coords="5,5,172,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,28,172,28,172,23,206,23"/>
+</map>

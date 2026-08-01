@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::requested_sop_instance_uid" name="kcenon::pacs::network::dimse::dimse_message::requested_sop_instance_uid">
+<area shape="rect" id="Node000001" title="Get the Requested SOP Instance UID (for N&#45;SET, N&#45;GET, N&#45;ACTION, N&#45;DELETE)" alt="" coords="5,5,220,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="268,5,423,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,30,254,30,254,35,220,35"/>
+</map>

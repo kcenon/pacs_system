@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::association::transition" name="kcenon::pacs::network::association::transition">
+<area shape="rect" id="Node000001" title="Perform state transition." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7c66fc80fb836cca1ae810daaa70d951" title="Validate state transition." alt="" coords="228,5,452,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,23,214,23,214,28,180,28"/>
+</map>

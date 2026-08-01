@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/services/cache/query_cache.h" name="include/kcenon/pacs/services/cache/query_cache.h">
+<area shape="rect" id="Node000001" title="DICOM query result cache with monitoring integration." alt="" coords="117,5,280,60"/>
+<area shape="rect" id="Node000002" href="$pacs-services-cache_8cppm.html" title="C++20 module partition for query caching." alt="" coords="5,108,200,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,72,124,110,120,106,160,68"/>
+<area shape="rect" id="Node000003" href="$query__cache_8cpp.html" title="Implementation of DICOM query result cache." alt="" coords="224,108,365,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,68,277,106,273,110,234,72"/>
+</map>

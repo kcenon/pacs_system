@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::endpoints::register_system_endpoints_impl" name="kcenon::pacs::web::endpoints::register_system_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="232,30,416,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#acb7be94ae4cff0f0bcfe1937552eb2e7" title="Start the server (blocking)" alt="" coords="19,5,170,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,45,170,38,171,33,219,40"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,69,184,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,75,185,80,184,74,218,69"/>
+</map>

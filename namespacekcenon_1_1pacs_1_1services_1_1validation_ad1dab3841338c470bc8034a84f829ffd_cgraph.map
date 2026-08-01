@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::is_valid_ophthalmic_dataset" name="kcenon::pacs::services::validation::is_valid_ophthalmic_dataset">
+<area shape="rect" id="Node000001" title="Quick check if a dataset is a valid ophthalmic image." alt="" coords="5,34,175,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a6227856a72dc10c4dbb836b4d7eab4b5" title="Quick check if dataset has minimum required ophthalmic attributes." alt="" coords="223,34,425,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,59,209,59,209,64,175,64"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="473,5,663,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,44,460,39,460,44,426,49"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="491,70,645,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="426,74,478,81,477,87,425,79"/>
+</map>

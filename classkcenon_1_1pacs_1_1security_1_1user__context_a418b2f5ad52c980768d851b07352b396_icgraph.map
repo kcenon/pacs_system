@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::user_context::is_valid" name="kcenon::pacs::security::user_context::is_valid">
+<area shape="rect" id="Node000001" title="Check if the context is valid (user is active)" alt="" coords="244,13,416,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1access__control__manager.html#a40b990752126342244ad081c68283703" title="Check if a DICOM operation is allowed." alt="" coords="5,5,196,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,35,196,35,196,30,230,30"/>
+</map>

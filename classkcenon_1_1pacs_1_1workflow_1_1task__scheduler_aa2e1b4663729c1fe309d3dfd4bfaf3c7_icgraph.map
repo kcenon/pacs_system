@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::task_scheduler::run_loop" name="kcenon::pacs::workflow::task_scheduler::run_loop">
+<area shape="rect" id="Node000001" title="Background thread main loop." alt="" coords="228,5,420,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#afa4a842d854fa691b1d9e0cbdd933abe" title="Start the scheduler service." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

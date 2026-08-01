@@ -1,0 +1,17 @@
+<map id="include/kcenon/pacs/monitoring/collectors/dicom_collector_base.h" name="include/kcenon/pacs/monitoring/collectors/dicom_collector_base.h">
+<area shape="rect" id="Node000001" title="CRTP base class for DICOM metrics collectors." alt="" coords="220,5,399,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,72,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,63,86,107,84,102,226,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="96,108,163,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="255,62,167,105,164,100,253,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,108,253,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="284,62,244,100,240,96,280,58"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="277,108,341,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="312,60,312,94,307,94,307,60"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="365,108,424,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="337,58,375,96,371,100,334,62"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="449,108,573,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="372,58,472,100,470,105,370,63"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="597,108,659,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="400,55,584,105,583,110,398,61"/>
+</map>

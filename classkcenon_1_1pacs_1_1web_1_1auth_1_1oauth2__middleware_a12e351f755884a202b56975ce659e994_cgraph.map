@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::web::auth::oauth2_middleware::authenticate" name="kcenon::pacs::web::auth::oauth2_middleware::authenticate">
+<area shape="rect" id="Node000001" title="Authenticate a request using OAuth 2.0 Bearer token." alt="" coords="5,192,193,247"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#af9e9bb7fd7bfe038763c77c0f8a14bf4" title="Decode a JWT token string into its components." alt="" coords="260,5,411,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,190,170,130,204,98,240,69,247,65,250,69,243,73,207,102,174,134,123,193"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#aa58b5a4af88fa438fc7644de42cc7779" title="Extract Bearer token from Authorization header." alt="" coords="241,84,429,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="155,190,240,149,256,142,258,147,242,154,157,194"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1web_1_1auth.html#a1d1a942332f0d26bea7520a1d1b20ee4" title="Get human&#45;readable description for a JWT error." alt="" coords="244,163,427,203"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="193,202,230,197,231,202,194,208"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a4467a0596896950c7f7064e8e8d5ef71" title="Set 401 Unauthorized response." alt="" coords="241,228,429,283"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="194,231,228,236,227,242,193,236"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#acf6a5b85718865814c2effe51d79155a" title="Validate JWT claims against configuration." alt="" coords="260,307,411,361"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="152,245,243,292,257,298,255,303,240,296,149,249"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#ab4c3f329bb3b9e5c28be18dd4d2cca03" title="Verify token signature using JWKS keys." alt="" coords="241,385,429,440"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="122,245,173,308,206,342,243,372,249,376,246,381,240,376,202,346,169,311,118,248"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1auth.html#abbde806349391c895e77bb5cc818c98c" title="Decode a Base64url&#45;encoded string (RFC 4648 Section 5)" alt="" coords="477,13,655,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="411,30,464,30,464,35,411,35"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="491,235,641,275"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="429,253,477,253,477,258,429,258"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#abd94c7e33418116efb2d631632ecfed9" title="Verify ES256 (ECDSA&#45;SHA256) signature." alt="" coords="491,345,641,400"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="429,394,477,385,477,391,430,399"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#af4d100a0eebc5ed5b594becc59032ff7" title="Verify RS256 (RSA&#45;SHA256) signature." alt="" coords="491,424,641,479"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="430,426,477,434,477,439,429,431"/>
+</map>

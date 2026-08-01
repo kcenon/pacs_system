@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::atna_audit_logger::build_security_alert" name="kcenon::pacs::security::atna_audit_logger::build_security_alert">
+<area shape="rect" id="Node000001" title="Build Security Alert audit message." alt="" coords="220,5,407,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#aae79d4e20891e3c88437d664daab60bb" title="Audit a Security Alert event (e.g., access denied)" alt="" coords="5,5,172,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,35,172,35,172,30,206,30"/>
+</map>

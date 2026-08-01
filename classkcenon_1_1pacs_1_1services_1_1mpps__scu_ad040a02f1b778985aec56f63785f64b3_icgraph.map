@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::services::mpps_scu::next_message_id" name="kcenon::pacs::services::mpps_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="449,37,667,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a250040ff0a6286a6b19ce4f35b8e8589" title="Create a new MPPS instance (N&#45;CREATE)" alt="" coords="232,5,401,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="435,44,401,39,402,34,436,38"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#aa28dd0724b31c668e00b411029c3776c" title="Update an existing MPPS instance (N&#45;SET)" alt="" coords="232,69,401,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="436,76,402,81,401,75,435,71"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a9a71a874fd3b49f6c3689cd522e2df97" title=" " alt="" coords="10,5,179,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,28,180,28,180,23,218,23"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="233,68,164,48,165,43,234,63"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#addeb561ea7611b63f87f7aacd025a862" title="Complete an MPPS instance (convenience method)" alt="" coords="10,69,179,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="218,92,180,92,180,87,218,87"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a86f8f61681c779010b8e8b45d5805244" title="Discontinue an MPPS instance (convenience method)" alt="" coords="5,133,184,173"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="234,116,165,136,164,131,233,111"/>
+</map>

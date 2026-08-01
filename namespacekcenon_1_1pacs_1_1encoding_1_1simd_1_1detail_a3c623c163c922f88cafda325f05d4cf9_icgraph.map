@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::encoding::simd::detail::split_16bit_to_planes_scalar" name="kcenon::pacs::encoding::simd::detail::split_16bit_to_planes_scalar">
+<area shape="rect" id="Node000001" title=" " alt="" coords="920,5,1099,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#ab4935a56e85c3e2f2b85bbcb0b93eab9" title="Split 16&#45;bit data into high and low byte planes." alt="" coords="697,5,872,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="906,35,872,35,872,30,906,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#aac26e9f5220ad1869ab20e4f0f48bd65" title=" " alt="" coords="467,5,649,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="683,35,649,35,649,30,683,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#a1e34d04599ef9972bf0d9b4a822a6fda" title=" " alt="" coords="236,5,419,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="453,35,419,35,419,30,453,30"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec.html#aa420e9db8e4f67306e6f826573f9d8d7" title="Compresses pixel data to RLE format." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="223,35,188,35,188,30,223,30"/>
+</map>

@@ -1,0 +1,41 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::transition_to" name="kcenon::pacs::network::v2::dicom_association_handler::transition_to">
+<area shape="rect" id="Node000001" title="Transition to new state." alt="" coords="1464,236,1639,291"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a864866bc36d600a70f070bcfb71f124d" title="Close and cleanup." alt="" coords="1240,268,1416,323"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1451,280,1416,285,1416,280,1450,275"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a6b0ad065cb9652fcc2ebd9a21f458861" title="Handle A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="973,84,1192,139"/>
+<area shape="poly" id="edge21_Node000001_Node000008" title=" " alt="" coords="1452,234,1167,141,1169,136,1454,229"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#acc8d56cebef31c934747ea70e41c2c82" title="Handle A&#45;RELEASE&#45;RQ PDU." alt="" coords="980,5,1185,60"/>
+<area shape="poly" id="edge22_Node000001_Node000010" title=" " alt="" coords="1500,230,1415,176,1305,121,1191,74,1162,63,1164,58,1193,69,1307,116,1417,172,1503,226"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#ac7bc2e41d20f2959d4634e778abacf40" title="Stop the handler and close the session." alt="" coords="995,581,1170,636"/>
+<area shape="poly" id="edge23_Node000001_Node000015" title=" " alt="" coords="1515,302,1457,358,1379,426,1289,498,1193,564,1157,583,1155,579,1191,560,1286,494,1376,422,1453,354,1511,298"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#afeb93804e79099d1c4e4493832f37024" title="Handle A&#45;ABORT PDU." alt="" coords="995,163,1170,217"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1250,265,1191,239,1146,220,1148,215,1193,234,1253,260"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#afff61fcb536357d6009ca730c3547bea" title="Process a complete PDU." alt="" coords="729,196,903,251"/>
+<area shape="poly" id="edge18_Node000002_Node000004" title=" " alt="" coords="1226,284,903,238,904,233,1227,278"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1de6f1a790a073ccd311d427618fa7c3" title="Process accumulated buffer for complete PDUs." alt="" coords="477,372,659,427"/>
+<area shape="poly" id="edge17_Node000002_Node000005" title=" " alt="" coords="1306,336,1194,520,1149,537,1091,548,1024,554,952,555,880,551,812,544,752,534,706,520,670,502,638,478,589,429,592,425,641,474,673,498,708,516,753,528,812,539,880,546,952,549,1024,549,1090,543,1148,532,1190,516,1301,333"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="1297,258,1251,204,1222,176,1191,152,1171,141,1174,137,1193,148,1225,172,1255,200,1301,255"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#af344252fdb845b0c4bec16292ec8fc90" title="Handle P&#45;DATA&#45;TF PDU." alt="" coords="983,293,1182,348"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="1227,308,1183,313,1182,308,1226,303"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="1310,256,1291,214,1265,165,1232,116,1190,73,1174,62,1177,58,1194,69,1236,112,1270,162,1296,211,1315,254"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a2946a7eb810d8951496b00f0ae0b3339" title="Handle session disconnection." alt="" coords="985,372,1180,427"/>
+<area shape="poly" id="edge13_Node000002_Node000011" title=" " alt="" coords="1260,331,1193,362,1161,374,1159,370,1191,357,1258,326"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#af7392fc694593dd5cbe91fbc3f1c7413" title="Handle session error." alt="" coords="995,451,1170,505"/>
+<area shape="poly" id="edge15_Node000002_Node000013" title=" " alt="" coords="1301,336,1254,389,1225,416,1193,440,1171,453,1168,448,1191,436,1221,412,1250,385,1297,332"/>
+<area shape="poly" id="edge19_Node000002_Node000015" title=" " alt="" coords="1306,336,1242,454,1230,485,1224,512,1214,537,1194,564,1168,583,1165,579,1190,560,1210,535,1219,510,1225,484,1238,452,1301,333"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="982,205,904,215,903,210,982,200"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="767,261,609,374,606,370,763,257"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a7fdebfd5cd1481667fd9d96071e44056" title="Handle data received from session." alt="" coords="228,372,429,427"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="464,402,430,402,430,397,464,397"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a20b3f39bcb4fc5a1fbbc79579ca8033f" title="Feed received data to the handler." alt="" coords="5,372,180,427"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="214,402,180,402,180,397,214,397"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="990,146,974,152,873,198,871,193,972,148,988,141"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="994,291,891,253,892,248,995,286"/>
+<area shape="poly" id="edge12_Node000010_Node000004" title=" " alt="" coords="984,68,975,74,935,103,898,136,841,197,837,194,894,132,932,98,972,69,981,64"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a0dd9d6b9099ec8a39dc6bb03de1b7fbb" title="Handle session disconnection." alt="" coords="713,372,919,427"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="972,402,920,402,920,397,972,397"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#ab1988de62015c52459b5512d59433571" title="Handle session error." alt="" coords="729,451,903,505"/>
+<area shape="poly" id="edge16_Node000013_Node000014" title=" " alt="" coords="982,481,904,481,904,475,982,475"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#aafd7abf7de8290a0e49790a287b597f0" title="Destructor (stops handler if still running)." alt="" coords="707,581,925,650"/>
+<area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="982,614,926,615,925,610,981,609"/>
+</map>

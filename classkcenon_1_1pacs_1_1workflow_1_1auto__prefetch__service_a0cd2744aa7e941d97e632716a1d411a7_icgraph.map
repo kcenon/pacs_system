@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::run_loop" name="kcenon::pacs::workflow::auto_prefetch_service::run_loop">
+<area shape="rect" id="Node000001" title="Background thread main loop." alt="" coords="451,5,625,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ad54ce309500c14050bebc65f7fb21acb" title="Start the prefetch service (alias for enable)" alt="" coords="228,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,35,403,35,403,30,437,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a049b14fc80b664ef700d1f9069c3423a" title="Enable the prefetch service." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,35,180,35,180,30,214,30"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::encoding::simd::has_neon" name="kcenon::pacs::encoding::simd::has_neon">
+<area shape="rect" id="Node000001" title="Check if NEON is available." alt="" coords="296,245,471,285"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a81db8d7d54394641c9cc5833faaa8231" title="Apply window/level transformation to 16&#45;bit unsigned grayscale data." alt="" coords="5,5,248,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,234,349,193,323,146,289,99,246,59,226,48,229,43,250,55,293,96,327,143,354,191,372,232"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a4487d0438cb9cd29ae52728a83859214" title="Apply window/level transformation to 16&#45;bit signed grayscale data." alt="" coords="25,70,228,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="355,237,308,187,278,162,247,140,222,127,225,122,249,135,282,157,311,183,359,233"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#af2cca9893dde15b61317a14b3e46e0f2" title="Apply window/level transformation to 8&#45;bit grayscale data." alt="" coords="9,149,244,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="332,241,247,204,210,192,212,187,249,199,334,237"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c79ede23913f8f5074a6961e45a020" title="Invert 16&#45;bit monochrome pixels." alt="" coords="6,213,247,253"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="282,255,247,251,248,246,283,250"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a074c91d6dc1d34132c3134d216da67a9" title="Invert 8&#45;bit monochrome pixels (MONOCHROME1 &lt;&#45;&gt; MONOCHROME2)" alt="" coords="10,277,243,317"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="282,281,244,285,243,280,282,275"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a0ad8104b8e94beef59a21145847c32b2" title="Get optimal vector width in bytes for current CPU." alt="" coords="21,341,232,381"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="334,294,249,332,212,344,210,339,247,327,332,289"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a90e8d6795e86be4e8157f3e3a0f4146c" title="Convert RGB to YCbCr color space (ITU&#45;R BT.601)" alt="" coords="34,405,219,445"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="360,298,312,348,282,374,249,396,221,409,219,404,247,391,279,370,309,344,356,294"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6c95440ef4ec429e565ac06bdb4c183a" title="Convert YCbCr to RGB color space (ITU&#45;R BT.601)" alt="" coords="34,469,219,509"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="370,299,351,337,325,380,291,423,250,460,221,475,218,470,246,455,287,419,320,377,347,334,366,297"/>
+</map>

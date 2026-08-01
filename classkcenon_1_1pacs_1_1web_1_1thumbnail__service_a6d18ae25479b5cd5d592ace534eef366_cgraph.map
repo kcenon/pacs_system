@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::thumbnail_service::set_max_cache_size" name="kcenon::pacs::web::thumbnail_service::set_max_cache_size">
+<area shape="rect" id="Node000001" title="Set maximum cache size." alt="" coords="5,5,176,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a5ff07710700d87ffe40bd860258a0e52" title="Evict least recently used entries to make room." alt="" coords="224,13,431,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,30,210,30,210,35,176,35"/>
+</map>

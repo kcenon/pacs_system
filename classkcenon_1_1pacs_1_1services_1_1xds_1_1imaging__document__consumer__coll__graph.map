@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::xds::imaging_document_consumer" name="kcenon::pacs::services::xds::imaging_document_consumer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,469,240,704"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__consumer__config.html" title="Configuration for the Imaging Document Consumer actor." alt="" coords="33,292,212,407"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,407,125,453,120,453,120,407"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="83,135,162,200"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,200,125,275,120,275,120,200"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="57,5,188,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="125,99,125,134,120,134,120,99"/>
+</map>

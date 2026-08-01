@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::security::tls_policy" name="kcenon::pacs::security::tls_policy">
+<area shape="rect" id="Node000001" title="TLS security policy configuration." alt="" coords="171,524,374,1399"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="26,329,143,395"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,395,92,445,101,499,131,607,168,713,163,715,126,609,95,501,86,445,83,395"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,135,164,215"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,228,87,329,82,329,82,228"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1security_1_1cipher__suite__spec.html" title="TLS cipher suite specification." alt="" coords="180,322,339,402"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="263,402,265,507,260,507,258,402"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="220,142,299,207"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="262,208,262,305,257,305,257,208"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="194,5,325,85"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="262,99,262,142,257,142,257,99"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1security_1_1certificate__constraints.html" title="Certificate validation constraints." alt="" coords="363,292,553,432"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="439,433,381,619,376,617,434,432"/>
+</map>

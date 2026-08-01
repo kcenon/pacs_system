@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::monitoring_adapter::shutdown" name="kcenon::pacs::integration::monitoring_adapter::shutdown">
+<area shape="rect" id="Node000001" title="Shutdown the monitoring adapter." alt="" coords="5,13,235,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#a666c8001e94c8a3e3dc20a122cb912f7" title=" " alt="" coords="283,5,477,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,30,269,30,269,35,235,35"/>
+</map>

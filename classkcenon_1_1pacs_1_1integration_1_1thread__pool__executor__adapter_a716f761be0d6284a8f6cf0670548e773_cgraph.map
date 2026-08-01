@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::thread_pool_executor_adapter::thread_pool_executor_adapter" name="kcenon::pacs::integration::thread_pool_executor_adapter::thread_pool_executor_adapter">
+<area shape="rect" id="Node000001" title="Construct adapter with worker count." alt="" coords="5,5,232,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__executor__adapter.html#a41b95273efab4ff0bd8b2151b85fb20f" title="Get the number of worker threads." alt="" coords="280,13,467,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,37,266,37,266,43,232,43"/>
+</map>

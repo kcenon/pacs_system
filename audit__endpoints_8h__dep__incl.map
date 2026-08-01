@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/audit_endpoints.h" name="include/kcenon/pacs/web/endpoints/audit_endpoints.h">
+<area shape="rect" id="Node000001" title="Audit log API endpoints for REST server." alt="" coords="115,5,273,60"/>
+<area shape="rect" id="Node000002" href="$audit__endpoints_8cpp.html" title="Audit log API endpoints implementation." alt="" coords="5,108,183,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,72,116,110,112,106,154,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="207,115,381,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="234,68,283,113,279,117,230,71"/>
+</map>

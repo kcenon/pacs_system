@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::dicom_association_collector::collect" name="kcenon::pacs::monitoring::dicom_association_collector::collect">
+<area shape="rect" id="Node000001" title="Collect current association metrics." alt="" coords="5,70,220,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#acbc5540ffe955472022386121b12d0a3" title="Get association counters." alt="" coords="273,5,478,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,67,288,46,289,52,214,72"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__association__collector.html#a8d1a7976143425d9205782ffd8a6cd68" title=" " alt="" coords="268,70,483,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="220,95,254,95,254,100,220,100"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="282,149,469,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="205,122,271,142,269,147,204,127"/>
+</map>

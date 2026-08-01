@@ -1,0 +1,26 @@
+<map id="kcenon::pacs::services::ups_result::is_success" name="kcenon::pacs::services::ups_result::is_success">
+<area shape="rect" id="Node000001" title="Check if the operation was successful." alt="" coords="531,197,705,237"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a9b2227149bcf70e824cced64747d696a" title="Change UPS workitem state (N&#45;ACTION Type 1)" alt="" coords="268,5,483,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="596,187,549,122,517,88,481,60,459,48,462,43,484,55,521,84,553,118,600,183"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#af5b16152021eaed8a1ecab96ed31871f" title="Create a new UPS workitem on the remote SCP (N&#45;CREATE)" alt="" coords="291,69,460,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="582,191,535,156,481,124,453,112,455,107,484,119,538,152,585,186"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#ad257b41db9b355354ca10f09a47eab8b" title="Retrieve UPS workitem attributes from remote SCP (N&#45;GET)" alt="" coords="291,133,460,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="528,196,451,176,452,171,529,191"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1services_1_1ups__result.html#a621523453998c8e3669d001991dae56c" title="Check if this was an error status." alt="" coords="291,197,460,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="517,220,460,220,460,215,517,215"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a11fdc2b132c1ca0103d62eed96cbdd7c" title="Request cancellation of a UPS workitem (N&#45;ACTION Type 3)" alt="" coords="287,262,464,317"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="537,244,465,266,463,260,536,239"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a03f3861af77f3295802b4a34da17d283" title=" " alt="" coords="291,406,460,461"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="602,251,555,323,522,362,484,395,461,409,459,405,481,391,518,358,551,320,598,248"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a6d59d6b83ee50674ed42b819f38923c9" title="Modify an existing UPS workitem (N&#45;SET)" alt="" coords="291,341,460,381"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="589,249,542,291,484,330,454,344,452,339,481,326,539,287,586,245"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a25e170843144b476727bebd493381136" title=" " alt="" coords="15,173,210,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="290,116,269,124,154,176,152,171,267,119,288,111"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a1a335b57357312eda00d11689580a989" title="Subscribe to UPS workitem events (N&#45;ACTION Type 3)" alt="" coords="13,341,212,381"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="277,409,186,384,187,379,278,404"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a9b1f3b4916717797262878ef425b63c1" title="Suspend global subscription (N&#45;ACTION Type 5)" alt="" coords="17,406,208,461"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="277,436,208,436,208,431,277,431"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#acf495dd81b3d6b6e321f855d76c4f5b7" title="Unsubscribe from UPS workitem events (N&#45;ACTION Type 4)" alt="" coords="5,485,220,525"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="278,463,187,488,186,483,277,457"/>
+<area shape="poly" id="edge12_Node000012_Node000004" title=" " alt="" coords="283,338,267,330,225,303,187,272,130,216,134,212,191,268,229,299,269,326,285,334"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::storage::s3_storage::store_with_progress" name="kcenon::pacs::storage::s3_storage::store_with_progress">
+<area shape="rect" id="Node000001" title="Store with progress tracking." alt="" coords="5,5,183,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#ae444a36339fdf1a1e434f097cefdf341" title="Create a new DICOM file from a dataset." alt="" coords="231,13,377,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,30,217,30,217,35,183,35"/>
+</map>

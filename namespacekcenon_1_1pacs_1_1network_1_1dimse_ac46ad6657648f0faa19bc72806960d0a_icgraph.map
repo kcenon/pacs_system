@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::dimse::is_failure" name="kcenon::pacs::network::dimse::is_failure">
+<area shape="rect" id="Node000001" title="Check if status indicates a failure." alt="" coords="251,37,419,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#ad3d2a4dfb904524519866c06505ed751" title="Get the category name for a status code." alt="" coords="13,5,195,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,46,195,41,196,35,237,41"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a6491f7678cc8aa160ddd6536898e9531" title="Get a human&#45;readable description of a status code." alt="" coords="5,69,203,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,74,203,78,203,73,236,68"/>
+</map>

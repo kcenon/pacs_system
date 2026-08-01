@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::mr_iod_validator::validate" name="kcenon::pacs::services::validation::mr_iod_validator::validate">
+<area shape="rect" id="Node000001" title="Validate a DICOM dataset against MR IOD." alt="" coords="223,5,436,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#afe5f6d62055025b3f7d0eb05557bca25" title="Validate an MR dataset with default options." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

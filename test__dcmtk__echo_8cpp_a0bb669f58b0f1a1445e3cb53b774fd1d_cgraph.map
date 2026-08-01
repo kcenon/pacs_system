@@ -1,0 +1,60 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,328,100,353"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__association.html#a64d8e08843113b1eb74d7d9b204b0bd6" title="Connect to a test server." alt="" coords="167,5,353,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="52,327,58,280,72,211,84,174,100,137,121,102,146,71,153,64,157,68,150,75,125,105,105,139,89,176,77,213,63,281,57,328"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a35abc5e237967550615d58155174f75d" title="Run C&#45;ECHO (echoscu) client." alt="" coords="162,85,358,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="53,327,62,290,79,238,106,183,125,157,146,135,152,130,155,134,150,139,129,160,111,185,84,240,67,291,59,329"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="167,149,353,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="57,326,88,265,114,229,146,199,155,193,158,197,150,203,118,233,93,268,61,329"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a0ba3666d382f01405d049345ff04d5a3" title="Check if DCMTK is available on the system." alt="" coords="149,213,371,253"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="67,326,102,298,147,269,177,255,179,260,149,274,105,302,70,330"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a472a5a59a14b419faa2baf4f3d4e4fa1" title="Check if a port is currently listening." alt="" coords="430,263,617,317"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="100,333,416,299,416,304,100,338"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a6ee8d2ae5c684829b158e88c11d8634d" title="Create a C&#45;ECHO request message." alt="" coords="167,442,353,482"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="66,352,101,390,124,410,149,428,162,434,160,439,147,432,120,414,97,393,62,355"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a86a35eb51b2f903ceb327bf7c9cddf0c" title="Register a service provider." alt="" coords="163,507,357,561"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="61,352,91,418,117,458,150,492,157,497,154,502,146,496,113,461,87,421,56,354"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a9305380a0d7aa02605c8e8d2ef934c96" title="Port listening timeout for pacs_system servers (5s normal, 30s CI)" alt="" coords="421,342,626,382"/>
+<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="100,340,407,354,407,359,100,345"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d1a995756db5730d6e83c249ca26ca" title="Start the server and wait for it to be ready." alt="" coords="167,378,353,418"/>
+<area shape="poly" id="edge24_Node000001_Node000024" title=" " alt="" coords="100,351,175,372,174,377,99,356"/>
+<area shape="rect" id="Node000027" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a09d074f43a846b9c824953bf536a83f9" title="Check if pacs_system supports real TCP DICOM connections." alt="" coords="148,586,372,626"/>
+<area shape="poly" id="edge29_Node000001_Node000027" title=" " alt="" coords="58,353,65,395,80,454,108,518,127,547,150,572,155,576,152,581,146,576,122,550,103,520,75,456,59,396,53,354"/>
+<area shape="rect" id="Node000028" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a56cdeee57bb691491591939a2c13f16e" title="Wait for a condition with timeout." alt="" coords="167,650,353,690"/>
+<area shape="poly" id="edge30_Node000001_Node000028" title=" " alt="" coords="57,353,60,405,72,482,84,523,100,564,122,603,150,636,157,642,153,646,146,640,118,606,96,567,79,525,67,483,55,406,51,354"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="430,134,617,174"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="353,161,416,157,416,163,354,166"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a378d43429576cb453524cdadfd31def8" title="Run a DCMTK tool and capture output." alt="" coords="425,198,621,238"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="371,224,412,222,412,227,371,229"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="683,155,870,209"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="621,201,669,195,670,200,622,207"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a39b86a50ebcefb7a9bfe2c9fbd37c0de" title="Run a process and wait for completion." alt="" coords="675,234,879,274"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="622,229,662,235,661,240,621,235"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a15e3ebe94f2cf5e85dd78cc6ffff77e1" title="Check if running in a CI environment." alt="" coords="683,342,870,382"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="618,314,694,336,692,341,616,319"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a9178996258a459106c732536ea795600" title="Set the Affected SOP Class UID." alt="" coords="420,485,627,540"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="354,477,407,488,406,493,353,483"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="699,485,854,540"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="627,510,685,510,685,515,627,515"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="927,449,1097,504"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="854,498,912,489,913,494,855,504"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="927,529,1097,569"/>
+<area shape="poly" id="edge19_Node000014_Node000020" title=" " alt="" coords="855,522,913,531,912,536,854,527"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="1146,449,1305,504"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="1098,474,1133,474,1133,479,1098,479"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="1353,449,1528,504"/>
+<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="1305,474,1340,474,1340,479,1305,479"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="1576,457,1751,497"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="1528,474,1562,474,1562,479,1528,479"/>
+<area shape="rect" id="Node000019" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="1799,457,1973,497"/>
+<area shape="poly" id="edge18_Node000018_Node000019" title=" " alt="" coords="1751,474,1785,474,1785,479,1751,479"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="1145,529,1305,569"/>
+<area shape="poly" id="edge20_Node000020_Node000021" title=" " alt="" coords="1098,546,1132,546,1132,551,1098,551"/>
+<area shape="poly" id="edge23_Node000023_Node000011" title=" " alt="" coords="626,359,670,359,670,365,626,365"/>
+<area shape="poly" id="edge28_Node000024_Node000023" title=" " alt="" coords="353,383,407,375,407,381,354,388"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#af5b68b253e9d55fe5f82c1fa5ab5bc83" title="Check if a port is listening (inline implementation)" alt="" coords="430,407,617,461"/>
+<area shape="poly" id="edge25_Node000024_Node000025" title=" " alt="" coords="354,408,417,417,416,422,353,413"/>
+<area shape="poly" id="edge26_Node000025_Node000011" title=" " alt="" coords="616,405,692,383,694,388,618,410"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__server.html#a07d61cf0e9e7677acdecd920fdf26fc9" title=" " alt="" coords="683,414,870,454"/>
+<area shape="poly" id="edge27_Node000025_Node000026" title=" " alt="" coords="617,431,669,431,669,437,617,437"/>
+</map>

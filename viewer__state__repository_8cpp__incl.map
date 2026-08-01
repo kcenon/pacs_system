@@ -1,0 +1,30 @@
+<map id="src/storage/viewer_state_repository.cpp" name="src/storage/viewer_state_repository.cpp">
+<area shape="rect" id="Node000001" title="Implementation of the viewer state repository." alt="" coords="517,5,677,45"/>
+<area shape="rect" id="Node000002" href="$viewer__state__repository_8h.html" title="Repository for viewer state persistence." alt="" coords="348,93,542,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="565,48,491,89,489,84,562,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="258,269,325,295"/>
+<area shape="poly" id="edge12_Node000001_Node000004" title=" " alt="" coords="517,39,386,58,236,89,164,108,101,130,51,155,19,183,11,196,8,208,10,219,16,228,39,244,73,257,161,272,244,277,244,283,160,277,72,262,36,249,12,232,5,221,3,208,6,194,15,180,48,151,99,125,163,103,235,83,385,53,516,33"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="566,101,628,126"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="600,46,600,87,594,87,594,46"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="652,101,726,126"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="619,44,668,89,664,93,615,48"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="751,101,830,126"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="640,43,753,93,751,98,638,48"/>
+<area shape="rect" id="Node000003" href="$viewer__state__record_8h.html" title="Viewer state record data structures for database operations." alt="" coords="553,181,724,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="488,131,584,173,582,178,486,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="753,269,828,295"/>
+<area shape="poly" id="edge8_Node000002_Node000005" title=" " alt="" coords="542,130,681,158,760,179,774,196,783,216,792,255,786,256,778,218,769,199,757,184,680,163,541,135"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="629,269,688,295"/>
+<area shape="poly" id="edge9_Node000002_Node000006" title=" " alt="" coords="540,131,667,158,715,170,737,179,744,190,745,201,738,223,720,247,696,265,693,260,716,243,733,220,740,200,739,192,734,183,713,175,665,163,539,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="30,181,218,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="375,136,207,180,206,175,374,131"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="242,189,320,214"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="410,136,316,185,314,180,408,131"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="344,189,442,214"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="436,135,409,178,405,175,431,132"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="466,189,528,214"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="459,132,485,175,480,178,454,135"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="556,224,339,273,338,268,555,219"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="676,219,756,260,754,265,673,224"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="646,221,654,255,649,256,640,222"/>
+</map>

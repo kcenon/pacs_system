@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::detail::accept_worker::is_accepting" name="kcenon::pacs::network::detail::accept_worker::is_accepting">
+<area shape="rect" id="Node000001" title="Checks if the worker is actively accepting connections." alt="" coords="223,5,392,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1detail_1_1accept__worker.html#a46e1d596f862ee5125b473a504466847" title="Gets a string representation of the worker state." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

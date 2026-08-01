@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration::lambda_job" name="kcenon::pacs::integration::lambda_job">
+<area shape="rect" id="Node000001" title="IJob implementation that wraps a callable." alt="" coords="37,277,215,457"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,135,204,215"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,228,119,277,113,277,108,229"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="228,142,307,207"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,209,204,266,200,263,242,206"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="202,5,333,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="270,99,270,142,265,142,265,99"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/encoding/explicit_vr_codec.h" name="include/kcenon/pacs/encoding/explicit_vr_codec.h">
+<area shape="rect" id="Node000001" title="Encoder/decoder for Explicit VR Little Endian transfer syntax." alt="" coords="226,5,383,60"/>
+<area shape="rect" id="Node000002" href="$explicit__vr__codec_8cpp.html" title="Implementation of Explicit VR Little Endian encoder/decoder." alt="" coords="5,108,161,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="231,68,129,110,127,106,229,63"/>
+<area shape="rect" id="Node000003" href="$pacs-encoding_8cppm.html" title="C++20 module partition for DICOM encoding types." alt="" coords="185,115,424,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="307,74,307,115,302,115,302,74"/>
+<area shape="rect" id="Node000004" href="$dimse__message_8cpp.html" title="DIMSE message implementation." alt="" coords="449,108,635,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="385,63,495,106,493,110,383,67"/>
+</map>

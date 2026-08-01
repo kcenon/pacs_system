@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::storage::annotation_repository::find_by_instance" name="kcenon::pacs::storage::annotation_repository::find_by_instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,41,179,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1annotation__repository.html#aa7146691c0064e3a11334e646d83ea7a" title=" " alt="" coords="227,41,400,96"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,66,213,66,213,71,179,71"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1annotation__repository.html#ab0483d4a621a16b7d6f3c2099d4a4a52" title=" " alt="" coords="448,5,621,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,52,434,46,435,52,401,57"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1storage.html#adb7abc77000b64fb0e7e4159502b3219" title="Convert annotation_type to string." alt="" coords="453,85,617,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="401,80,440,87,439,92,400,85"/>
+</map>

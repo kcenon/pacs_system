@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::services::storage_commitment_scp" name="kcenon::pacs::services::storage_commitment_scp">
+<area shape="rect" id="Node000001" title="Storage Commitment Push Model SCP." alt="" coords="278,1193,475,1612"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html" title=" " alt="" coords="282,844,471,1144"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="379,1158,379,1193,374,1193,374,1158"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="290,643,463,723"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="379,724,379,828,374,828,374,724"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="412,133,587,559"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="494,560,472,613,457,634,453,630,468,611,489,558"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="238,313,387,379"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="317,392,325,494,334,553,347,611,359,642,354,644,342,613,329,554,320,494,311,392"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="65,636,238,731"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="283,391,227,478,198,530,174,584,160,636,155,635,169,582,193,527,222,475,279,388"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="481,5,504,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="483,51,444,85,402,135,378,176,357,219,329,299,324,297,353,217,373,173,397,132,440,82,479,47"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="611,313,737,379"/>
+<area shape="poly" id="edge11_Node000010_Node000006" title=" " alt="" coords="506,45,552,79,578,103,602,132,625,173,643,216,667,296,662,298,638,218,620,175,597,135,574,107,548,83,503,49"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="152,731,153,811,159,915,176,1030,190,1088,207,1143,235,1205,271,1264,266,1267,231,1208,202,1145,185,1089,171,1031,154,916,148,812,147,731"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1storage_1_1storage__interface.html" title=" " alt="" coords="5,166,169,526"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="73,526,79,569,91,611,96,621,91,623,86,613,74,571,68,526"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="474,755,629,820"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="550,820,528,962,510,1053,486,1145,475,1178,470,1177,481,1143,504,1052,523,961,545,820"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="664,393,563,755,558,753,659,391"/>
+</map>

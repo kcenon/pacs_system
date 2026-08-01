@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration_test::dcmtk_server_guard::operator=" name="kcenon::pacs::integration_test::dcmtk_server_guard::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,200,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__server__guard.html#a04cbdbd636dafb4f88e4c026f2725005" title="Stop the server." alt="" coords="248,13,479,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,30,234,30,234,35,200,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#a04a3de5fddd9ac8d135540cba1b23d56" title="Stop the process." alt="" coords="527,5,721,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="479,30,513,30,513,35,479,35"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a6b0e200728163221c8f4c470992849a5" title="Stop a background process." alt="" coords="769,5,956,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="722,30,755,30,755,35,722,35"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#adc71a10b0361fa760bbd2b4209299f2c" title=" " alt="" coords="1004,5,1191,60"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="956,30,990,30,990,35,956,35"/>
+</map>

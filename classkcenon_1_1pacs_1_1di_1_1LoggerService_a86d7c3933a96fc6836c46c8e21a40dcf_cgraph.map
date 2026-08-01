@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::di::LoggerService::is_enabled" name="kcenon::pacs::di::LoggerService::is_enabled">
+<area shape="rect" id="Node000001" title="Check if a log level is enabled." alt="" coords="5,13,184,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#ab1bf43989f98aaa15121b78503c0394f" title="Check if a log level is enabled." alt="" coords="232,5,419,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,30,219,30,219,35,184,35"/>
+</map>

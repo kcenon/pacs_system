@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::operation_counter::average_duration_us" name="kcenon::pacs::monitoring::operation_counter::average_duration_us">
+<area shape="rect" id="Node000001" title="Get average duration in microseconds (0 if no operations)" alt="" coords="5,5,215,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1monitoring_1_1operation__counter.html#aefd20ef439d5379ec6ca8d8733f50c5f" title="Get total operation count (success + failure)" alt="" coords="263,13,492,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,30,249,30,249,35,215,35"/>
+</map>

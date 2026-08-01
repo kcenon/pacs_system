@@ -1,0 +1,41 @@
+<map id="kcenon::pacs::services::storage_scu::next_message_id" name="kcenon::pacs::services::storage_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="956,399,1187,439"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a641c5eb0c2e6f0ea60bccfb52262f224" title="Store a single DICOM dataset." alt="" coords="739,399,908,439"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="942,421,908,421,908,416,942,416"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a59b88fd376ac0b7cde00efb54d1aa924" title="Store multiple DICOM datasets." alt="" coords="499,5,691,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="817,385,807,318,785,230,768,184,747,139,721,97,689,59,673,48,676,43,692,55,725,93,752,136,773,182,790,228,812,317,822,385"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a4d87386aaaca5bc0c41c5872f4e024cb" title="Store a DICOM file." alt="" coords="507,69,683,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="814,386,800,329,776,259,740,186,716,153,689,123,672,112,676,107,692,119,721,149,744,183,781,257,805,328,819,385"/>
+<area shape="rect" id="Node000007" href="$test__dcmtk__store_8cpp.html#a55b309fd2f5cbdca202e698fee99af1c" title=" " alt="" coords="547,134,642,159"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="811,386,796,338,771,280,736,222,714,196,689,173,667,160,642,153,643,148,669,155,692,169,718,192,740,219,776,278,801,336,816,384"/>
+<area shape="rect" id="Node000008" href="$test__dcmtk__store_8cpp.html#a7ed8d0062be47853f291a628bccf071b" title=" " alt="" coords="547,183,642,209"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="807,387,789,348,763,303,730,259,689,222,666,210,642,203,643,198,668,205,692,218,734,256,767,300,793,346,812,384"/>
+<area shape="rect" id="Node000009" href="$test__stability_8cpp.html#aba37e4b736fc716134bd1a30402fb624" title=" " alt="" coords="547,233,642,258"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="801,389,754,328,724,298,689,272,666,261,641,254,643,249,668,256,692,267,727,293,758,325,805,385"/>
+<area shape="rect" id="Node000010" href="$test__stability_8cpp.html#ac918d054137b7ab8d9943c5af451d371" title=" " alt="" coords="547,282,642,307"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="789,391,744,355,690,321,641,305,643,300,692,316,747,350,793,387"/>
+<area shape="rect" id="Node000011" href="$test__error__recovery_8cpp.html#a4aa2d297f8a3fd95dac17d127623ac53" title=" " alt="" coords="547,331,642,357"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="760,396,690,371,641,357,643,352,691,365,762,391"/>
+<area shape="rect" id="Node000012" href="$test__error__recovery_8cpp.html#a9bb9af9333aef5d6112459cb24ca1cf9" title=" " alt="" coords="547,381,642,406"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="725,410,642,401,643,396,725,405"/>
+<area shape="rect" id="Node000013" href="$test__stability_8cpp.html#a61a3b1484035e99c37f5a9b538d72bc8" title=" " alt="" coords="547,430,642,455"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="725,432,643,440,642,435,725,426"/>
+<area shape="rect" id="Node000014" href="$test__stress_8cpp.html#af6c6e7d2419130d4208e5b57986dc547" title=" " alt="" coords="547,479,642,505"/>
+<area shape="poly" id="edge13_Node000002_Node000014" title=" " alt="" coords="758,446,691,469,643,483,642,478,690,464,756,441"/>
+<area shape="rect" id="Node000015" href="$test__store__query_8cpp.html#adff06e0c18274bd662b81c27fbda88b2" title=" " alt="" coords="547,529,642,554"/>
+<area shape="poly" id="edge14_Node000002_Node000015" title=" " alt="" coords="792,450,746,485,692,518,643,535,641,530,690,514,743,481,789,445"/>
+<area shape="rect" id="Node000016" href="$test__error__recovery_8cpp.html#a58edea7ec27068495b2cf1d479bceba9" title=" " alt="" coords="547,578,642,603"/>
+<area shape="poly" id="edge15_Node000002_Node000016" title=" " alt="" coords="804,452,758,511,727,542,692,568,668,579,643,586,642,581,666,574,689,563,723,538,754,508,800,449"/>
+<area shape="rect" id="Node000017" href="$test__error__recovery_8cpp.html#a8ee74506c7c2958aab6db2fb66c908a8" title=" " alt="" coords="547,627,642,653"/>
+<area shape="poly" id="edge16_Node000002_Node000017" title=" " alt="" coords="811,452,793,491,767,535,733,579,692,617,668,629,643,637,641,632,666,625,689,612,729,576,762,532,788,488,807,450"/>
+<area shape="rect" id="Node000018" href="$test__stability_8cpp.html#a838e097a6cdc8d1aab555bc9e10d8434" title=" " alt="" coords="547,677,642,702"/>
+<area shape="poly" id="edge17_Node000002_Node000018" title=" " alt="" coords="816,452,800,500,775,558,740,616,717,643,692,666,669,680,643,687,642,682,667,675,689,662,714,639,735,613,770,556,795,498,811,451"/>
+<area shape="rect" id="Node000019" href="$test__store__query_8cpp.html#a2ce5541cef81d06ef586d5bf1b0ed914" title=" " alt="" coords="547,726,642,751"/>
+<area shape="poly" id="edge18_Node000002_Node000019" title=" " alt="" coords="819,453,806,510,782,581,766,618,745,653,721,686,692,715,669,729,643,737,641,732,667,725,689,711,717,683,741,650,761,615,777,579,801,509,814,452"/>
+<area shape="rect" id="Node000020" href="$test__xa__storage_8cpp.html#a8fcc506f5ebe78ed022aa84f3f35bbce" title=" " alt="" coords="547,775,642,801"/>
+<area shape="poly" id="edge19_Node000002_Node000020" title=" " alt="" coords="822,453,811,519,789,603,773,647,751,690,725,730,692,765,669,779,643,787,641,782,667,774,689,761,720,726,747,687,768,645,784,601,806,518,816,452"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#af2734cf396a75e6ed6bd85822fd1490c" title="Store multiple DICOM files." alt="" coords="268,69,451,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="492,92,451,92,451,87,492,87"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#ac75eb05e5a427a5bb06233d04c5cfb8f" title="Store all DICOM files in a directory." alt="" coords="5,69,220,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="254,92,220,92,220,87,254,87"/>
+</map>

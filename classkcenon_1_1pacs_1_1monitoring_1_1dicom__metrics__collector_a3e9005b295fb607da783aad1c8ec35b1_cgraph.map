@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::dicom_metrics_collector::collect_query_metrics" name="kcenon::pacs::monitoring::dicom_metrics_collector::collect_query_metrics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,57,195,111"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#a866e23fd5ce54a1a15930cd6cd0b5ad3" title=" " alt="" coords="243,5,432,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,64,229,57,230,63,195,69"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="244,99,431,154"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,98,231,105,230,110,194,104"/>
+</map>
