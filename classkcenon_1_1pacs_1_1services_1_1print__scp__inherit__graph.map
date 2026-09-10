@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::print_scp" name="kcenon::pacs::services::print_scp">
+<area shape="rect" id="Node000001" title="Print Management SCP service." alt="" coords="5,353,195,1128"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html" title=" " alt="" coords="5,5,195,305"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,319,103,353,97,353,97,319"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::validate_acquisition_dose_module" name="kcenon::pacs::services::validation::mg_iod_validator::validate_acquisition_dose_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,161,260,215"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a115b4e1fa60e88e03a344558303b9382" title=" " alt="" coords="308,127,551,182"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,171,294,167,295,172,261,176"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="602,5,791,45"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="191,158,247,134,307,112,453,72,588,42,589,47,454,77,309,117,249,139,193,163"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="619,227,774,282"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="261,200,606,241,605,247,260,206"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a57fa7e9b5e7915e969145e420d4a3a3b" title="Validate compressed breast thickness." alt="" coords="317,258,542,313"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="218,213,333,251,332,256,216,218"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="471,125,530,90,598,55,615,48,617,53,600,60,533,94,474,129"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="504,180,611,220,609,225,502,185"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a172ecde95555311c0bd69d02e66a1d03" title="Get typical compression force range." alt="" coords="599,70,795,125"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="550,126,585,119,586,124,552,131"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a48a050964d290ff4cd750c5e42c5a805" title="Validate compression force value." alt="" coords="612,149,781,203"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="551,162,599,166,598,171,551,167"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="843,235,997,275"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="775,252,829,252,829,257,775,257"/>
+</map>

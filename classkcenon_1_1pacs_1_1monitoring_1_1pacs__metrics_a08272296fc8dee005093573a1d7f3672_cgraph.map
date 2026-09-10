@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::pacs_metrics::record_association_aborted" name="kcenon::pacs::monitoring::pacs_metrics::record_association_aborted">
+<area shape="rect" id="Node000001" title="Record an association being aborted." alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1monitoring_1_1association__counters.html#a7ad4754bf8b26f10d876ab1bce90dcb6" title="Record an association being aborted." alt="" coords="240,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+</map>

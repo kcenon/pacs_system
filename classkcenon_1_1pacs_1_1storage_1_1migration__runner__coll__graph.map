@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::storage::migration_runner" name="kcenon::pacs::storage::migration_runner">
+<area shape="rect" id="Node000001" title=" " alt="" coords="87,581,272,1156"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="76,439,283,519"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,519,182,565,177,565,177,519"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="10,261,181,361"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,360,154,422,150,425,118,363"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,133,143,199"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="83,212,91,261,85,261,78,213"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,5,36,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="19,71,20,90,24,108,30,119,25,121,20,110,15,91,14,71"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="113,5,144,71"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="118,72,102,110,98,119,93,117,97,108,113,70"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="216,279,337,344"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="259,358,228,416,212,440,208,437,224,413,255,355"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="276,133,299,199"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="288,199,283,262,278,262,282,199"/>
+</map>

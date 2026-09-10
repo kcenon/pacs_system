@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::core::dicom_dataset::insert" name="kcenon::pacs::core::dicom_dataset::insert">
+<area shape="rect" id="Node000001" title="Insert or replace an element in the dataset." alt="" coords="5,5,176,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="224,5,384,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,23,210,23,210,28,176,28"/>
+</map>

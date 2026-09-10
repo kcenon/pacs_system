@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_push_scu::build_change_state_dataset" name="kcenon::pacs::services::ups_push_scu::build_change_state_dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="268,5,440,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#a9b2227149bcf70e824cced64747d696a" title="Change UPS workitem state (N&#45;ACTION Type 1)" alt="" coords="5,13,220,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,35,220,35,220,30,254,30"/>
+</map>

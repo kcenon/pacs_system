@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::core::pool_manager::get" name="kcenon::pacs::core::pool_manager::get">
+<area shape="rect" id="Node000001" title="Get the thread&#45;local pool manager instance." alt="" coords="232,69,384,109"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1core.html#a883bcf472c05d505584a55cae6388e31" title="Create a pooled dicom_dataset." alt="" coords="8,5,181,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,68,161,48,163,43,228,63"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1core.html#a67692c4ca848fc45c74a7ca3e6cc9b93" title="Create a pooled dicom_element." alt="" coords="5,69,184,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,92,184,92,184,87,218,87"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1core.html#af6e2e154980ab70f564001a64d1c9391" title="Create a pooled dicom_element with string value." alt="" coords="5,133,184,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="228,116,163,136,161,131,227,111"/>
+</map>

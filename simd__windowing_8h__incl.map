@@ -1,0 +1,22 @@
+<map id="include/kcenon/pacs/encoding/simd/simd_windowing.h" name="include/kcenon/pacs/encoding/simd/simd_windowing.h">
+<area shape="rect" id="Node000001" title="SIMD optimizations for window/level (VOI LUT) application." alt="" coords="193,5,350,60"/>
+<area shape="rect" id="Node000002" href="$simd__config_8h.html" title="SIMD configuration and CPU feature detection." alt="" coords="21,181,133,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,58,149,79,109,110,92,138,83,168,78,167,87,136,105,106,146,74,191,53"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="41,255,112,280"/>
+<area shape="poly" id="edge10_Node000001_Node000003" title=" " alt="" coords="193,54,142,72,89,98,43,135,25,157,11,182,9,200,16,216,30,232,46,245,43,249,26,235,12,219,4,200,6,181,21,154,40,131,86,94,139,67,191,49"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="187,255,254,280"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="268,61,229,241,224,240,263,60"/>
+<area shape="rect" id="Node000005" href="$simd__types_8h.html" title="Platform&#45;specific SIMD type definitions and wrappers." alt="" coords="119,108,229,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="243,62,199,101,196,97,240,58"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="309,108,394,133"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="298,58,333,96,329,99,294,62"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="419,108,481,133"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="327,58,415,100,413,104,325,62"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="505,108,568,133"/>
+<area shape="poly" id="edge12_Node000001_Node000008" title=" " alt="" coords="351,57,493,103,492,108,349,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,207,79,241,74,241,74,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="101,204,186,246,184,251,99,209"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="160,136,105,175,102,171,157,131"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="174,135,165,169,147,208,128,230,107,248,104,244,124,227,142,205,160,167,169,133"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="180,133,215,241,210,242,175,135"/>
+</map>

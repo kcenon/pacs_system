@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::di::test::MockNetwork" name="kcenon::pacs::di::test::MockNetwork">
+<area shape="rect" id="Node000001" title="Mock network service for testing." alt="" coords="5,293,188,608"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1IDicomNetwork.html" title="Network service interface for DICOM communication." alt="" coords="10,5,183,245"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,259,99,293,94,293,94,259"/>
+</map>

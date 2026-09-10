@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration_test::generate_mr_dataset" name="kcenon::pacs::integration_test::generate_mr_dataset">
+<area shape="rect" id="Node000001" title="Generate a MR image dataset for testing." alt="" coords="148,23,349,63"/>
+<area shape="rect" id="Node000002" href="$test__error__recovery_8cpp.html#a9bb9af9333aef5d6112459cb24ca1cf9" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,31,100,27,101,21,135,26"/>
+<area shape="rect" id="Node000003" href="$test__store__query_8cpp.html#a2ce5541cef81d06ef586d5bf1b0ed914" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,60,101,64,100,59,134,55"/>
+</map>

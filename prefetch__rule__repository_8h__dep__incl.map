@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/storage/prefetch_rule_repository.h" name="include/kcenon/pacs/storage/prefetch_rule_repository.h">
+<area shape="rect" id="Node000001" title="Repository for prefetch rules using base_repository pattern." alt="" coords="5,5,171,60"/>
+<area shape="rect" id="Node000002" href="$prefetch__rule__repository_8cpp.html" title="Implementation of prefetch_rule_repository using base_repository pattern." alt="" coords="12,108,164,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,74,91,108,85,108,85,74"/>
+</map>

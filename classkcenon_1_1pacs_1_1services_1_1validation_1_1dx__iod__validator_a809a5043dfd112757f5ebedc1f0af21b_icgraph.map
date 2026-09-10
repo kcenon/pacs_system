@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::validation::dx_iod_validator::validate_general_study_module" name="kcenon::pacs::services::validation::dx_iod_validator::validate_general_study_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="523,84,761,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#a29b5c6019ba3ad5fabaa5fe6de541676" title="Validate a DICOM dataset against DX IOD." alt="" coords="264,84,475,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="509,114,475,114,475,109,509,109"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#af3ef75a8e4263b3420108fa886d07e7a" title="Validate a DX dataset with default options." alt="" coords="26,5,195,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="265,83,195,61,196,56,267,77"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#af03636db413c194c8f2fa031320a3a42" title="Validate a For Presentation DX dataset." alt="" coords="5,84,216,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="250,114,216,114,216,109,250,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#a2b7ecc9738f2fe6a4ab17f79e225a015" title="Validate a For Processing DX dataset." alt="" coords="5,163,216,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="266,145,202,165,201,160,265,140"/>
+</map>

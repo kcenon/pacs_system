@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::network::detail::accept_worker" name="kcenon::pacs::network::detail::accept_worker">
+<area shape="rect" id="Node000001" title=" " alt="" coords="195,389,433,869"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,261,204,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,337,197,437,192,440,130,340"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="229,261,399,327"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="317,327,317,373,311,373,311,327"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="342,133,467,199"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="375,211,365,224,338,263,334,260,361,221,371,208"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="424,261,569,327"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="443,208,453,221,480,260,475,263,449,224,439,211"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="393,5,416,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="407,71,407,117,402,117,402,71"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="483,328,463,367,444,402,439,400,458,364,478,326"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::container_adapter::maps_to_binary" name="kcenon::pacs::integration::container_adapter::maps_to_binary">
+<area shape="rect" id="Node000001" title="Check if a VR maps to binary data." alt="" coords="5,5,197,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#a4ebd2c5ae843cde7be61ec7820fbfaf8" title="Checks if a VR is a binary/raw byte type." alt="" coords="245,13,420,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,30,231,30,231,35,198,35"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_rt_storage_sop_class" name="kcenon::pacs::services::sop_classes::is_rt_storage_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is an RT Storage SOP Class." alt="" coords="5,5,205,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a18b75832fac1933ce75cff4ba61366b0" title="Get information about a specific RT SOP Class." alt="" coords="253,5,423,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,30,239,30,239,35,206,35"/>
+</map>

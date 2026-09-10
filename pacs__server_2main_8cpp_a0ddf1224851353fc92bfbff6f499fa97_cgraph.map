@@ -1,0 +1,70 @@
+<map id="main" name="main">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,474,60,499"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#ac657526064bff8edebcd2ed378728cef" title="Initialize all components." alt="" coords="108,316,311,356"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="36,473,61,422,81,393,106,367,116,360,119,365,110,371,85,396,66,425,41,475"/>
+<area shape="rect" id="Node000029" href="$structkcenon_1_1pacs_1_1example_1_1pacs__server__config.html#afed91e74c7d9f91c28e1331dc1411119" title="Parse configuration from command line arguments." alt="" coords="123,381,295,435"/>
+<area shape="poly" id="edge33_Node000001_Node000029" title=" " alt="" coords="56,471,107,446,123,438,125,443,109,450,58,476"/>
+<area shape="rect" id="Node000030" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#aa12cada44fc0100cd745dece8509bbe8" title="Get current server statistics." alt="" coords="121,459,298,514"/>
+<area shape="poly" id="edge34_Node000001_Node000030" title=" " alt="" coords="60,484,107,484,107,489,60,489"/>
+<area shape="rect" id="Node000031" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a418fabc41234f49236de696f871d6335" title="Start the DICOM server." alt="" coords="121,539,298,579"/>
+<area shape="poly" id="edge35_Node000001_Node000031" title=" " alt="" coords="57,497,109,524,128,532,126,536,107,529,54,502"/>
+<area shape="rect" id="Node000032" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#af000ecb903bed1fffa0c24db2eebfb9b" title="Wait for server shutdown." alt="" coords="122,603,297,658"/>
+<area shape="poly" id="edge36_Node000001_Node000032" title=" " alt="" coords="42,498,68,542,87,567,110,589,117,594,114,598,106,593,83,570,64,545,38,501"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#af43f9650079cf9a4e743b5329f8f7883" title="Set up database." alt="" coords="359,95,541,150"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="231,314,406,157,410,161,235,318"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a1ed05ed60c0709ef5bbd46b56c213669" title="Set up DICOM server." alt="" coords="359,270,541,325"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="310,317,345,312,346,317,311,322"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a7ad35e36362bcf644537044ff74f5274" title="Set up DICOM services." alt="" coords="359,349,541,403"/>
+<area shape="poly" id="edge31_Node000002_Node000027" title=" " alt="" coords="311,350,346,356,345,361,310,355"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a29b9e4098c465c8a03d1c0334184b8c0" title="Set up file storage." alt="" coords="359,427,541,482"/>
+<area shape="poly" id="edge32_Node000002_Node000028" title=" " alt="" coords="285,354,312,367,327,379,337,391,346,402,360,414,367,418,364,423,357,418,342,406,333,394,324,383,309,372,283,359"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1index__database.html#a7e9e52878482b777d1193df4b28734a4" title="Open or create a database with default configuration." alt="" coords="620,5,793,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="503,93,588,55,611,47,613,52,590,60,505,97"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a849b483ac0ad9a1b47791e589239a117" title="Get called AE title." alt="" coords="619,213,794,253"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="541,272,612,254,613,259,542,277"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a83150b77d9eb2b424ec2a38297ed3c68" title="Get calling AE title." alt="" coords="617,277,796,317"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="542,295,604,295,604,300,542,300"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a281ddad6bdc983e8342f495ec5a372c5" title="Handle MPPS N&#45;CREATE." alt="" coords="611,342,802,397"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="542,320,599,336,597,342,541,325"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#abee466bc680c35475d903479a1ce9737" title="Handle MPPS N&#45;SET." alt="" coords="611,70,802,125"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="466,268,516,202,550,166,588,135,598,129,601,133,591,140,553,170,520,205,471,271"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#abfc4d5337df624a8bf9a981e83b890f6" title="Handle C&#45;FIND query." alt="" coords="589,149,824,189"/>
+<area shape="poly" id="edge10_Node000005_Node000011" title=" " alt="" coords="482,268,531,232,588,199,605,192,607,197,591,204,534,237,486,272"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a18273010b2382be9746f8fb5ad07bb87" title="Handle C&#45;MOVE/C&#45;GET retrieve." alt="" coords="611,565,802,619"/>
+<area shape="poly" id="edge21_Node000005_Node000021" title=" " alt="" coords="531,323,543,334,561,363,569,391,569,418,567,445,565,471,566,498,573,524,591,550,602,560,598,564,587,554,569,526,560,498,559,471,562,445,564,418,563,392,556,365,539,338,528,327"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a83c815bcb8a3a9c3ddb511a3ae2c5794" title="Handle incoming C&#45;STORE request." alt="" coords="591,500,822,540"/>
+<area shape="poly" id="edge26_Node000005_Node000025" title=" " alt="" coords="530,323,543,334,557,354,564,374,567,413,570,450,577,468,591,486,596,490,592,494,587,490,572,471,564,452,561,413,559,376,553,357,539,338,527,327"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#a7e900f8f93ff59f8034d352063ccf847" title="Handle worklist query." alt="" coords="611,421,802,475"/>
+<area shape="poly" id="edge28_Node000005_Node000026" title=" " alt="" coords="527,323,543,334,559,353,567,372,575,390,591,407,601,414,598,419,588,411,571,393,563,374,555,356,540,338,524,327"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1services.html#aaef4895131b5df1e13f6fe1a3430c7bd" title="Convert mpps_status to DICOM string representation." alt="" coords="872,113,1041,153"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="803,108,859,117,858,122,802,114"/>
+<area shape="poly" id="edge20_Node000011_Node000010" title=" " alt="" coords="824,150,858,145,859,150,824,155"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="879,457,1034,511"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="810,187,826,199,842,219,852,239,859,277,861,317,865,339,874,363,899,406,926,444,922,447,894,409,870,365,860,340,856,318,853,277,847,240,838,222,822,203,807,192"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="879,297,1034,351"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="799,187,825,199,881,240,926,284,922,288,878,244,823,204,797,192"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="1110,333,1281,387"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1035,333,1097,342,1096,348,1034,338"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="1110,268,1281,308"/>
+<area shape="poly" id="edge18_Node000013_Node000019" title=" " alt="" coords="1034,310,1096,300,1097,306,1035,315"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="1350,333,1509,387"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="1281,357,1336,357,1336,363,1281,363"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="1557,333,1732,387"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="1509,357,1544,357,1544,363,1509,363"/>
+<area shape="rect" id="Node000017" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="1780,340,1955,380"/>
+<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="1732,357,1766,357,1766,363,1732,363"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="2003,340,2177,380"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="1955,357,1989,357,1989,363,1955,363"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="1349,268,1509,308"/>
+<area shape="poly" id="edge19_Node000019_Node000020" title=" " alt="" coords="1281,285,1336,285,1336,291,1281,291"/>
+<area shape="poly" id="edge22_Node000021_Node000012" title=" " alt="" coords="791,562,823,550,893,515,896,520,825,554,793,567"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="885,572,1028,612"/>
+<area shape="poly" id="edge23_Node000021_Node000022" title=" " alt="" coords="802,589,872,589,872,595,802,595"/>
+<area shape="rect" id="Node000023" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="1089,572,1301,612"/>
+<area shape="poly" id="edge24_Node000022_Node000023" title=" " alt="" coords="1028,589,1076,589,1076,595,1028,595"/>
+<area shape="rect" id="Node000024" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="1357,572,1502,612"/>
+<area shape="poly" id="edge25_Node000023_Node000024" title=" " alt="" coords="1302,589,1343,589,1343,595,1302,595"/>
+<area shape="poly" id="edge27_Node000025_Node000012" title=" " alt="" coords="822,501,865,494,866,500,823,506"/>
+<area shape="poly" id="edge29_Node000026_Node000012" title=" " alt="" coords="803,459,866,468,865,474,802,464"/>
+<area shape="poly" id="edge30_Node000026_Node000013" title=" " alt="" coords="797,418,823,407,866,383,906,357,908,362,869,388,825,412,799,423"/>
+</map>

@@ -1,0 +1,28 @@
+<map id="kcenon::pacs::services::validation::rt_dose_iod_validator::check_type1_attribute" name="kcenon::pacs::services::validation::rt_dose_iod_validator::check_type1_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="960,239,1164,308"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#aca71bc219765d74163dc4ba2e01c896d" title=" " alt="" coords="699,5,912,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1031,228,979,158,947,121,910,89,893,77,896,73,914,85,950,117,983,154,1035,225"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#abf6edef66ff6a030d14f2f819923cd34" title=" " alt="" coords="717,99,894,168"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="997,234,911,182,887,170,890,166,913,178,1000,229"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#ae10428bdbe046f331ad2dd5472d0c191" title=" " alt="" coords="718,192,893,261"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="946,255,892,245,893,240,947,250"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#ae45bbaecfcfa2b9cef9734fdeeb68e2d" title=" " alt="" coords="718,285,893,355"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="947,297,893,307,892,302,946,292"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#a16d87a180ca8f281ea029c696d742642" title=" " alt="" coords="718,379,893,448"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="1000,318,913,369,890,381,887,376,911,364,997,313"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#a6dee4a078e0cc26f09e1abe5938f0927" title=" " alt="" coords="718,472,893,541"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="1035,321,983,392,950,429,914,462,895,475,892,470,910,458,947,426,979,389,1031,318"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#aa11086ba78b1edc18da2132d80f16dee" title=" " alt="" coords="476,246,651,301"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="706,84,700,89,661,127,628,170,581,247,576,244,623,167,657,123,697,85,703,80"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__iod__validator.html#a2bade8682e0cd5f31805f0eeaf97e37a" title="Validate an RT dataset (auto&#45;detects type)" alt="" coords="223,206,428,261"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="462,259,428,253,429,248,463,254"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ae7faa4af4dcb8873e499666830c30d6f" title="Validate an RT Dose dataset with default options." alt="" coords="241,285,410,339"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="463,292,411,301,410,296,462,287"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a1be4c1e45ad15c531a2174ce4b67e731" title="Validate any RT dataset (auto&#45;detects type) with default options." alt="" coords="5,206,175,261"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="209,236,175,236,175,231,209,231"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="711,176,700,182,648,215,602,248,599,243,645,211,697,178,708,172"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="705,249,651,259,650,254,704,243"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="704,303,650,293,651,288,705,298"/>
+<area shape="poly" id="edge13_Node000010_Node000003" title=" " alt="" coords="708,375,697,369,645,336,599,303,602,299,648,332,700,364,711,370"/>
+<area shape="poly" id="edge15_Node000011_Node000003" title=" " alt="" coords="705,468,697,462,657,423,623,380,576,302,581,300,628,377,661,420,700,458,708,464"/>
+</map>

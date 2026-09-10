@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::monitoring::association_counters" name="kcenon::pacs::monitoring::association_counters">
+<area shape="rect" id="Node000001" title="Metrics for tracking DICOM association lifecycle." alt="" coords="126,419,305,579"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,261,204,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,326,159,393,164,403,160,406,154,396,118,328"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="153,133,278,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="176,211,164,224,132,263,127,259,160,221,173,207"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="228,261,427,327"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="266,206,280,221,310,260,305,263,276,224,262,210"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="204,5,227,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,71,218,117,213,117,213,71"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="316,328,283,396,278,406,273,403,278,393,311,326"/>
+</map>

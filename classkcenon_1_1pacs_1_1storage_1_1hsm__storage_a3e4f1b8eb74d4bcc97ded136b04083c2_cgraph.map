@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::storage::hsm_storage::migrate_instance" name="kcenon::pacs::storage::hsm_storage::migrate_instance">
+<area shape="rect" id="Node000001" title="Migrate a single instance between tiers." alt="" coords="5,5,179,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1storage.html#adb7abc77000b64fb0e7e4159502b3219" title="Convert annotation_type to string." alt="" coords="227,13,391,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,30,213,30,213,35,179,35"/>
+</map>

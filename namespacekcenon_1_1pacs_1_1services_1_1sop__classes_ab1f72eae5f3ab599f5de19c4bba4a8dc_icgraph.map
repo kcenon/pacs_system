@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::services::sop_classes::get_dx_sop_class_info" name="kcenon::pacs::services::sop_classes::get_dx_sop_class_info">
+<area shape="rect" id="Node000001" title="Get information about a specific DX SOP Class." alt="" coords="1104,124,1273,179"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a9f1519e32ad5a34718aef28570ae4cd4" title="Check if a SOP Class UID is a For Presentation SOP Class." alt="" coords="848,5,1029,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1134,118,1055,74,1028,63,1030,58,1057,69,1137,114"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a374ea5c692c4b7eab5471dbedcaea6a8" title="Check if a SOP Class UID is a For Processing SOP Class." alt="" coords="851,84,1026,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1090,138,1026,128,1027,123,1091,133"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aaf59b905dbfa227f89283c959636afc4" title="Check if a SOP Class UID is a DX Storage SOP Class." alt="" coords="835,163,1042,217"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1091,169,1043,177,1042,171,1090,164"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aedae2d6e8440c830d9abfb99598ffb35" title="Check if a SOP Class UID is a mammography SOP Class." alt="" coords="821,241,1056,296"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1136,189,1057,232,1030,244,1028,239,1055,228,1134,184"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a5f8f329fa5aa1b4685793618baeb6c87" title="Check if dataset is a For Presentation DX image." alt="" coords="523,13,773,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="834,35,774,35,774,30,834,30"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#aef96663e7be72585493c21442d407b85" title="Check if dataset is a For Processing DX image." alt="" coords="529,91,767,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="837,114,767,114,767,109,837,109"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#a85d271aed5eef5d115f4e085112f2f4d" title=" " alt="" coords="531,163,765,217"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="822,193,765,193,765,187,822,187"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#a29b5c6019ba3ad5fabaa5fe6de541676" title="Validate a DICOM dataset against DX IOD." alt="" coords="264,163,475,217"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="518,193,475,193,475,187,518,187"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#af3ef75a8e4263b3420108fa886d07e7a" title="Validate a DX dataset with default options." alt="" coords="26,84,195,139"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="265,161,195,140,196,135,267,156"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#af03636db413c194c8f2fa031320a3a42" title="Validate a For Presentation DX dataset." alt="" coords="5,163,216,217"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="250,193,216,193,216,187,250,187"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1dx__iod__validator.html#a2b7ecc9738f2fe6a4ab17f79e225a015" title="Validate a For Processing DX dataset." alt="" coords="5,241,216,296"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="266,224,202,244,201,239,265,219"/>
+</map>

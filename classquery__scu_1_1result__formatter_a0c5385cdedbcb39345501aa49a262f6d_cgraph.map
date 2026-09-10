@@ -1,0 +1,11 @@
+<map id="query_scu::result_formatter::format_table" name="query_scu::result_formatter::format_table">
+<area shape="rect" id="Node000001" title="Format results as a human&#45;readable table." alt="" coords="5,69,208,109"/>
+<area shape="rect" id="Node000002" href="$classquery__scu_1_1result__formatter.html#a299403628b2cbef1d4688c2a6a8e4ec9" title="Get columns appropriate for the query level." alt="" coords="256,5,459,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,67,265,46,266,51,186,72"/>
+<area shape="rect" id="Node000003" href="$classquery__scu_1_1result__formatter.html#a0b79429aa49b1f0df989ee554d3c53f4" title="Get tag value from dataset as string." alt="" coords="256,69,459,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,87,242,87,242,92,208,92"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services.html#aaef4895131b5df1e13f6fe1a3430c7bd" title="Convert mpps_status to DICOM string representation." alt="" coords="273,133,442,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="186,107,266,127,265,133,185,112"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="507,62,661,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="459,87,493,87,493,92,459,92"/>
+</map>

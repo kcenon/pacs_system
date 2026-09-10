@@ -1,0 +1,25 @@
+<map id="include/kcenon/pacs/network/detail/accept_worker.h" name="include/kcenon/pacs/network/detail/accept_worker.h">
+<area shape="rect" id="Node000001" title="Worker thread for accepting incoming DICOM connections." alt="" coords="638,5,805,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,152,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="638,46,428,71,166,111,165,105,427,66,638,40"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="177,108,365,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="638,54,376,108,375,103,637,49"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="389,115,456,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="639,59,469,111,462,113,461,108,467,105,637,53"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="480,115,547,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="664,62,552,112,550,107,662,58"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="571,115,658,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="693,62,640,108,637,104,689,58"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="683,115,760,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="724,60,724,101,719,101,719,60"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="784,115,843,141"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="749,58,794,103,790,107,746,62"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="867,115,959,141"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="776,58,879,107,876,112,774,62"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="984,115,1080,141"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="806,56,973,105,984,109,982,114,971,111,804,61"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="1105,115,1207,141"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="805,46,941,72,1093,105,1107,109,1105,114,1091,111,940,77,804,51"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1232,115,1307,141"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="805,38,997,61,1109,80,1221,105,1231,108,1229,113,1219,111,1108,86,996,67,805,44"/>
+</map>

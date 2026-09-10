@@ -1,0 +1,15 @@
+<map id="include/kcenon/pacs/security/uid_mapping.h" name="include/kcenon/pacs/security/uid_mapping.h">
+<area shape="rect" id="Node000001" title="UID mapping for consistent de&#45;identification across studies." alt="" coords="301,5,480,45"/>
+<area shape="rect" id="Node000002" href="$dcm__anonymize_2main_8cpp.html" title="DICOM Anonymize &#45; De&#45;identification Utility." alt="" coords="5,181,203,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="324,53,278,72,233,96,172,140,125,183,121,179,169,136,231,91,276,67,322,48"/>
+<area shape="rect" id="Node000003" href="$include_2kcenon_2pacs_2security_2anonymizer_8h.html" title="DICOM de&#45;identification/anonymization per PS3.15 Annex E." alt="" coords="244,93,415,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="371,58,345,95,341,92,367,55"/>
+<area shape="rect" id="Node000004" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="455,189,686,214"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="414,55,443,93,479,131,518,162,553,186,550,191,514,167,476,135,439,96,409,58"/>
+<area shape="rect" id="Node000006" href="$uid__mapping_8cpp.html" title="Implementation of UID mapping for de&#45;identification." alt="" coords="489,101,701,126"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="449,48,569,98,566,103,447,53"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="268,141,154,184,152,179,266,136"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="396,135,539,186,538,191,394,140"/>
+<area shape="rect" id="Node000005" href="$anonymizer_8cpp.html" title="Implementation of DICOM de&#45;identification/anonymization." alt="" coords="227,189,431,214"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="332,147,332,188,327,188,327,147"/>
+</map>

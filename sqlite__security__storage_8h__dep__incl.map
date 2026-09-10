@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/sqlite_security_storage.h" name="include/kcenon/pacs/storage/sqlite_security_storage.h">
+<area shape="rect" id="Node000001" title="SQLite implementation of security storage with SQL injection protection." alt="" coords="143,5,318,60"/>
+<area shape="rect" id="Node000002" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="5,115,235,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,71,136,117,132,113,187,67"/>
+<area shape="rect" id="Node000003" href="$sqlite__security__storage_8cpp.html" title="Implementation of SQLite security storage with SQL injection protection." alt="" coords="259,108,423,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="274,67,321,106,317,110,271,71"/>
+</map>

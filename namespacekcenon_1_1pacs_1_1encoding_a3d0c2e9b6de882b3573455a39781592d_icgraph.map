@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::is_numeric_vr" name="kcenon::pacs::encoding::is_numeric_vr">
+<area shape="rect" id="Node000001" title="Checks if a VR is a numeric type." alt="" coords="448,210,623,250"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ad36e2c2bfce8582f7dd6e6c7f0dcd401" title="Get the value as a string." alt="" coords="227,5,381,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="512,200,464,137,433,103,398,73,380,62,383,58,402,69,437,99,468,133,516,197"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a2a3a337471b5afc15c77e9f764450e45" title="Decode a dataset from Explicit VR Big Endian format." alt="" coords="228,84,380,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="491,205,399,152,375,141,377,136,401,148,493,200"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a9a85c5108450869d8893c2ead8348e4d" title="Encode a dataset using Explicit VR Big Endian." alt="" coords="228,163,380,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="433,215,380,206,381,200,434,210"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1container__adapter.html#a3b7bcaeb729fd2f989c61cdac004a925" title="Convert a container value back to a DICOM element." alt="" coords="211,241,397,296"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="434,250,398,256,397,250,434,244"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration_1_1container__adapter.html#abdac9d2971d00757912c58cb6ca5d724" title="Check if a VR maps to a numeric value." alt="" coords="208,320,400,375"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="491,260,401,310,374,322,372,318,399,305,489,255"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration_1_1container__adapter.html#a718183fa22bd71a3e264730318e5accb" title="Convert a DICOM element to a container value." alt="" coords="211,399,397,453"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="516,263,468,325,436,359,402,388,381,401,378,396,398,384,433,355,464,322,511,260"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#aebc9371fd70d918732452614b0472f06" title="Get multi&#45;valued string as a list." alt="" coords="5,5,160,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="212,35,160,35,160,30,212,30"/>
+</map>

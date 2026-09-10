@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::web::make_success_json" name="kcenon::pacs::web::make_success_json">
+<area shape="rect" id="Node000001" title="Create success response with optional message." alt="" coords="483,170,633,210"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a13c9e513985d8a1cacf57b486af877af" title="Register security endpoints with the Crow app." alt="" coords="239,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,161,487,117,433,74,413,63,416,58,436,69,491,113,534,158"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#ac9517101718757dad409bdb97f2dd9d3" title=" " alt="" coords="247,84,419,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="486,168,411,141,413,136,488,163"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a7711ddd2d6c52c2297775ca7e0c74cd1" title=" " alt="" coords="241,320,425,375"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="533,223,490,267,436,310,413,322,411,318,433,305,486,263,529,219"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#af035c20d72c1c01462d1d2125e6c6dd7" title=" " alt="" coords="232,163,435,217"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="468,193,435,193,435,187,468,187"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a56f8aff8810e57ece41d3af36d9d2fd5" title=" " alt="" coords="239,241,427,296"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="488,217,413,244,411,239,486,212"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,170,184,210"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="242,69,233,74,199,97,167,124,116,172,113,168,163,120,196,93,231,69,240,64"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="238,146,157,172,155,167,236,141"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="242,316,231,310,164,260,113,212,117,208,167,256,233,305,245,311"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#acb7be94ae4cff0f0bcfe1937552eb2e7" title="Start the server (blocking)" alt="" coords="19,327,170,367"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="228,350,170,350,170,345,228,345"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="218,193,184,193,184,187,218,187"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="236,239,155,213,157,208,238,234"/>
+</map>

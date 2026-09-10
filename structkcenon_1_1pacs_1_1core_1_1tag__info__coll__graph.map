@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::core::tag_info" name="kcenon::pacs::core::tag_info">
+<area shape="rect" id="Node000001" title=" " alt="" coords="196,512,331,652"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="5,135,161,435"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,415,175,433,214,496,209,499,170,436,159,418"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1core_1_1value__multiplicity.html" title="Value Multiplicity (VM) specification." alt="" coords="185,165,341,405"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="266,405,266,496,261,496,261,405"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="366,252,483,317"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="413,319,356,436,319,499,315,497,352,433,408,317"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="345,5,504,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="427,100,427,252,422,252,422,100"/>
+</map>

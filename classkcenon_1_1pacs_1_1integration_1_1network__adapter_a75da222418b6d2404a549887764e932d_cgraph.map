@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::network_adapter::create_server" name="kcenon::pacs::integration::network_adapter::create_server">
+<area shape="rect" id="Node000001" title="Create a DICOM server using network_system." alt="" coords="5,5,243,45"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1integration_1_1tls__config.html#a2cf803e27624fbfb418287d8ab4d9380" title="Check if TLS configuration is valid." alt="" coords="291,5,477,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="243,23,277,23,277,28,243,28"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::lock_token::is_expired" name="kcenon::pacs::workflow::lock_token::is_expired">
+<area shape="rect" id="Node000001" title="Check if the token has expired." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1workflow_1_1lock__token.html#acf4a46955ddc9921e95f4afe9012ff8f" title="Check if the token is valid (not expired)" alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,23,214,23,214,28,180,28"/>
+</map>

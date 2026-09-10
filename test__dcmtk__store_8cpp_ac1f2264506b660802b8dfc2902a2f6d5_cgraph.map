@@ -1,0 +1,21 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,141,100,166"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="167,5,353,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="61,138,96,97,120,75,147,55,159,49,161,53,149,60,123,79,100,101,65,142"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a0ba3666d382f01405d049345ff04d5a3" title="Check if DCMTK is available on the system." alt="" coords="149,69,371,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="89,138,147,119,173,111,175,116,149,124,91,143"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__directory.html#a46116d9a5681b7ee490e032dd3442449" title=" " alt="" coords="166,133,354,173"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="100,151,153,151,153,156,100,156"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a959facb858086710ffab91cf0d0380a2" title="Run C&#45;STORE (storescu) client." alt="" coords="161,197,359,237"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="91,164,149,183,175,191,173,196,147,188,89,169"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a09d074f43a846b9c824953bf536a83f9" title="Check if pacs_system supports real TCP DICOM connections." alt="" coords="148,261,372,301"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="65,165,100,206,123,228,149,247,161,253,159,258,147,252,120,232,96,209,61,168"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="425,5,611,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="354,23,411,23,411,28,354,28"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#a378d43429576cb453524cdadfd31def8" title="Run a DCMTK tool and capture output." alt="" coords="420,69,616,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="371,87,406,87,406,92,371,92"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="673,26,859,81"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="616,72,659,66,659,71,617,78"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a39b86a50ebcefb7a9bfe2c9fbd37c0de" title="Run a process and wait for completion." alt="" coords="664,105,868,145"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="617,101,651,106,650,111,616,106"/>
+</map>

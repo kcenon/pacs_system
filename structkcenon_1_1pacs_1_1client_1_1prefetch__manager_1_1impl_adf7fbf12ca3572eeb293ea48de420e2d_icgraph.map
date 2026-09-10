@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::prefetch_manager::impl::increment_rule_stats" name="kcenon::pacs::client::prefetch_manager::impl::increment_rule_stats">
+<area shape="rect" id="Node000001" title=" " alt="" coords="515,5,701,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#a4ebbba9ac5844b25e11bf1c6d467f4d3" title="Process worklist items and trigger prefetch." alt="" coords="260,5,467,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="501,35,467,35,467,30,501,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#adf0e78cc04eeb961afa9d3bf75cf9c47" title="Process worklist items asynchronously." alt="" coords="5,5,212,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,35,212,35,212,30,247,30"/>
+</map>

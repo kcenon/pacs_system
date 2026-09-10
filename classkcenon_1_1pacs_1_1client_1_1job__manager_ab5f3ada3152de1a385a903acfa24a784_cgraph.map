@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::job_manager::~job_manager" name="kcenon::pacs::client::job_manager::~job_manager">
+<area shape="rect" id="Node000001" title="Destructor &#45; stops workers if running." alt="" coords="5,5,224,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#af6b00f8cfaa5a89d3ae6848e86ea9c76" title="Stop the worker threads." alt="" coords="272,5,481,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,23,259,23,259,28,224,28"/>
+</map>

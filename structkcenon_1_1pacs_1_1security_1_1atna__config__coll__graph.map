@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::security::atna_config" name="kcenon::pacs::security::atna_config">
+<area shape="rect" id="Node000001" title="Configuration for ATNA audit logging." alt="" coords="5,559,171,719"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="49,135,127,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,200,81,336,81,496,84,542,78,543,76,496,76,336,83,200"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1security_1_1syslog__transport__config.html" title="Configuration for the Syslog transport." alt="" coords="208,336,384,496"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="117,199,221,321,216,325,113,202"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="23,5,153,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,99,91,134,85,134,85,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="223,498,176,548,172,545,220,494"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::build_service_map" name="kcenon::pacs::network::v2::dicom_server_v2::build_service_map">
+<area shape="rect" id="Node000001" title="Build service map from registered services." alt="" coords="653,5,821,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a39319a4369eab2d82493276a382df3d6" title="Create and register a new handler for a session." alt="" coords="437,5,605,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="639,35,606,35,606,30,639,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#af7040892e5e9f48c689e74fcb6e7d452" title="Handle new connection from server." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="423,35,390,35,390,30,423,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#ac6bee78f25c0056c75bf82dfcbeec600" title="Start the server." alt="" coords="5,5,173,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="207,35,174,35,174,30,207,30"/>
+</map>

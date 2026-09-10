@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::sop_classes::is_mg_storage_sop_class" name="kcenon::pacs::services::sop_classes::is_mg_storage_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a Mammography Storage SOP Class." alt="" coords="815,84,1025,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#ab8ba941464647a336e79721f749275ab" title=" " alt="" coords="533,84,767,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="801,114,767,114,767,109,801,109"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#a859ef51cff42cdebc4edb77faa2d36ce" title="Validate a DICOM dataset against Mammography IOD." alt="" coords="269,84,485,139"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="520,114,486,114,486,109,520,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#adde89309bf8c455c11e0a48caaf3a8ff" title="Validate a For Presentation mammography dataset." alt="" coords="5,5,221,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="271,83,205,63,207,58,273,78"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1mg__iod__validator.html#ad38a597d74ba274c931575bc4ee44921" title="Validate a For Processing mammography dataset." alt="" coords="5,84,221,139"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="256,114,221,114,221,109,256,109"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a0c87754194885095a7ec341cc132551e" title="Validate a mammography dataset with default options." alt="" coords="29,163,198,217"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="273,145,199,167,198,162,271,140"/>
+</map>

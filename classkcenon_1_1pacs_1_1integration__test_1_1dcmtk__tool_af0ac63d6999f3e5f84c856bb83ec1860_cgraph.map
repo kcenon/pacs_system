@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::storescp" name="kcenon::pacs::integration_test::dcmtk_tool::storescp">
+<area shape="rect" id="Node000001" title="Start C&#45;STORE SCP (storescp) server." alt="" coords="5,170,204,210"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ad5b53a9a3951e6959fe7dfd40a38b97f" title="Start a DCMTK tool in background." alt="" coords="256,84,443,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,167,250,140,252,145,169,172"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#a04a3de5fddd9ac8d135540cba1b23d56" title="Stop the process." alt="" coords="252,163,447,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="204,187,238,187,238,193,204,193"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a8d5c12453d31f7731ffd8f53b5c9a69a" title="Wait for a port to be listening." alt="" coords="256,241,443,296"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="169,208,252,235,250,240,167,213"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#ac4278dd4a540dc330f7c648c37c7afa6" title="Find the full path to a DCMTK tool." alt="" coords="495,5,681,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="432,81,491,62,492,67,434,86"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a8cd6d97c1cc75c4c41d9c9ab4f64f348" title=" " alt="" coords="495,84,681,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="443,109,481,109,481,114,443,114"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#a6b0e200728163221c8f4c470992849a5" title="Stop a background process." alt="" coords="495,163,681,217"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="447,187,481,187,481,193,447,193"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1process__launcher.html#adc71a10b0361fa760bbd2b4209299f2c" title=" " alt="" coords="729,163,916,217"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="681,187,716,187,716,193,681,193"/>
+</map>

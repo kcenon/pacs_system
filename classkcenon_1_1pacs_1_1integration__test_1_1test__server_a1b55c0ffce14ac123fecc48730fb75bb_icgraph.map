@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration_test::test_server::ae_title" name="kcenon::pacs::integration_test::test_server::ae_title">
+<area shape="rect" id="Node000001" title=" " alt="" coords="148,73,340,113"/>
+<area shape="rect" id="Node000002" href="$test__connectivity_8cpp.html#aa9aa4dc6b7863da737e026a38b517ddd" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,70,85,33,87,28,180,65"/>
+<area shape="rect" id="Node000003" href="$test__connectivity_8cpp.html#a2a13f62ef8f7cc99bc6f6956785a5bfc" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,81,100,76,101,71,135,75"/>
+<area shape="rect" id="Node000004" href="$test__connectivity_8cpp.html#a1109067f3781e9440a1227335020122c" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="135,109,101,113,100,108,134,104"/>
+<area shape="rect" id="Node000005" href="$test__connectivity_8cpp.html#a6515941f8cf148f0048aa6a6e3a3bdf7" title=" " alt="" coords="5,153,100,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="179,120,88,156,86,151,177,115"/>
+</map>

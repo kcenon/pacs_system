@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::storage::node_repository::find_by_id" name="kcenon::pacs::storage::node_repository::find_by_id">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,213,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1node__repository.html#a7c09d411c780b64ac5754db45fef50d0" title=" " alt="" coords="261,5,471,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,23,247,23,247,28,214,28"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1client.html#a035113c25f989fbd2fe6658d831a484e" title="Parse node_status from string." alt="" coords="519,5,709,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="471,23,505,23,505,28,471,28"/>
+</map>

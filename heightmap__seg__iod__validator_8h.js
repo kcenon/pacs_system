@@ -1,0 +1,28 @@
+var heightmap__seg__iod__validator_8h =
+[
+    [ "kcenon::pacs::services::validation::heightmap_seg_validation_options", "structkcenon_1_1pacs_1_1services_1_1validation_1_1heightmap__seg__validation__options.html", "structkcenon_1_1pacs_1_1services_1_1validation_1_1heightmap__seg__validation__options" ],
+    [ "kcenon::pacs::services::validation::heightmap_seg_iod_validator", "classkcenon_1_1pacs_1_1services_1_1validation_1_1heightmap__seg__iod__validator.html", "classkcenon_1_1pacs_1_1services_1_1validation_1_1heightmap__seg__iod__validator" ],
+    [ "is_heightmap_segmentation", "heightmap__seg__iod__validator_8h.html#aa0f08c03ca3452320a650257d2bc93e5", null ],
+    [ "is_valid_heightmap_seg_dataset", "heightmap__seg__iod__validator_8h.html#ad4c9446a43b02dde2d3380cb02a9ddb7", null ],
+    [ "validate_heightmap_seg_iod", "heightmap__seg__iod__validator_8h.html#a9dc6ccfe4ba167c572df7f46e562380f", null ],
+    [ "anatomic_region_sequence", "heightmap__seg__iod__validator_8h.html#a891d39d28297e9fd01946111ccd682f6", null ],
+    [ "device_serial_number", "heightmap__seg__iod__validator_8h.html#a8f2609201005d23a92854482c69d29a9", null ],
+    [ "dimension_index_sequence", "heightmap__seg__iod__validator_8h.html#a87b1817a14e034c1c85e31f8132c065c", null ],
+    [ "dimension_organization_sequence", "heightmap__seg__iod__validator_8h.html#a2fe544159015384c1445e8ff4c182610", null ],
+    [ "image_laterality", "heightmap__seg__iod__validator_8h.html#a17c670051bbfa20d32b0d0e383e899e5", null ],
+    [ "manufacturer", "heightmap__seg__iod__validator_8h.html#a878ae87aef9add712f05a95c1bfeea96", null ],
+    [ "manufacturer_model_name", "heightmap__seg__iod__validator_8h.html#a34da247508fbd0911a1675100cb2bf00", null ],
+    [ "modality", "heightmap__seg__iod__validator_8h.html#a9a05f11aed5c1f2a489511a9e145b056", null ],
+    [ "number_of_frames", "heightmap__seg__iod__validator_8h.html#a58c01e04b7385aa3def880bee6e3bff9", null ],
+    [ "per_frame_functional_groups_sequence", "heightmap__seg__iod__validator_8h.html#ae5e554f9be9691df906ce50399ae5267", null ],
+    [ "referenced_series_sequence", "heightmap__seg__iod__validator_8h.html#ab60def0a50342cc4ef167fec47efe530", null ],
+    [ "segment_algorithm_type", "heightmap__seg__iod__validator_8h.html#af9a859786e0ba5fe07334d6123a9412d", null ],
+    [ "segment_label", "heightmap__seg__iod__validator_8h.html#a0622ad8e73f97bbfdc6f5e08d2f32bc1", null ],
+    [ "segment_number", "heightmap__seg__iod__validator_8h.html#a7f92ab746605fc5e2851c0b8af6af07e", null ],
+    [ "segment_sequence", "heightmap__seg__iod__validator_8h.html#a12ffb601a16a7587266fac273b0a145d", null ],
+    [ "segmentation_type", "heightmap__seg__iod__validator_8h.html#adbc033afa22899c1a506f124ee43978b", null ],
+    [ "segmented_property_category_code_sequence", "heightmap__seg__iod__validator_8h.html#a6560545a0242f568613e05a6e1c699f2", null ],
+    [ "segmented_property_type_code_sequence", "heightmap__seg__iod__validator_8h.html#a852839b7148c26ac5a1172839b127d97", null ],
+    [ "shared_functional_groups_sequence", "heightmap__seg__iod__validator_8h.html#a54c608e9e198f686e80b4a6780913d7a", null ],
+    [ "software_versions", "heightmap__seg__iod__validator_8h.html#a8b0eb23f59a0caac4543c0af374de245", null ]
+];

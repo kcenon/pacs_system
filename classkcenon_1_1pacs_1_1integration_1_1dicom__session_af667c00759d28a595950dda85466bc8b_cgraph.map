@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::dicom_session::~dicom_session" name="kcenon::pacs::integration::dicom_session::~dicom_session">
+<area shape="rect" id="Node000001" title="Destructor (closes session if open)" alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#ac2a1033900838966fa2d83ce344edf0f" title="Close the session." alt="" coords="240,13,427,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::query_scu::find_studies" name="kcenon::pacs::services::query_scu::find_studies">
+<area shape="rect" id="Node000001" title="Query for studies." alt="" coords="509,53,692,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a93d047266e4b059206949fa9e24625cc" title="Query remote PACS for prior studies." alt="" coords="259,5,434,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="496,59,434,49,434,44,496,54"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="232,84,461,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="496,91,462,97,461,91,496,86"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,91,184,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,114,184,114,184,109,218,109"/>
+</map>

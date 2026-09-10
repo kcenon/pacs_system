@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::auth::oauth2_middleware::verify_signature" name="kcenon::pacs::web::auth::oauth2_middleware::verify_signature">
+<area shape="rect" id="Node000001" title="Verify token signature using JWKS keys." alt="" coords="5,45,193,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#abd94c7e33418116efb2d631632ecfed9" title="Verify ES256 (ECDSA&#45;SHA256) signature." alt="" coords="241,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,53,227,46,228,52,194,58"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#af4d100a0eebc5ed5b594becc59032ff7" title="Verify RS256 (RSA&#45;SHA256) signature." alt="" coords="241,84,392,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,87,228,93,227,98,193,92"/>
+</map>

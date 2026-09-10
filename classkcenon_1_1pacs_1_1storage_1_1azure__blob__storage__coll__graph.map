@@ -1,0 +1,32 @@
+<map id="kcenon::pacs::storage::azure_blob_storage" name="kcenon::pacs::storage::azure_blob_storage">
+<area shape="rect" id="Node000001" title=" " alt="" coords="403,1460,580,1820"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1storage__interface.html" title=" " alt="" coords="5,1037,169,1397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,1390,184,1396,236,1450,293,1500,404,1582,401,1586,289,1505,232,1454,180,1399,176,1394"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1storage_1_1azure__storage__config.html" title="Configuration for Azure Blob storage." alt="" coords="417,753,600,1013"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="508,1013,507,1037,498,1444,493,1444,502,1037,503,1013"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="752,135,831,200"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="752,175,725,180,696,190,670,205,648,225,639,257,633,315,630,474,629,634,627,695,622,730,612,748,607,745,617,728,622,694,624,634,625,474,628,315,633,256,644,223,666,200,694,185,723,175,751,170"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="572,1163,725,1272"/>
+<area shape="poly" id="edge10_Node000010_Node000004" title=" " alt="" coords="795,200,799,378,801,634,795,876,788,964,775,1015,767,1024,758,1029,749,1032,740,1039,703,1092,676,1149,671,1146,699,1090,736,1036,746,1028,756,1024,764,1020,770,1012,782,963,790,876,796,634,794,378,790,200"/>
+<area shape="rect" id="Node000011" href="$structkcenon_1_1pacs_1_1storage_1_1azure__blob__info.html" title="Information about an Azure Blob object." alt="" coords="861,522,1017,602"/>
+<area shape="poly" id="edge12_Node000011_Node000004" title=" " alt="" coords="806,199,921,506,916,507,801,201"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="726,5,857,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="794,99,794,134,789,134,789,99"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="194,1163,386,1272"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="318,1271,401,1444,396,1446,313,1273"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1storage_1_1azure__blob__storage_1_1azure__client__interface.html" title="Abstract interface for Azure Blob client operations." alt="" coords="72,395,265,729"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="153,730,151,797,153,869,161,942,175,1012,203,1072,248,1147,244,1150,199,1075,170,1014,155,943,148,870,145,797,147,730"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="290,529,439,595"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="350,608,321,669,301,701,279,731,269,739,260,743,252,747,246,755,226,807,216,862,214,918,219,974,228,1028,241,1079,269,1162,264,1163,236,1080,223,1030,213,975,208,918,210,861,221,805,241,752,249,743,257,738,266,734,275,727,297,698,316,667,346,606"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="385,135,408,200"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="388,186,377,204,369,225,355,302,352,381,354,454,360,513,355,513,349,454,346,381,350,302,363,223,372,202,383,183"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="463,522,607,602"/>
+<area shape="poly" id="edge15_Node000012_Node000009" title=" " alt="" coords="407,200,428,277,457,370,513,506,508,508,451,372,422,279,402,201"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="631,1273,566,1446,562,1444,626,1271"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="942,602,937,687,919,797,902,855,880,913,850,967,812,1015,793,1027,775,1029,757,1030,740,1039,717,1063,698,1090,671,1148,666,1146,694,1088,713,1060,736,1035,756,1025,775,1024,792,1022,808,1011,846,964,875,911,897,854,914,796,932,686,937,602"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="560,614,584,679,605,753,625,930,647,1162,641,1163,620,930,599,754,579,681,555,616"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="525,135,548,200"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="539,200,538,506,533,506,534,200"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="749,1185,884,1250"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="809,1251,782,1321,763,1361,740,1399,707,1443,670,1484,594,1558,590,1554,666,1481,703,1439,736,1396,758,1358,778,1319,804,1249"/>
+</map>

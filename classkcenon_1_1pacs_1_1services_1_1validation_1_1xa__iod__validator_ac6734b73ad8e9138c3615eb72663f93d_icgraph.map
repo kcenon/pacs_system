@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::xa_iod_validator::validate" name="kcenon::pacs::services::validation::xa_iod_validator::validate">
+<area shape="rect" id="Node000001" title="Validate a DICOM dataset against XA IOD." alt="" coords="264,45,475,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a25f7489aa36216276e4237dadf4efb44" title="Validate a multi&#45;frame XA dataset." alt="" coords="5,5,216,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,57,216,52,216,46,251,52"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#acabeff18a85e3a115c2d7912948f26d8" title="Validate an XA dataset with default options." alt="" coords="26,84,195,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="251,93,196,101,195,96,250,88"/>
+</map>

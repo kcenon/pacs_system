@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration::connection_config" name="kcenon::pacs::integration::connection_config">
+<area shape="rect" id="Node000001" title="Configuration for client connections." alt="" coords="59,377,237,497"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,192,110,257"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,257,123,361,118,363,80,258"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,99,73,192,68,192,68,99"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1integration_1_1tls__config.html" title="Configuration for TLS/SSL secure transport." alt="" coords="135,135,313,315"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,316,177,363,172,361,189,314"/>
+</map>

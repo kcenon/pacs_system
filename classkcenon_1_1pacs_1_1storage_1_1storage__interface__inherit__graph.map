@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::storage::storage_interface" name="kcenon::pacs::storage::storage_interface">
+<area shape="rect" id="Node000001" title=" " alt="" coords="386,5,550,365"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1test_1_1MockStorage.html" title=" " alt="" coords="5,473,157,853"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="376,240,324,274,269,315,217,362,172,415,137,474,133,471,167,412,213,358,266,311,321,270,373,236"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1azure__blob__storage.html" title=" " alt="" coords="182,453,359,873"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="388,379,373,414,357,454,352,452,368,412,383,377"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html" title=" " alt="" coords="383,443,553,883"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="471,379,471,443,465,443,465,379"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1hsm__storage.html" title=" " alt="" coords="577,413,749,913"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="553,377,568,412,579,440,574,442,563,414,548,379"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1storage_1_1s3__storage.html" title=" " alt="" coords="773,453,929,873"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="564,238,615,272,668,312,719,359,763,412,788,452,784,455,759,415,715,363,664,317,611,276,561,242"/>
+</map>

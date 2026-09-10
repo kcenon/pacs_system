@@ -1,0 +1,30 @@
+<map id="worklist_cli::worklist_result_formatter::format" name="worklist_cli::worklist_result_formatter::format">
+<area shape="rect" id="Node000001" title="Format worklist results." alt="" coords="5,165,192,205"/>
+<area shape="rect" id="Node000002" href="$classworklist__cli_1_1worklist__result__formatter.html#aa40d3b204e93972dad19a8761f5828c7" title="Format results as CSV." alt="" coords="245,69,461,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,163,239,119,262,111,263,116,241,124,141,168"/>
+<area shape="rect" id="Node000006" href="$classworklist__cli_1_1worklist__result__formatter.html#a9c218afd582318e2bd45c8539f3a7b2c" title="Format results as JSON." alt="" coords="243,133,464,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="192,171,229,166,229,172,192,176"/>
+<area shape="rect" id="Node000008" href="$classworklist__cli_1_1worklist__result__formatter.html#a8876822c4610107bd401fa44dd53c127" title="Format results as a human&#45;readable table." alt="" coords="240,197,467,237"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="192,194,226,199,226,204,192,200"/>
+<area shape="rect" id="Node000012" href="$classworklist__cli_1_1worklist__result__formatter.html#a6953000a9487d4c66f5f97127f8d30f1" title="Format results as XML." alt="" coords="244,261,463,301"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="141,203,241,247,263,255,262,260,239,252,139,208"/>
+<area shape="rect" id="Node000003" href="$classworklist__cli_1_1worklist__result__formatter.html#a7765cf4158609749c8d6272d31764844" title="Escape string for CSV output." alt="" coords="519,5,737,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="439,67,528,46,529,51,441,72"/>
+<area shape="rect" id="Node000004" href="$classworklist__cli_1_1worklist__result__formatter.html#aac9fbc413e56d977b3920e5e78bfe280" title="Extract worklist item data from dataset." alt="" coords="515,133,741,173"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="441,107,529,128,528,133,439,112"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="789,126,944,181"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="741,151,776,151,776,156,741,156"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="464,151,501,151,501,156,464,156"/>
+<area shape="rect" id="Node000007" href="$classworklist__cli_1_1worklist__result__formatter.html#a034517d2b9b2d7134113204e57a17561" title="Escape string for JSON output." alt="" coords="517,69,739,109"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="439,131,528,110,529,115,441,136"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="439,195,528,174,529,179,441,200"/>
+<area shape="rect" id="Node000009" href="$classworklist__cli_1_1worklist__result__formatter.html#a3fcb5dfa1a83840f38bf21d658c1a558" title="Format DICOM date (YYYYMMDD) for display." alt="" coords="517,197,739,237"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="467,215,503,215,503,220,467,220"/>
+<area shape="rect" id="Node000010" href="$classworklist__cli_1_1worklist__result__formatter.html#a16e6d79ba6117e164117d368746d97f0" title="Format DICOM time (HHMMSS) for display." alt="" coords="516,261,740,301"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="441,235,529,256,528,261,439,240"/>
+<area shape="rect" id="Node000011" href="$classworklist__cli_1_1worklist__result__formatter.html#a09d67e3c08a45dbfa492f6159c2030a9" title="Truncate string to max length." alt="" coords="529,325,727,365"/>
+<area shape="poly" id="edge12_Node000008_Node000011" title=" " alt="" coords="446,235,468,247,485,263,493,280,501,296,516,311,525,317,523,321,513,315,497,299,488,283,480,267,465,251,444,240"/>
+<area shape="poly" id="edge15_Node000012_Node000004" title=" " alt="" coords="444,259,465,247,480,232,488,216,497,199,513,183,523,177,525,182,516,187,501,203,493,219,485,235,468,251,446,264"/>
+<area shape="rect" id="Node000013" href="$classworklist__cli_1_1worklist__result__formatter.html#ada12bc827681ecb4551d8d767fa44e7e" title="Escape string for XML output." alt="" coords="517,389,739,429"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="384,299,444,337,516,375,535,382,533,387,514,380,441,342,381,304"/>
+</map>

@@ -1,0 +1,26 @@
+<map id="include/kcenon/pacs/monitoring/pacs_metrics.h" name="include/kcenon/pacs/monitoring/pacs_metrics.h">
+<area shape="rect" id="Node000001" title="Operation metrics collection for PACS DICOM services." alt="" coords="420,5,619,45"/>
+<area shape="rect" id="Node000002" href="$dicom__association__collector_8h.html" title="DICOM Association metrics collector." alt="" coords="39,93,261,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="432,51,254,96,253,91,431,46"/>
+<area shape="rect" id="Node000003" href="$pacs__monitor_8h.html" title="Unified PACS monitoring with IMonitor interface integration." alt="" coords="418,196,618,236"/>
+<area shape="poly" id="edge14_Node000001_Node000003" title=" " alt="" coords="522,59,521,195,515,195,516,59"/>
+<area shape="rect" id="Node000004" href="$pacs-monitoring_8cppm.html" title="C++20 module partition for system monitoring." alt="" coords="323,284,574,309"/>
+<area shape="poly" id="edge15_Node000001_Node000004" title=" " alt="" coords="406,28,299,32,187,42,135,51,89,62,53,77,29,95,15,115,9,134,10,151,16,167,29,182,47,196,95,221,155,242,222,258,351,281,350,287,221,264,154,247,93,226,44,200,25,186,12,170,4,152,4,133,10,113,25,91,51,72,88,57,134,45,186,37,299,26,406,23"/>
+<area shape="rect" id="Node000005" href="$dicom__metrics__collector_8h.html" title="CRTP&#45;based unified DICOM metrics collector." alt="" coords="285,93,481,148"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="482,55,423,95,420,91,479,51"/>
+<area shape="rect" id="Node000006" href="$dicom__service__collector_8h.html" title="DICOM DIMSE Service metrics collector." alt="" coords="557,93,751,148"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="559,51,618,91,614,95,556,55"/>
+<area shape="rect" id="Node000007" href="$dicom__storage__collector_8h.html" title="DICOM Storage metrics collector." alt="" coords="776,93,972,148"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="605,46,776,91,775,96,604,52"/>
+<area shape="rect" id="Node000008" href="$pacs__metrics_8cpp.html" title="Implementation of operation metrics collection for PACS DICOM services." alt="" coords="996,101,1147,141"/>
+<area shape="poly" id="edge16_Node000001_Node000008" title=" " alt="" coords="633,35,800,57,985,91,1014,98,1013,103,984,96,799,63,632,41"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="267,149,444,193,443,199,266,154"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="208,153,430,282,428,286,206,157"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="494,248,461,285,457,282,490,245"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="434,154,492,194,489,198,431,158"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="390,162,396,198,408,235,424,261,440,282,436,286,419,264,403,237,391,199,384,163"/>
+<area shape="poly" id="edge9_Node000006_Node000003" title=" " alt="" coords="606,158,547,198,544,194,603,154"/>
+<area shape="poly" id="edge10_Node000006_Node000004" title=" " alt="" coords="658,162,651,201,644,221,632,238,613,255,591,269,543,286,542,281,589,264,610,251,628,234,639,218,646,200,652,161"/>
+<area shape="poly" id="edge12_Node000007_Node000003" title=" " alt="" coords="763,154,591,199,589,193,762,148"/>
+<area shape="poly" id="edge13_Node000007_Node000004" title=" " alt="" coords="821,158,746,199,660,238,577,267,501,287,500,281,576,261,658,234,743,194,818,153"/>
+</map>
