@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::services::storage_scp::set_post_store_handler" name="kcenon::pacs::services::storage_scp::set_post_store_handler">
+<area shape="rect" id="Node000001" title=" " alt="" coords="501,39,672,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a006909e16f412d1f7e521e1006c1dca0" title="Attach to a Storage SCP for automatic routing." alt="" coords="13,5,204,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="487,62,204,42,204,37,488,56"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#ac4e6b96c23896af5f00fe374070c9f97" title="Detach from the currently attached Storage SCP." alt="" coords="260,71,453,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="488,82,454,87,453,82,488,77"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="246,72,203,60,205,55,247,67"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a1fe23fc6c7744646942624ba3567ff04" title="Destructor." alt="" coords="5,84,212,139"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="246,107,212,108,212,103,246,101"/>
+</map>

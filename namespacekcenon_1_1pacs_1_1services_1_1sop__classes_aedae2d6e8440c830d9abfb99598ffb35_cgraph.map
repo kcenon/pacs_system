@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_mammography_sop_class" name="kcenon::pacs::services::sop_classes::is_mammography_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a mammography SOP Class." alt="" coords="5,5,240,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#ab1f72eae5f3ab599f5de19c4bba4a8dc" title="Get information about a specific DX SOP Class." alt="" coords="288,5,457,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,30,274,30,274,35,240,35"/>
+</map>

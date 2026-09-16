@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::example::pacs_server_app::request_shutdown" name="kcenon::pacs::example::pacs_server_app::request_shutdown">
+<area shape="rect" id="Node000001" title="Request shutdown." alt="" coords="5,5,201,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1example_1_1pacs__server__app.html#ab9eabd8cdcb07b11449fe0c47377250f" title="Stop the server gracefully." alt="" coords="249,13,424,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,30,235,30,235,35,201,35"/>
+</map>

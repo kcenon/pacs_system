@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::validation::wsi_iod_validator::check_type2_attribute" name="kcenon::pacs::services::validation::wsi_iod_validator::check_type2_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="745,99,923,168"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#a03fce1214ae93254dc6fe4a3e99fb789" title=" " alt="" coords="467,5,671,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="731,100,667,77,669,72,733,95"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#af5bfda971c8aa3e941dc374bd42ac1b5" title=" " alt="" coords="467,99,671,168"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="732,136,671,136,671,131,732,131"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#af717cc962476fc935c9b3e5f28fb310e" title=" " alt="" coords="440,193,697,247"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="733,171,698,183,659,195,657,190,697,177,731,166"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#adb47f5cd69b9efe6f100a965c20c6081" title="Validate a DICOM dataset against WSI IOD." alt="" coords="223,106,392,161"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="459,82,385,108,384,103,457,77"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ae077f15a55dc453a0b22cc6be879315b" title="Validate a WSI dataset with default options." alt="" coords="5,106,175,161"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,136,175,136,175,131,209,131"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="453,136,392,136,392,131,453,131"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="465,191,439,183,383,163,385,158,441,177,467,186"/>
+</map>

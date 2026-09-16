@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::start" name="kcenon::pacs::network::v2::dicom_association_handler::start">
+<area shape="rect" id="Node000001" title="Start processing the session." alt="" coords="5,45,180,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#aeddb38228e89fc05eea5908dcdae4018" title="Report error through callback." alt="" coords="228,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,54,214,48,215,53,181,60"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a37fa4480e72290d497dee3a530bea88f" title="Update last activity timestamp." alt="" coords="228,84,403,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,85,215,91,214,96,180,90"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a698c6d4ad6413b8a6d8be0e35d6852df" title="Get the session identifier." alt="" coords="451,5,625,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="403,30,437,30,437,35,403,35"/>
+</map>

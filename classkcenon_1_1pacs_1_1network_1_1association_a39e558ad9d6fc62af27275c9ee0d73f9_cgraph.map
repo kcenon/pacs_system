@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::association::accept" name="kcenon::pacs::network::association::accept">
+<area shape="rect" id="Node000001" title="Accept an incoming SCP association." alt="" coords="5,53,173,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a7a248e63aa4c3004790316536ac86011" title="Build presentation context map from accepted contexts." alt="" coords="225,5,393,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,55,211,48,212,53,174,60"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#af26180c5943154974e63f126a177c9d3" title="Negotiate presentation contexts for SCP." alt="" coords="221,84,396,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,85,208,91,207,96,173,90"/>
+</map>

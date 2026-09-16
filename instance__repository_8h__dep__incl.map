@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/instance_repository.h" name="include/kcenon/pacs/storage/instance_repository.h">
+<area shape="rect" id="Node000001" title="Repository for instance metadata persistence using base_repository pattern." alt="" coords="117,5,335,45"/>
+<area shape="rect" id="Node000002" href="$index__database_8cpp.html" title="Implementation of PACS index database." alt="" coords="5,101,233,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,56,136,102,132,98,190,52"/>
+<area shape="rect" id="Node000003" href="$instance__repository_8cpp.html" title="Implementation of the instance repository." alt="" coords="257,93,411,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,52,312,91,308,95,259,56"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::workflow::task_scheduler::stop" name="kcenon::pacs::workflow::task_scheduler::stop">
+<area shape="rect" id="Node000001" title="Stop the scheduler service." alt="" coords="228,13,403,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a8e0090db3ef6578eae33be6c9e9a0d64" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,5,180,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,35,180,35,180,30,214,30"/>
+</map>

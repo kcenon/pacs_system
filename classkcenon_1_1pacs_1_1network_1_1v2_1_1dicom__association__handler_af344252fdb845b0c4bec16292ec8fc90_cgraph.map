@@ -1,0 +1,83 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::handle_p_data_tf" name="kcenon::pacs::network::v2::dicom_association_handler::handle_p_data_tf">
+<area shape="rect" id="Node000001" title="Handle P&#45;DATA&#45;TF PDU." alt="" coords="5,352,204,407"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a8042a19b3e0ad85e435eab1540468463" title="Get all accepted presentation contexts." alt="" coords="534,5,705,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,351,125,297,153,229,172,194,194,159,220,128,250,101,281,81,314,65,385,43,456,31,520,27,521,32,456,36,386,48,316,70,284,86,254,105,224,132,198,163,176,196,158,231,130,299,115,353"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a864866bc36d600a70f070bcfb71f124d" title="Close and cleanup." alt="" coords="271,312,447,367"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="204,361,257,353,258,358,205,366"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1association.html#aa56fdc4f1f53dc0d99ec6441c08f6610" title="Get the transfer syntax for an accepted context." alt="" coords="275,391,443,445"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="205,392,262,401,261,406,204,397"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a33ab110ea91a37ab3aa5c3a56ff626b3" title="Decode a DIMSE message from bytes." alt="" coords="267,469,451,524"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="155,404,253,454,270,462,268,466,251,459,153,409"/>
+<area shape="rect" id="Node000024" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#afd145eb73eeb8182004e862125a70688" title="Decode a P&#45;DATA&#45;TF PDU." alt="" coords="275,765,443,820"/>
+<area shape="poly" id="edge30_Node000001_Node000024" title=" " alt="" coords="125,406,336,752,332,755,121,408"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a0bcf606d2a21d40e6164976418f53198" title="Dispatch DIMSE message to appropriate service." alt="" coords="252,116,467,171"/>
+<area shape="poly" id="edge37_Node000001_Node000028" title=" " alt="" coords="126,350,181,288,250,219,303,177,307,181,254,223,185,292,130,354"/>
+<area shape="rect" id="Node000031" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#aeddb38228e89fc05eea5908dcdae4018" title="Report error through callback." alt="" coords="272,233,447,288"/>
+<area shape="poly" id="edge41_Node000001_Node000031" title=" " alt="" coords="151,350,251,297,265,291,267,296,253,302,153,354"/>
+<area shape="rect" id="Node000032" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1cb0df8e1dcd4d52493b1181abbc79e7" title="Send A&#45;ABORT PDU." alt="" coords="272,935,447,989"/>
+<area shape="poly" id="edge43_Node000001_Node000032" title=" " alt="" coords="114,406,130,482,159,589,200,711,226,772,254,830,287,880,323,923,319,926,283,883,250,833,221,774,195,713,154,591,125,483,109,407"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a698c6d4ad6413b8a6d8be0e35d6852df" title="Get the session identifier." alt="" coords="532,241,707,296"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="447,313,518,293,519,299,448,318"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1c442d6de6ec7f4d7ef08877a8b2cc47" title="Transition to new state." alt="" coords="532,320,707,375"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="448,339,518,342,518,347,447,345"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#ac88bc3681095093e41f45e674c1a7122" title="Decode bytes to a dataset using Explicit VR Little Endian." alt="" coords="520,531,719,571"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="452,513,511,526,510,531,451,519"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#ac1817a17571247687fad66001cc4a779" title="Decode bytes to a dataset using Implicit VR Little Endian." alt="" coords="520,399,719,439"/>
+<area shape="poly" id="edge19_Node000007_Node000018" title=" " alt="" coords="451,467,538,441,539,446,452,472"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a902eb0686d900e516c773857cfe0cea0" title="Check if a command field represents a request." alt="" coords="535,467,703,507"/>
+<area shape="poly" id="edge29_Node000007_Node000023" title=" " alt="" coords="451,491,522,488,522,493,451,496"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#a5e1e19e77a8fa3c7baae4f450f081890" title="Decode a single element from bytes." alt="" coords="772,525,971,580"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="719,549,758,549,758,555,719,555"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="786,461,957,501"/>
+<area shape="poly" id="edge16_Node000008_Node000015" title=" " alt="" coords="691,529,785,502,787,507,692,534"/>
+<area shape="rect" id="Node000017" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="799,397,944,437"/>
+<area shape="poly" id="edge18_Node000008_Node000017" title=" " alt="" coords="702,529,722,517,738,501,746,483,754,465,770,447,784,438,787,442,774,451,758,468,751,485,742,503,726,521,705,534"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#a506fe8bfc4dc910929678b2008bf3f9c" title=" " alt="" coords="1030,509,1229,564"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="971,544,1016,541,1016,546,971,549"/>
+<area shape="rect" id="Node000013" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa6eb56fd1ffc16dd50fb102224dcae6d" title="Parses a two&#45;character string to a vr_type." alt="" coords="1042,445,1217,485"/>
+<area shape="poly" id="edge14_Node000009_Node000013" title=" " alt="" coords="940,523,1018,494,1042,486,1044,491,1020,499,942,528"/>
+<area shape="rect" id="Node000014" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="1031,639,1227,679"/>
+<area shape="poly" id="edge15_Node000009_Node000014" title=" " alt="" coords="929,578,1020,618,1056,632,1054,637,1018,623,927,583"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1encoding_1_1explicit__vr__codec.html#a90315ebc0df0b81cffc11ccbf521b88d" title=" " alt="" coords="1311,575,1510,629"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="1230,557,1298,573,1297,578,1228,562"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af5d554755e5a71cf427553bccecd8c83" title="Get mutable access to sequence items." alt="" coords="1288,413,1533,453"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="1205,507,1239,494,1343,455,1345,460,1241,499,1207,512"/>
+<area shape="poly" id="edge11_Node000011_Node000008" title=" " alt="" coords="1372,632,1312,666,1277,682,1241,694,1159,706,1076,706,993,695,914,677,839,654,772,628,668,580,670,575,774,623,841,649,915,672,994,690,1076,701,1159,701,1239,689,1275,677,1310,662,1369,627"/>
+<area shape="poly" id="edge12_Node000011_Node000009" title=" " alt="" coords="1311,600,1172,592,1018,578,984,574,985,568,1019,573,1173,586,1311,595"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="1049,381,1209,421"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="934,458,970,446,1018,430,1044,422,1046,427,1019,435,972,451,935,463"/>
+<area shape="poly" id="edge27_Node000018_Node000015" title=" " alt="" coords="703,437,776,455,775,460,702,442"/>
+<area shape="poly" id="edge28_Node000018_Node000017" title=" " alt="" coords="719,416,785,415,785,420,719,421"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#a1af44ee6769ccc741badca4d53e26582" title="Decode a single element from bytes." alt="" coords="772,285,971,340"/>
+<area shape="poly" id="edge20_Node000018_Node000019" title=" " alt="" coords="687,397,723,384,807,344,810,349,725,388,689,402"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#a2e71902611adde0c1a83837eafd5ef9a" title=" " alt="" coords="1030,301,1229,356"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="971,316,1016,319,1016,324,971,321"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dictionary.html#a61e6f014998895ace442c0292471094d" title="Get the singleton instance." alt="" coords="1055,171,1204,225"/>
+<area shape="poly" id="edge26_Node000019_Node000022" title=" " alt="" coords="929,283,1018,242,1049,228,1051,233,1020,247,931,288"/>
+<area shape="poly" id="edge25_Node000020_Node000012" title=" " alt="" coords="1207,354,1241,366,1345,405,1343,410,1239,371,1205,359"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#a2165514cb3e4e3a2fe9f162def93e4c2" title=" " alt="" coords="1311,236,1510,291"/>
+<area shape="poly" id="edge22_Node000020_Node000021" title=" " alt="" coords="1228,303,1297,287,1298,292,1230,308"/>
+<area shape="poly" id="edge23_Node000021_Node000018" title=" " alt="" coords="1376,238,1315,195,1278,175,1239,161,1179,146,1130,143,1081,148,1019,161,943,177,884,195,831,224,774,274,763,289,757,303,751,331,746,359,738,374,726,388,718,394,715,390,722,384,734,371,741,357,746,330,752,301,758,286,770,271,828,220,882,190,941,172,1018,155,1080,143,1130,137,1179,141,1241,155,1280,170,1318,191,1379,234"/>
+<area shape="poly" id="edge24_Node000021_Node000019" title=" " alt="" coords="1311,270,1173,278,1019,291,985,296,984,290,1018,286,1172,272,1311,264"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#af222f7bc86bfedd75aba6d09c06db4de" title="Check if a complete PDU is available in the buffer." alt="" coords="775,805,968,845"/>
+<area shape="poly" id="edge31_Node000024_Node000025" title=" " alt="" coords="444,795,761,815,761,820,443,801"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a9686787c3e255a12501de5e5ff3eea23" title="Read a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1019,805,1240,845"/>
+<area shape="poly" id="edge33_Node000024_Node000026" title=" " alt="" coords="444,785,681,778,826,780,971,790,1032,799,1031,805,970,795,826,785,681,783,444,790"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#acc5535c405be98be76cd656e82bbc2d0" title="Validate PDU header and extract length." alt="" coords="532,856,707,911"/>
+<area shape="poly" id="edge34_Node000024_Node000027" title=" " alt="" coords="439,818,529,849,527,854,438,823"/>
+<area shape="poly" id="edge32_Node000025_Node000026" title=" " alt="" coords="968,822,1005,822,1005,827,968,827"/>
+<area shape="poly" id="edge35_Node000027_Node000025" title=" " alt="" coords="706,860,771,845,772,850,707,866"/>
+<area shape="poly" id="edge36_Node000027_Node000026" title=" " alt="" coords="707,877,832,869,970,854,1026,845,1027,850,971,859,832,874,707,882"/>
+<area shape="poly" id="edge38_Node000028_Node000002" title=" " alt="" coords="415,113,514,69,529,62,531,67,516,74,418,118"/>
+<area shape="rect" id="Node000029" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#aeaec0c446957454404fa033695b3d8ca" title="Get the command field." alt="" coords="527,163,711,217"/>
+<area shape="poly" id="edge39_Node000028_Node000029" title=" " alt="" coords="467,160,514,168,513,174,466,165"/>
+<area shape="rect" id="Node000030" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a3e1b70c9d6d0f2ae3a36811672ac4eca" title="Find service for SOP Class UID." alt="" coords="532,84,707,139"/>
+<area shape="poly" id="edge40_Node000028_Node000030" title=" " alt="" coords="466,127,518,121,519,126,467,133"/>
+<area shape="poly" id="edge42_Node000031_Node000004" title=" " alt="" coords="447,261,518,263,518,268,447,266"/>
+<area shape="rect" id="Node000033" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#abe44615d02dc30dd1450a555cd94c0a6" title="Encodes an A&#45;ABORT PDU." alt="" coords="515,1014,724,1054"/>
+<area shape="poly" id="edge44_Node000032_Node000033" title=" " alt="" coords="447,984,534,1008,533,1013,446,989"/>
+<area shape="rect" id="Node000035" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#addf91d7f3c19451c6c50f7ea922cebc8" title="Send raw PDU data." alt="" coords="532,935,707,989"/>
+<area shape="poly" id="edge46_Node000032_Node000035" title=" " alt="" coords="447,959,518,959,518,965,447,965"/>
+<area shape="rect" id="Node000034" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a072ecc5e4e38fc2897e62ef6d4327d44" title="Writes a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="787,1007,955,1061"/>
+<area shape="poly" id="edge45_Node000033_Node000034" title=" " alt="" coords="724,1031,774,1031,774,1037,724,1037"/>
+</map>

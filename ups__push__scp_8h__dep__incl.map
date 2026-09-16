@@ -1,0 +1,15 @@
+<map id="include/kcenon/pacs/services/ups/ups_push_scp.h" name="include/kcenon/pacs/services/ups/ups_push_scp.h">
+<area shape="rect" id="Node000001" title="DICOM UPS (Unified Procedure Step) Push SCP service." alt="" coords="323,5,536,45"/>
+<area shape="rect" id="Node000002" href="$ups__push__scu_8h.html" title="DICOM UPS (Unified Procedure Step) Push SCU service." alt="" coords="115,93,328,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="372,53,268,96,266,91,370,48"/>
+<area shape="rect" id="Node000006" href="$ups__push__scp_8cpp.html" title="Implementation of the UPS (Unified Procedure Step) Push SCP service." alt="" coords="353,93,506,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="432,59,432,93,427,93,427,59"/>
+<area shape="rect" id="Node000007" href="$ups__watch__scp_8cpp.html" title="Implementation of the UPS Watch SCP service." alt="" coords="530,93,683,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="482,49,569,91,567,96,479,54"/>
+<area shape="rect" id="Node000003" href="$ups__watch__scu_8h.html" title="DICOM UPS Watch SCU service (subscription client and event receiver)" alt="" coords="5,181,227,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="189,144,141,183,138,179,186,140"/>
+<area shape="rect" id="Node000005" href="$ups__push__scu_8cpp.html" title="Implementation of the UPS Push SCU service." alt="" coords="251,181,405,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="257,140,306,179,303,183,254,144"/>
+<area shape="rect" id="Node000004" href="$ups__watch__scu_8cpp.html" title="Implementation of the UPS Watch SCU service." alt="" coords="39,269,193,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,235,119,269,113,269,113,235"/>
+</map>

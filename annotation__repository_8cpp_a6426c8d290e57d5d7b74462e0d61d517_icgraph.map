@@ -1,0 +1,13 @@
+<map id="if" name="if">
+<area shape="rect" id="Node000001" title=" " alt="" coords="240,177,279,203"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1file__storage.html#a1a07d104a9ef0c59c714b86c0ec36533" title="Construct file storage with configuration." alt="" coords="17,5,181,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,166,225,119,210,95,190,73,175,62,178,58,194,69,214,91,230,116,252,163"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a4e8af0a4b92f9baee334f9e5a0f7fe1c" title="Construct task scheduler." alt="" coords="11,84,186,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="227,173,191,152,167,141,169,136,193,148,230,169"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a740d3c18e783ba36bb366bf23d1bd7c6" title="Construct task scheduler with IExecutor (recommended)" alt="" coords="11,163,186,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,193,186,193,186,187,226,187"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a02e76382fcce192b337b94082987d252" title="Construct task scheduler with storage and thread pool." alt="" coords="11,241,186,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="229,211,193,231,167,244,165,239,191,226,227,206"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html#a0f816f01f85ec3f811dca04a288ea6ee" title="Construct adapter with configuration." alt="" coords="5,320,192,375"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="252,216,230,263,214,287,194,309,177,322,173,318,190,305,209,284,225,260,247,214"/>
+</map>

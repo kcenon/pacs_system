@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::scp_service::supports_sop_class" name="kcenon::pacs::services::scp_service::supports_sop_class">
+<area shape="rect" id="Node000001" title="Check if this service supports a specific SOP Class." alt="" coords="5,5,176,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html#af2aa4593994a533625bf0e8262bcf3e2" title="Get the list of SOP Class UIDs supported by this service." alt="" coords="224,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,30,210,30,210,35,176,35"/>
+</map>

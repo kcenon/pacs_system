@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::print_scu::generate_uid" name="kcenon::pacs::services::print_scu::generate_uid">
+<area shape="rect" id="Node000001" title="Generate a unique SOP Instance UID." alt="" coords="224,13,407,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a1be359822370a2316116d2f1530881f8" title="Create a new Film Session (N&#45;CREATE)" alt="" coords="5,5,176,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,35,176,35,176,30,210,30"/>
+</map>

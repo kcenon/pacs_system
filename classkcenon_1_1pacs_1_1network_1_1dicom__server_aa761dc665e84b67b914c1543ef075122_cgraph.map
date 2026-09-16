@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::dicom_server::handle_association" name="kcenon::pacs::network::dicom_server::handle_association">
+<area shape="rect" id="Node000001" title="Handle a single association (runs in worker thread)" alt="" coords="5,30,176,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#adfa703465ab5143f6ee937208edbd16b" title="Abort the association immediately." alt="" coords="255,5,423,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,44,241,35,242,40,177,49"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#afa1f1a7af2eeaeaf415e0fdd625e0893" title="Add association to pool." alt="" coords="224,69,455,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,66,211,70,210,75,176,71"/>
+</map>

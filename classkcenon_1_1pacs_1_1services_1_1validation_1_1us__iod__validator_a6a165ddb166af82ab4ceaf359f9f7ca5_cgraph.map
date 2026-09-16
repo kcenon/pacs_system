@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::us_iod_validator::validate_us_image_module" name="kcenon::pacs::services::validation::us_iod_validator::validate_us_image_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,216,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="264,13,453,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,30,250,30,250,35,216,35"/>
+</map>

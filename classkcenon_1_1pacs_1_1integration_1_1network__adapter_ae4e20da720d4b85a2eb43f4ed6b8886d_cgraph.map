@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::network_adapter::connect" name="kcenon::pacs::integration::network_adapter::connect">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,204,45"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1integration_1_1tls__config.html#a2cf803e27624fbfb418287d8ab4d9380" title="Check if TLS configuration is valid." alt="" coords="252,5,439,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,23,238,23,238,28,204,28"/>
+</map>

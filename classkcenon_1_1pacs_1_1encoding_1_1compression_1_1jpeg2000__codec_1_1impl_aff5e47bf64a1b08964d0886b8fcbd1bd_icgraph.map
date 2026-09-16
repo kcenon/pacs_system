@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::encoding::compression::jpeg2000_codec::impl::is_lossless_mode" name="kcenon::pacs::encoding::compression::jpeg2000_codec::impl::is_lossless_mode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="495,84,721,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#aff42029c2146a3d0fc50ededefe83768" title="Checks if this codec is configured for lossless mode." alt="" coords="257,5,447,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="505,82,441,63,442,58,506,77"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a0dac9224f68e8a71ccb9a01709494303" title="Checks if this codec produces lossy compression." alt="" coords="261,84,443,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="481,114,443,114,443,109,481,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#ad7d17698e101d4b5211db10abac2c5ee" title="Returns a human&#45;readable name for the codec." alt="" coords="261,163,443,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="506,145,442,165,441,160,505,140"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a72a98a43fa79f96af23ae6e0c84fca75" title="Returns the Transfer Syntax UID supported by this codec." alt="" coords="5,5,209,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="243,35,210,35,210,30,243,30"/>
+</map>

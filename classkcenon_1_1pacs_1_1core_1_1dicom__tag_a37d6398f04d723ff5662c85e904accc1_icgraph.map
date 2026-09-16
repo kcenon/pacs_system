@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::core::dicom_tag::is_private" name="kcenon::pacs::core::dicom_tag::is_private">
+<area shape="rect" id="Node000001" title="Check if this is a private tag." alt="" coords="676,91,847,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a61e9ab88ec6a32488cdcab7b6d6c9dae" title="Check if this is a private creator tag." alt="" coords="439,9,610,64"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="684,90,609,66,611,61,685,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad5422abf4484a8a8e339ba581ad484f0" title="Check if this is a private data element." alt="" coords="421,91,628,131"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="662,114,628,114,628,109,662,109"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a984e6ec103ca43c126e00e5ef53fcc80" title="Read DICOM dataset from file." alt="" coords="437,159,613,213"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="685,138,613,161,611,156,683,133"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a0b83f0c3a7281eb2d54e465c99e12503" title="Get the data element range owned by this Private Creator tag." alt="" coords="213,5,365,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,38,366,37,366,31,425,32"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a09d023cf9cc4b6e8008929163fed0a23" title="Extract the Private Creator block number from this tag." alt="" coords="213,84,365,139"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="408,114,365,114,365,109,408,109"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a7a10ab20491d319fc3234b2196ecfd24" title="Get the Private Creator tag that owns this data element." alt="" coords="5,84,157,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="200,114,158,114,158,109,200,109"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#afa87b349fcc99cdace18e47346519fa1" title="Get selective metadata for an instance." alt="" coords="205,163,373,217"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="422,190,373,191,373,186,422,185"/>
+</map>

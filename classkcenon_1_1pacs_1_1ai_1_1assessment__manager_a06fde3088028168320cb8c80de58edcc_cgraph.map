@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ai::assessment_manager::store_assessment" name="kcenon::pacs::ai::assessment_manager::store_assessment">
+<area shape="rect" id="Node000001" title="Store an assessment SR document." alt="" coords="5,49,219,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="313,5,468,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,52,299,42,300,47,219,58"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1ai_1_1assessment__manager.html#aa111fab61fcb69a0c3f5bcd74ff6fccb" title=" " alt="" coords="267,85,515,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,80,253,84,253,90,219,85"/>
+</map>

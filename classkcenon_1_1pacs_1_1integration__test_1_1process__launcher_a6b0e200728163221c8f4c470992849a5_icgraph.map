@@ -1,0 +1,38 @@
+<map id="kcenon::pacs::integration_test::process_launcher::stop_background" name="kcenon::pacs::integration_test::process_launcher::stop_background">
+<area shape="rect" id="Node000001" title="Stop a background process." alt="" coords="801,191,988,245"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#a04a3de5fddd9ac8d135540cba1b23d56" title="Stop the process." alt="" coords="559,191,753,245"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="787,221,753,221,753,215,787,215"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#af578639aece7b74f23d6bc1649a8cdbf" title="Start C&#45;ECHO SCP (echoscp) server." alt="" coords="281,70,477,110"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="592,186,510,144,433,112,435,108,512,140,595,181"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__tool_8cpp.html#a996a2b404db755df974961b6b1649b6c" title=" " alt="" coords="55,5,150,31"/>
+<area shape="poly" id="edge17_Node000002_Node000004" title=" " alt="" coords="629,180,608,149,580,116,547,85,509,60,463,41,415,27,365,18,315,12,223,10,150,15,150,10,223,5,316,7,366,12,416,22,465,36,512,56,550,81,584,112,612,146,634,177"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#a132b9c29a1d67862a3e71a7f03023430" title=" " alt="" coords="282,155,477,209"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="544,206,477,197,477,192,545,201"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__server__guard.html#a04cbdbd636dafb4f88e4c026f2725005" title="Stop the server." alt="" coords="264,234,495,274"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="545,235,495,242,495,236,544,230"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__tool.html#af0ac63d6999f3e5f84c856bb83ec1860" title="Start C&#45;STORE SCP (storescp) server." alt="" coords="280,377,479,417"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="603,255,413,379,410,374,600,251"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html#aeca175556ff84b3e1d6ced9bc27d8efe" title=" " alt="" coords="248,441,511,496"/>
+<area shape="poly" id="edge18_Node000002_Node000018" title=" " alt="" coords="640,259,619,300,591,346,555,392,512,431,492,443,489,439,509,427,551,388,586,343,614,297,635,257"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="291,69,199,45,150,32,151,27,201,39,292,64"/>
+<area shape="rect" id="Node000005" href="$test__dcmtk__echo_8cpp.html#a3e7a1ca4eda1c8ca8c064a12b87e3b13" title=" " alt="" coords="55,55,150,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="267,83,150,74,150,68,268,78"/>
+<area shape="rect" id="Node000006" href="$test__dcmtk__tool_8cpp.html#a50b527123e22bb2006f44e34bbbc1b8a" title=" " alt="" coords="55,104,150,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="268,103,150,115,150,110,267,98"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__server__guard.html#aad3563b9355de99c3c348979f285c3de" title=" " alt="" coords="5,153,200,208"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="285,233,247,223,200,210,201,205,249,218,286,228"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1integration__test_1_1dcmtk__server__guard.html#aa9887517741011cce9bdba756bdd5c1a" title=" " alt="" coords="5,232,200,287"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="250,259,200,260,200,255,250,254"/>
+<area shape="rect" id="Node000012" href="$test__dcmtk__echo_8cpp.html#a279c9a3309373345650febdcb9701446" title=" " alt="" coords="55,311,150,336"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="293,376,199,350,150,337,151,332,201,345,295,370"/>
+<area shape="rect" id="Node000013" href="$test__dcmtk__move_8cpp.html#a1a7df4358030d4eb8b26b14b5444c32c" title=" " alt="" coords="55,360,150,385"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="266,390,150,379,150,374,266,384"/>
+<area shape="rect" id="Node000014" href="$test__dcmtk__move_8cpp.html#aac77386ed4751fdffc2faf778f8001d4" title=" " alt="" coords="55,409,150,435"/>
+<area shape="poly" id="edge13_Node000011_Node000014" title=" " alt="" coords="266,410,150,420,150,415,266,404"/>
+<area shape="rect" id="Node000015" href="$test__dcmtk__store_8cpp.html#a55b309fd2f5cbdca202e698fee99af1c" title=" " alt="" coords="55,459,150,484"/>
+<area shape="poly" id="edge14_Node000011_Node000015" title=" " alt="" coords="278,423,249,431,201,449,151,463,149,457,199,443,247,426,277,418"/>
+<area shape="rect" id="Node000016" href="$test__dcmtk__store_8cpp.html#a7ed8d0062be47853f291a628bccf071b" title=" " alt="" coords="55,508,150,533"/>
+<area shape="poly" id="edge15_Node000011_Node000016" title=" " alt="" coords="269,420,250,431,234,446,226,463,218,481,202,497,177,510,151,518,149,513,175,505,198,493,214,478,222,461,230,443,246,427,266,416"/>
+<area shape="rect" id="Node000017" href="$test__dcmtk__tool_8cpp.html#ae78352a1c54414c66345ab0be3491a4a" title=" " alt="" coords="55,557,150,583"/>
+<area shape="poly" id="edge16_Node000011_Node000017" title=" " alt="" coords="268,418,250,431,238,444,231,458,227,488,222,518,215,533,202,548,177,562,151,570,149,565,175,557,198,544,210,530,217,517,221,487,226,457,233,441,246,427,265,414"/>
+</map>

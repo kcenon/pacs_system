@@ -1,0 +1,36 @@
+<map id="kcenon::pacs::services::pir::patient_reconciliation_service" name="kcenon::pacs::services::pir::patient_reconciliation_service">
+<area shape="rect" id="Node000001" title=" " alt="" coords="588,986,776,1295"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="455,676,600,771"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="547,770,621,969,616,971,542,772"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html" title=" " alt="" coords="271,951,429,1331"/>
+<area shape="poly" id="edge10_Node000006_Node000002" title=" " alt="" coords="512,772,485,825,467,851,445,875,432,884,419,887,408,890,397,899,376,937,371,934,393,896,405,886,418,882,430,879,442,871,462,848,480,822,507,770"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html" title=" " alt="" coords="372,1536,517,1816"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="458,1536,487,1255,515,926,523,787,528,787,521,927,492,1255,463,1536"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="171,1393,329,1473"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="284,1472,363,1570,359,1574,280,1475"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="92,573,248,873"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="184,873,186,897,191,1020,192,1115,197,1210,217,1330,230,1377,225,1379,211,1331,192,1211,187,1115,186,1020,181,897,179,874"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="237,873,267,942,262,944,232,875"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="287,1332,271,1378,266,1377,282,1330"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="272,691,431,756"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="346,757,333,821,322,898,320,934,315,934,317,897,328,821,341,756"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="347,361,468,427"/>
+<area shape="poly" id="edge14_Node000002_Node000008" title=" " alt="" coords="426,439,466,548,513,675,508,677,461,550,421,441"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="382,440,367,472,355,506,347,556,345,606,350,690,344,691,340,606,342,555,350,505,362,470,378,437"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="624,669,775,778"/>
+<area shape="poly" id="edge19_Node000012_Node000008" title=" " alt="" coords="482,420,547,454,578,477,607,504,639,568,680,667,676,669,634,570,603,507,575,481,544,459,479,425"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="297,135,320,200"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="323,194,389,345,384,347,318,196"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="5,361,132,427"/>
+<area shape="poly" id="edge13_Node000010_Node000009" title=" " alt="" coords="299,181,116,352,112,348,295,178"/>
+<area shape="poly" id="edge11_Node000004_Node000010" title=" " alt="" coords="63,440,49,530,36,651,32,788,36,858,45,926,68,1044,95,1134,131,1221,184,1329,223,1392,218,1394,180,1332,126,1223,90,1136,63,1046,39,927,31,859,27,788,31,651,43,529,57,439"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="57,135,80,200"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="71,200,71,345,66,345,66,200"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="700,778,692,969,686,969,694,778"/>
+<area shape="rect" id="Node000013" href="$structkcenon_1_1pacs_1_1services_1_1pir_1_1reconciliation__audit__record.html" title="Audit record of a reconciliation operation." alt="" coords="747,307,915,481"/>
+<area shape="poly" id="edge16_Node000012_Node000013" title=" " alt="" coords="823,482,805,550,779,606,749,656,744,653,774,603,799,548,818,481"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="792,135,871,200"/>
+<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="834,200,834,290,829,290,829,200"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="766,5,897,85"/>
+<area shape="poly" id="edge18_Node000014_Node000015" title=" " alt="" coords="834,99,834,134,829,134,829,99"/>
+</map>

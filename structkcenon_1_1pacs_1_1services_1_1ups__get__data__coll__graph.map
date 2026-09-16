@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::ups_get_data" name="kcenon::pacs::services::ups_get_data">
+<area shape="rect" id="Node000001" title="Data for N&#45;GET operation (retrieve workitem)" alt="" coords="74,653,235,733"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="39,518,118,583"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,583,90,606,98,628,105,639,100,641,94,631,84,607,79,584"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,243,136,323"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="75,337,80,518,75,518,70,337"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="149,511,328,591"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="224,592,204,631,197,641,192,638,199,628,219,590"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="161,133,317,433"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="241,434,241,494,236,494,236,434"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="341,251,462,316"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="394,330,368,407,348,449,323,488,300,512,296,509,319,485,344,447,363,405,389,328"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="390,5,413,71"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="404,71,404,234,399,234,399,71"/>
+</map>

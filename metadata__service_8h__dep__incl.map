@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/metadata_service.h" name="include/kcenon/pacs/web/metadata_service.h">
+<area shape="rect" id="Node000001" title="Selective DICOM metadata retrieval and series navigation service." alt="" coords="134,5,321,45"/>
+<area shape="rect" id="Node000002" href="$metadata__endpoints_8cpp.html" title="Metadata REST API endpoints implementation." alt="" coords="5,93,212,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,56,136,95,133,91,188,51"/>
+<area shape="rect" id="Node000003" href="$metadata__service_8cpp.html" title="Selective metadata retrieval and navigation service implementation." alt="" coords="236,101,456,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="266,51,332,98,328,103,263,56"/>
+</map>

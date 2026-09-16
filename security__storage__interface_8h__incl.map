@@ -1,0 +1,22 @@
+<map id="include/kcenon/pacs/security/security_storage_interface.h" name="include/kcenon/pacs/security/security_storage_interface.h">
+<area shape="rect" id="Node000001" title="Storage interface for RBAC persistence." alt="" coords="245,5,435,60"/>
+<area shape="rect" id="Node000002" href="$user_8h.html" title="User definition for RBAC." alt="" coords="167,115,228,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="301,62,228,110,225,106,298,58"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="251,269,349,295"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="347,60,352,134,350,178,341,222,333,242,321,260,317,257,328,240,336,221,345,178,347,134,342,60"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="265,196,327,221"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="336,61,305,184,300,182,331,60"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="403,108,591,148"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="386,58,455,99,453,103,383,62"/>
+<area shape="rect" id="Node000003" href="$role_8h.html" title="Role definitions for RBAC." alt="" coords="72,196,131,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="185,143,128,189,124,185,181,139"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,269,64,295"/>
+<area shape="poly" id="edge7_Node000002_Node000004" title=" " alt="" coords="168,139,113,160,86,176,62,198,47,226,39,256,34,255,42,224,58,194,82,172,111,155,166,134"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="155,196,240,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="200,141,200,182,195,182,195,141"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="214,139,272,185,269,189,210,143"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="92,223,57,261,53,257,88,220"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="132,218,256,262,254,267,130,223"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="88,269,163,295"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="108,221,120,255,115,257,103,223"/>
+</map>

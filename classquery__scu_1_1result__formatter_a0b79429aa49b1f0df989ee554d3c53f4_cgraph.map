@@ -1,0 +1,5 @@
+<map id="query_scu::result_formatter::get_tag_value" name="query_scu::result_formatter::get_tag_value">
+<area shape="rect" id="Node000001" title="Get tag value from dataset as string." alt="" coords="5,13,208,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="256,5,411,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,30,242,30,242,35,208,35"/>
+</map>

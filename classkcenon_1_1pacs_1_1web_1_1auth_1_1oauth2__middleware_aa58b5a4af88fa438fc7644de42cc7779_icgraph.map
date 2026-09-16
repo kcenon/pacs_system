@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::auth::oauth2_middleware::extract_bearer_token" name="kcenon::pacs::web::auth::oauth2_middleware::extract_bearer_token">
+<area shape="rect" id="Node000001" title="Extract Bearer token from Authorization header." alt="" coords="241,5,429,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a12e351f755884a202b56975ce659e994" title="Authenticate a request using OAuth 2.0 Bearer token." alt="" coords="5,5,193,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,35,194,35,194,30,227,30"/>
+</map>

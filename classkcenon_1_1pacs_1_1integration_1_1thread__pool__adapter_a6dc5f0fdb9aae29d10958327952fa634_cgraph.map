@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::integration::thread_pool_adapter::submit_fire_and_forget" name="kcenon::pacs::integration::thread_pool_adapter::submit_fire_and_forget">
+<area shape="rect" id="Node000001" title="Submit a task without waiting for completion." alt="" coords="5,41,192,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html#a05b7b39952cfe4fa48693e6783878673" title="Internal task submission with priority." alt="" coords="240,41,427,96"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,66,226,66,226,71,192,71"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html#afb1ab6cfe1392c8f413a64e1644c0ebb" title="Check if the thread pool is running." alt="" coords="483,5,669,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,52,469,46,469,51,427,57"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html#ad315c2849006792f61a75c64d103a3b2" title="Start the thread pool." alt="" coords="475,85,677,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="427,80,461,85,461,90,426,85"/>
+</map>

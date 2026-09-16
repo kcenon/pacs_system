@@ -1,0 +1,13 @@
+<map id="query_scu::result_formatter::get_tag_value" name="query_scu::result_formatter::get_tag_value">
+<area shape="rect" id="Node000001" title="Get tag value from dataset as string." alt="" coords="507,69,709,109"/>
+<area shape="rect" id="Node000002" href="$classquery__scu_1_1result__formatter.html#a0227567640990492e71748f349c67d9c" title="Format results as CSV." alt="" coords="256,5,459,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="515,68,436,48,437,43,517,63"/>
+<area shape="rect" id="Node000004" href="$classquery__scu_1_1result__formatter.html#a8afaa4b6dee839aa0653b6ee1cec1d07" title="Format results as JSON." alt="" coords="256,69,459,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="493,92,459,92,459,87,493,87"/>
+<area shape="rect" id="Node000005" href="$classquery__scu_1_1result__formatter.html#a0c5385cdedbcb39345501aa49a262f6d" title="Format results as a human&#45;readable table." alt="" coords="256,133,459,173"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="517,115,437,136,436,131,515,110"/>
+<area shape="rect" id="Node000003" href="$classquery__scu_1_1result__formatter.html#a6f2d2c3f28147342273af02c3e8ad0e3" title="Format query results." alt="" coords="5,69,208,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="266,51,186,72,185,67,265,46"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="242,92,208,92,208,87,242,87"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="265,132,185,112,186,107,266,127"/>
+</map>

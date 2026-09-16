@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::services::validation::seg_iod_validator::validate_general_series_module" name="kcenon::pacs::services::validation::seg_iod_validator::validate_general_series_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,95,209,165"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a75e3228c094ca31b4497078d374350bf" title=" " alt="" coords="257,16,456,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,93,264,73,265,78,208,98"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#afb995792cad575ebcdbf8d0904499935" title=" " alt="" coords="268,95,445,165"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="209,127,254,127,254,133,209,133"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1seg__iod__validator.html#a17d4ef452b7f95fbd0eef20f4eb9fffd" title=" " alt="" coords="268,189,445,258"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="201,162,256,183,254,188,200,167"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="504,85,693,125"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="457,66,507,79,506,84,455,71"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="521,5,676,60"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="456,36,507,34,507,39,456,42"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="445,118,490,113,490,119,446,123"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="442,93,516,63,518,68,444,98"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="521,149,676,189"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="446,141,508,152,508,157,445,147"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="517,213,680,253"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="433,162,457,174,505,198,523,205,521,210,503,203,455,179,430,167"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="741,181,901,221"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="680,218,728,211,728,217,680,224"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="750,245,893,285"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="680,242,737,250,736,255,680,247"/>
+<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="435,186,454,174,478,154,503,134,516,128,518,133,505,139,481,158,458,179,437,191"/>
+<area shape="poly" id="edge13_Node000010_Node000007" title=" " alt="" coords="446,224,504,226,503,232,445,229"/>
+</map>

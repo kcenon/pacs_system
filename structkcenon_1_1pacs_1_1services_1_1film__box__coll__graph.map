@@ -1,0 +1,35 @@
+<map id="kcenon::pacs::services::film_box" name="kcenon::pacs::services::film_box">
+<area shape="rect" id="Node000001" title="Film box data created by N&#45;CREATE." alt="" coords="237,1589,398,1669"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,1103,110,1169"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,1169,46,1238,35,1329,35,1378,41,1427,54,1474,76,1517,104,1550,141,1575,181,1594,221,1608,219,1613,179,1599,138,1580,101,1554,71,1520,49,1476,35,1428,29,1378,29,1328,41,1237,58,1168"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="243,1346,421,1411"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="112,1156,168,1191,226,1237,269,1284,305,1331,301,1334,265,1287,222,1241,165,1196,109,1161"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,789,136,869"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,883,73,1103,68,1103,68,883"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="331,1412,321,1543,320,1572,315,1572,316,1543,326,1412"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="455,133,577,199"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="445,209,414,233,389,263,367,300,356,332,352,366,352,410,352,1137,347,1253,338,1346,333,1346,342,1252,347,1137,347,410,347,366,351,331,362,298,385,260,411,230,442,205"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="578,379,737,444"/>
+<area shape="poly" id="edge13_Node000011_Node000005" title=" " alt="" coords="544,209,641,377,637,380,539,212"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="570,1581,715,1676"/>
+<area shape="poly" id="edge16_Node000012_Node000005" title=" " alt="" coords="591,176,633,188,675,205,716,228,751,260,776,296,787,329,789,365,788,410,788,1380,786,1410,779,1439,755,1494,724,1543,691,1583,687,1580,719,1540,750,1491,774,1437,780,1409,783,1380,783,410,783,365,781,330,771,298,747,263,713,233,673,210,631,193,590,182"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="413,5,435,71"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="438,54,485,118,481,121,434,57"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="139,133,266,199"/>
+<area shape="poly" id="edge19_Node000013_Node000006" title=" " alt="" coords="413,48,274,127,271,123,411,44"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html" title=" " alt="" coords="446,1239,591,1519"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="470,1521,442,1559,413,1584,410,1580,438,1556,466,1517"/>
+<area shape="poly" id="edge15_Node000012_Node000007" title=" " alt="" coords="532,1518,549,1556,560,1571,556,1574,544,1559,527,1520"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="426,1096,585,1176"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="510,1176,513,1222,507,1222,505,1177"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html" title=" " alt="" coords="398,261,554,561"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="485,561,506,1080,500,1080,479,561"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html" title=" " alt="" coords="567,639,724,1019"/>
+<area shape="poly" id="edge11_Node000010_Node000009" title=" " alt="" coords="539,561,564,622,560,624,534,563"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="569,1001,549,1044,532,1082,527,1080,544,1042,564,998"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="659,444,654,622,649,622,654,444"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="640,1581,641,1200,642,1035,647,1035,647,1200,645,1581"/>
+<area shape="poly" id="edge17_Node000008_Node000013" title=" " alt="" coords="197,213,181,361,177,462,180,573,193,689,219,806,238,862,261,917,289,968,322,1017,345,1042,371,1064,427,1099,424,1103,368,1068,341,1046,318,1020,284,971,256,919,233,864,213,807,187,690,174,573,171,462,175,361,192,212"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="191,5,214,71"/>
+<area shape="poly" id="edge18_Node000013_Node000014" title=" " alt="" coords="205,71,205,117,200,117,200,71"/>
+</map>

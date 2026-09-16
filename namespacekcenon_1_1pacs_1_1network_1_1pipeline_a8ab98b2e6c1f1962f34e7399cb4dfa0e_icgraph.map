@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::network::pipeline::get_stage_name" name="kcenon::pacs::network::pipeline::get_stage_name">
+<area shape="rect" id="Node000001" title="Get the human&#45;readable name of a pipeline stage." alt="" coords="528,91,727,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__coordinator.html#a92d6c26f1ee49490a00285c8905e737b" title=" " alt="" coords="249,5,480,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="546,90,456,63,457,58,548,85"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__adapter.html#afbdfbd01fa8795e1cd1b5ff3e51e8eff" title="Handle backpressure." alt="" coords="266,84,463,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="514,114,464,114,464,109,514,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__coordinator.html#ac009904744b8fba56ba4d2384c1d4d9a" title="Start the pipeline." alt="" coords="281,163,449,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="548,138,450,167,448,162,546,133"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__adapter.html#a0993ccb13998edca9c5a6e67ea45a08a" title="Construct adapter with custom configuration." alt="" coords="5,84,201,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="252,114,202,114,202,109,252,109"/>
+</map>

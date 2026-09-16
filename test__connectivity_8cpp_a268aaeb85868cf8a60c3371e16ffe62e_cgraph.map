@@ -1,0 +1,9 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,56,100,81"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__association.html#a64d8e08843113b1eb74d7d9b204b0bd6" title="Connect to a test server." alt="" coords="148,5,335,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,57,134,51,135,56,101,62"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="148,85,335,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="101,75,135,82,134,87,100,80"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="383,85,569,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="335,102,369,102,369,107,335,107"/>
+</map>

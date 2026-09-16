@@ -1,0 +1,22 @@
+<map id="include/kcenon/pacs/security/atna_config.h" name="include/kcenon/pacs/security/atna_config.h">
+<area shape="rect" id="Node000001" title="Configuration management for ATNA audit logging." alt="" coords="487,5,656,45"/>
+<area shape="rect" id="Node000002" href="$atna__syslog__transport_8h.html" title="Syslog transport for ATNA audit messages (RFC 5424/5425/5426)" alt="" coords="313,93,491,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="532,48,441,90,438,85,530,43"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="499,167,558,192"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="568,47,538,154,533,153,563,45"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="567,93,664,119"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="584,44,604,80,600,83,580,47"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="688,93,751,119"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="608,43,687,84,684,89,606,48"/>
+<area shape="rect" id="Node000003" href="$result_8h.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="105,167,293,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="370,121,246,165,244,160,369,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="318,167,385,192"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="396,121,370,157,365,154,391,117"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="409,167,475,192"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="411,118,431,153,426,156,406,120"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="424,116,497,157,495,162,421,121"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,240,193,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,194,136,233,133,229,183,190"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="218,240,383,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="216,190,267,229,264,234,213,194"/>
+</map>

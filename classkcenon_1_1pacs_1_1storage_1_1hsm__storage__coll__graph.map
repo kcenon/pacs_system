@@ -1,0 +1,32 @@
+<map id="kcenon::pacs::storage::hsm_storage" name="kcenon::pacs::storage::hsm_storage">
+<area shape="rect" id="Node000001" title=" " alt="" coords="446,956,618,1356"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1storage__interface.html" title=" " alt="" coords="182,292,346,652"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="342,664,456,955,451,957,337,666"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="164,757,337,851"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="259,653,256,740,251,740,254,652"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="256,851,264,892,280,931,312,977,351,1019,393,1057,434,1089,431,1094,389,1061,347,1023,308,980,275,933,259,893,251,852"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,439,155,505"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="71,518,64,563,62,616,70,669,78,695,90,719,105,737,123,753,165,776,162,781,120,757,101,741,86,721,73,697,64,671,57,616,59,563,66,518"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="245,135,267,200"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="247,185,212,232,172,293,134,362,103,425,98,423,129,359,167,291,207,229,242,182"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="371,432,515,512"/>
+<area shape="poly" id="edge15_Node000012_Node000005" title=" " alt="" coords="269,179,311,226,360,291,395,355,424,416,419,418,391,357,355,293,307,229,265,182"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1storage_1_1hsm__storage__config.html" title="Configuration for HSM storage." alt="" coords="631,744,809,864"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="696,866,662,933,628,996,624,993,658,931,691,863"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1storage_1_1tier__policy.html" title=" " alt="" coords="834,382,1030,562"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="881,563,825,653,773,732,768,729,820,651,877,561"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="457,749,607,859"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="535,859,535,940,529,940,529,859"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="587,135,666,200"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="619,201,595,293,585,357,581,412,581,506,579,601,574,656,563,721,559,734,554,733,557,719,568,655,574,601,575,506,576,412,580,356,589,291,613,200"/>
+<area shape="rect" id="Node000011" href="$structkcenon_1_1pacs_1_1storage_1_1tier__metadata.html" title="Metadata for tracking instance tier location." alt="" coords="649,382,810,562"/>
+<area shape="poly" id="edge12_Node000011_Node000009" title=" " alt="" coords="640,200,696,366,691,367,635,201"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="561,5,692,85"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="629,99,629,134,624,134,624,99"/>
+<area shape="poly" id="edge11_Node000008_Node000011" title=" " alt="" coords="689,564,648,642,600,721,589,737,584,734,595,719,643,639,684,561"/>
+<area shape="poly" id="edge13_Node000008_Node000012" title=" " alt="" coords="425,526,413,569,406,619,408,671,413,695,422,719,438,742,459,761,455,765,434,745,418,721,408,697,402,671,401,619,408,568,420,524"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="431,135,454,200"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="445,200,445,415,440,415,440,200"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="833,771,967,837"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="869,839,632,1064,628,1060,865,835"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/workflow/task_scheduler.h" name="include/kcenon/pacs/workflow/task_scheduler.h">
+<area shape="rect" id="Node000001" title="Task scheduler service for automated PACS operations." alt="" coords="155,5,353,45"/>
+<area shape="rect" id="Node000002" href="$pacs-workflow_8cppm.html" title="C++20 module partition for DICOM workflow types." alt="" coords="5,93,244,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,55,145,95,142,91,210,50"/>
+<area shape="rect" id="Node000003" href="$task__scheduler_8cpp.html" title="Implementation of task scheduler service for automated PACS operations." alt="" coords="269,93,501,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="299,50,367,91,364,95,296,55"/>
+</map>

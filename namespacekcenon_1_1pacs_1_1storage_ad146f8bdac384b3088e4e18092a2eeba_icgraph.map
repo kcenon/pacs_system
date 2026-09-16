@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::storage::parse_worklist_status" name="kcenon::pacs::storage::parse_worklist_status">
+<area shape="rect" id="Node000001" title="Parse string to worklist_status enum." alt="" coords="217,13,389,53"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#ae4dcd04907a6dba9097883221168f451" title="Get the status as enum." alt="" coords="5,5,169,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,35,169,35,169,30,204,30"/>
+</map>

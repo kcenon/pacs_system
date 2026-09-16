@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration::network_adapter::connect" name="kcenon::pacs::integration::network_adapter::connect">
+<area shape="rect" id="Node000001" title=" " alt="" coords="285,37,484,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1DicomNetworkService.html#a38945cd81925c55f7a4c394d3140b7d1" title="Connect to a remote DICOM peer." alt="" coords="5,5,237,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="272,46,237,42,238,37,272,41"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1network__adapter.html#aa64187fa1dffb0d793c7aa4373c17b68" title="Connect to a remote DICOM peer (simplified overload)" alt="" coords="22,69,221,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,74,221,80,220,75,271,68"/>
+</map>

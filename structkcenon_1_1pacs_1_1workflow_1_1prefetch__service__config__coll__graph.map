@@ -1,0 +1,24 @@
+<map id="kcenon::pacs::workflow::prefetch_service_config" name="kcenon::pacs::workflow::prefetch_service_config">
+<area shape="rect" id="Node000001" title="Configuration for the auto prefetch service." alt="" coords="100,760,309,1040"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="223,570,397,665"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,666,265,746,260,744,290,664"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1workflow_1_1remote__pacs__config.html" title="Remote PACS connection configuration." alt="" coords="215,305,381,445"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="304,446,310,553,304,554,299,446"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="220,148,299,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="268,213,284,289,278,290,263,214"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="23,343,181,408"/>
+<area shape="poly" id="edge9_Node000009_Node000004" title=" " alt="" coords="239,215,223,239,195,283,150,333,146,329,191,280,218,236,235,212"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="194,5,325,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="262,99,262,148,257,148,257,99"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="405,343,527,408"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="446,422,391,515,350,572,345,568,386,512,441,419"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="455,148,477,213"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="469,214,469,326,463,326,463,214"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1workflow_1_1prefetch__criteria.html" title="Prefetch selection criteria." alt="" coords="5,537,199,697"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="133,696,150,743,145,745,128,698"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="105,408,105,521,99,521,99,408"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="41,148,142,213"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="94,227,95,281,101,342,95,343,90,281,88,227"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="80,13,103,78"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="94,78,94,131,89,131,89,78"/>
+</map>

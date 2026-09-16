@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::services::query_scu" name="kcenon::pacs::services::query_scu">
+<area shape="rect" id="Node000001" title=" " alt="" coords="313,888,483,1308"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="22,676,195,756"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,755,305,970,301,973,136,758"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,133,180,559"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,559,109,659,104,660,99,559"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="205,313,354,379"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="265,392,194,560,133,677,128,674,189,558,260,390"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="348,5,371,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="354,72,294,298,289,297,348,70"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="378,313,503,379"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="373,64,385,94,414,202,434,297,429,298,409,203,379,95,368,66"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1services_1_1query__scu__config.html" title="Configuration for Query SCU service." alt="" coords="593,636,755,796"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="645,797,608,865,555,938,497,1003,493,1000,550,934,604,863,640,795"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="219,683,390,749"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="305,749,305,803,311,864,313,872,308,873,306,864,299,803,300,749"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="428,393,368,560,320,684,315,682,364,558,423,391"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="414,683,569,749"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="450,393,490,683,484,683,444,393"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="487,749,462,865,460,872,455,871,457,863,482,748"/>
+</map>

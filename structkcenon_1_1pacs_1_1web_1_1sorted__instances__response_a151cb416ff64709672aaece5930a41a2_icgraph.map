@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::sorted_instances_response::ok" name="kcenon::pacs::web::sorted_instances_response::ok">
+<area shape="rect" id="Node000001" title="Create a success result." alt="" coords="437,13,660,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#a44be7b348819c150ee33b2346899ffe0" title="Get sorted instances for a series." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="424,35,389,35,389,30,424,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1metadata__service.html#af8c937446245978e0ade9fe9466d028d" title="Get navigation info for an instance." alt="" coords="5,5,173,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="207,35,174,35,174,30,207,30"/>
+</map>

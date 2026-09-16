@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::pipeline::decoded_pdu" name="kcenon::pacs::network::pipeline::decoded_pdu">
+<area shape="rect" id="Node000001" title="Result of PDU decoding containing the PDU type and data." alt="" coords="5,389,191,529"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="19,261,177,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,327,101,373,95,373,95,327"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="37,133,159,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,213,101,261,95,261,95,213"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="87,5,109,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="101,71,101,117,95,117,95,71"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::on_connection" name="kcenon::pacs::network::v2::dicom_server_v2::on_connection">
+<area shape="rect" id="Node000001" title="Handle new connection from server." alt="" coords="5,124,173,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a39319a4369eab2d82493276a382df3d6" title="Create and register a new handler for a session." alt="" coords="221,88,389,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,135,207,129,208,134,174,140"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a12493bdbd9cd0de90dd70b6f0155dd21" title="Report error through callback." alt="" coords="437,163,605,217"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="174,156,424,179,423,184,173,161"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a59c0eb4b0b0831eb5a97dc7d447357c9" title="Build service map from registered services." alt="" coords="437,5,605,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="377,85,436,62,438,67,379,90"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a81fd7d359a1ccb115ac444d2605dbe53" title="Remove handler by session ID." alt="" coords="437,84,605,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="390,111,423,110,424,116,390,116"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="386,140,430,156,428,161,384,145"/>
+</map>

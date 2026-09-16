@@ -1,0 +1,116 @@
+<map id="include/kcenon/pacs/network/dimse/status_codes.h" name="include/kcenon/pacs/network/dimse/status_codes.h">
+<area shape="rect" id="Node000001" title="DIMSE status codes." alt="" coords="5793,5,5959,60"/>
+<area shape="rect" id="Node000002" href="$dimse__message_8h.html" title="DIMSE message encoding and decoding." alt="" coords="2442,108,2609,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="5779,40,2609,134,2609,129,5779,34"/>
+<area shape="rect" id="Node000117" href="$remote__node__manager_8cpp.html" title="Implementation of the Remote Node Manager." alt="" coords="5,313,176,353"/>
+<area shape="poly" id="edge40_Node000001_Node000117" title=" " alt="" coords="5779,37,4691,38,2968,47,2092,56,1327,69,763,87,584,98,489,111,430,130,373,154,266,211,177,270,115,315,112,311,174,266,263,207,371,149,429,125,487,105,583,93,762,82,1327,64,2092,50,2968,41,4691,33,5779,31"/>
+<area shape="rect" id="Node000048" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="201,321,434,346"/>
+<area shape="poly" id="edge42_Node000001_Node000048" title=" " alt="" coords="5779,38,4449,58,3455,80,2429,111,2226,109,1970,98,1680,84,1375,74,1074,75,931,82,795,94,670,112,557,138,459,171,417,191,379,213,355,237,338,267,327,297,322,321,317,320,322,296,333,265,350,234,376,209,414,186,457,166,556,132,669,107,795,89,930,76,1074,70,1375,69,1680,79,1970,93,2226,104,2429,105,3455,75,4449,53,5779,32"/>
+<area shape="rect" id="Node000119" href="$pacs-network-dimse_8cppm.html" title="C++20 module partition for DIMSE message types." alt="" coords="3979,313,4173,353"/>
+<area shape="poly" id="edge41_Node000001_Node000119" title=" " alt="" coords="5779,39,5450,47,5025,61,4649,83,4525,96,4487,103,4468,110,4454,127,4448,145,4450,185,4453,227,4447,247,4433,267,4414,280,4389,291,4323,308,4247,320,4173,328,4173,323,4247,315,4322,303,4387,286,4412,275,4429,263,4442,245,4448,226,4445,186,4443,145,4449,125,4465,106,4486,98,4524,90,4649,77,5025,56,5450,41,5779,33"/>
+<area shape="rect" id="Node000102" href="$ups__push__scp_8cpp.html" title="Implementation of the UPS (Unified Procedure Step) Push SCP service." alt="" coords="4266,218,4419,258"/>
+<area shape="poly" id="edge57_Node000001_Node000102" title=" " alt="" coords="5779,36,5454,38,5029,48,4822,57,4641,70,4502,88,4454,98,4424,110,4397,133,4376,162,4360,193,4351,219,4346,217,4356,191,4371,160,4393,130,4421,106,4453,93,4501,83,4640,65,4822,52,5029,43,5454,33,5779,31"/>
+<area shape="rect" id="Node000073" href="$mpps__scp_8cpp.html" title="Implementation of the MPPS (Modality Performed Procedure Step) SCP service." alt="" coords="4479,123,4673,148"/>
+<area shape="poly" id="edge43_Node000001_Node000073" title=" " alt="" coords="5779,37,5579,41,5307,52,4998,74,4840,90,4686,111,4617,125,4616,120,4685,105,4839,85,4997,69,5307,47,5579,36,5779,32"/>
+<area shape="rect" id="Node000058" href="$mpps__scu_8cpp.html" title="Implementation of the MPPS (Modality Performed Procedure Step) SCU service." alt="" coords="4697,123,4892,148"/>
+<area shape="poly" id="edge44_Node000001_Node000058" title=" " alt="" coords="5779,39,5612,46,5395,58,5150,79,4904,111,4836,125,4835,120,4904,105,5150,74,5394,53,5612,40,5778,34"/>
+<area shape="rect" id="Node000075" href="$n__get__scp_8cpp.html" title="Implementation of the N&#45;GET SCP service." alt="" coords="4916,115,5055,155"/>
+<area shape="poly" id="edge45_Node000001_Node000075" title=" " alt="" coords="5779,39,5639,45,5461,57,5264,78,5067,111,5039,118,5038,113,5066,105,5263,73,5460,52,5639,39,5779,33"/>
+<area shape="rect" id="Node000060" href="$n__get__scu_8cpp.html" title="Implementation of the N&#45;GET SCU service." alt="" coords="5079,115,5217,155"/>
+<area shape="poly" id="edge46_Node000001_Node000060" title=" " alt="" coords="5779,42,5529,64,5379,84,5230,111,5202,118,5201,113,5229,105,5378,78,5528,58,5779,37"/>
+<area shape="rect" id="Node000077" href="$print__scp_8cpp.html" title="Implementation of the Print Management SCP service (PS3.4 Annex H)" alt="" coords="5241,115,5375,155"/>
+<area shape="poly" id="edge47_Node000001_Node000077" title=" " alt="" coords="5779,46,5596,71,5491,89,5387,111,5361,118,5360,113,5386,105,5490,83,5595,65,5779,41"/>
+<area shape="rect" id="Node000062" href="$print__scu_8cpp.html" title="Implementation of the Print Management SCU service (PS3.4 Annex H)" alt="" coords="5399,115,5532,155"/>
+<area shape="poly" id="edge48_Node000001_Node000062" title=" " alt="" coords="5780,56,5667,80,5545,111,5520,118,5519,113,5543,105,5665,75,5779,50"/>
+<area shape="rect" id="Node000088" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="5557,115,5697,155"/>
+<area shape="poly" id="edge49_Node000001_Node000088" title=" " alt="" coords="5800,67,5674,118,5672,113,5798,63"/>
+<area shape="rect" id="Node000070" href="$query__scu_8cpp.html" title="Implementation of the Query SCU service." alt="" coords="5721,115,5861,155"/>
+<area shape="poly" id="edge50_Node000001_Node000070" title=" " alt="" coords="5847,73,5809,117,5805,113,5843,69"/>
+<area shape="rect" id="Node000090" href="$retrieve__scp_8cpp.html" title="Implementation of the Retrieve SCP service (C&#45;MOVE/C&#45;GET)" alt="" coords="5885,115,6040,155"/>
+<area shape="poly" id="edge51_Node000001_Node000090" title=" " alt="" coords="5910,69,5948,113,5944,117,5906,73"/>
+<area shape="rect" id="Node000066" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="6064,115,6219,155"/>
+<area shape="poly" id="edge52_Node000001_Node000066" title=" " alt="" coords="5959,62,6092,113,6091,118,5957,67"/>
+<area shape="rect" id="Node000092" href="$storage__commitment__scp_8cpp.html" title="Implementation of Storage Commitment Push Model SCP service." alt="" coords="6243,115,6413,155"/>
+<area shape="poly" id="edge53_Node000001_Node000092" title=" " alt="" coords="5973,50,6231,105,6260,113,6259,118,6230,111,5972,55"/>
+<area shape="rect" id="Node000113" href="$storage__commitment__scu_8cpp.html" title="Implementation of Storage Commitment Push Model SCU service." alt="" coords="6437,115,6606,155"/>
+<area shape="poly" id="edge54_Node000001_Node000113" title=" " alt="" coords="5973,41,6182,65,6304,83,6426,105,6457,113,6456,118,6425,111,6303,89,6181,71,5972,46"/>
+<area shape="rect" id="Node000095" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="6631,115,6783,155"/>
+<area shape="poly" id="edge55_Node000001_Node000095" title=" " alt="" coords="5973,35,6102,43,6264,56,6442,76,6619,105,6649,113,6648,118,6618,111,6441,82,6263,61,6102,48,5973,41"/>
+<area shape="rect" id="Node000096" href="$storage__scu_8cpp.html" title="Implementation of the Storage SCU service." alt="" coords="6807,115,6959,155"/>
+<area shape="poly" id="edge56_Node000001_Node000096" title=" " alt="" coords="5974,33,6132,38,6337,50,6566,71,6682,87,6795,105,6826,113,6825,118,6794,111,6681,92,6565,77,6336,55,6131,43,5973,38"/>
+<area shape="rect" id="Node000101" href="$ups__push__scu_8cpp.html" title="Implementation of the UPS Push SCU service." alt="" coords="6983,115,7137,155"/>
+<area shape="poly" id="edge58_Node000001_Node000101" title=" " alt="" coords="5973,31,6159,34,6407,44,6688,67,6831,84,6971,105,7003,113,7002,118,6970,111,6831,89,6688,72,6407,50,6158,39,5973,36"/>
+<area shape="rect" id="Node000105" href="$ups__query__scp_8cpp.html" title="Implementation of the UPS Query SCP service (C&#45;FIND for workitems)" alt="" coords="7161,115,7314,155"/>
+<area shape="poly" id="edge59_Node000001_Node000105" title=" " alt="" coords="5973,34,6573,58,6907,79,7045,91,7150,105,7182,113,7180,118,7149,111,7044,97,6906,84,6573,63,5973,39"/>
+<area shape="rect" id="Node000103" href="$ups__watch__scp_8cpp.html" title="Implementation of the UPS Watch SCP service." alt="" coords="7338,115,7491,155"/>
+<area shape="poly" id="edge60_Node000001_Node000103" title=" " alt="" coords="5973,33,6267,41,6657,55,7045,76,7205,90,7327,105,7359,113,7358,118,7326,111,7205,95,7044,81,6657,60,6266,46,5973,39"/>
+<area shape="rect" id="Node000100" href="$ups__watch__scu_8cpp.html" title="Implementation of the UPS Watch SCU service." alt="" coords="7515,115,7669,155"/>
+<area shape="poly" id="edge61_Node000001_Node000100" title=" " alt="" coords="5973,33,6299,39,6741,52,7182,74,7366,88,7504,105,7537,113,7536,118,7504,111,7365,93,7182,79,6741,57,6299,44,5973,38"/>
+<area shape="rect" id="Node000108" href="$verification__scp_8cpp.html" title="Implementation of the Verification SCP service." alt="" coords="7693,115,7869,155"/>
+<area shape="poly" id="edge62_Node000001_Node000108" title=" " alt="" coords="5973,33,6330,39,6824,52,7319,74,7526,88,7682,105,7718,113,7717,118,7681,111,7525,93,7319,79,6824,57,6330,44,5973,38"/>
+<area shape="rect" id="Node000110" href="$worklist__scp_8cpp.html" title="Implementation of the Modality Worklist SCP service." alt="" coords="7893,115,8048,155"/>
+<area shape="poly" id="edge63_Node000001_Node000110" title=" " alt="" coords="5973,32,6366,36,6918,47,7205,56,7475,69,7707,85,7882,105,7915,113,7913,118,7881,111,7706,90,7474,74,7205,61,6918,52,6366,41,5973,37"/>
+<area shape="rect" id="Node000111" href="$worklist__scu_8cpp.html" title="Implementation of the Worklist SCU service." alt="" coords="8072,115,8227,155"/>
+<area shape="poly" id="edge64_Node000001_Node000111" title=" " alt="" coords="5973,31,6397,34,7001,44,7316,53,7613,66,7868,83,8060,105,8093,113,8092,118,8060,111,7867,89,7612,72,7316,59,7000,49,6397,39,5973,37"/>
+<area shape="rect" id="Node000003" href="$echo__scu_2main_8cpp.html" title="Echo SCU &#45; DICOM Connectivity Test Client (dcmtk&#45;style)" alt="" coords="1179,321,1394,346"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2622,134,2864,136,3160,145,3301,155,3423,168,3514,185,3544,196,3563,209,3573,223,3577,238,3573,253,3563,268,3481,276,3278,285,2639,304,1394,333,1394,327,2639,299,3278,280,3481,271,3560,263,3568,251,3571,238,3568,225,3559,213,3542,201,3512,191,3422,173,3301,160,3160,151,2863,141,2622,139"/>
+<area shape="rect" id="Node000004" href="$find__scu_2main_8cpp.html" title="find_scu &#45; DICOM C&#45;FIND SCU utility (dcmtk&#45;compatible)" alt="" coords="2339,321,2546,346"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="2622,133,2874,135,3185,144,3333,153,3461,166,3556,184,3589,196,3609,209,3618,223,3622,238,3618,253,3608,268,3568,276,3473,284,3175,302,2546,331,2546,325,3175,297,3473,279,3567,270,3605,263,3614,251,3616,238,3614,225,3605,213,3586,200,3555,190,3460,172,3333,158,3184,149,2874,140,2622,139"/>
+<area shape="rect" id="Node000005" href="$get__scu_2main_8cpp.html" title="get_scu &#45; DICOM C&#45;GET SCU utility (dcmtk&#45;compatible)" alt="" coords="3031,321,3235,346"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="2622,133,2879,134,3198,143,3351,152,3482,165,3580,184,3613,195,3634,209,3644,223,3647,238,3644,253,3634,267,3614,278,3579,288,3476,305,3236,328,3235,323,3476,300,3578,283,3612,273,3630,263,3639,251,3642,238,3639,225,3630,213,3611,200,3579,189,3481,171,3350,157,3198,148,2879,139,2622,138"/>
+<area shape="rect" id="Node000006" href="$test__connectivity_8cpp.html" title="Scenario 1: Basic Connectivity Tests." alt="" coords="752,218,955,258"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="2428,142,1694,166,1274,187,1099,199,967,213,927,221,926,215,966,208,1099,194,1273,181,1693,160,2428,136"/>
+<area shape="rect" id="Node000007" href="$test__dcmtk__echo_8cpp.html" title="C&#45;ECHO (Verification) interoperability tests with DCMTK." alt="" coords="979,218,1181,258"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="2428,139,2207,142,1901,152,1549,174,1369,192,1194,213,1154,221,1153,215,1193,208,1369,186,1549,169,1900,147,2207,137,2428,134"/>
+<area shape="rect" id="Node000008" href="$test__dcmtk__find_8cpp.html" title="C&#45;FIND (Query) interoperability tests with DCMTK." alt="" coords="1206,218,1402,258"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="2428,140,2240,145,1988,157,1702,179,1556,194,1414,213,1376,220,1375,215,1413,208,1556,189,1701,173,1988,152,2240,140,2428,135"/>
+<area shape="rect" id="Node000009" href="$test__dcmtk__move_8cpp.html" title="C&#45;MOVE (Retrieve) interoperability tests with DCMTK." alt="" coords="1426,218,1635,258"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="2428,143,2083,165,1866,185,1648,213,1609,221,1608,215,1648,208,1865,180,2082,160,2427,138"/>
+<area shape="rect" id="Node000010" href="$test__dcmtk__store_8cpp.html" title="C&#45;STORE interoperability tests with DCMTK." alt="" coords="1660,218,1865,258"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="2428,147,2178,172,2028,191,1878,213,1841,221,1840,215,1877,208,2027,185,2178,167,2428,142"/>
+<area shape="rect" id="Node000011" href="$test__dicom__server__v2__integration_8cpp.html" title="Full integration testing for dicom_server_v2 (network_system migration)" alt="" coords="1890,211,2075,265"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="2429,153,2268,179,2087,213,2076,216,2075,210,2086,208,2267,174,2428,148"/>
+<area shape="rect" id="Node000012" href="$test__error__recovery_8cpp.html" title="Scenario 5: Error Recovery Tests." alt="" coords="2099,218,2317,258"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="2431,169,2268,220,2267,215,2429,164"/>
+<area shape="rect" id="Node000013" href="$test__multimodal__workflow_8cpp.html" title="Multi&#45;Modal Clinical Workflow Integration Tests." alt="" coords="2341,211,2513,265"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="2492,175,2454,212,2451,209,2488,171"/>
+<area shape="rect" id="Node000014" href="$test__stability_8cpp.html" title="Long&#45;Running Stability Tests &#45; 24&#45;Hour Continuous Operation." alt="" coords="2537,218,2711,258"/>
+<area shape="poly" id="edge13_Node000002_Node000014" title=" " alt="" coords="2563,171,2607,216,2603,219,2559,174"/>
+<area shape="rect" id="Node000015" href="$test__store__query_8cpp.html" title="Scenario 2: Store and Query Workflow Tests." alt="" coords="2735,218,2934,258"/>
+<area shape="poly" id="edge14_Node000002_Node000015" title=" " alt="" coords="2619,164,2777,215,2776,220,2618,169"/>
+<area shape="rect" id="Node000016" href="$test__stress_8cpp.html" title="Scenario 4: Multi&#45;Association Stress Tests." alt="" coords="2959,218,3121,258"/>
+<area shape="poly" id="edge15_Node000002_Node000016" title=" " alt="" coords="2622,148,2775,174,2946,208,2976,215,2974,221,2945,213,2774,179,2622,154"/>
+<area shape="rect" id="Node000017" href="$test__tls__integration_8cpp.html" title="TLS Integration Tests &#45; Secure DICOM Communication." alt="" coords="3145,218,3364,258"/>
+<area shape="poly" id="edge16_Node000002_Node000017" title=" " alt="" coords="2623,143,2856,169,3134,208,3172,215,3171,221,3133,213,2855,174,2622,148"/>
+<area shape="rect" id="Node000018" href="$test__worklist__mpps_8cpp.html" title="Scenario 3: Worklist to MPPS Workflow Tests." alt="" coords="3389,211,3550,265"/>
+<area shape="poly" id="edge17_Node000002_Node000018" title=" " alt="" coords="2622,137,2769,143,2957,156,3167,177,3376,208,3389,211,3388,216,3376,213,3166,182,2957,161,2769,149,2622,142"/>
+<area shape="rect" id="Node000019" href="$move__scu_2main_8cpp.html" title="move_scu &#45; DICOM C&#45;MOVE SCU utility (dcmtk&#45;compatible)" alt="" coords="3490,321,3710,346"/>
+<area shape="poly" id="edge18_Node000002_Node000019" title=" " alt="" coords="2622,137,2892,146,3227,161,3519,182,3614,195,3644,201,3659,209,3668,223,3670,239,3659,271,3637,300,3615,322,3611,319,3633,297,3654,268,3664,238,3663,225,3656,213,3642,206,3613,200,3518,187,3227,167,2892,151,2622,142"/>
+<area shape="rect" id="Node000020" href="$query__scu_2main_8cpp.html" title="Query SCU &#45; DICOM C&#45;FIND Client." alt="" coords="458,313,614,353"/>
+<area shape="poly" id="edge19_Node000002_Node000020" title=" " alt="" coords="2428,139,1966,141,1330,150,1021,159,756,172,566,190,508,201,480,213,473,224,471,235,479,262,496,289,517,311,513,315,492,292,474,264,466,236,468,222,477,209,507,196,565,184,756,166,1021,153,1330,144,1966,135,2428,134"/>
+<area shape="rect" id="Node000021" href="$retrieve__scu_2main_8cpp.html" title="Retrieve SCU &#45; DICOM C&#45;MOVE/C&#45;GET Client." alt="" coords="639,313,809,353"/>
+<area shape="poly" id="edge20_Node000002_Node000021" title=" " alt="" coords="2428,139,1969,141,1339,150,1032,159,770,172,581,190,524,201,496,213,488,225,486,237,489,250,497,263,514,273,549,286,643,311,641,316,548,291,512,278,493,267,484,252,480,237,483,223,493,209,522,196,581,185,770,167,1032,154,1339,144,1969,135,2428,134"/>
+<area shape="rect" id="Node000022" href="$secure__echo__scu_8cpp.html" title="Secure Echo SCU &#45; TLS&#45;secured DICOM Connectivity Test Client." alt="" coords="834,313,1014,353"/>
+<area shape="poly" id="edge21_Node000002_Node000022" title=" " alt="" coords="2428,140,2019,143,1470,154,1204,164,978,176,815,193,765,202,742,213,733,225,731,237,734,250,742,264,757,277,782,289,847,311,845,316,780,294,754,281,738,267,729,252,726,237,728,223,738,209,764,197,814,187,977,171,1204,158,1470,149,2019,138,2428,134"/>
+<area shape="rect" id="Node000023" href="$association_8h.html" title="DICOM Association management per PS3.8." alt="" coords="507,218,677,258"/>
+<area shape="poly" id="edge22_Node000002_Node000023" title=" " alt="" coords="2428,141,2067,147,1566,161,1064,182,855,196,696,213,659,221,658,215,696,208,854,191,1063,177,1566,155,2067,142,2428,135"/>
+<area shape="poly" id="edge36_Node000002_Node000117" title=" " alt="" coords="2429,141,1971,148,1332,162,728,184,507,198,378,213,305,234,235,262,125,316,123,311,233,257,303,229,377,208,507,192,728,179,1331,157,1971,143,2428,135"/>
+<area shape="poly" id="edge38_Node000002_Node000048" title=" " alt="" coords="2428,139,1985,141,1372,150,1066,159,795,172,586,190,513,201,465,213,421,236,382,267,328,322,325,319,378,263,418,232,463,208,512,196,585,185,795,167,1065,154,1371,145,1985,135,2428,134"/>
+<area shape="rect" id="Node000118" href="$n__action_8h.html" title="N&#45;ACTION DIMSE service." alt="" coords="4047,218,4241,258"/>
+<area shape="poly" id="edge32_Node000002_Node000118" title=" " alt="" coords="2622,133,2869,134,3218,143,3415,153,3620,166,3826,184,4028,208,4070,215,4069,221,4028,213,3826,190,3620,171,3415,158,3217,149,2869,140,2622,138"/>
+<area shape="poly" id="edge37_Node000002_Node000119" title=" " alt="" coords="2623,134,2948,137,3374,148,3582,157,3764,170,3904,187,3953,197,3985,208,4005,225,4027,253,4067,312,4062,315,4023,256,4001,229,3983,213,3952,202,3903,192,3764,175,3582,163,3374,153,2948,143,2623,140"/>
+<area shape="rect" id="Node000120" href="$n__create_8h.html" title="N&#45;CREATE DIMSE service." alt="" coords="3777,218,3972,258"/>
+<area shape="poly" id="edge34_Node000002_Node000120" title=" " alt="" coords="2623,135,2829,139,3112,150,3434,172,3598,188,3759,208,3800,215,3799,221,3758,213,3598,193,3433,177,3111,155,2829,144,2623,140"/>
+<area shape="poly" id="edge39_Node000002_Node000102" title=" " alt="" coords="2623,135,2966,141,3438,153,3909,175,4105,190,4254,208,4287,215,4285,221,4253,213,4105,195,3909,180,3437,159,2966,146,2623,140"/>
+<area shape="poly" id="edge23_Node000023_Node000003" title=" " alt="" coords="690,255,740,263,976,294,1180,318,1179,323,975,300,740,268,690,260"/>
+<area shape="poly" id="edge24_Node000023_Node000004" title=" " alt="" coords="691,256,740,263,886,275,1077,286,1537,305,2339,327,2339,332,1537,310,1077,291,885,280,740,268,690,261"/>
+<area shape="poly" id="edge25_Node000023_Node000005" title=" " alt="" coords="691,256,740,263,1016,287,1250,301,1455,307,1647,308,2046,305,2280,305,2557,311,3031,326,3031,331,2557,316,2280,310,2046,310,1647,313,1455,312,1249,306,1016,292,740,268,690,261"/>
+<area shape="poly" id="edge26_Node000023_Node000019" title=" " alt="" coords="691,256,740,263,984,279,1287,290,1993,299,2698,302,3002,305,3247,311,3490,323,3490,328,3247,316,3002,310,2698,308,1992,305,1287,295,984,285,740,268,690,261"/>
+<area shape="poly" id="edge27_Node000023_Node000020" title=" " alt="" coords="576,271,550,315,545,312,571,269"/>
+<area shape="poly" id="edge28_Node000023_Node000021" title=" " alt="" coords="632,264,699,311,696,315,629,268"/>
+<area shape="poly" id="edge29_Node000023_Node000022" title=" " alt="" coords="673,259,858,311,856,316,671,264"/>
+<area shape="poly" id="edge30_Node000023_Node000117" title=" " alt="" coords="494,260,188,316,177,318,176,313,188,311,493,254"/>
+<area shape="poly" id="edge31_Node000023_Node000048" title=" " alt="" coords="524,265,352,323,350,318,523,260"/>
+<area shape="poly" id="edge33_Node000118_Node000119" title=" " alt="" coords="4124,271,4092,315,4088,312,4120,267"/>
+<area shape="poly" id="edge35_Node000120_Node000119" title=" " alt="" coords="3929,261,4036,311,4034,316,3927,266"/>
+</map>

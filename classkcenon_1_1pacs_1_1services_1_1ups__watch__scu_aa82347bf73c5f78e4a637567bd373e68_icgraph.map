@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::ups_watch_scu::next_message_id" name="kcenon::pacs::services::ups_watch_scu::next_message_id">
+<area shape="rect" id="Node000001" title=" " alt="" coords="485,70,655,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a03f3861af77f3295802b4a34da17d283" title=" " alt="" coords="268,70,437,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="472,100,437,100,437,95,472,95"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a1a335b57357312eda00d11689580a989" title="Subscribe to UPS workitem events (N&#45;ACTION Type 3)" alt="" coords="13,5,212,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="254,71,219,60,180,48,182,43,221,55,256,65"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#a9b1f3b4916717797262878ef425b63c1" title="Suspend global subscription (N&#45;ACTION Type 5)" alt="" coords="17,70,208,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="255,100,208,100,208,95,255,95"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scu.html#acf495dd81b3d6b6e321f855d76c4f5b7" title="Unsubscribe from UPS workitem events (N&#45;ACTION Type 4)" alt="" coords="5,149,220,189"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="256,129,181,152,179,147,254,124"/>
+</map>

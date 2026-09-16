@@ -1,0 +1,12 @@
+<map id="include/kcenon/pacs/web" name="include/kcenon/pacs/web">
+<area shape="rect" id="node1" href="dir_1c094cf031b20fefde46c261c2d68e01.html" title="services" alt="" coords="126,136,202,161"/>
+<area shape="rect" id="node2" href="dir_73a387774cb0d222143006fc151aa8e2.html" title="security" alt="" coords="27,136,101,161"/>
+<area shape="rect" id="node4" href="dir_61d1ce303ef15fe95bdbaf7f002e554c.html" title="auth" alt="" coords="37,63,88,88"/>
+<area shape="poly" id="edge1" href="dir_000002_000072.html" alt="" coords="66,88,66,122,61,123,60,88"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000002_000072.html" title="1" alt="" coords="67,110,77,125"/>
+<area shape="rect" id="node5" href="dir_dbdcc6453283d478c89bc9e4aedac235.html" title="endpoints" alt="" coords="113,63,199,88"/>
+<area shape="poly" id="edge2" href="dir_000034_000074.html" alt="" coords="160,88,164,122,159,123,155,89"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000034_000074.html" title="2" alt="" coords="164,110,174,124"/>
+<area shape="rect" id="clust2" href="dir_66f0964c2f27d189838628e8fe573ba3.html" alt="" coords="27,52,284,99"/>
+<area shape="rect" id="clust1" href="dir_3761379d2dd6dd34a00613829bea5e96.html" title="pacs" alt="" coords="16,16,295,172"/>
+</map>

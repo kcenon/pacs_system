@@ -1,0 +1,22 @@
+<map id="include/kcenon/pacs/integration/dicom_session.h" name="include/kcenon/pacs/integration/dicom_session.h">
+<area shape="rect" id="Node000001" title="DICOM session wrapper for network_system sessions." alt="" coords="707,5,916,45"/>
+<area shape="rect" id="Node000002" href="$dicom__association__handler_8h.html" title="DICOM association handler for network_system integration." alt="" coords="389,93,613,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="736,52,589,96,587,91,735,47"/>
+<area shape="rect" id="Node000008" href="$dicom__session_8cpp.html" title="Implementation of dicom_session for DICOM PDU communication." alt="" coords="637,101,797,141"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="784,57,738,103,734,99,780,53"/>
+<area shape="rect" id="Node000009" href="$network__adapter_8cpp.html" title="Implementation of network_adapter for network_system integration." alt="" coords="821,101,994,141"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="842,53,890,99,886,103,839,57"/>
+<area shape="rect" id="Node000010" href="$pacs-integration_8cppm.html" title="C++20 module partition for external system adapters." alt="" coords="1018,108,1269,133"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="892,46,1103,105,1102,110,891,52"/>
+<area shape="rect" id="Node000003" href="$dicom__server__v2_8h.html" title="DICOM server implementation using network_system&#39;s messaging_server." alt="" coords="219,196,446,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,157,368,198,365,194,440,152"/>
+<area shape="rect" id="Node000005" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="403,299,636,324"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="507,162,521,298,516,299,502,162"/>
+<area shape="rect" id="Node000007" href="$dicom__association__handler_8cpp.html" title="DICOM association handler implementation for network_system integration." alt="" coords="539,196,724,236"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="550,154,606,194,603,198,547,158"/>
+<area shape="rect" id="Node000004" href="$test__dicom__server__v2__integration_8cpp.html" title="Full integration testing for dicom_server_v2 (network_system migration)" alt="" coords="5,284,191,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="273,244,165,286,163,281,271,239"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="384,240,498,296,495,301,381,244"/>
+<area shape="rect" id="Node000006" href="$dicom__server__v2_8cpp.html" title="DICOM server V2 implementation using network_system&#39;s messaging_server." alt="" coords="215,291,378,331"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="323,250,306,292,301,290,318,248"/>
+</map>

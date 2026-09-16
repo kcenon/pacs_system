@@ -1,0 +1,16 @@
+<map id="include/kcenon/pacs/monitoring/health_status.h" name="include/kcenon/pacs/monitoring/health_status.h">
+<area shape="rect" id="Node000001" title="Health status data structures for PACS system monitoring." alt="" coords="379,5,581,45"/>
+<area shape="rect" id="Node000002" href="$health__checker_8h.html" title="Health check service for PACS system components." alt="" coords="185,93,396,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,53,333,96,331,91,425,49"/>
+<area shape="rect" id="Node000004" href="$pacs-monitoring_8cppm.html" title="C++20 module partition for system monitoring." alt="" coords="236,269,487,295"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="486,59,488,95,485,137,476,182,457,223,444,239,427,253,393,272,391,267,424,248,440,235,452,220,470,180,480,137,482,95,481,59"/>
+<area shape="rect" id="Node000006" href="$health__json_8h.html" title="JSON serialization for health check data structures." alt="" coords="518,93,706,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="522,51,584,91,581,95,519,55"/>
+<area shape="rect" id="Node000003" href="$pacs__monitor_8h.html" title="Unified PACS monitoring with IMonitor interface integration." alt="" coords="5,181,205,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="239,142,147,184,145,179,236,137"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="277,146,266,183,266,202,272,220,283,235,297,248,330,267,327,271,294,253,279,239,267,223,261,203,261,183,271,145"/>
+<area shape="rect" id="Node000005" href="$health__checker_8cpp.html" title="Implementation of health_checker class." alt="" coords="281,181,442,221"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="317,142,348,179,344,183,313,146"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="180,223,325,267,323,272,179,228"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="589,145,549,185,500,224,448,252,398,272,396,267,445,247,497,219,546,181,585,141"/>
+</map>

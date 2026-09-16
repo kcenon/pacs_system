@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::network::dimse::status_description" name="kcenon::pacs::network::dimse::status_description">
+<area shape="rect" id="Node000001" title="Get a human&#45;readable description of a status code." alt="" coords="5,101,203,141"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#ac46ad6657648f0faa19bc72806960d0a" title="Check if status indicates a failure." alt="" coords="251,5,419,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,99,250,55,267,48,269,53,252,60,151,104"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#abe720f89ca33caba4f6ff7d5e0a0865e" title="Check if status indicates pending (more results)" alt="" coords="251,69,419,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,105,237,100,238,105,203,110"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#aa44bf725c733be8af34c5e8b4799caa8" title="Check if status indicates success." alt="" coords="251,133,419,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="203,132,238,137,237,143,202,138"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a47a18cda3a3bb6573c5b9c5d9a8fd260" title="Check if status indicates a warning." alt="" coords="251,197,419,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="151,139,252,183,269,190,267,195,250,188,149,144"/>
+</map>

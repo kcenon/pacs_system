@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::xds::kos_instance_reference" name="kcenon::pacs::services::xds::kos_instance_reference">
+<area shape="rect" id="Node000001" title="Reference to a DICOM instance within a KOS document." alt="" coords="5,307,212,387"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="69,135,148,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,200,111,290,106,290,106,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="43,5,174,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="111,99,111,134,106,134,106,99"/>
+</map>

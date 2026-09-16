@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/viewer_state_endpoints.h" name="include/kcenon/pacs/web/endpoints/viewer_state_endpoints.h">
+<area shape="rect" id="Node000001" title="Viewer state API endpoints for REST server." alt="" coords="117,5,287,60"/>
+<area shape="rect" id="Node000002" href="$viewer__state__endpoints_8cpp.html" title="Viewer state API endpoints implementation." alt="" coords="5,108,193,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,72,122,110,118,106,161,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="217,115,392,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="243,68,293,113,290,117,240,71"/>
+</map>

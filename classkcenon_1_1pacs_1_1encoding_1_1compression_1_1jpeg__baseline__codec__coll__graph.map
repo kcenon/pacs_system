@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_baseline_codec" name="kcenon::pacs::encoding::compression::jpeg_baseline_codec">
+<area shape="rect" id="Node000001" title="JPEG Baseline (Process 1) codec implementation." alt="" coords="206,903,454,1363"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1compression__codec.html" title="Abstract base class for image compression codecs." alt="" coords="5,380,247,840"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,852,243,902,238,904,218,854"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="271,577,389,643"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="333,643,333,886,327,886,327,643"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="244,171,403,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="327,264,332,577,327,577,322,265"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="423,563,634,657"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="528,658,514,761,501,821,483,880,464,925,459,923,478,878,496,820,509,760,523,657"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec_1_1impl.html" title="PIMPL implementation for jpeg_baseline_codec." alt="" coords="427,133,630,288"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="531,288,531,546,526,546,526,288"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="654,178,803,243"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="709,257,554,563,550,561,704,255"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="717,5,740,71"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="731,71,731,162,726,162,726,71"/>
+</map>

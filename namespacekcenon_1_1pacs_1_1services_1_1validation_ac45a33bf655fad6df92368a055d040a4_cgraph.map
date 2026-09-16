@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::validation::has_breast_implant" name="kcenon::pacs::services::validation::has_breast_implant">
+<area shape="rect" id="Node000001" title="Check if dataset indicates breast implant presence." alt="" coords="5,34,180,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="228,5,417,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,45,214,40,215,45,181,50"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="245,70,400,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,72,232,81,231,86,180,78"/>
+</map>

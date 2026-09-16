@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::web::sorted_instances_response" name="kcenon::pacs::web::sorted_instances_response">
+<area shape="rect" id="Node000001" title="Response for sorted instances query." alt="" coords="220,637,411,757"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="265,135,344,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="347,198,363,223,384,279,397,328,404,373,404,416,400,459,391,505,363,614,361,623,356,621,358,613,386,504,394,458,399,416,399,373,392,329,379,281,358,225,342,201"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1web_1_1sorted__instance.html" title="Instance info for series navigation." alt="" coords="151,263,333,403"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="267,191,249,206,235,225,229,247,224,245,230,223,245,203,263,187"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="239,5,370,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="307,99,307,134,302,134,302,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="169,480,315,575"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="265,574,285,621,280,623,260,576"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="245,403,245,463,239,463,239,403"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,300,127,365"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="71,379,80,418,88,437,99,454,131,483,170,503,168,508,128,487,95,458,83,440,74,420,66,380"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="55,135,77,200"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="69,200,69,283,63,283,63,200"/>
+</map>

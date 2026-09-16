@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration_test::dcmtk_server_guard" name="kcenon::pacs::integration_test::dcmtk_server_guard">
+<area shape="rect" id="Node000001" title="RAII guard for DCMTK server processes." alt="" coords="27,407,214,707"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1background__process__guard.html" title="RAII wrapper for a background process." alt="" coords="5,5,236,344"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,344,123,390,118,390,118,344"/>
+</map>

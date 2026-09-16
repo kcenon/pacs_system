@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/client/routing_manager.h" name="include/kcenon/pacs/client/routing_manager.h">
+<area shape="rect" id="Node000001" title="Routing manager for automatic DICOM image forwarding." alt="" coords="69,5,257,45"/>
+<area shape="rect" id="Node000002" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="5,93,136,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,57,93,95,89,91,131,53"/>
+<area shape="rect" id="Node000003" href="$routing__endpoints_8cpp.html" title="Routing rule management REST API endpoints implementation." alt="" coords="161,93,351,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,53,237,91,234,95,192,57"/>
+</map>

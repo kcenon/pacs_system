@@ -1,0 +1,11 @@
+<map id="include/kcenon/pacs/monitoring/collectors/dicom_collector_base.h" name="include/kcenon/pacs/monitoring/collectors/dicom_collector_base.h">
+<area shape="rect" id="Node000001" title="CRTP base class for DICOM metrics collectors." alt="" coords="136,5,315,60"/>
+<area shape="rect" id="Node000002" href="$dicom__metrics__collector_8h.html" title="CRTP&#45;based unified DICOM metrics collector." alt="" coords="59,108,255,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,73,177,109,173,106,198,70"/>
+<area shape="rect" id="Node000004" href="$pacs-monitoring_8cppm.html" title="C++20 module partition for system monitoring." alt="" coords="117,299,368,324"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="254,71,269,107,276,163,271,218,260,266,250,299,244,298,255,265,265,218,270,163,264,109,249,73"/>
+<area shape="rect" id="Node000003" href="$pacs__monitor_8h.html" title="Unified PACS monitoring with IMonitor interface integration." alt="" coords="5,211,205,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="138,176,118,212,114,209,134,174"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="194,172,220,209,237,258,244,298,239,299,231,259,215,212,190,175"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="151,255,224,296,221,301,149,260"/>
+</map>

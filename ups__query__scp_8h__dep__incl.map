@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/services/ups/ups_query_scp.h" name="include/kcenon/pacs/services/ups/ups_query_scp.h">
+<area shape="rect" id="Node000001" title="DICOM UPS Query SCP service (C&#45;FIND handler for UPS workitems)" alt="" coords="5,5,224,45"/>
+<area shape="rect" id="Node000002" href="$ups__query__scp_8cpp.html" title="Implementation of the UPS Query SCP service (C&#45;FIND for workitems)" alt="" coords="38,93,191,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,59,117,93,112,93,112,59"/>
+</map>

@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::enable" name="kcenon::pacs::workflow::auto_prefetch_service::enable">
+<area shape="rect" id="Node000001" title="Enable the prefetch service." alt="" coords="5,183,180,237"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ad54ce309500c14050bebc65f7fb21acb" title="Start the prefetch service (alias for enable)" alt="" coords="228,183,403,237"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,207,214,207,214,213,180,213"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="931,163,1117,203"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="403,203,451,201,917,184,917,189,451,206,403,208"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a0cd2744aa7e941d97e632716a1d411a7" title="Background thread main loop." alt="" coords="451,215,625,269"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="403,220,438,225,437,230,403,225"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="1192,191,1379,231"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1118,191,1178,197,1178,203,1117,196"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="673,294,860,334"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="626,267,690,287,688,292,625,272"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a5bef4089bc04286caa45fcc6a2057ea4" title="Execute a single prefetch cycle." alt="" coords="679,84,854,139"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="585,212,705,143,708,148,588,217"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a569cf9d0158523dc02ec22e7d9d461b6" title="Update cumulative statistics." alt="" coords="679,215,854,269"/>
+<area shape="poly" id="edge13_Node000005_Node000012" title=" " alt="" coords="625,239,666,239,666,245,625,245"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="860,293,1178,230,1179,235,861,298"/>
+<area shape="poly" id="edge10_Node000007_Node000003" title=" " alt="" coords="855,133,909,149,938,157,937,162,907,154,854,139"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#abab83a011fa6dddee2a05ff84f7a000c" title="Increment a counter metric." alt="" coords="908,5,1140,60"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="853,82,920,62,922,67,855,87"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#a9d6865c3dab62c93fe82bb007972b4bb" title="Record a histogram sample." alt="" coords="921,84,1127,139"/>
+<area shape="poly" id="edge11_Node000007_Node000010" title=" " alt="" coords="854,109,907,109,907,114,854,114"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#a1545c4eabd7b0c9232fd2b75332fb6d2" title=" " alt="" coords="1188,5,1383,60"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="1140,30,1174,30,1174,35,1140,35"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#ad5620cd60d293f714a840c54aea814a2" title=" " alt="" coords="1188,84,1383,139"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="1128,109,1174,109,1174,114,1128,114"/>
+</map>

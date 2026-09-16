@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::association::send_dimse" name="kcenon::pacs::network::association::send_dimse">
+<area shape="rect" id="Node000001" title="Send a DIMSE message." alt="" coords="5,53,196,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="252,5,420,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,54,238,47,239,52,197,59"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="244,84,428,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="197,86,231,91,230,97,196,91"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="476,91,665,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="428,109,463,109,463,114,428,114"/>
+</map>

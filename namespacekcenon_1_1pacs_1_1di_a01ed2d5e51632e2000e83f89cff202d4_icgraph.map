@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::di::null_logger" name="kcenon::pacs::di::null_logger">
+<area shape="rect" id="Node000001" title="Get a shared null logger instance." alt="" coords="261,149,420,189"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#af18b8d20c1cf86c2e15f08e12fc8218b" title="Construct a job manager with custom configuration." alt="" coords="5,5,213,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="310,141,267,99,212,60,187,48,189,43,215,55,270,95,314,137"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a49481d59516248a5ea079c55ec3668b4" title="Construct a remote node manager." alt="" coords="19,70,200,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,148,197,127,198,122,264,143"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html#a8d601ad5d3106f6647e313b8f0e369a5" title="Set the logger instance." alt="" coords="18,149,201,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="248,172,201,172,201,167,248,167"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#ade2a2a0a46aedb351b35621845c5447d" title="Construct a sync manager with custom configuration." alt="" coords="28,214,191,269"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="263,196,192,219,190,214,262,191"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1sync__manager.html#a3913002cbd04ac8cb0c7b6c97b3d3134" title="Construct a sync manager from split repositories with custom configuration." alt="" coords="28,293,191,347"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="313,201,269,242,215,282,191,295,188,290,212,278,265,238,309,198"/>
+</map>

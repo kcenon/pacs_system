@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::access_control_manager::map_dicom_operation" name="kcenon::pacs::security::access_control_manager::map_dicom_operation">
+<area shape="rect" id="Node000001" title="Map DICOM operation to resource type and action." alt="" coords="244,5,435,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1access__control__manager.html#a40b990752126342244ad081c68283703" title="Check if a DICOM operation is allowed." alt="" coords="5,5,196,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,35,196,35,196,30,230,30"/>
+</map>

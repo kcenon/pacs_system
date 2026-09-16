@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::integration_test::dcmtk_tool::storescu" name="kcenon::pacs::integration_test::dcmtk_tool::storescu">
+<area shape="rect" id="Node000001" title="Run C&#45;STORE (storescu) client." alt="" coords="148,97,347,137"/>
+<area shape="rect" id="Node000002" href="$test__dcmtk__store_8cpp.html#a55b309fd2f5cbdca202e698fee99af1c" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,93,77,33,80,28,196,88"/>
+<area shape="rect" id="Node000003" href="$test__dcmtk__store_8cpp.html#aaddd54c5a1a81f6f142493bbad902900" title=" " alt="" coords="5,55,100,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,96,99,82,101,77,155,91"/>
+<area shape="rect" id="Node000004" href="$test__dcmtk__store_8cpp.html#a0db11938a94f602355af7ed602d273b4" title=" " alt="" coords="5,104,100,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="134,119,100,119,100,114,134,114"/>
+<area shape="rect" id="Node000005" href="$test__dcmtk__store_8cpp.html#aeb7daab0e16eedba78ab0125fbf1ad7a" title=" " alt="" coords="5,153,100,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="155,143,101,157,99,152,154,138"/>
+<area shape="rect" id="Node000006" href="$test__dcmtk__store_8cpp.html#ac1f2264506b660802b8dfc2902a2f6d5" title=" " alt="" coords="5,203,100,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="196,146,80,205,77,200,193,141"/>
+</map>

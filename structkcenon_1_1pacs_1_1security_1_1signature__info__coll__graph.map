@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::security::signature_info" name="kcenon::pacs::security::signature_info">
+<area shape="rect" id="Node000001" title="Information about a digital signature." alt="" coords="86,448,245,548"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,276,110,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,342,65,382,68,403,74,423,81,434,76,437,70,425,62,404,59,382,61,342"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,133,136,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,227,73,276,68,276,68,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="164,276,359,341"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="260,342,251,383,234,425,228,436,223,433,230,423,246,381,255,341"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="201,141,322,206"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="264,220,264,276,259,276,259,220"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="250,5,273,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="264,71,264,124,259,124,259,71"/>
+</map>

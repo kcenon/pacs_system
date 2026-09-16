@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::services::performed_series_info" name="kcenon::pacs::services::performed_series_info">
+<area shape="rect" id="Node000001" title="Information about a performed series for N&#45;SET COMPLETED." alt="" coords="133,412,301,492"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="205,148,284,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,213,278,237,288,279,294,314,291,348,278,389,273,400,268,397,273,387,285,347,288,314,283,280,273,238,263,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="50,280,229,345"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="220,215,200,239,176,269,172,265,196,236,216,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,5,310,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,99,247,148,242,148,242,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="137,346,137,367,143,387,150,398,145,401,138,389,132,367,132,346"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="64,227,70,251,91,278,87,281,65,253,59,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

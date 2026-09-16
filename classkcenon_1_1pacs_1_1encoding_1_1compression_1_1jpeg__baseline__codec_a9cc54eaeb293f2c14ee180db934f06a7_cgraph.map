@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::encoding::compression::jpeg_baseline_codec::decode" name="kcenon::pacs::encoding::compression::jpeg_baseline_codec::decode">
+<area shape="rect" id="Node000001" title="Decompresses JPEG Baseline data." alt="" coords="5,5,216,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec_1_1impl.html#a711516172aaaa33c66e1f438f92aed9e" title=" " alt="" coords="264,5,475,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,30,251,30,251,35,216,35"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="523,13,668,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,30,509,30,509,35,475,35"/>
+</map>

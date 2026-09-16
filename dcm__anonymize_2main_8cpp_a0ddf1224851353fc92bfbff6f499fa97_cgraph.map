@@ -1,0 +1,7 @@
+<map id="main" name="main">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,45,60,70"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1uid__mapping.html#a82ed5b4ae581491b089f612a3c40570b" title="Check if the mapping is empty." alt="" coords="108,5,275,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="60,49,94,42,95,48,61,55"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1uid__mapping.html#ab997888b50344bf3396235ca9d07f2f6" title="Get the number of mappings." alt="" coords="108,69,275,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="61,60,95,67,94,72,60,65"/>
+</map>

@@ -1,0 +1,3 @@
+<map id="kcenon::pacs::storage::patient_repository" name="kcenon::pacs::storage::patient_repository">
+<area shape="rect" id="Node000001" title="Repository for patient metadata persistence (legacy SQLite interface)" alt="" coords="5,5,175,365"/>
+</map>

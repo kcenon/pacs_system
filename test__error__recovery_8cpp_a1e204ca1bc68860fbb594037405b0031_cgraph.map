@@ -1,0 +1,13 @@
+<map id="TEST_CASE" name="TEST_CASE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,92,100,117"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration__test_1_1test__association.html#a64d8e08843113b1eb74d7d9b204b0bd6" title="Connect to a test server." alt="" coords="148,5,335,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,89,156,62,158,67,88,94"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1integration__test.html#aa35c5917f13c282c9347caeda53a762a" title="Default timeout for test operations (5s normal, 30s CI)" alt="" coords="148,85,335,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="100,102,134,102,134,107,100,107"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a475ae5fd37a777d1c5e38af21a7deabd" title="Find an available port for testing." alt="" coords="148,149,335,189"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="92,115,170,142,168,147,90,120"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a15e3ebe94f2cf5e85dd78cc6ffff77e1" title="Check if running in a CI environment." alt="" coords="383,85,569,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="335,102,369,102,369,107,335,107"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1integration__test.html#a71ce4d610f6f5036a818e0c79173cf8b" title="Check if a port is actually available by attempting to bind." alt="" coords="383,149,569,189"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="335,166,369,166,369,171,335,171"/>
+</map>

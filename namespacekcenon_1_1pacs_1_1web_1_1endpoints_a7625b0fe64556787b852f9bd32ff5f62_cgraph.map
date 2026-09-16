@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::web::endpoints::register_wado_uri_endpoints_impl" name="kcenon::pacs::web::endpoints::register_wado_uri_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,70,200,125"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="265,5,415,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,67,259,47,261,52,194,72"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1wado__uri.html#acf4060ad2a5db43bb1703155689f0911" title="Parse WADO&#45;URI query parameters from an HTTP request." alt="" coords="257,70,423,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,95,243,95,243,100,200,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1wado__uri.html#a8796523282be3272d7e183399893f9c7" title="Validate a WADO&#45;URI request." alt="" coords="248,149,432,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,122,245,142,243,147,185,127"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1web_1_1wado__uri_1_1validation__result.html#a8eca1d33c30dccf38d64c87b3b3f7d45" title=" " alt="" coords="489,70,643,125"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="419,146,475,126,477,131,420,151"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1web_1_1wado__uri.html#adc3b16a28e1a445fcb988579c494c6bf" title="Check if a content type is supported by WADO&#45;URI." alt="" coords="480,149,652,203"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="432,173,466,173,466,179,432,179"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1web_1_1wado__uri_1_1validation__result.html#af0cf75ac4295d301d8e2d8b5930cab92" title=" " alt="" coords="489,227,643,282"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="420,201,477,221,475,226,419,206"/>
+</map>
