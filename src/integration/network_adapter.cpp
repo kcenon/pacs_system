@@ -10,6 +10,7 @@
 #include <kcenon/pacs/integration/network_adapter.h>
 #include <kcenon/pacs/integration/dicom_session.h>
 #include <kcenon/pacs/network/dicom_server.h>
+#include <kcenon/pacs/compat/factory_result.h>
 
 #include <kcenon/network/facade/tcp_facade.h>
 
@@ -79,7 +80,7 @@ network_adapter::connect(const connection_config& config) {
         }
         client_cfg.verify_certificate = config.tls.verify_peer;
 
-        auto client_result = facade.create_client(client_cfg);
+        auto client_result = compat::factory_result(facade.create_client(client_cfg));
         if (client_result.is_err()) {
             return Result<session_ptr>(error_info("Connection failed: unable to create client"));
         }

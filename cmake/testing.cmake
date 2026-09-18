@@ -3,6 +3,11 @@
 if(PACS_BUILD_TESTS)
     enable_testing()
 
+    add_executable(pacs_factory_result_compat_test tests/compat/factory_result_test.cpp)
+    target_link_libraries(pacs_factory_result_compat_test PRIVATE pacs_core)
+    target_include_directories(pacs_factory_result_compat_test PRIVATE ${COMMON_SYSTEM_INCLUDE_DIR})
+    add_test(NAME pacs_factory_result_compat COMMAND pacs_factory_result_compat_test)
+
     # Fetch Catch2 for testing
     include(FetchContent)
     FetchContent_Declare(

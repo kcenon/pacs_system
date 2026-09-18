@@ -22,6 +22,7 @@
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
 #include <kcenon/network/facade/tcp_facade.h>
+#include <kcenon/pacs/compat/factory_result.h>
 #endif
 
 #if KCENON_HAS_COMMON_SYSTEM
@@ -136,7 +137,7 @@ Result<std::monostate> dicom_server_v2::start() {
         kcenon::network::facade::tcp_facade::server_config srv_cfg;
         srv_cfg.server_id = config_.ae_title;
         srv_cfg.port = config_.port;
-        auto server_result = facade.create_server(srv_cfg);
+        auto server_result = compat::factory_result(facade.create_server(srv_cfg));
         if (server_result.is_err()) {
             running_ = false;
             return server_result.error();
