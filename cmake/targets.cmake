@@ -438,7 +438,7 @@ if(TARGET database)
         pacs_services
         PUBLIC
         database
-        DatabaseSystem::database
+        database_system::database_system
     )
     target_compile_definitions(pacs_services PUBLIC PACS_WITH_DATABASE_SYSTEM=1)
     # Suppress deprecated warnings from database_system (database_base is deprecated)
@@ -675,12 +675,14 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
             pacs_storage
             PUBLIC
             database
-            DatabaseSystem::database
+            database_system::database_system
         )
         # Link integrated_database for unified_database_system (Issue #606)
         # integrated_database depends on monitoring_system, so both must be linked together.
         # On Linux, use --start-group/--end-group to resolve circular dependencies.
-        if(TARGET integrated_database AND TARGET monitoring_system)
+        if(TARGET database_system::integrated_database)
+            target_link_libraries(pacs_storage PUBLIC database_system::integrated_database)
+        elseif(TARGET integrated_database AND TARGET monitoring_system)
             if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 target_link_libraries(pacs_storage PUBLIC
                     "$<BUILD_LOCAL_INTERFACE:-Wl,--start-group>"
@@ -688,7 +690,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
                     "$<BUILD_LOCAL_INTERFACE:monitoring_system>"
                     "$<BUILD_LOCAL_INTERFACE:-Wl,--end-group>"
                     "$<INSTALL_INTERFACE:-Wl,--start-group>"
-                    "$<INSTALL_INTERFACE:DatabaseSystem::integrated_database>"
+                    "$<INSTALL_INTERFACE:database_system::integrated_database>"
                     "$<INSTALL_INTERFACE:monitoring_system::monitoring_system>"
                     "$<INSTALL_INTERFACE:-Wl,--end-group>"
                 )
@@ -696,7 +698,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
                 target_link_libraries(pacs_storage PUBLIC
                     "$<BUILD_LOCAL_INTERFACE:integrated_database>"
                     "$<BUILD_LOCAL_INTERFACE:monitoring_system>"
-                    "$<INSTALL_INTERFACE:DatabaseSystem::integrated_database>"
+                    "$<INSTALL_INTERFACE:database_system::integrated_database>"
                     "$<INSTALL_INTERFACE:monitoring_system::monitoring_system>"
                 )
             endif()
@@ -705,7 +707,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
                 pacs_storage
                 PUBLIC
                 integrated_database
-                DatabaseSystem::integrated_database
+                database_system::integrated_database
             )
         endif()
         target_compile_definitions(pacs_storage PUBLIC PACS_WITH_DATABASE_SYSTEM=1)

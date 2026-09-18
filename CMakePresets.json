@@ -16,9 +16,9 @@
                 "PACS_BUILD_TESTS": "OFF",
                 "PACS_BUILD_EXAMPLES": "OFF",
                 "PACS_BUILD_BENCHMARKS": "OFF",
-                "PACS_WITH_COMMON_SYSTEM": "ON",
-                "PACS_WITH_CONTAINER_SYSTEM": "ON",
-                "PACS_WITH_NETWORK_SYSTEM": "ON",
+                "KCENON_WITH_COMMON_SYSTEM": "ON",
+                "KCENON_WITH_CONTAINER_SYSTEM": "ON",
+                "KCENON_WITH_NETWORK_SYSTEM": "ON",
                 "PACS_BUILD_STORAGE": "ON"
             }
         },
