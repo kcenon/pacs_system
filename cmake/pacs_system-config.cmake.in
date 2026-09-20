@@ -3,6 +3,18 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(Threads REQUIRED)
+# pacs_encoding publicly links ICU; installed consumers need the same targets.
+if(APPLE AND NOT ICU_ROOT)
+    execute_process(COMMAND brew --prefix icu4c
+        OUTPUT_VARIABLE _pacs_icu_prefix OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+    if(_pacs_icu_prefix)
+        set(ICU_ROOT "${_pacs_icu_prefix}")
+    endif()
+endif()
+find_package(ICU CONFIG QUIET COMPONENTS uc data)
+if(NOT ICU_FOUND)
+    find_dependency(ICU REQUIRED COMPONENTS uc data)
+endif()
 find_dependency(common_system CONFIG REQUIRED)
 find_dependency(container_system CONFIG REQUIRED)
 find_dependency(network_system CONFIG REQUIRED)
