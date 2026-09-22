@@ -542,7 +542,7 @@ cmake --build build --target run_full_benchmarks
 | **Test Cases** | 2584+ tests |
 | **Example Programs** | 32 apps |
 | **Documentation** | 83 markdown files |
-| **CI/CD Workflows** | 14 workflows |
+| **CI/CD Workflows** | 20 workflows |
 | **Version** | 0.1.0 |
 | **Last Updated** | 2026-04-09 |
 
