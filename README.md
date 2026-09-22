@@ -37,6 +37,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - [Documentation](#documentation)
 - [Performance](#performance)
 - [Code Statistics](#code-statistics)
+- [Compliance](#compliance)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
@@ -45,14 +46,28 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ## Project Status
 
-**Current Phase**: ✅ Phase 4 Complete - Advanced Services & Production Hardening
+**Current Version**: 1.0.0-rc — release candidate, not yet tagged (v1.0.0 tag pending #1095)
+**Project Phase**: Phase 4 Complete — Advanced Services & Production Hardening
+
+The v1.0 contract freezes the public header surface under `include/kcenon/pacs/`, the
+`pacs_system::pacs_system` aggregate CMake target, and the documented Doxygen API. See
+[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md) for the frozen header inventory,
+[`docs/v1.0-throw-policy.md`](docs/v1.0-throw-policy.md) for the exception/Result<T> contract,
+and [`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md) for the
+pre-freeze deprecation audit.
+
+Upgrading from 0.x? Start with the [0.x → 1.0 Migration Guide](docs/migration/0.x-to-1.0.md)
+for the full upgrade walkthrough (include paths, namespaces, CMake contract, `Result<T>` migration,
+and the directory relocation), and consult the [CHANGELOG](CHANGELOG.md) for the underlying change
+set including the `samples/` → `examples/` and `examples/` → `tools/` directory relocation (#1139)
+and the `pacs_system::pacs_system` CMake contract (#1158).
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | ✅ Complete |
-| **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | ✅ Complete |
-| **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | ✅ Complete |
-| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer | ✅ Complete |
+| **Phase 1**: Foundation | DICOM Core, Tag Dictionary, File I/O (Part 10), Transfer Syntax | Complete |
+| **Phase 2**: Network Protocol | Upper Layer Protocol (PDU), Association State Machine, DIMSE-C, Compression Codecs | Complete |
+| **Phase 3**: Core Services | Storage SCP/SCU, File Storage, Index Database, Query/Retrieve, Logging, Monitoring | Complete |
+| **Phase 4**: Advanced Services | REST API, DICOMweb, AI Integration, Client Module, Cloud Storage, Print Management, Security, Workflow, Annotation/Viewer | Complete |
 
 **Test Coverage**: 1,980+ tests passing across 141+ test files | [![codecov](https://codecov.io/gh/kcenon/pacs_system/branch/main/graph/badge.svg)](https://codecov.io/gh/kcenon/pacs_system)
 
@@ -72,6 +87,9 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
 │       └─────────────┼───────────┼───────────┼──────────────┘        │
 │  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
+│  │  IHE Actors (XDS.b Source / Consumer / Registry Query + ATNA) │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
 │  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commit/Print) │  │
 │  └──────────────────────────────┬────────────────────────────────┘  │
 │  ┌──────────────────────────────▼────────────────────────────────┐  │
@@ -86,7 +104,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 │  │   S3/Azure) │  │   Prefetch/RemoteNode) │  │   Metrics)      │  │
 │  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
 ├─────────┼────────────────────────────────────────────────────────────┤
-│         │             Integration Adapters                           │
+│         │             Integration Adapters + DI                      │
 │  container │ network │ thread │ logger │ monitoring                  │
 ├─────────┼────────────────────────────────────────────────────────────┤
 │         │              kcenon Ecosystem                               │
@@ -242,6 +260,10 @@ ctest --output-on-failure
 
 **Test Results**: 1,980+ tests passing across 141+ test files (Core, Encoding, Network, Services, Storage, Security, Web, Workflow, Client, AI, Monitoring, Integration)
 
+### Testing Framework
+
+`pacs_system` uses **Catch2 v3.4.0** for its unit test corpus, which differs from the kcenon ecosystem default of **GoogleTest**. The pre-existing test corpus relies on Catch2 idioms (`TEST_CASE`, `SECTION`), and migration is intentionally out of scope for the directory-structure standardization work. See [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md) (section "Per-system conventions") for the full rationale and tracking issue [#1141](https://github.com/kcenon/pacs_system/issues/1141).
+
 ### Build Options
 
 ```cmake
@@ -257,11 +279,43 @@ PACS_BUILD_STORAGE (ON)            # Build storage module
 vcpkg install kcenon-pacs-system
 ```
 
-In your `CMakeLists.txt`:
+### CMake Integration
+
+After installing pacs_system (via `cmake --install`, vcpkg, or another package
+manager), downstream projects depend on it through the canonical CMake target
+`pacs_system::pacs_system`:
+
 ```cmake
-find_package(pacs_system CONFIG REQUIRED)
-target_link_libraries(your_target PRIVATE kcenon::pacs_system)
+find_package(pacs_system 1.0 REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
 ```
+
+`pacs_system::pacs_system` is an aggregate INTERFACE target that pulls in every
+required and built optional sub-component, so a single `target_link_libraries`
+call is enough for typical consumers.
+
+For fine-grained control, link individual components instead. The available
+component targets are:
+
+| Component | Target | Provides |
+|-----------|--------|----------|
+| Core | `pacs_system::core` | Tags, datasets, Part 10 file I/O |
+| Encoding | `pacs_system::encoding` | VR types, transfer syntaxes, codecs |
+| Network | `pacs_system::network` | PDU, association, DIMSE |
+| Client | `pacs_system::client` | Job/routing/sync/prefetch managers |
+| Services | `pacs_system::services` | SCP/SCU implementations |
+| Security | `pacs_system::security` | RBAC, anonymization, signatures, TLS |
+| Storage | `pacs_system::storage` | File storage, SQLite, S3/Azure (optional) |
+| AI | `pacs_system::ai` | AI service connector (optional) |
+| Monitoring | `pacs_system::monitoring` | Health checks, metrics (optional) |
+| Workflow | `pacs_system::workflow` | Auto prefetch, scheduling (optional) |
+| Web | `pacs_system::web` | REST API, DICOMweb (optional) |
+| Integration | `pacs_system::integration` | Ecosystem adapters (optional) |
+
+The legacy spelling `kcenon::pacs_system` is preserved as an alias for
+backward compatibility but new code should use `pacs_system::pacs_system`.
 
 ### Windows Development Notes
 
@@ -281,12 +335,27 @@ auto value = std::max(x, y);
 
 ## CLI Tools & Examples
 
-The project includes 32 example applications. Build them with:
+The project ships two complementary subtrees (see [#1139](https://github.com/kcenon/pacs_system/issues/1139)):
+
+- `tools/` — 32 standalone CLI utility binaries
+- `examples/` — 5 progressive tutorials (`01_hello_dicom` through `05_production_pacs`)
+
+Build the CLI tools:
 
 ```bash
 cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
 cmake --build build
 ```
+
+Build the tutorials:
+
+```bash
+cmake -S . -B build -DPACS_BUILD_SAMPLES=ON
+cmake --build build
+```
+
+> The CMake option names (`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`) are
+> preserved for backward compatibility with existing CI and downstream consumers.
 
 ### Tool Summary
 
@@ -391,29 +460,36 @@ This project leverages the following kcenon ecosystem components:
 
 ## Project Structure
 
+Public headers live under `include/kcenon/pacs/<module>/`. The legacy `include/pacs/...`
+path was retired; all consumers should `#include <kcenon/pacs/...>`.
+
 | Module | Location | Description |
 |--------|----------|-------------|
-| **Core** | `include/pacs/core/` | DICOM tags, elements, datasets, Part 10 file I/O, tag dictionary |
-| **Encoding** | `include/pacs/encoding/` | VR types, transfer syntaxes, compression codecs (JPEG, JP2K, JPLS, RLE) |
-| **Network** | `include/pacs/network/` | PDU encoding/decoding, association state machine, DIMSE protocol |
-| **Services** | `include/pacs/services/` | SCP/SCU implementations, SOP class registry, IOD validators |
-| **Storage** | `include/pacs/storage/` | File storage, SQLite indexing, cloud storage (S3/Azure), HSM |
-| **Security** | `include/pacs/security/` | RBAC, anonymization (PS3.15), digital signatures, TLS |
-| **Monitoring** | `include/pacs/monitoring/` | Health checks, Prometheus metrics |
-| **Web** | `include/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
-| **Client** | `include/pacs/client/` | Job, routing, sync, prefetch, remote node management |
-| **Workflow** | `include/pacs/workflow/` | Auto prefetch, task scheduler, study lock manager |
-| **AI** | `include/pacs/ai/` | AI service connector, result handler (SR/SEG) |
-| **Integration** | `include/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring) |
+| **Core** | `include/kcenon/pacs/core/` | DICOM tags, elements, datasets, Part 10 file I/O, tag dictionary |
+| **Encoding** | `include/kcenon/pacs/encoding/` | VR types, transfer syntaxes, compression codecs (JPEG, JP2K, JPLS, RLE) |
+| **Network** | `include/kcenon/pacs/network/` | PDU encoding/decoding, association state machine, DIMSE protocol |
+| **Services** | `include/kcenon/pacs/services/` | SCP/SCU implementations, SOP class registry, IOD validators |
+| **Storage** | `include/kcenon/pacs/storage/` | File storage, SQLite indexing, cloud storage (S3/Azure), HSM |
+| **Security** | `include/kcenon/pacs/security/` | RBAC, anonymization (PS3.15), digital signatures, TLS |
+| **Monitoring** | `include/kcenon/pacs/monitoring/` | Health checks, Prometheus metrics |
+| **Web** | `include/kcenon/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
+| **Client** | `include/kcenon/pacs/client/` | Job, routing, sync, prefetch, remote node management |
+| **Workflow** | `include/kcenon/pacs/workflow/` | Auto prefetch, task scheduler, study lock manager |
+| **AI** | `include/kcenon/pacs/ai/` | AI service connector, result handler (SR/SEG) |
+| **Integration** | `include/kcenon/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring) |
+| **IHE** | `include/kcenon/pacs/ihe/` | IHE actors (XDS.b Document Source/Consumer, Registry Query, ATNA audit) |
+| **DI** | `include/kcenon/pacs/di/` | Dependency injection utilities for service composition |
+| **Compat** | `include/kcenon/pacs/compat/` | Compatibility shims for cross-platform and legacy include paths |
 
 ```
 pacs_system/
-├── include/pacs/         # Public headers (222 files)
-├── src/                  # Source implementations (148 files)
-├── tests/                # Test suites (141+ files, 1,980+ tests)
-├── examples/             # Example applications (32 apps)
-├── docs/                 # Documentation (57 files)
-└── CMakeLists.txt        # Build configuration (v0.2.0)
+├── include/kcenon/pacs/  # Public headers (290 files)
+├── src/                  # Source implementations (217 files)
+├── tests/                # Test suites (189 files, 2,657+ tests)
+├── examples/             # Tutorials (5 progressive learning steps)
+├── tools/                # CLI utility binaries (32 apps)
+├── docs/                 # Documentation (87 markdown files)
+└── CMakeLists.txt        # Build configuration (v1.0.0-rc)
 ```
 
 > For the full file-level directory tree, see [Project Structure](docs/PROJECT_STRUCTURE.md).
@@ -467,16 +543,20 @@ int main() {
 
 ## Documentation
 
+- 🌐 [API Reference (Doxygen)](https://kcenon.github.io/pacs_system/) — Hosted Doxygen output (generated from `include/kcenon/pacs/**`)
 - 📋 [Implementation Analysis](docs/PACS_IMPLEMENTATION_ANALYSIS.md) - Detailed implementation strategy
 - 📋 [Product Requirements](docs/PRD.md) - Product Requirements Document
 - 🏗️ [Architecture Guide](docs/ARCHITECTURE.md) - System architecture
 - ⚡ [Features](docs/FEATURES.md) - Feature specifications
 - 📁 [Project Structure](docs/PROJECT_STRUCTURE.md) - Directory structure
-- 🔧 [API Reference](docs/API_REFERENCE.md) - API documentation
+- 🔧 [API Reference (narrative)](docs/API_REFERENCE.md) - High-level API walkthrough
 - 🖥️ [CLI Reference](docs/CLI_REFERENCE.md) - CLI tools documentation
 - 📄 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) - DICOM conformance
 - 🏥 [IHE Integration Statement](docs/IHE_INTEGRATION_STATEMENT.md) - IHE profile conformance (XDS-I.b, AIRA, PIR)
 - 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - Thread system migration summary
+
+**Upgrading:**
+- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - Every breaking change between the 0.1.0 baseline and the 1.0.0 API freeze, with before/after snippets, a `Result<T>` migration walkthrough, and a self-audit checklist.
 
 **Database Integration:**
 - 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system integration guide
@@ -535,18 +615,29 @@ cmake --build build --target run_full_benchmarks
 | **Source Files** | 204 files |
 | **Header LOC** | ~76800 lines |
 | **Source LOC** | ~110100 lines |
-| **Example LOC** | ~35700 lines |
+| **Example LOC** | ~39800 lines |
 | **Test LOC** | ~85300 lines |
-| **Total LOC** | ~307800 lines |
+| **Total LOC** | ~312000 lines |
 | **Test Files** | 180 files |
 | **Test Cases** | 2584+ tests |
-| **Example Programs** | 32 apps |
+| **Example Programs** | 33 apps |
 | **Documentation** | 83 markdown files |
 | **CI/CD Workflows** | 20 workflows |
 | **Version** | 0.1.0 |
-| **Last Updated** | 2026-04-09 |
+| **Last Updated** | 2026-09-22 |
 
 <!-- STATS_END -->
+
+---
+
+## Compliance
+
+`pacs_system` provides technical primitives that healthcare organizations may use as part of an Information Security Management System (ISMS). The library is not itself certified; adopters integrate it and supply the organizational controls (policy, training, incident response, business-continuity planning).
+
+- [ISO 27799 Control Mapping](docs/compliance/iso-27799.md) — how ATNA audit trail, audit log encryption, TLS policy, access control, and anonymization map to ISO 27799:2016 clauses 7.4–7.7
+- [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) — ISO 12052 / DICOM 2023e services, SOP classes, and transfer syntaxes implemented
+
+The ecosystem-level index at [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/develop/docs/compliance/ISO_OVERVIEW.md) lists all ISO standards the kcenon systems touch.
 
 ---
 

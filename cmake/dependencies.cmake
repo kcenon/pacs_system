@@ -47,8 +47,8 @@ if(PACS_BUILD_STORAGE)
 
         FetchContent_Declare(
             sqlite3
-            URL https://www.sqlite.org/2024/sqlite-amalgamation-3450100.zip
-            URL_HASH SHA3_256=72887d57a1d5c9ff937e59efc8db186c5c871fae9e2e5a9b20a1f2c7b5f1e8f7
+            URL https://www.sqlite.org/2024/sqlite-amalgamation-3450300.zip
+            URL_HASH SHA256=ea170e73e447703e8359308ca2e4366a3ae0c4304a8665896f068c736781c651
             DOWNLOAD_EXTRACT_TIMESTAMP TRUE
         )
         FetchContent_MakeAvailable(sqlite3)
@@ -229,7 +229,7 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
     FetchContent_Declare(
         openjph
         GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
-        GIT_TAG        0.18.2
+        GIT_TAG        0.21.0
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(openjph)
