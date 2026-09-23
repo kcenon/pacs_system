@@ -644,6 +644,61 @@ TEST_CASE("pdu_decoder error handling", "[network][pdu_decoder]") {
         auto result = pdu_decoder::decode_p_data_tf(malformed);
         CHECK(result.is_err());
     }
+
+    SECTION("decode_associate_rq rejects undersized presentation contexts") {
+        for (uint8_t item_length = 0; item_length < 4; ++item_length) {
+            const uint32_t pdu_length = 68 + 4 + item_length;
+            std::vector<uint8_t> malformed(6 + pdu_length, 0);
+            malformed[0] = 0x01;
+            malformed[5] = static_cast<uint8_t>(pdu_length);
+            malformed[7] = 0x01;
+            malformed[74] = 0x20;
+            malformed[77] = item_length;
+
+            auto result = pdu_decoder::decode_associate_rq(malformed);
+            CAPTURE(item_length);
+            REQUIRE(result.is_err());
+            CHECK(result.error().code == kcenon::pacs::error_codes::malformed_pdu);
+        }
+    }
+
+    SECTION("decode_associate_ac rejects undersized presentation contexts") {
+        for (uint8_t item_length = 0; item_length < 4; ++item_length) {
+            const uint32_t pdu_length = 68 + 4 + item_length;
+            std::vector<uint8_t> malformed(6 + pdu_length, 0);
+            malformed[0] = 0x02;
+            malformed[5] = static_cast<uint8_t>(pdu_length);
+            malformed[7] = 0x01;
+            malformed[74] = 0x21;
+            malformed[77] = item_length;
+
+            auto result = pdu_decoder::decode_associate_ac(malformed);
+            CAPTURE(item_length);
+            REQUIRE(result.is_err());
+            CHECK(result.error().code == kcenon::pacs::error_codes::malformed_pdu);
+        }
+    }
+
+    SECTION("decode rejects the presentation context AC fuzz regression") {
+        const std::vector<uint8_t> malformed{
+            0x02, 0x00, 0x00, 0x00, 0x00, 0x58, 0x00, 0x01,
+            0x2f, 0x00, 0xff, 0xff, 0x04, 0x00, 0x00, 0x00,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x0f, 0x00, 0x20, 0x00, 0x21, 0x00,
+            0x00, 0x00, 0x00, 0x29, 0x00, 0x00, 0x0f, 0x00,
+            0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x29,
+            0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x0f, 0x00,
+            0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00,
+        };
+
+        const auto result = pdu_decoder::decode(malformed);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::malformed_pdu);
+    }
 }
 
 // ============================================================================
