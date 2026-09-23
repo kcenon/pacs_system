@@ -3,6 +3,18 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(Threads REQUIRED)
+
+# Homebrew installs ICU keg-only, so its libraries are outside CMake's default
+# search paths even when the headers are visible.
+if(APPLE AND NOT ICU_ROOT)
+    execute_process(
+        COMMAND brew --prefix icu4c
+        OUTPUT_VARIABLE ICU_ROOT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+endif()
+find_dependency(ICU REQUIRED COMPONENTS uc data)
 find_dependency(common_system CONFIG REQUIRED)
 find_dependency(container_system CONFIG REQUIRED)
 find_dependency(network_system CONFIG REQUIRED)
