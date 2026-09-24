@@ -61,9 +61,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `## Documentation Audit Report
-
-${report}`
+              body: `## Documentation Audit Report\n\n${report}`
             });
 
       - name: Fail on critical findings
@@ -71,4 +69,3 @@ ${report}`
         run: |
           echo "::error::Documentation audit found critical issues. See PR comment for details."
           exit 1
-
