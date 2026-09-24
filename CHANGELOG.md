@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> **Release state:** The latest published release is still [0.1.0](#010---2026-03-13)
+> (`v0.1.0`; vcpkg `kcenon-pacs-system` 0.1.0, port-version 11). Entries below are untagged.
+> Some of them prepare the planned v1.0 API contract, which remains unreleased: no v1.0.0 tag,
+> GitHub release, or registry version exists, and publication is gated by
+> [#1095](https://github.com/kcenon/pacs_system/issues/1095) and
+> [#1164](https://github.com/kcenon/pacs_system/issues/1164).
+
 ### Documentation
 
+- Clarify package state: 0.1.0 is the latest published package and v1.0 is an unreleased milestone in both READMEs ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - Modernize Doxygen with doxygen-awesome-css theme, dark mode toggle, and standardized mainpage ([#1066](https://github.com/kcenon/pacs_system/issues/1066))
 
 ### Performance
@@ -25,10 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Synchronize the local `kcenon-pacs-system` overlay port with canonical registry port 0.1.0#11, move the registry baseline to `40632164`, and record the validated ecosystem source tuple and current FetchContent pins in `dependency-manifest.json` ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - Replace POSIX iconv with ICU (ucnv_convert) for DICOM character set encoding/decoding ([#1012](https://github.com/kcenon/pacs_system/issues/1012))
 
 ### Fixed
 
+- Release workflow version check: replace grep parsing that missed the multi-line `project()` and `version-semver` with `scripts/verify_release_version.py`, which also checks Doxygen `PROJECT_NUMBER` and the overlay manifest ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
+- `cmake --preset vcpkg`: accept the `NetworkSystem` and `LoggerSystem` package names installed by the published registry ports, and add `kcenon-logger-system` and `libjpeg-turbo` to the root manifest to match the overlay's default dependency set ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - Replace thread-unsafe `std::localtime` with `localtime_r`/`localtime_s` ([#990](https://github.com/kcenon/pacs_system/issues/990))
 
 ## [0.1.0] - 2026-03-13
