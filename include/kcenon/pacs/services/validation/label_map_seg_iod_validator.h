@@ -159,7 +159,7 @@ struct label_map_seg_validation_options {
  * - Common Instance Reference Module (M)
  * - SOP Common Module (M)
  *
- * @example
+ * @par Example:
  * @code
  * label_map_seg_iod_validator validator;
  * auto result = validator.validate(dataset);

@@ -94,7 +94,7 @@ struct monitoring_config {
  *
  * Thread Safety: All methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Initialize the monitoring adapter
  * monitoring_config config;

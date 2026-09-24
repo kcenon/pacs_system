@@ -77,7 +77,7 @@ struct migration_service_config {
  * - Uses condition variables for efficient scheduling
  * - Graceful shutdown support
  *
- * @example
+ * @par Example:
  * @code
  * // Create HSM storage
  * hsm_storage storage{hot, warm, cold};

@@ -133,7 +133,7 @@ using handler_error_callback =
  * 4. DIMSE messages are dispatched to registered services
  * 5. Call `stop()` or let graceful release complete
  *
- * @example
+ * @par Example:
  * @code
  * auto handler = std::make_shared<dicom_association_handler>(
  *     session, config, services);

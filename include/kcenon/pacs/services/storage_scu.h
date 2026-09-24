@@ -123,7 +123,7 @@ struct storage_scu_config {
  *  |                                    |
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * // Establish association with presentation contexts for storage
  * association_config config;
@@ -152,7 +152,7 @@ struct storage_scu_config {
  * assoc.release();
  * @endcode
  *
- * @example Batch Store with Progress
+ * @par Example: Batch Store with Progress
  * @code
  * storage_scu scu;
  * auto results = scu.store_batch(assoc, datasets,

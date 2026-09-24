@@ -117,7 +117,7 @@ struct tls_config {
  * operations. Includes connection parameters, supported services, and
  * runtime status information.
  *
- * @example
+ * @par Example:
  * @code
  * remote_node node;
  * node.node_id = "external-pacs-1";

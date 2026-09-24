@@ -35,15 +35,23 @@ cd build
 ctest --output-on-failure
 ```
 
+### TLS Integration Tests
+
+TLS test certificates are not stored in version control. Generate them before running TLS integration tests:
+
+```bash
+./tools/integration_tests/test_data/certs/generate_test_certs.sh
+```
+
 ## Development Workflow
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
+2. Branch from `develop` (the integration branch) — `git checkout develop && git pull && git checkout -b feature/your-feature`
 3. Make your changes
 4. Run tests and ensure they pass
 5. Commit your changes (see commit message guidelines below)
 6. Push to your fork (`git push origin feature/your-feature`)
-7. Open a Pull Request
+7. Open a Pull Request targeting `develop`. Releases to `main` are cut by maintainers via a separate `develop` -> `main` PR.
 
 ### Commit Message Guidelines
 
@@ -112,13 +120,17 @@ All code contributions must include tests:
 
 ### Writing Tests
 
-Use Google Test framework:
+Use Catch2 v3 (the project-wide test framework — note this differs from the kcenon
+ecosystem default of Google Test; see [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md) and
+[#1141](https://github.com/kcenon/pacs_system/issues/1141)):
 
 ```cpp
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
-TEST(ComponentTest, BasicFunctionality) {
-    // Test implementation
+TEST_CASE("Component: basic functionality", "[component]") {
+    SECTION("default state") {
+        // Test implementation
+    }
 }
 ```
 
@@ -128,6 +140,19 @@ Aim for:
 - New code: > 80% coverage
 - Critical paths: 100% coverage
 - Error handling: Test failure scenarios
+
+### Release Gates
+
+Before a release, the four medical-domain gates (DICOM conformance,
+TLS/ATNA audit logging, anonymization, storage/index migration) must be
+demonstrably green. Each gate has an exact command or workflow name and is
+followable without reading test source code. See
+[`docs/RELEASE_GATES.md`](docs/RELEASE_GATES.md) for the gate matrix and the
+pre-release checklist. The cheapest pre-flight check needs no build:
+
+```bash
+python3 tests/storage/check_storage_boundary.py "$(pwd)"
+```
 
 ## Pull Requests
 

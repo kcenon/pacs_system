@@ -14,9 +14,12 @@
  * - Windows uses localtime_s(tm*, time_t*) - thread-safe, tm pointer first
  *
  * Usage:
- *   #include <kcenon/pacs/compat/time.h>
- *   std::tm tm{};
- *   kcenon::pacs::compat::localtime_safe(&time_val, &tm);
+ * @code
+ * #include <kcenon/pacs/compat/time.h>
+ * std::tm tm{};
+ * kcenon::pacs::compat::localtime_safe(&time_val, &tm);
+ * @endcode
+ *
  * @author kcenon
  * @since 1.0.0
  */

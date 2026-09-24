@@ -197,7 +197,7 @@ struct pacs_monitor_config {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Initialize the monitor
  * pacs_monitor_config config;

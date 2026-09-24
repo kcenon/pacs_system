@@ -79,7 +79,7 @@ struct series_record {
  * Supports wildcard matching using '*' for prefix/suffix matching.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * series_query query;
  * query.study_uid = "1.2.840.123456";  // Exact study match

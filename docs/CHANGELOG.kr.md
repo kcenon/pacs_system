@@ -23,12 +23,25 @@ PACS System 프로젝트의 모든 주요 변경 사항이 이 파일에 문서�
 
 ## [미배포]
 
+> **릴리스 상태:** 게시된 릴리스는 `v0.1.0`(2026-03-13) 하나뿐이며, 게시된 패키지 버전은 루트
+> [CHANGELOG](../CHANGELOG.md)를 기준으로 합니다. 아래의 0.2.0 및 0.1.0 항목은 해당 릴리스 이전에
+> 기록된 개발 마일스톤이며 게시된 패키지가 아닙니다. v1.0은 #1095 및 #1164에서 관리하는 미출시 마일스톤입니다.
+
 ### 변경됨
 - 문서 표준화 (Doxyfile, README, 에코시스템 문서)
+- 디렉터리 레이아웃 통합: `samples/`를 `examples/`로 (5단계 튜토리얼), `examples/`를 `tools/`로 (32개 CLI 유틸리티 바이너리) 이름 변경하여 에코시스템 표준 역할 분리에 맞춤. CMake 옵션 이름(`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`)은 하위 호환성을 위해 유지 ([#1139](https://github.com/kcenon/pacs_system/issues/1139))
+- `cmake/*.cmake` 모듈을 `common_system/cmake/template`의 표준 에코시스템 템플릿에 맞춰 정렬. pacs 고유 모듈(`pacs_system-config.cmake.in`, `summary.cmake`) 및 의도적 설계 차이는 `cmake/DEVIATIONS.md`에 문서화하고, 정렬된 템플릿 버전은 `cmake/VERSION`에 기록 ([#1140](https://github.com/kcenon/pacs_system/issues/1140))
+
+### 호환성 변경 (BREAKING)
+- 기존 경로(`samples/...` 튜토리얼, `examples/...` CLI 유틸리티)를 참조하던 다운스트림 사용자는 새 위치로 업데이트 필요: 튜토리얼은 `examples/`, CLI 유틸리티 소스는 `tools/`. 튜토리얼 빌드 출력 경로도 `${CMAKE_BINARY_DIR}/samples`에서 `${CMAKE_BINARY_DIR}/examples`로 이동 ([#1139](https://github.com/kcenon/pacs_system/issues/1139))
+
+### 문서
+- Confirm canonical namespace is `kcenon::pacs::` across all source, with no remaining `pacs_system::` references; record ecosystem alignment ([#1138](https://github.com/kcenon/pacs_system/issues/1138))
+- Document Catch2 test framework retention as an explicit ecosystem exception in README, `docs/ECOSYSTEM.md`, and the master EPIC ([#1141](https://github.com/kcenon/pacs_system/issues/1141))
 
 ---
 
-## [0.2.0] - 2026-02-09
+## 0.2.0 개발 마일스톤 - 2026-02-09 (태그 및 게시되지 않음)
 
 ### 추가됨
 - **IHE 통합 프로파일**: XDS-I.b, AIRA, PIR 액터 지원
@@ -44,7 +57,7 @@ PACS System 프로젝트의 모든 주요 변경 사항이 이 파일에 문서�
 
 ---
 
-## [0.1.0] - 2024-12-01
+## 0.1.0 개발 베이스라인 - 2024-12-01 (게시된 `v0.1.0` 태그는 2026-03-13)
 
 ### 추가됨
 - PACS System 초기 릴리스

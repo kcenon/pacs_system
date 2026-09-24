@@ -24,6 +24,16 @@ NC='\033[0m' # No Color
 # Output format (default: markdown)
 OUTPUT_FORMAT="${1:-markdown}"
 
+count_example_programs() {
+    local examples_root="examples"
+    if [[ -d "examples/tutorials" ]]; then
+        examples_root="examples/tutorials"
+    fi
+
+    find "${examples_root}" -mindepth 1 -maxdepth 1 -type d ! -name common \
+        2>/dev/null | wc -l | tr -d ' '
+}
+
 # Calculate statistics
 calculate_stats() {
     cd "${PROJECT_ROOT}"
@@ -39,7 +49,7 @@ calculate_stats() {
     header_files=$(find include -name '*.h' -type f 2>/dev/null | wc -l | tr -d ' ')
     source_files=$(find src -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
-    example_dirs=$(find examples -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+    example_dirs=$(count_example_programs)
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
     workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
 
@@ -136,7 +146,7 @@ export_raw_stats() {
     header_files=$(find include -name '*.h' -type f 2>/dev/null | wc -l | tr -d ' ')
     source_files=$(find src -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
-    example_dirs=$(find examples -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+    example_dirs=$(count_example_programs)
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
     workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
     header_loc=$(find include -name '*.h' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')

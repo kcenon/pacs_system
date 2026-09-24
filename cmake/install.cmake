@@ -15,6 +15,43 @@ pacs_register_export_target(pacs_workflow workflow)
 pacs_register_export_target(pacs_web web)
 pacs_register_export_target(pacs_integration integration)
 
+##################################################
+# Umbrella target: pacs_system::pacs_system
+#
+# Provides a single canonical link target for downstream consumers. Linking
+# against pacs_system::pacs_system pulls in every required sub-component plus
+# any optional component that was actually built. This is the v1.0 contract
+# documented in the README "CMake Integration" section.
+#
+# Implementation: an INTERFACE library aggregating the per-component targets.
+# The sub-targets remain available for consumers that want fine-grained
+# linking (e.g., pacs_system::core, pacs_system::network).
+##################################################
+add_library(pacs_system_all INTERFACE)
+target_link_libraries(pacs_system_all INTERFACE
+    pacs_core
+    pacs_encoding
+    pacs_network
+    pacs_client
+    pacs_services
+    pacs_security
+)
+foreach(_pacs_optional_target
+    pacs_storage
+    pacs_ai
+    pacs_monitoring
+    pacs_workflow
+    pacs_web
+    pacs_integration
+)
+    if(TARGET ${_pacs_optional_target})
+        target_link_libraries(pacs_system_all INTERFACE ${_pacs_optional_target})
+    endif()
+endforeach()
+
+# Export the umbrella as pacs_system::pacs_system.
+pacs_register_export_target(pacs_system_all pacs_system)
+
 set(PACS_SYSTEM_INSTALL_TARGETS
     pacs_core
     pacs_encoding
@@ -22,6 +59,7 @@ set(PACS_SYSTEM_INSTALL_TARGETS
     pacs_client
     pacs_services
     pacs_security
+    pacs_system_all
 )
 
 foreach(_optional_target

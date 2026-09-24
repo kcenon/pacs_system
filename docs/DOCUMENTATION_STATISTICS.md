@@ -104,6 +104,7 @@ Changes to any of these directories:
 - `include/**`
 - `tests/**`
 - `examples/**`
+- `tools/**`
 - `docs/**`
 - `.github/workflows/**`
 

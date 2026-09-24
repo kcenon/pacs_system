@@ -42,7 +42,7 @@ namespace kcenon::pacs::core {
  * - Read operations (lookup) are thread-safe and can be concurrent
  * - Write operations (register_private_tag) are serialized
  *
- * @example
+ * @par Example:
  * @code
  * auto& dict = dicom_dictionary::instance();
  *

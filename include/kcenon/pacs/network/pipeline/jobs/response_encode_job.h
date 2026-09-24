@@ -53,7 +53,7 @@ struct encoded_response {
  * Stage 5 of the pipeline. Encodes service results into PDU format
  * and submits to the network send stage.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<response_encode_job>(result, max_pdu_size);
  * coordinator.submit_to_stage(pipeline_stage::response_encode, std::move(job));

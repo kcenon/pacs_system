@@ -71,6 +71,29 @@ TEST_CASE("index_database: create file-based database",
     std::filesystem::remove(test_path);
 }
 
+#ifdef PACS_WITH_DATABASE_SYSTEM
+TEST_CASE("index_database: :memory: redirect yields a real filesystem path "
+          "under PACS_WITH_DATABASE_SYSTEM (regression for #1107)",
+          "[storage][database]") {
+    // Under PACS_WITH_DATABASE_SYSTEM, ":memory:" is rewritten to a unique
+    // temp file so database_system's SQLite backend can attach. The WAL
+    // gate in open() must check the rewritten effective path (not the
+    // caller-supplied ":memory:" literal) so WAL is actually enabled on
+    // the temp file, avoiding the slow rollback-journal path that bit
+    // the Windows CI (#1105).
+
+    auto result = index_database::open(":memory:");
+    REQUIRE(result.is_ok());
+    auto db = std::move(result.value());
+    REQUIRE(db->is_open());
+
+    const auto effective = std::string{db->path()};
+    CHECK(effective != ":memory:");
+    CHECK(std::filesystem::exists(effective));
+    CHECK(effective.find("pacs_index_memory_") != std::string::npos);
+}
+#endif  // PACS_WITH_DATABASE_SYSTEM
+
 // ============================================================================
 // Patient Insert Tests
 // ============================================================================

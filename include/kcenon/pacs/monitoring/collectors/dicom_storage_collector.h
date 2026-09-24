@@ -66,7 +66,7 @@ struct storage_metric {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * dicom_storage_collector collector;
  * collector.initialize({});

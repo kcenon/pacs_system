@@ -51,7 +51,7 @@ namespace kcenon::pacs::integration {
  *
  * Thread Safety: All methods are thread-safe as they use only local state.
  *
- * @example
+ * @par Example:
  * @code
  * // Convert element to container value
  * auto element = dicom_element::from_string(tags::patient_name, vr_type::PN, "Doe^John");

@@ -131,7 +131,7 @@ struct wsi_validation_options {
  * ### User Optional Modules
  * - Specimen Module (U) — checked at info level
  *
- * @example
+ * @par Example:
  * @code
  * wsi_iod_validator validator;
  * auto result = validator.validate(dataset);

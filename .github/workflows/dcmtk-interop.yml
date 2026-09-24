@@ -257,16 +257,16 @@ jobs:
     - name: Make Shell Scripts Executable
       working-directory: pacs_system
       run: |
-        chmod +x ./examples/integration_tests/scripts/*.sh
+        chmod +x ./tools/integration_tests/scripts/*.sh
 
     - name: Run DCMTK Echo Shell Test
       working-directory: pacs_system
       timeout-minutes: 8
       continue-on-error: true
       run: |
-        if [ -f "./examples/integration_tests/scripts/test_dcmtk_echo.sh" ]; then
+        if [ -f "./tools/integration_tests/scripts/test_dcmtk_echo.sh" ]; then
           echo "=== Running C-ECHO Shell Test ==="
-          ./examples/integration_tests/scripts/test_dcmtk_echo.sh 2>&1 | tee build/dcmtk-echo-shell.log || true
+          ./tools/integration_tests/scripts/test_dcmtk_echo.sh 2>&1 | tee build/dcmtk-echo-shell.log || true
         fi
 
     - name: Run DCMTK Store Shell Test
@@ -274,9 +274,9 @@ jobs:
       timeout-minutes: 8
       continue-on-error: true
       run: |
-        if [ -f "./examples/integration_tests/scripts/test_dcmtk_store.sh" ]; then
+        if [ -f "./tools/integration_tests/scripts/test_dcmtk_store.sh" ]; then
           echo "=== Running C-STORE Shell Test ==="
-          ./examples/integration_tests/scripts/test_dcmtk_store.sh 2>&1 | tee build/dcmtk-store-shell.log || true
+          ./tools/integration_tests/scripts/test_dcmtk_store.sh 2>&1 | tee build/dcmtk-store-shell.log || true
         fi
 
     - name: Run DCMTK Find Shell Test
@@ -284,9 +284,9 @@ jobs:
       timeout-minutes: 8
       continue-on-error: true
       run: |
-        if [ -f "./examples/integration_tests/scripts/test_dcmtk_find.sh" ]; then
+        if [ -f "./tools/integration_tests/scripts/test_dcmtk_find.sh" ]; then
           echo "=== Running C-FIND Shell Test ==="
-          ./examples/integration_tests/scripts/test_dcmtk_find.sh 2>&1 | tee build/dcmtk-find-shell.log || true
+          ./tools/integration_tests/scripts/test_dcmtk_find.sh 2>&1 | tee build/dcmtk-find-shell.log || true
         fi
 
     - name: Run DCMTK Move Shell Test
@@ -294,9 +294,9 @@ jobs:
       timeout-minutes: 8
       continue-on-error: true
       run: |
-        if [ -f "./examples/integration_tests/scripts/test_dcmtk_move.sh" ]; then
+        if [ -f "./tools/integration_tests/scripts/test_dcmtk_move.sh" ]; then
           echo "=== Running C-MOVE Shell Test ==="
-          ./examples/integration_tests/scripts/test_dcmtk_move.sh 2>&1 | tee build/dcmtk-move-shell.log || true
+          ./tools/integration_tests/scripts/test_dcmtk_move.sh 2>&1 | tee build/dcmtk-move-shell.log || true
         fi
 
     - name: Upload Shell Test Logs

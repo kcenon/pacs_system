@@ -26,6 +26,11 @@
 
 namespace kcenon::pacs::storage {
 
+/// @cond DOXYGEN_IGNORE_IMPL
+// Template method implementations below are internal to base_repository.hpp
+// and not part of the public API. Doxygen skips this block to avoid
+// ambiguous cross-references with derived repository classes.
+
 // =============================================================================
 // Constructor
 // =============================================================================
@@ -564,5 +569,7 @@ auto base_repository<Entity, PrimaryKey>::pk_column() const
     -> const std::string& {
     return pk_column_;
 }
+
+/// @endcond
 
 }  // namespace kcenon::pacs::storage

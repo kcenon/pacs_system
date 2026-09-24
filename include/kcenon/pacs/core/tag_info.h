@@ -123,7 +123,7 @@ struct value_multiplicity {
  * This includes the tag itself, its VR, VM, keyword, descriptive name,
  * and whether the tag has been retired from the standard.
  *
- * @example
+ * @par Example:
  * @code
  * tag_info info{
  *     dicom_tag{0x0010, 0x0010},

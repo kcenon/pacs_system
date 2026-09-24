@@ -89,7 +89,7 @@ struct dicom_metrics_snapshot {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * dicom_metrics_collector collector;
  * collector.initialize({{"ae_title", "MY_PACS"}});

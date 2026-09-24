@@ -45,7 +45,7 @@ namespace kcenon::pacs::services {
  * with query_scp. Instead of returning all results in a vector, it
  * allows fetching results in batches.
  *
- * @example
+ * @par Example:
  * @code
  * // Create streaming handler
  * streaming_query_handler handler(db);

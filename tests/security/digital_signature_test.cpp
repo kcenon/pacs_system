@@ -15,6 +15,18 @@
 #include <kcenon/pacs/core/dicom_tag.h>
 #include <kcenon/pacs/encoding/vr_type.h>
 
+#include <openssl/bio.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
+
+#include <chrono>
+#include <cstdio>
+#include <filesystem>
+#include <fstream>
+#include <memory>
+#include <random>
+
 using namespace kcenon::pacs::security;
 using namespace kcenon::pacs::core;
 using namespace kcenon::pacs::encoding;
@@ -201,6 +213,112 @@ TEST_CASE("PrivateKey: Empty key behavior", "[security][private_key]") {
         REQUIRE(key.algorithm_name().empty());
         REQUIRE(key.key_size() == 0);
     }
+}
+
+// ============================================================================
+// Regression: macOS .key file handling (Issue #1155)
+// ============================================================================
+//
+// These tests pin the contract for loading a PEM private key from a path
+// on macOS, where prior implementations using `std::ostringstream::operator<<`
+// over a binary `rdbuf()` could silently truncate files lacking a trailing
+// newline (a frequent shape for OpenSSL-generated `.key` files on macOS).
+// Running on Linux/Windows is also fine: the tests assert byte-identical
+// behavior regardless of platform, which is the cross-platform parity goal
+// for v1.0 (#1095).
+
+namespace {
+
+// Make a unique temp filename rooted in the OS temp dir. We cannot rely on
+// `std::tmpnam` (deprecated, races with parallel tests).
+auto make_temp_path(const std::string& suffix) -> std::filesystem::path {
+    using namespace std::chrono;
+    const auto epoch = steady_clock::now().time_since_epoch();
+    const auto ns = duration_cast<nanoseconds>(epoch).count();
+    std::random_device rd;
+    auto name = std::string("pacs_keytest_") +
+                std::to_string(ns) + "_" + std::to_string(rd()) + suffix;
+    return std::filesystem::temp_directory_path() / name;
+}
+
+// Generate a self-contained PEM-encoded RSA private key as a string. Uses
+// the OpenSSL APIs already linked by the security library; we deliberately
+// do NOT shell out to the `openssl` CLI so the test is hermetic.
+auto make_pem_key() -> std::string {
+    EVP_PKEY* pkey = EVP_RSA_gen(2048);
+    REQUIRE(pkey);
+
+    BIO* bio = BIO_new(BIO_s_mem());
+    REQUIRE(bio);
+
+    const int rc = PEM_write_bio_PrivateKey(bio, pkey, nullptr, nullptr, 0,
+                                            nullptr, nullptr);
+    REQUIRE(rc == 1);
+
+    char* data = nullptr;
+    const long len = BIO_get_mem_data(bio, &data);
+    REQUIRE(len > 0);
+
+    std::string pem(data, static_cast<std::size_t>(len));
+    BIO_free(bio);
+    EVP_PKEY_free(pkey);
+    return pem;
+}
+
+}  // namespace
+
+TEST_CASE("PrivateKey: Load from path with no trailing newline (Issue #1155)",
+          "[security][private_key][regression][macos]") {
+    const auto pem = make_pem_key();
+    REQUIRE(!pem.empty());
+
+    // Strip every trailing newline byte to reproduce the macOS-prone shape:
+    // a PEM file whose last byte is the final '-' of the END marker.
+    std::string trimmed = pem;
+    while (!trimmed.empty() &&
+           (trimmed.back() == '\n' || trimmed.back() == '\r')) {
+        trimmed.pop_back();
+    }
+    REQUIRE(!trimmed.empty());
+    REQUIRE(trimmed.back() != '\n');
+
+    const auto path = make_temp_path(".key");
+    {
+        std::ofstream out(path, std::ios::binary);
+        REQUIRE(out.is_open());
+        out.write(trimmed.data(),
+                  static_cast<std::streamsize>(trimmed.size()));
+    }
+
+    // Sanity: the on-disk file size matches the trimmed PEM exactly.
+    REQUIRE(std::filesystem::file_size(path) == trimmed.size());
+
+    SECTION("load_from_pem succeeds for trailing-newline-less file") {
+        auto result = private_key::load_from_pem(path.string());
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().is_loaded());
+        REQUIRE(result.value().algorithm_name() == "RSA");
+        REQUIRE(result.value().key_size() == 2048);
+    }
+
+    std::error_code rm_ec;
+    std::filesystem::remove(path, rm_ec);
+}
+
+TEST_CASE("PrivateKey: Load rejects directory path (Issue #1155)",
+          "[security][private_key][regression]") {
+    // A bare directory must not produce a confusing OpenSSL parse error;
+    // the read_file layer must reject it up front.
+    const auto dir = std::filesystem::temp_directory_path();
+    auto result = private_key::load_from_pem(dir.string());
+    REQUIRE(result.is_err());
+}
+
+TEST_CASE("Certificate: Load rejects directory path (Issue #1155)",
+          "[security][certificate][regression]") {
+    const auto dir = std::filesystem::temp_directory_path();
+    auto result = certificate::load_from_pem(dir.string());
+    REQUIRE(result.is_err());
 }
 
 // ============================================================================

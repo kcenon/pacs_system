@@ -106,7 +106,7 @@ struct n_get_scu_config {
  *  |<-----------------------------------|
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * n_get_scu scu;
  *

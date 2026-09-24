@@ -1,28 +1,35 @@
-# PACS System Developer Samples
+# PACS System Developer Tutorials
 
-Progressive learning samples for building PACS applications with pacs_system. Each level introduces new concepts while building on previous knowledge.
+Progressive learning tutorials for building PACS applications with pacs_system.
+Each level introduces new concepts while building on previous knowledge.
+
+> **Layout note (#1139)**: this directory used to be named `samples/`. It now
+> lives under `examples/` to match the ecosystem convention where `examples/`
+> hosts learning material. The CLI utility binaries that were previously here
+> have moved to `tools/`. The CMake option name `PACS_BUILD_SAMPLES` is
+> preserved for backward compatibility — it still toggles the tutorials below.
 
 ## Quick Start
 
 ```bash
-# Clone and build with samples enabled
+# Clone and build with tutorials enabled
 git clone https://github.com/kcenon/pacs_system.git
 cd pacs_system
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 cmake --build build
 
-# Run your first sample
-./build/samples/hello_dicom
+# Run your first tutorial
+./build/examples/hello_dicom
 
-# Test network samples (in separate terminals)
-./build/samples/echo_server 11112          # Start server
-echoscu -aec ECHO_SCP localhost 11112      # Test with DCMTK
+# Test network tutorials (in separate terminals)
+./build/examples/echo_server 11112          # Start server
+echoscu -aec ECHO_SCP localhost 11112       # Test with DCMTK
 ```
 
 ## Learning Path
 
-| Level | Sample | Description | Key Concepts | Time |
-|:-----:|--------|-------------|--------------|:----:|
+| Level | Tutorial | Description | Key Concepts | Time |
+|:-----:|----------|-------------|--------------|:----:|
 | 1 | [Hello DICOM](01_hello_dicom/) | Core data structures | Tags, VR, Dataset, File I/O | 30 min |
 | 2 | [Echo Server](02_echo_server/) | Network basics | Server config, Association, C-ECHO | 1 hour |
 | 3 | [Storage Server](03_storage_server/) | File storage & DB | C-STORE, File storage, SQLite index | 2 hours |
@@ -54,10 +61,10 @@ echoscu -aec ECHO_SCP localhost 11112      # Test with DCMTK
 ## Directory Structure
 
 ```
-samples/
+examples/
 ├── CMakeLists.txt              # Root build configuration
 ├── README.md                   # This file
-├── common/                     # Shared utilities for all samples
+├── common/                     # Shared utilities for all tutorials
 │   ├── signal_handler.hpp/cpp  # Cross-platform signal handling
 │   ├── console_utils.hpp/cpp   # Formatted console output
 │   └── test_data_generator.hpp/cpp # Test DICOM data generation
@@ -119,11 +126,11 @@ Enterprise-ready features for production deployment.
 ## Build Options
 
 ```bash
-# Build all samples
+# Build all tutorials
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 cmake --build build
 
-# Build specific sample
+# Build specific tutorial
 cmake --build build --target sample_01_hello_dicom
 cmake --build build --target sample_02_echo_server
 cmake --build build --target sample_03_storage_server
@@ -159,14 +166,14 @@ movescu -v -aec <AE_TITLE> -aem <DEST_AE> -k StudyInstanceUID="..." localhost <P
 dcmdump file.dcm
 ```
 
-### Sample Testing Workflow
+### Tutorial Testing Workflow
 
 ```bash
 # Terminal 1: Start Mini PACS
-./build/samples/mini_pacs 11112
+./build/examples/mini_pacs 11112
 
 # Terminal 2: Generate and store test data
-./build/samples/hello_dicom                              # Creates test file
+./build/examples/hello_dicom                             # Creates test file
 storescu -v -aec MINI_PACS localhost 11112 hello_dicom_output.dcm
 
 # Terminal 2: Query stored data
@@ -202,7 +209,7 @@ findscu -v -aec MINI_PACS -P -k PatientName="*" localhost 11112
 ### Build Errors
 
 ```bash
-# Ensure samples are enabled
+# Ensure tutorials are enabled
 cmake -B build -DPACS_BUILD_SAMPLES=ON
 
 # Clean rebuild

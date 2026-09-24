@@ -54,7 +54,7 @@ using jwks_fetch_callback =
  * Manages JSON Web Key Sets for JWT signature verification. Keys can be
  * loaded statically from JSON or fetched dynamically via a callback.
  *
- * @example
+ * @par Example:
  * @code
  * jwks_provider provider;
  * provider.load_from_json(R"({"keys":[...]})");

@@ -80,7 +80,7 @@ struct stream_config {
  * Thread Safety: This class is NOT thread-safe. The stream should
  * be used from a single thread.
  *
- * @example
+ * @par Example:
  * @code
  * // Create stream from query
  * stream_config config;

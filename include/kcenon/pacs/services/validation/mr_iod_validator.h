@@ -158,7 +158,7 @@ struct mr_validation_options {
  * - MR Image Module (M)
  * - SOP Common Module (M)
  *
- * @example
+ * @par Example:
  * @code
  * mr_iod_validator validator;
  * auto result = validator.validate(dataset);

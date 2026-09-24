@@ -29,8 +29,8 @@ class sqlite_security_storage;
 
 #include <kcenon/pacs/security/security_storage_interface.h>
 
-#include <database/core/database_context.h>
-#include <database/database_manager.h>
+#include <kcenon/database/core/database_context.h>
+#include <kcenon/database/database_manager.h>
 
 #include <memory>
 #include <string>

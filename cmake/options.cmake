@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/KcenonDependencyOptions.cmake")
+
 ##################################################
 # Options and Utility Functions
 ##################################################
@@ -24,15 +26,18 @@
 ##################################################
 
 option(PACS_BUILD_TESTS "Build unit tests" ON)
-option(PACS_BUILD_EXAMPLES "Build examples" OFF)
+option(PACS_BUILD_EXAMPLES "Build CLI tools (sources under tools/)" OFF)
 option(PACS_BUILD_BENCHMARKS "Build benchmarks" OFF)
-option(PACS_BUILD_SAMPLES "Build developer samples" OFF)
+option(PACS_BUILD_SAMPLES "Build developer tutorials (sources under examples/)" OFF)
 option(PACS_BUILD_FUZZ_TARGETS "Build libFuzzer-based fuzz targets (requires Clang)" OFF)
 
 # Dependency integration options
-option(PACS_WITH_COMMON_SYSTEM "Enable common_system integration (REQUIRED)" ON)
-option(PACS_WITH_CONTAINER_SYSTEM "Enable container_system integration (REQUIRED)" ON)
-option(PACS_WITH_NETWORK_SYSTEM "Enable network_system integration (REQUIRED)" ON)
+kcenon_dependency_option(KCENON_WITH_COMMON_SYSTEM PACS_WITH_COMMON_SYSTEM
+    "Enable common_system integration (REQUIRED)" ON)
+kcenon_dependency_option(KCENON_WITH_CONTAINER_SYSTEM PACS_WITH_CONTAINER_SYSTEM
+    "Enable container_system integration (REQUIRED)" ON)
+kcenon_dependency_option(KCENON_WITH_NETWORK_SYSTEM PACS_WITH_NETWORK_SYSTEM
+    "Enable network_system integration (REQUIRED)" ON)
 option(PACS_BUILD_STORAGE "Build storage module (requires SQLite3)" ON)
 option(PACS_WITH_AWS_SDK "Enable AWS SDK integration for S3 storage" OFF)
 option(PACS_WITH_AZURE_SDK "Enable Azure SDK integration for Blob storage" OFF)

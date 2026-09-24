@@ -175,7 +175,7 @@ struct reconciliation_audit_record {
  * - **Patient Merge** (ADT^A40): Reassign all instances from source patient
  *   to target patient
  *
- * @example
+ * @par Example:
  * @code
  * patient_reconciliation_service service;
  *

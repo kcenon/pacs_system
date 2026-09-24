@@ -65,7 +65,7 @@ class job_manager;
  * - All public methods are thread-safe
  * - Uses shared_mutex for rule access
  *
- * @example
+ * @par Example:
  * @code
  * // Create manager with dependencies
  * auto routing_repo = std::make_shared<routing_repository>(db);

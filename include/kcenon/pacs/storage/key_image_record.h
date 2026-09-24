@@ -80,7 +80,7 @@ struct key_image_record {
  * Supports filtering by study, instance, and user.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * key_image_query query;
  * query.study_uid = "1.2.3.4.5";

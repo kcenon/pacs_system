@@ -61,7 +61,7 @@ namespace kcenon::pacs::client {
  * - All public methods are thread-safe
  * - Status callbacks are invoked from worker threads
  *
- * @example
+ * @par Example:
  * @code
  * // Create manager with repository
  * auto repo = std::make_shared<node_repository>(db);

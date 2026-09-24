@@ -98,7 +98,7 @@ struct nm_validation_options {
  * - Detector Information Sequence
  * - Rotation Information
  *
- * @example
+ * @par Example:
  * @code
  * nm_iod_validator validator;
  * auto result = validator.validate(dataset);

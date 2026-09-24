@@ -55,7 +55,7 @@ struct private_tag_definition {
  * - Read operations (find) are thread-safe and can be concurrent
  * - Write operations (register_tag, register_vendor) are serialized
  *
- * @example
+ * @par Example:
  * @code
  * auto& registry = private_tag_registry::instance();
  *

@@ -90,7 +90,7 @@ struct auth_result {
  * When OAuth 2.0 is disabled, the middleware is a no-op and the system
  * falls back to the existing X-User-ID header-based authentication.
  *
- * @example
+ * @par Example:
  * @code
  * oauth2_config config;
  * config.enabled = true;

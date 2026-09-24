@@ -184,7 +184,7 @@ using dimse_result = kcenon::pacs::Result<T>;
  * The command set is always encoded using Implicit VR Little Endian.
  * The data set uses the negotiated transfer syntax.
  *
- * @example
+ * @par Example:
  * @code
  * // Create a C-STORE request
  * dimse_message msg{command_field::c_store_rq, 1};

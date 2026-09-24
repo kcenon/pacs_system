@@ -45,7 +45,7 @@ namespace kcenon::pacs::storage {
  * - This class is NOT thread-safe. External synchronization is required
  *   for concurrent access.
  *
- * @example
+ * @par Example:
  * @code
  * auto db = std::make_shared<pacs_database_adapter>("pacs.db");
  * db->connect();

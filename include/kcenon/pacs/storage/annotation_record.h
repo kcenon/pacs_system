@@ -147,7 +147,7 @@ struct annotation_record {
  * Supports filtering by study, series, instance, user, and type.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * annotation_query query;
  * query.study_uid = "1.2.3.4.5";

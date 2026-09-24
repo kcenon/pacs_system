@@ -183,7 +183,7 @@ struct print_scu_config {
  *  |<------------------------------------------|
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * // Establish association with Print SCP
  * association_config config;

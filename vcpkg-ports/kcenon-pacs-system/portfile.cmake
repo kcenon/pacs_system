@@ -5,7 +5,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO kcenon/pacs_system
     REF "v${VERSION}"
-    SHA512 242dd7bc82f56e0267e4978dd406aebeebd1bb50e70f93a8c809d3474ae6de1d0e692cc8fbbbaa81dbb68e2642b48c14100b8d5daa5f99097287af2d9465904c
+    SHA512 0db1f80c979f726efc6db5836e626d717297e6e4ead74005973d655ab63e67d093ed89afa402579d53e823a7c1bf5ac350ee199faf2f5b5e2cb70976ed4c282a
     HEAD_REF main
 )
 
@@ -50,3 +50,5 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
+
+configure_file("${CMAKE_CURRENT_LIST_DIR}/usage" "${CURRENT_PACKAGES_DIR}/share/${PORT}/usage" COPYONLY)

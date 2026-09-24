@@ -35,7 +35,7 @@ namespace kcenon::pacs::network::pipeline {
  * Stage 1 of the pipeline. Receives raw bytes from the network
  * and forwards them to the PDU decode stage.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<receive_network_io_job>(session_id, on_data_received);
  * coordinator.submit_to_stage(pipeline_stage::network_receive, std::move(job));

@@ -157,7 +157,7 @@ struct heightmap_seg_validation_options {
  * - Common Instance Reference Module (M)
  * - SOP Common Module (M)
  *
- * @example
+ * @par Example:
  * @code
  * heightmap_seg_iod_validator validator;
  * auto result = validator.validate(dataset);

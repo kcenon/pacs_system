@@ -142,7 +142,7 @@ struct us_validation_options {
  * - US Multi-frame Module (C) - for multi-frame images
  * - Cine Module (C) - for multi-frame images
  *
- * @example
+ * @par Example:
  * @code
  * us_iod_validator validator;
  * auto result = validator.validate(dataset);

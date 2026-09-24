@@ -334,7 +334,7 @@ struct pool_counters {
  *
  * Thread Safety: All public methods are thread-safe using atomic operations.
  *
- * @example
+ * @par Example:
  * @code
  * // Get global metrics instance
  * auto& metrics = pacs_metrics::global_metrics();

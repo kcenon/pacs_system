@@ -62,7 +62,7 @@ namespace common = kcenon::common;
  *       network_system TCP integration. The actual socket accept logic will
  *       be implemented when network_system provides TCP server support.
  *
- * @example Usage in dicom_server
+ * @par Example: Usage in dicom_server
  * @code
  * accept_worker_ = std::make_unique<detail::accept_worker>(
  *     config_.port,

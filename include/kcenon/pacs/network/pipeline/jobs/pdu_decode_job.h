@@ -57,7 +57,7 @@ struct decoded_pdu {
  * Stage 2 of the pipeline. Decodes PDU bytes and submits
  * the decoded result to the DIMSE processing stage.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<pdu_decode_job>(session_id, pdu_bytes);
  * coordinator.submit_to_stage(pipeline_stage::pdu_decode, std::move(job));

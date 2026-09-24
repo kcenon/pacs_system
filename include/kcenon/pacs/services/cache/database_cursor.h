@@ -68,7 +68,7 @@ using query_record = std::variant<storage::patient_record, storage::study_record
  * used from a single thread, and the underlying database connection
  * must remain valid for the cursor's lifetime.
  *
- * @example
+ * @par Example:
  * @code
  * // Create cursor from a query
  * auto cursor_result = database_cursor::create_study_cursor(db, query);

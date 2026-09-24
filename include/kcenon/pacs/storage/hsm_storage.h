@@ -60,7 +60,7 @@ struct hsm_storage_config {
  * - Concurrent reads are allowed (shared lock)
  * - Writes and migrations require exclusive lock
  *
- * @example
+ * @par Example:
  * @code
  * // Create tier backends
  * auto hot = std::make_unique<file_storage>(hot_config);

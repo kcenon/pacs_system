@@ -62,7 +62,7 @@ enum class private_tag_action : std::uint8_t {
  * Thread Safety: This class is NOT thread-safe. Create separate instances
  * for concurrent operations, or use external synchronization.
  *
- * @example
+ * @par Example:
  * @code
  * // Basic anonymization
  * anonymizer anon(anonymization_profile::hipaa_safe_harbor);

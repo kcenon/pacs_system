@@ -65,7 +65,7 @@ class association_pool;
  * The server integrates with the ecosystem's thread_system for efficient
  * task scheduling and network_system for TCP operations.
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * server_config config;
  * config.ae_title = "MY_PACS";

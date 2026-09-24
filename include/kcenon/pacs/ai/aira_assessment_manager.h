@@ -39,7 +39,7 @@ namespace kcenon::pacs::ai {
  * retrieval capabilities. Assessments are stored in-memory and
  * can be queried by AI result UID, assessor, or assessment type.
  *
- * @example
+ * @par Example:
  * @code
  * assessment_manager manager;
  *

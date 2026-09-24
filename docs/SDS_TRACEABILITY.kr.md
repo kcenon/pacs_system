@@ -16,6 +16,15 @@ category: "GUID"
 > **상위 문서:** [SDS.kr.md](SDS.kr.md)
 > **최종 수정일:** 2026-02-07
 
+> **⚠ 번역 동기화 고지 (Translation Sync Notice)**
+> 이 한국어 문서는 영문 원본 [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) (현재 v3.0.0) 보다 뒤처져 있습니다.
+> 영문 v2.0.0 이후 추가된 7개 모듈 (Security, Web, Workflow, AI, DI, Monitoring, Compat),
+> 파일 수 81→257 업데이트, 76개의 신규 DES-xxx ID는 아직 반영되지 않았습니다.
+> 정확한 추적성 정보는 영문 원본을 참조하십시오.
+> (This Korean document lags behind the English source [SDS_TRACEABILITY.md](SDS_TRACEABILITY.md) (currently v3.0.0).
+> The 7 new modules, file-count update 81→257, and 76 new DES-xxx IDs added in v2.0.0+ are NOT yet reflected.
+> Refer to the English source for authoritative traceability information.)
+
 ---
 
 ## 목차

@@ -239,7 +239,7 @@ using query_streaming_callback = std::function<bool(const core::dicom_dataset&)>
  *  |<-----------------------------------|
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * // Establish association with presentation contexts for query
  * association_config config;
@@ -275,7 +275,7 @@ using query_streaming_callback = std::function<bool(const core::dicom_dataset&)>
  * assoc.release();
  * @endcode
  *
- * @example Streaming Query for Large Results
+ * @par Example: Streaming Query for Large Results
  * @code
  * query_scu scu;
  * core::dicom_dataset query;

@@ -105,7 +105,7 @@ struct slow_query {
  * **Thread Safety:** This class is thread-safe for read operations.
  * Callbacks are invoked synchronously and should complete quickly.
  *
- * @example
+ * @par Example:
  * @code
  * auto db = std::make_shared<pacs_database_adapter>("/path/to/db.sqlite");
  * db->connect();

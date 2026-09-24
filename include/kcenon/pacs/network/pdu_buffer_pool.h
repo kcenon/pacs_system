@@ -234,7 +234,7 @@ private:
  * Provides thread-safe access to object pools for PDU-related types.
  * Uses a singleton pattern for global access.
  *
- * @example
+ * @par Example:
  * @code
  * // Acquire a pooled buffer
  * auto buffer = pdu_buffer_pool::get().acquire_buffer();

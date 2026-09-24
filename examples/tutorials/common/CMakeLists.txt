@@ -1,5 +1,5 @@
-# samples/common/CMakeLists.txt
-# Common utilities library for developer samples
+# examples/common/CMakeLists.txt
+# Common utilities library for developer tutorials
 
 add_library(pacs_samples_common STATIC
     signal_handler.cpp

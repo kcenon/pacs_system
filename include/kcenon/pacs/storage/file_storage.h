@@ -99,7 +99,7 @@ struct file_storage_config {
  * - Writes require exclusive lock
  * - File operations use atomic write pattern (write to temp, then rename)
  *
- * @example
+ * @par Example:
  * @code
  * file_storage_config config;
  * config.root_path = "/data/dicom";

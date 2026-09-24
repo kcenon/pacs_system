@@ -36,7 +36,7 @@ namespace kcenon::pacs::core {
  * Memory layout: Stored as a single uint32_t for optimal memory usage
  * and comparison performance: (group << 16) | element
  *
- * @example
+ * @par Example:
  * @code
  * // Create Patient Name tag
  * dicom_tag tag{0x0010, 0x0010};

@@ -51,7 +51,7 @@ class dicom_dataset;
  * - Sequences (SQ) containing nested datasets
  * - Value Multiplicity (VM > 1) with backslash-separated values
  *
- * @example
+ * @par Example:
  * @code
  * // Create from string
  * auto name = dicom_element::from_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
@@ -330,6 +330,8 @@ private:
     /**
      * @brief Remove DICOM padding from a string value
      * @param str The padded string
+     * @param vr Value Representation of the source element, used to select
+     *           the trim policy (trailing-space vs trailing-NUL)
      * @return String with padding removed
      */
     [[nodiscard]] static auto remove_padding(std::string_view str,

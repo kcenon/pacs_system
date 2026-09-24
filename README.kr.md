@@ -47,19 +47,23 @@
 
 ## 프로젝트 상태
 
-**현재 버전**: 1.0.0 — 안정 공개 API
+**최신 게시 패키지**: 0.1.0 — [`v0.1.0` 릴리스](https://github.com/kcenon/pacs_system/releases/tag/v0.1.0), vcpkg 포트 `kcenon-pacs-system` 0.1.0 (port-version 11)
+**계획된 마일스톤**: v1.0 — 미출시 API 계약이며, v1.0.0 태그·GitHub 릴리스·레지스트리 버전은 아직 없습니다 ([#1095](https://github.com/kcenon/pacs_system/issues/1095) 및 [#1164](https://github.com/kcenon/pacs_system/issues/1164)에서 관리)
 **프로젝트 단계**: Phase 4 완료 — 고급 서비스 및 프로덕션 강화
 
-v1.0 계약은 `include/kcenon/pacs/` 아래의 공개 헤더 표면, `pacs_system::pacs_system`
-집계 CMake 타겟, 그리고 문서화된 Doxygen API를 고정합니다. 고정된 헤더 목록은
-[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md)를, 예외/Result<T> 계약은
+계획된 v1.0 계약은 `include/kcenon/pacs/` 아래의 공개 헤더 표면, `pacs_system::pacs_system`
+집계 CMake 타겟, 그리고 문서화된 Doxygen API를 대상으로 합니다. 이 표면은 검토를 위해 고정된
+상태일 뿐 출시되지 않았으며, #1095 준비 체크리스트가 닫히고 Tier 0-4 생태계 의존성이 모두
+v1.0을 게시한 뒤(#1164)에 출시됩니다. 검토 중인 헤더 목록은
+[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md)를, 계획된 예외/Result<T> 계약은
 [`docs/v1.0-throw-policy.md`](docs/v1.0-throw-policy.md)를, 고정 이전 지원 중단 감사는
 [`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md)를 참조하세요.
 
-0.x에서 업그레이드하시나요? 전체 업그레이드 절차(include 경로, 네임스페이스, CMake 계약,
-`Result<T>` 마이그레이션, 디렉터리 재배치)는 [0.x → 1.0 마이그레이션 가이드](docs/migration/0.x-to-1.0.md)에서
-시작하세요. 그리고 `samples/` → `examples/` 및 `examples/` → `tools/` 디렉터리 재배치(#1139)와
-`pacs_system::pacs_system` CMake 계약(#1158)을 포함한 기반 변경 사항은 [CHANGELOG](CHANGELOG.md)를 확인하세요.
+v1.0을 준비하시나요? [0.x → 1.0 마이그레이션 가이드](docs/migration/0.x-to-1.0.md)는 계획된 업그레이드
+절차(include 경로, 네임스페이스, CMake 계약, `Result<T>` 마이그레이션, 디렉터리 재배치)를 설명합니다.
+[CHANGELOG](CHANGELOG.md)는 `samples/` → `examples/` 및 `examples/` → `tools/` 디렉터리 재배치(#1139)와
+`pacs_system::pacs_system` CMake 계약(#1158)을 포함한 기반 변경 사항을 `[Unreleased]` 아래에 기록하며,
+v1.0.0 릴리스가 실제로 태그되기 전까지 v1.0.0 섹션을 만들지 않습니다.
 
 | 단계 | 범위 | 상태 |
 |-------|-------|--------|
@@ -278,10 +282,28 @@ PACS_BUILD_STORAGE (ON)            # 스토리지 모듈 빌드
 vcpkg install kcenon-pacs-system
 ```
 
-### CMake 통합
+이 명령은 `v0.1.0` 소스 아카이브로 빌드되는 최신 게시 패키지 0.1.0(port-version 11)을 설치합니다.
+0.1.0 패키지는 헤더를 `include/pacs/` 아래에 설치하고 `kcenon::pacs::<component>` 타겟
+(`core`, `encoding`, `network`, `client`, `services`, `security`, `integration` 및 기능에 따라 추가되는 컴포넌트)을 export합니다:
 
-pacs_system을 설치(`cmake --install`, vcpkg 또는 기타 패키지 관리자를 통해)한 후,
-다운스트림 프로젝트는 정규 CMake 타겟 `pacs_system::pacs_system`을 통해 의존합니다:
+```cmake
+find_package(pacs_system 0.1 CONFIG REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE kcenon::pacs::core)
+```
+
+> port-version 11에 포함된 `usage` 안내문은 `pacs_system::*` 타겟 이름을 나열합니다. 이 이름은 아래의
+> 계획된 v1.0 계약에 속하며 0.1.0 패키지는 export하지 않으므로, 0.1.0에서는 위의 `kcenon::pacs::*` 이름을 사용하세요
+> (레지스트리 정정은 [kcenon/vcpkg-registry#104](https://github.com/kcenon/vcpkg-registry/issues/104)에서 추적).
+> 패키지·레지스트리·출처 기록 전체는 [패키지 상태](docs/PACKAGE_STATE.kr.md)를 참조하세요.
+
+### CMake 통합 (계획된 v1.0 계약)
+
+계획된 v1.0 계약(#1158)은 0.1.0 타겟 이름을 정규 CMake 타겟 `pacs_system::pacs_system`으로 대체합니다.
+아직 어떤 게시 패키지에도 포함되지 않았습니다. 이 브랜치의 소스 설치(`cmake --install`)는 이미 이 타겟을
+제공하지만 패키지 버전은 여전히 0.1.0이므로, v1.0.0이 출시되기 전까지는 `find_package(pacs_system 0.1 REQUIRED)`로
+요청하세요. 출시 이후 다운스트림 프로젝트는 다음과 같이 의존합니다:
 
 ```cmake
 find_package(pacs_system 1.0 REQUIRED)
@@ -486,7 +508,7 @@ pacs_system/
 ├── examples/             # 튜토리얼 (5단계 점진적 학습)
 ├── tools/                # CLI 유틸리티 바이너리 (32 앱)
 ├── docs/                 # 문서 (87 마크다운 파일)
-└── CMakeLists.txt        # 빌드 구성 (v1.0.0)
+└── CMakeLists.txt        # 빌드 구성 (project VERSION 0.1.0)
 ```
 
 > 전체 파일 수준 디렉터리 트리는 [Project Structure](docs/PROJECT_STRUCTURE.md)를 참조하세요.
@@ -562,6 +584,7 @@ int main() {
 - 🏛️ [ADR-002](docs/adr/ADR-002-pacs-storage-port-segmentation.md) - PACS 스토리지 경계 및 리포지토리 세트 계약
 - ⚡ [Performance Guide](docs/database/PERFORMANCE_GUIDE.md) - 데이터베이스 최적화 팁
 - 📦 [Dependency Manifest](dependency-manifest.json) - 정규 네이티브, 페치, 내부, 프런트엔드 출처
+- 🏷️ [패키지 상태](docs/PACKAGE_STATE.kr.md) - 게시 버전, 레지스트리 포트, 오버레이 동기화, 소비 검증
 - ⚖️ [Third-Party Licenses](LICENSE-THIRD-PARTY) - 제품 배포 라이선스 목록
 
 ---
@@ -610,20 +633,20 @@ cmake --build build --target run_full_benchmarks
 
 | 메트릭 | 값 |
 |--------|-------|
-| **헤더 파일** | 290 파일 |
+| **헤더 파일** | 291 파일 |
 | **소스 파일** | 217 파일 |
-| **헤더 LOC** | ~78700 라인 |
-| **소스 LOC** | ~114700 라인 |
-| **예제 LOC** | ~4100 라인 |
-| **테스트 LOC** | ~89100 라인 |
-| **전체 LOC** | ~286500 라인 |
-| **테스트 파일** | 189 파일 |
-| **테스트 케이스** | 2657+ 테스트 |
-| **예제 프로그램** | 6 앱 |
-| **문서** | 87 마크다운 파일 |
+| **헤더 LOC** | ~78,700 라인 |
+| **소스 LOC** | ~114,700 라인 |
+| **예제 LOC** | ~4,100 라인 |
+| **테스트 LOC** | ~89,300 라인 |
+| **전체 LOC** | ~286,900 라인 |
+| **테스트 파일** | 191 파일 |
+| **테스트 케이스** | 2661+ 테스트 |
+| **예제 프로그램** | 5 앱 |
+| **문서** | 96 마크다운 파일 |
 | **CI/CD 워크플로우** | 22 워크플로우 |
-| **버전** | 1.0.0 |
-| **최종 업데이트** | 2026-05-13 |
+| **버전** | 0.1.0 |
+| **최종 업데이트** | 2026-09-24 |
 
 <!-- STATS_END -->
 

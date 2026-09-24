@@ -1,4 +1,4 @@
-# samples/05_production_pacs/CMakeLists.txt
+# examples/05_production_pacs/CMakeLists.txt
 # Level 5: Production PACS - Enterprise-grade DICOM server
 #
 # This sample demonstrates production-ready features:
@@ -73,7 +73,7 @@ endif()
 
 # Set output directory
 set_target_properties(${SAMPLE_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/samples"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
 )
 
 # Copy configuration files to build directory

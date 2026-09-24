@@ -210,7 +210,7 @@ using mpps_set_handler = std::function<network::Result<std::monostate>(
  *  Note: COMPLETED and DISCONTINUED are final states
  * ```
  *
- * @example Usage
+ * @par Example: Usage
  * @code
  * mpps_scp scp;
  *

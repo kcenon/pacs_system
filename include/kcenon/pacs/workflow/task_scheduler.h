@@ -121,7 +121,7 @@ class Result;
  * └─────────────────────────┘
  * ```
  *
- * @example Basic Usage
+ * @par Example: Basic Usage
  * @code
  * // Configure scheduler
  * task_scheduler_config config;

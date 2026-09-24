@@ -69,7 +69,7 @@ struct viewer_state_record {
  * Supports filtering by study and user.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * viewer_state_query query;
  * query.study_uid = "1.2.3.4.5";

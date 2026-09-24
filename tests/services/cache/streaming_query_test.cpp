@@ -155,6 +155,33 @@ private:
     std::unique_ptr<index_database> db_;
 };
 
+/**
+ * @brief Minimal database fixture without seeded data
+ *
+ * Opens an in-memory database but skips the ~400-row test data insertion.
+ * Use for tests that only need a valid index_database pointer for constructor
+ * injection but do not query any records.
+ *
+ * Motivation: the full test_database_fixture performs 400 upsert operations,
+ * which on Windows CI runners has exceeded the per-test ctest timeout of 60s
+ * when Catch2 re-runs the fixture for each SECTION. See issue #1105.
+ */
+class empty_database_fixture {
+public:
+    empty_database_fixture() {
+        auto result = index_database::open(":memory:");
+        REQUIRE(result.is_ok());
+        db_ = std::move(result.value());
+    }
+
+    [[nodiscard]] auto db() const -> index_database* {
+        return db_.get();
+    }
+
+private:
+    std::unique_ptr<index_database> db_;
+};
+
 }  // namespace
 
 // ============================================================================
@@ -461,7 +488,11 @@ TEST_CASE("query_result_stream study level", "[services][streaming]") {
 // ============================================================================
 
 TEST_CASE("streaming_query_handler configuration", "[services][streaming]") {
-    test_database_fixture fixture;
+    // Use empty_database_fixture: configuration accessors (page_size,
+    // max_results) do not touch the database, so the full 400-row seed
+    // in test_database_fixture is unnecessary and caused Windows CI
+    // timeouts (see issue #1105).
+    empty_database_fixture fixture;
     streaming_query_handler handler(fixture.db());
 
     SECTION("default page size is 100") {

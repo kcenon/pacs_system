@@ -1,1 +1,2 @@
+# Private key files: binary, no diff
 *.key binary -diff

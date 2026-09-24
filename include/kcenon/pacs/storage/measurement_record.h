@@ -123,7 +123,7 @@ struct measurement_record {
  * Supports filtering by instance, study (via instance), user, and type.
  * Empty fields are not included in the query filter.
  *
- * @example
+ * @par Example:
  * @code
  * measurement_query query;
  * query.sop_instance_uid = "1.2.3.4.5.6";

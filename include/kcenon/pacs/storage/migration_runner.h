@@ -83,7 +83,7 @@ using adapter_migration_function =
  * Thread Safety: This class is NOT thread-safe. External synchronization
  * is required for concurrent access to the same database.
  *
- * @example
+ * @par Example:
  * @code
  * sqlite3* db = ...;
  * migration_runner runner;

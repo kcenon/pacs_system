@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-INTR-002"
 doc_title: "IHE Integration Statement"
-doc_version: "1.0.0"
+doc_version: "0.1.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -25,6 +25,9 @@ profiles supported by the PACS System. It is structured according to the
 
 For DICOM-level conformance details, see the
 [DICOM Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md).
+For the concrete tracking of the XDS.b implementation gaps called out in
+[#1101](https://github.com/kcenon/pacs_system/issues/1101), see the
+[IHE XDS.b Completion Status](IHE_XDSB_COMPLETION_STATUS.md).
 
 ---
 

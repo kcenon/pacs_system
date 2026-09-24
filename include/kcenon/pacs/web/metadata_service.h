@@ -442,6 +442,8 @@ private:
     /**
      * @brief Read DICOM dataset from file
      * @param file_path Path to DICOM file
+     * @param requested_tags Set of tag keys (e.g. "00100010") to extract
+     * @param include_private If true, include private tags (odd group numbers)
      * @return Map of tag values
      */
     [[nodiscard]] std::unordered_map<std::string, std::string> read_dicom_tags(

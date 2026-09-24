@@ -94,7 +94,11 @@ endif()
 message(STATUS "")
 
 ##################################################
-# Developer Samples
+# Developer Tutorials (formerly samples/, see #1139)
+#
+# 5 progressive learning-path tutorials live under examples/. The CMake option
+# PACS_BUILD_SAMPLES is preserved for backward compatibility — toggling it
+# enables the tutorial subtree.
 ##################################################
 
 if(PACS_BUILD_SAMPLES)
@@ -102,5 +106,5 @@ if(PACS_BUILD_SAMPLES)
     message(STATUS "=== Building Developer Samples ===")
     add_subdirectory(examples/tutorials samples)
     pacs_apply_warnings(pacs_samples_common)
-    message(STATUS "Developer samples: ON")
+    message(STATUS "Developer tutorials: ON")
 endif()

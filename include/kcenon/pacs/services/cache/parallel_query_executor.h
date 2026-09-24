@@ -128,7 +128,7 @@ struct parallel_executor_config {
  * Thread Safety: This class is thread-safe. All public methods can be
  * called concurrently from multiple threads.
  *
- * @example
+ * @par Example:
  * @code
  * // Create executor
  * parallel_executor_config config;

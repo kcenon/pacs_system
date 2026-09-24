@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-API-002-CORE"
 doc_title: "API Reference - Core & Encoding Modules"
-doc_version: "1.0.0"
+doc_version: "0.1.5.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"

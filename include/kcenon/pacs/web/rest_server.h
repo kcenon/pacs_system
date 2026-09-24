@@ -138,10 +138,6 @@ public:
    * @brief Set metrics provider for /api/v1/system/metrics endpoint
    * @param metrics Metrics instance
    */
-  /**
-   * @brief Set metrics provider for /api/v1/system/metrics endpoint
-   * @param metrics Metrics instance
-   */
   void set_metrics_provider(std::shared_ptr<monitoring::pacs_metrics> metrics);
 
   /**

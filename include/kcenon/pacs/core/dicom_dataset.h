@@ -41,7 +41,7 @@ namespace kcenon::pacs::core {
  * Thread Safety: This class is NOT thread-safe. External synchronization
  * is required for concurrent access.
  *
- * @example
+ * @par Example:
  * @code
  * dicom_dataset ds;
  *
@@ -172,7 +172,7 @@ public:
      * @param tag The DICOM tag of the sequence element
      * @return Pointer to the sequence items vector, or nullptr if not found or not a sequence
      *
-     * @example
+     * @par Example:
      * @code
      * // Access Performed Series Sequence (0040,0340)
      * if (const auto* series = dataset.get_sequence(tags::performed_series_sequence)) {

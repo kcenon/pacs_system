@@ -90,7 +90,6 @@ struct validation_result {
 
 /**
  * @brief Parse WADO-URI query parameters from an HTTP request
- * @param request_type The requestType parameter value
  * @param study_uid The studyUID parameter value
  * @param series_uid The seriesUID parameter value
  * @param object_uid The objectUID parameter value

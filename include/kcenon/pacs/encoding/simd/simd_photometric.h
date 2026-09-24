@@ -56,6 +56,9 @@ inline void invert_monochrome_8bit_scalar(const uint8_t* src, uint8_t* dst,
 
 /**
  * @brief Scalar 16-bit monochrome inversion
+ * @param src Source pixel buffer (must not alias @p dst)
+ * @param dst Destination pixel buffer of length @p pixel_count
+ * @param pixel_count Number of pixels to invert
  * @param max_value Maximum pixel value (e.g., 4095 for 12-bit, 65535 for 16-bit)
  */
 inline void invert_monochrome_16bit_scalar(const uint16_t* src, uint16_t* dst,

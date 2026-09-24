@@ -10,6 +10,7 @@
 #include <kcenon/pacs/integration/network_adapter.h>
 #include <kcenon/pacs/integration/dicom_session.h>
 #include <kcenon/pacs/network/dicom_server.h>
+#include <kcenon/pacs/compat/factory_result.h>
 
 #include <kcenon/network/facade/tcp_facade.h>
 
@@ -79,17 +80,11 @@ network_adapter::connect(const connection_config& config) {
         }
         client_cfg.verify_certificate = config.tls.verify_peer;
 
-        // Handle both old API (returns shared_ptr) and new API (returns Result<shared_ptr>)
-        auto client = [](auto raw) -> std::shared_ptr<kcenon::network::interfaces::i_protocol_client> {
-            if constexpr (requires { raw.is_err(); raw.value(); }) {
-                return raw.is_err() ? nullptr : std::move(raw.value());
-            } else {
-                return std::move(raw);
-            }
-        }(facade.create_client(client_cfg));
-        if (!client) {
-            return Result<session_ptr>(error_info("Connection failed: could not create client"));
+        auto client_result = compat::factory_result(facade.create_client(client_cfg));
+        if (client_result.is_err()) {
+            return Result<session_ptr>(error_info("Connection failed: unable to create client"));
         }
+        auto client = std::move(client_result.value());
 
         // Set up promise/future for synchronous connection
         std::promise<std::error_code> connect_promise;

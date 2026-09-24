@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-GUID-004"
 doc_title: "Product Requirements Document - PACS System"
-doc_version: "1.0.0"
+doc_version: "0.2.0.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -1091,8 +1091,8 @@ When referencing other documents, always cite the specific version being referen
 | Document | Current Version | Authoritative For |
 |----------|----------------|------------------|
 | PRD | 0.2.0.0 | Phase definitions, functional requirements |
-| SRS | 0.1.3.1 | Detailed requirement specifications |
-| SDS | 0.2.0.0 | Software design, component architecture |
+| SRS | 0.1.3.2 | Detailed requirement specifications |
+| SDS | 0.2.0 | Software design, component architecture |
 | FEATURES | 0.2.0.0 | Feature documentation and examples |
 
 ### Appendix D: References

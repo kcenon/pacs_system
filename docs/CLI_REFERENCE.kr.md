@@ -525,7 +525,7 @@ TLS 1.2/1.3 및 상호 TLS를 지원하는 보안 DICOM 연결 테스트.
 
 ```bash
 # 먼저 테스트 인증서 생성
-cd examples/secure_dicom
+cd tools/secure_dicom
 ./generate_certs.sh
 
 # 보안 서버 시작 (TLS)
@@ -883,7 +883,7 @@ Modality Worklist 조회 클라이언트.
 
 ```bash
 # 설정 파일로 실행
-./build/examples/pacs_server/pacs_server --config pacs_server.yaml
+./build/tools/pacs_server/pacs_server --config pacs_server.yaml
 ```
 
 **샘플 설정** (`pacs_server.yaml`):

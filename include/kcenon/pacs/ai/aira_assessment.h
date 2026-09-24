@@ -192,7 +192,7 @@ struct assessment_info {
  * 2. Call create_assessment() to generate the SR document
  * 3. Store the resulting dataset using a storage backend
  *
- * @example
+ * @par Example:
  * @code
  * assessment_creator creator;
  *

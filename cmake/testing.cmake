@@ -1,6 +1,12 @@
 # Testing
+# Test framework: Catch2 (ecosystem exception -- see docs/ECOSYSTEM.md and #1141).
 if(PACS_BUILD_TESTS)
     enable_testing()
+
+    add_executable(pacs_factory_result_compat_test tests/compat/factory_result_test.cpp)
+    target_link_libraries(pacs_factory_result_compat_test PRIVATE pacs_core)
+    target_include_directories(pacs_factory_result_compat_test PRIVATE ${COMMON_SYSTEM_INCLUDE_DIR})
+    add_test(NAME pacs_factory_result_compat COMMAND pacs_factory_result_compat_test)
 
     # Fetch Catch2 for testing
     include(FetchContent)
@@ -223,6 +229,7 @@ if(PACS_BUILD_TESTS)
         tests/security/atna_service_auditor_test.cpp
         tests/security/atna_config_test.cpp
         tests/security/tls_policy_test.cpp
+        tests/security/audit_log_cipher_test.cpp
     )
 
     # Add digital signature tests if OpenSSL is available (Issue #191)
@@ -391,6 +398,74 @@ if(PACS_BUILD_TESTS)
         )
         # Link integrated_database and monitoring_system for database dependencies (Issue #642)
         pacs_link_database_deps(pacs_integration_tests)
+    endif()
+
+    # XDS-I.b Gazelle-style registry integration test (Issue #1115)
+    # Exercises the full ITI-41 / ITI-43 round trip against an in-process
+    # mock registry, asserting metadata parity (entry_uuid, unique_id,
+    # patient ID CX form, MIME type) between submit and retrieve.
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/integration/services/xds)
+    add_executable(xds_gazelle_integration_tests
+        tests/integration/services/xds/xds_gazelle_roundtrip_test.cpp
+    )
+    target_link_libraries(xds_gazelle_integration_tests
+        PRIVATE
+            pacs_services
+            Catch2::Catch2WithMain
+    )
+
+    # IHE XDS.b Document Source (ITI-41) tests (Issue #1128)
+    # Only defined when the pacs_ihe_xds target was created (requires pugixml,
+    # libcurl, and OpenSSL). Tests reach into internal headers under
+    # src/ihe/xds/common/ for the envelope / signer / packager layers, plus
+    # the public document_source.h for the end-to-end orchestrator.
+    if(TARGET pacs_ihe_xds)
+        file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/ihe/xds)
+        add_executable(pacs_ihe_xds_tests
+            tests/ihe/xds/soap_envelope_test.cpp
+            tests/ihe/xds/wss_signer_test.cpp
+            tests/ihe/xds/mtom_packager_test.cpp
+            tests/ihe/xds/document_source_test.cpp
+            tests/ihe/xds/document_consumer_test.cpp
+            tests/ihe/xds/registry_query_test.cpp
+        )
+        target_link_libraries(pacs_ihe_xds_tests
+            PRIVATE
+                pacs_ihe_xds
+                OpenSSL::SSL
+                OpenSSL::Crypto
+                Catch2::Catch2WithMain
+        )
+        if(TARGET pugixml::pugixml)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml::pugixml)
+        elseif(TARGET pugixml::static)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml::static)
+        elseif(TARGET pugixml::shared)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml::shared)
+        elseif(TARGET pugixml)
+            target_link_libraries(pacs_ihe_xds_tests PRIVATE pugixml)
+        endif()
+        message(STATUS "  [OK] pacs_ihe_xds_tests: ON (ITI-41 + ITI-43 + Registry Query ITI-18)")
+
+        # IHE XDS.b ATNA audit integration tests (Issue #1131)
+        # In-process Gazelle-lite harness: exercises the actor ->
+        # set_audit_sink() path end-to-end via the transport override hook
+        # and asserts exactly one audit event per success and failure case.
+        file(MAKE_DIRECTORY
+            ${CMAKE_SOURCE_DIR}/tests/integration/ihe/xds)
+        add_executable(pacs_xds_atna_integration_tests
+            tests/integration/ihe/xds/xds_atna_integration_test.cpp
+        )
+        target_link_libraries(pacs_xds_atna_integration_tests
+            PRIVATE
+                pacs_ihe_xds
+                pacs_security
+                OpenSSL::SSL
+                OpenSSL::Crypto
+                Catch2::Catch2WithMain
+        )
+        message(STATUS
+            "  [OK] pacs_xds_atna_integration_tests: ON (ITI-18/41/43 ATNA emission)")
     endif()
 
     # DI tests (Issue #312 - ServiceContainer based DI Integration)
@@ -568,6 +643,34 @@ if(PACS_BUILD_TESTS)
         catch_discover_tests(pacs_integration_tests
             TEST_PREFIX "integration::"
             PROPERTIES LABELS "integration"
+        )
+    endif()
+
+    # XDS-I.b Gazelle-style registry integration test (Issue #1115).
+    # Uses the same "integration::" TEST_PREFIX so the test is excluded
+    # from unit-test runs but still discovered by CI integration labels.
+    if(TARGET xds_gazelle_integration_tests)
+        catch_discover_tests(xds_gazelle_integration_tests
+            TEST_PREFIX "integration::"
+            PROPERTIES LABELS "integration"
+        )
+    endif()
+
+    # IHE XDS.b ITI-41 unit tests (Issue #1128).
+    if(TARGET pacs_ihe_xds_tests)
+        catch_discover_tests(pacs_ihe_xds_tests
+            PROPERTIES LABELS "unit"
+        )
+    endif()
+
+    # IHE XDS.b ATNA audit integration tests (Issue #1131).
+    # Registered under the pacs_xds_integration CTest label so CI can
+    # select this bucket with ctest -L pacs_xds_integration without
+    # pulling in the full integration suite.
+    if(TARGET pacs_xds_atna_integration_tests)
+        catch_discover_tests(pacs_xds_atna_integration_tests
+            TEST_PREFIX "integration::"
+            PROPERTIES LABELS "pacs_xds_integration"
         )
     endif()
 

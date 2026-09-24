@@ -97,7 +97,7 @@ struct seg_validation_options {
  * - Common Instance Reference Module (M)
  * - SOP Common Module (M)
  *
- * @example
+ * @par Example:
  * @code
  * seg_iod_validator validator;
  * auto result = validator.validate(dataset);

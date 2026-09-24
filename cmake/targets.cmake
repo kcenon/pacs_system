@@ -228,7 +228,7 @@ if(TARGET network_system)
         pacs_network
         PUBLIC
         network_system
-        network_system::network_system
+        ${PACS_NETWORK_SYSTEM_INSTALL_TARGET}
     )
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
 endif()
@@ -466,6 +466,12 @@ set(PACS_SECURITY_SOURCES
     src/security/atna_service_auditor.cpp
     src/security/atna_config.cpp
     src/security/tls_policy.cpp
+    src/security/xds_audit_events.cpp
+)
+
+# Audit log cipher (Issue #1102) - compiles without OpenSSL as a stub
+list(APPEND PACS_SECURITY_SOURCES
+    src/security/audit_log_cipher.cpp
 )
 
 # Digital signature sources (requires OpenSSL - Issue #191)
@@ -509,6 +515,81 @@ if(PACS_OPENSSL_FOUND)
     message(STATUS "  [OK] pacs_security: ON (with digital signatures)")
 else()
     message(STATUS "  [OK] pacs_security: ON (without digital signatures)")
+endif()
+
+# IHE XDS.b library (Issues #1128 / #1129 - Document Source ITI-41
+# and Document Consumer ITI-43)
+# Built only when pugixml, libcurl, and OpenSSL are all available; otherwise
+# the target is skipped and consumers that depend on it gate on TARGET pacs_ihe_xds.
+if(PACS_PUGIXML_FOUND AND PACS_CURL_FOUND AND PACS_OPENSSL_FOUND)
+    add_library(pacs_ihe_xds
+        src/ihe/xds/common/soap_envelope.cpp
+        src/ihe/xds/common/wss_signer.cpp
+        src/ihe/xds/common/mtom_packager.cpp
+        src/ihe/xds/common/http_client.cpp
+        src/ihe/xds/document_source.cpp
+        src/ihe/xds/consumer/retrieve_envelope.cpp
+        src/ihe/xds/consumer/retrieve_response_parser.cpp
+        src/ihe/xds/document_consumer.cpp
+        src/ihe/xds/registry_query/query_envelope.cpp
+        src/ihe/xds/registry_query/query_response_parser.cpp
+        src/ihe/xds/registry_query.cpp
+    )
+    target_include_directories(pacs_ihe_xds
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(pacs_ihe_xds
+        PUBLIC pacs_core pacs_security
+    )
+
+    # Link common_system (Tier 0) for Result<T>
+    if(PACS_COMMON_SYSTEM_INCLUDE_DIR)
+        pacs_link_external_dependency(
+            pacs_ihe_xds
+            PUBLIC
+            pacs_common_system_headers
+            kcenon::common_system
+        )
+        target_compile_definitions(pacs_ihe_xds PUBLIC
+            KCENON_HAS_COMMON_SYSTEM=1
+            PACS_WITH_COMMON_SYSTEM=1
+        )
+    endif()
+
+    # pugixml (some vcpkg / system setups export pugixml::pugixml, others
+    # export a bare pugixml target or a pugixml::static alias)
+    if(TARGET pugixml::pugixml)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml::pugixml)
+    elseif(TARGET pugixml::shared)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml::shared)
+    elseif(TARGET pugixml::static)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml::static)
+    elseif(TARGET pugixml)
+        target_link_libraries(pacs_ihe_xds PRIVATE pugixml)
+    else()
+        message(FATAL_ERROR "pugixml library target not found despite PACS_PUGIXML_FOUND")
+    endif()
+
+    # libcurl
+    if(TARGET CURL::libcurl)
+        target_link_libraries(pacs_ihe_xds PRIVATE CURL::libcurl)
+    else()
+        target_link_libraries(pacs_ihe_xds PRIVATE ${CURL_LIBRARIES})
+        target_include_directories(pacs_ihe_xds PRIVATE ${CURL_INCLUDE_DIRS})
+    endif()
+
+    # OpenSSL - needed for WS-Security XML-DSig signing. pacs_security exposes
+    # OpenSSL transitively when digital signatures are enabled, but we link
+    # directly so an accidental removal of the transitive edge does not
+    # silently break WS-Security signing.
+    target_link_libraries(pacs_ihe_xds PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+    target_compile_definitions(pacs_ihe_xds PUBLIC PACS_WITH_IHE_XDS=1)
+
+    message(STATUS "  [OK] pacs_ihe_xds: ON (Document Source ITI-41 + Document Consumer ITI-43)")
+else()
+    message(STATUS "  [--] pacs_ihe_xds: OFF (requires pugixml, libcurl, OpenSSL)")
 endif()
 
 # Storage library
@@ -599,7 +680,9 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
         # Link integrated_database for unified_database_system (Issue #606)
         # integrated_database depends on monitoring_system, so both must be linked together.
         # On Linux, use --start-group/--end-group to resolve circular dependencies.
-        if(TARGET integrated_database AND TARGET monitoring_system)
+        if(TARGET database_system::integrated_database)
+            target_link_libraries(pacs_storage PUBLIC database_system::integrated_database)
+        elseif(TARGET integrated_database AND TARGET monitoring_system)
             if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 target_link_libraries(pacs_storage PUBLIC
                     "$<BUILD_LOCAL_INTERFACE:-Wl,--start-group>"
@@ -861,6 +944,17 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
     )
+    # Issue #1097: network_system's public header secure_session.h includes
+    # "kcenon/network/internal/tcp/secure_tcp_socket.h", which resolves via a
+    # build-time symlink at ${network_system_BINARY_DIR}/internal_include. That
+    # directory is only attached as PRIVATE to network_system's own target, so
+    # dicom_session.cpp fails to compile without it being exposed here too.
+    if(TARGET network_system)
+        target_include_directories(pacs_integration
+            PRIVATE
+                $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/network_system_build/internal_include>
+        )
+    endif()
     # Suppress deprecated warnings from thread_system headers (logger_interface is deprecated)
     target_compile_options(pacs_integration PRIVATE
         $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-deprecated-declarations>
@@ -882,7 +976,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             pacs_integration
             PUBLIC
             logger_system
-            logger_system::logger
+            ${PACS_LOGGER_SYSTEM_INSTALL_TARGET}
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_LOGGER_SYSTEM)
         message(STATUS "    - logger_adapter: ON (logger_system)")
@@ -954,7 +1048,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             pacs_integration
             PUBLIC
             network_system
-            network_system::network_system
+            ${PACS_NETWORK_SYSTEM_INSTALL_TARGET}
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_NETWORK_SYSTEM)
         # network_system internal headers (secure_tcp_socket.h etc.) are exposed

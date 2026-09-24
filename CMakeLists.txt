@@ -6,6 +6,13 @@ project(pacs_system
     LANGUAGES CXX
 )
 
+# PROJECT_VERSION is the latest published package version (v0.1.0) and must
+# match Doxyfile, vcpkg.json and the overlay port (scripts/verify_release_version.py).
+# The v1.0 API contract is an unreleased milestone (#1095, #1164); raise the
+# version only in the change that prepares the v1.0.0 release. Optional stage
+# suffix for the build summary, e.g. "rc" while preparing a release.
+set(PACS_VERSION_STAGE "")
+
 ##################################################
 # C++ Standard and Build Configuration
 ##################################################
@@ -35,7 +42,7 @@ set(PACS_SYSTEM_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/pacs_system")
 #   targets.cmake      - PACS library targets and source file lists
 #   install.cmake      - Install rules, export configuration
 #   testing.cmake      - Test targets and CTest registration
-#   examples.cmake     - Example binaries, benchmarks, CLI smoke tests
+#   examples.cmake     - CLI tool binaries (under tools/), benchmarks, smoke tests
 #   warnings.cmake     - Apply compiler warnings to all PACS targets
 #   summary.cmake      - Build configuration summary output
 ##################################################

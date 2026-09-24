@@ -45,7 +45,7 @@ namespace kcenon::pacs::integration {
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Create adapter with configuration
  * thread_pool_config config;

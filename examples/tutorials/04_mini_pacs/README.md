@@ -4,7 +4,7 @@ A complete Mini PACS implementation integrating all core DICOM services into a s
 
 ## Learning Objectives
 
-After completing this sample, you will understand:
+After completing this tutorial, you will understand:
 
 1. **Service Integration** - How to combine multiple SCPs in one DICOM server
 2. **Query/Retrieve (Q/R)** - C-FIND and C-MOVE/C-GET operations
@@ -14,7 +14,7 @@ After completing this sample, you will understand:
 
 ## Prerequisites
 
-- Completed Level 1-3 samples
+- Completed Level 1-3 tutorials
 - Understanding of DICOM networking (associations, DIMSE)
 - Familiarity with C-STORE and C-ECHO operations
 - DCMTK tools for testing (optional but recommended)
@@ -67,10 +67,10 @@ cmake --build build --target mini_pacs
 
 ```bash
 # Default port 11112
-./build/samples/mini_pacs
+./build/examples/mini_pacs
 
 # Custom port
-./build/samples/mini_pacs 4242
+./build/examples/mini_pacs 4242
 ```
 
 ## Test Commands
@@ -92,7 +92,7 @@ storescu -v -aec MINI_PACS localhost 11112 image.dcm
 # Store multiple images
 storescu -v -aec MINI_PACS localhost 11112 *.dcm
 
-# Store from Level 1 sample output
+# Store from Level 1 tutorial output
 storescu -v -aec MINI_PACS localhost 11112 hello_dicom_output.dcm
 ```
 
@@ -337,7 +337,7 @@ sqlite3 ./pacs_data/index.db \
 ## File Structure
 
 ```
-samples/04_mini_pacs/
+examples/04_mini_pacs/
 ├── CMakeLists.txt      # Build configuration
 ├── mini_pacs.hpp       # Mini PACS class header
 ├── mini_pacs.cpp       # Mini PACS implementation

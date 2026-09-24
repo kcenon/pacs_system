@@ -77,6 +77,9 @@ uint32_t pdu_decoder::read_uint32_be(std::span<const uint8_t> data, size_t offse
 }
 
 std::string pdu_decoder::read_ae_title(std::span<const uint8_t> data, size_t offset) {
+    if (offset + AE_TITLE_LENGTH > data.size()) {
+        return {};
+    }
     std::string ae_title(reinterpret_cast<const char*>(data.data() + offset),
                          AE_TITLE_LENGTH);
     // Trim trailing spaces
@@ -91,6 +94,9 @@ std::string pdu_decoder::read_ae_title(std::span<const uint8_t> data, size_t off
 
 std::string pdu_decoder::read_uid(std::span<const uint8_t> data, size_t offset,
                                    size_t length) {
+    if (offset + length > data.size()) {
+        return {};
+    }
     std::string uid(reinterpret_cast<const char*>(data.data() + offset), length);
     // Trim trailing nulls and spaces
     while (!uid.empty() && (uid.back() == '\0' || uid.back() == ' ')) {
@@ -346,7 +352,9 @@ DecodeResult<p_data_tf_pdu> pdu_decoder::decode_p_data_tf(
                 "PDV item length too small");
         }
 
-        if (pos + pdv_item_length > pdu_end) {
+        // Subtract first to avoid pos + pdv_item_length wrapping on 32-bit
+        // platforms when pdv_item_length is attacker-controlled.
+        if (pdv_item_length > pdu_end - pos) {
             return make_error<p_data_tf_pdu>(pdu_decode_error::buffer_overflow,
                 "PDV item exceeds PDU bounds");
         }
@@ -419,15 +427,17 @@ DecodeResult<std::tuple<
 
             case 0x20:  // Presentation Context (RQ)
                 if (is_rq) {
+                    // Presentation Context RQ item body is:
+                    //   context_id (1) + reserved (3) + sub-items
+                    // Require at least the 4-byte fixed header before reading.
                     if (item_length < 4) {
                         return make_error<std::tuple<std::string,
                             std::vector<presentation_context_rq>,
                             std::vector<presentation_context_ac>,
                             user_information>>(pdu_decode_error::malformed_pdu,
-                                "Presentation Context RQ item is shorter than 4 bytes");
+                                "Presentation Context RQ item too small");
                     }
 
-                    // Parse presentation context RQ
                     presentation_context_rq pc;
                     pc.id = data[pos];
                     // 3 reserved bytes
@@ -458,12 +468,16 @@ DecodeResult<std::tuple<
 
             case 0x21:  // Presentation Context (AC)
                 if (!is_rq) {
+                    // Presentation Context AC item body is:
+                    //   context_id (1) + reserved (1) + result (1) + reserved (1)
+                    //   + sub-items
+                    // Require at least the 4-byte fixed header before reading.
                     if (item_length < 4) {
                         return make_error<std::tuple<std::string,
                             std::vector<presentation_context_rq>,
                             std::vector<presentation_context_ac>,
                             user_information>>(pdu_decode_error::malformed_pdu,
-                                "Presentation Context AC item is shorter than 4 bytes");
+                                "Presentation Context AC item too small");
                     }
 
                     presentation_context_ac pc;
@@ -555,9 +569,15 @@ DecodeResult<user_information> pdu_decoder::decode_user_info_item(
             case 0x54: {  // SCP/SCU Role Selection
                 if (sub_length >= 4) {
                     const uint16_t uid_length = read_uint16_be(data, pos);
-                    // UID is padded to even length in encoder
-                    const uint16_t padded_uid_length = uid_length + (uid_length % 2);
-                    if (pos + 2 + padded_uid_length + 2 <= pos + sub_length) {
+                    // UID is padded to even length in encoder. Compute in a
+                    // wider type to avoid uint16_t overflow when uid_length is
+                    // odd and near its maximum.
+                    const size_t padded_uid_length =
+                        static_cast<size_t>(uid_length) +
+                        (static_cast<size_t>(uid_length) % 2);
+                    // Bounds check: UID length field (2) + padded UID bytes +
+                    // SCU role (1) + SCP role (1) must fit inside sub_length.
+                    if (padded_uid_length + 4 <= sub_length) {
                         scp_scu_role_selection role;
                         role.sop_class_uid = read_uid(data, pos + 2, uid_length);
                         role.scu_role = (data[pos + 2 + padded_uid_length] != 0);

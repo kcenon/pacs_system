@@ -123,7 +123,7 @@ struct ophthalmic_validation_options {
  * ### Conditional Modules
  * - Multi-frame Module (C) — for OCT images
  *
- * @example
+ * @par Example:
  * @code
  * ophthalmic_iod_validator validator;
  * auto result = validator.validate(dataset);

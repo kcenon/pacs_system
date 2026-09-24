@@ -187,7 +187,7 @@ struct category_metrics {
  * Provides thread-safe metrics collection with minimal overhead using
  * atomic operations and relaxed memory ordering where safe.
  *
- * @example
+ * @par Example:
  * @code
  * pipeline_metrics metrics;
  *

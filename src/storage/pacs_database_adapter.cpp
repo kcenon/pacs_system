@@ -21,6 +21,7 @@
 #include <array>
 #include <chrono>
 #include <kcenon/pacs/compat/format.h>
+#include <kcenon/pacs/compat/factory_result.h>
 
 namespace kcenon::pacs::storage {
 
@@ -484,21 +485,17 @@ auto pacs_database_adapter::connect() -> VoidResult {
 
     try {
         // Create database system using builder
-        auto build_result =
+        auto database_result = compat::factory_result(
             database::integrated::unified_database_system::create_builder()
                 .set_backend(to_backend_type(impl_->db_type))
                 .enable_logging(database::integrated::db_log_level::warning)
-                .build();
-        if (build_result.is_err()) {
-            impl_->last_error_msg = build_result.error().message;
-            return make_void_error(
-                build_result.error().code,
-                kcenon::pacs::compat::format(
-                    "Failed to create database system: {}",
-                    build_result.error().message),
-                "storage");
+                .build());
+        if (database_result.is_err()) {
+            impl_->last_error_msg = database_result.error().message;
+            return make_void_error(database_result.error().code,
+                                   database_result.error().message, "storage");
         }
-        impl_->db = std::move(build_result.value());
+        impl_->db = std::move(database_result.value());
 
         // Connect to database
         auto result =

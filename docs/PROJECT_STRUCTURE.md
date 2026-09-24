@@ -1,7 +1,7 @@
 ---
 doc_id: "PAC-PROJ-005"
 doc_title: "Project Structure - PACS System"
-doc_version: "1.0.0"
+doc_version: "0.1.3.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
 project: "pacs_system"
@@ -233,8 +233,16 @@ pacs_system/
 │       ├── sample_mr.dcm
 │       └── sample_cr.dcm
 │
-├── examples/                   # Example applications & CLI utilities
+├── examples/                   # Tutorials (5 progressive learning steps)
 │   ├── CMakeLists.txt
+│   ├── common/                 # Tutorial helpers
+│   ├── 01_hello_dicom/         # Level 1: Basic DICOM file operations
+│   ├── 02_echo_server/         # Level 2: C-ECHO SCP/SCU
+│   ├── 03_storage_server/      # Level 3: C-STORE SCP/SCU
+│   ├── 04_mini_pacs/           # Level 4: Full PACS with query/retrieve
+│   └── 05_production_pacs/     # Level 5: Production-ready features
+│
+├── tools/                      # CLI utility binaries (32 apps)
 │   ├── echo_scu/               # C-ECHO SCU (Verification)
 │   │   └── main.cpp
 │   ├── store_scu/              # C-STORE SCU (Storage)
@@ -517,7 +525,7 @@ namespace pacs::core {
 ```cmake
 # Root CMakeLists.txt
 cmake_minimum_required(VERSION 3.20)
-project(pacs_system VERSION 1.0.0 LANGUAGES CXX)
+project(pacs_system VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

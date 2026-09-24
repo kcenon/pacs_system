@@ -49,7 +49,7 @@ class thread_pool_interface;
  * This class adapts a std::function to the IJob interface, allowing
  * lambda expressions and other callables to be used with IExecutor.
  *
- * @example
+ * @par Example:
  * @code
  * auto job = std::make_unique<lambda_job>(
  *     []() -> kcenon::common::VoidResult {
@@ -124,7 +124,7 @@ private:
  *
  * Thread Safety: All public methods are thread-safe.
  *
- * @example
+ * @par Example:
  * @code
  * // Create executor with thread pool
  * auto pool = std::make_shared<kcenon::thread::thread_pool>(4);
