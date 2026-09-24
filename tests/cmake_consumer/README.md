@@ -3,8 +3,10 @@
 This directory contains a standalone CMake project that exercises the v1.0
 public CMake contract from issue [#1158][1158]:
 
-1. `find_package(pacs_system 1.0 REQUIRED)` succeeds against an installed
-   pacs_system.
+1. `find_package(pacs_system <version> REQUIRED)` succeeds against an installed
+   pacs_system. The requested version is `PACS_CONSUMER_MIN_VERSION`, which
+   defaults to `0.1` while the source tree reports the published 0.1.0
+   package version; the change that prepares v1.0.0 (#1095) raises it to `1.0`.
 2. `target_link_libraries(consumer PRIVATE pacs_system::pacs_system)`
    resolves to the canonical aggregate INTERFACE target.
 3. A public `kcenon::pacs::core` header compiles and links without naming
@@ -35,7 +37,7 @@ cmake --build /tmp/pacs_consumer_build
 ```
 
 If `find_package` fails with a version mismatch, the project version in the
-top-level `CMakeLists.txt` has drifted below 1.0. If the linker complains
+top-level `CMakeLists.txt` is below `PACS_CONSUMER_MIN_VERSION`. If the linker complains
 about `pacs_system::pacs_system`, the umbrella INTERFACE target was removed
 from `cmake/install.cmake`.
 

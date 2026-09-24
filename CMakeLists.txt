@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(pacs_system
-    VERSION 1.0.0
+    VERSION 0.1.0
     DESCRIPTION "Modern C++20 PACS implementation"
     LANGUAGES CXX
 )
 
-# Pre-release stage marker. The numeric PROJECT_VERSION (1.0.0) is the target
-# v1.0 API contract, but no v1.0.0 git tag exists yet (highest tag is v0.1.0),
-# so human-facing surfaces append this stage to avoid advertising a released,
-# stable 1.0.0. Bump to a clean 1.0.0 by clearing this marker (set to "") in
-# the same commit that cuts the v1.0.0 git tag (#1095).
-set(PACS_VERSION_STAGE "rc")
+# PROJECT_VERSION is the latest published package version (v0.1.0) and must
+# match Doxyfile, vcpkg.json and the overlay port (scripts/verify_release_version.py).
+# The v1.0 API contract is an unreleased milestone (#1095, #1164); raise the
+# version only in the change that prepares the v1.0.0 release. Optional stage
+# suffix for the build summary, e.g. "rc" while preparing a release.
+set(PACS_VERSION_STAGE "")
 
 ##################################################
 # C++ Standard and Build Configuration

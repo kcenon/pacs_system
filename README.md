@@ -46,21 +46,25 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 
 ## Project Status
 
-**Current Version**: 1.0.0-rc — release candidate, not yet tagged (v1.0.0 tag pending #1095)
+**Latest Published Package**: 0.1.0 — [`v0.1.0` release](https://github.com/kcenon/pacs_system/releases/tag/v0.1.0), vcpkg port `kcenon-pacs-system` 0.1.0 (port-version 11)
+**Planned Milestone**: v1.0 — unreleased API contract; no v1.0.0 tag, GitHub release, or registry version exists yet (gated by [#1095](https://github.com/kcenon/pacs_system/issues/1095) and [#1164](https://github.com/kcenon/pacs_system/issues/1164))
 **Project Phase**: Phase 4 Complete — Advanced Services & Production Hardening
 
-The v1.0 contract freezes the public header surface under `include/kcenon/pacs/`, the
-`pacs_system::pacs_system` aggregate CMake target, and the documented Doxygen API. See
-[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md) for the frozen header inventory,
-[`docs/v1.0-throw-policy.md`](docs/v1.0-throw-policy.md) for the exception/Result<T> contract,
+The planned v1.0 contract covers the public header surface under `include/kcenon/pacs/`, the
+`pacs_system::pacs_system` aggregate CMake target, and the documented Doxygen API. This surface is
+frozen for review, not released: it ships only after the #1095 readiness checklist closes and every
+Tier 0-4 ecosystem dependency publishes v1.0 (#1164). See
+[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md) for the header inventory under review,
+[`docs/v1.0-throw-policy.md`](docs/v1.0-throw-policy.md) for the planned exception/Result<T> contract,
 and [`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md) for the
 pre-freeze deprecation audit.
 
-Upgrading from 0.x? Start with the [0.x → 1.0 Migration Guide](docs/migration/0.x-to-1.0.md)
-for the full upgrade walkthrough (include paths, namespaces, CMake contract, `Result<T>` migration,
-and the directory relocation), and consult the [CHANGELOG](CHANGELOG.md) for the underlying change
-set including the `samples/` → `examples/` and `examples/` → `tools/` directory relocation (#1139)
-and the `pacs_system::pacs_system` CMake contract (#1158).
+Preparing for v1.0? The [0.x → 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) describes the
+planned upgrade walkthrough (include paths, namespaces, CMake contract, `Result<T>` migration,
+and the directory relocation). The [CHANGELOG](CHANGELOG.md) records the underlying change set under
+`[Unreleased]`, including the `samples/` → `examples/` and `examples/` → `tools/` directory relocation
+(#1139) and the `pacs_system::pacs_system` CMake contract (#1158); no v1.0.0 section exists until a
+v1.0.0 release is actually tagged.
 
 | Phase | Scope | Status |
 |-------|-------|--------|
@@ -279,11 +283,31 @@ PACS_BUILD_STORAGE (ON)            # Build storage module
 vcpkg install kcenon-pacs-system
 ```
 
-### CMake Integration
+This installs the latest published package, 0.1.0 (port-version 11), built from the `v0.1.0`
+source archive. The 0.1.0 package installs headers under `include/pacs/` and exports
+`kcenon::pacs::<component>` targets (`core`, `encoding`, `network`, `client`, `services`,
+`security`, `integration`, plus feature-dependent components):
 
-After installing pacs_system (via `cmake --install`, vcpkg, or another package
-manager), downstream projects depend on it through the canonical CMake target
-`pacs_system::pacs_system`:
+```cmake
+find_package(pacs_system 0.1 CONFIG REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE kcenon::pacs::core)
+```
+
+> The `usage` text shipped with port-version 11 lists `pacs_system::*` target names. Those names
+> belong to the planned v1.0 contract below and are not exported by the 0.1.0 package; use the
+> `kcenon::pacs::*` names above with 0.1.0 (registry correction tracked in
+> [kcenon/vcpkg-registry#104](https://github.com/kcenon/vcpkg-registry/issues/104)).
+> See [Package State](docs/PACKAGE_STATE.md) for the full package, registry, and provenance record.
+
+### CMake Integration (planned v1.0 contract)
+
+The planned v1.0 contract (#1158) replaces the 0.1.0 target names with the canonical CMake target
+`pacs_system::pacs_system`. No published package ships it yet. A source install of this branch
+(`cmake --install`) already provides the target but still reports package version 0.1.0, so
+request `find_package(pacs_system 0.1 REQUIRED)` until v1.0.0 is released; after that,
+downstream projects depend on it as follows:
 
 ```cmake
 find_package(pacs_system 1.0 REQUIRED)
@@ -489,7 +513,7 @@ pacs_system/
 ├── examples/             # Tutorials (5 progressive learning steps)
 ├── tools/                # CLI utility binaries (32 apps)
 ├── docs/                 # Documentation (87 markdown files)
-└── CMakeLists.txt        # Build configuration (v1.0.0-rc)
+└── CMakeLists.txt        # Build configuration (project VERSION 0.1.0)
 ```
 
 > For the full file-level directory tree, see [Project Structure](docs/PROJECT_STRUCTURE.md).
@@ -565,6 +589,7 @@ int main() {
 - 🏛️ [ADR-002](docs/adr/ADR-002-pacs-storage-port-segmentation.md) - PACS storage boundary and repository-set contract
 - ⚡ [Performance Guide](docs/database/PERFORMANCE_GUIDE.md) - Database optimization tips
 - 📦 [Dependency Manifest](dependency-manifest.json) - Canonical native, fetched, internal, and frontend provenance
+- 🏷️ [Package State](docs/PACKAGE_STATE.md) - Published version, registry port, overlay sync, and consume verification
 - ⚖️ [Third-Party Licenses](LICENSE-THIRD-PARTY) - Product distribution license inventory
 
 ---
@@ -611,20 +636,20 @@ cmake --build build --target run_full_benchmarks
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 290 files |
+| **Header Files** | 291 files |
 | **Source Files** | 217 files |
 | **Header LOC** | ~78,700 lines |
 | **Source LOC** | ~114,700 lines |
 | **Example LOC** | ~4,100 lines |
 | **Test LOC** | ~89,300 lines |
-| **Total LOC** | ~286,800 lines |
-| **Test Files** | 190 files |
+| **Total LOC** | ~286,900 lines |
+| **Test Files** | 191 files |
 | **Test Cases** | 2661+ tests |
 | **Example Programs** | 6 apps |
 | **Documentation** | 94 markdown files |
 | **CI/CD Workflows** | 22 workflows |
-| **Version** | 1.0.0-rc (untagged) |
-| **Last Updated** | 2026-06-14 |
+| **Version** | 0.1.0 |
+| **Last Updated** | 2026-09-24 |
 
 <!-- STATS_END -->
 

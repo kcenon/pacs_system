@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> **Release state:** The only published release is `v0.1.0` (2026-03-13); the root
+> [CHANGELOG](../CHANGELOG.md) is authoritative for published package versions. The 0.2.0 and
+> 0.1.0 entries below are development milestones recorded before that release, not published
+> packages. v1.0 is an unreleased milestone gated by #1095 and #1164.
+
 ### Changed
 - Documentation standardization (Doxyfile, README, ecosystem docs)
 - Consolidate directory layout: `samples/` renamed to `examples/` (5 progressive tutorials) and `examples/` renamed to `tools/` (32 CLI utility binaries) so that the role split matches the ecosystem standard. CMake option names (`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`) are preserved for backward compatibility ([#1139](https://github.com/kcenon/pacs_system/issues/1139))
@@ -37,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.0] - 2026-02-09
+## 0.2.0 development milestone - 2026-02-09 (never tagged or published)
 
 ### Added
 - **IHE Integration Profiles**: XDS-I.b, AIRA, PIR actor support
@@ -53,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2024-12-01
+## 0.1.0 development baseline - 2024-12-01 (the published `v0.1.0` tag is dated 2026-03-13)
 
 ### Added
 - Initial release of PACS System

@@ -60,9 +60,11 @@ required-dependency guards are preserved. Effective values are mirrored in norma
 CMake scope; parent inputs and existing cache values are not forcibly overwritten.
 Remove an explicitly cached canonical choice with `cmake -U KCENON_WITH_<DEP>`
 before returning control to a legacy alias. Source compile definitions keep their
-existing names for compatibility. Overlay ports pass both spellings while their
-release references may predate the shim; they must retain the legacy flag until
-the selected published source supports the canonical one.
+existing names for compatibility. Overlay ports must retain the legacy flag until
+the selected published source supports the canonical one. The PACS overlay is a
+byte-identical copy of the canonical registry port (see `docs/PACKAGE_STATE.md`),
+which builds `v0.1.0` and therefore passes only the legacy spelling; add the
+canonical spelling in the registry port with the release that introduces the shim.
 
 ## Dispatch delivery
 

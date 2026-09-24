@@ -24,8 +24,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Acceptance criterion #1: find_package(pacs_system 1.0 REQUIRED) must succeed.
-find_package(pacs_system 1.0 REQUIRED)
+# Acceptance criterion #1: find_package(pacs_system <version> REQUIRED) must succeed.
+# The source tree still reports the published package version (0.1.0) until the
+# v1.0.0 release is prepared (#1095); that change raises this default to 1.0.
+set(PACS_CONSUMER_MIN_VERSION "0.1" CACHE STRING "Minimum pacs_system version requested")
+find_package(pacs_system ${PACS_CONSUMER_MIN_VERSION} REQUIRED)
 
 add_executable(pacs_consumer consumer.cpp)
 

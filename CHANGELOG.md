@@ -7,14 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> **Release state:** The latest published release is still [0.1.0](#010---2026-03-13)
+> (`v0.1.0`; vcpkg `kcenon-pacs-system` 0.1.0, port-version 11). Entries below are untagged.
+> Many of them prepare the planned v1.0 API contract, which remains unreleased: no v1.0.0 tag,
+> GitHub release, or registry version exists, and publication is gated by
+> [#1095](https://github.com/kcenon/pacs_system/issues/1095) and
+> [#1164](https://github.com/kcenon/pacs_system/issues/1164). They were previously listed under a
+> placeholder `[1.0.0] - TBD` heading; they move to a versioned section only when a release is tagged.
+
 ### Added
 
 - Formalize the four PACS medical-domain release gates (DICOM conformance, TLS/ATNA audit logging, anonymization, storage/index migration) in `docs/RELEASE_GATES.md`: a gate matrix mapping each gate to its exact Catch2 tag / CTest selector, test source, authoritative conformance doc, and CI-enforcing workflow, plus a pre-release checklist that is followable without reading test source. Linked from `CONTRIBUTING.md` and surfaced as a "Release Gates" section in the generated release notes (`release.yml`) ([#1176](https://github.com/kcenon/pacs_system/issues/1176))
-
-## [1.0.0] - TBD
-
-### Added
-
 - IHE XDS.b Document Source actor (ITI-41) at `src/ihe/xds/` with pugixml + libcurl transport stack ([#1128](https://github.com/kcenon/pacs_system/issues/1128))
 - IHE XDS.b Document Consumer actor (ITI-43) at `src/ihe/xds/` with retrieve envelope builder and MTOM/XOP response parser ([#1129](https://github.com/kcenon/pacs_system/issues/1129))
 - IHE XDS.b Registry Query actor (ITI-18) at `src/ihe/xds/` with FindDocuments and GetDocuments stored queries against a conformant XDS.b Document Registry ([#1130](https://github.com/kcenon/pacs_system/issues/1130))
@@ -23,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Keep `project(pacs_system VERSION ...)` at the published `0.1.0` (reverting the unreleased `1.0.0` bump from #1158 while keeping the `pacs_system::pacs_system` contract), synchronize the local `kcenon-pacs-system` overlay with canonical registry port 0.1.0#11, move the registry baseline to `40632164`, and record the validated ecosystem source tuple and current FetchContent pins in `dependency-manifest.json`, the dependency checkout action and `docs/SOUP.md` ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - API freeze for v1.0: enumerate the 290-header public surface under `include/kcenon/pacs/` in `docs/v1.0-api-surface.md`; confirm zero `[[deprecated]]` symbols and no experimental staging area; mark `network/detail/accept_worker.h` as the only implementation-detail header outside the v1.0 stability promise ([#1156](https://github.com/kcenon/pacs_system/issues/1156))
 - Migrate `decode_rle_segment` (file-scope helper in `src/encoding/compression/rle_codec.cpp`) from `throw std::runtime_error` to `Result<std::vector<uint8_t>>` so malformed RLE segments surface through the public `rle_codec::decode()` `Result<T>` contract instead of escaping as exceptions. Document the remaining 10 throws in `src/integration/` and `src/storage/hsm_storage.cpp` as constructor-invariant or `std::future`-boundary ABI escapes in the new `docs/v1.0-throw-policy.md`. Public headers under `include/kcenon/pacs/` continue to contain zero non-comment `throw` statements ([#1157](https://github.com/kcenon/pacs_system/issues/1157))
 - Enhance code coverage workflow with v1.0 70% line-coverage threshold gate, line/branch summary computation, and per-PR coverage comment with hit/total counts; threshold is advisory until v1.0 release (toggle via `PACS_COVERAGE_ENFORCE`) ([#1159](https://github.com/kcenon/pacs_system/issues/1159))
@@ -43,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Release workflow version check: replace grep parsing that missed the multi-line `project()` and `version-semver` with `scripts/verify_release_version.py`, which also checks Doxygen `PROJECT_NUMBER` and the overlay manifest ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
+- `cmake --preset vcpkg`: resolve the ecosystem packages installed by the published registry ports, and add `kcenon-logger-system` and `libjpeg-turbo` to the root manifest to match the overlay's default dependency set ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - Replace thread-unsafe `std::localtime` with `localtime_r`/`localtime_s` ([#990](https://github.com/kcenon/pacs_system/issues/990))
 
 ### Security
@@ -76,6 +82,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - vcpkg manifest with feature-based codecs, storage, and cloud features
 - Cross-platform support (Linux, macOS, Windows)
 
-[Unreleased]: https://github.com/kcenon/pacs_system/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/kcenon/pacs_system/compare/v0.1.0...v1.0.0
+[Unreleased]: https://github.com/kcenon/pacs_system/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/kcenon/pacs_system/releases/tag/v0.1.0

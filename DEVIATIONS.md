@@ -16,7 +16,7 @@ Authoritative in-repo sources cited below:
 - `cmake/targets.cmake` — `pacs_system_modules` target and its toolchain note
 - `src/modules/*.cppm` — module interface units (primary module `kcenon.pacs`)
 - `include/kcenon/pacs/compat/{format.h,time.h,namespace_compat.h}` — shims
-- `CMakeLists.txt` — `project(pacs_system VERSION 1.0.0 ...)`
+- `CMakeLists.txt` — `project(pacs_system VERSION 0.1.0 ...)` (published package; v1.0 unreleased)
 - `README.md` — build options and "C++20 Module Support" section
 - `cmake/VERSION`, `cmake/DEVIATIONS.md` — ecosystem cmake-template version (#1140)
 
@@ -96,7 +96,7 @@ concrete dates are intentionally omitted.
       global-module fragment, not `import std;`).
 - [ ] **TBD** — performance / IDE-tooling acceptance bar, if any.
 - [ ] **TBD** — reconcile the `module_version` constant in `src/modules/pacs.cppm`
-      (declares `0.1.0.0`) with the product version `1.0.0` in `CMakeLists.txt`.
+      (declares `0.1.0.0`) with the product version `0.1.0` in `CMakeLists.txt`.
 
 ### Closure
 
@@ -128,7 +128,7 @@ experimental caveats are removed from `cmake/targets.cmake` and `README.md`.
 
 ### Version SSOT status (prerequisite context)
 
-- The product version SSOT is `project(pacs_system VERSION 1.0.0 ...)` in
+- The product version SSOT is `project(pacs_system VERSION 0.1.0 ...)` in
   `CMakeLists.txt`.
 - `cmake/VERSION` (currently `1.0.0`) is a **different** axis: it records the
   ecosystem cmake-template version aligned under `cmake/DEVIATIONS.md` (#1140),

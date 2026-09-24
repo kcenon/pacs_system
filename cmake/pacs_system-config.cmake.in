@@ -15,16 +15,25 @@ find_package(ICU CONFIG QUIET COMPONENTS uc data)
 if(NOT ICU_FOUND)
     find_dependency(ICU REQUIRED COMPONENTS uc data)
 endif()
+# Published registry ports (0.1.x) install legacy package names; accept them
+# after the current names, matching cmake/dependencies.cmake.
+macro(_pacs_find_ecosystem_dependency current_name legacy_name)
+    find_package(${current_name} CONFIG QUIET)
+    if(NOT ${current_name}_FOUND)
+        find_dependency(${legacy_name} CONFIG)
+    endif()
+endmacro()
+
 find_dependency(common_system CONFIG REQUIRED)
-find_dependency(container_system CONFIG REQUIRED)
-find_dependency(network_system CONFIG REQUIRED)
+_pacs_find_ecosystem_dependency(container_system ContainerSystem)
+_pacs_find_ecosystem_dependency(network_system NetworkSystem)
 
 if(@PACS_SYSTEM_WITH_THREAD_SYSTEM@)
     find_dependency(thread_system CONFIG REQUIRED)
 endif()
 
 if(@PACS_SYSTEM_WITH_LOGGER_SYSTEM@)
-    find_dependency(logger_system CONFIG REQUIRED)
+    _pacs_find_ecosystem_dependency(logger_system LoggerSystem)
 endif()
 
 if(@PACS_SYSTEM_WITH_MONITORING_SYSTEM@)
