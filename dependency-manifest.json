@@ -6,62 +6,85 @@
     "license": "BSD-3-Clause",
     "manifest_purpose": "Canonical dependency provenance for IEC 62304 SOUP/SBOM workflows."
   },
+  "package_state": {
+    "current_release": "0.1.0",
+    "current_release_tag": "v0.1.0",
+    "vcpkg_port": "kcenon-pacs-system",
+    "vcpkg_port_version": 11,
+    "vcpkg_registry": "https://github.com/kcenon/vcpkg-registry",
+    "vcpkg_registry_baseline": "40632164c62b2256579a27eda228c48b057cbee9",
+    "release_archive_sha512": "0db1f80c979f726efc6db5836e626d717297e6e4ead74005973d655ab63e67d093ed89afa402579d53e823a7c1bf5ac350ee199faf2f5b5e2cb70976ed4c282a",
+    "planned_milestone": "v1.0 API contract (unreleased; gated by #1095 and #1164)"
+  },
+  "internal_ecosystem_provenance": {
+    "kind": "validated-source-tuple",
+    "source": "kcenon/common_system coherence run 35861689435 (common main 180a8155a96d9ef2794151b59e3fedff529c20d0)",
+    "source_url": "https://github.com/kcenon/common_system/actions/runs/35861689435",
+    "policy": "The internal_ecosystem versions are Git SHAs recorded as build-provenance pins for the validated ecosystem tuple. They are not published version constraints. Published v1.x dependency constraints are owned by #1164 and will replace these pins only after every Tier 0-4 dependency ships v1.0."
+  },
   "internal_ecosystem": [
     {
       "name": "common_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../common_system/include",
-      "version": "47be5fd27650f0ebfa2d029ebed35a1c262e55c4",
-      "license": "BSD-3-Clause"
+      "version": "180a8155a96d9ef2794151b59e3fedff529c20d0",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     },
     {
       "name": "container_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../container_system",
-      "version": "0b95a0c10edf53315581b7f3fa458f0193e8c039",
-      "license": "BSD-3-Clause"
+      "version": "605a0afd76ad78de97fc28ff6d416d5d08430b78",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     },
     {
       "name": "thread_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../thread_system",
-      "version": "db8d36f15cf2dfb679474b20cb47160494a6c8be",
-      "license": "BSD-3-Clause"
+      "version": "ec5fdf3351e1bddd852f8ae4f51501a1d8dac4f1",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     },
     {
       "name": "logger_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../logger_system",
-      "version": "f119ecd698fb5a8b25dd730647b9d038034aad5a",
-      "license": "BSD-3-Clause"
+      "version": "02eafd95640bc24799a36ed043c3e6a16c688832",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     },
     {
       "name": "monitoring_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../monitoring_system",
-      "version": "221bf3d2645a2bfd54b07fd84b1c24c2e32d754f",
-      "license": "BSD-3-Clause"
+      "version": "e8c4b2e333f9766511120a9cab063f73c7b970bb",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     },
     {
       "name": "network_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../network_system",
-      "version": "093691d9523265d672880e2cb7c0ea0e4463a8f8",
-      "license": "BSD-3-Clause"
+      "version": "47cf31923ad2c883a96577fb52c7261ec191980f",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     },
     {
       "name": "database_system",
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../database_system",
-      "version": "b90b0f3bb1e7c9719494724b4c900fd89199e513",
-      "license": "BSD-3-Clause"
+      "version": "0c0ad764a2c80ae3be5757b72f12299a1a2a7fd7",
+      "license": "BSD-3-Clause",
+      "version_kind": "git-sha-build-provenance"
     }
   ],
   "native_and_system": [
     {
       "name": "sqlite3",
-      "resolution": "find_package(SQLite3) or FetchContent sqlite-amalgamation-3450100",
-      "version": "3.45.1",
+      "resolution": "find_package(SQLite3) or FetchContent sqlite-amalgamation-3450300",
+      "version": "3.45.3",
       "license": "Public Domain"
     },
     {
@@ -117,7 +140,7 @@
     {
       "name": "OpenJPH",
       "resolution": "find_package(openjph) or FetchContent fallback",
-      "version": "0.18.2",
+      "version": "0.21.0",
       "license": "BSD-2-Clause"
     }
   ],

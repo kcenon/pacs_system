@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "kcenon-pacs-system",
   "version-semver": "0.1.0",
-  "port-version": 6,
+  "port-version": 11,
   "description": "Modern C++20 PACS implementation for DICOM medical imaging",
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
@@ -10,9 +10,14 @@
   "dependencies": [
     "kcenon-common-system",
     "kcenon-container-system",
+    "kcenon-logger-system",
     "kcenon-network-system",
     "kcenon-thread-system",
-    "icu"
+    "icu",
+    {
+      "name": "libjpeg-turbo",
+      "version>=": "3.0.2"
+    }
   ],
   "overrides": [
     { "name": "sqlite3", "version": "3.45.3" },
