@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::is_fixed_length" name="kcenon::pacs::encoding::is_fixed_length">
+<area shape="rect" id="Node000001" title="Checks if a VR has a fixed length." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#a2f90c2ff52c6a636b6b9cd57ee8cfa1b" title="Gets the fixed size of a VR if applicable." alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,23,214,23,214,28,180,28"/>
+</map>

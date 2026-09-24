@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ihe::xds::detail::built_envelope" name="kcenon::pacs::ihe::xds::detail::built_envelope">
+<area shape="rect" id="Node000001" title="Result of envelope construction." alt="" coords="5,321,192,401"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="59,135,138,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,200,101,305,96,305,96,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="33,5,164,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,99,101,134,96,134,96,99"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="include/kcenon/pacs/services/sop_classes/xa_storage.h" name="include/kcenon/pacs/services/sop_classes/xa_storage.h">
+<area shape="rect" id="Node000001" title="X&#45;Ray Angiographic (XA) Image Storage SOP Classes." alt="" coords="124,5,287,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,61,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,62,70,104,68,99,152,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="85,108,152,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,62,142,100,138,96,177,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="176,108,235,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="208,60,208,94,203,94,203,60"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="259,108,357,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="238,58,285,97,282,101,235,62"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="381,108,443,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="269,58,373,100,371,105,267,63"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/services/print_scu.h" name="include/kcenon/pacs/services/print_scu.h">
+<area shape="rect" id="Node000001" title="DICOM Print Management SCU service (PS3.4 Annex H)" alt="" coords="5,5,160,45"/>
+<area shape="rect" id="Node000002" href="$print__scu_8cpp.html" title="Implementation of the Print Management SCU service (PS3.4 Annex H)" alt="" coords="16,93,149,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,59,85,93,80,93,80,59"/>
+</map>

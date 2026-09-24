@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::workflow::to_string" name="kcenon::pacs::workflow::to_string">
+<area shape="rect" id="Node000001" title="Convert lock_type to string." alt="" coords="767,37,941,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1workflow_1_1study__lock__manager.html#a805b3d4eae9a856fea81d2f9f19ef5e6" title="Acquire a lock of specific type on a study." alt="" coords="502,5,702,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="753,47,702,41,703,35,754,42"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a5f08485629050d7dcc5e86801137bfbc" title="Serialize tasks to JSON." alt="" coords="485,69,719,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="753,73,719,77,719,72,753,67"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a446a27a16223f374eb9d48ae445e77f1" title="Save all tasks to persistence storage." alt="" coords="228,69,437,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="472,92,437,92,437,87,472,87"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1task__scheduler.html#a8e0090db3ef6578eae33be6c9e9a0d64" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,62,180,117"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="214,92,180,92,180,87,214,87"/>
+</map>

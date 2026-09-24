@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::validation::is_valid_sr_dataset" name="kcenon::pacs::services::validation::is_valid_sr_dataset">
+<area shape="rect" id="Node000001" title="Quick check if a dataset is a valid SR document." alt="" coords="5,70,175,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1sr__iod__validator.html#a4b004c16337895ad96af98ce22d37275" title="Quick check if dataset has minimum required attributes." alt="" coords="223,70,429,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,95,209,95,209,100,175,100"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="484,5,673,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="422,67,494,47,495,52,423,72"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="501,70,656,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="429,95,488,95,488,100,429,100"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a471a9b07bf4a33d96334c06629e4cb2b" title="Check if a SOP Class UID is an SR Storage SOP Class." alt="" coords="477,149,680,203"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="415,122,478,142,477,147,414,127"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa6147ca28dba63ecc64bf727f56037c0" title="Get information about a specific SR SOP Class." alt="" coords="728,149,897,203"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="680,173,714,173,714,179,680,179"/>
+</map>

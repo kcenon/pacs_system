@@ -1,0 +1,36 @@
+<map id="kcenon::pacs::security::atna_syslog_transport::close" name="kcenon::pacs::security::atna_syslog_transport::close">
+<area shape="rect" id="Node000001" title="Close the transport connection." alt="" coords="1439,273,1613,328"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ae382826d55646bfe0cdefe314985af34" title=" " alt="" coords="1211,208,1385,263"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1424,274,1385,263,1386,258,1426,269"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#aae3ea7e8c965624d9d588acfb204cfd6" title=" " alt="" coords="983,241,1157,296"/>
+<area shape="poly" id="edge16_Node000001_Node000003" title=" " alt="" coords="1425,296,1157,277,1158,272,1425,291"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#a27e91537a791eae76801884c8fd4e9bf" title=" " alt="" coords="1205,339,1391,393"/>
+<area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="1426,332,1392,342,1390,337,1425,327"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1197,253,1158,259,1157,253,1196,247"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ae6bb942a597dd27b78a91b95337397bf" title="Send an RFC 3881 XML audit message via Syslog." alt="" coords="721,249,935,289"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="969,271,935,271,935,266,969,266"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a54c92cf4955c20bbec5f291bca68498c" title="Send an audit message via syslog transport." alt="" coords="507,241,673,296"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="708,271,674,271,674,266,708,266"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a0766101d18d5ef7cbae3a3103c56c488" title="Audit a User Authentication event." alt="" coords="285,5,451,60"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="569,230,524,152,493,110,457,73,441,62,444,58,460,69,497,107,529,149,573,228"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#af8fc4f873ed31b18a1476838ca3cf300" title="Audit a C&#45;STORE (DICOM Instances Transferred) event." alt="" coords="281,84,455,139"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="552,233,509,192,457,152,438,141,441,137,460,148,512,188,556,229"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a4d61be4a91902ac14e823955635edd98" title="Audit a C&#45;FIND (Query) event." alt="" coords="285,163,451,217"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="498,239,445,220,447,215,500,234"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#aae79d4e20891e3c88437d664daab60bb" title="Audit a Security Alert event (e.g., access denied)" alt="" coords="285,241,451,296"/>
+<area shape="poly" id="edge10_Node000005_Node000011" title=" " alt="" coords="493,271,451,271,451,266,493,266"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a6ff8735d139a69b91816e473a14b3405" title="Audit an XDS&#45;I.b Provide and Register Document Set transaction." alt="" coords="278,321,458,390"/>
+<area shape="poly" id="edge11_Node000005_Node000012" title=" " alt="" coords="508,304,458,323,456,318,506,299"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a0c9a9c311c861f9c24839bcfde868a9c" title="Audit an XDS&#45;I.b Retrieve Document Set transaction." alt="" coords="285,415,451,469"/>
+<area shape="poly" id="edge13_Node000005_Node000014" title=" " alt="" coords="560,309,516,357,460,404,439,417,437,412,457,400,512,353,556,305"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a950367990f4f8d872f2f0822ed0af2b1" title="Emit a pre&#45;built RFC 3881 audit message." alt="" coords="277,493,459,548"/>
+<area shape="poly" id="edge15_Node000005_Node000016" title=" " alt="" coords="576,310,557,350,531,396,499,443,460,484,445,495,442,491,457,480,495,440,527,394,552,348,571,308"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1storage__scp.html#a7a449b12c3ea4d90b58c3a3a1ae3470a" title="Handle an incoming DIMSE message (C&#45;STORE&#45;RQ)" alt="" coords="33,84,202,139"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="268,114,202,114,202,109,268,109"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1query__scp.html#ab8559adec5737a7e22b05a6908b66151" title="Handle an incoming DIMSE message (C&#45;FIND&#45;RQ)" alt="" coords="10,170,225,210"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="271,193,225,193,225,187,271,187"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#a24c0398dfb95817dabbcca7dd20dd4a9" title="Publish a KOS document to the XDS registry/repository." alt="" coords="18,328,217,383"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="264,358,217,358,217,353,264,353"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__consumer.html#abcd2853c531385526c54717d7290ee9f" title="Retrieve a specific document from the XDS repository." alt="" coords="5,415,229,469"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="271,445,229,445,229,439,271,439"/>
+</map>

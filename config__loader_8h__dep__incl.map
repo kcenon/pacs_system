@@ -1,0 +1,12 @@
+<map id="examples/tutorials/05_production_pacs/config_loader.h" name="examples/tutorials/05_production_pacs/config_loader.h">
+<area shape="rect" id="Node000001" title="YAML configuration loader for Production PACS." alt="" coords="120,5,275,60"/>
+<area shape="rect" id="Node000002" href="$config__loader_8cpp.html" title="Implementation of YAML configuration loader." alt="" coords="5,108,160,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,71,114,110,111,106,155,67"/>
+<area shape="rect" id="Node000003" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="120,211,275,265"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,74,200,210,195,210,195,74"/>
+<area shape="rect" id="Node000004" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="235,108,389,163"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,67,284,106,280,110,236,71"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="273,174,229,213,226,209,270,170"/>
+<area shape="rect" id="Node000005" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="299,211,458,265"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="339,173,363,209,359,212,335,176"/>
+</map>

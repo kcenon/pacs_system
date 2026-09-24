@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::ihe::xds::detail::sign_envelope" name="kcenon::pacs::ihe::xds::detail::sign_envelope">
+<area shape="rect" id="Node000001" title="Sign the body + timestamp of env in place." alt="" coords="5,5,197,45"/>
+<area shape="rect" id="Node000002" href="$ai__service__connector_8cpp.html#aa7dd4092b16e5dda09a0fef9b433db84" title="Encode data to Base64." alt="" coords="245,13,368,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,23,232,23,232,28,197,28"/>
+</map>

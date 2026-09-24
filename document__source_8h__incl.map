@@ -1,0 +1,25 @@
+<map id="include/kcenon/pacs/ihe/xds/document_source.h" name="include/kcenon/pacs/ihe/xds/document_source.h">
+<area shape="rect" id="Node000001" title="IHE XDS.b Document Source Actor (ITI&#45;41 Provide and Register Document Set&#45;b)." alt="" coords="429,5,633,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,48,207,93,206,88,436,43"/>
+<area shape="rect" id="Node000003" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="218,93,373,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="480,48,361,91,359,86,479,43"/>
+<area shape="rect" id="Node000005" href="$http__options_8h.html" title="Transport configuration for IHE XDS.b actors." alt="" coords="397,93,551,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="521,47,497,83,492,80,516,44"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="559,181,618,207"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="544,44,566,92,586,166,581,168,561,94,539,47"/>
+<area shape="rect" id="Node000008" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="626,93,781,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="570,43,655,85,652,90,568,48"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="805,101,882,126"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="614,43,793,91,802,94,801,99,792,96,613,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="247,181,344,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="298,134,298,167,293,167,293,134"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="441,181,507,207"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="477,134,477,167,471,167,471,134"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="503,131,562,171,559,176,500,136"/>
+<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="677,136,618,176,615,171,674,131"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="655,181,722,207"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="702,134,696,168,691,167,697,133"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="747,181,809,207"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="723,132,759,169,755,173,719,135"/>
+</map>

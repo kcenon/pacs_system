@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::pet_iod_validator::quick_check" name="kcenon::pacs::services::validation::pet_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required attributes." alt="" coords="223,5,397,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a22708f1a35f8febc42960d82ac849400" title="Quick check if a dataset is a valid PET image." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,35,175,35,175,30,208,30"/>
+</map>

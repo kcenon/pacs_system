@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::ihe::xds::detail::build_iti41_envelope" name="kcenon::pacs::ihe::xds::detail::build_iti41_envelope">
+<area shape="rect" id="Node000001" title="Build a SOAP envelope for ITI&#45;41 from submission metadata and a list of content&#45;id references for MTO..." alt="" coords="221,5,388,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1document__source_1_1impl.html#af7c665f9669e42ce1108b6b18326902d" title=" " alt="" coords="5,5,173,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,35,173,35,173,30,208,30"/>
+</map>

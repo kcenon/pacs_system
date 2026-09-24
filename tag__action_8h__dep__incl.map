@@ -1,0 +1,17 @@
+<map id="include/kcenon/pacs/security/tag_action.h" name="include/kcenon/pacs/security/tag_action.h">
+<area shape="rect" id="Node000001" title="Tag action definitions for DICOM de&#45;identification." alt="" coords="413,5,576,45"/>
+<area shape="rect" id="Node000002" href="$anonymizer_8h.html" title="DICOM de&#45;identification/anonymization per PS3.15 Annex E." alt="" coords="305,93,476,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="463,56,415,95,412,91,459,52"/>
+<area shape="rect" id="Node000008" href="$tag__action_8cpp.html" title="Implementation of HIPAA identifier tag collections." alt="" coords="501,101,697,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="530,52,586,98,583,102,527,56"/>
+<area shape="rect" id="Node000003" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="96,181,251,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="335,141,236,184,233,179,333,136"/>
+<area shape="rect" id="Node000006" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="275,196,506,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="393,147,393,196,388,196,388,147"/>
+<area shape="rect" id="Node000007" href="$anonymizer_8cpp.html" title="Implementation of DICOM de&#45;identification/anonymization." alt="" coords="530,196,734,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="453,136,603,193,601,198,451,141"/>
+<area shape="rect" id="Node000004" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="5,284,160,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="142,248,108,286,104,282,138,245"/>
+<area shape="rect" id="Node000005" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="185,284,343,339"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="208,245,242,282,238,286,204,248"/>
+</map>

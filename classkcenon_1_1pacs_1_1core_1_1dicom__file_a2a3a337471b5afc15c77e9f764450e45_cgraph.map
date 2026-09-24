@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::core::dicom_file::decode_explicit_vr_be" name="kcenon::pacs::core::dicom_file::decode_explicit_vr_be">
+<area shape="rect" id="Node000001" title="Decode a dataset from Explicit VR Big Endian format." alt="" coords="5,126,157,181"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#a2f90c2ff52c6a636b6b9cd57ee8cfa1b" title="Gets the fixed size of a VR if applicable." alt="" coords="216,5,391,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,124,153,88,204,55,218,48,220,53,207,60,156,93,114,128"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding.html#aa6eb56fd1ffc16dd50fb102224dcae6d" title="Parses a two&#45;character string to a vr_type." alt="" coords="216,69,391,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,129,219,111,221,116,158,134"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding.html#adb98bd91373adf86818ca0009c164824" title="Checks if a VR requires 32&#45;bit length field in Explicit VR encoding." alt="" coords="205,133,401,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="158,151,191,151,191,156,158,156"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="218,197,389,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="158,173,221,191,219,196,157,178"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding.html#a3d0c2e9b6de882b3573455a39781592d" title="Checks if a VR is a numeric type." alt="" coords="216,261,391,301"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="114,179,156,214,207,247,220,254,218,258,204,252,153,218,110,183"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="449,197,609,237"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="389,215,436,215,436,220,389,220"/>
+</map>

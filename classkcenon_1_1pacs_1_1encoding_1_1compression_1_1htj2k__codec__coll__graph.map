@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::compression::htj2k_codec" name="kcenon::pacs::encoding::compression::htj2k_codec">
+<area shape="rect" id="Node000001" title="High&#45;Throughput JPEG 2000 (HTJ2K) codec implementation." alt="" coords="45,687,249,1407"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1compression__codec.html" title="Abstract base class for image compression codecs." alt="" coords="5,135,247,595"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,609,139,686,133,686,131,609"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="271,332,389,397"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="324,398,251,672,245,670,319,397"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="251,5,409,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="333,99,333,332,327,332,327,99"/>
+</map>

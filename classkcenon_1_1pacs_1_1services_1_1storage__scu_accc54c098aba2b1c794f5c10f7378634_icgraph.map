@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::storage_scu::next_message_id" name="kcenon::pacs::services::storage_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="956,37,1187,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a641c5eb0c2e6f0ea60bccfb52262f224" title="Store a single DICOM dataset." alt="" coords="739,37,908,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="942,60,908,60,908,55,942,55"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a59b88fd376ac0b7cde00efb54d1aa924" title="Store multiple DICOM datasets." alt="" coords="499,5,691,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="725,46,691,41,691,36,726,41"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#a4d87386aaaca5bc0c41c5872f4e024cb" title="Store a DICOM file." alt="" coords="507,69,683,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="726,74,683,80,683,74,725,68"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#af2734cf396a75e6ed6bd85822fd1490c" title="Store multiple DICOM files." alt="" coords="268,69,451,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="492,92,451,92,451,87,492,87"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1storage__scu.html#ac75eb05e5a427a5bb06233d04c5cfb8f" title="Store all DICOM files in a directory." alt="" coords="5,69,220,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="254,92,220,92,220,87,254,87"/>
+</map>

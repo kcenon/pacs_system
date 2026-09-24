@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::integration::monitoring_adapter::span" name="kcenon::pacs::integration::monitoring_adapter::span">
+<area shape="rect" id="Node000001" title="Represents a unit of work in distributed tracing." alt="" coords="139,924,328,1224"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="128,767,339,861"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,861,236,908,231,908,231,861"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1span_1_1impl.html" title=" " alt="" coords="41,484,268,704"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="197,704,214,750,209,752,192,706"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,312,192,392"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="110,392,128,468,123,469,105,393"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="72,133,221,199"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="94,211,86,224,80,245,79,268,87,311,81,312,74,268,75,244,82,222,90,208"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="219,5,242,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="221,58,179,121,175,118,217,55"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="241,223,391,288"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="245,67,300,206,295,208,240,69"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="320,302,319,379,315,480,304,592,283,705,260,767,255,765,277,703,298,592,310,479,314,379,314,302"/>
+</map>

@@ -1,0 +1,23 @@
+<map id="main" name="main">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,205,60,230"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1samples.html#adba70e4770254a0600996a79f4258f14" title="Print text in a decorative box." alt="" coords="130,5,301,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="34,204,41,174,54,134,76,92,106,55,117,48,120,52,110,59,80,95,59,136,46,175,39,205"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1samples.html#a0b35752828203618c347bea56ba9161b" title="Print an error message." alt="" coords="130,69,301,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="38,203,64,162,84,139,106,119,116,113,119,118,110,123,87,142,69,165,43,205"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1samples.html#a797bd1037d31deaf7eb6847028221797" title="Print a header/title with decorative border." alt="" coords="130,133,301,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="59,203,107,183,130,175,131,180,109,188,61,208"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1samples.html#ad682d073deb6fa48a16ef8a0df4eb584" title="Print a section header." alt="" coords="130,197,301,237"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="60,215,116,215,116,220,60,220"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1samples.html#ac6c67d10b1fc865948e9d4c2c229960e" title="Print a success message." alt="" coords="130,261,301,301"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="61,227,109,247,131,255,130,260,107,252,59,232"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1samples.html#a1b2bfa6a5964d747930fd1e1528ef384" title="Print a key&#45;value table." alt="" coords="130,325,301,365"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="43,229,69,270,87,292,110,311,119,317,116,321,106,315,84,296,64,273,38,232"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1samples_1_1scoped__signal__handler.html#aa844792d3e7d02a4fcbb953f7bf18634" title="Block until shutdown signal is received." alt="" coords="108,389,323,429"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="39,230,46,260,59,299,80,340,110,375,115,380,112,384,106,379,76,343,54,301,41,261,34,231"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1samples.html#a1c50c546c48ca7a4d293cd332bbb2dd4" title="Truncate a string to a maximum length." alt="" coords="371,5,541,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="301,23,357,23,357,28,301,28"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1samples.html#a9435666a27c8405a298bfa28f440b8d9" title="Center a string within a given width." alt="" coords="371,133,541,173"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="301,151,357,151,357,156,301,156"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1samples_1_1signal__handler.html#a06b2945a72d57208a362d4272d68d55d" title="Block until a shutdown signal is received." alt="" coords="371,382,541,437"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="323,407,357,407,357,412,323,412"/>
+</map>

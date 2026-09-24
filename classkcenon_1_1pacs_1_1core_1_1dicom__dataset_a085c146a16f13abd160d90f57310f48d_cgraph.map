@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::core::dicom_dataset::copy_with_tags" name="kcenon::pacs::core::dicom_dataset::copy_with_tags">
+<area shape="rect" id="Node000001" title="Create a copy containing only the specified tags." alt="" coords="5,5,171,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="219,13,389,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,30,205,30,205,35,171,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="437,13,597,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="390,30,424,30,424,35,390,35"/>
+</map>

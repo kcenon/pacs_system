@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::storage::prefetch_repository::serialize_modalities" name="kcenon::pacs::storage::prefetch_repository::serialize_modalities">
+<area shape="rect" id="Node000001" title=" " alt="" coords="429,5,593,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1prefetch__repository.html#a9e0b59cb1b1ccc75854a964b144d7ab7" title=" " alt="" coords="5,5,169,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="415,29,381,27,217,27,170,30,169,24,217,22,381,22,416,23"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1prefetch__repository.html#ac25843dd26822e3ec663a0091d8b07cd" title=" " alt="" coords="217,37,381,92"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="416,50,382,55,381,50,415,44"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="203,53,169,48,170,42,204,48"/>
+</map>

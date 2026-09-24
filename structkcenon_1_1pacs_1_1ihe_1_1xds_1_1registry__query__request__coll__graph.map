@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::ihe::xds::registry_query_request" name="kcenon::pacs::ihe::xds::registry_query_request">
+<area shape="rect" id="Node000001" title="ITI&#45;18 RegistryStoredQuery request target." alt="" coords="243,561,382,656"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="255,148,333,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="334,190,366,202,400,220,432,244,456,275,467,306,468,342,461,380,448,418,414,488,384,539,376,550,372,547,380,536,410,486,443,416,455,378,462,341,462,307,452,277,428,248,397,225,364,207,333,195"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="38,276,217,341"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="256,204,200,239,169,266,166,262,196,235,253,200"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1ihe_1_1xds_1_1registry__query__options.html" title="Optional creation&#45;time window for ITI&#45;18 FindDocuments queries." alt="" coords="243,404,382,499"/>
+<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="299,214,311,388,306,388,294,214"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="229,5,359,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="297,99,297,148,291,148,291,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="116,342,105,377,97,417,98,459,102,479,111,497,134,526,163,550,196,568,229,583,227,588,193,573,160,554,130,530,106,500,97,480,92,459,92,417,99,375,111,341"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="144,340,156,360,172,378,185,387,197,392,226,402,230,404,228,408,224,406,195,397,182,392,168,382,152,363,139,343"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="64,227,70,251,86,274,82,277,65,253,59,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="315,499,315,545,310,545,310,499"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::ihe::xds::registry_query::impl::get_documents" name="kcenon::pacs::ihe::xds::registry_query::impl::get_documents">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,111,172,165"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1registry__query_1_1impl.html#a1ea076a9ca2c783fe0f4bfa87ef899b6" title=" " alt="" coords="220,71,367,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,119,206,112,207,118,173,124"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1registry__query_1_1impl.html#a8160b6bc1b57d1fa15fee0ea6548f447" title=" " alt="" coords="220,149,367,204"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,151,207,158,206,163,172,156"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#a1cca3c0d7c05909118e6bdfc7cfb27b3" title="Build a SOAP envelope for ITI&#45;18 from a registry_query_request." alt="" coords="427,5,594,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="348,147,365,135,379,118,388,103,397,87,413,71,421,65,424,69,416,75,401,90,393,105,384,121,368,139,351,151"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#aa20e0184e7b87b49069c9594411c18ff" title="POST body to opts.endpoint with the given Content&#45;Type." alt="" coords="431,85,590,125"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="366,150,436,127,437,132,368,155"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#ad8aa2f5d4dc1ad5fcec2d9a9aa49cf20" title="Parse an AdhocQueryResponse envelope into a registry_query_result." alt="" coords="421,149,600,204"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="367,174,407,174,407,179,367,179"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#ad4f057738a21e0056362f36ca13c1338" title="Sign the body + timestamp of env in place." alt="" coords="415,229,607,269"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="368,198,437,222,436,227,366,203"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#aefc44a0f87bc1d00c4eadfde3fdc1b83" title="Verify the structural integrity of a previously signed envelope against the certificate embedded in i..." alt="" coords="435,293,586,348"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="323,202,365,241,416,278,427,285,424,289,413,283,362,245,319,206"/>
+<area shape="rect" id="Node000008" href="$ai__service__connector_8cpp.html#aa7dd4092b16e5dda09a0fef9b433db84" title="Encode data to Base64." alt="" coords="655,236,777,261"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="607,246,641,246,641,251,607,251"/>
+</map>

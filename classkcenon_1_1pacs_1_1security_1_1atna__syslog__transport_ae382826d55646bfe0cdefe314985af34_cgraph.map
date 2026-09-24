@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::security::atna_syslog_transport::ensure_tls_connected" name="kcenon::pacs::security::atna_syslog_transport::ensure_tls_connected">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,41,180,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html#ac8e307c718a6de6b13807d1fee888c8d" title="Close the transport connection." alt="" coords="228,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,52,214,46,215,52,181,57"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="243,85,388,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,80,230,88,229,93,180,85"/>
+</map>

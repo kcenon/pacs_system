@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::services::worklist_scu::cancel" name="kcenon::pacs::services::worklist_scu::cancel">
+<area shape="rect" id="Node000001" title="Send a C&#45;CANCEL request to stop an ongoing query." alt="" coords="5,85,175,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#affb6e11bf642b0d2227c3de8495f1def" title="Get the presentation context ID for an abstract syntax." alt="" coords="233,5,403,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,82,219,61,220,66,155,87"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="245,85,391,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,102,231,102,231,107,175,107"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a829d31f0e0ef610fe2cac048327fad3e" title="Send a DIMSE message." alt="" coords="223,149,413,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="163,122,233,142,232,147,161,127"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a55bc2802a54036684f61306e80fc4395" title="Enqueue message from peer (for in&#45;memory testing)." alt="" coords="469,101,637,156"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="413,150,455,143,456,148,414,155"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a53b37a21272e79a89d88ff7b75965d05" title="Check if the message is valid." alt="" coords="461,180,645,235"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="414,182,448,187,447,193,413,187"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="693,187,883,227"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="646,205,680,205,680,210,646,210"/>
+</map>

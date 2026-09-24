@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::samples::events::image_received_event" name="kcenon::pacs::samples::events::image_received_event">
+<area shape="rect" id="Node000001" title="Event fired when an image is received and stored." alt="" coords="5,321,228,401"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="77,135,156,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,200,119,305,114,305,114,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="51,5,182,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,99,119,134,114,134,114,99"/>
+</map>

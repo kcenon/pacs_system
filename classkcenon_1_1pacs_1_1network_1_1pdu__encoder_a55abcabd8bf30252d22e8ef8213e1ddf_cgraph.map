@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::pdu_encoder::encode_associate_header" name="kcenon::pacs::network::pdu_encoder::encode_associate_header">
+<area shape="rect" id="Node000001" title="Encodes the common header portion for ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="5,84,173,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa4ddd3f35a6314785c4025f83ec1e3ae" title="Writes an AE Title (16 bytes, space&#45;padded)." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,81,216,62,218,67,166,86"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#ac2ab53ad523a5947efac7785165941e6" title="Writes a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="221,84,389,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,109,208,109,208,114,174,114"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a072ecc5e4e38fc2897e62ef6d4327d44" title="Writes a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="221,163,389,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="166,136,218,155,216,160,164,141"/>
+</map>

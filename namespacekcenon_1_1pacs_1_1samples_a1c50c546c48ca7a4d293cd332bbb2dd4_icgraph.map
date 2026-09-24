@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::samples::truncate" name="kcenon::pacs::samples::truncate">
+<area shape="rect" id="Node000001" title="Truncate a string to a maximum length." alt="" coords="341,86,512,126"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1samples.html#adba70e4770254a0600996a79f4258f14" title="Print text in a decorative box." alt="" coords="115,22,286,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="341,85,271,65,273,59,343,80"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1samples.html#accc00b78dab8629df29927277d6ed320" title="Print all elements in a DICOM dataset." alt="" coords="109,86,293,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="328,109,293,109,293,103,328,103"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1samples.html#a0125dd5ae6691a4367bfe6e388498a9f" title="Print a summary of a DICOM dataset." alt="" coords="108,150,293,190"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="343,132,273,153,271,147,341,127"/>
+<area shape="rect" id="Node000003" href="$01__hello__dicom_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4" title=" " alt="" coords="5,5,60,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,30,60,24,60,19,102,25"/>
+<area shape="rect" id="Node000004" href="$02__echo__server_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="5,55,60,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="102,60,60,66,60,61,101,54"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::scoped_signal_handler::~scoped_signal_handler" name="kcenon::pacs::samples::scoped_signal_handler::~scoped_signal_handler">
+<area shape="rect" id="Node000001" title="Destructor &#45; resets signal handler state." alt="" coords="5,5,195,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1samples_1_1signal__handler.html#ad0a14040c36c01027dd9c1991ba27925" title="Reset the shutdown state." alt="" coords="243,13,413,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,30,229,30,229,35,195,35"/>
+</map>

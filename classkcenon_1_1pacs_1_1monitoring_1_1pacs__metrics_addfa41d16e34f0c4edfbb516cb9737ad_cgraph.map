@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::pacs_metrics::record_move" name="kcenon::pacs::monitoring::pacs_metrics::record_move">
+<area shape="rect" id="Node000001" title="Record a C&#45;MOVE operation." alt="" coords="5,91,215,131"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1monitoring_1_1data__transfer__metrics.html#aa38665051e2133b36b0197e21b5ea933" title="Record an image retrieved." alt="" coords="263,5,480,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,89,266,61,268,67,178,94"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1monitoring_1_1operation__counter.html#a2897046749b8703ae9c1c33d754e29c3" title="Record a failed operation with duration." alt="" coords="273,84,470,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,109,259,109,259,114,215,114"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1monitoring_1_1operation__counter.html#ad159b7eafa7c8cec9966625df9ae0192" title="Record a successful operation with duration." alt="" coords="273,163,470,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="178,129,268,156,266,161,176,134"/>
+</map>

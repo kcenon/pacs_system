@@ -1,0 +1,53 @@
+<map id="kcenon::pacs::services::validation::rt_dose_iod_validator::validate" name="kcenon::pacs::services::validation::rt_dose_iod_validator::validate">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,293,180,347"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#aca71bc219765d74163dc4ba2e01c896d" title=" " alt="" coords="228,285,441,355"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,317,214,317,214,323,180,323"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#abf6edef66ff6a030d14f2f819923cd34" title=" " alt="" coords="246,99,423,168"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="113,290,162,235,193,205,226,178,234,173,237,177,230,182,196,209,165,238,117,294"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#ae10428bdbe046f331ad2dd5472d0c191" title=" " alt="" coords="247,379,422,448"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="165,345,235,372,233,377,164,350"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#afee5ddbc183386e28ac484fe04bb5f1f" title=" " alt="" coords="247,5,422,75"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="101,292,118,247,145,193,181,135,226,85,234,78,238,82,230,89,185,139,150,195,123,250,106,294"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#ae45bbaecfcfa2b9cef9734fdeeb68e2d" title=" " alt="" coords="247,565,422,635"/>
+<area shape="poly" id="edge18_Node000001_Node000013" title=" " alt="" coords="106,346,123,390,150,445,185,501,230,551,238,558,234,562,226,555,181,505,145,447,118,393,101,348"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#a16d87a180ca8f281ea029c696d742642" title=" " alt="" coords="247,472,422,541"/>
+<area shape="poly" id="edge26_Node000001_Node000017" title=" " alt="" coords="117,346,165,402,196,431,230,458,237,463,234,467,226,462,193,435,162,405,113,350"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#a6dee4a078e0cc26f09e1abe5938f0927" title=" " alt="" coords="247,192,422,261"/>
+<area shape="poly" id="edge30_Node000001_Node000018" title=" " alt="" coords="164,290,233,263,235,268,165,295"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#abf4138ef86a7bb629dc4945da4dc1a6f" title=" " alt="" coords="489,292,693,361"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="442,320,476,321,476,326,441,325"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="741,429,931,469"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="663,359,784,421,782,425,660,364"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="759,325,913,379"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="694,335,746,340,745,345,693,340"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="755,187,917,227"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="661,290,781,230,783,235,664,294"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="979,219,1139,259"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="918,216,966,223,965,228,917,221"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="987,155,1130,195"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="917,192,974,184,974,189,918,198"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="423,166,443,178,504,228,554,279,550,283,500,232,440,182,421,170"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#a5b00db22b8f125d61eff9b250d63c278" title=" " alt="" coords="489,97,693,167"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="423,130,476,130,476,135,423,136"/>
+<area shape="poly" id="edge11_Node000010_Node000004" title=" " alt="" coords="637,165,668,197,696,235,707,257,713,278,717,315,723,350,731,369,743,389,760,406,779,420,776,424,756,410,739,392,726,371,718,352,712,316,708,279,702,259,691,237,664,200,633,169"/>
+<area shape="poly" id="edge12_Node000010_Node000006" title=" " alt="" coords="694,161,757,180,756,185,693,166"/>
+<area shape="poly" id="edge14_Node000011_Node000003" title=" " alt="" coords="421,381,475,363,477,368,423,386"/>
+<area shape="poly" id="edge15_Node000011_Node000004" title=" " alt="" coords="422,417,727,439,727,444,422,422"/>
+<area shape="poly" id="edge17_Node000012_Node000010" title=" " alt="" coords="423,69,482,90,480,95,421,74"/>
+<area shape="poly" id="edge23_Node000013_Node000003" title=" " alt="" coords="421,565,440,551,481,509,516,462,545,415,567,372,572,375,550,417,521,465,485,513,443,555,424,569"/>
+<area shape="poly" id="edge24_Node000013_Node000004" title=" " alt="" coords="422,604,484,605,553,600,624,588,692,567,726,549,758,526,808,478,811,482,761,530,729,553,694,572,625,594,553,605,484,610,422,610"/>
+<area shape="poly" id="edge25_Node000013_Node000005" title=" " alt="" coords="421,575,553,531,624,499,692,462,716,440,740,415,780,385,783,389,743,419,720,444,695,466,627,504,555,536,423,580"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__dose__iod__validator.html#ae8a8706a8d437f4efbc27753d3b556f4" title=" " alt="" coords="492,639,691,708"/>
+<area shape="poly" id="edge19_Node000013_Node000014" title=" " alt="" coords="423,622,479,639,478,644,422,627"/>
+<area shape="poly" id="edge20_Node000014_Node000004" title=" " alt="" coords="665,636,692,618,728,584,761,547,812,479,816,483,765,551,732,588,695,622,668,641"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="759,646,913,701"/>
+<area shape="poly" id="edge21_Node000014_Node000015" title=" " alt="" coords="691,671,745,671,745,676,691,676"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="981,653,1136,693"/>
+<area shape="poly" id="edge22_Node000015_Node000016" title=" " alt="" coords="914,671,968,671,968,676,914,676"/>
+<area shape="poly" id="edge27_Node000017_Node000003" title=" " alt="" coords="421,472,439,458,455,439,463,419,471,399,487,378,501,367,504,371,491,382,476,402,468,421,460,441,443,462,424,476"/>
+<area shape="poly" id="edge28_Node000017_Node000004" title=" " alt="" coords="422,494,727,459,728,464,423,499"/>
+<area shape="poly" id="edge29_Node000017_Node000005" title=" " alt="" coords="422,477,489,456,745,377,746,382,490,461,423,482"/>
+<area shape="poly" id="edge31_Node000018_Node000003" title=" " alt="" coords="423,258,490,284,488,289,421,263"/>
+<area shape="poly" id="edge32_Node000018_Node000004" title=" " alt="" coords="423,232,587,253,657,265,695,278,708,291,716,304,723,332,728,360,733,374,743,389,761,406,781,420,778,425,758,410,739,392,729,377,723,362,718,333,711,306,704,294,692,282,655,270,587,258,422,238"/>
+<area shape="poly" id="edge33_Node000018_Node000005" title=" " alt="" coords="422,211,484,207,553,207,625,215,694,233,726,249,756,269,804,312,800,316,752,273,723,253,692,239,624,220,553,212,484,212,423,216"/>
+</map>

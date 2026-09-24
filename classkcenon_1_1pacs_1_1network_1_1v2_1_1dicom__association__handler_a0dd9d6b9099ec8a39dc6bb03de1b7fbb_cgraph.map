@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::handle_disconnect" name="kcenon::pacs::network::v2::dicom_association_handler::handle_disconnect">
+<area shape="rect" id="Node000001" title="Handle session disconnection." alt="" coords="5,52,212,107"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a2946a7eb810d8951496b00f0ae0b3339" title="Handle session disconnection." alt="" coords="260,19,455,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,63,246,58,247,63,213,68"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a698c6d4ad6413b8a6d8be0e35d6852df" title="Get the session identifier." alt="" coords="727,84,901,139"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="212,81,713,104,713,109,212,87"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a864866bc36d600a70f070bcfb71f124d" title="Close and cleanup." alt="" coords="503,19,679,73"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,43,489,43,489,49,455,49"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="680,69,714,79,713,85,678,74"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1c442d6de6ec7f4d7ef08877a8b2cc47" title="Transition to new state." alt="" coords="727,5,901,60"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="679,38,713,36,713,41,679,43"/>
+</map>

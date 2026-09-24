@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::ihe::xds::registry_query::impl::execute" name="kcenon::pacs::ihe::xds::registry_query::impl::execute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,149,152,204"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#a1cca3c0d7c05909118e6bdfc7cfb27b3" title="Build a SOAP envelope for ITI&#45;18 from a registry_query_request." alt="" coords="213,5,379,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,147,147,109,199,70,210,64,212,69,201,75,151,113,108,151"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#aa20e0184e7b87b49069c9594411c18ff" title="POST body to opts.endpoint with the given Content&#45;Type." alt="" coords="217,85,375,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,150,221,127,223,132,153,155"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#ad8aa2f5d4dc1ad5fcec2d9a9aa49cf20" title="Parse an AdhocQueryResponse envelope into a registry_query_result." alt="" coords="207,149,385,204"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="152,174,193,174,193,179,152,179"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#ad4f057738a21e0056362f36ca13c1338" title="Sign the body + timestamp of env in place." alt="" coords="200,229,392,269"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="153,198,223,222,221,227,151,203"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#aefc44a0f87bc1d00c4eadfde3fdc1b83" title="Verify the structural integrity of a previously signed envelope against the certificate embedded in i..." alt="" coords="221,293,371,348"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="108,202,151,241,201,278,212,285,210,289,199,283,147,245,105,206"/>
+<area shape="rect" id="Node000006" href="$ai__service__connector_8cpp.html#aa7dd4092b16e5dda09a0fef9b433db84" title="Encode data to Base64." alt="" coords="440,236,563,261"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="392,246,427,246,427,251,392,251"/>
+</map>

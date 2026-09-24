@@ -1,0 +1,24 @@
+<map id="kcenon::pacs::security::atna_service_auditor" name="kcenon::pacs::security::atna_service_auditor">
+<area shape="rect" id="Node000001" title="High&#45;level facade for emitting ATNA audit events from DICOM services." alt="" coords="435,1165,621,1465"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,148,110,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,214,60,343,59,426,67,509,81,635,89,698,103,764,124,835,157,914,204,1002,269,1101,303,1143,342,1182,424,1247,420,1251,338,1186,299,1147,265,1104,199,1004,152,916,119,837,97,765,84,699,76,635,61,510,54,426,54,343,64,213"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1security_1_1syslog__transport__config.html" title="Configuration for the Syslog transport." alt="" coords="76,349,252,509"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="85,213,131,333,126,334,80,215"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,99,73,148,68,148,68,99"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html" title="Sends ATNA audit messages via Syslog protocol." alt="" coords="279,623,476,1103"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="448,1102,461,1140,464,1149,459,1151,456,1142,443,1104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="206,508,274,646,269,649,201,511"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1security_1_1atna__syslog__transport_1_1tls__context.html" title=" " alt="" coords="277,382,443,477"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="359,477,356,533,356,606,351,606,351,533,354,477"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="476,397,631,462"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="555,462,537,1141,537,1149,532,1149,532,1141,550,462"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="518,464,457,512,436,522,427,526,420,535,401,570,388,607,383,606,396,568,415,532,424,522,433,517,455,507,515,460"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="579,148,704,213"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="596,225,588,239,572,279,562,322,555,397,550,396,557,321,567,277,583,236,592,222"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="627,533,773,599"/>
+<area shape="poly" id="edge11_Node000010_Node000008" title=" " alt="" coords="659,226,661,237,677,320,688,403,701,533,695,533,683,404,671,321,656,238,653,227"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="630,13,653,78"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="644,78,644,131,639,131,639,78"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="706,599,711,688,712,814,708,886,699,959,686,1033,667,1104,651,1142,631,1180,627,1177,646,1140,661,1102,681,1031,694,958,702,885,706,814,706,688,701,599"/>
+</map>

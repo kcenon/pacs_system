@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::supports_color" name="kcenon::pacs::samples::supports_color">
+<area shape="rect" id="Node000001" title="Check if the terminal supports ANSI colors." alt="" coords="224,5,395,45"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1samples.html#acb37024197c886c312a0ddc4d0093c1e" title="Check if colors are currently enabled." alt="" coords="5,5,176,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,28,176,28,176,23,210,23"/>
+</map>

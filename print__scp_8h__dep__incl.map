@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/services/print_scp.h" name="include/kcenon/pacs/services/print_scp.h">
+<area shape="rect" id="Node000001" title="DICOM Print Management SCP service (PS3.4 Annex H)" alt="" coords="89,5,244,45"/>
+<area shape="rect" id="Node000002" href="$print__scu_8h.html" title="DICOM Print Management SCU service (PS3.4 Annex H)" alt="" coords="5,93,160,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,57,103,95,99,91,137,53"/>
+<area shape="rect" id="Node000004" href="$print__scp_8cpp.html" title="Implementation of the Print Management SCP service (PS3.4 Annex H)" alt="" coords="184,93,317,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="197,53,234,91,230,95,193,57"/>
+<area shape="rect" id="Node000003" href="$print__scu_8cpp.html" title="Implementation of the Print Management SCU service (PS3.4 Annex H)" alt="" coords="16,181,149,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,147,85,181,80,181,80,147"/>
+</map>

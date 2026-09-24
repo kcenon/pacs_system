@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::dicomweb::dataset_to_dicom_json" name="kcenon::pacs::web::dicomweb::dataset_to_dicom_json">
+<area shape="rect" id="Node000001" title="Convert a DICOM dataset to DicomJSON format." alt="" coords="5,30,172,85"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#a831f876ef35f8f4c172b8deef9636704" title="Check if a DICOM tag contains bulk data." alt="" coords="220,5,427,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,43,206,39,207,44,173,49"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="248,69,399,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,66,235,75,234,80,172,71"/>
+</map>

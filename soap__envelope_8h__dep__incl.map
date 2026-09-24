@@ -1,0 +1,23 @@
+<map id="src/ihe/xds/common/soap_envelope.h" name="src/ihe/xds/common/soap_envelope.h">
+<area shape="rect" id="Node000001" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;41 requests." alt="" coords="481,5,635,45"/>
+<area shape="rect" id="Node000002" href="$soap__envelope_8cpp.html" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;41." alt="" coords="5,93,159,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="468,44,170,96,159,98,158,93,170,91,468,38"/>
+<area shape="rect" id="Node000003" href="$wss__signer_8cpp.html" title="OpenSSL&#45;backed WS&#45;Security XML&#45;DSig signer." alt="" coords="183,93,336,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="480,52,325,96,324,91,479,47"/>
+<area shape="rect" id="Node000004" href="$retrieve__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;43 RetrieveDocumentSet." alt="" coords="361,93,521,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="522,56,468,95,465,91,519,52"/>
+<area shape="rect" id="Node000006" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="477,181,639,221"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="561,59,561,181,555,181,555,59"/>
+<area shape="rect" id="Node000007" href="$document__source_8cpp.html" title="IHE XDS.b Document Source actor (ITI&#45;41)." alt="" coords="596,93,757,133"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="597,51,652,91,649,95,594,56"/>
+<area shape="rect" id="Node000008" href="$registry__query_8cpp.html" title="IHE XDS.b Registry Query actor (ITI&#45;18)." alt="" coords="722,181,869,221"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="649,33,681,41,714,53,744,69,771,92,785,113,793,137,799,181,793,182,788,138,780,115,767,95,741,74,711,57,680,46,648,38"/>
+<area shape="rect" id="Node000009" href="$query__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;18 RegistryStoredQuery." alt="" coords="833,93,1019,133"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="649,45,846,91,844,96,647,50"/>
+<area shape="rect" id="Node000005" href="$retrieve__envelope_8cpp.html" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;43." alt="" coords="282,181,453,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="418,146,386,183,382,179,414,142"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="479,140,534,179,530,183,476,144"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="887,143,826,183,823,179,884,139"/>
+<area shape="rect" id="Node000010" href="$query__envelope_8cpp.html" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;18." alt="" coords="893,181,1095,221"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="952,143,981,179,977,183,947,146"/>
+</map>

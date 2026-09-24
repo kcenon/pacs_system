@@ -1,0 +1,15 @@
+<map id="include/kcenon/pacs/services/sop_classes/mg_storage.h" name="include/kcenon/pacs/services/sop_classes/mg_storage.h">
+<area shape="rect" id="Node000001" title="Digital Mammography X&#45;Ray Image Storage SOP Classes." alt="" coords="177,5,340,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,61,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,63,75,106,73,101,189,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="85,108,152,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,62,151,103,148,98,215,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="176,108,251,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="247,61,228,97,223,95,242,59"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="275,108,333,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="275,59,294,95,289,97,270,61"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="358,108,455,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="305,58,376,99,374,103,303,62"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="479,108,542,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="336,58,467,102,465,107,335,63"/>
+</map>

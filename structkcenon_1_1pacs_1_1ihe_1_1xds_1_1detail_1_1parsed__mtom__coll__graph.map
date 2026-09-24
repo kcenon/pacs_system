@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::ihe::xds::detail::parsed_mtom" name="kcenon::pacs::ihe::xds::detail::parsed_mtom">
+<area shape="rect" id="Node000001" title="Result of parsing an inbound multipart/related MTOM response." alt="" coords="193,733,373,813"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="313,276,392,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="363,341,367,365,367,409,349,562,334,627,311,710,309,719,303,717,306,709,329,626,344,561,362,409,362,366,358,342"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1ihe_1_1xds_1_1detail_1_1mtom__part.html" title="One attachment part, mapped 1:1 to an xop:Include in the envelope." alt="" coords="134,433,297,513"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="315,338,281,367,247,420,242,417,277,364,311,334"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="287,133,418,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,227,355,276,350,276,350,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="137,576,293,671"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,670,261,717,256,719,234,672"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="218,513,218,559,213,559,213,513"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="71,276,258,341"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="171,341,186,409,189,417,184,419,181,410,166,342"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,141,127,206"/>
+<area shape="poly" id="edge9_Node000004_Node000007" title=" " alt="" coords="50,220,38,261,28,309,27,359,37,408,60,457,91,502,126,541,160,574,157,578,122,545,87,505,55,460,31,410,21,360,23,308,33,259,45,218"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="100,215,143,274,139,277,95,219"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="55,5,77,71"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="69,71,69,124,63,124,63,71"/>
+</map>

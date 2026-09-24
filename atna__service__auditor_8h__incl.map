@@ -1,0 +1,31 @@
+<map id="include/kcenon/pacs/security/atna_service_auditor.h" name="include/kcenon/pacs/security/atna_service_auditor.h">
+<area shape="rect" id="Node000001" title="High&#45;level facade for ATNA audit logging in DICOM services." alt="" coords="232,5,397,60"/>
+<area shape="rect" id="Node000002" href="$atna__audit__logger_8h.html" title="IHE ATNA&#45;compliant audit message generator (RFC 3881 XML format)" alt="" coords="75,108,226,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="266,62,186,104,183,99,263,58"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,181,163,207"/>
+<area shape="poly" id="edge14_Node000001_Node000004" title=" " alt="" coords="232,50,131,75,90,91,65,110,60,125,67,142,81,158,99,172,96,176,78,162,62,145,55,126,60,106,87,86,129,70,231,45"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="275,181,333,207"/>
+<area shape="poly" id="edge16_Node000001_Node000005" title=" " alt="" coords="316,60,308,168,303,168,310,60"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="187,181,250,207"/>
+<area shape="poly" id="edge17_Node000001_Node000006" title=" " alt="" coords="301,62,235,171,231,168,297,59"/>
+<area shape="rect" id="Node000007" href="$atna__syslog__transport_8h.html" title="Syslog transport for ATNA audit messages (RFC 5424/5425/5426)" alt="" coords="352,108,531,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="355,58,414,98,411,102,352,62"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="571,181,637,207"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="398,45,472,68,510,85,544,106,574,136,595,168,590,171,570,139,541,110,507,89,470,73,397,50"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="605,108,683,133"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="398,53,593,103,592,108,397,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="134,136,70,176,67,171,131,131"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="150,134,139,169,134,167,145,133"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="176,131,268,173,266,178,174,136"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="164,132,200,169,196,173,160,136"/>
+<area shape="poly" id="edge11_Node000007_Node000004" title=" " alt="" coords="389,136,177,184,175,178,388,131"/>
+<area shape="poly" id="edge12_Node000007_Node000005" title=" " alt="" coords="420,136,340,177,337,173,418,131"/>
+<area shape="rect" id="Node000008" href="$result_8h.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="358,181,546,207"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="446,133,451,167,446,168,440,134"/>
+<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="469,131,566,173,564,178,466,136"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="258,255,446,295"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="439,209,389,248,385,244,436,205"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="471,255,636,295"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="469,205,520,244,516,248,465,209"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/azure_blob_storage.h" name="include/kcenon/pacs/storage/azure_blob_storage.h">
+<area shape="rect" id="Node000001" title="Azure Blob storage backend for DICOM cloud storage support." alt="" coords="155,5,309,60"/>
+<area shape="rect" id="Node000002" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="5,115,235,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,71,136,117,133,113,188,67"/>
+<area shape="rect" id="Node000003" href="$azure__blob__storage_8cpp.html" title="Implementation of Azure Blob DICOM storage backend." alt="" coords="259,108,429,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="276,67,323,106,320,110,273,71"/>
+</map>

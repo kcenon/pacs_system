@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::mpps_scu::build_create_dataset" name="kcenon::pacs::services::mpps_scu::build_create_dataset">
+<area shape="rect" id="Node000001" title="Build DICOM dataset for N&#45;CREATE request." alt="" coords="223,5,405,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a250040ff0a6286a6b19ce4f35b8e8589" title="Create a new MPPS instance (N&#45;CREATE)" alt="" coords="5,13,175,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

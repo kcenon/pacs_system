@@ -1,0 +1,27 @@
+<map id="main" name="main">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,269,60,294"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a849b483ac0ad9a1b47791e589239a117" title="Get called AE title." alt="" coords="128,5,303,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="32,268,35,228,46,171,68,109,85,81,106,55,114,48,118,53,110,59,89,84,73,112,51,172,40,228,37,269"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a83150b77d9eb2b424ec2a38297ed3c68" title="Get calling AE title." alt="" coords="126,69,305,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="34,268,41,238,54,198,76,156,106,119,113,114,116,118,110,123,80,159,59,200,46,239,39,269"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1samples.html#adba70e4770254a0600996a79f4258f14" title="Print text in a decorative box." alt="" coords="130,133,301,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="38,267,64,226,84,203,106,183,116,177,119,182,110,187,87,206,69,229,43,269"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1samples.html#a0b35752828203618c347bea56ba9161b" title="Print an error message." alt="" coords="130,197,301,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="59,267,107,247,130,239,131,244,109,252,61,272"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1samples.html#a797bd1037d31deaf7eb6847028221797" title="Print a header/title with decorative border." alt="" coords="130,261,301,301"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="60,279,116,279,116,284,60,284"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1samples.html#ad682d073deb6fa48a16ef8a0df4eb584" title="Print a section header." alt="" coords="130,325,301,365"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="61,291,109,311,131,319,130,324,107,316,59,296"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1samples.html#ac6c67d10b1fc865948e9d4c2c229960e" title="Print a success message." alt="" coords="130,389,301,429"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="43,293,69,334,87,356,110,375,119,381,116,385,106,379,84,360,64,337,38,296"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1samples.html#a1b2bfa6a5964d747930fd1e1528ef384" title="Print a key&#45;value table." alt="" coords="130,453,301,493"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="39,294,46,324,59,363,80,404,110,439,120,447,117,451,106,443,76,407,54,365,41,325,34,295"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1samples_1_1scoped__signal__handler.html#aa844792d3e7d02a4fcbb953f7bf18634" title="Block until shutdown signal is received." alt="" coords="108,517,323,557"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="37,294,40,334,51,391,73,451,89,479,110,503,114,507,111,511,106,507,85,482,68,453,46,392,35,335,32,294"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1samples.html#a1c50c546c48ca7a4d293cd332bbb2dd4" title="Truncate a string to a maximum length." alt="" coords="371,133,541,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="301,151,357,151,357,156,301,156"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1samples.html#a9435666a27c8405a298bfa28f440b8d9" title="Center a string within a given width." alt="" coords="371,261,541,301"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="301,279,357,279,357,284,301,284"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1samples_1_1signal__handler.html#a06b2945a72d57208a362d4272d68d55d" title="Block until a shutdown signal is received." alt="" coords="371,510,541,565"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="323,535,357,535,357,540,323,540"/>
+</map>

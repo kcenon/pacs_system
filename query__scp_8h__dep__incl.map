@@ -1,0 +1,55 @@
+<map id="include/kcenon/pacs/services/query_scp.h" name="include/kcenon/pacs/services/query_scp.h">
+<area shape="rect" id="Node000001" title="DICOM Query SCP service (C&#45;FIND handler)" alt="" coords="1129,5,1292,45"/>
+<area shape="rect" id="Node000002" href="$mini__pacs_8h.html" title="Mini PACS class integrating all DICOM services." alt="" coords="320,101,517,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1116,40,518,110,517,105,1116,35"/>
+<area shape="rect" id="Node000008" href="$parallel__query__executor_8h.html" title="Parallel query executor for concurrent query processing." alt="" coords="705,196,879,251"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1116,43,1034,64,992,78,952,96,913,119,877,146,819,198,815,194,873,142,910,114,949,91,990,73,1033,59,1115,38"/>
+<area shape="rect" id="Node000011" href="$query__result__stream_8h.html" title="Streaming query results with pagination support." alt="" coords="963,93,1125,148"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1166,55,1092,96,1090,91,1163,50"/>
+<area shape="rect" id="Node000012" href="$streaming__query__handler_8h.html" title="Streaming query handler for memory&#45;efficient C&#45;FIND processing." alt="" coords="1115,196,1307,251"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="1213,59,1213,196,1208,196,1208,59"/>
+<area shape="rect" id="Node000015" href="$query__scu_8h.html" title="DICOM Query SCU service (C&#45;FIND sender)" alt="" coords="1563,101,1725,141"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="1306,44,1563,99,1562,105,1305,50"/>
+<area shape="rect" id="Node000021" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="2292,211,2527,236"/>
+<area shape="poly" id="edge28_Node000001_Node000021" title=" " alt="" coords="1306,28,1418,36,1543,48,1658,66,1704,78,1739,91,1755,104,1765,119,1774,134,1789,146,1833,161,1891,171,2030,182,2170,186,2279,193,2359,208,2358,213,2278,199,2170,191,2029,187,1890,176,1832,166,1787,150,1770,137,1760,122,1752,108,1736,96,1702,83,1657,71,1543,53,1418,41,1306,34"/>
+<area shape="rect" id="Node000024" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="1801,101,1941,141"/>
+<area shape="poly" id="edge29_Node000001_Node000024" title=" " alt="" coords="1306,30,1524,51,1654,68,1782,91,1812,98,1811,103,1781,96,1653,74,1524,56,1305,36"/>
+<area shape="rect" id="Node000003" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="5,203,184,243"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="346,147,156,206,155,201,344,142"/>
+<area shape="rect" id="Node000004" href="$mini__pacs_8cpp.html" title="Implementation of Mini PACS class." alt="" coords="209,203,421,243"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="391,152,336,205,332,201,387,148"/>
+<area shape="rect" id="Node000005" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="444,196,599,251"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="449,148,496,194,493,198,446,152"/>
+<area shape="rect" id="Node000006" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="263,299,417,353"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="463,260,389,301,386,296,461,255"/>
+<area shape="rect" id="Node000007" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="442,299,601,353"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="524,264,524,299,519,299,519,264"/>
+<area shape="rect" id="Node000009" href="$pacs-services-cache_8cppm.html" title="C++20 module partition for query caching." alt="" coords="857,306,1052,346"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="847,256,925,303,922,308,844,260"/>
+<area shape="rect" id="Node000010" href="$parallel__query__executor_8cpp.html" title="Implementation of parallel query executor." alt="" coords="625,306,833,346"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="771,264,744,307,739,304,766,261"/>
+<area shape="poly" id="edge11_Node000011_Node000008" title=" " alt="" coords="967,155,859,198,857,193,965,150"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="1101,153,1168,193,1166,198,1098,157"/>
+<area shape="rect" id="Node000014" href="$query__result__stream_8cpp.html" title="Implementation of streaming query results with pagination." alt="" coords="904,203,1091,243"/>
+<area shape="poly" id="edge15_Node000011_Node000014" title=" " alt="" coords="1028,162,1009,204,1004,202,1024,159"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="1132,258,1004,308,1002,303,1130,253"/>
+<area shape="rect" id="Node000013" href="$streaming__query__handler_8cpp.html" title="Implementation of streaming query handler." alt="" coords="1076,306,1295,346"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1203,265,1193,306,1188,305,1198,263"/>
+<area shape="rect" id="Node000016" href="$retrieve__scu_8h.html" title="DICOM Retrieve SCU service (C&#45;MOVE/C&#45;GET sender)" alt="" coords="1431,203,1607,243"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="1611,151,1544,205,1540,201,1608,147"/>
+<area shape="rect" id="Node000017" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="1319,313,1515,339"/>
+<area shape="poly" id="edge22_Node000015_Node000017" title=" " alt="" coords="1549,131,1514,139,1478,152,1447,171,1421,197,1408,226,1406,259,1410,289,1416,312,1411,314,1405,290,1401,259,1403,225,1416,195,1443,167,1476,147,1512,134,1548,126"/>
+<area shape="rect" id="Node000019" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="1719,306,1918,346"/>
+<area shape="poly" id="edge27_Node000015_Node000019" title=" " alt="" coords="1645,154,1651,202,1659,227,1671,249,1688,267,1708,282,1752,304,1749,308,1705,286,1685,271,1667,252,1654,229,1646,203,1640,154"/>
+<area shape="rect" id="Node000020" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="1682,211,1889,236"/>
+<area shape="poly" id="edge23_Node000015_Node000020" title=" " alt="" coords="1683,147,1771,208,1767,213,1680,151"/>
+<area shape="poly" id="edge24_Node000015_Node000021" title=" " alt="" coords="1724,141,1744,145,1894,165,2011,172,2129,177,2279,193,2359,208,2358,213,2278,199,2128,183,2011,177,1893,171,1744,151,1723,146"/>
+<area shape="rect" id="Node000022" href="$query__scu_8cpp.html" title="Implementation of the Query SCU service." alt="" coords="1913,203,2053,243"/>
+<area shape="poly" id="edge25_Node000015_Node000022" title=" " alt="" coords="1724,142,1901,193,1924,201,1923,206,1899,199,1723,147"/>
+<area shape="rect" id="Node000023" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="2077,203,2267,243"/>
+<area shape="poly" id="edge26_Node000015_Node000023" title=" " alt="" coords="1726,141,1745,145,1834,161,1904,170,1975,178,2064,193,2098,201,2097,206,2064,199,1974,184,1904,175,1833,166,1743,151,1725,146"/>
+<area shape="poly" id="edge19_Node000016_Node000017" title=" " alt="" coords="1492,255,1431,315,1427,311,1488,251"/>
+<area shape="rect" id="Node000018" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="1540,306,1695,346"/>
+<area shape="poly" id="edge20_Node000016_Node000018" title=" " alt="" coords="1549,252,1601,304,1597,308,1545,255"/>
+<area shape="poly" id="edge21_Node000016_Node000019" title=" " alt="" coords="1588,245,1763,303,1762,308,1587,250"/>
+</map>

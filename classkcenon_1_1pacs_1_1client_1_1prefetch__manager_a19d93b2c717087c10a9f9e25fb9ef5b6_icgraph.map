@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::prefetch_manager::stop_worklist_monitor" name="kcenon::pacs::client::prefetch_manager::stop_worklist_monitor">
+<area shape="rect" id="Node000001" title="Stop the worklist monitor." alt="" coords="211,5,396,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#ab49591bb0a3b21b4da47041263f55524" title="Destructor &#45; stops scheduler and monitor if running." alt="" coords="5,5,163,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,35,163,35,163,30,196,30"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::validation::rt_structure_set_iod_validator::validate_structure_set_module" name="kcenon::pacs::services::validation::rt_structure_set_iod_validator::validate_structure_set_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="727,38,929,107"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__structure__set__iod__validator.html#afd65864399aeb927285145d2d47b9768" title=" " alt="" coords="476,45,679,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="713,75,679,75,679,70,713,70"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1rt__iod__validator.html#a2bade8682e0cd5f31805f0eeaf97e37a" title="Validate an RT dataset (auto&#45;detects type)" alt="" coords="223,5,428,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="462,57,428,52,428,46,463,52"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#abec2dec2a1476cae7eeb71e674ec27e9" title="Validate an RT Structure Set dataset with default options." alt="" coords="241,84,410,139"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="463,93,410,101,410,96,462,88"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a1be4c1e45ad15c531a2174ce4b67e731" title="Validate any RT dataset (auto&#45;detects type) with default options." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

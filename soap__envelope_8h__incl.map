@@ -1,0 +1,18 @@
+<map id="src/ihe/xds/common/soap_envelope.h" name="src/ihe/xds/common/soap_envelope.h">
+<area shape="rect" id="Node000001" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;41 requests." alt="" coords="308,5,461,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="323,48,176,92,174,87,321,43"/>
+<area shape="rect" id="Node000003" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="218,93,373,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="367,48,327,86,323,82,363,44"/>
+<area shape="rect" id="Node000005" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="397,93,551,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="406,44,446,82,442,86,403,48"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="555,181,614,207"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="463,36,517,56,543,71,565,92,577,109,584,129,588,168,583,168,578,131,572,112,561,95,540,76,515,60,461,41"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="247,181,344,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="298,134,298,167,293,167,293,134"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="374,181,441,207"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="460,135,428,172,424,169,456,132"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="502,131,559,171,556,175,499,136"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="465,181,528,207"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="482,133,492,167,487,169,477,134"/>
+</map>

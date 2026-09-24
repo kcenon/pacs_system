@@ -1,0 +1,28 @@
+<map id="include/kcenon/pacs/security/atna_audit_logger.h" name="include/kcenon/pacs/security/atna_audit_logger.h">
+<area shape="rect" id="Node000001" title="IHE ATNA&#45;compliant audit message generator (RFC 3881 XML format)" alt="" coords="1168,5,1323,60"/>
+<area shape="rect" id="Node000002" href="$atna__service__auditor_8h.html" title="High&#45;level facade for ATNA audit logging in DICOM services." alt="" coords="568,108,733,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1155,52,734,123,733,117,1154,47"/>
+<area shape="rect" id="Node000009" href="$xds__audit__events_8h.html" title="ATNA audit event helpers for the IHE XDS.b actors (ITI&#45;18/41/43)." alt="" coords="1168,108,1323,163"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1248,74,1248,108,1243,108,1243,74"/>
+<area shape="rect" id="Node000013" href="$atna__audit__logger_8cpp.html" title="Implementation of the ATNA audit message generator." alt="" coords="1347,115,1517,155"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="1307,64,1398,113,1395,117,1305,69"/>
+<area shape="rect" id="Node000003" href="$atna__service__auditor_8cpp.html" title="Implementation of the ATNA service auditor facade." alt="" coords="5,211,189,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="555,155,202,213,190,215,189,210,201,208,554,150"/>
+<area shape="rect" id="Node000004" href="$xds__audit__events_8cpp.html" title="Implementation of the XDS.b audit event sinks." alt="" coords="977,211,1141,251"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="748,156,977,208,976,213,746,161"/>
+<area shape="rect" id="Node000005" href="$query__scp_8cpp.html" title="Implementation of the Query SCP service." alt="" coords="214,211,354,251"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="555,163,355,214,353,209,554,158"/>
+<area shape="rect" id="Node000006" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="379,211,531,251"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="584,171,496,213,493,208,582,166"/>
+<area shape="rect" id="Node000007" href="$imaging__document__consumer_8cpp.html" title="Implementation of IHE XDS&#45;I.b Imaging Document Consumer Actor." alt="" coords="555,211,746,251"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="653,176,653,211,648,211,648,176"/>
+<area shape="rect" id="Node000008" href="$imaging__document__source_8cpp.html" title="Implementation of IHE XDS&#45;I.b Imaging Document Source Actor." alt="" coords="770,211,953,251"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="723,166,820,208,817,213,721,171"/>
+<area shape="poly" id="edge12_Node000009_Node000004" title=" " alt="" coords="1182,171,1098,213,1095,208,1179,166"/>
+<area shape="rect" id="Node000010" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="1165,211,1326,251"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1248,176,1248,211,1243,211,1243,176"/>
+<area shape="rect" id="Node000011" href="$document__source_8cpp.html" title="IHE XDS.b Document Source actor (ITI&#45;41)." alt="" coords="1350,211,1511,251"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="1311,166,1394,208,1392,213,1308,171"/>
+<area shape="rect" id="Node000012" href="$registry__query_8cpp.html" title="IHE XDS.b Registry Query actor (ITI&#45;18)." alt="" coords="1536,211,1683,251"/>
+<area shape="poly" id="edge11_Node000009_Node000012" title=" " alt="" coords="1336,160,1536,210,1535,215,1335,165"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_job_base" name="kcenon::pacs::network::pipeline::pipeline_job_base">
+<area shape="rect" id="Node000001" title="Base class for all pipeline jobs." alt="" coords="571,5,737,280"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1dimse__process__job.html" title="Job for processing DIMSE messages." alt="" coords="5,347,212,762"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="558,168,480,191,392,225,305,271,264,299,226,330,208,349,204,345,223,326,261,295,302,267,390,220,478,186,557,163"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pdu__decode__job.html" title="Job for decoding raw PDU bytes." alt="" coords="237,375,423,735"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="561,211,496,266,437,330,407,376,402,373,433,326,493,262,558,207"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1receive__network__io__job.html" title="Job for receiving PDU data from network connections." alt="" coords="448,338,639,771"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="616,294,604,339,599,337,611,293"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1response__encode__job.html" title="Job for encoding DIMSE responses into PDU bytes." alt="" coords="663,337,869,772"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="697,293,709,337,704,338,692,294"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1send__network__io__job.html" title="Job for sending PDU data over network connections." alt="" coords="893,357,1079,752"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="750,204,819,259,853,292,883,326,903,356,899,359,879,330,849,295,816,263,747,208"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1storage__query__exec__job.html" title="Job for executing storage and query operations." alt="" coords="1103,328,1325,781"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="752,162,832,186,921,220,1012,266,1054,294,1093,326,1105,337,1101,341,1090,330,1051,299,1009,271,919,225,830,191,750,167"/>
+</map>

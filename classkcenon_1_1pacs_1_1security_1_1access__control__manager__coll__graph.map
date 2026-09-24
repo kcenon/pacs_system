@@ -1,0 +1,34 @@
+<map id="kcenon::pacs::security::access_control_manager" name="kcenon::pacs::security::access_control_manager">
+<area shape="rect" id="Node000001" title="Manages permissions and access checks." alt="" coords="618,855,818,1189"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="244,697,427,792"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="401,790,606,937,603,942,398,794"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="124,518,331,598"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,598,233,635,247,672,255,683,250,686,242,675,228,637,224,598"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1security_1_1Permission.html" title="Represents a permission grant." alt="" coords="167,223,325,343"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="245,344,234,502,228,502,239,343"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,251,127,316"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="54,330,47,366,44,407,48,448,64,485,91,513,125,532,122,536,88,517,60,488,43,449,38,407,41,366,49,329"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="415,5,437,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="415,43,369,50,301,66,225,93,189,112,156,135,133,158,114,183,86,236,81,234,110,181,129,154,152,131,186,108,223,88,300,60,368,45,414,38"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="360,525,487,591"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="429,71,426,509,421,509,423,71"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="929,251,1078,316"/>
+<area shape="poly" id="edge12_Node000011_Node000006" title=" " alt="" coords="438,38,530,46,673,64,819,92,878,110,920,131,944,153,964,180,991,234,986,237,959,182,940,157,916,136,876,115,817,98,672,70,529,52,437,43"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="361,601,339,631,330,663,330,697,324,697,325,662,334,628,357,598"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="578,705,733,785"/>
+<area shape="poly" id="edge16_Node000012_Node000007" title=" " alt="" coords="473,599,500,628,512,651,525,672,551,692,579,709,576,714,548,696,521,675,508,653,496,631,469,602"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="349,251,372,316"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="357,316,352,352,350,395,353,441,364,486,379,511,374,514,360,488,348,442,345,395,347,352,352,316"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="707,511,881,605"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="793,606,783,709,766,831,764,839,759,838,761,830,778,709,788,605"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1security_1_1security__storage__interface.html" title="Abstract interface for persisting security data (Users, Roles)" alt="" coords="683,133,905,433"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="797,433,797,494,791,494,791,433"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="985,330,956,381,920,435,885,476,849,512,845,508,881,472,916,432,951,379,980,327"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="656,785,659,830,661,838,655,839,654,831,651,785"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="579,525,657,591"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="633,590,645,629,654,688,649,688,639,630,628,592"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="527,243,658,323"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="600,337,618,525,612,525,595,337"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="872,712,956,777"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="894,779,830,869,825,866,889,776"/>
+</map>

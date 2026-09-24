@@ -1,0 +1,17 @@
+<map id="examples/tutorials/common/console_utils.h" name="examples/tutorials/common/console_utils.h">
+<area shape="rect" id="Node000001" title="Console output utilities for developer samples." alt="" coords="669,5,853,45"/>
+<area shape="rect" id="Node000002" href="$01__hello__dicom_2main_8cpp.html" title="Level 1 Sample: Hello DICOM &#45; Introduction to DICOM fundamentals." alt="" coords="5,101,197,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="656,38,449,61,210,96,175,103,174,98,209,91,448,55,655,33"/>
+<area shape="rect" id="Node000003" href="$02__echo__server_2main_8cpp.html" title="Level 2 Sample: Echo Server &#45; DICOM network communication fundamentals." alt="" coords="221,101,413,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="656,49,426,96,394,103,393,98,425,91,655,44"/>
+<area shape="rect" id="Node000004" href="$03__storage__server_2main_8cpp.html" title="Level 3 Sample: Storage Server &#45; DICOM image reception and archiving." alt="" coords="437,101,648,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="706,53,588,103,586,98,704,48"/>
+<area shape="rect" id="Node000005" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="672,101,851,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="764,59,764,101,759,101,759,59"/>
+<area shape="rect" id="Node000006" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="875,93,1029,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="813,49,899,91,897,96,811,54"/>
+<area shape="rect" id="Node000007" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="1054,93,1213,148"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="858,46,1042,91,1054,94,1053,99,1041,96,857,51"/>
+<area shape="rect" id="Node000008" href="$console__utils_8cpp.html" title="Implementation of console output utilities." alt="" coords="1237,101,1435,141"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="868,37,1036,59,1226,91,1261,98,1259,103,1225,96,1035,65,867,42"/>
+</map>

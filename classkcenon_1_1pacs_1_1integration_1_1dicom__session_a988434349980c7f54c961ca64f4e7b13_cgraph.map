@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration::dicom_session::on_data_received" name="kcenon::pacs::integration::dicom_session::on_data_received">
+<area shape="rect" id="Node000001" title="Handle incoming data from network." alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a0cfe63fba7923c8363e8e21a405a7430" title="Process buffered data for complete PDUs." alt="" coords="240,13,469,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#a8bda8d45ed8ebd3c6f00bcfc86dd5bf0" title="Parse PDU header from buffer." alt="" coords="517,5,704,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="470,30,504,30,504,35,470,35"/>
+</map>

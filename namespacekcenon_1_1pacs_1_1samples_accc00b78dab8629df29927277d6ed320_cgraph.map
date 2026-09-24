@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::samples::print_dataset_elements" name="kcenon::pacs::samples::print_dataset_elements">
+<area shape="rect" id="Node000001" title="Print all elements in a DICOM dataset." alt="" coords="5,37,189,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding.html#ae2c4e449332587a5bbd275b365a9e5f8" title="Converts a vr_type to its two&#45;character string representation." alt="" coords="237,5,412,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,42,223,37,224,42,190,47"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1samples.html#a1c50c546c48ca7a4d293cd332bbb2dd4" title="Truncate a string to a maximum length." alt="" coords="239,69,410,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,68,226,73,225,78,189,73"/>
+</map>

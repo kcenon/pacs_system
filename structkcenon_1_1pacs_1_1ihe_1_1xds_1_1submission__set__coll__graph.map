@@ -1,0 +1,19 @@
+<map id="kcenon::pacs::ihe::xds::submission_set" name="kcenon::pacs::ihe::xds::submission_set">
+<area shape="rect" id="Node000001" title="ebRIM/ebRS&#45;shaped submission set metadata." alt="" coords="234,939,381,1019"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="335,276,413,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="396,341,405,365,411,402,411,431,405,497,406,617,411,712,410,757,404,804,390,856,367,916,362,926,357,924,362,914,385,855,398,803,405,757,406,712,401,617,399,497,405,431,405,402,399,366,391,343"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1ihe_1_1xds_1_1xds__document.html" title="A single XDS document entry plus its binary payload." alt="" coords="155,521,295,601"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="336,331,313,347,295,367,279,400,276,429,274,461,265,498,260,508,255,506,259,496,269,460,270,429,274,398,290,364,310,343,333,327"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="309,133,439,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="377,227,377,276,371,276,371,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="152,781,297,876"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="253,875,280,923,275,926,248,878"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="227,602,227,765,222,765,222,602"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="77,276,263,341"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="174,341,182,413,199,497,202,505,197,507,194,498,177,414,169,342"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,141,127,206"/>
+<area shape="poly" id="edge9_Node000004_Node000007" title=" " alt="" coords="51,220,33,276,18,346,13,422,16,460,23,497,55,579,98,657,144,725,186,779,182,783,140,729,93,660,50,582,18,498,10,460,8,422,13,345,28,275,46,218"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="101,215,147,274,143,277,97,219"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="55,5,77,71"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="69,71,69,124,63,124,63,71"/>
+</map>

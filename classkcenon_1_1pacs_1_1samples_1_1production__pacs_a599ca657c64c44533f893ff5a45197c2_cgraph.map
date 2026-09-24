@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::production_pacs::print_status" name="kcenon::pacs::samples::production_pacs::print_status">
+<area shape="rect" id="Node000001" title="Print server status to stdout." alt="" coords="5,5,180,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1samples_1_1production__statistics.html#ab3263a6d17530810cabe35e19beaa236" title="Get uptime duration." alt="" coords="228,5,399,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,30,215,30,215,35,180,35"/>
+</map>

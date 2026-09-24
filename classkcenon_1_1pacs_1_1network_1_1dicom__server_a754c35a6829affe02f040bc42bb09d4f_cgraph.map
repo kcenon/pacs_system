@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::network::dicom_server::message_loop" name="kcenon::pacs::network::dicom_server::message_loop">
+<area shape="rect" id="Node000001" title="Process incoming DIMSE messages." alt="" coords="5,166,225,206"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a02a67ca34386a6ee33de7f6102643024" title="Dispatch message to appropriate service." alt="" coords="284,44,465,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,163,272,108,287,101,289,106,274,112,157,168"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a76cf5c7a2978b1eddd42dc3569af924e" title="Remove association from pool." alt="" coords="287,123,463,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="225,168,273,161,273,167,226,173"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a160dccc6103c997c1cf961d30a68d09f" title="Report error through callback." alt="" coords="273,202,476,242"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="226,199,260,203,260,209,225,204"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a829ca7eb32639bdcc1c0440cc64cb58a" title="Update association activity timestamp." alt="" coords="291,267,459,321"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="163,204,274,252,292,259,290,264,272,256,161,209"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a25f41bf2902c24cbd4c67ee708dbd488" title="Get the Affected SOP Class UID." alt="" coords="524,5,708,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="465,54,510,47,511,52,466,59"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a49deb3be4fbee3ff0ceaa1ee9ccedfdd" title="Get service for SOP Class." alt="" coords="532,84,700,139"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="466,84,519,93,518,98,465,89"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="756,5,911,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="708,30,742,30,742,35,708,35"/>
+</map>

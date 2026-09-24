@@ -1,0 +1,26 @@
+<map id="src/ihe/xds/registry_query/query_response_parser.cpp" name="src/ihe/xds/registry_query/query_response_parser.cpp">
+<area shape="rect" id="Node000001" title="pugixml&#45;backed parser for ITI&#45;18 AdhocQueryResponse." alt="" coords="573,5,747,60"/>
+<area shape="rect" id="Node000002" href="$query__response__parser_8h.html" title="Parser for IHE XDS.b ITI&#45;18 AdhocQueryResponse." alt="" coords="403,108,587,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="611,62,530,104,528,99,608,58"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="110,269,207,295"/>
+<area shape="poly" id="edge13_Node000001_Node000005" title=" " alt="" coords="573,43,428,59,260,87,179,105,108,127,52,153,31,168,16,183,8,201,16,220,32,238,52,252,97,269,95,274,49,256,28,242,11,223,3,201,11,180,28,164,49,149,107,122,178,100,259,81,428,54,573,38"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="580,269,639,295"/>
+<area shape="poly" id="edge12_Node000001_Node000008" title=" " alt="" coords="657,61,617,257,612,255,652,60"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="698,108,801,133"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="689,58,729,96,726,100,685,62"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="825,108,890,133"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="721,58,819,100,817,105,719,63"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="26,181,214,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="441,136,224,181,223,176,440,131"/>
+<area shape="rect" id="Node000004" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="239,181,393,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="470,136,373,178,370,173,468,131"/>
+<area shape="rect" id="Node000006" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="417,181,572,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="497,134,497,168,492,168,492,134"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="523,131,556,151,586,180,603,218,611,255,605,256,598,219,582,183,553,155,520,136"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="280,224,195,265,193,261,277,219"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="387,269,453,295"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="479,223,443,261,439,257,475,220"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="524,219,583,259,580,264,521,224"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="478,269,541,295"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="501,221,507,255,502,256,496,222"/>
+</map>

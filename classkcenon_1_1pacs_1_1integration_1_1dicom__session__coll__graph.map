@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::integration::dicom_session" name="kcenon::pacs::integration::dicom_session">
+<area shape="rect" id="Node000001" title="DICOM session wrapper for network_system sessions." alt="" coords="287,724,469,1264"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,574,215,654"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,664,289,863,285,866,143,667"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="300,261,459,327"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="341,329,308,363,280,405,269,437,266,464,267,528,267,576,270,624,286,719,281,720,265,624,262,576,262,528,261,464,264,436,276,403,304,360,338,325"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1integration_1_1pdu__data.html" title="Container for received PDU data." alt="" coords="290,404,469,504"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="382,327,382,387,377,387,377,327"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="381,133,503,199"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="416,212,410,224,393,262,388,260,405,221,411,209"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="305,567,451,661"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="484,209,490,222,511,299,514,331,513,362,503,426,483,505,468,539,444,568,440,565,463,536,478,503,497,425,508,362,509,331,506,300,485,224,479,211"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="431,5,453,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="445,71,445,117,439,117,439,71"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="381,662,381,708,375,708,375,662"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="382,504,381,550,376,550,376,504"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="475,581,585,647"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="520,648,477,753,472,751,515,646"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="609,581,693,647"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="631,648,481,855,476,852,626,645"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::simd::interleaved_to_planar_rgb8" name="kcenon::pacs::encoding::simd::interleaved_to_planar_rgb8">
+<area shape="rect" id="Node000001" title="Convert interleaved RGB to planar format using best available SIMD." alt="" coords="697,5,872,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#aac26e9f5220ad1869ab20e4f0f48bd65" title=" " alt="" coords="467,5,649,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="683,35,649,35,649,30,683,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec_1_1impl.html#a1e34d04599ef9972bf0d9b4a822a6fda" title=" " alt="" coords="236,5,419,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="453,35,419,35,419,30,453,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1rle__codec.html#aa420e9db8e4f67306e6f826573f9d8d7" title="Compresses pixel data to RLE format." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="223,35,188,35,188,30,223,30"/>
+</map>

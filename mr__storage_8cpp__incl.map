@@ -1,0 +1,11 @@
+<map id="src/services/sop_classes/mr_storage.cpp" name="src/services/sop_classes/mr_storage.cpp">
+<area shape="rect" id="Node000001" title="Implementation of MR Image Storage SOP Class utilities." alt="" coords="47,5,228,45"/>
+<area shape="rect" id="Node000002" href="$mr__storage_8h.html" title="MR Image Storage SOP Classes." alt="" coords="40,93,235,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,46,140,79,135,79,135,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,64,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,136,62,175,59,171,111,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="89,181,186,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="140,134,140,167,135,167,135,134"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="210,181,273,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="164,131,217,171,213,175,161,136"/>
+</map>

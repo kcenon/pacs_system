@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::samples::storage_config" name="kcenon::pacs::samples::storage_config">
+<area shape="rect" id="Node000001" title="File storage configuration." alt="" coords="65,292,228,372"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,142,110,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,208,67,237,74,267,81,278,76,281,70,269,62,238,62,208"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,99,73,142,68,142,68,99"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1samples_1_1database__config.html" title="Database configuration for index storage." alt="" coords="141,135,304,215"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,216,196,269,190,280,185,277,191,267,211,214"/>
+</map>

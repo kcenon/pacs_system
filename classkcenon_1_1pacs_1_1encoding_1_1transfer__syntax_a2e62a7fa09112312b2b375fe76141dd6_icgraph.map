@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::transfer_syntax::uid" name="kcenon::pacs::encoding::transfer_syntax::uid">
+<area shape="rect" id="Node000001" title="Returns the Transfer Syntax UID." alt="" coords="265,91,440,131"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1codec__factory.html#ae1f44b0082e7b985fcd93b2e321b4954" title="Creates a codec instance for the given Transfer Syntax." alt="" coords="5,5,217,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="277,90,195,63,197,58,279,85"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1codec__factory.html#af03b759ef3780013bb12ed9165bdc9b8" title="Checks if a Transfer Syntax is supported for compression." alt="" coords="5,84,217,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,114,217,114,217,109,252,109"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1transfer__syntax.html#a1cdb498e148231c8d7e682a041728c90" title="Constructs a transfer_syntax from a UID string." alt="" coords="16,163,207,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="279,138,197,165,195,160,277,133"/>
+</map>

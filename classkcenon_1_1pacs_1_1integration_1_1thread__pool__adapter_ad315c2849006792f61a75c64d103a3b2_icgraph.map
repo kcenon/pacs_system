@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration::thread_pool_adapter::start" name="kcenon::pacs::integration::thread_pool_adapter::start">
+<area shape="rect" id="Node000001" title="Start the thread pool." alt="" coords="475,13,677,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html#a05b7b39952cfe4fa48693e6783878673" title="Internal task submission with priority." alt="" coords="240,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,35,427,35,427,30,461,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__adapter.html#a6dc5f0fdb9aae29d10958327952fa634" title="Submit a task without waiting for completion." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,35,192,35,192,30,227,30"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::pir::demographics_update_request" name="kcenon::pacs::services::pir::demographics_update_request">
+<area shape="rect" id="Node000001" title="Request to update patient demographics." alt="" coords="55,377,246,492"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,192,110,257"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,258,67,304,70,329,77,352,82,362,77,364,72,354,65,330,62,304,63,258"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,136,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,99,73,192,68,192,68,99"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1services_1_1pir_1_1patient__demographics.html" title="Updated patient demographics for a reconciliation operation." alt="" coords="135,135,327,315"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="217,316,204,354,200,364,195,362,199,352,212,314"/>
+</map>

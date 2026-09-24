@@ -1,0 +1,21 @@
+<map id="include/kcenon/pacs/security/anonymization_profile.h" name="include/kcenon/pacs/security/anonymization_profile.h">
+<area shape="rect" id="Node000001" title="DICOM de&#45;identification profiles per PS3.15 Annex E." alt="" coords="259,5,437,60"/>
+<area shape="rect" id="Node000002" href="$config__loader_8h.html" title="YAML configuration loader for Production PACS." alt="" coords="177,108,332,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="316,72,281,110,277,106,312,69"/>
+<area shape="rect" id="Node000007" href="$anonymizer_8h.html" title="DICOM de&#45;identification/anonymization per PS3.15 Annex E." alt="" coords="400,115,571,155"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="396,66,461,113,458,117,393,70"/>
+<area shape="rect" id="Node000003" href="$config__loader_8cpp.html" title="Implementation of YAML configuration loader." alt="" coords="5,211,160,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,172,129,213,126,208,197,167"/>
+<area shape="rect" id="Node000004" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="120,313,275,368"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="239,176,225,211,212,266,203,314,198,313,207,265,220,210,234,174"/>
+<area shape="rect" id="Node000005" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="235,211,389,265"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="279,173,299,209,295,212,274,176"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="273,277,229,315,226,311,270,273"/>
+<area shape="rect" id="Node000006" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="299,313,458,368"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="339,275,363,312,359,315,335,278"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="442,164,359,213,356,208,440,160"/>
+<area shape="rect" id="Node000008" href="$pacs-security_8cppm.html" title="C++20 module partition for DICOM security types." alt="" coords="414,225,645,251"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="502,167,527,224,522,226,497,169"/>
+<area shape="rect" id="Node000009" href="$anonymizer_8cpp.html" title="Implementation of DICOM de&#45;identification/anonymization." alt="" coords="669,225,873,251"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="552,157,739,223,737,228,551,162"/>
+</map>

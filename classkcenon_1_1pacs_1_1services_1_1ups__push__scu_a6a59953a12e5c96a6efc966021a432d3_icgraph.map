@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::ups_push_scu::generate_workitem_uid" name="kcenon::pacs::services::ups_push_scu::generate_workitem_uid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="223,5,409,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__push__scu.html#af5b16152021eaed8a1ecab96ed31871f" title="Create a new UPS workitem on the remote SCP (N&#45;CREATE)" alt="" coords="5,13,175,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

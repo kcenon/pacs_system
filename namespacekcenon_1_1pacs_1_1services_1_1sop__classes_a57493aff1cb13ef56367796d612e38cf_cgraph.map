@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_enhanced_xa_sop_class" name="kcenon::pacs::services::sop_classes::is_enhanced_xa_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is an enhanced XA SOP Class." alt="" coords="5,5,203,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a9f8bd8b982e3609e1b989bb143049afd" title="Get information about a specific XA SOP Class." alt="" coords="251,5,420,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,30,237,30,237,35,203,35"/>
+</map>

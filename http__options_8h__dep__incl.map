@@ -1,0 +1,24 @@
+<map id="include/kcenon/pacs/ihe/xds/http_options.h" name="include/kcenon/pacs/ihe/xds/http_options.h">
+<area shape="rect" id="Node000001" title="Transport configuration for IHE XDS.b actors." alt="" coords="244,5,415,45"/>
+<area shape="rect" id="Node000002" href="$document__consumer_8h.html" title="IHE XDS.b Document Consumer Actor (ITI&#45;43 Retrieve Document Set)." alt="" coords="5,181,229,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,56,142,183,139,179,294,52"/>
+<area shape="rect" id="Node000004" href="$document__source_8h.html" title="IHE XDS.b Document Source Actor (ITI&#45;41 Provide and Register Document Set&#45;b)." alt="" coords="298,93,502,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="356,54,386,91,382,95,351,58"/>
+<area shape="rect" id="Node000005" href="$registry__query_8h.html" title="IHE XDS.b Registry Query Actor (ITI&#45;18 RegistryStoredQuery)." alt="" coords="253,181,435,221"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="307,58,288,94,284,113,288,132,303,158,322,179,319,183,299,161,283,134,278,113,283,92,302,55"/>
+<area shape="rect" id="Node000008" href="$http__client_8h.html" title="libcurl&#45;backed HTTPS POST client for ITI&#45;41 transport." alt="" coords="582,93,735,133"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="415,46,587,91,586,96,414,51"/>
+<area shape="rect" id="Node000003" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="319,269,481,309"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="193,223,339,267,337,272,192,228"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="326,140,180,184,178,179,324,135"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="382,146,359,183,354,180,378,144"/>
+<area shape="rect" id="Node000007" href="$document__source_8cpp.html" title="IHE XDS.b Document Source actor (ITI&#45;41)." alt="" coords="459,181,621,221"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="444,138,511,179,508,184,441,143"/>
+<area shape="rect" id="Node000006" href="$registry__query_8cpp.html" title="IHE XDS.b Registry Query actor (ITI&#45;18)." alt="" coords="529,269,676,309"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="415,223,547,267,545,272,413,228"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="662,147,655,186,647,206,635,223,610,240,572,254,482,276,480,271,570,249,608,235,631,219,643,203,650,185,657,147"/>
+<area shape="poly" id="edge13_Node000008_Node000006" title=" " alt="" coords="749,126,802,140,848,160,864,173,873,188,874,205,865,223,853,234,835,244,788,260,677,282,676,277,786,255,833,239,849,230,861,220,869,203,868,189,860,177,845,165,801,145,748,131"/>
+<area shape="poly" id="edge12_Node000008_Node000007" title=" " alt="" coords="623,144,568,183,565,179,620,139"/>
+<area shape="rect" id="Node000009" href="$http__client_8cpp.html" title="libcurl HTTPS client with RAII over CURL* and curl_slist*." alt="" coords="697,181,850,221"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="697,140,750,179,746,183,693,144"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::ihe::xds::registry_query::set_audit_sink" name="kcenon::pacs::ihe::xds::registry_query::set_audit_sink">
+<area shape="rect" id="Node000001" title="Install an ATNA audit sink." alt="" coords="5,5,152,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1registry__query_1_1impl.html#a6fa86040cf374a8166f65f5f598d489c" title=" " alt="" coords="200,5,361,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,30,186,30,186,35,153,35"/>
+</map>

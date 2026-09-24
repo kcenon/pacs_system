@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::security::audit_cipher_key" name="kcenon::pacs::security::audit_cipher_key">
+<area shape="rect" id="Node000001" title="A versioned symmetric key pair (data encryption + MAC)" alt="" coords="156,448,316,648"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,305,110,371"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,369,149,433,145,436,94,372"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,133,136,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,227,73,305,68,305,68,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="135,298,337,378"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,378,239,432,233,432,233,378"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="273,141,388,206"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="290,219,276,239,261,269,249,299,244,297,256,266,271,236,286,216"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="361,291,540,385"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="391,213,411,236,428,262,439,290,435,292,423,264,407,239,387,217"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="319,5,342,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="333,71,333,124,328,124,328,71"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="405,387,330,460,326,456,401,383"/>
+</map>

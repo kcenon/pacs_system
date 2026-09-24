@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::stop" name="kcenon::pacs::network::v2::dicom_association_handler::stop">
+<area shape="rect" id="Node000001" title="Stop the handler and close the session." alt="" coords="272,13,447,67"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#aafd7abf7de8290a0e49790a287b597f0" title="Destructor (stops handler if still running)." alt="" coords="5,5,224,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,43,224,43,224,37,258,37"/>
+</map>

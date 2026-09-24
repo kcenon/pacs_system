@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::web::metadata_service::get_sorted_instances" name="kcenon::pacs::web::metadata_service::get_sorted_instances">
+<area shape="rect" id="Node000001" title="Get sorted instances for a series." alt="" coords="5,77,173,132"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1web_1_1sorted__instances__response.html#a2ae944f11befaab94d10d9ddce6db207" title="Create an error result." alt="" coords="233,5,432,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,77,226,61,228,66,174,82"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1web_1_1sorted__instances__response.html#a151cb416ff64709672aaece5930a41a2" title="Create a success result." alt="" coords="221,85,444,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,102,208,102,208,107,173,107"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#a320f15c5e92d6b5139cb507f72a6a6cb" title="Open and read a DICOM file from disk." alt="" coords="261,149,404,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,124,249,144,247,149,173,129"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1memory__mapped__file.html#a57061e3bcaea134222af799848f158d5" title="Open and memory&#45;map a file for reading." alt="" coords="492,149,704,189"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="404,166,478,166,478,171,404,171"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="752,149,897,189"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="704,166,738,166,738,171,704,171"/>
+</map>

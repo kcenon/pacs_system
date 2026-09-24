@@ -1,0 +1,74 @@
+<map id="include/kcenon/pacs/storage/audit_record.h" name="include/kcenon/pacs/storage/audit_record.h">
+<area shape="rect" id="Node000001" title="Audit log record data structures." alt="" coords="711,5,883,45"/>
+<area shape="rect" id="Node000002" href="$audit__repository_8h.html" title="Repository for audit log persistence." alt="" coords="276,93,471,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="698,49,467,96,466,91,697,44"/>
+<area shape="rect" id="Node000005" href="$index__database_8h.html" title="PACS index database for metadata storage and retrieval." alt="" coords="2892,93,3087,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="897,28,2892,106,2892,111,897,33"/>
+<area shape="rect" id="Node000016" href="$pacs-storage_8cppm.html" title="C++20 module partition for DICOM storage types." alt="" coords="512,189,741,214"/>
+<area shape="poly" id="edge36_Node000001_Node000016" title=" " alt="" coords="771,57,640,190,636,186,767,53"/>
+<area shape="rect" id="Node000019" href="$audit__endpoints_8cpp.html" title="Audit log API endpoints implementation." alt="" coords="766,181,943,221"/>
+<area shape="poly" id="edge37_Node000001_Node000019" title=" " alt="" coords="810,58,851,180,846,182,805,59"/>
+<area shape="rect" id="Node000003" href="$audit__repository_8cpp.html" title="Implementation of the audit repository." alt="" coords="5,189,235,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="306,140,155,191,153,186,304,135"/>
+<area shape="rect" id="Node000004" href="$index__database_8cpp.html" title="Implementation of PACS index database." alt="" coords="259,189,487,214"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="376,147,376,188,371,188,371,147"/>
+<area shape="poly" id="edge17_Node000005_Node000004" title=" " alt="" coords="2878,119,2396,125,1709,138,1012,157,721,170,500,184,441,191,440,186,500,179,720,164,1011,152,1708,132,2396,120,2878,113"/>
+<area shape="rect" id="Node000006" href="$03__storage__server_2main_8cpp.html" title="Level 3 Sample: Storage Server &#45; DICOM image reception and archiving." alt="" coords="3249,181,3460,221"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="3083,134,3275,179,3274,184,3082,139"/>
+<area shape="rect" id="Node000007" href="$mini__pacs_8h.html" title="Mini PACS class integrating all DICOM services." alt="" coords="3484,181,3681,221"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="3101,126,3472,179,3484,181,3483,186,3472,184,3100,132"/>
+<area shape="rect" id="Node000013" href="$ai__result__handler_8h.html" title="Handler for AI&#45;generated DICOM objects (SR, SEG, PR)" alt="" coords="3705,181,3871,221"/>
+<area shape="poly" id="edge12_Node000005_Node000013" title=" " alt="" coords="3101,119,3371,141,3533,158,3694,179,3705,181,3705,186,3693,184,3532,163,3371,146,3100,124"/>
+<area shape="rect" id="Node000015" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="3895,189,4091,214"/>
+<area shape="poly" id="edge14_Node000005_Node000015" title=" " alt="" coords="3100,117,3450,138,3666,156,3883,179,3932,186,3932,191,3882,184,3666,161,3449,143,3100,122"/>
+<area shape="poly" id="edge15_Node000005_Node000016" title=" " alt="" coords="2878,119,1826,140,1207,159,949,171,754,184,694,191,693,186,753,179,949,165,1207,154,1826,134,2878,114"/>
+<area shape="rect" id="Node000017" href="$health__checker_8cpp.html" title="Implementation of health_checker class." alt="" coords="4115,181,4277,221"/>
+<area shape="poly" id="edge16_Node000005_Node000017" title=" " alt="" coords="3100,113,3290,119,3541,130,3821,149,4104,179,4116,180,4115,186,4104,184,3821,154,3540,135,3290,124,3100,119"/>
+<area shape="rect" id="Node000018" href="$annotation__endpoints_8cpp.html" title="Annotation API endpoints implementation." alt="" coords="4301,181,4515,221"/>
+<area shape="poly" id="edge18_Node000005_Node000018" title=" " alt="" coords="3101,114,3320,119,3615,131,3950,150,4290,179,4300,180,4300,185,4289,184,3950,155,3615,136,3319,125,3100,119"/>
+<area shape="poly" id="edge19_Node000005_Node000019" title=" " alt="" coords="2878,119,2475,125,1920,138,1364,157,1132,170,956,184,944,186,943,180,956,179,1132,164,1364,152,1920,133,2475,120,2878,113"/>
+<area shape="rect" id="Node000020" href="$dicomweb__endpoints_8cpp.html" title="DICOMweb (WADO&#45;RS) API endpoints implementation." alt="" coords="4540,181,4751,221"/>
+<area shape="poly" id="edge20_Node000005_Node000020" title=" " alt="" coords="3100,112,3356,116,3710,126,4116,146,4324,160,4528,179,4540,180,4540,185,4528,184,4324,166,4116,151,3709,131,3356,121,3100,118"/>
+<area shape="rect" id="Node000021" href="$key__image__endpoints_8cpp.html" title="Key image API endpoints implementation." alt="" coords="4775,181,4943,221"/>
+<area shape="poly" id="edge21_Node000005_Node000021" title=" " alt="" coords="3101,114,3936,135,4414,154,4612,165,4763,179,4775,180,4774,186,4762,184,4612,171,4413,159,3936,140,3101,119"/>
+<area shape="rect" id="Node000022" href="$measurement__endpoints_8cpp.html" title="Measurement API endpoints implementation." alt="" coords="4967,181,5201,221"/>
+<area shape="poly" id="edge22_Node000005_Node000022" title=" " alt="" coords="3100,112,3417,113,3876,121,4410,142,4685,158,4955,179,4967,180,4966,185,4954,184,4685,163,4410,147,3876,127,3417,118,3100,117"/>
+<area shape="rect" id="Node000023" href="$metadata__endpoints_8cpp.html" title="Metadata REST API endpoints implementation." alt="" coords="5226,181,5433,221"/>
+<area shape="poly" id="edge23_Node000005_Node000023" title=" " alt="" coords="3101,113,4147,133,4762,153,5019,165,5214,179,5226,180,5225,185,5213,184,5019,170,4762,158,4147,139,3100,119"/>
+<area shape="rect" id="Node000024" href="$patient__endpoints_8cpp.html" title="Patient API endpoints implementation." alt="" coords="5457,181,5647,221"/>
+<area shape="poly" id="edge24_Node000005_Node000024" title=" " alt="" coords="3101,113,3577,118,4255,130,4942,149,5229,163,5446,179,5456,180,5456,185,5445,184,5228,168,4942,155,4255,135,3577,123,3101,118"/>
+<area shape="rect" id="Node000025" href="$series__endpoints_8cpp.html" title="Series API endpoints implementation." alt="" coords="5671,181,5854,221"/>
+<area shape="poly" id="edge25_Node000005_Node000025" title=" " alt="" coords="3101,112,3614,116,4354,127,5107,147,5422,161,5660,179,5671,180,5671,185,5660,184,5422,166,5107,152,4354,132,3614,122,3101,118"/>
+<area shape="rect" id="Node000026" href="$storage__commitment__endpoints_8cpp.html" title="DICOMweb Storage Commitment REST endpoint implementation." alt="" coords="968,181,1179,221"/>
+<area shape="poly" id="edge26_Node000005_Node000026" title=" " alt="" coords="2878,117,2585,119,2168,127,1684,147,1436,163,1192,184,1179,185,1178,180,1192,179,1435,158,1684,142,2168,122,2585,113,2878,112"/>
+<area shape="rect" id="Node000027" href="$study__endpoints_8cpp.html" title="Study API endpoints implementation." alt="" coords="1203,181,1383,221"/>
+<area shape="poly" id="edge27_Node000005_Node000027" title=" " alt="" coords="2878,117,2615,118,2248,127,1825,147,1608,163,1396,184,1384,186,1383,180,1396,179,1608,158,1825,142,2247,122,2615,113,2878,111"/>
+<area shape="rect" id="Node000028" href="$thumbnail__endpoints_8cpp.html" title="Thumbnail REST API endpoints implementation." alt="" coords="1408,181,1619,221"/>
+<area shape="poly" id="edge28_Node000005_Node000028" title=" " alt="" coords="2879,119,2651,124,2341,135,1989,154,1632,184,1619,185,1618,180,1632,179,1989,149,2341,130,2651,119,2878,113"/>
+<area shape="rect" id="Node000029" href="$viewer__state__endpoints_8cpp.html" title="Viewer state API endpoints implementation." alt="" coords="1643,181,1831,221"/>
+<area shape="poly" id="edge29_Node000005_Node000029" title=" " alt="" coords="2878,120,2683,126,2426,137,2136,156,1844,184,1832,186,1831,180,1844,179,2136,151,2426,132,2683,120,2878,114"/>
+<area shape="rect" id="Node000030" href="$wado__uri__endpoints_8cpp.html" title="WADO&#45;URI (Web Access to DICOM Objects — URI&#45;based) endpoint implementation." alt="" coords="1856,181,2035,221"/>
+<area shape="poly" id="edge30_Node000005_Node000030" title=" " alt="" coords="2878,121,2509,141,2279,159,2048,184,2035,186,2034,180,2048,179,2279,154,2509,136,2878,116"/>
+<area shape="rect" id="Node000031" href="$worklist__endpoints_8cpp.html" title="Worklist API endpoints implementation." alt="" coords="2059,181,2255,221"/>
+<area shape="poly" id="edge31_Node000005_Node000031" title=" " alt="" coords="2878,125,2601,148,2268,184,2256,186,2255,180,2268,179,2600,143,2878,120"/>
+<area shape="rect" id="Node000032" href="$metadata__service_8cpp.html" title="Selective metadata retrieval and navigation service implementation." alt="" coords="2279,189,2499,214"/>
+<area shape="poly" id="edge32_Node000005_Node000032" title=" " alt="" coords="2879,132,2512,184,2464,191,2463,186,2512,179,2878,127"/>
+<area shape="rect" id="Node000033" href="$thumbnail__service_8cpp.html" title="Thumbnail generation service implementation." alt="" coords="2523,189,2746,214"/>
+<area shape="poly" id="edge33_Node000005_Node000033" title=" " alt="" coords="2899,139,2682,191,2681,186,2898,134"/>
+<area shape="rect" id="Node000034" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="2770,181,2969,221"/>
+<area shape="poly" id="edge34_Node000005_Node000034" title=" " alt="" coords="2953,144,2897,183,2894,179,2950,139"/>
+<area shape="rect" id="Node000035" href="$task__scheduler_8cpp.html" title="Implementation of task scheduler service for automated PACS operations." alt="" coords="2993,189,3225,214"/>
+<area shape="poly" id="edge35_Node000005_Node000035" title=" " alt="" coords="3029,139,3095,186,3092,191,3026,144"/>
+<area shape="rect" id="Node000008" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="3172,277,3351,317"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="3505,228,3327,279,3326,274,3504,223"/>
+<area shape="rect" id="Node000009" href="$mini__pacs_8cpp.html" title="Implementation of Mini PACS class." alt="" coords="3375,277,3587,317"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="3554,233,3504,279,3500,275,3550,229"/>
+<area shape="rect" id="Node000010" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="3611,269,3765,324"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="3616,228,3660,267,3657,271,3612,232"/>
+<area shape="rect" id="Node000011" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="3520,372,3675,427"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="3657,336,3623,374,3619,370,3653,333"/>
+<area shape="rect" id="Node000012" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="3699,372,3858,427"/>
+<area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="3723,333,3757,370,3753,374,3719,336"/>
+<area shape="rect" id="Node000014" href="$ai__result__handler_8cpp.html" title="Implementation of the AI result handler." alt="" coords="3790,284,3989,309"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="3821,229,3878,282,3875,286,3817,233"/>
+</map>

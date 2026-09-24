@@ -1,0 +1,14 @@
+<map id="src/ihe/xds/common/mtom_packager.h" name="src/ihe/xds/common/mtom_packager.h">
+<area shape="rect" id="Node000001" title="MTOM / XOP multipart/related packager for ITI&#45;41." alt="" coords="281,5,434,45"/>
+<area shape="rect" id="Node000002" href="$mtom__packager_8cpp.html" title="multipart/related + XOP/MTOM body assembly." alt="" coords="5,93,163,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,52,145,96,143,91,283,47"/>
+<area shape="rect" id="Node000003" href="$retrieve__response__parser_8h.html" title="Parser for IHE XDS.b ITI&#45;43 RetrieveDocumentSetResponse." alt="" coords="187,93,389,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="335,58,305,95,301,91,331,55"/>
+<area shape="rect" id="Node000005" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="346,181,507,221"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="383,55,404,92,419,139,427,181,422,182,414,141,399,94,378,58"/>
+<area shape="rect" id="Node000006" href="$document__source_8cpp.html" title="IHE XDS.b Document Source actor (ITI&#45;41)." alt="" coords="465,93,626,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="412,49,505,91,503,96,410,53"/>
+<area shape="rect" id="Node000004" href="$retrieve__response__parser_8cpp.html" title="pugixml&#45;backed parser for ITI&#45;43 RetrieveDocumentSetResponse." alt="" coords="105,181,322,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="264,146,232,183,228,179,260,142"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="331,138,398,179,395,184,328,143"/>
+</map>

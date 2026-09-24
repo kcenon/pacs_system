@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::production_pacs::export_statistics" name="kcenon::pacs::samples::production_pacs::export_statistics">
+<area shape="rect" id="Node000001" title="Export statistics to JSON file." alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1samples_1_1production__statistics.html#ab3263a6d17530810cabe35e19beaa236" title="Get uptime duration." alt="" coords="240,5,411,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+</map>

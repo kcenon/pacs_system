@@ -1,0 +1,61 @@
+<map id="main" name="main">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,427,60,452"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="118,5,273,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="32,426,39,354,54,248,75,142,90,100,106,70,107,68,111,72,110,73,94,102,81,143,59,249,45,355,38,427"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="118,84,273,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="31,426,32,376,41,304,51,263,64,223,82,185,106,150,109,146,113,150,110,153,87,187,69,225,56,265,47,305,38,377,36,426"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1samples.html#adba70e4770254a0600996a79f4258f14" title="Print text in a decorative box." alt="" coords="110,163,281,203"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="32,426,36,386,47,329,69,268,86,239,106,214,110,210,114,214,110,217,90,242,74,270,52,331,41,386,37,427"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1samples.html#a0b35752828203618c347bea56ba9161b" title="Print an error message." alt="" coords="110,227,281,267"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="34,426,41,396,55,356,76,314,106,277,112,273,115,277,110,281,81,317,60,359,46,398,39,427"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1samples.html#a797bd1037d31deaf7eb6847028221797" title="Print a header/title with decorative border." alt="" coords="110,291,281,331"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="39,425,65,384,84,361,106,341,114,336,117,340,110,345,88,365,69,387,43,428"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1samples.html#ad682d073deb6fa48a16ef8a0df4eb584" title="Print a section header." alt="" coords="110,355,281,395"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="59,425,107,405,125,398,127,403,109,410,61,430"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1samples.html#ac6c67d10b1fc865948e9d4c2c229960e" title="Print a success message." alt="" coords="110,419,281,459"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="60,437,96,437,96,442,60,442"/>
+<area shape="rect" id="Node000012" href="$namespacekcenon_1_1pacs_1_1samples.html#a1b2bfa6a5964d747930fd1e1528ef384" title="Print a key&#45;value table." alt="" coords="110,483,281,523"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="61,449,109,469,127,476,125,481,107,474,59,454"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a14d8dfdfe13a0430e72142e8896fb95a" title="Set a numeric value for the given tag." alt="" coords="118,548,273,603"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="43,451,70,491,88,513,110,533,116,538,113,542,106,537,84,517,65,494,39,454"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#ada335b878c01dec8831a6c500d01caf3" title="Set a string value for the given tag." alt="" coords="118,627,273,681"/>
+<area shape="poly" id="edge19_Node000001_Node000019" title=" " alt="" coords="39,451,46,483,59,526,80,571,110,612,114,616,111,620,106,616,76,574,54,528,41,484,34,453"/>
+<area shape="rect" id="Node000025" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a8ad6e0efec0586cfe015e1ab5425edd6" title="Get the number of elements in the dataset." alt="" coords="115,706,275,746"/>
+<area shape="poly" id="edge26_Node000001_Node000025" title=" " alt="" coords="37,452,39,497,49,560,71,629,88,662,110,691,116,696,112,700,106,694,84,665,66,632,44,561,34,497,31,452"/>
+<area shape="rect" id="Node000026" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="114,770,277,810"/>
+<area shape="poly" id="edge27_Node000001_Node000026" title=" " alt="" coords="38,452,46,516,61,607,82,697,96,732,110,756,113,759,109,763,106,760,91,735,77,699,56,608,41,516,33,453"/>
+<area shape="rect" id="Node000029" href="$namespacekcenon_1_1pacs_1_1encoding.html#ae2c4e449332587a5bbd275b365a9e5f8" title="Converts a vr_type to its two&#45;character string representation." alt="" coords="108,834,283,874"/>
+<area shape="poly" id="edge30_Node000001_Node000029" title=" " alt="" coords="37,452,44,527,57,637,79,747,93,791,110,820,113,824,109,827,106,824,88,793,74,749,52,638,38,527,32,452"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="339,13,493,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="273,30,325,30,325,35,273,35"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1samples.html#a1c50c546c48ca7a4d293cd332bbb2dd4" title="Truncate a string to a maximum length." alt="" coords="331,163,501,203"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="281,181,317,181,317,186,281,186"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1samples.html#a9435666a27c8405a298bfa28f440b8d9" title="Center a string within a given width." alt="" coords="331,291,501,331"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="281,309,317,309,317,314,281,314"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af2974ceb4e12d5316062638ca0abd9f8" title="Create an element from a numeric value." alt="" coords="331,499,501,553"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="272,555,317,545,318,551,274,561"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="331,578,501,618"/>
+<area shape="poly" id="edge17_Node000013_Node000018" title=" " alt="" coords="273,581,317,585,317,591,273,586"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ac014eeea6bc5ca8b452041039ca9d4f8" title="Set the value from a numeric value." alt="" coords="550,429,709,484"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="500,496,536,484,538,489,501,501"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="549,577,709,617"/>
+<area shape="poly" id="edge15_Node000014_Node000016" title=" " alt="" coords="500,551,556,570,554,575,499,556"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="553,509,705,549"/>
+<area shape="poly" id="edge16_Node000014_Node000017" title=" " alt="" coords="502,524,540,525,540,530,502,530"/>
+<area shape="poly" id="edge18_Node000018_Node000016" title=" " alt="" coords="502,595,536,595,536,600,502,600"/>
+<area shape="poly" id="edge25_Node000019_Node000018" title=" " alt="" coords="272,632,323,619,324,624,274,637"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a32210115d1dcd739dda5c1b951533486" title="Create an element from a string value." alt="" coords="331,643,501,697"/>
+<area shape="poly" id="edge20_Node000019_Node000020" title=" " alt="" coords="273,657,317,660,317,666,273,662"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ae534d8e09b9e949bb91b3510b8fbc84e" title="Set the value from a string." alt="" coords="550,643,709,697"/>
+<area shape="poly" id="edge21_Node000020_Node000021" title=" " alt="" coords="502,667,537,667,537,673,502,673"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a17cdebd3deb51aa96c57f647045fa6dc" title="Apply DICOM padding to ensure even length." alt="" coords="757,643,932,697"/>
+<area shape="poly" id="edge22_Node000021_Node000022" title=" " alt="" coords="709,667,744,667,744,673,709,673"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1encoding.html#a378e731d510ac3f10e38ce0c246ed186" title="Gets the padding character for a VR." alt="" coords="980,650,1155,690"/>
+<area shape="poly" id="edge23_Node000022_Node000023" title=" " alt="" coords="932,667,966,667,966,673,932,673"/>
+<area shape="rect" id="Node000024" href="$namespacekcenon_1_1pacs_1_1encoding.html#a6aef03595f7666f158d0fde94b969d35" title="Checks if a VR is a string type." alt="" coords="1203,650,1377,690"/>
+<area shape="poly" id="edge24_Node000023_Node000024" title=" " alt="" coords="1155,667,1189,667,1189,673,1155,673"/>
+<area shape="rect" id="Node000027" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="336,754,496,794"/>
+<area shape="poly" id="edge28_Node000026_Node000027" title=" " alt="" coords="277,781,322,778,322,783,277,787"/>
+<area shape="rect" id="Node000028" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="345,818,487,858"/>
+<area shape="poly" id="edge29_Node000026_Node000028" title=" " alt="" coords="278,805,332,817,331,822,277,810"/>
+</map>

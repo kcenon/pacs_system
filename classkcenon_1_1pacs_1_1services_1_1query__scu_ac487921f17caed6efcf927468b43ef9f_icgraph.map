@@ -1,0 +1,20 @@
+<map id="kcenon::pacs::services::query_scu::build_query_dataset" name="kcenon::pacs::services::query_scu::build_query_dataset">
+<area shape="rect" id="Node000001" title="Build query dataset from patient keys." alt="" coords="755,94,935,149"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a4fafaf28d151347fa31eec6f5bfee20b" title="Query for instances within a series." alt="" coords="509,5,707,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="775,90,706,60,673,48,675,43,708,55,777,86"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a4fa261b2b206b4ca315b72cadef04cea" title="Query for patients." alt="" coords="514,69,702,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="741,110,702,105,703,99,742,105"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#add307183e4dcfb256eb06876cee213b6" title="Query for series within a study." alt="" coords="521,133,695,173"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="742,138,696,144,695,139,741,133"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1query__scu.html#a5a9cb1d2d19b5e3fc5fef6b096b50697" title="Query for studies." alt="" coords="517,197,699,237"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="777,157,708,188,675,200,673,195,706,183,775,152"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a6af111908c59047e2656b85fb76a4e58" title=" " alt="" coords="232,87,461,142"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="533,52,510,60,425,90,423,85,508,55,531,47"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,95,184,135"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,117,184,117,184,112,218,112"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="500,102,462,106,461,101,500,97"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="507,141,461,134,462,129,507,136"/>
+<area shape="poly" id="edge10_Node000007_Node000003" title=" " alt="" coords="528,195,508,188,406,144,408,140,510,183,530,190"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#a93d047266e4b059206949fa9e24625cc" title="Query remote PACS for prior studies." alt="" coords="259,190,434,245"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="503,220,434,220,434,215,503,215"/>
+</map>

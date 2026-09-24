@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::services::validation::xa_iod_validator::check_type2_attribute" name="kcenon::pacs::services::validation::xa_iod_validator::check_type2_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="812,84,1023,139"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#aadb6894e0596859c150d04bb6eb74278" title=" " alt="" coords="523,5,764,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="807,83,739,63,740,58,809,78"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ae0c42d778e74272b49b86fed4b8eb891" title=" " alt="" coords="524,84,763,139"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="798,114,763,114,763,109,798,109"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#abba7e353d1f181f3361f63b051de5b72" title=" " alt="" coords="538,163,749,217"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="809,145,740,165,739,160,807,140"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#ac6734b73ad8e9138c3615eb72663f93d" title="Validate a DICOM dataset against XA IOD." alt="" coords="264,84,475,139"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="535,66,466,86,465,81,533,61"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a25f7489aa36216276e4237dadf4efb44" title="Validate a multi&#45;frame XA dataset." alt="" coords="5,44,216,99"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="250,96,216,90,216,85,251,90"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#acabeff18a85e3a115c2d7912948f26d8" title="Validate an XA dataset with default options." alt="" coords="26,123,195,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="251,132,196,140,195,135,250,126"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="510,114,475,114,475,109,510,109"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="533,161,465,141,466,136,535,156"/>
+</map>

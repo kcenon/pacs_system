@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::monitoring::dicom_storage_collector::collect" name="kcenon::pacs::monitoring::dicom_storage_collector::collect">
+<area shape="rect" id="Node000001" title="Collect current storage metrics." alt="" coords="5,45,195,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html#ad3a6c6aa4e35a8071268c9384fab168b" title=" " alt="" coords="243,5,432,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,54,229,48,230,54,195,59"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html#a11bcd9e72f7b79be3cc4e7942915aa4e" title=" " alt="" coords="243,84,432,139"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="195,85,230,91,229,96,194,91"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html#adfec9089002bd5c734ff55bd0b767663" title=" " alt="" coords="480,84,669,139"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="422,58,479,77,478,82,420,63"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="481,5,668,60"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="432,30,467,30,467,35,432,35"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="432,109,466,109,466,114,432,114"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="420,81,478,62,479,67,422,86"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a15873f4a2ed8d209437505cdab89b772" title="Get data transfer metrics." alt="" coords="481,163,668,203"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="429,136,496,157,494,162,427,141"/>
+</map>

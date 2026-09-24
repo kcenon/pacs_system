@@ -1,0 +1,33 @@
+<map id="include/kcenon/pacs/ihe/xds/document_consumer.h" name="include/kcenon/pacs/ihe/xds/document_consumer.h">
+<area shape="rect" id="Node000001" title="IHE XDS.b Document Consumer Actor (ITI&#45;43 Retrieve Document Set)." alt="" coords="450,5,674,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,181,193,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="513,48,163,179,161,174,511,43"/>
+<area shape="rect" id="Node000003" href="$document__source_8h.html" title="IHE XDS.b Document Source Actor (ITI&#45;41 Provide and Register Document Set&#45;b)." alt="" coords="485,93,639,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="565,46,565,79,559,79,559,46"/>
+<area shape="rect" id="Node000004" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="218,181,373,221"/>
+<area shape="poly" id="edge15_Node000001_Node000004" title=" " alt="" coords="534,48,459,96,337,176,334,171,457,91,531,43"/>
+<area shape="rect" id="Node000006" href="$http__options_8h.html" title="Transport configuration for IHE XDS.b actors." alt="" coords="397,181,551,221"/>
+<area shape="poly" id="edge16_Node000001_Node000006" title=" " alt="" coords="524,48,496,68,475,95,469,112,466,131,469,168,463,168,461,131,464,111,470,92,492,64,520,43"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="605,269,663,295"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="609,43,645,64,677,91,695,113,705,133,718,181,722,202,718,222,699,247,675,265,671,260,695,243,713,220,717,202,713,182,700,135,690,116,673,95,642,68,607,48"/>
+<area shape="rect" id="Node000009" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="778,181,933,221"/>
+<area shape="poly" id="edge17_Node000001_Node000009" title=" " alt="" coords="649,43,706,63,761,91,804,129,837,169,833,172,800,132,758,96,704,67,647,48"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="626,189,703,214"/>
+<area shape="poly" id="edge18_Node000001_Node000012" title=" " alt="" coords="602,43,630,64,654,92,663,113,667,134,670,175,664,175,662,135,657,114,649,95,626,68,598,48"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="485,132,207,183,206,178,484,126"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="504,136,367,180,366,175,503,131"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="544,136,505,174,501,170,541,132"/>
+<area shape="poly" id="edge14_Node000003_Node000008" title=" " alt="" coords="573,133,626,256,621,258,568,135"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="627,131,779,175,777,180,626,136"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="586,132,642,177,638,181,583,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="247,269,344,295"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="298,222,298,255,293,255,293,222"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="441,269,507,295"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="477,222,477,255,471,255,471,222"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="513,219,599,261,597,266,511,224"/>
+<area shape="poly" id="edge11_Node000009_Node000008" title=" " alt="" coords="803,224,677,268,676,263,801,219"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="866,269,933,295"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="868,220,888,256,884,259,864,223"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="779,269,841,295"/>
+<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="847,223,826,259,821,256,842,220"/>
+</map>

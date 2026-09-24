@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::test_data_generator::save_to_directory" name="kcenon::pacs::samples::test_data_generator::save_to_directory">
+<area shape="rect" id="Node000001" title="Save datasets to a directory structure." alt="" coords="5,5,176,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__file.html#ae444a36339fdf1a1e434f097cefdf341" title="Create a new DICOM file from a dataset." alt="" coords="224,13,371,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,30,210,30,210,35,176,35"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::samples::mini_pacs::handle_store" name="kcenon::pacs::samples::mini_pacs::handle_store">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,42,193,82"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="481,5,636,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,53,468,36,468,41,194,59"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1samples_1_1mini__pacs.html#acc51114be486b2cce992986151f170cb" title=" " alt="" coords="241,70,433,110"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,70,228,74,227,80,193,76"/>
+<area shape="poly" id="edge5_Node000003_Node000002" title=" " alt="" coords="414,67,467,54,469,59,416,73"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="481,84,636,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="434,97,468,100,467,105,434,102"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="684,91,839,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="636,109,670,109,670,114,636,114"/>
+</map>

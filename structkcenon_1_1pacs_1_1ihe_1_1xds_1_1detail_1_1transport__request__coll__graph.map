@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ihe::xds::detail::transport_request" name="kcenon::pacs::ihe::xds::detail::transport_request">
+<area shape="rect" id="Node000001" title="Optional test hook: replaces the real libcurl transport." alt="" coords="5,307,155,401"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="41,135,119,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,200,83,290,77,290,77,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="15,5,145,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,99,83,134,77,134,77,99"/>
+</map>

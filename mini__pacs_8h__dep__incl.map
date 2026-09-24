@@ -1,0 +1,13 @@
+<map id="examples/tutorials/04_mini_pacs/mini_pacs.h" name="examples/tutorials/04_mini_pacs/mini_pacs.h">
+<area shape="rect" id="Node000001" title="Mini PACS class integrating all DICOM services." alt="" coords="216,5,413,45"/>
+<area shape="rect" id="Node000002" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="5,101,184,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="259,53,140,103,138,98,257,48"/>
+<area shape="rect" id="Node000003" href="$mini__pacs_8cpp.html" title="Implementation of Mini PACS class." alt="" coords="209,101,421,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="317,59,317,101,312,101,312,59"/>
+<area shape="rect" id="Node000004" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="444,93,599,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="370,49,464,91,462,96,368,53"/>
+<area shape="rect" id="Node000005" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="353,196,508,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="490,160,456,198,452,194,486,157"/>
+<area shape="rect" id="Node000006" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="533,196,691,251"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="556,157,590,194,586,198,552,160"/>
+</map>

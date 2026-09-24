@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::health_status::update_level" name="kcenon::pacs::monitoring::health_status::update_level">
+<area shape="rect" id="Node000001" title="Calculate overall health level from component status." alt="" coords="5,13,216,53"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1monitoring_1_1storage__status.html#a5c54096bde965f82164ccee0e9cab09a" title="Storage usage percentage (0&#45;100)" alt="" coords="264,5,451,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,30,250,30,250,35,216,35"/>
+</map>

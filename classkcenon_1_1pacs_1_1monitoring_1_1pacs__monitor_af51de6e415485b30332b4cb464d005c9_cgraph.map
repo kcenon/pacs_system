@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::pacs_monitor::get_metrics" name="kcenon::pacs::monitoring::pacs_monitor::get_metrics">
+<area shape="rect" id="Node000001" title="Get current metrics snapshot." alt="" coords="5,13,208,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__monitor.html#ae8133cc2b899061838dff1174540c912" title=" " alt="" coords="256,5,443,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,30,242,30,242,35,208,35"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1monitoring_1_1metrics__snapshot.html#a56a9f8f67d56b3d2d7ac42e49327aed9" title=" " alt="" coords="491,13,717,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,30,477,30,477,35,443,35"/>
+</map>
