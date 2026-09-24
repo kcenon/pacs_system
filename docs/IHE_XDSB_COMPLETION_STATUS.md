@@ -1,5 +1,5 @@
 ---
-doc_id: "PAC-INTR-003"
+doc_id: "PAC-INTR-004"
 doc_title: "IHE XDS.b Completion Status"
 doc_version: "0.1.0"
 doc_date: "2026-04-20"

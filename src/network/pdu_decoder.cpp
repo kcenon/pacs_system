@@ -644,12 +644,14 @@ DecodeResult<associate_rq> pdu_decoder::decode_associate_rq(
         auto var_result = decode_variable_items(
             data.subspan(variable_start, variable_length), true);
 
-        if (var_result.is_ok()) {
-            auto& [app_ctx, pcs_rq, pcs_ac, user_info] = var_result.value();
-            rq.application_context = std::move(app_ctx);
-            rq.presentation_contexts = std::move(pcs_rq);
-            rq.user_info = std::move(user_info);
+        if (var_result.is_err()) {
+            return var_result.error();
         }
+
+        auto& [app_ctx, pcs_rq, pcs_ac, user_info] = var_result.value();
+        rq.application_context = std::move(app_ctx);
+        rq.presentation_contexts = std::move(pcs_rq);
+        rq.user_info = std::move(user_info);
     }
 
     return make_ok(std::move(rq));
@@ -698,12 +700,14 @@ DecodeResult<associate_ac> pdu_decoder::decode_associate_ac(
         auto var_result = decode_variable_items(
             data.subspan(variable_start, variable_length), false);
 
-        if (var_result.is_ok()) {
-            auto& [app_ctx, pcs_rq, pcs_ac, user_info] = var_result.value();
-            ac.application_context = std::move(app_ctx);
-            ac.presentation_contexts = std::move(pcs_ac);
-            ac.user_info = std::move(user_info);
+        if (var_result.is_err()) {
+            return var_result.error();
         }
+
+        auto& [app_ctx, pcs_rq, pcs_ac, user_info] = var_result.value();
+        ac.application_context = std::move(app_ctx);
+        ac.presentation_contexts = std::move(pcs_ac);
+        ac.user_info = std::move(user_info);
     }
 
     return make_ok(std::move(ac));

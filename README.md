@@ -315,7 +315,6 @@ find_package(pacs_system 1.0 REQUIRED)
 add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
 ```
-
 `pacs_system::pacs_system` is an aggregate INTERFACE target that pulls in every
 required and built optional sub-component, so a single `target_link_libraries`
 call is enough for typical consumers.
@@ -645,8 +644,8 @@ cmake --build build --target run_full_benchmarks
 | **Total LOC** | ~286,900 lines |
 | **Test Files** | 191 files |
 | **Test Cases** | 2661+ tests |
-| **Example Programs** | 6 apps |
-| **Documentation** | 94 markdown files |
+| **Example Programs** | 5 apps |
+| **Documentation** | 96 markdown files |
 | **CI/CD Workflows** | 22 workflows |
 | **Version** | 0.1.0 |
 | **Last Updated** | 2026-09-24 |
