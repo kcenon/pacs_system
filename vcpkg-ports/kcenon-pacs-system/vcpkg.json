@@ -1,7 +1,7 @@
 {
   "name": "kcenon-pacs-system",
   "version-semver": "0.1.0",
-  "port-version": 9,
+  "port-version": 11,
   "description": "Modern C++20 PACS (Picture Archiving and Communication System) built on the kcenon ecosystem",
   "homepage": "https://github.com/kcenon/pacs_system",
   "license": "BSD-3-Clause",
@@ -96,8 +96,13 @@
       ]
     },
     "testing": {
-      "description": "Build unit tests and benchmarks (Catch2 is fetched via CMake FetchContent; see docs/ECOSYSTEM.md)",
+      "description": "Build unit tests and benchmarks",
       "dependencies": [
+        {
+          "name": "gtest",
+          "version>=": "1.14.0",
+          "features": ["gmock"]
+        },
         {
           "name": "benchmark"
         }

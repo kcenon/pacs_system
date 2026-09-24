@@ -228,7 +228,7 @@ if(TARGET network_system)
         pacs_network
         PUBLIC
         network_system
-        network_system::network_system
+        ${PACS_NETWORK_SYSTEM_INSTALL_TARGET}
     )
     target_compile_definitions(pacs_network PUBLIC PACS_WITH_NETWORK_SYSTEM)
 endif()
@@ -976,7 +976,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             pacs_integration
             PUBLIC
             logger_system
-            logger_system::logger_system
+            ${PACS_LOGGER_SYSTEM_INSTALL_TARGET}
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_LOGGER_SYSTEM)
         message(STATUS "    - logger_adapter: ON (logger_system)")
@@ -1048,7 +1048,7 @@ if(TARGET container_system AND COMMON_SYSTEM_FOUND AND TARGET network_system)
             pacs_integration
             PUBLIC
             network_system
-            network_system::network_system
+            ${PACS_NETWORK_SYSTEM_INSTALL_TARGET}
         )
         target_compile_definitions(pacs_integration PUBLIC PACS_WITH_NETWORK_SYSTEM)
         message(STATUS "    - network_adapter: ON (network_system)")
