@@ -1,6 +1,6 @@
 ---
-doc_id: "PAC-PROJ-006"
-doc_title: "SOUP List &mdash; pacs_system"
+doc_id: "PAC-PROJ-010"
+doc_title: "Archived SOUP snapshot before PR-001"
 doc_version: "1.0.0"
 doc_date: "2026-04-04"
 doc_status: "Released"
