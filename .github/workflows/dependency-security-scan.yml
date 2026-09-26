@@ -11,8 +11,8 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    # Run security scan daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run security scan weekly on Tuesday at 02:31 UTC
+    - cron: '31 2 * * 2'
   workflow_dispatch:
 
 permissions:
@@ -234,3 +234,92 @@ jobs:
         name: dicom-security-report
         path: dicom_security_report.md
         retention-days: 30
+
+  # Report once after all jobs, including matrices and summaries, finish.
+  notify-scheduled-failure:
+    name: Report scheduled failure
+    needs:
+      - security-scan
+      - npm-audit
+      - dependency-review
+      - dicom-security-check
+    if: ${{ always() && github.event_name == 'schedule' && contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    concurrency:
+      group: scheduled-failure-dependency-security-scan
+      cancel-in-progress: false
+
+    steps:
+    - name: Open or update failure issue
+      uses: actions/github-script@v7
+      env:
+        WORKFLOW_FILE: dependency-security-scan.yml
+        NEEDS_JSON: ${{ toJSON(needs) }}
+      with:
+        script: |
+          if (context.eventName !== 'schedule') return;
+          const results = JSON.parse(process.env.NEEDS_JSON);
+          if (!Object.values(results).some(job => job.result === 'failure')) return;
+
+          const file = process.env.WORKFLOW_FILE;
+          const marker = `<!-- scheduled-ci-failure:${file} -->`;
+          const endMarker = `<!-- /scheduled-ci-failure:${file} -->`;
+          const title = `[Scheduled CI] ${file} failed`;
+          const attempt = process.env.GITHUB_RUN_ATTEMPT;
+          const repoUrl = `${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}`;
+          const runUrl = `${repoUrl}/actions/runs/${context.runId}/attempts/${attempt}`;
+          const report = [
+            marker,
+            '## Scheduled workflow failure',
+            '',
+            `**Workflow:** ${context.workflow} (\`.github/workflows/${file}\`)`,
+            `**Schedule (UTC):** \`${context.payload.schedule}\``,
+            `**Ref:** \`${context.ref}\``,
+            `**Commit:** [\`${context.sha}\`](${repoUrl}/commit/${context.sha})`,
+            `**Run:** [${context.runId}, attempt ${attempt}](${runUrl})`,
+            '',
+            '| Job | Result |',
+            '| --- | --- |',
+            ...Object.entries(results).map(([job, value]) => `| \`${job}\` | ${value.result} |`),
+            '',
+            'Skipped downstream jobs are listed separately from failures.',
+            'This block is updated automatically; keep investigation notes outside it.',
+            endMarker
+          ].join('\n');
+
+          const issues = await github.paginate(github.rest.issues.listForRepo, {
+            ...context.repo,
+            state: 'all',
+            sort: 'created',
+            direction: 'desc',
+            per_page: 100
+          });
+          const matches = issues.filter(issue =>
+            !issue.pull_request &&
+            (issue.body || '').split('\n').some(line => line.trim() === marker)
+          );
+          const existing = matches.find(issue => issue.state === 'open') || matches[0];
+
+          if (!existing) {
+            const { data } = await github.rest.issues.create({
+              ...context.repo, title, body: report
+            });
+            core.info(`Scheduled failure tracked in ${data.html_url}`);
+          } else {
+            const start = existing.body.indexOf(marker);
+            const end = existing.body.indexOf(endMarker, start + marker.length);
+            if (end === -1) {
+              throw new Error(`Issue #${existing.number} has an incomplete report block; preserving its body.`);
+            }
+            const body = existing.body.slice(0, start) + report +
+              existing.body.slice(end + endMarker.length);
+            if (existing.state !== 'open' || existing.title !== title || existing.body !== body) {
+              await github.rest.issues.update({
+                ...context.repo, issue_number: existing.number, state: 'open', title, body
+              });
+            }
+            core.info(`Scheduled failure tracked in ${existing.html_url}`);
+          }
