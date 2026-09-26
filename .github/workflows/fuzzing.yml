@@ -21,8 +21,8 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    # Run nightly at 03:00 UTC for extended fuzzing coverage
-    - cron: '0 3 * * *'
+    # Run weekly on Wednesday at 03:43 UTC for extended fuzzing coverage
+    - cron: '43 3 * * 3'
   workflow_dispatch:
     inputs:
       fuzz_duration:
@@ -30,9 +30,10 @@ on:
         required: false
         default: '120'
 
-# Ensure only one workflow runs per branch/PR
+# Ensure only one workflow runs per branch/PR. Scheduled runs use their own
+# group so a push to the default branch cannot cancel the weekly run.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' && 'schedule' || 'ci' }}
   cancel-in-progress: true
 
 permissions:
@@ -187,3 +188,90 @@ jobs:
         echo "| fuzz_rle_codec | RLE Lossless Compression | ${{ contains(needs.fuzz.result, 'success') && 'PASS' || 'CHECK' }} |" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "Crash artifacts (if any) are available in the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+
+  # Report once after all jobs, including matrices and summaries, finish.
+  notify-scheduled-failure:
+    name: Report scheduled failure
+    needs:
+      - fuzz
+      - fuzz-summary
+    if: ${{ always() && github.event_name == 'schedule' && contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    concurrency:
+      group: scheduled-failure-fuzzing
+      cancel-in-progress: false
+
+    steps:
+    - name: Open or update failure issue
+      uses: actions/github-script@v7
+      env:
+        WORKFLOW_FILE: fuzzing.yml
+        NEEDS_JSON: ${{ toJSON(needs) }}
+      with:
+        script: |
+          if (context.eventName !== 'schedule') return;
+          const results = JSON.parse(process.env.NEEDS_JSON);
+          if (!Object.values(results).some(job => job.result === 'failure')) return;
+
+          const file = process.env.WORKFLOW_FILE;
+          const marker = `<!-- scheduled-ci-failure:${file} -->`;
+          const endMarker = `<!-- /scheduled-ci-failure:${file} -->`;
+          const title = `[Scheduled CI] ${file} failed`;
+          const attempt = process.env.GITHUB_RUN_ATTEMPT;
+          const repoUrl = `${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}`;
+          const runUrl = `${repoUrl}/actions/runs/${context.runId}/attempts/${attempt}`;
+          const report = [
+            marker,
+            '## Scheduled workflow failure',
+            '',
+            `**Workflow:** ${context.workflow} (\`.github/workflows/${file}\`)`,
+            `**Schedule (UTC):** \`${context.payload.schedule}\``,
+            `**Ref:** \`${context.ref}\``,
+            `**Commit:** [\`${context.sha}\`](${repoUrl}/commit/${context.sha})`,
+            `**Run:** [${context.runId}, attempt ${attempt}](${runUrl})`,
+            '',
+            '| Job | Result |',
+            '| --- | --- |',
+            ...Object.entries(results).map(([job, value]) => `| \`${job}\` | ${value.result} |`),
+            '',
+            'Skipped downstream jobs are listed separately from failures.',
+            'This block is updated automatically; keep investigation notes outside it.',
+            endMarker
+          ].join('\n');
+
+          const issues = await github.paginate(github.rest.issues.listForRepo, {
+            ...context.repo,
+            state: 'all',
+            sort: 'created',
+            direction: 'desc',
+            per_page: 100
+          });
+          const matches = issues.filter(issue =>
+            !issue.pull_request &&
+            (issue.body || '').split('\n').some(line => line.trim() === marker)
+          );
+          const existing = matches.find(issue => issue.state === 'open') || matches[0];
+
+          if (!existing) {
+            const { data } = await github.rest.issues.create({
+              ...context.repo, title, body: report
+            });
+            core.info(`Scheduled failure tracked in ${data.html_url}`);
+          } else {
+            const start = existing.body.indexOf(marker);
+            const end = existing.body.indexOf(endMarker, start + marker.length);
+            if (end === -1) {
+              throw new Error(`Issue #${existing.number} has an incomplete report block; preserving its body.`);
+            }
+            const body = existing.body.slice(0, start) + report +
+              existing.body.slice(end + endMarker.length);
+            if (existing.state !== 'open' || existing.title !== title || existing.body !== body) {
+              await github.rest.issues.update({
+                ...context.repo, issue_number: existing.number, state: 'open', title, body
+              });
+            }
+            core.info(`Scheduled failure tracked in ${existing.html_url}`);
+          }
