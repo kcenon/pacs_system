@@ -210,3 +210,13 @@ links (or the local command output) to the release PR or the release issue:
 
 See [`CONTRIBUTING.md`](../CONTRIBUTING.md) for the contributor-facing summary of
 these gates.
+
+## Medical product and supplier readiness review
+
+The gates above provide technical evidence for a release. For a medical product
+or a component supplied to one, also determine the applicable review scope using
+the [SaMD readiness checklists](checklists/README.md). Their
+[proposed product gates](checklists/README.md#release-readiness-gates) cover
+classification, risk, validation, manufacturer obligations and support decisions.
+Record the adopted scope and approvals separately; this link does not change the
+four existing CI gates or declare regulatory conformity.

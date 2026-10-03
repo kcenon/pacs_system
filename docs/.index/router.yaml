@@ -69,6 +69,7 @@ intent_routes:
   - {keywords: [prd, product, vision, 제품], bundle: product}
 
   # V&V / compliance
+  - {keywords: [samd, readiness, checklist, mfds, gmp, 체크리스트, 인증], bundle: samd-readiness}
   - {keywords: [validation, validate, 유효성], bundle: validation}
   - {keywords: [verification, verify, test report, 검증], bundle: verification}
   - {keywords: [traceability, trace, matrix, 추적성], bundle: traceability}

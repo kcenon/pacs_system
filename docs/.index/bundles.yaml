@@ -149,8 +149,13 @@ traceability:
 
 compliance:
   name: "Regulatory Compliance"
-  desc: "DICOM, IHE, security statement, SOUP"
-  files: [DICOM_CONFORMANCE_STATEMENT.md, IHE_INTEGRATION_STATEMENT.md, SECURITY.md, SOUP.md]
+  desc: "DICOM, IHE, security statement, SOUP and readiness review entry point"
+  files: [DICOM_CONFORMANCE_STATEMENT.md, IHE_INTEGRATION_STATEMENT.md, SECURITY.md, SOUP.md, checklists/README.md]
+
+samd-readiness:
+  name: "SaMD Certification Readiness"
+  desc: "Applicability, sources and evidence recording; select technical checklists from the index"
+  files: [checklists/README.md, checklists/regulatory-references.md, checklists/review-record-template.md, RELEASE_GATES.md]
 
 # ============================================================================
 # Performance / quality bundles
