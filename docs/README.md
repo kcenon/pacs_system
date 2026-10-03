@@ -3,7 +3,7 @@
 > **SSOT**: This file is the single source of truth for the documentation index
 > of **pacs_system**.
 
-Total documents: **74**
+Total documents: **86**
 
 ## Document Index
 
@@ -83,6 +83,18 @@ Total documents: **74**
 | 72 | PAC-PROJ-005 | Project Structure - PACS System | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Released |
 | 73 | PAC-PROJ-006 | SOUP List &mdash; pacs_system | [SOUP.md](./SOUP.md) | Released |
 | 74 | PAC-PROJ-007 | Contributing to PACS System | [CONTRIBUTING.md](./contributing/CONTRIBUTING.md) | Released |
+| 75 | PAC-QUAL-009 | SaMD certification readiness checklists | [README.md](./checklists/README.md) | Draft |
+| 76 | PAC-QUAL-010 | IEC 62304 software lifecycle checklist | [iec-62304-checklist.md](./checklists/iec-62304-checklist.md) | Draft |
+| 77 | PAC-QUAL-011 | ISO 13485 quality management checklist | [iso-13485-checklist.md](./checklists/iso-13485-checklist.md) | Draft |
+| 78 | PAC-QUAL-012 | ISO 14971 risk management checklist | [iso-14971-checklist.md](./checklists/iso-14971-checklist.md) | Draft |
+| 79 | PAC-QUAL-013 | IEC 62366-1 usability engineering checklist | [iec-62366-1-checklist.md](./checklists/iec-62366-1-checklist.md) | Draft |
+| 80 | PAC-QUAL-014 | IEC 81001-5-1 cybersecurity lifecycle checklist | [iec-81001-5-1-checklist.md](./checklists/iec-81001-5-1-checklist.md) | Draft |
+| 81 | PAC-QUAL-015 | IEC 82304-1 health software product checklist | [iec-82304-1-checklist.md](./checklists/iec-82304-1-checklist.md) | Draft |
+| 82 | PAC-QUAL-016 | MFDS digital medical device approval checklist | [mfds-digital-device-approval-checklist.md](./checklists/mfds-digital-device-approval-checklist.md) | Draft |
+| 83 | PAC-QUAL-017 | MFDS digital medical device GMP checklist | [mfds-digital-gmp-checklist.md](./checklists/mfds-digital-gmp-checklist.md) | Draft |
+| 84 | PAC-QUAL-018 | MFDS digital medical device cybersecurity checklist | [mfds-digital-cybersecurity-checklist.md](./checklists/mfds-digital-cybersecurity-checklist.md) | Draft |
+| 85 | PAC-QUAL-019 | SaMD checklist sources and applicability | [regulatory-references.md](./checklists/regulatory-references.md) | Draft |
+| 86 | PAC-QUAL-020 | SaMD checklist review record template | [review-record-template.md](./checklists/review-record-template.md) | Draft |
 
 ## Documents by Category
 
@@ -175,7 +187,7 @@ Total documents: **74**
 | PAC-INTR-001 | DICOM Conformance Statement | [DICOM_CONFORMANCE_STATEMENT.md](./DICOM_CONFORMANCE_STATEMENT.md) | Released |
 | PAC-INTR-002 | IHE Integration Statement | [IHE_INTEGRATION_STATEMENT.md](./IHE_INTEGRATION_STATEMENT.md) | Released |
 
-### Quality (8)
+### Quality (20)
 
 | doc_id | Topic | Document | Status |
 |--------|-------|----------|--------|
@@ -187,6 +199,18 @@ Total documents: **74**
 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
 | PAC-QUAL-006 | PACS 시스템 검증 보고서 | [VERIFICATION_REPORT.kr.md](./VERIFICATION_REPORT.kr.md) | Released |
 | PAC-QUAL-007 | PACS System Verification Report | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) | Released |
+| PAC-QUAL-009 | SaMD certification readiness checklists | [README.md](./checklists/README.md) | Draft |
+| PAC-QUAL-010 | IEC 62304 software lifecycle checklist | [iec-62304-checklist.md](./checklists/iec-62304-checklist.md) | Draft |
+| PAC-QUAL-011 | ISO 13485 quality management checklist | [iso-13485-checklist.md](./checklists/iso-13485-checklist.md) | Draft |
+| PAC-QUAL-012 | ISO 14971 risk management checklist | [iso-14971-checklist.md](./checklists/iso-14971-checklist.md) | Draft |
+| PAC-QUAL-013 | IEC 62366-1 usability engineering checklist | [iec-62366-1-checklist.md](./checklists/iec-62366-1-checklist.md) | Draft |
+| PAC-QUAL-014 | IEC 81001-5-1 cybersecurity lifecycle checklist | [iec-81001-5-1-checklist.md](./checklists/iec-81001-5-1-checklist.md) | Draft |
+| PAC-QUAL-015 | IEC 82304-1 health software product checklist | [iec-82304-1-checklist.md](./checklists/iec-82304-1-checklist.md) | Draft |
+| PAC-QUAL-016 | MFDS digital medical device approval checklist | [mfds-digital-device-approval-checklist.md](./checklists/mfds-digital-device-approval-checklist.md) | Draft |
+| PAC-QUAL-017 | MFDS digital medical device GMP checklist | [mfds-digital-gmp-checklist.md](./checklists/mfds-digital-gmp-checklist.md) | Draft |
+| PAC-QUAL-018 | MFDS digital medical device cybersecurity checklist | [mfds-digital-cybersecurity-checklist.md](./checklists/mfds-digital-cybersecurity-checklist.md) | Draft |
+| PAC-QUAL-019 | SaMD checklist sources and applicability | [regulatory-references.md](./checklists/regulatory-references.md) | Draft |
+| PAC-QUAL-020 | SaMD checklist review record template | [review-record-template.md](./checklists/review-record-template.md) | Draft |
 
 ### Security (2)
 

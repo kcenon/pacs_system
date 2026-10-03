@@ -656,6 +656,8 @@ cmake --build build --target run_full_benchmarks
 
 ## Compliance
 
+- [SaMD certification readiness checklists](docs/checklists/README.md) — scope and applicability decisions, nine technical/QMS reviews, evidence records and proposed release gates.
+
 `pacs_system` provides technical primitives that healthcare organizations may use as part of an Information Security Management System (ISMS). The library is not itself certified; adopters integrate it and supply the organizational controls (policy, training, incident response, business-continuity planning).
 
 - [ISO 27799 Control Mapping](docs/compliance/iso-27799.md) — how ATNA audit trail, audit log encryption, TLS policy, access control, and anonymization map to ISO 27799:2016 clauses 7.4–7.7

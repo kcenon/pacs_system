@@ -1,6 +1,6 @@
 # PACS System Document Manifest — read this FIRST, then load only needed sections.
 # PACS is the largest system: medical imaging, DICOM, compliance, SRS/SDS/validation.
-_meta: {schema: "1.0.0", generated: "2026-04-12", docs: 72, project: "pacs_system", tier: 4, domain: "medical"}
+_meta: {schema: "1.0.0", generated: "2026-04-12", updated: "2026-10-03", docs: 85, project: "pacs_system", tier: 4, domain: "medical"}
 
 # ============================================================================
 # Top-level index
@@ -90,6 +90,21 @@ compliance:
   - {id: PAC-IHE,      file: IHE_INTEGRATION_STATEMENT.md,   title: "IHE Integration Statement",   keywords: [ihe, integration, profiles, actors], lines: 248}
   - {id: PAC-SEC,      file: SECURITY.md,                    title: "Security Statement",          keywords: [security, compliance], lines: 286}
   - {id: PAC-SOUP,     file: SOUP.md,                        title: "SOUP",                        keywords: [soup, third-party, medical-device], lines: 134}
+
+# SaMD readiness prompts and controlled evidence entry points
+checklists:
+  - {id: PAC-QUAL-009, file: checklists/README.md, title: "SaMD certification readiness checklists", keywords: [samd, checklist, readiness], lines: 161}
+  - {id: PAC-QUAL-010, file: checklists/iec-62304-checklist.md, title: "IEC 62304 software lifecycle checklist", keywords: [samd, checklist, readiness], lines: 86}
+  - {id: PAC-QUAL-011, file: checklists/iso-13485-checklist.md, title: "ISO 13485 quality management checklist", keywords: [samd, checklist, readiness], lines: 77}
+  - {id: PAC-QUAL-012, file: checklists/iso-14971-checklist.md, title: "ISO 14971 risk management checklist", keywords: [samd, checklist, readiness], lines: 68}
+  - {id: PAC-QUAL-013, file: checklists/iec-62366-1-checklist.md, title: "IEC 62366-1 usability engineering checklist", keywords: [samd, checklist, readiness], lines: 60}
+  - {id: PAC-QUAL-014, file: checklists/iec-81001-5-1-checklist.md, title: "IEC 81001-5-1 cybersecurity lifecycle checklist", keywords: [samd, checklist, readiness], lines: 70}
+  - {id: PAC-QUAL-015, file: checklists/iec-82304-1-checklist.md, title: "IEC 82304-1 health software product checklist", keywords: [samd, checklist, readiness], lines: 66}
+  - {id: PAC-QUAL-016, file: checklists/mfds-digital-device-approval-checklist.md, title: "MFDS digital medical device approval checklist", keywords: [samd, checklist, readiness], lines: 74}
+  - {id: PAC-QUAL-017, file: checklists/mfds-digital-gmp-checklist.md, title: "MFDS digital medical device GMP checklist", keywords: [samd, checklist, readiness], lines: 77}
+  - {id: PAC-QUAL-018, file: checklists/mfds-digital-cybersecurity-checklist.md, title: "MFDS digital medical device cybersecurity checklist", keywords: [samd, checklist, readiness], lines: 72}
+  - {id: PAC-QUAL-019, file: checklists/regulatory-references.md, title: "SaMD checklist sources and applicability", keywords: [samd, checklist, readiness], lines: 125}
+  - {id: PAC-QUAL-020, file: checklists/review-record-template.md, title: "SaMD checklist review record template", keywords: [samd, checklist, readiness], lines: 85}
 
 # ============================================================================
 # Verification / Validation
