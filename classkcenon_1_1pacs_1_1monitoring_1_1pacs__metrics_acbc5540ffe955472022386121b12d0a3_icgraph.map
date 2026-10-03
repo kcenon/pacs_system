@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::pacs_metrics::associations" name="kcenon::pacs::monitoring::pacs_metrics::associations">
+<area shape="rect" id="Node000001" title="Get association counters." alt="" coords="505,53,711,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__association__collector.html#acac6ca63ca1b2a0d3a5547a7c4b2d473" title="Collect current association metrics." alt="" coords="243,5,457,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="491,57,457,52,458,47,492,52"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#aa6e37a96fa92dd0fff3947d6c6143d03" title=" " alt="" coords="245,84,455,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="492,93,456,98,455,93,491,87"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__metrics__collector.html#af4d3b5284698e317082c369aeff843b5" title="Collect all DICOM metrics." alt="" coords="5,84,195,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="231,114,195,114,195,109,231,109"/>
+</map>

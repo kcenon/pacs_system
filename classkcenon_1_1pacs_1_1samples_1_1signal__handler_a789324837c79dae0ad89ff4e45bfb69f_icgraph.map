@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::samples::signal_handler::request_shutdown" name="kcenon::pacs::samples::signal_handler::request_shutdown">
+<area shape="rect" id="Node000001" title="Request shutdown programmatically." alt="" coords="684,5,867,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1samples_1_1signal__handler.html#a545b260cc4205c73077f1fe845ca4593" title="Signal handler function for C signal API." alt="" coords="453,13,636,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="671,35,636,35,636,30,671,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1samples_1_1signal__handler.html#a3d545bed26a36b5cd20f84ae32948006" title="Install signal handlers with optional callback." alt="" coords="232,13,405,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="440,35,405,35,405,30,440,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1samples_1_1scoped__signal__handler.html#a3b1ed1f22a3c15f8d70f340d75f9e12b" title="Construct and install signal handlers." alt="" coords="5,5,184,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,35,184,35,184,30,218,30"/>
+</map>

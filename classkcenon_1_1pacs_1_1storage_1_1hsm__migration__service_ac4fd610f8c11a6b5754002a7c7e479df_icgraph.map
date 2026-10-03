@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::storage::hsm_migration_service::run_loop" name="kcenon::pacs::storage::hsm_migration_service::run_loop">
+<area shape="rect" id="Node000001" title="Background thread main loop." alt="" coords="236,5,419,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1hsm__migration__service.html#ad0218d85afcc9670e5011b0a2bdd32a0" title="Start the background migration service." alt="" coords="5,5,188,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,35,188,35,188,30,223,30"/>
+</map>

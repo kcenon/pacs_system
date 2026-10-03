@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::services::validation::ophthalmic_iod_validator::check_type1_attribute" name="kcenon::pacs::services::validation::ophthalmic_iod_validator::check_type1_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="701,192,905,261"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#acc1e8de861d8455922acc9e0545f50e2" title=" " alt="" coords="460,5,640,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="760,183,710,135,652,89,633,77,635,73,655,84,714,131,763,180"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a88ccdf454a4f3b2b83867f21405f9024" title=" " alt="" coords="461,99,639,168"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="695,190,638,168,640,163,697,185"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a12e90d4fee8e25ebab443ebe48dfadbb" title=" " alt="" coords="462,192,638,261"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="687,229,638,229,638,224,687,224"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a080a5e0c744c94c843ad95d971f72124" title=" " alt="" coords="447,285,653,355"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="697,269,646,288,644,283,695,264"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a2b400ac37546cb2ad12d8773d21da524" title=" " alt="" coords="462,379,638,448"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="763,274,714,322,655,369,635,381,633,376,652,364,710,318,760,270"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#ac2a7b2a8546ebf3a853696180926fd3c" title="Validate a DICOM dataset against Ophthalmic IOD." alt="" coords="223,199,399,254"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,84,448,89,415,116,384,145,335,201,331,197,380,142,411,112,445,85,452,80"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a19169c48d86a7e1071040d2db56f7b08" title="Validate an ophthalmic dataset with default options." alt="" coords="5,199,175,254"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,229,175,229,175,224,209,224"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="450,175,382,202,380,197,448,170"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="448,229,399,229,399,224,448,224"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="447,283,380,256,382,252,449,278"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="452,373,445,369,411,342,380,312,331,256,335,253,384,308,415,338,448,365,455,369"/>
+</map>

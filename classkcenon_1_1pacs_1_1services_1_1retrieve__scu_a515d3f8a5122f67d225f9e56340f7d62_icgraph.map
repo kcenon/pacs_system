@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::retrieve_scu::build_instance_query" name="kcenon::pacs::services::retrieve_scu::build_instance_query">
+<area shape="rect" id="Node000001" title="Build query dataset for instance retrieval." alt="" coords="223,5,392,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1retrieve__scu.html#a027e7deaf6e070bf225a041fcc3b6edf" title="Retrieve a single instance by SOP Instance UID." alt="" coords="5,5,175,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,175,35,175,30,209,30"/>
+</map>

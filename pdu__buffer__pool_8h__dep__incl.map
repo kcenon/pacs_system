@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/network/pdu_buffer_pool.h" name="include/kcenon/pacs/network/pdu_buffer_pool.h">
+<area shape="rect" id="Node000001" title="Object pooling for PDU buffers and network data structures." alt="" coords="158,5,313,60"/>
+<area shape="rect" id="Node000002" href="$pacs-network_8cppm.html" title="C++20 module partition for DICOM network protocol." alt="" coords="5,115,239,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,71,138,117,135,113,191,67"/>
+<area shape="rect" id="Node000003" href="$pdu__buffer__pool_8cpp.html" title="Implementation of PDU buffer pooling." alt="" coords="263,108,434,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,67,327,106,324,110,276,71"/>
+</map>

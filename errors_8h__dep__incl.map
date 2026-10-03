@@ -1,0 +1,69 @@
+<map id="include/kcenon/pacs/ihe/xds/errors.h" name="include/kcenon/pacs/ihe/xds/errors.h">
+<area shape="rect" id="Node000001" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="1191,5,1345,45"/>
+<area shape="rect" id="Node000002" href="$document__consumer_8h.html" title="IHE XDS.b Document Consumer Actor (ITI&#45;43 Retrieve Document Set)." alt="" coords="744,203,968,243"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1177,38,1082,58,1033,74,987,96,951,120,918,150,872,205,868,201,915,146,947,116,984,91,1031,69,1081,53,1176,33"/>
+<area shape="rect" id="Node000004" href="$document__source_8h.html" title="IHE XDS.b Document Source Actor (ITI&#45;41 Provide and Register Document Set&#45;b)." alt="" coords="998,101,1202,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1223,54,1135,103,1133,98,1221,50"/>
+<area shape="rect" id="Node000005" href="$registry__query_8h.html" title="IHE XDS.b Registry Query Actor (ITI&#45;18 RegistryStoredQuery)." alt="" coords="1177,203,1359,243"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="1271,59,1271,203,1265,203,1265,59"/>
+<area shape="rect" id="Node000008" href="$http__client_8h.html" title="libcurl&#45;backed HTTPS POST client for ITI&#45;41 transport." alt="" coords="630,101,783,141"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="1178,44,784,109,783,104,1177,39"/>
+<area shape="rect" id="Node000010" href="$mtom__packager_8h.html" title="MTOM / XOP multipart/related packager for ITI&#45;41." alt="" coords="350,101,503,141"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="1177,38,925,62,618,96,504,111,503,106,617,91,924,57,1177,32"/>
+<area shape="rect" id="Node000012" href="$retrieve__response__parser_8h.html" title="Parser for IHE XDS.b ITI&#45;43 RetrieveDocumentSetResponse." alt="" coords="5,203,208,243"/>
+<area shape="poly" id="edge40_Node000001_Node000012" title=" " alt="" coords="1177,31,982,36,740,48,506,67,410,80,338,96,278,119,221,148,133,205,131,201,218,144,276,114,337,91,409,75,505,62,739,42,982,31,1177,26"/>
+<area shape="rect" id="Node000014" href="$soap__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;41 requests." alt="" coords="1675,101,1829,141"/>
+<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="1359,41,1676,102,1675,107,1358,47"/>
+<area shape="rect" id="Node000017" href="$retrieve__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;43 RetrieveDocumentSet." alt="" coords="1993,203,2153,243"/>
+<area shape="poly" id="edge39_Node000001_Node000017" title=" " alt="" coords="1359,24,1460,28,1581,38,1712,58,1778,73,1841,91,1902,115,1960,145,2049,201,2046,205,1957,149,1900,120,1839,96,1776,78,1711,64,1581,44,1459,33,1359,29"/>
+<area shape="rect" id="Node000019" href="$query__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;18 RegistryStoredQuery." alt="" coords="2177,203,2364,243"/>
+<area shape="poly" id="edge41_Node000001_Node000019" title=" " alt="" coords="1359,26,1473,32,1613,43,1767,62,1919,91,2008,115,2095,145,2231,201,2229,206,2093,150,2007,120,1918,96,1766,68,1613,49,1472,37,1359,32"/>
+<area shape="rect" id="Node000021" href="$wss__signer_8h.html" title="WS&#45;Security XML&#45;DSig signer backed by OpenSSL EVP_DigestSign." alt="" coords="1345,101,1498,141"/>
+<area shape="poly" id="edge33_Node000001_Node000021" title=" " alt="" coords="1312,50,1392,98,1389,103,1309,55"/>
+<area shape="rect" id="Node000022" href="$query__response__parser_8h.html" title="Parser for IHE XDS.b ITI&#45;18 AdhocQueryResponse." alt="" coords="2315,93,2488,148"/>
+<area shape="poly" id="edge42_Node000001_Node000022" title=" " alt="" coords="1359,30,1710,54,2159,91,2315,107,2314,112,2158,96,1710,60,1359,35"/>
+<area shape="rect" id="Node000003" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="775,299,937,339"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="859,257,859,299,853,299,853,257"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="1042,149,903,206,901,201,1040,144"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="1144,145,1238,201,1235,206,1142,150"/>
+<area shape="rect" id="Node000007" href="$document__source_8cpp.html" title="IHE XDS.b Document Source actor (ITI&#45;41)." alt="" coords="991,203,1153,243"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="1094,155,1080,204,1075,203,1088,153"/>
+<area shape="rect" id="Node000006" href="$registry__query_8cpp.html" title="IHE XDS.b Registry Query actor (ITI&#45;18)." alt="" coords="1564,299,1711,339"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="1357,244,1565,296,1563,302,1355,249"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="693,154,685,177,680,202,681,227,690,249,707,268,728,283,776,303,774,308,725,288,704,272,686,252,676,228,675,201,680,175,688,152"/>
+<area shape="poly" id="edge13_Node000008_Node000006" title=" " alt="" coords="706,154,706,178,710,204,718,228,734,249,750,258,778,267,860,281,969,293,1095,301,1356,311,1564,314,1564,320,1356,316,1094,306,968,298,859,286,776,272,748,263,730,253,714,231,704,205,701,179,700,154"/>
+<area shape="poly" id="edge12_Node000008_Node000007" title=" " alt="" coords="791,142,981,193,1007,201,1005,206,979,199,789,147"/>
+<area shape="rect" id="Node000009" href="$http__client_8cpp.html" title="libcurl HTTPS client with RAII over CURL* and curl_slist*." alt="" coords="465,203,618,243"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="665,150,574,206,571,201,662,146"/>
+<area shape="poly" id="edge19_Node000010_Node000003" title=" " alt="" coords="426,154,431,204,439,228,454,249,476,263,507,276,592,294,687,306,775,312,775,317,687,311,591,300,506,281,473,268,450,253,434,231,425,205,421,155"/>
+<area shape="poly" id="edge20_Node000010_Node000007" title=" " alt="" coords="517,132,618,145,800,165,879,175,981,193,1011,201,1010,206,979,199,878,180,799,170,617,151,517,137"/>
+<area shape="rect" id="Node000011" href="$mtom__packager_8cpp.html" title="multipart/related + XOP/MTOM body assembly." alt="" coords="232,203,389,243"/>
+<area shape="poly" id="edge15_Node000010_Node000011" title=" " alt="" coords="396,152,334,205,331,201,393,148"/>
+<area shape="poly" id="edge16_Node000010_Node000012" title=" " alt="" coords="355,147,168,206,166,201,353,142"/>
+<area shape="poly" id="edge18_Node000012_Node000003" title=" " alt="" coords="197,244,220,248,374,270,527,288,775,309,775,315,526,293,373,276,220,253,196,249"/>
+<area shape="rect" id="Node000013" href="$retrieve__response__parser_8cpp.html" title="pugixml&#45;backed parser for ITI&#45;43 RetrieveDocumentSetResponse." alt="" coords="266,299,483,339"/>
+<area shape="poly" id="edge17_Node000012_Node000013" title=" " alt="" coords="175,245,321,296,320,301,173,250"/>
+<area shape="poly" id="edge27_Node000014_Node000003" title=" " alt="" coords="1751,155,1736,207,1722,232,1701,253,1659,269,1584,282,1371,301,1132,313,937,318,937,313,1132,307,1370,295,1583,276,1657,263,1699,248,1718,229,1731,205,1746,154"/>
+<area shape="poly" id="edge29_Node000014_Node000006" title=" " alt="" coords="1761,154,1762,202,1758,228,1748,252,1722,281,1690,301,1687,296,1718,277,1743,249,1753,226,1757,202,1756,154"/>
+<area shape="poly" id="edge28_Node000014_Node000007" title=" " alt="" coords="1662,134,1396,165,1166,199,1135,206,1134,201,1165,193,1395,160,1661,129"/>
+<area shape="rect" id="Node000015" href="$soap__envelope_8cpp.html" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;41." alt="" coords="1815,203,1969,243"/>
+<area shape="poly" id="edge22_Node000014_Node000015" title=" " alt="" coords="1791,147,1867,201,1864,205,1788,151"/>
+<area shape="rect" id="Node000016" href="$wss__signer_8cpp.html" title="OpenSSL&#45;backed WS&#45;Security XML&#45;DSig signer." alt="" coords="1535,203,1689,243"/>
+<area shape="poly" id="edge23_Node000014_Node000016" title=" " alt="" coords="1716,151,1640,205,1637,201,1713,147"/>
+<area shape="poly" id="edge24_Node000014_Node000017" title=" " alt="" coords="1826,142,2014,201,2012,206,1824,147"/>
+<area shape="poly" id="edge30_Node000014_Node000019" title=" " alt="" coords="1843,134,1994,160,2166,193,2198,201,2197,206,2165,199,1993,165,1842,139"/>
+<area shape="poly" id="edge26_Node000017_Node000003" title=" " alt="" coords="2001,249,1980,253,1887,265,1764,276,1467,295,937,317,937,312,1467,290,1763,271,1886,260,1980,248,2000,244"/>
+<area shape="rect" id="Node000018" href="$retrieve__envelope_8cpp.html" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;43." alt="" coords="1981,299,2152,339"/>
+<area shape="poly" id="edge25_Node000017_Node000018" title=" " alt="" coords="2074,257,2071,299,2065,298,2068,257"/>
+<area shape="poly" id="edge31_Node000019_Node000006" title=" " alt="" coords="2187,249,2166,253,2041,274,1916,291,1711,313,1710,308,1916,286,2040,269,2165,248,2186,244"/>
+<area shape="rect" id="Node000020" href="$query__envelope_8cpp.html" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;18." alt="" coords="2177,299,2378,339"/>
+<area shape="poly" id="edge32_Node000019_Node000020" title=" " alt="" coords="2276,257,2279,298,2273,299,2270,257"/>
+<area shape="poly" id="edge36_Node000021_Node000003" title=" " alt="" coords="1433,154,1436,178,1436,204,1430,230,1416,253,1392,265,1348,276,1219,295,1069,308,937,316,937,311,1069,302,1218,289,1347,271,1390,260,1413,249,1425,228,1431,203,1431,178,1427,155"/>
+<area shape="poly" id="edge38_Node000021_Node000006" title=" " alt="" coords="1442,151,1478,199,1524,249,1561,275,1598,296,1595,301,1558,280,1521,253,1474,203,1438,154"/>
+<area shape="poly" id="edge37_Node000021_Node000007" title=" " alt="" coords="1344,147,1138,206,1137,201,1342,142"/>
+<area shape="poly" id="edge35_Node000021_Node000013" title=" " alt="" coords="1421,155,1406,207,1392,232,1372,253,1338,259,1261,266,1016,284,484,314,484,309,1016,278,1260,261,1338,254,1369,248,1388,229,1402,205,1416,154"/>
+<area shape="poly" id="edge34_Node000021_Node000016" title=" " alt="" coords="1471,145,1578,201,1575,206,1468,150"/>
+<area shape="poly" id="edge43_Node000022_Node000006" title=" " alt="" coords="2408,162,2402,209,2393,233,2378,253,2348,262,2288,271,2103,289,1711,316,1710,310,2102,283,2287,266,2347,257,2374,248,2389,230,2397,208,2402,161"/>
+<area shape="rect" id="Node000023" href="$query__response__parser_8cpp.html" title="pugixml&#45;backed parser for ITI&#45;18 AdhocQueryResponse." alt="" coords="2439,196,2612,251"/>
+<area shape="poly" id="edge44_Node000022_Node000023" title=" " alt="" coords="2446,155,2495,194,2491,198,2443,159"/>
+</map>

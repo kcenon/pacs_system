@@ -1,0 +1,32 @@
+<map id="src/ihe/xds/common/http_client.cpp" name="src/ihe/xds/common/http_client.cpp">
+<area shape="rect" id="Node000001" title="libcurl HTTPS client with RAII over CURL* and curl_slist*." alt="" coords="827,5,981,45"/>
+<area shape="rect" id="Node000002" href="$http__client_8h.html" title="libcurl&#45;backed HTTPS POST client for ITI&#45;41 transport." alt="" coords="501,93,603,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="828,46,618,93,617,88,827,41"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="103,255,201,280"/>
+<area shape="poly" id="edge15_Node000001_Node000005" title=" " alt="" coords="827,29,632,35,511,42,386,54,266,72,158,96,112,111,72,128,39,147,15,168,10,178,8,186,16,205,30,222,49,235,91,253,89,258,46,240,27,226,11,208,3,186,5,176,11,165,36,143,69,123,110,106,156,91,265,66,385,49,511,37,632,29,827,24"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="580,255,639,280"/>
+<area shape="poly" id="edge14_Node000001_Node000008" title=" " alt="" coords="864,48,831,68,801,95,783,124,777,152,769,180,749,208,727,226,702,240,653,259,651,254,700,235,724,222,745,205,764,177,771,150,778,122,797,92,828,64,862,43"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="810,93,897,119"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="894,47,871,83,866,80,890,44"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="921,93,991,119"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="919,44,943,80,939,83,914,47"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1016,93,1093,119"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="941,43,1021,84,1019,89,939,48"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="1117,93,1181,119"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="964,43,1106,88,1104,93,962,48"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1206,93,1266,119"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="982,41,1193,91,1192,96,980,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="26,167,214,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="501,119,228,169,227,163,500,114"/>
+<area shape="rect" id="Node000004" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="239,167,393,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="519,121,387,165,385,160,517,116"/>
+<area shape="rect" id="Node000006" href="$http__options_8h.html" title="Transport configuration for IHE XDS.b actors." alt="" coords="417,167,572,207"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="546,120,519,157,514,154,542,117"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="562,118,587,166,607,240,602,241,582,168,557,120"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="647,174,734,199"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="574,117,660,165,657,170,571,121"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="278,209,190,251,187,246,276,204"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="461,255,528,280"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="497,207,497,241,492,241,492,207"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="524,205,583,245,580,249,521,209"/>
+</map>

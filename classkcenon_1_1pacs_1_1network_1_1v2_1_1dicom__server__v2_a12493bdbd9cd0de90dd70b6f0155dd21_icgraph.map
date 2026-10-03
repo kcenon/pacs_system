@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::report_error" name="kcenon::pacs::network::v2::dicom_server_v2::report_error">
+<area shape="rect" id="Node000001" title="Report error through callback." alt="" coords="653,71,821,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a39319a4369eab2d82493276a382df3d6" title="Create and register a new handler for a session." alt="" coords="437,5,605,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="639,71,605,61,606,55,641,66"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#af7040892e5e9f48c689e74fcb6e7d452" title="Handle new connection from server." alt="" coords="221,43,389,97"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="639,94,389,78,390,73,640,89"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a007f61853d6fc36f6a624b4f8c2730bb" title="Handle network error." alt="" coords="221,121,389,176"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="640,112,390,142,389,136,639,107"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="424,52,390,58,389,53,423,47"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#ac6bee78f25c0056c75bf82dfcbeec600" title="Start the server." alt="" coords="5,83,173,137"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="208,91,174,97,173,92,207,85"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="207,134,173,128,174,122,208,129"/>
+</map>

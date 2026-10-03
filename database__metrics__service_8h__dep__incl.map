@@ -1,0 +1,10 @@
+<map id="include/kcenon/pacs/services/monitoring/database_metrics_service.h" name="include/kcenon/pacs/services/monitoring/database_metrics_service.h">
+<area shape="rect" id="Node000001" title="Database monitoring and metrics service." alt="" coords="114,5,322,60"/>
+<area shape="rect" id="Node000002" href="$metrics__endpoints_8h.html" title="Database metrics REST API endpoints." alt="" coords="5,108,180,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,71,127,110,124,106,173,67"/>
+<area shape="rect" id="Node000003" href="$metrics__endpoints_8cpp.html" title="Database metrics REST API endpoints implementation." alt="" coords="59,211,252,251"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="216,74,208,118,195,164,171,212,166,209,190,162,203,116,211,73"/>
+<area shape="rect" id="Node000004" href="$database__metrics__service_8cpp.html" title="Database monitoring and metrics service implementation." alt="" coords="255,115,477,155"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="269,65,339,113,336,117,266,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,173,145,209,140,212,116,176"/>
+</map>

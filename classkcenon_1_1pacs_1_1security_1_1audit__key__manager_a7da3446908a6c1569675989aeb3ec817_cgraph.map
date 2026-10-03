@@ -1,0 +1,23 @@
+<map id="kcenon::pacs::security::audit_key_manager::load_from_env" name="kcenon::pacs::security::audit_key_manager::load_from_env">
+<area shape="rect" id="Node000001" title="Load keys from environment variables." alt="" coords="5,181,200,235"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1audit__key__manager.html#a5e82d7623163277d87cef10d6d2342dd" title="Retrieve the active write key (error if none configured)" alt="" coords="268,5,475,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,179,184,134,247,87,313,49,316,54,249,92,187,138,135,183"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1security_1_1audit__key__manager.html#a37432c8f1b50d2155cbe713fdfdf2c25" title="Decode a hex or base64 key string into a fixed&#45;size buffer." alt="" coords="250,101,493,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,178,247,157,292,143,294,148,249,163,186,183"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="558,197,703,237"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="200,201,340,198,495,201,544,205,544,210,495,207,340,204,200,206"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1security_1_1audit__key__manager.html#ab57088d185962ffd442a45899bd59b83" title="Look up a key by identifier (returns nullptr if unknown)" alt="" coords="276,216,467,256"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="200,215,263,222,262,227,200,221"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1security_1_1audit__key__manager.html#a8ac572efd61cbe32fe871010158557cb" title="Register a key (idempotent by key_id; overwrites existing entry)" alt="" coords="248,280,495,320"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="166,233,249,265,275,274,273,279,247,271,164,238"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1security_1_1audit__key__manager.html#a173e36b2286344fa30a351efa3b3e91d" title="Mark a previously&#45;registered key as the active write key." alt="" coords="278,345,465,399"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="131,234,183,282,215,308,249,330,267,338,264,343,247,334,212,312,180,287,128,238"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a97c8cd808c5b82e310f59731d8b08e81" title="Create a PACS error result with module context." alt="" coords="558,5,703,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,23,544,23,544,28,475,28"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1security_1_1detail.html#a29c7834a578fe28924d14f344a0b8e45" title="Standard base64 decode; returns false on malformed input." alt="" coords="543,69,719,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="492,104,529,99,530,104,493,109"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1security_1_1detail.html#a60d237854597c75ffeb118cabb6b93e7" title="Hex decode (lowercase or uppercase); returns false on malformed input." alt="" coords="547,133,714,173"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="493,134,534,139,533,144,492,139"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="445,139,496,158,544,183,560,190,558,195,542,188,494,162,443,144"/>
+<area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="464,344,493,330,552,288,599,245,603,249,555,293,496,334,466,348"/>
+</map>

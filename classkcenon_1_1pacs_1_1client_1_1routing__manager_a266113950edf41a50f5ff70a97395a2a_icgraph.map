@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::client::routing_manager::get_field_value" name="kcenon::pacs::client::routing_manager::get_field_value">
+<area shape="rect" id="Node000001" title="Get DICOM field value from dataset." alt="" coords="975,70,1145,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a8dd101fc4ef26cb5af1f1714d10515ea" title="Check if a condition matches a dataset." alt="" coords="736,70,927,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="961,100,927,100,927,95,961,95"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a5583e33859c18f69fd0b8fa1faa13caa" title="Evaluate rules against a dataset." alt="" coords="478,5,685,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="722,69,651,48,652,43,724,64"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#adbcb1eac4eb82b06b5f670fd9d68e7b5" title="Evaluate rules and return with matched rule IDs." alt="" coords="478,70,685,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="722,100,685,100,685,95,722,95"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a206b6977c650231f005930242646f1f8" title="Test rules against a dataset without executing actions." alt="" coords="475,149,688,189"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="724,131,652,152,651,147,722,126"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a6d568ad6223794fcbcfc2024bcfec45d" title="Route a DICOM dataset based on matching rules." alt="" coords="244,77,427,117"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="464,100,427,100,427,95,464,95"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a006909e16f412d1f7e521e1006c1dca0" title="Attach to a Storage SCP for automatic routing." alt="" coords="5,70,196,125"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="230,100,196,100,196,95,230,95"/>
+</map>

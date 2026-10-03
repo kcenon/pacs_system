@@ -1,0 +1,15 @@
+<map id="src/security/tls_policy.cpp" name="src/security/tls_policy.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="130,5,318,31"/>
+<area shape="rect" id="Node000002" href="$tls__policy_8h.html" title="TLS security policy for BCP 195 compliance (DICOM PS3.15)" alt="" coords="145,79,303,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,31,227,65,221,65,221,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,121,79,164,77,159,179,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,167,171,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="204,121,159,160,155,155,200,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="195,167,253,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="227,119,227,153,221,153,221,119"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="278,167,375,192"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="250,117,302,156,299,160,247,121"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="399,167,462,192"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="274,116,389,159,387,164,273,121"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="kcenon::pacs::monitoring::pool_counters" name="kcenon::pacs::monitoring::pool_counters">
+<area shape="rect" id="Node000001" title="Metrics for tracking object pool usage." alt="" coords="126,433,305,593"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,261,204,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,326,156,408,161,418,157,420,152,410,115,328"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="153,133,278,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="176,211,164,224,132,263,127,259,160,221,173,207"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="228,261,427,327"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="266,206,280,221,310,260,305,263,276,224,262,210"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="204,5,227,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,71,218,117,213,117,213,71"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="319,328,283,410,278,420,273,418,278,408,314,326"/>
+</map>

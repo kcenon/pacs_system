@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::samples::server_config" name="kcenon::pacs::samples::server_config">
+<area shape="rect" id="Node000001" title="DICOM server configuration." alt="" coords="5,485,168,605"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="47,135,126,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,201,80,263,78,343,80,423,83,468,77,469,75,423,72,343,75,263,80,200"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1samples_1_1tls__config.html" title="TLS security configuration for DICOM connections." alt="" coords="155,263,317,423"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="116,199,159,248,155,252,112,202"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="21,5,152,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,99,89,134,84,134,84,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="179,425,142,474,138,471,175,421"/>
+</map>

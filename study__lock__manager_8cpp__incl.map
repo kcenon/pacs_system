@@ -1,0 +1,39 @@
+<map id="src/workflow/study_lock_manager.cpp" name="src/workflow/study_lock_manager.cpp">
+<area shape="rect" id="Node000001" title="Implementation of study lock manager." alt="" coords="899,5,1045,45"/>
+<area shape="rect" id="Node000002" href="$study__lock__manager_8h.html" title="Study lock manager for modification control and concurrent access." alt="" coords="417,93,589,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="899,42,602,96,602,91,898,37"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="613,93,801,133"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="915,48,778,92,777,87,913,43"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="825,101,911,126"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="951,48,895,93,891,89,947,44"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="935,101,1009,126"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="975,46,975,87,969,87,969,46"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="1033,101,1105,126"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="995,44,1048,89,1044,93,992,48"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="1129,101,1204,126"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="1016,43,1129,93,1127,98,1014,48"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="1228,101,1292,126"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="1046,41,1129,63,1217,91,1223,93,1221,98,1215,96,1127,68,1045,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="417,129,266,151,86,184,85,179,266,146,416,124"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,181,163,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="417,134,177,184,176,178,416,128"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="187,181,253,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="436,136,267,182,266,177,434,131"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="278,181,365,207"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="460,136,362,178,360,173,458,131"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="389,181,440,207"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="483,136,440,174,436,170,480,132"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="464,181,541,207"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="505,134,505,167,500,167,500,134"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="565,181,629,207"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="527,131,574,170,571,174,524,136"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="653,181,728,207"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="549,131,651,173,649,178,547,136"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="752,181,867,207"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="577,131,752,175,750,180,575,136"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="891,181,949,207"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="589,128,602,131,738,153,877,179,876,184,737,158,601,136,588,134"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="974,181,1037,207"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="589,129,602,131,701,144,779,153,859,162,961,179,960,184,858,167,779,158,700,150,601,136,588,134"/>
+</map>

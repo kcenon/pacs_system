@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::services::ups_watch_scp::send_n_action_response" name="kcenon::pacs::services::ups_watch_scp::send_n_action_response">
+<area shape="rect" id="Node000001" title=" " alt="" coords="689,74,859,129"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a8fd6f5a8b7b3cad74802ee530e3000ad" title=" " alt="" coords="233,74,413,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="727,68,686,43,641,24,591,12,551,8,512,12,462,24,407,47,361,76,358,72,405,42,461,19,511,7,551,3,592,7,642,19,689,38,730,64"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a825783fac086f1371d0bbd08414ed961" title=" " alt="" coords="461,34,641,89"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="675,86,641,80,642,75,676,81"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a3d5db2be87a5c6afdb78e06d0c4dcbf3" title=" " alt="" coords="461,113,641,167"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="676,121,642,127,641,122,675,116"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#ad6e84de75a0b1a14d12ac86cd8c5911e" title=" " alt="" coords="461,191,641,246"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="719,138,643,181,617,194,614,189,640,176,716,133"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1ups__watch__scp.html#a9936acb1aee80557d80ad9ef56daa7b4" title="Handle an incoming DIMSE message." alt="" coords="5,74,185,129"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="219,104,185,104,185,99,219,99"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="448,82,414,88,413,83,447,77"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="447,125,413,119,414,114,448,120"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="474,188,460,181,370,131,372,127,463,176,476,183"/>
+</map>

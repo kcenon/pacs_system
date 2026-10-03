@@ -1,0 +1,26 @@
+var structkcenon_1_1pacs_1_1storage_1_1worklist__item =
+[
+    [ "get_status", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#ae4dcd04907a6dba9097883221168f451", null ],
+    [ "is_scheduled", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a65fc3e0416eae259f544b86ef2a5e43f", null ],
+    [ "is_valid", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#af17b83b28c64cd8e629d20c5d31f7f48", null ],
+    [ "accession_no", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#abd3255fe8ad607954c79b6b42e0b5b3d", null ],
+    [ "birth_date", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a547c39510ab55541c4760932040cfa24", null ],
+    [ "created_at", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a8baa9f9495979965395eea22ac4f5c71", null ],
+    [ "modality", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a7e767c675264ac8595898d19f7e2bf2d", null ],
+    [ "patient_id", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a4ec4a167bdc24ff62007b8a630a6ec1e", null ],
+    [ "patient_name", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#ab74931f4e2956f593afae2727103cef6", null ],
+    [ "pk", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a87703fbedb1ca770b0451de731f2b149", null ],
+    [ "procedure_desc", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a3d49e9216dccde31c7478d0bd5ca20fe", null ],
+    [ "protocol_code", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#aaddb9d82f04b63a093a992671ed8278a", null ],
+    [ "referring_phys", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#afa91d6db42585bdbad283d329bbe0124", null ],
+    [ "referring_phys_id", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a27ac615d134d4342ec52f5658b66762c", null ],
+    [ "requested_proc_id", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#ab6a71824710a9d5c5e527cb8f741f28f", null ],
+    [ "scheduled_datetime", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a6e13ae02f336b4de262b8d63fdadd427", null ],
+    [ "sex", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a78afa6c01b6bf32aa21b187b5483b251", null ],
+    [ "station_ae", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#ad940b72b742443cf8fe570980ca7489c", null ],
+    [ "station_name", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a5e6b175f07b921e0d6083050dbb3d108", null ],
+    [ "step_id", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a72e2c555aeaeb0721851c1364fa29454", null ],
+    [ "step_status", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#ad819bf63c803256a7cdad4c0f36b23c7", null ],
+    [ "study_uid", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#a36130a3f7150d6b50a01dedd0de2b035", null ],
+    [ "updated_at", "structkcenon_1_1pacs_1_1storage_1_1worklist__item.html#aee3f53be1f651ca311f71878e014f800", null ]
+];

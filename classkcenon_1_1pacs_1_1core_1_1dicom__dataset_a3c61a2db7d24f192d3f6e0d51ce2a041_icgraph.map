@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::core::dicom_dataset::remove" name="kcenon::pacs::core::dicom_dataset::remove">
+<area shape="rect" id="Node000001" title="Remove an element from the dataset." alt="" coords="524,13,708,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a7c3603a1fb22bff8ee58fe509901fa36" title="Calculate and set CommandGroupLength." alt="" coords="237,5,476,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="510,35,476,35,476,30,510,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a0f4172d673a0ad077306ef8258e9102e" title="Encode the DIMSE message to bytes." alt="" coords="5,5,189,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="224,35,189,35,189,30,224,30"/>
+</map>

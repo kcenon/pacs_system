@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::client::job_priority_from_string" name="kcenon::pacs::client::job_priority_from_string">
+<area shape="rect" id="Node000001" title="Parse job_priority from string." alt="" coords="444,53,631,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1routing__repository.html#acb3b712c1c92988610434f4683f8897c" title=" " alt="" coords="232,5,396,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="430,56,396,50,397,45,431,51"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#acfc4dff4fe63133ea3054c6c50ea32ec" title=" " alt="" coords="233,84,395,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="431,94,396,100,395,95,430,89"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,91,184,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="219,114,184,114,184,109,219,109"/>
+</map>

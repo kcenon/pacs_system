@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::dicom_service_collector::collect_operation_metrics" name="kcenon::pacs::monitoring::dicom_service_collector::collect_operation_metrics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,41,204,96"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#a0e006c79ca854e3afdec1cc5d70315a3" title=" " alt="" coords="252,5,439,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,51,238,46,239,51,205,56"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1monitoring.html#ad2335ef3bbc51a064374da9e18c8abb4" title="Convert health level to string representation." alt="" coords="252,85,439,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="205,81,239,86,238,91,204,86"/>
+</map>

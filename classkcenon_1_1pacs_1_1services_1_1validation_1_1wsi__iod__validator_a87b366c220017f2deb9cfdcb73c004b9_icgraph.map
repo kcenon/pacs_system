@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::services::validation::wsi_iod_validator::check_type1_attribute" name="kcenon::pacs::services::validation::wsi_iod_validator::check_type1_attribute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="716,285,893,355"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#a03fce1214ae93254dc6fe4a3e99fb789" title=" " alt="" coords="452,5,656,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="784,274,765,230,739,181,706,132,666,89,650,77,654,73,670,85,710,128,744,178,770,228,789,272"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#af5bfda971c8aa3e941dc374bd42ac1b5" title=" " alt="" coords="452,99,656,168"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="766,276,721,228,666,182,647,171,650,166,670,178,725,224,770,273"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#accaa97faf9e9a4b0a3e54143c50cf594" title=" " alt="" coords="456,192,652,261"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="702,285,647,264,649,259,704,280"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#a685c62537aa037996571b6ad7b1dc569" title=" " alt="" coords="440,285,668,355"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="702,323,668,323,668,317,702,317"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#a183806fd4b7b1b53af7668e08be8e319" title=" " alt="" coords="455,379,653,448"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="704,360,649,381,647,376,702,355"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#a09055d2a0aeff1b56c769ef7ce082af0" title=" " alt="" coords="465,472,643,541"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="770,367,725,416,670,462,645,476,643,472,666,458,721,412,766,364"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#ac51ae2f5fc797dac9935016e6120d7a9" title=" " alt="" coords="465,565,643,635"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="789,368,770,412,744,462,710,512,670,555,645,573,642,568,666,551,706,508,739,459,765,410,784,366"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1wsi__iod__validator.html#adb47f5cd69b9efe6f100a965c20c6081" title="Validate a DICOM dataset against WSI IOD." alt="" coords="223,293,392,347"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="446,85,442,89,398,138,363,195,337,249,320,293,315,291,332,247,358,192,393,135,438,85,443,81"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ae077f15a55dc453a0b22cc6be879315b" title="Validate a WSI dataset with default options." alt="" coords="5,293,175,347"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,323,175,323,175,317,209,317"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="449,177,442,182,408,209,378,238,331,294,327,291,374,235,405,205,438,178,446,173"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="450,269,381,295,379,290,448,264"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="426,323,392,323,392,317,426,317"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="448,376,379,350,381,345,450,371"/>
+<area shape="poly" id="edge13_Node000009_Node000003" title=" " alt="" coords="451,470,438,462,405,435,374,405,327,349,331,346,378,402,408,431,442,458,454,466"/>
+<area shape="poly" id="edge15_Node000010_Node000003" title=" " alt="" coords="452,566,438,555,393,505,358,448,332,393,315,349,320,347,337,391,363,445,398,502,442,551,455,562"/>
+</map>

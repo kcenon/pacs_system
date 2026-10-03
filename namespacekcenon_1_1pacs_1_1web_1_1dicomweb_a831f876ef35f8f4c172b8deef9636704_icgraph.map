@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::web::dicomweb::is_bulk_data_tag" name="kcenon::pacs::web::dicomweb::is_bulk_data_tag">
+<area shape="rect" id="Node000001" title="Check if a DICOM tag contains bulk data." alt="" coords="220,13,427,53"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#a6a7b98d76f3f5588f5ea257b92e4b53d" title="Convert a DICOM dataset to DicomJSON format." alt="" coords="5,5,172,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,35,172,35,172,30,206,30"/>
+</map>

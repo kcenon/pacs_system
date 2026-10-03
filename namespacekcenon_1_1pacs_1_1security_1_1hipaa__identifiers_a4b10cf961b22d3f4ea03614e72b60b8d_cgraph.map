@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::security::hipaa_identifiers::get_all_identifier_tags" name="kcenon::pacs::security::hipaa_identifiers::get_all_identifier_tags">
+<area shape="rect" id="Node000001" title="Get all HIPAA identifier tags." alt="" coords="5,163,172,217"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#ac81d9f08a74d9d5c17490dfaa5a782ce" title="Tags containing communication identifiers." alt="" coords="220,5,387,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,161,160,115,218,69,225,65,228,69,222,74,164,119,117,164"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#aa6ab48510d26fc361b23dbda40844b13" title="Tags containing dates (except year)" alt="" coords="220,84,387,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,160,214,141,216,146,165,165"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#ad6fa842db9c27c602db2c6c8a14e88e2" title="Tags containing geographic identifiers." alt="" coords="220,163,387,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="173,187,206,187,206,193,173,193"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#a607f5143ed3f915c78023cb0fc236b27" title="Tags containing names." alt="" coords="220,241,387,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="165,215,216,234,214,239,163,220"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1security_1_1hipaa__identifiers.html#a900ac15978d9cf487020c9d8b9dd5063" title="Tags containing unique identifiers." alt="" coords="220,320,387,375"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="118,216,164,260,222,305,230,311,227,315,218,310,161,264,114,220"/>
+</map>

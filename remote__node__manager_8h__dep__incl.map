@@ -1,0 +1,13 @@
+<map id="include/kcenon/pacs/client/remote_node_manager.h" name="include/kcenon/pacs/client/remote_node_manager.h">
+<area shape="rect" id="Node000001" title="Remote PACS node manager for client operations." alt="" coords="397,5,551,60"/>
+<area shape="rect" id="Node000002" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="5,115,201,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="384,59,150,118,148,113,383,54"/>
+<area shape="rect" id="Node000003" href="$prefetch__manager_8cpp.html" title="Implementation of the Prefetch Manager." alt="" coords="226,108,365,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="413,69,333,110,330,105,411,64"/>
+<area shape="rect" id="Node000004" href="$remote__node__manager_8cpp.html" title="Implementation of the Remote Node Manager." alt="" coords="389,108,559,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="477,74,477,108,471,108,471,74"/>
+<area shape="rect" id="Node000005" href="$sync__manager_8cpp.html" title="Implementation of the Sync Manager." alt="" coords="584,115,791,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="548,63,662,113,660,118,546,68"/>
+<area shape="rect" id="Node000006" href="$remote__nodes__endpoints_8cpp.html" title="Remote PACS node management REST API endpoints implementation." alt="" coords="815,108,1005,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="565,51,823,105,821,111,564,56"/>
+</map>

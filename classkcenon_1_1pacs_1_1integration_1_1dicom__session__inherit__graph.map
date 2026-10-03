@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::dicom_session" name="kcenon::pacs::integration::dicom_session">
+<area shape="rect" id="Node000001" title="DICOM session wrapper for network_system sessions." alt="" coords="19,133,201,753"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,215,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,99,113,133,107,133,107,99"/>
+</map>

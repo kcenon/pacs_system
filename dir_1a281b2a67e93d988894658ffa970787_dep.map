@@ -1,0 +1,13 @@
+<map id="examples/tutorials/05_production_pacs" name="examples/tutorials/05_production_pacs">
+<area shape="rect" id="node1" href="dir_49d7641fd9fab08f4f653c6f093ad442.html" title="04_mini_pacs" alt="" coords="27,125,138,151"/>
+<area shape="rect" id="node2" href="dir_9503303759077aa78f24dd56c007775b.html" title="common" alt="" coords="162,125,241,151"/>
+<area shape="rect" id="node3" href="dir_1a281b2a67e93d988894658ffa970787.html" title="05_production_pacs" alt="" coords="90,52,241,77"/>
+<area shape="poly" id="edge1" href="dir_000004_000003.html" alt="" coords="154,79,108,118,105,114,150,75"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000004_000003.html" title="1" alt="" coords="111,112,120,127"/>
+<area shape="poly" id="edge2" href="dir_000004_000014.html" alt="" coords="174,76,192,112,187,114,169,79"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000004_000014.html" title="3" alt="" coords="190,98,199,113"/>
+<area shape="rect" id="node4" href="dir_d44c64559bbebec7f509842c48db8b23.html" title="include" alt="" coords="265,125,335,151"/>
+<area shape="poly" id="edge3" href="dir_000004_000035.html" alt="" coords="188,75,267,116,265,121,186,80"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000004_000035.html" title="7" alt="" coords="261,102,271,117"/>
+<area shape="rect" id="clust1" href="dir_b924738f7fa1776121f5a731840e6549.html" title="tutorials" alt="" coords="16,16,252,161"/>
+</map>

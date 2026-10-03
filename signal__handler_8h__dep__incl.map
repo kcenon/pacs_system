@@ -1,0 +1,13 @@
+<map id="examples/tutorials/common/signal_handler.h" name="examples/tutorials/common/signal_handler.h">
+<area shape="rect" id="Node000001" title="Cross&#45;platform signal handling for graceful shutdown." alt="" coords="449,5,642,45"/>
+<area shape="rect" id="Node000002" href="$02__echo__server_2main_8cpp.html" title="Level 2 Sample: Echo Server &#45; DICOM network communication fundamentals." alt="" coords="5,101,197,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="436,50,210,96,178,103,177,98,209,91,435,45"/>
+<area shape="rect" id="Node000003" href="$03__storage__server_2main_8cpp.html" title="Level 3 Sample: Storage Server &#45; DICOM image reception and archiving." alt="" coords="221,101,432,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="490,53,372,103,370,98,488,48"/>
+<area shape="rect" id="Node000004" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="456,101,635,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="548,59,548,101,543,101,543,59"/>
+<area shape="rect" id="Node000005" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="659,93,813,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="597,49,683,91,681,96,595,54"/>
+<area shape="rect" id="Node000006" href="$signal__handler_8cpp.html" title="Implementation of cross&#45;platform signal handling." alt="" coords="837,101,1045,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="639,46,862,98,861,103,638,51"/>
+</map>

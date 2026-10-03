@@ -1,0 +1,34 @@
+<map id="kcenon::pacs::services::xds::imaging_document_consumer" name="kcenon::pacs::services::xds::imaging_document_consumer">
+<area shape="rect" id="Node000001" title="IHE XDS&#45;I.b Imaging Document Consumer Actor." alt="" coords="33,1735,268,1989"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__consumer__config.html" title="Configuration for the Imaging Document Consumer actor." alt="" coords="5,533,184,648"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,648,121,880,129,1030,132,1182,132,1626,136,1718,131,1718,127,1626,127,1182,123,1031,116,881,98,648"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="175,148,254,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="176,191,132,208,112,221,97,239,80,271,69,306,62,343,60,380,64,453,76,517,71,517,59,453,55,380,57,342,64,305,75,269,92,236,109,217,130,203,174,186"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html" title="High&#45;level facade for emitting ATNA audit events from DICOM services." alt="" coords="527,1215,713,1515"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="218,213,226,367,237,479,255,606,282,743,320,884,370,1021,400,1087,434,1151,473,1208,518,1261,514,1265,469,1211,430,1153,396,1090,365,1023,315,885,277,744,250,607,232,480,220,367,212,214"/>
+<area shape="rect" id="Node000008" href="$structkcenon_1_1pacs_1_1security_1_1syslog__transport__config.html" title="Configuration for the Syslog transport." alt="" coords="252,349,428,509"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="233,212,295,333,290,335,228,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="149,5,280,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="217,99,217,148,212,148,212,99"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="533,1577,707,1672"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="534,1672,284,1797,282,1792,532,1667"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="623,1515,623,1561,617,1561,617,1515"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1security_1_1atna__syslog__transport.html" title="Sends ATNA audit messages via Syslog protocol." alt="" coords="444,672,641,1152"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="586,1152,594,1198,589,1199,581,1153"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="376,508,440,661,435,663,371,510"/>
+<area shape="rect" id="Node000009" href="$structkcenon_1_1pacs_1_1security_1_1atna__syslog__transport_1_1tls__context.html" title=" " alt="" coords="453,382,619,477"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="529,477,521,534,519,655,514,655,516,533,524,477"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="644,397,799,462"/>
+<area shape="poly" id="edge16_Node000006_Node000010" title=" " alt="" coords="723,462,705,820,690,1034,672,1191,670,1199,665,1198,667,1190,684,1034,700,819,717,462"/>
+<area shape="poly" id="edge11_Node000007_Node000010" title=" " alt="" coords="692,464,633,512,619,518,606,521,595,525,585,535,575,555,566,583,554,656,549,655,561,582,570,553,581,532,592,521,604,516,617,513,631,507,688,460"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="779,148,904,213"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="768,213,753,224,741,239,723,278,716,320,715,361,718,396,713,397,710,361,711,319,718,276,736,236,749,221,765,208"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="782,558,927,623"/>
+<area shape="poly" id="edge15_Node000013_Node000011" title=" " alt="" coords="839,227,839,237,838,329,841,419,854,558,848,558,836,419,832,329,833,237,834,227"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="918,13,941,78"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="920,65,874,136,869,133,916,63"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="911,249,1060,314"/>
+<area shape="poly" id="edge18_Node000014_Node000012" title=" " alt="" coords="939,78,977,232,971,233,934,79"/>
+<area shape="poly" id="edge14_Node000006_Node000013" title=" " alt="" coords="863,623,875,717,881,851,879,926,870,1004,853,1080,828,1153,808,1190,783,1225,727,1285,723,1281,779,1221,804,1187,823,1151,848,1079,864,1003,873,926,876,851,870,717,858,624"/>
+<area shape="poly" id="edge17_Node000005_Node000014" title=" " alt="" coords="988,327,988,589,988,1366,980,1415,959,1457,928,1494,888,1526,844,1552,797,1574,708,1606,706,1600,795,1569,841,1548,885,1522,924,1490,955,1454,975,1413,983,1366,983,589,983,327"/>
+</map>

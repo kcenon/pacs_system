@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler::~dicom_association_handler" name="kcenon::pacs::network::v2::dicom_association_handler::~dicom_association_handler">
+<area shape="rect" id="Node000001" title="Destructor (stops handler if still running)." alt="" coords="5,38,224,107"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a9b8d2cf37a332f0c1dc47c1f021b182d" title="Check if the handler is closed." alt="" coords="272,5,447,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,52,258,46,259,52,225,57"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#ac7bc2e41d20f2959d4634e778abacf40" title="Stop the handler and close the session." alt="" coords="272,84,447,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="225,87,259,93,258,98,224,93"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a864866bc36d600a70f070bcfb71f124d" title="Close and cleanup." alt="" coords="495,51,671,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="447,96,481,90,482,96,448,101"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1c442d6de6ec7f4d7ef08877a8b2cc47" title="Transition to new state." alt="" coords="719,116,893,171"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="447,115,705,133,705,139,447,120"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a698c6d4ad6413b8a6d8be0e35d6852df" title="Get the session identifier." alt="" coords="719,37,893,92"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="671,70,705,68,705,73,671,75"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="672,101,706,111,705,117,670,106"/>
+</map>

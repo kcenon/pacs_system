@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::to_dicom_uid" name="kcenon::pacs::security::to_dicom_uid">
+<area shape="rect" id="Node000001" title="Convert mac_algorithm to DICOM UID string." alt="" coords="263,5,429,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1digital__signature.html#aac9f6cc853269198e7d9e94ae49d4c51" title="Sign specific tags in a DICOM dataset." alt="" coords="5,5,215,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="249,28,215,28,215,23,249,23"/>
+</map>

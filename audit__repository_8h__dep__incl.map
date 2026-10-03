@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/audit_repository.h" name="include/kcenon/pacs/storage/audit_repository.h">
+<area shape="rect" id="Node000001" title="Repository for audit log persistence." alt="" coords="149,5,344,45"/>
+<area shape="rect" id="Node000002" href="$audit__repository_8cpp.html" title="Implementation of the audit repository." alt="" coords="5,93,235,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,55,140,95,137,91,203,51"/>
+<area shape="rect" id="Node000003" href="$index__database_8cpp.html" title="Implementation of PACS index database." alt="" coords="259,93,487,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="291,51,356,91,353,95,288,55"/>
+</map>

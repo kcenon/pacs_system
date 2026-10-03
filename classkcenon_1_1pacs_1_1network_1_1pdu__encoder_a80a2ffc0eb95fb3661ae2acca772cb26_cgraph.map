@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::network::pdu_encoder::encode_associate_ac" name="kcenon::pacs::network::pdu_encoder::encode_associate_ac">
+<area shape="rect" id="Node000001" title="Encodes an A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="5,163,173,217"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#af3e409c490b3d74dba2f3b839f464951" title="Encodes an Application Context item." alt="" coords="232,84,400,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,160,223,141,225,146,170,165"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a55abcabd8bf30252d22e8ef8213e1ddf" title="Encodes the common header portion for ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="232,241,400,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="170,215,225,234,223,239,168,220"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa446dadfc32639189fdb6f21ef0d9bcd" title="Encodes a Presentation Context item for A&#45;ASSOCIATE&#45;AC." alt="" coords="221,5,411,60"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="114,161,161,115,220,69,228,64,231,69,223,74,164,119,117,164"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a769ea854bd70ea06090e748ae7dcdbaa" title="Encodes a User Information item." alt="" coords="232,163,400,217"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="173,187,218,187,218,193,173,193"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa369dfad27cf016bffdc8ec99474080d" title="Updates the PDU length field at position 2&#45;5." alt="" coords="232,320,400,375"/>
+<area shape="poly" id="edge15_Node000001_Node000010" title=" " alt="" coords="117,216,164,261,223,306,231,311,228,316,220,311,161,265,114,219"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#adda17a67c78d1fba73085589ea8a13df" title="Writes a UID string." alt="" coords="459,55,640,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,96,445,89,445,94,401,101"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#ac2ab53ad523a5947efac7785165941e6" title="Writes a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="465,120,633,175"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="401,122,452,130,451,135,400,127"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="389,239,409,228,433,206,457,184,465,179,468,184,460,188,437,210,412,232,392,244"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#aa4ddd3f35a6314785c4025f83ec1e3ae" title="Writes an AE Title (16 bytes, space&#45;padded)." alt="" coords="465,277,633,332"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="401,279,452,287,451,292,400,284"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a072ecc5e4e38fc2897e62ef6d4327d44" title="Writes a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="465,199,633,253"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="400,251,451,241,452,246,401,256"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="412,47,446,54,445,59,411,53"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="390,58,412,69,436,87,460,105,472,111,469,116,457,110,433,91,409,74,388,63"/>
+<area shape="poly" id="edge12_Node000009_Node000003" title=" " alt="" coords="387,160,409,148,433,126,457,105,469,99,472,103,460,110,436,130,412,152,390,165"/>
+<area shape="poly" id="edge13_Node000009_Node000004" title=" " alt="" coords="400,172,451,163,452,168,401,177"/>
+<area shape="poly" id="edge14_Node000009_Node000007" title=" " alt="" coords="401,200,452,208,451,214,400,206"/>
+</map>

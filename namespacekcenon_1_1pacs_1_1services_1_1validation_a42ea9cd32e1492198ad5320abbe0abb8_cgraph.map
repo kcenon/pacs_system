@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::validation::is_for_presentation_mg" name="kcenon::pacs::services::validation::is_for_presentation_mg">
+<area shape="rect" id="Node000001" title="Check if dataset is a For Presentation mammography image." alt="" coords="5,77,261,117"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="309,5,499,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,75,314,46,315,52,210,80"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="327,70,481,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,95,313,95,313,100,262,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a4ee2745716651208c263438589c3e187" title="Check if a SOP Class UID is a For Presentation mammography SOP Class." alt="" coords="313,149,495,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="204,115,301,143,300,149,202,120"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a64efa29793987aa03e5cf3f1064b911d" title="Get information about a specific Mammography SOP Class." alt="" coords="547,149,716,203"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="495,173,533,173,533,179,495,179"/>
+</map>

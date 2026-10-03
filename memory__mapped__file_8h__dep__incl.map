@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/core/memory_mapped_file.h" name="include/kcenon/pacs/core/memory_mapped_file.h">
+<area shape="rect" id="Node000001" title="RAII wrapper for memory&#45;mapped file I/O." alt="" coords="107,5,280,60"/>
+<area shape="rect" id="Node000002" href="$dicom__file_8cpp.html" title="Implementation of DICOM Part 10 file handling." alt="" coords="5,115,176,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,71,105,117,102,113,152,68"/>
+<area shape="rect" id="Node000003" href="$memory__mapped__file_8cpp.html" title="Implementation of RAII memory&#45;mapped file I/O." alt="" coords="200,108,392,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,68,277,106,273,110,231,72"/>
+</map>

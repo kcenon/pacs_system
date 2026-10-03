@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/annotation_endpoints.h" name="include/kcenon/pacs/web/endpoints/annotation_endpoints.h">
+<area shape="rect" id="Node000001" title="Annotation API endpoints for REST server." alt="" coords="125,5,319,60"/>
+<area shape="rect" id="Node000002" href="$annotation__endpoints_8cpp.html" title="Annotation API endpoints implementation." alt="" coords="5,108,220,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,71,136,110,133,106,179,67"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="244,115,419,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="265,67,319,113,316,117,262,71"/>
+</map>

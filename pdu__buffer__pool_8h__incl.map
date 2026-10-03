@@ -1,0 +1,40 @@
+<map id="include/kcenon/pacs/network/pdu_buffer_pool.h" name="include/kcenon/pacs/network/pdu_buffer_pool.h">
+<area shape="rect" id="Node000001" title="Object pooling for PDU buffers and network data structures." alt="" coords="576,5,731,60"/>
+<area shape="rect" id="Node000002" href="$pdu__types_8h.html" title=" " alt="" coords="76,196,177,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="576,46,445,69,371,87,300,110,219,150,155,190,152,186,217,145,298,106,370,82,444,63,575,40"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,277,72,302"/>
+<area shape="poly" id="edge18_Node000001_Node000003" title=" " alt="" coords="576,43,409,65,312,84,217,111,118,138,81,158,64,174,46,197,39,213,36,230,36,263,31,263,30,229,34,211,42,195,60,171,78,154,116,133,215,105,311,79,408,59,575,37"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="453,277,515,302"/>
+<area shape="poly" id="edge21_Node000001_Node000005" title=" " alt="" coords="613,62,586,84,562,110,537,149,517,191,493,264,488,262,512,189,532,146,558,106,583,80,610,58"/>
+<area shape="rect" id="Node000006" href="$pdu__decoder_8h.html" title=" " alt="" coords="311,115,427,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="577,62,418,114,416,109,575,57"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="572,108,735,148"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="656,60,656,94,651,94,651,60"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="759,115,825,141"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="694,58,765,106,762,110,691,62"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="850,115,921,141"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="720,58,845,108,843,113,718,63"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="945,115,1031,141"/>
+<area shape="poly" id="edge19_Node000001_Node000016" title=" " alt="" coords="732,50,934,105,944,108,942,113,933,111,730,56"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="1056,115,1133,141"/>
+<area shape="poly" id="edge20_Node000001_Node000017" title=" " alt="" coords="731,42,878,67,1045,105,1054,108,1053,113,1043,111,877,72,730,47"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,224,63,270,60,266,112,220"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,277,156,302"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="129,222,129,263,124,263,124,222"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="178,218,440,276,439,281,177,224"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="335,143,176,194,174,189,333,138"/>
+<area shape="poly" id="edge10_Node000006_Node000003" title=" " alt="" coords="312,138,245,146,172,159,107,176,83,187,66,198,55,212,48,229,41,264,36,263,43,227,50,209,62,194,80,182,106,171,171,154,244,141,311,132"/>
+<area shape="poly" id="edge14_Node000006_Node000005" title=" " alt="" coords="393,139,427,161,460,194,476,229,484,262,479,264,471,231,455,198,424,166,390,143"/>
+<area shape="rect" id="Node000007" href="$result_8h.html" title="Result&lt;T&gt; type aliases and helpers for PACS system." alt="" coords="573,196,761,221"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="413,138,611,190,609,195,412,143"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="201,196,276,221"/>
+<area shape="poly" id="edge11_Node000006_Node000010" title=" " alt="" coords="351,143,271,191,268,186,349,139"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="300,196,353,221"/>
+<area shape="poly" id="edge12_Node000006_Node000011" title=" " alt="" coords="365,142,342,185,337,183,361,140"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="378,196,446,221"/>
+<area shape="poly" id="edge13_Node000006_Node000012" title=" " alt="" coords="378,140,402,183,397,185,373,142"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="751,269,939,309"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="694,219,791,261,789,266,692,224"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="561,269,727,309"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="666,222,656,257,651,255,661,221"/>
+</map>

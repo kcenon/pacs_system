@@ -1,0 +1,18 @@
+<map id="kcenon::pacs::web::dicomweb::multipart_parser::parse_result" name="kcenon::pacs::web::dicomweb::multipart_parser::parse_result">
+<area shape="rect" id="Node000001" title="Parse result &#45; either parts or error." alt="" coords="198,733,349,848"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="192,576,355,671"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="276,671,276,716,271,716,271,671"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1web_1_1dicomweb_1_1multipart__part.html" title="Parsed part from multipart request." alt="" coords="118,433,301,513"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,513,245,551,249,560,244,562,240,553,224,515"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="31,276,110,341"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="72,341,76,375,90,408,107,426,103,429,86,411,71,377,67,342"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,133,136,213"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="73,227,73,276,68,276,68,227"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="142,276,301,341"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="222,342,216,417,211,417,216,341"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="223,141,345,206"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="315,218,323,237,344,324,351,395,345,466,323,553,312,577,307,575,317,551,340,465,346,395,338,325,317,238,310,219"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="253,219,242,238,230,277,225,275,238,236,249,216"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="273,5,295,71"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="287,71,287,124,281,124,281,71"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::ihe::xds::registry_query_result" name="kcenon::pacs::ihe::xds::registry_query_result">
+<area shape="rect" id="Node000001" title="ITI&#45;18 RegistryStoredQueryResponse payload." alt="" coords="263,848,402,943"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="288,135,367,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="369,198,386,223,395,264,401,328,401,496,388,678,378,759,366,825,364,833,358,832,361,823,373,758,383,677,395,495,395,328,390,265,381,225,365,201"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1ihe_1_1xds_1_1registry__document__entry.html" title="One XDSDocumentEntry extracted from an AdhocQueryResponse." alt="" coords="153,439,361,599"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="290,191,271,206,256,225,239,273,232,324,232,374,237,422,232,423,227,375,227,323,234,272,252,223,267,202,286,187"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="262,5,393,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="330,99,330,134,325,134,325,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="173,691,343,785"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="283,785,306,832,301,834,278,787"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="260,599,260,674,255,674,254,599"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,486,127,551"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="65,565,70,617,79,642,92,665,109,682,129,697,174,717,172,722,126,701,106,686,88,668,74,644,65,618,60,566"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="55,135,77,200"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="69,200,69,469,63,469,63,200"/>
+</map>

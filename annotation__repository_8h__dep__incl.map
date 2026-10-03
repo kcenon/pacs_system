@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/annotation_repository.h" name="include/kcenon/pacs/storage/annotation_repository.h">
+<area shape="rect" id="Node000001" title="Repository for annotation persistence using base_repository pattern." alt="" coords="120,5,275,60"/>
+<area shape="rect" id="Node000002" href="$annotation__repository_8cpp.html" title="Implementation of the annotation repository." alt="" coords="5,108,173,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,71,113,110,109,106,155,67"/>
+<area shape="rect" id="Node000003" href="$annotation__endpoints_8cpp.html" title="Annotation API endpoints implementation." alt="" coords="198,108,413,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="240,67,285,106,282,110,237,71"/>
+</map>

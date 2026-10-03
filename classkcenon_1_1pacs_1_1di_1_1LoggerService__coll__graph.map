@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::di::LoggerService" name="kcenon::pacs::di::LoggerService">
+<area shape="rect" id="Node000001" title="Default implementation of ILogger using logger_adapter." alt="" coords="7,479,178,719"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,5,180,431"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,445,95,478,90,478,90,445"/>
+</map>

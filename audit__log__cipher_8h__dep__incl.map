@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/security/audit_log_cipher.h" name="include/kcenon/pacs/security/audit_log_cipher.h">
+<area shape="rect" id="Node000001" title="At&#45;rest encryption for ATNA audit log records (ISO 27799 compliance)" alt="" coords="5,5,160,60"/>
+<area shape="rect" id="Node000002" href="$audit__log__cipher_8cpp.html" title="AES&#45;256&#45;GCM + HMAC&#45;SHA256 envelope cipher for ATNA audit logs." alt="" coords="15,108,150,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,74,85,108,80,108,80,74"/>
+</map>

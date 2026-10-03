@@ -1,0 +1,31 @@
+<map id="kcenon::pacs::security::audit_log_cipher" name="kcenon::pacs::security::audit_log_cipher">
+<area shape="rect" id="Node000001" title="Encrypts and decrypts single audit log records." alt="" coords="385,1215,543,1375"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1audit__key__manager.html" title="Holds the active encryption key and any retired keys for decryption of historical records." alt="" coords="381,912,547,1152"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="467,1152,467,1199,461,1199,461,1152"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="279,762,363,827"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="343,826,385,896,381,899,338,829"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="388,740,540,849"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="467,850,467,895,461,895,461,850"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="545,305,623,371"/>
+<area shape="poly" id="edge16_Node000002_Node000005" title=" " alt="" coords="600,370,619,420,633,477,642,533,646,578,643,622,633,678,617,736,597,793,547,899,542,896,592,791,612,734,628,677,638,621,641,578,637,534,628,478,614,421,595,372"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="587,371,585,437,577,524,559,622,545,670,528,717,523,727,518,725,523,715,540,669,554,621,572,523,580,436,582,371"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1security_1_1audit__cipher__key.html" title="A versioned symmetric key pair (data encryption + MAC)" alt="" coords="327,477,487,677"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="552,373,533,388,514,399,497,411,464,464,459,461,493,408,511,394,531,383,548,369"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="519,133,649,213"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="587,227,587,305,581,305,581,227"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="436,677,448,723,443,725,431,679"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="317,298,520,378"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="402,379,392,410,388,461,383,461,387,409,397,377"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="189,141,304,206"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="318,192,353,210,385,236,404,265,414,297,409,298,399,267,381,239,351,215,316,197"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="115,291,293,385"/>
+<area shape="poly" id="edge12_Node000011_Node000009" title=" " alt="" coords="222,219,215,238,206,291,201,290,209,237,217,217"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="181,5,203,71"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="206,62,220,94,232,125,227,127,215,96,201,65"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="5,133,149,213"/>
+<area shape="poly" id="edge15_Node000012_Node000010" title=" " alt="" coords="182,51,137,96,116,122,112,118,133,93,179,48"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="246,384,318,468,314,472,242,387"/>
+<area shape="poly" id="edge13_Node000004_Node000012" title=" " alt="" coords="79,227,81,277,89,335,103,395,128,452,171,522,211,572,316,675,391,738,387,742,313,679,207,576,166,525,123,455,98,397,83,336,76,277,73,227"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="51,5,74,71"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="65,71,67,109,68,117,62,117,61,110,59,71"/>
+</map>

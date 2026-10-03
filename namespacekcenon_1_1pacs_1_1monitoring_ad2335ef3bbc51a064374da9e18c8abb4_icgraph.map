@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::to_string" name="kcenon::pacs::monitoring::to_string">
+<area shape="rect" id="Node000001" title="Convert health level to string representation." alt="" coords="487,53,673,93"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#a454450c19bcdded825a8772e2f38be2e" title=" " alt="" coords="240,5,439,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="473,58,438,52,439,47,474,52"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#afcbb6401eaad05109402374210642aa0" title="Get supported metric types." alt="" coords="246,84,433,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="474,92,433,99,432,94,473,87"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__service__collector.html#ac7b93a38494c90ee23869424038f5459" title="Collect current DIMSE service metrics." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="226,35,192,35,192,30,226,30"/>
+</map>

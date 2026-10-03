@@ -1,0 +1,23 @@
+<map id="include/kcenon/pacs/storage/prefetch_repository.h" name="include/kcenon/pacs/storage/prefetch_repository.h">
+<area shape="rect" id="Node000001" title="Repository for prefetch rule and history persistence." alt="" coords="323,5,539,45"/>
+<area shape="rect" id="Node000002" href="$prefetch__types_8h.html" title="Types and structures for prefetch manager." alt="" coords="67,93,210,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,48,216,92,215,87,366,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="192,181,251,207"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="386,48,345,69,306,95,268,133,239,171,234,168,264,130,302,91,343,64,383,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="275,181,338,207"/>
+<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="386,48,354,68,327,95,319,112,313,131,309,168,303,167,308,130,314,110,323,92,351,63,383,43"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="337,93,525,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="433,46,433,79,428,79,428,46"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="549,101,627,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="466,43,556,92,554,96,464,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="651,101,725,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="493,43,640,91,646,93,644,98,638,96,491,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="750,101,847,126"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="527,43,738,91,751,94,750,99,737,96,526,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="116,136,66,175,63,170,113,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,181,167,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="140,134,137,168,132,167,134,133"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="161,132,201,170,197,174,157,135"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="180,131,271,173,268,178,178,136"/>
+</map>

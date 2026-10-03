@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::cache::simple_lru_cache::purge_expired" name="kcenon::pacs::services::cache::simple_lru_cache::purge_expired">
+<area shape="rect" id="Node000001" title="Remove all expired entries from the cache." alt="" coords="5,5,195,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1cache_1_1simple__lru__cache.html#aa1937fd53cd4670a2260733c80d5d48c" title=" " alt="" coords="243,5,432,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,30,229,30,229,35,195,35"/>
+</map>

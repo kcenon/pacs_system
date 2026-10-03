@@ -1,0 +1,27 @@
+<map id="kcenon::pacs::network::pdu_decoder::read_uint16_be" name="kcenon::pacs::network::pdu_decoder::read_uint16_be">
+<area shape="rect" id="Node000001" title="Read a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="1844,77,2065,117"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a3320c0e594a8643df44c1b7578d86697" title="Decode an A&#45;ASSOCIATE&#45;AC PDU." alt="" coords="1196,16,1364,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1908,72,1855,46,1795,26,1738,16,1680,11,1563,10,1454,18,1364,30,1364,25,1454,13,1562,4,1680,5,1739,11,1797,21,1857,41,1910,68"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a3bd152610bd4e5bf841c80f014e6a941" title="Decode an A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="1196,95,1364,150"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1830,112,1796,114,1580,125,1364,126,1364,121,1580,120,1796,109,1830,106"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a1e8b1daebb984f5c7cf3da931f66c91e" title="Decode User Information sub&#45;items." alt="" coords="1628,36,1796,91"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="1830,83,1796,78,1796,72,1831,77"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a0d06b134a1faee6f3fd463c2b8a385ea" title="Decode variable items from ASSOCIATE&#45;RQ/AC PDUs." alt="" coords="1412,55,1580,110"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="1830,108,1731,110,1628,106,1580,101,1580,95,1628,101,1731,105,1830,103"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a62fee0be01724f5e8026355f624fd965" title="Decode any PDU from bytes." alt="" coords="955,28,1123,68"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1182,48,1123,49,1123,44,1182,43"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="1182,95,1103,70,1105,65,1184,90"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a6b0ad065cb9652fcc2ebd9a21f458861" title="Handle A&#45;ASSOCIATE&#45;RQ PDU." alt="" coords="929,95,1148,150"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="1182,125,1148,125,1148,120,1182,120"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#afff61fcb536357d6009ca730c3547bea" title="Process a complete PDU." alt="" coords="707,95,881,150"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="916,125,881,125,881,120,916,120"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a1de6f1a790a073ccd311d427618fa7c3" title="Process accumulated buffer for complete PDUs." alt="" coords="477,95,659,150"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="693,125,659,125,659,120,693,120"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a7fdebfd5cd1481667fd9d96071e44056" title="Handle data received from session." alt="" coords="228,95,429,150"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="464,125,430,125,430,120,464,120"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__association__handler.html#a20b3f39bcb4fc5a1fbbc79579ca8033f" title="Feed received data to the handler." alt="" coords="5,95,180,150"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="214,125,180,125,180,120,214,120"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="1614,75,1580,78,1580,72,1614,69"/>
+<area shape="poly" id="edge12_Node000011_Node000002" title=" " alt="" coords="1398,67,1364,61,1365,56,1399,62"/>
+<area shape="poly" id="edge13_Node000011_Node000004" title=" " alt="" coords="1399,103,1365,109,1364,104,1398,98"/>
+</map>

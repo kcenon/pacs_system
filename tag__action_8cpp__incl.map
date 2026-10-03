@@ -1,0 +1,35 @@
+<map id="src/security/tag_action.cpp" name="src/security/tag_action.cpp">
+<area shape="rect" id="Node000001" title="Implementation of HIPAA identifier tag collections." alt="" coords="313,5,509,31"/>
+<area shape="rect" id="Node000002" href="$tag__action_8h.html" title="Tag action definitions for DICOM de&#45;identification." alt="" coords="429,79,587,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,29,476,68,472,72,423,33"/>
+<area shape="rect" id="Node000014" href="$dicom__tag__constants_8h.html" title="Compile&#45;time constants for commonly used DICOM tags." alt="" coords="225,79,404,119"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="398,33,350,72,347,68,395,29"/>
+<area shape="rect" id="Node000003" href="$dicom__tag_8h.html" title="DICOM Tag representation (Group, Element pairs)" alt="" coords="233,167,412,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="468,121,377,163,375,158,466,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,255,72,280"/>
+<area shape="poly" id="edge11_Node000002_Node000005" title=" " alt="" coords="429,119,416,121,348,132,294,137,241,146,177,169,144,186,113,207,63,247,59,243,110,203,141,182,175,164,240,141,293,132,347,126,416,116,428,114"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="97,255,183,280"/>
+<area shape="poly" id="edge12_Node000002_Node000006" title=" " alt="" coords="429,120,298,149,223,169,202,185,183,205,155,244,151,241,179,201,198,181,220,164,297,144,428,115"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="395,255,469,280"/>
+<area shape="poly" id="edge13_Node000002_Node000007" title=" " alt="" coords="502,120,445,243,441,241,497,118"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="493,255,552,280"/>
+<area shape="poly" id="edge14_Node000002_Node000008" title=" " alt="" coords="512,119,523,241,518,241,507,119"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="577,255,674,280"/>
+<area shape="poly" id="edge15_Node000002_Node000009" title=" " alt="" coords="521,118,578,205,608,243,604,246,574,208,517,120"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="588,174,655,199"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="535,117,597,163,593,168,532,121"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="679,174,747,199"/>
+<area shape="poly" id="edge16_Node000002_Node000012" title=" " alt="" coords="554,116,675,166,673,171,552,121"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="771,174,834,199"/>
+<area shape="poly" id="edge17_Node000002_Node000013" title=" " alt="" coords="588,115,672,137,761,164,767,166,765,171,759,169,671,142,587,120"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="207,255,286,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="306,209,270,246,266,243,302,205"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="255,209,86,256,84,251,254,204"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="280,209,181,252,179,247,278,204"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="351,205,406,244,403,249,348,209"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="372,204,482,247,480,252,370,209"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="396,204,569,249,567,254,394,209"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="310,255,370,280"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="329,206,337,241,332,242,324,207"/>
+<area shape="poly" id="edge19_Node000014_Node000003" title=" " alt="" coords="319,119,322,153,317,153,314,119"/>
+</map>

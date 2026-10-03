@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::mpps_scu::set" name="kcenon::pacs::services::mpps_scu::set">
+<area shape="rect" id="Node000001" title="Update an existing MPPS instance (N&#45;SET)" alt="" coords="232,37,401,77"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#addeb561ea7611b63f87f7aacd025a862" title="Complete an MPPS instance (convenience method)" alt="" coords="10,5,179,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,46,179,40,180,35,219,41"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1mpps__scu.html#a86f8f61681c779010b8e8b45d5805244" title="Discontinue an MPPS instance (convenience method)" alt="" coords="5,69,184,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,74,184,79,184,74,218,69"/>
+</map>

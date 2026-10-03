@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::services::xds::document_retrieval_result" name="kcenon::pacs::services::xds::document_retrieval_result">
+<area shape="rect" id="Node000001" title="Result of a document retrieval." alt="" coords="5,463,185,597"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="211,276,390,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="273,344,171,452,167,449,269,340"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="87,148,165,213"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="111,215,98,244,89,277,83,319,81,363,85,446,80,446,75,363,77,319,83,275,93,242,106,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="167,211,220,250,241,265,238,269,216,254,164,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="61,5,191,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="129,99,129,148,123,148,123,99"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="240,148,361,213"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="303,227,303,276,298,276,298,227"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="289,13,312,78"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="303,78,303,131,298,131,298,78"/>
+</map>

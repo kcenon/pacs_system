@@ -1,0 +1,25 @@
+var classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec =
+[
+    [ "impl", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec_1_1impl.html", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec_1_1impl" ],
+    [ "jpeg2000_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a93b405af90e1c520f4b9ebf8e4502891", null ],
+    [ "~jpeg2000_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a2ceddcce1192df964395956db37f744e", null ],
+    [ "jpeg2000_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a37aa082bb501d5085c96ac0b0807a300", null ],
+    [ "jpeg2000_codec", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a56bd06e156c11d6977abcd1fdb9d7877", null ],
+    [ "can_decode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a5fcbcaaac5547204a61a8a75541aee53", null ],
+    [ "can_encode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a4fda11eb6960808d8f5a19c2c745d9bc", null ],
+    [ "compression_ratio", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a6f1029ffd40f968e21036d0399e7df7d", null ],
+    [ "decode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#aaca3068b1b7e87a9a5342b18fe0c1b06", null ],
+    [ "encode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a5e2fe9fe00da42e78e7f7166accea37c", null ],
+    [ "is_lossless_mode", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#aff42029c2146a3d0fc50ededefe83768", null ],
+    [ "is_lossy", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a0dac9224f68e8a71ccb9a01709494303", null ],
+    [ "name", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#ad7d17698e101d4b5211db10abac2c5ee", null ],
+    [ "operator=", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a8958e38a1f9631957431990ea80698c2", null ],
+    [ "operator=", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#ac172b09f0cdac62df36779e88817f4ca", null ],
+    [ "resolution_levels", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#ad316bcf4ddf276e766aaa69dcd492691", null ],
+    [ "transfer_syntax_uid", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a72a98a43fa79f96af23ae6e0c84fca75", null ],
+    [ "impl_", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#a216a5b3819bcf437761236eec9cc4824", null ],
+    [ "kDefaultCompressionRatio", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#af7abd38373ce30978b83b3520b1bc0b9", null ],
+    [ "kDefaultResolutionLevels", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#ab5e372d8ead2911ebc489ff985d11dfa", null ],
+    [ "kTransferSyntaxUIDLossless", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#af020949a55859f97250788a9787aa8a3", null ],
+    [ "kTransferSyntaxUIDLossy", "classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec.html#aec9f4383d2d87203c2f72a3a7cb390c9", null ]
+];

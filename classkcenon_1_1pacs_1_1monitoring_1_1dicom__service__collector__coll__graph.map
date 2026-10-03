@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::monitoring::dicom_service_collector" name="kcenon::pacs::monitoring::dicom_service_collector">
+<area shape="rect" id="Node000001" title="Collector for DICOM DIMSE service operation metrics." alt="" coords="99,404,306,764"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="33,276,111,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,341,112,388,107,390,85,343"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,133,136,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,227,74,276,69,276,69,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="135,276,294,341"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="210,342,207,366,205,387,200,387,201,365,205,341"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="160,141,275,206"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="219,220,218,276,213,276,214,220"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="206,5,229,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="220,71,220,124,215,124,215,71"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="329,276,413,341"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="361,343,344,381,317,426,313,424,339,379,357,341"/>
+</map>

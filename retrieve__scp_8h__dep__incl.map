@@ -1,0 +1,27 @@
+<map id="include/kcenon/pacs/services/retrieve_scp.h" name="include/kcenon/pacs/services/retrieve_scp.h">
+<area shape="rect" id="Node000001" title="DICOM Retrieve SCP service (C&#45;MOVE/C&#45;GET handler)" alt="" coords="801,5,977,45"/>
+<area shape="rect" id="Node000002" href="$mini__pacs_8h.html" title="Mini PACS class integrating all DICOM services." alt="" coords="368,93,565,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="789,50,560,96,559,91,788,44"/>
+<area shape="rect" id="Node000008" href="$retrieve__scu_8h.html" title="DICOM Retrieve SCU service (C&#45;MOVE/C&#45;GET sender)" alt="" coords="687,93,863,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="855,56,802,95,798,91,851,52"/>
+<area shape="rect" id="Node000012" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="887,101,1121,126"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="928,52,990,98,987,102,924,56"/>
+<area shape="rect" id="Node000013" href="$retrieve__scp_8cpp.html" title="Implementation of the Retrieve SCP service (C&#45;MOVE/C&#45;GET)" alt="" coords="1145,93,1300,133"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="976,46,1150,91,1149,96,975,51"/>
+<area shape="rect" id="Node000003" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="5,189,184,229"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="377,139,197,184,168,191,167,186,195,179,376,134"/>
+<area shape="rect" id="Node000004" href="$mini__pacs_8cpp.html" title="Implementation of Mini PACS class." alt="" coords="209,189,421,229"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="426,143,347,191,344,186,423,138"/>
+<area shape="rect" id="Node000005" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="444,181,599,236"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="487,144,508,180,504,183,482,146"/>
+<area shape="rect" id="Node000006" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="353,284,508,339"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="490,248,456,286,452,282,486,245"/>
+<area shape="rect" id="Node000007" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="533,284,691,339"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="556,245,590,282,586,286,552,248"/>
+<area shape="rect" id="Node000009" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="623,196,819,221"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="759,147,730,197,726,194,755,144"/>
+<area shape="rect" id="Node000010" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="844,189,999,229"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="817,138,893,186,890,191,814,143"/>
+<area shape="rect" id="Node000011" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="1023,189,1222,229"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="859,134,1053,186,1052,191,858,139"/>
+</map>

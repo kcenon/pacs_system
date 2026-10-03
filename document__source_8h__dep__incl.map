@@ -1,0 +1,13 @@
+<map id="include/kcenon/pacs/ihe/xds/document_source.h" name="include/kcenon/pacs/ihe/xds/document_source.h">
+<area shape="rect" id="Node000001" title="IHE XDS.b Document Source Actor (ITI&#45;41 Provide and Register Document Set&#45;b)." alt="" coords="242,5,446,45"/>
+<area shape="rect" id="Node000002" href="$document__consumer_8h.html" title="IHE XDS.b Document Consumer Actor (ITI&#45;43 Retrieve Document Set)." alt="" coords="5,93,229,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="282,53,168,96,166,91,280,48"/>
+<area shape="rect" id="Node000004" href="$registry__query_8h.html" title="IHE XDS.b Registry Query Actor (ITI&#45;18 RegistryStoredQuery)." alt="" coords="253,93,435,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="347,59,347,93,341,93,341,59"/>
+<area shape="rect" id="Node000006" href="$document__source_8cpp.html" title="IHE XDS.b Document Source actor (ITI&#45;41)." alt="" coords="459,93,621,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="400,48,498,91,496,96,398,53"/>
+<area shape="rect" id="Node000003" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="37,181,198,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,147,120,181,115,181,115,147"/>
+<area shape="rect" id="Node000005" href="$registry__query_8cpp.html" title="IHE XDS.b Registry Query actor (ITI&#45;18)." alt="" coords="271,181,417,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="347,147,347,181,341,181,341,147"/>
+</map>

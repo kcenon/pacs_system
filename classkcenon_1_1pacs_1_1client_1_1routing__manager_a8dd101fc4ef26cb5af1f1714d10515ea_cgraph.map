@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::client::routing_manager::match_condition" name="kcenon::pacs::client::routing_manager::match_condition">
+<area shape="rect" id="Node000001" title="Check if a condition matches a dataset." alt="" coords="5,45,196,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a266113950edf41a50f5ff70a97395a2a" title="Get DICOM field value from dataset." alt="" coords="254,5,425,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,54,240,47,241,52,197,59"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1routing__manager.html#a414b09558c75f093f7eb69ea4ee3a34f" title="Match a wildcard pattern against a value." alt="" coords="244,84,435,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="197,85,231,91,230,96,196,91"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="483,5,637,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,30,469,30,469,35,425,35"/>
+</map>

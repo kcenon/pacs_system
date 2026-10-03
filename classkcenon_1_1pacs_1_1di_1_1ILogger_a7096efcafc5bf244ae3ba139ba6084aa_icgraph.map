@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::di::ILogger::is_enabled" name="kcenon::pacs::di::ILogger::is_enabled">
+<area shape="rect" id="Node000001" title="Check if a log level is enabled." alt="" coords="236,165,419,205"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#a0a2fe3d35666abfd3cd717e2f3e5ffc0" title="Log a formatted debug&#45;level message." alt="" coords="5,5,188,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="298,157,249,107,219,82,187,60,163,48,166,43,189,55,222,78,253,104,302,153"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#a7eb463823a1c528c6b5acb7d7e87bf37" title="Log a formatted error&#45;level message." alt="" coords="5,69,188,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,162,187,124,156,112,158,107,189,119,274,157"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#ab24b7acaaba97384a9960907f038007b" title="Log a formatted fatal&#45;level message." alt="" coords="5,133,188,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="222,173,188,169,189,163,223,168"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#a887452d985788fa8ce30290ab2ae3623" title="Log a formatted info&#45;level message." alt="" coords="5,197,188,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="223,202,189,207,188,202,222,197"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#a6d0d00e7aff5711eb6b96d79dfb01d39" title="Log a formatted trace&#45;level message." alt="" coords="5,261,188,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="274,214,189,252,158,264,156,259,187,247,272,209"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html#aeea4cf795577b212561591b9b9f62510" title="Log a formatted warning&#45;level message." alt="" coords="5,325,188,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="302,217,253,267,222,293,189,316,166,328,163,323,187,311,219,289,249,263,298,214"/>
+</map>

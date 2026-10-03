@@ -1,0 +1,18 @@
+<map id="include/kcenon/pacs/integration/network_adapter.h" name="include/kcenon/pacs/integration/network_adapter.h">
+<area shape="rect" id="Node000001" title="Adapter for integrating network_system for DICOM protocol." alt="" coords="279,5,433,60"/>
+<area shape="rect" id="Node000002" href="$service__interfaces_8h.html" title="Service interface aliases for dependency injection." alt="" coords="72,108,245,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="289,68,200,110,198,105,287,63"/>
+<area shape="rect" id="Node000006" href="$network__adapter_8cpp.html" title="Implementation of network_adapter for network_system integration." alt="" coords="269,108,443,148"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="359,74,359,108,353,108,353,74"/>
+<area shape="rect" id="Node000007" href="$pacs-integration_8cppm.html" title="C++20 module partition for external system adapters." alt="" coords="467,115,717,141"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="436,63,564,113,562,118,434,68"/>
+<area shape="rect" id="Node000003" href="$service__registration_8h.html" title="ServiceContainer registration module for PACS services." alt="" coords="67,196,250,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="161,162,161,196,156,196,156,162"/>
+<area shape="rect" id="Node000004" href="$test__support_8h.html" title="Test support utilities for PACS dependency injection." alt="" coords="5,284,160,324"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="99,157,75,174,57,197,51,219,54,242,72,283,67,285,49,243,46,218,52,195,72,171,96,152"/>
+<area shape="rect" id="Node000005" href="$pacs-di_8cppm.html" title="C++20 module partition for dependency injection." alt="" coords="101,372,293,397"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="221,152,246,171,265,195,274,220,275,246,270,272,260,297,234,342,210,373,206,370,230,339,255,295,265,270,269,245,269,221,260,197,242,174,218,157"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="135,248,101,286,97,282,131,245"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="169,249,197,371,192,373,164,250"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="123,330,182,370,179,374,120,334"/>
+</map>

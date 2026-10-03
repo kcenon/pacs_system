@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::prefetch_manager::start_scheduler" name="kcenon::pacs::client::prefetch_manager::start_scheduler">
+<area shape="rect" id="Node000001" title="Start the scheduler for cron&#45;based rules." alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1prefetch__manager_1_1impl.html#a291250de6c29a344a596a1355233008a" title=" " alt="" coords="240,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1prefetch__manager_1_1impl.html#a634c8992f1804fe741da476011d0012a" title=" " alt="" coords="475,5,661,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="427,30,461,30,461,35,427,35"/>
+</map>

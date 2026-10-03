@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/storage/patient_repository.h" name="include/kcenon/pacs/storage/patient_repository.h">
+<area shape="rect" id="Node000001" title="Repository for patient metadata persistence using base_repository pattern." alt="" coords="121,5,329,45"/>
+<area shape="rect" id="Node000002" href="$index__database_8cpp.html" title="Implementation of PACS index database." alt="" coords="5,101,233,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,56,136,102,132,98,189,52"/>
+<area shape="rect" id="Node000003" href="$patient__repository_8cpp.html" title="Implementation of the patient repository." alt="" coords="258,93,402,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="260,52,308,91,305,95,257,56"/>
+</map>

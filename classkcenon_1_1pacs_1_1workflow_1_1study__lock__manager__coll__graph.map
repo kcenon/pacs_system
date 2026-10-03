@@ -1,0 +1,43 @@
+<map id="kcenon::pacs::workflow::study_lock_manager" name="kcenon::pacs::workflow::study_lock_manager">
+<area shape="rect" id="Node000001" title="Manages locks on DICOM studies for concurrent access control." alt="" coords="691,1093,877,1533"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1workflow_1_1study__lock__manager__config.html" title="Configuration for the study lock manager." alt="" coords="145,801,348,981"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="315,979,362,1029,440,1094,523,1154,678,1251,676,1255,520,1158,437,1098,358,1033,311,983"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="372,836,564,945"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="510,944,684,1174,679,1177,506,947"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="137,148,215,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="138,204,107,225,75,251,46,283,26,321,13,365,8,401,12,436,26,479,44,519,62,551,82,577,103,599,155,639,223,686,260,706,292,716,325,726,362,749,398,783,428,821,424,824,394,787,358,753,322,731,291,721,258,711,220,690,152,643,100,603,78,580,58,554,39,521,21,481,7,437,3,400,8,364,21,319,42,280,71,247,104,220,135,200"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1workflow_1_1lock__info.html" title="Detailed information about a lock on a study." alt="" coords="37,320,203,480"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="138,204,119,219,105,239,96,270,95,303,90,303,90,269,100,236,115,216,135,200"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="228,367,407,433"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="190,213,206,253,229,295,275,353,271,357,224,297,202,255,185,215"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="509,360,664,440"/>
+<area shape="poly" id="edge16_Node000013_Node000004" title=" " alt="" coords="216,194,271,211,312,217,345,218,378,221,417,235,443,252,475,280,541,346,538,350,471,284,440,257,415,240,377,226,345,223,312,222,270,216,215,199"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="111,5,241,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="179,99,179,148,173,148,173,99"/>
+<area shape="rect" id="Node000006" href="$structkcenon_1_1pacs_1_1workflow_1_1study__lock__manager_1_1lock__entry.html" title=" " alt="" coords="234,593,401,688"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="348,687,429,820,425,823,343,690"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="188,479,271,579,266,582,184,482"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="320,433,320,577,315,577,315,433"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="283,148,405,213"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="322,227,319,238,313,272,312,306,315,367,310,367,306,307,308,271,313,237,317,225"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="515,13,538,78"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="517,57,402,140,399,136,514,53"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="501,148,627,213"/>
+<area shape="poly" id="edge14_Node000011_Node000010" title=" " alt="" coords="526,78,526,101,531,123,534,132,529,134,525,125,521,101,521,78"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="899,148,1024,213"/>
+<area shape="poly" id="edge23_Node000018_Node000010" title=" " alt="" coords="540,54,587,92,632,122,695,144,762,159,826,168,882,174,882,179,825,174,761,164,694,149,629,126,584,96,536,58"/>
+<area shape="poly" id="edge12_Node000003_Node000011" title=" " alt="" coords="556,227,544,263,526,298,512,310,500,321,485,363,474,421,464,564,463,715,468,836,462,836,458,715,458,564,469,420,479,362,495,319,508,306,522,294,539,261,551,226"/>
+<area shape="poly" id="edge17_Node000013_Node000011" title=" " alt="" coords="571,227,585,360,580,360,566,227"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="687,13,710,78"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="695,79,686,103,671,126,643,149,640,145,667,122,681,101,690,77"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="624,439,645,469,662,503,686,580,698,646,702,707,700,763,695,882,697,950,708,1030,717,1077,712,1078,703,1031,692,951,689,882,695,763,696,707,693,647,681,581,657,505,641,472,620,442"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="717,858,851,923"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="787,924,787,1077,781,1077,781,924"/>
+<area shape="rect" id="Node000015" href="$structkcenon_1_1pacs_1_1workflow_1_1lock__manager__stats.html" title="Statistics for lock manager operations." alt="" coords="875,751,1042,1031"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="903,1032,884,1079,879,1077,898,1030"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="1066,858,1150,923"/>
+<area shape="poly" id="edge20_Node000001_Node000016" title=" " alt="" coords="1102,924,1085,976,1057,1032,1020,1085,978,1135,891,1224,887,1220,974,1132,1015,1082,1052,1029,1080,974,1097,923"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="1047,504,1217,569"/>
+<area shape="poly" id="edge21_Node000001_Node000017" title=" " alt="" coords="1144,569,1163,651,1181,767,1185,832,1185,899,1179,966,1165,1031,1147,1076,1121,1117,1089,1154,1053,1186,1013,1215,972,1239,893,1277,890,1272,969,1234,1010,1210,1049,1182,1085,1150,1117,1114,1142,1074,1160,1030,1174,965,1180,899,1180,832,1175,767,1158,652,1139,571"/>
+<area shape="poly" id="edge22_Node000017_Node000018" title=" " alt="" coords="985,224,1119,502,1114,505,980,227"/>
+</map>

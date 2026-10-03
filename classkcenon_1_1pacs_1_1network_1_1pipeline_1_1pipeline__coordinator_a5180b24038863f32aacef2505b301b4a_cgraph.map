@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::network::pipeline::pipeline_coordinator::~pipeline_coordinator" name="kcenon::pacs::network::pipeline::pipeline_coordinator::~pipeline_coordinator">
+<area shape="rect" id="Node000001" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,5,180,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pipeline_1_1pipeline__coordinator.html#aed3e09d556d0e7bbf2d6fdbeddb4da9e" title="Stop the pipeline gracefully." alt="" coords="228,13,396,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,37,214,37,214,43,180,43"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs.html#a57d4bbf9e126a534cc3200005d32e457" title="Create a PACS void error result." alt="" coords="444,20,589,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="396,37,430,37,430,43,396,43"/>
+</map>

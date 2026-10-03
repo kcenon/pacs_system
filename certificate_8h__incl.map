@@ -1,0 +1,19 @@
+<map id="include/kcenon/pacs/security/certificate.h" name="include/kcenon/pacs/security/certificate.h">
+<area shape="rect" id="Node000001" title="X.509 Certificate and Private Key handling for DICOM digital signatures." alt="" coords="403,5,561,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="403,47,197,93,196,88,402,42"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="218,101,285,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="429,48,298,96,292,98,290,93,296,91,427,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="309,101,375,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="453,48,374,96,371,91,450,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="399,101,477,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="475,47,453,89,448,87,470,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="501,101,554,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="494,44,517,87,512,89,490,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="578,101,637,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="511,43,581,91,578,95,508,48"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="661,101,759,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="533,43,668,93,666,98,531,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="783,101,845,126"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="562,38,663,60,772,91,778,93,776,98,771,96,662,65,561,43"/>
+</map>

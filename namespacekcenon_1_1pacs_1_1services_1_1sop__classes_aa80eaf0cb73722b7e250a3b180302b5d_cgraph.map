@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_waveform_storage_sop_class" name="kcenon::pacs::services::sop_classes::is_waveform_storage_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a Waveform Storage SOP Class." alt="" coords="5,5,205,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a19ce0054fedc24a9e9203a6b5e28d351" title="Get information about a specific Waveform SOP Class." alt="" coords="253,5,464,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,30,240,30,240,35,205,35"/>
+</map>

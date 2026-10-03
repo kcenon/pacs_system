@@ -1,0 +1,9 @@
+<map id="include/kcenon/pacs/services/retrieve_scu.h" name="include/kcenon/pacs/services/retrieve_scu.h">
+<area shape="rect" id="Node000001" title="DICOM Retrieve SCU service (C&#45;MOVE/C&#45;GET sender)" alt="" coords="215,5,391,45"/>
+<area shape="rect" id="Node000002" href="$job__manager_8cpp.html" title="Implementation of the Job Manager." alt="" coords="5,101,201,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="248,53,131,103,129,98,246,48"/>
+<area shape="rect" id="Node000003" href="$retrieve__scu_8cpp.html" title="Implementation of the Retrieve SCU service (C&#45;MOVE/C&#45;GET)" alt="" coords="226,93,381,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="306,59,306,93,301,93,301,59"/>
+<area shape="rect" id="Node000004" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="405,93,604,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="361,48,462,91,460,96,359,53"/>
+</map>

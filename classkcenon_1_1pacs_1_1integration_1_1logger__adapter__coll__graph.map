@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::integration::logger_adapter" name="kcenon::pacs::integration::logger_adapter">
+<area shape="rect" id="Node000001" title="Adapter for DICOM audit logging using logger_system." alt="" coords="58,448,257,848"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="67,291,247,385"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,385,160,431,155,431,155,385"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter_1_1impl.html" title=" " alt="" coords="5,133,184,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="112,213,136,274,131,276,107,214"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="208,141,357,206"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="252,219,195,292,191,289,248,215"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="271,5,294,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="285,71,285,124,280,124,280,71"/>
+</map>

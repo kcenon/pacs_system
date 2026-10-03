@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dimse::dimse_message::set_attribute_identifier_list" name="kcenon::pacs::network::dimse::dimse_message::set_attribute_identifier_list">
+<area shape="rect" id="Node000001" title="Set the Attribute Identifier List." alt="" coords="231,5,436,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1network_1_1dimse.html#a36d449fd375a592287e93e5c891b7d12" title="Create an N&#45;GET request message." alt="" coords="5,13,183,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,35,183,35,183,30,217,30"/>
+</map>

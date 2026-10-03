@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::n_get_scu::next_message_id" name="kcenon::pacs::services::n_get_scu::next_message_id">
+<area shape="rect" id="Node000001" title="Get the next message ID for DIMSE operations." alt="" coords="223,5,440,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1n__get__scu.html#a4ddc6cf6383fa8861e11379f6cb1659a" title="Retrieve attributes from a managed SOP Instance." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,28,175,28,175,23,209,23"/>
+</map>

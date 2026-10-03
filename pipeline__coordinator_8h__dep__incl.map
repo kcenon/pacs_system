@@ -1,0 +1,45 @@
+<map id="include/kcenon/pacs/network/pipeline/pipeline_coordinator.h" name="include/kcenon/pacs/network/pipeline/pipeline_coordinator.h">
+<area shape="rect" id="Node000001" title="Main coordinator for the 6&#45;stage DICOM I/O pipeline." alt="" coords="431,5,622,60"/>
+<area shape="rect" id="Node000002" href="$dimse__process__job_8h.html" title="DIMSE processing job for Stage 3 of the pipeline." alt="" coords="267,211,434,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="419,53,371,74,350,90,333,109,324,133,324,160,330,186,339,210,334,212,325,188,318,161,318,132,328,107,346,86,368,70,417,48"/>
+<area shape="rect" id="Node000003" href="$storage__query__exec__job_8h.html" title="Storage and query execution job for Stage 4 of the pipeline." alt="" coords="132,313,327,368"/>
+<area shape="poly" id="edge25_Node000001_Node000003" title=" " alt="" coords="419,58,364,79,315,110,294,132,277,157,252,213,239,268,233,313,228,313,234,267,247,211,272,154,290,128,312,106,362,74,417,53"/>
+<area shape="rect" id="Node000004" href="$response__encode__job_8h.html" title="Response encoding job for Stage 5 of the pipeline." alt="" coords="5,416,184,471"/>
+<area shape="poly" id="edge20_Node000001_Node000004" title=" " alt="" coords="419,51,341,73,303,89,268,110,213,155,178,198,151,248,123,314,106,368,99,416,94,416,101,367,117,312,146,246,173,195,209,151,265,106,301,85,339,68,417,46"/>
+<area shape="rect" id="Node000007" href="$pipeline__adapter_8h.html" title="Adapter for integrating pipeline with existing DICOM components." alt="" coords="566,416,757,471"/>
+<area shape="poly" id="edge26_Node000001_Node000007" title=" " alt="" coords="636,44,665,53,693,66,719,84,740,106,757,140,761,161,761,187,748,259,712,369,699,395,685,417,680,414,695,392,707,367,743,257,756,186,756,161,752,141,735,110,715,88,691,71,663,58,635,49"/>
+<area shape="rect" id="Node000011" href="$pdu__decode__job_8h.html" title="PDU decoding job for Stage 2 of the pipeline." alt="" coords="342,108,509,163"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="492,72,454,110,450,106,488,68"/>
+<area shape="rect" id="Node000013" href="$receive__network__io__job_8h.html" title="Network I/O receive job for Stage 1 of the pipeline." alt="" coords="533,108,725,163"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="565,68,604,106,601,110,561,72"/>
+<area shape="rect" id="Node000014" href="$send__network__io__job_8h.html" title="Network I/O send job for Stage 6 of the pipeline." alt="" coords="801,313,975,368"/>
+<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="637,42,675,52,713,65,750,83,783,106,806,129,825,155,855,212,875,268,886,313,881,314,870,269,850,214,821,158,802,132,780,110,747,87,711,70,673,57,635,48"/>
+<area shape="rect" id="Node000016" href="$pipeline__coordinator_8cpp.html" title="Implementation of the pipeline coordinator." alt="" coords="851,115,1037,155"/>
+<area shape="poly" id="edge27_Node000001_Node000016" title=" " alt="" coords="636,58,866,113,865,118,635,63"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="310,276,263,315,259,311,307,272"/>
+<area shape="rect" id="Node000008" href="$pipeline__adapter_8cpp.html" title="Implementation of pipeline adapter." alt="" coords="485,526,646,566"/>
+<area shape="poly" id="edge12_Node000002_Node000008" title=" " alt="" coords="380,275,481,414,555,524,551,527,476,418,376,278"/>
+<area shape="rect" id="Node000009" href="$dimse__process__job_8cpp.html" title="Implementation of DIMSE process job." alt="" coords="259,423,467,463"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="356,279,364,423,359,423,350,279"/>
+<area shape="rect" id="Node000010" href="$pdu__decode__job_8cpp.html" title="Implementation of PDU decode job." alt="" coords="485,321,675,361"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="424,268,538,318,536,323,422,273"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="185,378,132,418,128,414,182,374"/>
+<area shape="rect" id="Node000006" href="$storage__query__exec__job_8cpp.html" title="Implementation of storage/query execution job." alt="" coords="67,519,253,573"/>
+<area shape="poly" id="edge9_Node000003_Node000006" title=" " alt="" coords="224,382,199,472,177,520,172,517,193,470,219,381"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="341,365,566,417,565,422,339,370"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="277,374,339,421,336,425,274,379"/>
+<area shape="rect" id="Node000005" href="$response__encode__job_8cpp.html" title="Implementation of response encode job." alt="" coords="285,519,456,573"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="180,473,300,516,298,521,178,478"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="121,481,145,517,141,520,117,484"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="629,482,586,527,582,524,625,479"/>
+<area shape="poly" id="edge14_Node000011_Node000002" title=" " alt="" coords="400,175,372,212,368,209,395,172"/>
+<area shape="poly" id="edge15_Node000011_Node000010" title=" " alt="" coords="445,174,469,218,499,264,528,294,557,318,553,323,524,298,495,267,464,221,440,176"/>
+<area shape="rect" id="Node000012" href="$receive__network__io__job_8cpp.html" title="Implementation of network I/O receive job." alt="" coords="509,211,675,265"/>
+<area shape="poly" id="edge16_Node000011_Node000012" title=" " alt="" coords="482,168,550,208,547,213,479,172"/>
+<area shape="poly" id="edge18_Node000013_Node000007" title=" " alt="" coords="668,172,680,190,689,210,700,253,702,288,689,369,675,417,670,415,684,367,697,288,695,254,684,212,675,192,663,175"/>
+<area shape="poly" id="edge19_Node000013_Node000012" title=" " alt="" coords="617,177,604,212,599,210,612,175"/>
+<area shape="poly" id="edge23_Node000014_Node000005" title=" " alt="" coords="932,376,952,398,968,423,973,448,970,461,962,472,945,486,923,498,869,512,802,519,729,521,584,517,522,517,474,521,457,525,456,519,473,516,522,512,584,512,729,515,802,514,868,507,922,493,942,482,958,469,965,459,967,448,963,425,948,401,928,379"/>
+<area shape="poly" id="edge22_Node000014_Node000007" title=" " alt="" coords="818,376,721,418,719,414,815,371"/>
+<area shape="rect" id="Node000015" href="$send__network__io__job_8cpp.html" title="Implementation of network I/O send job." alt="" coords="781,416,947,471"/>
+<area shape="poly" id="edge24_Node000014_Node000015" title=" " alt="" coords="881,382,873,417,868,415,876,381"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::security::syslog_transport_config" name="kcenon::pacs::security::syslog_transport_config">
+<area shape="rect" id="Node000001" title="Configuration for the Syslog transport." alt="" coords="5,336,181,496"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="54,135,133,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,200,96,319,91,319,91,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="28,5,159,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="96,99,96,134,91,134,91,99"/>
+</map>

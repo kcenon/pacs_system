@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::monitoring_adapter::increment_counter" name="kcenon::pacs::integration::monitoring_adapter::increment_counter">
+<area shape="rect" id="Node000001" title="Increment a counter metric." alt="" coords="5,5,237,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#a1545c4eabd7b0c9232fd2b75332fb6d2" title=" " alt="" coords="285,5,480,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,30,272,30,272,35,238,35"/>
+</map>

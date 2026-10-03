@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::samples::center_text" name="kcenon::pacs::samples::center_text">
+<area shape="rect" id="Node000001" title="Center a string within a given width." alt="" coords="327,23,497,63"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1samples.html#a797bd1037d31deaf7eb6847028221797" title="Print a header/title with decorative border." alt="" coords="108,23,279,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="313,46,279,46,279,41,313,41"/>
+<area shape="rect" id="Node000003" href="$01__hello__dicom_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4" title=" " alt="" coords="5,5,60,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="94,30,60,25,61,20,95,25"/>
+<area shape="rect" id="Node000004" href="$02__echo__server_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" title=" " alt="" coords="5,55,60,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="95,61,61,66,60,61,94,55"/>
+</map>

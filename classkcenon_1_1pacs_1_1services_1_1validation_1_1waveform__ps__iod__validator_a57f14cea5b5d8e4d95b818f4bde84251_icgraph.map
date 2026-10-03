@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::waveform_ps_iod_validator::validate_general_study_module" name="kcenon::pacs::services::validation::waveform_ps_iod_validator::validate_general_study_module">
+<area shape="rect" id="Node000001" title=" " alt="" coords="251,5,448,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1waveform__ps__iod__validator.html#a1c663e35524fcc2e4de26b7201a26eaa" title="Validate a complete Waveform Presentation State or Annotation dataset." alt="" coords="5,13,203,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,43,203,43,203,37,237,37"/>
+</map>

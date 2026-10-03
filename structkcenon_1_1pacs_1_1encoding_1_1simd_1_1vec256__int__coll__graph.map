@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::encoding::simd::vec256_int" name="kcenon::pacs::encoding::simd::vec256_int">
+<area shape="rect" id="Node000001" title="Portable 256&#45;bit integer vector wrapper." alt="" coords="5,243,172,423"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1encoding_1_1simd_1_1vec128__int.html" title="Portable 128&#45;bit integer vector wrapper." alt="" coords="5,5,172,165"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,165,91,226,86,226,86,165"/>
+</map>

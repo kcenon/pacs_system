@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::storage::tier_metadata::should_migrate" name="kcenon::pacs::storage::tier_metadata::should_migrate">
+<area shape="rect" id="Node000001" title="Check if instance is eligible for migration to a target tier." alt="" coords="5,5,179,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1storage_1_1tier__metadata.html#a1aeecca0575d058f9a131ce4690f6814" title="Get the time since last access." alt="" coords="227,5,391,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,30,213,30,213,35,179,35"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1storage_1_1tier__metadata.html#a96ded6003bc88b81b2c4fa9d5ac89060" title="Get the age of the instance (time since storage)" alt="" coords="439,13,603,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="391,30,425,30,425,35,391,35"/>
+</map>

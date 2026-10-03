@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::client::remote_node_manager::verify_node" name="kcenon::pacs::client::remote_node_manager::verify_node">
+<area shape="rect" id="Node000001" title="Verify a node&#39;s connectivity synchronously." alt="" coords="235,45,416,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#a3263db5079ad314a67d03b558569a98d" title="Verify all nodes asynchronously." alt="" coords="5,5,187,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,57,187,51,187,46,222,52"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1client_1_1remote__node__manager.html#afe97f16df5d97ba5fa9dcf00bc16f34b" title="Verify a node&#39;s connectivity asynchronously." alt="" coords="5,84,187,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,93,187,99,187,93,221,88"/>
+</map>

@@ -1,0 +1,34 @@
+<map id="src/core/standard_tags_data.cpp" name="src/core/standard_tags_data.cpp">
+<area shape="rect" id="Node000001" title="Standard DICOM tags from PS3.6 Data Dictionary." alt="" coords="237,5,406,45"/>
+<area shape="rect" id="Node000002" href="$tag__info_8h.html" title="DICOM tag metadata information structure." alt="" coords="176,93,336,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="309,47,281,84,276,81,305,44"/>
+<area shape="rect" id="Node000011" href="$vr__type_8h.html" title=" " alt="" coords="26,181,193,221"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="250,48,206,67,166,95,139,131,121,169,117,167,134,128,162,91,203,63,248,43"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="360,101,416,126"/>
+<area shape="poly" id="edge18_Node000001_Node000012" title=" " alt="" coords="338,44,372,88,368,91,334,47"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="440,101,493,126"/>
+<area shape="poly" id="edge19_Node000001_Node000013" title=" " alt="" coords="355,43,437,91,434,96,352,48"/>
+<area shape="rect" id="Node000003" href="$dicom__tag_8h.html" title="DICOM Tag representation (Group, Element pairs)" alt="" coords="319,189,422,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="283,131,346,178,342,182,280,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,269,72,295"/>
+<area shape="poly" id="edge10_Node000002_Node000005" title=" " alt="" coords="176,129,80,151,41,166,17,183,10,200,11,219,26,257,21,259,5,220,4,199,13,180,38,161,78,146,175,124"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="96,269,171,295"/>
+<area shape="poly" id="edge11_Node000002_Node000007" title=" " alt="" coords="252,134,235,177,207,223,187,245,164,263,161,259,183,241,203,220,230,174,247,132"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="615,269,673,295"/>
+<area shape="poly" id="edge12_Node000002_Node000008" title=" " alt="" coords="311,131,436,179,611,261,608,266,434,184,309,136"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="195,269,293,295"/>
+<area shape="poly" id="edge13_Node000002_Node000009" title=" " alt="" coords="258,134,252,222,249,256,244,256,247,221,252,133"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="401,269,479,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="383,212,423,257,419,261,379,216"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="321,217,86,272,85,266,320,212"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="503,269,590,295"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="397,212,510,261,508,266,395,216"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="337,217,182,268,180,263,335,211"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="411,211,602,266,600,271,410,217"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="353,216,276,264,273,260,351,212"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="317,269,377,295"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="370,215,357,257,352,255,365,213"/>
+<area shape="poly" id="edge15_Node000011_Node000005" title=" " alt="" coords="94,223,60,261,56,257,90,220"/>
+<area shape="poly" id="edge16_Node000011_Node000007" title=" " alt="" coords="118,221,128,255,123,257,113,222"/>
+<area shape="poly" id="edge17_Node000011_Node000009" title=" " alt="" coords="143,219,214,260,211,265,140,224"/>
+</map>

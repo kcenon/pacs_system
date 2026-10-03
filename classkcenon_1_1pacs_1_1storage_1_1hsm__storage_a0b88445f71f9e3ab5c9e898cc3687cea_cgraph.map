@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::storage::hsm_storage::update_metadata" name="kcenon::pacs::storage::hsm_storage::update_metadata">
+<area shape="rect" id="Node000001" title="Update tier metadata after store/retrieve." alt="" coords="5,5,172,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="220,5,375,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,30,206,30,206,35,172,35"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::client::job_manager::impl::execute_sync_job" name="kcenon::pacs::client::job_manager::impl::execute_sync_job">
+<area shape="rect" id="Node000001" title=" " alt="" coords="623,5,783,60"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#acd8de41a0c6c011d49f906aa819bcfdc" title=" " alt="" coords="415,5,575,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="609,35,575,35,575,30,609,30"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1client_1_1job__manager_1_1impl.html#a02d2240a5a19d4b38d41cd3f7d397268" title=" " alt="" coords="207,5,367,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="401,35,367,35,367,30,401,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1client_1_1job__manager.html#a1be8a6262590f3bd54b54d6794f6f3dc" title="Start the worker threads." alt="" coords="5,5,159,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="193,35,159,35,159,30,193,30"/>
+</map>

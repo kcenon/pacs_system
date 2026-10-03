@@ -1,0 +1,25 @@
+<map id="include/kcenon/pacs/services/storage_scp.h" name="include/kcenon/pacs/services/storage_scp.h">
+<area shape="rect" id="Node000001" title="DICOM Storage SCP service (C&#45;STORE handler)" alt="" coords="542,5,717,45"/>
+<area shape="rect" id="Node000002" href="$03__storage__server_2main_8cpp.html" title="Level 3 Sample: Storage Server &#45; DICOM image reception and archiving." alt="" coords="5,93,216,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="529,46,217,97,216,92,528,41"/>
+<area shape="rect" id="Node000003" href="$mini__pacs_8h.html" title="Mini PACS class integrating all DICOM services." alt="" coords="240,93,437,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="553,52,403,96,402,91,552,47"/>
+<area shape="rect" id="Node000009" href="$routing__manager_8cpp.html" title="Implementation of the routing manager for auto&#45;forwarding." alt="" coords="461,93,592,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="598,56,551,95,548,91,594,52"/>
+<area shape="rect" id="Node000010" href="$pacs-services_8cppm.html" title="C++20 module partition for DICOM SCP services." alt="" coords="616,101,851,126"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="665,52,721,98,717,102,661,56"/>
+<area shape="rect" id="Node000011" href="$storage__scp_8cpp.html" title="Implementation of the Storage SCP service." alt="" coords="875,93,1027,133"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="713,46,881,91,880,96,712,51"/>
+<area shape="rect" id="Node000012" href="$storage__scu_8cpp.html" title="Implementation of the Storage SCU service." alt="" coords="1051,93,1203,133"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="731,39,1039,91,1051,93,1050,98,1038,96,730,44"/>
+<area shape="rect" id="Node000004" href="$04__mini__pacs_2main_8cpp.html" title="Level 4 Sample: Mini PACS &#45; Complete DICOM server with all services." alt="" coords="29,189,208,229"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="283,141,164,191,162,186,281,136"/>
+<area shape="rect" id="Node000005" href="$mini__pacs_8cpp.html" title="Implementation of Mini PACS class." alt="" coords="233,189,445,229"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="341,147,341,189,336,189,336,147"/>
+<area shape="rect" id="Node000006" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="468,181,623,236"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="394,137,488,179,486,184,392,141"/>
+<area shape="rect" id="Node000007" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="377,284,532,339"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="514,248,480,286,476,282,510,245"/>
+<area shape="rect" id="Node000008" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="557,284,715,339"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="580,245,614,282,610,286,576,248"/>
+</map>

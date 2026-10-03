@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::xa_iod_validator::check_xa_photometric" name="kcenon::pacs::services::validation::xa_iod_validator::check_xa_photometric">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,70,216,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="264,5,453,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,67,275,47,277,52,206,72"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="281,70,436,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,95,267,95,267,100,216,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a66914fe52c4f21335c902005cb198d54" title="Check if photometric interpretation is valid for XA." alt="" coords="274,149,443,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="198,122,262,143,260,148,197,127"/>
+</map>

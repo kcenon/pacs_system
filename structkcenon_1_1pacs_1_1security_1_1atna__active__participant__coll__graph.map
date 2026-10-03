@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::security::atna_active_participant" name="kcenon::pacs::security::atna_active_participant">
+<area shape="rect" id="Node000001" title="An active participant in the audit event." alt="" coords="237,651,447,751"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="293,135,372,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="374,193,387,206,398,223,421,280,437,331,445,378,446,423,442,468,432,516,398,628,394,637,389,635,393,626,427,514,437,467,441,423,440,379,432,332,416,282,393,225,383,210,370,196"/>
+<area shape="rect" id="Node000005" href="$structkcenon_1_1pacs_1_1security_1_1atna__coded__value.html" title="A coded value with code, code system name, and display name." alt="" coords="179,292,337,372"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="295,189,273,204,256,225,249,250,248,276,243,275,244,249,252,223,269,201,291,184"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="267,5,398,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="335,99,335,134,330,134,330,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="188,493,336,588"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="277,587,292,626,298,636,293,638,288,628,272,589"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="261,372,263,477,258,477,256,372"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,299,127,365"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="65,378,70,425,77,447,89,468,110,488,135,504,189,525,187,530,132,509,107,492,85,471,72,450,65,426,60,379"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="55,135,77,200"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="69,200,69,283,63,283,63,200"/>
+</map>

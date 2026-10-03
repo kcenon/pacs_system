@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::job_record::can_cancel" name="kcenon::pacs::client::job_record::can_cancel">
+<area shape="rect" id="Node000001" title="Check if job can be cancelled." alt="" coords="5,5,184,45"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1client.html#a2224cefe2f1791fceebbc935eb2d567e" title="Check if job status is a terminal state." alt="" coords="232,5,383,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,23,218,23,218,28,184,28"/>
+</map>

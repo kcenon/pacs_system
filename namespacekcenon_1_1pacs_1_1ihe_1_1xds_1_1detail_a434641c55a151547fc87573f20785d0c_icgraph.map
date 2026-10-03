@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::ihe::xds::detail::base64_decode_bytes" name="kcenon::pacs::ihe::xds::detail::base64_decode_bytes">
+<area shape="rect" id="Node000001" title="Base64&#45;decode b64 using the same BIO&#45;backed decoder the signer and verifier use internally." alt="" coords="483,5,628,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#a59751258efeb7178c4425bdc4e008e66" title="Parse a RetrieveDocumentSetResponse envelope and resolve the attachment that matches req." alt="" coords="243,5,435,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="469,35,435,35,435,30,469,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1document__consumer_1_1impl.html#af7f1538a44e6a822ac46bb1ea1c22df3" title=" " alt="" coords="5,5,195,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,35,195,35,195,30,229,30"/>
+</map>

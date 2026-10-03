@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/web/endpoints/jobs_endpoints.h" name="include/kcenon/pacs/web/endpoints/jobs_endpoints.h">
+<area shape="rect" id="Node000001" title="Job management REST API and WebSocket endpoints." alt="" coords="112,5,267,60"/>
+<area shape="rect" id="Node000002" href="$jobs__endpoints_8cpp.html" title="Job management REST API and WebSocket endpoints implementation." alt="" coords="5,108,176,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,71,112,110,109,106,150,68"/>
+<area shape="rect" id="Node000003" href="$rest__server_8cpp.html" title="REST API server implementation." alt="" coords="201,115,375,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,68,277,113,274,117,225,71"/>
+</map>

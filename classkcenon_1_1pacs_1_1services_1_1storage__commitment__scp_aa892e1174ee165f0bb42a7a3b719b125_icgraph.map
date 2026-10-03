@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::storage_commitment_scp::build_event_report_dataset" name="kcenon::pacs::services::storage_commitment_scp::build_event_report_dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="745,5,953,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scp.html#af3f859382db9b83d35185a6287676968" title=" " alt="" coords="499,5,697,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="732,35,697,35,697,30,732,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scp.html#a8cee03cc71f4f6034b607453093f4b1a" title=" " alt="" coords="252,5,451,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="485,35,451,35,451,30,485,30"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1storage__commitment__scp.html#a2668da7a1dae0e47ff178238ce895ba6" title="Handle an incoming DIMSE message." alt="" coords="5,5,204,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="238,35,204,35,204,30,238,30"/>
+</map>

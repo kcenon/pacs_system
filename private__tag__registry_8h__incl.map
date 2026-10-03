@@ -1,0 +1,26 @@
+<map id="include/kcenon/pacs/core/private_tag_registry.h" name="include/kcenon/pacs/core/private_tag_registry.h">
+<area shape="rect" id="Node000001" title="Registry of vendor&#45;specific private tag definitions." alt="" coords="307,5,506,45"/>
+<area shape="rect" id="Node000002" href="$vr__type_8h.html" title=" " alt="" coords="49,93,215,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="347,48,206,92,205,87,346,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,72,207"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="307,33,229,40,148,52,80,70,55,81,38,95,29,111,27,130,32,168,27,169,21,130,24,110,34,92,52,77,78,65,147,46,228,35,307,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="109,181,184,207"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="379,48,178,176,175,172,376,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="239,181,337,207"/>
+<area shape="poly" id="edge12_Node000001_Node000005" title=" " alt="" coords="381,47,355,69,332,95,311,132,297,169,292,167,306,130,327,92,351,65,377,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="341,101,392,126"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="400,47,380,89,375,87,395,44"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="416,101,480,126"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="418,44,439,87,434,89,413,47"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="504,101,619,126"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="442,43,530,92,528,96,439,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="643,101,696,126"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="481,43,554,64,632,91,636,93,634,97,630,96,553,69,480,48"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="720,101,779,126"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="507,41,605,62,709,91,715,93,713,98,707,96,604,67,506,46"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="803,101,866,126"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="507,35,643,56,718,72,791,91,798,93,797,98,790,96,717,77,642,61,506,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="111,136,65,174,62,170,108,132"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="138,133,145,167,139,168,133,134"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="171,131,254,173,252,177,168,136"/>
+</map>

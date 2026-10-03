@@ -1,0 +1,21 @@
+<map id="kcenon::pacs::ihe::xds::document_consumer::impl::retrieve" name="kcenon::pacs::ihe::xds::document_consumer::impl::retrieve">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,228,195,283"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1document__consumer_1_1impl.html#af3ebaaffc079d49885a606abef5f4462" title=" " alt="" coords="244,5,433,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,226,164,150,200,107,241,69,247,65,250,69,244,73,204,111,168,153,118,229"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#a9dd66b7261fa96ddea5fb3ef070ec1d8" title="Build a SOAP envelope for ITI&#45;43 from a retrieve_request." alt="" coords="255,84,422,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,226,182,187,241,149,254,142,256,147,244,154,186,192,136,230"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#aa20e0184e7b87b49069c9594411c18ff" title="POST body to opts.endpoint with the given Content&#45;Type." alt="" coords="259,163,418,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="190,225,258,205,259,210,192,230"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#ae44642cadc3463e414526cba6ffc60ac" title="Parse a multipart/related MTOM response body." alt="" coords="249,228,429,283"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="195,253,235,253,235,258,195,258"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#a59751258efeb7178c4425bdc4e008e66" title="Parse a RetrieveDocumentSetResponse envelope and resolve the attachment that matches req." alt="" coords="243,307,435,361"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="185,280,243,300,241,305,183,285"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#ad4f057738a21e0056362f36ca13c1338" title="Sign the body + timestamp of env in place." alt="" coords="243,386,435,426"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="129,281,180,327,244,372,257,378,254,383,241,376,177,331,126,285"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#aefc44a0f87bc1d00c4eadfde3fdc1b83" title="Verify the structural integrity of a previously signed envelope against the certificate embedded in i..." alt="" coords="263,451,414,505"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="119,282,169,357,204,399,244,436,253,442,250,446,241,440,200,403,165,360,114,285"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1ihe_1_1xds_1_1detail.html#a434641c55a151547fc87573f20785d0c" title="Base64&#45;decode b64 using the same BIO&#45;backed decoder the signer and verifier use internally." alt="" coords="483,307,628,361"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="435,331,469,331,469,337,435,337"/>
+<area shape="rect" id="Node000009" href="$ai__service__connector_8cpp.html#aa7dd4092b16e5dda09a0fef9b433db84" title="Encode data to Base64." alt="" coords="494,393,617,419"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="435,403,480,403,480,409,435,409"/>
+</map>

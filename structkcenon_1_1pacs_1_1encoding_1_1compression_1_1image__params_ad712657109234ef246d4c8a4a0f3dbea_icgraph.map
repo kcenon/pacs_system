@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::compression::image_params::valid_for_jpeg_baseline" name="kcenon::pacs::encoding::compression::image_params::valid_for_jpeg_baseline">
+<area shape="rect" id="Node000001" title="Validates image parameters for JPEG Baseline compression." alt="" coords="805,5,1024,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec_1_1impl.html#ad3f336cc9b04a9ef2beba8d2de3baa78" title=" " alt="" coords="547,5,757,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="792,35,758,35,758,30,792,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg__baseline__codec.html#a889aeabff901f0a686926434f3c7d144" title="Compresses pixel data to JPEG Baseline format." alt="" coords="288,5,499,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="533,35,499,35,499,30,533,30"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web_1_1dicomweb.html#ae42d333cbf06384a1e37a148a34c8a6e" title="Render a DICOM image to JPEG or PNG." alt="" coords="5,13,240,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="274,35,240,35,240,30,274,30"/>
+</map>

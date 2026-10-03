@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::network::pdu_decoder::validate_pdu_header" name="kcenon::pacs::network::pdu_decoder::validate_pdu_header">
+<area shape="rect" id="Node000001" title="Validate PDU header and extract length." alt="" coords="5,27,180,82"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#af222f7bc86bfedd75aba6d09c06db4de" title="Check if a complete PDU is available in the buffer." alt="" coords="228,5,421,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,41,214,37,215,42,180,46"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__decoder.html#a9686787c3e255a12501de5e5ff3eea23" title="Read a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="469,35,691,75"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="180,54,228,55,421,55,455,54,456,60,421,60,228,60,180,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="422,34,456,38,455,43,421,39"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::samples::events::query_executed_event" name="kcenon::pacs::samples::events::query_executed_event">
+<area shape="rect" id="Node000001" title="Event fired when a query is executed." alt="" coords="5,277,227,397"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="77,135,155,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,200,119,261,113,261,113,200"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="51,5,181,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,99,119,134,113,134,113,99"/>
+</map>

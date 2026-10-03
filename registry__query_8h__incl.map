@@ -1,0 +1,34 @@
+<map id="include/kcenon/pacs/ihe/xds/registry_query.h" name="include/kcenon/pacs/ihe/xds/registry_query.h">
+<area shape="rect" id="Node000001" title="IHE XDS.b Registry Query Actor (ITI&#45;18 RegistryStoredQuery)." alt="" coords="542,5,723,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,181,193,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="561,48,395,96,269,139,161,179,159,174,268,134,393,91,559,43"/>
+<area shape="rect" id="Node000003" href="$document__source_8h.html" title="IHE XDS.b Document Source Actor (ITI&#45;41 Provide and Register Document Set&#45;b)." alt="" coords="498,93,653,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="622,47,598,83,593,80,618,44"/>
+<area shape="rect" id="Node000004" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="218,181,373,221"/>
+<area shape="poly" id="edge15_Node000001_Node000004" title=" " alt="" coords="580,48,525,69,467,96,396,136,335,176,332,171,393,132,465,91,523,64,578,43"/>
+<area shape="rect" id="Node000006" href="$http__options_8h.html" title="Transport configuration for IHE XDS.b actors." alt="" coords="397,181,551,221"/>
+<area shape="poly" id="edge16_Node000001_Node000006" title=" " alt="" coords="556,48,518,67,502,80,488,95,479,112,474,130,472,167,467,167,469,129,474,110,484,92,498,76,515,62,553,43"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="635,269,694,295"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="653,44,687,92,707,135,718,181,721,202,718,222,706,244,691,262,687,258,702,241,713,220,716,202,713,182,702,137,682,95,648,47"/>
+<area shape="rect" id="Node000009" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="778,181,933,221"/>
+<area shape="poly" id="edge17_Node000001_Node000009" title=" " alt="" coords="678,43,720,64,761,91,802,130,835,168,831,172,798,133,758,95,717,69,676,48"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="925,269,988,295"/>
+<area shape="poly" id="edge20_Node000001_Node000011" title=" " alt="" coords="724,43,783,62,844,90,901,129,926,153,947,180,956,198,960,218,962,255,957,256,955,219,951,200,942,183,922,156,898,133,842,95,781,67,723,48"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="626,189,703,214"/>
+<area shape="poly" id="edge18_Node000001_Node000012" title=" " alt="" coords="647,44,658,67,667,93,672,136,670,175,665,175,667,136,662,94,654,69,642,47"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="498,131,207,183,207,178,497,126"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="515,136,370,180,369,175,513,131"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="555,136,509,174,505,170,551,132"/>
+<area shape="poly" id="edge14_Node000003_Node000008" title=" " alt="" coords="583,133,595,174,616,220,645,258,641,261,612,223,590,176,577,134"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="638,131,782,175,780,180,636,136"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="597,132,644,177,641,181,593,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="247,269,344,295"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="298,222,298,255,293,255,293,222"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="441,269,507,295"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="477,222,477,255,471,255,471,222"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="521,219,625,262,623,267,519,224"/>
+<area shape="poly" id="edge11_Node000009_Node000008" title=" " alt="" coords="811,224,706,267,704,262,809,219"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="822,269,889,295"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="858,222,858,255,853,255,853,222"/>
+<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="881,219,932,258,929,263,878,224"/>
+</map>

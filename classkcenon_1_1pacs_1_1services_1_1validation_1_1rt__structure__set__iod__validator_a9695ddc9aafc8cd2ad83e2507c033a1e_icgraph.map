@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::rt_structure_set_iod_validator::quick_check" name="kcenon::pacs::services::validation::rt_structure_set_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title=" " alt="" coords="240,5,469,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#a59231550fd85a3c17794e8dd0395c25b" title="Quick check if a dataset is a valid RT Structure Set." alt="" coords="5,5,192,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,35,192,35,192,30,226,30"/>
+</map>

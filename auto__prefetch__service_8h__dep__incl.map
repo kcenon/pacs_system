@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/workflow/auto_prefetch_service.h" name="include/kcenon/pacs/workflow/auto_prefetch_service.h">
+<area shape="rect" id="Node000001" title="Automatic prefetch service for prior studies." alt="" coords="157,5,335,60"/>
+<area shape="rect" id="Node000002" href="$pacs-workflow_8cppm.html" title="C++20 module partition for DICOM workflow types." alt="" coords="5,115,244,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,71,142,117,138,113,199,66"/>
+<area shape="rect" id="Node000003" href="$auto__prefetch__service_8cpp.html" title="Implementation of automatic prefetch service for prior studies." alt="" coords="268,108,467,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="293,66,344,106,341,110,289,71"/>
+</map>

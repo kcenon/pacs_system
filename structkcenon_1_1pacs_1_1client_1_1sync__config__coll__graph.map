@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::client::sync_config" name="kcenon::pacs::client::sync_config">
+<area shape="rect" id="Node000001" title="Configuration for a synchronization task." alt="" coords="133,419,298,699"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="205,148,284,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,213,278,237,287,280,289,316,278,395,276,403,271,402,273,394,284,315,282,281,273,238,263,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="47,276,226,341"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="219,215,176,265,172,262,215,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,5,310,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,99,247,148,242,148,242,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="137,341,137,367,141,394,143,402,137,404,135,395,132,368,131,341"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="64,227,70,251,88,274,84,278,65,253,59,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

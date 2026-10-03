@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::workflow::task_scheduler::cancel_task" name="kcenon::pacs::workflow::task_scheduler::cancel_task">
+<area shape="rect" id="Node000001" title="Cancel a scheduled task." alt="" coords="5,5,219,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="267,5,453,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,23,253,23,253,28,219,28"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="501,5,688,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="453,23,488,23,488,28,453,28"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::security::certificate_chain::add" name="kcenon::pacs::security::certificate_chain::add">
+<area shape="rect" id="Node000001" title="Add a certificate to the chain." alt="" coords="227,13,396,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1certificate__chain.html#a1d2072bd826e28a1088b4991c51dadab" title="Load certificate chain from PEM file." alt="" coords="5,5,179,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,35,179,35,179,30,213,30"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::services::validation::us_iod_validator::check_pixel_data_consistency" name="kcenon::pacs::services::validation::us_iod_validator::check_pixel_data_consistency">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,110,232,165"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="280,5,469,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,108,279,55,297,48,299,53,281,60,172,112"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="297,70,452,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,117,284,109,284,114,233,122"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="297,149,452,203"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="233,152,284,160,284,165,232,157"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a7d8f6bbdc8118d7e2bf16a7d5d79cbb5" title="Check if photometric interpretation is valid for US." alt="" coords="290,227,459,282"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="176,162,281,212,297,219,295,224,279,217,174,167"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="517,77,672,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="452,95,503,95,503,100,452,100"/>
+</map>

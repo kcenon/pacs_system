@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::services::worklist_scu::build_query_dataset" name="kcenon::pacs::services::worklist_scu::build_query_dataset">
+<area shape="rect" id="Node000001" title="Build query dataset from typed keys." alt="" coords="471,120,640,175"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#a87beae0e1f801a8dcca34995311b930b" title="Perform a MWL C&#45;FIND query with typed keys." alt="" coords="253,91,423,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="457,134,422,128,423,123,457,128"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#af11e5f4306420be981eddf1cc7a1d950" title="Perform a streaming MWL query for large worklists." alt="" coords="253,156,423,211"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="457,166,423,172,422,167,457,161"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="375,80,362,73,338,70,317,72,305,77,300,83,303,90,297,92,295,82,302,72,316,67,338,65,363,68,377,75"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#af22f687bccfa4dc29c5cd49c4e4a79dc" title="Query worklist by date range." alt="" coords="21,5,190,60"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="264,89,186,63,188,58,266,84"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#a6fda683acbc110ccf89b8b80c61387ff" title="Query worklist by patient ID." alt="" coords="21,84,190,139"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="239,114,190,114,190,109,239,109"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1worklist__scu.html#af8e170854b1128843505bd4c201b17c6" title="Query today&#39;s worklist for a station." alt="" coords="5,163,205,203"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="260,138,172,166,170,161,259,133"/>
+</map>

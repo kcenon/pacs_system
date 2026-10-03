@@ -1,0 +1,67 @@
+<map id="kcenon::pacs::services::validation::ophthalmic_iod_validator::validate" name="kcenon::pacs::services::validation::ophthalmic_iod_validator::validate">
+<area shape="rect" id="Node000001" title="Validate a DICOM dataset against Ophthalmic IOD." alt="" coords="5,339,181,394"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a0488e2c059edd1795751548598beadad" title=" " alt="" coords="229,5,441,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,338,114,286,140,219,177,148,201,115,227,85,231,81,235,85,231,89,205,118,182,151,145,221,119,288,104,340"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#acc1e8de861d8455922acc9e0545f50e2" title=" " alt="" coords="245,192,425,261"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="129,337,175,304,228,271,239,265,241,270,231,276,178,308,132,341"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a88ccdf454a4f3b2b83867f21405f9024" title=" " alt="" coords="247,285,424,355"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="181,347,232,337,233,342,182,352"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a12e90d4fee8e25ebab443ebe48dfadbb" title=" " alt="" coords="247,472,423,541"/>
+<area shape="poly" id="edge19_Node000001_Node000013" title=" " alt="" coords="132,392,178,425,231,458,241,464,239,468,228,462,175,429,129,397"/>
+<area shape="rect" id="Node000018" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a9cb11b345dcb8e5ed4f99320ab639345" title=" " alt="" coords="515,509,691,579"/>
+<area shape="poly" id="edge27_Node000001_Node000018" title=" " alt="" coords="107,393,125,431,151,476,187,518,207,536,231,551,263,565,297,574,368,582,437,579,501,569,502,574,438,584,367,587,296,579,261,570,228,556,204,541,183,522,147,479,120,434,102,395"/>
+<area shape="rect" id="Node000019" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a080a5e0c744c94c843ad95d971f72124" title=" " alt="" coords="232,379,439,448"/>
+<area shape="poly" id="edge30_Node000001_Node000019" title=" " alt="" coords="182,381,219,388,218,393,181,386"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#aadd10688e47639d8fc0206032fcf2f5b" title=" " alt="" coords="247,99,423,168"/>
+<area shape="poly" id="edge36_Node000001_Node000021" title=" " alt="" coords="106,338,154,260,188,217,228,178,234,173,237,177,231,182,192,220,158,263,111,340"/>
+<area shape="rect" id="Node000022" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a2b400ac37546cb2ad12d8773d21da524" title=" " alt="" coords="247,616,423,685"/>
+<area shape="poly" id="edge38_Node000001_Node000022" title=" " alt="" coords="107,393,125,436,152,490,188,545,231,595,244,606,241,610,227,599,184,549,148,492,121,438,102,395"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="764,372,953,412"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="441,26,510,26,583,36,619,45,655,58,688,76,718,98,735,117,745,137,751,176,753,217,757,240,766,264,798,316,832,360,828,363,794,319,762,267,752,241,748,218,746,176,740,138,731,120,714,102,685,80,652,63,618,50,582,41,509,31,441,31"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#aa21178cc3f9f85ed00d5e6f79bff8689" title=" " alt="" coords="490,206,715,261"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="426,226,476,228,476,233,425,232"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#aaed7e3ea3c41721eca37ce9ef12cbcff" title=" " alt="" coords="501,285,705,355"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="426,255,491,278,489,283,425,261"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a0cb3377c02e82c3e8f5fe58a49e93f7b" title=" " alt="" coords="501,112,705,181"/>
+<area shape="poly" id="edge13_Node000004_Node000011" title=" " alt="" coords="425,197,487,179,488,184,426,202"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="692,259,717,271,780,315,830,360,827,364,777,319,715,276,690,263"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="781,470,936,525"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="702,259,718,271,733,291,741,309,746,346,749,383,755,402,766,422,783,442,803,460,799,464,779,446,762,426,750,404,744,384,741,346,736,311,728,293,714,275,699,263"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="706,346,774,366,773,371,704,351"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="656,353,808,460,805,464,653,357"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#abf574471489b3a0948fcc5c629c11a24" title="Convert to string representation." alt="" coords="777,213,940,253"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="704,283,785,255,787,260,706,288"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="1001,181,1161,221"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="940,219,988,212,988,217,940,224"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="1010,245,1153,285"/>
+<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="940,242,997,251,996,256,940,248"/>
+<area shape="poly" id="edge14_Node000011_Node000003" title=" " alt="" coords="701,179,718,191,735,209,745,225,766,264,836,359,832,362,762,267,741,228,731,212,714,195,698,184"/>
+<area shape="poly" id="edge15_Node000011_Node000008" title=" " alt="" coords="706,179,787,206,785,211,704,184"/>
+<area shape="poly" id="edge17_Node000012_Node000007" title=" " alt="" coords="424,317,487,317,487,323,424,323"/>
+<area shape="poly" id="edge18_Node000012_Node000011" title=" " alt="" coords="423,284,439,271,455,252,463,232,471,212,487,191,492,187,496,191,491,195,475,215,468,234,460,254,443,275,426,288"/>
+<area shape="poly" id="edge26_Node000013_Node000007" title=" " alt="" coords="419,470,440,458,465,438,488,415,549,362,552,366,491,419,468,442,443,462,422,474"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#a7bc31a4e502afbed0670cf518ff61959" title=" " alt="" coords="503,653,702,723"/>
+<area shape="poly" id="edge20_Node000013_Node000014" title=" " alt="" coords="389,539,541,643,538,648,386,544"/>
+<area shape="poly" id="edge21_Node000014_Node000003" title=" " alt="" coords="694,651,714,633,729,611,736,589,739,547,741,504,748,481,762,456,781,435,803,417,807,421,785,438,766,459,753,483,747,505,745,548,742,590,734,613,718,636,698,655"/>
+<area shape="poly" id="edge24_Node000014_Node000006" title=" " alt="" coords="684,651,714,632,774,583,823,533,827,537,778,587,718,637,687,655"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="781,621,936,675"/>
+<area shape="poly" id="edge22_Node000014_Node000015" title=" " alt="" coords="702,670,767,660,768,665,703,675"/>
+<area shape="rect" id="Node000017" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#adb5c07f85d7c53d2d27261da266e05f9" title="Check if photometric interpretation is valid for ophthalmic imaging." alt="" coords="765,699,953,754"/>
+<area shape="poly" id="edge25_Node000014_Node000017" title=" " alt="" coords="703,700,751,708,751,713,702,706"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="1004,628,1159,668"/>
+<area shape="poly" id="edge23_Node000015_Node000016" title=" " alt="" coords="936,645,990,645,990,651,936,651"/>
+<area shape="poly" id="edge28_Node000018_Node000003" title=" " alt="" coords="690,507,715,494,739,475,762,455,815,418,818,422,766,459,742,480,717,498,692,512"/>
+<area shape="poly" id="edge29_Node000018_Node000006" title=" " alt="" coords="690,525,767,511,768,516,691,531"/>
+<area shape="poly" id="edge35_Node000019_Node000003" title=" " alt="" coords="439,406,750,394,750,399,439,412"/>
+<area shape="poly" id="edge34_Node000019_Node000007" title=" " alt="" coords="434,376,489,357,491,362,436,381"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1ophthalmic__iod__validator.html#ab18d8d059763c508e5c84a2066c201e0" title=" " alt="" coords="489,430,716,485"/>
+<area shape="poly" id="edge31_Node000019_Node000020" title=" " alt="" coords="439,428,476,434,475,439,439,433"/>
+<area shape="poly" id="edge32_Node000020_Node000003" title=" " alt="" coords="710,427,766,413,767,418,711,432"/>
+<area shape="poly" id="edge33_Node000020_Node000006" title=" " alt="" coords="717,472,768,481,768,486,716,478"/>
+<area shape="poly" id="edge37_Node000021_Node000011" title=" " alt="" coords="424,135,487,138,487,144,424,140"/>
+<area shape="poly" id="edge40_Node000022_Node000003" title=" " alt="" coords="423,639,600,616,675,602,715,588,728,574,736,559,741,527,745,493,751,475,762,456,782,435,805,417,808,421,786,439,766,459,755,477,750,494,746,528,741,561,733,577,717,593,676,607,601,621,424,644"/>
+<area shape="poly" id="edge41_Node000022_Node000006" title=" " alt="" coords="390,683,460,720,501,738,544,751,589,759,633,760,675,752,715,732,729,720,738,707,744,678,748,645,753,627,762,608,789,568,818,533,823,537,793,572,766,611,758,629,753,646,750,679,742,709,733,723,717,737,677,757,633,766,588,765,543,756,499,743,457,725,387,688"/>
+<area shape="poly" id="edge39_Node000022_Node000007" title=" " alt="" coords="381,614,412,585,439,552,456,516,462,485,469,453,487,416,511,387,538,362,542,366,515,391,492,419,474,454,468,486,461,518,444,555,416,589,385,618"/>
+<area shape="rect" id="Node000023" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a51d5c6dbd611db869b43ddf625b4459f" title="Check if a SOP Class UID is an Ophthalmic Storage SOP Class." alt="" coords="499,798,706,853"/>
+<area shape="poly" id="edge42_Node000022_Node000023" title=" " alt="" coords="374,684,427,731,491,776,515,790,513,794,488,781,424,735,370,688"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::simd::has_sse2" name="kcenon::pacs::encoding::simd::has_sse2">
+<area shape="rect" id="Node000001" title="Check if SSE2 is available." alt="" coords="5,37,180,77"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a7c58b0fc45c37eb282ea7181574b6bbf" title="Get cached SIMD features (singleton pattern)" alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,42,214,37,215,42,181,47"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25232bbf012acb7d93bf3eb6ed813914" title="Check if a specific feature is set." alt="" coords="228,69,403,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,67,215,72,214,78,180,73"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c5b859f9c8a8af24c8150f90171eb7" title="Detect available SIMD features at runtime." alt="" coords="451,5,625,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="403,23,437,23,437,28,403,28"/>
+</map>

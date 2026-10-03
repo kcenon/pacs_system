@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::sop_classes::is_nm_storage_sop_class" name="kcenon::pacs::services::sop_classes::is_nm_storage_sop_class">
+<area shape="rect" id="Node000001" title="Check if a SOP Class UID is a NM Storage SOP Class." alt="" coords="5,5,216,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#afb58d79b65164023c953f055fe82eda9" title="Get information about a specific NM SOP Class." alt="" coords="264,5,433,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,30,250,30,250,35,216,35"/>
+</map>

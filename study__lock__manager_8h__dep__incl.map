@@ -1,0 +1,7 @@
+<map id="include/kcenon/pacs/workflow/study_lock_manager.h" name="include/kcenon/pacs/workflow/study_lock_manager.h">
+<area shape="rect" id="Node000001" title="Study lock manager for modification control and concurrent access." alt="" coords="153,5,312,60"/>
+<area shape="rect" id="Node000002" href="$pacs-workflow_8cppm.html" title="C++20 module partition for DICOM workflow types." alt="" coords="5,115,244,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,71,140,117,137,113,190,67"/>
+<area shape="rect" id="Node000003" href="$study__lock__manager_8cpp.html" title="Implementation of study lock manager." alt="" coords="269,108,415,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="276,67,322,106,318,110,272,71"/>
+</map>

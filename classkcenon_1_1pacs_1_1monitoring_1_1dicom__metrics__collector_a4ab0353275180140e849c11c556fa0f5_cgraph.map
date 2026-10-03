@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::monitoring::dicom_metrics_collector::collect_transfer_metrics" name="kcenon::pacs::monitoring::dicom_metrics_collector::collect_transfer_metrics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,99,195,154"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#ae3d9751822284bd8a94aae63810ca347" title=" " alt="" coords="243,5,439,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,97,230,77,232,82,178,102"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="247,99,434,154"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,124,234,124,234,129,195,129"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a15873f4a2ed8d209437505cdab89b772" title="Get data transfer metrics." alt="" coords="247,179,434,219"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="193,152,261,172,259,177,191,157"/>
+</map>

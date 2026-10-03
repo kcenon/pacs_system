@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::signal_handler::should_shutdown" name="kcenon::pacs::samples::signal_handler::should_shutdown">
+<area shape="rect" id="Node000001" title="Check if shutdown has been requested." alt="" coords="232,5,408,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1samples_1_1scoped__signal__handler.html#a3e212cb0209f161be5615b773a5e90e5" title="Check if shutdown has been requested." alt="" coords="5,5,184,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,35,184,35,184,30,218,30"/>
+</map>

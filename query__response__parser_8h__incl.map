@@ -1,0 +1,18 @@
+<map id="src/ihe/xds/registry_query/query_response_parser.h" name="src/ihe/xds/registry_query/query_response_parser.h">
+<area shape="rect" id="Node000001" title="Parser for IHE XDS.b ITI&#45;18 AdhocQueryResponse." alt="" coords="298,5,471,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,193,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="305,63,170,106,169,101,304,58"/>
+<area shape="rect" id="Node000003" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="218,108,373,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="361,62,325,100,321,96,357,58"/>
+<area shape="rect" id="Node000005" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="397,108,551,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="412,58,449,96,445,100,408,62"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="555,196,614,221"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="473,49,522,71,546,87,565,106,576,124,583,144,588,182,583,182,578,145,572,126,561,110,542,91,520,76,470,54"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="247,196,344,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="298,148,298,182,293,182,293,148"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="374,196,441,221"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="460,150,428,187,424,184,456,146"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="502,146,559,186,556,190,499,150"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="465,196,528,221"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="482,147,492,182,487,184,477,149"/>
+</map>

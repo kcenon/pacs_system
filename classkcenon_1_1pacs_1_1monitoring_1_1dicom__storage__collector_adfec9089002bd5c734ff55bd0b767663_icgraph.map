@@ -1,0 +1,10 @@
+<map id="kcenon::pacs::monitoring::dicom_storage_collector::create_metric" name="kcenon::pacs::monitoring::dicom_storage_collector::create_metric">
+<area shape="rect" id="Node000001" title=" " alt="" coords="480,45,669,100"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html#ad3a6c6aa4e35a8071268c9384fab168b" title=" " alt="" coords="243,5,432,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,57,432,51,433,46,467,52"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html#a11bcd9e72f7b79be3cc4e7942915aa4e" title=" " alt="" coords="243,84,432,139"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="467,93,433,99,432,93,466,88"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__storage__collector.html#aaae1df56e058049edbcc312b9417a534" title="Collect current storage metrics." alt="" coords="5,45,195,100"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="230,54,195,59,194,54,229,48"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="229,96,194,91,195,85,230,91"/>
+</map>

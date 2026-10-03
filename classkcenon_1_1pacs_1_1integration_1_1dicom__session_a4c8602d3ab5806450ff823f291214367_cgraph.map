@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::integration::dicom_session::send_pdu" name="kcenon::pacs::integration::dicom_session::send_pdu">
+<area shape="rect" id="Node000001" title="Send a complete DICOM PDU." alt="" coords="5,49,201,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#ac76f1f45b086d761f07a35104c316034" title="Encode PDU header." alt="" coords="257,5,443,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,52,242,46,243,51,202,57"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1dicom__session.html#aef0efc65d3af270e70008265b4081f14" title="Send data through the underlying session." alt="" coords="249,85,451,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,80,236,85,235,91,201,86"/>
+</map>

@@ -1,0 +1,36 @@
+<map id="src/web/auth/jwt_validator.cpp" name="src/web/auth/jwt_validator.cpp">
+<area shape="rect" id="Node000001" title="Implementation of JWT token validation." alt="" coords="701,5,921,31"/>
+<area shape="rect" id="Node000002" href="$jwt__validator_8h.html" title="JWT (JSON Web Token) validation for OAuth 2.0." alt="" coords="223,79,390,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="738,33,404,85,403,80,737,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="516,255,583,280"/>
+<area shape="poly" id="edge16_Node000001_Node000004" title=" " alt="" coords="726,33,673,51,649,64,627,81,597,119,576,163,563,206,555,242,550,241,557,204,571,161,593,116,623,77,646,59,671,46,724,28"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,255,64,280"/>
+<area shape="poly" id="edge18_Node000001_Node000005" title=" " alt="" coords="700,21,596,25,473,34,342,52,213,81,156,95,110,106,90,115,72,127,54,144,37,168,30,185,27,205,31,241,25,242,22,204,25,184,32,165,50,141,68,123,88,110,108,101,155,90,211,76,341,47,472,29,596,19,700,16"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="637,86,723,111"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="793,33,712,81,710,76,790,29"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="747,86,803,111"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="808,32,788,75,783,72,803,30"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="827,86,869,111"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="819,30,839,72,834,75,814,32"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="893,86,960,111"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="829,29,900,76,897,80,826,33"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="985,86,1055,111"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="843,28,973,76,979,79,978,84,971,81,841,33"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1080,86,1147,111"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="873,28,966,48,1069,76,1076,78,1074,83,1067,81,965,53,872,33"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="1171,86,1267,111"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="897,28,1021,48,1159,76,1172,79,1171,85,1158,81,1020,53,896,33"/>
+<area shape="rect" id="Node000003" href="$oauth2__config_8h.html" title="OAuth 2.0 configuration for DICOMweb endpoints." alt="" coords="345,167,511,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="335,117,392,157,389,161,332,121"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="391,103,426,111,462,123,496,141,526,165,538,182,546,202,552,240,547,241,541,204,533,185,522,168,493,145,460,128,425,116,390,109"/>
+<area shape="poly" id="edge8_Node000002_Node000005" title=" " alt="" coords="223,105,181,111,138,123,97,142,62,169,50,185,43,203,37,241,32,240,38,202,46,182,58,165,94,137,136,118,180,106,222,99"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="335,255,398,280"/>
+<area shape="poly" id="edge10_Node000002_Node000006" title=" " alt="" coords="312,118,321,159,336,206,354,242,349,244,331,208,316,161,307,120"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="72,174,147,199"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="264,121,149,171,147,166,262,116"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="171,174,269,199"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="289,121,244,166,240,162,286,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="459,205,521,245,519,249,456,209"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="345,207,78,260,77,255,344,202"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="415,209,386,245,382,242,411,205"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::services::ups_result::is_error" name="kcenon::pacs::services::ups_result::is_error">
+<area shape="rect" id="Node000001" title="Check if this was an error status." alt="" coords="5,37,175,77"/>
+<area shape="rect" id="Node000002" href="$structkcenon_1_1pacs_1_1services_1_1ups__result.html#a4fcf2c4c6d0b5cae9771ad743735dc99" title="Check if the operation was successful." alt="" coords="223,5,397,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,42,209,37,210,43,175,48"/>
+<area shape="rect" id="Node000003" href="$structkcenon_1_1pacs_1_1services_1_1ups__result.html#ad23f8b6dadeabb5570cdfb16e1e89f27" title="Check if this was a warning status." alt="" coords="223,69,397,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,67,210,72,209,77,174,72"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::storage::key_image_repository::find_by_study" name="kcenon::pacs::storage::key_image_repository::find_by_study">
+<area shape="rect" id="Node000001" title=" " alt="" coords="487,5,661,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1web_1_1endpoints.html#a41c33684aca5ab97c7a51960aa643cb8" title=" " alt="" coords="232,5,439,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="473,35,439,35,439,30,473,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1rest__server.html#a0b592bcff88946efbe6c23914224cc80" title="Start the server (non&#45;blocking)" alt="" coords="5,13,184,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,35,184,35,184,30,218,30"/>
+</map>

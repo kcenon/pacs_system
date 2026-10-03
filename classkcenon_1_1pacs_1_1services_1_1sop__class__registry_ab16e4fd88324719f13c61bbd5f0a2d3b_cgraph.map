@@ -1,0 +1,43 @@
+<map id="kcenon::pacs::services::sop_class_registry::sop_class_registry" name="kcenon::pacs::services::sop_class_registry::sop_class_registry">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,667,175,721"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a5acfdda71531aa8e9de74c2dd2d2536d" title=" " alt="" coords="223,667,444,721"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,691,209,691,209,697,175,697"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#aa8e7359255cda5c7665eaabb7927a8e6" title=" " alt="" coords="519,5,695,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="335,666,354,540,386,362,408,270,432,186,460,117,474,90,490,70,505,57,509,61,494,73,479,93,464,120,437,188,413,271,392,363,359,541,341,667"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a7066b0ef37c6173c4d2567480577c49c" title=" " alt="" coords="517,84,697,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="332,666,336,570,343,504,356,432,376,356,404,281,441,211,490,148,503,137,507,141,494,152,446,214,409,283,381,358,361,433,349,505,341,570,337,667"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a6b90b63d4e111cb167c87781f19c5c4d" title=" " alt="" coords="516,163,699,217"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="333,666,342,582,351,526,366,465,386,401,412,338,447,279,490,227,503,216,506,220,494,231,451,282,417,341,391,403,371,466,357,527,347,583,338,667"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a3788a09bc388475f02ff43cc0a87c58b" title=" " alt="" coords="515,241,700,296"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="336,666,349,595,376,499,396,447,422,396,453,349,490,307,501,298,504,302,494,311,457,352,426,399,401,449,381,500,354,596,341,667"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a72b94bf2cba5b478d0c2d5dce4fe32e7" title=" " alt="" coords="516,321,699,390"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="340,665,359,611,390,540,433,466,460,431,490,400,503,390,506,394,494,404,464,434,438,469,395,542,364,613,345,667"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#ad3357e49eb4c220dd51bd194c2f022ce" title=" " alt="" coords="508,415,707,469"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="346,665,368,624,401,575,442,524,490,480,499,474,502,478,494,484,446,528,405,578,373,627,350,668"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#aea261e138699832aa39e174e79600475" title=" " alt="" coords="514,494,701,563"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="364,664,421,619,491,573,502,567,504,572,493,578,425,623,368,668"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a87831460483342242a0bb0066a6381c3" title=" " alt="" coords="515,588,700,643"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="428,664,501,643,502,648,430,669"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a2a077730e3a01eecbc60320bc8d785a6" title=" " alt="" coords="510,667,705,721"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="444,691,496,691,496,697,444,697"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a76db27f12ae354b4437d5e7cce342c7d" title=" " alt="" coords="520,745,695,800"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="430,719,508,741,506,746,428,724"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a18925daddfb2dd32cad5b1882924187a" title=" " alt="" coords="514,824,701,879"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="368,720,424,765,493,809,508,816,505,821,491,814,421,769,364,724"/>
+<area shape="rect" id="Node000014" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#aac9fa0d752ed048d1d1119d76acebe45" title=" " alt="" coords="519,903,695,957"/>
+<area shape="poly" id="edge13_Node000002_Node000014" title=" " alt="" coords="352,720,375,758,408,803,448,848,494,888,508,897,505,901,490,892,444,852,404,806,371,761,348,723"/>
+<area shape="rect" id="Node000015" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a628fc9e3b4a9f730ee1757483d79799d" title=" " alt="" coords="514,981,701,1036"/>
+<area shape="poly" id="edge14_Node000002_Node000015" title=" " alt="" coords="346,721,365,773,396,839,439,907,465,939,494,967,504,974,501,978,490,971,461,942,434,910,391,841,360,775,341,723"/>
+<area shape="rect" id="Node000016" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a9e04bff19f7446b10bbeb71153fce341" title=" " alt="" coords="518,1060,697,1115"/>
+<area shape="poly" id="edge15_Node000002_Node000016" title=" " alt="" coords="342,721,357,787,385,874,405,920,430,965,459,1008,494,1045,507,1056,504,1060,490,1049,455,1011,425,968,401,922,380,876,352,788,337,722"/>
+<area shape="rect" id="Node000017" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#acf2cb7daf23b86866983faabb7033011" title=" " alt="" coords="492,1139,723,1193"/>
+<area shape="poly" id="edge16_Node000002_Node000017" title=" " alt="" coords="339,721,350,800,375,908,395,966,421,1023,454,1077,494,1124,498,1128,495,1132,490,1128,450,1080,417,1025,390,968,370,909,345,801,334,722"/>
+<area shape="rect" id="Node000020" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a85500b5c9a4179840c3ad96ace2a7955" title=" " alt="" coords="514,1217,701,1272"/>
+<area shape="poly" id="edge19_Node000002_Node000020" title=" " alt="" coords="337,721,344,813,352,874,365,942,385,1012,412,1081,448,1147,494,1204,504,1213,500,1217,490,1208,444,1150,407,1084,380,1014,360,943,347,875,338,813,332,722"/>
+<area shape="rect" id="Node000021" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a9e3f98abd335b5967571b355b147de7f" title=" " alt="" coords="517,1296,697,1351"/>
+<area shape="poly" id="edge20_Node000002_Node000021" title=" " alt="" coords="341,721,360,841,394,1010,415,1096,439,1175,466,1239,494,1283,508,1294,504,1298,490,1286,461,1242,434,1176,410,1097,388,1011,355,842,336,722"/>
+<area shape="rect" id="Node000018" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a19ce0054fedc24a9e9203a6b5e28d351" title="Get information about a specific Waveform SOP Class." alt="" coords="771,1100,981,1155"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="723,1147,757,1142,758,1147,723,1152"/>
+<area shape="rect" id="Node000019" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#a5201ede194720d0137fea031f901f27c" title="Get all Waveform Storage SOP Class UIDs." alt="" coords="771,1179,981,1233"/>
+<area shape="poly" id="edge18_Node000017_Node000019" title=" " alt="" coords="723,1181,758,1186,757,1191,723,1186"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::find_handler" name="kcenon::pacs::network::v2::dicom_server_v2::find_handler">
+<area shape="rect" id="Node000001" title="Find handler by session ID." alt="" coords="437,124,605,179"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a71fd6325c5ac3db4622d08f6bec11fe7" title="Check for idle timeouts on handlers." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="465,119,388,74,366,63,369,58,391,69,467,114"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#abf8ee92d12d45ee968dc0a47acf33ce8" title="Handle disconnection notification." alt="" coords="221,84,389,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="423,136,389,129,390,124,424,131"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a007f61853d6fc36f6a624b4f8c2730bb" title="Handle network error." alt="" coords="221,163,389,217"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="424,171,390,178,389,172,423,166"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a43e7697d87b387a97ccbd2f1c912c8c2" title="Handle receive data (forwarded to handler)" alt="" coords="221,241,389,296"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="466,188,391,231,366,244,364,239,388,226,463,183"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#ac6bee78f25c0056c75bf82dfcbeec600" title="Start the server." alt="" coords="5,163,173,217"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="217,146,166,165,164,160,216,141"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="207,193,174,193,174,187,207,187"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="216,239,164,220,166,215,217,234"/>
+</map>

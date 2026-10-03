@@ -1,0 +1,7 @@
+<map id="src/ihe/xds/consumer/retrieve_response_parser.h" name="src/ihe/xds/consumer/retrieve_response_parser.h">
+<area shape="rect" id="Node000001" title="Parser for IHE XDS.b ITI&#45;43 RetrieveDocumentSetResponse." alt="" coords="119,5,322,45"/>
+<area shape="rect" id="Node000002" href="$retrieve__response__parser_8cpp.html" title="pugixml&#45;backed parser for ITI&#45;43 RetrieveDocumentSetResponse." alt="" coords="5,93,223,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,56,139,95,136,91,185,52"/>
+<area shape="rect" id="Node000003" href="$document__consumer_8cpp.html" title="IHE XDS.b Document Consumer actor (ITI&#45;43)." alt="" coords="247,93,408,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="257,52,305,91,302,95,253,56"/>
+</map>

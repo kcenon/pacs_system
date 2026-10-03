@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::services::print_scu::find_print_context" name="kcenon::pacs::services::print_scu::find_print_context">
+<area shape="rect" id="Node000001" title="Find an accepted presentation context for a print SOP class." alt="" coords="255,214,424,269"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a2e740a41e99464fc0fabb8c68faa8b73" title="Create a new Film Box (N&#45;CREATE)" alt="" coords="5,5,207,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="317,203,272,129,241,92,205,59,185,48,187,43,208,55,245,88,276,126,321,200"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a1be359822370a2316116d2f1530881f8" title="Create a new Film Session (N&#45;CREATE)" alt="" coords="21,70,191,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="297,207,254,172,205,140,181,127,183,122,208,135,257,168,300,203"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a46c5b1cc9e178a7b4474f2bc1b4616e6" title="Delete a Film Box (N&#45;DELETE)" alt="" coords="5,149,207,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="240,214,171,192,172,187,242,209"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a4ec55860a64d9f830dbd43ae611ef917" title="Delete a Film Session (N&#45;DELETE)" alt="" coords="21,214,191,269"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="241,244,192,244,192,239,241,239"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a29dc4bcf0d0ca0a3f39b742a6c5f82ff" title="Print a Film Box (N&#45;ACTION)" alt="" coords="11,293,201,333"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="242,274,172,296,171,291,240,269"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#a765b7324476ac56066e6c9cbfb520c91" title="Query printer status (N&#45;GET)" alt="" coords="14,358,198,413"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="300,280,257,315,208,348,183,360,181,356,205,343,254,310,297,276"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1services_1_1print__scu.html#aa1b4c12bac5f3520eb130a59f429216a" title="Set Image Box pixel data (N&#45;SET)" alt="" coords="8,437,204,477"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="321,282,276,355,245,393,208,426,185,439,183,435,205,422,241,390,272,352,317,280"/>
+</map>

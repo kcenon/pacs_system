@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::pdu_encoder::encode_release_rq" name="kcenon::pacs::network::pdu_encoder::encode_release_rq">
+<area shape="rect" id="Node000001" title="Encodes an A&#45;RELEASE&#45;RQ PDU." alt="" coords="5,5,173,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a072ecc5e4e38fc2897e62ef6d4327d44" title="Writes a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="221,5,389,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,30,208,30,208,35,174,35"/>
+</map>

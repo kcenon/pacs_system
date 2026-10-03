@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::samples::mini_pacs::setup_event_handlers" name="kcenon::pacs::samples::mini_pacs::setup_event_handlers">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,30,189,85"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a849b483ac0ad9a1b47791e589239a117" title="Get called AE title." alt="" coords="239,5,414,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,42,225,37,226,42,190,47"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1association.html#a83150b77d9eb2b424ec2a38297ed3c68" title="Get calling AE title." alt="" coords="237,69,416,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,68,224,72,223,78,189,73"/>
+</map>

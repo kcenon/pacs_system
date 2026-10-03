@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::validation::heightmap_seg_iod_validator::quick_check" name="kcenon::pacs::services::validation::heightmap_seg_iod_validator::quick_check">
+<area shape="rect" id="Node000001" title="Quick check if dataset has minimum required attributes." alt="" coords="239,5,471,60"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1services_1_1validation.html#ad4c9446a43b02dde2d3380cb02a9ddb7" title="Quick check if a dataset is a valid Heightmap Segmentation object." alt="" coords="5,5,191,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,35,191,35,191,30,225,30"/>
+</map>

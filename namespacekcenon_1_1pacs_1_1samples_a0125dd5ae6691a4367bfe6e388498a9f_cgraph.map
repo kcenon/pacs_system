@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::samples::print_dataset_summary" name="kcenon::pacs::samples::print_dataset_summary">
+<area shape="rect" id="Node000001" title="Print a summary of a DICOM dataset." alt="" coords="5,85,191,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="247,5,401,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,82,233,59,234,64,162,87"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1samples.html#a1b2bfa6a5964d747930fd1e1528ef384" title="Print a key&#45;value table." alt="" coords="239,85,409,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,102,225,102,225,107,191,107"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1samples.html#a1c50c546c48ca7a4d293cd332bbb2dd4" title="Truncate a string to a maximum length." alt="" coords="239,149,409,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="170,122,240,142,239,147,169,127"/>
+</map>

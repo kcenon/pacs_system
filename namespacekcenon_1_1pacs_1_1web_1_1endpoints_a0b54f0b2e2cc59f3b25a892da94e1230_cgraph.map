@@ -1,0 +1,30 @@
+<map id="kcenon::pacs::web::endpoints::register_measurement_endpoints_impl" name="kcenon::pacs::web::endpoints::register_measurement_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,309,232,364"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ac6a0827845a780679571fec52511153f" title=" " alt="" coords="280,5,475,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,308,148,258,180,194,224,128,250,97,278,69,282,66,286,70,282,73,254,101,228,131,185,197,153,260,132,310"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#adfe698f13628ed7ba49def041e61ce32" title=" " alt="" coords="280,84,475,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="137,307,196,234,235,193,278,156,297,143,300,148,282,160,239,197,200,238,142,310"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a26e560631c6587652af5b9193acd4fe0" title=" " alt="" coords="541,163,736,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="141,307,198,249,237,221,279,200,341,182,406,173,469,170,527,173,527,178,469,176,406,178,342,187,281,204,240,226,202,254,144,311"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a2e87cf4c196123e22e66a1df657070b8" title=" " alt="" coords="280,215,475,269"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="193,307,288,272,290,277,195,312"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ab6c0c5a083844fdb10cd2b7ef97254af" title=" " alt="" coords="541,267,736,321"/>
+<area shape="poly" id="edge15_Node000001_Node000007" title=" " alt="" coords="232,325,527,300,528,306,232,330"/>
+<area shape="rect" id="Node000009" href="$namespacekcenon_1_1pacs_1_1web.html#ac963bad63eea402e40395cc6e09b45da" title="Escape a string for JSON." alt="" coords="302,345,453,385"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="233,346,289,352,288,358,232,352"/>
+<area shape="rect" id="Node000010" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="302,409,453,449"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="192,362,281,394,302,402,301,407,279,399,191,367"/>
+<area shape="rect" id="Node000011" href="$namespacekcenon_1_1pacs_1_1storage.html#a11405c5a73f4568a6255cdcd1db4f1b5" title="Parse string to measurement_type." alt="" coords="280,473,475,528"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="152,362,210,410,281,458,294,465,291,470,279,463,207,414,149,367"/>
+<area shape="rect" id="Node000012" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#a465a36e682ae58a6ce914acf19986114" title=" " alt="" coords="280,552,475,607"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="137,363,161,401,194,448,235,496,282,539,287,543,284,547,278,543,231,500,190,452,157,404,133,366"/>
+<area shape="rect" id="Node000013" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ac54f703383daa568ff696050382fc94f" title=" " alt="" coords="523,374,755,414"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="128,363,145,420,174,492,195,528,219,562,248,593,281,617,332,641,376,648,421,640,473,617,502,599,527,578,570,526,602,472,623,426,628,428,606,474,574,529,531,581,505,604,476,622,423,645,377,653,330,646,279,622,244,597,215,566,190,531,170,494,140,422,123,365"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1storage_1_1measurement__repository.html#ad50dbd799b41b5b9bdea88784afb848c" title=" " alt="" coords="803,237,997,292"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="736,215,791,231,790,236,734,220"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="476,259,528,269,527,275,474,264"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="736,280,789,274,789,280,737,286"/>
+<area shape="rect" id="Node000008" href="$namespacekcenon_1_1pacs_1_1storage.html#adb7abc77000b64fb0e7e4159502b3219" title="Convert annotation_type to string." alt="" coords="818,338,982,378"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="737,315,806,332,804,337,736,320"/>
+<area shape="poly" id="edge14_Node000013_Node000008" title=" " alt="" coords="755,375,804,368,805,374,755,381"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::core::dicom_dictionary::dicom_dictionary" name="kcenon::pacs::core::dicom_dictionary::dicom_dictionary">
+<area shape="rect" id="Node000001" title="Private constructor &#45; initializes with standard tags." alt="" coords="5,5,155,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dictionary.html#a4320e722c5f737e4af6c2653083efe36" title="Initialize the dictionary with standard PS3.6 tags." alt="" coords="203,5,380,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,30,189,30,189,35,155,35"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1core.html#acf71199cdf04096d3a2fbec19c9946ad" title=" " alt="" coords="428,13,579,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="380,30,414,30,414,35,380,35"/>
+</map>

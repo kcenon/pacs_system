@@ -1,0 +1,22 @@
+<map id="include/kcenon/pacs/monitoring/health_status.h" name="include/kcenon/pacs/monitoring/health_status.h">
+<area shape="rect" id="Node000001" title="Health status data structures for PACS system monitoring." alt="" coords="594,5,795,45"/>
+<area shape="rect" id="Node000002" href="$health__checker_8h.html" title="Health check service for PACS system components." alt="" coords="352,93,563,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="631,53,510,96,508,91,629,48"/>
+<area shape="rect" id="Node000007" href="$pacs-monitoring_8cppm.html" title="C++20 module partition for system monitoring." alt="" coords="468,299,719,324"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="700,60,696,143,687,191,670,237,658,257,643,274,612,301,608,297,639,271,654,254,666,235,682,190,691,142,694,59"/>
+<area shape="rect" id="Node000009" href="$health__json_8h.html" title="JSON serialization for health check data structures." alt="" coords="733,93,921,133"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="737,51,799,91,796,95,734,55"/>
+<area shape="rect" id="Node000003" href="$production__pacs_8h.html" title="Production&#45;grade PACS with enterprise features." alt="" coords="41,181,196,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="373,139,209,184,197,187,195,182,207,179,372,134"/>
+<area shape="rect" id="Node000006" href="$pacs__monitor_8h.html" title="Unified PACS monitoring with IMonitor interface integration." alt="" coords="220,189,420,229"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="420,143,349,191,346,186,417,139"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="460,147,467,191,474,214,485,235,502,255,523,272,566,296,564,301,520,276,499,259,480,237,469,216,461,192,455,148"/>
+<area shape="rect" id="Node000008" href="$health__checker_8cpp.html" title="Implementation of health_checker class." alt="" coords="495,189,657,229"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="494,140,554,187,550,191,490,144"/>
+<area shape="rect" id="Node000004" href="$05__production__pacs_2main_8cpp.html" title="Level 5 Sample: Production PACS with Enterprise Features." alt="" coords="5,284,160,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,250,95,285,90,283,102,248"/>
+<area shape="rect" id="Node000005" href="$production__pacs_8cpp.html" title="Implementation of production&#45;grade PACS." alt="" coords="185,284,343,339"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="169,242,227,282,224,286,166,246"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="385,231,563,296,561,301,383,236"/>
+<area shape="poly" id="edge10_Node000009_Node000007" title=" " alt="" coords="805,145,765,191,715,238,664,274,617,301,614,296,661,270,712,234,761,187,801,142"/>
+</map>

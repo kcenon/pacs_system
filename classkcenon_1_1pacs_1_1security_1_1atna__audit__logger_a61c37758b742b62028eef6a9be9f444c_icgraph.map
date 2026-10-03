@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::security::atna_audit_logger::build_export" name="kcenon::pacs::security::atna_audit_logger::build_export">
+<area shape="rect" id="Node000001" title="Build Export audit message (media/network export)" alt="" coords="480,13,667,67"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1security_1_1atna__service__auditor.html#a6ff8735d139a69b91816e473a14b3405" title="Audit an XDS&#45;I.b Provide and Register Document Set transaction." alt="" coords="252,5,432,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,43,432,43,432,37,466,37"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#a24c0398dfb95817dabbcca7dd20dd4a9" title="Publish a KOS document to the XDS registry/repository." alt="" coords="5,13,204,67"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="238,43,204,43,204,37,238,37"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::dicom_collector_base::collect" name="kcenon::pacs::monitoring::dicom_collector_base::collect">
+<area shape="rect" id="Node000001" title="Collect metrics from the data source." alt="" coords="5,5,192,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1dicom__collector__base.html#a949865887f7eae5cbca512137a6cd5a2" title="Get reference to derived class (CRTP helper)" alt="" coords="240,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,30,226,30,226,35,192,35"/>
+</map>

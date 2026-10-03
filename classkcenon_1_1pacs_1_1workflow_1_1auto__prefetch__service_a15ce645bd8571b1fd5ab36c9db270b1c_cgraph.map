@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::workflow::auto_prefetch_service::on_worklist_query" name="kcenon::pacs::workflow::auto_prefetch_service::on_worklist_query">
+<area shape="rect" id="Node000001" title="Handle worklist query event." alt="" coords="5,70,180,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a8e29580cfcb37e6936bf1b1fa3c959a1" title="Log a debug&#45;level message." alt="" coords="228,5,415,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,67,243,47,245,52,181,72"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#ae5b07574caca2151fac1f691f1479564" title="Get the number of pending prefetch requests." alt="" coords="234,70,409,125"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="180,95,220,95,220,100,180,100"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1workflow_1_1auto__prefetch__service.html#adf9305094978d65911d416e2b5989a08" title="Add request to queue (deduplicated)" alt="" coords="234,149,409,203"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="174,122,230,142,228,147,172,127"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="463,5,649,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,23,449,23,449,28,415,28"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::client::prefetch_manager::get_rule_statistics" name="kcenon::pacs::client::prefetch_manager::get_rule_statistics">
+<area shape="rect" id="Node000001" title="Get statistics for a specific rule." alt="" coords="5,5,184,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1client_1_1prefetch__manager.html#a3ec216875c31cce12e7ec1c7ae9aa299" title="Get a rule by ID." alt="" coords="232,13,443,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,30,218,30,218,35,184,35"/>
+</map>

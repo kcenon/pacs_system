@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::get_standard_storage_sop_classes" name="kcenon::pacs::services::get_standard_storage_sop_classes">
+<area shape="rect" id="Node000001" title="Get a list of all standard Storage SOP Class UIDs." alt="" coords="235,5,405,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1storage__scp.html#a579016519598be9ffdf8afb779b866cf" title="Get supported SOP Class UIDs." alt="" coords="5,5,187,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,35,187,35,187,30,221,30"/>
+</map>

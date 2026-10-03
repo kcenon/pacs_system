@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::services::validation::mg_iod_validator::check_laterality_consistency" name="kcenon::pacs::services::validation::mg_iod_validator::check_laterality_consistency">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,70,224,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="272,5,461,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,67,282,47,283,52,212,72"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="289,70,444,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,95,275,95,275,100,224,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1services_1_1sop__classes.html#aa2c04e1cc443b95c73123c736553fde9" title="Check if a laterality value is valid for mammography." alt="" coords="282,149,451,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="204,122,269,143,268,148,202,127"/>
+</map>

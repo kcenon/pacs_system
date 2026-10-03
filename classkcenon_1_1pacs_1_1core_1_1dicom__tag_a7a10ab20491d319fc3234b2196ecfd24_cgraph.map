@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::core::dicom_tag::private_creator_tag" name="kcenon::pacs::core::dicom_tag::private_creator_tag">
+<area shape="rect" id="Node000001" title="Get the Private Creator tag that owns this data element." alt="" coords="5,6,157,61"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="879,42,1021,82"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,23,285,12,453,4,642,6,737,12,831,23,882,35,881,40,830,28,737,17,641,11,453,9,286,17,158,28"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a09d023cf9cc4b6e8008929163fed0a23" title="Extract the Private Creator block number from this tag." alt="" coords="205,38,357,93"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,43,192,49,191,54,157,49"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="665,38,825,78"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="358,62,651,57,652,62,358,67"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad5422abf4484a8a8e339ba581ad484f0" title="Check if this is a private data element." alt="" coords="405,95,612,135"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="358,80,403,90,402,95,357,85"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="591,92,651,78,652,83,592,98"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a37d6398f04d723ff5662c85e904accc1" title="Check if this is a private tag." alt="" coords="660,102,831,142"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="612,115,646,116,646,122,612,121"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="814,99,867,83,868,88,815,104"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="kcenon::pacs::services::get_sop_class_name" name="kcenon::pacs::services::get_sop_class_name">
+<area shape="rect" id="Node000001" title="Get human&#45;readable name for a SOP Class." alt="" coords="5,65,175,105"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#a0e987f9a196d36f50bd8df197c6343b7" title="Get information about a SOP Class." alt="" coords="223,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,62,209,53,210,59,175,67"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1services_1_1sop__class__registry.html#abde698eac88ad2162ff5046143984358" title="Get the singleton instance." alt="" coords="223,108,392,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,102,210,110,209,115,174,107"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="265,108,265,98,273,89,287,83,307,81,332,84,346,92,343,97,330,89,307,87,288,89,276,93,270,100,270,108"/>
+</map>

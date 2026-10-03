@@ -1,0 +1,25 @@
+<map id="kcenon::pacs::ihe::xds::document_consumer" name="kcenon::pacs::ihe::xds::document_consumer">
+<area shape="rect" id="Node000001" title="ITI&#45;43 Document Consumer actor." alt="" coords="357,971,543,1191"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="358,813,542,908"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="453,908,453,954,447,954,447,908"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1ihe_1_1xds_1_1document__consumer_1_1impl.html" title=" " alt="" coords="223,611,442,751"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="381,750,413,798,408,801,376,753"/>
+<area shape="rect" id="Node000004" href="$structkcenon_1_1pacs_1_1ihe_1_1xds_1_1http__options.html" title="HTTPS transport options for the Document Source actor." alt="" coords="5,379,143,519"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="145,509,245,598,241,602,141,513"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="123,148,201,213"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="124,200,98,216,79,239,67,268,61,299,60,362,55,362,55,298,62,266,74,236,95,212,121,195"/>
+<area shape="rect" id="Node000007" href="$structkcenon_1_1pacs_1_1ihe_1_1xds_1_1signing__material.html" title="Signing material for WS&#45;Security XML&#45;DSig." alt="" coords="167,409,322,489"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="199,212,215,236,230,275,240,316,248,392,242,392,234,317,225,277,210,239,194,215"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="97,5,227,85"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="165,99,165,148,159,148,159,99"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="262,488,303,594,298,596,257,490"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="346,401,519,496"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="415,497,372,596,367,594,410,495"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="390,148,539,213"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="434,226,429,238,420,280,418,323,425,401,420,401,412,323,415,279,423,237,429,224"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="567,13,589,78"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="568,62,504,137,500,134,564,59"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="603,263,753,329"/>
+<area shape="poly" id="edge12_Node000011_Node000010" title=" " alt="" coords="592,74,662,247,657,249,587,76"/>
+<area shape="poly" id="edge11_Node000002_Node000011" title=" " alt="" coords="663,342,471,814,466,812,658,340"/>
+</map>

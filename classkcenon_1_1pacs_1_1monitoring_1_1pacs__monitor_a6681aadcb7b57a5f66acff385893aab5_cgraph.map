@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::monitoring::pacs_monitor::to_json" name="kcenon::pacs::monitoring::pacs_monitor::to_json">
+<area shape="rect" id="Node000001" title="Export all metrics as JSON." alt="" coords="5,49,192,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#a46606a44516de98edb670d906a1206b8" title="Get the global singleton instance." alt="" coords="240,5,427,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,52,226,46,227,52,192,57"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#aaf28afb899753190edeb64cee36a18a1" title="Export metrics as JSON string." alt="" coords="240,85,427,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,80,227,86,226,91,192,86"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::ihe::xds::document_response" name="kcenon::pacs::ihe::xds::document_response">
+<area shape="rect" id="Node000001" title="ITI&#45;43 RetrieveDocumentSet response payload." alt="" coords="73,463,249,543"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,276,110,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="66,342,63,389,66,414,74,437,82,449,77,452,70,440,61,415,57,389,61,341"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,133,136,213"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,227,73,276,68,276,68,227"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="159,276,345,341"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="252,342,244,390,225,440,218,451,213,448,220,437,239,388,247,341"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="191,141,313,206"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="255,220,255,276,249,276,249,220"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="241,5,263,71"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="255,71,255,124,249,124,249,71"/>
+</map>

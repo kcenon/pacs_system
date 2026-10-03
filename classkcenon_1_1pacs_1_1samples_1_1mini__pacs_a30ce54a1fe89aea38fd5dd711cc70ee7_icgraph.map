@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::samples::mini_pacs::stop" name="kcenon::pacs::samples::mini_pacs::stop">
+<area shape="rect" id="Node000001" title="Stop the PACS server." alt="" coords="235,5,405,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1samples_1_1mini__pacs.html#a7ce96f385d36f724686bbc0a81f5fc5e" title="Destructor &#45; ensures clean shutdown." alt="" coords="5,5,187,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,28,187,28,187,23,221,23"/>
+</map>

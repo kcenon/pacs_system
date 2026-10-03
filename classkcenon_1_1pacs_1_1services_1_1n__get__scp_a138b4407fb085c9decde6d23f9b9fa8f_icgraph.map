@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::n_get_scp::send_n_get_response" name="kcenon::pacs::services::n_get_scp::send_n_get_response">
+<area shape="rect" id="Node000001" title="Send N&#45;GET response." alt="" coords="267,5,444,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1n__get__scp.html#a8f3c1ccc22ba586289cdccde0f55a065" title="Handle an incoming N&#45;GET&#45;RQ message." alt="" coords="5,13,219,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="253,35,219,35,219,30,253,30"/>
+</map>

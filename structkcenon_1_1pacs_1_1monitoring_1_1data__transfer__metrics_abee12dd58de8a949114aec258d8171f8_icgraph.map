@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::monitoring::data_transfer_metrics::increment_images_stored" name="kcenon::pacs::monitoring::data_transfer_metrics::increment_images_stored">
+<area shape="rect" id="Node000001" title="Record an image stored." alt="" coords="259,5,457,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1monitoring_1_1pacs__metrics.html#ae84aa7baa63c678fd877858dccd78c92" title="Record a C&#45;STORE operation." alt="" coords="5,13,211,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,35,211,35,211,30,245,30"/>
+</map>

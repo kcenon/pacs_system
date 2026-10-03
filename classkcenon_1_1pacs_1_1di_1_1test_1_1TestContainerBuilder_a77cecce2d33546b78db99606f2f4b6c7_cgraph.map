@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::di::test::TestContainerBuilder::with_network" name="kcenon::pacs::di::test::TestContainerBuilder::with_network">
+<area shape="rect" id="Node000001" title="Use a specific mock network instance." alt="" coords="5,5,171,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1di_1_1test_1_1TestContainerBuilder.html#adb8884a0957ae2eeeac502fc45bf8027" title="Get the mock network instance (for test assertions)" alt="" coords="219,5,384,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,30,205,30,205,35,171,35"/>
+</map>

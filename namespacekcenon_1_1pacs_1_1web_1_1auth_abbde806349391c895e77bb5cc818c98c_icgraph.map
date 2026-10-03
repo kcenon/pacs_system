@@ -1,0 +1,7 @@
+<map id="kcenon::pacs::web::auth::base64url_decode" name="kcenon::pacs::web::auth::base64url_decode">
+<area shape="rect" id="Node000001" title="Decode a Base64url&#45;encoded string (RFC 4648 Section 5)" alt="" coords="440,13,617,53"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1jwt__validator.html#af9e9bb7fd7bfe038763c77c0f8a14bf4" title="Decode a JWT token string into its components." alt="" coords="241,5,392,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,35,393,35,393,30,426,30"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1auth_1_1oauth2__middleware.html#a12e351f755884a202b56975ce659e994" title="Authenticate a request using OAuth 2.0 Bearer token." alt="" coords="5,5,193,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,35,194,35,194,30,227,30"/>
+</map>

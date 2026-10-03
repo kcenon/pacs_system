@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::make_pooled_pdu_buffer" name="kcenon::pacs::network::make_pooled_pdu_buffer">
+<area shape="rect" id="Node000001" title="Create a pooled byte buffer." alt="" coords="5,5,199,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__buffer__pool.html#ad8e2db552ca441c7c3a0143a2cb5e3ce" title="Get the global PDU buffer pool instance." alt="" coords="247,5,415,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,23,233,23,233,28,199,28"/>
+</map>

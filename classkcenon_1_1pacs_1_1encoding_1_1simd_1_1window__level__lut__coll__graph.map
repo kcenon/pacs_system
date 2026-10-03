@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::encoding::simd::window_level_lut" name="kcenon::pacs::encoding::simd::window_level_lut">
+<area shape="rect" id="Node000001" title="Precomputed LUT for fast repeated window/level application." alt="" coords="5,404,180,604"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="13,261,172,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,327,95,387,90,387,90,327"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="32,133,153,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,213,95,261,90,261,90,213"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="81,5,104,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="95,71,95,117,90,117,90,71"/>
+</map>

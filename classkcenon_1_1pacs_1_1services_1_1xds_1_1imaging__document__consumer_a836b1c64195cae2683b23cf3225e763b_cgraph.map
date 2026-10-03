@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::xds::imaging_document_consumer::extract_references" name="kcenon::pacs::services::xds::imaging_document_consumer::extract_references">
+<area shape="rect" id="Node000001" title="Extract image references from a KOS dataset." alt="" coords="5,5,228,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="276,13,431,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,30,262,30,262,35,228,35"/>
+</map>

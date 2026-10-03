@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::dicom_server::~dicom_server" name="kcenon::pacs::network::dicom_server::~dicom_server">
+<area shape="rect" id="Node000001" title="Destructor (stops server if running)" alt="" coords="5,5,183,60"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dicom__server.html#a141c85ffc96c6f4f9b4a9472f6b18b81" title="Stop the server gracefully." alt="" coords="231,13,399,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,30,217,30,217,35,183,35"/>
+</map>

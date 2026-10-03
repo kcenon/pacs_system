@@ -1,0 +1,15 @@
+<map id="src/ihe/xds/common/mtom_packager.h" name="src/ihe/xds/common/mtom_packager.h">
+<area shape="rect" id="Node000001" title="MTOM / XOP multipart/related packager for ITI&#45;41." alt="" coords="353,5,507,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,48,185,93,184,87,357,43"/>
+<area shape="rect" id="Node000003" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="218,93,373,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="402,48,338,88,335,84,399,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="397,101,463,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="433,46,433,87,427,87,427,46"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="487,101,546,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="451,44,497,89,493,92,447,48"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="571,101,633,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="469,43,568,92,566,97,467,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="247,181,344,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="298,134,298,167,293,167,293,134"/>
+</map>

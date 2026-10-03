@@ -1,0 +1,15 @@
+<map id="kcenon::pacs::encoding::implicit_vr_codec::encode" name="kcenon::pacs::encoding::implicit_vr_codec::encode">
+<area shape="rect" id="Node000001" title="Encode a dataset to bytes using Implicit VR Little Endian." alt="" coords="785,85,984,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a0f4172d673a0ad077306ef8258e9102e" title="Encode the DIMSE message to bytes." alt="" coords="259,5,443,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="844,79,794,50,737,27,661,14,583,10,509,13,444,20,443,15,509,8,583,5,661,9,738,22,797,45,847,75"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#a358a8f29b2f34e1585076c3b681caa56" title=" " alt="" coords="519,116,717,171"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="772,124,718,132,717,126,771,118"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1dimse_1_1dimse__message.html#a7c3603a1fb22bff8ee58fe509901fa36" title="Calculate and set CommandGroupLength." alt="" coords="499,37,737,92"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="771,90,737,85,738,80,772,85"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#ae1b5f8d052f06e49a4794b8c6869fc7b" title=" " alt="" coords="252,116,451,171"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="505,146,451,146,451,141,505,141"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1encoding_1_1implicit__vr__codec.html#a6e2e3ae41652b14340170554364310fa" title="Encode a single element to bytes." alt="" coords="5,149,204,204"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="239,161,205,166,204,161,238,156"/>
+<area shape="poly" id="edge5_Node000005_Node000001" title=" " alt="" coords="218,192,328,204,459,209,599,204,669,195,737,181,770,170,802,155,855,123,857,127,804,159,772,175,738,186,670,200,599,209,459,215,327,209,217,197"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="485,51,443,46,444,41,485,46"/>
+</map>

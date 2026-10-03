@@ -1,0 +1,36 @@
+<map id="src/ihe/xds/registry_query/query_envelope.cpp" name="src/ihe/xds/registry_query/query_envelope.cpp">
+<area shape="rect" id="Node000001" title="pugixml&#45;backed SOAP 1.2 envelope builder for ITI&#45;18." alt="" coords="618,5,819,45"/>
+<area shape="rect" id="Node000002" href="$query__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;18 RegistryStoredQuery." alt="" coords="363,93,501,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="651,48,488,92,486,87,649,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="93,328,190,353"/>
+<area shape="poly" id="edge20_Node000001_Node000005" title=" " alt="" coords="618,36,439,55,338,73,238,96,146,121,108,138,66,169,37,195,16,221,10,234,8,248,11,262,18,279,30,293,45,305,80,323,78,328,43,310,27,297,14,281,6,264,3,248,5,232,11,218,33,191,62,165,106,133,144,116,237,91,337,67,438,50,617,30"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="628,328,695,353"/>
+<area shape="poly" id="edge16_Node000001_Node000007" title=" " alt="" coords="716,46,704,94,682,218,667,315,662,314,676,217,699,93,711,45"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="416,328,475,353"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="618,41,490,62,420,77,352,96,298,110,249,120,166,137,129,150,95,170,62,199,30,241,23,261,24,269,30,278,48,288,83,297,187,313,403,334,402,339,186,319,82,302,46,293,26,282,19,271,18,260,26,239,58,196,92,166,127,145,164,132,248,115,297,105,350,91,419,72,489,57,618,35"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="713,93,815,119"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="732,44,753,80,748,83,727,47"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="840,93,907,119"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="757,43,840,85,837,89,755,48"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="931,93,1003,119"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="779,43,918,87,917,92,777,48"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1027,93,1101,119"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="803,43,1014,90,1013,96,802,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="41,240,229,280"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,121,305,169,181,235,179,231,303,164,405,116"/>
+<area shape="rect" id="Node000004" href="$errors_8h.html" title="Typed error codes for IHE XDS.b actors (ITI&#45;41 and siblings)" alt="" coords="253,240,408,280"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="387,121,349,139,333,152,320,168,314,182,313,197,319,227,314,228,308,197,309,181,315,165,329,148,346,135,384,116"/>
+<area shape="rect" id="Node000006" href="$submission__set_8h.html" title="XDS.b submission set metadata for ITI&#45;41 Provide and Register Document Set&#45;b." alt="" coords="483,240,637,280"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="476,116,515,135,534,148,549,165,562,195,565,226,560,227,557,197,545,168,530,152,513,139,474,121"/>
+<area shape="rect" id="Node000010" href="$soap__envelope_8h.html" title="SOAP 1.2 envelope builder for IHE XDS.b ITI&#45;41 requests." alt="" coords="329,167,535,192"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="435,119,435,153,429,153,429,119"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="286,282,183,325,181,320,284,278"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="586,278,637,317,634,321,583,282"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="534,282,475,322,472,318,531,278"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="529,328,591,353"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="563,280,563,314,557,314,557,280"/>
+<area shape="poly" id="edge10_Node000010_Node000003" title=" " alt="" coords="390,195,220,239,219,234,388,189"/>
+<area shape="poly" id="edge11_Node000010_Node000004" title=" " alt="" coords="419,194,368,234,365,229,416,190"/>
+<area shape="poly" id="edge12_Node000010_Node000006" title=" " alt="" coords="452,190,519,230,516,235,450,194"/>
+<area shape="poly" id="edge13_Node000010_Node000008" title=" " alt="" coords="436,192,446,314,441,314,430,192"/>
+</map>

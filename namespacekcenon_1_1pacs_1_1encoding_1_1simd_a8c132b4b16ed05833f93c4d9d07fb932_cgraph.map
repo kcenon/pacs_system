@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::simd::planar_to_interleaved_rgb8" name="kcenon::pacs::encoding::simd::planar_to_interleaved_rgb8">
+<area shape="rect" id="Node000001" title="Convert planar RGB to interleaved format using best available SIMD." alt="" coords="5,69,253,109"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a6033b8c73db95ad59f315d9dfcc47139" title="Check if AVX2 is available." alt="" coords="317,69,491,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,87,303,87,303,92,254,92"/>
+<area shape="rect" id="Node000006" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a75897377c534bc5623c9a62858917125" title="Check if SSSE3 is available." alt="" coords="317,5,491,45"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="215,67,304,46,305,51,217,72"/>
+<area shape="rect" id="Node000007" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd_1_1detail.html#adf5cdc467089b63dcc0cf480c859b019" title=" " alt="" coords="301,134,507,189"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="207,107,289,128,287,134,206,112"/>
+<area shape="rect" id="Node000003" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a7c58b0fc45c37eb282ea7181574b6bbf" title="Get cached SIMD features (singleton pattern)" alt="" coords="555,5,729,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="478,67,553,46,555,51,480,72"/>
+<area shape="rect" id="Node000005" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25232bbf012acb7d93bf3eb6ed813914" title="Check if a specific feature is set." alt="" coords="555,69,729,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="492,87,541,87,541,92,492,92"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1encoding_1_1simd.html#a25c5b859f9c8a8af24c8150f90171eb7" title="Detect available SIMD features at runtime." alt="" coords="777,5,952,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="730,23,764,23,764,28,730,28"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="492,23,541,23,541,28,492,28"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="480,43,555,63,553,68,478,48"/>
+</map>

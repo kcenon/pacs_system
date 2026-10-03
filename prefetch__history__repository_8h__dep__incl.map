@@ -1,0 +1,5 @@
+<map id="include/kcenon/pacs/storage/prefetch_history_repository.h" name="include/kcenon/pacs/storage/prefetch_history_repository.h">
+<area shape="rect" id="Node000001" title="Repository for prefetch history records using base_repository pattern." alt="" coords="5,5,191,60"/>
+<area shape="rect" id="Node000002" href="$prefetch__history__repository_8cpp.html" title="Implementation of prefetch_history_repository using base_repository pattern." alt="" coords="12,108,184,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,74,101,108,95,108,95,74"/>
+</map>

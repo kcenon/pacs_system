@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::xds::imaging_document_source::build_evidence_sequence" name="kcenon::pacs::services::xds::imaging_document_source::build_evidence_sequence">
+<area shape="rect" id="Node000001" title="Build the Current Requested Procedure Evidence Sequence." alt="" coords="276,5,463,75"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1xds_1_1imaging__document__source.html#ae34af0b34eb4b4bbd13275d37ed33c0a" title="Create a KOS document from a set of DICOM instance references." alt="" coords="5,13,228,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="262,43,228,43,228,37,262,37"/>
+</map>

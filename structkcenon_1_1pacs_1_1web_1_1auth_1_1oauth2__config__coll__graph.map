@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::web::auth::oauth2_config" name="kcenon::pacs::web::auth::oauth2_config">
+<area shape="rect" id="Node000001" title="OAuth 2.0 configuration for DICOMweb authorization." alt="" coords="125,404,297,524"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="205,148,284,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,213,277,237,286,277,291,309,289,341,278,381,274,391,269,389,273,379,283,341,286,309,281,278,271,238,262,215"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="41,276,219,341"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="218,215,172,265,168,262,214,212"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,5,310,85"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,99,247,148,242,148,242,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="128,342,129,361,134,379,139,389,134,391,129,381,124,361,123,342"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,148,127,213"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="64,227,70,251,86,274,82,277,65,253,59,228"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="55,13,77,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="69,78,69,131,63,131,63,78"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::integration::thread_pool_executor_adapter::shutdown" name="kcenon::pacs::integration::thread_pool_executor_adapter::shutdown">
+<area shape="rect" id="Node000001" title="Shutdown the executor." alt="" coords="292,13,479,67"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1thread__pool__executor__adapter.html#a674d9998e5b007286ed8a270b27aa15f" title="Destructor &#45; ensures graceful shutdown." alt="" coords="5,5,244,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="278,43,244,43,244,37,278,37"/>
+</map>

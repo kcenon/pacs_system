@@ -1,0 +1,17 @@
+<map id="kcenon::pacs::encoding::compression::jpeg2000_codec" name="kcenon::pacs::encoding::compression::jpeg2000_codec">
+<area shape="rect" id="Node000001" title="JPEG 2000 codec implementation supporting both lossless and lossy modes." alt="" coords="210,997,429,1597"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1compression__codec.html" title="Abstract base class for image compression codecs." alt="" coords="5,460,247,920"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,933,226,996,221,998,201,934"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="271,657,389,723"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="331,723,323,944,323,981,317,981,318,944,326,723"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="251,211,409,291"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="333,305,333,657,327,657,327,305"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="445,643,655,737"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="554,738,549,847,540,911,523,974,486,1059,440,1139,436,1136,482,1057,518,972,534,910,544,847,549,738"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1encoding_1_1compression_1_1jpeg2000__codec_1_1impl.html" title="PIMPL implementation for jpeg2000_codec." alt="" coords="454,133,627,368"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="546,368,551,626,546,627,540,369"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="651,218,801,283"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="711,297,571,644,566,642,706,295"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="715,5,737,71"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="729,71,729,202,723,202,723,71"/>
+</map>

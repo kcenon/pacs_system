@@ -1,0 +1,13 @@
+<map id="kcenon::pacs::core::dicom_tag::private_data_range" name="kcenon::pacs::core::dicom_tag::private_data_range">
+<area shape="rect" id="Node000001" title="Get the data element range owned by this Private Creator tag." alt="" coords="5,17,157,71"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ad80814741a8f00a74e0f2c6d51a61b17" title="Get the element number." alt="" coords="429,28,589,68"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,42,415,44,415,50,158,47"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#ac236c315256ea7d2369f186b04543678" title="Get the group number." alt="" coords="643,32,785,72"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,28,246,16,356,6,476,4,595,13,646,25,645,30,594,19,475,9,356,11,247,21,158,33"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a61e9ab88ec6a32488cdcab7b6d6c9dae" title="Check if this is a private creator tag." alt="" coords="205,82,376,137"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="159,65,193,76,191,81,157,70"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="375,83,424,69,425,74,377,88"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__tag.html#a37d6398f04d723ff5662c85e904accc1" title="Check if this is a private tag." alt="" coords="424,92,595,132"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="376,108,410,108,410,113,376,113"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="578,89,631,73,632,79,579,94"/>
+</map>

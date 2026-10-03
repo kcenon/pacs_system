@@ -1,0 +1,16 @@
+<map id="kcenon::pacs::services::storage_commitment_scu" name="kcenon::pacs::services::storage_commitment_scu">
+<area shape="rect" id="Node000001" title="Storage Commitment Push Model SCU." alt="" coords="241,808,451,1112"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="166,636,339,716"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,716,293,791,288,793,263,717"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1di_1_1ILogger.html" title="Abstract logger interface for dependency injection." alt="" coords="5,133,180,559"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,532,195,557,227,620,222,622,190,560,178,534"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="205,313,354,379"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="278,392,258,636,253,636,273,392"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="348,5,371,71"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="354,72,294,298,289,297,348,70"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="378,313,503,379"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="373,62,386,94,415,202,435,296,430,298,410,203,381,96,368,64"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="363,643,518,709"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="433,710,404,794,399,792,427,708"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="443,392,443,643,438,643,438,392"/>
+</map>

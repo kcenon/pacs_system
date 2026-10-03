@@ -1,0 +1,14 @@
+<map id="kcenon::pacs::core::dicom_dataset::set_numeric" name="kcenon::pacs::core::dicom_dataset::set_numeric">
+<area shape="rect" id="Node000001" title="Set a numeric value for the given tag." alt="" coords="5,111,160,165"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#af2974ceb4e12d5316062638ca0abd9f8" title="Create an element from a numeric value." alt="" coords="208,75,379,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,122,194,116,195,122,161,127"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a5c9b29be646b3e866074d72864f0238d" title="Insert or replace an element in the dataset." alt="" coords="208,154,379,194"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="161,149,195,154,194,160,160,154"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ac014eeea6bc5ca8b452041039ca9d4f8" title="Set the value from a numeric value." alt="" coords="427,5,586,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="377,72,413,60,415,65,379,77"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#a3ad6f299e9280118c62f147b609f150a" title="Get the element&#39;s tag." alt="" coords="427,150,587,190"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="380,127,431,143,429,148,378,132"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__element.html#ab2aca330ebd9e5a8e786f31d05d47237" title="Get the element&#39;s VR." alt="" coords="431,85,583,125"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="379,100,417,101,417,106,379,106"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="379,170,413,169,413,174,379,175"/>
+</map>

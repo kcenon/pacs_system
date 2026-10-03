@@ -1,0 +1,28 @@
+var structkcenon_1_1pacs_1_1client_1_1remote__node =
+[
+    [ "address", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#aaa28364fdc7b8d0ac791a738fa16a87f", null ],
+    [ "has_tls", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#ad342d9eb4846d37478e00a61edfb6f72", null ],
+    [ "is_online", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a20698d9ad52929dd23ab287413862ad9", null ],
+    [ "supports_query_retrieve", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#ab9c90c6c4e79f532227771060ffe5dfe", null ],
+    [ "ae_title", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a3b78f970a3848980a90d47e93c1010e2", null ],
+    [ "connection_timeout", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#af6dbe99cd120afe214deb02d5df062e2", null ],
+    [ "created_at", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#aea4abc0877da32ce503cbbecb3c7790b", null ],
+    [ "dimse_timeout", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#ad6df3e4db1b874b8da6cd31fc27107a4", null ],
+    [ "host", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#aec700a5d38a2317ee50d895e494ca224", null ],
+    [ "last_error", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a7342e7c24e45bfb19d91ac8ebd791008", null ],
+    [ "last_error_message", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a8c28002dd70933307446fa45f6718b0a", null ],
+    [ "last_verified", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a6c348a798cb7aaad75d22254defbffd5", null ],
+    [ "max_associations", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a78c591a6f41ef84e2b5aa75dd84120fd", null ],
+    [ "name", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a43104efd243731293a16a264b387d5ef", null ],
+    [ "node_id", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a6ef30dcda706b2436389fa000e7849b7", null ],
+    [ "pk", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a2e1cb0e697c2cd0cbb9f9cbb378702c1", null ],
+    [ "port", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a5a299248dcf271e51bb6ef4163f2212e", null ],
+    [ "status", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a2f86fa6f9a4cdc47f8c894824d2264b5", null ],
+    [ "supports_find", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#ab151f7a37da34b9c89c5f1dac9268c36", null ],
+    [ "supports_get", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#aa8501081bdb19a4bf5fb48c5db6cc7e8", null ],
+    [ "supports_move", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a6f801f4dcb2c4e962c824218533cf33e", null ],
+    [ "supports_store", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a036876f413751e9ee8dbacfb3e54a698", null ],
+    [ "supports_worklist", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a8bbcd2c8fe48e31426ec0f9bde5d0f8d", null ],
+    [ "tls", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a35fecb09be5a8c9c5ebfdfea087adbad", null ],
+    [ "updated_at", "structkcenon_1_1pacs_1_1client_1_1remote__node.html#a0a923284bd0fce144c0d6d046c9c045e", null ]
+];

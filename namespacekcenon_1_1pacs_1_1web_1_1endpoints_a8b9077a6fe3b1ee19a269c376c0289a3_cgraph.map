@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::web::endpoints::register_routing_endpoints_impl" name="kcenon::pacs::web::endpoints::register_routing_endpoints_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,70,188,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a7913bbb8a29825a1fbb5d74f11aac6c1" title="Check if the dataset is empty." alt="" coords="236,5,412,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,67,246,47,248,52,184,72"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#af64ea94c3d5366ba727d87c394ba56f6" title="Get the string value of an element." alt="" coords="247,70,401,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,95,233,95,233,100,188,100"/>
+<area shape="rect" id="Node000004" href="$namespacekcenon_1_1pacs_1_1web.html#a55cb4c6d30bfdffe2c8c087932da56e7" title="Create JSON error response body with details." alt="" coords="249,149,399,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="184,122,248,143,246,148,183,127"/>
+</map>

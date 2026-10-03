@@ -1,0 +1,14 @@
+<map id="ai_service_connector::impl::request_inference" name="ai_service_connector::impl::request_inference">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,189,109"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#abd042eec47c77c840bb6c7b1b3158ea9" title="Log an error&#45;level message." alt="" coords="260,5,447,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,67,259,46,261,51,179,72"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter.html#abab83a011fa6dddee2a05ff84f7a000c" title="Increment a counter metric." alt="" coords="237,134,469,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="170,107,244,128,242,133,169,112"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#aa9a1e5a22cf7cd59f59b44096e1c3f6e" title="Log an info&#45;level message." alt="" coords="260,69,447,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="189,87,246,87,246,92,189,92"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1integration_1_1logger__adapter.html#a67eccdc22a86b24fd822b20ca37e34f8" title="Log a message at the specified level." alt="" coords="521,37,708,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="447,34,508,42,507,47,447,39"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1integration_1_1monitoring__adapter_1_1impl.html#a1545c4eabd7b0c9232fd2b75332fb6d2" title=" " alt="" coords="517,134,712,189"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="470,159,504,159,504,164,470,164"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="447,75,507,68,508,73,447,81"/>
+</map>

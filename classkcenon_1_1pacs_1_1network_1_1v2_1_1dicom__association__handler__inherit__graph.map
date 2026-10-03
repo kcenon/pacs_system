@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::network::v2::dicom_association_handler" name="kcenon::pacs::network::v2::dicom_association_handler">
+<area shape="rect" id="Node000001" title="Bridges network_system sessions with DICOM protocol handling." alt="" coords="7,148,223,917"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,224,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,114,117,148,112,148,112,114"/>
+</map>

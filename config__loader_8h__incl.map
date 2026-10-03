@@ -1,0 +1,24 @@
+<map id="examples/tutorials/05_production_pacs/config_loader.h" name="examples/tutorials/05_production_pacs/config_loader.h">
+<area shape="rect" id="Node000001" title="YAML configuration loader for Production PACS." alt="" coords="336,5,491,60"/>
+<area shape="rect" id="Node000002" href="$anonymization__profile_8h.html" title="DICOM de&#45;identification profiles per PS3.15 Annex E." alt="" coords="127,108,310,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="360,62,272,104,269,100,357,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,196,72,221"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="336,39,281,46,220,58,159,79,103,110,85,126,71,145,50,184,45,182,66,143,81,123,100,106,156,74,218,53,280,40,335,34"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,196,171,221"/>
+<area shape="poly" id="edge10_Node000001_Node000004" title=" " alt="" coords="336,45,272,55,207,69,152,87,131,98,118,110,111,126,110,145,122,183,117,184,105,146,105,125,114,106,128,94,150,82,206,64,271,50,335,40"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="317,196,376,221"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="400,61,377,109,355,183,350,182,372,107,396,59"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="386,108,574,148"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="434,59,461,95,456,98,430,62"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="599,115,665,141"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="476,58,594,108,592,112,474,63"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="689,115,780,141"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="492,52,678,105,688,109,686,114,677,111,490,57"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="805,115,867,141"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="491,42,633,66,713,84,793,105,800,108,798,113,791,111,712,89,632,71,491,47"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="177,150,79,193,77,188,174,146"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="200,150,158,188,154,184,196,146"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="251,146,318,187,315,191,248,150"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="195,196,293,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="227,147,239,182,234,184,222,149"/>
+</map>

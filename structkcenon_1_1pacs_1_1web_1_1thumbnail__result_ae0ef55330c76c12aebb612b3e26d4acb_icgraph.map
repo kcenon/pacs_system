@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::web::thumbnail_result::error" name="kcenon::pacs::web::thumbnail_result::error">
+<area shape="rect" id="Node000001" title="Create an error result." alt="" coords="661,34,832,74"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a6aa9dd21f9e1329f2d89849fb1afe583" title="Get thumbnail for a series (representative image)" alt="" coords="224,26,395,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="678,32,613,16,528,8,443,16,388,29,387,24,442,11,528,3,614,11,679,27"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#ab6a503714ac101824b3b545162e55609" title="Get thumbnail for a study (representative image)" alt="" coords="5,60,176,114"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="677,80,614,95,495,106,376,108,266,105,176,98,176,93,267,99,376,103,495,101,613,90,676,75"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1web_1_1thumbnail__service.html#a39c07a55df4b5950d270150a88d4e00c" title="Get or generate thumbnail for a specific instance." alt="" coords="443,26,613,81"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="648,56,614,56,614,51,648,51"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="211,71,177,77,176,71,210,66"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="429,56,395,56,395,51,429,51"/>
+</map>

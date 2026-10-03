@@ -1,0 +1,11 @@
+<map id="kcenon::pacs::services::validation::xa_iod_validator::validate_calibration" name="kcenon::pacs::services::validation::xa_iod_validator::validate_calibration">
+<area shape="rect" id="Node000001" title="Validate calibration data for quantitative analysis." alt="" coords="5,34,216,89"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1validation_1_1xa__iod__validator.html#a008a6a3aed334a3709df0166422ebfa3" title=" " alt="" coords="264,34,479,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,59,250,59,250,64,216,64"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aedc914f560ec3e29c8bebc52de69cd5d" title="Check if the dataset contains an element with the given tag." alt="" coords="527,5,716,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="479,43,513,38,514,43,479,48"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#aabe5ff58f68e4e9fc3f1e81601fae534" title="Get the numeric value of an element." alt="" coords="544,70,699,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="479,74,531,82,530,87,479,79"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1core_1_1dicom__dataset.html#a32bc11622a53535e749b509df4af9616" title="Get a pointer to the element with the given tag." alt="" coords="764,77,919,117"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="699,95,750,95,750,100,699,100"/>
+</map>

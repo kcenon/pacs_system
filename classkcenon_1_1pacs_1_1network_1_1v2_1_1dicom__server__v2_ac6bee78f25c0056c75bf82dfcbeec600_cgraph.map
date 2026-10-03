@@ -1,0 +1,29 @@
+<map id="kcenon::pacs::network::v2::dicom_server_v2::start" name="kcenon::pacs::network::v2::dicom_server_v2::start">
+<area shape="rect" id="Node000001" title="Start the server." alt="" coords="5,149,173,203"/>
+<area shape="rect" id="Node000002" href="$namespacekcenon_1_1pacs_1_1compat.html#a53d55ac6fb262fa05f81320f43e0f424" title=" " alt="" coords="223,5,387,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,146,160,100,220,55,230,49,233,54,223,60,164,105,117,150"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#af7040892e5e9f48c689e74fcb6e7d452" title="Handle new connection from server." alt="" coords="221,70,389,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,146,216,127,218,132,166,151"/>
+<area shape="rect" id="Node000008" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#abf8ee92d12d45ee968dc0a47acf33ce8" title="Handle disconnection notification." alt="" coords="221,306,389,361"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="118,202,165,247,223,292,230,297,227,301,220,297,161,251,114,205"/>
+<area shape="rect" id="Node000010" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a007f61853d6fc36f6a624b4f8c2730bb" title="Handle network error." alt="" coords="221,149,389,203"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="174,173,208,173,208,179,174,179"/>
+<area shape="rect" id="Node000011" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a43e7697d87b387a97ccbd2f1c912c8c2" title="Handle receive data (forwarded to handler)" alt="" coords="221,227,389,282"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="166,201,218,220,216,225,164,206"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a39319a4369eab2d82493276a382df3d6" title="Create and register a new handler for a session." alt="" coords="437,101,605,155"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="390,107,424,112,423,117,389,112"/>
+<area shape="rect" id="Node000007" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a12493bdbd9cd0de90dd70b6f0155dd21" title="Report error through callback." alt="" coords="653,22,821,77"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="360,67,397,52,437,41,488,34,541,31,639,35,639,40,541,37,489,39,438,47,399,58,362,72"/>
+<area shape="rect" id="Node000005" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a59c0eb4b0b0831eb5a97dc7d447357c9" title="Build service map from registered services." alt="" coords="653,101,821,155"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="606,125,640,125,640,131,606,131"/>
+<area shape="rect" id="Node000006" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a81fd7d359a1ccb115ac444d2605dbe53" title="Remove handler by session ID." alt="" coords="653,179,821,234"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="598,153,650,172,648,177,596,158"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="596,98,648,79,650,84,598,103"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="390,332,494,323,550,313,604,296,652,271,694,241,697,245,655,276,606,301,552,318,495,329,390,337"/>
+<area shape="rect" id="Node000009" href="$classkcenon_1_1pacs_1_1network_1_1v2_1_1dicom__server__v2.html#a8159156565dc36aa4583fdfb281632f3" title="Find handler by session ID." alt="" coords="437,231,605,286"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="384,303,428,288,430,293,386,308"/>
+<area shape="poly" id="edge13_Node000010_Node000006" title=" " alt="" coords="390,179,640,197,639,202,389,185"/>
+<area shape="poly" id="edge14_Node000010_Node000007" title=" " alt="" coords="368,146,388,134,401,121,410,109,420,97,436,86,486,66,539,54,591,46,640,44,640,49,592,52,540,59,488,71,439,90,424,101,415,112,405,125,391,138,371,151"/>
+<area shape="poly" id="edge12_Node000010_Node000009" title=" " alt="" coords="379,201,438,224,436,229,377,206"/>
+<area shape="poly" id="edge16_Node000011_Node000009" title=" " alt="" coords="390,254,424,254,423,260,390,259"/>
+</map>

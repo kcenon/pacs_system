@@ -1,0 +1,5 @@
+<map id="kcenon::pacs::services::scp_service::logger" name="kcenon::pacs::services::scp_service::logger">
+<area shape="rect" id="Node000001" title="Get the current logger instance." alt="" coords="236,5,405,45"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1services_1_1scp__service.html#a8d601ad5d3106f6647e313b8f0e369a5" title="Set the logger instance." alt="" coords="5,5,188,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,28,188,28,188,23,222,23"/>
+</map>

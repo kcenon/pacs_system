@@ -1,0 +1,9 @@
+<map id="kcenon::pacs::network::pdu_encoder::encode_user_information" name="kcenon::pacs::network::pdu_encoder::encode_user_information">
+<area shape="rect" id="Node000001" title="Encodes a User Information item." alt="" coords="5,70,173,125"/>
+<area shape="rect" id="Node000002" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#adda17a67c78d1fba73085589ea8a13df" title="Writes a UID string." alt="" coords="221,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,68,236,47,237,52,175,73"/>
+<area shape="rect" id="Node000003" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#ac2ab53ad523a5947efac7785165941e6" title="Writes a 16&#45;bit unsigned integer in big&#45;endian format." alt="" coords="228,70,396,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,95,214,95,214,100,174,100"/>
+<area shape="rect" id="Node000004" href="$classkcenon_1_1pacs_1_1network_1_1pdu__encoder.html#a072ecc5e4e38fc2897e62ef6d4327d44" title="Writes a 32&#45;bit unsigned integer in big&#45;endian format." alt="" coords="228,149,396,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,122,222,142,220,147,167,127"/>
+</map>
