@@ -105,8 +105,9 @@ envelope + HMAC).
   cases.
 - `Dependency Security Scan` (`.github/workflows/dependency-security-scan.yml`)
   — emits a TLS-configuration report for the source tree and runs the
-  dependency vulnerability scan (Trivy, OSV, npm audit). Triggers on push,
-  pull_request, nightly schedule, and `workflow_dispatch`.
+  dependency vulnerability scan (Trivy, npm audit; the OSV manifest scan
+  runs separately in `osv-scanner.yml`). Triggers on push, pull_request,
+  a weekly schedule, and `workflow_dispatch`.
 - `Integration Tests` — the XDS.b ATNA integration bucket
   (`pacs_xds_integration` CTest label).
 
