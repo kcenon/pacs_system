@@ -1,16 +1,44 @@
+# Repository events and Pages deployment for pacs_system.
+# Doxygen runs in the reusable kcenon/common_system workflow, which uploads the
+# github-pages artifact; the deploy job publishes it with actions/deploy-pages.
 name: Generate-Documentation
 
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: documentation-pages-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   docs:
+    permissions:
+      contents: read
     uses: kcenon/common_system/.github/workflows/doxygen.yml@main
-    secrets: inherit
+    with:
+      pages-artifact: true
+
+  deploy:
+    needs: docs
+    if: >-
+      github.repository == 'kcenon/pacs_system' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
