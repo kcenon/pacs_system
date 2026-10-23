@@ -147,15 +147,15 @@ const jwt_validator& oauth2_middleware::validator() const noexcept {
 // Private Helpers
 // =============================================================================
 
-std::optional<std::string_view> oauth2_middleware::extract_bearer_token(
+std::optional<std::string> oauth2_middleware::extract_bearer_token(
     const crow::request& req) const {
 
-    auto auth_header = req.get_header_value("Authorization");
+    const auto& auth_header = req.get_header_value("Authorization");
     if (auth_header.empty()) return std::nullopt;
 
     std::string_view header_view(auth_header);
 
-    // Check for "Bearer " prefix (case-insensitive for "Bearer")
+    // Check for "Bearer " prefix
     constexpr std::string_view bearer_prefix = "Bearer ";
     if (header_view.size() <= bearer_prefix.size()) return std::nullopt;
 
@@ -167,7 +167,8 @@ std::optional<std::string_view> oauth2_middleware::extract_bearer_token(
     auto token = header_view.substr(bearer_prefix.size());
     if (token.empty()) return std::nullopt;
 
-    return token;
+    // Return a copy: the caller must not hold a view into the header value
+    return std::string(token);
 }
 
 bool oauth2_middleware::verify_signature(const jwt_token& token) const {

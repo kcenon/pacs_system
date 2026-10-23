@@ -189,8 +189,8 @@ private:
     std::shared_ptr<jwks_provider> jwks_provider_;
     std::shared_ptr<security::access_control_manager> security_manager_;
 
-    /// Extract Bearer token from Authorization header
-    [[nodiscard]] std::optional<std::string_view> extract_bearer_token(
+    /// Extract a copy of the Bearer token from the Authorization header
+    [[nodiscard]] std::optional<std::string> extract_bearer_token(
         const crow::request& req) const;
 
     /// Verify token signature using JWKS keys
