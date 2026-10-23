@@ -285,8 +285,9 @@ jobs:
     # without failing the job: the scripts run pacs_system SCPs and SCUs as
     # separate processes against DCMTK, which needs real TCP DICOM support
     # (#1240), and they still call echo_scu and store_scu with the old
-    # positional AE-title syntax. shell: bash sets pipefail, so the script's
-    # exit code survives the tee. Remove continue-on-error when both are fixed.
+    # positional AE-title syntax (#1258). shell: bash sets pipefail, so the
+    # script's exit code survives the tee. Remove continue-on-error when both
+    # are fixed.
     - name: Run DCMTK Echo Shell Test
       working-directory: pacs_system
       timeout-minutes: 8
