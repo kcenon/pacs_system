@@ -289,6 +289,7 @@ jobs:
     # script's exit code survives the tee. Remove continue-on-error when both
     # are fixed.
     - name: Run DCMTK Echo Shell Test
+      id: shell_echo
       working-directory: pacs_system
       timeout-minutes: 8
       continue-on-error: true
@@ -300,6 +301,7 @@ jobs:
         fi
 
     - name: Run DCMTK Store Shell Test
+      id: shell_store
       working-directory: pacs_system
       timeout-minutes: 8
       continue-on-error: true
@@ -311,6 +313,7 @@ jobs:
         fi
 
     - name: Run DCMTK Find Shell Test
+      id: shell_find
       working-directory: pacs_system
       timeout-minutes: 8
       continue-on-error: true
@@ -322,6 +325,7 @@ jobs:
         fi
 
     - name: Run DCMTK Move Shell Test
+      id: shell_move
       working-directory: pacs_system
       timeout-minutes: 8
       continue-on-error: true
@@ -331,6 +335,32 @@ jobs:
           echo "=== Running C-MOVE Shell Test ==="
           ./tools/integration_tests/scripts/test_dcmtk_move.sh 2>&1 | tee build/dcmtk-move-shell.log
         fi
+
+    - name: Record shell test outcomes
+      if: always()
+      run: |
+        # continue-on-error above keeps the job green; record the real outcomes
+        # so the known failures (#1240, #1258) stay visible in the job summary
+        echo_outcome='${{ steps.shell_echo.outcome }}'
+        store_outcome='${{ steps.shell_store.outcome }}'
+        find_outcome='${{ steps.shell_find.outcome }}'
+        move_outcome='${{ steps.shell_move.outcome }}'
+        {
+          echo "### DCMTK shell tests (known failures, quarantined under #1240 and #1258)"
+          echo ""
+          echo "| Test | Outcome |"
+          echo "|---|---|"
+          echo "| C-ECHO | ${echo_outcome} |"
+          echo "| C-STORE | ${store_outcome} |"
+          echo "| C-FIND | ${find_outcome} |"
+          echo "| C-MOVE | ${move_outcome} |"
+        } >> "$GITHUB_STEP_SUMMARY"
+        for outcome in "$echo_outcome" "$store_outcome" "$find_outcome" "$move_outcome"; do
+          if [ "$outcome" = failure ]; then
+            echo "::warning title=Known failure (#1240, #1258)::DCMTK shell tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
+            break
+          fi
+        done
 
     - name: Upload Shell Test Logs
       uses: actions/upload-artifact@v7

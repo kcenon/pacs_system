@@ -215,6 +215,7 @@ jobs:
 
     - name: Build application (fallback - Windows)
       if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
+      id: build_fallback_windows
       working-directory: pacs_system
       shell: pwsh
       # Known failing (#1266), so this step reports failure without failing the
@@ -246,6 +247,19 @@ jobs:
         cmake --build . --config Release --parallel
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         ctest -C Release --output-on-failure --timeout 120 --no-tests=error
+
+    - name: Record Windows build outcome
+      if: always() && runner.os == 'Windows'
+      shell: bash
+      run: |
+        # continue-on-error above keeps the job green; record the real outcomes
+        # so the known failure (#1266) stays visible in the job summary
+        vcpkg_outcome='${{ steps.build_vcpkg_windows.outcome }}'
+        fallback_outcome='${{ steps.build_fallback_windows.outcome }}'
+        echo "Windows build and tests: vcpkg path ${vcpkg_outcome:-skipped}, fallback ${fallback_outcome:-skipped} (known failure, quarantined under #1266)" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$fallback_outcome" = failure ]; then
+          echo "::warning title=Known failure (#1266)::The Windows build and tests did not run; continue-on-error keeps this job green until #1266 is fixed"
+        fi
 
     - name: Upload test results
       if: always()

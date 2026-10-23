@@ -9,7 +9,9 @@
 stress::lockfree_queue memory safety
 
 # #1253: pipeline_coordinator::stop() and thread_pool_adapter::shutdown()
-# stop thread pools while holding their own mutex (lock-order inversion)
+# stop thread pools while holding their own mutex (lock-order inversion; the
+# thread_system half, the worker lifecycle lock held across do_work(), is
+# kcenon/thread_system#762)
 pipeline_coordinator job submission
 pipeline_coordinator callbacks
 pipeline_coordinator concurrent job submission

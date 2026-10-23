@@ -853,6 +853,7 @@ jobs:
         fi
 
     - name: Run Binary Integration Tests
+      id: binary_tests
       working-directory: pacs_system
       run: |
         if [ -f "./tools/integration_tests/scripts/run_all_binary_tests.sh" ]; then
@@ -868,6 +869,17 @@ jobs:
       # and the scripts pass arguments the CLI tools no longer accept (#1258).
       # Remove continue-on-error when both are fixed.
       continue-on-error: true
+
+    - name: Record binary integration test outcome
+      if: always()
+      run: |
+        # continue-on-error above keeps the job green; record the real outcome
+        # so the known failure (#1240, #1258) stays visible in the job summary
+        outcome='${{ steps.binary_tests.outcome }}'
+        echo "Binary integration tests: ${outcome} (known failure, quarantined under #1240 and #1258)" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$outcome" = failure ]; then
+          echo "::warning title=Known failure (#1240, #1258)::Binary integration tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
+        fi
 
   # ============================================================================
   # Test Summary
