@@ -203,6 +203,10 @@ The `test_dicom_server_v2_integration.cpp` provides end-to-end integration testi
 | Mixed Operations | `[v2][stress][mixed]` | Concurrent echo and store workers |
 | TLS with V2 | `[tls][v2]` | TLS connections with V2 server |
 
+The `[v2][stress]` cases are skipped while `supports_real_tcp_dicom()` returns
+false: `association::connect()` reaches only the in-memory `dicom_server`
+registry and cannot connect to `dicom_server_v2` over TCP yet.
+
 ### V2 E2E Test Fixtures
 
 ```cpp
