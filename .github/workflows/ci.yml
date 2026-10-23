@@ -217,12 +217,12 @@ jobs:
       if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
       working-directory: pacs_system
       shell: pwsh
-      # Known failing, so this step reports failure without failing the job:
-      # the vcpkg manifest build stops at kcenon-logger-system (link errors on
-      # x64-windows), and this fallback has no vcpkg toolchain, so ICU and the
-      # other dependencies are missing. Windows unit tests run in
+      # Known failing (#1266), so this step reports failure without failing the
+      # job: the vcpkg manifest build stops at kcenon-logger-system (link errors
+      # on x64-windows), and this fallback turns manifest mode off, so ICU and
+      # the other dependencies are missing. Windows unit tests run in
       # integration-tests.yml (Build & Unit Tests (windows-2022)). Remove
-      # continue-on-error when the Windows vcpkg build is fixed.
+      # continue-on-error when #1266 is fixed.
       continue-on-error: true
       run: |
         Write-Host "vcpkg build failed. Falling back to system libraries..."
