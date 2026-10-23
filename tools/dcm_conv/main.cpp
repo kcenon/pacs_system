@@ -148,8 +148,8 @@ void list_supported_syntaxes() {
     std::cout << std::string(70, '-') << "\n";
     std::cout << "Total: " << syntaxes.size() << " transfer syntaxes\n\n";
 
-    // Also list compression codecs if available
-    auto codec_uids = compression::codec_factory::supported_transfer_syntaxes();
+    // Also list the compression codecs this build includes
+    auto codec_uids = compression::codec_factory::available_transfer_syntaxes();
     if (!codec_uids.empty()) {
         std::cout << "Compression Codecs Available:\n";
         std::cout << std::string(50, '-') << "\n";
@@ -324,6 +324,14 @@ bool convert_file(const std::filesystem::path& input_path,
     if (!target_ts.is_supported()) {
         std::cerr << "Error: Target Transfer Syntax '" << target_ts.name()
                   << "' is not currently supported\n";
+        return false;
+    }
+
+    // An encapsulated target also needs its codec in this build
+    if (target_ts.is_encapsulated() &&
+        !compression::codec_factory::is_available(target_ts)) {
+        std::cerr << "Error: Target Transfer Syntax '" << target_ts.name()
+                  << "' needs a codec that this build does not include\n";
         return false;
     }
 

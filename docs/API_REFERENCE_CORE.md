@@ -1028,20 +1028,28 @@ public:
     [[nodiscard]] static std::unique_ptr<compression_codec> create(
         const transfer_syntax& ts);
 
-    // Query supported codecs
+    // Query implemented codecs (independent of the build; stubs excluded)
     [[nodiscard]] static std::vector<std::string_view> supported_transfer_syntaxes();
     [[nodiscard]] static bool is_supported(std::string_view transfer_syntax_uid);
     [[nodiscard]] static bool is_supported(const transfer_syntax& ts);
+
+    // Query the codecs this build can use (built in, or optional library found)
+    [[nodiscard]] static std::vector<std::string_view> available_transfer_syntaxes();
+    [[nodiscard]] static bool is_available(std::string_view transfer_syntax_uid);
+    [[nodiscard]] static bool is_available(const transfer_syntax& ts);
 };
 
-// Currently supported Transfer Syntaxes:
+// Implemented codecs (supported_transfer_syntaxes()):
 // - 1.2.840.10008.1.2.5   - RLE Lossless (pure C++ implementation)
-// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - Lossy
-// - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - Lossless
-// - 1.2.840.10008.1.2.4.80 - JPEG-LS Lossless Image Compression
-// - 1.2.840.10008.1.2.4.81 - JPEG-LS Lossy (Near-Lossless) Image Compression
-// - 1.2.840.10008.1.2.4.90 - JPEG 2000 Lossless Only
-// - 1.2.840.10008.1.2.4.91 - JPEG 2000 (Lossy or Lossless)
+// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - Lossy (libjpeg-turbo)
+// - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - Lossless (built in)
+// - 1.2.840.10008.1.2.4.80 - JPEG-LS Lossless Image Compression (CharLS)
+// - 1.2.840.10008.1.2.4.81 - JPEG-LS Lossy (Near-Lossless) Image Compression (CharLS)
+// - 1.2.840.10008.1.2.4.90 - JPEG 2000 Lossless Only (OpenJPEG)
+// - 1.2.840.10008.1.2.4.91 - JPEG 2000 (Lossy or Lossless) (OpenJPEG)
+// - 1.2.840.10008.1.2.4.201/.202/.203 - HTJ2K (OpenJPH)
+// create() also returns the HEVC, JPEG XL, and Frame Deflate stubs, whose
+// encode() and decode() always fail.
 
 } // namespace pacs::encoding::compression
 ```

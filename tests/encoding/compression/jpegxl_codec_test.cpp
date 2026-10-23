@@ -204,8 +204,11 @@ TEST_CASE("jpegxl_codec move semantics", "[encoding][compression][jpegxl]") {
 }
 
 TEST_CASE("codec_factory JPEG XL support", "[encoding][compression][jpegxl]") {
-    SECTION("Factory recognizes JPEG XL Lossless UID") {
-        CHECK(codec_factory::is_supported("1.2.840.10008.1.2.4.110"));
+    // The factory creates the stub codec, but does not report it as
+    // supported or available.
+    SECTION("Factory creates the JPEG XL Lossless stub") {
+        CHECK_FALSE(codec_factory::is_supported("1.2.840.10008.1.2.4.110"));
+        CHECK_FALSE(codec_factory::is_available("1.2.840.10008.1.2.4.110"));
 
         auto codec = codec_factory::create("1.2.840.10008.1.2.4.110");
         REQUIRE(codec != nullptr);
@@ -213,8 +216,9 @@ TEST_CASE("codec_factory JPEG XL support", "[encoding][compression][jpegxl]") {
         CHECK_FALSE(codec->is_lossy());
     }
 
-    SECTION("Factory recognizes JPEG XL JPEG Recompression UID") {
-        CHECK(codec_factory::is_supported("1.2.840.10008.1.2.4.111"));
+    SECTION("Factory creates the JPEG XL JPEG Recompression stub") {
+        CHECK_FALSE(codec_factory::is_supported("1.2.840.10008.1.2.4.111"));
+        CHECK_FALSE(codec_factory::is_available("1.2.840.10008.1.2.4.111"));
 
         auto codec = codec_factory::create("1.2.840.10008.1.2.4.111");
         REQUIRE(codec != nullptr);
@@ -222,8 +226,9 @@ TEST_CASE("codec_factory JPEG XL support", "[encoding][compression][jpegxl]") {
         CHECK_FALSE(codec->is_lossy());
     }
 
-    SECTION("Factory recognizes JPEG XL Lossy UID") {
-        CHECK(codec_factory::is_supported("1.2.840.10008.1.2.4.112"));
+    SECTION("Factory creates the JPEG XL Lossy stub") {
+        CHECK_FALSE(codec_factory::is_supported("1.2.840.10008.1.2.4.112"));
+        CHECK_FALSE(codec_factory::is_available("1.2.840.10008.1.2.4.112"));
 
         auto codec = codec_factory::create("1.2.840.10008.1.2.4.112");
         REQUIRE(codec != nullptr);
@@ -231,7 +236,7 @@ TEST_CASE("codec_factory JPEG XL support", "[encoding][compression][jpegxl]") {
         CHECK(codec->is_lossy());
     }
 
-    SECTION("JPEG XL UIDs appear in supported transfer syntaxes list") {
+    SECTION("JPEG XL UIDs are not in the supported transfer syntaxes list") {
         auto supported = codec_factory::supported_transfer_syntaxes();
 
         bool found_lossless = false;
@@ -244,9 +249,9 @@ TEST_CASE("codec_factory JPEG XL support", "[encoding][compression][jpegxl]") {
             if (uid == "1.2.840.10008.1.2.4.112") found_lossy = true;
         }
 
-        CHECK(found_lossless);
-        CHECK(found_recompression);
-        CHECK(found_lossy);
+        CHECK_FALSE(found_lossless);
+        CHECK_FALSE(found_recompression);
+        CHECK_FALSE(found_lossy);
     }
 }
 
@@ -257,7 +262,7 @@ TEST_CASE("jpegxl_codec transfer syntax registry integration",
 
         CHECK(ts.is_valid());
         CHECK(ts.is_encapsulated());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
         CHECK(ts.name() == "JPEG XL Lossless");
     }
 
@@ -266,7 +271,7 @@ TEST_CASE("jpegxl_codec transfer syntax registry integration",
 
         CHECK(ts.is_valid());
         CHECK(ts.is_encapsulated());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
         CHECK(ts.name() == "JPEG XL JPEG Recompression");
     }
 
@@ -275,7 +280,7 @@ TEST_CASE("jpegxl_codec transfer syntax registry integration",
 
         CHECK(ts.is_valid());
         CHECK(ts.is_encapsulated());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
         CHECK(ts.name() == "JPEG XL");
     }
 }

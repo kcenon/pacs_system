@@ -84,6 +84,7 @@ if(PACS_BUILD_TESTS)
     # Encoding tests
     add_executable(encoding_tests
         tests/encoding/transfer_syntax_test.cpp
+        tests/encoding/transfer_syntax_support_test.cpp
         tests/encoding/vr_type_test.cpp
         tests/encoding/vr_info_test.cpp
         tests/encoding/implicit_vr_codec_test.cpp
