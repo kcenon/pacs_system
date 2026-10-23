@@ -387,8 +387,8 @@ void dicom_server::message_loop(association_info& info) {
             break;
         }
 
-        // Update activity timestamp
-        info.last_activity = clock::now();
+        // Update activity timestamp under associations_mutex_, which
+        // check_idle_timeouts() holds while it reads it from another thread
         touch_association(info.id);
 
         // Dispatch message to service
@@ -631,9 +631,8 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
         std::lock_guard<std::mutex> lock(associations_mutex_);
         auto it = associations_.find(id);
         if (it != associations_.end()) {
-            // Link peers
+            // Link peers (set_peer() pairs both ends)
             it->second->assoc.set_peer(client_peer);
-            client_peer->set_peer(&it->second->assoc);
 
             // Submit message loop to thread_pool_adapter instead of creating dedicated thread.
             // We need to capture the raw pointer to info because unique_ptr is in the map.

@@ -12,6 +12,7 @@
 #include "kcenon/pacs/network/dicom_server.h"
 
 #include <algorithm>
+#include <array>
 #include <sstream>
 #include <stdexcept>
 
@@ -95,6 +96,34 @@ void rejection_info::build_description() {
 }
 
 // =============================================================================
+// In-memory peer link (test hook)
+// =============================================================================
+
+/**
+ * @brief Pairing state shared by the two ends of an in-memory association.
+ *
+ * The in-memory dicom_server hook pairs a client association with a server
+ * association. Instead of holding a raw pointer to the other end, each end
+ * owns a slot here and clears it when it is released, aborted, or destroyed.
+ * A sender looks the other end up and enqueues under the same mutex, so a
+ * send never reaches an association that is gone.
+ *
+ * Lock order: an association's mutex_ before peer_link::mutex. Code holding
+ * peer_link::mutex never locks an association's mutex_; it only touches the
+ * other end's incoming_queue_, which is thread-safe.
+ */
+struct association::peer_link {
+    std::mutex mutex;
+
+    /// The two ends; a slot is null once its end has left
+    std::array<association*, 2> ends{nullptr, nullptr};
+
+    /// How each end left (released or aborted), set when its slot is cleared
+    std::array<association_state, 2> exit_states{
+        association_state::aborted, association_state::aborted};
+};
+
+// =============================================================================
 // association Implementation - Construction/Destruction
 // =============================================================================
 
@@ -119,21 +148,16 @@ association::association(association&& other) noexcept {
     abort_source_ = other.abort_source_;
     abort_reason_ = other.abort_reason_;
     is_scu_ = other.is_scu_;
-    peer_ = other.peer_;
-    incoming_queue_ = std::move(other.incoming_queue_);
-    other.incoming_queue_ = std::make_unique<message_queue_type>();
+    take_peer_link_from(other);
 
     other.state_ = association_state::idle;
-    other.peer_ = nullptr;
-
-    if (peer_) {
-        peer_->update_peer(&other, this);
-    }
 }
 
 association& association::operator=(association&& other) noexcept {
     if (this != &other) {
         std::scoped_lock lock(mutex_, other.mutex_);
+        // The association being overwritten ends here
+        leave_peer_link();
         state_ = other.state_;
         calling_ae_ = std::move(other.calling_ae_);
         called_ae_ = std::move(other.called_ae_);
@@ -151,16 +175,9 @@ association& association::operator=(association&& other) noexcept {
         abort_source_ = other.abort_source_;
         abort_reason_ = other.abort_reason_;
         is_scu_ = other.is_scu_;
-        peer_ = other.peer_;
-        incoming_queue_ = std::move(other.incoming_queue_);
-        other.incoming_queue_ = std::make_unique<message_queue_type>();
+        take_peer_link_from(other);
 
         other.state_ = association_state::idle;
-        other.peer_ = nullptr;
-
-        if (peer_) {
-            peer_->update_peer(&other, this);
-        }
     }
     return *this;
 }
@@ -171,6 +188,8 @@ association::~association() {
         // Abort silently on destruction
         state_ = association_state::aborted;
     }
+    // An in-memory peer must not keep sending to this object
+    leave_peer_link();
 }
 
 // =============================================================================
@@ -391,9 +410,19 @@ Result<std::monostate> association::send_dimse(
     // Placeholder for actual send implementation
     (void)msg;
 
-    if (peer_) {
-        peer_->enqueue_message(context_id, msg);
-        return std::monostate{};
+    if (peer_link_) {
+        {
+            std::lock_guard<std::mutex> link_lock(peer_link_->mutex);
+            if (auto* peer = peer_link_->ends[1 - peer_end_]) {
+                peer->enqueue_message(context_id, msg);
+                return std::monostate{};
+            }
+        }
+        // The in-memory peer released, aborted, or was destroyed
+        finish_after_peer_left(*peer_exit_state());
+        return error_info{association_aborted,
+            "Cannot send DIMSE: the in-memory peer released or aborted the association",
+            "network"};
     }
 
     return std::monostate{};
@@ -417,9 +446,20 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
         return std::move(*item);
     }
 
-    // Check if we were aborted/released while waiting
+    // Check if we were aborted/released while waiting, or the in-memory peer
+    // left (it wakes this queue when it does)
     {
         std::lock_guard<std::mutex> lock(mutex_);
+        if (state_ == association_state::established) {
+            if (auto peer_exit = peer_exit_state()) {
+                // A peer that left cannot enqueue any more, so this only
+                // drains what it sent before leaving
+                if (auto item = incoming_queue_->try_dequeue()) {
+                    return std::move(*item);
+                }
+                finish_after_peer_left(*peer_exit);
+            }
+        }
         if (state_ != association_state::established) {
             return error_info{association_aborted, "Association aborted or released", "network"};
         }
@@ -560,6 +600,9 @@ Result<std::monostate> association::release(duration /*timeout*/) {
     // For now, simulate successful release
     state_ = association_state::released;
 
+    // An in-memory peer sees the release once it has drained its queue
+    leave_peer_link();
+
     return std::monostate{};
 }
 
@@ -576,6 +619,7 @@ void association::process_release_rp() {
 
     if (state_ == association_state::awaiting_release_rp) {
         state_ = association_state::released;
+        leave_peer_link();
     }
 }
 
@@ -585,6 +629,7 @@ void association::abort(uint8_t source, uint8_t reason) {
     abort_source_ = source;
     abort_reason_ = reason;
     state_ = association_state::aborted;
+    leave_peer_link();
 
     // Wake up any waiters on the lock-free queue
     incoming_queue_->notify_all();
@@ -596,6 +641,7 @@ void association::process_abort(const abort_source& source, const abort_reason& 
     abort_source_ = static_cast<uint8_t>(source);
     abort_reason_ = static_cast<uint8_t>(reason);
     state_ = association_state::aborted;
+    leave_peer_link();
 
     // Wake up any waiters on the lock-free queue
     incoming_queue_->notify_all();
@@ -607,8 +653,29 @@ void association::set_state(association_state new_state) {
 }
 
 void association::set_peer(association* peer) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    peer_ = peer;
+    if (peer == this) {
+        return;
+    }
+
+    if (peer == nullptr) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        leave_peer_link();
+        return;
+    }
+
+    std::scoped_lock lock(mutex_, peer->mutex_);
+    if (peer_link_ && peer_link_ == peer->peer_link_) {
+        return;  // Already paired with each other
+    }
+    leave_peer_link();
+    peer->leave_peer_link();
+
+    auto link = std::make_shared<peer_link>();
+    link->ends = {this, peer};
+    peer_link_ = link;
+    peer_end_ = 0;
+    peer->peer_link_ = std::move(link);
+    peer->peer_end_ = 1;
 }
 
 void association::enqueue_message(uint8_t context_id, dimse::dimse_message msg) {
@@ -617,9 +684,18 @@ void association::enqueue_message(uint8_t context_id, dimse::dimse_message msg) 
 }
 
 void association::update_peer(association* old_peer, association* new_peer) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (peer_ == old_peer) {
-        peer_ = new_peer;
+    bool paired_with_old = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (peer_link_) {
+            std::lock_guard<std::mutex> link_lock(peer_link_->mutex);
+            paired_with_old = peer_link_->ends[1 - peer_end_] == old_peer;
+        } else {
+            paired_with_old = old_peer == nullptr;
+        }
+    }
+    if (paired_with_old) {
+        set_peer(new_peer);
     }
 }
 
@@ -741,6 +817,64 @@ void association::negotiate_contexts(
             });
         }
     }
+}
+
+void association::leave_peer_link() {
+    if (!peer_link_) {
+        return;
+    }
+
+    {
+        std::lock_guard<std::mutex> link_lock(peer_link_->mutex);
+        peer_link_->ends[peer_end_] = nullptr;
+        peer_link_->exit_states[peer_end_] =
+            state_ == association_state::released
+                ? association_state::released
+                : association_state::aborted;
+
+        if (auto* peer = peer_link_->ends[1 - peer_end_]) {
+            // Wake the peer's receivers now instead of at their timeout; the
+            // peer still dequeues what is queued, then sees this end gone
+            peer->incoming_queue_->shutdown();
+        }
+    }
+    peer_link_.reset();
+}
+
+void association::take_peer_link_from(association& other) {
+    peer_link_ = std::move(other.peer_link_);
+    peer_end_ = other.peer_end_;
+
+    // The peer enqueues into whichever object owns this end's slot, so the
+    // slot and the queue move together under the link mutex
+    std::unique_lock<std::mutex> link_lock;
+    if (peer_link_) {
+        link_lock = std::unique_lock<std::mutex>(peer_link_->mutex);
+        peer_link_->ends[peer_end_] = this;
+    }
+    incoming_queue_ = std::move(other.incoming_queue_);
+    other.incoming_queue_ = std::make_unique<message_queue_type>();
+}
+
+std::optional<association_state> association::peer_exit_state() const {
+    if (!peer_link_) {
+        return std::nullopt;
+    }
+
+    std::lock_guard<std::mutex> link_lock(peer_link_->mutex);
+    const auto other_end = 1 - peer_end_;
+    if (peer_link_->ends[other_end] != nullptr) {
+        return std::nullopt;
+    }
+    return peer_link_->exit_states[other_end];
+}
+
+void association::finish_after_peer_left(association_state peer_exit) {
+    // The peer already cleared its slot, so dropping the link frees it
+    peer_link_.reset();
+    state_ = peer_exit == association_state::released
+        ? association_state::released
+        : association_state::aborted;
 }
 
 }  // namespace kcenon::pacs::network
