@@ -12,7 +12,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <atomic>
 #include <filesystem>
+#include <thread>
+#include <vector>
 
 using namespace kcenon::pacs::storage;
 using namespace kcenon::pacs::core;
@@ -512,6 +515,68 @@ TEST_CASE("file_storage: rebuild_index", "[storage][file_storage]") {
 
     auto stats = storage2.get_statistics();
     CHECK(stats.total_instances == 2);
+}
+
+// ============================================================================
+// Thread Safety Tests
+// ============================================================================
+
+TEST_CASE("file_storage: concurrent store from multiple threads",
+          "[storage][file_storage][threading]") {
+    temp_directory temp_dir;
+
+    file_storage_config config;
+    config.root_path = temp_dir.path();
+
+    file_storage storage{config};
+
+    constexpr int num_threads = 8;
+    constexpr int stores_per_thread = 10;
+
+    auto sop_uid_for = [](int thread_index, int i) {
+        return "1.2.5." + std::to_string(thread_index) + ".1." +
+               std::to_string(i);
+    };
+
+    std::atomic<int> failed_stores{0};
+    std::vector<std::thread> threads;
+    threads.reserve(num_threads);
+
+    for (int t = 0; t < num_threads; ++t) {
+        threads.emplace_back([&, t]() {
+            auto study_uid = "1.2.5." + std::to_string(t);
+            for (int i = 0; i < stores_per_thread; ++i) {
+                auto ds = create_test_dataset(study_uid, study_uid + ".1",
+                                              sop_uid_for(t, i));
+                if (storage.store(ds).is_err()) {
+                    ++failed_stores;
+                }
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    CHECK(failed_stores == 0);
+
+    for (int t = 0; t < num_threads; ++t) {
+        for (int i = 0; i < stores_per_thread; ++i) {
+            auto path = storage.get_file_path(sop_uid_for(t, i));
+            CHECK(std::filesystem::exists(path));
+        }
+    }
+
+    CHECK(storage.get_statistics().total_instances ==
+          num_threads * stores_per_thread);
+
+    // Every temporary file was renamed into place
+    for (const auto& entry :
+         std::filesystem::recursive_directory_iterator(temp_dir.path())) {
+        CHECK(entry.path().filename().string().find(".tmp.") ==
+              std::string::npos);
+    }
 }
 
 // ============================================================================
