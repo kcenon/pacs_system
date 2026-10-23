@@ -4,6 +4,7 @@
 # This workflow:
 # - Calculates actual code statistics on relevant file changes
 # - Checks if documented statistics in README.md are within 10% of actual
+# - Checks that the README.kr.md statistics block carries the README.md values
 # - Generates statistics report as CI artifact
 # - Optionally auto-updates README.md on main branch merges
 
@@ -20,6 +21,11 @@ on:
       - 'tools/**'
       - 'docs/**'
       - '.github/workflows/**'
+      - 'README.md'
+      - 'README.kr.md'
+      - 'scripts/calculate-stats.sh'
+      - 'scripts/update-readme-stats.sh'
+      - 'scripts/check-stats-drift.sh'
   pull_request:
     branches: [main, develop]
     paths:
@@ -30,6 +36,11 @@ on:
       - 'tools/**'
       - 'docs/**'
       - '.github/workflows/**'
+      - 'README.md'
+      - 'README.kr.md'
+      - 'scripts/calculate-stats.sh'
+      - 'scripts/update-readme-stats.sh'
+      - 'scripts/check-stats-drift.sh'
   workflow_dispatch:
     inputs:
       update_readme:
@@ -129,7 +140,8 @@ jobs:
 
             const body = `## :warning: Documentation Statistics Drift Detected
 
-            Some code statistics in README.md are more than 10% different from actual values.
+            Some code statistics in README.md are more than 10% different from actual values,
+            or the README.kr.md statistics block does not carry the same values as README.md.
 
             <details>
             <summary>Drift Report</summary>
@@ -144,6 +156,7 @@ jobs:
             \`\`\`bash
             ./scripts/update-readme-stats.sh
             \`\`\`
+            Then copy the new values into the README.kr.md statistics block.
             `;
 
             github.rest.issues.createComment({
@@ -156,7 +169,7 @@ jobs:
       - name: Fail if drift detected
         if: steps.drift-check.outputs.drift_detected == 'true'
         run: |
-          echo "::error::Documentation statistics drift detected. Please run ./scripts/update-readme-stats.sh"
+          echo "::error::Documentation statistics drift detected. Please run ./scripts/update-readme-stats.sh and copy the values into README.kr.md"
           exit 1
 
   auto-update:
