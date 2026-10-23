@@ -37,6 +37,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 | [PRD](PRD.md) | Product Requirements Document |
 | [SRS](SRS.md) | Software Requirements Specification |
 | [SDS](SDS.md) | Software Design Specification |
+| [SaMD readiness checklists](checklists/README.md) | Applicability, software, risk, usability, security, QMS and MFDS evidence reviews |
 
 ## Quick Links
 
