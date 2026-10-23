@@ -31,6 +31,7 @@ category: "ARCH"
 - [스레드 모델](#스레드-모델)
 - [오류 처리 전략](#오류-처리-전략)
 - [보안 아키텍처](#보안-아키텍처)
+- [C++20 모듈 아키텍처](#c20-모듈-아키텍처)
 
 ---
 
@@ -171,6 +172,46 @@ PACS 시스템은 네 가지 기본 원칙을 중심으로 설계되었습니다
 ---
 
 ## 시스템 아키텍처
+
+### 계층 개요
+
+계층 구성과 그 아래의 에코시스템 라이브러리입니다 (README에서 옮김):
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                            PACS System                               │
+├──────────────────────────────────────────────────────────────────────┤
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌───────────┐  │
+│  │ REST API │ │ DICOMweb │ │ Web UI  │ │ AI Svc   │ │ Workflow  │  │
+│  │ (Crow)   │ │ WADO/STOW│ │ (React) │ │Connector │ │ Scheduler │  │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
+│       └─────────────┼───────────┼───────────┼──────────────┘        │
+│  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
+│  │  IHE Actors (XDS.b Source / Consumer / Registry Query + ATNA) │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commit/Print) │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Network (PDU/Association/DIMSE) + Security (RBAC/TLS/Anon)   │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Core (Tag/Element/Dataset/File) + Encoding (VR/Codecs/SIMD)  │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌─────────────┐  ┌─────────────┴──────────┐  ┌─────────────────┐  │
+│  │  Storage    │  │  Client Module         │  │  Monitoring     │  │
+│  │  (DB/File/  │  │  (Job/Route/Sync/      │  │  (Health/       │  │
+│  │   S3/Azure) │  │   Prefetch/RemoteNode) │  │   Metrics)      │  │
+│  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
+├─────────┼────────────────────────────────────────────────────────────┤
+│         │             Integration Adapters + DI                      │
+│  container │ network │ thread │ logger │ monitoring                  │
+├─────────┼────────────────────────────────────────────────────────────┤
+│         │              kcenon Ecosystem                               │
+│  common_system │ container_system │ thread_system │ network_system   │
+│  logger_system │ monitoring_system │ database_system (opt)           │
+└──────────────────────────────────────────────────────────────────────┘
+```
 
 ### 고수준 아키텍처
 
@@ -850,6 +891,69 @@ auto& file = result.value();
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## C++20 모듈 아키텍처
+
+PACS System은 헤더 기반 인터페이스의 대안으로 C++20 모듈 인터페이스(`src/modules/`)를 정의합니다.
+
+> **상태**: 현재 리비전에서는 모듈 빌드가 컴파일되지 않습니다. 파티션은 여전히 접두사 없는 `pacs::`
+> 네임스페이스의 이름을 재노출하지만(예: `using pacs::core::dicom_tag;`) 공개 헤더는 이 이름들을
+> `kcenon::pacs::`에 선언하므로, `pacs_system_modules` 빌드는 비어 있는 `:ai` 파티션을 제외한 모든
+> 파티션에서 실패합니다. `PACS_BUILD_MODULES=ON`으로 빌드하는 CI 작업은 없습니다. 헤더 기반
+> 인터페이스를 사용하세요.
+
+### 모듈 요구사항
+
+- **CMake 3.28+**
+- **Clang 16+, GCC 14+ 또는 MSVC 2022 17.4+**
+
+### 모듈로 빌드하기
+
+```bash
+cmake -B build -DPACS_BUILD_MODULES=ON
+cmake --build build
+```
+
+### 모듈 사용하기
+
+아래 예제는 공개 헤더가 선언하는 이름을 사용하며, 파티션이 이 이름들을 export한 뒤에야 빌드됩니다
+(위의 상태 안내 참조).
+
+```cpp
+import kcenon.pacs;
+
+int main() {
+    kcenon::pacs::core::dicom_dataset dataset;
+    dataset.set_string(kcenon::pacs::core::tags::patient_name,
+                       kcenon::pacs::encoding::vr_type::PN, "DOE^JOHN");
+    const auto& syntax = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian;
+    return (dataset.size() == 1 && syntax.is_valid()) ? 0 : 1;
+}
+```
+
+### 모듈 구조
+
+`src/modules/pacs.cppm`은 다음 파티션을 임포트합니다:
+
+| 모듈 | 내용 |
+|--------|----------|
+| `kcenon.pacs` | 기본 모듈 (모든 파티션 임포트) |
+| `kcenon.pacs:core` | 핵심 DICOM 데이터 구조 및 유틸리티 |
+| `kcenon.pacs:network` | DICOM 네트워크 프로토콜 (DIMSE) |
+| `kcenon.pacs:storage` | DICOM 파일 스토리지 및 검색 |
+| `kcenon.pacs:encoding` | 전송 구문 및 코덱 지원 |
+| `kcenon.pacs:services` | DICOM 서비스 구현 (C-STORE, C-FIND 등) |
+| `kcenon.pacs:security` | TLS 및 인증 |
+| `kcenon.pacs:web` | DICOMweb REST API |
+| `kcenon.pacs:workflow` | 워크플로우 관리 |
+| `kcenon.pacs:integration` | 에코시스템 어댑터 |
+| `kcenon.pacs:ai` | AI 서비스 커넥터 (`KCENON_WITH_AI`가 정의되지 않으면 비어 있으며, 빌드는 이를 정의하지 않음) |
+| `kcenon.pacs:monitoring` | 헬스 체크 및 메트릭 |
+| `kcenon.pacs:di` | 의존성 주입 유틸리티 |
+
+> **참고**: C++20 모듈은 실험적입니다. 헤더 기반 인터페이스가 기본 API로 유지됩니다.
 
 ---
 

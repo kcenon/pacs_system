@@ -1,271 +1,131 @@
+# PACS System
+
+Status: active (v1.0을 향해 개발 진행 중) | 최신 릴리스: [v0.1.0](https://github.com/kcenon/pacs_system/releases/tag/v0.1.0)
+
+> **언어:** [English](README.md) | **한국어**
+
 [![CI](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/ci.yml)
 [![Integration Tests](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/integration-tests.yml)
 [![Code Coverage](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/coverage.yml)
 [![Static Analysis](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/static-analysis.yml)
-[![codecov](https://codecov.io/gh/kcenon/pacs_system/branch/main/graph/badge.svg)](https://codecov.io/gh/kcenon/pacs_system)
 [![Documentation](https://github.com/kcenon/pacs_system/actions/workflows/build-Doxygen.yaml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/build-Doxygen.yaml)
 [![SBOM Generation](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml/badge.svg)](https://github.com/kcenon/pacs_system/actions/workflows/sbom.yml)
-[![License](https://img.shields.io/github/license/kcenon/pacs_system)](https://github.com/kcenon/pacs_system/blob/main/LICENSE)
-
-# PACS System
-
-> **언어:** [English](README.md) | **한국어**
 
 ## 개요
 
-외부 DICOM 라이브러리 없이 kcenon 에코시스템을 기반으로 구축된 현대적인 C++20 PACS(Picture Archiving and Communication System) 구현체입니다. 이 프로젝트는 기존의 고성능 인프라를 활용하여 DICOM 표준을 처음부터 구현합니다.
+kcenon 에코시스템을 기반으로 구축된 C++20 PACS(Picture Archiving and Communication System)입니다.
+DICOM 데이터 모델, 인코딩, 네트워크 프로토콜, 서비스를 이 저장소에서 직접 구현하며 DCMTK나 GDCM에
+의존하지 않습니다. DCMTK는 [DCMTK 상호운용성 워크플로](.github/workflows/dcmtk-interop.yml)에서
+테스트 상대로만 사용됩니다.
 
-**핵심 특징**:
-- **외부 DICOM 라이브러리 제로**: kcenon 에코시스템을 활용한 순수 구현
-- **고성능**: SIMD 가속, lock-free 큐, 비동기 I/O 활용
-- **프로덕션 품질**: 종합적인 CI/CD, 새니타이저, 품질 메트릭
-- **모듈식 아키텍처**: 인터페이스 기반 설계로 관심사의 명확한 분리
-- **크로스 플랫폼**: Linux, macOS, Windows 지원
+## 기능
 
----
+- **DICOM 서비스**: Storage, Query/Retrieve, Modality Worklist, MPPS, Storage Commitment, Print Management SCP/SCU; Crow REST 서버 위의 DICOMweb (WADO-RS, STOW-RS, QIDO-RS)
+- **모듈식 라이브러리**: core, encoding, network, services, storage, security와 개별적으로 링크할 수 있는 선택 컴포넌트 AI, monitoring, workflow, web, integration
+- **구성 요소**: thread_system의 스레드 풀과 큐, network_system의 TCP/TLS 전송, 바이트 스왑·RLE·광도 변환·window/level용 SIMD 코드 경로 (`include/kcenon/pacs/encoding/simd/`)
+- **품질 점검**: [새니타이저](.github/workflows/sanitizers.yml), [정적 분석](.github/workflows/static-analysis.yml), [퍼징](.github/workflows/fuzzing.yml)을 포함한 CI/CD
+- **플랫폼**: CI가 Ubuntu (GCC, Clang), macOS, Windows (MSVC)에서 빌드하고 각각 CTest를 실행합니다 ([ci.yml](.github/workflows/ci.yml))
 
 ## 목차
 
 - [프로젝트 상태](#프로젝트-상태)
-- [아키텍처](#아키텍처)
 - [DICOM 적합성](#dicom-적합성)
-- [vcpkg 기능](#vcpkg-기능)
 - [시작하기](#시작하기)
 - [CLI 도구 및 예제](#cli-도구-및-예제)
 - [에코시스템 의존성](#에코시스템-의존성)
+- [아키텍처](#아키텍처)
 - [프로젝트 구조](#프로젝트-구조)
-- [C++20 모듈 지원](#c20-모듈-지원)
-- [문서](#문서)
 - [성능](#성능)
+- [문서](#문서)
 - [코드 통계](#코드-통계)
 - [규정 준수](#규정-준수)
 - [기여하기](#기여하기)
 - [라이선스](#라이선스)
-- [연락처](#연락처)
-
----
 
 ## 프로젝트 상태
 
 **최신 게시 패키지**: 0.1.0 — [`v0.1.0` 릴리스](https://github.com/kcenon/pacs_system/releases/tag/v0.1.0), vcpkg 포트 `kcenon-pacs-system` 0.1.0 (port-version 11)
 **계획된 마일스톤**: v1.0 — 미출시 API 계약이며, v1.0.0 태그·GitHub 릴리스·레지스트리 버전은 아직 없습니다 ([#1095](https://github.com/kcenon/pacs_system/issues/1095) 및 [#1164](https://github.com/kcenon/pacs_system/issues/1164)에서 관리)
-**프로젝트 단계**: Phase 4 완료 — 고급 서비스 및 프로덕션 강화
+**프로젝트 단계**: 아래 표의 Phase 1-4 컴포넌트는 `v0.1.0` 태그에 포함되어 있으며, 그 이후 기본 브랜치의 작업(예: IHE XDS.b 액터, `include/kcenon/pacs/` 헤더 구조, `pacs_system::pacs_system` CMake 계약)은 미출시 상태입니다
 
-계획된 v1.0 계약은 `include/kcenon/pacs/` 아래의 공개 헤더 표면, `pacs_system::pacs_system`
-집계 CMake 타겟, 그리고 문서화된 Doxygen API를 대상으로 합니다. 이 표면은 검토를 위해 고정된
-상태일 뿐 출시되지 않았으며, #1095 준비 체크리스트가 닫히고 Tier 0-4 생태계 의존성이 모두
-v1.0을 게시한 뒤(#1164)에 출시됩니다. 검토 중인 헤더 목록은
-[`docs/v1.0-api-surface.md`](docs/v1.0-api-surface.md)를, 계획된 예외/Result<T> 계약은
-[`docs/v1.0-throw-policy.md`](docs/v1.0-throw-policy.md)를, 고정 이전 지원 중단 감사는
-[`docs/v1.0-deprecation-inventory.md`](docs/v1.0-deprecation-inventory.md)를 참조하세요.
+계획된 v1.0 계약은 `include/kcenon/pacs/` 아래의 공개 헤더 표면, `pacs_system::pacs_system` 집계 CMake
+타겟, 그리고 문서화된 Doxygen API를 대상으로 합니다. 이 표면은 검토를 위해 고정된 상태일 뿐 출시되지
+않았으며, #1095 준비 체크리스트가 닫히고 Tier 0-4 생태계 의존성이 모두 v1.0을 게시한 뒤(#1164)에
+출시됩니다. [검토 중인 헤더 목록](docs/v1.0-api-surface.md), [계획된 예외/`Result<T>` 계약](docs/v1.0-throw-policy.md),
+[고정 이전 지원 중단 감사](docs/v1.0-deprecation-inventory.md), [0.x → 1.0 마이그레이션 가이드](docs/migration/0.x-to-1.0.md)를
+참조하세요. [CHANGELOG](CHANGELOG.md)는 `samples/` → `examples/` 및 `examples/` → `tools/` 재배치(#1139)와
+CMake 계약(#1158)을 포함한 변경 사항을 `[Unreleased]` 아래에 기록하며, v1.0.0이 태그되기 전까지
+v1.0.0 섹션을 만들지 않습니다.
 
-v1.0을 준비하시나요? [0.x → 1.0 마이그레이션 가이드](docs/migration/0.x-to-1.0.md)는 계획된 업그레이드
-절차(include 경로, 네임스페이스, CMake 계약, `Result<T>` 마이그레이션, 디렉터리 재배치)를 설명합니다.
-[CHANGELOG](CHANGELOG.md)는 `samples/` → `examples/` 및 `examples/` → `tools/` 디렉터리 재배치(#1139)와
-`pacs_system::pacs_system` CMake 계약(#1158)을 포함한 기반 변경 사항을 `[Unreleased]` 아래에 기록하며,
-v1.0.0 릴리스가 실제로 태그되기 전까지 v1.0.0 섹션을 만들지 않습니다.
+| 단계 | 범위 | `v0.1.0` 포함 |
+|-------|-------|-------------|
+| **Phase 1**: 기반 | DICOM 코어, 태그 사전, 파일 I/O (Part 10), 전송 구문 | 예 |
+| **Phase 2**: 네트워크 프로토콜 | Upper Layer Protocol (PDU), Association 상태 머신, DIMSE-C, 압축 코덱 | 예 |
+| **Phase 3**: 핵심 서비스 | Storage SCP/SCU, 파일 스토리지, 인덱스 데이터베이스, Query/Retrieve, 로깅, 모니터링 | 예 |
+| **Phase 4**: 고급 서비스 | REST API, DICOMweb, AI 통합, 클라이언트 모듈, 클라우드 스토리지, 인쇄 관리, 보안, 워크플로우, 주석/뷰어 | 예 |
 
-| 단계 | 범위 | 상태 |
-|-------|-------|--------|
-| **Phase 1**: 기반 | DICOM 코어, 태그 사전, 파일 I/O (Part 10), 전송 구문 | 완료 |
-| **Phase 2**: 네트워크 프로토콜 | Upper Layer Protocol (PDU), Association 상태 머신, DIMSE-C, 압축 코덱 | 완료 |
-| **Phase 3**: 핵심 서비스 | Storage SCP/SCU, 파일 스토리지, 인덱스 데이터베이스, Query/Retrieve, 로깅, 모니터링 | 완료 |
-| **Phase 4**: 고급 서비스 | REST API, DICOMweb, AI 통합, 클라이언트 모듈, 클라우드 스토리지, 인쇄 관리, 보안, 워크플로우, 주석/뷰어 | 완료 |
-
-**테스트 커버리지**: 141+ 테스트 파일에서 1,980+ 테스트 통과 | [![codecov](https://codecov.io/gh/kcenon/pacs_system/branch/main/graph/badge.svg)](https://codecov.io/gh/kcenon/pacs_system)
-
-> 단계별 상세 기능 목록은 [Features](docs/FEATURES.md)를 참조하세요.
-
----
-
-## 아키텍처
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                            PACS System                               │
-├──────────────────────────────────────────────────────────────────────┤
-│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌───────────┐  │
-│  │ REST API │ │ DICOMweb │ │ Web UI  │ │ AI Svc   │ │ Workflow  │  │
-│  │ (Crow)   │ │ WADO/STOW│ │ (React) │ │Connector │ │ Scheduler │  │
-│  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
-│       └─────────────┼───────────┼───────────┼──────────────┘        │
-│  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
-│  │  IHE Actors (XDS.b Source / Consumer / Registry Query + ATNA) │  │
-│  └──────────────────────────────┬────────────────────────────────┘  │
-│  ┌──────────────────────────────▼────────────────────────────────┐  │
-│  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commit/Print) │  │
-│  └──────────────────────────────┬────────────────────────────────┘  │
-│  ┌──────────────────────────────▼────────────────────────────────┐  │
-│  │  Network (PDU/Association/DIMSE) + Security (RBAC/TLS/Anon)   │  │
-│  └──────────────────────────────┬────────────────────────────────┘  │
-│  ┌──────────────────────────────▼────────────────────────────────┐  │
-│  │  Core (Tag/Element/Dataset/File) + Encoding (VR/Codecs/SIMD)  │  │
-│  └──────────────────────────────┬────────────────────────────────┘  │
-│  ┌─────────────┐  ┌─────────────┴──────────┐  ┌─────────────────┐  │
-│  │  Storage    │  │  Client Module         │  │  Monitoring     │  │
-│  │  (DB/File/  │  │  (Job/Route/Sync/      │  │  (Health/       │  │
-│  │   S3/Azure) │  │   Prefetch/RemoteNode) │  │   Metrics)      │  │
-│  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
-├─────────┼────────────────────────────────────────────────────────────┤
-│         │             Integration Adapters + DI                      │
-│  container │ network │ thread │ logger │ monitoring                  │
-├─────────┼────────────────────────────────────────────────────────────┤
-│         │              kcenon Ecosystem                               │
-│  common_system │ container_system │ thread_system │ network_system   │
-│  logger_system │ monitoring_system │ database_system (opt)           │
-└──────────────────────────────────────────────────────────────────────┘
-```
-
----
+CI는 단위 테스트를 실행하고([ci.yml](.github/workflows/ci.yml)) 커버리지 보고서를
+[Codecov](https://codecov.io/gh/kcenon/pacs_system)에 업로드하며, 단계별 기능 목록은 [기능](docs/FEATURES.kr.md)에 있습니다.
 
 ## DICOM 적합성
 
-### 지원 SOP 클래스
-
-| 서비스 | SOP 클래스 | 상태 |
-|---------|-----------|--------|
-| **Verification** | 1.2.840.10008.1.1 | ✅ 완료 |
-| **CT Storage** | 1.2.840.10008.5.1.4.1.1.2 | ✅ 완료 |
-| **MR Storage** | 1.2.840.10008.5.1.4.1.1.4 | ✅ 완료 |
-| **US Storage** | 1.2.840.10008.5.1.4.1.1.6.x | ✅ 완료 |
-| **XA Storage** | 1.2.840.10008.5.1.4.1.1.12.x | ✅ 완료 |
-| **XRF Storage** | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ 완료 |
-| **X-Ray Storage** | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ 완료 |
-| **Patient Root Q/R** | 1.2.840.10008.5.1.4.1.2.1.x | ✅ 완료 |
-| **Study Root Q/R** | 1.2.840.10008.5.1.4.1.2.2.x | ✅ 완료 |
-| **Modality Worklist** | 1.2.840.10008.5.1.4.31 | ✅ 완료 |
-| **MPPS** | 1.2.840.10008.3.1.2.3.3 | ✅ 완료 |
-| **Storage Commitment** | 1.2.840.10008.1.20.1 | ✅ 완료 |
-| **NM Storage** | 1.2.840.10008.5.1.4.1.1.20 | ✅ 완료 |
-| **PET Storage** | 1.2.840.10008.5.1.4.1.1.128 | ✅ 완료 |
-| **RT Storage** | 1.2.840.10008.5.1.4.1.1.481.x | ✅ 완료 |
-| **SR Storage** | 1.2.840.10008.5.1.4.1.1.88.x | ✅ 완료 |
-| **SEG Storage** | 1.2.840.10008.5.1.4.1.1.66.4 | ✅ 완료 |
-| **MG Storage** | 1.2.840.10008.5.1.4.1.1.1.2.x | ✅ 완료 |
-| **CR Storage** | 1.2.840.10008.5.1.4.1.1.1 | ✅ 완료 |
-| **SC Storage** | 1.2.840.10008.5.1.4.1.1.7 | ✅ 완료 |
-| **Basic Grayscale Print** | 1.2.840.10008.5.1.1.9 | ✅ 완료 |
-| **Basic Color Print** | 1.2.840.10008.5.1.1.18 | ✅ 완료 |
-| **Printer** | 1.2.840.10008.5.1.1.16 | ✅ 완료 |
+지원 SOP 클래스의 출처는 [DICOM 적합성 선언문](docs/DICOM_CONFORMANCE_STATEMENT.md) 3절입니다:
+Verification; CT, MR, US, XA, XRF, X-Ray, NM, PET, RT, SR, SEG, MG, CR, SC Storage; Patient 및 Study
+Root Query/Retrieve; Modality Worklist; MPPS; Storage Commitment; Basic Grayscale Print, Basic Color
+Print, Printer. [DCMTK 상호운용성 워크플로](.github/workflows/dcmtk-interop.yml)는 Ubuntu와 macOS에서
+DCMTK 도구를 상대로 C-ECHO, C-STORE, C-FIND, C-MOVE를 실행합니다.
 
 ### 전송 구문 지원
 
+코덱 기반 전송 구문은 `PACS_BUILD_CODECS=ON`(기본값)과 구성 시점에 찾은 해당 라이브러리가 필요하며,
+라이브러리가 없으면 CMake가 경고와 함께 그 코덱을 비활성화합니다(`cmake/dependencies.cmake`).
+적합성 선언문 4절에는 그 밖의 전송 구문(Deflated Explicit VR Little Endian, HTJ2K, HEVC, JPEG XL,
+Frame Deflate)이 있습니다.
+
 | 전송 구문 | UID | 상태 |
 |----------------|-----|--------|
-| Implicit VR Little Endian | 1.2.840.10008.1.2 | ✅ 완료 |
-| Explicit VR Little Endian | 1.2.840.10008.1.2.1 | ✅ 완료 |
-| Explicit VR Big Endian | 1.2.840.10008.1.2.2 | ✅ 완료 |
-| JPEG Baseline (Process 1) | 1.2.840.10008.1.2.4.50 | ✅ 완료 |
-| JPEG Lossless (Process 14) | 1.2.840.10008.1.2.4.70 | ✅ 완료 |
-| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | ✅ 완료 |
-| JPEG 2000 Lossy | 1.2.840.10008.1.2.4.91 | ✅ 완료 |
-| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | 구현됨; 적합성 선언문에는 아직 미기재 |
-| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | 구현됨; 적합성 선언문에는 아직 미기재 |
-| RLE Lossless | 1.2.840.10008.1.2.5 | ✅ 완료 |
-
-> 전체 DICOM 적합성 선언문은 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md)를 참조하세요.
-
----
-
-## vcpkg 기능
-
-```bash
-vcpkg install kcenon-pacs-system[feature1,feature2,...]
-```
-
-| 기능 | 기본값 | 설명 | 추가 의존성 | 사전 요구사항 |
-|---------|:-------:|-------------|----------|---------------|
-| aws | off | 클라우드 기반 PACS 스토리지를 위한 AWS S3 통합 | aws-sdk-cpp (S3) | -- |
-| azure | off | 클라우드 기반 PACS 스토리지를 위한 Azure Blob 스토리지 통합 | azure-storage-blobs-cpp | -- |
-| codecs | off | 이미지 압축 코덱 (JPEG, JPEG 2000, HTJ2K, JPEG-LS, PNG) | libjpeg-turbo, openjpeg, charls, openjph, libpng | -- |
-| rest-api | off | Crow HTTP 프레임워크를 통한 DICOMweb REST API | crow | -- |
-| ssl | off | 보안 DICOM association을 위한 TLS/SSL 지원 | openssl | -- |
-| storage | off | SQLite3 기반 PACS 스토리지 및 인덱싱 | sqlite3 | -- |
-| testing | off | 단위 테스트 및 벤치마크 | gtest, benchmark | -- |
-
-### 기능 선택 가이드
-
-- **최소 설치**: `vcpkg install kcenon-pacs-system`
-- **TLS를 포함한 프로덕션**: `vcpkg install kcenon-pacs-system[storage,ssl]`
-- **전체 영상 파이프라인**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,rest-api]`
-- **클라우드 배포 (AWS)**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,aws,rest-api]`
-
----
+| Implicit VR Little Endian | 1.2.840.10008.1.2 | 내장 |
+| Explicit VR Little Endian | 1.2.840.10008.1.2.1 | 내장 |
+| Explicit VR Big Endian | 1.2.840.10008.1.2.2 | 내장 |
+| JPEG Baseline (Process 1) | 1.2.840.10008.1.2.4.50 | 빌드 시 libjpeg-turbo 필요 |
+| JPEG Lossless (Process 14) | 1.2.840.10008.1.2.4.70 | 내장 |
+| JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | 빌드 시 OpenJPEG 필요 |
+| JPEG 2000 Lossy | 1.2.840.10008.1.2.4.91 | 빌드 시 OpenJPEG 필요 |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | 구현됨; 적합성 선언문에는 아직 미기재 (빌드 시 CharLS 필요) |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | 구현됨; 적합성 선언문에는 아직 미기재 (빌드 시 CharLS 필요) |
+| RLE Lossless | 1.2.840.10008.1.2.5 | 내장 |
 
 ## 시작하기
 
 ### 사전 요구사항
 
-**모든 플랫폼:**
-- Concepts를 지원하는 C++20 호환 컴파일러:
-  - GCC 10+ (완전한 std::format 지원을 위해 GCC 13+ 권장)
-  - Clang 10+ (Clang 14+ 권장)
-  - MSVC 2022 (19.30+)
-- CMake 3.20+
-- Ninja (권장 빌드 시스템)
-- kcenon 에코시스템 라이브러리 (CMake가 자동 다운로드)
+- Concepts를 지원하는 C++20 컴파일러: GCC 10+ (std::format 전체 지원을 위해 GCC 13+ 권장), Clang 10+ (Clang 14+ 권장), MSVC 2022 (19.30+)
+- CMake 3.20+와 Ninja (권장); kcenon 에코시스템 라이브러리는 CMake가 자동으로 다운로드합니다
 
-**Linux (Ubuntu 24.04+):**
-```bash
-sudo apt install cmake ninja-build libicu-dev libsqlite3-dev libssl-dev libfmt-dev
-```
-
-**macOS:**
-```bash
-brew install cmake ninja icu4c sqlite3 openssl@3 fmt
-```
-
-**Windows:**
-- C++ 워크로드를 포함한 Visual Studio 2022
-- 패키지 관리를 위한 [vcpkg](https://vcpkg.io/)
-- 의존성: `icu`, `sqlite3`, `openssl`, `fmt`
+| 플랫폼 | 의존성 |
+|--------|--------|
+| Linux (Ubuntu 24.04+) | `sudo apt install cmake ninja-build libicu-dev libsqlite3-dev libssl-dev libfmt-dev` |
+| macOS | `brew install cmake ninja icu4c sqlite3 openssl@3 fmt` |
+| Windows | C++ 워크로드를 포함한 Visual Studio 2022와 [vcpkg](https://vcpkg.io/): `icu`, `sqlite3`, `openssl`, `fmt` |
 
 ### 빌드
 
-#### Linux/macOS
-
 ```bash
-# 리포지토리 클론
 git clone https://github.com/kcenon/pacs_system.git
 cd pacs_system
-
-# 구성 및 빌드
 cmake -S . -B build
 cmake --build build
-
-# 테스트 실행
 cd build && ctest --output-on-failure
 ```
 
-#### Windows
+Windows(PowerShell)에서는 `vcpkg install icu:x64-windows sqlite3:x64-windows openssl:x64-windows fmt:x64-windows`를
+실행하고 구성 명령에 `-G Ninja -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"`를
+추가합니다.
 
-```powershell
-# 사전 요구사항: Visual Studio 2022, vcpkg, CMake 3.20+
-
-# vcpkg를 통한 의존성 설치
-vcpkg install icu:x64-windows sqlite3:x64-windows openssl:x64-windows fmt:x64-windows
-
-# 리포지토리 클론
-git clone https://github.com/kcenon/pacs_system.git
-cd pacs_system
-
-# vcpkg 툴체인으로 구성
-cmake -S . -B build -G Ninja `
-  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-
-# 빌드
-cmake --build build
-
-# 테스트 실행
-cd build
-ctest --output-on-failure
-```
-
-**테스트 결과**: 141+ 테스트 파일에서 1,980+ 테스트 통과 (Core, Encoding, Network, Services, Storage, Security, Web, Workflow, Client, AI, Monitoring, Integration)
-
-### 테스트 프레임워크
-
-`pacs_system`은 단위 테스트 코퍼스에 kcenon 에코시스템 기본값인 **GoogleTest**와는 다른 **Catch2 v3.4.0**을 사용합니다. 기존 테스트 코퍼스는 Catch2 관용구(`TEST_CASE`, `SECTION`)에 의존하며, 디렉터리 구조 표준화 작업에서 마이그레이션은 의도적으로 범위 밖입니다. 전체 근거와 추적 이슈 [#1141](https://github.com/kcenon/pacs_system/issues/1141)은 [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md#per-system-conventions)("Per-system conventions" 섹션)를 참조하세요.
+단위 테스트는 kcenon 에코시스템 기본값인 GoogleTest와 달리 **Catch2 v3.4.0**을 사용합니다.
+[`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md#per-system-conventions)와
+[#1141](https://github.com/kcenon/pacs_system/issues/1141)을 참조하세요. `(std::min)(a, b)` 같은 Windows
+코딩 규칙은 [기여 가이드](docs/contributing/CONTRIBUTING.md#windows-compatibility)에 있습니다.
 
 ### 빌드 옵션
 
@@ -284,7 +144,8 @@ vcpkg install kcenon-pacs-system
 
 이 명령은 `v0.1.0` 소스 아카이브로 빌드되는 최신 게시 패키지 0.1.0(port-version 11)을 설치합니다.
 0.1.0 패키지는 헤더를 `include/pacs/` 아래에 설치하고 `kcenon::pacs::<component>` 타겟
-(`core`, `encoding`, `network`, `client`, `services`, `security`, `integration` 및 기능에 따라 추가되는 컴포넌트)을 export합니다:
+(`core`, `encoding`, `network`, `client`, `services`, `security`, `integration` 및 기능에 따라 추가되는
+컴포넌트)을 export합니다:
 
 ```cmake
 find_package(pacs_system 0.1 CONFIG REQUIRED)
@@ -294,212 +155,62 @@ target_link_libraries(my_app PRIVATE kcenon::pacs::core)
 ```
 
 > port-version 11에 포함된 `usage` 안내문은 `pacs_system::*` 타겟 이름을 나열합니다. 이 이름은 아래의
-> 계획된 v1.0 계약에 속하며 0.1.0 패키지는 export하지 않으므로, 0.1.0에서는 위의 `kcenon::pacs::*` 이름을 사용하세요
-> (레지스트리 정정은 [kcenon/vcpkg-registry#104](https://github.com/kcenon/vcpkg-registry/issues/104)에서 추적).
-> 패키지·레지스트리·출처 기록 전체는 [패키지 상태](docs/PACKAGE_STATE.kr.md)를 참조하세요.
+> 계획된 v1.0 계약에 속하며 0.1.0 패키지는 export하지 않습니다(레지스트리 정정은
+> [kcenon/vcpkg-registry#104](https://github.com/kcenon/vcpkg-registry/issues/104)에서 추적).
+> 선택 기능과 전체 패키지 기록은 [패키지 상태](docs/PACKAGE_STATE.kr.md#vcpkg-기능)를 참조하세요.
 
-### CMake 통합 (계획된 v1.0 계약)
-
-계획된 v1.0 계약(#1158)은 0.1.0 타겟 이름을 정규 CMake 타겟 `pacs_system::pacs_system`으로 대체합니다.
-아직 어떤 게시 패키지에도 포함되지 않았습니다. 이 브랜치의 소스 설치(`cmake --install`)는 이미 이 타겟을
-제공하지만 패키지 버전은 여전히 0.1.0이므로, v1.0.0이 출시되기 전까지는 `find_package(pacs_system 0.1 REQUIRED)`로
-요청하세요. 출시 이후 다운스트림 프로젝트는 다음과 같이 의존합니다:
-
-```cmake
-find_package(pacs_system 1.0 REQUIRED)
-
-add_executable(my_app main.cpp)
-target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
-```
-
-`pacs_system::pacs_system`은 필수 및 빌드된 모든 선택적 하위 컴포넌트를 끌어오는 집계
-INTERFACE 타겟이므로, 일반적인 소비자에게는 단일 `target_link_libraries` 호출로 충분합니다.
-
-세밀한 제어가 필요하면 개별 컴포넌트를 링크하세요. 사용 가능한 컴포넌트 타겟은 다음과 같습니다:
-
-| 컴포넌트 | 타겟 | 제공 기능 |
-|-----------|--------|----------|
-| Core | `pacs_system::core` | 태그, 데이터셋, Part 10 파일 I/O |
-| Encoding | `pacs_system::encoding` | VR 타입, 전송 구문, 코덱 |
-| Network | `pacs_system::network` | PDU, association, DIMSE |
-| Client | `pacs_system::client` | 작업/라우팅/동기/프리페치 관리자 |
-| Services | `pacs_system::services` | SCP/SCU 구현 |
-| Security | `pacs_system::security` | RBAC, 익명화, 서명, TLS |
-| Storage | `pacs_system::storage` | 파일 스토리지, SQLite, S3/Azure (선택) |
-| AI | `pacs_system::ai` | AI 서비스 커넥터 (선택) |
-| Monitoring | `pacs_system::monitoring` | 헬스 체크, 메트릭 (선택) |
-| Workflow | `pacs_system::workflow` | 자동 프리페치, 스케줄링 (선택) |
-| Web | `pacs_system::web` | REST API, DICOMweb (선택) |
-| Integration | `pacs_system::integration` | 에코시스템 어댑터 (선택) |
-
-레거시 표기 `kcenon::pacs_system`은 하위 호환성을 위한 별칭으로 유지되지만, 새 코드는
-`pacs_system::pacs_system`을 사용해야 합니다.
-
-### Windows 개발 참고사항
-
-Windows 호환 코드를 작성할 때는 Windows.h 매크로와의 충돌을 방지하기 위해 `std::min`과
-`std::max` 호출을 괄호로 감싸세요:
-
-```cpp
-// 올바름: 모든 플랫폼에서 동작
-size_t result = (std::min)(a, b);
-auto value = (std::max)(x, y);
-
-// 잘못됨: Windows MSVC에서 실패 (error C2589)
-size_t result = std::min(a, b);
-auto value = std::max(x, y);
-```
-
----
+**계획된 v1.0 CMake 계약** (#1158): 집계 타겟 `pacs_system::pacs_system`이며, 아직 어떤 게시 패키지에도
+포함되지 않았습니다. 이 브랜치의 소스 설치(`cmake --install`)는 이미 이 타겟을 제공하지만 패키지 버전은
+0.1.0으로 보고하므로, v1.0.0이 출시되기 전까지는 `find_package(pacs_system 0.1 REQUIRED)`로 요청하세요.
+소비자 예제, 컴포넌트 타겟, 레거시 별칭 `kcenon::pacs_system`은
+[패키지 상태](docs/PACKAGE_STATE.kr.md#cmake-타겟-계획된-v10-계약)에 있습니다.
 
 ## CLI 도구 및 예제
 
-이 프로젝트는 두 개의 상호 보완적인 하위 트리를 제공합니다(자세한 내용은 [#1139](https://github.com/kcenon/pacs_system/issues/1139) 참조):
+- `tools/` — 도구마다 하나의 하위 디렉터리: CLI 유틸리티와 `module_example` C++20 모듈 데모 (하위 디렉터리 32개); `-DPACS_BUILD_EXAMPLES=ON`으로 빌드
+- `examples/` — `examples/tutorials/` 아래의 5개 점진적 튜토리얼 (`01_hello_dicom`부터 `05_production_pacs`까지); `-DPACS_BUILD_SAMPLES=ON`으로 빌드
 
-- `tools/` — 도구마다 하나의 하위 디렉터리: 아래 표의 CLI 유틸리티와 `module_example` C++20 모듈
-  데모 (하위 디렉터리 32개)
-- `examples/` — `examples/tutorials/` 아래의 5개 점진적 튜토리얼 (`01_hello_dicom`부터 `05_production_pacs`까지)
-
-CLI 도구 빌드:
+이 옵션 이름은 기존 CI 및 다운스트림 소비자와의 호환성을 위해 유지됩니다
+([#1139](https://github.com/kcenon/pacs_system/issues/1139) 참조). 빌드 후 빠른 예제:
 
 ```bash
-cmake -S . -B build -DPACS_BUILD_EXAMPLES=ON
-cmake --build build
-```
-
-튜토리얼 빌드:
-
-```bash
-cmake -S . -B build -DPACS_BUILD_SAMPLES=ON
-cmake --build build
-```
-
-> CMake 옵션 이름(`PACS_BUILD_EXAMPLES`, `PACS_BUILD_SAMPLES`)은 기존 CI 및 다운스트림
-> 소비자와의 하위 호환성을 위해 유지됩니다.
-
-### 도구 요약
-
-| 카테고리 | 도구 | 설명 |
-|----------|------|-------------|
-| **파일 유틸리티** | `dcm_dump` | DICOM 파일 메타데이터 검사 |
-| | `dcm_info` | DICOM 파일 요약 표시 |
-| | `dcm_modify` | DICOM 태그 수정 (dcmtk 호환) |
-| | `dcm_conv` | 전송 구문 변환 |
-| | `dcm_anonymize` | DICOM 파일 비식별화 (PS3.15) |
-| | `dcm_dir` | DICOMDIR 생성/관리 (PS3.10) |
-| | `dcm_to_json` | DICOM을 JSON으로 변환 (PS3.18) |
-| | `json_to_dcm` | JSON을 DICOM으로 변환 (PS3.18) |
-| | `dcm_to_xml` | DICOM을 XML로 변환 (PS3.19) |
-| | `xml_to_dcm` | XML을 DICOM으로 변환 (PS3.19) |
-| | `img_to_dcm` | JPEG 이미지를 DICOM으로 변환 |
-| | `dcm_extract` | 픽셀 데이터를 이미지 형식으로 추출 |
-| | `db_browser` | PACS 인덱스 데이터베이스 탐색 |
-| **네트워크** | `echo_scu` / `echo_scp` | DICOM 연결 검증 |
-| | `secure_dicom` | TLS 보안 DICOM Echo SCU/SCP |
-| | `store_scu` / `store_scp` | DICOM 스토리지 (C-STORE) |
-| | `query_scu` | 쿼리 클라이언트 (C-FIND) |
-| | `find_scu` | dcmtk 호환 C-FIND SCU |
-| | `retrieve_scu` | 검색 클라이언트 (C-MOVE/C-GET) |
-| | `move_scu` | dcmtk 호환 C-MOVE SCU |
-| | `get_scu` | dcmtk 호환 C-GET SCU |
-| | `print_scu` | 인쇄 관리 클라이언트 (PS3.4 Annex H) |
-| **서버** | `qr_scp` | Query/Retrieve SCP (C-FIND/C-MOVE/C-GET) |
-| | `worklist_scu` / `worklist_scp` | Modality Worklist (MWL) |
-| | `mpps_scu` / `mpps_scp` | Modality Performed Procedure Step |
-| | `pacs_server` | 구성 기능을 갖춘 전체 PACS 서버 |
-| **테스팅** | `integration_tests` | 엔드 투 엔드 워크플로우 테스트 |
-
-### 빠른 예제
-
-**DICOM 연결 검증:**
-```bash
-./build/bin/echo_scu localhost 11112
-```
-
-**DICOM 파일 전송:**
-```bash
-./build/bin/store_scu localhost 11112 image.dcm
-```
-
-**환자 이름으로 연구 조회:**
-```bash
+./build/bin/echo_scu localhost 11112                  # 연결 검증 (C-ECHO)
+./build/bin/store_scu localhost 11112 image.dcm       # 파일 전송 (C-STORE)
 ./build/bin/query_scu localhost 11112 PACS_SCP --level STUDY --patient-name "DOE^*"
+./build/bin/dcm_dump image.dcm --format json          # 파일 검사
 ```
 
-**DICOM 파일 검사:**
-```bash
-./build/bin/dcm_dump image.dcm --format json
-```
-
-> 모든 옵션을 포함한 전체 CLI 문서는 [CLI Reference](docs/CLI_REFERENCE.md)를 참조하세요.
-
----
+도구는 파일 유틸리티(덤프, 수정, 변환, 비식별화, DICOMDIR, JSON 및 XML), 네트워크 클라이언트(echo,
+store, find, move, get, print), 서버(Query/Retrieve, worklist, MPPS, `pacs_server`)로 구성됩니다.
+모든 도구와 옵션은 [CLI 레퍼런스](docs/CLI_REFERENCE.kr.md)를 참조하세요.
 
 ## 에코시스템 의존성
 
-### 에코시스템 의존성 맵
+| 시스템 | pacs_system에서의 용도 | 필수 여부 |
+|--------|------------------------|-----------|
+| [common_system](https://github.com/kcenon/common_system) | `Result<T>`, `IExecutor`, 이벤트 버스 | 필수 (Tier 0) |
+| [container_system](https://github.com/kcenon/container_system) | DICOM 데이터 직렬화 | 필수 (Tier 1) |
+| [network_system](https://github.com/kcenon/network_system) | DICOM용 TCP/TLS 전송 | 필수 (Tier 4) |
+| [thread_system](https://github.com/kcenon/thread_system) | 스레드 풀과 큐 | network_system 경유 (Tier 1) |
+| [logger_system](https://github.com/kcenon/logger_system) | 로깅 인프라 | network_system 경유 (Tier 2) |
+| [monitoring_system](https://github.com/kcenon/monitoring_system) | 메트릭 및 추적 | 선택 (Tier 3) |
+| [database_system](https://github.com/kcenon/database_system) | 구성 시점에 발견되면 스토리지 인덱스 리포지토리의 쿼리 빌더로 사용 (`PACS_WITH_DATABASE_SYSTEM`) | 선택 (Tier 3) |
 
-```mermaid
-graph TD
-    A[common_system] --> B[thread_system]
-    A --> C[container_system]
-    B --> D[logger_system]
-    B --> E[monitoring_system]
-    D --> F[database_system]
-    E --> F
-    F --> G[network_system]
-    G --> H[pacs_system]
+의존성 그래프는 [Architecture](docs/ARCHITECTURE.md#ecosystem-dependencies)에, 버전·라이선스·안전 분류는
+[IEC 62304 SOUP 등록부](docs/SOUP.md)에 있습니다.
 
-    style H fill:#f9f,stroke:#333,stroke-width:3px
-```
+## 아키텍처
 
-> **에코시스템 참조**:
-> [common_system](https://github.com/kcenon/common_system) — Tier 0: Result&lt;T&gt;, IExecutor, 이벤트 버스
-> [container_system](https://github.com/kcenon/container_system) — Tier 1: DICOM 데이터 직렬화
-> [thread_system](https://github.com/kcenon/thread_system) — Tier 1: 스레드 풀 (network_system 경유)
-> [logger_system](https://github.com/kcenon/logger_system) — Tier 2: 로깅 인프라 (network_system 경유)
-> [monitoring_system](https://github.com/kcenon/monitoring_system) — Tier 3: 메트릭 및 관찰 가능성 (선택)
-> [network_system](https://github.com/kcenon/network_system) — Tier 4: DICOM용 TCP/TLS 전송
-> [database_system](https://github.com/kcenon/database_system) — Tier 3: 데이터베이스 추상화 (선택)
-
-> 버전, 라이선스, 안전 분류를 포함한 전체 IEC 62304 SOUP 등록부는 [docs/SOUP.md](docs/SOUP.md)를 참조하세요.
-
-이 프로젝트는 다음 kcenon 에코시스템 컴포넌트를 활용합니다:
-
-| 시스템 | 목적 | 주요 기능 |
-|--------|---------|--------------|
-| **common_system** | 기반 인터페이스 | IExecutor, Result<T>, 이벤트 버스 |
-| **container_system** | 데이터 직렬화 | 타입 안전 값, SIMD 가속 |
-| **thread_system** | 동시성 | 스레드 풀, lock-free 큐 |
-| **logger_system** | 로깅 | 비동기 로깅, 4.34M msg/s |
-| **monitoring_system** | 관찰 가능성 | 메트릭, 분산 추적 |
-| **network_system** | 네트워크 I/O | TCP/TLS, 비동기 작업 |
-| **database_system** | 데이터베이스 추상화 | SQL 인젝션 방지, 다중 DB 지원 (선택) |
-
----
+[계층 다이어그램](docs/ARCHITECTURE.kr.md#계층-개요)은 REST/DICOMweb, AI, 워크플로우 프런트엔드에서 IHE 액터,
+DICOM 서비스, 네트워크 및 보안, 코어/인코딩을 거쳐 kcenon 에코시스템 라이브러리까지 이어집니다.
+`kcenon.pacs`의 C++20 모듈 인터페이스가 `src/modules/` 아래에 있지만, 현재 리비전에서는 모듈 빌드가
+컴파일되지 않으며 `PACS_BUILD_MODULES=ON`으로 빌드하는 CI 작업도 없으므로 헤더 기반 인터페이스를
+사용하세요([상태와 12개 파티션](docs/ARCHITECTURE.kr.md#c20-모듈-아키텍처)).
 
 ## 프로젝트 구조
 
-공개 헤더는 `include/kcenon/pacs/<module>/` 아래에 위치합니다. 레거시 `include/pacs/...`
-경로는 폐기되었으며, 모든 소비자는 `#include <kcenon/pacs/...>`를 사용해야 합니다.
-
-| 모듈 | 위치 | 설명 |
-|--------|----------|-------------|
-| **Core** | `include/kcenon/pacs/core/` | DICOM 태그, 요소, 데이터셋, Part 10 파일 I/O, 태그 사전 |
-| **Encoding** | `include/kcenon/pacs/encoding/` | VR 타입, 전송 구문, 압축 코덱 (JPEG, JP2K, JPLS, RLE) |
-| **Network** | `include/kcenon/pacs/network/` | PDU 인코딩/디코딩, association 상태 머신, DIMSE 프로토콜 |
-| **Services** | `include/kcenon/pacs/services/` | SCP/SCU 구현, SOP 클래스 레지스트리, IOD 검증기 |
-| **Storage** | `include/kcenon/pacs/storage/` | 파일 스토리지, SQLite 인덱싱, 클라우드 스토리지 (S3/Azure), HSM |
-| **Security** | `include/kcenon/pacs/security/` | RBAC, 익명화 (PS3.15), 디지털 서명, TLS |
-| **Monitoring** | `include/kcenon/pacs/monitoring/` | 헬스 체크, Prometheus 메트릭 |
-| **Web** | `include/kcenon/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
-| **Client** | `include/kcenon/pacs/client/` | 작업, 라우팅, 동기, 프리페치, 원격 노드 관리 |
-| **Workflow** | `include/kcenon/pacs/workflow/` | 자동 프리페치, 작업 스케줄러, 연구 잠금 관리자 |
-| **AI** | `include/kcenon/pacs/ai/` | AI 서비스 커넥터, 결과 처리기 (SR/SEG) |
-| **Integration** | `include/kcenon/pacs/integration/` | 에코시스템 어댑터 (container, network, thread, logger, monitoring) |
-| **IHE** | `include/kcenon/pacs/ihe/` | IHE 액터 (XDS.b Document Source/Consumer, Registry Query, ATNA 감사) |
-| **DI** | `include/kcenon/pacs/di/` | 서비스 구성을 위한 의존성 주입 유틸리티 |
-| **Compat** | `include/kcenon/pacs/compat/` | 크로스 플랫폼 및 레거시 include 경로용 호환성 shim |
+공개 헤더는 `include/kcenon/pacs/<module>/` 아래에 위치합니다. 레거시 `include/pacs/...` 경로는
+폐기되었으며, 모든 소비자는 `#include <kcenon/pacs/...>`를 사용해야 합니다.
 
 ```
 pacs_system/
@@ -512,140 +223,34 @@ pacs_system/
 └── CMakeLists.txt        # 빌드 구성 (project VERSION 0.1.0)
 ```
 
-> 파일·라인·테스트 수는 CI에서 `scripts/check-stats-drift.sh`가 검사하는 [코드 통계](#코드-통계)에
-> 기록됩니다. 전체 파일 수준 디렉터리 트리는 [Project Structure](docs/PROJECT_STRUCTURE.md)를 참조하세요.
-
----
-
-## C++20 모듈 지원
-
-PACS System은 헤더 기반 인터페이스의 대안으로 C++20 모듈 인터페이스(`src/modules/`)를 정의합니다.
-
-> **상태**: 현재 리비전에서는 모듈 빌드가 컴파일되지 않습니다. 파티션은 여전히 접두사 없는 `pacs::`
-> 네임스페이스의 이름을 재노출하지만(예: `using pacs::core::dicom_tag;`) 공개 헤더는 이 이름들을
-> `kcenon::pacs::`에 선언하므로, `pacs_system_modules` 빌드는 비어 있는 `:ai` 파티션을 제외한 모든
-> 파티션에서 실패합니다. `PACS_BUILD_MODULES=ON`으로 빌드하는 CI 작업은 없습니다. 헤더 기반
-> 인터페이스를 사용하세요.
-
-### 모듈 요구사항
-
-- **CMake 3.28+**
-- **Clang 16+, GCC 14+ 또는 MSVC 2022 17.4+**
-
-### 모듈로 빌드하기
-
-```bash
-cmake -B build -DPACS_BUILD_MODULES=ON
-cmake --build build
-```
-
-### 모듈 사용하기
-
-아래 예제는 공개 헤더가 선언하는 이름을 사용하며, 파티션이 이 이름들을 export한 뒤에야 빌드됩니다
-(위의 상태 안내 참조).
-
-```cpp
-import kcenon.pacs;
-
-int main() {
-    kcenon::pacs::core::dicom_dataset dataset;
-    dataset.set_string(kcenon::pacs::core::tags::patient_name,
-                       kcenon::pacs::encoding::vr_type::PN, "DOE^JOHN");
-    const auto& syntax = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian;
-    return (dataset.size() == 1 && syntax.is_valid()) ? 0 : 1;
-}
-```
-
-### 모듈 구조
-
-| 모듈 | 내용 |
-|--------|----------|
-| `kcenon.pacs` | 기본 모듈 (모든 파티션 임포트) |
-| `kcenon.pacs:core` | 핵심 DICOM 데이터 구조 및 유틸리티 |
-| `kcenon.pacs:network` | DICOM 네트워크 프로토콜 (DIMSE) |
-| `kcenon.pacs:storage` | DICOM 파일 스토리지 및 검색 |
-| `kcenon.pacs:encoding` | 전송 구문 및 코덱 지원 |
-| `kcenon.pacs:services` | DICOM 서비스 구현 (C-STORE, C-FIND 등) |
-| `kcenon.pacs:security` | TLS 및 인증 |
-| `kcenon.pacs:web` | DICOMweb REST API |
-| `kcenon.pacs:workflow` | 워크플로우 관리 |
-| `kcenon.pacs:integration` | 에코시스템 어댑터 |
-| `kcenon.pacs:ai` | AI 서비스 커넥터 (`KCENON_WITH_AI`가 정의되지 않으면 비어 있으며, 빌드는 이를 정의하지 않음) |
-| `kcenon.pacs:monitoring` | 헬스 체크 및 메트릭 |
-| `kcenon.pacs:di` | 의존성 주입 유틸리티 |
-
-> **참고**: C++20 모듈은 실험적입니다. 헤더 기반 인터페이스가 기본 API로 유지됩니다.
-
-## 문서
-
-- 🌐 [API Reference (Doxygen)](https://kcenon.github.io/pacs_system/) — 호스팅된 Doxygen 출력 (`include/kcenon/pacs/**`에서 생성)
-- 📋 [Implementation Analysis](docs/PACS_IMPLEMENTATION_ANALYSIS.md) - 상세 구현 전략
-- 📋 [Product Requirements](docs/PRD.md) - 제품 요구사항 문서
-- 🏗️ [Architecture Guide](docs/ARCHITECTURE.md) - 시스템 아키텍처
-- ⚡ [Features](docs/FEATURES.md) - 기능 명세
-- 📁 [Project Structure](docs/PROJECT_STRUCTURE.md) - 디렉터리 구조
-- 🔧 [API Reference (narrative)](docs/API_REFERENCE.md) - 상위 수준 API 설명
-- 🖥️ [CLI Reference](docs/CLI_REFERENCE.md) - CLI 도구 문서
-- 📄 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) - DICOM 적합성
-- 🏥 [IHE Integration Statement](docs/IHE_INTEGRATION_STATEMENT.md) - IHE 프로파일 적합성 (XDS-I.b, AIRA, PIR)
-- 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - 스레드 시스템 마이그레이션 요약
-
-**업그레이드:**
-- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - 0.1.0 베이스라인과 계획된 1.0.0 API 고정 사이의 모든 호환성 변경 사항, 전후 스니펫, `Result<T>` 마이그레이션 설명, 자가 점검 체크리스트 포함.
-
-**데이터베이스 통합:**
-- 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system 통합 가이드
-- 📚 [API Reference (Database)](docs/database/API_REFERENCE.md) - Query Builder API 문서
-- 🏛️ [ADR-001](docs/adr/ADR-001-database-system-integration.md) - 아키텍처 결정 기록
-- 🏛️ [ADR-002](docs/adr/ADR-002-pacs-storage-port-segmentation.md) - PACS 스토리지 경계 및 리포지토리 세트 계약
-- ⚡ [Performance Guide](docs/database/PERFORMANCE_GUIDE.md) - 데이터베이스 최적화 팁
-- 📦 [Dependency Manifest](dependency-manifest.json) - 정규 네이티브, 페치, 내부, 프런트엔드 출처
-- 🏷️ [패키지 상태](docs/PACKAGE_STATE.kr.md) - 게시 버전, 레지스트리 포트, 오버레이 동기화, 소비 검증
-- ⚖️ [Third-Party Licenses](LICENSE-THIRD-PARTY) - 제품 배포 라이선스 목록
-
----
+모듈별 표와 파일 수준 디렉터리 트리는 [프로젝트 구조](docs/PROJECT_STRUCTURE.kr.md#공개-헤더-모듈)에 있으며,
+파일·라인·테스트 수는 CI에서 `scripts/check-stats-drift.sh`가 검사하는 [코드 통계](#코드-통계)에 기록됩니다.
 
 ## 성능
 
-PACS 시스템은 고성능 동시 작업을 위해 `thread_system` 라이브러리를 활용합니다.
-스레드 시스템 마이그레이션(Epic #153)이 성공적으로 완료되어, 모든 직접 `std::thread` 사용이
-jthread 지원 및 취소 토큰을 포함한 현대적인 C++20 추상화로 대체되었습니다.
-상세 벤치마크 결과는 [PERFORMANCE_RESULTS.md](docs/PERFORMANCE_RESULTS.md)를, 마이그레이션 요약은
-[MIGRATION_COMPLETE.md](docs/MIGRATION_COMPLETE.md)를 참조하세요.
+[벤치마크](docs/BENCHMARKS.kr.md)에는 스위트, 목표, 실행 명령, 그리고 환경·날짜·명령·결과 파일을 갖춘 기록된
+결과가 있으며, [스레드 시스템 마이그레이션 요약](docs/MIGRATION_COMPLETE.kr.md)도 참조하세요.
 
-### 주요 성능 메트릭
+## 문서
 
-| 메트릭 | 결과 |
-|--------|--------|
-| **Association 지연 시간** | < 1 ms |
-| **C-ECHO 처리량** | 89,964 msg/s |
-| **C-STORE 처리량** | 31,759 store/s |
-| **동시 작업** | 124 ops/s (10 워커) |
-| **정상 종료** | 110 ms (활성 연결 포함) |
-| **데이터 전송률 (512x512)** | 9,247 MB/s |
-
-### 벤치마크 실행
-
-```bash
-# 벤치마크와 함께 빌드
-cmake -B build -DPACS_BUILD_BENCHMARKS=ON
-cmake --build build
-
-# 모든 벤치마크 실행
-cmake --build build --target run_full_benchmarks
-
-# 특정 벤치마크 카테고리 실행
-./build/bin/thread_performance_benchmarks "[benchmark][association]"
-./build/bin/thread_performance_benchmarks "[benchmark][throughput]"
-./build/bin/thread_performance_benchmarks "[benchmark][concurrent]"
-./build/bin/thread_performance_benchmarks "[benchmark][shutdown]"
-```
-
----
+| 주제 | 문서 |
+|------|------|
+| API | [API Reference (Doxygen)](https://kcenon.github.io/pacs_system/) (`include/kcenon/pacs/**`에서 생성); [API 참조](docs/API_REFERENCE.kr.md) |
+| 설계 | [아키텍처](docs/ARCHITECTURE.kr.md), [제품 요구사항](docs/PRD.kr.md), [구현 분석](docs/PACS_IMPLEMENTATION_ANALYSIS.kr.md), [기능](docs/FEATURES.kr.md), [프로젝트 구조](docs/PROJECT_STRUCTURE.kr.md) |
+| 도구 | [CLI 레퍼런스](docs/CLI_REFERENCE.kr.md) |
+| 적합성 | [DICOM 적합성 선언문](docs/DICOM_CONFORMANCE_STATEMENT.md); [IHE 통합 선언문](docs/IHE_INTEGRATION_STATEMENT.md) — IHE 프로파일 자체 선언 (XDS-I.b, AIRA, PIR); Connectathon에서 검증되지 않음 |
+| 업그레이드 | [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md): 0.1.0 베이스라인과 계획된 1.0.0 API 고정 사이의 모든 호환성 변경 사항, 전후 스니펫, `Result<T>` 마이그레이션 설명, 자가 점검 체크리스트 포함 |
+| 데이터베이스 | [Migration Guide](docs/database/MIGRATION_GUIDE.md), [Query Builder API](docs/database/API_REFERENCE.md), [Performance Guide](docs/database/PERFORMANCE_GUIDE.md), [ADR-001](docs/adr/ADR-001-database-system-integration.md), [ADR-002](docs/adr/ADR-002-pacs-storage-port-segmentation.md) (스토리지 경계 및 리포지토리 세트 계약) |
+| 패키징 | [패키지 상태](docs/PACKAGE_STATE.kr.md), [Dependency Manifest](dependency-manifest.json) (네이티브, 페치, 내부, 프런트엔드 출처), [Third-Party Licenses](LICENSE-THIRD-PARTY) |
+| 색인 | [문서 등록부](docs/README.md) |
 
 ## 코드 통계
 
+`scripts/update-readme-stats.sh`가 트리에서 생성한 영문 README의 표를 옮긴 것입니다(집계 규칙은 `scripts/calculate-stats.sh`).
+[Documentation Statistics 워크플로](.github/workflows/docs-stats.yml)는 영문 README의 값이 허용 범위를 벗어나면 실패합니다.
+
 <!-- STATS_START -->
+<!-- source: generated by scripts/update-readme-stats.sh from scripts/calculate-stats.sh; checked by scripts/check-stats-drift.sh in the Documentation Statistics workflow (.github/workflows/docs-stats.yml) -->
 
 | 메트릭 | 값 |
 |--------|-------|
@@ -659,50 +264,32 @@ cmake --build build --target run_full_benchmarks
 | **테스트 파일** | 191 파일 |
 | **테스트 케이스** | 2661+ 테스트 |
 | **예제 프로그램** | 5 앱 |
-| **문서** | 108 마크다운 파일 |
+| **문서** | 109 마크다운 파일 |
 | **CI/CD 워크플로우** | 23 워크플로우 |
 | **버전** | 0.1.0 |
-| **최종 업데이트** | 2026-10-22 |
 
 <!-- STATS_END -->
 
----
-
 ## 규정 준수
-
-- [SaMD 인증 준비 체크리스트](docs/checklists/README.md) — 제품 범위·적용성 결정, 9개 기술·품질관리 검토, 증거 기록 및 제안된 출시 점검 항목(영문).
 
 `pacs_system`은 의료 기관이 정보보안관리체계(ISMS)의 일부로 사용할 수 있는 기술적 기본 요소를
 제공합니다. 라이브러리 자체는 인증되지 않았으며, 도입 기관이 이를 통합하고 조직적 통제(정책,
 교육, 사고 대응, 업무 연속성 계획)를 제공합니다.
 
+- [SaMD 인증 준비 체크리스트](docs/checklists/README.md) — 제품 범위·적용성 결정, 9개 기술·품질관리 검토, 증거 기록 및 제안된 출시 점검 항목(영문)
 - [ISO 27799 통제 매핑](docs/compliance/iso-27799.md) — ATNA 감사 추적, 감사 로그 암호화, TLS 정책, 접근 통제, 익명화가 ISO 27799:2016 조항 7.4–7.7에 어떻게 매핑되는지
 - [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) — 구현된 ISO 12052 / DICOM 2023e 서비스, SOP 클래스, 전송 구문
-
-에코시스템 수준의 색인 [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/main/docs/compliance/ISO_OVERVIEW.md)는 kcenon 시스템이 다루는 모든 ISO 표준을 나열합니다.
-
----
+- [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/main/docs/compliance/ISO_OVERVIEW.md) — kcenon 시스템이 다루는 모든 ISO 표준의 에코시스템 수준 색인
 
 ## 기여하기
 
-기여를 환영합니다! Pull Request를 제출하기 전에 기여 가이드라인을 읽어 주세요.
-
----
-
-## 라이선스
-
-이 프로젝트는 BSD 3-Clause 라이선스에 따라 배포됩니다 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
----
-
-## 연락처
+Pull Request를 제출하기 전에 [기여 가이드](docs/contributing/CONTRIBUTING.md)를 읽어 주세요. README 변경은
+[README 편집 정책](docs/contributing/README_POLICY.md)을 따르며, `python3 scripts/readme_lint.py`가 이를 검사합니다.
 
 - **프로젝트 소유자**: kcenon (kcenon@naver.com)
 - **리포지토리**: https://github.com/kcenon/pacs_system
 - **이슈**: https://github.com/kcenon/pacs_system/issues
 
----
+## 라이선스
 
-<p align="center">
-  Made with ❤️ by 🍀☀🌕🌥 🌊
-</p>
+이 프로젝트는 BSD 3-Clause 라이선스에 따라 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.

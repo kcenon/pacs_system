@@ -18,7 +18,7 @@ This directory contains performance-related documentation for PACS System.
 
 ### Benchmarks
 
-- [BENCHMARKS.md](../BENCHMARKS.md) - Performance benchmark definitions, targets, and how to run them
+- [BENCHMARKS.md](../BENCHMARKS.md) - Benchmark suites, targets, recorded results with environment and date, and how to run them
 - [BENCHMARKS.kr.md](../BENCHMARKS.kr.md) - Korean version
 
 ### Performance Reports
@@ -29,9 +29,9 @@ This directory contains performance-related documentation for PACS System.
 ## Running Performance Tests
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DPACS_BUILD_TESTS=ON
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPACS_BUILD_BENCHMARKS=ON
 cmake --build build
-./build/bin/pacs_benchmarks
+cmake --build build --target run_full_benchmarks
 ```
 
-See [BENCHMARKS.md](../BENCHMARKS.md) for detailed instructions and configuration options.
+See [BENCHMARKS.md](../BENCHMARKS.md#running-benchmarks) for the individual suites and targets.

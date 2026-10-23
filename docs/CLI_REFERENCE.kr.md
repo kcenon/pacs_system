@@ -14,7 +14,7 @@ category: "API"
 
 > **언어:** [English](CLI_REFERENCE.md) | **한국어**
 
-PACS System에 포함된 32개 CLI 도구의 전체 문서입니다. 간단한 개요는 [README](../README.kr.md)를 참조하세요.
+`tools/` 아래 CLI 도구의 전체 문서입니다. `tools/`에는 도구마다 하나의 하위 디렉터리가 있으며(하위 디렉터리 32개), 그중 `module_example`은 CLI 도구가 아니라 C++20 모듈 데모입니다. 간단한 개요는 [README](../README.kr.md#cli-도구-및-예제)를 참조하세요.
 
 ## 예제 빌드
 
