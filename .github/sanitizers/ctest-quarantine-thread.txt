@@ -4,9 +4,6 @@
 # Each group names the issue that tracks the failure. Remove the lines when
 # the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.
 
-# #1244: data race on the static RNG in file_storage::generate_temp_filename()
-hsm_storage: concurrent access
-
 # kcenon/thread_system#761: payload races behind the concurrent_queue race;
 # the racing accesses are in test code, so tsan.supp cannot match them
 stress::lockfree_queue memory safety
