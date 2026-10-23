@@ -51,7 +51,8 @@ calculate_stats() {
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     example_dirs=$(count_example_programs)
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
-    workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
+    # Workflow files under .github/workflows/, both extensions (e.g. build-Doxygen.yaml)
+    workflow_files=$(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null | wc -l | tr -d ' ')
 
     # Line counts (approximate)
     local header_loc
@@ -87,10 +88,6 @@ calculate_stats() {
     local version
     version=$(sed -n '/^project(/,/)/p' CMakeLists.txt | grep -oE 'VERSION\s+[0-9]+\.[0-9]+\.[0-9]+' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "0.0.0")
 
-    # Current date
-    local last_updated
-    last_updated=$(date -u +%Y-%m-%d)
-
     # Output based on format
     case "${OUTPUT_FORMAT}" in
         --json)
@@ -108,8 +105,7 @@ calculate_stats() {
   "example_programs": ${example_dirs},
   "documentation": ${doc_files},
   "workflows": ${workflow_files},
-  "version": "${version}",
-  "last_updated": "${last_updated}"
+  "version": "${version}"
 }
 EOF
             ;;
@@ -130,7 +126,6 @@ EOF
 | **Documentation** | ${doc_files} markdown files |
 | **CI/CD Workflows** | ${workflow_files} workflows |
 | **Version** | ${version} |
-| **Last Updated** | ${last_updated} |
 EOF
             ;;
     esac
@@ -148,7 +143,7 @@ export_raw_stats() {
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     example_dirs=$(count_example_programs)
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
-    workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
+    workflow_files=$(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null | wc -l | tr -d ' ')
     header_loc=$(find include -name '*.h' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     source_loc=$(find src -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     test_loc=$(find tests -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')

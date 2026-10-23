@@ -47,6 +47,67 @@ python3 scripts/verify_release_version.py 0.1.0
 [kcenon/vcpkg-registry#104](https://github.com/kcenon/vcpkg-registry/issues/104)에서 정정될 때까지
 캐노니컬 안내문을 그대로 유지합니다.
 
+## vcpkg 기능
+
+게시된 포트(`vcpkg-ports/kcenon-pacs-system/vcpkg.json`)는 다음 기능을 제공하며, 모두 기본값은 꺼져 있습니다.
+
+```bash
+vcpkg install kcenon-pacs-system[feature1,feature2,...]
+```
+
+| 기능 | 기본값 | 설명 | 추가 의존성 | 사전 요구사항 |
+|---------|:-------:|-------------|----------|---------------|
+| aws | off | 클라우드 기반 PACS 스토리지를 위한 AWS S3 통합 | aws-sdk-cpp (S3) | -- |
+| azure | off | 클라우드 기반 PACS 스토리지를 위한 Azure Blob 스토리지 통합 | azure-storage-blobs-cpp | -- |
+| codecs | off | 이미지 압축 코덱 (JPEG, JPEG 2000, HTJ2K, JPEG-LS, PNG) | libjpeg-turbo, openjpeg, charls, openjph, libpng | -- |
+| rest-api | off | Crow HTTP 프레임워크를 통한 DICOMweb REST API | crow | -- |
+| ssl | off | 보안 DICOM association을 위한 TLS/SSL 지원 | openssl | -- |
+| storage | off | SQLite3 기반 PACS 스토리지 및 인덱싱 | sqlite3 | -- |
+| testing | off | 단위 테스트 및 벤치마크 | gtest, benchmark | -- |
+
+기능 선택 예:
+
+- **최소 설치**: `vcpkg install kcenon-pacs-system`
+- **TLS를 포함한 프로덕션**: `vcpkg install kcenon-pacs-system[storage,ssl]`
+- **전체 영상 파이프라인**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,rest-api]`
+- **클라우드 배포 (AWS)**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,aws,rest-api]`
+
+## CMake 타겟 (계획된 v1.0 계약)
+
+계획된 v1.0 계약(#1158)은 0.1.0의 `kcenon::pacs::<component>` 이름을 정규 타겟 `pacs_system::pacs_system`으로
+대체합니다. 이 타겟은 필수 및 빌드된 모든 선택적 하위 컴포넌트를 끌어오는 집계 INTERFACE 타겟이므로,
+일반적인 소비자에게는 단일 `target_link_libraries` 호출로 충분합니다. 아직 어떤 게시 패키지에도 포함되지
+않았으며, 현재 트리의 소스 설치본은 이 타겟을 제공하지만 패키지 버전은 0.1.0으로 보고하므로, v1.0.0이
+출시되기 전까지는 `find_package(pacs_system 0.1 REQUIRED)`로 요청하세요. 출시 이후 다운스트림 프로젝트는
+다음과 같이 의존합니다:
+
+```cmake
+find_package(pacs_system 1.0 REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
+```
+
+세밀한 제어가 필요하면 개별 컴포넌트를 링크하세요:
+
+| 컴포넌트 | 타겟 | 제공 기능 |
+|-----------|--------|----------|
+| Core | `pacs_system::core` | 태그, 데이터셋, Part 10 파일 I/O |
+| Encoding | `pacs_system::encoding` | VR 타입, 전송 구문, 코덱 |
+| Network | `pacs_system::network` | PDU, association, DIMSE |
+| Client | `pacs_system::client` | 작업/라우팅/동기/프리페치 관리자 |
+| Services | `pacs_system::services` | SCP/SCU 구현 |
+| Security | `pacs_system::security` | RBAC, 익명화, 서명, TLS |
+| Storage | `pacs_system::storage` | 파일 스토리지, SQLite, S3/Azure (선택) |
+| AI | `pacs_system::ai` | AI 서비스 커넥터 (선택) |
+| Monitoring | `pacs_system::monitoring` | 헬스 체크, 메트릭 (선택) |
+| Workflow | `pacs_system::workflow` | 자동 프리페치, 스케줄링 (선택) |
+| Web | `pacs_system::web` | REST API, DICOMweb (선택) |
+| Integration | `pacs_system::integration` | 에코시스템 어댑터 (선택) |
+
+레거시 표기 `kcenon::pacs_system`은 하위 호환성을 위한 별칭으로 유지되지만, 새 코드는
+`pacs_system::pacs_system`을 사용해야 합니다.
+
 ## 루트 매니페스트와 오버레이 의존성 집합
 
 루트 `vcpkg.json`은 현재 소스 트리를, 오버레이는 게시된 `v0.1.0` 아카이브를 빌드합니다. 기본(core)

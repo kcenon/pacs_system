@@ -149,6 +149,12 @@ private:
             return storage_status::storage_error;
         }
 
+        // handle_store() runs concurrently on the server's association
+        // threads, but index_database is not thread-safe and requires
+        // external synchronization. Unsynchronized calls race in
+        // upsert_patient() (check-then-insert of the shared patient ID).
+        std::lock_guard<std::mutex> db_lock(db_mutex_);
+
         // 1. Upsert Patient
         auto patient_res = database_->upsert_patient(
             dataset.get_string(tags::patient_id),
@@ -246,6 +252,9 @@ private:
 
     mutable std::mutex mutex_;
     std::vector<std::string> stored_instance_uids_;
+
+    /// Serializes index_database access from concurrent association threads
+    std::mutex db_mutex_;
 };
 
 /**

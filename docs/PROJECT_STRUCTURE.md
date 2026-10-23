@@ -21,6 +21,7 @@ category: "PROJ"
 ## Table of Contents
 
 - [Overview](#overview)
+- [Public Header Modules](#public-header-modules)
 - [Directory Layout](#directory-layout)
 - [Module Descriptions](#module-descriptions)
 - [Header Files](#header-files)
@@ -34,6 +35,36 @@ category: "PROJ"
 ## Overview
 
 The PACS System follows a modular directory structure consistent with other kcenon ecosystem projects. Each module has a clear responsibility and interfaces are defined through header files in the `include/` directory.
+
+---
+
+## Public Header Modules
+
+Public headers live under `include/kcenon/pacs/<module>/`. The legacy `include/pacs/...`
+path was retired; all consumers should `#include <kcenon/pacs/...>`. The published 0.1.0
+package predates the relocation and still installs headers under `include/pacs/` (see
+[Package State](PACKAGE_STATE.md)).
+
+| Module | Location | Description |
+|--------|----------|-------------|
+| **Core** | `include/kcenon/pacs/core/` | DICOM tags, elements, datasets, Part 10 file I/O, tag dictionary |
+| **Encoding** | `include/kcenon/pacs/encoding/` | VR types, transfer syntaxes, compression codecs (JPEG, JP2K, JPLS, RLE) |
+| **Network** | `include/kcenon/pacs/network/` | PDU encoding/decoding, association state machine, DIMSE protocol |
+| **Services** | `include/kcenon/pacs/services/` | SCP/SCU implementations, SOP class registry, IOD validators |
+| **Storage** | `include/kcenon/pacs/storage/` | File storage, SQLite indexing, cloud storage (S3/Azure), HSM |
+| **Security** | `include/kcenon/pacs/security/` | RBAC, anonymization (PS3.15), digital signatures, TLS |
+| **Monitoring** | `include/kcenon/pacs/monitoring/` | Health checks, Prometheus metrics |
+| **Web** | `include/kcenon/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
+| **Client** | `include/kcenon/pacs/client/` | Job, routing, sync, prefetch, remote node management |
+| **Workflow** | `include/kcenon/pacs/workflow/` | Auto prefetch, task scheduler, study lock manager |
+| **AI** | `include/kcenon/pacs/ai/` | AI service connector, result handler (SR/SEG) |
+| **Integration** | `include/kcenon/pacs/integration/` | Ecosystem adapters (container, network, thread, logger, monitoring) |
+| **IHE** | `include/kcenon/pacs/ihe/` | IHE actors (XDS.b Document Source/Consumer, Registry Query, ATNA audit) |
+| **DI** | `include/kcenon/pacs/di/` | Dependency injection utilities for service composition |
+| **Compat** | `include/kcenon/pacs/compat/` | Compatibility shims for cross-platform and legacy include paths |
+
+The directory layout and module descriptions below predate the header relocation and still
+name `include/pacs/` paths.
 
 ---
 

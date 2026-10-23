@@ -222,12 +222,13 @@ protected:
      * @brief Called when stop() is requested
      *
      * This hook is called from the thread calling stop() before the worker
-     * thread actually stops. Currently a no-op as the base class handles
+     * thread actually stops. It is a no-op as the base class handles
      * waking up the worker thread.
      *
-     * Future implementation will:
-     * - Cancel any pending async accept operations
-     * - Close the acceptor to unblock accept calls
+     * It must not close or modify the listening socket: the socket is
+     * owned by the worker thread (opened in before_start(), polled in
+     * do_work(), closed in after_stop()), which may still be inside
+     * do_work() when this hook runs.
      */
     void on_stop_requested() override;
 
