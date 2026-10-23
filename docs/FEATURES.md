@@ -19,11 +19,17 @@ category: "FEAT"
 This document provides comprehensive details on all features available in the PACS system.
 
 > **Phase Definitions**: See [PRD Development Phases](PRD.md#development-phases) for the authoritative phase definitions. Feature sections below correspond to phases as follows:
-> - **Phase 1** (Complete): DICOM Core Features
-> - **Phase 2** (Complete): Network Protocol Features, Compression Codecs
-> - **Phase 3** (Complete): DICOM Services, Storage Backend
-> - **Phase 4** (Complete): Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
+> - **Phase 1**: DICOM Core Features
+> - **Phase 2**: Network Protocol Features, Compression Codecs
+> - **Phase 3**: DICOM Services, Storage Backend
+> - **Phase 4**: Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
 > - **Phase 5** (Planned): Enterprise Features — Enhanced Metrics (see [Planned Features](#planned-features))
+>
+> **Release status**: the components listed for Phases 1-4 are in the `v0.1.0` tag. The feature
+> descriptions on this page were written before that tag and do not cover later work on the
+> default branch (for example the IHE XDS.b actors under `include/kcenon/pacs/ihe/xds/`, the
+> `include/kcenon/pacs/` header layout, and the `pacs_system::pacs_system` CMake contract), which is
+> unreleased. The code examples predate that header layout and the `kcenon::pacs::` namespace.
 >
 > **Note**: Connection Pooling was originally listed as a Phase 5 feature but is already fully implemented in the Client Module (`remote_node_manager`). See [Remote Node Manager](#remote-node-manager-connection-pooling) for details.
 
@@ -999,11 +1005,16 @@ struct migration_result {
 
 **Optimized Operations**:
 
-| Operation | SIMD Support | Speedup |
-|-----------|--------------|---------|
-| Byte swap (16-bit) | AVX2, SSSE3, NEON | 8-16x |
-| Byte swap (32-bit) | AVX2, SSSE3, NEON | 8-16x |
-| Byte swap (64-bit) | AVX2, SSSE3, NEON | 8-16x |
+| Operation | SIMD Support |
+|-----------|--------------|
+| Byte swap (16-bit) | AVX2, SSSE3, NEON |
+| Byte swap (32-bit) | AVX2, SSSE3, NEON |
+| Byte swap (64-bit) | AVX2, SSSE3, NEON |
+
+No SIMD speedup measurement is recorded in the repository. The 8-16x range that this table used
+to list was the expected speedup stated when SIMD byte swapping was added, not a measured result.
+`benchmarks/simd_performance/` contains the byte swap benchmark; see
+[Benchmarks](BENCHMARKS.md#simd-benchmarks).
 
 **Usage**:
 ```cpp
@@ -1820,26 +1831,26 @@ See [Object Pool Memory Management](#object-pool-memory-management) for details 
 
 ---
 
-## Recently Completed Features (v1.2.0 - 2025-12-13)
+## Features Added in December 2025
 
-| Feature | Description | Issue | Status |
-|---------|-------------|-------|--------|
-| Study Lock Manager | Thread-safe lock manager for concurrent access control | #208 | ✅ Complete |
-| Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | ✅ Complete |
-| Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | ✅ Complete |
-| Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
-| Azure Blob Storage | Azure Blob storage backend (mock + full Azure SDK via `PACS_WITH_AZURE_SDK`) | #199 | ✅ Complete |
-| Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
-| Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
-| RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
-| REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
-| S3 Cloud Storage | S3-compatible storage backend (mock + full AWS SDK via `PACS_WITH_AWS_SDK`) | #198 | ✅ Complete |
-| Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
-| Network System V2 | Optional messaging_server integration | #163 | ✅ Complete |
-| DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | ✅ Complete |
-| Ultrasound Storage | US, US-MF SOP classes | #128 | ✅ Complete |
-| XA Image Storage | XA, Enhanced XA, XRF SOP classes | #129 | ✅ Complete |
-| Explicit VR Big Endian | Transfer syntax support | #126 | ✅ Complete |
+| Feature | Description | Issue | In `v0.1.0` |
+|---------|-------------|-------|-------------|
+| Study Lock Manager | Thread-safe lock manager for concurrent access control | #208 | Yes |
+| Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | Yes |
+| Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | Yes |
+| Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | Yes |
+| Azure Blob Storage | Azure Blob storage backend (mock + full Azure SDK via `PACS_WITH_AZURE_SDK`) | #199 | Yes |
+| Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | Yes |
+| Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | Yes |
+| RLE Lossless Codec | RLE compression codec (pure C++) | #182 | Yes |
+| REST API Server | Web administration API with Crow framework | #194 | Yes |
+| S3 Cloud Storage | S3-compatible storage backend (mock + full AWS SDK via `PACS_WITH_AWS_SDK`) | #198 | Yes |
+| Thread System Migration | std::thread → thread_system | #153 | Yes |
+| Network System V2 | Optional messaging_server integration | #163 | Yes |
+| DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | Yes |
+| Ultrasound Storage | US, US-MF SOP classes | #128 | Yes |
+| XA Image Storage | XA, Enhanced XA, XRF SOP classes | #129 | Yes |
+| Explicit VR Big Endian | Transfer syntax support | #126 | Yes |
 
 ---
 
@@ -1913,17 +1924,17 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 
 ## Planned Features
 
-### Completed (Previously Planned)
+### Previously Planned, in `v0.1.0`
 
-| Feature | Description | Completed Phase |
-|---------|-------------|-----------------|
-| ~~Additional SOP Classes (PET/NM)~~ | NM, PET support | Phase 4 ✅ |
-| ~~Additional SOP Classes (RT)~~ | RT Plan, RT Structure Set, etc. | Phase 4 ✅ |
-| ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb support per PS3.18 | Phase 4 ✅ |
-| ~~AI Integration~~ | External AI service connector + result handler | Phase 4 ✅ |
-| ~~Full AWS S3 SDK~~ | Production AWS SDK integration (`PACS_WITH_AWS_SDK`) | Phase 4 ✅ |
-| ~~Full Azure SDK~~ | Production Azure SDK integration (`PACS_WITH_AZURE_SDK`) | Phase 4 ✅ |
-| ~~Connection Pooling~~ | DICOM association reuse via `remote_node_manager` | Phase 4 ✅ |
+| Feature | Description | Phase | In `v0.1.0` |
+|---------|-------------|-------|-------------|
+| ~~Additional SOP Classes (PET/NM)~~ | NM, PET support | Phase 4 | Yes |
+| ~~Additional SOP Classes (RT)~~ | RT Plan, RT Structure Set, etc. | Phase 4 | Yes |
+| ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb support per PS3.18 | Phase 4 | Yes |
+| ~~AI Integration~~ | External AI service connector + result handler | Phase 4 | Yes |
+| ~~Full AWS S3 SDK~~ | Production AWS SDK integration (`PACS_WITH_AWS_SDK`) | Phase 4 | Yes |
+| ~~Full Azure SDK~~ | Production Azure SDK integration (`PACS_WITH_AZURE_SDK`) | Phase 4 | Yes |
+| ~~Connection Pooling~~ | DICOM association reuse via `remote_node_manager` | Phase 4 | Yes |
 
 ### Phase 5: Enterprise Features (Future)
 

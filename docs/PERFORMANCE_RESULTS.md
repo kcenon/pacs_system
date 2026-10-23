@@ -13,7 +13,13 @@ category: "PERF"
 > **SSOT**: This document is the single source of truth for **Performance Results After Thread Migration**.
 
 **Version:** 0.1.0.0
-**Date:** 2024-12-05
+**Date:** Not recorded reliably. This report originally gave 2024-12-05, which cannot be the run
+date: the repository's first commit is dated 2025-11-30, the benchmark sources it reports on
+(`benchmarks/thread_performance/`) were added on 2025-12-04 (`7c59a5d7`, PR #164), Issue #160 was
+opened on 2025-12-04, the report was committed on 2025-12-05 (`501957b0`, PR #171), and
+macOS 26.2 and Apple Clang 17.0.0 ([Test Environment](#test-environment)) were not available on
+2024-12-05. No record gives the actual run date (see
+[BENCHMARKS.md](BENCHMARKS.md#thread-migration-run-issue-160)).
 **Related Issue:** #160 - Performance testing and optimization after thread migration
 
 ## Overview
@@ -373,7 +379,10 @@ config.enable_metrics = true;
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0.0 | 2024-12-05 | Initial performance results after thread migration |
-| 1.0.1 | 2024-12-07 | Updated acceptance criteria to match Issue #160 requirements |
-| 1.1.0 | 2024-12-18 | Added lock-free structure stress tests (#337) |
-| 1.2.0 | 2025-01-08 | Added pipeline performance targets (#517) |
+| 1.0.0 | 2025-12-05 | Initial performance results after thread migration |
+| 1.0.1 | 2025-12-07 | Updated acceptance criteria to match Issue #160 requirements |
+| 1.1.0 | 2025-12-18 | Added lock-free structure stress tests (#337) |
+| 1.2.0 | 2026-01-08 | Added pipeline performance targets (#517) |
+
+The dates are those of the commits that made each change (`501957b0`, `209cba84`, `e5977046`,
+`dab45704`); earlier revisions of this table gave each date one year early.
