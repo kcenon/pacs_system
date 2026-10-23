@@ -21,6 +21,10 @@
 
 #pragma once
 
+#include "kcenon/pacs/storage/instance_record.h"
+#include "kcenon/pacs/storage/series_record.h"
+#include "kcenon/pacs/storage/study_record.h"
+
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -35,12 +39,6 @@ class dicom_dataset;
 
 namespace kcenon::pacs::storage {
 class index_database;
-struct study_record;
-struct series_record;
-struct instance_record;
-struct study_query;
-struct series_query;
-struct instance_query;
 } // namespace kcenon::pacs::storage
 
 namespace kcenon::pacs::web {
