@@ -23,6 +23,11 @@ pipeline integration - job ID uniqueness
 integration::C-MOVE workflow with thread pool
 integration::Nested operations with error handling
 integration::No deadlocks under concurrent access
+# Same cycle through the in-memory dicom_server: thread_pool_adapter::shutdown()
+# stops the pool under its mutex while a worker holding the lifecycle lock
+# takes the dicom_server mutex in touch_association()
+dicom_server stores over negotiated JPEG-LS contexts
+dicom_server: a response to a destroyed SCU fails cleanly
 
 # #1254: task_scheduler and study_lock_manager lock their state and stats
 # mutexes in opposite orders (lock-order inversion)
