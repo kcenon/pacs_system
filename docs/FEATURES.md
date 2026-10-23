@@ -1463,10 +1463,11 @@ auto buffer = kcenon::pacs::network::make_pooled_pdu_buffer(16384);
 ```
 
 **Performance Benefits**:
-- ~90% reduction in allocation latency
 - Reduced memory fragmentation
 - Better cache locality
 - Lower GC pressure
+
+No allocation latency measurement with and without the pools is recorded in the repository.
 
 **Monitoring**:
 ```cpp

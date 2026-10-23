@@ -161,19 +161,22 @@ Under load:            [XXXX] ms
 After thread_system migration (Phase 2-3), benchmarks were run on 2024-12-05.
 Full results are documented in [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md).
 
+The baseline column holds the pass thresholds, not measurements from before the migration, so the
+table reports pass or fail rather than a ratio.
+
 | Metric | Baseline Target | After Migration | Status |
 |--------|-----------------|-----------------|--------|
-| Association latency | < 100 ms | 0.001 ms | ✅ Exceeds |
-| C-ECHO throughput | > 100 msg/s | 89,964 msg/s | ✅ 900x |
-| C-STORE throughput | > 20 store/s | 31,759 store/s | ✅ 1,500x |
-| Concurrent operations | > 50 ops/s | 124 ops/s | ✅ 2.5x |
-| Shutdown time (active) | < 5000 ms | 110 ms | ✅ 45x faster |
+| Association latency | < 100 ms | 0.001 ms | ✅ Pass |
+| C-ECHO throughput | > 100 msg/s | 89,964 msg/s | ✅ Pass |
+| C-STORE throughput | > 20 store/s | 31,759 store/s | ✅ Pass |
+| Concurrent operations | > 50 ops/s | 124 ops/s | ✅ Pass |
+| Shutdown time (5 active connections) | < 5000 ms | 107 ms | ✅ Pass |
 | Memory stability | No leaks | No leaks | ✅ Pass |
 
 **Acceptance Criteria Verification:**
 - [x] Performance overhead < 5% - **No regression detected**
 - [x] No memory leaks - **Verified**
-- [x] Graceful shutdown within 5 seconds - **110ms achieved**
+- [x] Graceful shutdown within 5 seconds - **107 ms with 5 active connections**
 
 ## Environment Requirements
 

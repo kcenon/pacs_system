@@ -193,7 +193,7 @@ Per Issue #160, all acceptance criteria have been verified:
 
 | Criterion | Requirement | Result | Status |
 |-----------|-------------|--------|--------|
-| Graceful shutdown | < 5 seconds | ~110 ms | ✅ PASS |
+| Graceful shutdown | < 5 seconds | 107 ms with 5 active connections | ✅ PASS |
 | Test success rate | 100% | 39/39 shutdown tests passed | ✅ PASS |
 
 ## Recommendations
