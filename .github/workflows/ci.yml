@@ -44,6 +44,10 @@ jobs:
             cc: clang
             cxx: clang++
             triplet: x64-linux
+            # Quarantine (#1257): OpenJPH's AVX-512 encoder makes the HTJ2K
+            # encode cases crash in clang builds on runners with AVX-512.
+            # Remove when #1257 is fixed.
+            ctest_exclude: '^htj2k_codec (lossless |lossy |decode sets output parameters correctly$)'
           # macOS: use explicit /usr/bin paths to ensure Apple Clang (Xcode)
           # is used instead of Homebrew LLVM Clang, which lacks std::format
           - os: macos-14
@@ -148,7 +152,9 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120
+        ctest --output-on-failure --timeout 120 ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+      env:
+        CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
     - name: Build application (vcpkg - Windows)
       if: runner.os == 'Windows' && steps.vcpkg_install_windows.outcome != 'failure'
@@ -197,7 +203,9 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120
+        ctest --output-on-failure --timeout 120 ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+      env:
+        CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
     - name: Build application (fallback - Windows)
       if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
