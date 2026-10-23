@@ -564,10 +564,10 @@ DICOM Storage SCU for sending images to a remote SCP.
 # Send all files in directory (recursive) with progress
 ./build/bin/store_scu -r --progress localhost 11112 ./dicom_folder/
 
-# Specify transfer syntax preference
-./build/bin/store_scu --prefer-lossless localhost 11112 *.dcm
+# Propose only Explicit VR Little Endian for uncompressed files
+./build/bin/store_scu -xe localhost 11112 *.dcm
 
-# Verbose output with timeout
+# Verbose output with timeout (also lists proposed and accepted contexts)
 ./build/bin/store_scu -v -to 60 localhost 11112 image.dcm
 
 # Generate transfer report
@@ -579,6 +579,15 @@ DICOM Storage SCU for sending images to a remote SCP.
 # Show help
 ./build/bin/store_scu --help
 ```
+
+Transfer syntaxes:
+- Each file is sent in its own transfer syntax; `store_scu` does not compress or decompress Pixel Data
+- One presentation context is proposed per (SOP Class, transfer syntax) pair of the files
+- A compressed file (JPEG, JPEG-LS, JPEG 2000, HTJ2K, RLE, ...) is proposed only in its own syntax and fails if the SCP does not accept that syntax
+- An uncompressed file is proposed in its own syntax first, then the other Little Endian syntax (`+xa`, `--propose-all`, the default); `-xe` (`--propose-explicit`) or `-xv` (`--propose-implicit`) proposes only Explicit or Implicit VR Little Endian
+- Explicit VR Big Endian is not proposed; a Big Endian file is sent as Little Endian
+- `-xs` (`--prefer-lossless`) is deprecated and has no effect
+- One association carries at most 128 presentation contexts (PS3.8); a file whose pair does not fit fails unless another proposed context can carry it
 
 ### Query SCU
 

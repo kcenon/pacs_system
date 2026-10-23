@@ -16,6 +16,8 @@
 
 #include <algorithm>
 #include <array>
+#include <optional>
+#include <string_view>
 
 namespace kcenon::pacs::services {
 
@@ -47,6 +49,47 @@ constexpr std::array<std::string_view, 4> dicom_extensions = {
            != dicom_extensions.end();
 }
 
+/// Check if the DIMSE layer can encode a dataset in a transfer syntax; it
+/// writes datasets only in Implicit or Explicit VR Little Endian
+[[nodiscard]] bool is_dimse_encodable(std::string_view transfer_syntax_uid) {
+    return transfer_syntax_uid ==
+               encoding::transfer_syntax::implicit_vr_little_endian.uid() ||
+           transfer_syntax_uid ==
+               encoding::transfer_syntax::explicit_vr_little_endian.uid();
+}
+
+/// Find an accepted presentation context for a SOP Class that carries a
+/// dataset encoded in @p transfer_syntax without converting it
+[[nodiscard]] std::optional<uint8_t> find_matching_context(
+    const network::association& assoc,
+    std::string_view sop_class_uid,
+    const encoding::transfer_syntax& transfer_syntax) {
+
+    std::optional<uint8_t> native_context;
+    for (const auto& ctx : assoc.accepted_contexts()) {
+        if (!ctx.is_accepted() || ctx.abstract_syntax != sop_class_uid) {
+            continue;
+        }
+        if (transfer_syntax.is_encapsulated()) {
+            // Encapsulated Pixel Data is sent as it is, so only a context
+            // that accepted the same transfer syntax can carry it
+            if (ctx.transfer_syntax == transfer_syntax.uid()) {
+                return ctx.id;
+            }
+        } else if (is_dimse_encodable(ctx.transfer_syntax)) {
+            // The DIMSE layer encodes a native dataset in the context's VR
+            // encoding; prefer the dataset's own syntax
+            if (ctx.transfer_syntax == transfer_syntax.uid()) {
+                return ctx.id;
+            }
+            if (!native_context) {
+                native_context = ctx.id;
+            }
+        }
+    }
+    return native_context;
+}
+
 }  // namespace
 
 // =============================================================================
@@ -68,12 +111,24 @@ network::Result<store_result> storage_scu::store(
     network::association& assoc,
     const core::dicom_dataset& dataset) {
 
-    return store_impl(assoc, dataset, next_message_id());
+    // A dataset without a known transfer syntax is native data
+    return store_impl(assoc, dataset,
+                      encoding::transfer_syntax::explicit_vr_little_endian,
+                      next_message_id());
+}
+
+network::Result<store_result> storage_scu::store(
+    network::association& assoc,
+    const core::dicom_dataset& dataset,
+    const encoding::transfer_syntax& transfer_syntax) {
+
+    return store_impl(assoc, dataset, transfer_syntax, next_message_id());
 }
 
 network::Result<store_result> storage_scu::store_impl(
     network::association& assoc,
     const core::dicom_dataset& dataset,
+    const encoding::transfer_syntax& transfer_syntax,
     uint16_t message_id) {
 
     using namespace network::dimse;
@@ -101,12 +156,31 @@ network::Result<store_result> storage_scu::store_impl(
             "Association not established");
     }
 
-    // Get accepted presentation context for this SOP class
-    auto context_id = assoc.accepted_context_id(sop_class_uid);
-    if (!context_id) {
+    if (!transfer_syntax.is_valid()) {
         return kcenon::pacs::pacs_error<store_result>(
-            kcenon::pacs::error_codes::store_no_accepted_context,
-            "No accepted presentation context for SOP Class: " + sop_class_uid);
+            kcenon::pacs::error_codes::unsupported_transfer_syntax,
+            "Unknown transfer syntax: " + std::string(transfer_syntax.uid()));
+    }
+
+    // Get an accepted presentation context that carries the dataset as it is
+    auto context_id = find_matching_context(assoc, sop_class_uid, transfer_syntax);
+    if (!context_id) {
+        if (!assoc.has_accepted_context(sop_class_uid)) {
+            return kcenon::pacs::pacs_error<store_result>(
+                kcenon::pacs::error_codes::store_no_accepted_context,
+                "No accepted presentation context for SOP Class: " + sop_class_uid);
+        }
+        // Sending on another context would label the Pixel Data with a
+        // transfer syntax it is not encoded in
+        const auto error_msg =
+            "No accepted presentation context for SOP Class " + sop_class_uid +
+            " carries " + std::string(transfer_syntax.name()) + " (" +
+            std::string(transfer_syntax.uid()) + "), and storage_scu does not "
+            "transcode Pixel Data; SOP Instance " + sop_instance_uid +
+            " was not sent";
+        logger_->error(error_msg);
+        return kcenon::pacs::pacs_error<store_result>(
+            kcenon::pacs::error_codes::store_no_accepted_context, error_msg);
     }
 
     // Build C-STORE-RQ message
@@ -248,11 +322,10 @@ network::Result<store_result> storage_scu::store_file(
             kcenon::pacs::error_codes::file_parse_failed, error_msg);
     }
 
-    // Get the dataset from the parsed file
-    const auto& dataset = file_result.value().dataset();
-
-    // Store the dataset using the existing store method
-    return store(assoc, dataset);
+    // Send the dataset in the file's transfer syntax: encapsulated Pixel Data
+    // stays as it is, so it needs a context that accepted that syntax
+    const auto& file = file_result.value();
+    return store(assoc, file.dataset(), file.transfer_syntax());
 }
 
 std::vector<store_result> storage_scu::store_files(
@@ -340,6 +413,36 @@ std::vector<std::filesystem::path> storage_scu::collect_dicom_files(
     std::sort(files.begin(), files.end());
 
     return files;
+}
+
+// =============================================================================
+// Presentation Context Negotiation
+// =============================================================================
+
+std::vector<std::string> storage_scu::proposed_transfer_syntaxes(
+    const encoding::transfer_syntax& transfer_syntax) {
+
+    if (!transfer_syntax.is_valid()) {
+        return {};
+    }
+
+    // store() sends encapsulated Pixel Data only in its own syntax
+    if (transfer_syntax.is_encapsulated()) {
+        return {std::string(transfer_syntax.uid())};
+    }
+
+    const std::string implicit_le{
+        encoding::transfer_syntax::implicit_vr_little_endian.uid()};
+    const std::string explicit_le{
+        encoding::transfer_syntax::explicit_vr_little_endian.uid()};
+
+    if (transfer_syntax.uid() == implicit_le) {
+        return {implicit_le, explicit_le};
+    }
+
+    // Explicit VR Little Endian, and native syntaxes the DIMSE layer cannot
+    // encode (Explicit VR Big Endian, Deflated), which go out re-encoded
+    return {explicit_le, implicit_le};
 }
 
 // =============================================================================
