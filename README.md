@@ -81,8 +81,9 @@ C-FIND, and C-MOVE against DCMTK tools on Ubuntu and macOS.
 
 Codec-backed syntaxes need `PACS_BUILD_CODECS=ON` (the default) and the named library at configure
 time; CMake disables a codec with a warning when its library is missing (`cmake/dependencies.cmake`).
-Section 4 of the Conformance Statement lists further syntaxes (Deflated Explicit VR Little Endian,
-HTJ2K, HEVC, JPEG XL, Frame Deflate).
+Section 4 of the Conformance Statement covers every registered syntax, including HTJ2K, and states
+which ones PACS_SCP negotiates: Explicit VR Big Endian is limited to Part 10 files, and Deflated
+Explicit VR Little Endian, HEVC, JPEG XL, and Frame Deflate have no working codec.
 
 | Transfer Syntax | UID | Status |
 |----------------|-----|--------|

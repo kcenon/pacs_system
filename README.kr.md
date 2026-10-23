@@ -79,8 +79,9 @@ DCMTK 도구를 상대로 C-ECHO, C-STORE, C-FIND, C-MOVE를 실행합니다.
 
 코덱 기반 전송 구문은 `PACS_BUILD_CODECS=ON`(기본값)과 구성 시점에 찾은 해당 라이브러리가 필요하며,
 라이브러리가 없으면 CMake가 경고와 함께 그 코덱을 비활성화합니다(`cmake/dependencies.cmake`).
-적합성 선언문 4절에는 그 밖의 전송 구문(Deflated Explicit VR Little Endian, HTJ2K, HEVC, JPEG XL,
-Frame Deflate)이 있습니다.
+적합성 선언문 4절은 HTJ2K를 포함해 등록된 모든 전송 구문을 다루며, PACS_SCP가 어떤 전송 구문을
+협상하는지 밝힙니다. Explicit VR Big Endian은 Part 10 파일로 한정되고, Deflated Explicit VR Little Endian,
+HEVC, JPEG XL, Frame Deflate에는 동작하는 코덱이 없습니다.
 
 | 전송 구문 | UID | 상태 |
 |----------------|-----|--------|
