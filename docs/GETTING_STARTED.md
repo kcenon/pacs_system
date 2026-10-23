@@ -83,7 +83,7 @@ target_link_libraries(my_app PRIVATE pacs_core pacs_encoding)
 | Option | Default | Description |
 |---|---|---|
 | `PACS_BUILD_TESTS` | ON | Build Catch2 unit tests |
-| `PACS_BUILD_EXAMPLES` | OFF | Build 32 CLI utility binaries (sources under `tools/`) |
+| `PACS_BUILD_EXAMPLES` | OFF | Build the CLI tools plus the `module_example` demo (sources under `tools/`; see [CLI Reference](CLI_REFERENCE.md)) |
 | `PACS_BUILD_SAMPLES` | OFF | Build 5 progressive tutorials (sources under `examples/`) |
 | `PACS_BUILD_STORAGE` | ON | Build storage module (requires SQLite3) |
 | `PACS_BUILD_CODECS` | ON | Build compression codecs |

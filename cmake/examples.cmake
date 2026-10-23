@@ -1,10 +1,12 @@
 ##################################################
 # CLI Tools
 #
-# Builds 32 standalone CLI utility binaries (DICOM file tools, network SCU/SCP
-# clients/servers, storage tools). Sources live under tools/ after the layout
-# consolidation in #1139. The CMake option name PACS_BUILD_EXAMPLES is preserved
-# for backward compatibility with existing CI workflows and downstream consumers.
+# Builds the CLI tools (DICOM file tools, network SCU/SCP clients/servers,
+# storage tools), the integration test suite, and the module_example C++20
+# module demo, one subdirectory each under tools/; docs/CLI_REFERENCE.md lists
+# every tool. Sources live under tools/ after the layout consolidation in #1139.
+# The CMake option name PACS_BUILD_EXAMPLES is preserved for backward
+# compatibility with existing CI workflows and downstream consumers.
 ##################################################
 
 if(PACS_BUILD_EXAMPLES)

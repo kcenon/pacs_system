@@ -66,7 +66,8 @@ The `<!-- STATS_START -->` ... `<!-- STATS_END -->` block in `README.md` is gene
 and checked by `scripts/check-stats-drift.sh` in the `Documentation Statistics` workflow.
 The block holds file, line, and test counts, not measured figures, and passes the linter.
 Regenerate it instead of editing values by hand. `README.kr.md` keeps a hand-maintained
-Korean copy of the block; update it to the same values after regenerating.
+Korean copy of the block; update it to the same values after regenerating. The drift
+check fails when any value in the Korean copy differs from `README.md`.
 
 ## Evidence and review
 
