@@ -93,8 +93,8 @@ HTJ2K, HEVC, JPEG XL, Frame Deflate).
 | JPEG Lossless (Process 14) | 1.2.840.10008.1.2.4.70 | Built in |
 | JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | Requires OpenJPEG at build time |
 | JPEG 2000 Lossy | 1.2.840.10008.1.2.4.91 | Requires OpenJPEG at build time |
-| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | Implemented; not yet in the Conformance Statement (requires CharLS at build time) |
-| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | Implemented; not yet in the Conformance Statement (requires CharLS at build time) |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | Requires CharLS at build time |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | Requires CharLS at build time |
 | RLE Lossless | 1.2.840.10008.1.2.5 | Built in |
 
 ## Getting Started
@@ -259,12 +259,12 @@ the [Documentation Statistics workflow](.github/workflows/docs-stats.yml) fails 
 | **Header Files** | 291 files |
 | **Source Files** | 217 files |
 | **Header LOC** | ~78,700 lines |
-| **Source LOC** | ~114,700 lines |
+| **Source LOC** | ~114,800 lines |
 | **Example LOC** | ~4,100 lines |
-| **Test LOC** | ~89,300 lines |
-| **Total LOC** | ~286,900 lines |
+| **Test LOC** | ~89,600 lines |
+| **Total LOC** | ~287,300 lines |
 | **Test Files** | 191 files |
-| **Test Cases** | 2661+ tests |
+| **Test Cases** | 2667+ tests |
 | **Example Programs** | 5 apps |
 | **Documentation** | 109 markdown files |
 | **CI/CD Workflows** | 23 workflows |
