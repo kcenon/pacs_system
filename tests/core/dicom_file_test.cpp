@@ -1104,8 +1104,10 @@ namespace {
 
 /**
  * @brief Create DICOM bytes with encapsulated pixel data
+ * @param ts_uid Encapsulated Transfer Syntax UID written to the meta information
  */
-[[nodiscard]] auto create_dicom_with_encapsulated_pixel_data() -> std::vector<uint8_t> {
+[[nodiscard]] auto create_dicom_with_encapsulated_pixel_data(
+    std::string_view ts_uid = "1.2.840.10008.1.2.4.90") -> std::vector<uint8_t> {
     std::vector<uint8_t> data;
 
     // 128-byte preamble
@@ -1166,8 +1168,7 @@ namespace {
     write_u16(static_cast<uint16_t>(sop_instance.size() % 2 == 0 ? sop_instance.size() : sop_instance.size() + 1));
     write_string(sop_instance);
 
-    // Transfer Syntax: JPEG 2000 Lossless
-    std::string_view ts_uid = "1.2.840.10008.1.2.4.90";
+    // Transfer Syntax (JPEG 2000 Lossless by default)
     write_u16(0x0002);
     write_u16(0x0010);
     data.push_back('U');
@@ -1314,6 +1315,27 @@ TEST_CASE("dicom_file encapsulated pixel data parsing", "[core][dicom_file][enca
         // BOT (8 bytes) + Fragment1 (8 + 16) + Fragment2 (8 + 8) = 48 bytes
         // Note: We don't include the sequence delimitation item in the stored data
         CHECK(pixel_elem->length() > 0);
+    }
+}
+
+TEST_CASE("dicom_file parses JPEG-LS encapsulated pixel data", "[core][dicom_file][encapsulated][jpegls]") {
+    for (std::string_view jpeg_ls_uid :
+         {"1.2.840.10008.1.2.4.80", "1.2.840.10008.1.2.4.81"}) {
+        DYNAMIC_SECTION("Transfer Syntax " << jpeg_ls_uid) {
+            auto data = create_dicom_with_encapsulated_pixel_data(jpeg_ls_uid);
+
+            auto result = dicom_file::from_bytes(data);
+
+            REQUIRE(result.is_ok());
+            auto& file = result.value();
+
+            auto ts = file.transfer_syntax();
+            CHECK(ts.is_valid());
+            CHECK(ts.uid() == jpeg_ls_uid);
+            CHECK(ts.is_encapsulated());
+            CHECK(file.dataset().get_string(tags::patient_name) == "ENCAP^TEST");
+            CHECK(file.dataset().contains(tags::pixel_data));
+        }
     }
 }
 

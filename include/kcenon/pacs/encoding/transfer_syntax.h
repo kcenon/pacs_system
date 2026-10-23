@@ -124,6 +124,12 @@ public:
     /// JPEG Lossless, Non-Hierarchical (1.2.840.10008.1.2.4.70)
     static const transfer_syntax jpeg_lossless;
 
+    /// JPEG-LS Lossless Image Compression (1.2.840.10008.1.2.4.80)
+    static const transfer_syntax jpeg_ls_lossless;
+
+    /// JPEG-LS Lossy (Near-Lossless) Image Compression (1.2.840.10008.1.2.4.81)
+    static const transfer_syntax jpeg_ls_near_lossless;
+
     /// JPEG 2000 Image Compression (Lossless Only) (1.2.840.10008.1.2.4.90)
     static const transfer_syntax jpeg2000_lossless;
 

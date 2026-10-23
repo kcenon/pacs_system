@@ -22,6 +22,8 @@ constexpr const char* VERIFICATION_SOP_CLASS = "1.2.840.10008.1.1";
 constexpr const char* CT_IMAGE_STORAGE = "1.2.840.10008.5.1.4.1.1.2";
 constexpr const char* IMPLICIT_VR_LE = "1.2.840.10008.1.2";
 constexpr const char* EXPLICIT_VR_LE = "1.2.840.10008.1.2.1";
+constexpr const char* JPEG_LS_LOSSLESS = "1.2.840.10008.1.2.4.80";
+constexpr const char* JPEG_LS_NEAR_LOSSLESS = "1.2.840.10008.1.2.4.81";
 
 }  // namespace
 
@@ -348,6 +350,80 @@ TEST_CASE("association process A-ASSOCIATE-AC", "[association][negotiation]") {
         bool success = assoc.process_associate_ac(ac);
         CHECK_FALSE(success);
         CHECK_FALSE(assoc.is_established());
+    }
+}
+
+// =============================================================================
+// JPEG-LS Negotiation Tests (Issue #1242)
+// =============================================================================
+
+TEST_CASE("association SCP accepts JPEG-LS transfer syntaxes", "[association][scp][jpegls]") {
+    for (const char* jpeg_ls_uid : {JPEG_LS_LOSSLESS, JPEG_LS_NEAR_LOSSLESS}) {
+        DYNAMIC_SECTION("proposing only " << jpeg_ls_uid) {
+            associate_rq rq;
+            rq.calling_ae_title = "REMOTE_SCU";
+            rq.called_ae_title = "MY_SCP";
+            rq.application_context = DICOM_APPLICATION_CONTEXT;
+            rq.presentation_contexts.push_back({1, CT_IMAGE_STORAGE, {jpeg_ls_uid}});
+            rq.user_info.max_pdu_length = 16384;
+
+            scp_config config;
+            config.ae_title = "MY_SCP";
+            config.supported_abstract_syntaxes = {CT_IMAGE_STORAGE};
+            config.supported_transfer_syntaxes = {
+                JPEG_LS_LOSSLESS, JPEG_LS_NEAR_LOSSLESS, EXPLICIT_VR_LE};
+
+            auto assoc = association::accept(rq, config);
+            REQUIRE(assoc.is_established());
+
+            auto ac = assoc.build_associate_ac();
+            REQUIRE(ac.presentation_contexts.size() == 1);
+            CHECK(ac.presentation_contexts[0].result ==
+                  presentation_context_result::acceptance);
+            CHECK(ac.presentation_contexts[0].transfer_syntax == jpeg_ls_uid);
+
+            // The accepted context must resolve through the transfer syntax
+            // registry, or DIMSE messages on it are refused
+            auto ts_result = assoc.context_transfer_syntax(1);
+            REQUIRE(ts_result.is_ok());
+            CHECK(ts_result.value().uid() == jpeg_ls_uid);
+            CHECK(ts_result.value().is_encapsulated());
+        }
+    }
+}
+
+TEST_CASE("association SCU uses an accepted JPEG-LS context", "[association][negotiation][jpegls]") {
+    for (const char* jpeg_ls_uid : {JPEG_LS_LOSSLESS, JPEG_LS_NEAR_LOSSLESS}) {
+        DYNAMIC_SECTION("A-ASSOCIATE-AC accepting " << jpeg_ls_uid) {
+            association_config config;
+            config.calling_ae_title = "TEST_SCU";
+            config.called_ae_title = "TEST_SCP";
+            config.proposed_contexts.push_back({1, CT_IMAGE_STORAGE, {jpeg_ls_uid}});
+
+            auto result = association::connect("localhost", 104, config);
+            REQUIRE(result.is_ok());
+            auto& assoc = result.value();
+
+            associate_ac ac;
+            ac.calling_ae_title = "TEST_SCU";
+            ac.called_ae_title = "TEST_SCP";
+            ac.application_context = DICOM_APPLICATION_CONTEXT;
+            ac.presentation_contexts.push_back({
+                1,
+                presentation_context_result::acceptance,
+                jpeg_ls_uid
+            });
+            ac.user_info.max_pdu_length = 16384;
+
+            REQUIRE(assoc.process_associate_ac(ac));
+
+            auto ts_result = assoc.context_transfer_syntax(1);
+            REQUIRE(ts_result.is_ok());
+            CHECK(ts_result.value().uid() == jpeg_ls_uid);
+
+            dimse::dimse_message msg{dimse::command_field::c_store_rq, 1};
+            CHECK(assoc.send_dimse(1, msg).is_ok());
+        }
     }
 }
 
